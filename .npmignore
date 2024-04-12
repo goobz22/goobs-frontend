@@ -2,6 +2,7 @@
 *
 
 # But include the specific directories and files
+!src/components/index.ts
 !src/components/Button/index.tsx
 !src/components/ConfirmationCodeInput/index.tsx
 !src/components/Grid/index.tsx
