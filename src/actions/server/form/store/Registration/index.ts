@@ -1,10 +1,11 @@
 'use server'
-import { ValidationProps, SpreadErrorMessage } from '@/types/validation'
+
+import { SpreadErrorMessage } from '@/types/validation'
 import { createDataField } from '../dataField'
 
 class RegistrationStore {
   private static instance: RegistrationStore | null = null
-  private store: Record<string, Record<string, any>> = {}
+  private store: Record<string, Record<string, SpreadErrorMessage>> = {}
 
   private constructor() {
     console.log('RegistrationStore constructor called')
@@ -32,17 +33,18 @@ class RegistrationStore {
       'Getting registration token for registration token:',
       registrationToken
     )
-    const result = this.store[registrationToken]?.['registrationToken']
+    const dataField = await createDataField<SpreadErrorMessage>(
+      this.store[registrationToken],
+      'registrationToken'
+    )
+    const result = await dataField.get({ identifier: 'registrationToken' })
     console.log(
       'RegistrationToken retrieved with identifier:',
       registrationToken,
       'and value:',
       result
     )
-    if (result && result.identifier === registrationToken) {
-      return result
-    }
-    return undefined
+    return result
   }
 
   public async get(
@@ -55,17 +57,18 @@ class RegistrationStore {
       'and identifier:',
       identifier
     )
-    const result = this.store[registrationToken]?.[identifier]
+    const dataField = await createDataField<SpreadErrorMessage>(
+      this.store[registrationToken],
+      identifier
+    )
+    const result = await dataField.get({ identifier })
     console.log(
       'Value retrieved with identifier:',
       identifier,
       'and value:',
       result
     )
-    if (result && result.identifier === identifier) {
-      return result
-    }
-    return undefined
+    return result
   }
 
   public async set(
@@ -82,12 +85,11 @@ class RegistrationStore {
     if (!this.store[registrationToken]) {
       this.store[registrationToken] = {}
     }
-    const existingValue = this.store[registrationToken][identifier]
-    if (existingValue && existingValue.identifier !== identifier) {
-      console.log('Identifier does not match, not updating the value')
-      return
-    }
-    this.store[registrationToken][identifier] = { identifier, value }
+    const dataField = await createDataField<SpreadErrorMessage>(
+      this.store[registrationToken],
+      identifier
+    )
+    await dataField.set({ identifier, value })
     console.log('Value set with identifier:', identifier, 'and value:', value)
   }
 }
