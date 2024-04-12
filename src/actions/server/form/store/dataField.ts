@@ -1,4 +1,5 @@
 'use server'
+
 import {
   HelperFooterMessage,
   ValidationProps,
@@ -47,25 +48,22 @@ class DataField<T extends HelperFooterMessage & SpreadErrorMessage> {
         'Identifier not set. Call setIdentifier() before using set().'
       )
     }
-
     const value = props.value
     if (value === undefined || typeof value !== 'string') {
       console.error('Invalid value. Expected a string.')
       throw new Error('Invalid value. Expected a string.')
     }
-
     const encryptionUtility = await createEncryptionUtility()
     console.log('Original value before encryption:', value)
     const encryptedValue = encryptionUtility.encrypt(value)
     console.log('Encrypted value:', encryptedValue)
-
-    let data: Record<string, any> = {
+    const data: T = {
+      ...props,
       identifier: this.identifier,
       value: encryptedValue,
     }
-
     console.log('Storing data with identifier:', this.identifier)
-    this.store[this.identifier] = data as T
+    this.store[this.identifier] = data
     console.log('Stored data:', this.store[this.identifier])
   }
 
@@ -77,7 +75,6 @@ class DataField<T extends HelperFooterMessage & SpreadErrorMessage> {
         'Identifier not set. Call setIdentifier() before using delete().'
       )
     }
-
     console.log('Deleting data with identifier:', this.identifier)
     delete this.store[this.identifier]
     console.log('Deleted data with identifier:', this.identifier)
