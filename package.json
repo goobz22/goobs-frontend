@@ -38,5 +38,16 @@
   "bugs": {
     "url": "https://github.com/goobz22/goobs-repo/issues"
   },
-  "homepage": "https://github.com/goobz22/goobs-repo#readme"
+  "homepage": "https://github.com/goobz22/goobs-repo#readme",
+  "files": [
+    "src/components/Button/index.tsx",
+    "src/components/ConfirmationCodeInput/index.tsx",
+    "src/components/Grid/index.tsx",
+    "src/components/Typography/index.tsx",
+    "src/actions/server/form/store/reusableStore.ts",
+    "src/actions/server/form/store/dataField.ts",
+    "src/actions/server/form/store/crypt.ts",
+    "src/actions/server/form/getFormData.ts",
+    "src/actions/client/codeconfirmation/useCodeConfirmation.tsx"
+  ]
 }
