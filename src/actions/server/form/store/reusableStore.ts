@@ -1,23 +1,23 @@
 'use server'
 
 import { SpreadErrorMessage } from '@/types/validation'
-import { createDataField } from '../dataField'
+import { createDataField } from './dataField'
 
-class RegistrationStore {
-  private static instance: RegistrationStore | null = null
+class ReusableStore {
+  private static instance: ReusableStore | null = null
   private store: Record<string, Record<string, SpreadErrorMessage>> = {}
 
   private constructor() {
-    console.log('RegistrationStore constructor called')
+    console.log('ReusableStore constructor called')
   }
 
-  public static async getInstance(): Promise<RegistrationStore> {
-    console.log('Getting RegistrationStore instance')
-    if (!RegistrationStore.instance) {
-      RegistrationStore.instance = new RegistrationStore()
+  public static async getInstance(): Promise<ReusableStore> {
+    console.log('Getting ReusableStore instance')
+    if (!ReusableStore.instance) {
+      ReusableStore.instance = new ReusableStore()
     }
-    console.log('RegistrationStore instance retrieved')
-    return RegistrationStore.instance
+    console.log('ReusableStore instance retrieved')
+    return ReusableStore.instance
   }
 
   public async setRegistrationToken(registrationToken: string): Promise<void> {
@@ -94,7 +94,7 @@ class RegistrationStore {
   }
 }
 
-export async function getRegistrationStore(): Promise<RegistrationStore> {
-  console.log('Exporting RegistrationStore instance')
-  return RegistrationStore.getInstance()
+export async function getReusableStore(): Promise<ReusableStore> {
+  console.log('Exporting ReusableStore instance')
+  return ReusableStore.getInstance()
 }
