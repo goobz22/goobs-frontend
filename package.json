@@ -40,6 +40,7 @@
   },
   "homepage": "https://github.com/goobz22/goobs-repo#readme",
   "files": [
+    "src/components/index.ts",
     "src/components/Button/index.tsx",
     "src/components/ConfirmationCodeInput/index.tsx",
     "src/components/Grid/index.tsx",
