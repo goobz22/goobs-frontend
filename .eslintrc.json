@@ -1,11 +1,13 @@
 {
-  "parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
     "next/core-web-vitals",
     "next",
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "no-unused-vars": "warn",
     "no-undef": "warn",
