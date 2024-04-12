@@ -1,0 +1,20 @@
+{
+  "parser": "@babel/eslint-parser",
+  "extends": [
+    "eslint:recommended",
+    "next/core-web-vitals",
+    "next",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-undef": "warn",
+    "no-empty": "warn",
+    "no-case-declarations": "warn",
+    "react/display-name": "warn",
+    "no-useless-catch": "warn",
+    "react/no-unescaped-entities": "warn",
+    "react-hooks/rules-of-hooks": "warn",
+    "prettier/prettier": "warn"
+  }
+}
