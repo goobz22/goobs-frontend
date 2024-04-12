@@ -25,11 +25,11 @@
     ]
   },
   "include": [
+    "src",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/lib/apollo-wrapper.jsx"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
