@@ -18,3 +18,7 @@ export interface SpreadErrorMessage extends HelperFooterMessage {
     | 'ontoSubmit'
   spreadMessage?: string
 }
+
+export interface IconProps {
+  status: 'error' | 'success'
+}
