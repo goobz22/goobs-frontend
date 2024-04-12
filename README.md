@@ -1,31 +1,93 @@
-# formStore
+# goobs-repo
 
-A encrypted server action formStore used for memStore caching with formData in React. Can take the place of most if not all client side caching and validation structures. Can store any data for duration of form or input. Allows database to only have to be reached at the end of submit.
+goobs-repo is a collection of reusable components and utilities for building web applications with React and Next.js. It provides a set of tools to streamline development and enhance functionality.
 
-First open source project. Quite a few different things that go into making sense of what this is used for an how it is used. Will add walkthrough and sample examples of usage soon getting data out there now and this will evolve rapidly. Versioning is up for debate but in my opinion as of today this can be forked for usage
+## Installation
 
-I will provide an example to make sense of this in the coming days. You can fork for now if interested. Email me to ask questions hit me up on Twitter and soon you will see either an npm or github package associated. Thanks everyone let me know if you see any issues concerns or if you have any feature requests
+You can install goobs-repo using npm or yarn:
 
-Coming soon all to be open sourced - as of 04/12/2024 at 6AM
+### npm
 
-Finish updating this repo get ready for usage by others
+```bash
+npm i goobs-repo
+```
 
-Generic server action handle used to deliver formData to the server action that access this formStore
+### Yarn
 
-Generic server action used to handle the delivery of the formData and that hands off to formStore
+```bash
+yarn add goobs-repo
+```
 
-Generic styledcomponent used to handle formdata is able to be used as anything with an outlinedinput or input and is built into the theme and style over rides within MUI. Used for textfield, datepicker, dropdown, phonenumber, searchbar and many more in the future
+This entire repository is written in typescript and there is no need for a types/ install file
 
-Auth open source project that uses all of these and enables people to register and login there users without having to use a third party or API. Secure, MFA, email verification, phone number verification, MFA apps, and the ability to use all of that just one type of verification or multiple. This is the big dev project that led these smaller things and I expect more open source projects to spin out of it.
+## Version
 
-Auth project will handle tokens, registration, login, validation of user identity, and two auth utilities which can be used on each RSC and server action within your application to provide a custom middleware that validates identity before rendering and each and every action that can force logout if identity is not legit and automatic redirect.
+Current version: 0.4.0 (beta)
 
-This lays the foundation for a very strong database and validation structure along side registration and login. Allows for everyone to have increased understanding of each step in that process and will enable us to be able to add features that allow us to have permission controls over users in later versions.
+This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
 
-More to come soon this is just the start will update this when I can. Will link each of these projects here and together when the time comes in the next week or two as each of them are very very close to release. MIT license on all of these probably not setup exactly right but the premise stands you can use this for anything the point is to help people all whilst helping myself to build a robust system.
+## Components
 
-This is my first go at something of this scale. it wont be perfect but within a month it will be a handful of very powerful tools that allow applications to be setup quicker then previous thought possible with full knowledge of security and how auth is intertwined.
+The following components are included in this release:
 
-With much love.
+- `src/components/Button/index.tsx`: A customizable button component with support for icons, variants, and styling props.
+- `src/components/ConfirmationCodeInput/index.tsx`: A confirmation code input component for handling verification codes.
+- `src/components/Grid/index.tsx`: A grid component for creating responsive layouts with customizable columns and spacing.
+- `src/components/Typography/index.tsx`: A typography component for rendering text with customizable styles.
 
-Matthew Goluba
+## Server Actions
+
+The following server actions are included in this release:
+
+- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server.
+- `src/actions/server/form/store/dataField.ts`: A utility for managing data fields in the reusable store.
+- `src/actions/server/form/store/crypt.ts`: Encryption and decryption utilities for secure data storage.
+- `src/actions/server/form/getFormData.ts`: A server action for retrieving form data.
+
+## Client Actions
+
+The following client actions are included in this release:
+
+- `src/actions/client/codeconfirmation/useCodeConfirmation.tsx`: A custom hook for handling confirmation code input and validation.
+
+## Usage
+
+To use the components and utilities in your project, you can import them from the `goobs-repo` package. For example:
+
+```jsx
+import { CustomButton, ConfirmationCodeInputs, CustomGrid, Typography } from 'goobs-repo/components';
+```
+
+For server actions and client actions, you can import them similarly:
+
+```jsx
+import { getReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore';
+import { useCodeConfirmation } from 'goobs-repo/actions/client/codeconfirmation/useCodeConfirmation';
+```
+
+Please refer to the individual component and utility files for more details on their usage and available props.
+
+## Upcoming Features
+
+We are moving very quickly, so there may not be detailed release notes for future versions at this time. However, we have exciting features planned, including:
+
+- Generic server action handle for delivering form data to the server action that accesses the reusable store.
+- Generic server action for handling the delivery of form data and handing off to the reusable store.
+- Generic styled component for handling form data, which can be used as anything with an outlined input or input and is built into the theme and style overrides within MUI. It will be used for textfields, date pickers, dropdowns, phone numbers, search bars, and many more in the future.
+- Auth open source project that uses all of these components and enables people to register and log in their users without having to use a third-party API. It will include secure MFA, email verification, phone number verification, MFA apps, and the ability to use just one type of verification or multiple.
+
+Stay tuned for more updates and releases!
+
+## License
+
+This project is licensed under the MIT License.
+
+## Feedback and Contributions
+
+We welcome feedback, bug reports, and contributions. If you encounter any issues or have feature requests, please open an issue on the [GitHub repository](https://github.com/goobz22/goobs-repo/issues).
+
+If you would like to contribute to the project, please fork the repository and submit a pull request with your changes.
+
+## Contact
+
+For any questions or inquiries, please contact Matthew Goluba.
