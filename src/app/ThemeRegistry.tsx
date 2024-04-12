@@ -1,20 +1,26 @@
 'use client'
 
-import React from 'react'
-import createCache from '@emotion/cache'
+import React, { ReactNode } from 'react'
+import createCache, { EmotionCache } from '@emotion/cache'
 import { useServerInsertedHTML } from 'next/navigation'
 import { CacheProvider } from '@emotion/react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import theme from '@/themes'
 
-// This is the current recommended workaround for using Next13 App folder
-// reference: https://mui.com/material-ui/guides/next-js-app-router/
-export default function ThemeRegistry(props: any) {
+interface ThemeRegistryProps {
+  options: {
+    key: string
+    nonce?: string
+  }
+  children: ReactNode
+}
+
+export default function ThemeRegistry(props: ThemeRegistryProps) {
   const { options, children } = props
 
   const [{ cache, flush }] = React.useState(() => {
-    const cache = createCache(options)
+    const cache: EmotionCache = createCache(options)
     cache.compat = true
     const prevInsert = cache.insert
     let inserted: string[] = []
