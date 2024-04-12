@@ -1,6 +1,6 @@
 {
-  "name": "dynamic-goobs",
-  "version": "0.2.0",
+  "name": "goobs-repo",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "next dev",
@@ -9,18 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.15",
     "@mui/material-nextjs": "^5.15.11",
     "next": "^14.2.0",
     "react": "^18.2.0",
-    "@emotion/react": "^11.11.4",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.3",
-    "@babel/eslint-parser": "^7.24.1",
     "@types/node": "20.12.2",
     "@types/react": "18.2.73",
+    "@typescript-eslint/eslint-plugin": "^7.6.0",
+    "@typescript-eslint/parser": "^7.6.0",
     "eslint": "8.57.0",
     "eslint-config-next": "^14.1.4",
     "eslint-config-prettier": "^9.1.0",
