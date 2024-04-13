@@ -94,8 +94,8 @@ If you would like to contribute to the project, please fork the repository and s
 
 For any questions or inquiries, please contact Matthew Goluba.
 
-Email - mkgoluba@technologiesunlimited.net
-Twitter - https://twitter.com/goobz22
-LinkedIn - https://www.linkedin.com/in/matthew-goluba/
+- Email - mkgoluba@technologiesunlimited.net
+- Twitter - https://twitter.com/goobz22
+- LinkedIn - https://www.linkedin.com/in/matthew-goluba/
 
 Website is in Progress and will be shared here soon
