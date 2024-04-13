@@ -1,8 +1,8 @@
 {
   "name": "goobs-repo",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
-  "license": "MIT", 
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -50,5 +50,31 @@
     "src/actions/server/form/store/crypt.ts",
     "src/actions/server/form/getFormData.ts",
     "src/actions/client/codeconfirmation/useCodeConfirmation.tsx"
+  ],
+  "keywords": [
+    "react",
+    "next.js",
+    "formData",
+    "form",
+    "memory-store",
+    "form-validation",
+    "form-submission",
+    "form-caching",
+    "redis-alternative",
+    "useState-alternative",
+    "jotai-alternative",
+    "button",
+    "confirmation-code-input",
+    "grid",
+    "typography",
+    "server-actions",
+    "form-store",
+    "encryption",
+    "decryption",
+    "form-data",
+    "client-actions",
+    "reusable-server-actions",
+    "responsive-grid",
+    "code-confirmation"
   ]
 }
