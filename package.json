@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -50,6 +50,8 @@
     "src/actions/server/form/store/reusableStore.ts",
     "src/actions/server/form/store/dataField.ts",
     "src/actions/server/form/store/crypt.ts",
+    "src/actions/server/registration/getUser.ts",
+    "src/actions/server/registration/updateUser.ts",
     "src/actions/server/form/getFormData.ts",
     "src/actions/client/codeconfirmation/useCodeConfirmation.tsx"
   ],
@@ -59,6 +61,12 @@
     "formData",
     "form",
     "memory-store",
+    "mongoose",
+    "mongodb",
+    "registration",
+    "getUser",
+    "updateUser",
+    "identityManagement",
     "form-validation",
     "form-submission",
     "form-caching",
