@@ -1,5 +1,6 @@
+import React from 'react'
 import { ColorPaletteKeys } from '@/themes/palette'
-import React, { RefObject } from 'react'
+import { RefObject } from 'react'
 import { HelperFooterMessage } from '@/types/validation'
 
 declare module '@mui/material/OutlinedInput' {
@@ -20,7 +21,6 @@ declare module '@mui/material/InputBase' {
   }
 }
 
-// Define your custom props for the styled component
 export interface StyledComponentProps {
   name?: string
   outlinecolor?: ColorPaletteKeys
@@ -53,8 +53,8 @@ export interface StyledComponentProps {
   label?: string
   shrunklabellocation?: 'onnotch' | 'above' | 'left'
   value?: string
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onChange?: (
+    // eslint-disable-next-line no-unused-vars
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
   defaultValue?: string

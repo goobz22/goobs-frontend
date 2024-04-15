@@ -1,4 +1,7 @@
-export interface UserRegistrationData {
+import { Document, Types } from 'mongoose'
+
+export interface UserRegistrationData extends Document {
+  _id?: Types.ObjectId
   firstName?: string
   lastName?: string
   phoneNumber?: string
