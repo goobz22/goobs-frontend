@@ -1,7 +1,6 @@
 'use client'
-
 import React, { useRef, useCallback, useState } from 'react'
-import { HelperFooterMessage, ValidationProps } from '@/types/validation'
+import { HelperFooterMessage, IconProps } from '@/types/validation'
 
 interface CodeState {
   code1: string
@@ -12,18 +11,11 @@ interface CodeState {
   code6: string
 }
 
-interface ConfirmationStatus {
-  iconStatus: 'error' | 'success'
-  helperFooterStatus: 'error' | 'success'
-  helperFooterMessage: string
-}
-
 export const useCodeConfirmation = (
   codeLength: number,
-  resendErrorServer?: () => Promise<HelperFooterMessage | null>,
-  verifyErrorServer?: (
-    props: ValidationProps
-  ) => Promise<HelperFooterMessage | null>
+  resendErrorServer?: () => Promise<HelperFooterMessage>,
+  // eslint-disable-next-line no-unused-vars
+  verifyErrorServer?: (verificationCode: string) => Promise<HelperFooterMessage>
 ) => {
   const [code, setCode] = useState<CodeState>({
     code1: '',
@@ -33,14 +25,14 @@ export const useCodeConfirmation = (
     code5: '',
     code6: '',
   })
-
   const [confirmationStatus, setConfirmationStatus] =
-    useState<ConfirmationStatus>({
-      iconStatus: 'success',
-      helperFooterStatus: 'success',
-      helperFooterMessage: '',
+    useState<HelperFooterMessage>({
+      status: 'success',
+      statusMessage: '',
     })
-
+  const [iconStatus, setIconStatus] = useState<IconProps>({
+    status: 'success',
+  })
   const inputRefs = useRef<React.RefObject<HTMLInputElement>[]>(
     Array(codeLength)
       .fill(null)
@@ -54,7 +46,6 @@ export const useCodeConfirmation = (
         ...prevCode,
         [`code${index + 1}`]: value,
       }))
-
       if (value && index < codeLength - 1) {
         inputRefs.current[index + 1].current?.focus()
       }
@@ -118,24 +109,23 @@ export const useCodeConfirmation = (
       const result = await resendErrorServer()
       setConfirmationStatus(prevStatus => ({
         ...prevStatus,
-        helperFooterStatus: result?.status || 'success',
-        helperFooterMessage: result?.statusMessage || 'Resend Successful',
+        status: result?.status || 'success',
+        statusMessage: result?.statusMessage || 'Resend Successful',
       }))
     }
   }
 
   const handleVerifyError = async () => {
     if (verifyErrorServer) {
-      const result = await verifyErrorServer({
-        identifier: combinedCode,
-        value: combinedCode,
-      })
+      const result = await verifyErrorServer(combinedCode)
       setConfirmationStatus(prevStatus => ({
         ...prevStatus,
-        iconStatus: result?.status || 'success',
-        helperFooterStatus: result?.status || 'success',
-        helperFooterMessage: result?.statusMessage || 'Verification Successful',
+        status: result?.status || 'success',
+        statusMessage: result?.statusMessage || 'Verification Successful',
       }))
+      setIconStatus({
+        status: result?.status === 'error' ? 'error' : 'success',
+      })
     }
   }
 
@@ -147,6 +137,7 @@ export const useCodeConfirmation = (
     handleKeyDown,
     combinedCode,
     confirmationStatus,
+    iconStatus,
     handleResendError,
     handleVerifyError,
   }
