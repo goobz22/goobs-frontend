@@ -6,13 +6,13 @@ import labelStyles from '@/themes/StyledComponent/Label'
 import { StyledComponentProps } from '@/types/styledcomponent'
 import { CustomButtonProps } from '@/types/button'
 import gridStyles from '@/themes/Grid'
-import { theme as customPalette } from './palette' // Import the custom palette
+import { theme as customPalette } from './palette'
 import typographyStyles from '@/themes/Typography/typographyStyles'
 import formControlStyles from '@/themes/StyledComponent/FormControl'
 
 const theme: Theme = createTheme({
   typography: typography,
-  palette: customPalette.palette, // Merge the custom palette into the theme
+  palette: customPalette.palette,
   components: {
     MuiTypography: {
       styleOverrides: {
@@ -87,7 +87,6 @@ const theme: Theme = createTheme({
             combinedfontcolor,
             iconcolor,
             shrunklabellocation,
-            helperfooter,
           } = ownerState as unknown as StyledComponentProps
           if (componentvariant) {
             return {
@@ -99,7 +98,6 @@ const theme: Theme = createTheme({
                 shrunkfontcolor,
                 combinedfontcolor,
                 iconcolor,
-                helperfooter,
                 shrunklabellocation,
               }),
               ...outlinedInputStyles({

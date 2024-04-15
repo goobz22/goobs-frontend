@@ -1,6 +1,6 @@
 import { CSSObject } from '@emotion/react'
 import { StyledComponentProps } from '@/types/styledcomponent'
-import { Theme } from '@mui/material'
+import { theme } from '../../palette'
 
 export const outlinedInputStyles = (
   props: Pick<
@@ -13,8 +13,7 @@ export const outlinedInputStyles = (
     | 'combinedfontcolor'
     | 'iconcolor'
     | 'shrunklabellocation'
-  >,
-  theme: Theme
+  >
 ): CSSObject => {
   const {
     outlinecolor,
@@ -24,17 +23,18 @@ export const outlinedInputStyles = (
     combinedfontcolor,
     iconcolor,
   } = props
+
   const defaultControlHeight = '40px'
   const multilineMinHeight = '85px'
   const inputPadding = '0 0px'
   const searchInputPadding = '0 14px 0 24px'
 
-  const getColorValue = (colorKey: string | undefined) => {
+  const getColorValue = (colorKey: string | undefined): string => {
     if (!colorKey) return 'inherit'
     const [colorName, colorVariant = 'main'] = colorKey.split('.')
     const colorPalette = theme.palette[colorName as keyof typeof theme.palette]
     return colorPalette
-      ? colorPalette[colorVariant as keyof typeof colorPalette]
+      ? colorPalette[colorVariant as keyof typeof colorPalette] || 'inherit'
       : 'inherit'
   }
 

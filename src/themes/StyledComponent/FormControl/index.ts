@@ -1,6 +1,6 @@
 import { CSSObject } from '@emotion/react'
 import { StyledComponentProps } from '@/types/styledcomponent'
-import { Theme } from '@mui/material'
+import { theme } from '../../palette'
 
 export const formControlStyles = (
   props: Pick<
@@ -13,18 +13,18 @@ export const formControlStyles = (
     | 'combinedfontcolor'
     | 'iconcolor'
     | 'shrunklabellocation'
-    | 'helperfooter'
-  >,
-  theme: Theme
+  >
 ): CSSObject => {
   const { outlinecolor, componentvariant } = props
 
-  const getColorValue = (colorKey: string | undefined) => {
+  const getColorValue = (colorKey: string | undefined): string => {
     if (!colorKey) return 'inherit'
+
     const [colorName, colorVariant = 'main'] = colorKey.split('.')
     const colorPalette = theme.palette[colorName as keyof typeof theme.palette]
+
     return colorPalette
-      ? colorPalette[colorVariant as keyof typeof colorPalette]
+      ? colorPalette[colorVariant as keyof typeof colorPalette] || 'inherit'
       : 'inherit'
   }
 

@@ -10,8 +10,8 @@ export const buttonStyles = (
 ): CSSObject => {
   const { outlinecolor, fontlocation, iconcolor, backgroundcolor } = props
 
-  const height = 'auto' // Changed to const since it is not reassigned
-  let justifyContent = 'center' // This stays 'let' since it's reassigned below
+  const height = 'auto'
+  let justifyContent = 'center'
 
   if (fontlocation === 'left') {
     justifyContent = 'flex-start'
@@ -21,7 +21,7 @@ export const buttonStyles = (
 
   return {
     '&.MuiButton-contained': {
-      width: '100%', // Set width to 100% for full width
+      width: '100%',
       height: height,
       justifyContent: justifyContent,
       whiteSpace: 'nowrap',
@@ -37,7 +37,7 @@ export const buttonStyles = (
       color: iconcolor
         ? `${theme.palette[iconcolor]?.main} !important`
         : undefined,
-      width: '100%', // Set width to 100% for full width
+      width: '100%',
       height: height,
       justifyContent: justifyContent,
       minWidth: 'max-content',
@@ -50,7 +50,7 @@ export const buttonStyles = (
       color: iconcolor
         ? `${theme.palette[iconcolor]?.main} !important`
         : undefined,
-      width: '100%', // Set width to 100% for full width
+      width: '100%',
       height: height,
       justifyContent: justifyContent,
       minWidth: 'max-content',
