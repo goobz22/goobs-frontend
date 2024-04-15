@@ -24,7 +24,7 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.4.0 (beta)
+Current version: 0.4.2 (beta)
 
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
 
@@ -57,14 +57,19 @@ The following client actions are included in this release:
 To use the components and utilities in your project, you can import them from the `goobs-repo` package. For example:
 
 ```jsx
-import { CustomButton, ConfirmationCodeInputs, CustomGrid, Typography } from 'goobs-repo/components';
+import {
+  CustomButton,
+  ConfirmationCodeInputs,
+  CustomGrid,
+  Typography,
+} from 'goobs-repo/components'
 ```
 
 For server actions and client actions, you can import them similarly:
 
 ```jsx
-import { getReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore';
-import { useCodeConfirmation } from 'goobs-repo/actions/client/codeconfirmation/useCodeConfirmation';
+import { getReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore'
+import { useCodeConfirmation } from 'goobs-repo/actions/client/codeconfirmation/useCodeConfirmation'
 ```
 
 Please refer to the individual component and utility files for more details on their usage and available props.
