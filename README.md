@@ -19,13 +19,11 @@ yarn add goobs-repo
 ```
 
 The NPM repo is available here - https://www.npmjs.com/package/goobs-repo
-
 This entire repository is written in typescript and there is no need for a types/ install file
 
 ## Version
 
-Current version: 0.4.1 (beta)
-
+Current version: 0.4.2 (beta)
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
 
 ## Components
@@ -45,6 +43,8 @@ The following server actions are included in this release:
 - `src/actions/server/form/store/dataField.ts`: A utility for managing data fields in the reusable store.
 - `src/actions/server/form/store/crypt.ts`: Encryption and decryption utilities for secure data storage.
 - `src/actions/server/form/getFormData.ts`: A server action for retrieving form data.
+- `src/actions/server/user/getUser.tsx`: A server action for fetching user data from the database.
+- `src/actions/server/user/updateUser.tsx`: A server action for updating user data in the database.
 
 ## Client Actions
 
@@ -70,6 +70,8 @@ For server actions and client actions, you can import them similarly:
 ```jsx
 import { getReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore'
 import { useCodeConfirmation } from 'goobs-repo/actions/client/codeconfirmation/useCodeConfirmation'
+import { getUser } from 'goobs-repo/actions/server/user/getUser'
+import { updateUser } from 'goobs-repo/actions/server/user/updateUser'
 ```
 
 Please refer to the individual component and utility files for more details on their usage and available props.
@@ -103,4 +105,4 @@ For any questions or inquiries, please contact Matthew Goluba.
 - Twitter - https://twitter.com/goobz22
 - LinkedIn - https://www.linkedin.com/in/matthew-goluba/
 
-Website is in Progress and will be shared here soon
+Website is in Progress and will be shared here soon.
