@@ -50,8 +50,8 @@
     "src/actions/server/form/store/reusableStore.ts",
     "src/actions/server/form/store/dataField.ts",
     "src/actions/server/form/store/crypt.ts",
-    "src/actions/server/registration/getUser.ts",
-    "src/actions/server/registration/updateUser.ts",
+    "src/actions/server/user/getUser.ts",
+    "src/actions/server/user/updateUser.ts",
     "src/actions/server/form/getFormData.ts",
     "src/actions/client/codeconfirmation/useCodeConfirmation.tsx"
   ],

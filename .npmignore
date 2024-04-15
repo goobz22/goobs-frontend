@@ -11,4 +11,6 @@
 !src/actions/server/form/store/dataField.ts
 !src/actions/server/form/store/crypt.ts
 !src/actions/server/form/getFormData.ts
+!src/actions/server/user/getUser.tsx
+!src/actions/server/user/updateUser.tsx
 !src/actions/client/codeconfirmation/useCodeConfirmation.tsx
