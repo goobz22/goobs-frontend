@@ -2,9 +2,11 @@ import {
   Typography as MuiTypography,
   TypographyProps as MuiTypographyProps,
 } from '@mui/material'
+import React from 'react'
+import { theme } from '@/themes/palette'
 
 interface CustomTypographyProps extends MuiTypographyProps {
-  fontcolor?: string
+  fontcolor?: keyof typeof theme.palette
 }
 
 export const Typography: React.FC<CustomTypographyProps> = ({
@@ -12,8 +14,10 @@ export const Typography: React.FC<CustomTypographyProps> = ({
   fontcolor,
   ...rest
 }) => {
+  const color = fontcolor ? theme.palette[fontcolor].main : undefined
+
   return (
-    <MuiTypography style={{ color: fontcolor }} {...rest}>
+    <MuiTypography style={{ color }} {...rest}>
       {children}
     </MuiTypography>
   )
