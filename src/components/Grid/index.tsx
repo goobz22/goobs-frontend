@@ -1,48 +1,49 @@
 import React from 'react'
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, useMediaQuery, useTheme } from '@mui/material'
 import { CustomGridProps } from '@/types/grid'
 
 const CustomGrid: React.FC<CustomGridProps> = ({
   variant,
   children,
-  marginTop,
-  marginBottom,
-  marginBetween = 0,
-  rowGap = marginBetween,
+  marginTop = 0,
+  marginBottom = 0,
+  marginBetweenColumns = 0,
+  marginBetweenRows = 0,
+  width = 'fullWidth',
+  rowConfig,
 }) => {
-  const childrenArray = React.Children.toArray(children)
-  let rows = []
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  if (variant === 'twoColumns' || variant === 'threeColumns') {
-    const columns = variant === 'twoColumns' ? 2 : 3
-    for (let i = 0; i < childrenArray.length; i += columns) {
-      const rowItems = childrenArray.slice(i, i + columns)
-      rows.push(
-        <Grid item key={i} container>
-          {rowItems.map((child, index) => (
-            <Grid item key={index} xs={true}>
-              {React.cloneElement(child as React.ReactElement, {
-                sx: { margin: 0 },
-              })}
-            </Grid>
-          ))}
-        </Grid>
-      )
+  const childrenArray = React.Children.toArray(children)
+  const rowCount = Math.max(...(rowConfig?.map(item => item?.row || 0) || [0]))
+  const columnCount = isMobile ? 1 : variant === 'twoColumns' ? 2 : 1
+  const gridItems: (React.ReactNode | undefined)[][] = Array.from(
+    { length: rowCount },
+    () => Array.from({ length: columnCount }, () => undefined)
+  )
+  rowConfig?.forEach((item, index) => {
+    const rowIndex = item?.row ? item.row - 1 : index
+    const columnIndex = isMobile ? 0 : item?.column ? item.column - 1 : 0
+    if (!gridItems[rowIndex]) {
+      gridItems[rowIndex] = Array.from({ length: columnCount }, () => undefined)
     }
-  } else {
-    rows = childrenArray.map((child, index) => (
-      <Grid item key={index} sx={{ margin: 0 }}>
-        {React.cloneElement(child as React.ReactElement, {
-          sx: { margin: 0 },
-        })}
-      </Grid>
-    ))
-  }
+    gridItems[rowIndex][columnIndex] = childrenArray[index]
+  })
+  const gridWidth = width === 'fullWidth' ? '100%' : `${width}px`
 
   return (
-    <Box mt={marginTop} mb={marginBottom}>
-      <Grid container direction="column" rowGap={rowGap}>
-        {rows}
+    <Box mt={marginTop} mb={marginBottom} width={gridWidth}>
+      <Grid container direction="column" rowGap={marginBetweenRows}>
+        {gridItems.map((row, rowIndex) => (
+          <Grid item key={rowIndex} container columnGap={marginBetweenColumns}>
+            {row.map((item, columnIndex) => (
+              <Grid item key={`${rowIndex}-${columnIndex}`} xs={true}>
+                {item || <Box />}
+              </Grid>
+            ))}
+          </Grid>
+        ))}
       </Grid>
     </Box>
   )
