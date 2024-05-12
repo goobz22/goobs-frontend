@@ -1,0 +1,10 @@
+export type Animation =
+  | 'none'
+  | 'slideIn'
+  | 'slideInUp'
+  | 'slideInDown'
+  | 'slideInLeft'
+  | 'slideInRight'
+  | 'stuckOnScroll'
+  | 'fadeOut'
+  | 'fadeIn'

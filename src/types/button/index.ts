@@ -1,13 +1,14 @@
 import React from 'react'
-import { ButtonProps } from '@mui/material'
+import { ButtonProps, TypographyPropsVariantOverrides } from '@mui/material'
 import { ColorPaletteKeys } from '@/themes/palette'
 import { HelperFooterMessage } from '@/types/validation'
+import { Alignment } from '@/types/content/alignment'
+import { columnconfig } from '@/types/grid/customgrid'
 
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     [key: string]: true
   }
-
   interface ButtonPropsVariantOverrides {
     [key: string]: true
   }
@@ -16,24 +17,20 @@ declare module '@mui/material/Button' {
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
   text?: string
-  name?: string
   backgroundcolor?: ColorPaletteKeys
   outlinecolor?: ColorPaletteKeys
   fontcolor?: ColorPaletteKeys
-  fontlocation?: 'left' | 'center' | 'right'
-  fontsize?:
-    | 'merrih1'
-    | 'merrih2'
-    | 'merrih5'
-    | 'merriparagraph'
-    | 'merrihelperfooter'
-  icon?: false | React.ReactNode
+  fontlocation?: Alignment
+  fontsize?: keyof TypographyPropsVariantOverrides
+  icon?: React.ReactNode | false
   iconcolor?: ColorPaletteKeys
+  iconsize?: string
   iconlocation?: 'left' | 'top' | 'right'
   variant?: 'text' | 'outlined' | 'contained'
-  onClick?: (
-    // eslint-disable-next-line no-unused-vars
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => void
+  onClick?: () => void
   helperfooter?: HelperFooterMessage
+  columnconfig?: columnconfig
+  width?: string
+  formname?: string
+  name?: string
 }
