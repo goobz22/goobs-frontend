@@ -23,14 +23,56 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.4.3 (beta)
+Current version: 0.4.6 (beta)
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
 
 ## Components
 
 The following components are included in this release:
 
-- `src/components/Button/index.tsx`: A customizable button component with support for icons, variants, and styling props.
+### Button
+The Button component is a customizable button with support for icons, variants, and styling props. It provides a flexible and reusable way to create buttons in your application.
+Props:
+
+- `src/components/Button/index.tsx`
+- text (optional): The text to display on the button.
+- variant (optional): The variant of the button (e.g., 'contained', 'outlined', 'text').
+- fontsize (optional): The font size of the button text.
+- icon (optional): The icon to display on the button.
+- iconlocation (optional): The location of the icon ('left' or 'right').
+- type (optional): The type of the button (e.g., 'button', 'submit', 'reset').
+- onClick (optional): The function to be called when the button is clicked.
+- fontcolor (optional): The color of the button text.
+- helperfooter (optional): An object containing helper footer properties (status, statusMessage).
+
+#### Usage:
+
+```jsx
+import { CustomButton } from 'goobs-repo/components'
+
+function MyComponent() {
+  const handleClick = () => {
+    // Handle button click
+  }
+
+  return (
+    <CustomButton
+      text="Click me"
+      variant="contained"
+      fontsize="merriparagraph"
+      icon={<StarIcon />}
+      iconlocation="left"
+      onClick={handleClick}
+      fontcolor="white"
+      helperfooter={{
+        status: 'error',
+        statusMessage: 'Error message',
+      }}
+    />
+  )
+}
+```
+
 - `src/components/ConfirmationCodeInput/index.tsx`: A confirmation code input component for handling verification codes.
 - `src/components/Grid/index.tsx`: A grid component for creating responsive layouts with customizable columns and spacing.
 - `src/components/Typography/index.tsx`: A typography component for rendering text with customizable styles.
@@ -39,9 +81,30 @@ The following components are included in this release:
 
 The following server actions are included in this release:
 
-- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server.
-- `src/actions/server/form/store/dataField.ts`: A utility for managing data fields in the reusable store.
-- `src/actions/server/form/store/crypt.ts`: Encryption and decryption utilities for secure data storage.
+- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server. It provides a simple and efficient way to store and retrieve form data across requests. The store utilizes a JSON file storage mechanism for data persistence.
+
+#### Usage:
+
+```jsx
+import { getReusableStore, setReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore'
+
+async function handleFormSubmit(formData) {
+  // Store form data using the reusable store
+  await setReusableStore({
+    storename: 'myFormStore',
+    identifier: 'userId123',
+    value: formData,
+    expirationTime: Date.now() + 24 * 60 * 60 * 1000, // Expiration time: 24 hours from now
+  })
+
+  // Retrieve form data from the reusable store
+  const storedFormData = await getReusableStore('myFormStore', 'userId123')
+  console.log('Stored form data:', storedFormData)
+}
+```
+
+- `src/actions/server/form/store/crypt.ts`: Encryption and decryption utilities for secure data storage. These utilities help protect sensitive data by encrypting it before storing and decrypting it when retrieving from the store. The encryption key and initialization vector (IV) are securely sourced from environment variables.
+
 - `src/actions/server/form/getFormData.ts`: A server action for retrieving form data.
 - `src/actions/server/user/getUser.tsx`: A server action for fetching user data from the database.
 - `src/actions/server/user/updateUser.tsx`: A server action for updating user data in the database.
