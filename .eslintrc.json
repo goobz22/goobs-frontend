@@ -17,6 +17,7 @@
     "no-useless-catch": "warn",
     "react/no-unescaped-entities": "warn",
     "react-hooks/rules-of-hooks": "warn",
-    "prettier/prettier": "warn"
+    "prettier/prettier": "warn",
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }
