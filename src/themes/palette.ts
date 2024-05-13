@@ -116,6 +116,11 @@ export const theme = createTheme({
       light: 'rgba(255, 255, 255, 0.15)',
       dark: 'rgba(255, 255, 255, 0.05)',
     },
+    semiTransparentBlack: {
+      main: 'rgba(0, 0, 0, 0.09)',
+      light: 'rgba(0, 0, 0, 0.15)',
+      dark: 'rgba(0, 0, 0, 0.05)',
+    },
     red: {
       main: '#FF0000',
       light: '#FF4C4C',
@@ -125,6 +130,11 @@ export const theme = createTheme({
       main: '#00FF00',
       light: '#4CFF4C',
       dark: '#00B300',
+    },
+    greyborder: {
+      main: '#E8E8E8',
+      light: '#F5F5F5',
+      dark: '#BDBDBD',
     },
   },
 })
@@ -191,6 +201,7 @@ declare module '@mui/material/Typography' {
 
 export const colorPalette = [
   'moss',
+  'greyborder',
   'aqua',
   'madder',
   'woad',
@@ -212,4 +223,5 @@ export const colorPalette = [
   'red',
   'green',
   'semiTransparentWhite',
+  'semiTransparentBlack',
 ] as const

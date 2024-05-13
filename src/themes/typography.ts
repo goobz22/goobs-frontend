@@ -95,7 +95,7 @@ const paragraphConfig: Omit<CustomTypographyVariant, 'fontFamily'> = {
 }
 
 const helperHeaderConfig: Omit<CustomTypographyVariant, 'fontFamily'> = {
-  fontSize: '0.7rem',
+  fontSize: '0.8rem',
   fontWeight: 400,
   textTransform: 'none',
 }

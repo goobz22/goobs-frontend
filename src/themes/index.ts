@@ -1,14 +1,14 @@
 import { createTheme, Theme } from '@mui/material/styles'
-import typography from './typography'
+import typography from '@/themes/typography'
 import outlinedInputStyles from '@/themes/StyledComponent/OutlinedInput'
 import buttonStyles from '@/themes/Button/'
 import labelStyles from '@/themes/StyledComponent/Label'
 import { StyledComponentProps } from '@/types/styledcomponent'
 import { CustomButtonProps } from '@/types/button'
-import gridStyles from '@/themes/Grid'
-import { theme as customPalette } from './palette'
+import { theme as customPalette } from '@/themes/palette'
 import typographyStyles from '@/themes/Typography/typographyStyles'
 import formControlStyles from '@/themes/StyledComponent/FormControl'
+import { TypographyProps } from '@/types/typography'
 
 const theme: Theme = createTheme({
   typography: typography,
@@ -17,7 +17,7 @@ const theme: Theme = createTheme({
     MuiTypography: {
       styleOverrides: {
         root: ({ ownerState }) => {
-          const { fontcolor } = ownerState as CustomButtonProps
+          const { fontcolor } = ownerState as TypographyProps
           return typographyStyles({
             fontcolor,
           })
@@ -27,21 +27,20 @@ const theme: Theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState }) => {
-          const { outlinecolor, fontlocation, iconcolor, backgroundcolor } =
-            ownerState as CustomButtonProps
+          const {
+            outlinecolor,
+            fontlocation,
+            iconcolor,
+            backgroundcolor,
+            width,
+          } = ownerState as CustomButtonProps
           return buttonStyles({
             outlinecolor,
             fontlocation,
             iconcolor,
             backgroundcolor,
+            width,
           })
-        },
-      },
-    },
-    MuiGrid: {
-      styleOverrides: {
-        root: () => {
-          return gridStyles()
         },
       },
     },
@@ -111,7 +110,6 @@ const theme: Theme = createTheme({
               }),
             }
           }
-          // Provide a default value here
           return {
             ...formControlStyles({
               outlinecolor,
