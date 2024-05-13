@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.4.3",
+  "version": "0.4.6",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -15,17 +15,19 @@
     "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.15",
     "@mui/material-nextjs": "^5.15.11",
-    "next": "^14.2.0",
+    "jotai": "^2.8.0",
+    "lodash": "^4.17.21",
     "mongoose": "^8.2.4",
+    "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "20.12.2",
     "@types/react": "18.2.73",
-    "dotenv": "^16.4.5",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^7.6.0",
+    "dotenv": "^16.4.5",
     "eslint": "8.57.0",
     "eslint-config-next": "^14.1.4",
     "eslint-config-prettier": "^9.1.0",
