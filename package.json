@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -57,7 +57,7 @@
     "src/actions/server/form/getFormData.ts",
     "src/types/button/index.ts",
     "src/types/content/alignment/index.ts",
-    "src/types/content/animation/index.ts", 
+    "src/types/content/animation/index.ts",
     "src/types/formstore/index.ts",
     "src/types/grid/customgrid/index.ts",
     "src/types/styledcomponent/index.ts",
