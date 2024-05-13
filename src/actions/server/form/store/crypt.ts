@@ -1,70 +1,42 @@
 import crypto from 'crypto'
 
 const algorithm = 'aes-256-cbc'
-const keyLength = 32 // Key length in bytes for AES-256
 
-interface CryptoConfig {
-  key: Buffer
-  iv: Buffer
-}
+const encryptionKey: string = process.env.ENCRYPTION_KEY || ''
+const encryptionIV: string = process.env.ENCRYPTION_IV || ''
 
-let encryptionConfig: CryptoConfig | null = null
+class EncryptionUtility {
+  private key: Buffer
+  private iv: Buffer
 
-class DecryptionUtility {
-  static decrypt(encryptedValue: string, config: CryptoConfig): string {
-    if (!config || !config.key || !config.iv) {
-      throw new Error('Decryption configuration missing key or IV.')
-    }
-    const decipher = crypto.createDecipheriv(algorithm, config.key, config.iv)
+  constructor(key: string, iv: string) {
+    this.key = Buffer.from(key, 'hex')
+    this.iv = Buffer.from(iv, 'base64')
+  }
+
+  encrypt(value: string): string {
+    const cipher = crypto.createCipheriv(algorithm, this.key, this.iv)
+    let encrypted = cipher.update(value, 'utf8', 'hex')
+    encrypted += cipher.final('hex')
+    return encrypted
+  }
+
+  decrypt(encryptedValue: string): string {
+    const decipher = crypto.createDecipheriv(algorithm, this.key, this.iv)
     let decrypted = decipher.update(encryptedValue, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
     return decrypted
   }
 }
 
+export async function encryptValue(value: string): Promise<string> {
+  const encryptionUtility = new EncryptionUtility(encryptionKey, encryptionIV)
+  const encryptedValue = encryptionUtility.encrypt(value)
+  return encryptedValue
+}
+
 export async function decryptValue(encryptedValue: string): Promise<string> {
-  if (!encryptionConfig) {
-    throw new Error('Encryption configuration not initialized.')
-  }
-  return DecryptionUtility.decrypt(encryptedValue, encryptionConfig)
-}
-
-class EncryptionUtility {
-  private config: CryptoConfig
-
-  constructor(config: CryptoConfig) {
-    if (
-      !config.key ||
-      config.key.length !== keyLength ||
-      !config.iv ||
-      config.iv.length !== 16
-    ) {
-      throw new Error('Encryption configuration has invalid key or IV length.')
-    }
-    this.config = config
-  }
-
-  encrypt(value: string): string {
-    const cipher = crypto.createCipheriv(
-      algorithm,
-      this.config.key,
-      this.config.iv
-    )
-    let encrypted = cipher.update(value, 'utf8', 'hex')
-    encrypted += cipher.final('hex')
-    return encrypted
-  }
-}
-
-export async function createEncryptionUtility(): Promise<EncryptionUtility> {
-  if (!encryptionConfig) {
-    const key = crypto.randomBytes(keyLength)
-    const iv = crypto.randomBytes(16)
-    encryptionConfig = { key, iv }
-  }
-  return new EncryptionUtility(encryptionConfig)
-}
-
-export async function getAlgorithm(): Promise<string> {
-  return algorithm
+  const encryptionUtility = new EncryptionUtility(encryptionKey, encryptionIV)
+  const decryptedValue = encryptionUtility.decrypt(encryptedValue)
+  return decryptedValue
 }
