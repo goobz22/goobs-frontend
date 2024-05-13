@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { RefObject } from 'react'
 import { ColorPaletteKeys } from '@/themes/palette'
-import { RefObject } from 'react'
 import { HelperFooterMessage } from '@/types/validation'
+import { columnconfig } from '@/types/grid/customgrid'
 
 declare module '@mui/material/OutlinedInput' {
   interface OutlinedInputPropsColorOverrides {
@@ -29,8 +29,9 @@ export interface StyledComponentProps {
   combinedfontcolor?: ColorPaletteKeys
   unshrunkfontcolor?: ColorPaletteKeys
   shrunkfontcolor?: ColorPaletteKeys
+  endAdornmentMarginRight?: number | string
   autoComplete?: string
-  componentvariant:
+  componentvariant?:
     | 'multilinetextfield'
     | 'dropdown'
     | 'searchbar'
@@ -50,13 +51,17 @@ export interface StyledComponentProps {
   helperfooter?: HelperFooterMessage
   placeholder?: string
   minRows?: number
+  formname?: string
   label?: string
   shrunklabellocation?: 'onnotch' | 'above' | 'left'
   value?: string
   onChange?: (
-    // eslint-disable-next-line no-unused-vars
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
   defaultValue?: string
   inputRef?: RefObject<HTMLInputElement>
+  columnconfig?: columnconfig
+  serverActionValidation?: (
+    formData: FormData
+  ) => Promise<HelperFooterMessage | undefined>
 }

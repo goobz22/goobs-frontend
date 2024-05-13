@@ -19,11 +19,13 @@ yarn add goobs-repo
 ```
 
 The NPM repo is available here - https://www.npmjs.com/package/goobs-repo
+
 This entire repository is written in typescript and there is no need for a types/ install file
 
 ## Version
 
-Current version: 0.4.6 (beta)
+Current version: 0.5.0 (beta)
+
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
 
 ## Components
@@ -31,6 +33,7 @@ This is a beta release of the tools. It is available via npm to ensure functiona
 The following components are included in this release:
 
 ### Button
+
 The Button component is a customizable button with support for icons, variants, and styling props. It provides a flexible and reusable way to create buttons in your application.
 Props:
 
@@ -73,9 +76,117 @@ function MyComponent() {
 }
 ```
 
-- `src/components/ConfirmationCodeInput/index.tsx`: A confirmation code input component for handling verification codes.
 - `src/components/Grid/index.tsx`: A grid component for creating responsive layouts with customizable columns and spacing.
 - `src/components/Typography/index.tsx`: A typography component for rendering text with customizable styles.
+
+### StyledComponent
+
+The StyledComponent is a versatile and customizable input component built with React and Material-UI. It provides a range of input variants and supports various styling options to match your application's design requirements.
+
+#### Features
+
+- Multiple input variants: textfield, phonenumber, password, dropdown, searchbar, and more.
+- Customizable styling properties for outline color, icon color, background color, font colors, and more.
+- Built-in validation and error handling with helper footer messages.
+- Integration with server-side validation actions.
+- Debounced validation to optimize performance.
+- Responsive design and compatibility with different screen sizes.
+
+#### Props
+The StyledComponent accepts the following props:
+
+src/components/StyledComponent/index.tsx
+- name (optional): The name of the input field.
+- outlinecolor (optional): The color of the input outline.
+- iconcolor (optional): The color of the input icons.
+- backgroundcolor (optional): The background color of the input.
+- combinedfontcolor (optional): The color of the input text and label when combined.
+- unshrunkfontcolor (optional): The color of the label when not shrunk.
+- shrunkfontcolor (optional): The color of the label when shrunk.
+- endAdornmentMarginRight (optional): The right margin of the end adornment.
+- autoComplete (optional): The autocomplete attribute for the input.
+- componentvariant (optional): The variant of the input component (e.g., 'textfield', 'phonenumber', 'password', 'dropdown', 'searchbar').
+- options (optional): An array of options for the dropdown variant.
+- helperfooter (optional): An object containing helper footer properties (status, statusMessage).
+- placeholder (optional): The placeholder text for the input.
+- minRows (optional): The minimum number of rows for the multiline textfield variant.
+- formname (optional): The name of the form associated with the input.
+- label (optional): The label text for the input.
+- shrunklabellocation (optional): The location of the shrunk label ('onnotch', 'above', 'left').
+- value (optional): The value of the input.
+- onChange (optional): The function to be called when the input value changes.
+- defaultValue (optional): The default value of the input.
+- inputRef (optional): The ref object for the input element.
+- columnconfig (optional): The configuration object for the grid column.
+- serverActionValidation (optional): An async function that performs server-side validation on the input value.
+
+#### Usage
+
+```jsx
+import { StyledComponent } from 'goobs-repo/components';
+
+function MyComponent() {
+  const handleChange = (event) => {
+    // Handle input change
+  };
+
+  const handleServerValidation = async (formData) => {
+    // Perform server-side validation
+    // Return a HelperFooterMessage object if validation fails
+  };
+
+  return (
+    <StyledComponent
+      name="username"
+      componentvariant="textfield"
+      label="Username"
+      onChange={handleChange}
+      serverActionValidation={handleServerValidation}
+      helperfooter={{
+        status: 'error',
+        statusMessage: 'Username is required',
+      }}
+    />
+  );
+}
+```
+
+#### Hooks
+The StyledComponent utilizes several custom hooks to enhance its functionality:
+
+- src/hooks/styledcomponent/useDropdown.tsx: Handles the dropdown functionality, including opening/closing the dropdown, filtering options, and selecting an option.
+- src/hooks/styledcomponent/usePhoneNumber.tsx: Handles phone number formatting and updating the input value.
+- src/hooks/styledcomponent/usePassword.tsx: Handles password visibility toggling.
+- src/hooks/styledcomponent/useSearchbar.tsx: Handles the searchbar functionality, including filtering options based on the search query.
+
+#### Adornments
+The StyledComponent also includes start and end adornments for additional visual elements and interactivity. The adornments are rendered based on the componentvariant prop.
+
+Start Adornment:
+
+- For the searchbar variant, it renders a search icon.
+
+End Adornment:
+
+- For the password variant, it renders a show/hide eye icon to toggle password visibility.
+- For the dropdown variant, it renders a down arrow icon.
+- For the searchbar variant, it renders an empty end adornment for spacing.
+
+The adornments are defined in the src/components/StyledComponent/adornments.tsx file.
+
+#### Validation
+The StyledComponent supports both client-side and server-side validation. Client-side validation is handled by the component itself, while server-side validation is performed through the serverActionValidation prop.
+
+When the serverActionValidation prop is provided, the component debounces the validation function to optimize performance. The validation result is then displayed in the helper footer message.
+
+#### Styling
+The StyledComponent utilizes Material-UI's styling system to provide a wide range of customization options. The component accepts various styling props to control the appearance of the input, label, outline, icons, and more.
+
+The component also extends the Material-UI's OutlinedInput, FormControl, and InputBase components to support additional color overrides.
+The prop types for the StyledComponent are defined in src/types/styledcomponent/index.ts.
+
+#### Utilities
+The StyledComponent uses utility functions for phone number formatting, located in src/utils/phone/format.ts.
 
 ## Server Actions
 
@@ -86,7 +197,10 @@ The following server actions are included in this release:
 #### Usage:
 
 ```jsx
-import { getReusableStore, setReusableStore } from 'goobs-repo/actions/server/form/store/reusableStore'
+import {
+  getReusableStore,
+  setReusableStore,
+} from 'goobs-repo/actions/server/form/store/reusableStore'
 
 async function handleFormSubmit(formData) {
   // Store form data using the reusable store
@@ -143,9 +257,6 @@ Please refer to the individual component and utility files for more details on t
 
 We are moving very quickly, so there may not be detailed release notes for future versions at this time. However, we have exciting features planned, including:
 
-- Generic server action handle for delivering form data to the server action that accesses the reusable store.
-- Generic server action for handling the delivery of form data and handing off to the reusable store.
-- Generic styled component for handling form data, which can be used as anything with an outlined input or input and is built into the theme and style overrides within MUI. It will be used for textfields, date pickers, dropdowns, phone numbers, search bars, and many more in the future.
 - Auth open source project that uses all of these components and enables people to register and log in their users without having to use a third-party API. It will include secure MFA, email verification, phone number verification, MFA apps, and the ability to use just one type of verification or multiple.
 
 Stay tuned for more updates and releases!

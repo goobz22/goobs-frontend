@@ -39,23 +39,6 @@ export const outlinedInputStyles = (
   }
 
   return {
-    '& .MuiFormControl-root': {
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center',
-      border: outlinecolor
-        ? `1px solid ${getColorValue(outlinecolor)} !important`
-        : 'inherit',
-      borderColor: outlinecolor
-        ? `1px solid ${getColorValue(outlinecolor)} !important`
-        : 'inherit',
-      width: '100%',
-      position: 'relative',
-      cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
-      margin: 0,
-      padding: 0,
-    },
-
     '& .MuiOutlinedInput-root': {
       backgroundColor: getColorValue(backgroundcolor),
       width: '100%',
@@ -157,12 +140,6 @@ export const outlinedInputStyles = (
         top: '50%',
         bottom: 'auto',
         transform: 'none',
-        '& svg': {
-          color: getColorValue(iconcolor),
-        },
-      },
-
-      '& .MuiInputAdornment-positionEnd': {
         '& svg': {
           color: getColorValue(iconcolor),
         },

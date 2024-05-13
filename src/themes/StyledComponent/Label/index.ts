@@ -24,7 +24,7 @@ export const labelStyles = (
 
   // Exception translations
   const exceptions: Partial<
-    Record<StyledComponentProps['componentvariant'], string>
+    Record<Exclude<StyledComponentProps['componentvariant'], undefined>, string>
   > = {
     searchbar: 'translate(35px, 9px) scale(1)',
   }
