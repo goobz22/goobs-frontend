@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "type": "module",
   "license": "MIT",
   "main": "src/index.ts",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.15.14",
+    "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
     "@mui/material-nextjs": "^5.15.11",
     "@types/lodash": "^4.17.1",
@@ -68,7 +68,7 @@
     "useState-alternative",
     "jotai-alternative",
     "button",
-    "grid", 
+    "grid",
     "jsonStorage",
     "localStorage",
     "sessionStorage",
