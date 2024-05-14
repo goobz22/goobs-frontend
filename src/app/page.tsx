@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <AppRouterCacheProvider>
       <ThemeRegistry options={{ key: 'mui-theme' }}>
-        <WebsitePage />;
+        <WebsitePage />
       </ThemeRegistry>
     </AppRouterCacheProvider>
   )
