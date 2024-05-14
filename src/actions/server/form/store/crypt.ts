@@ -2,41 +2,38 @@ import crypto from 'crypto'
 
 const algorithm = 'aes-256-cbc'
 
-const encryptionKey: string = process.env.ENCRYPTION_KEY || ''
-const encryptionIV: string = process.env.ENCRYPTION_IV || ''
+function createEncryptionUtility(key: string, iv: string) {
+  const keyBuffer = Buffer.from(key, 'hex')
+  const ivBuffer = Buffer.from(iv, 'base64')
 
-class EncryptionUtility {
-  private key: Buffer
-  private iv: Buffer
-
-  constructor(key: string, iv: string) {
-    this.key = Buffer.from(key, 'hex')
-    this.iv = Buffer.from(iv, 'base64')
-  }
-
-  encrypt(value: string): string {
-    const cipher = crypto.createCipheriv(algorithm, this.key, this.iv)
+  function encrypt(value: string): string {
+    const cipher = crypto.createCipheriv(algorithm, keyBuffer, ivBuffer)
     let encrypted = cipher.update(value, 'utf8', 'hex')
     encrypted += cipher.final('hex')
     return encrypted
   }
 
-  decrypt(encryptedValue: string): string {
-    const decipher = crypto.createDecipheriv(algorithm, this.key, this.iv)
+  function decrypt(encryptedValue: string): string {
+    const decipher = crypto.createDecipheriv(algorithm, keyBuffer, ivBuffer)
     let decrypted = decipher.update(encryptedValue, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
     return decrypted
   }
+
+  return {
+    encrypt,
+    decrypt,
+  }
 }
 
-export async function encryptValue(value: string): Promise<string> {
-  const encryptionUtility = new EncryptionUtility(encryptionKey, encryptionIV)
+export function encryptValue(value: string, encryptionKey: string, encryptionIV: string): string {
+  const encryptionUtility = createEncryptionUtility(encryptionKey, encryptionIV)
   const encryptedValue = encryptionUtility.encrypt(value)
   return encryptedValue
 }
 
-export async function decryptValue(encryptedValue: string): Promise<string> {
-  const encryptionUtility = new EncryptionUtility(encryptionKey, encryptionIV)
+export function decryptValue(encryptedValue: string, encryptionKey: string, encryptionIV: string): string {
+  const encryptionUtility = createEncryptionUtility(encryptionKey, encryptionIV)
   const decryptedValue = encryptionUtility.decrypt(encryptedValue)
   return decryptedValue
 }
