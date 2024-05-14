@@ -1,55 +1,7 @@
-import { Arapey, Inter, Merriweather } from 'next/font/google'
-import { TypographyOptions } from '@mui/material/styles/createTypography'
-import React from 'react'
-
-type TextTransform =
-  | 'none'
-  | 'capitalize'
-  | 'uppercase'
-  | 'lowercase'
-  | 'inherit'
-  | 'initial'
-  | 'revert'
-  | 'unset'
-
-interface CustomTypographyVariant {
-  fontFamily: string
-  fontSize: string
-  fontWeight: number
-  textTransform?: TextTransform
-}
-
-export type FontFamily = 'arapey' | 'inter' | 'merri'
-export type TypographyVariant =
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6'
-  | 'paragraph'
-  | 'helperheader'
-  | 'helperfooter'
-
-type CustomTypographyOptions = TypographyOptions & {
-  // eslint-disable-next-line no-unused-vars
-  [key in `${FontFamily}${TypographyVariant}`]?: CustomTypographyVariant
-}
-
-declare module '@mui/material/styles' {
-  interface TypographyVariants
-    extends Record<`${FontFamily}${TypographyVariant}`, React.CSSProperties> {}
-  interface TypographyVariantsOptions
-    extends Partial<
-      Record<`${FontFamily}${TypographyVariant}`, React.CSSProperties>
-    > {}
-  export type TypographyVariant = keyof TypographyVariants
-}
-
-declare module '@mui/material/Typography' {
-  interface TypographyPropsVariantOverrides
-    extends Record<`${FontFamily}${TypographyVariant}`, true> {}
-}
+import {
+  CustomTypographyVariant,
+  CustomTypographyOptions,
+} from '@/types/typography'
 
 // Define base configurations for each heading level
 const h1Config: Omit<CustomTypographyVariant, 'fontFamily'> = {
@@ -106,108 +58,156 @@ const helperFooterConfig: Omit<CustomTypographyVariant, 'fontFamily'> = {
   textTransform: 'none',
 }
 
-const arapey = Arapey({ subsets: ['latin'], weight: '400' })
-const inter = Inter({ subsets: ['latin'], weight: '400' })
-const merriweather = Merriweather({ subsets: ['latin'], weight: '400' })
+const arapeyFontFamily = 'var(--font-arapey)'
+const interFontFamily = 'var(--font-inter)'
+const merriweatherFontFamily = 'var(--font-merriweather)'
+
+const arapeyh1: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h1Config,
+}
+
+const arapeyh2: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h2Config,
+}
+
+const arapeyh3: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h3Config,
+}
+
+const arapeyh4: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h4Config,
+}
+
+const arapeyh5: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h5Config,
+}
+
+const arapeyh6: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...h6Config,
+}
+
+const arapeyparagraph: CustomTypographyVariant = {
+  fontFamily: arapeyFontFamily,
+  ...paragraphConfig,
+}
+
+const interh1: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h1Config,
+}
+
+const interh2: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h2Config,
+}
+
+const interh3: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h3Config,
+}
+
+const interh4: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h4Config,
+}
+
+const interh5: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h5Config,
+}
+
+const interh6: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...h6Config,
+}
+
+const interparagraph: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...paragraphConfig,
+}
+
+const interhelperheader: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...helperHeaderConfig,
+}
+
+const interhelperfooter: CustomTypographyVariant = {
+  fontFamily: interFontFamily,
+  ...helperFooterConfig,
+}
+
+const merrih1: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h1Config,
+}
+
+const merrih2: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h2Config,
+}
+
+const merrih3: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h3Config,
+}
+
+const merrih4: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h4Config,
+}
+
+const merrih5: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h5Config,
+}
+
+const merrih6: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...h6Config,
+}
+
+const merriparagraph: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...paragraphConfig,
+}
+
+const merrihelperfooter: CustomTypographyVariant = {
+  fontFamily: merriweatherFontFamily,
+  ...helperFooterConfig,
+}
 
 const typography: CustomTypographyOptions = {
   fontFamily: ['roboto', 'serif', 'sans-serif'].join(','),
-  arapeyh1: {
-    fontFamily: arapey.style.fontFamily,
-    ...h1Config,
-  },
-  arapeyh2: {
-    fontFamily: arapey.style.fontFamily,
-    ...h2Config,
-  },
-  arapeyh3: {
-    fontFamily: arapey.style.fontFamily,
-    ...h3Config,
-  },
-  arapeyh4: {
-    fontFamily: arapey.style.fontFamily,
-    ...h4Config,
-  },
-  arapeyh5: {
-    fontFamily: arapey.style.fontFamily,
-    ...h5Config,
-  },
-  arapeyh6: {
-    fontFamily: arapey.style.fontFamily,
-    ...h6Config,
-  },
-  arapeyparagraph: {
-    fontFamily: arapey.style.fontFamily,
-    ...paragraphConfig,
-  },
-  interh1: {
-    fontFamily: inter.style.fontFamily,
-    ...h1Config,
-  },
-  interh2: {
-    fontFamily: inter.style.fontFamily,
-    ...h2Config,
-  },
-  interh3: {
-    fontFamily: inter.style.fontFamily,
-    ...h3Config,
-  },
-  interh4: {
-    fontFamily: inter.style.fontFamily,
-    ...h4Config,
-  },
-  interh5: {
-    fontFamily: inter.style.fontFamily,
-    ...h5Config,
-  },
-  interh6: {
-    fontFamily: inter.style.fontFamily,
-    ...h6Config,
-  },
-  interparagraph: {
-    fontFamily: inter.style.fontFamily,
-    ...paragraphConfig,
-  },
-  interhelperheader: {
-    fontFamily: inter.style.fontFamily,
-    ...helperHeaderConfig,
-  },
-  interhelperfooter: {
-    fontFamily: inter.style.fontFamily,
-    ...helperFooterConfig,
-  },
-  merrih1: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h1Config,
-  },
-  merrih2: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h2Config,
-  },
-  merrih3: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h3Config,
-  },
-  merrih4: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h4Config,
-  },
-  merrih5: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h5Config,
-  },
-  merrih6: {
-    fontFamily: merriweather.style.fontFamily,
-    ...h6Config,
-  },
-  merriparagraph: {
-    fontFamily: merriweather.style.fontFamily,
-    ...paragraphConfig,
-  },
-  merrihelperfooter: {
-    fontFamily: merriweather.style.fontFamily,
-    ...helperFooterConfig,
-  },
+  arapeyh1,
+  arapeyh2,
+  arapeyh3,
+  arapeyh4,
+  arapeyh5,
+  arapeyh6,
+  arapeyparagraph,
+  interh1,
+  interh2,
+  interh3,
+  interh4,
+  interh5,
+  interh6,
+  interparagraph,
+  interhelperheader,
+  interhelperfooter,
+  merrih1,
+  merrih2,
+  merrih3,
+  merrih4,
+  merrih5,
+  merrih6,
+  merriparagraph,
+  merrihelperfooter,
 }
 
 export default typography

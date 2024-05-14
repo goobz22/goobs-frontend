@@ -9,7 +9,10 @@ export interface FormStoreProps {
 
 export type ReusableStore = {
   storageDir: string
-  get: (storename: string, identifier: string) => Promise<FormStoreProps | undefined>
+  get: (
+    storename: string,
+    identifier: string
+  ) => Promise<FormStoreProps | undefined>
   set: (props: FormStoreProps) => Promise<void>
   cleanup: () => Promise<void>
 }
