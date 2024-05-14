@@ -26,13 +26,21 @@ function createEncryptionUtility(key: string, iv: string) {
   }
 }
 
-export function encryptValue(value: string, encryptionKey: string, encryptionIV: string): string {
+export function encryptValue(
+  value: string,
+  encryptionKey: string,
+  encryptionIV: string
+): string {
   const encryptionUtility = createEncryptionUtility(encryptionKey, encryptionIV)
   const encryptedValue = encryptionUtility.encrypt(value)
   return encryptedValue
 }
 
-export function decryptValue(encryptedValue: string, encryptionKey: string, encryptionIV: string): string {
+export function decryptValue(
+  encryptedValue: string,
+  encryptionKey: string,
+  encryptionIV: string
+): string {
   const encryptionUtility = createEncryptionUtility(encryptionKey, encryptionIV)
   const decryptedValue = encryptionUtility.decrypt(encryptedValue)
   return decryptedValue
