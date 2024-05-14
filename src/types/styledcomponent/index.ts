@@ -65,3 +65,12 @@ export interface StyledComponentProps {
     formData: FormData
   ) => Promise<HelperFooterMessage | undefined>
 }
+
+export interface AdornmentProps {
+  componentvariant: string
+  passwordVisible?: boolean
+  // eslint-disable-next-line no-unused-vars
+  togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void
+  // eslint-disable-next-line no-unused-vars
+  marginRight?: number | string
+}

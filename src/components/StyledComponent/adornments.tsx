@@ -3,15 +3,7 @@ import { InputAdornment } from '@mui/material'
 import SearchIcon from '@/components/Icons/Search'
 import ShowHideEyeIcon from '@/components/Icons/ShowHideEye'
 import DownArrowFilledIcon from '@/components/Icons/DownArrowFilled'
-
-interface AdornmentProps {
-  componentvariant: string
-  passwordVisible?: boolean
-  // eslint-disable-next-line no-unused-vars
-  togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void
-  // eslint-disable-next-line no-unused-vars
-  marginRight?: number | string
-}
+import { AdornmentProps } from '@/types/styledcomponent'
 
 export const StartAdornment: React.FC<AdornmentProps> = ({
   componentvariant,
@@ -58,6 +50,5 @@ export const EndAdornment: React.FC<AdornmentProps> = ({
       <InputAdornment position="end" style={adornmentStyle}></InputAdornment>
     )
   }
-
   return null
 }
