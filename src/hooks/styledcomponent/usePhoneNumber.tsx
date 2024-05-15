@@ -1,5 +1,5 @@
-import { StyledComponentProps } from '@/types/styledcomponent'
-import { formatPhoneNumber } from '@/utils/phone/format'
+import { StyledComponentProps } from '../../types/styledcomponent'
+import { formatPhoneNumber } from '../../utils/phone/format'
 import React from 'react'
 
 export const usePhoneNumber = (

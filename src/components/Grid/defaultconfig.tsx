@@ -1,5 +1,9 @@
-import { gridconfig, rowconfig, columnconfig } from '@/types/grid/customgrid'
-import Typography from '@/components/Typography'
+import {
+  gridconfig,
+  rowconfig,
+  columnconfig,
+} from '../../types/grid/customgrid'
+import Typography from '../../components/Typography'
 
 export const defaultGridConfig: gridconfig = {
   rows: 2,

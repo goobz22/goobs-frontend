@@ -1,7 +1,7 @@
 import { GridProps } from '@mui/material'
 import { Alignment } from '../../content/alignment'
 import { Animation } from '../../content/animation'
-import { ColorPaletteKeys } from '@/themes/palette'
+import { ColorPaletteKeys } from '../../../themes/palette'
 import React from 'react'
 
 export interface rowconfig {

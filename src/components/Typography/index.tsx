@@ -1,5 +1,5 @@
 import { Typography as MuiTypography } from '@mui/material'
-import { TypographyProps } from '@/types/typography'
+import { TypographyProps } from '../../types/typography'
 import React from 'react'
 
 export const Typography: React.FC<TypographyProps> = ({

@@ -1,5 +1,5 @@
 import { CSSObject } from '@emotion/react'
-import { StyledComponentProps } from '@/types/styledcomponent'
+import { StyledComponentProps } from '../../../types/styledcomponent'
 
 export const labelStyles = (
   props: Pick<

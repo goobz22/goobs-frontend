@@ -1,6 +1,6 @@
 import { CSSObject } from '@emotion/react'
-import { CustomButtonProps } from '@/types/button'
-import { theme } from '@/themes/palette'
+import { CustomButtonProps } from '../../types/button'
+import { theme } from '../../themes/palette'
 
 export const buttonStyles = (
   props: Pick<

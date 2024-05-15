@@ -3,7 +3,7 @@ import {
   TypographyProps as MuiTypographyProps,
 } from '@mui/material'
 import { TypographyOptions } from '@mui/material/styles/createTypography'
-import { columnconfig, cellconfig } from '@/types/grid/customgrid'
+import { columnconfig, cellconfig } from '../../types/grid/customgrid'
 import React from 'react'
 
 export type TextTransform =

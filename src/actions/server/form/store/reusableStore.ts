@@ -1,7 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { FormStoreProps, ReusableStore } from '@/types/formstore'
-import { encryptValue, decryptValue } from '@/actions/server/form/store/crypt'
+import { FormStoreProps, ReusableStore } from '../../../../types/formstore'
+import {
+  encryptValue,
+  decryptValue,
+} from '../../../../actions/server/form/store/crypt'
 
 let instance: ReusableStore | null = null
 
