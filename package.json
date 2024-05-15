@@ -1,27 +1,16 @@
 {
   "name": "goobs-repo",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "type": "module",
   "license": "MIT",
-  "exports": {
-    "./components/Button": "./src/components/Button/index.ts",
-    "./components/Grid": "./src/components/Grid/index.ts",
-    "./components/StyledComponent": "./src/components/StyledComponent/index.ts",
-    "./components/Typography": "./src/components/Typography/index.ts",
-    "./actions/server/form/store/reusableStore": {
-      "import": "./src/actions/server/form/store/reusableStore.ts",
-      "require": "./src/actions/server/form/store/reusableStore.ts"
-    },
-    "./actions/server/form/store/crypt": {
-      "import": "./src/actions/server/form/store/crypt.ts",
-      "require": "./src/actions/server/form/store/crypt.ts"
-    },
-    "./actions/server/user/getUser": "./src/actions/server/user/getUser.ts",
-    "./actions/server/user/updateUser": "./src/actions/server/user/updateUser.ts",
-    "./actions/server/form/getFormData": "./src/actions/server/form/getFormData.ts",
-    "./types/*": "./src/types/*"
-  },
+  "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "format": "prettier --write .",
