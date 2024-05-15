@@ -24,9 +24,70 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.6.12 (beta)
+Current version: 0.7.0 (beta)
 
-This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready.
+This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation confirmed working with install instructions below. 
+
+## Integrating goobs-repo with Next.js
+
+This guide explains how to integrate the goobs-repo package with a Next.js project, resolving any compatibility issues that may arise.
+
+**Step 1: Install the required dependencies**
+
+In your Next.js project directory, run the following command to install the necessary dependencies:
+
+`yarn add --dev next-transpile-modules babel-loader @babel/preset-react @babel/preset-typescript`
+`npm install --save-dev next-transpile-modules babel-loader @babel/preset-react @babel/preset-typescript`
+
+This command installs the following packages as dev dependencies:
+
+- next-transpile-modules: A package that enables transpilation of modules from the node_modules directory using the Next.js Babel configuration.
+- babel-loader: The Babel loader for webpack, which allows transpiling JavaScript files using Babel and webpack.
+- @babel/preset-react: The Babel preset for React, which includes the necessary plugins for transpiling React code.
+- @babel/preset-typescript: The Babel preset for TypeScript, which includes the necessary plugins for transpiling TypeScript code.
+
+**Step 2: Update the next.config.js file**
+Replace the contents of your next.config.js file with the following code or add the following transpile code:
+
+```
+/** @type {import('next').NextConfig} */
+// next.config.js
+
+import transpileModules from 'next-transpile-modules';
+
+const withTM = transpileModules(['goobs-repo']);
+
+const nextConfig = {
+  reactStrictMode: true,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+        os: false,
+      };
+    }
+
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-react', '@babel/preset-typescript'],
+          },
+        },
+      ],
+    });
+
+    return config;
+  },
+};
+
+export default withTM(nextConfig);
+```
+
+Then run yarn build - see this discussion for more info - https://github.com/goobz22/goobs-repo/discussions/21
 
 ## Components
 

@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.6.12",
+  "version": "0.7.0",
   "type": "module",
   "license": "MIT",
   "main": "./src/index.ts",
