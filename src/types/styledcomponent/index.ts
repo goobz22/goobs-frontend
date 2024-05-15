@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react'
-import { ColorPaletteKeys } from '@/themes/palette'
-import { HelperFooterMessage } from '@/types/validation'
-import { columnconfig } from '@/types/grid/customgrid'
+import { ColorPaletteKeys } from '../../themes/palette'
+import { HelperFooterMessage } from '../../types/validation'
+import { columnconfig } from '../../types/grid/customgrid'
 
 declare module '@mui/material/OutlinedInput' {
   interface OutlinedInputPropsColorOverrides {

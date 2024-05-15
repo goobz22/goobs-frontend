@@ -1,7 +1,7 @@
 import {
   CustomTypographyVariant,
   CustomTypographyOptions,
-} from '@/types/typography'
+} from '../types/typography'
 
 // Define base configurations for each heading level
 const h1Config: Omit<CustomTypographyVariant, 'fontFamily'> = {

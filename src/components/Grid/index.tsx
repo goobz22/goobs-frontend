@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Grid, Box } from '@mui/material'
-import { CustomGridProps, cellconfig } from '@/types/grid/customgrid'
+import { CustomGridProps, cellconfig } from '../../types/grid/customgrid'
 import {
   defaultGridConfig,
   defaultRowConfig,

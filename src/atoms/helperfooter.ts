@@ -1,5 +1,5 @@
 import { atom } from 'jotai'
-import { HelperFooterMessage } from '@/types/validation'
+import { HelperFooterMessage } from '../types/validation'
 
 export const helperFooterAtom = atom<Record<string, HelperFooterMessage>>({
   default: {

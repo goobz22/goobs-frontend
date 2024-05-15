@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { UserRegistrationData } from '@/types/user' // Import the interface
+import { UserRegistrationData } from '../../types/user' // Import the interface
 
 const Schema = mongoose.Schema
 

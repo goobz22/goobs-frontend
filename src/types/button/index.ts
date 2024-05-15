@@ -1,9 +1,9 @@
 import React from 'react'
 import { ButtonProps, TypographyPropsVariantOverrides } from '@mui/material'
-import { ColorPaletteKeys } from '@/themes/palette'
-import { HelperFooterMessage } from '@/types/validation'
-import { Alignment } from '@/types/content/alignment'
-import { columnconfig } from '@/types/grid/customgrid'
+import { ColorPaletteKeys } from '../../themes/palette'
+import { HelperFooterMessage } from '../../types/validation'
+import { Alignment } from '../../types/content/alignment'
+import { columnconfig } from '../../types/grid/customgrid'
 
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {

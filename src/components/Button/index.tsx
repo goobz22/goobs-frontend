@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, useTheme, Box } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
-import { CustomButtonProps } from '@/types/button'
+import { CustomButtonProps } from '../../types/button'
 import Typography from '../Typography'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'

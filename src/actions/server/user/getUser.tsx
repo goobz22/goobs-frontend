@@ -1,6 +1,6 @@
 'use server'
-import userDatabase from '@/config/registration/userDatabase'
-import { UserRegistrationData } from '@/types/user'
+import userDatabase from '../../../config/registration/userDatabase'
+import { UserRegistrationData } from '../../../types/user'
 import crypto from 'crypto'
 import { FilterQuery } from 'mongoose'
 

@@ -1,48 +1,62 @@
 {
   "name": "goobs-repo",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "type": "module",
   "license": "MIT",
-  "main": "src/index.ts",
+  "exports": {
+    "./components/Button": "./src/components/Button/index.ts",
+    "./components/Grid": "./src/components/Grid/index.ts",
+    "./components/StyledComponent": "./src/components/StyledComponent/index.ts",
+    "./components/Typography": "./src/components/Typography/index.ts",
+    "./actions/server/form/store/reusableStore": {
+      "import": "./src/actions/server/form/store/reusableStore.ts",
+      "require": "./src/actions/server/form/store/reusableStore.ts"
+    },
+    "./actions/server/form/store/crypt": {
+      "import": "./src/actions/server/form/store/crypt.ts",
+      "require": "./src/actions/server/form/store/crypt.ts"
+    },
+    "./actions/server/user/getUser": "./src/actions/server/user/getUser.ts",
+    "./actions/server/user/updateUser": "./src/actions/server/user/updateUser.ts",
+    "./actions/server/form/getFormData": "./src/actions/server/form/getFormData.ts",
+    "./types/*": "./src/types/*"
+  },
+  "types": "./src/index.ts",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "tsc": "tsc"
+    "dev": "vite",
+    "format": "prettier --write .",
+    "lint:format": "prettier --write .",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
-    "@mui/material-nextjs": "^5.15.11",
     "@types/lodash": "^4.17.1",
+    "@vitejs/plugin-react": "^4.2.1",
     "jotai": "^2.8.0",
     "lodash": "^4.17.21",
     "mongoose": "^8.2.4",
-    "next": "^14.2.0",
-    "next-transpile-modules": "^10.0.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "vite": "^5.2.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/preset-typescript": "^7.24.1",
-    "@types/node": "20.12.2",
+    "@types/node": "^20.12.12",
     "@types/react": "18.2.73",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^7.6.0",
-    "babel-loader": "^9.1.3",
     "dotenv": "^16.4.5",
     "eslint": "8.57.0",
-    "eslint-config-next": "^14.1.4",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "3.2.5",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-tsconfig-paths": "^4.3.2"
   },
   "repository": {
     "type": "git",

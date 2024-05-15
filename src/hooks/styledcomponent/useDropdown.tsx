@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { StyledComponentProps } from '@/types/styledcomponent'
+import { StyledComponentProps } from '../../types/styledcomponent'
 import { styled, Menu, MenuItem } from '@mui/material'
 import React from 'react'
 
