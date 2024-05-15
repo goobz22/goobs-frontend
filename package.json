@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "type": "module",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -27,9 +27,9 @@
     "@vitejs/plugin-react": "^4.2.1",
     "jotai": "^2.8.0",
     "lodash": "^4.17.21",
-    "mongoose": "^8.2.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "mongoose": "^8.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "vite": "^5.2.11"
   },
   "devDependencies": {

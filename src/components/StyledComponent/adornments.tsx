@@ -5,7 +5,7 @@ import ShowHideEyeIcon from '../../components/Icons/ShowHideEye'
 import DownArrowFilledIcon from '../../components/Icons/DownArrowFilled'
 import { AdornmentProps } from '../../types/styledcomponent'
 
-export const StartAdornment: React.FC<AdornmentProps> = ({
+const StartAdornment: React.FC<AdornmentProps> = ({
   componentvariant,
 }) => {
   if (componentvariant === 'searchbar') {
@@ -18,7 +18,7 @@ export const StartAdornment: React.FC<AdornmentProps> = ({
   return null
 }
 
-export const EndAdornment: React.FC<AdornmentProps> = ({
+const EndAdornment: React.FC<AdornmentProps> = ({
   componentvariant,
   passwordVisible,
   togglePasswordVisibility,
@@ -50,5 +50,8 @@ export const EndAdornment: React.FC<AdornmentProps> = ({
       <InputAdornment position="end" style={adornmentStyle}></InputAdornment>
     )
   }
+
   return null
 }
+
+export { StartAdornment, EndAdornment }
