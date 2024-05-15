@@ -15,12 +15,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve('src', 'index.ts'),
-      name: 'unlimited-components',
+      name: 'goobs-repo',
       formats: ['es'],
-      fileName: format => `unlimited-components.${format}.js`,
+      fileName: format => `goobs-repo.${format}.js`,
     },
     rollupOptions: {
-      // dependecies to exclude in our library bundle. ie: packages that are expected to be manually installed in the consumer repository
       external: [
         'react',
         'react-dom',
@@ -30,16 +29,23 @@ export default defineConfig({
         '@mui/material',
         '@mui/system',
         '@mui/x-data-grid-pro',
-        // '@fontsource/inter',
-        // '@fontsource/material-icons',
-        // '@fontsource/roboto',
       ],
       output: {
         globals: {
-          // will need more external dependecies here
           react: 'React',
         },
       },
     },
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  optimizeDeps: {
+    include: ['@emotion/react', '@emotion/styled'],
+  },
+  esbuild: {
+    loader: 'tsx',
   },
 })
