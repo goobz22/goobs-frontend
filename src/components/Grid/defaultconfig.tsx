@@ -4,6 +4,7 @@ import {
   columnconfig,
 } from '../../types/grid/customgrid'
 import Typography from '../../components/Typography'
+import React from 'react';
 
 export const defaultGridConfig: gridconfig = {
   rows: 2,

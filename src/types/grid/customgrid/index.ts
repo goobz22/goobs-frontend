@@ -16,7 +16,6 @@ export interface rowconfig {
   marginleft?: number
   animation?: Animation
   bordercolor?: ColorPaletteKeys
-  rowheight?: string
 }
 
 export interface columnconfig {
@@ -24,8 +23,8 @@ export interface columnconfig {
   column?: number
   gridname?: string
   alignment?: Alignment
-  columnwidth?: string
   margintop?: number
+  columnwidth?: string
   marginbottom?: number
   marginright?: number
   marginleft?: number
@@ -58,4 +57,6 @@ export interface CustomGridProps extends GridProps {
 export interface cellconfig {
   border?: 'none' | 'solid'
   minHeight?: string
+  maxHeight?: string
+  width?: string
 }
