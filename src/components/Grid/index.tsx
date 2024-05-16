@@ -58,7 +58,6 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 rowIndex === rows - 1 ? currentRowConfig.marginbottom || 0 : 0,
               marginLeft: currentRowConfig.marginleft || 0,
               width: currentRowConfig.rowwidth || 'auto',
-              minHeight: currentRowConfig.rowheight || 'auto',
             }}
           >
             {Array.from({ length: columns }).map((_, columnIndex) => {
@@ -116,32 +115,26 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         ? 'var(--Grid-borderWidth) solid'
                         : 'none',
                       borderColor: 'divider',
-                      minHeight:
-                        currentColumnConfig?.cellconfig?.minHeight || '100%',
+                      minHeight: currentCellConfig.minHeight || 'auto',
+                      maxHeight: currentCellConfig.maxHeight || 'none',
+                      height: currentCellConfig.maxHeight || 'auto',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: justifyContent,
                       marginTop: currentColumnConfig?.margintop || 0,
                       marginBottom: currentColumnConfig?.marginbottom || 0,
+                      overflow: 'auto',
                     },
                   }}
                 >
                   <Box
-                    width="100%"
-                    minHeight="100%"
+                    width={currentCellConfig.width || '100%'}
+                    height="100%"
                     display="flex"
                     alignItems="center"
                     justifyContent={justifyContent}
-                    pl={
-                      currentColumnConfig?.alignment === 'left'
-                        ? currentColumnConfig?.marginleft || 0
-                        : 0
-                    }
-                    pr={
-                      currentColumnConfig?.alignment === 'right'
-                        ? currentColumnConfig?.marginright || 0
-                        : 0
-                    }
+                    pl={currentColumnConfig?.marginleft || 0}
+                    pr={currentColumnConfig?.marginright || 0}
                   >
                     {currentColumnConfig?.component || null}
                   </Box>
