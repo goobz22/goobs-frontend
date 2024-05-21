@@ -20,3 +20,5 @@
 !src/types/styledcomponent/index.ts
 !src/types/typography/index.ts
 !src/types/user/index.ts
+!src/styles/palette.ts
+!src/styles/typography.ts
