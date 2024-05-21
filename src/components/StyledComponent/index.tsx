@@ -7,13 +7,16 @@ import { useDropdown } from '../../hooks/styledcomponent/useDropdown'
 import { usePhoneNumber } from '../../hooks/styledcomponent/usePhoneNumber'
 import { usePassword } from '../../hooks/styledcomponent/usePassword'
 import Typography from '../../components/Typography'
-import { theme as customTheme } from '../../themes/palette'
+import { red, green } from '../../styles/palette'
 import { formatPhoneNumber } from '../../utils/phone/format'
 import { StartAdornment, EndAdornment } from './adornments'
 import { useAtom } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
 import { debounce } from 'lodash'
+import labelStyles from '../../styles/StyledComponent/Label'
+import formControlStyles from '../../styles/StyledComponent/FormControl'
+import outlinedInputStyles from '../../styles/StyledComponent/OutlinedInput'
 
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
@@ -24,9 +27,13 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     name,
     serverActionValidation,
     onChange,
+    backgroundcolor,
+    iconcolor,
+    unshrunkfontcolor,
+    combinedfontcolor,
+    shrunkfontcolor,
+    shrunklabellocation,
   } = props
-
-  const theme = customTheme
 
   const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
 
@@ -41,23 +48,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const { handlePhoneNumberChange } = usePhoneNumber(props)
 
   const { passwordVisible, togglePasswordVisibility } = usePassword()
-
-  const inputLabelProps = {
-    componentvariant,
-    unshrunkfontcolor: props.unshrunkfontcolor,
-    shrunkfontcolor: props.shrunkfontcolor,
-    shrunklabellocation: props.shrunklabellocation,
-    combinedfontcolor: props.combinedfontcolor,
-  }
-
-  const formControlStylingProps = {
-    backgroundcolor: props.backgroundcolor,
-    outlinecolor,
-    iconcolor: props.iconcolor,
-    componentvariant,
-    unshrunkfontcolor: props.unshrunkfontcolor,
-    combinedfontcolor: props.combinedfontcolor,
-  }
 
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -111,22 +101,54 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   return (
     <FormControl
       ref={inputRef}
-      {...formControlStylingProps}
+      style={formControlStyles({
+        outlinecolor,
+        backgroundcolor,
+        componentvariant,
+        unshrunkfontcolor,
+        shrunkfontcolor,
+        combinedfontcolor,
+        iconcolor,
+        shrunklabellocation,
+      })}
       fullWidth
       onClick={handleDropdownClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ flexDirection: 'column' }}
     >
-      <InputLabel {...inputLabelProps}>{label}</InputLabel>
+      <InputLabel
+        style={labelStyles({
+          componentvariant,
+          unshrunkfontcolor,
+          shrunkfontcolor,
+          shrunklabellocation,
+          combinedfontcolor,
+        })}
+        shrink
+      >
+        {label}
+      </InputLabel>
       <OutlinedInput
+        style={outlinedInputStyles({
+          outlinecolor,
+          backgroundcolor,
+          componentvariant,
+          unshrunkfontcolor,
+          shrunkfontcolor,
+          combinedfontcolor,
+          iconcolor,
+          shrunklabellocation,
+        })}
         type={
           componentvariant === 'password' && !passwordVisible
             ? 'password'
             : 'text'
         }
         startAdornment={
-          <StartAdornment componentvariant={componentvariant || ''} />
+          <StartAdornment
+            componentvariant={componentvariant || ''}
+            iconcolor={iconcolor}
+          />
         }
         endAdornment={
           <EndAdornment
@@ -134,13 +156,14 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             passwordVisible={passwordVisible}
             togglePasswordVisibility={togglePasswordVisibility}
             marginRight={props.endAdornmentMarginRight}
+            iconcolor={iconcolor}
           />
         }
         onChange={handleChange}
         multiline={componentvariant === 'multilinetextfield'}
         label={label}
         autoComplete={props.autoComplete}
-        name={props.name}
+        name={name}
         value={componentvariant === 'dropdown' ? selectedOption : props.value}
         readOnly={componentvariant === 'dropdown'}
       />
@@ -149,9 +172,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           variant="merrihelperfooter"
           fontcolor={
             currentHelperFooter?.status === 'error'
-              ? theme.palette.red.main
+              ? red.main
               : currentHelperFooter?.status === 'success'
-                ? theme.palette.green.dark
+                ? green.dark
                 : undefined
           }
           marginTop={0.5}

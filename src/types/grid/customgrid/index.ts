@@ -1,7 +1,6 @@
 import { GridProps } from '@mui/material'
 import { Alignment } from '../../content/alignment'
 import { Animation } from '../../content/animation'
-import { ColorPaletteKeys } from '../../../themes/palette'
 import React from 'react'
 
 export interface rowconfig {
@@ -15,7 +14,7 @@ export interface rowconfig {
   marginright?: number
   marginleft?: number
   animation?: Animation
-  bordercolor?: ColorPaletteKeys
+  bordercolor?: string
 }
 
 export interface columnconfig {
@@ -30,7 +29,7 @@ export interface columnconfig {
   marginleft?: number
   animation?: Animation
   component?: React.ReactNode
-  bordercolor?: ColorPaletteKeys
+  bordercolor?: string
   cellconfig?: cellconfig
 }
 
@@ -44,7 +43,7 @@ export interface gridconfig {
   marginleft?: number
   gridwidth?: string
   animation?: Animation
-  bordercolor?: ColorPaletteKeys
+  bordercolor?: string
 }
 
 export interface CustomGridProps extends GridProps {

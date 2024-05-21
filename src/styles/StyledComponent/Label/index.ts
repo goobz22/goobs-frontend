@@ -1,7 +1,6 @@
-import { CSSObject } from '@emotion/react'
 import { StyledComponentProps } from '../../../types/styledcomponent'
 
-export const labelStyles = (
+const labelStyles = (
   props: Pick<
     StyledComponentProps,
     | 'componentvariant'
@@ -10,7 +9,7 @@ export const labelStyles = (
     | 'combinedfontcolor'
     | 'shrunklabellocation'
   >
-): CSSObject => {
+): React.CSSProperties => {
   const {
     componentvariant,
     unshrunkfontcolor,
@@ -41,7 +40,20 @@ export const labelStyles = (
       ? exceptions[componentvariant]
       : defaultTransform
 
-  const baseStyles: CSSObject = {
+  const shrunkStyles: React.CSSProperties =
+    shrunklabellocation === 'above'
+      ? {
+          transform: ShrunkTransform,
+          color: combinedfontcolor || shrunkfontcolor || 'black',
+          padding: '0 4px',
+        }
+      : {
+          transform: defaultShrunkTransform,
+          color: combinedfontcolor || shrunkfontcolor || 'black',
+          padding: '0 4px',
+        }
+
+  return {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -49,20 +61,9 @@ export const labelStyles = (
     padding: '0 4px',
     color: combinedfontcolor || unshrunkfontcolor || 'black',
     transform: transform,
-    '&.MuiInputLabel-outlined': {
-      minHeight: '20px',
-      '&.Mui-focused, &.MuiInputLabel-shrink': {
-        transform:
-          shrunklabellocation === 'above'
-            ? ShrunkTransform
-            : defaultShrunkTransform,
-        color: combinedfontcolor || shrunkfontcolor || 'black',
-        padding: '0 4px',
-      },
-    },
+    minHeight: '20px',
+    ...(shrunkStyles as any),
   }
-
-  return baseStyles
 }
 
 export default labelStyles

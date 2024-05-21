@@ -1,5 +1,4 @@
 import React, { RefObject } from 'react'
-import { ColorPaletteKeys } from '../../themes/palette'
 import { HelperFooterMessage } from '../../types/validation'
 import { columnconfig } from '../../types/grid/customgrid'
 
@@ -23,12 +22,12 @@ declare module '@mui/material/InputBase' {
 
 export interface StyledComponentProps {
   name?: string
-  outlinecolor?: ColorPaletteKeys
-  iconcolor?: ColorPaletteKeys
-  backgroundcolor?: ColorPaletteKeys
-  combinedfontcolor?: ColorPaletteKeys
-  unshrunkfontcolor?: ColorPaletteKeys
-  shrunkfontcolor?: ColorPaletteKeys
+  outlinecolor?: string
+  iconcolor?: string
+  backgroundcolor?: string
+  combinedfontcolor?: string
+  unshrunkfontcolor?: string
+  shrunkfontcolor?: string
   endAdornmentMarginRight?: number | string
   autoComplete?: string
   componentvariant?:
@@ -68,6 +67,7 @@ export interface StyledComponentProps {
 
 export interface AdornmentProps {
   componentvariant: string
+  iconcolor?: string
   passwordVisible?: boolean
   // eslint-disable-next-line no-unused-vars
   togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void

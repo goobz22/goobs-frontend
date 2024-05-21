@@ -1,7 +1,4 @@
-import {
-  CustomTypographyVariant,
-  CustomTypographyOptions,
-} from '../types/typography'
+import { CustomTypographyVariant } from '../types/typography'
 
 // Define base configurations for each heading level
 const h1Config: Omit<CustomTypographyVariant, 'fontFamily'> = {
@@ -62,152 +59,122 @@ const arapeyFontFamily = 'var(--font-arapey)'
 const interFontFamily = 'var(--font-inter)'
 const merriweatherFontFamily = 'var(--font-merriweather)'
 
-const arapeyh1: CustomTypographyVariant = {
+export const arapeyh1: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h1Config,
 }
 
-const arapeyh2: CustomTypographyVariant = {
+export const arapeyh2: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h2Config,
 }
 
-const arapeyh3: CustomTypographyVariant = {
+export const arapeyh3: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h3Config,
 }
 
-const arapeyh4: CustomTypographyVariant = {
+export const arapeyh4: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h4Config,
 }
 
-const arapeyh5: CustomTypographyVariant = {
+export const arapeyh5: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h5Config,
 }
 
-const arapeyh6: CustomTypographyVariant = {
+export const arapeyh6: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...h6Config,
 }
 
-const arapeyparagraph: CustomTypographyVariant = {
+export const arapeyparagraph: CustomTypographyVariant = {
   fontFamily: arapeyFontFamily,
   ...paragraphConfig,
 }
 
-const interh1: CustomTypographyVariant = {
+export const interh1: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h1Config,
 }
 
-const interh2: CustomTypographyVariant = {
+export const interh2: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h2Config,
 }
 
-const interh3: CustomTypographyVariant = {
+export const interh3: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h3Config,
 }
 
-const interh4: CustomTypographyVariant = {
+export const interh4: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h4Config,
 }
 
-const interh5: CustomTypographyVariant = {
+export const interh5: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h5Config,
 }
 
-const interh6: CustomTypographyVariant = {
+export const interh6: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...h6Config,
 }
 
-const interparagraph: CustomTypographyVariant = {
+export const interparagraph: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...paragraphConfig,
 }
 
-const interhelperheader: CustomTypographyVariant = {
+export const interhelperheader: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...helperHeaderConfig,
 }
 
-const interhelperfooter: CustomTypographyVariant = {
+export const interhelperfooter: CustomTypographyVariant = {
   fontFamily: interFontFamily,
   ...helperFooterConfig,
 }
 
-const merrih1: CustomTypographyVariant = {
+export const merrih1: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h1Config,
 }
 
-const merrih2: CustomTypographyVariant = {
+export const merrih2: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h2Config,
 }
 
-const merrih3: CustomTypographyVariant = {
+export const merrih3: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h3Config,
 }
 
-const merrih4: CustomTypographyVariant = {
+export const merrih4: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h4Config,
 }
 
-const merrih5: CustomTypographyVariant = {
+export const merrih5: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h5Config,
 }
 
-const merrih6: CustomTypographyVariant = {
+export const merrih6: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...h6Config,
 }
 
-const merriparagraph: CustomTypographyVariant = {
+export const merriparagraph: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...paragraphConfig,
 }
 
-const merrihelperfooter: CustomTypographyVariant = {
+export const merrihelperfooter: CustomTypographyVariant = {
   fontFamily: merriweatherFontFamily,
   ...helperFooterConfig,
 }
-
-const typography: CustomTypographyOptions = {
-  fontFamily: ['roboto', 'serif', 'sans-serif'].join(','),
-  arapeyh1,
-  arapeyh2,
-  arapeyh3,
-  arapeyh4,
-  arapeyh5,
-  arapeyh6,
-  arapeyparagraph,
-  interh1,
-  interh2,
-  interh3,
-  interh4,
-  interh5,
-  interh6,
-  interparagraph,
-  interhelperheader,
-  interhelperfooter,
-  merrih1,
-  merrih2,
-  merrih3,
-  merrih4,
-  merrih5,
-  merrih6,
-  merriparagraph,
-  merrihelperfooter,
-}
-
-export default typography
