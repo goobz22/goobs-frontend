@@ -22,6 +22,11 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     fontcolor,
     name,
     formname,
+    outlinecolor,
+    backgroundcolor,
+    fontlocation,
+    iconcolor,
+    width,
   } = props
 
   const theme = useTheme()
@@ -47,14 +52,6 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       setCurrentHelperFooter(undefined)
     }
   }, [helperFooterAtomValue])
-
-  const buttonStylingProps: CustomButtonProps = {
-    outlinecolor: props.outlinecolor,
-    backgroundcolor: props.backgroundcolor,
-    fontlocation: props.fontlocation,
-    iconcolor: props.iconcolor,
-    width: props.width,
-  }
 
   const renderIcon = () => {
     if (icon === false) {
@@ -111,13 +108,16 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
         type={type}
         name={name}
         onClick={handleButtonClick}
-        sx={{
+        style={{
           minWidth: text ? 'auto' : 'fit-content',
           paddingLeft: text ? '8px' : '0',
           paddingRight: text ? '8px' : '0',
-          justifyContent: 'center',
+          justifyContent: fontlocation || 'center',
+          backgroundColor: backgroundcolor,
+          border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
+          color: iconcolor,
+          width: width || 'auto',
         }}
-        {...buttonStylingProps}
       >
         <Box
           // @ts-ignore
@@ -136,9 +136,9 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
           variant="merrihelperfooter"
           fontcolor={
             currentHelperFooter?.status === 'error'
-              ? theme.palette.red.main
+              ? 'red'
               : currentHelperFooter?.status === 'success'
-                ? theme.palette.green.dark
+                ? 'green'
                 : undefined
           }
           marginTop={0.5}
