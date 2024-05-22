@@ -106,6 +106,8 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     setIsFocused(false)
   }
 
+  const isNotchedVariant = componentvariant !== 'dropdown'
+
   return (
     <Box
       // @ts-ignore
@@ -130,7 +132,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           combinedfontcolor,
           focused: isFocused || !!props.value,
         })}
-        shrink={isFocused || !!props.value}
+        shrink={isFocused || !!props.value || componentvariant === 'dropdown'}
       >
         {label}
       </InputLabel>
@@ -186,7 +188,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           name={name}
           value={componentvariant === 'dropdown' ? selectedOption : props.value}
           readOnly={componentvariant === 'dropdown'}
-          notched={isFocused || !!props.value}
+          notched={isNotchedVariant && (isFocused || !!props.value)}
         />
         {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
       </Box>
