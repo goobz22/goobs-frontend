@@ -8,6 +8,7 @@ const labelStyles = (
     | 'shrunkfontcolor'
     | 'combinedfontcolor'
     | 'shrunklabellocation'
+    | 'focused'
   >
 ): React.CSSProperties => {
   const {
@@ -15,43 +16,45 @@ const labelStyles = (
     unshrunkfontcolor,
     shrunkfontcolor,
     combinedfontcolor,
-    shrunklabellocation,
+    shrunklabellocation = 'onnotch', // Set 'onnotch' as the default value
+    focused,
   } = props
 
   // Default translation
-  const defaultTransform = 'translate(14px, 9px) scale(1)'
+  const defaultTransform = 'translate(12px, 13px) scale(1)'
 
   // Exception translations
   const exceptions: Partial<
     Record<Exclude<StyledComponentProps['componentvariant'], undefined>, string>
   > = {
-    searchbar: 'translate(35px, 9px) scale(1)',
+    searchbar: 'translate(35px, 13px) scale(1)',
+    dropdown: defaultTransform,
   }
 
-  // Shrink transformation for dropdown variant
-  const ShrunkTransform = 'translate(0px, -18px) scale(0.75)'
+  const unshrunkStyles: React.CSSProperties = {
+    color: combinedfontcolor || unshrunkfontcolor || 'black',
+    transform:
+      componentvariant && exceptions[componentvariant]
+        ? exceptions[componentvariant]
+        : defaultTransform,
+    transformOrigin: 'top left',
+  }
 
-  // Shrink transformation for other variants
-  const defaultShrunkTransform = 'translate(11px, -9px) scale(0.75)'
-
-  // Determine the correct transformation based on componentvariant
-  const transform =
-    componentvariant && exceptions[componentvariant]
-      ? exceptions[componentvariant]
-      : defaultTransform
-
-  const shrunkStyles: React.CSSProperties =
-    shrunklabellocation === 'above'
-      ? {
-          transform: ShrunkTransform,
-          color: combinedfontcolor || shrunkfontcolor || 'black',
-          padding: '0 4px',
-        }
-      : {
-          transform: defaultShrunkTransform,
-          color: combinedfontcolor || shrunkfontcolor || 'black',
-          padding: '0 4px',
-        }
+  const shrunkStyles: React.CSSProperties = {
+    color: combinedfontcolor || shrunkfontcolor || 'black',
+    transform: 'scale(0.75)',
+    transformOrigin: 'top left',
+    top: '-4px',
+    left: '12px',
+    ...(shrunklabellocation === 'above' && {
+      top: '-16px',
+      left: '0',
+    }),
+    ...(shrunklabellocation === 'left' && {
+      top: '8px',
+      left: '-12px',
+    }),
+  }
 
   return {
     position: 'absolute',
@@ -59,10 +62,9 @@ const labelStyles = (
     left: 0,
     height: 'auto',
     padding: '0 4px',
-    color: combinedfontcolor || unshrunkfontcolor || 'black',
-    transform: transform,
     minHeight: '20px',
-    ...(shrunkStyles as any),
+    ...unshrunkStyles,
+    ...(focused && shrunkStyles),
   }
 }
 

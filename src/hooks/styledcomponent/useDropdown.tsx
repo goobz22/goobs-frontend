@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { StyledComponentProps } from '../../types/styledcomponent'
 import { styled, Menu, MenuItem } from '@mui/material'
 import React from 'react'
@@ -13,11 +13,13 @@ const StyledSelectMenu = styled(MenuItem)({
   },
 })
 
-export const useDropdown = (props: StyledComponentProps) => {
+export const useDropdown = (
+  props: StyledComponentProps,
+  inputBoxRef: React.RefObject<HTMLDivElement>
+) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [filteredOptions, setFilteredOptions] = useState<string[]>([])
-  const [isHovering, setIsHovering] = useState(false)
   const [selectedOption, setSelectedOption] = useState(props.defaultValue || '')
   const [isDropdownFocused, setIsDropdownFocused] = useState(false)
 
@@ -43,47 +45,37 @@ export const useDropdown = (props: StyledComponentProps) => {
     }
   }, [value])
 
-  const handleDropdownClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleDropdownClick = useCallback(() => {
+    console.log('Dropdown clicked')
     if (componentvariant === 'dropdown') {
-      setAnchorEl(event.currentTarget)
+      setAnchorEl(inputBoxRef.current)
       setIsDropdownOpen(!isDropdownOpen)
     }
-  }
+  }, [componentvariant, inputBoxRef, isDropdownOpen])
 
-  const handleDropdownClose = () => {
-    if (componentvariant === 'dropdown') {
+  const handleOptionSelect = useCallback(
+    (option: string) => {
+      console.log('Option selected:', option)
+      setSelectedOption(option)
+      if (onChange) {
+        onChange({
+          target: { value: option },
+        } as React.ChangeEvent<HTMLInputElement>)
+      }
       setIsDropdownOpen(false)
-      setAnchorEl(null)
-    }
-  }
+    },
+    [onChange]
+  )
 
-  const handleMouseEnter = () => {
-    if (componentvariant === 'dropdown') {
-      setIsHovering(true)
-    }
-  }
-
-  const handleMouseLeave = () => {
-    if (componentvariant === 'dropdown') {
-      setIsHovering(false)
-    }
-  }
-
-  const handleOptionSelect = (option: string) => {
-    setSelectedOption(option)
-    handleDropdownClose()
-    if (onChange) {
-      onChange({
-        target: { value: option },
-      } as React.ChangeEvent<HTMLInputElement>)
-    }
-  }
-
-  const handleInputFocus = (focused: boolean) => {
-    if (componentvariant === 'dropdown') {
-      setIsDropdownFocused(focused)
-    }
-  }
+  const handleInputFocus = useCallback(
+    (focused: boolean) => {
+      console.log('Dropdown focused:', focused)
+      if (componentvariant === 'dropdown') {
+        setIsDropdownFocused(focused)
+      }
+    },
+    [componentvariant]
+  )
 
   if (componentvariant !== 'dropdown') {
     return {}
@@ -93,10 +85,10 @@ export const useDropdown = (props: StyledComponentProps) => {
     <Menu
       anchorEl={anchorEl}
       open={isDropdownOpen}
-      onClose={handleDropdownClose}
+      onClose={() => setIsDropdownOpen(false)}
       PaperProps={{
         style: {
-          minWidth: anchorEl?.offsetWidth,
+          minWidth: inputBoxRef.current?.offsetWidth,
         },
       }}
     >
@@ -121,10 +113,6 @@ export const useDropdown = (props: StyledComponentProps) => {
     anchorEl,
     filteredOptions,
     handleDropdownClick,
-    handleDropdownClose,
-    isHovering,
-    handleMouseEnter,
-    handleMouseLeave,
     selectedOption,
     handleOptionSelect,
     isDropdownFocused,

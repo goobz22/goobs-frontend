@@ -1,12 +1,10 @@
-'use client'
-
-import React, { useCallback } from 'react'
-import { FormControl, InputLabel, OutlinedInput } from '@mui/material'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
+import { Box, InputLabel, OutlinedInput } from '@mui/material'
 import { StyledComponentProps } from '../../types/styledcomponent'
 import { useDropdown } from '../../hooks/styledcomponent/useDropdown'
 import { usePhoneNumber } from '../../hooks/styledcomponent/usePhoneNumber'
 import { usePassword } from '../../hooks/styledcomponent/usePassword'
-import Typography from '../../components/Typography'
+import { Typography } from 'goobs-repo'
 import { red, green } from '../../styles/palette'
 import { formatPhoneNumber } from '../../utils/phone/format'
 import { StartAdornment, EndAdornment } from './adornments'
@@ -15,8 +13,6 @@ import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
 import { debounce } from 'lodash'
 import labelStyles from '../../styles/StyledComponent/Label'
-import formControlStyles from '../../styles/StyledComponent/FormControl'
-import outlinedInputStyles from '../../styles/StyledComponent/OutlinedInput'
 
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
@@ -36,14 +32,18 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   } = props
 
   const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRefInternal = useRef<HTMLInputElement>(null)
+  const inputBoxRef = useRef<HTMLDivElement>(null)
 
-  const {
-    handleDropdownClick,
-    handleMouseEnter,
-    handleMouseLeave,
-    renderMenu,
-    selectedOption,
-  } = useDropdown(props)
+  useEffect(() => {
+    if (props.value && inputRefInternal.current) {
+      inputRefInternal.current.focus()
+    }
+  }, [props.value])
+
+  const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
+    useDropdown(props, inputBoxRef)
 
   const { handlePhoneNumberChange } = usePhoneNumber(props)
 
@@ -98,23 +98,28 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
   const currentHelperFooter = name ? helperFooterResult[name] : undefined
 
+  const handleFocus = () => {
+    setIsFocused(true)
+  }
+
+  const handleBlur = () => {
+    setIsFocused(false)
+  }
+
   return (
-    <FormControl
-      ref={inputRef}
-      style={formControlStyles({
-        outlinecolor,
-        backgroundcolor,
-        componentvariant,
-        unshrunkfontcolor,
-        shrunkfontcolor,
-        combinedfontcolor,
-        iconcolor,
-        shrunklabellocation,
-      })}
-      fullWidth
-      onClick={handleDropdownClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <Box
+      // @ts-ignore
+      sx={{
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        width: '100%',
+        position: 'relative',
+        margin: 0,
+        padding: 0,
+        overflow: 'hidden',
+      }}
     >
       <InputLabel
         style={labelStyles({
@@ -123,50 +128,68 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           shrunkfontcolor,
           shrunklabellocation,
           combinedfontcolor,
+          focused: isFocused || !!props.value,
         })}
-        shrink
+        shrink={isFocused || !!props.value}
       >
         {label}
       </InputLabel>
-      <OutlinedInput
-        style={outlinedInputStyles({
-          outlinecolor,
-          backgroundcolor,
-          componentvariant,
-          unshrunkfontcolor,
-          shrunkfontcolor,
-          combinedfontcolor,
-          iconcolor,
-          shrunklabellocation,
-        })}
-        type={
-          componentvariant === 'password' && !passwordVisible
-            ? 'password'
-            : 'text'
-        }
-        startAdornment={
-          <StartAdornment
-            componentvariant={componentvariant || ''}
-            iconcolor={iconcolor}
-          />
-        }
-        endAdornment={
-          <EndAdornment
-            componentvariant={componentvariant || ''}
-            passwordVisible={passwordVisible}
-            togglePasswordVisibility={togglePasswordVisibility}
-            marginRight={props.endAdornmentMarginRight}
-            iconcolor={iconcolor}
-          />
-        }
-        onChange={handleChange}
-        multiline={componentvariant === 'multilinetextfield'}
-        label={label}
-        autoComplete={props.autoComplete}
-        name={name}
-        value={componentvariant === 'dropdown' ? selectedOption : props.value}
-        readOnly={componentvariant === 'dropdown'}
-      />
+      <Box ref={inputBoxRef} sx={{ width: '100%', paddingTop: '5px' }}>
+        <OutlinedInput
+          ref={inputRef || inputRefInternal}
+          onClick={handleDropdownClick}
+          style={{
+            backgroundColor: backgroundcolor || 'inherit',
+            width: '100%',
+            height: 40,
+            cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
+            boxSizing: 'border-box',
+            borderRadius: 5,
+            marginTop: 'auto',
+          }}
+          inputProps={{
+            style: {
+              width: '100%',
+              color: combinedfontcolor || unshrunkfontcolor || 'inherit',
+              height: '100%',
+              cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
+            },
+            placeholder: props.placeholder || '',
+          }}
+          type={
+            componentvariant === 'password' && !passwordVisible
+              ? 'password'
+              : 'text'
+          }
+          startAdornment={
+            <StartAdornment
+              componentvariant={componentvariant || ''}
+              iconcolor={iconcolor}
+            />
+          }
+          endAdornment={
+            <EndAdornment
+              componentvariant={componentvariant || ''}
+              passwordVisible={passwordVisible}
+              togglePasswordVisibility={togglePasswordVisibility}
+              marginRight={props.endAdornmentMarginRight}
+              iconcolor={iconcolor}
+            />
+          }
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          fullWidth
+          multiline={componentvariant === 'multilinetextfield'}
+          label={label}
+          autoComplete={props.autoComplete}
+          name={name}
+          value={componentvariant === 'dropdown' ? selectedOption : props.value}
+          readOnly={componentvariant === 'dropdown'}
+          notched={isFocused || !!props.value}
+        />
+        {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
+      </Box>
       {currentHelperFooter?.statusMessage && (
         <Typography
           variant="merrihelperfooter"
@@ -183,8 +206,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           text={currentHelperFooter?.statusMessage}
         />
       )}
-      {componentvariant === 'dropdown' && renderMenu}
-    </FormControl>
+    </Box>
   )
 }
 
