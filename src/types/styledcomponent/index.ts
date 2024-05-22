@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react'
 import { HelperFooterMessage } from '../../types/validation'
-import { columnconfig } from '../../types/grid/customgrid'
+import { columnconfig } from 'goobs-repo'
 
 declare module '@mui/material/OutlinedInput' {
   interface OutlinedInputPropsColorOverrides {
@@ -25,6 +25,7 @@ export interface StyledComponentProps {
   outlinecolor?: string
   iconcolor?: string
   backgroundcolor?: string
+  notched?: boolean
   combinedfontcolor?: string
   unshrunkfontcolor?: string
   shrunkfontcolor?: string
@@ -63,6 +64,7 @@ export interface StyledComponentProps {
   serverActionValidation?: (
     formData: FormData
   ) => Promise<HelperFooterMessage | undefined>
+  focused?: boolean
 }
 
 export interface AdornmentProps {
