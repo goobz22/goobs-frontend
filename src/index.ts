@@ -10,8 +10,6 @@ export {
   setReusableStore,
 } from './actions/server/form/store/reusableStore'
 export { encryptValue, decryptValue } from './actions/server/form/store/crypt'
-export { default as getUser } from './actions/server/user/getUser'
-export { default as updateUser } from './actions/server/user/updateUser'
 export { default as getFormData } from './actions/server/form/getFormData'
 
 // Types
@@ -22,7 +20,6 @@ export * from './types/formstore'
 export * from './types/grid/customgrid'
 export * from './types/styledcomponent'
 export * from './types/typography'
-export * from './types/user'
 
 // Colors
 export { moss } from './styles/palette'
