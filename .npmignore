@@ -9,8 +9,6 @@
 !src/components/Typography/index.tsx
 !src/actions/server/form/store/reusableStore.ts
 !src/actions/server/form/store/crypt.ts
-!src/actions/server/user/getUser.tsx
-!src/actions/server/user/updateUser.tsx
 !src/actions/server/form/getFormData.ts
 !src/types/button/index.ts
 !src/types/content/alignment/index.ts
@@ -19,6 +17,5 @@
 !src/types/grid/customgrid/index.ts
 !src/types/styledcomponent/index.ts
 !src/types/typography/index.ts
-!src/types/user/index.ts
 !src/styles/palette.ts
 !src/styles/typography.ts
