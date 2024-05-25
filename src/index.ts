@@ -76,7 +76,7 @@ export { default as getFormData } from './actions/server/form/getFormData'
 
 // Type exports
 export type { CustomButtonProps } from './components/Button'
-export type { CustomGridProps } from './components/Grid'
+export type { CustomGridProps, columnconfig, rowconfig, gridconfig } from './components/Grid'
 export type {
   StyledComponentProps,
   AdornmentProps,
