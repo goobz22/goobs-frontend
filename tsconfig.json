@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,9 +16,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "paths": {
-      "goobs-repo": [
-        "./src/index.ts"
-      ]
+      "goobs-repo": ["./src/index.ts"]
     },
     "composite": true,
     "incremental": true,
@@ -36,9 +30,8 @@
     "src",
     "vite.config.ts",
     "package.json",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "dist/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
