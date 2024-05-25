@@ -1,4 +1,4 @@
-import { StyledComponentProps } from '../../../types/styledcomponent'
+import { StyledComponentProps } from '../../../components/StyledComponent'
 import React from 'react'
 
 const labelStyles = (

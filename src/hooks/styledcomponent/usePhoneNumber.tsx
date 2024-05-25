@@ -1,4 +1,4 @@
-import { StyledComponentProps } from '../../types/styledcomponent'
+import { StyledComponentProps } from '../../components/StyledComponent'
 import { formatPhoneNumber } from '../../utils/phone/format'
 import React from 'react'
 
