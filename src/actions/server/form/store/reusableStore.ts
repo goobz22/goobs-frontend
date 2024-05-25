@@ -2,11 +2,29 @@
 
 import fs from 'fs/promises'
 import path from 'path'
-import { FormStoreProps } from '../../../../types/formstore'
 import {
   encryptValue,
   decryptValue,
 } from '../../../../actions/server/form/store/crypt'
+
+export interface FormStoreProps {
+  identifier: string
+  storename: string
+  value: string
+  expirationTime: number
+  encryptionKey: string
+  encryptionIV: string
+}
+
+export type ReusableStore = {
+  storageDir: string
+  get: (
+    storename: string,
+    identifier: string
+  ) => Promise<FormStoreProps | undefined>
+  set: (props: FormStoreProps) => Promise<void>
+  cleanup: () => Promise<void>
+}
 
 export async function reusableStore(
   operation: 'get' | 'set' | 'cleanup',
