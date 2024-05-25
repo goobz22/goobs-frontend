@@ -1,4 +1,4 @@
-import { CustomTypographyVariant } from '../types/typography'
+import { CustomTypographyVariant } from '../components/Typography'
 
 // Define base configurations for each heading level
 const h1Config: Omit<CustomTypographyVariant, 'fontFamily'> = {

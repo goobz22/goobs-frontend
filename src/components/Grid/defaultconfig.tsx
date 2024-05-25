@@ -1,8 +1,4 @@
-import {
-  gridconfig,
-  rowconfig,
-  columnconfig,
-} from '../../types/grid/customgrid'
+import { gridconfig, rowconfig, columnconfig } from './index'
 import Typography from '../../components/Typography'
 import React from 'react'
 
