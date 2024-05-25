@@ -80,18 +80,14 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       currentHelperFooter?.spreadMessage &&
       currentHelperFooter?.status === 'error'
     ) {
-      console.log('Form has errors. Cannot proceed.')
-      console.log('Spread message:', currentHelperFooter?.spreadMessage)
       return
     }
 
     if (onClick) {
-      console.log('Calling onClick function')
       onClick()
     }
   }
 
-  console.log('currentHelperFooter:', currentHelperFooter)
 
   return (
     <Box

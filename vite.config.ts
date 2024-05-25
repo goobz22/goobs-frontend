@@ -17,7 +17,7 @@ export default defineConfig({
       entry: resolve('src', 'index.ts'),
       name: 'goobs-repo',
       formats: ['es'],
-      fileName: format => `goobs-repo.${format}.js`,
+      fileName: format => `goobs-repo.${format}.ts`,
     },
     rollupOptions: {
       external: [
@@ -44,6 +44,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['@emotion/react', '@emotion/styled'],
+    esbuildOptions: {
+      loader: {
+        '.ts': 'ts',
+      },
+    },
   },
   esbuild: {
     loader: 'tsx',
