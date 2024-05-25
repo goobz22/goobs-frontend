@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 import dts from 'vite-plugin-dts'
 import tsConfigPaths from 'vite-tsconfig-paths'
+import { libInjectCss } from 'vite-plugin-lib-inject-css'
 
 export default defineConfig({
   plugins: [
@@ -10,47 +11,45 @@ export default defineConfig({
     tsConfigPaths(),
     dts({
       include: ['src'],
+      insertTypesEntry: true,
     }),
+    libInjectCss(),
   ],
   build: {
+    sourcemap: false, // Disable sourcemap generation
     lib: {
-      entry: resolve('src', 'index.ts'),
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'goobs-repo',
-      formats: ['es'],
-      fileName: format => `goobs-repo.${format}.ts`,
+      formats: ['es', 'umd'],
+      fileName: format => `goobs-repo.${format}.js`,
     },
     rollupOptions: {
       external: [
         'react',
         'react-dom',
-        '@emotion/react',
-        '@emotion/styled',
-        '@mui/icons-material',
         '@mui/material',
-        '@mui/system',
-        '@mui/x-data-grid-pro',
+        '@mui/icons-material',
+        'jotai',
+        '@emotion/react', 
       ],
       output: {
         globals: {
           react: 'React',
+          'react-dom': 'ReactDOM',
+          '@mui/material': 'MaterialUI',
+          '@mui/icons-material': 'MaterialIcons',
+          jotai: 'Jotai',
+          '@emotion/react': 'emotionReact',
         },
       },
     },
+  },
+  optimizeDeps: {
+    include: ['@mui/material', '@mui/icons-material', 'jotai'],
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
-  },
-  optimizeDeps: {
-    include: ['@emotion/react', '@emotion/styled'],
-    esbuildOptions: {
-      loader: {
-        '.ts': 'ts',
-      },
-    },
-  },
-  esbuild: {
-    loader: 'tsx',
   },
 })
