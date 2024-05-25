@@ -32,7 +32,7 @@ export interface CustomButtonProps
   outlinecolor?: string
   fontcolor?: string
   fontlocation?: Alignment
-  fontsize?: keyof TypographyPropsVariantOverrides
+  fontvariant?: keyof TypographyPropsVariantOverrides
   icon?: React.ReactNode | false
   iconcolor?: string
   iconsize?: string
@@ -50,7 +50,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
     text,
     variant,
-    fontsize = 'merriparagraph',
+    fontvariant = 'merriparagraph',
     icon,
     iconlocation,
     iconsize,
@@ -151,7 +151,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
         >
           {iconlocation === 'left' && renderIcon()}
           {text && (
-            <Typography variant={fontsize} fontcolor={fontcolor} text={text} />
+            <Typography variant={fontvariant} fontcolor={fontcolor} text={text} />
           )}
           {iconlocation === 'right' && renderIcon()}
         </Box>
