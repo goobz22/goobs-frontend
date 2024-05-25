@@ -1,4 +1,5 @@
 import { StyledComponentProps } from '../../../types/styledcomponent'
+import React from 'react'
 
 const labelStyles = (
   props: Pick<

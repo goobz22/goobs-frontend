@@ -18,7 +18,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
     label,
     componentvariant,
-    outlinecolor,
     inputRef,
     name,
     serverActionValidation,
