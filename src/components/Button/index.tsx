@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Button, useTheme, Box } from '@mui/material'
+import { Button, Box } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import { CustomButtonProps } from '../../types/button'
 import Typography from '../Typography'
@@ -29,7 +29,6 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     width,
   } = props
 
-  const theme = useTheme()
   const helperFooterAtomValue = useAtomValue(helperFooterAtom)
   const [currentHelperFooter, setCurrentHelperFooter] = useState<
     HelperFooterMessage | undefined
@@ -87,7 +86,6 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       onClick()
     }
   }
-
 
   return (
     <Box
