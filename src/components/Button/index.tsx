@@ -1,13 +1,50 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Button, Box } from '@mui/material'
+import {
+  Button,
+  Box,
+  ButtonProps,
+  TypographyPropsVariantOverrides,
+} from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
-import { CustomButtonProps } from '../../types/button'
 import Typography from '../Typography'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
+import { Alignment } from '../../types/content/alignment'
+import { columnconfig } from '../../components/Grid'
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    [key: string]: true
+  }
+
+  interface ButtonPropsVariantOverrides {
+    [key: string]: true
+  }
+}
+
+export interface CustomButtonProps
+  extends Omit<ButtonProps, 'color' | 'variant'> {
+  text?: string
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  fontlocation?: Alignment
+  fontsize?: keyof TypographyPropsVariantOverrides
+  icon?: React.ReactNode | false
+  iconcolor?: string
+  iconsize?: string
+  iconlocation?: 'left' | 'top' | 'right'
+  variant?: 'text' | 'outlined' | 'contained'
+  onClick?: () => void
+  helperfooter?: HelperFooterMessage
+  columnconfig?: columnconfig
+  width?: string
+  formname?: string
+  name?: string
+}
 
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
@@ -36,11 +73,9 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
 
   useEffect(() => {
     console.log('helperFooterAtomValue changed:', helperFooterAtomValue)
-
     const errorFooter = Object.values(helperFooterAtomValue).find(
       footer => footer?.status === 'error'
     )
-
     if (errorFooter) {
       setCurrentHelperFooter(errorFooter)
     } else if (
@@ -56,13 +91,11 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     if (icon === false) {
       return null
     }
-
     if (React.isValidElement(icon)) {
       return React.cloneElement(icon as React.ReactElement, {
         style: { fontSize: iconsize },
       })
     }
-
     return <StarIcon style={{ fontSize: iconsize }} />
   }
 
@@ -74,14 +107,12 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       'currentHelperFooter inside handleButtonClick:',
       currentHelperFooter
     )
-
     if (
       currentHelperFooter?.spreadMessage &&
       currentHelperFooter?.status === 'error'
     ) {
       return
     }
-
     if (onClick) {
       onClick()
     }

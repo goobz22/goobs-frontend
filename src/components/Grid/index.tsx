@@ -1,13 +1,111 @@
 'use client'
 
 import React from 'react'
-import { Grid, Box } from '@mui/material'
-import { CustomGridProps, cellconfig } from '../../types/grid/customgrid'
-import {
-  defaultGridConfig,
-  defaultRowConfig,
-  defaultColumnConfig,
-} from './defaultconfig'
+import { Grid, Box, GridProps } from '@mui/material'
+import { Alignment } from '../../types/content/alignment'
+import { Animation } from '../../types/content/animation'
+
+export interface rowconfig {
+  columns?: number
+  gridname?: string
+  alignment?: Alignment
+  rowwidth?: string
+  marginbetweenrows?: number
+  margintop?: number
+  marginbottom?: number
+  marginright?: number
+  marginleft?: number
+  animation?: Animation
+  bordercolor?: string
+}
+
+export interface columnconfig {
+  row?: number
+  column?: number
+  gridname?: string
+  alignment?: Alignment
+  margintop?: number
+  columnwidth?: string
+  marginbottom?: number
+  marginright?: number
+  marginleft?: number
+  animation?: Animation
+  component?: React.ReactNode
+  bordercolor?: string
+  cellconfig?: cellconfig
+}
+
+export interface gridconfig {
+  rows?: number
+  gridname?: string
+  alignment?: Alignment
+  margintop?: number
+  marginbottom?: number
+  marginright?: number
+  marginleft?: number
+  gridwidth?: string
+  animation?: Animation
+  bordercolor?: string
+}
+
+export interface CustomGridProps extends GridProps {
+  gridconfig?: gridconfig
+  rowconfig?: rowconfig
+  columnconfig?: columnconfig[]
+  cellconfig?: cellconfig
+}
+
+export interface cellconfig {
+  border?: 'none' | 'solid'
+  minHeight?: string
+  maxHeight?: string
+  width?: string
+}
+
+const defaultGridConfig: gridconfig = {
+  rows: 1,
+  gridname: '',
+  alignment: 'center',
+  margintop: 0,
+  marginbottom: 0,
+  marginright: 0,
+  marginleft: 0,
+  gridwidth: '100%',
+  animation: 'none',
+  bordercolor: '',
+}
+
+const defaultRowConfig: rowconfig = {
+  columns: 1,
+  gridname: '',
+  alignment: 'center',
+  rowwidth: 'auto',
+  marginbetweenrows: 0,
+  margintop: 0,
+  marginbottom: 0,
+  marginright: 0,
+  marginleft: 0,
+  animation: 'none',
+  bordercolor: '',
+}
+
+const defaultColumnConfig: columnconfig = {
+  row: 1,
+  column: 1,
+  gridname: '',
+  alignment: 'center',
+  margintop: 0,
+  columnwidth: 'auto',
+  marginbottom: 0,
+  marginright: 0,
+  marginleft: 0,
+  animation: 'none',
+  component: null,
+  bordercolor: '',
+  cellconfig: {
+    border: 'none',
+  },
+}
 
 const defaultCellConfig: cellconfig = {
   border: 'none',
@@ -16,7 +114,7 @@ const defaultCellConfig: cellconfig = {
 const CustomGrid: React.FC<CustomGridProps> = ({
   gridconfig = defaultGridConfig,
   rowconfig = defaultRowConfig,
-  columnconfig = defaultColumnConfig,
+  columnconfig = [defaultColumnConfig],
   cellconfig = defaultCellConfig,
 }) => {
   const gridConfigValues = Array.isArray(gridconfig)
