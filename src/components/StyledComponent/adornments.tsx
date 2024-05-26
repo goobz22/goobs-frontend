@@ -6,15 +6,16 @@ import DownArrowFilledIcon from '../../components/Icons/DownArrowFilled'
 import { AdornmentProps } from './index'
 
 const StartAdornment: React.FC<AdornmentProps> = props => {
-  const { componentvariant } = props
+  const { componentvariant, iconcolor } = props
 
   if (componentvariant === 'searchbar') {
     return (
       <InputAdornment position="start">
-        <SearchIcon />
+        <SearchIcon color={iconcolor} />
       </InputAdornment>
     )
   }
+
   return null
 }
 

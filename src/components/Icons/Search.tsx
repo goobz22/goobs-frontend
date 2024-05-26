@@ -1,9 +1,10 @@
 import React from 'react'
 import Search from '@mui/icons-material/Search'
 
-const BlackSearchIcon: React.FC<{
+const SearchIcon: React.FC<{
   size?: number | 'small' | 'medium' | 'large'
-}> = ({ size = 'medium' }) => {
+  color?: string
+}> = ({ size = 'medium', color = 'black' }) => {
   let fontSize = '20px'
 
   if (typeof size === 'number') {
@@ -22,7 +23,7 @@ const BlackSearchIcon: React.FC<{
     }
   }
 
-  return <Search style={{ fontSize }} />
+  return <Search style={{ fontSize, color }} />
 }
 
-export default BlackSearchIcon
+export default SearchIcon
