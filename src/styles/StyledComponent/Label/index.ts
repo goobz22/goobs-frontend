@@ -1,5 +1,4 @@
 import { StyledComponentProps } from '../../../components/StyledComponent'
-
 import React from 'react'
 
 const labelStyles = (
@@ -14,10 +13,11 @@ const labelStyles = (
   >
 ): React.CSSProperties => {
   const {
+    componentvariant,
     unshrunkfontcolor,
     shrunkfontcolor,
     combinedfontcolor,
-    shrunklabellocation = 'onnotch',
+    shrunklabellocation = 'onnotch', // Set 'onnotch' as the default value
     focused,
   } = props
 
@@ -27,6 +27,9 @@ const labelStyles = (
     transformOrigin: 'top left',
     top: '13px',
     left: '12px',
+    ...(componentvariant === 'searchbar' && {
+      transform: 'translate(35px, 13px) scale(1)',
+    }),
   }
 
   const shrunkStyles: React.CSSProperties = {
