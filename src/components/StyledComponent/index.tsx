@@ -18,7 +18,7 @@ import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
 import { debounce } from 'lodash'
 import labelStyles from '../../styles/StyledComponent/Label'
-import { columnconfig } from '../../components/Grid'
+import { columnconfig } from 'goobs-repo'
 
 declare module '@mui/material/OutlinedInput' {
   interface OutlinedInputPropsColorOverrides {
@@ -47,7 +47,6 @@ export interface StyledComponentProps {
   combinedfontcolor?: string
   unshrunkfontcolor?: string
   shrunkfontcolor?: string
-  endAdornmentMarginRight?: number | string
   autoComplete?: string
   componentvariant?:
     | 'multilinetextfield'
@@ -71,7 +70,7 @@ export interface StyledComponentProps {
   minRows?: number
   formname?: string
   label?: string
-  shrunklabellocation?: 'onnotch' | 'above' | 'left'
+  shrunklabellocation?: 'onnotch' | 'above'
   value?: string
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -186,7 +185,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     setIsFocused(false)
   }
 
-  const isNotchedVariant = componentvariant !== 'dropdown'
+  const isNotchedVariant = componentvariant !== 'dropdown' || !!label
 
   return (
     <Box
@@ -203,74 +202,88 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
         overflow: 'hidden',
       }}
     >
-      <InputLabel
-        style={labelStyles({
-          componentvariant,
-          unshrunkfontcolor,
-          shrunkfontcolor,
-          shrunklabellocation,
-          combinedfontcolor,
-          focused: isFocused || !!props.value,
-        })}
-        shrink={isFocused || !!props.value || componentvariant === 'dropdown'}
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          paddingTop: shrunklabellocation === 'above' ? '20px' : '5px',
+        }}
       >
-        {label}
-      </InputLabel>
-      <Box ref={inputBoxRef} sx={{ width: '100%', paddingTop: '5px' }}>
-        <OutlinedInput
-          ref={inputRef || inputRefInternal}
-          onClick={handleDropdownClick}
-          style={{
-            backgroundColor: backgroundcolor || 'inherit',
-            width: '100%',
-            height: 40,
-            cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
-            boxSizing: 'border-box',
-            borderRadius: 5,
-            marginTop: 'auto',
-          }}
-          inputProps={{
-            style: {
+        {label && (
+          <InputLabel
+            style={labelStyles({
+              componentvariant,
+              unshrunkfontcolor,
+              shrunkfontcolor,
+              shrunklabellocation,
+              combinedfontcolor,
+              focused: isFocused || !!props.value,
+            })}
+            shrink={
+              isFocused || !!props.value || componentvariant === 'dropdown'
+            }
+          >
+            {label}
+          </InputLabel>
+        )}
+        <Box ref={inputBoxRef} sx={{ width: '100%' }}>
+          <OutlinedInput
+            ref={inputRef || inputRefInternal}
+            onClick={handleDropdownClick}
+            style={{
+              backgroundColor: backgroundcolor || 'inherit',
               width: '100%',
-              color: combinedfontcolor || unshrunkfontcolor || 'inherit',
-              height: '100%',
+              height: 40,
               cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
-            },
-            placeholder: props.placeholder || '',
-          }}
-          type={
-            componentvariant === 'password' && !passwordVisible
-              ? 'password'
-              : 'text'
-          }
-          startAdornment={
-            <StartAdornment
-              componentvariant={componentvariant || ''}
-              iconcolor={iconcolor}
-            />
-          }
-          endAdornment={
-            <EndAdornment
-              componentvariant={componentvariant || ''}
-              passwordVisible={passwordVisible}
-              togglePasswordVisibility={togglePasswordVisibility}
-              marginRight={props.endAdornmentMarginRight}
-              iconcolor={iconcolor}
-            />
-          }
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          fullWidth
-          multiline={componentvariant === 'multilinetextfield'}
-          label={label}
-          autoComplete={props.autoComplete}
-          name={name}
-          value={componentvariant === 'dropdown' ? selectedOption : props.value}
-          readOnly={componentvariant === 'dropdown'}
-          notched={isNotchedVariant && (isFocused || !!props.value)}
-        />
-        {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
+              boxSizing: 'border-box',
+              borderRadius: 5,
+              marginTop: 'auto',
+              paddingRight: 6,
+            }}
+            inputProps={{
+              style: {
+                width: '100%',
+                color: combinedfontcolor || unshrunkfontcolor || 'inherit',
+                height: '100%',
+                cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
+              },
+              placeholder: props.placeholder || '',
+            }}
+            type={
+              componentvariant === 'password' && !passwordVisible
+                ? 'password'
+                : 'text'
+            }
+            startAdornment={
+              <StartAdornment
+                componentvariant={componentvariant || ''}
+                iconcolor={iconcolor}
+              />
+            }
+            endAdornment={
+              <EndAdornment
+                componentvariant={componentvariant || ''}
+                passwordVisible={passwordVisible}
+                togglePasswordVisibility={togglePasswordVisibility}
+                iconcolor={iconcolor}
+              />
+            }
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            fullWidth
+            multiline={componentvariant === 'multilinetextfield'}
+            label={label}
+            autoComplete={props.autoComplete}
+            name={name}
+            value={
+              componentvariant === 'dropdown' ? selectedOption : props.value
+            }
+            readOnly={componentvariant === 'dropdown'}
+            notched={isNotchedVariant && (isFocused || !!props.value)}
+          />
+          {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
+        </Box>
       </Box>
       {currentHelperFooter?.statusMessage && (
         <Typography

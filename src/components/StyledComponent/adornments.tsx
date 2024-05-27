@@ -20,16 +20,10 @@ const StartAdornment: React.FC<AdornmentProps> = props => {
 }
 
 const EndAdornment: React.FC<AdornmentProps> = props => {
-  const {
-    componentvariant,
-    passwordVisible,
-    togglePasswordVisibility,
-    marginRight,
-  } = props
+  const { componentvariant, passwordVisible, togglePasswordVisibility } = props
 
   const adornmentStyle = {
     cursor: 'pointer',
-    marginRight: marginRight !== undefined ? marginRight : undefined,
   }
 
   if (componentvariant === 'password' && togglePasswordVisibility) {
