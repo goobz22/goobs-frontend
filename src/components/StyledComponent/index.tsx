@@ -72,6 +72,7 @@ export interface StyledComponentProps {
   label?: string
   shrunklabellocation?: 'onnotch' | 'above'
   value?: string
+  valuestatus?: boolean
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
@@ -108,18 +109,23 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     combinedfontcolor,
     shrunkfontcolor,
     shrunklabellocation,
+    value,
+    valuestatus,
   } = props
 
   const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
   const [isFocused, setIsFocused] = useState(false)
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
+  const formDataRef = useRef<FormData | null>(null)
 
   useEffect(() => {
-    if (props.value && inputRefInternal.current) {
-      inputRefInternal.current.focus()
+    if (value || valuestatus) {
+      setIsFocused(true)
+    } else {
+      setIsFocused(false)
     }
-  }, [props.value])
+  }, [value, valuestatus])
 
   const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
     useDropdown(props, inputBoxRef)
@@ -146,13 +152,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
         handlePhoneNumberChange(formattedEvent)
       }
 
-      if (serverActionValidation && name) {
-        const formData = new FormData()
-        formData.append(e.target.name, e.target.value)
+      const formData = new FormData()
+      formData.append(e.target.name, e.target.value)
+      formDataRef.current = formData
 
+      if (serverActionValidation && name) {
         const debouncedServerActionValidation = debounce(async () => {
-          if (serverActionValidation && name) {
-            const validationResult = await serverActionValidation(formData)
+          if (serverActionValidation && name && formDataRef.current) {
+            const validationResult = await serverActionValidation(
+              formDataRef.current
+            )
             if (validationResult) {
               setHelperFooterResult(prevState => ({
                 ...prevState,
@@ -182,10 +191,15 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }
 
   const handleBlur = () => {
-    setIsFocused(false)
+    if (!value && !valuestatus) {
+      setIsFocused(false)
+    }
   }
 
-  const isNotchedVariant = componentvariant !== 'dropdown' || !!label
+  const isNotchedVariant =
+    componentvariant !== 'dropdown' &&
+    shrunklabellocation !== 'above' &&
+    !!label
 
   return (
     <Box
@@ -217,11 +231,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               shrunkfontcolor,
               shrunklabellocation,
               combinedfontcolor,
-              focused: isFocused || !!props.value,
+              focused: isFocused,
             })}
-            shrink={
-              isFocused || !!props.value || componentvariant === 'dropdown'
-            }
+            shrink={isFocused}
           >
             {label}
           </InputLabel>
@@ -276,11 +288,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             label={label}
             autoComplete={props.autoComplete}
             name={name}
-            value={
-              componentvariant === 'dropdown' ? selectedOption : props.value
-            }
+            value={componentvariant === 'dropdown' ? selectedOption : value}
             readOnly={componentvariant === 'dropdown'}
-            notched={isNotchedVariant && (isFocused || !!props.value)}
+            notched={isNotchedVariant && isFocused}
           />
           {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
         </Box>

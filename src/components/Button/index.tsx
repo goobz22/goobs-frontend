@@ -151,7 +151,11 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
         >
           {iconlocation === 'left' && renderIcon()}
           {text && (
-            <Typography variant={fontvariant} fontcolor={fontcolor} text={text} />
+            <Typography
+              variant={fontvariant}
+              fontcolor={fontcolor}
+              text={text}
+            />
           )}
           {iconlocation === 'right' && renderIcon()}
         </Box>
