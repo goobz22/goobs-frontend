@@ -1,4 +1,5 @@
 import { StyledComponentProps } from '../../../components/StyledComponent'
+
 import React from 'react'
 
 const labelStyles = (
@@ -17,43 +18,29 @@ const labelStyles = (
     unshrunkfontcolor,
     shrunkfontcolor,
     combinedfontcolor,
-    shrunklabellocation = 'onnotch', // Set 'onnotch' as the default value
+    shrunklabellocation = 'onnotch',
     focused,
   } = props
 
-  // Default translation
-  const defaultTransform = 'translate(12px, 13px) scale(1)'
-
-  // Exception translations
-  const exceptions: Partial<
-    Record<Exclude<StyledComponentProps['componentvariant'], undefined>, string>
-  > = {
-    searchbar: 'translate(35px, 13px) scale(1)',
-    dropdown: defaultTransform,
-  }
-
   const unshrunkStyles: React.CSSProperties = {
     color: combinedfontcolor || unshrunkfontcolor || 'black',
-    transform:
-      componentvariant && exceptions[componentvariant]
-        ? exceptions[componentvariant]
-        : defaultTransform,
+    transform: 'scale(1)',
     transformOrigin: 'top left',
+    top: '13px',
+    left: '12px',
   }
 
   const shrunkStyles: React.CSSProperties = {
     color: combinedfontcolor || shrunkfontcolor || 'black',
     transform: 'scale(0.75)',
     transformOrigin: 'top left',
-    top: '-4px',
-    left: '12px',
-    ...(shrunklabellocation === 'above' && {
-      top: '-16px',
-      left: '0',
+    ...(shrunklabellocation === 'onnotch' && {
+      top: '-4px',
+      left: '12px',
     }),
-    ...(shrunklabellocation === 'left' && {
-      top: '8px',
-      left: '-12px',
+    ...(shrunklabellocation === 'above' && {
+      top: '3px',
+      left: '0',
     }),
   }
 
