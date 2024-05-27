@@ -14,7 +14,6 @@ const labelStyles = (
   >
 ): React.CSSProperties => {
   const {
-    componentvariant,
     unshrunkfontcolor,
     shrunkfontcolor,
     combinedfontcolor,
