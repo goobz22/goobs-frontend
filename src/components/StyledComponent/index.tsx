@@ -20,24 +20,6 @@ import { debounce } from 'lodash'
 import labelStyles from '../../styles/StyledComponent/Label'
 import { columnconfig } from 'goobs-repo'
 
-declare module '@mui/material/OutlinedInput' {
-  interface OutlinedInputPropsColorOverrides {
-    [key: string]: true
-  }
-}
-
-declare module '@mui/material/FormControl' {
-  interface FormControlPropsColorOverrides {
-    [key: string]: true
-  }
-}
-
-declare module '@mui/material/InputBase' {
-  interface InputBasePropsColorOverrides {
-    [key: string]: true
-  }
-}
-
 export interface StyledComponentProps {
   name?: string
   outlinecolor?: string
