@@ -17,7 +17,7 @@ const labelStyles = (
     unshrunkfontcolor,
     shrunkfontcolor,
     combinedfontcolor,
-    shrunklabellocation = 'onnotch', // Set 'onnotch' as the default value
+    shrunklabellocation = 'onnotch',
     focused,
   } = props
 
@@ -28,7 +28,7 @@ const labelStyles = (
     top: '13px',
     left: '12px',
     ...(componentvariant === 'searchbar' && {
-      transform: 'translate(35px, 13px) scale(1)',
+      transform: 'translate(25px, 2px) scale(1)',
     }),
   }
 
