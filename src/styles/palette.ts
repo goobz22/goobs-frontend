@@ -107,10 +107,10 @@ export const white = {
 }
 
 export const none = {
-  main: 'transparent',
-  light: 'transparent',
-  dark: 'transparent',
-}
+  main: 'rgba(0, 0, 0, 0)',
+  light: 'rgba(0, 0, 0, 0)',
+  dark: 'rgba(0, 0, 0, 0)',
+};
 
 export const semiTransparentWhite = {
   main: 'rgba(255, 255, 255, 0.09)',
