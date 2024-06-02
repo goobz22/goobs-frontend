@@ -13,17 +13,6 @@ import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
 import { Alignment } from '../../types/content/alignment'
-import { columnconfig } from '../../components/Grid'
-
-declare module '@mui/material/Button' {
-  interface ButtonPropsColorOverrides {
-    [key: string]: true
-  }
-
-  interface ButtonPropsVariantOverrides {
-    [key: string]: true
-  }
-}
 
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
@@ -40,7 +29,6 @@ export interface CustomButtonProps
   variant?: 'text' | 'outlined' | 'contained'
   onClick?: () => void
   helperfooter?: HelperFooterMessage
-  columnconfig?: columnconfig
   width?: string
   formname?: string
   name?: string
