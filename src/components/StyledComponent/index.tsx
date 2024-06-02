@@ -18,7 +18,6 @@ import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
 import { debounce } from 'lodash'
 import labelStyles from '../../styles/StyledComponent/Label'
-import { columnconfig } from 'goobs-repo'
 
 export interface StyledComponentProps {
   name?: string
@@ -60,7 +59,6 @@ export interface StyledComponentProps {
   ) => void
   defaultValue?: string
   inputRef?: RefObject<HTMLInputElement>
-  columnconfig?: columnconfig
   serverActionValidation?: (
     formData: FormData
   ) => Promise<HelperFooterMessage | undefined>
