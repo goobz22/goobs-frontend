@@ -22,8 +22,9 @@ declare module '@mui/material/Typography' {
     extends Record<`${FontFamily}${TypographyVariant}`, true> {}
 }
 
-type TypographyPropsVariantOverrides = MuiTypographyPropsVariantOverrides &
-  Record<`${FontFamily}${TypographyVariant}`, true>
+export type TypographyPropsVariantOverrides =
+  MuiTypographyPropsVariantOverrides &
+    Record<`${FontFamily}${TypographyVariant}`, true>
 
 export interface TypographyProps {
   text?: string
