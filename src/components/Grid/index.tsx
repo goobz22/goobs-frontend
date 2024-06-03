@@ -116,6 +116,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
   rowconfig = defaultRowConfig,
   columnconfig = [defaultColumnConfig],
   cellconfig = defaultCellConfig,
+  ...rest
 }) => {
   const gridConfigValues = Array.isArray(gridconfig)
     ? gridconfig[0]
@@ -125,13 +126,15 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
   return (
     <Box
-      // @ts-ignore
       mt={gridConfigValues.margintop || 0}
       mb={gridConfigValues.marginbottom || 0}
       ml={gridConfigValues.marginleft || 0}
       mr={gridConfigValues.marginright || 0}
-      width={gridConfigValues.gridwidth || '100%'}
-      alignItems="center"
+      width="100%"
+      height="100%"
+      display="flex"
+      flexDirection="column"
+      {...rest}
     >
       {Array.from({ length: rows }).map((_, rowIndex) => {
         const currentRowConfig = Array.isArray(rowconfig)
@@ -156,6 +159,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 rowIndex === rows - 1 ? currentRowConfig.marginbottom || 0 : 0,
               marginLeft: currentRowConfig.marginleft || 0,
               width: currentRowConfig.rowwidth || 'auto',
+              flexGrow: 1,
             }}
           >
             {Array.from({ length: columns }).map((_, columnIndex) => {
@@ -166,7 +170,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
               const columnWidth =
                 currentColumnConfig?.columnwidth || `${100 / columns}%`
 
-              const isPixelWidth = columnWidth.endsWith('px')
+              const isPercentWidth = columnWidth.endsWith('%')
 
               const justifyContent =
                 currentColumnConfig?.alignment === 'left'
@@ -187,16 +191,15 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                   display="flex"
                   justifyContent={justifyContent}
                   key={`column-${columnIndex}`}
-                  xs={12}
-                  sm={isPixelWidth ? 'auto' : true}
+                  xs={isPercentWidth ? false : 12}
                   sx={{
                     display: 'flex',
                     marginRight:
                       columnIndex === columns - 1
                         ? currentRowConfig.marginright || 0
                         : 0,
-                    width: isPixelWidth ? columnWidth : 'auto',
-                    flexBasis: isPixelWidth ? 'auto' : columnWidth,
+                    width: isPercentWidth ? columnWidth : 'auto',
+                    flexBasis: isPercentWidth ? columnWidth : 'auto',
                     '--Grid-borderWidth': hasBorder ? '1px' : '0',
                     borderTop: hasBorder
                       ? 'var(--Grid-borderWidth) solid'
