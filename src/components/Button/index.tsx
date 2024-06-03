@@ -8,7 +8,7 @@ import {
   TypographyPropsVariantOverrides,
 } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
-import Typography from '../Typography'
+import { Typography } from 'goobs-repo'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 import { HelperFooterMessage } from '../../types/validation'
@@ -112,6 +112,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       display="flex"
       flexDirection="column"
       alignItems="center"
+      width={width}
     >
       <Button
         disableElevation
@@ -129,7 +130,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
           backgroundColor: backgroundcolor,
           border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
           color: iconcolor,
-          width: width || 'auto',
+          width: width,
         }}
       >
         <Box
