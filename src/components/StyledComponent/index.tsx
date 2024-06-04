@@ -273,7 +273,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             readOnly={componentvariant === 'dropdown'}
             notched={
               (isNotchedVariant && isFocused) ||
-              isDropdownVariant ||
+              (isDropdownVariant && shrunklabellocation !== 'above') ||
               hasPlaceholder
             }
           />
