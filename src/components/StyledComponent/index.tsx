@@ -91,6 +91,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     shrunklabellocation,
     value,
     valuestatus,
+    placeholder,
   } = props
 
   const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
@@ -176,10 +177,10 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }
 
+  const isDropdownVariant = componentvariant === 'dropdown'
   const isNotchedVariant =
-    componentvariant !== 'dropdown' &&
-    shrunklabellocation !== 'above' &&
-    !!label
+    !isDropdownVariant && shrunklabellocation !== 'above' && !!label
+  const hasPlaceholder = !!placeholder
 
   return (
     <Box
@@ -211,9 +212,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               shrunkfontcolor,
               shrunklabellocation,
               combinedfontcolor,
-              focused: isFocused,
+              focused: isFocused || isDropdownVariant || hasPlaceholder,
             })}
-            shrink={isFocused}
+            shrink={isFocused || isDropdownVariant || hasPlaceholder}
           >
             {label}
           </InputLabel>
@@ -239,7 +240,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
                 height: '100%',
                 cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
               },
-              placeholder: props.placeholder || '',
+              placeholder: placeholder || '',
             }}
             type={
               componentvariant === 'password' && !passwordVisible
@@ -270,7 +271,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             name={name}
             value={componentvariant === 'dropdown' ? selectedOption : value}
             readOnly={componentvariant === 'dropdown'}
-            notched={isNotchedVariant && isFocused}
+            notched={
+              (isNotchedVariant && isFocused) ||
+              isDropdownVariant ||
+              hasPlaceholder
+            }
           />
           {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
         </Box>
