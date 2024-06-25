@@ -74,7 +74,6 @@ export type { CustomButtonProps } from './components/Button'
 export type {
   CustomGridProps,
   columnconfig,
-  rowconfig,
   gridconfig,
   cellconfig,
 } from './components/Grid'
