@@ -1,29 +1,16 @@
-import { gridconfig, rowconfig, columnconfig } from './index'
-import Typography from '../../components/Typography'
+import { gridconfig, columnconfig, cellconfig } from './index'
+import { Typography } from 'goobs-repo'
 import React from 'react'
 
 export const defaultGridConfig: gridconfig = {
-  rows: 2,
   gridname: 'testgrid',
+  alignment: 'center',
   margintop: 10,
   marginbottom: 2,
   marginright: 2,
   marginleft: 10,
+  animation: 'none',
   gridwidth: '100%',
-  animation: 'none',
-}
-
-export const defaultRowConfig: rowconfig = {
-  columns: 3,
-  gridname: 'testgrid',
-  alignment: 'center',
-  rowwidth: '100%',
-  marginbetweenrows: 2,
-  margintop: 2,
-  marginbottom: 2,
-  marginright: 0,
-  marginleft: 2,
-  animation: 'none',
 }
 
 export const defaultColumnConfig: columnconfig[] = [
@@ -39,6 +26,12 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 0,
     animation: 'none',
     component: <Typography variant="h4" text="Column 1" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
   {
     row: 1,
@@ -52,6 +45,12 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 0,
     animation: 'none',
     component: <Typography variant="h4" text="Column 2" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
   {
     row: 1,
@@ -65,6 +64,12 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 0,
     animation: 'none',
     component: <Typography variant="h4" text="Column 3" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
   {
     row: 2,
@@ -78,6 +83,12 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 2,
     animation: 'none',
     component: <Typography variant="h4" text="Column 4" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
   {
     row: 2,
@@ -91,6 +102,12 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 2,
     animation: 'none',
     component: <Typography variant="h4" text="Column 5" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
   {
     row: 2,
@@ -104,5 +121,18 @@ export const defaultColumnConfig: columnconfig[] = [
     marginleft: 0,
     animation: 'none',
     component: <Typography variant="h4" text="Column 6" />,
+    cellconfig: {
+      border: 'none',
+      mobilewidth: '100%',
+      tabletwidth: '33.33%',
+      computerwidth: '33.33%',
+    },
   },
 ]
+
+export const defaultCellConfig: cellconfig = {
+  border: 'none',
+  mobilewidth: '100%',
+  tabletwidth: '100%',
+  computerwidth: '100%',
+}
