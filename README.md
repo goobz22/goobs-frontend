@@ -8,7 +8,7 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.7.33 (beta)
+Current version: 0.7.34 (beta)
 
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation confirmed working with install instructions below.
 
@@ -84,9 +84,8 @@ The Grid component is a highly customizable and flexible grid system built with 
 
 #### Capabilities Preview
 
-- gridconfig (optional): An object or an array of objects representing the grid configuration. It includes properties such as the number of rows, grid name, margins, width, and animation.
-- rowconfig (optional): An object or an array of objects representing the row configuration. It includes properties such as the number of columns, grid name, alignment, row width, margins, and animation.
-- columnconfig (optional): An array of objects representing the column configuration. Each object includes properties such as the row and column position, grid name, alignment, column width, margins, animation, and custom component.
+- gridconfig: An object or an array of objects representing the grid configuration. It includes properties such as grid name, margins, width, and animation.
+- columnconfig: An array of objects representing the column configuration. Each object includes properties such as the row and column position, grid name, alignment, column width, margins, animation, and custom component.
 - cellconfig (optional): An object representing the cell configuration. It includes properties such as border style and minimum height.
 
 The usage of the grid component and these props will be documented before release of v.8. within this wiki - https://github.com/goobz22/goobs-repo/wiki/Grid

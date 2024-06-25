@@ -3,9 +3,15 @@ import CustomButton from './components/Button'
 import CustomGrid from './components/Grid'
 import StyledComponent from './components/StyledComponent'
 import Typography from './components/Typography'
+import ConfirmationCodeInput from './components/ConfirmationCodeInput'
 // Actions
-import { reusableStore } from './actions/server/form/store/reusableStore'
-import { encryptValue, decryptValue } from './actions/server/form/store/crypt'
+import {
+  cleanupReusableStore,
+  setReusableStore,
+  updateReusableStore,
+  deleteReusableStore,
+  subscribeToStoreEvents,
+} from './actions/server/form/store/reusableStore'
 import getFormData from './actions/server/form/getFormData'
 // Colors
 import {
@@ -61,14 +67,22 @@ import {
   merriparagraph,
   merrihelperfooter,
 } from './styles/typography'
+
 // Named exports
 export { CustomButton }
 export { CustomGrid }
 export { StyledComponent }
 export { Typography }
-export { reusableStore }
-export { encryptValue, decryptValue }
+export { ConfirmationCodeInput }
+export {
+  cleanupReusableStore,
+  setReusableStore,
+  updateReusableStore,
+  deleteReusableStore,
+  subscribeToStoreEvents,
+}
 export { getFormData }
+
 // Type exports
 export type { CustomButtonProps } from './components/Button'
 export type {
@@ -82,7 +96,8 @@ export type {
   AdornmentProps,
 } from './components/StyledComponent'
 export type { TypographyProps } from './components/Typography'
-export type { FormStoreProps } from './actions/server/form/store/reusableStore'
+export type { ConfirmationCodeInputsProps } from './components/ConfirmationCodeInput'
+
 export {
   moss,
   aqua,
