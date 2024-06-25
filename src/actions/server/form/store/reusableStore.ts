@@ -625,16 +625,53 @@ async function subscribeToStoreEvents(
   })
 }
 
+async function getReusableStore(key: string): Promise<DataValue | undefined> {
+  return await lock.acquire(key, async () => {
+    // Check cache first
+    const cachedItem = getCacheItem(key)
+    if (cachedItem) {
+      return cachedItem
+    }
+
+    // If not in cache, check main data store
+    const storedItem = dataStore.get(key)
+    if (!storedItem) {
+      return undefined
+    }
+
+    // If it's a string value, it might be encrypted
+    if (storedItem.type === 'string') {
+      try {
+        const decrypted = await encryptionUtility.decrypt(
+          storedItem.value,
+          'authTag'
+        ) // You might need to store authTags separately
+        storedItem.value = decrypted
+      } catch (error) {
+        console.error(`Failed to decrypt value for key ${key}:`, error)
+        // Depending on your requirements, you might want to throw an error here
+      }
+    }
+
+    // Update cache with the retrieved item
+    setCacheItem(key, storedItem, new Date(Date.now() + config.cacheMaxAge))
+
+    return storedItem
+  })
+}
+
 // Initialize the store
 initialize().catch(error => {
   console.error('Failed to initialize the store:', error)
   process.exit(1)
 })
 
+// Update the exports to include the new function
 export {
   cleanupReusableStore,
   setReusableStore,
   updateReusableStore,
   deleteReusableStore,
   subscribeToStoreEvents,
+  getReusableStore,
 }
