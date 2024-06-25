@@ -11,6 +11,7 @@ import {
   updateReusableStore,
   deleteReusableStore,
   subscribeToStoreEvents,
+  getReusableStore,
 } from './actions/server/form/store/reusableStore'
 import getFormData from './actions/server/form/getFormData'
 // Colors
@@ -80,6 +81,7 @@ export {
   updateReusableStore,
   deleteReusableStore,
   subscribeToStoreEvents,
+  getReusableStore,
 }
 export { getFormData }
 
