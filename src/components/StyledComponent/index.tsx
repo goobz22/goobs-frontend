@@ -15,9 +15,16 @@ import { formatPhoneNumber } from '../../utils/phone/format'
 import { StartAdornment, EndAdornment } from './adornments'
 import { useAtom } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
-import { HelperFooterMessage } from '../../types/validation'
 import { debounce } from 'lodash'
 import labelStyles from '../../styles/StyledComponent/Label'
+
+interface HelperFooterMessage {
+  status?: 'error' | 'success'
+  statusMessage?: string
+  spreadMessage?: string
+  spreadMessagePriority?: number
+  formname?: string
+}
 
 export interface StyledComponentProps {
   name?: string
