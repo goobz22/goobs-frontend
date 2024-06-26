@@ -1,12 +1,10 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   compiler: {
-    styledComponents: true,
+    emotion: true,
   },
-  distDir: 'dist',
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  output: 'standalone',
 }
+
+module.exports = nextConfig
