@@ -2,13 +2,27 @@
   "jsc": {
     "parser": {
       "syntax": "typescript",
-      "decorators": true
+      "decorators": true,
+      "dynamicImport": true
     },
     "transform": {
-      "react-jsx": true
-    }
+      "react": {
+        "runtime": "automatic"
+      },
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "esnext",
+    "loose": true,
+    "externalHelpers": false,
+    "keepClassNames": true
   },
   "module": {
-    "type": "es6"
-  }
+    "type": "es6",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": false
 }
