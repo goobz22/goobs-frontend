@@ -7,7 +7,6 @@ import ConfirmationCodeInput from './components/ConfirmationCodeInput'
 import RadioGroup from './components/RadioGroup'
 import PopupForm from './components/Form/Popup'
 import ContentSection from './components/Content'
-
 // Actions
 import {
   cleanupReusableStore,
@@ -18,7 +17,6 @@ import {
   getReusableStore,
 } from './actions/server/form/store/reusableStore'
 import getFormData from './actions/server/form/getFormData'
-
 // Colors
 import {
   moss,
@@ -46,7 +44,6 @@ import {
   green,
   greyborder,
 } from './styles/palette'
-
 // Typography
 import {
   arapeyh1,
@@ -74,10 +71,8 @@ import {
   merriparagraph,
   merrihelperfooter,
 } from './styles/typography'
-
 // Styles
 import { formContainerStyle } from './styles/Form'
-
 // Named exports
 export { CustomButton }
 export { CustomGrid }
@@ -97,7 +92,6 @@ export {
 }
 export { getFormData }
 export { formContainerStyle }
-
 // Type exports
 export type { CustomButtonProps } from './components/Button'
 export type {
@@ -110,7 +104,10 @@ export type {
   StyledComponentProps,
   AdornmentProps,
 } from './components/StyledComponent'
-export type { TypographyProps } from './components/Typography'
+export type {
+  TypographyProps,
+  TypographyPropsVariantOverrides,
+} from './components/Typography'
 export type { ConfirmationCodeInputsProps } from './components/ConfirmationCodeInput'
 export type { RadioOption, RadioGroupProps } from './components/RadioGroup'
 export type {
@@ -121,7 +118,6 @@ export type {
 export type { Alignment } from './types/content/alignment'
 export type { Animation } from './types/content/animation'
 export type { BorderProp } from './types/content/border'
-
 // Color exports
 export {
   moss,
@@ -149,7 +145,6 @@ export {
   green,
   greyborder,
 }
-
 // Typography exports
 export {
   arapeyh1,
