@@ -13,7 +13,7 @@ import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 import { Alignment } from '../../types/content/alignment'
 
-export interface HelperFooterMessage {
+interface HelperFooterMessage {
   status?: 'error' | 'success'
   statusMessage?: string
   spreadMessage?: string

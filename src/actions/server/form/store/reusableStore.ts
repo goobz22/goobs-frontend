@@ -11,13 +11,10 @@ import { EventEmitter } from 'events'
 import AsyncLock from 'async-lock'
 import vm from 'vm'
 
-// Promisify the pipeline function for use with async/await
 const pipelineAsync = promisify(pipeline)
 
-// Define the supported encryption algorithms
 type EncryptionAlgorithm = 'aes-256-gcm' | 'aes-192-gcm' | 'aes-128-gcm'
 
-// Configuration interface with options for various features
 interface Config {
   algorithm: EncryptionAlgorithm
   storageDir: string
@@ -34,24 +31,22 @@ interface Config {
   evictionPolicy: 'lru' | 'lfu' | 'random'
 }
 
-// Configuration object with default values
 const config: Config = {
   algorithm: 'aes-256-gcm',
   storageDir: process.env.STORAGE_DIR || path.join(process.cwd(), 'storage'),
   secureDir: process.env.SECURE_DIR || path.join(process.cwd(), '.secure'),
   keyFileName: 'encryption_key',
   ivFileName: 'encryption_iv',
-  keyCheckIntervalMs: 24 * 60 * 60 * 1000, // 24 hours
-  keyRotationIntervalMs: 30 * 24 * 60 * 60 * 1000, // 30 days
-  compressionLevel: -1, // Default compression
+  keyCheckIntervalMs: 24 * 60 * 60 * 1000,
+  keyRotationIntervalMs: 30 * 24 * 60 * 60 * 1000,
+  compressionLevel: -1,
   cacheSize: 1000,
-  cacheMaxAge: 60 * 60 * 1000, // 1 hour
-  persistenceInterval: 5 * 60 * 1000, // 5 minutes
-  maxMemoryUsage: 1024 * 1024 * 1024, // 1GB
+  cacheMaxAge: 60 * 60 * 1000,
+  persistenceInterval: 5 * 60 * 1000,
+  maxMemoryUsage: 1024 * 1024 * 1024,
   evictionPolicy: 'lru',
 }
 
-// Custom error classes for more specific error handling
 class EncryptionError extends Error {
   constructor(message: string) {
     super(message)
@@ -66,7 +61,6 @@ class StorageError extends Error {
   }
 }
 
-// Define various data structures
 interface StringValue {
   type: 'string'
   value: string
@@ -117,34 +111,25 @@ type DataValue =
   | HLLValue
   | GeoValue
 
-// Main data store
 const dataStore = new Map<string, DataValue>()
 
-// Interface for cache items with last accessed timestamp
 interface CacheItem<T> {
   value: T
   lastAccessed: number
   expirationDate: Date
 }
 
-// LRU cache for frequently accessed items
 const cache = new LRUCache<string, CacheItem<DataValue>>({
   max: config.cacheSize,
   ttl: config.cacheMaxAge,
 })
 
-// Async lock for handling concurrency
 const lock = new AsyncLock()
 
-// Event emitter for pub/sub functionality
 const pubsub = new EventEmitter()
 
-// Create a context for running scripts
-const scriptContext = vm.createContext({
-  // Add any safe globals here
-})
+const scriptContext = vm.createContext({})
 
-// Async function to ensure necessary directories exist
 async function ensureDirectories(): Promise<void> {
   try {
     await fs.mkdir(config.storageDir, { recursive: true })
@@ -156,7 +141,6 @@ async function ensureDirectories(): Promise<void> {
   }
 }
 
-// Encryption utility class
 class EncryptionUtility {
   private key: Buffer
   private iv: Buffer
@@ -166,7 +150,6 @@ class EncryptionUtility {
     this.iv = iv
   }
 
-  // Encrypt a string value
   async encrypt(
     value: string
   ): Promise<{ encryptedData: string; authTag: string }> {
@@ -189,7 +172,6 @@ class EncryptionUtility {
     })
   }
 
-  // Decrypt an encrypted value
   async decrypt(encryptedValue: string, authTag: string): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
@@ -213,7 +195,6 @@ class EncryptionUtility {
 
 let encryptionUtility: EncryptionUtility
 
-// Async function to initialize the system
 async function initialize(): Promise<void> {
   try {
     await ensureDirectories()
@@ -221,7 +202,6 @@ async function initialize(): Promise<void> {
     encryptionUtility = new EncryptionUtility(key, iv)
     await checkKeyIntegrity()
 
-    // Set up periodic key integrity checks
     setInterval(async () => {
       try {
         await checkKeyIntegrity()
@@ -230,7 +210,6 @@ async function initialize(): Promise<void> {
       }
     }, config.keyCheckIntervalMs)
 
-    // Set up automatic key rotation
     setInterval(async () => {
       try {
         await rotateEncryptionKeys()
@@ -239,24 +218,20 @@ async function initialize(): Promise<void> {
       }
     }, config.keyRotationIntervalMs)
 
-    // Set up persistence
     setInterval(async () => {
       await persistData()
     }, config.persistenceInterval)
 
-    // Set up memory management
     setInterval(() => {
       manageMemory()
-    }, 60000) // Check every minute
+    }, 60000)
 
-    // Load persisted data
     await loadPersistedData()
   } catch (error) {
     throw new Error(`Initialization failed: ${(error as Error).message}`)
   }
 }
 
-// Function to persist data to disk
 async function persistData(): Promise<void> {
   const snapshot = JSON.stringify(Array.from(dataStore.entries()))
   const compressedData = await compressData(snapshot)
@@ -266,7 +241,6 @@ async function persistData(): Promise<void> {
   )
 }
 
-// Function to load persisted data
 async function loadPersistedData(): Promise<void> {
   try {
     const compressedData = await fs.readFile(
@@ -283,7 +257,6 @@ async function loadPersistedData(): Promise<void> {
   }
 }
 
-// Function to manage memory usage
 function manageMemory(): void {
   const memoryUsage = process.memoryUsage().heapUsed
   if (memoryUsage > config.maxMemoryUsage) {
@@ -296,14 +269,13 @@ function manageMemory(): void {
             const bAccessed = cache.get(b)?.lastAccessed || 0
             return aAccessed - bAccessed
           })
-          .slice(0, Math.floor(dataStore.size * 0.1)) // Evict 10% of keys
+          .slice(0, Math.floor(dataStore.size * 0.1))
         break
       case 'random':
         keysToEvict = Array.from(dataStore.keys())
           .sort(() => 0.5 - Math.random())
           .slice(0, Math.floor(dataStore.size * 0.1))
         break
-      // Implement other eviction policies as needed
     }
     for (const key of keysToEvict) {
       dataStore.delete(key)
@@ -312,7 +284,6 @@ function manageMemory(): void {
   }
 }
 
-// Function to set a cache item
 function setCacheItem(
   key: string,
   value: DataValue,
@@ -321,7 +292,6 @@ function setCacheItem(
   cache.set(key, { value, lastAccessed: Date.now(), expirationDate })
 }
 
-// Function to get a cache item
 function getCacheItem(key: string): DataValue | undefined {
   const item = cache.get(key)
   if (item && item.expirationDate > new Date()) {
@@ -331,7 +301,6 @@ function getCacheItem(key: string): DataValue | undefined {
   return undefined
 }
 
-// Function to execute Lua-like script (now JavaScript)
 async function executeLuaScript(
   script: string,
   keys: string[],
@@ -349,7 +318,6 @@ async function executeLuaScript(
   }
 }
 
-// Function to start a transaction
 async function multi(): Promise<Transaction> {
   return new Transaction()
 }
@@ -370,7 +338,6 @@ class Transaction {
   }
 }
 
-// Helper functions for compression
 async function compressData(data: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const gzip = createGzip({ level: config.compressionLevel } as ZlibOptions)
@@ -400,7 +367,6 @@ async function decompressData(compressedData: Buffer): Promise<string> {
   })
 }
 
-// Helper functions for encryption
 async function getEncryptionMaterial(): Promise<{ key: Buffer; iv: Buffer }> {
   try {
     const key = await fs.readFile(
@@ -439,7 +405,6 @@ async function checkKeyIntegrity(): Promise<void> {
     if (key.length !== keySize || iv.length !== 16) {
       throw new EncryptionError('Encryption material has incorrect length')
     }
-    // Additional integrity checks can be added here
   } catch (error) {
     throw new EncryptionError(
       `Key integrity check failed: ${(error as Error).message}`
@@ -452,18 +417,15 @@ async function rotateEncryptionKeys(): Promise<void> {
     const { key: newKey, iv: newIV } = await generateEncryptionMaterial()
     const newEncryptionUtility = new EncryptionUtility(newKey, newIV)
 
-    // Re-encrypt all data with new keys
     for (const [key, value] of dataStore.entries()) {
       if (value.type === 'string') {
         const decrypted = await encryptionUtility.decrypt(
           value.value,
           'authTag'
-        ) // Assume authTag is stored somewhere
+        )
         const { encryptedData } = await newEncryptionUtility.encrypt(decrypted)
         dataStore.set(key, { type: 'string', value: encryptedData })
-        // Note: We should store the new authTag if we're using it elsewhere
       }
-      // Handle other data types similarly
     }
 
     encryptionUtility = newEncryptionUtility
@@ -474,7 +436,6 @@ async function rotateEncryptionKeys(): Promise<void> {
   }
 }
 
-// Utility function to generate a unique ID for streams
 async function generateStreamId(): Promise<string> {
   const timestamp = Date.now().toString()
   const random = Math.floor(Math.random() * 1000)
@@ -483,16 +444,22 @@ async function generateStreamId(): Promise<string> {
   return `${timestamp}-${random}`
 }
 
-// The five main async functions
-async function cleanupReusableStore(): Promise<void> {
+export async function cleanupReusableStore(): Promise<void> {
   const transaction = await multi()
   const now = new Date()
   for (const [key, item] of cache.entries()) {
     if (item.expirationDate <= now) {
       transaction.exec(async () => {
-        cache.delete(key)
-        dataStore.delete(key)
-        await pubsub.emit('deleted', key)
+        const result = await executeLuaScript(
+          'return "delete"',
+          [key],
+          [item.expirationDate.toISOString()]
+        )
+        if (result === 'delete') {
+          cache.delete(key)
+          dataStore.delete(key)
+          await pubsub.emit('deleted', key)
+        }
       })
     }
   }
@@ -500,10 +467,11 @@ async function cleanupReusableStore(): Promise<void> {
   await pubsub.emit('cleanup', null)
 }
 
-async function setReusableStore(
+export async function setReusableStore(
   key: string,
   value: DataValue,
   expirationDate: Date,
+  identifier: string,
   script?: string
 ): Promise<void> {
   await lock.acquire(key, async () => {
@@ -519,7 +487,7 @@ async function setReusableStore(
     if (script) {
       const result = await executeLuaScript(
         script,
-        [key],
+        [`${identifier}:${key}`],
         [JSON.stringify(value), expirationDate.toISOString()]
       )
       if (result !== null) {
@@ -529,22 +497,29 @@ async function setReusableStore(
 
     const transaction = await multi()
     transaction.exec(async () => {
-      dataStore.set(key, value)
-      setCacheItem(key, value, expirationDate)
+      dataStore.set(`${identifier}:${key}`, value)
+      setCacheItem(`${identifier}:${key}`, value, expirationDate)
     })
     await transaction.commit()
-    await pubsub.emit('set', { key, value, expirationDate })
+    await pubsub.emit('set', {
+      key: `${identifier}:${key}`,
+      value,
+      expirationDate,
+    })
   })
 }
 
-async function updateReusableStore(
+export async function updateReusableStore(
   key: string,
   value: DataValue,
   expirationDate: Date,
+  identifier: string,
   script?: string
 ): Promise<void> {
   await lock.acquire(key, async () => {
-    const existingItem = getCacheItem(key) || dataStore.get(key)
+    const existingItem =
+      getCacheItem(`${identifier}:${key}`) ||
+      dataStore.get(`${identifier}:${key}`)
     if (existingItem) {
       if (existingItem.type === 'string' && value.type === 'string') {
         value.value = `${existingItem.value}-${parseInt(existingItem.value.split('-').pop() || '0') + 1}`
@@ -566,7 +541,7 @@ async function updateReusableStore(
     if (script) {
       const result = await executeLuaScript(
         script,
-        [key],
+        [`${identifier}:${key}`],
         [
           JSON.stringify(existingItem),
           JSON.stringify(value),
@@ -580,25 +555,32 @@ async function updateReusableStore(
 
     const transaction = await multi()
     transaction.exec(async () => {
-      dataStore.set(key, value)
-      setCacheItem(key, value, expirationDate)
+      dataStore.set(`${identifier}:${key}`, value)
+      setCacheItem(`${identifier}:${key}`, value, expirationDate)
     })
     await transaction.commit()
-    await pubsub.emit('updated', { key, value, expirationDate })
+    await pubsub.emit('updated', {
+      key: `${identifier}:${key}`,
+      value,
+      expirationDate,
+    })
   })
 }
 
-async function deleteReusableStore(
+export async function deleteReusableStore(
   key: string,
+  identifier: string,
   script?: string
 ): Promise<void> {
   await lock.acquire(key, async () => {
-    const existingItem = getCacheItem(key) || dataStore.get(key)
+    const existingItem =
+      getCacheItem(`${identifier}:${key}`) ||
+      dataStore.get(`${identifier}:${key}`)
 
     if (script) {
       const result = await executeLuaScript(
         script,
-        [key],
+        [`${identifier}:${key}`],
         [JSON.stringify(existingItem)]
       )
       if (result === 'cancel') {
@@ -608,15 +590,15 @@ async function deleteReusableStore(
 
     const transaction = await multi()
     transaction.exec(async () => {
-      dataStore.delete(key)
-      cache.delete(key)
+      dataStore.delete(`${identifier}:${key}`)
+      cache.delete(`${identifier}:${key}`)
     })
     await transaction.commit()
-    await pubsub.emit('deleted', key)
+    await pubsub.emit('deleted', `${identifier}:${key}`)
   })
 }
 
-async function subscribeToStoreEvents(
+export async function subscribeToStoreEvents(
   event: 'set' | 'updated' | 'deleted' | 'cleanup',
   callback: (data: unknown) => Promise<void>
 ): Promise<void> {
@@ -625,53 +607,41 @@ async function subscribeToStoreEvents(
   })
 }
 
-async function getReusableStore(key: string): Promise<DataValue | undefined> {
+export async function getReusableStore(
+  key: string,
+  identifier: string
+): Promise<DataValue | undefined> {
   return await lock.acquire(key, async () => {
-    // Check cache first
-    const cachedItem = getCacheItem(key)
+    const fullKey = `${identifier}:${key}`
+    const cachedItem = getCacheItem(fullKey)
     if (cachedItem) {
       return cachedItem
     }
 
-    // If not in cache, check main data store
-    const storedItem = dataStore.get(key)
+    const storedItem = dataStore.get(fullKey)
     if (!storedItem) {
       return undefined
     }
 
-    // If it's a string value, it might be encrypted
     if (storedItem.type === 'string') {
       try {
         const decrypted = await encryptionUtility.decrypt(
           storedItem.value,
           'authTag'
-        ) // You might need to store authTags separately
+        )
         storedItem.value = decrypted
       } catch (error) {
-        console.error(`Failed to decrypt value for key ${key}:`, error)
-        // Depending on your requirements, you might want to throw an error here
+        console.error(`Failed to decrypt value for key ${fullKey}:`, error)
       }
     }
 
-    // Update cache with the retrieved item
-    setCacheItem(key, storedItem, new Date(Date.now() + config.cacheMaxAge))
+    setCacheItem(fullKey, storedItem, new Date(Date.now() + config.cacheMaxAge))
 
     return storedItem
   })
 }
 
-// Initialize the store
 initialize().catch(error => {
   console.error('Failed to initialize the store:', error)
   process.exit(1)
 })
-
-// Update the exports to include the new function
-export {
-  cleanupReusableStore,
-  setReusableStore,
-  updateReusableStore,
-  deleteReusableStore,
-  subscribeToStoreEvents,
-  getReusableStore,
-}
