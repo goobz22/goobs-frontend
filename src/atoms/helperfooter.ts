@@ -1,5 +1,12 @@
 import { atom } from 'jotai'
-import { HelperFooterMessage } from '../types/validation'
+
+interface HelperFooterMessage {
+  status?: 'error' | 'success'
+  statusMessage?: string
+  spreadMessage?: string
+  spreadMessagePriority?: number
+  formname?: string
+}
 
 export const helperFooterAtom = atom<Record<string, HelperFooterMessage>>({
   default: {
