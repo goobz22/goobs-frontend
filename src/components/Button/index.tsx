@@ -11,8 +11,15 @@ import StarIcon from '@mui/icons-material/Star'
 import { Typography } from 'goobs-repo'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
-import { HelperFooterMessage } from '../../types/validation'
 import { Alignment } from '../../types/content/alignment'
+
+export interface HelperFooterMessage {
+  status?: 'error' | 'success'
+  statusMessage?: string
+  spreadMessage?: string
+  spreadMessagePriority?: number
+  formname?: string
+}
 
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
