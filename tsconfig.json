@@ -3,8 +3,7 @@
     "target": "ES6",
     "lib": [
       "DOM",
-      "DOM.Iterable",
-      "ESNext"
+      "DOM.Iterable"
     ],
     "allowJs": true,
     "skipLibCheck": true,
