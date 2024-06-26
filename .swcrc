@@ -1,0 +1,14 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "decorators": true
+    },
+    "transform": {
+      "react-jsx": true
+    }
+  },
+  "module": {
+    "type": "es6"
+  }
+}
