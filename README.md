@@ -8,7 +8,7 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.7.35 (beta)
+Current version: 0.7.36 (beta)
 
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation confirmed working with install instructions below.
 
@@ -155,9 +155,7 @@ The usage of the StyledComponent component and these props will be documented be
 
 The following server actions are included in this release:
 
-- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server. It provides a simple and efficient way to store and retrieve form data across requests. The store utilizes a JSON file storage mechanism for data persistence. - this needs testing to confirm usage in imported library
-
-- `src/actions/server/form/store/crypt.ts`: Encryption and decryption utilities for secure data storage. These utilities help protect sensitive data by encrypting it before storing and decrypting it when retrieving from the store. The encryption key and initialization vector (IV) are securely sourced from environment variables. - this needs testing to confirm usage in imported library
+- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server. This is a TypeScript redis alternative
 
 - `src/actions/server/form/getFormData.ts`: A server action for retrieving form data.
 
@@ -171,6 +169,8 @@ import {
   CustomGrid,
   StyledComponent
   Typography,
+  RadioGroup,
+  ConfirmationCodeInputs
 } from 'goobs-repo'
 ```
 
