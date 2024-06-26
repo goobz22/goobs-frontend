@@ -8,7 +8,7 @@ This entire repository is written in typescript and there is no need for a types
 
 ## Version
 
-Current version: 0.7.41 (beta)
+Current version: 0.7.42 (beta)
 
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation confirmed working with install instructions below.
 
