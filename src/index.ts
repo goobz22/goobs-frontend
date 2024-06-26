@@ -118,6 +118,9 @@ export type {
   CustomButtonProps as ContentCustomButtonProps,
   StyledComponentProps as ContentStyledComponentProps,
 } from './types/content'
+export type { Alignment } from './types/content/alignment'
+export type { Animation } from './types/content/animation'
+export type { BorderProp } from './types/content/border'
 
 // Color exports
 export {

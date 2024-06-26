@@ -14,6 +14,7 @@
 !src/actions/server/form/getFormData.ts
 !src/types/content/alignment/index.ts
 !src/types/content/animation/index.ts
+!src/types/content/border/index.ts
 !src/types/content/index.ts
 !src/styles/palette.ts
 !src/styles/typography.ts
