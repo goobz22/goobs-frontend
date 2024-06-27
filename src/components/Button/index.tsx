@@ -8,12 +8,13 @@ import {
   TypographyPropsVariantOverrides,
 } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
-import { Typography } from 'goobs-repo'
+import { Typography } from '../Typography'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
-import { Alignment } from '../../types/content/alignment'
 
-interface HelperFooterMessage {
+export type ButtonAlignment = 'left' | 'center' | 'right'
+
+export interface HelperFooterMessage {
   status?: 'error' | 'success'
   statusMessage?: string
   spreadMessage?: string
@@ -27,7 +28,7 @@ export interface CustomButtonProps
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
-  fontlocation?: Alignment
+  fontlocation?: ButtonAlignment
   fontvariant?: keyof TypographyPropsVariantOverrides
   icon?: React.ReactNode | false
   iconcolor?: string
