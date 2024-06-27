@@ -1,18 +1,9 @@
 'use client'
 import React from 'react'
 import CustomGrid, { columnconfig, gridconfig } from '../../components/Grid'
-import useGridTitle, {
-  ExtendedTypographyProps as TitleProps,
-} from '../../components/Content/Structure/title/useGridTitle'
-import useGridSubtitle, {
-  ExtendedTypographyProps as SubtitleProps,
-} from '../../components/Content/Structure/subtitle/useGridSubtitle'
-import useGridParagraph, {
-  ExtendedTypographyProps as ParagraphProps,
-} from '../../components/Content/Structure/paragraph/useGridParagraph'
-import useBodyTitle, {
-  ExtendedTypographyProps as BodyTitleProps,
-} from '../../components/Content/Structure/bodytitle/useBodyTitle'
+import useGridTypography, {
+  ExtendedTypographyProps as TypographyProps,
+} from './Structure/typography/useGridTypography'
 import useStyledComponent, {
   ExtendedStyledComponentProps,
 } from '../../components/Content/Structure/styledcomponent/useStyledComponent'
@@ -31,19 +22,13 @@ import useImage, {
 import useButton, {
   ExtendedButtonProps,
 } from '../../components/Content/Structure/button/useButton'
-import useHelperFooter, {
-  ExtendedTypographyProps as HelperFooterProps,
-} from '../../components/Content/Structure/helperfooter/useHelperFooter'
 
 export interface ContentSectionProps {
   gridconfig?: gridconfig
   confirmationcodeinput?:
     | ExtendedConfirmationCodeInputsProps
     | ExtendedConfirmationCodeInputsProps[]
-  title?: TitleProps | TitleProps[]
-  subtitle?: SubtitleProps | SubtitleProps[]
-  paragraph?: ParagraphProps | ParagraphProps[]
-  bodytitle?: BodyTitleProps | BodyTitleProps[]
+  typography?: TypographyProps | TypographyProps[]
   styledcomponent?:
     | ExtendedStyledComponentProps
     | ExtendedStyledComponentProps[]
@@ -51,7 +36,6 @@ export interface ContentSectionProps {
   link?: LinkProps | LinkProps[]
   button?: ExtendedButtonProps | ExtendedButtonProps[]
   image?: ExtendedImageProps | ExtendedImageProps[]
-  helperfooter?: HelperFooterProps | HelperFooterProps[]
 }
 
 const RenderContent: React.FC<ContentSectionProps> = ({
@@ -60,39 +44,12 @@ const RenderContent: React.FC<ContentSectionProps> = ({
 }) => {
   let columnConfigs: columnconfig[] = []
 
-  const title = useGridTitle(props)
-  if (title) {
-    if (Array.isArray(title)) {
-      columnConfigs = columnConfigs.concat(title)
-    } else {
-      columnConfigs.push(title)
-    }
-  }
-
-  const subtitle = useGridSubtitle(props)
-  if (subtitle) {
-    if (Array.isArray(subtitle)) {
-      columnConfigs = columnConfigs.concat(subtitle)
-    } else {
-      columnConfigs.push(subtitle)
-    }
-  }
-
-  const paragraph = useGridParagraph(props)
+  const paragraph = useGridTypography(props)
   if (paragraph) {
     if (Array.isArray(paragraph)) {
       columnConfigs = columnConfigs.concat(paragraph)
     } else {
       columnConfigs.push(paragraph)
-    }
-  }
-
-  const bodytitle = useBodyTitle(props)
-  if (bodytitle) {
-    if (Array.isArray(bodytitle)) {
-      columnConfigs = columnConfigs.concat(bodytitle)
-    } else {
-      columnConfigs.push(bodytitle)
     }
   }
 
@@ -138,15 +95,6 @@ const RenderContent: React.FC<ContentSectionProps> = ({
   const image = useImage(props)
   if (image) {
     columnConfigs = columnConfigs.concat(image)
-  }
-
-  const helperFooter = useHelperFooter(props)
-  if (helperFooter) {
-    if (Array.isArray(helperFooter)) {
-      columnConfigs = columnConfigs.concat(helperFooter)
-    } else {
-      columnConfigs.push(helperFooter)
-    }
   }
 
   return <CustomGrid gridconfig={gridconfig} columnconfig={columnConfigs} />

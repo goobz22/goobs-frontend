@@ -32,14 +32,219 @@ export interface TypographyProps {
   fontcolor?: string
 }
 
+const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
+  h1: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '3rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h2: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '2.5rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h3: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '2rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h4: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '1.5rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h5: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '1.25rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h6: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '1.1rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  paragraph: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '1rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperheader: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperfooter: {
+    fontFamily: 'Arapey, serif',
+    fontSize: '0.75rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+}
+
+const interStyles: Record<TypographyVariant, React.CSSProperties> = {
+  h1: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '3rem',
+    fontWeight: 700,
+    textTransform: 'none',
+  },
+  h2: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    textTransform: 'none',
+  },
+  h3: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '2rem',
+    fontWeight: 600,
+    textTransform: 'none',
+  },
+  h4: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '1.5rem',
+    fontWeight: 600,
+    textTransform: 'none',
+  },
+  h5: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '1.25rem',
+    fontWeight: 500,
+    textTransform: 'none',
+  },
+  h6: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '1.1rem',
+    fontWeight: 500,
+    textTransform: 'none',
+  },
+  paragraph: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '1rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperheader: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperfooter: {
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.75rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+}
+
+const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
+  h1: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '3rem',
+    fontWeight: 700,
+    textTransform: 'none',
+  },
+  h2: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    textTransform: 'none',
+  },
+  h3: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '2rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h4: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1.5rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h5: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1.25rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  h6: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1.1rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  paragraph: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperheader: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+  helperfooter: {
+    fontFamily: 'Merriweather, serif',
+    fontSize: '0.75rem',
+    fontWeight: 400,
+    textTransform: 'none',
+  },
+}
+
 export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
   text,
   fontcolor,
   fontvariant,
   ...rest
 }) => {
+  let variantStyle: React.CSSProperties = {}
+
+  if (fontvariant) {
+    const fontFamily = fontvariant.startsWith('arapey')
+      ? 'arapey'
+      : fontvariant.startsWith('inter')
+        ? 'inter'
+        : fontvariant.startsWith('merri')
+          ? 'merri'
+          : null
+
+    if (fontFamily) {
+      const variant = fontvariant.slice(fontFamily.length) as TypographyVariant
+      switch (fontFamily) {
+        case 'arapey':
+          variantStyle = arapeyStyles[variant] || {}
+          break
+        case 'inter':
+          variantStyle = interStyles[variant] || {}
+          break
+        case 'merri':
+          variantStyle = merriStyles[variant] || {}
+          break
+      }
+    }
+  }
+
   return (
-    <MuiTypography style={{ color: fontcolor }} variant={fontvariant} {...rest}>
+    <MuiTypography
+      style={{
+        color: fontcolor,
+        ...variantStyle,
+      }}
+      variant={fontvariant}
+      {...rest}
+    >
       {text}
     </MuiTypography>
   )
