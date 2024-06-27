@@ -144,7 +144,10 @@ const cache = new LRUCache<string, CacheItem<DataValue>>({
   ttl: config.cacheMaxAge,
 })
 
-const lock = new AsyncLock()
+const lock = new AsyncLock({
+  timeout: 30000,
+  maxPending: Infinity,
+})
 
 const pubsub = new EventEmitter()
 
