@@ -82,7 +82,7 @@ export interface AdornmentProps {
   marginRight?: number | string
 }
 
-const NoAutofillOutlinedInput = styled(OutlinedInput)(({ theme }) => ({
+const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   '& .MuiInputBase-input': {
     '&:-webkit-autofill': {
       transition: 'background-color 600000s 0s, color 600000s 0s',
