@@ -7,7 +7,7 @@ import React, {
   useEffect,
   RefObject,
 } from 'react'
-import { Box, InputLabel, OutlinedInput } from '@mui/material'
+import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
 import { useDropdown } from './hooks/useDropdown'
 import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { usePassword } from './hooks/usePassword'
@@ -82,6 +82,23 @@ export interface AdornmentProps {
   marginRight?: number | string
 }
 
+const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
+  '& .MuiInputBase-input': {
+    '&:-webkit-autofill': {
+      transition: 'background-color 600000s 0s, color 600000s 0s',
+    },
+    '&:-webkit-autofill:hover': {
+      transition: 'background-color 600000s 0s, color 600000s 0s',
+    },
+    '&:-webkit-autofill:focus': {
+      transition: 'background-color 600000s 0s, color 600000s 0s',
+    },
+    '&:-webkit-autofill:active': {
+      transition: 'background-color 600000s 0s, color 600000s 0s',
+    },
+  },
+}))
+
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
     label,
@@ -115,6 +132,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
       setHasInput(false)
     }
   }, [value, valuestatus])
+
+  useEffect(() => {
+    const input = inputRefInternal.current || inputRef?.current
+    if (input) {
+      input.setAttribute('autocomplete', 'new-password')
+      input.setAttribute('autocorrect', 'off')
+      input.setAttribute('autocapitalize', 'none')
+      input.setAttribute('spellcheck', 'false')
+    }
+  }, [inputRef])
 
   const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
     useDropdown(props, inputBoxRef)
@@ -230,7 +257,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
           </InputLabel>
         )}
         <Box ref={inputBoxRef} sx={{ width: '100%' }}>
-          <OutlinedInput
+          <NoAutofillOutlinedInput
             ref={inputRef || inputRefInternal}
             onClick={handleDropdownClick}
             style={{
@@ -277,7 +304,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             fullWidth
             multiline={componentvariant === 'multilinetextfield'}
             label={label}
-            autoComplete={props.autoComplete}
+            autoComplete="off"
             name={name}
             value={componentvariant === 'dropdown' ? selectedOption : value}
             readOnly={componentvariant === 'dropdown'}
