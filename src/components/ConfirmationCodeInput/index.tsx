@@ -1,8 +1,9 @@
 'use client'
+
 import React, { ChangeEvent, KeyboardEvent } from 'react'
 import { Input, Box } from '@mui/material'
 import { useCodeConfirmation } from './../../actions/client/codeconfirmation/useCodeConfirmation'
-import { columnconfig } from 'goobs-repo'
+import { columnconfig } from '../../components/Grid'
 import { red, green } from '../../styles/palette'
 
 export interface ConfirmationCodeInputsProps {
