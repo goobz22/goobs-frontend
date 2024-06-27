@@ -1,14 +1,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import {
-  Button,
-  Box,
-  ButtonProps,
-  TypographyPropsVariantOverrides,
-} from '@mui/material'
+import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
-import { Typography } from '../Typography'
+import { Typography, TypographyPropsVariantOverrides } from '../Typography'
 import { useAtomValue } from 'jotai'
 import { helperFooterAtom } from '../../atoms/helperfooter'
 
@@ -116,7 +111,6 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
 
   return (
     <Box
-      // @ts-ignore
       display="flex"
       flexDirection="column"
       alignItems="center"
@@ -141,15 +135,11 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
           width: width,
         }}
       >
-        <Box
-          // @ts-ignore
-          display="flex"
-          alignItems="center"
-        >
+        <Box display="flex" alignItems="center">
           {iconlocation === 'left' && renderIcon()}
           {text && (
             <Typography
-              variant={fontvariant}
+              fontvariant={fontvariant}
               fontcolor={fontcolor}
               text={text}
             />
@@ -159,7 +149,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       </Button>
       {currentHelperFooter?.spreadMessage && (
         <Typography
-          variant="merrihelperfooter"
+          fontvariant="merrihelperfooter"
           fontcolor={
             currentHelperFooter?.status === 'error'
               ? 'red'
@@ -167,9 +157,11 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
                 ? 'green'
                 : undefined
           }
-          marginTop={0.5}
-          marginBottom={0}
-          align="left"
+          style={{
+            marginTop: '0.5rem',
+            marginBottom: 0,
+            textAlign: 'left',
+          }}
           text={currentHelperFooter?.spreadMessage}
         />
       )}
