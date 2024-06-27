@@ -1,5 +1,5 @@
 import { gridconfig, columnconfig, cellconfig } from './index'
-import { Typography } from 'goobs-repo'
+import { Typography } from '../../components/Typography'
 import React from 'react'
 
 export const defaultGridConfig: gridconfig = {
@@ -9,7 +9,6 @@ export const defaultGridConfig: gridconfig = {
   marginbottom: 2,
   marginright: 2,
   marginleft: 10,
-  animation: 'none',
   gridwidth: '100%',
 }
 
@@ -24,7 +23,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 0,
     marginleft: 0,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 1" />,
     cellconfig: {
       border: 'none',
@@ -43,7 +41,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 0,
     marginleft: 0,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 2" />,
     cellconfig: {
       border: 'none',
@@ -62,7 +59,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 0,
     marginleft: 0,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 3" />,
     cellconfig: {
       border: 'none',
@@ -81,7 +77,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 2,
     marginleft: 2,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 4" />,
     cellconfig: {
       border: 'none',
@@ -100,7 +95,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 2,
     marginleft: 2,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 5" />,
     cellconfig: {
       border: 'none',
@@ -119,7 +113,6 @@ export const defaultColumnConfig: columnconfig[] = [
     marginbottom: 1,
     marginright: 0,
     marginleft: 0,
-    animation: 'none',
     component: <Typography variant="h4" text="Column 6" />,
     cellconfig: {
       border: 'none',
