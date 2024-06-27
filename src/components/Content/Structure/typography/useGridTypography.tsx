@@ -7,23 +7,23 @@ export interface ExtendedTypographyProps extends TypographyProps {
   cellconfig?: cellconfig
 }
 
-const useHelperFooter = (grid: {
-  helperfooter?: ExtendedTypographyProps | ExtendedTypographyProps[]
+const useGridTypography = (grid: {
+  typography?: ExtendedTypographyProps | ExtendedTypographyProps[]
 }) => {
-  if (!grid.helperfooter) return null
+  if (!grid.typography) return null
 
-  const renderHelperFooter = (
-    helperFooterItem: ExtendedTypographyProps,
+  const renderTypography = (
+    typographyItem: ExtendedTypographyProps,
     index: number
   ): columnconfig => {
     const {
       text,
       fontcolor,
+      fontvariant,
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = helperFooterItem
-    const fontvariant = 'merrihelperfooter'
+    } = typographyItem
 
     return {
       ...itemColumnConfig,
@@ -33,7 +33,7 @@ const useHelperFooter = (grid: {
       },
       component: (
         <Typography
-          key={`helperfooter-${index}`}
+          key={`typography-${index}`}
           text={text}
           fontvariant={fontvariant}
           fontcolor={fontcolor}
@@ -43,11 +43,11 @@ const useHelperFooter = (grid: {
     }
   }
 
-  if (Array.isArray(grid.helperfooter)) {
-    return grid.helperfooter.map(renderHelperFooter)
+  if (Array.isArray(grid.typography)) {
+    return grid.typography.map(renderTypography)
   } else {
-    return renderHelperFooter(grid.helperfooter, 0)
+    return renderTypography(grid.typography, 0)
   }
 }
 
-export default useHelperFooter
+export default useGridTypography
