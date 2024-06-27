@@ -6,9 +6,8 @@ import {
   FormControl,
   FormLabel,
 } from '@mui/material'
-import { Typography } from 'goobs-repo'
+import { Typography } from './../../components/Typography'
 import { TypographyPropsVariantOverrides } from '@mui/material'
-import { columnconfig } from 'goobs-repo'
 
 export interface RadioOption {
   value: string
@@ -25,7 +24,6 @@ export interface RadioGroupProps {
   labelFontVariant?: keyof TypographyPropsVariantOverrides
   labelFontColor?: string
   labelText?: string
-  columnconfig?: columnconfig
   onChange?: (value: string) => void
 }
 
@@ -48,10 +46,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
 
   return (
     <FormControl>
-      <FormLabel
-        id={`${name}-label`}
-        sx={{ marginBottom: '8px' }} // Add 8px margin under the label text
-      >
+      <FormLabel id={`${name}-label`} sx={{ marginBottom: '8px' }}>
         <Typography
           text={labelText || label}
           fontcolor={labelFontColor}
