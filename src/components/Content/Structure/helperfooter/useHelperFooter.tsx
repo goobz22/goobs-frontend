@@ -1,23 +1,34 @@
 import React from 'react'
-import { Typography } from 'goobs-repo'
-import { TypographyProps } from './../../../../types/content'
-import { columnconfig } from 'goobs-repo'
+import { Typography, TypographyProps } from '../../../Typography'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedTypographyProps extends TypographyProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useHelperFooter = (grid: {
-  helperfooter?: TypographyProps | TypographyProps[]
+  helperfooter?: ExtendedTypographyProps | ExtendedTypographyProps[]
 }) => {
   if (!grid.helperfooter) return null
 
   const renderHelperFooter = (
-    helperFooterItem: TypographyProps,
+    helperFooterItem: ExtendedTypographyProps,
     index: number
   ): columnconfig => {
-    const { text, fontcolor, columnconfig } = helperFooterItem
+    const {
+      text,
+      fontcolor,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = helperFooterItem
     const fontvariant = 'merrihelperfooter'
 
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
+        ...cellconfig,
         border: 'none',
       },
       component: (
@@ -26,6 +37,7 @@ const useHelperFooter = (grid: {
           text={text}
           fontvariant={fontvariant}
           fontcolor={fontcolor}
+          {...restProps}
         />
       ),
     }

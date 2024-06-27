@@ -1,22 +1,32 @@
 import React from 'react'
-import { Typography } from 'goobs-repo'
-import { columnconfig } from 'goobs-repo'
-import { TypographyProps } from './../../../../types/content'
+import { Typography, TypographyProps } from '../../../Typography'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedTypographyProps extends TypographyProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useGridTitle = (grid: {
-  title?: TypographyProps | TypographyProps[]
+  title?: ExtendedTypographyProps | ExtendedTypographyProps[]
 }) => {
   if (!grid.title) return null
 
   const renderTitle = (
-    titleItem: TypographyProps,
+    titleItem: ExtendedTypographyProps,
     index: number
   ): columnconfig => {
-    const { text, fontcolor, columnconfig, cellconfig } = titleItem
+    const {
+      text,
+      fontcolor,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = titleItem
     const fontvariant = 'merrih2'
 
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
         border: 'none',
@@ -27,6 +37,7 @@ const useGridTitle = (grid: {
           text={text}
           fontvariant={fontvariant}
           fontcolor={fontcolor}
+          {...restProps}
         />
       ),
     }

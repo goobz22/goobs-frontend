@@ -1,22 +1,31 @@
 import React from 'react'
-import { Typography } from 'goobs-repo'
-import { columnconfig } from 'goobs-repo'
-import { TypographyProps } from './../../../../types/content'
+import { Typography, TypographyProps } from '../../../Typography'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedTypographyProps extends TypographyProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useBodyTitle = (grid: {
-  bodytitle?: TypographyProps | TypographyProps[]
+  bodytitle?: ExtendedTypographyProps | ExtendedTypographyProps[]
 }) => {
   if (!grid.bodytitle) return null
 
   const renderBodyTitle = (
-    bodyTitleItem: TypographyProps,
+    bodyTitleItem: ExtendedTypographyProps,
     index: number
   ): columnconfig => {
-    const { text, fontcolor, columnconfig, cellconfig } = bodyTitleItem
-    const fontvariant = 'merrih4'
+    const {
+      text,
+      fontcolor,
+      fontvariant = 'merrih4',
+      columnconfig: itemColumnConfig,
+      cellconfig,
+    } = bodyTitleItem
 
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
         border: 'none',

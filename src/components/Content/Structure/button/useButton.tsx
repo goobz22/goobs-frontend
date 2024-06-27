@@ -1,16 +1,21 @@
 'use client'
 import React from 'react'
-import { CustomButton } from 'goobs-repo'
-import { CustomButtonProps } from './../../../../types/content'
-import { columnconfig } from 'goobs-repo'
+import CustomButton, { CustomButtonProps } from './../../../Button'
+import { columnconfig, cellconfig } from '../../../Grid'
+import { TypographyPropsVariantOverrides } from '@mui/material'
+
+export interface ExtendedButtonProps extends CustomButtonProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useButton = (grid: {
-  button?: CustomButtonProps | CustomButtonProps[]
+  button?: ExtendedButtonProps | ExtendedButtonProps[]
 }) => {
   if (!grid.button) return null
 
   const renderButton = (
-    buttonItem: CustomButtonProps,
+    buttonItem: ExtendedButtonProps,
     index: number
   ): columnconfig => {
     const {
@@ -24,18 +29,21 @@ const useButton = (grid: {
       fontvariant,
       icon,
       iconcolor,
+      iconsize,
       iconlocation,
       variant,
       onClick,
       helperfooter,
-      columnconfig,
+      columnconfig: itemColumnConfig,
       cellconfig,
+      ...restProps
     } = buttonItem
 
-    // Merge the cellconfig with the columnconfig
-    const mergedConfig = {
-      ...columnconfig,
-      ...cellconfig,
+    const mergedConfig: columnconfig = {
+      ...itemColumnConfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
         <CustomButton
           key={`button-${index}`}
@@ -44,16 +52,17 @@ const useButton = (grid: {
           backgroundcolor={backgroundcolor}
           outlinecolor={outlinecolor}
           fontcolor={fontcolor}
-          fontlocation={fontlocation}
-          fontvariant={fontvariant}
-          icon={icon}
           width={width}
+          fontlocation={fontlocation}
+          fontvariant={fontvariant as keyof TypographyPropsVariantOverrides}
+          icon={icon}
           iconcolor={iconcolor}
+          iconsize={iconsize}
           iconlocation={iconlocation}
           variant={variant}
           onClick={onClick}
           helperfooter={helperfooter}
-          fullWidth
+          {...restProps}
         />
       ),
     }

@@ -10,6 +10,7 @@ import { LRUCache } from 'lru-cache'
 import { EventEmitter } from 'events'
 import AsyncLock from 'async-lock'
 import vm from 'vm'
+import os from 'os'
 
 const pipelineAsync = promisify(pipeline)
 
@@ -22,29 +23,48 @@ interface Config {
   keyFileName: string
   ivFileName: string
   keyCheckIntervalMs: number
-  keyRotationIntervalMs: number
   compressionLevel: -1 | 0 | 1 | 9
   cacheSize: number
   cacheMaxAge: number
   persistenceInterval: number
-  maxMemoryUsage: number
+  maxMemoryUsage: number | 'max'
   evictionPolicy: 'lru' | 'lfu' | 'random'
+  forceReset: boolean
 }
 
-const config: Config = {
+const defaultConfig: Config = {
   algorithm: 'aes-256-gcm',
-  storageDir: process.env.STORAGE_DIR || path.join(process.cwd(), 'storage'),
-  secureDir: process.env.SECURE_DIR || path.join(process.cwd(), '.secure'),
+  storageDir: path.join(process.cwd(), 'storage'),
+  secureDir: path.join(process.cwd(), '.secure'),
   keyFileName: 'encryption_key',
   ivFileName: 'encryption_iv',
-  keyCheckIntervalMs: 24 * 60 * 60 * 1000,
-  keyRotationIntervalMs: 30 * 24 * 60 * 60 * 1000,
+  keyCheckIntervalMs: 24 * 60 * 60 * 1000, // 24 hours
   compressionLevel: -1,
   cacheSize: 1000,
-  cacheMaxAge: 60 * 60 * 1000,
-  persistenceInterval: 5 * 60 * 1000,
-  maxMemoryUsage: 1024 * 1024 * 1024,
+  cacheMaxAge: 60 * 60 * 1000, // 1 hour
+  persistenceInterval: 5 * 60 * 1000, // 5 minutes
+  maxMemoryUsage: 1024 * 1024 * 1024, // 1GB
   evictionPolicy: 'lru',
+  forceReset: false,
+}
+
+let config: Config = { ...defaultConfig }
+
+async function loadConfig(): Promise<void> {
+  try {
+    const configPath = path.join(process.cwd(), '.reusablestorerc')
+    const configData = await fs.readFile(configPath, 'utf8')
+    const userConfig = JSON.parse(configData)
+    config = { ...defaultConfig, ...userConfig }
+    if (config.maxMemoryUsage === 'max') {
+      config.maxMemoryUsage = os.totalmem()
+    }
+    console.log('Configuration loaded successfully')
+  } catch (error) {
+    console.warn(
+      'No .reusablestorerc file found or invalid. Using default configuration.'
+    )
+  }
 }
 
 class EncryptionError extends Error {
@@ -130,11 +150,20 @@ const pubsub = new EventEmitter()
 
 const scriptContext = vm.createContext({})
 
+let encryptionUtility: EncryptionUtility
+let lastKeyRotation: number = 0
+let isInitialized = false
+
 async function ensureDirectories(): Promise<void> {
   try {
     await fs.mkdir(config.storageDir, { recursive: true })
     await fs.mkdir(config.secureDir, { recursive: true })
+    console.log('Directories created successfully')
   } catch (error) {
+    console.error(
+      `Failed to create necessary directories: ${(error as Error).message}`
+    )
+    console.error('Stack trace:', (error as Error).stack)
     throw new StorageError(
       `Failed to create necessary directories: ${(error as Error).message}`
     )
@@ -165,6 +194,8 @@ class EncryptionUtility {
         const authTag = cipher.getAuthTag().toString('hex')
         resolve({ encryptedData: encrypted, authTag })
       } catch (error) {
+        console.error(`Encryption failed: ${(error as Error).message}`)
+        console.error('Stack trace:', (error as Error).stack)
         reject(
           new EncryptionError(`Encryption failed: ${(error as Error).message}`)
         )
@@ -185,6 +216,8 @@ class EncryptionUtility {
         decrypted += decipher.final('utf8')
         resolve(decrypted)
       } catch (error) {
+        console.error(`Decryption failed: ${(error as Error).message}`)
+        console.error('Stack trace:', (error as Error).stack)
         reject(
           new EncryptionError(`Decryption failed: ${(error as Error).message}`)
         )
@@ -193,52 +226,61 @@ class EncryptionUtility {
   }
 }
 
-let encryptionUtility: EncryptionUtility
+export async function initializeReusableStore(): Promise<void> {
+  if (isInitialized) {
+    console.log('ReusableStore already initialized')
+    return
+  }
 
-async function initialize(): Promise<void> {
   try {
+    await loadConfig()
     await ensureDirectories()
+
+    if (config.forceReset) {
+      console.log(
+        'Force reset option detected. Generating new encryption material...'
+      )
+      await generateEncryptionMaterial()
+    }
+
     const { key, iv } = await getEncryptionMaterial()
     encryptionUtility = new EncryptionUtility(key, iv)
-    await checkKeyIntegrity()
 
-    setInterval(async () => {
-      try {
-        await checkKeyIntegrity()
-      } catch (error) {
-        console.error('Key integrity check failed:', error)
-      }
-    }, config.keyCheckIntervalMs)
-
-    setInterval(async () => {
-      try {
-        await rotateEncryptionKeys()
-      } catch (error) {
-        console.error('Key rotation failed:', error)
-      }
-    }, config.keyRotationIntervalMs)
-
-    setInterval(async () => {
-      await persistData()
-    }, config.persistenceInterval)
-
-    setInterval(() => {
-      manageMemory()
-    }, 60000)
+    try {
+      await checkKeyIntegrity()
+    } catch (error) {
+      console.error(
+        'Key integrity check failed. Attempting to generate new encryption material...'
+      )
+      await generateEncryptionMaterial()
+      const { key: newKey, iv: newIV } = await getEncryptionMaterial()
+      encryptionUtility = new EncryptionUtility(newKey, newIV)
+      await checkKeyIntegrity()
+    }
 
     await loadPersistedData()
+    isInitialized = true
+    console.log('ReusableStore initialized successfully')
   } catch (error) {
+    console.error(`Initialization failed: ${(error as Error).message}`)
+    console.error('Stack trace:', (error as Error).stack)
     throw new Error(`Initialization failed: ${(error as Error).message}`)
   }
 }
 
 async function persistData(): Promise<void> {
-  const snapshot = JSON.stringify(Array.from(dataStore.entries()))
-  const compressedData = await compressData(snapshot)
-  await fs.writeFile(
-    path.join(config.storageDir, 'snapshot.gz'),
-    compressedData
-  )
+  try {
+    const snapshot = JSON.stringify(Array.from(dataStore.entries()))
+    const compressedData = await compressData(snapshot)
+    await fs.writeFile(
+      path.join(config.storageDir, 'snapshot.gz'),
+      compressedData
+    )
+    console.log('Data persisted successfully')
+  } catch (error) {
+    console.error(`Failed to persist data: ${(error as Error).message}`)
+    console.error('Stack trace:', (error as Error).stack)
+  }
 }
 
 async function loadPersistedData(): Promise<void> {
@@ -252,14 +294,19 @@ async function loadPersistedData(): Promise<void> {
     for (const [key, value] of loadedData) {
       dataStore.set(key, value)
     }
+    console.log('Persisted data loaded successfully')
   } catch (error) {
-    console.error('Failed to load persisted data:', error)
+    console.error(`Failed to load persisted data: ${(error as Error).message}`)
+    console.error('Stack trace:', (error as Error).stack)
   }
 }
 
 function manageMemory(): void {
   const memoryUsage = process.memoryUsage().heapUsed
-  if (memoryUsage > config.maxMemoryUsage) {
+  if (
+    typeof config.maxMemoryUsage === 'number' &&
+    memoryUsage > config.maxMemoryUsage
+  ) {
     let keysToEvict: string[] = []
     switch (config.evictionPolicy) {
       case 'lru':
@@ -281,6 +328,7 @@ function manageMemory(): void {
       dataStore.delete(key)
       cache.delete(key)
     }
+    console.log(`Memory managed: Evicted ${keysToEvict.length} items`)
   }
 }
 
@@ -314,6 +362,8 @@ async function executeLuaScript(
     `
     return vm.runInContext(contextifiedScript, scriptContext, { timeout: 1000 })
   } catch (error) {
+    console.error(`Script execution failed: ${(error as Error).message}`)
+    console.error('Stack trace:', (error as Error).stack)
     throw new Error(`Script execution failed: ${(error as Error).message}`)
   }
 }
@@ -373,9 +423,12 @@ async function getEncryptionMaterial(): Promise<{ key: Buffer; iv: Buffer }> {
       path.join(config.secureDir, config.keyFileName)
     )
     const iv = await fs.readFile(path.join(config.secureDir, config.ivFileName))
+    console.log('Encryption material loaded successfully')
     return { key, iv }
   } catch (error) {
-    console.log('Generating new encryption material...')
+    console.log(
+      'Encryption material not found. Generating new encryption material...'
+    )
     return generateEncryptionMaterial()
   }
 }
@@ -390,8 +443,14 @@ async function generateEncryptionMaterial(): Promise<{
   try {
     await fs.writeFile(path.join(config.secureDir, config.keyFileName), key)
     await fs.writeFile(path.join(config.secureDir, config.ivFileName), iv)
+    console.log('New encryption material generated and saved successfully.')
+    lastKeyRotation = Date.now()
     return { key, iv }
   } catch (error) {
+    console.error(
+      `Failed to write encryption material: ${(error as Error).message}`
+    )
+    console.error('Stack trace:', (error as Error).stack)
     throw new EncryptionError(
       `Failed to write encryption material: ${(error as Error).message}`
     )
@@ -403,12 +462,40 @@ async function checkKeyIntegrity(): Promise<void> {
     const { key, iv } = await getEncryptionMaterial()
     const keySize = parseInt(config.algorithm.split('-')[1]) / 8
     if (key.length !== keySize || iv.length !== 16) {
-      throw new EncryptionError('Encryption material has incorrect length')
+      throw new EncryptionError(
+        `Encryption material has incorrect length. Key length: ${key.length}, IV length: ${iv.length}`
+      )
     }
+    console.log('Key integrity check passed successfully.')
   } catch (error) {
+    console.error(`Key integrity check failed: ${(error as Error).message}`)
+    console.error('Stack trace:', (error as Error).stack)
     throw new EncryptionError(
       `Key integrity check failed: ${(error as Error).message}`
     )
+  }
+}
+
+export async function checkAndRotateKeys(): Promise<void> {
+  if (!isInitialized) {
+    console.log(
+      'ReusableStore not initialized. Skipping key check and rotation.'
+    )
+    return
+  }
+
+  try {
+    await checkKeyIntegrity()
+    const now = Date.now()
+    if (now - lastKeyRotation >= config.keyCheckIntervalMs) {
+      await rotateEncryptionKeys()
+    } else {
+      console.log(
+        'Skipping key rotation: Not enough time has passed since last rotation.'
+      )
+    }
+  } catch (error) {
+    console.error('Error during key check and rotation:', error)
   }
 }
 
@@ -429,7 +516,13 @@ async function rotateEncryptionKeys(): Promise<void> {
     }
 
     encryptionUtility = newEncryptionUtility
+    lastKeyRotation = Date.now()
+    console.log('Encryption keys rotated successfully')
   } catch (error) {
+    console.error(
+      `Failed to rotate encryption keys: ${(error as Error).message}`
+    )
+    console.error('Stack trace:', (error as Error).stack)
     throw new EncryptionError(
       `Failed to rotate encryption keys: ${(error as Error).message}`
     )
@@ -445,6 +538,11 @@ async function generateStreamId(): Promise<string> {
 }
 
 export async function cleanupReusableStore(): Promise<void> {
+  if (!isInitialized) {
+    console.log('ReusableStore not initialized. Skipping cleanup.')
+    return
+  }
+
   const transaction = await multi()
   const now = new Date()
   for (const [key, item] of cache.entries()) {
@@ -465,6 +563,7 @@ export async function cleanupReusableStore(): Promise<void> {
   }
   await transaction.commit()
   await pubsub.emit('cleanup', null)
+  console.log('ReusableStore cleanup completed')
 }
 
 export async function setReusableStore(
@@ -474,6 +573,12 @@ export async function setReusableStore(
   identifier: string,
   script?: string
 ): Promise<void> {
+  if (!isInitialized) {
+    throw new Error(
+      'ReusableStore not initialized. Call initializeReusableStore() first.'
+    )
+  }
+
   await lock.acquire(key, async () => {
     if (value.type === 'stream') {
       value.value = await Promise.all(
@@ -506,6 +611,7 @@ export async function setReusableStore(
       value,
       expirationDate,
     })
+    console.log(`Value set for key: ${identifier}:${key}`)
   })
 }
 
@@ -516,6 +622,12 @@ export async function updateReusableStore(
   identifier: string,
   script?: string
 ): Promise<void> {
+  if (!isInitialized) {
+    throw new Error(
+      'ReusableStore not initialized. Call initializeReusableStore() first.'
+    )
+  }
+
   await lock.acquire(key, async () => {
     const existingItem =
       getCacheItem(`${identifier}:${key}`) ||
@@ -564,6 +676,7 @@ export async function updateReusableStore(
       value,
       expirationDate,
     })
+    console.log(`Value updated for key: ${identifier}:${key}`)
   })
 }
 
@@ -572,6 +685,12 @@ export async function deleteReusableStore(
   identifier: string,
   script?: string
 ): Promise<void> {
+  if (!isInitialized) {
+    throw new Error(
+      'ReusableStore not initialized. Call initializeReusableStore() first.'
+    )
+  }
+
   await lock.acquire(key, async () => {
     const existingItem =
       getCacheItem(`${identifier}:${key}`) ||
@@ -584,6 +703,7 @@ export async function deleteReusableStore(
         [JSON.stringify(existingItem)]
       )
       if (result === 'cancel') {
+        console.log(`Deletion cancelled for key: ${identifier}:${key}`)
         return // Cancel deletion if script returns 'cancel'
       }
     }
@@ -595,6 +715,7 @@ export async function deleteReusableStore(
     })
     await transaction.commit()
     await pubsub.emit('deleted', `${identifier}:${key}`)
+    console.log(`Value deleted for key: ${identifier}:${key}`)
   })
 }
 
@@ -605,21 +726,30 @@ export async function subscribeToStoreEvents(
   pubsub.on(event, async (data: unknown) => {
     await callback(data)
   })
+  console.log(`Subscribed to event: ${event}`)
 }
 
 export async function getReusableStore(
   key: string,
   identifier: string
 ): Promise<DataValue | undefined> {
+  if (!isInitialized) {
+    throw new Error(
+      'ReusableStore not initialized. Call initializeReusableStore() first.'
+    )
+  }
+
   return await lock.acquire(key, async () => {
     const fullKey = `${identifier}:${key}`
     const cachedItem = getCacheItem(fullKey)
     if (cachedItem) {
+      console.log(`Cache hit for key: ${fullKey}`)
       return cachedItem
     }
 
     const storedItem = dataStore.get(fullKey)
     if (!storedItem) {
+      console.log(`Item not found for key: ${fullKey}`)
       return undefined
     }
 
@@ -636,12 +766,25 @@ export async function getReusableStore(
     }
 
     setCacheItem(fullKey, storedItem, new Date(Date.now() + config.cacheMaxAge))
+    console.log(`Value retrieved and cached for key: ${fullKey}`)
 
     return storedItem
   })
 }
 
-initialize().catch(error => {
-  console.error('Failed to initialize the store:', error)
-  process.exit(1)
-})
+export async function persistReusableStore(): Promise<void> {
+  if (!isInitialized) {
+    throw new Error(
+      'ReusableStore not initialized. Call initializeReusableStore() first.'
+    )
+  }
+  await persistData()
+}
+
+// Schedule periodic tasks
+setInterval(async () => {
+  if (isInitialized) {
+    await persistData()
+    manageMemory()
+  }
+}, config.persistenceInterval)

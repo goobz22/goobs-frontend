@@ -1,23 +1,50 @@
 'use client'
-
 import React from 'react'
 import Link from 'next/link'
-import { Typography } from 'goobs-repo'
-import { LinkProps } from './../../../../types/content/link'
-import { columnconfig } from 'goobs-repo'
+import { Typography, TypographyProps } from '../../../Typography'
+import { columnconfig, cellconfig } from '../../../Grid'
 
-const useLink = (grid: { link?: LinkProps | LinkProps[] }) => {
+export interface ExtendedTypographyProps extends TypographyProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+  link?: string
+}
+
+const useLink = (grid: {
+  link?: ExtendedTypographyProps | ExtendedTypographyProps[]
+}) => {
   if (!grid.link) return null
 
-  const renderLink = (linkItem: LinkProps, index: number): columnconfig => {
-    const { link, text, fontcolor, fontvariant, columnconfig } = linkItem
+  const renderLink = (
+    linkItem: ExtendedTypographyProps,
+    index: number
+  ): columnconfig => {
+    const {
+      link,
+      text,
+      fontcolor,
+      fontvariant,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = linkItem
 
-    // Extend the existing columnconfig with the component
+    if (!link) {
+      throw new Error('Link property is required in ExtendedTypographyProps')
+    }
+
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
-        <Link key={`link-${index}`} href={link} passHref>
-          <Typography text={text} variant={fontvariant} color={fontcolor} />
+        <Link key={`link-${index}`} href={link} passHref {...restProps}>
+          <Typography
+            text={text}
+            fontvariant={fontvariant}
+            fontcolor={fontcolor}
+          />
         </Link>
       ),
     }

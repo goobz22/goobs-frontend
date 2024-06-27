@@ -1,32 +1,46 @@
 'use client'
-
 import React from 'react'
 import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
-} from './../../../../components/ConfirmationCodeInput'
-import { columnconfig } from 'goobs-repo'
+} from '../../../ConfirmationCodeInput'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedConfirmationCodeInputsProps
+  extends ConfirmationCodeInputsProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useConfirmationInput = (grid: {
   confirmationcodeinput?:
-    | ConfirmationCodeInputsProps
-    | ConfirmationCodeInputsProps[]
+    | ExtendedConfirmationCodeInputsProps
+    | ExtendedConfirmationCodeInputsProps[]
 }): columnconfig | columnconfig[] | null => {
   if (!grid.confirmationcodeinput) return null
 
   const renderConfirmationInput = (
-    confirmationCodeInputProps: ConfirmationCodeInputsProps,
+    confirmationCodeInputProps: ExtendedConfirmationCodeInputsProps,
     index: number
   ): columnconfig => {
-    const { identifier, isValid, columnconfig } = confirmationCodeInputProps
+    const {
+      identifier,
+      isValid,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = confirmationCodeInputProps
 
-    // Extend the existing columnconfig with the component
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
         <ConfirmationCodeInputs
           key={`confirmationcodeinput-${index}`}
           identifier={identifier}
           isValid={isValid}
+          {...restProps}
         />
       ),
     }

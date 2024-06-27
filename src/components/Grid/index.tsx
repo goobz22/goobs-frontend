@@ -2,13 +2,9 @@
 
 import React from 'react'
 import { Grid, Box, GridProps, useMediaQuery, useTheme } from '@mui/material'
-import { Alignment } from '../../types/content/alignment'
-import { Animation } from '../../types/content/animation'
-import {
-  defaultGridConfig,
-  defaultColumnConfig,
-  defaultCellConfig,
-} from './defaultconfig'
+
+export type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
+export type BorderProp = 'none' | 'solid'
 
 export interface columnconfig {
   row?: number
@@ -20,7 +16,6 @@ export interface columnconfig {
   marginbottom?: number
   marginright?: number
   marginleft?: number
-  animation?: Animation
   component?: React.ReactNode
   bordercolor?: string
   cellconfig?: cellconfig
@@ -37,7 +32,6 @@ export interface gridconfig {
   marginright?: number
   marginleft?: number
   gridwidth?: string
-  animation?: Animation
   bordercolor?: string
 }
 
@@ -48,7 +42,7 @@ export interface CustomGridProps extends GridProps {
 }
 
 export interface cellconfig {
-  border?: 'none' | 'solid'
+  border?: BorderProp
   minHeight?: string
   maxHeight?: string
   width?: string
@@ -58,9 +52,9 @@ export interface cellconfig {
 }
 
 const CustomGrid: React.FC<CustomGridProps> = ({
-  gridconfig = defaultGridConfig,
-  columnconfig = defaultColumnConfig,
-  cellconfig = defaultCellConfig,
+  gridconfig,
+  columnconfig,
+  cellconfig,
   ...rest
 }) => {
   const gridConfigValues = Array.isArray(gridconfig)
@@ -68,9 +62,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
     : gridconfig
 
   const gridJustifyContent =
-    gridConfigValues.alignment === 'left'
+    gridConfigValues?.alignment === 'left'
       ? 'flex-start'
-      : gridConfigValues.alignment === 'right'
+      : gridConfigValues?.alignment === 'right'
         ? 'flex-end'
         : 'center'
 
@@ -82,21 +76,21 @@ const CustomGrid: React.FC<CustomGridProps> = ({
   const minGridWidth = '300px'
 
   // Calculate the number of rows based on the columnconfig
-  const rows = Math.max(...columnconfig.map(c => c.row || 1))
+  const rows = Math.max(...(columnconfig || []).map(c => c.row || 1))
 
   return (
     <Box
-      width={gridConfigValues.gridwidth || '100%'}
+      width={gridConfigValues?.gridwidth || '100%'}
       display="flex"
       justifyContent={gridJustifyContent}
       minWidth={minGridWidth}
     >
       <Box
         // @ts-ignore
-        mt={gridConfigValues.margintop || 0}
-        mb={gridConfigValues.marginbottom || 0}
-        ml={gridConfigValues.marginleft || 0}
-        mr={gridConfigValues.marginright || 0}
+        mt={gridConfigValues?.margintop || 0}
+        mb={gridConfigValues?.marginbottom || 0}
+        ml={gridConfigValues?.marginleft || 0}
+        mr={gridConfigValues?.marginright || 0}
         width="100%"
         height="100%"
         display="flex"
@@ -106,7 +100,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
       >
         {Array.from({ length: rows }).map((_, rowIndex) => {
           const columns = Math.max(
-            ...columnconfig
+            ...(columnconfig || [])
               .filter(c => c.row === rowIndex + 1)
               .map(c => c.column || 1)
           )
@@ -119,18 +113,19 @@ const CustomGrid: React.FC<CustomGridProps> = ({
               display="flex"
               justifyContent="center"
               sx={{
-                marginTop: rowIndex === 0 ? gridConfigValues.margintop || 0 : 0,
+                marginTop:
+                  rowIndex === 0 ? gridConfigValues?.margintop || 0 : 0,
                 marginBottom:
                   rowIndex === rows - 1
-                    ? gridConfigValues.marginbottom || 0
+                    ? gridConfigValues?.marginbottom || 0
                     : 0,
-                marginLeft: gridConfigValues.marginleft || 0,
-                marginRight: gridConfigValues.marginright || 0,
+                marginLeft: gridConfigValues?.marginleft || 0,
+                marginRight: gridConfigValues?.marginright || 0,
                 flexGrow: 1,
               }}
             >
               {Array.from({ length: columns }).map((_, columnIndex) => {
-                const currentColumnConfig = columnconfig.find(
+                const currentColumnConfig = (columnconfig || []).find(
                   c => c.row === rowIndex + 1 && c.column === columnIndex + 1
                 )
 
@@ -158,15 +153,13 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 const currentCellConfig =
                   currentColumnConfig?.cellconfig || cellconfig
 
-                const hasBorder = currentCellConfig.border === 'solid'
+                const hasBorder = currentCellConfig?.border === 'solid'
 
-                const cellWidth = currentCellConfig.width
-                  ? currentCellConfig.width
-                  : '100%'
+                const cellWidth = currentCellConfig?.width || '100%'
 
-                const mobileWidth = currentCellConfig.mobilewidth || '100%'
-                const tabletWidth = currentCellConfig.tabletwidth || '100%'
-                const computerWidth = currentCellConfig.computerwidth || '100%'
+                const mobileWidth = currentCellConfig?.mobilewidth || '100%'
+                const tabletWidth = currentCellConfig?.tabletwidth || '100%'
+                const computerWidth = currentCellConfig?.computerwidth || '100%'
 
                 return (
                   <Grid
@@ -198,9 +191,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                           ? 'var(--Grid-borderWidth) solid'
                           : 'none',
                         borderColor: 'divider',
-                        minHeight: currentCellConfig.minHeight || 'auto',
-                        maxHeight: currentCellConfig.maxHeight || 'none',
-                        height: currentCellConfig.maxHeight || 'auto',
+                        minHeight: currentCellConfig?.minHeight || 'auto',
+                        maxHeight: currentCellConfig?.maxHeight || 'none',
+                        height: currentCellConfig?.maxHeight || 'auto',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: justifyContent,

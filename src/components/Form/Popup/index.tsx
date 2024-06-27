@@ -1,18 +1,18 @@
 'use client'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box } from '@mui/material'
-import ContentSection from '../../Content'
+import ContentSection, { ContentSectionProps } from '../../Content'
 import { formContainerStyle } from './../../../styles/Form'
-import { ContentSectionProps } from './../../../types/content'
-import { TypographyProps } from './../../../types/content'
+import { TypographyProps } from './../../../components/Typography'
 import React from 'react'
 
-interface PopupFormProps extends ContentSectionProps {
+export interface PopupFormProps {
   title?: string
   description?: string
   open: boolean
   onClose: () => void
   onSubmit?: (formData: FormData) => void
+  grids: ContentSectionProps[]
 }
 
 function PopupForm({
@@ -33,16 +33,13 @@ function PopupForm({
 
   const headerGrid = [
     {
-      grid: {
-        gridconfig: {
-          rows: 2,
-          gridname: 'formHeader',
-          margintop: 0,
-          marginbottom: 1,
-          marginleft: 0,
-          marginright: 0,
-          gridwidth: '100%',
-        },
+      gridconfig: {
+        gridname: 'formHeader',
+        margintop: 0,
+        marginbottom: 1,
+        marginleft: 0,
+        marginright: 0,
+        gridwidth: '100%',
       },
       subtitle: {
         text: title,
@@ -51,7 +48,7 @@ function PopupForm({
           column: 1,
           gridname: 'formHeader',
           columnwidth: '100%',
-          alignment: 'left' as const,
+          alignment: 'left',
           marginbottom: 0.5,
         },
         cellconfig: {

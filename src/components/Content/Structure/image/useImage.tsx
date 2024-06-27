@@ -1,21 +1,44 @@
 'use client'
-
 import React from 'react'
 import Image from 'next/image'
-import { ImageProps } from './../../../../types/content/image'
-import { columnconfig } from 'goobs-repo'
+import { columnconfig, cellconfig } from '../../../Grid'
 
-const useImage = (grid: { image?: ImageProps | ImageProps[] }) => {
+type ImageProps = {
+  url: string
+  alt?: string
+  width?: number
+  height?: number
+}
+
+export interface ExtendedImageProps extends Omit<ImageProps, 'columnconfig'> {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
+
+const useImage = (grid: {
+  image?: ExtendedImageProps | ExtendedImageProps[]
+}) => {
   if (!grid.image) return null
 
-  const renderImage = (imageItem: ImageProps, index: number): columnconfig => {
-    const { url, alt = '', columnconfig } = imageItem
+  const renderImage = (
+    imageItem: ExtendedImageProps,
+    index: number
+  ): columnconfig => {
+    const {
+      url,
+      alt = '',
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = imageItem
 
-    if (!url) return columnconfig
+    if (!url) return itemColumnConfig || {}
 
-    // Extend the existing columnconfig with the component
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
         <Image
           key={`image-${index}`}
@@ -23,6 +46,7 @@ const useImage = (grid: { image?: ImageProps | ImageProps[] }) => {
           alt={alt || 'image'}
           style={{ width: '100%', height: 'auto' }}
           fill
+          {...restProps}
         />
       ),
     }

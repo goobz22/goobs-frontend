@@ -1,7 +1,17 @@
 'use client'
-
 import { Box, styled, keyframes } from '@mui/material'
 import React, { useEffect } from 'react'
+
+export type Animation =
+  | 'none'
+  | 'slideIn'
+  | 'slideInUp'
+  | 'slideInDown'
+  | 'slideInLeft'
+  | 'slideInRight'
+  | 'stuckOnScroll'
+  | 'fadeOut'
+  | 'fadeIn'
 
 export const slideIn = keyframes`
   0% { opacity: 0; transform: translateX(-20px); }
@@ -39,10 +49,10 @@ export const fadeIn = keyframes`
 `
 
 interface AnimationProps {
-  animationtype?: keyof typeof animationStyles
+  animationtype?: Animation
 }
 
-const animationStyles = {
+const animationStyles: Record<Animation, string> = {
   none: 'none',
   slideIn: `${slideIn} 1s ease-in-out forwards`,
   slideInUp: `${slideInUp} 1s ease-in-out forwards`,
