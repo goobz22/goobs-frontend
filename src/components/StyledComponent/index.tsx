@@ -78,9 +78,7 @@ export interface AdornmentProps {
   componentvariant: string
   iconcolor?: string
   passwordVisible?: boolean
-  // eslint-disable-next-line no-unused-vars
   togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void
-  // eslint-disable-next-line no-unused-vars
   marginRight?: number | string
 }
 
@@ -105,15 +103,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
   const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
   const [isFocused, setIsFocused] = useState(false)
+  const [hasInput, setHasInput] = useState(false)
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
   const formDataRef = useRef<FormData | null>(null)
 
   useEffect(() => {
     if (value || valuestatus) {
-      setIsFocused(true)
+      setHasInput(true)
     } else {
-      setIsFocused(false)
+      setHasInput(false)
     }
   }, [value, valuestatus])
 
@@ -129,6 +128,8 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
       if (onChange) {
         onChange(e)
       }
+
+      setHasInput(!!e.target.value)
 
       if (componentvariant === 'phonenumber') {
         const formattedValue = formatPhoneNumber(e.target.value)
@@ -181,9 +182,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }
 
   const handleBlur = () => {
-    if (!value && !valuestatus) {
-      setIsFocused(false)
-    }
+    setIsFocused(false)
   }
 
   const isDropdownVariant = componentvariant === 'dropdown'
@@ -191,9 +190,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     !isDropdownVariant && shrunklabellocation !== 'above' && !!label
   const hasPlaceholder = !!placeholder
 
+  const shouldShrinkLabel =
+    isFocused || isDropdownVariant || hasPlaceholder || hasInput
+
   return (
     <Box
-      // @ts-ignore
       sx={{
         boxSizing: 'border-box',
         display: 'flex',
@@ -221,9 +222,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               shrunkfontcolor,
               shrunklabellocation,
               combinedfontcolor,
-              focused: isFocused || isDropdownVariant || hasPlaceholder,
+              focused: shouldShrinkLabel,
             })}
-            shrink={isFocused || isDropdownVariant || hasPlaceholder}
+            shrink={shouldShrinkLabel}
           >
             {label}
           </InputLabel>
@@ -281,7 +282,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             value={componentvariant === 'dropdown' ? selectedOption : value}
             readOnly={componentvariant === 'dropdown'}
             notched={
-              (isNotchedVariant && isFocused) ||
+              (isNotchedVariant && shouldShrinkLabel) ||
               (isDropdownVariant && shrunklabellocation !== 'above') ||
               hasPlaceholder
             }
