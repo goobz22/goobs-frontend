@@ -1,15 +1,23 @@
 import React from 'react'
-import { StyledComponent } from 'goobs-repo'
-import { StyledComponentProps } from './../../../../types/content'
-import { columnconfig } from 'goobs-repo'
+import StyledComponent, {
+  StyledComponentProps,
+} from '../../../../components/StyledComponent'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedStyledComponentProps extends StyledComponentProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useStyledComponent = (grid: {
-  styledcomponent?: StyledComponentProps | StyledComponentProps[]
+  styledcomponent?:
+    | ExtendedStyledComponentProps
+    | ExtendedStyledComponentProps[]
 }) => {
   if (!grid.styledcomponent) return null
 
   const renderStyledComponent = (
-    component: StyledComponentProps,
+    component: ExtendedStyledComponentProps,
     index: number
   ): columnconfig => {
     const {
@@ -36,12 +44,15 @@ const useStyledComponent = (grid: {
       serverActionValidation,
       valuestatus,
       cellconfig,
+      ...restProps
     } = component
 
     // Merge the cellconfig with the columnconfig
-    const mergedConfig = {
+    const mergedConfig: columnconfig = {
       ...columnconfig,
-      ...cellconfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
         <StyledComponent
           key={`styledcomponent-${index}`}
@@ -66,10 +77,10 @@ const useStyledComponent = (grid: {
           inputRef={inputRef}
           serverActionValidation={serverActionValidation}
           valuestatus={valuestatus}
+          {...restProps}
         />
       ),
     }
-
     return mergedConfig
   }
 

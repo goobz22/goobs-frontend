@@ -1,29 +1,66 @@
 'use client'
-
 import React from 'react'
-import { ContentSectionProps } from './../../types/content'
-import { CustomGrid } from 'goobs-repo'
-import useGridTitle from './../../components/Content/Structure/title/useGridTitle'
-import useGridSubtitle from './../../components/Content/Structure/subtitle/useGridSubtitle'
-import useGridParagraph from './../../components/Content/Structure/paragraph/useGridParagraph'
-import useBodyTitle from './../../components/Content/Structure/bodytitle/useBodyTitle'
-import useStyledComponent from './../../components/Content/Structure/styledcomponent/useStyledComponent'
-import useGridRadioGroup from './../../components/Content/Structure/radiogroup/useGridRadioGroup'
-import useConfirmationInput from './../../components/Content/Structure/confirmationinput/useConfirmationInput'
-import useLink from './../../components/Content/Structure/link/useLink'
-import useImage from './../../components/Content/Structure/image/useImage'
-import useButton from './../../components/Content/Structure/button/useButton'
-import useHelperFooter from './../../components/Content/Structure/helperfooter/useHelperFooter'
-import { columnconfig } from 'goobs-repo'
+import CustomGrid, { columnconfig, gridconfig } from '../../components/Grid'
+import useGridTitle, {
+  ExtendedTypographyProps as TitleProps,
+} from '../../components/Content/Structure/title/useGridTitle'
+import useGridSubtitle, {
+  ExtendedTypographyProps as SubtitleProps,
+} from '../../components/Content/Structure/subtitle/useGridSubtitle'
+import useGridParagraph, {
+  ExtendedTypographyProps as ParagraphProps,
+} from '../../components/Content/Structure/paragraph/useGridParagraph'
+import useBodyTitle, {
+  ExtendedTypographyProps as BodyTitleProps,
+} from '../../components/Content/Structure/bodytitle/useBodyTitle'
+import useStyledComponent, {
+  ExtendedStyledComponentProps,
+} from '../../components/Content/Structure/styledcomponent/useStyledComponent'
+import useGridRadioGroup, {
+  ExtendedRadioGroupProps,
+} from '../../components/Content/Structure/radiogroup/useGridRadioGroup'
+import useConfirmationInput, {
+  ExtendedConfirmationCodeInputsProps,
+} from '../../components/Content/Structure/confirmationinput/useConfirmationInput'
+import useLink, {
+  ExtendedTypographyProps as LinkProps,
+} from '../../components/Content/Structure/link/useLink'
+import useImage, {
+  ExtendedImageProps,
+} from '../../components/Content/Structure/image/useImage'
+import useButton, {
+  ExtendedButtonProps,
+} from '../../components/Content/Structure/button/useButton'
+import useHelperFooter, {
+  ExtendedTypographyProps as HelperFooterProps,
+} from '../../components/Content/Structure/helperfooter/useHelperFooter'
 
-const RenderContent = ({
-  grid,
-}: {
-  grid: ContentSectionProps['grids'][number]
+export interface ContentSectionProps {
+  gridconfig?: gridconfig
+  confirmationcodeinput?:
+    | ExtendedConfirmationCodeInputsProps
+    | ExtendedConfirmationCodeInputsProps[]
+  title?: TitleProps | TitleProps[]
+  subtitle?: SubtitleProps | SubtitleProps[]
+  paragraph?: ParagraphProps | ParagraphProps[]
+  bodytitle?: BodyTitleProps | BodyTitleProps[]
+  styledcomponent?:
+    | ExtendedStyledComponentProps
+    | ExtendedStyledComponentProps[]
+  radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
+  link?: LinkProps | LinkProps[]
+  button?: ExtendedButtonProps | ExtendedButtonProps[]
+  image?: ExtendedImageProps | ExtendedImageProps[]
+  helperfooter?: HelperFooterProps | HelperFooterProps[]
+}
+
+const RenderContent: React.FC<ContentSectionProps> = ({
+  gridconfig,
+  ...props
 }) => {
   let columnConfigs: columnconfig[] = []
 
-  const title = useGridTitle(grid)
+  const title = useGridTitle(props)
   if (title) {
     if (Array.isArray(title)) {
       columnConfigs = columnConfigs.concat(title)
@@ -32,7 +69,7 @@ const RenderContent = ({
     }
   }
 
-  const subtitle = useGridSubtitle(grid)
+  const subtitle = useGridSubtitle(props)
   if (subtitle) {
     if (Array.isArray(subtitle)) {
       columnConfigs = columnConfigs.concat(subtitle)
@@ -41,7 +78,7 @@ const RenderContent = ({
     }
   }
 
-  const paragraph = useGridParagraph(grid)
+  const paragraph = useGridParagraph(props)
   if (paragraph) {
     if (Array.isArray(paragraph)) {
       columnConfigs = columnConfigs.concat(paragraph)
@@ -50,7 +87,7 @@ const RenderContent = ({
     }
   }
 
-  const bodytitle = useBodyTitle(grid)
+  const bodytitle = useBodyTitle(props)
   if (bodytitle) {
     if (Array.isArray(bodytitle)) {
       columnConfigs = columnConfigs.concat(bodytitle)
@@ -59,17 +96,19 @@ const RenderContent = ({
     }
   }
 
-  const styledComponent = useStyledComponent(grid)
+  const styledComponent = useStyledComponent(props)
   if (styledComponent) {
     columnConfigs = columnConfigs.concat(styledComponent)
   }
 
-  const radioGroup = useGridRadioGroup(grid)
+  const radioGroup = useGridRadioGroup(props)
   if (radioGroup) {
     columnConfigs = columnConfigs.concat(radioGroup)
   }
 
-  const confirmationInput = useConfirmationInput(grid)
+  const confirmationInput = useConfirmationInput({
+    confirmationcodeinput: props.confirmationcodeinput,
+  })
   if (confirmationInput) {
     if (Array.isArray(confirmationInput)) {
       columnConfigs = columnConfigs.concat(confirmationInput)
@@ -78,12 +117,12 @@ const RenderContent = ({
     }
   }
 
-  const links = useLink(grid)
+  const links = useLink(props)
   if (links) {
     columnConfigs = columnConfigs.concat(links)
   }
 
-  const button = useButton(grid)
+  const button = useButton(props)
   if (button) {
     if (Array.isArray(button)) {
       button.forEach(btn => {
@@ -96,12 +135,12 @@ const RenderContent = ({
     }
   }
 
-  const image = useImage(grid)
+  const image = useImage(props)
   if (image) {
     columnConfigs = columnConfigs.concat(image)
   }
 
-  const helperFooter = useHelperFooter(grid)
+  const helperFooter = useHelperFooter(props)
   if (helperFooter) {
     if (Array.isArray(helperFooter)) {
       columnConfigs = columnConfigs.concat(helperFooter)
@@ -110,19 +149,18 @@ const RenderContent = ({
     }
   }
 
-  return (
-    <CustomGrid
-      gridconfig={grid.grid.gridconfig}
-      columnconfig={columnConfigs}
-    />
-  )
+  return <CustomGrid gridconfig={gridconfig} columnconfig={columnConfigs} />
 }
 
-export default function ContentSection({ grids }: ContentSectionProps) {
+export default function ContentSection({
+  grids,
+}: {
+  grids: ContentSectionProps[]
+}) {
   return (
     <>
       {grids.map((grid, index) => (
-        <RenderContent key={index} grid={grid} />
+        <RenderContent key={index} {...grid} />
       ))}
     </>
   )

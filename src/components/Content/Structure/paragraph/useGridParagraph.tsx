@@ -1,23 +1,32 @@
-// src\components\Content\Structure\paragraph\useGridParagraph.tsx
 import React from 'react'
-import { Typography } from 'goobs-repo'
-import { columnconfig } from 'goobs-repo'
-import { TypographyProps } from './../../../../types/content'
+import { Typography, TypographyProps } from '../../../Typography'
+import { columnconfig, cellconfig } from '../../../Grid'
+
+export interface ExtendedTypographyProps extends TypographyProps {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useGridParagraph = (grid: {
-  paragraph?: TypographyProps | TypographyProps[]
+  paragraph?: ExtendedTypographyProps | ExtendedTypographyProps[]
 }) => {
   if (!grid.paragraph) return null
 
   const renderParagraph = (
-    paragraphItem: TypographyProps,
+    paragraphItem: ExtendedTypographyProps,
     index: number
   ): columnconfig => {
-    const { text, fontcolor, columnconfig, cellconfig } = paragraphItem
+    const {
+      text,
+      fontcolor,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
+    } = paragraphItem
     const fontvariant = 'merriparagraph'
 
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
         border: 'none',
@@ -28,6 +37,7 @@ const useGridParagraph = (grid: {
           text={text}
           fontvariant={fontvariant}
           fontcolor={fontcolor}
+          {...restProps}
         />
       ),
     }

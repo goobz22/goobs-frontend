@@ -1,16 +1,21 @@
 import React from 'react'
-import RadioGroup, {
-  RadioGroupProps,
-} from './../../../../components/RadioGroup'
-import { columnconfig } from 'goobs-repo'
+import RadioGroup from '../../../RadioGroup'
+import { columnconfig, cellconfig } from '../../../Grid'
+import { RadioGroupProps as BaseRadioGroupProps } from '../../../../components/RadioGroup'
+
+export interface ExtendedRadioGroupProps
+  extends Omit<BaseRadioGroupProps, 'columnconfig'> {
+  columnconfig?: columnconfig
+  cellconfig?: cellconfig
+}
 
 const useGridRadioGroup = (grid: {
-  radiogroup?: RadioGroupProps | RadioGroupProps[]
+  radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
 }) => {
   if (!grid.radiogroup) return null
 
   const renderRadioGroup = (
-    radiogroup: RadioGroupProps,
+    radiogroup: ExtendedRadioGroupProps,
     index: number
   ): columnconfig => {
     const {
@@ -21,11 +26,16 @@ const useGridRadioGroup = (grid: {
       labelFontVariant,
       labelFontColor,
       labelText,
-      columnconfig,
+      columnconfig: itemColumnConfig,
+      cellconfig,
+      ...restProps
     } = radiogroup
 
     return {
-      ...columnconfig,
+      ...itemColumnConfig,
+      cellconfig: {
+        ...cellconfig,
+      },
       component: (
         <RadioGroup
           key={`radiogroup-${index}`}
@@ -36,6 +46,7 @@ const useGridRadioGroup = (grid: {
           labelFontVariant={labelFontVariant}
           labelFontColor={labelFontColor}
           labelText={labelText}
+          {...restProps}
         />
       ),
     }
