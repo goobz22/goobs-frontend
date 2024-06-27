@@ -1,12 +1,39 @@
 // Components
-import CustomButton from './components/Button'
-import CustomGrid from './components/Grid'
-import StyledComponent from './components/StyledComponent'
-import Typography from './components/Typography'
-import ConfirmationCodeInput from './components/ConfirmationCodeInput'
-import RadioGroup from './components/RadioGroup'
-import PopupForm from './components/Form/Popup'
-import ContentSection from './components/Content'
+import CustomButton, {
+  ButtonAlignment,
+  HelperFooterMessage,
+} from './components/Button'
+import CustomGrid, {
+  Alignment,
+  BorderProp,
+  columnconfig,
+  gridconfig,
+  cellconfig,
+} from './components/Grid'
+import StyledComponent, {
+  StyledComponentProps,
+  AdornmentProps,
+} from './components/StyledComponent'
+import Typography, {
+  FontFamily,
+  TypographyVariant,
+  TypographyPropsVariantOverrides,
+  TypographyProps,
+} from './components/Typography'
+import ConfirmationCodeInput, {
+  ConfirmationCodeInputsProps,
+} from './components/ConfirmationCodeInput'
+import RadioGroup, {
+  RadioOption,
+  RadioGroupProps,
+} from './components/RadioGroup'
+import PopupForm, { PopupFormProps } from './components/Form/Popup'
+import ContentSection, { ContentSectionProps } from './components/Content'
+import React from 'react'
+
+// Animations
+import { Animation } from './components/Content/Structure/animations'
+
 // Actions
 import {
   cleanupReusableStore,
@@ -17,6 +44,7 @@ import {
   getReusableStore,
 } from './actions/server/form/store/reusableStore'
 import getFormData from './actions/server/form/getFormData'
+
 // Colors
 import {
   moss,
@@ -44,6 +72,7 @@ import {
   green,
   greyborder,
 } from './styles/palette'
+
 // Typography
 import {
   arapeyh1,
@@ -71,8 +100,23 @@ import {
   merriparagraph,
   merrihelperfooter,
 } from './styles/typography'
+
 // Styles
 import { formContainerStyle } from './styles/Form'
+
+// Type declarations
+declare type CustomButtonProps = React.ComponentProps<typeof CustomButton>
+declare type CustomGridProps = React.ComponentProps<typeof CustomGrid>
+declare type TypographyComponentProps = React.ComponentProps<typeof Typography>
+declare type ConfirmationCodeInputProps = React.ComponentProps<
+  typeof ConfirmationCodeInput
+>
+declare type RadioGroupComponentProps = React.ComponentProps<typeof RadioGroup>
+declare type PopupFormComponentProps = React.ComponentProps<typeof PopupForm>
+declare type ContentSectionComponentProps = React.ComponentProps<
+  typeof ContentSection
+>
+
 // Named exports
 export { CustomButton }
 export { CustomGrid }
@@ -92,32 +136,34 @@ export {
 }
 export { getFormData }
 export { formContainerStyle }
+
 // Type exports
-export type { CustomButtonProps } from './components/Button'
+export type { CustomButtonProps }
+export type { ButtonAlignment, HelperFooterMessage }
+export type { CustomGridProps }
+export type { Alignment, BorderProp, columnconfig, gridconfig, cellconfig }
+export type { StyledComponentProps, AdornmentProps }
 export type {
-  CustomGridProps,
-  columnconfig,
-  gridconfig,
-  cellconfig,
-} from './components/Grid'
-export type {
-  StyledComponentProps,
-  AdornmentProps,
-} from './components/StyledComponent'
-export type {
-  TypographyProps,
+  FontFamily,
+  TypographyVariant,
   TypographyPropsVariantOverrides,
-} from './components/Typography'
-export type { ConfirmationCodeInputsProps } from './components/ConfirmationCodeInput'
-export type { RadioOption, RadioGroupProps } from './components/RadioGroup'
-export type {
-  TypographyProps as ContentTypographyProps,
-  CustomButtonProps as ContentCustomButtonProps,
-  StyledComponentProps as ContentStyledComponentProps,
-} from './types/content'
-export type { Alignment } from './types/content/alignment'
-export type { Animation } from './types/content/animation'
-export type { BorderProp } from './types/content/border'
+  TypographyProps,
+}
+export type { ConfirmationCodeInputsProps }
+export type { RadioOption, RadioGroupProps }
+export type { PopupFormProps }
+export type { ContentSectionProps }
+
+// Additional type exports for the newly declared types
+export type { TypographyComponentProps }
+export type { ConfirmationCodeInputProps }
+export type { RadioGroupComponentProps }
+export type { PopupFormComponentProps }
+export type { ContentSectionComponentProps }
+
+// Animation type export
+export type { Animation }
+
 // Color exports
 export {
   moss,
@@ -145,6 +191,7 @@ export {
   green,
   greyborder,
 }
+
 // Typography exports
 export {
   arapeyh1,
