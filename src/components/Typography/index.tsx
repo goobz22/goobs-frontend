@@ -32,6 +32,9 @@ export interface TypographyProps {
   fontcolor?: string
 }
 
+/**
+ * arapeyStyles object contains the styles for typography variants using the Arapey font family.
+ */
 const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Arapey, serif',
@@ -89,6 +92,9 @@ const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
+/**
+ * interStyles object contains the styles for typography variants using the Inter font family.
+ */
 const interStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Inter, sans-serif',
@@ -146,6 +152,9 @@ const interStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
+/**
+ * merriStyles object contains the styles for typography variants using the Merriweather font family.
+ */
 const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Merriweather, serif',
@@ -203,6 +212,12 @@ const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
+/**
+ * Typography component is a wrapper around MuiTypography that applies custom styles based on the fontvariant prop.
+ * It supports different font families (Arapey, Inter, Merriweather) and typography variants (h1, h2, h3, h4, h5, h6, paragraph, helperheader, helperfooter).
+ * @param props The props for the Typography component.
+ * @returns The rendered Typography component.
+ */
 export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
   text,
   fontcolor,

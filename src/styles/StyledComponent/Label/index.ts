@@ -1,6 +1,12 @@
 import { StyledComponentProps } from '../../../components/StyledComponent'
 import React from 'react'
 
+/**
+ * labelStyles function generates the styles for the input label based on the provided props.
+ * It adjusts the label's position, color, and transform based on the component variant, font colors, and focus state.
+ * @param props The props for the labelStyles function, including componentvariant, unshrunkfontcolor, shrunkfontcolor, combinedfontcolor, shrunklabellocation, and focused.
+ * @returns The styles for the input label.
+ */
 const labelStyles = (
   props: Pick<
     StyledComponentProps,
@@ -21,6 +27,9 @@ const labelStyles = (
     focused,
   } = props
 
+  /**
+   * unshrunkStyles object contains the styles for the unshrunk label state.
+   */
   const unshrunkStyles: React.CSSProperties = {
     color: combinedfontcolor || unshrunkfontcolor || 'black',
     transform: 'scale(1)',
@@ -32,6 +41,9 @@ const labelStyles = (
     }),
   }
 
+  /**
+   * shrunkStyles object contains the styles for the shrunk label state.
+   */
   const shrunkStyles: React.CSSProperties = {
     color: combinedfontcolor || shrunkfontcolor || 'black',
     transform: 'scale(0.75)',
@@ -46,6 +58,9 @@ const labelStyles = (
     }),
   }
 
+  /**
+   * Return the combined styles for the label, including the base styles, unshrunk styles, and shrunk styles if focused.
+   */
   return {
     position: 'absolute',
     top: 0,

@@ -13,7 +13,6 @@ import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { usePassword } from './hooks/usePassword'
 import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
-import { formatPhoneNumber } from './utils/formatPhoneNumber'
 import { StartAdornment, EndAdornment } from './adornments'
 import { useHelperFooter } from './helperfooter/useHelperFooter'
 import labelStyles from '../../styles/StyledComponent/Label'
@@ -92,6 +91,12 @@ const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   },
 }))
 
+/**
+ * StyledComponent is a customizable input component that supports various input types and configurations.
+ * It includes functionality for validation, helper footers, and adornments.
+ * @param props The props for the StyledComponent component.
+ * @returns The rendered StyledComponent component.
+ */
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
     label,
@@ -118,18 +123,19 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
-  const [phoneNumber, setPhoneNumber] = useState(value || '+1 ')
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
+  /**
+   * Update hasInput state based on value or valuestatus changes.
+   */
   useEffect(() => {
-    if (value || valuestatus) {
-      setHasInput(true)
-    } else {
-      setHasInput(false)
-    }
+    setHasInput(!!value || !!valuestatus)
   }, [value, valuestatus])
 
+  /**
+   * Set autocomplete, autocorrect, autocapitalize, and spellcheck attributes on the input element.
+   */
   useEffect(() => {
     const input = inputRefInternal.current || inputRef?.current
     if (input) {
@@ -140,6 +146,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }, [inputRef])
 
+  /**
+   * Validate the field when the component mounts if it's required and has a formname, name, and label.
+   */
   useEffect(() => {
     if (required && formname && name && label) {
       const emptyFormData = new FormData()
@@ -148,6 +157,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }, [required, formname, name, label, validateField])
 
+  /**
+   * Update showError state based on formSubmitted, hasInput, and isFocused changes.
+   */
   useEffect(() => {
     setShowError(formSubmitted || (hasInput && !isFocused))
   }, [formSubmitted, hasInput, isFocused])
@@ -155,30 +167,17 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
     useDropdown(props, inputBoxRef)
 
-  usePhoneNumber(props)
+  const { handlePhoneNumberChange } = usePhoneNumber({ ...props, onChange })
 
   const { passwordVisible, togglePasswordVisibility } = usePassword()
 
+  /**
+   * Handle input change event, perform validation, and call onChange callback.
+   */
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (componentvariant === 'phonenumber') {
-        let inputValue = e.target.value
-        if (!inputValue.startsWith('+1')) {
-          inputValue = '+1' + inputValue.slice(2)
-        }
-        const digitsOnly = inputValue.replace(/\D/g, '')
-        const formattedValue = formatPhoneNumber(digitsOnly)
-        setPhoneNumber(formattedValue)
-
-        if (onChange) {
-          onChange({
-            ...e,
-            target: {
-              ...e.target,
-              value: formattedValue,
-            },
-          })
-        }
+        handlePhoneNumberChange(e)
       } else {
         if (onChange) {
           onChange(e)
@@ -201,6 +200,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     [
       componentvariant,
       onChange,
+      handlePhoneNumberChange,
       validateField,
       name,
       label,
@@ -212,13 +212,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
   const currentHelperFooter = name ? helperFooterAtomValue[name] : undefined
 
+  /**
+   * Handle input focus event.
+   */
   const handleFocus = () => {
     setIsFocused(true)
-    if (componentvariant === 'phonenumber' && phoneNumber === '') {
-      setPhoneNumber('+1 ')
-    }
   }
 
+  /**
+   * Handle input blur event and perform validation if the field is empty.
+   */
   const handleBlur = () => {
     setIsFocused(false)
     if (name && label && !hasInput && formname) {
@@ -326,13 +329,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             label={label}
             autoComplete="off"
             name={name}
-            value={
-              componentvariant === 'phonenumber'
-                ? phoneNumber
-                : componentvariant === 'dropdown'
-                  ? selectedOption
-                  : value
-            }
+            value={componentvariant === 'dropdown' ? selectedOption : value}
             readOnly={componentvariant === 'dropdown'}
             notched={
               (isNotchedVariant && shouldShrinkLabel) ||

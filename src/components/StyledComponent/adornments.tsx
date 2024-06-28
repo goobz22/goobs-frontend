@@ -5,6 +5,12 @@ import ShowHideEyeIcon from '../../components/Icons/ShowHideEye'
 import DownArrowFilledIcon from '../../components/Icons/DownArrowFilled'
 import { AdornmentProps } from './index'
 
+/**
+ * StartAdornment component renders the start adornment for the input component based on the component variant.
+ * It displays a search icon for the 'searchbar' variant.
+ * @param props The props for the StartAdornment component.
+ * @returns The rendered start adornment or null.
+ */
 const StartAdornment: React.FC<AdornmentProps> = props => {
   const { componentvariant, iconcolor } = props
 
@@ -19,6 +25,13 @@ const StartAdornment: React.FC<AdornmentProps> = props => {
   return null
 }
 
+/**
+ * EndAdornment component renders the end adornment for the input component based on the component variant.
+ * It displays a show/hide eye icon for the 'password' variant, a down arrow icon for the 'dropdown' variant,
+ * and an empty adornment for the 'searchbar' variant.
+ * @param props The props for the EndAdornment component.
+ * @returns The rendered end adornment or null.
+ */
 const EndAdornment: React.FC<AdornmentProps> = props => {
   const { componentvariant, passwordVisible, togglePasswordVisibility } = props
 

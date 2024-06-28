@@ -13,6 +13,12 @@ const StyledSelectMenu = styled(MenuItem)({
   },
 })
 
+/**
+ * useDropdown hook provides functionality for rendering a dropdown menu and handling option selection.
+ * @param props The props for the dropdown component.
+ * @param inputBoxRef A reference to the input box element.
+ * @returns An object containing the necessary state and handlers for the dropdown.
+ */
 export const useDropdown = (
   props: StyledComponentProps,
   inputBoxRef: React.RefObject<HTMLDivElement>
@@ -22,9 +28,11 @@ export const useDropdown = (
   const [filteredOptions, setFilteredOptions] = useState<string[]>([])
   const [selectedOption, setSelectedOption] = useState(props.defaultValue || '')
   const [isDropdownFocused, setIsDropdownFocused] = useState(false)
-
   const { componentvariant, options, defaultValue, onChange, value } = props
 
+  /**
+   * useEffect hook to update the filtered options and handle default value selection.
+   */
   useEffect(() => {
     if (componentvariant === 'dropdown' && options) {
       setFilteredOptions([...options])
@@ -39,23 +47,32 @@ export const useDropdown = (
     }
   }, [componentvariant, options, defaultValue, onChange, selectedOption])
 
+  /**
+   * useEffect hook to update the selected option when the value prop changes.
+   */
   useEffect(() => {
     if (value !== undefined) {
       setSelectedOption(value)
     }
   }, [value])
 
+  /**
+   * handleDropdownClick function toggles the dropdown menu when the input box is clicked.
+   */
   const handleDropdownClick = useCallback(() => {
-    console.log('Dropdown clicked')
     if (componentvariant === 'dropdown') {
       setAnchorEl(inputBoxRef.current)
       setIsDropdownOpen(!isDropdownOpen)
     }
   }, [componentvariant, inputBoxRef, isDropdownOpen])
 
+  /**
+   * handleOptionSelect function is called when an option is selected from the dropdown menu.
+   * It updates the selected option and calls the onChange callback.
+   * @param option The selected option.
+   */
   const handleOptionSelect = useCallback(
     (option: string) => {
-      console.log('Option selected:', option)
       setSelectedOption(option)
       if (onChange) {
         onChange({
@@ -67,9 +84,12 @@ export const useDropdown = (
     [onChange]
   )
 
+  /**
+   * handleInputFocus function updates the isDropdownFocused state when the input box is focused or blurred.
+   * @param focused A boolean indicating whether the input box is focused.
+   */
   const handleInputFocus = useCallback(
     (focused: boolean) => {
-      console.log('Dropdown focused:', focused)
       if (componentvariant === 'dropdown') {
         setIsDropdownFocused(focused)
       }
@@ -81,6 +101,9 @@ export const useDropdown = (
     return {}
   }
 
+  /**
+   * renderMenu variable renders the dropdown menu when the anchor element is available and the dropdown is open.
+   */
   const renderMenu = anchorEl !== null && isDropdownOpen !== undefined && (
     <Menu
       anchorEl={anchorEl}

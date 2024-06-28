@@ -38,12 +38,21 @@ export interface ContentSectionProps {
   image?: ExtendedImageProps | ExtendedImageProps[]
 }
 
+/**
+ * RenderContent component renders the content of a section based on the provided props.
+ * It uses various custom hooks to generate column configurations for different content types.
+ * @param props The props for the RenderContent component.
+ * @returns The rendered content section.
+ */
 const RenderContent: React.FC<ContentSectionProps> = ({
   gridconfig,
   ...props
 }) => {
   let columnConfigs: columnconfig[] = []
 
+  /**
+   * Generate column configurations for typography content.
+   */
   const paragraph = useGridTypography(props)
   if (paragraph) {
     if (Array.isArray(paragraph)) {
@@ -53,16 +62,25 @@ const RenderContent: React.FC<ContentSectionProps> = ({
     }
   }
 
+  /**
+   * Generate column configurations for styled component content.
+   */
   const styledComponent = useStyledComponent(props)
   if (styledComponent) {
     columnConfigs = columnConfigs.concat(styledComponent)
   }
 
+  /**
+   * Generate column configurations for radio group content.
+   */
   const radioGroup = useGridRadioGroup(props)
   if (radioGroup) {
     columnConfigs = columnConfigs.concat(radioGroup)
   }
 
+  /**
+   * Generate column configurations for confirmation input content.
+   */
   const confirmationInput = useConfirmationInput({
     confirmationcodeinput: props.confirmationcodeinput,
   })
@@ -74,11 +92,17 @@ const RenderContent: React.FC<ContentSectionProps> = ({
     }
   }
 
+  /**
+   * Generate column configurations for link content.
+   */
   const links = useLink(props)
   if (links) {
     columnConfigs = columnConfigs.concat(links)
   }
 
+  /**
+   * Generate column configurations for button content.
+   */
   const button = useButton(props)
   if (button) {
     if (Array.isArray(button)) {
@@ -92,6 +116,9 @@ const RenderContent: React.FC<ContentSectionProps> = ({
     }
   }
 
+  /**
+   * Generate column configurations for image content.
+   */
   const image = useImage(props)
   if (image) {
     columnConfigs = columnConfigs.concat(image)
@@ -100,6 +127,11 @@ const RenderContent: React.FC<ContentSectionProps> = ({
   return <CustomGrid gridconfig={gridconfig} columnconfig={columnConfigs} />
 }
 
+/**
+ * ContentSection component renders a list of content sections based on the provided grids prop.
+ * @param props The props for the ContentSection component.
+ * @returns The rendered content sections.
+ */
 export default function ContentSection({
   grids,
 }: {

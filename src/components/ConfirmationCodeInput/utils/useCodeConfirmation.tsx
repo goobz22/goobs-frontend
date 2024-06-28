@@ -1,7 +1,6 @@
 'use client'
-
 import React, { useCallback, useState, useEffect } from 'react'
-import { ConfirmationCodeInputsProps } from './../../../components/ConfirmationCodeInput'
+import { ConfirmationCodeInputsProps } from '..'
 
 interface CodeState {
   code1: string
@@ -16,6 +15,12 @@ interface UseCodeConfirmationProps extends ConfirmationCodeInputsProps {
   codeLength: number
 }
 
+/**
+ * useCodeConfirmation hook handles the state and logic for a confirmation code input.
+ * @param codeLength The length of the confirmation code.
+ * @param isValid A boolean indicating whether the entered code is valid.
+ * @returns An object containing the necessary handlers and state for the confirmation code input.
+ */
 export const useCodeConfirmation = ({
   codeLength,
   isValid,
@@ -28,7 +33,6 @@ export const useCodeConfirmation = ({
     code5: '',
     code6: '',
   })
-
   const [iconColor, setIconColor] = useState<string>('red')
 
   useEffect(() => {
@@ -39,6 +43,11 @@ export const useCodeConfirmation = ({
     }
   }, [isValid])
 
+  /**
+   * handleCodeChange updates the code state when an input value changes.
+   * @param event The change event triggered by the input.
+   * @param index The index of the input field.
+   */
   const handleCodeChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
       const value = event.target.value.replace(/[^0-9]/g, '')
@@ -50,6 +59,11 @@ export const useCodeConfirmation = ({
     []
   )
 
+  /**
+   * handleKeyDown handles the keydown event on the input fields.
+   * @param event The keydown event triggered by the input.
+   * @param index The index of the input field.
+   */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
       if (

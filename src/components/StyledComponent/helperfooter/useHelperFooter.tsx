@@ -9,20 +9,36 @@ import {
 } from '../../../atoms/helperfooter'
 import { get, set } from 'goobs-cache'
 
+/**
+ * isValidEmailFormat function checks if the provided email string is in a valid email format.
+ * @param email The email string to validate.
+ * @returns A boolean indicating whether the email is in a valid format.
+ */
 const isValidEmailFormat = (email: string): boolean => {
-  console.log('Validating email format for:', email)
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   const result = emailRegex.test(email)
-  console.log('Email validation result:', result)
   return result
 }
 
+/**
+ * useHelperFooter hook provides functions for validating form fields and managing helper footer messages.
+ * It handles validation for email, password, confirm password, phone number, and generic fields.
+ * @returns An object containing the helperFooterAtomValue and validateField function.
+ */
 export const useHelperFooter = () => {
   const [helperFooterAtomValue, setHelperFooterAtomValue] =
     useAtom(helperFooterAtom)
 
-  console.log('useHelperFooter hook initialized')
-
+  /**
+   * handleGenericErrorCreation function handles validation for generic form fields.
+   * It checks if the field is required and not empty, and returns an error message if applicable.
+   * @param formData The form data object containing field values.
+   * @param name The name of the field being validated.
+   * @param label The label of the field being validated.
+   * @param required A boolean indicating whether the field is required.
+   * @param formname The name of the form the field belongs to.
+   * @returns A HelperFooterMessage object if an error is detected, otherwise undefined.
+   */
   const handleGenericErrorCreation = useCallback(
     (
       formData: FormData,
@@ -31,11 +47,9 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log(`handleGenericErrorCreation called for ${name}`)
       const value = formData.get(name) as string
 
       if (required && (!value || !value.trim())) {
-        console.log(`${name} is required but empty`)
         return {
           status: 'error',
           statusMessage: `${label} is required. Please enter a ${label.toLowerCase()}.`,
@@ -46,29 +60,28 @@ export const useHelperFooter = () => {
         }
       }
 
-      if (!value) {
-        console.log(`${name} is empty, clearing error`)
-        return undefined
-      }
-
-      console.log(`${name} is valid or not required`)
       return undefined
     },
     []
   )
 
+  /**
+   * handleEmailErrorCreation function handles validation for email fields.
+   * It checks if the email is required, not empty, and in a valid format.
+   * @param formData The form data object containing field values.
+   * @param required A boolean indicating whether the email field is required.
+   * @param formname The name of the form the email field belongs to.
+   * @returns A HelperFooterMessage object with the validation result.
+   */
   const handleEmailErrorCreation = useCallback(
     (
       formData: FormData,
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log('handleEmailErrorCreation called')
       const email = formData.get('email') as string
-      console.log('Email value:', email)
 
       if (required && (!email || !email.trim())) {
-        console.log('Email is required but empty')
         return {
           status: 'error',
           statusMessage: 'Please enter an email address.',
@@ -80,12 +93,10 @@ export const useHelperFooter = () => {
       }
 
       if (!email) {
-        console.log('Email is empty, clearing error')
         return undefined
       }
 
       if (email && !isValidEmailFormat(email)) {
-        console.log('Email format is invalid')
         return {
           status: 'error',
           statusMessage: 'Please enter a valid email address.',
@@ -96,7 +107,6 @@ export const useHelperFooter = () => {
         }
       }
 
-      console.log('Email is valid')
       return {
         status: 'success',
         statusMessage: 'Email is valid.',
@@ -109,15 +119,21 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * handlePasswordErrorCreation function handles validation for password fields.
+   * It checks if the password is required, not empty, and meets the complexity requirements.
+   * @param formData The form data object containing field values.
+   * @param required A boolean indicating whether the password field is required.
+   * @param formname The name of the form the password field belongs to.
+   * @returns A Promise that resolves to a HelperFooterMessage object with the validation result.
+   */
   const handlePasswordErrorCreation = useCallback(
     async (
       formData: FormData,
       required: boolean,
       formname: string
     ): Promise<HelperFooterMessage | undefined> => {
-      console.log('handlePasswordErrorCreation called')
       const password = formData.get('verifyPassword') as string
-      console.log('Password value:', password)
 
       // Always store the password in the cache, even if it's invalid
       await set(
@@ -125,10 +141,8 @@ export const useHelperFooter = () => {
         { type: 'string', value: password },
         new Date(Date.now() + 30 * 60 * 1000)
       )
-      console.log('Password stored in cache:', password)
 
       if (required && (!password || !password.trim())) {
-        console.log('Password is required but empty')
         return {
           status: 'error',
           statusMessage: 'Password is required.',
@@ -140,7 +154,6 @@ export const useHelperFooter = () => {
       }
 
       if (!password) {
-        console.log('Password is empty, clearing error')
         return undefined
       }
 
@@ -153,7 +166,6 @@ export const useHelperFooter = () => {
         : 'error'
 
       if (passwordComplexityStatus === 'error') {
-        console.log('Password does not meet complexity requirements')
         return {
           status: 'error',
           statusMessage:
@@ -165,7 +177,6 @@ export const useHelperFooter = () => {
         }
       }
 
-      console.log('Password validation complete')
       return {
         status: 'success',
         statusMessage: 'Password meets all requirements.',
@@ -178,18 +189,23 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * handleConfirmPasswordErrorCreation function handles validation for confirm password fields.
+   * It checks if the confirm password is required, not empty, and matches the original password.
+   * @param formData The form data object containing field values.
+   * @param required A boolean indicating whether the confirm password field is required.
+   * @param formname The name of the form the confirm password field belongs to.
+   * @returns A Promise that resolves to a HelperFooterMessage object with the validation result.
+   */
   const handleConfirmPasswordErrorCreation = useCallback(
     async (
       formData: FormData,
       required: boolean,
       formname: string
     ): Promise<HelperFooterMessage | undefined> => {
-      console.log('handleConfirmPasswordErrorCreation called')
       const confirmPassword = formData.get('confirmPassword') as string
-      console.log('Confirm password value:', confirmPassword)
 
       if (required && (!confirmPassword || !confirmPassword.trim())) {
-        console.log('Confirm password is required but empty')
         return {
           status: 'error',
           statusMessage: 'Please confirm your password.',
@@ -201,15 +217,12 @@ export const useHelperFooter = () => {
       }
 
       if (!confirmPassword) {
-        console.log('Confirm password is empty, clearing error')
         return undefined
       }
 
       const verifyPassword = await get('verifyPassword')
-      console.log('Verify password retrieved from store:', verifyPassword)
 
       if (!verifyPassword) {
-        console.log('Original password not found in store')
         return {
           status: 'error',
           statusMessage: 'Please enter your password first.',
@@ -220,12 +233,7 @@ export const useHelperFooter = () => {
         }
       }
 
-      console.log('Comparing passwords:')
-      console.log('Confirm password:', confirmPassword)
-      console.log('Verify password:', verifyPassword)
-
       if (confirmPassword !== verifyPassword) {
-        console.log('Passwords do not match')
         return {
           status: 'error',
           statusMessage: 'Passwords do not match.',
@@ -236,7 +244,6 @@ export const useHelperFooter = () => {
         }
       }
 
-      console.log('Confirm password validation complete')
       return {
         status: 'success',
         statusMessage: 'Passwords match.',
@@ -249,18 +256,23 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * handlePhoneNumberErrorCreation function handles validation for phone number fields.
+   * It checks if the phone number is required, not empty, and in a valid format.
+   * @param formData The form data object containing field values.
+   * @param required A boolean indicating whether the phone number field is required.
+   * @param formname The name of the form the phone number field belongs to.
+   * @returns A HelperFooterMessage object with the validation result.
+   */
   const handlePhoneNumberErrorCreation = useCallback(
     (
       formData: FormData,
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log('handlePhoneNumberErrorCreation called')
       const phoneNumber = formData.get('phoneNumber') as string
-      console.log('Phone number value:', phoneNumber)
 
       if (required && (!phoneNumber || !phoneNumber.trim())) {
-        console.log('Phone number is required but empty')
         return {
           status: 'error',
           statusMessage:
@@ -273,19 +285,16 @@ export const useHelperFooter = () => {
       }
 
       if (!phoneNumber) {
-        console.log('Phone number is empty, clearing error')
         return undefined
       }
 
       const digitsOnly = phoneNumber.replace(/[^\d]/g, '')
       const length = digitsOnly.length
-      console.log('Phone number length (digits only):', length)
 
       if (
         (length === 10 && !digitsOnly.startsWith('1')) ||
         (length === 11 && digitsOnly.startsWith('1'))
       ) {
-        console.log('Phone number is valid')
         return {
           status: 'success',
           statusMessage: 'Phone number is valid.',
@@ -295,7 +304,6 @@ export const useHelperFooter = () => {
           required,
         }
       } else {
-        console.log('Phone number is invalid')
         return {
           status: 'error',
           statusMessage:
@@ -310,28 +318,30 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * getHelperFooterOption function returns the appropriate validation function based on the field name.
+   * @param name The name of the field being validated.
+   * @param label The label of the field being validated.
+   * @param required A boolean indicating whether the field is required.
+   * @param formname The name of the form the field belongs to.
+   * @returns The validation function for the specified field.
+   */
   const getHelperFooterOption = useCallback(
     (name: string, label: string, required: boolean, formname: string) => {
-      console.log(`getHelperFooterOption called for ${name}`)
       switch (name) {
         case 'email':
-          console.log('Returning email validation function')
           return (formData: FormData) =>
             handleEmailErrorCreation(formData, required, formname)
         case 'verifyPassword':
-          console.log('Returning password validation function')
           return (formData: FormData) =>
             handlePasswordErrorCreation(formData, required, formname)
         case 'confirmPassword':
-          console.log('Returning confirm password validation function')
           return (formData: FormData) =>
             handleConfirmPasswordErrorCreation(formData, required, formname)
         case 'phoneNumber':
-          console.log('Returning phone number validation function')
           return (formData: FormData) =>
             handlePhoneNumberErrorCreation(formData, required, formname)
         default:
-          console.log('Returning generic validation function')
           return (formData: FormData) =>
             handleGenericErrorCreation(
               formData,
@@ -351,6 +361,15 @@ export const useHelperFooter = () => {
     ]
   )
 
+  /**
+   * validateField function validates a specific form field and updates the helper footer atom.
+   * It debounces the validation to prevent excessive updates.
+   * @param name The name of the field being validated.
+   * @param formData The form data object containing field values.
+   * @param label The label of the field being validated.
+   * @param required A boolean indicating whether the field is required.
+   * @param formname The name of the form the field belongs to.
+   */
   const validateField = useCallback(
     (
       name: string,
@@ -359,7 +378,6 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ) => {
-      console.log(`validateField called for ${name}`)
       const helperFooterOption = getHelperFooterOption(
         name,
         label,
@@ -368,9 +386,7 @@ export const useHelperFooter = () => {
       )
       if (helperFooterOption) {
         const debouncedHelperFooterOption = debounce(async () => {
-          console.log(`Debounced validation running for ${name}`)
           const validationResult = await helperFooterOption(formData)
-          console.log(`Validation result for ${name}:`, validationResult)
           setHelperFooterAtomValue(prevState => {
             if (validationResult) {
               return { ...prevState, [name]: validationResult }
@@ -383,8 +399,6 @@ export const useHelperFooter = () => {
         }, 300)
 
         debouncedHelperFooterOption()
-      } else {
-        console.log(`No helper footer option found for ${name}`)
       }
     },
     [getHelperFooterOption, setHelperFooterAtomValue]

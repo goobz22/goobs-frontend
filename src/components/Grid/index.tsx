@@ -51,6 +51,12 @@ export interface cellconfig {
   computerwidth?: string
 }
 
+/**
+ * CustomGrid component renders a customizable grid layout with configurable rows and columns.
+ * It supports responsive design by adapting to different screen sizes (mobile, tablet, computer).
+ * @param props The props for the CustomGrid component.
+ * @returns The rendered CustomGrid component.
+ */
 const CustomGrid: React.FC<CustomGridProps> = ({
   gridconfig,
   columnconfig,
@@ -75,7 +81,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
 
   const minGridWidth = '300px'
 
-  // Calculate the number of rows based on the columnconfig
+  /**
+   * Calculate the number of rows based on the columnconfig.
+   */
   const rows = Math.max(...(columnconfig || []).map(c => c.row || 1))
 
   return (
@@ -99,6 +107,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
         {...rest}
       >
         {Array.from({ length: rows }).map((_, rowIndex) => {
+          /**
+           * Calculate the number of columns in the current row based on the columnconfig.
+           */
           const columns = Math.max(
             ...(columnconfig || [])
               .filter(c => c.row === rowIndex + 1)
@@ -126,10 +137,16 @@ const CustomGrid: React.FC<CustomGridProps> = ({
               }}
             >
               {Array.from({ length: columns }).map((_, columnIndex) => {
+                /**
+                 * Get the current column configuration based on the row and column indices.
+                 */
                 const currentColumnConfig = (columnconfig || []).find(
                   c => c.row === rowIndex + 1 && c.column === columnIndex + 1
                 )
 
+                /**
+                 * Determine the column width based on the screen size and configuration.
+                 */
                 const columnWidth = isMobile
                   ? currentColumnConfig?.mobilewidth ||
                     currentColumnConfig?.columnwidth ||
@@ -144,6 +161,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         `${100 / columns}%`
                       : currentColumnConfig?.columnwidth || `${100 / columns}%`
 
+                /**
+                 * Determine the justification of the column content based on the alignment configuration.
+                 */
                 const justifyContent =
                   currentColumnConfig?.alignment === 'left'
                     ? 'flex-start'
@@ -151,13 +171,25 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                       ? 'flex-end'
                       : 'center'
 
+                /**
+                 * Get the current cell configuration based on the column configuration or the default cell configuration.
+                 */
                 const currentCellConfig =
                   currentColumnConfig?.cellconfig || cellconfig
 
+                /**
+                 * Determine if the cell has a border based on the cell configuration.
+                 */
                 const hasBorder = currentCellConfig?.border === 'solid'
 
+                /**
+                 * Determine the cell width based on the cell configuration.
+                 */
                 const cellWidth = currentCellConfig?.width || '100%'
 
+                /**
+                 * Determine the cell widths for different screen sizes based on the cell configuration.
+                 */
                 const mobileWidth = currentCellConfig?.mobilewidth || '100%'
                 const tabletWidth = currentCellConfig?.tabletwidth || '100%'
                 const computerWidth = currentCellConfig?.computerwidth || '100%'
