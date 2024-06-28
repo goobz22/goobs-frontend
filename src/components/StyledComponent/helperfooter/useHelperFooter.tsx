@@ -1,17 +1,13 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { debounce } from 'lodash'
 import { useAtom } from 'jotai'
 import {
   helperFooterAtom,
   HelperFooterMessage,
 } from '../../../atoms/helperfooter'
-import {
-  get as getReusableStore,
-  set as setReusableStore,
-  init as initReusableStore,
-} from './../../../actions/server/form/store/reusableStore'
+import { get, set } from 'goobs-cache'
 
 const isValidEmailFormat = (email: string): boolean => {
   console.log('Validating email format for:', email)
@@ -26,10 +22,6 @@ export const useHelperFooter = () => {
     useAtom(helperFooterAtom)
 
   console.log('useHelperFooter hook initialized')
-
-  useEffect(() => {
-    initReusableStore('memory')
-  }, [])
 
   const handleGenericErrorCreation = useCallback(
     (
@@ -125,7 +117,15 @@ export const useHelperFooter = () => {
     ): Promise<HelperFooterMessage | undefined> => {
       console.log('handlePasswordErrorCreation called')
       const password = formData.get('verifyPassword') as string
-      console.log('Password value:', password ? '[REDACTED]' : 'empty')
+      console.log('Password value:', password)
+
+      // Always store the password in the cache, even if it's invalid
+      await set(
+        'verifyPassword',
+        { type: 'string', value: password },
+        new Date(Date.now() + 30 * 60 * 1000)
+      )
+      console.log('Password stored in cache:', password)
 
       if (required && (!password || !password.trim())) {
         console.log('Password is required but empty')
@@ -165,13 +165,6 @@ export const useHelperFooter = () => {
         }
       }
 
-      console.log('Password is valid, storing in reusable store')
-      await setReusableStore(
-        'verifyPassword',
-        { type: 'string', value: password },
-        new Date(Date.now() + 30 * 60 * 1000)
-      )
-
       console.log('Password validation complete')
       return {
         status: 'success',
@@ -193,10 +186,7 @@ export const useHelperFooter = () => {
     ): Promise<HelperFooterMessage | undefined> => {
       console.log('handleConfirmPasswordErrorCreation called')
       const confirmPassword = formData.get('confirmPassword') as string
-      console.log(
-        'Confirm password value:',
-        confirmPassword ? '[REDACTED]' : 'empty'
-      )
+      console.log('Confirm password value:', confirmPassword)
 
       if (required && (!confirmPassword || !confirmPassword.trim())) {
         console.log('Confirm password is required but empty')
@@ -215,15 +205,8 @@ export const useHelperFooter = () => {
         return undefined
       }
 
-      const verifyPasswordResult = await getReusableStore('verifyPassword')
-      const verifyPassword =
-        verifyPasswordResult?.type === 'string'
-          ? verifyPasswordResult.value
-          : undefined
-      console.log(
-        'Verify password retrieved from store:',
-        verifyPassword ? '[REDACTED]' : 'not found'
-      )
+      const verifyPassword = await get('verifyPassword')
+      console.log('Verify password retrieved from store:', verifyPassword)
 
       if (!verifyPassword) {
         console.log('Original password not found in store')
@@ -236,6 +219,10 @@ export const useHelperFooter = () => {
           required,
         }
       }
+
+      console.log('Comparing passwords:')
+      console.log('Confirm password:', confirmPassword)
+      console.log('Verify password:', verifyPassword)
 
       if (confirmPassword !== verifyPassword) {
         console.log('Passwords do not match')
