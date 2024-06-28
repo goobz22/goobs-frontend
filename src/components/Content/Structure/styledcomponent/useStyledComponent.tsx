@@ -44,6 +44,7 @@ const useStyledComponent = (grid: {
       serverActionValidation,
       valuestatus,
       cellconfig,
+      required,
       ...restProps
     } = component
 
@@ -77,6 +78,7 @@ const useStyledComponent = (grid: {
           inputRef={inputRef}
           serverActionValidation={serverActionValidation}
           valuestatus={valuestatus}
+          required={required}
           {...restProps}
         />
       ),

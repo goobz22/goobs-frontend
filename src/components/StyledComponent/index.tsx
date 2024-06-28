@@ -13,20 +13,11 @@ import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { usePassword } from './hooks/usePassword'
 import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
-import { formatPhoneNumber } from './utils/format'
+import { formatPhoneNumber } from './utils/formatPhoneNumber'
 import { StartAdornment, EndAdornment } from './adornments'
-import { useAtom } from 'jotai'
-import { helperFooterAtom } from '../../atoms/helperfooter'
-import { debounce } from 'lodash'
+import { useHelperFooter } from './helperfooter/useHelperFooter'
 import labelStyles from '../../styles/StyledComponent/Label'
-
-interface HelperFooterMessage {
-  status?: 'error' | 'success'
-  statusMessage?: string
-  spreadMessage?: string
-  spreadMessagePriority?: number
-  formname?: string
-}
+import { HelperFooterMessage } from '../../atoms/helperfooter'
 
 export interface StyledComponentProps {
   name?: string
@@ -72,6 +63,8 @@ export interface StyledComponentProps {
     formData: FormData
   ) => Promise<HelperFooterMessage | undefined>
   focused?: boolean
+  required?: boolean
+  formSubmitted?: boolean
 }
 
 export interface AdornmentProps {
@@ -116,14 +109,18 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     value,
     valuestatus,
     placeholder,
+    required = false,
+    formname,
+    formSubmitted = false,
   } = props
 
-  const [helperFooterResult, setHelperFooterResult] = useAtom(helperFooterAtom)
+  const { validateField, helperFooterAtomValue } = useHelperFooter()
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
+  const [showError, setShowError] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState(value || '+1 ')
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
-  const formDataRef = useRef<FormData | null>(null)
 
   useEffect(() => {
     if (value || valuestatus) {
@@ -143,73 +140,92 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }, [inputRef])
 
+  useEffect(() => {
+    if (required && formname && name && label) {
+      const emptyFormData = new FormData()
+      emptyFormData.append(name, '')
+      validateField(name, emptyFormData, label, required, formname)
+    }
+  }, [required, formname, name, label, validateField])
+
+  useEffect(() => {
+    setShowError(formSubmitted || (hasInput && !isFocused))
+  }, [formSubmitted, hasInput, isFocused])
+
   const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
     useDropdown(props, inputBoxRef)
 
-  const { handlePhoneNumberChange } = usePhoneNumber(props)
+  usePhoneNumber(props)
 
   const { passwordVisible, togglePasswordVisibility } = usePassword()
 
   const handleChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (onChange) {
-        onChange(e)
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (componentvariant === 'phonenumber') {
+        let inputValue = e.target.value
+        if (!inputValue.startsWith('+1')) {
+          inputValue = '+1' + inputValue.slice(2)
+        }
+        const digitsOnly = inputValue.replace(/\D/g, '')
+        const formattedValue = formatPhoneNumber(digitsOnly)
+        setPhoneNumber(formattedValue)
+
+        if (onChange) {
+          onChange({
+            ...e,
+            target: {
+              ...e.target,
+              value: formattedValue,
+            },
+          })
+        }
+      } else {
+        if (onChange) {
+          onChange(e)
+        }
       }
 
       setHasInput(!!e.target.value)
 
-      if (componentvariant === 'phonenumber') {
-        const formattedValue = formatPhoneNumber(e.target.value)
-        const formattedEvent = {
-          ...e,
-          target: {
-            ...e.target,
-            value: formattedValue,
-          },
-        }
-        handlePhoneNumberChange(formattedEvent)
-      }
-
       const formData = new FormData()
       formData.append(e.target.name, e.target.value)
-      formDataRef.current = formData
+
+      if (name && label && formname) {
+        validateField(name, formData, label, required, formname)
+      }
 
       if (serverActionValidation && name) {
-        const debouncedServerActionValidation = debounce(async () => {
-          if (serverActionValidation && name && formDataRef.current) {
-            const validationResult = await serverActionValidation(
-              formDataRef.current
-            )
-            if (validationResult) {
-              setHelperFooterResult(prevState => ({
-                ...prevState,
-                [name]: validationResult as HelperFooterMessage,
-              }))
-            }
-          }
-        }, 1000)
-
-        debouncedServerActionValidation()
+        serverActionValidation(formData)
       }
     },
     [
       componentvariant,
       onChange,
-      handlePhoneNumberChange,
-      serverActionValidation,
+      validateField,
       name,
-      setHelperFooterResult,
+      label,
+      required,
+      formname,
+      serverActionValidation,
     ]
   )
 
-  const currentHelperFooter = name ? helperFooterResult[name] : undefined
+  const currentHelperFooter = name ? helperFooterAtomValue[name] : undefined
 
   const handleFocus = () => {
     setIsFocused(true)
+    if (componentvariant === 'phonenumber' && phoneNumber === '') {
+      setPhoneNumber('+1 ')
+    }
   }
 
   const handleBlur = () => {
     setIsFocused(false)
+    if (name && label && !hasInput && formname) {
+      const formData = new FormData()
+      formData.append(name, '')
+      validateField(name, formData, label, required, formname)
+    }
   }
 
   const isDropdownVariant = componentvariant === 'dropdown'
@@ -218,7 +234,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const hasPlaceholder = !!placeholder
 
   const shouldShrinkLabel =
-    isFocused || isDropdownVariant || hasPlaceholder || hasInput
+    isFocused ||
+    isDropdownVariant ||
+    hasPlaceholder ||
+    hasInput ||
+    componentvariant === 'phonenumber'
 
   return (
     <Box
@@ -306,20 +326,27 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             label={label}
             autoComplete="off"
             name={name}
-            value={componentvariant === 'dropdown' ? selectedOption : value}
+            value={
+              componentvariant === 'phonenumber'
+                ? phoneNumber
+                : componentvariant === 'dropdown'
+                  ? selectedOption
+                  : value
+            }
             readOnly={componentvariant === 'dropdown'}
             notched={
               (isNotchedVariant && shouldShrinkLabel) ||
               (isDropdownVariant && shrunklabellocation !== 'above') ||
-              hasPlaceholder
+              hasPlaceholder ||
+              componentvariant === 'phonenumber'
             }
           />
           {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
         </Box>
       </Box>
-      {currentHelperFooter?.statusMessage && (
+      {showError && currentHelperFooter?.statusMessage && (
         <Typography
-          variant="merrihelperfooter"
+          fontvariant="merrihelperfooter"
           fontcolor={
             currentHelperFooter?.status === 'error'
               ? red.main

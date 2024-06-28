@@ -122,6 +122,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 marginLeft: gridConfigValues?.marginleft || 0,
                 marginRight: gridConfigValues?.marginright || 0,
                 flexGrow: 1,
+                width: '100%',
               }}
             >
               {Array.from({ length: columns }).map((_, columnIndex) => {
@@ -164,16 +165,14 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 return (
                   <Grid
                     item
-                    alignItems="center"
-                    display="flex"
-                    justifyContent={justifyContent}
                     key={`column-${columnIndex}`}
                     sx={{
                       display: 'flex',
-                      marginRight:
-                        columnIndex === columns - 1
-                          ? currentColumnConfig?.marginright || 0
-                          : 0,
+                      justifyContent,
+                      marginRight: currentColumnConfig?.marginright || 0,
+                      marginLeft: currentColumnConfig?.marginleft || 0,
+                      marginTop: currentColumnConfig?.margintop || 0,
+                      marginBottom: currentColumnConfig?.marginbottom || 0,
                       width: columnWidth,
                       '--Grid-borderWidth': hasBorder ? '1px' : '0',
                       borderTop: hasBorder
@@ -183,7 +182,10 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         ? 'var(--Grid-borderWidth) solid'
                         : 'none',
                       borderColor: 'divider',
-                      '& > div': {
+                    }}
+                  >
+                    <Box
+                      sx={{
                         borderRight: hasBorder
                           ? 'var(--Grid-borderWidth) solid'
                           : 'none',
@@ -196,9 +198,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                         height: currentCellConfig?.maxHeight || 'auto',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: justifyContent,
-                        marginTop: currentColumnConfig?.margintop || 0,
-                        marginBottom: currentColumnConfig?.marginbottom || 0,
+                        justifyContent,
                         overflow: 'auto',
                         width: cellWidth,
                         minWidth: isMobile
@@ -215,17 +215,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                             : isComputer
                               ? computerWidth
                               : '100%',
-                      },
-                    }}
-                  >
-                    <Box
-                      width="100%"
-                      height="100%"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent={justifyContent}
-                      pl={currentColumnConfig?.marginleft || 0}
-                      pr={currentColumnConfig?.marginright || 0}
+                      }}
                     >
                       {currentColumnConfig?.component || null}
                     </Box>

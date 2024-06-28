@@ -1,29 +1,32 @@
 import { StyledComponentProps } from '..'
-import { formatPhoneNumber } from '../utils/format'
-import React from 'react'
+import { formatPhoneNumber } from '../utils/formatPhoneNumber'
+import React, { useCallback } from 'react'
 
 export const usePhoneNumber = (
   props: StyledComponentProps & {
     onChange?: (
-      // eslint-disable-next-line no-unused-vars
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => void
   }
 ) => {
-  const handlePhoneNumberChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const formattedValue = formatPhoneNumber(e.target.value)
-    if (props.onChange) {
-      props.onChange({
-        ...e,
-        target: {
-          ...e.target,
-          value: formattedValue,
-        },
-      })
-    }
-  }
+  const handlePhoneNumberChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const input = e.target.value
+      const digitsOnly = input.replace(/\D/g, '')
+      const formattedValue = formatPhoneNumber(digitsOnly)
+
+      if (props.onChange) {
+        props.onChange({
+          ...e,
+          target: {
+            ...e.target,
+            value: formattedValue,
+          },
+        })
+      }
+    },
+    [props]
+  )
 
   return {
     handlePhoneNumberChange,

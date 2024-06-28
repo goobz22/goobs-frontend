@@ -1,11 +1,12 @@
 import { atom } from 'jotai'
 
-interface HelperFooterMessage {
+export interface HelperFooterMessage {
   status?: 'error' | 'success'
   statusMessage?: string
   spreadMessage?: string
   spreadMessagePriority?: number
   formname?: string
+  required?: boolean
 }
 
 export const helperFooterAtom = atom<Record<string, HelperFooterMessage>>({
@@ -15,5 +16,6 @@ export const helperFooterAtom = atom<Record<string, HelperFooterMessage>>({
     spreadMessage: '',
     spreadMessagePriority: 0,
     formname: '',
+    required: false,
   },
 })
