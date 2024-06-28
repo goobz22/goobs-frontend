@@ -13,7 +13,7 @@ import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { usePassword } from './hooks/usePassword'
 import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
-import { formatPhoneNumber } from './utils/format'
+import { formatPhoneNumber } from './utils/formatPhoneNumber'
 import { StartAdornment, EndAdornment } from './adornments'
 import { useHelperFooter } from './helperfooter/useHelperFooter'
 import labelStyles from '../../styles/StyledComponent/Label'
@@ -118,6 +118,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState(value || '+1 ')
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
@@ -154,29 +155,37 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
     useDropdown(props, inputBoxRef)
 
-  const { handlePhoneNumberChange } = usePhoneNumber(props)
+  usePhoneNumber(props)
 
   const { passwordVisible, togglePasswordVisibility } = usePassword()
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (onChange) {
-        onChange(e)
+      if (componentvariant === 'phonenumber') {
+        let inputValue = e.target.value
+        if (!inputValue.startsWith('+1')) {
+          inputValue = '+1' + inputValue.slice(2)
+        }
+        const digitsOnly = inputValue.replace(/\D/g, '')
+        const formattedValue = formatPhoneNumber(digitsOnly)
+        setPhoneNumber(formattedValue)
+
+        if (onChange) {
+          onChange({
+            ...e,
+            target: {
+              ...e.target,
+              value: formattedValue,
+            },
+          })
+        }
+      } else {
+        if (onChange) {
+          onChange(e)
+        }
       }
 
       setHasInput(!!e.target.value)
-
-      if (componentvariant === 'phonenumber') {
-        const formattedValue = formatPhoneNumber(e.target.value)
-        const formattedEvent = {
-          ...e,
-          target: {
-            ...e.target,
-            value: formattedValue,
-          },
-        }
-        handlePhoneNumberChange(formattedEvent)
-      }
 
       const formData = new FormData()
       formData.append(e.target.name, e.target.value)
@@ -192,7 +201,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     [
       componentvariant,
       onChange,
-      handlePhoneNumberChange,
       validateField,
       name,
       label,
@@ -206,6 +214,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
   const handleFocus = () => {
     setIsFocused(true)
+    if (componentvariant === 'phonenumber' && phoneNumber === '') {
+      setPhoneNumber('+1 ')
+    }
   }
 
   const handleBlur = () => {
@@ -223,7 +234,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const hasPlaceholder = !!placeholder
 
   const shouldShrinkLabel =
-    isFocused || isDropdownVariant || hasPlaceholder || hasInput
+    isFocused ||
+    isDropdownVariant ||
+    hasPlaceholder ||
+    hasInput ||
+    componentvariant === 'phonenumber'
 
   return (
     <Box
@@ -311,12 +326,19 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             label={label}
             autoComplete="off"
             name={name}
-            value={componentvariant === 'dropdown' ? selectedOption : value}
+            value={
+              componentvariant === 'phonenumber'
+                ? phoneNumber
+                : componentvariant === 'dropdown'
+                  ? selectedOption
+                  : value
+            }
             readOnly={componentvariant === 'dropdown'}
             notched={
               (isNotchedVariant && shouldShrinkLabel) ||
               (isDropdownVariant && shrunklabellocation !== 'above') ||
-              hasPlaceholder
+              hasPlaceholder ||
+              componentvariant === 'phonenumber'
             }
           />
           {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
@@ -324,7 +346,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
       </Box>
       {showError && currentHelperFooter?.statusMessage && (
         <Typography
-          variant="merrihelperfooter"
+          fontvariant="merrihelperfooter"
           fontcolor={
             currentHelperFooter?.status === 'error'
               ? red.main
