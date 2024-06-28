@@ -31,9 +31,6 @@ import React from 'react'
 // Animations
 import { Animation } from './components/Content/Structure/animations'
 
-// Actions
-import getFormData from './actions/server/form/getFormData'
-
 // Importing ExtendedButtonProps from useButton
 import { ExtendedButtonProps } from './components/Content/Structure/button/useButton'
 
@@ -120,7 +117,6 @@ export { ConfirmationCodeInput }
 export { RadioGroup }
 export { PopupForm }
 export { ContentSection }
-export { getFormData }
 export { formContainerStyle }
 
 // Exporting ExtendedButtonProps

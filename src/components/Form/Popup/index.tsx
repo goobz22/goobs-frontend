@@ -15,6 +15,12 @@ export interface PopupFormProps {
   grids: ContentSectionProps[]
 }
 
+/**
+ * PopupForm component renders a popup form with a title, description, and content sections.
+ * It uses the ContentSection component to render the form content.
+ * @param props The props for the PopupForm component.
+ * @returns The rendered popup form.
+ */
 function PopupForm({
   title,
   description,
@@ -23,6 +29,12 @@ function PopupForm({
   grids,
   onSubmit,
 }: PopupFormProps) {
+  /**
+   * handleSubmit function is called when the form is submitted.
+   * It prevents the default form submission behavior and creates a FormData object from the form data.
+   * If an onSubmit callback is provided, it is called with the FormData object.
+   * @param event The form submission event.
+   */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
@@ -31,6 +43,10 @@ function PopupForm({
     }
   }
 
+  /**
+   * headerGrid array contains the grid configuration for the form header.
+   * It includes the title and description typography props.
+   */
   const headerGrid = [
     {
       gridconfig: {
@@ -71,6 +87,9 @@ function PopupForm({
     },
   ]
 
+  /**
+   * contentSectionGrids array combines the headerGrid and the provided grids prop.
+   */
   const contentSectionGrids = [...headerGrid, ...grids]
 
   return (

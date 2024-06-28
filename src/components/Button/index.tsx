@@ -58,6 +58,12 @@ export interface CustomButtonProps
   onFormSubmit?: (isSubmitted: boolean) => void
 }
 
+/**
+ * CustomButton component renders a customizable button with various styling and functionality options.
+ * It integrates with helper footers to display error messages and form validation status.
+ * @param props The props for the CustomButton component.
+ * @returns The rendered CustomButton component.
+ */
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
     text,
@@ -86,26 +92,26 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
   const [isFormValid, setIsFormValid] = useState<boolean>(true)
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false)
 
-  useEffect(() => {
+  /**
+   * updateFormValidation function updates the form validation status and error message
+   * based on the values in the helper footers associated with the current form.
+   * It checks for error footers and empty required fields to determine the form's validity
+   * and sets the error message accordingly.
+   */
+  const updateFormValidation = () => {
     if (formname) {
-      console.log('formname:', formname)
-      console.log('helperFooterAtomValue:', helperFooterAtomValue)
-
       const relevantFooters = Object.values(helperFooterAtomValue).filter(
         footer => footer?.formname === formname
       )
-      console.log('relevantFooters:', relevantFooters)
 
       const errorFooters = relevantFooters.filter(
         footer => footer?.status === 'error'
       )
-      console.log('errorFooters:', errorFooters)
 
       const emptyRequiredFields = relevantFooters.filter(
         footer =>
           footer?.required && (!footer.status || footer.status === 'error')
       )
-      console.log('emptyRequiredFields:', emptyRequiredFields)
 
       if (errorFooters.length > 0) {
         const highestPriorityError = errorFooters.reduce((prev, current) =>
@@ -114,27 +120,42 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
             ? prev
             : current
         )
-        console.log('highestPriorityError:', highestPriorityError)
         setErrorMessage(highestPriorityError.spreadMessage)
         setIsFormValid(false)
       } else if (emptyRequiredFields.length > 0) {
-        console.log('Empty required fields found')
         setErrorMessage('Please fill in all required fields.')
         setIsFormValid(false)
       } else {
-        console.log('No errors or empty required fields found')
         setErrorMessage(undefined)
         setIsFormValid(true)
       }
     }
+  }
+
+  /**
+   * useEffect hook that triggers the updateFormValidation function whenever the
+   * helperFooterAtomValue or formname changes.
+   */
+  useEffect(() => {
+    updateFormValidation()
   }, [helperFooterAtomValue, formname])
 
+  /**
+   * useEffect hook that calls the onFormSubmit callback with the current isFormSubmitted state
+   * whenever the isFormSubmitted state or onFormSubmit prop changes.
+   */
   useEffect(() => {
     if (onFormSubmit) {
       onFormSubmit(isFormSubmitted)
     }
   }, [isFormSubmitted, onFormSubmit])
 
+  /**
+   * renderIcon function renders the icon element based on the provided icon prop.
+   * It clones the icon element and applies the iconsize style if the icon is a valid React element.
+   * If the icon prop is set to false, it returns null.
+   * @returns The rendered icon element or null.
+   */
   const renderIcon = () => {
     if (icon === false) {
       return null
@@ -147,16 +168,15 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     return <StarIcon style={{ fontSize: iconsize }} />
   }
 
+  /**
+   * handleButtonClick function is called when the button is clicked.
+   * It sets the isFormSubmitted state to true and checks the form validity.
+   * If the form is valid and an onClick handler is provided, it calls the onClick handler.
+   */
   const handleButtonClick = async () => {
-    console.log('handleButtonClick called')
-    console.log('formname:', formname)
-    console.log('helperFooterAtomValue:', helperFooterAtomValue)
-    console.log('isFormValid:', isFormValid)
-
     setIsFormSubmitted(true)
 
     if (!isFormValid) {
-      console.log('Button click prevented due to invalid form state')
       return
     }
 
@@ -164,8 +184,6 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       onClick()
     }
   }
-
-  console.log('errorMessage:', errorMessage)
 
   return (
     <Box

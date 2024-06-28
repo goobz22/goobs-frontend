@@ -27,6 +27,12 @@ export interface RadioGroupProps {
   onChange?: (value: string) => void
 }
 
+/**
+ * RadioGroup component renders a group of radio buttons with customizable options.
+ * It allows selecting a single value from a list of options.
+ * @param props The props for the RadioGroup component.
+ * @returns The rendered RadioGroup component.
+ */
 const RadioGroup: React.FC<RadioGroupProps> = ({
   label,
   options,
@@ -37,6 +43,11 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   labelText,
   onChange,
 }) => {
+  /**
+   * handleChange function is called when the selected radio button changes.
+   * It invokes the onChange callback with the selected value.
+   * @param event The change event triggered by the radio button.
+   */
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const selectedValue = event.target.value
     if (onChange) {
