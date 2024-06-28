@@ -1,6 +1,6 @@
 {
   "name": "goobs-repo",
-  "version": "0.7.50",
+  "version": "0.7.51",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -30,6 +30,7 @@
     "@types/mongodb": "^4.0.7",
     "async-lock": "^1.4.1",
     "aws4": "^1.13.0",
+    "goobs-cache": "^1.0.1",
     "jotai": "^2.8.3",
     "lodash": "^4.17.21",
     "mongodb": "^6.8.0",
