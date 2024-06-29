@@ -1,8 +1,8 @@
-# goobs-repo
+# goobs-frontend
 
-goobs-repo is a collection of reusable components and utilities for building web applications with React and Next.js. It provides a set of tools to streamline development and enhance functionality.
+goobs-frontend previously known as goobs-repo is a collection of reusable components and utilities for building web applications with React and Next.js. It provides a set of tools to streamline development and enhance functionality.
 
-The NPM repo is available here - https://www.npmjs.com/package/goobs-repo
+The NPM repo is available here - https://www.npmjs.com/package/goobs-frontend
 
 This entire repository is written in typescript and there is no need for a types/ install file
 
@@ -10,7 +10,7 @@ This entire repository is written in typescript and there is no need for a types
 
 This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation confirmed working with install instructions below.
 
-## Integrating goobs-repo with Next.js
+## Integrating goobs-frontend with Next.js
 
 This guide explains how to integrate the goobs-repo package with a Next.js project
 
@@ -21,13 +21,13 @@ In your Next.js project directory, run the following command to install goobs-re
 #### npm
 
 ```bash
-npm i goobs-repo
+npm i goobs-frontend
 ```
 
 #### yarn
 
 ```bash
-yarn add goobs-repo
+yarn add goobs-frontend
 ```
 
 **Step 2: Update next.config.js**
@@ -40,12 +40,13 @@ We are using SWC; here is the minimum recommended configuration for next.config.
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-};
+  transpilePackages: ['goobs-frontend'],
+}
 
-export default nextConfig;
+export default nextConfig
 ```
 
-which you can see more information on how we got here and how it was incorrectly done in previous versions via - https://github.com/goobz22/goobs-repo/discussions/21
+which you can see more information on how we got here and how it was incorrectly done in previous versions via - https://github.com/goobz22/goobs-frontend/discussions/21
 
 **Step 3: Implement into project and build to confirm functionality**
 
@@ -55,7 +56,7 @@ This readme update along side the following documentation updates are all a push
 
 ## Components
 
-The following components are within goobs-repo
+The following components are within goobs-frontend
 
 ### Button
 
@@ -146,15 +147,7 @@ The StyledComponent supports both client-side and server-side validation. Client
 
 When the serverActionValidation prop is provided, the component debounces the validation function to optimize performance. The validation result is then displayed in the helper footer message.
 
-The usage of the StyledComponent component and these props will be documented before release of v.8. within this wiki - https://github.com/goobz22/goobs-repo/wiki/StyledComponent
-
-## Server Actions
-
-The following server actions are included in this release:
-
-- `src/actions/server/form/store/reusableStore.ts`: A reusable store for caching form data on the server. This is a TypeScript redis alternative
-
-- `src/actions/server/form/getFormData.ts`: A server action for retrieving form data.
+The usage of the StyledComponent component and these props will be documented before release of v.8. within this wiki - https://github.com/goobz22/goobs-frontend/wiki/StyledComponent
 
 ## Usage
 
