@@ -11,6 +11,7 @@ import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
 import { useDropdown } from './hooks/useDropdown'
 import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { usePassword } from './hooks/usePassword'
+import { useSplitButton } from './hooks/useSplitButton'
 import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
 import { StartAdornment, EndAdornment } from './adornments'
@@ -44,6 +45,7 @@ export interface StyledComponentProps {
     | 'domain'
     | 'time'
     | 'date'
+    | 'splitbutton'
   options?: readonly string[]
   helperfooter?: HelperFooterMessage
   placeholder?: string
@@ -72,6 +74,8 @@ export interface AdornmentProps {
   passwordVisible?: boolean
   togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void
   marginRight?: number | string
+  handleIncrement?: () => void
+  handleDecrement?: () => void
 }
 
 const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
@@ -92,10 +96,9 @@ const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
 }))
 
 /**
- * StyledComponent is a customizable input component that supports various input types and configurations.
- * It includes functionality for validation, helper footers, and adornments.
- * @param props The props for the StyledComponent component.
- * @returns The rendered StyledComponent component.
+ * StyledComponent is a customizable input component with various variants and features.
+ * @param props The props for the StyledComponent.
+ * @returns The rendered StyledComponent.
  */
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
@@ -127,7 +130,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
   /**
-   * Update hasInput state based on value or valuestatus changes.
+   * Update the hasInput state when the value or valuestatus props change.
    */
   useEffect(() => {
     setHasInput(!!value || !!valuestatus)
@@ -147,7 +150,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }, [inputRef])
 
   /**
-   * Validate the field when the component mounts if it's required and has a formname, name, and label.
+   * Validate the field if it is required and the form name, name, and label are provided.
    */
   useEffect(() => {
     if (required && formname && name && label) {
@@ -158,7 +161,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }, [required, formname, name, label, validateField])
 
   /**
-   * Update showError state based on formSubmitted, hasInput, and isFocused changes.
+   * Update the showError state based on the formSubmitted, hasInput, and isFocused states.
    */
   useEffect(() => {
     setShowError(formSubmitted || (hasInput && !isFocused))
@@ -171,13 +174,26 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
   const { passwordVisible, togglePasswordVisibility } = usePassword()
 
+  const {
+    value: splitButtonValue,
+    handleIncrement,
+    handleDecrement,
+  } = useSplitButton(props)
+
   /**
-   * Handle input change event, perform validation, and call onChange callback.
+   * Handle the change event of the input element.
+   * @param e The change event.
    */
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (componentvariant === 'phonenumber') {
         handlePhoneNumberChange(e)
+      } else if (componentvariant === 'splitbutton') {
+        // Only allow numbers for splitbutton
+        const numValue = e.target.value.replace(/[^0-9]/g, '')
+        if (onChange) {
+          onChange({ ...e, target: { ...e.target, value: numValue } })
+        }
       } else {
         if (onChange) {
           onChange(e)
@@ -213,14 +229,14 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const currentHelperFooter = name ? helperFooterAtomValue[name] : undefined
 
   /**
-   * Handle input focus event.
+   * Handle the focus event of the input element.
    */
   const handleFocus = () => {
     setIsFocused(true)
   }
 
   /**
-   * Handle input blur event and perform validation if the field is empty.
+   * Handle the blur event of the input element.
    */
   const handleBlur = () => {
     setIsFocused(false)
@@ -232,13 +248,21 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }
 
   const isDropdownVariant = componentvariant === 'dropdown'
+  const isSplitButtonVariant = componentvariant === 'splitbutton'
   const isNotchedVariant =
-    !isDropdownVariant && shrunklabellocation !== 'above' && !!label
+    !isDropdownVariant &&
+    !isSplitButtonVariant &&
+    shrunklabellocation !== 'above' &&
+    !!label
   const hasPlaceholder = !!placeholder
 
+  /**
+   * Determine if the label should be shrunk based on various conditions.
+   */
   const shouldShrinkLabel =
     isFocused ||
     isDropdownVariant ||
+    isSplitButtonVariant ||
     hasPlaceholder ||
     hasInput ||
     componentvariant === 'phonenumber'
@@ -282,12 +306,15 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
         <Box ref={inputBoxRef} sx={{ width: '100%' }}>
           <NoAutofillOutlinedInput
             ref={inputRef || inputRefInternal}
-            onClick={handleDropdownClick}
             style={{
               backgroundColor: backgroundcolor || 'inherit',
               width: '100%',
               height: 40,
-              cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
+              cursor: isSplitButtonVariant
+                ? 'default'
+                : isDropdownVariant
+                  ? 'pointer'
+                  : 'text',
               boxSizing: 'border-box',
               borderRadius: 5,
               marginTop: 'auto',
@@ -298,7 +325,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
                 width: '100%',
                 color: combinedfontcolor || unshrunkfontcolor || 'inherit',
                 height: '100%',
-                cursor: componentvariant === 'dropdown' ? 'pointer' : 'text',
+                cursor: isSplitButtonVariant
+                  ? 'default'
+                  : isDropdownVariant
+                    ? 'pointer'
+                    : 'text',
               },
               placeholder: placeholder || '',
             }}
@@ -319,6 +350,8 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
                 passwordVisible={passwordVisible}
                 togglePasswordVisibility={togglePasswordVisibility}
                 iconcolor={iconcolor}
+                handleIncrement={handleIncrement}
+                handleDecrement={handleDecrement}
               />
             }
             onChange={handleChange}
@@ -329,16 +362,23 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             label={label}
             autoComplete="off"
             name={name}
-            value={componentvariant === 'dropdown' ? selectedOption : value}
-            readOnly={componentvariant === 'dropdown'}
+            value={
+              isDropdownVariant
+                ? selectedOption
+                : isSplitButtonVariant
+                  ? splitButtonValue
+                  : value
+            }
+            readOnly={isDropdownVariant}
             notched={
               (isNotchedVariant && shouldShrinkLabel) ||
-              (isDropdownVariant && shrunklabellocation !== 'above') ||
+              ((isDropdownVariant || isSplitButtonVariant) &&
+                shrunklabellocation !== 'above') ||
               hasPlaceholder ||
               componentvariant === 'phonenumber'
             }
           />
-          {componentvariant === 'dropdown' && isDropdownOpen && renderMenu}
+          {isDropdownVariant && isDropdownOpen && renderMenu}
         </Box>
       </Box>
       {showError && currentHelperFooter?.statusMessage && (
