@@ -26,6 +26,18 @@ import RadioGroup, {
 } from './components/RadioGroup'
 import PopupForm, { PopupFormProps } from './components/Form/Popup'
 import ContentSection, { ContentSectionProps } from './components/Content'
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from './components/Accordion'
+import Card, { CardProps } from './components/Card'
+import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
+import Nav, { NavProps } from './components/Nav'
+import PricingTable, { PricingProps } from './components/PricingTable'
+import { CustomStepper, CustomStepperProps } from './components/Stepper'
+import CustomToolbar, { ToolbarProps } from './components/Toolbar'
+import TransferList, { TransferListProps } from './components/TransferList'
 import React from 'react'
 
 // Animations
@@ -93,8 +105,6 @@ import {
 // Styles
 import { formContainerStyle } from './styles/Form'
 
-import { helperFooterAtom, HelperFooterMessage } from './atoms/helperfooter'
-
 // Type declarations
 declare type CustomButtonProps = React.ComponentProps<typeof CustomButton>
 declare type CustomGridProps = React.ComponentProps<typeof CustomGrid>
@@ -107,6 +117,28 @@ declare type PopupFormComponentProps = React.ComponentProps<typeof PopupForm>
 declare type ContentSectionComponentProps = React.ComponentProps<
   typeof ContentSection
 >
+declare type AccordionProps = React.ComponentProps<typeof Accordion>
+declare type AccordionSummaryProps = React.ComponentProps<
+  typeof AccordionSummary
+>
+declare type AccordionDetailsProps = React.ComponentProps<
+  typeof AccordionDetails
+>
+declare type CardComponentProps = React.ComponentProps<typeof Card>
+declare type CodeCopyComponentProps = React.ComponentProps<typeof CodeCopy>
+declare type NavComponentProps = React.ComponentProps<typeof Nav>
+declare type PricingTableComponentProps = React.ComponentProps<
+  typeof PricingTable
+>
+declare type CustomStepperComponentProps = React.ComponentProps<
+  typeof CustomStepper
+>
+declare type CustomToolbarComponentProps = React.ComponentProps<
+  typeof CustomToolbar
+>
+declare type TransferListComponentProps = React.ComponentProps<
+  typeof TransferList
+>
 
 // Named exports
 export { CustomButton }
@@ -117,14 +149,18 @@ export { ConfirmationCodeInput }
 export { RadioGroup }
 export { PopupForm }
 export { ContentSection }
+export { Accordion, AccordionSummary, AccordionDetails }
+export { Card }
+export { CodeCopy }
+export { Nav }
+export { PricingTable }
+export { CustomStepper }
+export { CustomToolbar }
+export { TransferList }
 export { formContainerStyle }
 
 // Exporting ExtendedButtonProps
 export type { ExtendedButtonProps }
-
-// Exporting helperFooterAtom and HelperFooterMessage
-export { helperFooterAtom }
-export type { HelperFooterMessage }
 
 // Type exports
 export type { CustomButtonProps }
@@ -142,6 +178,13 @@ export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
 export type { PopupFormProps }
 export type { ContentSectionProps }
+export type { CardProps }
+export type { CodeCopyProps }
+export type { NavProps }
+export type { PricingProps }
+export type { CustomStepperProps }
+export type { ToolbarProps }
+export type { TransferListProps }
 
 // Additional type exports for the newly declared types
 export type { TypographyComponentProps }
@@ -149,6 +192,14 @@ export type { ConfirmationCodeInputProps }
 export type { RadioGroupComponentProps }
 export type { PopupFormComponentProps }
 export type { ContentSectionComponentProps }
+export type { AccordionProps, AccordionSummaryProps, AccordionDetailsProps }
+export type { CardComponentProps }
+export type { CodeCopyComponentProps }
+export type { NavComponentProps }
+export type { PricingTableComponentProps }
+export type { CustomStepperComponentProps }
+export type { CustomToolbarComponentProps }
+export type { TransferListComponentProps }
 
 // Animation type export
 export type { Animation }
