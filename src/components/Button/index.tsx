@@ -1,22 +1,52 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
-import { useAtom } from 'jotai'
-import { helperFooterAtom, HelperFooterMessage } from '../../atoms/helperfooter'
+import { get, JSONValue } from 'goobs-cache'
 import { red } from '../../styles/palette'
 
+/**
+ * Defines the possible alignment options for button content.
+ */
 export type ButtonAlignment = 'left' | 'center' | 'right'
 
+/**
+ * Defines the structure of helper footer messages used for form validation.
+ */
+export interface HelperFooterMessage {
+  /** Indicates whether the message represents an error or success state */
+  status: 'error' | 'success'
+  /** The message to display in the status area */
+  statusMessage: string
+  /** The message to spread across multiple components */
+  spreadMessage: string
+  /** Priority of the spread message for determining which message to show */
+  spreadMessagePriority: number
+  /** The name of the form this message is associated with */
+  formname: string
+  /** Indicates if the field associated with this message is required */
+  required: boolean
+}
+
+/**
+ * Props for the CustomButton component.
+ * Extends ButtonProps from Material-UI, omitting 'color' and 'variant'.
+ */
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
+  /** Text to display on the button */
   text?: string
+  /** Background color of the button */
   backgroundcolor?: string
+  /** Color of the button's outline */
   outlinecolor?: string
+  /** Color of the button's text */
   fontcolor?: string
+  /** Alignment of the button's text */
   fontlocation?: ButtonAlignment
+  /** Typography variant for the button's text */
   fontvariant?:
     | 'arapeyh1'
     | 'arapeyh2'
@@ -45,24 +75,31 @@ export interface CustomButtonProps
     | 'merriparagraph'
     | 'merrihelperheader'
     | 'merrihelperfooter'
+  /** Icon to display on the button. Set to false to hide the icon */
   icon?: React.ReactNode | false
+  /** Color of the icon */
   iconcolor?: string
+  /** Size of the icon */
   iconsize?: string
+  /** Position of the icon relative to the text */
   iconlocation?: 'left' | 'top' | 'right'
+  /** Style variant of the button */
   variant?: 'text' | 'outlined' | 'contained'
+  /** Function to call when the button is clicked */
   onClick?: () => void
+  /** Helper footer message for form validation */
   helperfooter?: HelperFooterMessage
+  /** Width of the button */
   width?: string
+  /** Name of the form this button is associated with */
   formname?: string
+  /** Name attribute for the button element */
   name?: string
-  onFormSubmit?: (isSubmitted: boolean) => void
 }
 
 /**
- * CustomButton component renders a customizable button with various styling and functionality options.
- * It integrates with helper footers to display error messages and form validation status.
- * @param props The props for the CustomButton component.
- * @returns The rendered CustomButton component.
+ * CustomButton component renders a customizable button with integrated form validation.
+ * It displays error messages based on helper footers and form validation status.
  */
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
@@ -82,25 +119,27 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     fontlocation,
     iconcolor,
     width,
-    onFormSubmit,
   } = props
 
-  const [helperFooterAtomValue] = useAtom(helperFooterAtom)
+  /** State for storing the current error message */
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   )
+  /** State for tracking whether the associated form is valid */
   const [isFormValid, setIsFormValid] = useState<boolean>(true)
-  const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false)
+  /** State for storing helper footer messages */
+  const [helperFooterValue, setHelperFooterValue] = useState<
+    Record<string, HelperFooterMessage>
+  >({})
 
   /**
-   * updateFormValidation function updates the form validation status and error message
-   * based on the values in the helper footers associated with the current form.
-   * It checks for error footers and empty required fields to determine the form's validity
-   * and sets the error message accordingly.
+   * Updates the form validation status and error message based on helper footers.
+   * This function filters relevant footers, checks for errors and empty required fields,
+   * and updates the error message and form validity accordingly.
    */
-  const updateFormValidation = () => {
+  const updateFormValidation = useCallback(() => {
     if (formname) {
-      const relevantFooters = Object.values(helperFooterAtomValue).filter(
+      const relevantFooters = Object.values(helperFooterValue).filter(
         footer => footer?.formname === formname
       )
 
@@ -130,30 +169,46 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
         setIsFormValid(true)
       }
     }
-  }
+  }, [formname, helperFooterValue])
 
   /**
-   * useEffect hook that triggers the updateFormValidation function whenever the
-   * helperFooterAtomValue or formname changes.
+   * Fetches helper footer data from the cache when formname changes.
+   * This effect runs whenever the formname prop changes.
+   */
+  useEffect(() => {
+    const fetchHelperFooter = async () => {
+      const helperFooterResult = await get('helperFooter', 'client')
+      if (
+        helperFooterResult &&
+        typeof helperFooterResult === 'object' &&
+        'value' in helperFooterResult
+      ) {
+        setHelperFooterValue(
+          (helperFooterResult as JSONValue).value as Record<
+            string,
+            HelperFooterMessage
+          >
+        )
+      }
+    }
+
+    fetchHelperFooter()
+  }, [formname])
+
+  /**
+   * Triggers form validation whenever helperFooterValue changes.
+   * This effect ensures that the form validation is updated whenever
+   * the helper footer messages change.
    */
   useEffect(() => {
     updateFormValidation()
-  }, [helperFooterAtomValue, formname])
+  }, [updateFormValidation])
 
   /**
-   * useEffect hook that calls the onFormSubmit callback with the current isFormSubmitted state
-   * whenever the isFormSubmitted state or onFormSubmit prop changes.
-   */
-  useEffect(() => {
-    if (onFormSubmit) {
-      onFormSubmit(isFormSubmitted)
-    }
-  }, [isFormSubmitted, onFormSubmit])
-
-  /**
-   * renderIcon function renders the icon element based on the provided icon prop.
-   * It clones the icon element and applies the iconsize style if the icon is a valid React element.
-   * If the icon prop is set to false, it returns null.
+   * Renders the icon element based on the provided icon prop.
+   * If the icon prop is false, it returns null.
+   * If the icon is a valid React element, it clones it with the specified size.
+   * Otherwise, it renders a default StarIcon.
    * @returns The rendered icon element or null.
    */
   const renderIcon = () => {
@@ -169,13 +224,10 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
   }
 
   /**
-   * handleButtonClick function is called when the button is clicked.
-   * It sets the isFormSubmitted state to true and checks the form validity.
-   * If the form is valid and an onClick handler is provided, it calls the onClick handler.
+   * Handles the button click event.
+   * If the form is valid and an onClick handler is provided, it calls the handler.
    */
   const handleButtonClick = async () => {
-    setIsFormSubmitted(true)
-
     if (!isFormValid) {
       return
     }
@@ -223,7 +275,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
           {iconlocation === 'right' && renderIcon()}
         </Box>
       </Button>
-      {isFormSubmitted && errorMessage && (
+      {errorMessage && (
         <Typography
           fontvariant="merrihelperfooter"
           fontcolor={red.main}
