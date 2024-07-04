@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { InputAdornment, Button, Box } from '@mui/material'
 import SearchIcon from '../../components/Icons/Search'
 import ShowHideEyeIcon from '../../components/Icons/ShowHideEye'
@@ -12,7 +12,6 @@ import { AdornmentProps } from './index'
  */
 const StartAdornment: React.FC<AdornmentProps> = props => {
   const { componentvariant, iconcolor } = props
-
   // Render the search icon for the search bar variant
   if (componentvariant === 'searchbar') {
     return (
@@ -21,7 +20,6 @@ const StartAdornment: React.FC<AdornmentProps> = props => {
       </InputAdornment>
     )
   }
-
   return null
 }
 
@@ -34,24 +32,31 @@ const EndAdornment: React.FC<AdornmentProps> = props => {
   const {
     componentvariant,
     passwordVisible,
-    togglePasswordVisibility,
     handleIncrement,
     handleDecrement,
   } = props
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(
+    passwordVisible || false
+  )
 
   const adornmentStyle = {
     cursor: 'pointer',
   }
 
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible)
+  }
+
   // Render the show/hide eye icon for the password variant
-  if (componentvariant === 'password' && togglePasswordVisibility) {
+  if (componentvariant === 'password') {
     return (
       <InputAdornment
         position="end"
         onClick={togglePasswordVisibility}
         style={adornmentStyle}
       >
-        <ShowHideEyeIcon visible={passwordVisible || false} />
+        <ShowHideEyeIcon visible={isPasswordVisible} />
       </InputAdornment>
     )
   }
@@ -111,7 +116,6 @@ const EndAdornment: React.FC<AdornmentProps> = props => {
       <InputAdornment position="end" style={adornmentStyle}></InputAdornment>
     )
   }
-
   return null
 }
 

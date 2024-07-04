@@ -2,17 +2,12 @@
 
 import { useCallback } from 'react'
 import { debounce } from 'lodash'
-import { useAtom } from 'jotai'
-import {
-  helperFooterAtom,
-  HelperFooterMessage,
-} from '../../../atoms/helperfooter'
-import { get, set } from 'goobs-cache'
+import { get, set, StringValue, JSONValue } from 'goobs-cache'
 
 /**
- * isValidEmailFormat function checks if the provided email string is in a valid email format.
- * @param email The email string to validate.
- * @returns A boolean indicating whether the email is in a valid format.
+ * Validates if the given string is in a valid email format
+ * @param {string} email - The email string to validate
+ * @returns {boolean} True if the email is valid, false otherwise
  */
 const isValidEmailFormat = (email: string): boolean => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -21,23 +16,24 @@ const isValidEmailFormat = (email: string): boolean => {
 }
 
 /**
- * useHelperFooter hook provides functions for validating form fields and managing helper footer messages.
- * It handles validation for email, password, confirm password, phone number, and generic fields.
- * @returns An object containing the helperFooterAtomValue and validateField function.
+ * Interface for helper footer messages
+ */
+export interface HelperFooterMessage {
+  status: 'error' | 'success'
+  statusMessage: string
+  spreadMessage: string
+  spreadMessagePriority: number
+  formname: string
+  required: boolean
+}
+
+/**
+ * Custom hook for form validation and helper footer messages
+ * @returns {Object} An object containing the validateField function
  */
 export const useHelperFooter = () => {
-  const [helperFooterAtomValue, setHelperFooterAtomValue] =
-    useAtom(helperFooterAtom)
-
   /**
-   * handleGenericErrorCreation function handles validation for generic form fields.
-   * It checks if the field is required and not empty, and returns an error message if applicable.
-   * @param formData The form data object containing field values.
-   * @param name The name of the field being validated.
-   * @param label The label of the field being validated.
-   * @param required A boolean indicating whether the field is required.
-   * @param formname The name of the form the field belongs to.
-   * @returns A HelperFooterMessage object if an error is detected, otherwise undefined.
+   * Handles generic error creation for form fields
    */
   const handleGenericErrorCreation = useCallback(
     (
@@ -66,12 +62,7 @@ export const useHelperFooter = () => {
   )
 
   /**
-   * handleEmailErrorCreation function handles validation for email fields.
-   * It checks if the email is required, not empty, and in a valid format.
-   * @param formData The form data object containing field values.
-   * @param required A boolean indicating whether the email field is required.
-   * @param formname The name of the form the email field belongs to.
-   * @returns A HelperFooterMessage object with the validation result.
+   * Handles email validation and error creation
    */
   const handleEmailErrorCreation = useCallback(
     (
@@ -120,12 +111,7 @@ export const useHelperFooter = () => {
   )
 
   /**
-   * handlePasswordErrorCreation function handles validation for password fields.
-   * It checks if the password is required, not empty, and meets the complexity requirements.
-   * @param formData The form data object containing field values.
-   * @param required A boolean indicating whether the password field is required.
-   * @param formname The name of the form the password field belongs to.
-   * @returns A Promise that resolves to a HelperFooterMessage object with the validation result.
+   * Handles password validation and error creation
    */
   const handlePasswordErrorCreation = useCallback(
     async (
@@ -135,11 +121,12 @@ export const useHelperFooter = () => {
     ): Promise<HelperFooterMessage | undefined> => {
       const password = formData.get('verifyPassword') as string
 
-      // Always store the password in the cache, even if it's invalid
+      // Store the password in the cache
       await set(
         'verifyPassword',
-        { type: 'string', value: password },
-        new Date(Date.now() + 30 * 60 * 1000)
+        { type: 'string', value: password } as StringValue,
+        new Date(Date.now() + 30 * 60 * 1000),
+        'client'
       )
 
       if (required && (!password || !password.trim())) {
@@ -190,12 +177,7 @@ export const useHelperFooter = () => {
   )
 
   /**
-   * handleConfirmPasswordErrorCreation function handles validation for confirm password fields.
-   * It checks if the confirm password is required, not empty, and matches the original password.
-   * @param formData The form data object containing field values.
-   * @param required A boolean indicating whether the confirm password field is required.
-   * @param formname The name of the form the confirm password field belongs to.
-   * @returns A Promise that resolves to a HelperFooterMessage object with the validation result.
+   * Handles password confirmation validation and error creation
    */
   const handleConfirmPasswordErrorCreation = useCallback(
     async (
@@ -220,7 +202,16 @@ export const useHelperFooter = () => {
         return undefined
       }
 
-      const verifyPassword = await get('verifyPassword')
+      const verifyPasswordResult = await get('verifyPassword', 'client')
+      let verifyPassword: string | undefined
+
+      if (
+        verifyPasswordResult &&
+        typeof verifyPasswordResult === 'object' &&
+        'value' in verifyPasswordResult
+      ) {
+        verifyPassword = (verifyPasswordResult as StringValue).value
+      }
 
       if (!verifyPassword) {
         return {
@@ -257,12 +248,7 @@ export const useHelperFooter = () => {
   )
 
   /**
-   * handlePhoneNumberErrorCreation function handles validation for phone number fields.
-   * It checks if the phone number is required, not empty, and in a valid format.
-   * @param formData The form data object containing field values.
-   * @param required A boolean indicating whether the phone number field is required.
-   * @param formname The name of the form the phone number field belongs to.
-   * @returns A HelperFooterMessage object with the validation result.
+   * Handles phone number validation and error creation
    */
   const handlePhoneNumberErrorCreation = useCallback(
     (
@@ -319,38 +305,86 @@ export const useHelperFooter = () => {
   )
 
   /**
-   * getHelperFooterOption function returns the appropriate validation function based on the field name.
-   * @param name The name of the field being validated.
-   * @param label The label of the field being validated.
-   * @param required A boolean indicating whether the field is required.
-   * @param formname The name of the form the field belongs to.
-   * @returns The validation function for the specified field.
+   * Validates a form field and updates the helper footer messages
    */
-  const getHelperFooterOption = useCallback(
-    (name: string, label: string, required: boolean, formname: string) => {
-      switch (name) {
-        case 'email':
-          return (formData: FormData) =>
-            handleEmailErrorCreation(formData, required, formname)
-        case 'verifyPassword':
-          return (formData: FormData) =>
-            handlePasswordErrorCreation(formData, required, formname)
-        case 'confirmPassword':
-          return (formData: FormData) =>
-            handleConfirmPasswordErrorCreation(formData, required, formname)
-        case 'phoneNumber':
-          return (formData: FormData) =>
-            handlePhoneNumberErrorCreation(formData, required, formname)
-        default:
-          return (formData: FormData) =>
-            handleGenericErrorCreation(
+  const validateField = useCallback(
+    (
+      name: string,
+      formData: FormData,
+      label: string,
+      required: boolean,
+      formname: string
+    ) => {
+      const debouncedValidation = debounce(async () => {
+        let validationResult: HelperFooterMessage | undefined
+
+        // Determine which validation function to use based on the field name
+        switch (name) {
+          case 'email':
+            validationResult = handleEmailErrorCreation(
+              formData,
+              required,
+              formname
+            )
+            break
+          case 'verifyPassword':
+            validationResult = await handlePasswordErrorCreation(
+              formData,
+              required,
+              formname
+            )
+            break
+          case 'confirmPassword':
+            validationResult = await handleConfirmPasswordErrorCreation(
+              formData,
+              required,
+              formname
+            )
+            break
+          case 'phoneNumber':
+            validationResult = handlePhoneNumberErrorCreation(
+              formData,
+              required,
+              formname
+            )
+            break
+          default:
+            validationResult = handleGenericErrorCreation(
               formData,
               name,
               label,
               required,
               formname
             )
-      }
+        }
+
+        // Update the helper footer messages in the cache
+        const helperFooterResult = await get('helperFooter', 'client')
+        let currentHelperFooter: Record<string, HelperFooterMessage> = {}
+        if (
+          helperFooterResult &&
+          typeof helperFooterResult === 'object' &&
+          'value' in helperFooterResult
+        ) {
+          currentHelperFooter = (helperFooterResult as JSONValue)
+            .value as Record<string, HelperFooterMessage>
+        }
+
+        if (validationResult) {
+          currentHelperFooter[name] = validationResult
+        } else {
+          delete currentHelperFooter[name]
+        }
+
+        await set(
+          'helperFooter',
+          { type: 'json', value: currentHelperFooter } as JSONValue,
+          new Date(Date.now() + 30 * 60 * 1000), // 30 minutes expiration
+          'client'
+        )
+      }, 300)
+
+      debouncedValidation()
     },
     [
       handleEmailErrorCreation,
@@ -361,51 +395,7 @@ export const useHelperFooter = () => {
     ]
   )
 
-  /**
-   * validateField function validates a specific form field and updates the helper footer atom.
-   * It debounces the validation to prevent excessive updates.
-   * @param name The name of the field being validated.
-   * @param formData The form data object containing field values.
-   * @param label The label of the field being validated.
-   * @param required A boolean indicating whether the field is required.
-   * @param formname The name of the form the field belongs to.
-   */
-  const validateField = useCallback(
-    (
-      name: string,
-      formData: FormData,
-      label: string,
-      required: boolean,
-      formname: string
-    ) => {
-      const helperFooterOption = getHelperFooterOption(
-        name,
-        label,
-        required,
-        formname
-      )
-      if (helperFooterOption) {
-        const debouncedHelperFooterOption = debounce(async () => {
-          const validationResult = await helperFooterOption(formData)
-          setHelperFooterAtomValue(prevState => {
-            if (validationResult) {
-              return { ...prevState, [name]: validationResult }
-            } else {
-              const newState = { ...prevState }
-              delete newState[name]
-              return newState
-            }
-          })
-        }, 300)
-
-        debouncedHelperFooterOption()
-      }
-    },
-    [getHelperFooterOption, setHelperFooterAtomValue]
-  )
-
   return {
-    helperFooterAtomValue,
     validateField,
   }
 }

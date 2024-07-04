@@ -17,8 +17,23 @@ import { red, green } from '../../styles/palette'
 import { StartAdornment, EndAdornment } from './adornments'
 import { useHelperFooter } from './helperfooter/useHelperFooter'
 import labelStyles from '../../styles/StyledComponent/Label'
-import { HelperFooterMessage } from '../../atoms/helperfooter'
+import { get, JSONValue } from 'goobs-cache'
 
+/**
+ * Interface for helper footer messages
+ */
+export interface HelperFooterMessage {
+  status: 'error' | 'success'
+  statusMessage: string
+  spreadMessage: string
+  spreadMessagePriority: number
+  formname: string
+  required: boolean
+}
+
+/**
+ * Props interface for the StyledComponent
+ */
 export interface StyledComponentProps {
   name?: string
   outlinecolor?: string
@@ -55,29 +70,31 @@ export interface StyledComponentProps {
   shrunklabellocation?: 'onnotch' | 'above'
   value?: string
   valuestatus?: boolean
-  onChange?: (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void
   defaultValue?: string
   inputRef?: RefObject<HTMLInputElement>
-  serverActionValidation?: (
-    formData: FormData
-  ) => Promise<HelperFooterMessage | undefined>
   focused?: boolean
   required?: boolean
   formSubmitted?: boolean
+  onChange?: (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
 }
 
+/**
+ * Props interface for the Adornment components
+ */
 export interface AdornmentProps {
   componentvariant: string
   iconcolor?: string
   passwordVisible?: boolean
-  togglePasswordVisibility?: (event: React.MouseEvent<HTMLDivElement>) => void
   marginRight?: number | string
   handleIncrement?: () => void
   handleDecrement?: () => void
 }
 
+/**
+ * Styled component to prevent autofill styles
+ */
 const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   '& .MuiInputBase-input': {
     '&:-webkit-autofill': {
@@ -106,8 +123,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     componentvariant,
     inputRef,
     name,
-    serverActionValidation,
-    onChange,
     backgroundcolor,
     iconcolor,
     unshrunkfontcolor,
@@ -120,25 +135,38 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     required = false,
     formname,
     formSubmitted = false,
+    onChange,
   } = props
 
-  const { validateField, helperFooterAtomValue } = useHelperFooter()
+  const { validateField } = useHelperFooter()
+  const [helperFooterValue, setHelperFooterValue] = useState<
+    Record<string, HelperFooterMessage>
+  >({})
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
-  /**
-   * Update the hasInput state when the value or valuestatus props change.
-   */
+  // Fetch helper footer values from cache
+  useEffect(() => {
+    const fetchHelperFooter = async () => {
+      const result = await get('helperFooter', 'client')
+      if (result && typeof result === 'object' && 'value' in result) {
+        setHelperFooterValue(
+          (result as JSONValue).value as Record<string, HelperFooterMessage>
+        )
+      }
+    }
+    fetchHelperFooter()
+  }, [])
+
+  // Update hasInput state when value or valuestatus changes
   useEffect(() => {
     setHasInput(!!value || !!valuestatus)
   }, [value, valuestatus])
 
-  /**
-   * Set autocomplete, autocorrect, autocapitalize, and spellcheck attributes on the input element.
-   */
+  // Set input attributes to prevent autocomplete and related features
   useEffect(() => {
     const input = inputRefInternal.current || inputRef?.current
     if (input) {
@@ -149,9 +177,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }, [inputRef])
 
-  /**
-   * Validate the field if it is required and the form name, name, and label are provided.
-   */
+  // Validate field if required and necessary props are provided
   useEffect(() => {
     if (required && formname && name && label) {
       const emptyFormData = new FormData()
@@ -160,20 +186,18 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }, [required, formname, name, label, validateField])
 
-  /**
-   * Update the showError state based on the formSubmitted, hasInput, and isFocused states.
-   */
+  // Update showError state based on form submission and input state
   useEffect(() => {
     setShowError(formSubmitted || (hasInput && !isFocused))
   }, [formSubmitted, hasInput, isFocused])
 
-  const { handleDropdownClick, renderMenu, selectedOption, isDropdownOpen } =
-    useDropdown(props, inputBoxRef)
-
-  const { handlePhoneNumberChange } = usePhoneNumber({ ...props, onChange })
-
-  const { passwordVisible, togglePasswordVisibility } = usePassword()
-
+  // Custom hooks for specific component variants
+  const { renderMenu, selectedOption, isDropdownOpen } = useDropdown(
+    props,
+    inputBoxRef
+  )
+  const { handlePhoneNumberChange } = usePhoneNumber()
+  const { passwordVisible } = usePassword()
   const {
     value: splitButtonValue,
     handleIncrement,
@@ -185,19 +209,17 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
    * @param e The change event.
    */
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (componentvariant === 'phonenumber') {
         handlePhoneNumberChange(e)
       } else if (componentvariant === 'splitbutton') {
         // Only allow numbers for splitbutton
         const numValue = e.target.value.replace(/[^0-9]/g, '')
-        if (onChange) {
-          onChange({ ...e, target: { ...e.target, value: numValue } })
-        }
-      } else {
-        if (onChange) {
-          onChange(e)
-        }
+        e.target.value = numValue
+      }
+
+      if (onChange) {
+        onChange(e)
       }
 
       setHasInput(!!e.target.value)
@@ -209,24 +231,79 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
         validateField(name, formData, label, required, formname)
       }
 
-      if (serverActionValidation && name) {
-        serverActionValidation(formData)
+      // Implement validation logic directly
+      if (name) {
+        let result: HelperFooterMessage | undefined
+
+        // Basic validation logic (you can expand this based on your requirements)
+        if (required && !e.target.value) {
+          result = {
+            status: 'error',
+            statusMessage: `${label} is required.`,
+            spreadMessage: `${label} is required.`,
+            spreadMessagePriority: 1,
+            formname: formname || '',
+            required: true,
+          }
+        } else if (
+          componentvariant === 'email' &&
+          !/\S+@\S+\.\S+/.test(e.target.value)
+        ) {
+          result = {
+            status: 'error',
+            statusMessage: 'Invalid email format.',
+            spreadMessage: 'Invalid email format.',
+            spreadMessagePriority: 1,
+            formname: formname || '',
+            required: required,
+          }
+        }
+        // Add more validation rules here as needed
+
+        if (result) {
+          setHelperFooterValue(prevState => ({
+            ...prevState,
+            [name]: result,
+          }))
+        } else {
+          // Clear any existing error for this field
+          setHelperFooterValue(prevState => {
+            const newState = { ...prevState }
+            delete newState[name]
+            return newState
+          })
+        }
+      }
+
+      // Fetch updated helper footer state
+      const helperFooterResult = await get('helperFooter', 'client')
+      if (
+        helperFooterResult &&
+        typeof helperFooterResult === 'object' &&
+        'value' in helperFooterResult
+      ) {
+        setHelperFooterValue(prevState => ({
+          ...prevState,
+          ...((helperFooterResult as JSONValue).value as Record<
+            string,
+            HelperFooterMessage
+          >),
+        }))
       }
     },
     [
       componentvariant,
-      onChange,
       handlePhoneNumberChange,
+      onChange,
       validateField,
       name,
       label,
       required,
       formname,
-      serverActionValidation,
     ]
   )
 
-  const currentHelperFooter = name ? helperFooterAtomValue[name] : undefined
+  const currentHelperFooter = name ? helperFooterValue[name] : undefined
 
   /**
    * Handle the focus event of the input element.
@@ -348,7 +425,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               <EndAdornment
                 componentvariant={componentvariant || ''}
                 passwordVisible={passwordVisible}
-                togglePasswordVisibility={togglePasswordVisibility}
                 iconcolor={iconcolor}
                 handleIncrement={handleIncrement}
                 handleDecrement={handleDecrement}

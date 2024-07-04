@@ -1,4 +1,3 @@
-import { StyledComponentProps } from '..'
 import React, { useCallback } from 'react'
 
 /**
@@ -10,44 +9,33 @@ import React, { useCallback } from 'react'
 export const formatPhoneNumber = (value: string): string => {
   // Remove all non-digit characters
   const digits = value.replace(/\D/g, '')
-
   // Ensure the number starts with +1
   let formattedNumber = '+1 '
-
   if (digits.length > 0) {
     // Add the area code
     formattedNumber += digits.slice(0, 3)
-
     if (digits.length > 3) {
       // Add first dash and next three digits
       formattedNumber += '-' + digits.slice(3, 6)
-
       if (digits.length > 6) {
         // Add second dash and last four digits
         formattedNumber += '-' + digits.slice(6, 10)
       }
     }
   }
-
   return formattedNumber
 }
 
 /**
  * usePhoneNumber hook provides functionality for handling phone number input changes.
- * It formats the input value using the formatPhoneNumber function and calls the onChange callback with the formatted value.
+ * It formats the input value using the formatPhoneNumber function.
  * @param props The props for the phone number input component.
  * @returns An object containing the handlePhoneNumberChange function.
  */
-export const usePhoneNumber = (
-  props: StyledComponentProps & {
-    onChange?: (
-      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => void
-  }
-) => {
+export const usePhoneNumber = () => {
   /**
    * handlePhoneNumberChange function is called when the phone number input value changes.
-   * It formats the input value using the formatPhoneNumber function and calls the onChange callback with the formatted value.
+   * It formats the input value using the formatPhoneNumber function.
    * @param e The change event triggered by the phone number input.
    */
   const handlePhoneNumberChange = useCallback(
@@ -55,18 +43,9 @@ export const usePhoneNumber = (
       const input = e.target.value
       const digitsOnly = input.replace(/\D/g, '')
       const formattedValue = formatPhoneNumber(digitsOnly)
-
-      if (props.onChange) {
-        props.onChange({
-          ...e,
-          target: {
-            ...e.target,
-            value: formattedValue,
-          },
-        })
-      }
+      e.target.value = formattedValue
     },
-    [props]
+    []
   )
 
   return {
