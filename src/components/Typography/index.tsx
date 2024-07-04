@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Typography as MuiTypography,
   TypographyProps as MuiTypographyProps,
@@ -5,7 +7,14 @@ import {
 } from '@mui/material'
 import React from 'react'
 
+/**
+ * Type definition for supported font families
+ */
 export type FontFamily = 'arapey' | 'inter' | 'merri'
+
+/**
+ * Type definition for typography variants
+ */
 export type TypographyVariant =
   | 'h1'
   | 'h2'
@@ -17,15 +26,24 @@ export type TypographyVariant =
   | 'helperheader'
   | 'helperfooter'
 
+/**
+ * Extend Material-UI's TypographyPropsVariantOverrides to include custom variants
+ */
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides
     extends Record<`${FontFamily}${TypographyVariant}`, true> {}
 }
 
+/**
+ * Custom type for TypographyPropsVariantOverrides
+ */
 export type TypographyPropsVariantOverrides =
   MuiTypographyPropsVariantOverrides &
     Record<`${FontFamily}${TypographyVariant}`, true>
 
+/**
+ * Props interface for the custom Typography component
+ */
 export interface TypographyProps {
   text?: string
   fontvariant?: keyof TypographyPropsVariantOverrides
@@ -215,8 +233,8 @@ const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
 /**
  * Typography component is a wrapper around MuiTypography that applies custom styles based on the fontvariant prop.
  * It supports different font families (Arapey, Inter, Merriweather) and typography variants (h1, h2, h3, h4, h5, h6, paragraph, helperheader, helperfooter).
- * @param props The props for the Typography component.
- * @returns The rendered Typography component.
+ * @param {TypographyProps & MuiTypographyProps} props - The props for the Typography component.
+ * @returns {JSX.Element} The rendered Typography component.
  */
 export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
   text,
@@ -227,6 +245,7 @@ export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
   let variantStyle: React.CSSProperties = {}
 
   if (fontvariant) {
+    // Determine the font family based on the fontvariant prefix
     const fontFamily = fontvariant.startsWith('arapey')
       ? 'arapey'
       : fontvariant.startsWith('inter')
@@ -236,7 +255,9 @@ export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
           : null
 
     if (fontFamily) {
+      // Extract the variant part from the fontvariant string
       const variant = fontvariant.slice(fontFamily.length) as TypographyVariant
+      // Apply the appropriate style based on the font family
       switch (fontFamily) {
         case 'arapey':
           variantStyle = arapeyStyles[variant] || {}
