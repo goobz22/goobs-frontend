@@ -1,4 +1,5 @@
 'use client'
+
 import React from 'react'
 import CustomGrid, { columnconfig, gridconfig } from '../../components/Grid'
 import useGridTypography, {
@@ -22,27 +23,62 @@ import useImage, {
 import useButton, {
   ExtendedButtonProps,
 } from '../../components/Content/Structure/button/useButton'
+import usePricing, {
+  ExtendedPricingProps,
+} from './../../components/Content/Structure/pricing/usePricing'
+import useStepper, {
+  ExtendedStepperProps,
+} from './../../components/Content/Structure/stepper/useStepper'
+import useTransferList, {
+  ExtendedTransferListProps,
+} from './../../components/Content/Structure/transferlist/useTransferList'
+import useCard, {
+  ExtendedCardProps,
+} from './../../components/Content/Structure/card/useCard'
+import useCodeCopy, {
+  ExtendedCodeCopyProps,
+} from './../../components/Content/Structure/codecopy/useCodeCopy'
 
+/**
+ * Props for the ContentSection component.
+ * Includes configuration for various content elements.
+ */
 export interface ContentSectionProps {
+  /** Grid configuration */
   gridconfig?: gridconfig
+  /** Configuration for confirmation code input */
   confirmationcodeinput?:
     | ExtendedConfirmationCodeInputsProps
     | ExtendedConfirmationCodeInputsProps[]
+  /** Typography configuration */
   typography?: TypographyProps | TypographyProps[]
+  /** Styled component configuration */
   styledcomponent?:
     | ExtendedStyledComponentProps
     | ExtendedStyledComponentProps[]
+  /** Radio group configuration */
   radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
+  /** Link configuration */
   link?: LinkProps | LinkProps[]
+  /** Button configuration */
   button?: ExtendedButtonProps | ExtendedButtonProps[]
+  /** Image configuration */
   image?: ExtendedImageProps | ExtendedImageProps[]
+  /** Pricing configuration */
+  pricing?: ExtendedPricingProps
+  /** Stepper configuration */
+  stepper?: ExtendedStepperProps | ExtendedStepperProps[]
+  /** Transfer list configuration */
+  transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
+  /** Card configuration */
+  card?: ExtendedCardProps | ExtendedCardProps[]
+  /** Code copy configuration */
+  codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
 }
 
 /**
- * RenderContent component renders the content of a section based on the provided props.
- * It uses various custom hooks to generate column configurations for different content types.
- * @param props The props for the RenderContent component.
- * @returns The rendered content section.
+ * RenderContent component handles the rendering of various content elements
+ * based on the provided configuration.
  */
 const RenderContent: React.FC<ContentSectionProps> = ({
   gridconfig,
@@ -50,87 +86,39 @@ const RenderContent: React.FC<ContentSectionProps> = ({
 }) => {
   let columnConfigs: columnconfig[] = []
 
-  /**
-   * Generate column configurations for typography content.
-   */
-  const paragraph = useGridTypography(props)
-  if (paragraph) {
-    if (Array.isArray(paragraph)) {
-      columnConfigs = columnConfigs.concat(paragraph)
-    } else {
-      columnConfigs.push(paragraph)
+  // Helper function to add configurations to columnConfigs
+  const addToColumnConfigs = (config: columnconfig | columnconfig[] | null) => {
+    if (config) {
+      if (Array.isArray(config)) {
+        columnConfigs = columnConfigs.concat(config)
+      } else {
+        columnConfigs.push(config)
+      }
     }
   }
 
-  /**
-   * Generate column configurations for styled component content.
-   */
-  const styledComponent = useStyledComponent(props)
-  if (styledComponent) {
-    columnConfigs = columnConfigs.concat(styledComponent)
-  }
-
-  /**
-   * Generate column configurations for radio group content.
-   */
-  const radioGroup = useGridRadioGroup(props)
-  if (radioGroup) {
-    columnConfigs = columnConfigs.concat(radioGroup)
-  }
-
-  /**
-   * Generate column configurations for confirmation input content.
-   */
-  const confirmationInput = useConfirmationInput({
-    confirmationcodeinput: props.confirmationcodeinput,
-  })
-  if (confirmationInput) {
-    if (Array.isArray(confirmationInput)) {
-      columnConfigs = columnConfigs.concat(confirmationInput)
-    } else {
-      columnConfigs.push(confirmationInput)
-    }
-  }
-
-  /**
-   * Generate column configurations for link content.
-   */
-  const links = useLink(props)
-  if (links) {
-    columnConfigs = columnConfigs.concat(links)
-  }
-
-  /**
-   * Generate column configurations for button content.
-   */
-  const button = useButton(props)
-  if (button) {
-    if (Array.isArray(button)) {
-      button.forEach(btn => {
-        if (btn) {
-          columnConfigs.push(btn)
-        }
-      })
-    } else {
-      columnConfigs.push(button)
-    }
-  }
-
-  /**
-   * Generate column configurations for image content.
-   */
-  const image = useImage(props)
-  if (image) {
-    columnConfigs = columnConfigs.concat(image)
-  }
+  // Add configurations for each content type
+  addToColumnConfigs(useGridTypography(props))
+  addToColumnConfigs(useStyledComponent(props))
+  addToColumnConfigs(useGridRadioGroup(props))
+  addToColumnConfigs(
+    useConfirmationInput({ confirmationcodeinput: props.confirmationcodeinput })
+  )
+  addToColumnConfigs(useLink(props))
+  addToColumnConfigs(useButton(props))
+  addToColumnConfigs(useImage(props))
+  addToColumnConfigs(usePricing(props.pricing))
+  addToColumnConfigs(useStepper(props))
+  addToColumnConfigs(useTransferList(props))
+  addToColumnConfigs(useCard(props))
+  addToColumnConfigs(useCodeCopy(props))
 
   return <CustomGrid gridconfig={gridconfig} columnconfig={columnConfigs} />
 }
 
 /**
- * ContentSection component renders a list of content sections based on the provided grids prop.
- * @param props The props for the ContentSection component.
- * @returns The rendered content sections.
+ * ContentSection component renders multiple grids based on the provided configuration.
+ * @param grids An array of ContentSectionProps, each representing a grid to be rendered.
  */
 export default function ContentSection({
   grids,
