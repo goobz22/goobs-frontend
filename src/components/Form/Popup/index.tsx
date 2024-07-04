@@ -1,23 +1,32 @@
 'use client'
+
+import React from 'react'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { formContainerStyle } from './../../../styles/Form'
-import { TypographyProps } from './../../../components/Typography'
-import React from 'react'
+import { ExtendedTypographyProps } from '../../Content/Structure/typography/useGridTypography'
 
+/**
+ * Props for the PopupForm component.
+ */
 export interface PopupFormProps {
+  /** Title of the popup form */
   title?: string
+  /** Description of the popup form */
   description?: string
+  /** Boolean to control the open state of the dialog */
   open: boolean
+  /** Function to call when closing the dialog */
   onClose: () => void
-  onSubmit?: (formData: FormData) => void
+  /** Array of ContentSectionProps to render the form content */
   grids: ContentSectionProps[]
 }
 
 /**
  * PopupForm component renders a popup form with a title, description, and content sections.
- * It uses the ContentSection component to render the form content.
+ * It uses the ContentSection component to render the form content within a Material-UI Dialog.
+ *
  * @param props The props for the PopupForm component.
  * @returns The rendered popup form.
  */
@@ -27,38 +36,25 @@ function PopupForm({
   open,
   onClose,
   grids,
-  onSubmit,
 }: PopupFormProps) {
   /**
-   * handleSubmit function is called when the form is submitted.
-   * It prevents the default form submission behavior and creates a FormData object from the form data.
-   * If an onSubmit callback is provided, it is called with the FormData object.
-   * @param event The form submission event.
+   * headerGrid contains the grid configuration for the form header.
+   * It includes the title and description as typography items.
    */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    if (onSubmit) {
-      onSubmit(formData)
-    }
-  }
-
-  /**
-   * headerGrid array contains the grid configuration for the form header.
-   * It includes the title and description typography props.
-   */
-  const headerGrid = [
-    {
-      gridconfig: {
-        gridname: 'formHeader',
-        margintop: 0,
-        marginbottom: 1,
-        marginleft: 0,
-        marginright: 0,
-        gridwidth: '100%',
-      },
-      subtitle: {
+  const headerGrid: ContentSectionProps = {
+    gridconfig: {
+      gridname: 'formHeader',
+      margintop: 0,
+      marginbottom: 1,
+      marginleft: 0,
+      marginright: 0,
+      gridwidth: '100%',
+    },
+    typography: [
+      {
         text: title,
+        fontvariant: 'merrih5',
+        fontcolor: 'black',
         columnconfig: {
           row: 1,
           column: 1,
@@ -70,9 +66,11 @@ function PopupForm({
         cellconfig: {
           border: 'none',
         },
-      } as TypographyProps,
-      paragraph: {
+      },
+      {
         text: description,
+        fontvariant: 'merriparagraph',
+        fontcolor: 'black',
         columnconfig: {
           row: 2,
           column: 1,
@@ -83,17 +81,16 @@ function PopupForm({
         cellconfig: {
           border: 'none',
         },
-      } as TypographyProps,
-    },
-  ]
+      },
+    ] as ExtendedTypographyProps[],
+  }
 
-  /**
-   * contentSectionGrids array combines the headerGrid and the provided grids prop.
-   */
-  const contentSectionGrids = [...headerGrid, ...grids]
+  /** Combine the header grid with the provided content grids */
+  const contentSectionGrids: ContentSectionProps[] = [headerGrid, ...grids]
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      {/* Close button */}
       <IconButton
         size="small"
         onClick={onClose}
@@ -106,11 +103,14 @@ function PopupForm({
       >
         <Close />
       </IconButton>
+
+      {/* Form container */}
       <Box
         // @ts-ignore
         sx={formContainerStyle}
       >
-        <form onSubmit={handleSubmit}>
+        <form>
+          {/* Render the form content using ContentSection */}
           <ContentSection grids={contentSectionGrids} />
         </form>
       </Box>
