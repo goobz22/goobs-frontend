@@ -9,13 +9,18 @@ import {
 import { Typography } from './../../components/Typography'
 import { TypographyPropsVariantOverrides } from '@mui/material'
 
+/**
+ * Interface representing a single radio option
+ */
 export interface RadioOption {
-  value: string
   label: string
   fontColor?: string
   fontVariant?: keyof TypographyPropsVariantOverrides
 }
 
+/**
+ * Interface for the props of the RadioGroup component
+ */
 export interface RadioGroupProps {
   label?: string
   options: RadioOption[]
@@ -24,7 +29,6 @@ export interface RadioGroupProps {
   labelFontVariant?: keyof TypographyPropsVariantOverrides
   labelFontColor?: string
   labelText?: string
-  onChange?: (value: string) => void
 }
 
 /**
@@ -41,22 +45,10 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   labelFontVariant,
   labelFontColor,
   labelText,
-  onChange,
 }) => {
-  /**
-   * handleChange function is called when the selected radio button changes.
-   * It invokes the onChange callback with the selected value.
-   * @param event The change event triggered by the radio button.
-   */
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const selectedValue = event.target.value
-    if (onChange) {
-      onChange(selectedValue)
-    }
-  }
-
   return (
     <FormControl>
+      {/* Render the form label */}
       <FormLabel id={`${name}-label`} sx={{ marginBottom: '8px' }}>
         <Typography
           text={labelText || label}
@@ -66,16 +58,16 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           }
         />
       </FormLabel>
+      {/* Render the radio group */}
       <MuiRadioGroup
         aria-labelledby={`${name}-label`}
         defaultValue={defaultValue}
         name={name}
-        onChange={handleChange}
       >
-        {options.map(option => (
+        {/* Render individual radio options */}
+        {options.map((option, index) => (
           <FormControlLabel
-            key={option.value}
-            value={option.value}
+            key={index}
             control={<Radio />}
             label={
               <Typography
