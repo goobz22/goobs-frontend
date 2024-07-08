@@ -44,44 +44,35 @@ import useCodeCopy, {
  * Includes configuration for various content elements.
  */
 export interface ContentSectionProps {
-  /** Grid configuration */
-  gridconfig?: gridconfig
-  /** Configuration for confirmation code input */
-  confirmationcodeinput?:
-    | ExtendedConfirmationCodeInputsProps
-    | ExtendedConfirmationCodeInputsProps[]
-  /** Typography configuration */
-  typography?: TypographyProps | TypographyProps[]
-  /** Styled component configuration */
-  styledcomponent?:
-    | ExtendedStyledComponentProps
-    | ExtendedStyledComponentProps[]
-  /** Radio group configuration */
-  radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
-  /** Link configuration */
-  link?: LinkProps | LinkProps[]
-  /** Button configuration */
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
-  /** Image configuration */
-  image?: ExtendedImageProps | ExtendedImageProps[]
-  /** Pricing configuration */
-  pricing?: ExtendedPricingProps
-  /** Stepper configuration */
-  stepper?: ExtendedStepperProps | ExtendedStepperProps[]
-  /** Transfer list configuration */
-  transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
-  /** Card configuration */
-  card?: ExtendedCardProps | ExtendedCardProps[]
-  /** Code copy configuration */
-  codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
+  grids: Array<{
+    grid: {
+      gridconfig?: gridconfig
+    }
+    confirmationcodeinput?:
+      | ExtendedConfirmationCodeInputsProps
+      | ExtendedConfirmationCodeInputsProps[]
+    typography?: TypographyProps | TypographyProps[]
+    styledcomponent?:
+      | ExtendedStyledComponentProps
+      | ExtendedStyledComponentProps[]
+    radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
+    link?: LinkProps | LinkProps[]
+    button?: ExtendedButtonProps | ExtendedButtonProps[]
+    image?: ExtendedImageProps | ExtendedImageProps[]
+    pricing?: ExtendedPricingProps
+    stepper?: ExtendedStepperProps | ExtendedStepperProps[]
+    transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
+    card?: ExtendedCardProps | ExtendedCardProps[]
+    codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
+  }>
 }
 
 /**
  * RenderContent component handles the rendering of various content elements
  * based on the provided configuration.
  */
-const RenderContent: React.FC<ContentSectionProps> = ({
-  gridconfig,
+const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
+  grid,
   ...props
 }) => {
   let columnConfigs: columnconfig[] = []
@@ -113,22 +104,20 @@ const RenderContent: React.FC<ContentSectionProps> = ({
   addToColumnConfigs(useCard(props))
   addToColumnConfigs(useCodeCopy(props))
 
-  return <CustomGrid gridconfig={gridconfig} columnconfig={columnConfigs} />
+  return (
+    <CustomGrid gridconfig={grid.gridconfig} columnconfig={columnConfigs} />
+  )
 }
 
 /**
  * ContentSection component renders multiple grids based on the provided configuration.
  * @param grids An array of ContentSectionProps, each representing a grid to be rendered.
  */
-export default function ContentSection({
-  grids,
-}: {
-  grids: ContentSectionProps[]
-}) {
+export default function ContentSection({ grids }: ContentSectionProps) {
   return (
     <>
-      {grids.map((grid, index) => (
-        <RenderContent key={index} {...grid} />
+      {grids.map((gridProps, index) => (
+        <RenderContent key={index} {...gridProps} />
       ))}
     </>
   )

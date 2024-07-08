@@ -38,6 +38,7 @@ import PricingTable, { PricingProps } from './components/PricingTable'
 import { CustomStepper, CustomStepperProps } from './components/Stepper'
 import CustomToolbar, { ToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
+import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
 import React from 'react'
 
 // Animations
@@ -139,6 +140,9 @@ declare type CustomToolbarComponentProps = React.ComponentProps<
 declare type TransferListComponentProps = React.ComponentProps<
   typeof TransferList
 >
+declare type StyledTooltipComponentProps = React.ComponentProps<
+  typeof StyledTooltip
+>
 
 // Named exports
 export { CustomButton }
@@ -157,6 +161,7 @@ export { PricingTable }
 export { CustomStepper }
 export { CustomToolbar }
 export { TransferList }
+export { StyledTooltip }
 export { formContainerStyle }
 
 // Exporting ExtendedButtonProps
@@ -185,6 +190,7 @@ export type { PricingProps }
 export type { CustomStepperProps }
 export type { ToolbarProps }
 export type { TransferListProps }
+export type { CustomTooltipProps }
 
 // Additional type exports for the newly declared types
 export type { TypographyComponentProps }
@@ -200,6 +206,7 @@ export type { PricingTableComponentProps }
 export type { CustomStepperComponentProps }
 export type { CustomToolbarComponentProps }
 export type { TransferListComponentProps }
+export type { StyledTooltipComponentProps }
 
 // Animation type export
 export type { Animation }

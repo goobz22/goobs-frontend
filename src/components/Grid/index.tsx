@@ -13,8 +13,8 @@ export type BorderProp = 'none' | 'solid'
  * Configuration for individual columns within the grid
  */
 export interface columnconfig {
-  row?: number
-  column?: number
+  row: number
+  column: number
   gridname?: string
   alignment?: Alignment
   margintop?: number
