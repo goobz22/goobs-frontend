@@ -2,14 +2,19 @@ import React from 'react'
 import { Typography, TypographyProps } from '../../../Typography'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedTypographyProps extends TypographyProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedTypographyProps
+  extends Omit<TypographyProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
 const useGridTypography = (grid: {
   typography?: ExtendedTypographyProps | ExtendedTypographyProps[]
-}) => {
+}): columnconfig | columnconfig[] | null => {
   if (!grid.typography) return null
 
   const renderTypography = (
@@ -24,6 +29,17 @@ const useGridTypography = (grid: {
       cellconfig,
       ...restProps
     } = typographyItem
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
 
     return {
       ...itemColumnConfig,

@@ -4,8 +4,13 @@ import StyledComponent, {
 } from '../../../../components/StyledComponent'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedStyledComponentProps extends StyledComponentProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedStyledComponentProps
+  extends Omit<StyledComponentProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
@@ -13,7 +18,7 @@ const useStyledComponent = (grid: {
   styledcomponent?:
     | ExtendedStyledComponentProps
     | ExtendedStyledComponentProps[]
-}) => {
+}): columnconfig | columnconfig[] | null => {
   if (!grid.styledcomponent) return null
 
   const renderStyledComponent = (
@@ -40,16 +45,27 @@ const useStyledComponent = (grid: {
       onChange,
       defaultValue,
       inputRef,
-      columnconfig,
+      columnconfig: itemColumnConfig,
       valuestatus,
       cellconfig,
       required,
       ...restProps
     } = component
 
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
+
     // Merge the cellconfig with the columnconfig
     const mergedConfig: columnconfig = {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
       },
@@ -87,7 +103,7 @@ const useStyledComponent = (grid: {
   if (Array.isArray(grid.styledcomponent)) {
     return grid.styledcomponent.map(renderStyledComponent)
   } else {
-    return [renderStyledComponent(grid.styledcomponent, 0)]
+    return renderStyledComponent(grid.styledcomponent, 0)
   }
 }
 

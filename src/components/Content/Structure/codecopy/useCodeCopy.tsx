@@ -3,8 +3,13 @@ import React from 'react'
 import CodeCopy, { CodeCopyProps } from './../../../../components/CodeCopy'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedCodeCopyProps extends CodeCopyProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedCodeCopyProps
+  extends Omit<CodeCopyProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
@@ -24,6 +29,17 @@ const useCodeCopy = (grid: {
       cellconfig,
       ...restProps
     } = codeCopyProps
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
 
     // Merge the existing columnconfig with the new props
     const mergedConfig: columnconfig = {

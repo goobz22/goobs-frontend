@@ -10,7 +10,7 @@ import useStyledComponent, {
 } from '../../components/Content/Structure/styledcomponent/useStyledComponent'
 import useGridRadioGroup, {
   ExtendedRadioGroupProps,
-} from '../../components/Content/Structure/radiogroup/useGridRadioGroup'
+} from './Structure/radiogroup/useRadioGroup'
 import useConfirmationInput, {
   ExtendedConfirmationCodeInputsProps,
 } from '../../components/Content/Structure/confirmationinput/useConfirmationInput'

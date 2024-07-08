@@ -5,9 +5,13 @@ import ConfirmationCodeInputs, {
 } from '../../../ConfirmationCodeInput'
 import { columnconfig, cellconfig } from '../../../Grid'
 
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
 export interface ExtendedConfirmationCodeInputsProps
-  extends ConfirmationCodeInputsProps {
-  columnconfig?: columnconfig
+  extends Omit<ConfirmationCodeInputsProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
@@ -29,6 +33,17 @@ const useConfirmationInput = (grid: {
       cellconfig,
       ...restProps
     } = confirmationCodeInputProps
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
 
     return {
       ...itemColumnConfig,

@@ -3,6 +3,10 @@ import React from 'react'
 import Image from 'next/image'
 import { columnconfig, cellconfig } from '../../../Grid'
 
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
 type ImageProps = {
   url: string
   alt?: string
@@ -11,13 +15,13 @@ type ImageProps = {
 }
 
 export interface ExtendedImageProps extends Omit<ImageProps, 'columnconfig'> {
-  columnconfig?: columnconfig
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
 const useImage = (grid: {
   image?: ExtendedImageProps | ExtendedImageProps[]
-}) => {
+}): columnconfig | columnconfig[] | null => {
   if (!grid.image) return null
 
   const renderImage = (
@@ -32,7 +36,20 @@ const useImage = (grid: {
       ...restProps
     } = imageItem
 
-    if (!url) return itemColumnConfig || {}
+    if (!url) {
+      throw new Error('URL is required for image')
+    }
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
 
     return {
       ...itemColumnConfig,
@@ -55,7 +72,7 @@ const useImage = (grid: {
   if (Array.isArray(grid.image)) {
     return grid.image.map(renderImage)
   } else {
-    return [renderImage(grid.image, 0)]
+    return renderImage(grid.image, 0)
   }
 }
 

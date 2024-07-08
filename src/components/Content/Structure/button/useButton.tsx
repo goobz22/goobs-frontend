@@ -5,7 +5,7 @@ import { columnconfig, cellconfig } from '../../../Grid'
 import { TypographyPropsVariantOverrides } from '@mui/material'
 
 export interface ExtendedButtonProps extends CustomButtonProps {
-  columnconfig?: columnconfig
+  columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
@@ -39,8 +39,19 @@ const useButton = (grid: {
       ...restProps
     } = buttonItem
 
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
+
     const mergedConfig: columnconfig = {
-      ...itemColumnConfig,
+      ...(itemColumnConfig as columnconfig),
       cellconfig: {
         ...cellconfig,
       },

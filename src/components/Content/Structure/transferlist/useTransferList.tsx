@@ -2,35 +2,53 @@ import React from 'react'
 import TransferList, { TransferListProps } from '../../../TransferList'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedTransferListProps extends TransferListProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedTransferListProps
+  extends Omit<TransferListProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
 const useTransferList = (grid: {
   transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
-}) => {
+}): columnconfig | columnconfig[] | null => {
   if (!grid.transferlist) return null
 
   const renderTransferList = (
-    transferListItem: ExtendedTransferListProps
+    transferListItem: ExtendedTransferListProps,
+    index: number
   ): columnconfig => {
     const {
       leftItems,
       rightItems,
       onChange,
-      columnconfig,
+      columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
     } = transferListItem
 
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
+
     const mergedConfig: columnconfig = {
-      ...columnconfig,
+      ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
       },
       component: (
         <TransferList
+          key={`transferlist-${index}`}
           leftItems={leftItems}
           rightItems={rightItems}
           onChange={onChange}
@@ -38,14 +56,15 @@ const useTransferList = (grid: {
         />
       ),
     }
-
     return mergedConfig
   }
 
   if (Array.isArray(grid.transferlist)) {
-    return grid.transferlist.map(renderTransferList)
+    return grid.transferlist.map((item, index) =>
+      renderTransferList(item, index)
+    )
   } else {
-    return renderTransferList(grid.transferlist)
+    return renderTransferList(grid.transferlist, 0)
   }
 }
 

@@ -7,8 +7,8 @@ import { Typography } from '../Typography'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
 import StyledComponent from '../StyledComponent'
-import CustomGrid from '@/components/Grid'
-import { columnconfig, gridconfig } from '@/components/Grid/'
+import CustomGrid from './../../components/Grid'
+import { columnconfig, gridconfig } from './../../components/Grid/'
 import defaultConfig from './defaultconfig'
 import { useRouter } from 'next/navigation'
 import {
@@ -19,6 +19,11 @@ import {
   aqua,
 } from '../../styles/palette'
 
+type TiedToPackage = {
+  tiedtopackages?: string
+  columnconfig?: Omit<columnconfig, 'component'>
+}
+
 /**
  * Interface for sub-features in the pricing table
  */
@@ -26,15 +31,8 @@ interface SubFeature {
   title: string
   titlelink?: string
   infopopuptext?: string
-  columnconfig?: columnconfig
-  tiedtopackage?: {
-    row?: number
-    column?: number
-    tiedtopackages?: string
-    mobilewidth?: string
-    tabletwidth?: string
-    computerwidth?: string
-  }
+  columnconfig?: Omit<columnconfig, 'component'>
+  tiedtopackage?: TiedToPackage
 }
 
 /**
@@ -45,15 +43,8 @@ interface Feature {
   infopopuptext?: string
   titlelink?: string
   subfeatures: SubFeature[]
-  columnconfig?: columnconfig
-  tiedtopackage?: {
-    row?: number
-    column?: number
-    tiedtopackages?: string
-    mobilewidth?: string
-    tabletwidth?: string
-    computerwidth?: string
-  }
+  columnconfig?: Omit<columnconfig, 'component'>
+  tiedtopackage?: TiedToPackage
 }
 
 /**
@@ -184,11 +175,7 @@ const PricingTable: React.FC<PricingProps> = props => {
         featureColumnConfigs.push({
           ...feature.columnconfig,
           component: (
-            <Box
-              // @ts-ignore
-              display="flex"
-              alignItems="center"
-            >
+            <Box display="flex" alignItems="center">
               <Typography
                 text={feature.title}
                 fontcolor={black.main}
@@ -211,13 +198,13 @@ const PricingTable: React.FC<PricingProps> = props => {
               )}
             </Box>
           ),
-        })
+        } as columnconfig)
       }
 
       // Render feature checkbox
-      if (feature.tiedtopackage) {
-        featureColumnConfigs.push({
-          ...feature.tiedtopackage,
+      if (feature.tiedtopackage && feature.tiedtopackage.columnconfig) {
+        const tiedConfig: columnconfig = {
+          ...feature.tiedtopackage.columnconfig,
           cellconfig: {
             border: 'solid',
             minHeight: '40px',
@@ -225,12 +212,10 @@ const PricingTable: React.FC<PricingProps> = props => {
           component: feature.tiedtopackage.tiedtopackages ? (
             <CheckCircleIcon />
           ) : (
-            <Box
-              // @ts-ignore
-              sx={{ width: '24px', height: '24px' }}
-            />
+            <Box sx={{ width: '24px', height: '24px' }} />
           ),
-        })
+        }
+        featureColumnConfigs.push(tiedConfig)
       }
 
       // Render subfeatures
@@ -262,13 +247,13 @@ const PricingTable: React.FC<PricingProps> = props => {
                 )}
               </Box>
             ),
-          })
+          } as columnconfig)
         }
 
         // Render subfeature checkbox
-        if (subFeature.tiedtopackage) {
-          featureColumnConfigs.push({
-            ...subFeature.tiedtopackage,
+        if (subFeature.tiedtopackage && subFeature.tiedtopackage.columnconfig) {
+          const tiedConfig: columnconfig = {
+            ...subFeature.tiedtopackage.columnconfig,
             cellconfig: {
               border: 'solid',
               minHeight: '40px',
@@ -278,7 +263,8 @@ const PricingTable: React.FC<PricingProps> = props => {
             ) : (
               <Box sx={{ width: '24px', height: '24px' }} />
             ),
-          })
+          }
+          featureColumnConfigs.push(tiedConfig)
         }
       })
     }

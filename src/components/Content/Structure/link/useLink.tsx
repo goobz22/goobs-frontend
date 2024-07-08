@@ -4,15 +4,20 @@ import Link from 'next/link'
 import { Typography, TypographyProps } from '../../../Typography'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedTypographyProps extends TypographyProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedTypographyProps
+  extends Omit<TypographyProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
-  link?: string
+  link: string
 }
 
 const useLink = (grid: {
   link?: ExtendedTypographyProps | ExtendedTypographyProps[]
-}) => {
+}): columnconfig | columnconfig[] | null => {
   if (!grid.link) return null
 
   const renderLink = (
@@ -31,6 +36,17 @@ const useLink = (grid: {
 
     if (!link) {
       throw new Error('Link property is required in ExtendedTypographyProps')
+    }
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
     }
 
     return {
@@ -53,7 +69,7 @@ const useLink = (grid: {
   if (Array.isArray(grid.link)) {
     return grid.link.map(renderLink)
   } else {
-    return [renderLink(grid.link, 0)]
+    return renderLink(grid.link, 0)
   }
 }
 

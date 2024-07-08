@@ -3,8 +3,12 @@ import React from 'react'
 import { columnconfig, cellconfig } from '../../../Grid'
 import Card, { CardProps } from './../../../../components/Card'
 
-export interface ExtendedCardProps extends CardProps {
-  columnconfig?: columnconfig
+type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
+  component?: columnconfig['component']
+}
+
+export interface ExtendedCardProps extends Omit<CardProps, 'columnconfig'> {
+  columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
 
@@ -22,6 +26,17 @@ const useCard = (grid: {
       cellconfig,
       ...restProps
     } = cardProps
+
+    if (
+      !itemColumnConfig ||
+      typeof itemColumnConfig !== 'object' ||
+      typeof itemColumnConfig.row !== 'number' ||
+      typeof itemColumnConfig.column !== 'number'
+    ) {
+      throw new Error(
+        'columnconfig must be an object with row and column as numbers'
+      )
+    }
 
     // Merge the existing columnconfig with the new props
     const mergedConfig: columnconfig = {
