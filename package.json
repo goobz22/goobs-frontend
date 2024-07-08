@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.7.56",
+  "version": "0.7.57",
   "description": "A comprehensive React-based UI library built on Material-UI, offering a wide range of customizable components including grids, typography, buttons, cards, forms, navigation, pricing tables, steppers, tooltips, accordions, and more. Designed for building responsive and consistent user interfaces with advanced features like form validation, theming, and code syntax highlighting.",
   "license": "MIT",
   "main": "./src/index.ts",
