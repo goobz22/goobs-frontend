@@ -1,16 +1,27 @@
 import React, { useState } from 'react'
 import { InputAdornment, Button, Box } from '@mui/material'
-import SearchIcon from '../../components/Icons/Search'
-import ShowHideEyeIcon from '../../components/Icons/ShowHideEye'
-import DownArrowFilledIcon from '../../components/Icons/DownArrowFilled'
-import { AdornmentProps } from './index'
+import SearchIcon from '../../Icons/Search'
+import ShowHideEyeIcon from '../../Icons/ShowHideEye'
+import DownArrowFilledIcon from '../../Icons/DownArrowFilled'
+
+/**
+ * Props interface for the Adornment components
+ */
+export interface AdornmentProps {
+  componentvariant: string
+  iconcolor?: string
+  passwordVisible?: boolean
+  marginRight?: number | string
+  handleIncrement?: () => void
+  handleDecrement?: () => void
+}
 
 /**
  * StartAdornment component renders the start adornment for the input component.
  * @param props The props for the StartAdornment component.
  * @returns The start adornment component or null.
  */
-const StartAdornment: React.FC<AdornmentProps> = props => {
+export const StartAdornment: React.FC<AdornmentProps> = props => {
   const { componentvariant, iconcolor } = props
   // Render the search icon for the search bar variant
   if (componentvariant === 'searchbar') {
@@ -28,26 +39,22 @@ const StartAdornment: React.FC<AdornmentProps> = props => {
  * @param props The props for the EndAdornment component.
  * @returns The end adornment component or null.
  */
-const EndAdornment: React.FC<AdornmentProps> = props => {
+export const EndAdornment: React.FC<AdornmentProps> = props => {
   const {
     componentvariant,
     passwordVisible,
     handleIncrement,
     handleDecrement,
   } = props
-
   const [isPasswordVisible, setIsPasswordVisible] = useState(
     passwordVisible || false
   )
-
   const adornmentStyle = {
     cursor: 'pointer',
   }
-
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible)
   }
-
   // Render the show/hide eye icon for the password variant
   if (componentvariant === 'password') {
     return (
@@ -118,5 +125,3 @@ const EndAdornment: React.FC<AdornmentProps> = props => {
   }
   return null
 }
-
-export { StartAdornment, EndAdornment }

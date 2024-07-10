@@ -1,3 +1,4 @@
+// File: src/components/PopupForm/index.tsx
 'use client'
 import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import { Close } from '@mui/icons-material'
@@ -20,9 +21,11 @@ export interface PopupFormProps {
   /** Function to call when closing the dialog */
   onClose: () => void
   /** ContentSectionProps to render the form content */
-  grids: ContentSectionProps['grids']
+  grids?: ContentSectionProps['grids']
   /** Optional function to handle form submission */
   onSubmit?: () => void
+  /** Optional direct content to render */
+  content?: React.ReactNode
 }
 
 /**
@@ -35,7 +38,7 @@ export interface PopupFormProps {
  * @returns The rendered popup form.
  */
 const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
-  ({ title, description, open, onClose, grids, onSubmit }, ref) => {
+  ({ title, description, open, onClose, grids, onSubmit, content }, ref) => {
     const [submittedData, setSubmittedData] = React.useState<
       Record<string, string>
     >({})
@@ -84,7 +87,7 @@ const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
     /** Combine the header grid with the provided content grids */
     const contentSectionGrids: ContentSectionProps['grids'] = [
       headerGrid,
-      ...grids,
+      ...(grids || []),
     ]
 
     /**
@@ -107,9 +110,24 @@ const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
       }
     }
 
+    /**
+     * Renders the header typography elements
+     */
+    const renderHeaderTypography = () => {
+      if (Array.isArray(headerGrid.typography)) {
+        return headerGrid.typography.map(
+          (typo: ExtendedTypographyProps, index: number) => (
+            <Typography key={index} {...typo} />
+          )
+        )
+      } else if (headerGrid.typography) {
+        return <Typography {...headerGrid.typography} />
+      }
+      return null
+    }
+
     return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        {/* Close button */}
         <IconButton
           size="small"
           onClick={onClose}
@@ -122,16 +140,20 @@ const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
         >
           <Close />
         </IconButton>
-        {/* Form container */}
         <Box
           // @ts-ignore
           sx={formContainerStyle}
         >
           <form onSubmit={handleSubmit} ref={internalFormRef}>
-            {/* Render the form content using ContentSection */}
-            <ContentSection grids={contentSectionGrids} />
+            {content ? (
+              <>
+                {renderHeaderTypography()}
+                {content}
+              </>
+            ) : (
+              <ContentSection grids={contentSectionGrids} />
+            )}
           </form>
-          {/* Display submitted data */}
           {Object.keys(submittedData).length > 0 && (
             <Box mt={2}>
               <Typography fontvariant="merrih6" text="Submitted Data:" />

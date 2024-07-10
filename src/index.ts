@@ -9,7 +9,6 @@ import CustomGrid, {
 } from './components/Grid'
 import StyledComponent, {
   StyledComponentProps,
-  AdornmentProps,
 } from './components/StyledComponent'
 import Typography, {
   FontFamily,
@@ -172,7 +171,7 @@ export type { CustomButtonProps }
 export type { ButtonAlignment }
 export type { CustomGridProps }
 export type { Alignment, BorderProp, columnconfig, gridconfig, cellconfig }
-export type { StyledComponentProps, AdornmentProps }
+export type { StyledComponentProps }
 export type {
   FontFamily,
   TypographyVariant,

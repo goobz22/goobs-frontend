@@ -42,9 +42,6 @@ const useStyledComponent = (grid: {
       label,
       shrunklabellocation,
       value,
-      onChange,
-      defaultValue,
-      inputRef,
       columnconfig: itemColumnConfig,
       valuestatus,
       cellconfig,
@@ -88,9 +85,6 @@ const useStyledComponent = (grid: {
           label={label}
           shrunklabellocation={shrunklabellocation}
           value={value}
-          onChange={onChange}
-          defaultValue={defaultValue}
-          inputRef={inputRef}
           valuestatus={valuestatus}
           required={required}
           {...restProps}

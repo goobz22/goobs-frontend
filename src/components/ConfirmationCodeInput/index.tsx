@@ -4,12 +4,16 @@ import { Input, Box } from '@mui/material'
 import { useCodeConfirmation } from './utils/useCodeConfirmation'
 import { columnconfig } from '../../components/Grid'
 import { red, green } from '../../styles/palette'
+import { set } from 'goobs-cache'
 
 export interface ConfirmationCodeInputsProps {
   identifier?: string
   columnconfig?: columnconfig
   isValid: boolean
   codeLength?: number
+  'aria-label'?: string
+  'aria-required'?: boolean
+  'aria-invalid'?: boolean
 }
 
 /**
@@ -21,12 +25,17 @@ export interface ConfirmationCodeInputsProps {
 const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
   isValid,
+  'aria-label': ariaLabel,
+  'aria-required': ariaRequired,
+  'aria-invalid': ariaInvalid,
   ...props
 }) => {
-  const { handleCodeChange, handleKeyDown } = useCodeConfirmation({
-    codeLength,
-    isValid,
-  })
+  const { handleCodeChange, handleKeyDown, combinedCode } = useCodeConfirmation(
+    {
+      codeLength,
+      isValid,
+    }
+  )
 
   /**
    * handleChange function is called when the value of an input field changes.
@@ -63,8 +72,29 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
     handleKeyDown(event, index)
   }
 
+  /**
+   * useEffect hook is used to set the verification code into an atom using goobs-cache.
+   * It sets the code whenever the combinedCode changes and the code is valid.
+   */
+  React.useEffect(() => {
+    if (isValid) {
+      set(
+        'verificationCode',
+        combinedCode,
+        new Date(Date.now() + 3600000),
+        'memory'
+      )
+    }
+  }, [combinedCode, isValid])
+
   return (
-    <Box display="flex" flexDirection="row" alignItems="center">
+    <Box
+      display="flex"
+      flexDirection="row"
+      alignItems="center"
+      role="group"
+      aria-label={ariaLabel || 'Confirmation Code'}
+    >
       <Box display="flex" gap={1}>
         {Array.from({ length: codeLength }, (_, index) => (
           <Input
@@ -72,6 +102,9 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
             name={`code${index + 1}`}
             inputProps={{
               maxLength: 1,
+              'aria-label': `Code Digit ${index + 1}`,
+              'aria-required': ariaRequired,
+              'aria-invalid': ariaInvalid,
             }}
             sx={{
               border: '1px solid',
@@ -100,6 +133,8 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
         borderRadius="50%"
         bgcolor={isValid ? green.main : red.main}
         ml={2}
+        role="status"
+        aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
       />
     </Box>
   )
