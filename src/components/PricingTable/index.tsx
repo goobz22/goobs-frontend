@@ -88,9 +88,7 @@ const PricingTable: React.FC<PricingProps> = props => {
   const config: PricingProps = { ...defaultConfig, ...props }
 
   // State for selected package
-  const [selectedPackage, setSelectedPackage] = useState<string>(
-    'goobs-frontend-unlimited'
-  )
+  const [selectedPackage] = useState<string>('goobs-frontend-unlimited')
 
   const router = useRouter()
 
@@ -130,8 +128,7 @@ const PricingTable: React.FC<PricingProps> = props => {
             value={selectedPackage}
             outlinecolor={black.main}
             backgroundcolor={semiTransparentBlack.main}
-            options={['goobs-frontend-unlimited']}
-            onChange={e => setSelectedPackage(e.target.value)}
+            options={['ThothOS']}
           />
         ),
       })
