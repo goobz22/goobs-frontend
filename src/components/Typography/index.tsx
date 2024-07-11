@@ -3,18 +3,11 @@
 import {
   Typography as MuiTypography,
   TypographyProps as MuiTypographyProps,
-  TypographyPropsVariantOverrides as MuiTypographyPropsVariantOverrides,
 } from '@mui/material'
 import React from 'react'
 
-/**
- * Type definition for supported font families
- */
 export type FontFamily = 'arapey' | 'inter' | 'merri'
 
-/**
- * Type definition for typography variants
- */
 export type TypographyVariant =
   | 'h1'
   | 'h2'
@@ -26,33 +19,15 @@ export type TypographyVariant =
   | 'helperheader'
   | 'helperfooter'
 
-/**
- * Extend Material-UI's TypographyPropsVariantOverrides to include custom variants
- */
-declare module '@mui/material/Typography' {
-  interface TypographyPropsVariantOverrides
-    extends Record<`${FontFamily}${TypographyVariant}`, true> {}
-}
+type CustomTypographyVariant = `${FontFamily}${TypographyVariant}`
 
-/**
- * Custom type for TypographyPropsVariantOverrides
- */
-export type TypographyPropsVariantOverrides =
-  MuiTypographyPropsVariantOverrides &
-    Record<`${FontFamily}${TypographyVariant}`, true>
-
-/**
- * Props interface for the custom Typography component
- */
-export interface TypographyProps {
+export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   text?: string
-  fontvariant?: keyof TypographyPropsVariantOverrides
+  fontvariant?: CustomTypographyVariant
   fontcolor?: string
+  variant?: CustomTypographyVariant | MuiTypographyProps['variant']
 }
 
-/**
- * arapeyStyles object contains the styles for typography variants using the Arapey font family.
- */
 const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Arapey, serif',
@@ -110,9 +85,6 @@ const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
-/**
- * interStyles object contains the styles for typography variants using the Inter font family.
- */
 const interStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Inter, sans-serif',
@@ -170,9 +142,6 @@ const interStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
-/**
- * merriStyles object contains the styles for typography variants using the Merriweather font family.
- */
 const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
   h1: {
     fontFamily: 'Merriweather, serif',
@@ -230,43 +199,38 @@ const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
-/**
- * Typography component is a wrapper around MuiTypography that applies custom styles based on the fontvariant prop.
- * It supports different font families (Arapey, Inter, Merriweather) and typography variants (h1, h2, h3, h4, h5, h6, paragraph, helperheader, helperfooter).
- * @param {TypographyProps & MuiTypographyProps} props - The props for the Typography component.
- * @returns {JSX.Element} The rendered Typography component.
- */
-export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
+export const Typography: React.FC<TypographyProps> = ({
   text,
   fontcolor,
   fontvariant,
+  variant,
   ...rest
 }) => {
   let variantStyle: React.CSSProperties = {}
+  const actualVariant = fontvariant || variant
 
-  if (fontvariant) {
-    // Determine the font family based on the fontvariant prefix
-    const fontFamily = fontvariant.startsWith('arapey')
+  if (typeof actualVariant === 'string') {
+    const fontFamily = actualVariant.startsWith('arapey')
       ? 'arapey'
-      : fontvariant.startsWith('inter')
+      : actualVariant.startsWith('inter')
         ? 'inter'
-        : fontvariant.startsWith('merri')
+        : actualVariant.startsWith('merri')
           ? 'merri'
           : null
 
     if (fontFamily) {
-      // Extract the variant part from the fontvariant string
-      const variant = fontvariant.slice(fontFamily.length) as TypographyVariant
-      // Apply the appropriate style based on the font family
+      const variantPart = actualVariant.slice(
+        fontFamily.length
+      ) as TypographyVariant
       switch (fontFamily) {
         case 'arapey':
-          variantStyle = arapeyStyles[variant] || {}
+          variantStyle = arapeyStyles[variantPart] || {}
           break
         case 'inter':
-          variantStyle = interStyles[variant] || {}
+          variantStyle = interStyles[variantPart] || {}
           break
         case 'merri':
-          variantStyle = merriStyles[variant] || {}
+          variantStyle = merriStyles[variantPart] || {}
           break
       }
     }
@@ -278,7 +242,7 @@ export const Typography: React.FC<TypographyProps & MuiTypographyProps> = ({
         color: fontcolor,
         ...variantStyle,
       }}
-      variant={fontvariant}
+      variant={actualVariant as MuiTypographyProps['variant']}
       {...rest}
     >
       {text}
