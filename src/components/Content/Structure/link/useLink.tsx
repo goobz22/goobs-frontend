@@ -55,11 +55,12 @@ const useLink = (grid: {
         ...cellconfig,
       },
       component: (
-        <Link key={`link-${index}`} href={link} passHref {...restProps}>
+        <Link key={`link-${index}`} href={link} passHref>
           <Typography
             text={text}
             fontvariant={fontvariant}
             fontcolor={fontcolor}
+            {...restProps}
           />
         </Link>
       ),
