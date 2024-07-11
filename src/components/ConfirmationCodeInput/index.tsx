@@ -82,7 +82,7 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
         'verificationCode',
         combinedCode,
         new Date(Date.now() + 3600000),
-        'memory'
+        'client'
       )
     }
   }, [combinedCode, isValid])
