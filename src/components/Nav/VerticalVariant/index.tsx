@@ -4,7 +4,6 @@ import React from 'react'
 import {
   Drawer,
   Box,
-  Typography,
   Stack,
   Divider,
   MenuItem,
@@ -24,33 +23,25 @@ import {
   ocean,
   semiTransparentWhite,
 } from '../../../styles/palette'
+import { Typography } from './../../Typography'
 
-/**
- * Interface for the props of the VerticalVariant component
- */
 export interface VerticalVariantProps {
-  items: (NavProps | SubNav | View)[] // Array of navigation items
-  showSearchbar: boolean // Flag to show/hide search bar
-  showDropdown: boolean // Flag to show/hide dropdown
-  showTitle: boolean // Flag to show/hide title
-  showLine: boolean // Flag to show/hide divider line
-  verticalNavTitle: string // Title for the vertical navigation
-  dropdownLabel: string // Label for the dropdown
-  searchbarLabel: string // Label for the search bar
-  anchor: 'left' | 'right' // Position of the drawer
-  expandedNavs: string[] // Array of expanded navigation items
-  setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>> // Function to set expanded navs
-  expandedSubnavs: string[] // Array of expanded subnavigation items
-  setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>> // Function to set expanded subnavs
-  verticalNavWidth: string // Width of the vertical navigation
-  selectedNav?: string // Currently selected navigation item
+  items: (NavProps | SubNav | View)[]
+  showSearchbar: boolean
+  showDropdown: boolean
+  showTitle: boolean
+  showLine: boolean
+  verticalNavTitle: string
+  dropdownLabel: string
+  searchbarLabel: string
+  anchor: 'left' | 'right'
+  expandedNavs: string[]
+  setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>>
+  expandedSubnavs: string[]
+  setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
+  verticalNavWidth: string
 }
 
-/**
- * VerticalVariant component for rendering a vertical navigation drawer
- * @param {VerticalVariantProps} props - The props for the component
- * @returns {JSX.Element} The rendered VerticalVariant component
- */
 function VerticalVariant({
   items,
   showSearchbar,
@@ -66,30 +57,13 @@ function VerticalVariant({
   expandedSubnavs,
   setExpandedSubnavs,
   verticalNavWidth,
-  selectedNav,
 }: VerticalVariantProps) {
   const router = useRouter()
 
-  // Filter and map navigation options for the dropdown
   const navOptions = items
     .filter((item): item is NavProps => 'title' in item && 'subnavs' in item)
     .map(nav => nav.title ?? '')
 
-  /**
-   * Handle dropdown change event
-   * @param {React.ChangeEvent<{ value: unknown }>} event - The change event
-   */
-  const handleDropdownChange = (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => {
-    const selectedOption = event.target.value as string
-    console.log('handleDropdownChange - selectedOption:', selectedOption)
-  }
-
-  /**
-   * Handle navigation item click event
-   * @param {NavProps} nav - The clicked navigation item
-   */
   const handleNavClick = (nav: NavProps) => {
     console.log('Clicked Nav:', nav.title)
     if (nav.trigger === 'route') {
@@ -103,20 +77,12 @@ function VerticalVariant({
     }
   }
 
-  /**
-   * Render a navigation item (NavProps, SubNav, or View)
-   * @param {NavProps | SubNav | View} item - The item to render
-   * @param {number} level - The nesting level of the item
-   * @param {string} activeAndHoverColor - The color for active and hover states
-   * @returns {JSX.Element | null} The rendered item
-   */
   const renderItem = (
     item: NavProps | SubNav | View,
     level: number,
     activeAndHoverColor = semiTransparentWhite.main
   ) => {
     if ('title' in item && 'subnavs' in item) {
-      // Render NavProps item
       const nav = item as NavProps
       const isExpanded = expandedNavs.includes(nav.title ?? '')
       return (
@@ -180,15 +146,12 @@ function VerticalVariant({
             }}
             onClick={() => handleNavClick(nav)}
           >
-            {nav.trigger === 'route' || nav.trigger === 'onClick' ? (
-              <Typography variant="merrih5" color={white.main} pl={4 * level}>
-                {nav.title}
-              </Typography>
-            ) : (
-              <Typography variant="merrih5" color={white.main} pl={4 * level}>
-                {nav.title}
-              </Typography>
-            )}
+            <Typography
+              fontvariant="merrih5"
+              fontcolor={white.main}
+              text={nav.title ?? ''}
+              marginLeft={4 * level}
+            />
           </AccordionSummary>
           <AccordionDetails sx={{ border: 'none', p: 0 }}>
             <List sx={{ py: 0 }}>
@@ -200,7 +163,6 @@ function VerticalVariant({
         </MuiAccordion>
       )
     } else if ('title' in item && 'views' in item) {
-      // Render SubNav item
       const subnav = item as SubNav
       const isExpanded = expandedSubnavs.includes(subnav.title ?? '')
       if (subnav.views?.length === 0) {
@@ -225,7 +187,11 @@ function VerticalVariant({
                 },
               }}
             >
-              <Typography variant="merrih6">{subnav.title}</Typography>
+              <Typography
+                fontvariant="merrih6"
+                text={subnav.title ?? ''}
+                fontcolor={white.main}
+              />
             </MenuItem>
           </Link>
         )
@@ -290,9 +256,12 @@ function VerticalVariant({
                 },
               }}
             >
-              <Typography variant="merrih6" color={white.main} pl={4}>
-                {subnav.title}
-              </Typography>
+              <Typography
+                fontvariant="merrih6"
+                fontcolor={white.main}
+                text={subnav.title ?? ''}
+                marginLeft={4}
+              />
             </AccordionSummary>
             <AccordionDetails sx={{ border: 'none', p: 0 }}>
               <List sx={{ py: 0 }}>
@@ -305,7 +274,6 @@ function VerticalVariant({
         )
       }
     } else if ('title' in item && 'route' in item) {
-      // Render View item
       const view = item as View
       return (
         <Link
@@ -328,7 +296,11 @@ function VerticalVariant({
               },
             }}
           >
-            <Typography variant="merriparagraph">{view.title}</Typography>
+            <Typography
+              fontvariant="merriparagraph"
+              text={view.title ?? ''}
+              fontcolor={white.main}
+            />
           </MenuItem>
         </Link>
       )
@@ -359,7 +331,6 @@ function VerticalVariant({
         // @ts-ignore
         px={`15px`}
       >
-        {/* Render title if showTitle is true */}
         {showTitle && (
           <Box pt="0px" pb="0px">
             <Link
@@ -367,13 +338,14 @@ function VerticalVariant({
               passHref
               style={{ textDecoration: 'none' }}
             >
-              <Typography variant="merrih4" color={white.main}>
-                {verticalNavTitle}
-              </Typography>
+              <Typography
+                fontvariant="merrih4"
+                fontcolor={white.main}
+                text={verticalNavTitle}
+              />
             </Link>
           </Box>
         )}
-        {/* Render dropdown and searchbar if either showDropdown or showSearchbar is true */}
         {(showDropdown || showSearchbar) && (
           <Stack mt={1} spacing={1}>
             {showDropdown && (
@@ -382,8 +354,6 @@ function VerticalVariant({
                 componentvariant="dropdown"
                 outlinecolor="none"
                 options={navOptions}
-                value={selectedNav || navOptions[0]}
-                onChange={handleDropdownChange}
                 backgroundcolor={white.main}
                 shrunklabellocation="above"
                 shrunkfontcolor={white.main}
@@ -404,7 +374,6 @@ function VerticalVariant({
           </Stack>
         )}
       </Box>
-      {/* Render divider line if showLine is true */}
       {showLine && (
         <Divider
           sx={{
@@ -414,7 +383,6 @@ function VerticalVariant({
           }}
         />
       )}
-      {/* Render navigation items */}
       {items.map(item => renderItem(item, 0))}
     </Drawer>
   )
