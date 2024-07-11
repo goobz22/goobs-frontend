@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
 import { useDropdown } from './hooks/useDropdown'
 import { usePhoneNumber } from './hooks/usePhoneNumber'
@@ -14,13 +14,7 @@ import {
   HelperFooterMessage,
 } from './helperfooter/useHelperFooter'
 import labelStyles from '../../styles/StyledComponent/Label'
-import {
-  useHelperFooterEffect,
-  useHasInputEffect,
-  usePreventAutocompleteEffect,
-  useValidateRequiredEffect,
-  useShowErrorEffect,
-} from './useEffects'
+import { useHasInputEffect, usePreventAutocompleteEffect } from './useEffects'
 
 /**
  * Props interface for the StyledComponent
@@ -118,10 +112,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     'aria-describedby': ariaDescribedBy,
   } = props
 
-  const { validateField } = useHelperFooter()
-  const [helperFooterValue, setHelperFooterValue] = useState<
-    Record<string, HelperFooterMessage>
-  >({})
+  console.log('StyledComponent: Initializing with props', {
+    name,
+    label,
+    required,
+    formname,
+    formSubmitted,
+  })
+
+  const { validateField, validateRequiredField, helperFooterValue } =
+    useHelperFooter()
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
@@ -142,13 +142,25 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   } = useSplitButton(props)
 
   // useEffect hooks
-  useHelperFooterEffect(setHelperFooterValue)
   useHasInputEffect(value, valuestatus, setHasInput)
   usePreventAutocompleteEffect(inputRefInternal)
-  useValidateRequiredEffect(required, formname, name, label)
-  useShowErrorEffect(formSubmitted, hasInput, isFocused, setShowError)
+
+  useEffect(() => {
+    if (required && formname && name && label) {
+      validateRequiredField(required, formname, name, label)
+    }
+  }, [required, formname, name, label, validateRequiredField])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowError(formSubmitted || hasInput)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [formSubmitted, hasInput])
 
   const currentHelperFooter = name ? helperFooterValue[name] : undefined
+  console.log('StyledComponent: Current helper footer', currentHelperFooter)
 
   /**
    * Handle the change event of the input element.
@@ -157,6 +169,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    console.log('StyledComponent: handleChange called', {
+      name: e.target.name,
+      value: e.target.value,
+    })
+
     if (componentvariant === 'phonenumber') {
       handlePhoneNumberChange(e)
     } else if (componentvariant === 'splitbutton') {
@@ -170,6 +187,12 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     const formData = new FormData()
     formData.append(e.target.name, e.target.value)
     if (name && label && formname) {
+      console.log('StyledComponent: Calling validateField', {
+        name,
+        label,
+        required,
+        formname,
+      })
       validateField(name, formData, label, required, formname)
     }
   }
@@ -178,6 +201,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
    * Handle the focus event of the input element.
    */
   const handleFocus = () => {
+    console.log('StyledComponent: handleFocus called')
     setIsFocused(true)
   }
 
@@ -185,8 +209,15 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
    * Handle the blur event of the input element.
    */
   const handleBlur = () => {
+    console.log('StyledComponent: handleBlur called')
     setIsFocused(false)
     if (name && label && !hasInput && formname) {
+      console.log('StyledComponent: Calling validateField on blur', {
+        name,
+        label,
+        required,
+        formname,
+      })
       const formData = new FormData()
       formData.append(name, '')
       validateField(name, formData, label, required, formname)
@@ -212,6 +243,14 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     hasPlaceholder ||
     hasInput ||
     componentvariant === 'phonenumber'
+
+  console.log('StyledComponent: Rendering', {
+    name,
+    showError,
+    hasHelperFooter: !!currentHelperFooter,
+    helperFooterStatus: currentHelperFooter?.status,
+    helperFooterMessage: currentHelperFooter?.statusMessage,
+  })
 
   return (
     <Box
