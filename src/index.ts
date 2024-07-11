@@ -13,7 +13,6 @@ import StyledComponent, {
 import Typography, {
   FontFamily,
   TypographyVariant,
-  TypographyPropsVariantOverrides,
   TypographyProps,
 } from './components/Typography'
 import ConfirmationCodeInput, {
@@ -172,12 +171,7 @@ export type { ButtonAlignment }
 export type { CustomGridProps }
 export type { Alignment, BorderProp, columnconfig, gridconfig, cellconfig }
 export type { StyledComponentProps }
-export type {
-  FontFamily,
-  TypographyVariant,
-  TypographyPropsVariantOverrides,
-  TypographyProps,
-}
+export type { FontFamily, TypographyVariant, TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
 export type { PopupFormProps }
