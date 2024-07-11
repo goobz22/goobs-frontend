@@ -1798,10 +1798,10 @@ globby@^11.1.0:
     merge2 "^1.4.1"
     slash "^3.0.0"
 
-goobs-cache@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/goobs-cache/-/goobs-cache-1.3.1.tgz#33df778e312d7a61e2dbb747a6abedc114f46304"
-  integrity sha512-sudzFwO74qdOS4wB4c/uAZxwYNA51zDzJ1rxqeCakPCyZgnm25CaOuJOLwtlLpjnnfTcVZ72n9Vv4qT38u5Bow==
+goobs-cache@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/goobs-cache/-/goobs-cache-1.3.2.tgz#32a0ccea5cf43c706f63f90f76705a865c96a5ba"
+  integrity sha512-wQxyNcKWjaT9V22yoX1d9cc/41BrjPIZ9yW2e3HqsjSHUdAUXTsn7YxHIAUtk9p/S/+zhOA245dPM05xemxm4w==
   dependencies:
     "@types/lz4js" "^0.2.1"
     "@types/react" "^18.3.3"
