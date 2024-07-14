@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react'
 import { Close } from '@mui/icons-material'
-import { Dialog, IconButton, Box } from '@mui/material'
+import { Dialog, IconButton, Box, DialogProps } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { formContainerStyle } from './../../../styles/Form'
 import { ExtendedTypographyProps } from '../../Content/Structure/typography/useGridTypography'
@@ -34,6 +34,8 @@ export interface PopupFormProps {
   open?: boolean
   /** Callback function to handle closing the popup (only applicable for 'dialog' type) */
   onClose?: () => void
+  /** The width of the popup form in pixels */
+  width?: number
 }
 
 /**
@@ -52,11 +54,22 @@ export interface PopupFormProps {
  *   onClose={handleClose}
  *   onSubmit={handleSubmit}
  *   content={<LoginForm />}
+ *   width={400}
  * />
  */
 const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
   (
-    { title, description, grids, onSubmit, content, popupType, open, onClose },
+    {
+      title,
+      description,
+      grids,
+      onSubmit,
+      content,
+      popupType,
+      open,
+      onClose,
+      width = 450,
+    },
     ref
   ) => {
     const internalFormRef = useRef<HTMLFormElement>(null)
@@ -151,22 +164,28 @@ const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
       [renderHeader, handleSubmit, content, grids]
     )
 
+    const dialogProps: DialogProps = {
+      open: popupType === 'modal' ? true : open || false,
+      onClose: popupType === 'modal' ? undefined : onClose,
+      fullWidth: true,
+      maxWidth: false,
+      PaperProps: {
+        style: {
+          width: `${width}px`,
+        },
+      },
+    }
+
     if (popupType === 'modal') {
       return (
-        <Dialog
-          open={true}
-          fullWidth
-          maxWidth="sm"
-          disableEscapeKeyDown
-          hideBackdrop
-        >
+        <Dialog {...dialogProps} disableEscapeKeyDown hideBackdrop>
           {renderContent}
         </Dialog>
       )
     }
 
     return (
-      <Dialog open={open || false} onClose={onClose} fullWidth maxWidth="sm">
+      <Dialog {...dialogProps}>
         {onClose && (
           <IconButton
             size="small"

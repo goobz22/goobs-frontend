@@ -65,16 +65,16 @@ export interface ContentSectionProps {
     card?: ExtendedCardProps | ExtendedCardProps[]
     codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
   }>
+  width?: number
 }
 
 /**
  * RenderContent component handles the rendering of various content elements
  * based on the provided configuration.
  */
-const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
-  grid,
-  ...props
-}) => {
+const RenderContent: React.FC<
+  ContentSectionProps['grids'][0] & { width?: number }
+> = ({ grid, width, ...props }) => {
   let columnConfigs: columnconfig[] = []
 
   // Helper function to add configurations to columnConfigs
@@ -104,20 +104,26 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   addToColumnConfigs(useCard(props))
   addToColumnConfigs(useCodeCopy(props))
 
+  const updatedGridConfig: gridconfig = {
+    ...grid.gridconfig,
+    gridwidth: width ? `${width}px` : grid.gridconfig?.gridwidth,
+  }
+
   return (
-    <CustomGrid gridconfig={grid.gridconfig} columnconfig={columnConfigs} />
+    <CustomGrid gridconfig={updatedGridConfig} columnconfig={columnConfigs} />
   )
 }
 
 /**
  * ContentSection component renders multiple grids based on the provided configuration.
  * @param grids An array of ContentSectionProps, each representing a grid to be rendered.
+ * @param width Optional width for the content section, defaults to 450px if not provided.
  */
-export default function ContentSection({ grids }: ContentSectionProps) {
+export default function ContentSection({ grids, width }: ContentSectionProps) {
   return (
     <>
       {grids.map((gridProps, index) => (
-        <RenderContent key={index} {...gridProps} />
+        <RenderContent key={index} {...gridProps} width={width} />
       ))}
     </>
   )
