@@ -18,7 +18,6 @@ export const useHasInputEffect = (
 ) => {
   useEffect(() => {
     const hasInput = !!value || !!valuestatus
-    console.log('useHasInputEffect: Setting hasInput to', hasInput)
     setHasInput(hasInput)
   }, [value, valuestatus, setHasInput])
 }
@@ -39,16 +38,12 @@ export const usePreventAutocompleteEffect = (
   inputRefInternal: React.RefObject<HTMLInputElement>
 ) => {
   useEffect(() => {
-    console.log('usePreventAutocompleteEffect: Starting effect')
     const input = inputRefInternal.current
     if (input) {
-      console.log('usePreventAutocompleteEffect: Setting input attributes')
       input.setAttribute('autocomplete', 'new-password')
       input.setAttribute('autocorrect', 'off')
       input.setAttribute('autocapitalize', 'none')
       input.setAttribute('spellcheck', 'false')
-    } else {
-      console.log('usePreventAutocompleteEffect: Input ref is null')
     }
   }, [inputRefInternal])
 }
