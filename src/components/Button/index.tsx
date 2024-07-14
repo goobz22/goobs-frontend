@@ -1,52 +1,52 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
-import { get, JSONValue } from 'goobs-cache'
 import { red } from '../../styles/palette'
+import { get, JSONValue } from 'goobs-cache'
 
 /**
- * Defines the possible alignment options for button content.
+ * Represents the alignment options for button text.
  */
 export type ButtonAlignment = 'left' | 'center' | 'right'
 
 /**
- * Defines the structure of helper footer messages used for form validation.
+ * Represents the structure of a helper footer message.
  */
 export interface HelperFooterMessage {
-  /** Indicates whether the message represents an error or success state */
+  /** The status of the message, either 'error' or 'success'. */
   status: 'error' | 'success'
-  /** The message to display in the status area */
+  /** The status message. */
   statusMessage: string
-  /** The message to spread across multiple components */
+  /** The spread message to be displayed. */
   spreadMessage: string
-  /** Priority of the spread message for determining which message to show */
+  /** The priority of the spread message. */
   spreadMessagePriority: number
-  /** The name of the form this message is associated with */
+  /** The name of the form associated with this message. */
   formname: string
-  /** Indicates if the field associated with this message is required */
+  /** Indicates if the field associated with this message is required. */
   required: boolean
 }
 
 /**
  * Props for the CustomButton component.
- * Extends ButtonProps from Material-UI, omitting 'color' and 'variant'.
+ * @extends {Omit<ButtonProps, 'color' | 'variant'>}
  */
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
-  /** Text to display on the button */
+  /** The text to be displayed on the button. */
   text?: string
-  /** Background color of the button */
+  /** The background color of the button. */
   backgroundcolor?: string
-  /** Color of the button's outline */
+  /** The outline color of the button. */
   outlinecolor?: string
-  /** Color of the button's text */
+  /** The font color of the button text. */
   fontcolor?: string
-  /** Alignment of the button's text */
+  /** The alignment of the button text. */
   fontlocation?: ButtonAlignment
-  /** Typography variant for the button's text */
+  /** The variant of the font to be used for the button text. */
   fontvariant?:
     | 'arapeyh1'
     | 'arapeyh2'
@@ -75,31 +75,41 @@ export interface CustomButtonProps
     | 'merriparagraph'
     | 'merrihelperheader'
     | 'merrihelperfooter'
-  /** Icon to display on the button. Set to false to hide the icon */
+  /** The icon to be displayed on the button. Set to false to remove the icon. */
   icon?: React.ReactNode | false
-  /** Color of the icon */
+  /** The color of the icon. */
   iconcolor?: string
-  /** Size of the icon */
+  /** The size of the icon. */
   iconsize?: string
-  /** Position of the icon relative to the text */
+  /** The location of the icon relative to the button text. */
   iconlocation?: 'left' | 'top' | 'right'
-  /** Style variant of the button */
+  /** The variant of the button. */
   variant?: 'text' | 'outlined' | 'contained'
-  /** Function to call when the button is clicked */
+  /** The function to be called when the button is clicked. */
   onClick?: () => void
-  /** Helper footer message for form validation */
+  /** The helper footer message for the button. */
   helperfooter?: HelperFooterMessage
-  /** Width of the button */
+  /** The width of the button. */
   width?: string
-  /** Name of the form this button is associated with */
+  /** The name of the form associated with the button. */
   formname?: string
-  /** Name attribute for the button element */
+  /** The name attribute of the button. */
   name?: string
 }
 
 /**
- * CustomButton component renders a customizable button with integrated form validation.
- * It displays error messages based on helper footers and form validation status.
+ * A customizable button component with advanced features.
+ *
+ * @component
+ * @example
+ * <CustomButton
+ *   text="Submit"
+ *   variant="contained"
+ *   backgroundcolor="#007bff"
+ *   fontcolor="#ffffff"
+ *   onClick={() => handleSubmit()}
+ *   formname="myForm"
+ * />
  */
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
@@ -121,97 +131,98 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     width,
   } = props
 
-  /** State for storing the current error message */
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   )
-  /** State for tracking whether the associated form is valid */
   const [isFormValid, setIsFormValid] = useState<boolean>(true)
-  /** State for storing helper footer messages */
-  const [helperFooterValue, setHelperFooterValue] = useState<
-    Record<string, HelperFooterMessage>
-  >({})
+  const [hasBeenClicked, setHasBeenClicked] = useState<boolean>(false)
 
   /**
-   * Updates the form validation status and error message based on helper footers.
-   * This function filters relevant footers, checks for errors and empty required fields,
-   * and updates the error message and form validity accordingly.
+   * Memoized function to extract HelperFooterMessage objects from a complex data structure.
+   * @param {unknown} data - The data to extract HelperFooterMessages from.
+   * @returns {HelperFooterMessage[]} An array of extracted HelperFooterMessages.
    */
-  const updateFormValidation = useCallback(() => {
-    if (formname) {
-      const relevantFooters = Object.values(helperFooterValue).filter(
-        footer => footer?.formname === formname
-      )
-
-      const errorFooters = relevantFooters.filter(
-        footer => footer?.status === 'error'
-      )
-
-      const emptyRequiredFields = relevantFooters.filter(
-        footer =>
-          footer?.required && (!footer.status || footer.status === 'error')
-      )
-
-      if (errorFooters.length > 0) {
-        const highestPriorityError = errorFooters.reduce((prev, current) =>
-          (prev.spreadMessagePriority || Infinity) <
-          (current.spreadMessagePriority || Infinity)
-            ? prev
-            : current
-        )
-        setErrorMessage(highestPriorityError.spreadMessage)
-        setIsFormValid(false)
-      } else if (emptyRequiredFields.length > 0) {
-        setErrorMessage('Please fill in all required fields.')
-        setIsFormValid(false)
-      } else {
-        setErrorMessage(undefined)
-        setIsFormValid(true)
+  const extractHelperFooters = useMemo(() => {
+    return (data: unknown): HelperFooterMessage[] => {
+      if (typeof data !== 'object' || data === null) {
+        return []
       }
-    }
-  }, [formname, helperFooterValue])
 
-  /**
-   * Fetches helper footer data from the cache when formname changes.
-   * This effect runs whenever the formname prop changes.
-   */
-  useEffect(() => {
-    const fetchHelperFooter = async () => {
-      const helperFooterResult = await get('helperFooter', 'client')
-      if (
-        helperFooterResult &&
-        typeof helperFooterResult === 'object' &&
-        'value' in helperFooterResult
-      ) {
-        setHelperFooterValue(
-          (helperFooterResult as JSONValue).value as Record<
-            string,
-            HelperFooterMessage
-          >
-        )
+      if ('status' in data && 'spreadMessage' in data && 'formname' in data) {
+        return [data as HelperFooterMessage]
       }
-    }
 
-    fetchHelperFooter()
-  }, [formname])
+      if (Array.isArray(data)) {
+        return data.flatMap(extractHelperFooters)
+      }
+
+      return Object.values(data).flatMap(extractHelperFooters)
+    }
+  }, [])
 
   /**
-   * Triggers form validation whenever helperFooterValue changes.
-   * This effect ensures that the form validation is updated whenever
-   * the helper footer messages change.
+   * Fetches HelperFooterMessages from the cache for the current form.
+   * @returns {Promise<HelperFooterMessage[]>} A promise that resolves to an array of HelperFooterMessages.
    */
+  const fetchHelperFooters = useCallback(async (): Promise<
+    HelperFooterMessage[]
+  > => {
+    if (!formname) {
+      return []
+    }
+    const helperFooterCache = (await get('helperFooter', 'client')) as JSONValue
+    const allHelperFooters = extractHelperFooters(helperFooterCache)
+    const relevantHelperFooters = allHelperFooters.filter(
+      footer => footer.formname === formname
+    )
+    return relevantHelperFooters
+  }, [formname, extractHelperFooters])
+
+  /**
+   * Updates the form validation state based on the current HelperFooterMessages.
+   */
+  const updateFormValidation = useCallback(async () => {
+    const helperFooters = await fetchHelperFooters()
+
+    const requiredFooters = helperFooters.filter(footer => footer.required)
+    const errorFooters = helperFooters.filter(
+      footer => footer.status === 'error'
+    )
+
+    if (errorFooters.length > 0) {
+      const highestPriorityError = errorFooters.reduce((prev, current) =>
+        prev.spreadMessagePriority < current.spreadMessagePriority
+          ? prev
+          : current
+      )
+      setErrorMessage(highestPriorityError.spreadMessage)
+      setIsFormValid(false)
+    } else if (
+      requiredFooters.length > 0 &&
+      requiredFooters.some(
+        footer => !footer.status || footer.status === 'error'
+      )
+    ) {
+      setErrorMessage('Please fill in required fields')
+      setIsFormValid(false)
+    } else if (requiredFooters.length === 0 && helperFooters.length === 0) {
+      setErrorMessage('Please fill in required fields')
+      setIsFormValid(false)
+    } else {
+      setErrorMessage(undefined)
+      setIsFormValid(true)
+    }
+  }, [fetchHelperFooters])
+
   useEffect(() => {
-    updateFormValidation()
+    void updateFormValidation()
   }, [updateFormValidation])
 
   /**
-   * Renders the icon element based on the provided icon prop.
-   * If the icon prop is false, it returns null.
-   * If the icon is a valid React element, it clones it with the specified size.
-   * Otherwise, it renders a default StarIcon.
-   * @returns The rendered icon element or null.
+   * Renders the icon for the button.
+   * @returns {React.ReactNode | null} The rendered icon or null if no icon should be displayed.
    */
-  const renderIcon = () => {
+  const renderIcon = (): React.ReactNode => {
     if (icon === false) {
       return null
     }
@@ -224,10 +235,16 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
   }
 
   /**
-   * Handles the button click event.
-   * If the form is valid and an onClick handler is provided, it calls the handler.
+   * Handles the button click event, performing form validation before executing the onClick callback.
+   * @param {React.MouseEvent<HTMLButtonElement>} event - The click event.
    */
-  const handleButtonClick = async () => {
+  const handleButtonClick = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
+    event.preventDefault()
+    setHasBeenClicked(true)
+
+    await updateFormValidation()
     if (!isFormValid) {
       return
     }
@@ -275,7 +292,7 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
           {iconlocation === 'right' && renderIcon()}
         </Box>
       </Button>
-      {errorMessage && (
+      {hasBeenClicked && errorMessage && (
         <Typography
           fontvariant="merrihelperfooter"
           fontcolor={red.main}
