@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import { Box, Paper } from '@mui/material'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
@@ -87,9 +87,6 @@ const PricingTable: React.FC<PricingProps> = props => {
   // Merge default config with provided props
   const config: PricingProps = { ...defaultConfig, ...props }
 
-  // State for selected package
-  const [selectedPackage] = useState<string>('goobs-frontend-unlimited')
-
   const router = useRouter()
 
   /**
@@ -125,10 +122,10 @@ const PricingTable: React.FC<PricingProps> = props => {
             shrunklabellocation="above"
             componentvariant="dropdown"
             shrunkfontcolor={black.main}
-            value={selectedPackage}
             outlinecolor={black.main}
             backgroundcolor={semiTransparentBlack.main}
-            options={['ThothOS']}
+            defaultOption="ThothOS"
+            options={['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise']}
           />
         ),
       })
@@ -142,7 +139,7 @@ const PricingTable: React.FC<PricingProps> = props => {
           <Typography
             text={config.monthlyprice.prices}
             fontcolor={black.main}
-            fontvariant="merrih6"
+            fontvariant="merrih5"
           />
         ),
       })
@@ -156,7 +153,7 @@ const PricingTable: React.FC<PricingProps> = props => {
           <Typography
             text={config.annualprice.annualprices}
             fontcolor={black.main}
-            fontvariant="merrih6"
+            fontvariant="merrih5"
           />
         ),
       })
@@ -203,7 +200,6 @@ const PricingTable: React.FC<PricingProps> = props => {
         const tiedConfig: columnconfig = {
           ...feature.tiedtopackage.columnconfig,
           cellconfig: {
-            border: 'solid',
             minHeight: '40px',
           },
           component: feature.tiedtopackage.tiedtopackages ? (
@@ -225,7 +221,7 @@ const PricingTable: React.FC<PricingProps> = props => {
                 <Typography
                   text={subFeature.title}
                   fontcolor={black.main}
-                  fontvariant="merrih6"
+                  fontvariant="merriparagraph"
                   noWrap
                 />
                 {subFeature.infopopuptext && (
@@ -252,7 +248,6 @@ const PricingTable: React.FC<PricingProps> = props => {
           const tiedConfig: columnconfig = {
             ...subFeature.tiedtopackage.columnconfig,
             cellconfig: {
-              border: 'solid',
               minHeight: '40px',
             },
             component: subFeature.tiedtopackage.tiedtopackages ? (
@@ -281,6 +276,7 @@ const PricingTable: React.FC<PricingProps> = props => {
             fontcolor={white.main}
             backgroundcolor={black.main}
             href={buttonLink}
+            width="100%"
             onClick={() => router.push(buttonLink)}
             text={config.buttoncolumns.buttontexts}
           />
