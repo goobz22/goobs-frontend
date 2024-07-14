@@ -1,89 +1,42 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { Box, Tabs, styled, Tab } from '@mui/material'
+import { Box, Tabs, Tab } from '@mui/material'
 import { get, set, JSONValue } from 'goobs-cache'
 import { NavProps, SubNav, View } from '../index'
 
-// Define the possible alignment values for the navigation
+/**
+ * Represents the possible alignment options for the horizontal navigation.
+ */
 type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
 
 /**
- * Interface representing the active tab value
+ * Represents the structure of an active tab value.
  */
 export interface ActiveTabValue {
+  /** The unique identifier of the active tab. */
   tabId: string
 }
 
 /**
- * Interface for the props of the HorizontalVariant component
+ * Props for the HorizontalVariant component.
  */
 export interface HorizontalVariantProps {
-  items: (NavProps | SubNav | View)[] // Array of navigation items
-  height?: string // Optional height of the navigation
-  alignment?: Alignment // Optional alignment of the navigation
-  navname?: string // Optional name for the navigation
+  /** An array of navigation items, sub-navigation items, or views. */
+  items: (NavProps | SubNav | View)[]
+  /** The height of the navigation bar. Defaults to '80px'. */
+  height?: string
+  /** The alignment of the navigation items. Defaults to 'left'. */
+  alignment?: Alignment
+  /** A unique name for this navigation component. Used for state management. */
+  navname?: string
 }
 
 /**
- * Styled component for the Tab, extending MUI's Tab with custom props
- */
-const StyledTab = styled(Tab, {
-  shouldForwardProp: prop =>
-    prop !== 'height' && prop !== 'hasleftborder' && prop !== 'hasrightborder',
-})<NavProps & { height?: string }>(
-  ({ height = '80px', hasleftborder = 'false', hasrightborder = 'false' }) => ({
-    minHeight: 0,
-    textTransform: 'none',
-    border: 'none',
-    boxSizing: 'border-box',
-    backgroundColor: 'black',
-    color: '#fff',
-    fontWeight: 500,
-    fontFamily: 'Merriweather',
-    fontSize: 16,
-    height: height,
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    '& .MuiTouchRipple-root': {
-      color: '#fff',
-    },
-    '&.Mui-selected': {
-      color: '#fff',
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '& .MuiSvgIcon-root': {
-      color: '#fff',
-    },
-    ...(hasleftborder === 'true' && {
-      borderLeft: '1px solid white',
-    }),
-    ...(hasrightborder === 'true' && {
-      borderRight: '1px solid white',
-    }),
-  })
-)
-
-/**
- * Styled component for the horizontal navigation container
- */
-const HorizontalNavContainer = styled(Box)<{
-  height?: string
-  alignment?: Alignment
-}>(({ height = '80px', alignment = 'left' }) => ({
-  flexGrow: 1,
-  bgcolor: 'black',
-  display: 'flex',
-  height: height,
-  justifyContent: alignment,
-  paddingLeft: '5px',
-  paddingRight: '5px',
-}))
-
-/**
- * HorizontalVariant component for rendering a horizontal navigation bar
- * @param {HorizontalVariantProps} props - The props for the component
- * @returns {JSX.Element} The rendered HorizontalVariant component
+ * HorizontalVariant component that renders a horizontal navigation bar.
+ * It supports dynamic tab management, routing, and custom click handlers.
+ *
+ * @param {HorizontalVariantProps} props - The props for the HorizontalVariant component.
+ * @returns {JSX.Element} The rendered HorizontalVariant component.
  */
 function HorizontalVariant({
   items,
@@ -91,13 +44,20 @@ function HorizontalVariant({
   alignment = 'left',
   navname,
 }: HorizontalVariantProps) {
-  // State to store active tab values
+  /**
+   * State to keep track of active tab values for different navigation components.
+   */
   const [activeTabValues, setActiveTabValues] = useState<
     Record<string, ActiveTabValue | null>
   >({})
 
-  // Effect to fetch active tab values from cache on component mount
+  /**
+   * Effect hook to fetch and set the active tab values when the component mounts.
+   */
   useEffect(() => {
+    /**
+     * Asynchronously fetches the active tab values from the cache.
+     */
     const fetchActiveTabValues = async () => {
       const result = await get('activeTabValues', 'client')
       if (result && typeof result === 'object' && 'value' in result) {
@@ -111,9 +71,11 @@ function HorizontalVariant({
   }, [])
 
   /**
-   * Handle tab change event
-   * @param {React.SyntheticEvent} event - The event object
-   * @param {string} newValue - The new value of the selected tab
+   * Handles tab change events.
+   * Updates the active tab values in the state and cache.
+   *
+   * @param {React.SyntheticEvent} event - The event object.
+   * @param {string} newValue - The new value of the selected tab.
    */
   const handleTabChange = async (
     event: React.SyntheticEvent,
@@ -124,7 +86,6 @@ function HorizontalVariant({
       [navname ?? '']: { tabId: newValue },
     }
     setActiveTabValues(updatedActiveTabValues)
-    // Store updated values in cache with 30 minutes expiration
     await set(
       'activeTabValues',
       { type: 'json', value: updatedActiveTabValues } as JSONValue,
@@ -134,8 +95,10 @@ function HorizontalVariant({
   }
 
   /**
-   * Handle tab click event based on the tab's trigger type
-   * @param {NavProps} tab - The tab object that was clicked
+   * Handles click events on individual tabs.
+   * Supports different trigger types: route, onClick, and routeonhorizontal.
+   *
+   * @param {NavProps} tab - The tab object that was clicked.
    */
   const handleTabClick = (tab: NavProps) => {
     if (tab.trigger === 'route') {
@@ -154,9 +117,19 @@ function HorizontalVariant({
   }
 
   return (
-    <HorizontalNavContainer height={height} alignment={alignment}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'black',
+        display: 'flex',
+        height: height,
+        justifyContent: alignment,
+        paddingLeft: '5px',
+        paddingRight: '5px',
+      }}
+    >
       <Tabs
-        value={activeTabValues[navname ?? '']?.tabId || false}
+        value={activeTabValues?.[navname ?? '']?.tabId || false}
         onChange={handleTabChange}
         aria-label="nav tabs"
         sx={{
@@ -171,35 +144,56 @@ function HorizontalVariant({
         }}
       >
         {items.map((item: NavProps | SubNav | View) => {
-          // Only render NavProps items as tabs
           if ('orientation' in item) {
             const tab = item as NavProps
             return (
-              <StyledTab
+              <Tab
                 key={tab.title}
                 value={tab.title}
                 label={tab.title}
-                hasleftborder={tab.hasleftborder}
-                hasrightborder={tab.hasrightborder}
-                height={height}
-                orientation={tab.orientation}
+                onClick={() => handleTabClick(tab)}
                 sx={{
+                  minHeight: 0,
+                  textTransform: 'none',
+                  border: 'none',
+                  boxSizing: 'border-box',
+                  backgroundColor: 'black',
+                  color: '#fff',
+                  fontWeight: 500,
+                  fontFamily: 'Merriweather',
+                  fontSize: 16,
+                  height: height,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                  '& .MuiTouchRipple-root': {
+                    color: '#fff',
+                  },
+                  '&.Mui-selected': {
+                    color: '#fff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#fff',
+                  },
+                  ...(tab.hasleftborder === 'true' && {
+                    borderLeft: '1px solid white',
+                  }),
+                  ...(tab.hasrightborder === 'true' && {
+                    borderRight: '1px solid white',
+                  }),
                   width: 'auto',
                   justifyContent: 'center',
                   alignItems: 'center',
                   px: 4,
                 }}
-                onClick={() => handleTabClick(tab)}
-                title={tab.title}
-                route={tab.route}
-                navname={tab.navname}
               />
             )
           }
           return null
         })}
       </Tabs>
-    </HorizontalNavContainer>
+    </Box>
   )
 }
 

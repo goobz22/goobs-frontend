@@ -25,23 +25,47 @@ import {
 } from '../../../styles/palette'
 import { Typography } from './../../Typography'
 
+/**
+ * Props for the VerticalVariant component.
+ */
 export interface VerticalVariantProps {
+  /** An array of navigation items, sub-navigation items, or views. */
   items: (NavProps | SubNav | View)[]
+  /** Determines whether to show the search bar. */
   showSearchbar: boolean
+  /** Determines whether to show the dropdown. */
   showDropdown: boolean
+  /** Determines whether to show the title. */
   showTitle: boolean
+  /** Determines whether to show a divider line. */
   showLine: boolean
+  /** The title of the vertical navigation. */
   verticalNavTitle: string
+  /** The label for the dropdown. */
   dropdownLabel: string
+  /** The label for the search bar. */
   searchbarLabel: string
+  /** The anchor position of the drawer ('left' or 'right'). */
   anchor: 'left' | 'right'
+  /** An array of expanded navigation items. */
   expandedNavs: string[]
+  /** Function to set the expanded navigation items. */
   setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>>
+  /** An array of expanded sub-navigation items. */
   expandedSubnavs: string[]
+  /** Function to set the expanded sub-navigation items. */
   setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
+  /** The width of the vertical navigation drawer. */
   verticalNavWidth: string
 }
 
+/**
+ * VerticalVariant component that renders a vertical navigation drawer.
+ * It supports nested navigation items, sub-navigation items, and views.
+ *
+ * @param {VerticalVariantProps} props - The props for the VerticalVariant component.
+ * @returns {JSX.Element} The rendered VerticalVariant component.
+ */
 function VerticalVariant({
   items,
   showSearchbar,
@@ -60,10 +84,19 @@ function VerticalVariant({
 }: VerticalVariantProps) {
   const router = useRouter()
 
+  /**
+   * Extracts navigation options from the items array.
+   */
   const navOptions = items
     .filter((item): item is NavProps => 'title' in item && 'subnavs' in item)
     .map(nav => nav.title ?? '')
 
+  /**
+   * Handles click events on navigation items.
+   * Supports different trigger types: route and onClick.
+   *
+   * @param {NavProps} nav - The navigation item that was clicked.
+   */
   const handleNavClick = (nav: NavProps) => {
     console.log('Clicked Nav:', nav.title)
     if (nav.trigger === 'route') {
@@ -77,6 +110,14 @@ function VerticalVariant({
     }
   }
 
+  /**
+   * Recursively renders navigation items, sub-navigation items, and views.
+   *
+   * @param {NavProps | SubNav | View} item - The item to render.
+   * @param {number} level - The nesting level of the item.
+   * @param {string} [activeAndHoverColor] - The color to use for active and hover states.
+   * @returns {JSX.Element | null} The rendered item or null if the item type is not recognized.
+   */
   const renderItem = (
     item: NavProps | SubNav | View,
     level: number,
