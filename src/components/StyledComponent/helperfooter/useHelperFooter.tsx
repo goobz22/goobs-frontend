@@ -2,12 +2,10 @@
 
 import { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import { debounce } from 'lodash'
-import React from 'react'
-import { get, set, StringValue } from 'goobs-cache'
+import { get, set, StringValue, JSONValue } from 'goobs-cache'
 
 /**
  * Validates if the given string is a valid email format.
- *
  * @param {string} email - The email string to validate.
  * @returns {boolean} True if the email is valid, false otherwise.
  */
@@ -17,15 +15,7 @@ const isValidEmailFormat = (email: string): boolean => {
 }
 
 /**
- * Represents a message for the helper footer.
- *
- * @interface HelperFooterMessage
- * @property {('error' | 'success')} status - The status of the message.
- * @property {string} statusMessage - The detailed status message.
- * @property {string} spreadMessage - A condensed version of the message for spreading.
- * @property {number} spreadMessagePriority - The priority of the spread message.
- * @property {string} formname - The name of the form this message is associated with.
- * @property {boolean} required - Indicates if the field associated with this message is required.
+ * Interface representing a helper footer message.
  */
 export interface HelperFooterMessage {
   status: 'error' | 'success'
@@ -37,9 +27,8 @@ export interface HelperFooterMessage {
 }
 
 /**
- * A custom hook for managing form validation and helper messages.
- *
- * @returns {Object} An object containing validation functions and helper footer state.
+ * Custom hook for managing helper footer messages and form validation.
+ * @returns {Object} An object containing functions and values for managing helper footers.
  */
 export const useHelperFooter = () => {
   const [helperFooterValue, setHelperFooterValue] = useState<
@@ -48,14 +37,90 @@ export const useHelperFooter = () => {
   const helperFooterRef = useRef<Record<string, HelperFooterMessage>>({})
 
   /**
-   * Handles creation of generic error messages for form fields.
-   *
-   * @param {FormData} formData - The form data to validate.
-   * @param {string} name - The name of the form field.
-   * @param {string} label - The label of the form field.
+   * Stores a helper footer message in the cache.
+   * @param {string} name - The name of the field associated with the message.
+   * @param {HelperFooterMessage | undefined} message - The message to store, or undefined to remove the message.
+   */
+  const storeHelperFooter = useCallback(
+    async (name: string, message: HelperFooterMessage | undefined) => {
+      if (message) {
+        const key = `helperFooter_${message.formname}_${name}`
+        await set(
+          key,
+          { type: 'json', value: message } as JSONValue,
+          new Date(Date.now() + 30 * 60 * 1000),
+          'client'
+        )
+      }
+    },
+    []
+  )
+
+  /**
+   * Fetches all helper footer messages for a given form.
+   * @param {string} formname - The name of the form to fetch messages for.
+   * @returns {Promise<HelperFooterMessage[]>} A promise that resolves to an array of HelperFooterMessages.
+   */
+  const fetchHelperFooters = useCallback(
+    async (formname: string): Promise<HelperFooterMessage[]> => {
+      const allKeys = (await get('helperFooter_keys', 'client')) as JSONValue
+      const helperFooters: HelperFooterMessage[] = []
+      if (allKeys && 'value' in allKeys && Array.isArray(allKeys.value)) {
+        for (const key of allKeys.value) {
+          if (
+            typeof key === 'string' &&
+            key.startsWith(`helperFooter_${formname}_`)
+          ) {
+            const result = (await get(key, 'client')) as JSONValue
+            if (
+              result &&
+              'value' in result &&
+              typeof result.value === 'object' &&
+              result.value !== null
+            ) {
+              helperFooters.push(result.value as HelperFooterMessage)
+            }
+          }
+        }
+      }
+      return helperFooters
+    },
+    []
+  )
+
+  /**
+   * Updates the list of helper footer keys in the cache.
+   * @param {string} name - The name of the new key to add.
+   */
+  const updateHelperFooterKeys = useCallback(async (name: string) => {
+    const currentKeys = (await get('helperFooter_keys', 'client')) as JSONValue
+    let keys: string[] = []
+    if (
+      currentKeys &&
+      'value' in currentKeys &&
+      Array.isArray(currentKeys.value)
+    ) {
+      keys = currentKeys.value as string[]
+    }
+    if (!keys.includes(`helperFooter_${name}`)) {
+      keys.push(`helperFooter_${name}`)
+      await set(
+        'helperFooter_keys',
+        { type: 'json', value: keys } as JSONValue,
+        new Date(Date.now() + 30 * 60 * 1000),
+        'client'
+      )
+    }
+  }, [])
+
+  /**
+   * Handles generic error creation for form fields.
+   * @param {FormData} formData - The form data.
+   * @param {string} name - The name of the field.
+   * @param {string} label - The label of the field.
    * @param {boolean} required - Whether the field is required.
    * @param {string} formname - The name of the form.
-   * @returns {HelperFooterMessage | undefined} An error message object if there's an error, undefined otherwise.
+   * @returns {HelperFooterMessage | undefined} A HelperFooterMessage if there's an error, undefined otherwise.
    */
   const handleGenericErrorCreation = useCallback(
     (
@@ -65,11 +130,9 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log(`Handling generic error creation for ${name}`)
       const value = formData.get(name) as string
       if (required && (!value || !value.trim())) {
-        console.log(`Error: ${label} is required`)
-        return {
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: `${label} is required. Please enter a ${label.toLowerCase()}.`,
           spreadMessage: `${label} is required.`,
@@ -77,20 +140,21 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter(name, message)
+        updateHelperFooterKeys(name)
+        return message
       }
-      console.log(`No error for ${name}`)
       return undefined
     },
-    []
+    [storeHelperFooter, updateHelperFooterKeys]
   )
 
   /**
-   * Handles creation of email-specific error messages.
-   *
-   * @param {FormData} formData - The form data to validate.
+   * Handles email-specific error creation.
+   * @param {FormData} formData - The form data.
    * @param {boolean} required - Whether the email field is required.
    * @param {string} formname - The name of the form.
-   * @returns {HelperFooterMessage | undefined} An error or success message object, or undefined if no message is needed.
+   * @returns {HelperFooterMessage | undefined} A HelperFooterMessage if there's an error, undefined otherwise.
    */
   const handleEmailErrorCreation = useCallback(
     (
@@ -98,11 +162,9 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log('Handling email error creation')
       const email = formData.get('email') as string
       if (required && (!email || !email.trim())) {
-        console.log('Error: Email is required')
-        return {
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Please enter an email address.',
           spreadMessage: 'Email is required.',
@@ -110,11 +172,13 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('email', message)
+        updateHelperFooterKeys('email')
+        return message
       }
       if (!email) return undefined
       if (email && !isValidEmailFormat(email)) {
-        console.log('Error: Invalid email format')
-        return {
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Please enter a valid email address.',
           spreadMessage: 'Invalid email format.',
@@ -122,9 +186,11 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('email', message)
+        updateHelperFooterKeys('email')
+        return message
       }
-      console.log('Email is valid')
-      return {
+      const message: HelperFooterMessage = {
         status: 'success',
         statusMessage: 'Email is valid.',
         spreadMessage: 'Email is valid.',
@@ -132,17 +198,19 @@ export const useHelperFooter = () => {
         formname,
         required,
       }
+      storeHelperFooter('email', message)
+      updateHelperFooterKeys('email')
+      return message
     },
-    []
+    [storeHelperFooter, updateHelperFooterKeys]
   )
 
   /**
-   * Handles creation of password-specific error messages and stores the password in the client cache.
-   *
-   * @param {FormData} formData - The form data to validate.
+   * Handles password-specific error creation.
+   * @param {FormData} formData - The form data.
    * @param {boolean} required - Whether the password field is required.
    * @param {string} formname - The name of the form.
-   * @returns {HelperFooterMessage | undefined} An error or success message object, or undefined if no message is needed.
+   * @returns {HelperFooterMessage | undefined} A HelperFooterMessage if there's an error, undefined otherwise.
    */
   const handlePasswordErrorCreation = useCallback(
     (
@@ -150,38 +218,22 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log('Handling password error creation')
       const password = formData.get('verifyPassword') as string
-      console.log('Password received:', password)
+      console.log('handlePasswordErrorCreation - Password:', password)
 
       const debouncedPasswordStorage = debounce(async () => {
-        console.log('Attempting to store password in goobs-cache client store')
         try {
           if (password) {
-            console.log('Setting password in goobs-cache:', password)
+            console.log('Storing password in goobs-cache...')
             await set(
               'verifyPassword',
               { type: 'string', value: password } as StringValue,
               new Date(Date.now() + 30 * 60 * 1000),
               'client'
             )
-            console.log('Password set operation completed')
-
-            // Immediately retrieve the password to verify it was stored
-            console.log('Attempting to retrieve password from client store')
-            const storedPassword = await get('verifyPassword', 'client')
-            console.log('Raw stored password result:', storedPassword)
-
-            if (storedPassword && storedPassword.value) {
-              console.log(
-                'Immediately retrieved password from client store:',
-                storedPassword.value
-              )
-            } else {
-              console.log('Retrieved password is null or undefined')
-            }
+            console.log('Password stored successfully')
           } else {
-            console.log('Password is null or empty, not storing in goobs-cache')
+            console.log('No password to store')
           }
         } catch (error) {
           console.error('Error interacting with goobs-cache:', error)
@@ -191,8 +243,8 @@ export const useHelperFooter = () => {
       debouncedPasswordStorage()
 
       if (required && (!password || !password.trim())) {
-        console.log('Error: Password is required')
-        return {
+        console.log('Password is required but not provided')
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Password is required.',
           spreadMessage: 'Password is required.',
@@ -200,8 +252,12 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('verifyPassword', message)
+        updateHelperFooterKeys('verifyPassword')
+        return message
       }
       if (!password) return undefined
+
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
       const passwordComplexityStatus: 'error' | 'success' = passwordRegex.test(
@@ -209,9 +265,11 @@ export const useHelperFooter = () => {
       )
         ? 'success'
         : 'error'
+      console.log('Password complexity status:', passwordComplexityStatus)
+
       if (passwordComplexityStatus === 'error') {
-        console.log('Error: Invalid password complexity')
-        return {
+        console.log('Password does not meet complexity requirements')
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage:
             'Password must include at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
@@ -220,9 +278,13 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('verifyPassword', message)
+        updateHelperFooterKeys('verifyPassword')
+        return message
       }
+
       console.log('Password meets all requirements')
-      return {
+      const message: HelperFooterMessage = {
         status: 'success',
         statusMessage: 'Password meets all requirements.',
         spreadMessage: 'Password is valid.',
@@ -230,31 +292,28 @@ export const useHelperFooter = () => {
         formname,
         required,
       }
+      storeHelperFooter('verifyPassword', message)
+      updateHelperFooterKeys('verifyPassword')
+      return message
     },
-    []
+    [storeHelperFooter, updateHelperFooterKeys]
   )
 
-  /**
-   * Handles creation of confirm password error messages by comparing with the stored password.
-   *
-   * @param {FormData} formData - The form data to validate.
-   * @param {boolean} required - Whether the confirm password field is required.
-   * @param {string} formname - The name of the form.
-   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to an error or success message object, or undefined if no message is needed.
-   */
   const handleConfirmPasswordErrorCreation = useCallback(
     async (
       formData: FormData,
       required: boolean,
       formname: string
     ): Promise<HelperFooterMessage | undefined> => {
-      console.log('Handling confirm password error creation')
       const confirmPassword = formData.get('confirmPassword') as string
-      console.log('Confirm password received:', confirmPassword)
+      console.log(
+        'handleConfirmPasswordErrorCreation - Confirm Password:',
+        confirmPassword
+      )
 
       if (required && (!confirmPassword || !confirmPassword.trim())) {
-        console.log('Error: Password confirmation is required')
-        return {
+        console.log('Confirm password is required but not provided')
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Please confirm your password.',
           spreadMessage: 'Password confirmation is required.',
@@ -262,16 +321,17 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('confirmPassword', message)
+        updateHelperFooterKeys('confirmPassword')
+        return message
       }
       if (!confirmPassword) return undefined
 
-      console.log(
-        'Attempting to retrieve verify password from goobs-cache client store'
-      )
       let verifyPasswordResult
       try {
+        console.log('Retrieving password from goobs-cache...')
         verifyPasswordResult = await get('verifyPassword', 'client')
-        console.log('Retrieved verify password result:', verifyPasswordResult)
+        console.log('Retrieved password result:', verifyPasswordResult)
       } catch (error) {
         console.error('Error retrieving password from goobs-cache:', error)
       }
@@ -283,19 +343,18 @@ export const useHelperFooter = () => {
         'value' in verifyPasswordResult &&
         verifyPasswordResult.value &&
         typeof verifyPasswordResult.value === 'object' &&
-        'value' in verifyPasswordResult.value
+        'value' in verifyPasswordResult.value &&
+        typeof verifyPasswordResult.value.value === 'string'
       ) {
         verifyPassword = verifyPasswordResult.value.value
-        console.log('Verify password from client store:', verifyPassword)
+        console.log('Verify password retrieved:', verifyPassword)
       } else {
-        console.log(
-          'Verify password not found in client store or in unexpected format'
-        )
+        console.log('Invalid or missing verify password result')
       }
 
       if (!verifyPassword) {
-        console.log('Error: Password not set')
-        return {
+        console.log('Verify password not found')
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Please enter your password first.',
           spreadMessage: 'Password not set.',
@@ -303,11 +362,15 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('confirmPassword', message)
+        updateHelperFooterKeys('confirmPassword')
+        return message
       }
 
+      console.log('Comparing passwords:', { confirmPassword, verifyPassword })
       if (confirmPassword !== verifyPassword) {
-        console.log('Error: Passwords do not match')
-        return {
+        console.log('Passwords do not match')
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage: 'Passwords do not match.',
           spreadMessage: 'Passwords do not match.',
@@ -315,10 +378,13 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('confirmPassword', message)
+        updateHelperFooterKeys('confirmPassword')
+        return message
       }
 
       console.log('Passwords match')
-      return {
+      const message: HelperFooterMessage = {
         status: 'success',
         statusMessage: 'Passwords match.',
         spreadMessage: 'Passwords match.',
@@ -326,17 +392,19 @@ export const useHelperFooter = () => {
         formname,
         required,
       }
+      storeHelperFooter('confirmPassword', message)
+      updateHelperFooterKeys('confirmPassword')
+      return message
     },
-    []
+    [storeHelperFooter, updateHelperFooterKeys]
   )
 
   /**
-   * Handles creation of phone number error messages.
-   *
-   * @param {FormData} formData - The form data to validate.
+   * Handles phone number-specific error creation.
+   * @param {FormData} formData - The form data.
    * @param {boolean} required - Whether the phone number field is required.
    * @param {string} formname - The name of the form.
-   * @returns {HelperFooterMessage | undefined} An error or success message object, or undefined if no message is needed.
+   * @returns {HelperFooterMessage | undefined} A HelperFooterMessage if there's an error, undefined otherwise.
    */
   const handlePhoneNumberErrorCreation = useCallback(
     (
@@ -344,11 +412,9 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ): HelperFooterMessage | undefined => {
-      console.log('Handling phone number error creation')
       const phoneNumber = formData.get('phoneNumber') as string
       if (required && (!phoneNumber || !phoneNumber.trim())) {
-        console.log('Error: Phone number is required')
-        return {
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage:
             'Phone number is required. Please enter a phone number.',
@@ -357,6 +423,9 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('phoneNumber', message)
+        updateHelperFooterKeys('phoneNumber')
+        return message
       }
       if (!phoneNumber) return undefined
       const digitsOnly = phoneNumber.replace(/[^\d]/g, '')
@@ -365,8 +434,7 @@ export const useHelperFooter = () => {
         (length === 10 && !digitsOnly.startsWith('1')) ||
         (length === 11 && digitsOnly.startsWith('1'))
       ) {
-        console.log('Phone number is valid')
-        return {
+        const message: HelperFooterMessage = {
           status: 'success',
           statusMessage: 'Phone number is valid.',
           spreadMessage: 'Phone number is valid.',
@@ -374,9 +442,11 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('phoneNumber', message)
+        updateHelperFooterKeys('phoneNumber')
+        return message
       } else {
-        console.log('Error: Invalid phone number format')
-        return {
+        const message: HelperFooterMessage = {
           status: 'error',
           statusMessage:
             'Please enter a valid 10-digit phone number or a 10-digit number starting with 1.',
@@ -385,16 +455,46 @@ export const useHelperFooter = () => {
           formname,
           required,
         }
+        storeHelperFooter('phoneNumber', message)
+        updateHelperFooterKeys('phoneNumber')
+        return message
       }
     },
-    []
+    [storeHelperFooter, updateHelperFooterKeys]
+  )
+
+  /**
+   * Updates the helper footer state and cache with new validation results.
+   * @param {string} name - The name of the field.
+   * @param {HelperFooterMessage | undefined} validationResult - The validation result for the field.
+   */
+  const updateHelperFooter = useCallback(
+    (name: string, validationResult: HelperFooterMessage | undefined): void => {
+      if (validationResult) {
+        helperFooterRef.current = {
+          ...helperFooterRef.current,
+          [name]: validationResult,
+        }
+      } else {
+        const newHelperFooter: Record<string, HelperFooterMessage> = {}
+        Object.keys(helperFooterRef.current).forEach(key => {
+          if (key !== name) {
+            newHelperFooter[key] = helperFooterRef.current[key]
+          }
+        })
+        helperFooterRef.current = newHelperFooter
+      }
+
+      setHelperFooterValue({ ...helperFooterRef.current })
+      void storeHelperFooter(name, validationResult)
+    },
+    [storeHelperFooter]
   )
 
   /**
    * Validates a specific field in the form.
-   *
    * @param {string} name - The name of the field to validate.
-   * @param {FormData} formData - The form data to validate.
+   * @param {FormData} formData - The form data.
    * @param {string} label - The label of the field.
    * @param {boolean} required - Whether the field is required.
    * @param {string} formname - The name of the form.
@@ -407,8 +507,7 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ) => {
-      console.log(`Validating field: ${name}`)
-      const validation = () => {
+      const validation = async () => {
         let validationResult: HelperFooterMessage | undefined
         switch (name) {
           case 'email':
@@ -426,15 +525,12 @@ export const useHelperFooter = () => {
             )
             break
           case 'confirmPassword':
-            handleConfirmPasswordErrorCreation(
+            validationResult = await handleConfirmPasswordErrorCreation(
               formData,
               required,
               formname
-            ).then(result => {
-              validationResult = result
-              updateHelperFooter(name, validationResult)
-            })
-            return
+            )
+            break
           case 'phoneNumber':
             validationResult = handlePhoneNumberErrorCreation(
               formData,
@@ -463,66 +559,48 @@ export const useHelperFooter = () => {
       handleConfirmPasswordErrorCreation,
       handlePhoneNumberErrorCreation,
       handleGenericErrorCreation,
+      updateHelperFooter,
     ]
   )
 
-  const updateHelperFooter = (
-    name: string,
-    validationResult: HelperFooterMessage | undefined
-  ) => {
-    if (validationResult) {
-      helperFooterRef.current = {
-        ...helperFooterRef.current,
-        [name]: validationResult,
-      }
-    } else {
-      helperFooterRef.current = Object.fromEntries(
-        Object.entries(helperFooterRef.current).filter(([key]) => key !== name)
-      )
-    }
-
-    console.log('Updated helperFooterRef:', helperFooterRef.current)
-    setHelperFooterValue({ ...helperFooterRef.current })
-    console.log('Helper footer updated in state')
-  }
-
+  /**
+   * Validates a required field in the form.
+   * @param {boolean} required - Whether the field is required.
+   * @param {string} formname - The name of the form.
+   * @param {string} name - The name of the field.
+   * @param {string} label - The label of the field.
+   */
   const validateRequiredField = useCallback(
     (required: boolean, formname: string, name: string, label: string) => {
-      console.log('validateRequiredField: Starting', {
-        required,
-        formname,
-        name,
-        label,
-      })
       if (required && formname && name && label) {
-        console.log('validateRequiredField: Validating required field')
         const emptyFormData = new FormData()
         emptyFormData.append(name, '')
         validateField(name, emptyFormData, label, required, formname)
-      } else {
-        console.log(
-          'validateRequiredField: Not validating (missing required props)'
-        )
       }
     },
     [validateField]
   )
 
+  /**
+   * Custom effect hook to manage the visibility of error messages.
+   * @param {boolean} formSubmitted - Whether the form has been submitted.
+   * @param {boolean} hasInput - Whether the field has input.
+   * @param {boolean} isFocused - Whether the field is currently focused.
+   * @returns {boolean} Whether the error should be shown.
+   */
   const useShowErrorEffect = (
     formSubmitted: boolean,
     hasInput: boolean,
-    isFocused: boolean,
-    setShowError: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
+    isFocused: boolean
+  ): boolean => {
+    const [showError, setShowError] = useState<boolean>(false)
+
     useEffect(() => {
-      const showError = formSubmitted || (hasInput && !isFocused)
-      console.log('useShowErrorEffect: Setting showError to', showError, {
-        formSubmitted,
-        hasInput,
-        isFocused,
-      })
-      setShowError(showError)
-    }, [formSubmitted, hasInput, isFocused, setShowError])
+      const shouldShowError = formSubmitted || (hasInput && !isFocused)
+      setShowError(shouldShowError)
+    }, [formSubmitted, hasInput, isFocused])
+
+    return showError
   }
 
   return useMemo(
@@ -531,7 +609,15 @@ export const useHelperFooter = () => {
       validateRequiredField,
       helperFooterValue,
       useShowErrorEffect,
+      fetchHelperFooters,
     }),
-    [validateField, validateRequiredField, helperFooterValue]
+    [
+      validateField,
+      validateRequiredField,
+      helperFooterValue,
+      fetchHelperFooters,
+    ]
   )
 }
+
+export default useHelperFooter

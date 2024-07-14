@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
 import { useDropdown } from './hooks/useDropdown'
 import { usePhoneNumber } from './hooks/usePhoneNumber'
-import { usePassword } from './hooks/usePassword'
 import { useSplitButton } from './hooks/useSplitButton'
 import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
@@ -16,9 +15,6 @@ import {
 import labelStyles from '../../styles/StyledComponent/Label'
 import { useHasInputEffect, usePreventAutocompleteEffect } from './useEffects'
 
-/**
- * Props interface for the StyledComponent
- */
 export interface StyledComponentProps {
   name?: string
   outlinecolor?: string
@@ -63,11 +59,9 @@ export interface StyledComponentProps {
   'aria-required'?: boolean
   'aria-invalid'?: boolean
   'aria-describedby'?: string
+  onOptionSelect?: (option: string) => void
 }
 
-/**
- * Styled component to prevent autofill styles
- */
 const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   '& .MuiInputBase-input': {
     '&:-webkit-autofill': {
@@ -85,11 +79,6 @@ const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   },
 }))
 
-/**
- * StyledComponent is a customizable input component with various variants and features.
- * @param props The props for the StyledComponent.
- * @returns The rendered StyledComponent.
- */
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
     label,
@@ -111,6 +100,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     'aria-required': ariaRequired,
     'aria-invalid': ariaInvalid,
     'aria-describedby': ariaDescribedBy,
+    onOptionSelect,
   } = props
 
   const { validateField, validateRequiredField, helperFooterValue } =
@@ -118,15 +108,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
+  const [passwordVisible, setPasswordVisible] = useState(false)
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
   const { renderMenu, selectedOption, handleDropdownClick } = useDropdown(
     props,
-    inputBoxRef
+    inputBoxRef,
+    onOptionSelect
   )
   const { handlePhoneNumberChange } = usePhoneNumber()
-  const { passwordVisible } = usePassword()
   const {
     value: splitButtonValue,
     handleIncrement,
@@ -182,6 +173,10 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
       formData.append(name, '')
       validateField(name, formData, label, required, formname)
     }
+  }
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible)
   }
 
   const isDropdownVariant = componentvariant === 'dropdown'
@@ -290,6 +285,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               <EndAdornment
                 componentvariant={componentvariant || ''}
                 passwordVisible={passwordVisible}
+                togglePasswordVisibility={togglePasswordVisibility}
                 iconcolor={iconcolor}
                 handleIncrement={handleIncrement}
                 handleDecrement={handleDecrement}

@@ -15,14 +15,14 @@ const StyledSelectMenu = styled(MenuItem)({
 
 export const useDropdown = (
   props: StyledComponentProps,
-  inputBoxRef: React.RefObject<HTMLDivElement>
+  inputBoxRef: React.RefObject<HTMLDivElement>,
+  onOptionSelect?: (option: string) => void
 ) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [filteredOptions, setFilteredOptions] = useState<string[]>([])
   const [selectedOption, setSelectedOption] = useState('')
   const [isDropdownFocused, setIsDropdownFocused] = useState(false)
-
   const { componentvariant, options, value, defaultOption } = props
 
   useEffect(() => {
@@ -48,10 +48,16 @@ export const useDropdown = (
     }
   }, [componentvariant, inputBoxRef])
 
-  const handleOptionSelect = useCallback((option: string) => {
-    setSelectedOption(option)
-    setIsDropdownOpen(false)
-  }, [])
+  const handleOptionSelect = useCallback(
+    (option: string) => {
+      setSelectedOption(option)
+      setIsDropdownOpen(false)
+      if (onOptionSelect) {
+        onOptionSelect(option)
+      }
+    },
+    [onOptionSelect]
+  )
 
   const handleInputFocus = useCallback(
     (focused: boolean) => {
