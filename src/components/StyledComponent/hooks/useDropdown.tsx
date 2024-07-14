@@ -22,7 +22,8 @@ export const useDropdown = (
   const [filteredOptions, setFilteredOptions] = useState<string[]>([])
   const [selectedOption, setSelectedOption] = useState('')
   const [isDropdownFocused, setIsDropdownFocused] = useState(false)
-  const { componentvariant, options, value } = props
+
+  const { componentvariant, options, value, defaultOption } = props
 
   useEffect(() => {
     if (componentvariant === 'dropdown' && options) {
@@ -33,15 +34,19 @@ export const useDropdown = (
   useEffect(() => {
     if (value !== undefined) {
       setSelectedOption(value)
+    } else if (defaultOption !== undefined) {
+      setSelectedOption(defaultOption)
+    } else if (options && options.length > 0) {
+      setSelectedOption(options[0])
     }
-  }, [value])
+  }, [value, defaultOption, options])
 
   const handleDropdownClick = useCallback(() => {
     if (componentvariant === 'dropdown') {
       setAnchorEl(inputBoxRef.current)
-      setIsDropdownOpen(!isDropdownOpen)
+      setIsDropdownOpen(prev => !prev)
     }
-  }, [componentvariant, inputBoxRef, isDropdownOpen])
+  }, [componentvariant, inputBoxRef])
 
   const handleOptionSelect = useCallback((option: string) => {
     setSelectedOption(option)
@@ -57,11 +62,7 @@ export const useDropdown = (
     [componentvariant]
   )
 
-  if (componentvariant !== 'dropdown') {
-    return {}
-  }
-
-  const renderMenu = anchorEl !== null && isDropdownOpen !== undefined && (
+  const renderMenu = (
     <Menu
       anchorEl={anchorEl}
       open={isDropdownOpen}
@@ -77,12 +78,13 @@ export const useDropdown = (
           <StyledSelectMenu
             key={option}
             onClick={() => handleOptionSelect(option)}
+            selected={option === selectedOption}
           >
             {option}
           </StyledSelectMenu>
         ))
       ) : (
-        <div>No Options Found</div>
+        <MenuItem disabled>No Options Found</MenuItem>
       )}
     </Menu>
   )

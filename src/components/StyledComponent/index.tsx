@@ -47,6 +47,7 @@ export interface StyledComponentProps {
     | 'date'
     | 'splitbutton'
   options?: readonly string[]
+  defaultOption?: string
   helperfooter?: HelperFooterMessage
   placeholder?: string
   minRows?: number
@@ -112,14 +113,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     'aria-describedby': ariaDescribedBy,
   } = props
 
-  console.log('StyledComponent: Initializing with props', {
-    name,
-    label,
-    required,
-    formname,
-    formSubmitted,
-  })
-
   const { validateField, validateRequiredField, helperFooterValue } =
     useHelperFooter()
   const [isFocused, setIsFocused] = useState(false)
@@ -128,8 +121,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
-  // Custom hooks
-  const { renderMenu, selectedOption, isDropdownOpen } = useDropdown(
+  const { renderMenu, selectedOption, handleDropdownClick } = useDropdown(
     props,
     inputBoxRef
   )
@@ -141,7 +133,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     handleDecrement,
   } = useSplitButton(props)
 
-  // useEffect hooks
   useHasInputEffect(value, valuestatus, setHasInput)
   usePreventAutocompleteEffect(inputRefInternal)
 
@@ -160,24 +151,13 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   }, [formSubmitted, hasInput])
 
   const currentHelperFooter = name ? helperFooterValue[name] : undefined
-  console.log('StyledComponent: Current helper footer', currentHelperFooter)
 
-  /**
-   * Handle the change event of the input element.
-   * @param e The change event.
-   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    console.log('StyledComponent: handleChange called', {
-      name: e.target.name,
-      value: e.target.value,
-    })
-
     if (componentvariant === 'phonenumber') {
       handlePhoneNumberChange(e)
     } else if (componentvariant === 'splitbutton') {
-      // Only allow numbers for splitbutton
       const numValue = e.target.value.replace(/[^0-9]/g, '')
       e.target.value = numValue
     }
@@ -187,37 +167,17 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     const formData = new FormData()
     formData.append(e.target.name, e.target.value)
     if (name && label && formname) {
-      console.log('StyledComponent: Calling validateField', {
-        name,
-        label,
-        required,
-        formname,
-      })
       validateField(name, formData, label, required, formname)
     }
   }
 
-  /**
-   * Handle the focus event of the input element.
-   */
   const handleFocus = () => {
-    console.log('StyledComponent: handleFocus called')
     setIsFocused(true)
   }
 
-  /**
-   * Handle the blur event of the input element.
-   */
   const handleBlur = () => {
-    console.log('StyledComponent: handleBlur called')
     setIsFocused(false)
     if (name && label && !hasInput && formname) {
-      console.log('StyledComponent: Calling validateField on blur', {
-        name,
-        label,
-        required,
-        formname,
-      })
       const formData = new FormData()
       formData.append(name, '')
       validateField(name, formData, label, required, formname)
@@ -233,9 +193,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     !!label
   const hasPlaceholder = !!placeholder
 
-  /**
-   * Determine if the label should be shrunk based on various conditions.
-   */
   const shouldShrinkLabel =
     isFocused ||
     isDropdownVariant ||
@@ -243,14 +200,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     hasPlaceholder ||
     hasInput ||
     componentvariant === 'phonenumber'
-
-  console.log('StyledComponent: Rendering', {
-    name,
-    showError,
-    hasHelperFooter: !!currentHelperFooter,
-    helperFooterStatus: currentHelperFooter?.status,
-    helperFooterMessage: currentHelperFooter?.statusMessage,
-  })
 
   return (
     <Box
@@ -349,6 +298,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onClick={isDropdownVariant ? handleDropdownClick : undefined}
             fullWidth
             multiline={componentvariant === 'multilinetextfield'}
             label={label}
@@ -370,7 +320,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               componentvariant === 'phonenumber'
             }
           />
-          {isDropdownVariant && isDropdownOpen && renderMenu}
+          {isDropdownVariant && renderMenu}
         </Box>
       </Box>
       {showError && currentHelperFooter?.statusMessage && (
