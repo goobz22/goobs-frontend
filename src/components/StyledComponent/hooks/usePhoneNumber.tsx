@@ -1,25 +1,25 @@
-import React, { useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 
 /**
- * formatPhoneNumber function formats a given string of digits into a standard US phone number format.
- * It ensures the number starts with "+1" and adds the appropriate dashes for area code and subsequent digits.
- * @param value The string of digits to format.
- * @returns The formatted phone number string.
+ * Formats a string of digits into a US phone number format with a "+1" country code.
+ *
+ * @param {string} value - The input string to be formatted.
+ * @returns {string} A formatted phone number string in the format "+1 xxx-xxx-xxxx".
+ *
+ * @example
+ * formatPhoneNumber("1234567890") // returns "+1 123-456-7890"
+ * formatPhoneNumber("12345") // returns "+1 123-45"
  */
 export const formatPhoneNumber = (value: string): string => {
-  // Remove all non-digit characters
   const digits = value.replace(/\D/g, '')
-  // Ensure the number starts with +1
+  const limitedDigits = digits.slice(0, 10)
   let formattedNumber = '+1 '
-  if (digits.length > 0) {
-    // Add the area code
-    formattedNumber += digits.slice(0, 3)
-    if (digits.length > 3) {
-      // Add first dash and next three digits
-      formattedNumber += '-' + digits.slice(3, 6)
-      if (digits.length > 6) {
-        // Add second dash and last four digits
-        formattedNumber += '-' + digits.slice(6, 10)
+  if (limitedDigits.length > 0) {
+    formattedNumber += limitedDigits.slice(0, 3)
+    if (limitedDigits.length > 3) {
+      formattedNumber += '-' + limitedDigits.slice(3, 6)
+      if (limitedDigits.length > 6) {
+        formattedNumber += '-' + limitedDigits.slice(6)
       }
     }
   }
@@ -27,28 +27,54 @@ export const formatPhoneNumber = (value: string): string => {
 }
 
 /**
- * usePhoneNumber hook provides functionality for handling phone number input changes.
- * It formats the input value using the formatPhoneNumber function.
- * @param props The props for the phone number input component.
- * @returns An object containing the handlePhoneNumberChange function.
+ * A custom React hook for managing and formatting a phone number input.
+ *
+ * @param {string} [initialValue=''] - The initial value of the phone number.
+ * @returns {Object} An object containing the current phone number state and functions to update it.
+ * @property {string} phoneNumber - The current formatted phone number.
+ * @property {function} handlePhoneNumberChange - A function to handle changes to the phone number input.
+ * @property {function} updatePhoneNumber - A function to directly update the phone number.
+ *
+ * @example
+ * const { phoneNumber, handlePhoneNumberChange, updatePhoneNumber } = usePhoneNumber();
  */
-export const usePhoneNumber = () => {
+export const usePhoneNumber = (initialValue: string = '') => {
   /**
-   * handlePhoneNumberChange function is called when the phone number input value changes.
-   * It formats the input value using the formatPhoneNumber function.
-   * @param e The change event triggered by the phone number input.
+   * The current state of the formatted phone number.
+   * @type {[string, function]}
+   */
+  const [phoneNumber, setPhoneNumber] = useState(
+    formatPhoneNumber(initialValue)
+  )
+
+  /**
+   * Handles changes to the phone number input.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event.
    */
   const handlePhoneNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const input = e.target.value
-      const digitsOnly = input.replace(/\D/g, '')
-      const formattedValue = formatPhoneNumber(digitsOnly)
-      e.target.value = formattedValue
+      // Remove the "+1 " prefix if it exists
+      const strippedInput = input.startsWith('+1 ') ? input.slice(3) : input
+      const formattedValue = formatPhoneNumber(strippedInput)
+      setPhoneNumber(formattedValue)
     },
     []
   )
 
+  /**
+   * Updates the phone number state with a new value.
+   *
+   * @param {string} newValue - The new phone number value to set.
+   */
+  const updatePhoneNumber = useCallback((newValue: string) => {
+    setPhoneNumber(formatPhoneNumber(newValue))
+  }, [])
+
   return {
+    phoneNumber,
     handlePhoneNumberChange,
+    updatePhoneNumber,
   }
 }
