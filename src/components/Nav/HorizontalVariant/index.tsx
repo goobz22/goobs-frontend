@@ -59,10 +59,17 @@ function HorizontalVariant({
      * Asynchronously fetches the active tab values from the cache.
      */
     const fetchActiveTabValues = async () => {
-      const result = await get('activeTabValues', 'client')
-      if (result && typeof result === 'object' && 'value' in result) {
+      const result = await get('activeTabValues', 'tabStore', 'client')
+      if (
+        result &&
+        typeof result === 'object' &&
+        'type' in result &&
+        result.type === 'json' &&
+        'value' in result &&
+        typeof result.value === 'object'
+      ) {
         setActiveTabValues(
-          (result as JSONValue).value as Record<string, ActiveTabValue | null>
+          result.value as Record<string, ActiveTabValue | null>
         )
       }
     }
@@ -88,8 +95,8 @@ function HorizontalVariant({
     setActiveTabValues(updatedActiveTabValues)
     await set(
       'activeTabValues',
+      'tabStore',
       { type: 'json', value: updatedActiveTabValues } as JSONValue,
-      new Date(Date.now() + 30 * 60 * 1000),
       'client'
     )
   }

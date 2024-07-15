@@ -1,9 +1,8 @@
 'use client'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import type { JSX } from 'react'
 import HorizontalVariant from './HorizontalVariant'
 import VerticalVariant from './VerticalVariant'
-import { get, JSONValue } from 'goobs-cache'
 
 // Type definition for alignment options
 type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
@@ -78,7 +77,7 @@ function Nav({
   // State for expanded navigation items
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
   const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
-  const [verticalNavWidth, setVerticalNavWidth] = useState<number>(250) // Default width
+  const [verticalNavWidth] = useState<number>(250) // Default width, no longer using goobs-cache
 
   // Memoized navigation items
   const navs = useMemo(() => {
@@ -96,17 +95,6 @@ function Nav({
     })
     return navs
   }, [items])
-
-  // Effect to fetch vertical nav width from cache
-  useEffect(() => {
-    const fetchVerticalNavWidth = async () => {
-      const result = await get('verticalNavWidth', 'client')
-      if (result && typeof result === 'object' && 'value' in result) {
-        setVerticalNavWidth((result as JSONValue).value as number)
-      }
-    }
-    fetchVerticalNavWidth()
-  }, [])
 
   // Render vertical or horizontal variant based on orientation
   if (orientation === 'vertical') {

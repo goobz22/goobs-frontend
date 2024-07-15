@@ -15,16 +15,30 @@ import {
 import labelStyles from '../../styles/StyledComponent/Label'
 import { useHasInputEffect, usePreventAutocompleteEffect } from './useEffects'
 
+/**
+ * Props interface for the StyledComponent.
+ * @interface
+ */
 export interface StyledComponentProps {
+  /** Name attribute for the input element */
   name?: string
+  /** Color of the input outline */
   outlinecolor?: string
+  /** Color of the icon */
   iconcolor?: string
+  /** Background color of the input */
   backgroundcolor?: string
+  /** Whether the input is notched */
   notched?: boolean
+  /** Combined font color for the input */
   combinedfontcolor?: string
+  /** Font color when the label is not shrunk */
   unshrunkfontcolor?: string
+  /** Font color when the label is shrunk */
   shrunkfontcolor?: string
+  /** Autocomplete attribute for the input */
   autoComplete?: string
+  /** Variant of the component */
   componentvariant?:
     | 'multilinetextfield'
     | 'dropdown'
@@ -42,26 +56,49 @@ export interface StyledComponentProps {
     | 'time'
     | 'date'
     | 'splitbutton'
+  /** Options for dropdown variant */
   options?: readonly string[]
+  /** Default option for dropdown variant */
   defaultOption?: string
+  /** Helper footer message */
   helperfooter?: HelperFooterMessage
+  /** Placeholder text for the input */
   placeholder?: string
+  /** Minimum number of rows for multiline text field */
   minRows?: number
+  /** Name of the form the input belongs to */
   formname?: string
+  /** Label text for the input */
   label?: string
+  /** Location of the shrunk label */
   shrunklabellocation?: 'onnotch' | 'above'
+  /** Value of the input */
   value?: string
+  /** Status of the value */
   valuestatus?: boolean
+  /** Whether the input is focused */
   focused?: boolean
+  /** Whether the input is required */
   required?: boolean
+  /** Whether the form has been submitted */
   formSubmitted?: boolean
+  /** ARIA label for the input */
   'aria-label'?: string
+  /** ARIA required attribute */
   'aria-required'?: boolean
+  /** ARIA invalid attribute */
   'aria-invalid'?: boolean
+  /** ARIA describedby attribute */
   'aria-describedby'?: string
+  /** Callback function when an option is selected (for dropdown variant) */
   onOptionSelect?: (option: string) => void
+  /** Callback function when the input value changes */
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
+/**
+ * Styled OutlinedInput component that prevents autofill styling.
+ */
 const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   '& .MuiInputBase-input': {
     '&:-webkit-autofill': {
@@ -79,6 +116,11 @@ const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   },
 }))
 
+/**
+ * StyledComponent is a versatile input component that can render various types of inputs based on the provided props.
+ * @param {StyledComponentProps} props - The props for the StyledComponent
+ * @returns {React.ReactElement} The rendered StyledComponent
+ */
 const StyledComponent: React.FC<StyledComponentProps> = props => {
   const {
     label,
@@ -101,10 +143,15 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     'aria-invalid': ariaInvalid,
     'aria-describedby': ariaDescribedBy,
     onOptionSelect,
+    onChange,
   } = props
 
-  const { validateField, validateRequiredField, helperFooterValue } =
-    useHelperFooter()
+  const {
+    validateField,
+    validateRequiredField,
+    helperFooterValue,
+    initializeRequiredFields,
+  } = useHelperFooter()
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
   const [showError, setShowError] = useState(false)
@@ -117,7 +164,8 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     inputBoxRef,
     onOptionSelect
   )
-  const { handlePhoneNumberChange } = usePhoneNumber()
+  const { phoneNumber, handlePhoneNumberChange, updatePhoneNumber } =
+    usePhoneNumber(value || '')
   const {
     value: splitButtonValue,
     handleIncrement,
@@ -127,12 +175,27 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   useHasInputEffect(value, valuestatus, setHasInput)
   usePreventAutocompleteEffect(inputRefInternal)
 
+  /**
+   * Initialize required fields when the form name changes
+   */
+  useEffect(() => {
+    if (formname) {
+      initializeRequiredFields(formname)
+    }
+  }, [formname, initializeRequiredFields])
+
+  /**
+   * Validate required field when relevant props change
+   */
   useEffect(() => {
     if (required && formname && name && label) {
       validateRequiredField(required, formname, name, label)
     }
   }, [required, formname, name, label, validateRequiredField])
 
+  /**
+   * Show error after a delay when form is submitted or input has value
+   */
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowError(formSubmitted || hasInput)
@@ -141,16 +204,37 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     return () => clearTimeout(timer)
   }, [formSubmitted, hasInput])
 
+  /**
+   * Update phone number when componentvariant is 'phonenumber' and value changes
+   */
+  useEffect(() => {
+    if (componentvariant === 'phonenumber' && value) {
+      updatePhoneNumber(value)
+    }
+  }, [componentvariant, value, updatePhoneNumber])
+
   const currentHelperFooter = name ? helperFooterValue[name] : undefined
 
+  /**
+   * Handle change event for the input
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event
+   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     if (componentvariant === 'phonenumber') {
       handlePhoneNumberChange(e)
+      if (onChange) {
+        onChange(e as React.ChangeEvent<HTMLInputElement>)
+      }
     } else if (componentvariant === 'splitbutton') {
       const numValue = e.target.value.replace(/[^0-9]/g, '')
       e.target.value = numValue
+      if (onChange) {
+        onChange(e as React.ChangeEvent<HTMLInputElement>)
+      }
+    } else if (onChange) {
+      onChange(e as React.ChangeEvent<HTMLInputElement>)
     }
 
     setHasInput(!!e.target.value)
@@ -162,10 +246,16 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }
 
+  /**
+   * Handle focus event for the input
+   */
   const handleFocus = () => {
     setIsFocused(true)
   }
 
+  /**
+   * Handle blur event for the input
+   */
   const handleBlur = () => {
     setIsFocused(false)
     if (name && label && !hasInput && formname) {
@@ -175,6 +265,9 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
   }
 
+  /**
+   * Toggle password visibility for password input
+   */
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible)
   }
@@ -194,7 +287,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     isSplitButtonVariant ||
     hasPlaceholder ||
     hasInput ||
-    componentvariant === 'phonenumber'
+    (componentvariant === 'phonenumber' && phoneNumber !== '')
 
   return (
     <Box
@@ -301,11 +394,13 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
             autoComplete="off"
             name={name}
             value={
-              isDropdownVariant
-                ? selectedOption
-                : isSplitButtonVariant
-                  ? splitButtonValue
-                  : value
+              componentvariant === 'phonenumber'
+                ? phoneNumber
+                : isDropdownVariant
+                  ? selectedOption
+                  : isSplitButtonVariant
+                    ? splitButtonValue
+                    : value
             }
             readOnly={isDropdownVariant}
             notched={
@@ -313,7 +408,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               ((isDropdownVariant || isSplitButtonVariant) &&
                 shrunklabellocation !== 'above') ||
               hasPlaceholder ||
-              componentvariant === 'phonenumber'
+              (componentvariant === 'phonenumber' && phoneNumber !== '')
             }
           />
           {isDropdownVariant && renderMenu}

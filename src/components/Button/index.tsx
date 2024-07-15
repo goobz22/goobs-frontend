@@ -1,52 +1,28 @@
-'use client'
-
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
 import { red } from '../../styles/palette'
-import { get, JSONValue } from 'goobs-cache'
+import { get } from 'goobs-cache'
 
-/**
- * Represents the alignment options for button text.
- */
 export type ButtonAlignment = 'left' | 'center' | 'right'
 
-/**
- * Represents the structure of a helper footer message.
- */
 export interface HelperFooterMessage {
-  /** The status of the message, either 'error' or 'success'. */
   status: 'error' | 'success'
-  /** The status message. */
   statusMessage: string
-  /** The spread message to be displayed. */
   spreadMessage: string
-  /** The priority of the spread message. */
   spreadMessagePriority: number
-  /** The name of the form associated with this message. */
   formname: string
-  /** Indicates if the field associated with this message is required. */
   required: boolean
 }
 
-/**
- * Props for the CustomButton component.
- * @extends {Omit<ButtonProps, 'color' | 'variant'>}
- */
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
-  /** The text to be displayed on the button. */
   text?: string
-  /** The background color of the button. */
   backgroundcolor?: string
-  /** The outline color of the button. */
   outlinecolor?: string
-  /** The font color of the button text. */
   fontcolor?: string
-  /** The alignment of the button text. */
   fontlocation?: ButtonAlignment
-  /** The variant of the font to be used for the button text. */
   fontvariant?:
     | 'arapeyh1'
     | 'arapeyh2'
@@ -75,42 +51,18 @@ export interface CustomButtonProps
     | 'merriparagraph'
     | 'merrihelperheader'
     | 'merrihelperfooter'
-  /** The icon to be displayed on the button. Set to false to remove the icon. */
   icon?: React.ReactNode | false
-  /** The color of the icon. */
   iconcolor?: string
-  /** The size of the icon. */
   iconsize?: string
-  /** The location of the icon relative to the button text. */
   iconlocation?: 'left' | 'top' | 'right'
-  /** The variant of the button. */
   variant?: 'text' | 'outlined' | 'contained'
-  /** The function to be called when the button is clicked. */
   onClick?: () => void
-  /** The helper footer message for the button. */
   helperfooter?: HelperFooterMessage
-  /** The width of the button. */
   width?: string
-  /** The name of the form associated with the button. */
   formname?: string
-  /** The name attribute of the button. */
   name?: string
 }
 
-/**
- * A customizable button component with advanced features.
- *
- * @component
- * @example
- * <CustomButton
- *   text="Submit"
- *   variant="contained"
- *   backgroundcolor="#007bff"
- *   fontcolor="#ffffff"
- *   onClick={() => handleSubmit()}
- *   formname="myForm"
- * />
- */
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
     text,
@@ -134,62 +86,86 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   )
-  const [isFormValid, setIsFormValid] = useState<boolean>(true)
+  const [, setIsFormValid] = useState<boolean>(true)
   const [hasBeenClicked, setHasBeenClicked] = useState<boolean>(false)
 
-  /**
-   * Memoized function to extract HelperFooterMessage objects from a complex data structure.
-   * @param {unknown} data - The data to extract HelperFooterMessages from.
-   * @returns {HelperFooterMessage[]} An array of extracted HelperFooterMessages.
-   */
-  const extractHelperFooters = useMemo(() => {
-    return (data: unknown): HelperFooterMessage[] => {
-      if (typeof data !== 'object' || data === null) {
-        return []
-      }
-
-      if ('status' in data && 'spreadMessage' in data && 'formname' in data) {
-        return [data as HelperFooterMessage]
-      }
-
-      if (Array.isArray(data)) {
-        return data.flatMap(extractHelperFooters)
-      }
-
-      return Object.values(data).flatMap(extractHelperFooters)
-    }
-  }, [])
-
-  /**
-   * Fetches HelperFooterMessages from the cache for the current form.
-   * @returns {Promise<HelperFooterMessage[]>} A promise that resolves to an array of HelperFooterMessages.
-   */
   const fetchHelperFooters = useCallback(async (): Promise<
     HelperFooterMessage[]
   > => {
     if (!formname) {
+      console.log('CustomButton: No formname provided, returning empty array')
       return []
     }
-    const helperFooterCache = (await get('helperFooter', 'client')) as JSONValue
-    const allHelperFooters = extractHelperFooters(helperFooterCache)
-    const relevantHelperFooters = allHelperFooters.filter(
-      footer => footer.formname === formname
-    )
-    return relevantHelperFooters
-  }, [formname, extractHelperFooters])
+    console.log('CustomButton: Fetching helper footers for formname:', formname)
 
-  /**
-   * Updates the form validation state based on the current HelperFooterMessages.
-   */
-  const updateFormValidation = useCallback(async () => {
+    // Wait for 2 seconds before fetching to allow time for cache update
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    const helperFooterResult = await get('helperfooter', formname, 'client')
+    console.log('CustomButton: Helper footer result:', helperFooterResult)
+
+    if (
+      helperFooterResult &&
+      typeof helperFooterResult === 'object' &&
+      'type' in helperFooterResult &&
+      helperFooterResult.type === 'json' &&
+      'value' in helperFooterResult &&
+      typeof helperFooterResult.value === 'object' &&
+      helperFooterResult.value !== null
+    ) {
+      const helperFooters = Object.entries(
+        helperFooterResult.value as Record<string, unknown>
+      )
+        .map(([key, value]): HelperFooterMessage | null => {
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            'status' in value &&
+            'statusMessage' in value &&
+            'spreadMessage' in value &&
+            'spreadMessagePriority' in value &&
+            'required' in value
+          ) {
+            return {
+              status: value.status as 'error' | 'success',
+              statusMessage: String(value.statusMessage),
+              spreadMessage: String(value.spreadMessage),
+              spreadMessagePriority: Number(value.spreadMessagePriority),
+              required: Boolean(value.required),
+              formname: key,
+            }
+          }
+          return null
+        })
+        .filter((value): value is HelperFooterMessage => value !== null)
+
+      console.log('CustomButton: Valid helper footers:', helperFooters)
+      return helperFooters
+    }
+
+    console.log('CustomButton: No valid helper footers found in cache')
+    return []
+  }, [formname])
+
+  const updateFormValidation = useCallback(async (): Promise<boolean> => {
+    console.log('CustomButton: Starting form validation')
     const helperFooters = await fetchHelperFooters()
+    console.log('CustomButton: Fetched helper footers:', helperFooters)
 
-    const requiredFooters = helperFooters.filter(footer => footer.required)
+    if (helperFooters.length === 0) {
+      console.log('CustomButton: No helper footers found, form is valid')
+      setErrorMessage(undefined)
+      setIsFormValid(true)
+      return true
+    }
+
     const errorFooters = helperFooters.filter(
       footer => footer.status === 'error'
     )
+    console.log('CustomButton: Error footers:', errorFooters)
 
     if (errorFooters.length > 0) {
+      console.log('CustomButton: Found error footers, form is invalid')
       const highestPriorityError = errorFooters.reduce((prev, current) =>
         prev.spreadMessagePriority < current.spreadMessagePriority
           ? prev
@@ -197,31 +173,20 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       )
       setErrorMessage(highestPriorityError.spreadMessage)
       setIsFormValid(false)
-    } else if (
-      requiredFooters.length > 0 &&
-      requiredFooters.some(
-        footer => !footer.status || footer.status === 'error'
-      )
-    ) {
-      setErrorMessage('Please fill in required fields')
-      setIsFormValid(false)
-    } else if (requiredFooters.length === 0 && helperFooters.length === 0) {
-      setErrorMessage('Please fill in required fields')
-      setIsFormValid(false)
-    } else {
-      setErrorMessage(undefined)
-      setIsFormValid(true)
+      return false
     }
+
+    console.log('CustomButton: No error footers found, form is valid')
+    setErrorMessage(undefined)
+    setIsFormValid(true)
+    return true
   }, [fetchHelperFooters])
 
   useEffect(() => {
+    console.log('CustomButton: Running effect to update form validation')
     void updateFormValidation()
   }, [updateFormValidation])
 
-  /**
-   * Renders the icon for the button.
-   * @returns {React.ReactNode | null} The rendered icon or null if no icon should be displayed.
-   */
   const renderIcon = (): React.ReactNode => {
     if (icon === false) {
       return null
@@ -234,23 +199,20 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     return <StarIcon style={{ fontSize: iconsize }} />
   }
 
-  /**
-   * Handles the button click event, performing form validation before executing the onClick callback.
-   * @param {React.MouseEvent<HTMLButtonElement>} event - The click event.
-   */
   const handleButtonClick = async (
     event: React.MouseEvent<HTMLButtonElement>
   ): Promise<void> => {
+    console.log('CustomButton: Button clicked')
     event.preventDefault()
     setHasBeenClicked(true)
 
-    await updateFormValidation()
-    if (!isFormValid) {
-      return
-    }
-
-    if (onClick) {
+    const isValid = await updateFormValidation()
+    console.log('CustomButton: Form validation result:', isValid)
+    if (isValid && onClick) {
+      console.log('CustomButton: Form is valid, calling onClick')
       onClick()
+    } else {
+      console.log('CustomButton: Form is invalid or no onClick provided')
     }
   }
 

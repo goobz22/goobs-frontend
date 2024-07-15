@@ -80,8 +80,8 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
     if (isValid) {
       set(
         'verificationCode',
-        combinedCode,
-        new Date(Date.now() + 3600000),
+        'codeStore',
+        { type: 'string', value: combinedCode },
         'client'
       )
     }
