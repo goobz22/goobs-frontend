@@ -1,28 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useMemo, useCallback } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
 import { red } from '../../styles/palette'
-import { get } from 'goobs-cache'
+import useHelperFooter from './hook/useHelperFooter'
 
+/**
+ * Defines the possible alignment options for the button text.
+ */
 export type ButtonAlignment = 'left' | 'center' | 'right'
 
-export interface HelperFooterMessage {
-  status: 'error' | 'success'
-  statusMessage: string
-  spreadMessage: string
-  spreadMessagePriority: number
-  formname: string
-  required: boolean
-}
-
+/**
+ * Interface for the CustomButton component props.
+ * Extends ButtonProps from Material-UI, omitting 'color' and 'variant'.
+ */
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
+  /** The text to display on the button */
   text?: string
+  /** The background color of the button */
   backgroundcolor?: string
+  /** The outline color of the button */
   outlinecolor?: string
+  /** The font color of the button text */
   fontcolor?: string
+  /** The alignment of the button text */
   fontlocation?: ButtonAlignment
+  /** The variant of the font to use for the button text */
   fontvariant?:
     | 'arapeyh1'
     | 'arapeyh2'
@@ -51,18 +55,32 @@ export interface CustomButtonProps
     | 'merriparagraph'
     | 'merrihelperheader'
     | 'merrihelperfooter'
+  /** The icon to display on the button */
   icon?: React.ReactNode | false
+  /** The color of the icon */
   iconcolor?: string
+  /** The size of the icon */
   iconsize?: string
+  /** The location of the icon relative to the text */
   iconlocation?: 'left' | 'top' | 'right'
+  /** The variant of the button */
   variant?: 'text' | 'outlined' | 'contained'
+  /** The function to call when the button is clicked */
   onClick?: () => void
-  helperfooter?: HelperFooterMessage
+  /** The width of the button */
   width?: string
+  /** The name of the form associated with this button */
   formname?: string
+  /** The name attribute of the button */
   name?: string
 }
 
+/**
+ * CustomButton component that extends Material-UI's Button with additional styling and functionality.
+ *
+ * @param props - The props for the CustomButton component
+ * @returns A React functional component
+ */
 const CustomButton: React.FC<CustomButtonProps> = props => {
   const {
     text,
@@ -83,111 +101,15 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
     width,
   } = props
 
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
-  )
-  const [, setIsFormValid] = useState<boolean>(true)
-  const [hasBeenClicked, setHasBeenClicked] = useState<boolean>(false)
+  const { errorMessage, isFormValid, updateFormValidation } =
+    useHelperFooter(formname)
 
-  const fetchHelperFooters = useCallback(async (): Promise<
-    HelperFooterMessage[]
-  > => {
-    if (!formname) {
-      console.log('CustomButton: No formname provided, returning empty array')
-      return []
-    }
-    console.log('CustomButton: Fetching helper footers for formname:', formname)
-
-    // Wait for 2 seconds before fetching to allow time for cache update
-    await new Promise(resolve => setTimeout(resolve, 3000))
-
-    const helperFooterResult = await get('helperfooter', formname, 'client')
-    console.log('CustomButton: Helper footer result:', helperFooterResult)
-
-    if (
-      helperFooterResult &&
-      typeof helperFooterResult === 'object' &&
-      'type' in helperFooterResult &&
-      helperFooterResult.type === 'json' &&
-      'value' in helperFooterResult &&
-      typeof helperFooterResult.value === 'object' &&
-      helperFooterResult.value !== null
-    ) {
-      const helperFooters = Object.entries(
-        helperFooterResult.value as Record<string, unknown>
-      )
-        .map(([key, value]): HelperFooterMessage | null => {
-          if (
-            typeof value === 'object' &&
-            value !== null &&
-            'status' in value &&
-            'statusMessage' in value &&
-            'spreadMessage' in value &&
-            'spreadMessagePriority' in value &&
-            'required' in value
-          ) {
-            return {
-              status: value.status as 'error' | 'success',
-              statusMessage: String(value.statusMessage),
-              spreadMessage: String(value.spreadMessage),
-              spreadMessagePriority: Number(value.spreadMessagePriority),
-              required: Boolean(value.required),
-              formname: key,
-            }
-          }
-          return null
-        })
-        .filter((value): value is HelperFooterMessage => value !== null)
-
-      console.log('CustomButton: Valid helper footers:', helperFooters)
-      return helperFooters
-    }
-
-    console.log('CustomButton: No valid helper footers found in cache')
-    return []
-  }, [formname])
-
-  const updateFormValidation = useCallback(async (): Promise<boolean> => {
-    console.log('CustomButton: Starting form validation')
-    const helperFooters = await fetchHelperFooters()
-    console.log('CustomButton: Fetched helper footers:', helperFooters)
-
-    if (helperFooters.length === 0) {
-      console.log('CustomButton: No helper footers found, form is valid')
-      setErrorMessage(undefined)
-      setIsFormValid(true)
-      return true
-    }
-
-    const errorFooters = helperFooters.filter(
-      footer => footer.status === 'error'
-    )
-    console.log('CustomButton: Error footers:', errorFooters)
-
-    if (errorFooters.length > 0) {
-      console.log('CustomButton: Found error footers, form is invalid')
-      const highestPriorityError = errorFooters.reduce((prev, current) =>
-        prev.spreadMessagePriority < current.spreadMessagePriority
-          ? prev
-          : current
-      )
-      setErrorMessage(highestPriorityError.spreadMessage)
-      setIsFormValid(false)
-      return false
-    }
-
-    console.log('CustomButton: No error footers found, form is valid')
-    setErrorMessage(undefined)
-    setIsFormValid(true)
-    return true
-  }, [fetchHelperFooters])
-
-  useEffect(() => {
-    console.log('CustomButton: Running effect to update form validation')
-    void updateFormValidation()
-  }, [updateFormValidation])
-
-  const renderIcon = (): React.ReactNode => {
+  /**
+   * Renders the icon for the button based on the provided props.
+   *
+   * @returns {React.ReactNode} The rendered icon or null
+   */
+  const renderIcon = useCallback((): React.ReactNode => {
     if (icon === false) {
       return null
     }
@@ -197,24 +119,80 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
       })
     }
     return <StarIcon style={{ fontSize: iconsize }} />
-  }
+  }, [icon, iconsize])
 
-  const handleButtonClick = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ): Promise<void> => {
-    console.log('CustomButton: Button clicked')
-    event.preventDefault()
-    setHasBeenClicked(true)
+  /**
+   * Handles the button click event. Prevents default behavior, validates the form,
+   * and calls the onClick prop if the form is valid.
+   *
+   * @param event - The mouse event from clicking the button
+   */
+  const handleButtonClick = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+      event.preventDefault()
+      const validationResult = await updateFormValidation(formname)
+      if (validationResult && onClick) {
+        onClick()
+      }
+    },
+    [updateFormValidation, onClick, formname]
+  )
 
-    const isValid = await updateFormValidation()
-    console.log('CustomButton: Form validation result:', isValid)
-    if (isValid && onClick) {
-      console.log('CustomButton: Form is valid, calling onClick')
-      onClick()
-    } else {
-      console.log('CustomButton: Form is invalid or no onClick provided')
-    }
-  }
+  /**
+   * Memoized style object for the button.
+   */
+  const buttonStyle = useMemo(
+    () => ({
+      minWidth: text ? 'auto' : 'fit-content',
+      paddingLeft: text ? '8px' : '0',
+      paddingRight: text ? '8px' : '0',
+      justifyContent: fontlocation || 'center',
+      backgroundColor: backgroundcolor,
+      border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
+      color: iconcolor,
+      width: width,
+    }),
+    [text, fontlocation, backgroundcolor, outlinecolor, iconcolor, width]
+  )
+
+  /**
+   * Memoized content for the button, including icon and text.
+   */
+  const buttonContent = useMemo(
+    () => (
+      <Box display="flex" alignItems="center">
+        {iconlocation === 'left' && renderIcon()}
+        {text && (
+          <Typography
+            fontvariant={fontvariant}
+            fontcolor={fontcolor}
+            text={text}
+          />
+        )}
+        {iconlocation === 'right' && renderIcon()}
+      </Box>
+    ),
+    [iconlocation, renderIcon, text, fontvariant, fontcolor]
+  )
+
+  /**
+   * Memoized error message component that displays when the form is invalid.
+   */
+  const errorMessageComponent = useMemo(
+    () =>
+      !isFormValid && errorMessage ? (
+        <Typography
+          fontvariant="merrihelperfooter"
+          fontcolor={red.main}
+          text={errorMessage}
+          marginTop={0.5}
+          marginBottom={0}
+          align="center"
+          width="100%"
+        />
+      ) : null,
+    [errorMessage, isFormValid]
+  )
 
   return (
     <Box
@@ -231,42 +209,13 @@ const CustomButton: React.FC<CustomButtonProps> = props => {
         type={type}
         name={name}
         onClick={handleButtonClick}
-        style={{
-          minWidth: text ? 'auto' : 'fit-content',
-          paddingLeft: text ? '8px' : '0',
-          paddingRight: text ? '8px' : '0',
-          justifyContent: fontlocation || 'center',
-          backgroundColor: backgroundcolor,
-          border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
-          color: iconcolor,
-          width: width,
-        }}
+        style={buttonStyle}
       >
-        <Box display="flex" alignItems="center">
-          {iconlocation === 'left' && renderIcon()}
-          {text && (
-            <Typography
-              fontvariant={fontvariant}
-              fontcolor={fontcolor}
-              text={text}
-            />
-          )}
-          {iconlocation === 'right' && renderIcon()}
-        </Box>
+        {buttonContent}
       </Button>
-      {hasBeenClicked && errorMessage && (
-        <Typography
-          fontvariant="merrihelperfooter"
-          fontcolor={red.main}
-          text={errorMessage}
-          marginTop={0.5}
-          marginBottom={0}
-          align="center"
-          width="100%"
-        />
-      )}
+      {errorMessageComponent}
     </Box>
   )
 }
 
-export default CustomButton
+export default React.memo(CustomButton)
