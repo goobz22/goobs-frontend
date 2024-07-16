@@ -33,7 +33,6 @@ const useButton = (grid: {
       iconlocation,
       variant,
       onClick,
-      helperfooter,
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
@@ -72,7 +71,6 @@ const useButton = (grid: {
           iconlocation={iconlocation}
           variant={variant}
           onClick={onClick}
-          helperfooter={helperfooter}
           {...restProps}
         />
       ),
