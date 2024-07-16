@@ -164,8 +164,10 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     inputBoxRef,
     onOptionSelect
   )
-  const { phoneNumber, handlePhoneNumberChange, updatePhoneNumber } =
-    usePhoneNumber(value || '')
+  const { phoneNumber, handlePhoneNumberChange } = usePhoneNumber(
+    value || '',
+    componentvariant
+  )
   const {
     value: splitButtonValue,
     handleIncrement,
@@ -203,15 +205,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
 
     return () => clearTimeout(timer)
   }, [formSubmitted, hasInput])
-
-  /**
-   * Update phone number when componentvariant is 'phonenumber' and value changes
-   */
-  useEffect(() => {
-    if (componentvariant === 'phonenumber' && value) {
-      updatePhoneNumber(value)
-    }
-  }, [componentvariant, value, updatePhoneNumber])
 
   const currentHelperFooter = name ? helperFooterValue[name] : undefined
 

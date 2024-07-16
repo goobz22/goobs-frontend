@@ -2,27 +2,53 @@
 
 import { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import { debounce } from 'lodash'
-import { get, set, StringValue, JSONValue } from 'goobs-cache'
+import { get, set, remove, StringValue, JSONValue } from 'goobs-cache'
 
+/**
+ * Validates if the given email string is in a valid email format.
+ * @param {string} email - The email string to validate.
+ * @returns {boolean} True if the email is valid, false otherwise.
+ */
 const isValidEmailFormat = (email: string): boolean => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   return emailRegex.test(email)
 }
 
+/**
+ * Represents the structure of a helper footer message.
+ */
 export interface HelperFooterMessage {
+  /** The status of the message: 'error', 'success', or 'emptyAndRequired'. */
   status: 'error' | 'success' | 'emptyAndRequired'
+  /** A detailed message describing the status. */
   statusMessage: string
+  /** A concise message for display purposes. */
   spreadMessage: string
+  /** A number indicating the priority of the message. Lower numbers indicate higher priority. */
   spreadMessagePriority: number
+  /** Indicates whether this field is required. */
   required: boolean
 }
 
+/**
+ * A custom hook for managing helper footer messages and form validation.
+ * @returns {Object} An object containing functions and state for managing helper footers.
+ */
 export const useHelperFooter = () => {
   const [helperFooterValue, setHelperFooterValue] = useState<
     Record<string, HelperFooterMessage>
   >({})
   const helperFooterRef = useRef<Record<string, HelperFooterMessage>>({})
 
+  /**
+   * Handles the creation of error messages for generic fields.
+   * @param {FormData} formData - The form data containing the field value.
+   * @param {string} name - The name of the field.
+   * @param {string} label - The label of the field.
+   * @param {boolean} required - Whether the field is required.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to a HelperFooterMessage or undefined.
+   */
   const handleGenericErrorCreation = useCallback(
     async (
       formData: FormData,
@@ -53,18 +79,22 @@ export const useHelperFooter = () => {
           },
         }
         await set('helperfooter', formname, jsonValue, 'client')
-        console.log(
-          `Stored helper footer for ${name}:`,
-          message,
-          `storeName: ${formname}`
-        )
         return message
+      } else {
+        await remove('helperfooter', formname, 'client')
       }
       return undefined
     },
     []
   )
 
+  /**
+   * Handles the creation of error messages for email fields.
+   * @param {FormData} formData - The form data containing the email value.
+   * @param {boolean} required - Whether the email field is required.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to a HelperFooterMessage or undefined.
+   */
   const handleEmailErrorCreation = useCallback(
     async (
       formData: FormData,
@@ -101,24 +131,23 @@ export const useHelperFooter = () => {
       }
 
       if (message) {
-        const jsonValue: JSONValue = {
-          type: 'json',
-          value: {
-            email: {
-              status: message.status,
-              statusMessage: message.statusMessage,
-              spreadMessage: message.spreadMessage,
-              spreadMessagePriority: message.spreadMessagePriority,
-              required: message.required,
+        if (message.status === 'success') {
+          await remove('helperfooter', formname, 'client')
+        } else {
+          const jsonValue: JSONValue = {
+            type: 'json',
+            value: {
+              email: {
+                status: message.status,
+                statusMessage: message.statusMessage,
+                spreadMessage: message.spreadMessage,
+                spreadMessagePriority: message.spreadMessagePriority,
+                required: message.required,
+              },
             },
-          },
+          }
+          await set('helperfooter', formname, jsonValue, 'client')
         }
-        await set('helperfooter', formname, jsonValue, 'client')
-        console.log(
-          `Stored helper footer for email:`,
-          message,
-          `storeName: ${formname}`
-        )
       }
 
       return message
@@ -126,6 +155,13 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * Handles the creation of error messages for password fields.
+   * @param {FormData} formData - The form data containing the password value.
+   * @param {boolean} required - Whether the password field is required.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to a HelperFooterMessage or undefined.
+   */
   const handlePasswordErrorCreation = useCallback(
     async (
       formData: FormData,
@@ -133,24 +169,15 @@ export const useHelperFooter = () => {
       formname: string
     ): Promise<HelperFooterMessage | undefined> => {
       const password = formData.get('verifyPassword') as string
-      console.log('handlePasswordErrorCreation - Password:', password)
 
       const debouncedPasswordStorage = debounce(async () => {
-        try {
-          if (password) {
-            console.log('Storing password in goobs-cache...')
-            await set(
-              'validate',
-              formname,
-              { type: 'string', value: password } as StringValue,
-              'client'
-            )
-            console.log('Password stored successfully')
-          } else {
-            console.log('No password to store')
-          }
-        } catch (error) {
-          console.error('Error interacting with goobs-cache:', error)
+        if (password) {
+          await set(
+            'validate',
+            formname,
+            { type: 'string', value: password } as StringValue,
+            'client'
+          )
         }
       }, 2000)
 
@@ -193,24 +220,23 @@ export const useHelperFooter = () => {
       }
 
       if (message) {
-        const jsonValue: JSONValue = {
-          type: 'json',
-          value: {
-            verifyPassword: {
-              status: message.status,
-              statusMessage: message.statusMessage,
-              spreadMessage: message.spreadMessage,
-              spreadMessagePriority: message.spreadMessagePriority,
-              required: message.required,
+        if (message.status === 'success') {
+          await remove('helperfooter', formname, 'client')
+        } else {
+          const jsonValue: JSONValue = {
+            type: 'json',
+            value: {
+              verifyPassword: {
+                status: message.status,
+                statusMessage: message.statusMessage,
+                spreadMessage: message.spreadMessage,
+                spreadMessagePriority: message.spreadMessagePriority,
+                required: message.required,
+              },
             },
-          },
+          }
+          await set('helperfooter', formname, jsonValue, 'client')
         }
-        await set('helperfooter', formname, jsonValue, 'client')
-        console.log(
-          `Stored helper footer for verifyPassword:`,
-          message,
-          `storeName: ${formname}`
-        )
       }
 
       return message
@@ -218,6 +244,13 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * Handles the creation of error messages for password confirmation fields.
+   * @param {FormData} formData - The form data containing the confirmation password value.
+   * @param {boolean} required - Whether the confirmation password field is required.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to a HelperFooterMessage or undefined.
+   */
   const handleConfirmPasswordErrorCreation = useCallback(
     async (
       formData: FormData,
@@ -225,10 +258,6 @@ export const useHelperFooter = () => {
       formname: string
     ): Promise<HelperFooterMessage | undefined> => {
       const confirmPassword = formData.get('confirmPassword') as string
-      console.log(
-        'handleConfirmPasswordErrorCreation - Confirm Password:',
-        confirmPassword
-      )
 
       let message: HelperFooterMessage | undefined
 
@@ -243,11 +272,9 @@ export const useHelperFooter = () => {
       } else if (confirmPassword) {
         let verifyPasswordResult
         try {
-          console.log('Retrieving password from goobs-cache...')
           verifyPasswordResult = await get('validate', formname, 'client')
-          console.log('Retrieved password result:', verifyPasswordResult)
         } catch (error) {
-          console.error('Error retrieving password from goobs-cache:', error)
+          // Error handling
         }
 
         let verifyPassword: string | undefined
@@ -260,9 +287,6 @@ export const useHelperFooter = () => {
           typeof verifyPasswordResult.value === 'string'
         ) {
           verifyPassword = verifyPasswordResult.value
-          console.log('Verify password retrieved:', verifyPassword)
-        } else {
-          console.log('Invalid or missing verify password result')
         }
 
         if (!verifyPassword) {
@@ -293,24 +317,23 @@ export const useHelperFooter = () => {
       }
 
       if (message) {
-        const jsonValue: JSONValue = {
-          type: 'json',
-          value: {
-            confirmPassword: {
-              status: message.status,
-              statusMessage: message.statusMessage,
-              spreadMessage: message.spreadMessage,
-              spreadMessagePriority: message.spreadMessagePriority,
-              required: message.required,
+        if (message.status === 'success') {
+          await remove('helperfooter', formname, 'client')
+        } else {
+          const jsonValue: JSONValue = {
+            type: 'json',
+            value: {
+              confirmPassword: {
+                status: message.status,
+                statusMessage: message.statusMessage,
+                spreadMessage: message.spreadMessage,
+                spreadMessagePriority: message.spreadMessagePriority,
+                required: message.required,
+              },
             },
-          },
+          }
+          await set('helperfooter', formname, jsonValue, 'client')
         }
-        await set('helperfooter', formname, jsonValue, 'client')
-        console.log(
-          `Stored helper footer for confirmPassword:`,
-          message,
-          `storeName: ${formname}`
-        )
       }
 
       return message
@@ -318,6 +341,13 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * Handles the creation of error messages for phone number fields.
+   * @param {FormData} formData - The form data containing the phone number value.
+   * @param {boolean} required - Whether the phone number field is required.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage | undefined>} A promise that resolves to a HelperFooterMessage or undefined.
+   */
   const handlePhoneNumberErrorCreation = useCallback(
     async (
       formData: FormData,
@@ -363,24 +393,23 @@ export const useHelperFooter = () => {
       }
 
       if (message) {
-        const jsonValue: JSONValue = {
-          type: 'json',
-          value: {
-            phoneNumber: {
-              status: message.status,
-              statusMessage: message.statusMessage,
-              spreadMessage: message.spreadMessage,
-              spreadMessagePriority: message.spreadMessagePriority,
-              required: message.required,
+        if (message.status === 'success') {
+          await remove('helperfooter', formname, 'client')
+        } else {
+          const jsonValue: JSONValue = {
+            type: 'json',
+            value: {
+              phoneNumber: {
+                status: message.status,
+                statusMessage: message.statusMessage,
+                spreadMessage: message.spreadMessage,
+                spreadMessagePriority: message.spreadMessagePriority,
+                required: message.required,
+              },
             },
-          },
+          }
+          await set('helperfooter', formname, jsonValue, 'client')
         }
-        await set('helperfooter', formname, jsonValue, 'client')
-        console.log(
-          `Stored helper footer for phoneNumber:`,
-          message,
-          `storeName: ${formname}`
-        )
       }
 
       return message
@@ -388,6 +417,11 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * Updates the helper footer state with new validation results.
+   * @param {string} name - The name of the field.
+   * @param {HelperFooterMessage | undefined} validationResult - The validation result for the field.
+   */
   const updateHelperFooter = useCallback(
     (name: string, validationResult: HelperFooterMessage | undefined): void => {
       if (validationResult) {
@@ -410,9 +444,12 @@ export const useHelperFooter = () => {
     []
   )
 
+  /**
+   * Initializes required fields for a given form.
+   * @param {string} formname - The name of the form.
+   */
   const initializeRequiredFields = useCallback(
     async (formname: string) => {
-      console.log(`Initializing required fields for ${formname}`)
       const fields = await get('helperfooter', formname, 'client')
       if (
         fields &&
@@ -425,7 +462,6 @@ export const useHelperFooter = () => {
           ([field, message]) => {
             if (message && typeof message === 'object' && 'status' in message) {
               updateHelperFooter(field, message as HelperFooterMessage)
-              console.log(`Initialized required field ${field}:`, message)
             }
           }
         )
@@ -434,6 +470,14 @@ export const useHelperFooter = () => {
     [updateHelperFooter]
   )
 
+  /**
+   * Validates a specific field in the form.
+   * @param {string} name - The name of the field.
+   * @param {FormData} formData - The form data containing the field value.
+   * @param {string} label - The label of the field.
+   * @param {boolean} required - Whether the field is required.
+   * @param {string} formname - The name of the form.
+   */
   const validateField = useCallback(
     async (
       name: string,
@@ -442,7 +486,6 @@ export const useHelperFooter = () => {
       required: boolean,
       formname: string
     ) => {
-      console.log(`Validating field: ${name}`)
       let validationResult: HelperFooterMessage | undefined
 
       switch (name) {
@@ -485,7 +528,6 @@ export const useHelperFooter = () => {
       }
 
       updateHelperFooter(name, validationResult)
-      console.log(`Validation result for ${name}:`, validationResult)
     },
     [
       handleEmailErrorCreation,
@@ -497,9 +539,15 @@ export const useHelperFooter = () => {
     ]
   )
 
+  /**
+   * Validates a required field in the form.
+   * @param {boolean} required - Whether the field is required.
+   * @param {string} formname - The name of the form.
+   * @param {string} name - The name of the field.
+   * @param {string} label - The label of the field.
+   */
   const validateRequiredField = useCallback(
     (required: boolean, formname: string, name: string, label: string) => {
-      console.log(`Validating required field: ${name}`)
       if (required && formname && name && label) {
         const emptyFormData = new FormData()
         emptyFormData.append(name, '')
@@ -509,6 +557,13 @@ export const useHelperFooter = () => {
     [validateField]
   )
 
+  /**
+   * A custom hook to determine whether to show an error message.
+   * @param {boolean} formSubmitted - Whether the form has been submitted.
+   * @param {boolean} hasInput - Whether the field has input.
+   * @param {boolean} isFocused - Whether the field is currently focused.
+   * @returns {boolean} Whether to show the error message.
+   */
   const useShowErrorEffect = (
     formSubmitted: boolean,
     hasInput: boolean,
@@ -519,15 +574,18 @@ export const useHelperFooter = () => {
     useEffect(() => {
       const shouldShowError = formSubmitted || (hasInput && !isFocused)
       setShowError(shouldShowError)
-      console.log('Show error state updated:', shouldShowError)
     }, [formSubmitted, hasInput, isFocused])
 
     return showError
   }
 
+  /**
+   * Fetches helper footer messages for a given form.
+   * @param {string} formname - The name of the form.
+   * @returns {Promise<HelperFooterMessage[]>} A promise that resolves to an array of HelperFooterMessages.
+   */
   const fetchHelperFooters = useCallback(
     async (formname: string): Promise<HelperFooterMessage[]> => {
-      console.log(`Fetching helper footers for ${formname}`)
       const helperFooters = await get('helperfooter', formname, 'client')
       if (
         helperFooters &&
