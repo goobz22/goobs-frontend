@@ -80,7 +80,9 @@ const TransferList: React.FC<TransferListProps> = ({
     const newRight = right.concat(left)
     setRight(newRight)
     setLeft([])
-    onChange && onChange(newRight)
+    if (onChange) {
+      onChange(newRight)
+    }
   }
 
   /**
@@ -92,7 +94,9 @@ const TransferList: React.FC<TransferListProps> = ({
     setRight(newRight)
     setLeft(newLeft)
     setChecked(not(checked, leftChecked))
-    onChange && onChange(newRight)
+    if (onChange) {
+      onChange(newRight)
+    }
   }
 
   /**
@@ -104,7 +108,9 @@ const TransferList: React.FC<TransferListProps> = ({
     setLeft(newLeft)
     setRight(newRight)
     setChecked(not(checked, rightChecked))
-    onChange && onChange(newRight)
+    if (onChange) {
+      onChange(newRight)
+    }
   }
 
   /**
@@ -114,7 +120,9 @@ const TransferList: React.FC<TransferListProps> = ({
     const newLeft = left.concat(right)
     setLeft(newLeft)
     setRight([])
-    onChange && onChange([])
+    if (onChange) {
+      onChange([])
+    }
   }
 
   /**
