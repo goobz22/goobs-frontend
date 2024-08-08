@@ -4,7 +4,7 @@ import { Input, Box } from '@mui/material'
 import { useCodeConfirmation } from './utils/useCodeConfirmation'
 import { columnconfig } from '../../components/Grid'
 import { red, green } from '../../styles/palette'
-import { set } from 'goobs-cache'
+import { session } from 'goobs-cache'
 
 export interface ConfirmationCodeInputsProps {
   identifier?: string
@@ -30,6 +30,9 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
   'aria-invalid': ariaInvalid,
   ...props
 }) => {
+  const verificationCodeAtom = session.atom<string>('')
+  const [, setVerificationCode] = session.useAtom(verificationCodeAtom)
+
   const { handleCodeChange, handleKeyDown, combinedCode } = useCodeConfirmation(
     {
       codeLength,
@@ -73,19 +76,14 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
   }
 
   /**
-   * useEffect hook is used to set the verification code into an atom using goobs-cache.
+   * useEffect hook is used to set the verification code into the session atom using goobs-cache.
    * It sets the code whenever the combinedCode changes and the code is valid.
    */
   React.useEffect(() => {
     if (isValid) {
-      set(
-        'verificationCode',
-        'codeStore',
-        { type: 'string', value: combinedCode },
-        'client'
-      )
+      setVerificationCode(combinedCode)
     }
-  }, [combinedCode, isValid])
+  }, [combinedCode, isValid, setVerificationCode])
 
   return (
     <Box

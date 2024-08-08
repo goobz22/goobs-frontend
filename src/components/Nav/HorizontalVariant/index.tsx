@@ -1,7 +1,7 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Box, Tabs, Tab } from '@mui/material'
-import { get, set, JSONValue } from 'goobs-cache'
+import { session } from 'goobs-cache'
 import { NavProps, SubNav, View } from '../index'
 
 /**
@@ -47,58 +47,32 @@ function HorizontalVariant({
   /**
    * State to keep track of active tab values for different navigation components.
    */
-  const [activeTabValues, setActiveTabValues] = useState<
+  const activeTabValuesAtom = session.atom<
     Record<string, ActiveTabValue | null>
   >({})
+  const [activeTabValues, setActiveTabValues] =
+    session.useAtom(activeTabValuesAtom)
 
   /**
-   * Effect hook to fetch and set the active tab values when the component mounts.
+   * Effect hook to initialize the active tab values when the component mounts.
    */
   useEffect(() => {
-    /**
-     * Asynchronously fetches the active tab values from the cache.
-     */
-    const fetchActiveTabValues = async () => {
-      const result = await get('activeTabValues', 'tabStore', 'client')
-      if (
-        result &&
-        typeof result === 'object' &&
-        'type' in result &&
-        result.type === 'json' &&
-        'value' in result &&
-        typeof result.value === 'object'
-      ) {
-        setActiveTabValues(
-          result.value as Record<string, ActiveTabValue | null>
-        )
-      }
-    }
-
-    fetchActiveTabValues()
+    // The initialization is now handled by the session atom
+    // No need to fetch from cache as it's automatically handled by goobs-cache
   }, [])
 
   /**
    * Handles tab change events.
-   * Updates the active tab values in the state and cache.
+   * Updates the active tab values in the state.
    *
    * @param {React.SyntheticEvent} event - The event object.
    * @param {string} newValue - The new value of the selected tab.
    */
-  const handleTabChange = async (
-    event: React.SyntheticEvent,
-    newValue: string
-  ) => {
-    const updatedActiveTabValues = {
-      ...activeTabValues,
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    setActiveTabValues(prev => ({
+      ...prev,
       [navname ?? '']: { tabId: newValue },
-    }
-    setActiveTabValues(updatedActiveTabValues)
-    await set(
-      'activeTabValues',
-      'tabStore',
-      { type: 'json', value: updatedActiveTabValues } as JSONValue,
-      'client'
-    )
+    }))
   }
 
   /**

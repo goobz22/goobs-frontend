@@ -1,32 +1,19 @@
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useEffect, useState } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
 import { red } from '../../styles/palette'
 import useHelperFooter from './hook/useHelperFooter'
 
-/**
- * Defines the possible alignment options for the button text.
- */
 export type ButtonAlignment = 'left' | 'center' | 'right'
 
-/**
- * Interface for the CustomButton component props.
- * Extends ButtonProps from Material-UI, omitting 'color' and 'variant'.
- */
 export interface CustomButtonProps
   extends Omit<ButtonProps, 'color' | 'variant'> {
-  /** The text to display on the button */
   text?: string
-  /** The background color of the button */
   backgroundcolor?: string
-  /** The outline color of the button */
   outlinecolor?: string
-  /** The font color of the button text */
   fontcolor?: string
-  /** The alignment of the button text */
   fontlocation?: ButtonAlignment
-  /** The variant of the font to use for the button text */
   fontvariant?:
     | 'arapeyh1'
     | 'arapeyh2'
@@ -55,167 +42,226 @@ export interface CustomButtonProps
     | 'merriparagraph'
     | 'merrihelperheader'
     | 'merrihelperfooter'
-  /** The icon to display on the button */
   icon?: React.ReactNode | false
-  /** The color of the icon */
   iconcolor?: string
-  /** The size of the icon */
   iconsize?: string
-  /** The location of the icon relative to the text */
   iconlocation?: 'left' | 'top' | 'right'
-  /** The variant of the button */
   variant?: 'text' | 'outlined' | 'contained'
-  /** The function to call when the button is clicked */
   onClick?: () => void
-  /** The width of the button */
   width?: string
-  /** The name of the form associated with this button */
   formname?: string
-  /** The name attribute of the button */
   name?: string
 }
 
-/**
- * CustomButton component that extends Material-UI's Button with additional styling and functionality.
- *
- * @param props - The props for the CustomButton component
- * @returns A React functional component
- */
-const CustomButton: React.FC<CustomButtonProps> = props => {
-  const {
-    text,
-    variant,
-    fontvariant = 'merriparagraph',
-    icon,
-    iconlocation,
-    iconsize,
-    type,
-    onClick,
-    fontcolor,
-    name,
-    formname,
-    outlinecolor,
-    backgroundcolor,
-    fontlocation,
-    iconcolor,
-    width,
-  } = props
+const CustomButton: React.FC<CustomButtonProps> = React.memo(
+  props => {
+    const {
+      text,
+      variant,
+      fontvariant = 'merriparagraph',
+      icon,
+      iconlocation,
+      iconsize,
+      type,
+      onClick,
+      fontcolor,
+      name,
+      formname,
+      outlinecolor,
+      backgroundcolor,
+      fontlocation,
+      iconcolor,
+      width,
+    } = props
 
-  const { errorMessage, isFormValid, updateFormValidation } =
-    useHelperFooter(formname)
+    const [isFormFinished, setIsFormFinished] = useState<boolean>(false)
+    const [isCheckingForm, setIsCheckingForm] = useState<boolean>(true)
 
-  /**
-   * Renders the icon for the button based on the provided props.
-   *
-   * @returns {React.ReactNode} The rendered icon or null
-   */
-  const renderIcon = useCallback((): React.ReactNode => {
-    if (icon === false) {
-      return null
-    }
-    if (React.isValidElement(icon)) {
-      return React.cloneElement(icon as React.ReactElement, {
-        style: { fontSize: iconsize },
-      })
-    }
-    return <StarIcon style={{ fontSize: iconsize }} />
-  }, [icon, iconsize])
+    const {
+      updateFormValidation,
+      checkFormStatus,
+      getEmptyRequiredFields,
+      fetchHelperFooters,
+    } = useHelperFooter(formname)
 
-  /**
-   * Handles the button click event. Prevents default behavior, validates the form,
-   * and calls the onClick prop if the form is valid.
-   *
-   * @param event - The mouse event from clicking the button
-   */
-  const handleButtonClick = useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-      event.preventDefault()
-      const validationResult = await updateFormValidation(formname)
-      if (validationResult && onClick) {
-        onClick()
+    const checkFormState = useCallback(async (): Promise<void> => {
+      console.log('CustomButton: Checking form state...')
+      setIsCheckingForm(true)
+
+      const formStatus = await checkFormStatus()
+      const emptyFields = await getEmptyRequiredFields()
+      const helperFooters = await fetchHelperFooters()
+
+      console.log('CustomButton: Form status:', formStatus)
+      console.log('CustomButton: Empty fields:', emptyFields)
+      console.log('CustomButton: Helper footers:', helperFooters)
+
+      const newIsFormFinished =
+        formStatus &&
+        emptyFields.length === 0 &&
+        (!helperFooters || Object.keys(helperFooters).length === 0)
+
+      setIsFormFinished(newIsFormFinished)
+      setIsCheckingForm(false)
+
+      console.log(
+        'CustomButton: Form status changed. Is form finished:',
+        newIsFormFinished
+      )
+    }, [checkFormStatus, getEmptyRequiredFields, fetchHelperFooters])
+
+    useEffect(() => {
+      console.log('CustomButton: Performing initial check')
+      checkFormState()
+    }, [checkFormState])
+
+    const handleButtonClick = useCallback(
+      async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+        event.preventDefault()
+        console.log(
+          'CustomButton: Button clicked. Is form finished:',
+          isFormFinished,
+          'Is checking form:',
+          isCheckingForm
+        )
+        if (!isFormFinished || isCheckingForm) return
+
+        const validationResult = await updateFormValidation()
+        console.log('CustomButton: Validation result:', validationResult)
+        if (validationResult && onClick) {
+          onClick()
+        }
+        checkFormState()
+      },
+      [
+        isFormFinished,
+        isCheckingForm,
+        updateFormValidation,
+        onClick,
+        checkFormState,
+      ]
+    )
+
+    const renderIcon = useCallback((): React.ReactNode => {
+      if (icon === false) {
+        return null
       }
-    },
-    [updateFormValidation, onClick, formname]
-  )
+      if (React.isValidElement(icon)) {
+        return React.cloneElement(icon as React.ReactElement, {
+          style: { fontSize: iconsize },
+        })
+      }
+      return <StarIcon style={{ fontSize: iconsize }} />
+    }, [icon, iconsize])
 
-  /**
-   * Memoized style object for the button.
-   */
-  const buttonStyle = useMemo(
-    () => ({
-      minWidth: text ? 'auto' : 'fit-content',
-      paddingLeft: text ? '8px' : '0',
-      paddingRight: text ? '8px' : '0',
-      justifyContent: fontlocation || 'center',
-      backgroundColor: backgroundcolor,
-      border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
-      color: iconcolor,
-      width: width,
-    }),
-    [text, fontlocation, backgroundcolor, outlinecolor, iconcolor, width]
-  )
+    const buttonStyle = useMemo(
+      () => ({
+        minWidth: text ? 'auto' : 'fit-content',
+        paddingLeft: text ? '8px' : '0',
+        paddingRight: text ? '8px' : '0',
+        justifyContent: fontlocation || 'center',
+        backgroundColor: backgroundcolor,
+        border: outlinecolor ? `1px solid ${outlinecolor}` : undefined,
+        color: iconcolor,
+        width: width,
+        opacity: !isFormFinished || isCheckingForm ? 0.5 : 1,
+      }),
+      [
+        text,
+        fontlocation,
+        backgroundcolor,
+        outlinecolor,
+        iconcolor,
+        width,
+        isFormFinished,
+        isCheckingForm,
+      ]
+    )
 
-  /**
-   * Memoized content for the button, including icon and text.
-   */
-  const buttonContent = useMemo(
-    () => (
-      <Box display="flex" alignItems="center">
-        {iconlocation === 'left' && renderIcon()}
-        {text && (
+    const buttonContent = useMemo(
+      () => (
+        <Box display="flex" alignItems="center">
+          {iconlocation === 'left' && renderIcon()}
+          {text && (
+            <Typography
+              fontvariant={fontvariant}
+              fontcolor={fontcolor}
+              text={text}
+            />
+          )}
+          {iconlocation === 'right' && renderIcon()}
+        </Box>
+      ),
+      [iconlocation, renderIcon, text, fontvariant, fontcolor]
+    )
+
+    const messageComponent = useMemo(
+      () =>
+        !isFormFinished || isCheckingForm ? (
           <Typography
-            fontvariant={fontvariant}
-            fontcolor={fontcolor}
-            text={text}
+            fontvariant="merrihelperfooter"
+            fontcolor={red.main}
+            text="Fill in required fields"
+            marginTop={0.5}
+            marginBottom={0}
+            align="center"
+            width="100%"
           />
-        )}
-        {iconlocation === 'right' && renderIcon()}
-      </Box>
-    ),
-    [iconlocation, renderIcon, text, fontvariant, fontcolor]
-  )
+        ) : null,
+      [isFormFinished, isCheckingForm]
+    )
 
-  /**
-   * Memoized error message component that displays when the form is invalid.
-   */
-  const errorMessageComponent = useMemo(
-    () =>
-      !isFormValid && errorMessage ? (
-        <Typography
-          fontvariant="merrihelperfooter"
-          fontcolor={red.main}
-          text={errorMessage}
-          marginTop={0.5}
-          marginBottom={0}
-          align="center"
-          width="100%"
-        />
-      ) : null,
-    [errorMessage, isFormValid]
-  )
+    console.log(
+      `CustomButton: Rendering. Is form finished: ${isFormFinished} Is checking form: ${isCheckingForm}`
+    )
 
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      width={width}
-    >
-      <Button
-        disableElevation
-        variant={variant}
-        startIcon={null}
-        endIcon={null}
-        type={type}
-        name={name}
-        onClick={handleButtonClick}
-        style={buttonStyle}
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        width={width}
       >
-        {buttonContent}
-      </Button>
-      {errorMessageComponent}
-    </Box>
-  )
-}
+        <Button
+          disableElevation
+          variant={variant}
+          startIcon={null}
+          endIcon={null}
+          type={type}
+          name={name}
+          onClick={handleButtonClick}
+          style={buttonStyle}
+          disabled={!isFormFinished || isCheckingForm}
+        >
+          {buttonContent}
+        </Button>
+        {messageComponent}
+      </Box>
+    )
+  },
+  (prevProps, nextProps) => {
+    const propsAreEqual =
+      prevProps.text === nextProps.text &&
+      prevProps.variant === nextProps.variant &&
+      prevProps.fontvariant === nextProps.fontvariant &&
+      prevProps.icon === nextProps.icon &&
+      prevProps.iconlocation === nextProps.iconlocation &&
+      prevProps.iconsize === nextProps.iconsize &&
+      prevProps.type === nextProps.type &&
+      prevProps.onClick === nextProps.onClick &&
+      prevProps.fontcolor === nextProps.fontcolor &&
+      prevProps.name === nextProps.name &&
+      prevProps.formname === nextProps.formname &&
+      prevProps.outlinecolor === nextProps.outlinecolor &&
+      prevProps.backgroundcolor === nextProps.backgroundcolor &&
+      prevProps.fontlocation === nextProps.fontlocation &&
+      prevProps.iconcolor === nextProps.iconcolor &&
+      prevProps.width === nextProps.width
+    console.log('CustomButton: Props changed:', !propsAreEqual)
+    return propsAreEqual
+  }
+)
 
-export default React.memo(CustomButton)
+CustomButton.displayName = 'CustomButton'
+
+export default CustomButton

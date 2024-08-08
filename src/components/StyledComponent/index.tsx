@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
+import { session } from 'goobs-cache'
 import { useDropdown } from './hooks/useDropdown'
 import { usePhoneNumber } from './hooks/usePhoneNumber'
 import { useSplitButton } from './hooks/useSplitButton'
@@ -9,9 +10,10 @@ import { Typography } from './../Typography'
 import { red, green } from '../../styles/palette'
 import { StartAdornment, EndAdornment } from './adornment'
 import {
-  useHelperFooter,
+  useInputHelperFooter,
   HelperFooterMessage,
-} from './helperfooter/useHelperFooter'
+} from './hooks/useInputHelperFooter'
+import { useRequiredFieldsValidator } from './hooks/useRequiredFieldsValidator'
 import labelStyles from '../../styles/StyledComponent/Label'
 import { useHasInputEffect, usePreventAutocompleteEffect } from './useEffects'
 
@@ -94,6 +96,8 @@ export interface StyledComponentProps {
   onOptionSelect?: (option: string) => void
   /** Callback function when the input value changes */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  /** Priority of the spread message */
+  spreadMessagePriority?: number
 }
 
 /**
@@ -135,7 +139,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     value,
     valuestatus,
     placeholder,
-    required = false,
     formname,
     formSubmitted = false,
     'aria-label': ariaLabel,
@@ -144,17 +147,22 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     'aria-describedby': ariaDescribedBy,
     onOptionSelect,
     onChange,
+    spreadMessagePriority,
   } = props
 
-  const {
-    validateField,
-    validateRequiredField,
-    helperFooterValue,
-    initializeRequiredFields,
-  } = useHelperFooter()
+  const { validateField } = useInputHelperFooter()
+  const helperFooterAtom = session.atom<Record<string, HelperFooterMessage>>({})
+  const [helperFooterValue] = session.useAtom(helperFooterAtom)
+
+  const showErrorAtom = session.atom<boolean>(false)
+  const [showError, setShowError] = session.useAtom(showErrorAtom)
+
+  const hasInputRef = useRef(false)
+
+  useRequiredFieldsValidator(formname || '', [props], hasInputRef)
+
   const [isFocused, setIsFocused] = useState(false)
   const [hasInput, setHasInput] = useState(false)
-  const [showError, setShowError] = useState(false)
   const [passwordVisible, setPasswordVisible] = useState(false)
   const inputRefInternal = useRef<HTMLInputElement>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
@@ -178,24 +186,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
   usePreventAutocompleteEffect(inputRefInternal)
 
   /**
-   * Initialize required fields when the form name changes
-   */
-  useEffect(() => {
-    if (formname) {
-      initializeRequiredFields(formname)
-    }
-  }, [formname, initializeRequiredFields])
-
-  /**
-   * Validate required field when relevant props change
-   */
-  useEffect(() => {
-    if (required && formname && name && label) {
-      validateRequiredField(required, formname, name, label)
-    }
-  }, [required, formname, name, label, validateRequiredField])
-
-  /**
    * Show error after a delay when form is submitted or input has value
    */
   useEffect(() => {
@@ -204,7 +194,11 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [formSubmitted, hasInput])
+  }, [formSubmitted, hasInput, setShowError])
+
+  useEffect(() => {
+    hasInputRef.current = !!value
+  }, [value])
 
   const currentHelperFooter = name ? helperFooterValue[name] : undefined
 
@@ -231,11 +225,12 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     }
 
     setHasInput(!!e.target.value)
+    hasInputRef.current = !!e.target.value
 
     const formData = new FormData()
     formData.append(e.target.name, e.target.value)
     if (name && label && formname) {
-      validateField(name, formData, label, required, formname)
+      validateField(name, formData, label, formname, spreadMessagePriority)
     }
   }
 
@@ -254,7 +249,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     if (name && label && !hasInput && formname) {
       const formData = new FormData()
       formData.append(name, '')
-      validateField(name, formData, label, required, formname)
+      validateField(name, formData, label, formname, spreadMessagePriority)
     }
   }
 
