@@ -1,251 +1,224 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { get } from 'goobs-cache'
+import { useCallback, useMemo } from 'react'
+import { session } from 'goobs-cache'
 
-/**
- * Represents the structure of a helper footer message.
- * @interface HelperFooterMessage
- */
 export interface HelperFooterMessage {
-  /** The status of the message, either 'error' or 'success'. */
-  status: 'error' | 'success'
-  /** A message describing the status. */
+  status: 'error' | 'success' | 'emptyAndRequired'
   statusMessage: string
-  /** A message to be displayed to the user. */
   spreadMessage: string
-  /** A number indicating the priority of the message. Lower numbers indicate higher priority. */
   spreadMessagePriority: number
-  /** The name of the form associated with this message. */
-  formname: string
-  /** Indicates whether this message is required to be addressed. */
   required: boolean
+  hasInput?: boolean
 }
 
-/**
- * A type definition for the interval ID returned by setInterval.
- */
-type IntervalID = ReturnType<typeof setInterval>
-
-/**
- * A custom hook for managing helper footer messages and form validation.
- *
- * @param {string} [initialFormname] - The initial name of the form to fetch helper footers for.
- * @returns {Object} An object containing the current error message, form validity state, and functions to update and fetch form validation.
- */
 const useHelperFooter = (initialFormname?: string) => {
-  /**
-   * State for storing the current error message.
-   */
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+  console.log(
+    'useHelperFooter: Hook called with initialFormname:',
+    initialFormname
   )
 
-  /**
-   * State for storing the current form validity.
-   */
-  const [isFormValid, setIsFormValid] = useState<boolean>(true)
+  const helperFooterAtom = session.atom<Record<
+    string,
+    HelperFooterMessage
+  > | null>(null)
+  const currentErrorIndexAtom = session.atom<number>(0)
 
-  /**
-   * State for storing the current helper footers.
-   */
-  const [helperFooters, setHelperFooters] = useState<HelperFooterMessage[]>([])
+  const fetchHelperFooters = useCallback(async (): Promise<Record<
+    string,
+    HelperFooterMessage
+  > | null> => {
+    console.log('useHelperFooter: fetchHelperFooters called')
+    if (!initialFormname) {
+      console.log('useHelperFooter: No formname provided, returning null')
+      return null
+    }
 
-  /**
-   * Ref for storing the previous helper footers to compare against.
-   */
-  const prevHelperFooters = useRef<HelperFooterMessage[]>([])
+    const [helperFooters, setHelperFooters] = session.useAtom(helperFooterAtom)
 
-  /**
-   * Ref for storing the previous error message to compare against.
-   */
-  const prevErrorMessage = useRef<string | undefined>(undefined)
-
-  /**
-   * Ref for storing the previous form validity to compare against.
-   */
-  const prevIsFormValid = useRef<boolean>(true)
-
-  /**
-   * Ref for storing the interval ID for periodic helper footer fetching.
-   */
-  const intervalIdRef = useRef<IntervalID | null>(null)
-
-  /**
-   * Fetches helper footer messages from the cache.
-   *
-   * @param {string} [formname] - The name of the form to fetch helper footers for.
-   * @returns {Promise<HelperFooterMessage[]>} A promise that resolves to an array of HelperFooterMessage objects.
-   */
-  const fetchHelperFooters = useCallback(
-    async (formname?: string): Promise<HelperFooterMessage[]> => {
-      const currentFormname = formname || initialFormname
-      if (!currentFormname) {
-        return []
-      }
-
-      const helperFooterResult = await get(
-        'helperfooter',
-        currentFormname,
-        'client'
+    if (helperFooters === null) {
+      const [helperFooterResult] = session.useAtom(
+        session.atom(`helperfooter:${initialFormname}`)
       )
+      console.log('useHelperFooter: helperFooterResult:', helperFooterResult)
 
       if (
         helperFooterResult &&
         typeof helperFooterResult === 'object' &&
-        'type' in helperFooterResult &&
-        helperFooterResult.type === 'json' &&
-        'value' in helperFooterResult &&
-        typeof helperFooterResult.value === 'object' &&
-        helperFooterResult.value !== null
+        helperFooterResult !== null
       ) {
-        const fetchedHelperFooters = Object.entries(
-          helperFooterResult.value as Record<string, unknown>
-        )
-          .map(([key, value]): HelperFooterMessage | null => {
-            if (
-              typeof value === 'object' &&
-              value !== null &&
-              'status' in value &&
-              'statusMessage' in value &&
-              'spreadMessage' in value &&
-              'spreadMessagePriority' in value &&
-              'required' in value
-            ) {
-              return {
-                status: value.status as 'error' | 'success',
-                statusMessage: String(value.statusMessage),
-                spreadMessage: String(value.spreadMessage),
-                spreadMessagePriority: Number(value.spreadMessagePriority),
-                required: Boolean(value.required),
-                formname: key,
-              }
-            }
-            return null
-          })
-          .filter((value): value is HelperFooterMessage => value !== null)
+        const fetchedHelperFooters: Record<string, HelperFooterMessage> = {}
 
-        if (
-          JSON.stringify(fetchedHelperFooters) !==
-          JSON.stringify(prevHelperFooters.current)
-        ) {
-          setHelperFooters(fetchedHelperFooters)
-          prevHelperFooters.current = fetchedHelperFooters
+        for (const [key, value] of Object.entries(helperFooterResult)) {
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            'status' in value &&
+            'statusMessage' in value &&
+            'spreadMessage' in value &&
+            'spreadMessagePriority' in value &&
+            'required' in value &&
+            'hasInput' in value
+          ) {
+            fetchedHelperFooters[key] = {
+              status: value.status as 'error' | 'success' | 'emptyAndRequired',
+              statusMessage: String(value.statusMessage),
+              spreadMessage: String(value.spreadMessage),
+              spreadMessagePriority: Number(value.spreadMessagePriority),
+              required: Boolean(value.required),
+              hasInput: Boolean(value.hasInput),
+            }
+          }
         }
+
+        console.log(
+          'useHelperFooter: Fetched helper footers:',
+          fetchedHelperFooters
+        )
+        setHelperFooters(fetchedHelperFooters)
         return fetchedHelperFooters
       }
 
-      if (helperFooters.length > 0) {
-        setHelperFooters([])
-        prevHelperFooters.current = []
-      }
-      return []
-    },
-    [initialFormname, helperFooters]
-  )
+      console.log(
+        'useHelperFooter: Invalid helper footer result, returning null'
+      )
+      return null
+    }
 
-  /**
-   * Updates the form validation state based on the fetched helper footers.
-   *
-   * @param {string} [formname] - The name of the form to update validation for.
-   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the form is valid.
-   */
-  const updateFormValidation = useCallback(
-    async (formname?: string): Promise<boolean> => {
-      const fetchedHelperFooters = await fetchHelperFooters(formname)
+    return helperFooters
+  }, [initialFormname, helperFooterAtom])
 
-      if (fetchedHelperFooters.length === 0) {
-        setErrorMessage(undefined)
-        setIsFormValid(true)
+  const updateFormValidation = useCallback(async (): Promise<boolean> => {
+    console.log('useHelperFooter: updateFormValidation called')
+    const fetchedHelperFooters = await fetchHelperFooters()
+
+    if (fetchedHelperFooters) {
+      const errorFooters = Object.values(fetchedHelperFooters).filter(
+        footer =>
+          (footer.status === 'error' || footer.status === 'emptyAndRequired') &&
+          footer.required
+      )
+
+      console.log('useHelperFooter: Error footers:', errorFooters)
+
+      if (errorFooters.length === 0) {
+        const [, setCurrentErrorIndex] = session.useAtom(currentErrorIndexAtom)
+        setCurrentErrorIndex(0)
+        console.log('useHelperFooter: No errors found, returning true')
         return true
       }
 
-      const errorFooters = fetchedHelperFooters.filter(
-        footer => footer.status === 'error' && footer.required
+      errorFooters.sort(
+        (a, b) => a.spreadMessagePriority - b.spreadMessagePriority
       )
 
-      if (errorFooters.length > 0) {
-        const highestPriorityError = errorFooters.reduce((prev, current) =>
-          prev.spreadMessagePriority < current.spreadMessagePriority
-            ? prev
-            : current
+      const [currentErrorIndex, setCurrentErrorIndex] = session.useAtom(
+        currentErrorIndexAtom
+      )
+      if (currentErrorIndex >= errorFooters.length) {
+        setCurrentErrorIndex(0)
+      }
+
+      console.log('useHelperFooter: Errors found, returning false')
+      return false
+    }
+
+    console.log('useHelperFooter: No helper footers, returning true')
+    return true
+  }, [fetchHelperFooters, currentErrorIndexAtom])
+
+  const checkFormStatus = useCallback(async () => {
+    console.log('useHelperFooter: checkFormStatus called')
+    const fetchedHelperFooters = await fetchHelperFooters()
+    const status = fetchedHelperFooters
+      ? Object.values(fetchedHelperFooters).every(
+          value => !value.required || (value.required && value.hasInput)
         )
-        setErrorMessage(highestPriorityError.spreadMessage)
-        setIsFormValid(false)
-        return false
-      }
+      : true
+    console.log('useHelperFooter: Form status:', status)
+    return status
+  }, [fetchHelperFooters])
 
-      setErrorMessage(undefined)
-      setIsFormValid(true)
-      return true
-    },
-    [fetchHelperFooters]
-  )
+  const getEmptyRequiredFields = useCallback(async () => {
+    console.log('useHelperFooter: getEmptyRequiredFields called')
+    const fetchedHelperFooters = await fetchHelperFooters()
+    if (!fetchedHelperFooters) return []
+    const emptyFields = Object.entries(fetchedHelperFooters)
+      .filter(([, value]) => value.required && !value.hasInput)
+      .map(([key]) => key)
+    console.log('useHelperFooter: Empty required fields:', emptyFields)
+    return emptyFields
+  }, [fetchHelperFooters])
 
-  /**
-   * Effect to run form validation when the initial form name changes.
-   */
-  useEffect(() => {
-    void updateFormValidation()
-  }, [initialFormname, updateFormValidation])
+  const getCurrentErrorMessage = useCallback(async () => {
+    console.log('useHelperFooter: getCurrentErrorMessage called')
+    const fetchedHelperFooters = await fetchHelperFooters()
+    if (!fetchedHelperFooters) return undefined
+    const errorFooters = Object.values(fetchedHelperFooters).filter(
+      footer =>
+        (footer.status === 'error' || footer.status === 'emptyAndRequired') &&
+        footer.required
+    )
+    if (errorFooters.length === 0) return undefined
+    const [currentErrorIndex] = session.useAtom(currentErrorIndexAtom)
+    const message = errorFooters[currentErrorIndex]?.spreadMessage
+    console.log('useHelperFooter: Current error message:', message)
+    return message
+  }, [fetchHelperFooters, currentErrorIndexAtom])
 
-  /**
-   * Effect to set up periodic helper footer fetching.
-   */
-  useEffect(() => {
-    if (initialFormname) {
-      const fetchAndUpdateHelperFooters = async () => {
-        await updateFormValidation(initialFormname)
-      }
+  const isFormValid = useCallback(async () => {
+    const fetchedHelperFooters = await fetchHelperFooters()
+    if (!fetchedHelperFooters) return true
+    const valid = Object.values(fetchedHelperFooters).every(
+      footer =>
+        footer.status !== 'error' && footer.status !== 'emptyAndRequired'
+    )
+    console.log('useHelperFooter: isFormValid:', valid)
+    return valid
+  }, [fetchHelperFooters])
 
-      void fetchAndUpdateHelperFooters()
-      intervalIdRef.current = setInterval(fetchAndUpdateHelperFooters, 1000)
-
-      return () => {
-        if (intervalIdRef.current) {
-          clearInterval(intervalIdRef.current)
-        }
-      }
+  const nextError = useCallback(async () => {
+    console.log('useHelperFooter: nextError called')
+    const fetchedHelperFooters = await fetchHelperFooters()
+    if (!fetchedHelperFooters) return
+    const errorFooters = Object.values(fetchedHelperFooters).filter(
+      footer =>
+        (footer.status === 'error' || footer.status === 'emptyAndRequired') &&
+        footer.required
+    )
+    if (errorFooters.length > 0) {
+      const [currentErrorIndex, setCurrentErrorIndex] = session.useAtom(
+        currentErrorIndexAtom
+      )
+      setCurrentErrorIndex((currentErrorIndex + 1) % errorFooters.length)
+      console.log(
+        'useHelperFooter: New error index:',
+        (currentErrorIndex + 1) % errorFooters.length
+      )
     }
-  }, [initialFormname, updateFormValidation])
+  }, [fetchHelperFooters, currentErrorIndexAtom])
 
-  /**
-   * Effect to update refs when error message or form validity changes.
-   */
-  useEffect(() => {
-    if (
-      errorMessage !== prevErrorMessage.current ||
-      isFormValid !== prevIsFormValid.current
-    ) {
-      prevErrorMessage.current = errorMessage
-      prevIsFormValid.current = isFormValid
-    }
-  }, [errorMessage, isFormValid])
-
-  /**
-   * Memoized helper footers to prevent unnecessary re-renders.
-   */
-  const memoizedHelperFooters = useMemo(() => helperFooters, [helperFooters])
-
-  /**
-   * Memoized return value of the hook to prevent unnecessary re-renders.
-   */
-  const returnValue = useMemo(
+  const result = useMemo(
     () => ({
-      errorMessage,
+      errorMessage: getCurrentErrorMessage,
       isFormValid,
       updateFormValidation,
       fetchHelperFooters,
-      helperFooters: memoizedHelperFooters,
+      nextError,
+      checkFormStatus,
+      getEmptyRequiredFields,
     }),
     [
-      errorMessage,
+      getCurrentErrorMessage,
       isFormValid,
       updateFormValidation,
       fetchHelperFooters,
-      memoizedHelperFooters,
+      nextError,
+      checkFormStatus,
+      getEmptyRequiredFields,
     ]
   )
 
-  return returnValue
+  console.log('useHelperFooter: Returning result:', result)
+  return result
 }
 
 export default useHelperFooter
