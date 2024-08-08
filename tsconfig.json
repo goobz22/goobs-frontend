@@ -20,7 +20,6 @@
       }
     ],
     "paths": {
-      "goobs-repo": ["./src/index.ts"],
       "@/*": ["./src/*"]
     },
     "baseUrl": ".",
