@@ -1,12 +1,6 @@
 'use client'
 
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react'
+import React, { useMemo } from 'react'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box, DialogProps } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
@@ -24,8 +18,6 @@ export interface PopupFormProps {
   description?: string
   /** The grid configuration for the form content */
   grids?: ContentSectionProps['grids']
-  /** Callback function to handle form submission */
-  onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void
   /** Custom content to render inside the form */
   content?: React.ReactNode
   /** The type of popup to render ('dialog' or 'modal') */
@@ -52,160 +44,131 @@ export interface PopupFormProps {
  *   popupType="dialog"
  *   open={isOpen}
  *   onClose={handleClose}
- *   onSubmit={handleSubmit}
  *   content={<LoginForm />}
  *   width={400}
  * />
  */
-const PopupForm = forwardRef<HTMLFormElement, PopupFormProps>(
-  (
-    {
-      title,
-      description,
-      grids,
-      onSubmit,
-      content,
-      popupType,
-      open,
-      onClose,
-      width = 450,
-    },
-    ref
-  ) => {
-    const internalFormRef = useRef<HTMLFormElement>(null)
-
-    // Expose the internal form ref to the parent component
-    useImperativeHandle(ref, () => internalFormRef.current as HTMLFormElement)
-
-    /**
-     * Memoized header grid configuration
-     */
-    const headerGrid: ContentSectionProps['grids'][0] = useMemo(
-      () => ({
-        grid: {
-          gridconfig: {
+const PopupForm: React.FC<PopupFormProps> = ({
+  title,
+  description,
+  grids,
+  content,
+  popupType,
+  open,
+  onClose,
+  width = 450,
+}) => {
+  /**
+   * Memoized header grid configuration
+   */
+  const headerGrid: ContentSectionProps['grids'][0] = useMemo(
+    () => ({
+      grid: {
+        gridconfig: {
+          gridname: 'formHeader',
+          marginbottom: 1,
+          gridwidth: '100%',
+        },
+      },
+      typography: [
+        {
+          text: title,
+          fontvariant: 'merrih5',
+          fontcolor: 'black',
+          columnconfig: {
+            row: 1,
+            column: 1,
             gridname: 'formHeader',
-            marginbottom: 1,
-            gridwidth: '100%',
+            columnwidth: '100%',
+            alignment: 'left',
+            marginbottom: 1.5,
           },
         },
-        typography: [
-          {
-            text: title,
-            fontvariant: 'merrih5',
-            fontcolor: 'black',
-            columnconfig: {
-              row: 1,
-              column: 1,
-              gridname: 'formHeader',
-              columnwidth: '100%',
-              alignment: 'left',
-              marginbottom: 1.5,
-            },
+        {
+          text: description,
+          fontvariant: 'merriparagraph',
+          fontcolor: 'black',
+          columnconfig: {
+            row: 2,
+            column: 1,
+            alignment: 'left',
+            gridname: 'formHeader',
+            columnwidth: '100%',
           },
-          {
-            text: description,
-            fontvariant: 'merriparagraph',
-            fontcolor: 'black',
-            columnconfig: {
-              row: 2,
-              column: 1,
-              alignment: 'left',
-              gridname: 'formHeader',
-              columnwidth: '100%',
-            },
-          },
-        ] as ExtendedTypographyProps[],
-      }),
-      [title, description]
-    )
-
-    /**
-     * Handle form submission
-     * @param {React.FormEvent<HTMLFormElement>} event - The form submission event
-     */
-    const handleSubmit = useCallback(
-      (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        if (onSubmit) {
-          onSubmit(event)
-        }
-      },
-      [onSubmit]
-    )
-
-    /**
-     * Memoized header render function
-     */
-    const renderHeader = useMemo(
-      () => <ContentSection grids={[headerGrid]} />,
-      [headerGrid]
-    )
-
-    /**
-     * Memoized content render function
-     */
-    const renderContent = useMemo(
-      () => (
-        <Box
-          // @ts-ignore
-          sx={formContainerStyle}
-        >
-          <Box mb={0}>{renderHeader}</Box>
-          <form onSubmit={handleSubmit} ref={internalFormRef}>
-            {React.isValidElement(content)
-              ? React.cloneElement(content as React.ReactElement, {
-                  onSubmit: handleSubmit,
-                })
-              : content || (grids && <ContentSection grids={grids} />)}
-          </form>
-        </Box>
-      ),
-      [renderHeader, handleSubmit, content, grids]
-    )
-
-    const dialogProps: DialogProps = {
-      open: popupType === 'modal' ? true : open || false,
-      onClose: popupType === 'modal' ? undefined : onClose,
-      fullWidth: true,
-      maxWidth: false,
-      PaperProps: {
-        style: {
-          width: `${width}px`,
         },
+      ] as ExtendedTypographyProps[],
+    }),
+    [title, description]
+  )
+
+  /**
+   * Memoized header render function
+   */
+  const renderHeader = useMemo(
+    () => <ContentSection grids={[headerGrid]} />,
+    [headerGrid]
+  )
+
+  /**
+   * Memoized content render function
+   */
+  const renderContent = useMemo(
+    () => (
+      <Box
+        // @ts-ignore
+        sx={formContainerStyle}
+      >
+        <Box mb={0}>{renderHeader}</Box>
+        {React.isValidElement(content)
+          ? React.cloneElement(content as React.ReactElement, {
+              onClose: onClose,
+              open: open,
+            })
+          : content || (grids && <ContentSection grids={grids} />)}
+      </Box>
+    ),
+    [renderHeader, content, grids, onClose, open]
+  )
+
+  const dialogProps: DialogProps = {
+    open: popupType === 'modal' ? true : open || false,
+    onClose: popupType === 'modal' ? undefined : onClose,
+    fullWidth: true,
+    maxWidth: false,
+    PaperProps: {
+      style: {
+        width: `${width}px`,
       },
-    }
+    },
+  }
 
-    if (popupType === 'modal') {
-      return (
-        <Dialog {...dialogProps} disableEscapeKeyDown hideBackdrop>
-          {renderContent}
-        </Dialog>
-      )
-    }
-
+  if (popupType === 'modal') {
     return (
-      <Dialog {...dialogProps}>
-        {onClose && (
-          <IconButton
-            size="small"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: theme => theme.palette.grey[500],
-            }}
-          >
-            <Close />
-          </IconButton>
-        )}
+      <Dialog {...dialogProps} disableEscapeKeyDown hideBackdrop>
         {renderContent}
       </Dialog>
     )
   }
-)
 
-PopupForm.displayName = 'PopupForm'
+  return (
+    <Dialog {...dialogProps}>
+      {onClose && (
+        <IconButton
+          size="small"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: theme => theme.palette.grey[500],
+          }}
+        >
+          <Close />
+        </IconButton>
+      )}
+      {renderContent}
+    </Dialog>
+  )
+}
 
 export default PopupForm
