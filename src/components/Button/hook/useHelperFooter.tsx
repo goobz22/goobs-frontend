@@ -16,79 +16,77 @@ const useHelperFooter = (initialFormname?: string) => {
     initialFormname
   )
 
-  const helperFooterAtom = session.atom<Record<
-    string,
-    HelperFooterMessage
-  > | null>(null)
-  const currentErrorIndexAtom = session.atom<number>(0)
+  const helperFooterAtom = useMemo(
+    () => session.atom<Record<string, HelperFooterMessage> | null>(null),
+    []
+  )
+  const currentErrorIndexAtom = useMemo(() => session.atom<number>(0), [])
 
-  const fetchHelperFooters = useCallback(async (): Promise<Record<
+  const [helperFooters, setHelperFooters] = session.useAtom(helperFooterAtom)
+  const [currentErrorIndex, setCurrentErrorIndex] = session.useAtom(
+    currentErrorIndexAtom
+  )
+  const [helperFooterResult] = session.useAtom(
+    useMemo(
+      () => session.atom(`helperfooter:${initialFormname}`),
+      [initialFormname]
+    )
+  )
+
+  const fetchHelperFooters = useCallback((): Record<
     string,
     HelperFooterMessage
-  > | null> => {
+  > | null => {
     console.log('useHelperFooter: fetchHelperFooters called')
     if (!initialFormname) {
       console.log('useHelperFooter: No formname provided, returning null')
       return null
     }
 
-    const [helperFooters, setHelperFooters] = session.useAtom(helperFooterAtom)
+    if (
+      helperFooters === null &&
+      helperFooterResult &&
+      typeof helperFooterResult === 'object' &&
+      helperFooterResult !== null
+    ) {
+      const fetchedHelperFooters: Record<string, HelperFooterMessage> = {}
 
-    if (helperFooters === null) {
-      const [helperFooterResult] = session.useAtom(
-        session.atom(`helperfooter:${initialFormname}`)
-      )
-      console.log('useHelperFooter: helperFooterResult:', helperFooterResult)
-
-      if (
-        helperFooterResult &&
-        typeof helperFooterResult === 'object' &&
-        helperFooterResult !== null
-      ) {
-        const fetchedHelperFooters: Record<string, HelperFooterMessage> = {}
-
-        for (const [key, value] of Object.entries(helperFooterResult)) {
-          if (
-            typeof value === 'object' &&
-            value !== null &&
-            'status' in value &&
-            'statusMessage' in value &&
-            'spreadMessage' in value &&
-            'spreadMessagePriority' in value &&
-            'required' in value &&
-            'hasInput' in value
-          ) {
-            fetchedHelperFooters[key] = {
-              status: value.status as 'error' | 'success' | 'emptyAndRequired',
-              statusMessage: String(value.statusMessage),
-              spreadMessage: String(value.spreadMessage),
-              spreadMessagePriority: Number(value.spreadMessagePriority),
-              required: Boolean(value.required),
-              hasInput: Boolean(value.hasInput),
-            }
+      for (const [key, value] of Object.entries(helperFooterResult)) {
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          'status' in value &&
+          'statusMessage' in value &&
+          'spreadMessage' in value &&
+          'spreadMessagePriority' in value &&
+          'required' in value &&
+          'hasInput' in value
+        ) {
+          fetchedHelperFooters[key] = {
+            status: value.status as 'error' | 'success' | 'emptyAndRequired',
+            statusMessage: String(value.statusMessage),
+            spreadMessage: String(value.spreadMessage),
+            spreadMessagePriority: Number(value.spreadMessagePriority),
+            required: Boolean(value.required),
+            hasInput: Boolean(value.hasInput),
           }
         }
-
-        console.log(
-          'useHelperFooter: Fetched helper footers:',
-          fetchedHelperFooters
-        )
-        setHelperFooters(fetchedHelperFooters)
-        return fetchedHelperFooters
       }
 
       console.log(
-        'useHelperFooter: Invalid helper footer result, returning null'
+        'useHelperFooter: Fetched helper footers:',
+        fetchedHelperFooters
       )
-      return null
+      setHelperFooters(fetchedHelperFooters)
+      return fetchedHelperFooters
     }
 
     return helperFooters
-  }, [initialFormname, helperFooterAtom])
+  }, [helperFooters, helperFooterResult, initialFormname, setHelperFooters])
 
-  const updateFormValidation = useCallback(async (): Promise<boolean> => {
+  const updateFormValidation = useCallback((): boolean => {
     console.log('useHelperFooter: updateFormValidation called')
-    const fetchedHelperFooters = await fetchHelperFooters()
+    const fetchedHelperFooters = fetchHelperFooters()
 
     if (fetchedHelperFooters) {
       const errorFooters = Object.values(fetchedHelperFooters).filter(
@@ -100,7 +98,6 @@ const useHelperFooter = (initialFormname?: string) => {
       console.log('useHelperFooter: Error footers:', errorFooters)
 
       if (errorFooters.length === 0) {
-        const [, setCurrentErrorIndex] = session.useAtom(currentErrorIndexAtom)
         setCurrentErrorIndex(0)
         console.log('useHelperFooter: No errors found, returning true')
         return true
@@ -110,9 +107,6 @@ const useHelperFooter = (initialFormname?: string) => {
         (a, b) => a.spreadMessagePriority - b.spreadMessagePriority
       )
 
-      const [currentErrorIndex, setCurrentErrorIndex] = session.useAtom(
-        currentErrorIndexAtom
-      )
       if (currentErrorIndex >= errorFooters.length) {
         setCurrentErrorIndex(0)
       }
@@ -123,11 +117,11 @@ const useHelperFooter = (initialFormname?: string) => {
 
     console.log('useHelperFooter: No helper footers, returning true')
     return true
-  }, [fetchHelperFooters, currentErrorIndexAtom])
+  }, [fetchHelperFooters, currentErrorIndex, setCurrentErrorIndex])
 
-  const checkFormStatus = useCallback(async () => {
+  const checkFormStatus = useCallback(() => {
     console.log('useHelperFooter: checkFormStatus called')
-    const fetchedHelperFooters = await fetchHelperFooters()
+    const fetchedHelperFooters = fetchHelperFooters()
     const status = fetchedHelperFooters
       ? Object.values(fetchedHelperFooters).every(
           value => !value.required || (value.required && value.hasInput)
@@ -137,9 +131,9 @@ const useHelperFooter = (initialFormname?: string) => {
     return status
   }, [fetchHelperFooters])
 
-  const getEmptyRequiredFields = useCallback(async () => {
+  const getEmptyRequiredFields = useCallback(() => {
     console.log('useHelperFooter: getEmptyRequiredFields called')
-    const fetchedHelperFooters = await fetchHelperFooters()
+    const fetchedHelperFooters = fetchHelperFooters()
     if (!fetchedHelperFooters) return []
     const emptyFields = Object.entries(fetchedHelperFooters)
       .filter(([, value]) => value.required && !value.hasInput)
@@ -148,9 +142,9 @@ const useHelperFooter = (initialFormname?: string) => {
     return emptyFields
   }, [fetchHelperFooters])
 
-  const getCurrentErrorMessage = useCallback(async () => {
+  const getCurrentErrorMessage = useCallback(() => {
     console.log('useHelperFooter: getCurrentErrorMessage called')
-    const fetchedHelperFooters = await fetchHelperFooters()
+    const fetchedHelperFooters = fetchHelperFooters()
     if (!fetchedHelperFooters) return undefined
     const errorFooters = Object.values(fetchedHelperFooters).filter(
       footer =>
@@ -158,14 +152,13 @@ const useHelperFooter = (initialFormname?: string) => {
         footer.required
     )
     if (errorFooters.length === 0) return undefined
-    const [currentErrorIndex] = session.useAtom(currentErrorIndexAtom)
     const message = errorFooters[currentErrorIndex]?.spreadMessage
     console.log('useHelperFooter: Current error message:', message)
     return message
-  }, [fetchHelperFooters, currentErrorIndexAtom])
+  }, [fetchHelperFooters, currentErrorIndex])
 
-  const isFormValid = useCallback(async () => {
-    const fetchedHelperFooters = await fetchHelperFooters()
+  const isFormValid = useCallback(() => {
+    const fetchedHelperFooters = fetchHelperFooters()
     if (!fetchedHelperFooters) return true
     const valid = Object.values(fetchedHelperFooters).every(
       footer =>
@@ -175,9 +168,9 @@ const useHelperFooter = (initialFormname?: string) => {
     return valid
   }, [fetchHelperFooters])
 
-  const nextError = useCallback(async () => {
+  const nextError = useCallback(() => {
     console.log('useHelperFooter: nextError called')
-    const fetchedHelperFooters = await fetchHelperFooters()
+    const fetchedHelperFooters = fetchHelperFooters()
     if (!fetchedHelperFooters) return
     const errorFooters = Object.values(fetchedHelperFooters).filter(
       footer =>
@@ -185,16 +178,13 @@ const useHelperFooter = (initialFormname?: string) => {
         footer.required
     )
     if (errorFooters.length > 0) {
-      const [currentErrorIndex, setCurrentErrorIndex] = session.useAtom(
-        currentErrorIndexAtom
-      )
-      setCurrentErrorIndex((currentErrorIndex + 1) % errorFooters.length)
+      setCurrentErrorIndex(prevIndex => (prevIndex + 1) % errorFooters.length)
       console.log(
         'useHelperFooter: New error index:',
         (currentErrorIndex + 1) % errorFooters.length
       )
     }
-  }, [fetchHelperFooters, currentErrorIndexAtom])
+  }, [fetchHelperFooters, currentErrorIndex, setCurrentErrorIndex])
 
   const result = useMemo(
     () => ({
