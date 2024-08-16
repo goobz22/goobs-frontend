@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react'
+import React, { useMemo, useCallback, useState } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import Typography from '../Typography'
@@ -74,15 +74,15 @@ const CustomButton: React.FC<CustomButtonProps> = React.memo(
       width,
     } = props
 
-    const [isFormFinished, setIsFormFinished] = useState<boolean>(false)
-    const [isCheckingForm, setIsCheckingForm] = useState<boolean>(true)
-
     const {
       updateFormValidation,
       checkFormStatus,
       getEmptyRequiredFields,
       fetchHelperFooters,
     } = useHelperFooter(formname)
+
+    const [isFormFinished, setIsFormFinished] = useState(false)
+    const [isCheckingForm, setIsCheckingForm] = useState(true)
 
     const checkFormState = useCallback(async (): Promise<void> => {
       console.log('CustomButton: Checking form state...')
@@ -109,11 +109,6 @@ const CustomButton: React.FC<CustomButtonProps> = React.memo(
         newIsFormFinished
       )
     }, [checkFormStatus, getEmptyRequiredFields, fetchHelperFooters])
-
-    useEffect(() => {
-      console.log('CustomButton: Performing initial check')
-      checkFormState()
-    }, [checkFormState])
 
     const handleButtonClick = useCallback(
       async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
