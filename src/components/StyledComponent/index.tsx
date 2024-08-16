@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useRef, useCallback, useMemo } from 'react'
 import { Box, InputLabel, OutlinedInput, styled } from '@mui/material'
 import { session } from 'goobs-cache'
 import { useDropdown } from './hooks/useDropdown'
@@ -15,32 +15,20 @@ import {
 } from './hooks/useInputHelperFooter'
 import { useRequiredFieldsValidator } from './hooks/useRequiredFieldsValidator'
 import labelStyles from '../../styles/StyledComponent/Label'
-import { useHasInputEffect, usePreventAutocompleteEffect } from './useEffects'
+import { usePreventAutocomplete } from './useCallbacks'
+import { ClientLogger } from 'goobs-testing'
 
-/**
- * Props interface for the StyledComponent.
- * @interface
- */
-export interface StyledComponentProps {
-  /** Name attribute for the input element */
+export interface StyledComponentProps
+  extends React.ComponentPropsWithoutRef<'div'> {
   name?: string
-  /** Color of the input outline */
   outlinecolor?: string
-  /** Color of the icon */
   iconcolor?: string
-  /** Background color of the input */
   backgroundcolor?: string
-  /** Whether the input is notched */
   notched?: boolean
-  /** Combined font color for the input */
   combinedfontcolor?: string
-  /** Font color when the label is not shrunk */
   unshrunkfontcolor?: string
-  /** Font color when the label is shrunk */
   shrunkfontcolor?: string
-  /** Autocomplete attribute for the input */
   autoComplete?: string
-  /** Variant of the component */
   componentvariant?:
     | 'multilinetextfield'
     | 'dropdown'
@@ -58,51 +46,28 @@ export interface StyledComponentProps {
     | 'time'
     | 'date'
     | 'splitbutton'
-  /** Options for dropdown variant */
   options?: readonly string[]
-  /** Default option for dropdown variant */
   defaultOption?: string
-  /** Helper footer message */
   helperfooter?: HelperFooterMessage
-  /** Placeholder text for the input */
   placeholder?: string
-  /** Minimum number of rows for multiline text field */
   minRows?: number
-  /** Name of the form the input belongs to */
   formname?: string
-  /** Label text for the input */
   label?: string
-  /** Location of the shrunk label */
   shrunklabellocation?: 'onnotch' | 'above'
-  /** Value of the input */
   value?: string
-  /** Status of the value */
   valuestatus?: boolean
-  /** Whether the input is focused */
   focused?: boolean
-  /** Whether the input is required */
   required?: boolean
-  /** Whether the form has been submitted */
   formSubmitted?: boolean
-  /** ARIA label for the input */
   'aria-label'?: string
-  /** ARIA required attribute */
   'aria-required'?: boolean
-  /** ARIA invalid attribute */
   'aria-invalid'?: boolean
-  /** ARIA describedby attribute */
   'aria-describedby'?: string
-  /** Callback function when an option is selected (for dropdown variant) */
   onOptionSelect?: (option: string) => void
-  /** Callback function when the input value changes */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
-  /** Priority of the spread message */
   spreadMessagePriority?: number
 }
 
-/**
- * Styled OutlinedInput component that prevents autofill styling.
- */
 const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   '& .MuiInputBase-input': {
     '&:-webkit-autofill': {
@@ -120,12 +85,9 @@ const NoAutofillOutlinedInput = styled(OutlinedInput)(() => ({
   },
 }))
 
-/**
- * StyledComponent is a versatile input component that can render various types of inputs based on the provided props.
- * @param {StyledComponentProps} props - The props for the StyledComponent
- * @returns {React.ReactElement} The rendered StyledComponent
- */
-const StyledComponent: React.FC<StyledComponentProps> = props => {
+const StyledComponent: React.FC<StyledComponentProps> = React.memo(props => {
+  ClientLogger.debug('StyledComponent render', { props })
+
   const {
     label,
     componentvariant,
@@ -137,7 +99,6 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     shrunkfontcolor,
     shrunklabellocation,
     value,
-    valuestatus,
     placeholder,
     formname,
     formSubmitted = false,
@@ -148,137 +109,226 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
     onOptionSelect,
     onChange,
     spreadMessagePriority,
+    minRows,
+    ...restProps
   } = props
 
-  const { validateField } = useInputHelperFooter()
-  const helperFooterAtom = session.atom<Record<string, HelperFooterMessage>>({})
-  const [helperFooterValue] = session.useAtom(helperFooterAtom)
+  const helperFooterAtom = useMemo(
+    () => session.atom<Record<string, HelperFooterMessage>>({}),
+    []
+  )
+  const [helperFooters] = session.useAtom(helperFooterAtom)
+  const { validateField, useShowErrorEffect } =
+    useInputHelperFooter(helperFooterAtom)
 
-  const showErrorAtom = session.atom<boolean>(false)
-  const [showError, setShowError] = session.useAtom(showErrorAtom)
+  const inputValueAtom = useMemo(() => session.atom(value || ''), [value])
+  const [inputValue, setInputValue] = session.useAtom(inputValueAtom)
+  const hasInput = useMemo(() => !!inputValue, [inputValue])
+  const hasInputRef = useRef(hasInput)
+  hasInputRef.current = hasInput
 
-  const hasInputRef = useRef(false)
+  const memoizedRequiredFieldsProps = useMemo(() => [props], [props])
+  useRequiredFieldsValidator(
+    formname || '',
+    memoizedRequiredFieldsProps,
+    hasInputRef,
+    helperFooterAtom
+  )
 
-  useRequiredFieldsValidator(formname || '', [props], hasInputRef)
-
-  const [isFocused, setIsFocused] = useState(false)
-  const [hasInput, setHasInput] = useState(false)
-  const [passwordVisible, setPasswordVisible] = useState(false)
-  const inputRefInternal = useRef<HTMLInputElement>(null)
+  const isFocusedAtom = useMemo(() => session.atom(false), [])
+  const [isFocused, setIsFocused] = session.useAtom(isFocusedAtom)
+  const passwordVisibleAtom = useMemo(() => session.atom(false), [])
+  const [passwordVisible, setPasswordVisible] =
+    session.useAtom(passwordVisibleAtom)
+  const inputRefInternal = useRef<HTMLInputElement | null>(null)
   const inputBoxRef = useRef<HTMLDivElement>(null)
 
-  const { renderMenu, selectedOption, handleDropdownClick } = useDropdown(
-    props,
-    inputBoxRef,
-    onOptionSelect
+  const memoizedDropdownProps = useMemo(
+    () => ({
+      componentvariant,
+      options: props.options,
+      value: inputValue,
+      defaultOption: props.defaultOption,
+    }),
+    [componentvariant, props.options, inputValue, props.defaultOption]
   )
-  const { phoneNumber, handlePhoneNumberChange } = usePhoneNumber(
-    value || '',
-    componentvariant
+
+  const {
+    renderMenu,
+    selectedOption,
+    handleDropdownClick,
+    updateDropdownState,
+  } = useDropdown(memoizedDropdownProps, inputBoxRef, onOptionSelect)
+
+  const { phoneNumber, handlePhoneNumberChange, checkAndUpdatePhoneNumber } =
+    usePhoneNumber(inputValue, componentvariant)
+
+  const memoizedSplitButtonProps = useMemo(
+    () => ({ value: inputValue }),
+    [inputValue]
   )
   const {
     value: splitButtonValue,
     handleIncrement,
     handleDecrement,
-  } = useSplitButton(props)
+    updateValueFromProps,
+  } = useSplitButton(memoizedSplitButtonProps)
 
-  useHasInputEffect(value, valuestatus, setHasInput)
-  usePreventAutocompleteEffect(inputRefInternal)
+  const setInputAttributes = usePreventAutocomplete()
 
-  /**
-   * Show error after a delay when form is submitted or input has value
-   */
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowError(formSubmitted || hasInput)
-    }, 1000)
+  const inputRef = useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRefInternal.current = node
+      if (node) {
+        setInputAttributes(node)
+      }
+    },
+    [setInputAttributes]
+  )
 
-    return () => clearTimeout(timer)
-  }, [formSubmitted, hasInput, setShowError])
+  const showError = useShowErrorEffect(formSubmitted, hasInput, isFocused)
 
-  useEffect(() => {
-    hasInputRef.current = !!value
-  }, [value])
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      ClientLogger.debug('handleChange', {
+        componentvariant,
+        value: e.target.value,
+        name: e.target.name,
+      })
 
-  const currentHelperFooter = name ? helperFooterValue[name] : undefined
+      setInputValue(e.target.value)
 
-  /**
-   * Handle change event for the input
-   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event
-   */
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    if (componentvariant === 'phonenumber') {
-      handlePhoneNumberChange(e)
-      if (onChange) {
+      if (componentvariant === 'phonenumber') {
+        handlePhoneNumberChange(e)
+        if (onChange) {
+          onChange(e as React.ChangeEvent<HTMLInputElement>)
+        }
+      } else if (componentvariant === 'splitbutton') {
+        const numValue = e.target.value.replace(/[^0-9]/g, '')
+        e.target.value = numValue
+        if (onChange) {
+          onChange(e as React.ChangeEvent<HTMLInputElement>)
+        }
+      } else if (onChange) {
         onChange(e as React.ChangeEvent<HTMLInputElement>)
       }
-    } else if (componentvariant === 'splitbutton') {
-      const numValue = e.target.value.replace(/[^0-9]/g, '')
-      e.target.value = numValue
-      if (onChange) {
-        onChange(e as React.ChangeEvent<HTMLInputElement>)
+
+      const newHasInput = !!e.target.value
+      hasInputRef.current = newHasInput
+
+      const formData = new FormData()
+      formData.append(e.target.name, e.target.value)
+      if (name && label && formname) {
+        validateField(name, formData, label, formname, spreadMessagePriority)
       }
-    } else if (onChange) {
-      onChange(e as React.ChangeEvent<HTMLInputElement>)
-    }
 
-    setHasInput(!!e.target.value)
-    hasInputRef.current = !!e.target.value
+      if (componentvariant === 'dropdown') {
+        updateDropdownState()
+      } else if (componentvariant === 'phonenumber') {
+        checkAndUpdatePhoneNumber()
+      } else if (componentvariant === 'splitbutton') {
+        updateValueFromProps()
+      }
+    },
+    [
+      componentvariant,
+      handlePhoneNumberChange,
+      onChange,
+      name,
+      label,
+      formname,
+      validateField,
+      spreadMessagePriority,
+      updateDropdownState,
+      checkAndUpdatePhoneNumber,
+      updateValueFromProps,
+      setInputValue,
+    ]
+  )
 
-    const formData = new FormData()
-    formData.append(e.target.name, e.target.value)
-    if (name && label && formname) {
-      validateField(name, formData, label, formname, spreadMessagePriority)
-    }
-  }
-
-  /**
-   * Handle focus event for the input
-   */
-  const handleFocus = () => {
+  const handleFocus = useCallback(() => {
+    ClientLogger.debug('handleFocus')
     setIsFocused(true)
-  }
+  }, [setIsFocused])
 
-  /**
-   * Handle blur event for the input
-   */
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
+    ClientLogger.debug('handleBlur', {
+      name,
+      label,
+      hasInput: hasInputRef.current,
+      formname,
+    })
     setIsFocused(false)
-    if (name && label && !hasInput && formname) {
+    if (name && label && !hasInputRef.current && formname) {
       const formData = new FormData()
       formData.append(name, '')
       validateField(name, formData, label, formname, spreadMessagePriority)
     }
-  }
+  }, [
+    name,
+    label,
+    formname,
+    validateField,
+    spreadMessagePriority,
+    setIsFocused,
+  ])
 
-  /**
-   * Toggle password visibility for password input
-   */
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible)
-  }
+  const togglePasswordVisibility = useCallback(() => {
+    setPasswordVisible(prev => {
+      ClientLogger.debug('togglePasswordVisibility', { passwordVisible: !prev })
+      return !prev
+    })
+  }, [setPasswordVisible])
 
-  const isDropdownVariant = componentvariant === 'dropdown'
-  const isSplitButtonVariant = componentvariant === 'splitbutton'
-  const isNotchedVariant =
-    !isDropdownVariant &&
-    !isSplitButtonVariant &&
-    shrunklabellocation !== 'above' &&
-    !!label
-  const hasPlaceholder = !!placeholder
+  const isDropdownVariant = useMemo(
+    () => componentvariant === 'dropdown',
+    [componentvariant]
+  )
+  const isSplitButtonVariant = useMemo(
+    () => componentvariant === 'splitbutton',
+    [componentvariant]
+  )
+  const isNotchedVariant = useMemo(
+    () =>
+      !isDropdownVariant &&
+      !isSplitButtonVariant &&
+      shrunklabellocation !== 'above' &&
+      !!label,
+    [isDropdownVariant, isSplitButtonVariant, shrunklabellocation, label]
+  )
+  const hasPlaceholder = useMemo(() => !!placeholder, [placeholder])
 
-  const shouldShrinkLabel =
-    isFocused ||
-    isDropdownVariant ||
-    isSplitButtonVariant ||
-    hasPlaceholder ||
-    hasInput ||
-    (componentvariant === 'phonenumber' && phoneNumber !== '')
+  const shouldShrinkLabel = useMemo(
+    () => !!inputValue || isFocused || hasPlaceholder,
+    [inputValue, isFocused, hasPlaceholder]
+  )
+
+  const shouldNotch = useMemo(
+    () => shouldShrinkLabel && isNotchedVariant,
+    [shouldShrinkLabel, isNotchedVariant]
+  )
+
+  ClientLogger.debug('Rendering StyledComponent', {
+    isDropdownVariant,
+    isSplitButtonVariant,
+    isNotchedVariant,
+    hasPlaceholder,
+    shouldShrinkLabel,
+    shouldNotch,
+    componentvariant,
+    name,
+    label,
+    inputValue,
+    phoneNumber,
+    selectedOption,
+    splitButtonValue,
+    showError,
+    currentHelperFooter: name ? helperFooters[name]?.statusMessage : undefined,
+  })
 
   return (
     <Box
+      {...restProps}
       sx={{
         boxSizing: 'border-box',
         display: 'flex',
@@ -316,7 +366,8 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
         )}
         <Box ref={inputBoxRef} sx={{ width: '100%' }}>
           <NoAutofillOutlinedInput
-            ref={inputRefInternal}
+            inputRef={inputRef}
+            minRows={minRows}
             style={{
               backgroundColor: backgroundcolor || 'inherit',
               width: '100%',
@@ -347,7 +398,7 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
               'aria-invalid': ariaInvalid,
               'aria-required': ariaRequired,
               'aria-describedby':
-                ariaDescribedBy || currentHelperFooter?.statusMessage
+                ariaDescribedBy || (name && helperFooters[name]?.statusMessage)
                   ? `${name}-helper-text`
                   : undefined,
             }}
@@ -388,39 +439,35 @@ const StyledComponent: React.FC<StyledComponentProps> = props => {
                   ? selectedOption
                   : isSplitButtonVariant
                     ? splitButtonValue
-                    : value
+                    : inputValue
             }
             readOnly={isDropdownVariant}
-            notched={
-              (isNotchedVariant && shouldShrinkLabel) ||
-              ((isDropdownVariant || isSplitButtonVariant) &&
-                shrunklabellocation !== 'above') ||
-              hasPlaceholder ||
-              (componentvariant === 'phonenumber' && phoneNumber !== '')
-            }
+            notched={shouldNotch}
           />
           {isDropdownVariant && renderMenu}
         </Box>
       </Box>
-      {showError && currentHelperFooter?.statusMessage && (
+      {showError && name && helperFooters[name]?.statusMessage && (
         <Typography
           id={`${name}-helper-text`}
           fontvariant="merrihelperfooter"
           fontcolor={
-            currentHelperFooter?.status === 'error'
+            helperFooters[name]?.status === 'error'
               ? red.main
-              : currentHelperFooter?.status === 'success'
+              : helperFooters[name]?.status === 'success'
                 ? green.dark
                 : undefined
           }
           marginTop={0.5}
           marginBottom={0}
           align="left"
-          text={currentHelperFooter?.statusMessage}
+          text={helperFooters[name]?.statusMessage}
         />
       )}
     </Box>
   )
-}
+})
+
+StyledComponent.displayName = 'StyledComponent'
 
 export default StyledComponent
