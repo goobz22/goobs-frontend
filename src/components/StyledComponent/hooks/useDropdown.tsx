@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+'use client'
+
+import { useState, useCallback } from 'react'
 import { StyledComponentProps } from '..'
 import { styled, Menu, MenuItem } from '@mui/material'
 import React from 'react'
@@ -29,40 +31,25 @@ export const useDropdown = (
   inputBoxRef: React.RefObject<HTMLDivElement>,
   onOptionSelect?: (option: string) => void
 ) => {
+  const { componentvariant, options, value, defaultOption } = props
+
   /** State to control if the dropdown is open */
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   /** State to store the anchor element for the dropdown */
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   /** State to store the filtered options */
-  const [filteredOptions, setFilteredOptions] = useState<string[]>([])
+  const [filteredOptions, setFilteredOptions] = useState<string[]>(
+    componentvariant === 'dropdown' && options ? [...options] : []
+  )
   /** State to store the currently selected option */
-  const [selectedOption, setSelectedOption] = useState('')
+  const [selectedOption, setSelectedOption] = useState(() => {
+    if (value !== undefined) return value
+    if (defaultOption !== undefined) return defaultOption
+    if (options && options.length > 0) return options[0]
+    return ''
+  })
   /** State to track if the dropdown is focused */
   const [isDropdownFocused, setIsDropdownFocused] = useState(false)
-
-  const { componentvariant, options, value, defaultOption } = props
-
-  /**
-   * Effect to set filtered options when component variant is dropdown and options are provided
-   */
-  useEffect(() => {
-    if (componentvariant === 'dropdown' && options) {
-      setFilteredOptions([...options])
-    }
-  }, [componentvariant, options])
-
-  /**
-   * Effect to set the selected option based on value, defaultOption, or first option
-   */
-  useEffect(() => {
-    if (value !== undefined) {
-      setSelectedOption(value)
-    } else if (defaultOption !== undefined) {
-      setSelectedOption(defaultOption)
-    } else if (options && options.length > 0) {
-      setSelectedOption(options[0])
-    }
-  }, [value, defaultOption, options])
 
   /**
    * Handle click on the dropdown to open/close it
@@ -101,6 +88,22 @@ export const useDropdown = (
     },
     [componentvariant]
   )
+
+  /**
+   * Update filtered options and selected option when props change
+   */
+  const updateDropdownState = useCallback(() => {
+    if (componentvariant === 'dropdown' && options) {
+      setFilteredOptions([...options])
+    }
+    if (value !== undefined) {
+      setSelectedOption(value)
+    } else if (defaultOption !== undefined) {
+      setSelectedOption(defaultOption)
+    } else if (options && options.length > 0) {
+      setSelectedOption(options[0])
+    }
+  }, [componentvariant, options, value, defaultOption])
 
   /**
    * Render the dropdown menu
@@ -142,5 +145,6 @@ export const useDropdown = (
     handleOptionSelect,
     isDropdownFocused,
     handleInputFocus,
+    updateDropdownState,
   }
 }

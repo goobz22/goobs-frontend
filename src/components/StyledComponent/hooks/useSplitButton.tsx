@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { StyledComponentProps } from '../index'
 
 /**
@@ -9,16 +9,9 @@ import { StyledComponentProps } from '../index'
  * @returns An object containing the value and handlers for the split button.
  */
 export const useSplitButton = (props: StyledComponentProps) => {
-  const [value, setValue] = useState('0')
-
-  /**
-   * Update the value state when the value prop changes.
-   */
-  useEffect(() => {
-    if (props.value !== undefined) {
-      setValue(props.value)
-    }
-  }, [props.value])
+  const [value, setValue] = useState(() => {
+    return props.value !== undefined ? props.value : '0'
+  })
 
   /**
    * Increment the value by 1.
@@ -57,10 +50,21 @@ export const useSplitButton = (props: StyledComponentProps) => {
     setValue(numValue === '' ? '0' : numValue)
   }, [])
 
+  /**
+   * Update the value state when the value prop changes.
+   * This function replaces the useEffect from the original implementation.
+   */
+  const updateValueFromProps = useCallback(() => {
+    if (props.value !== undefined) {
+      setValue(props.value)
+    }
+  }, [props.value])
+
   return {
     value,
     handleIncrement,
     handleDecrement,
     handleChange,
+    updateValueFromProps,
   }
 }

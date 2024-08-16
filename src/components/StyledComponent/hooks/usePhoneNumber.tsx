@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react'
+'use client'
+
+import React, { useState, useCallback } from 'react'
 
 /**
  * Formats a string of digits into a US phone number format.
@@ -37,9 +39,10 @@ export const formatPhoneNumber = (value: string): string => {
  * @property {string} phoneNumber - The current formatted phone number.
  * @property {function} handlePhoneNumberChange - A function to handle changes to the phone number input.
  * @property {function} updatePhoneNumber - A function to directly update the phone number.
+ * @property {function} checkAndUpdatePhoneNumber - A function to check and update the phone number based on component variant and initial value.
  *
  * @example
- * const { phoneNumber, handlePhoneNumberChange, updatePhoneNumber } = usePhoneNumber();
+ * const { phoneNumber, handlePhoneNumberChange, updatePhoneNumber, checkAndUpdatePhoneNumber } = usePhoneNumber();
  */
 export const usePhoneNumber = (
   initialValue: string = '',
@@ -58,10 +61,8 @@ export const usePhoneNumber = (
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const input = e.target.value
       let strippedInput = input.replace(/^\+1\s?/, '').replace(/\D/g, '')
-
       // Ensure we don't exceed 10 digits
       strippedInput = strippedInput.slice(0, 10)
-
       // Only format if there's actual input beyond "+1 "
       const formattedValue =
         strippedInput.length > 0 ? formatPhoneNumber(strippedInput) : '+1 '
@@ -80,9 +81,10 @@ export const usePhoneNumber = (
   }, [])
 
   /**
-   * Update phone number when componentvariant is 'phonenumber' and value changes
+   * Checks and updates the phone number based on component variant and initial value.
+   * This function replaces the useEffect from the original implementation.
    */
-  useEffect(() => {
+  const checkAndUpdatePhoneNumber = useCallback(() => {
     if (componentvariant === 'phonenumber' && initialValue) {
       updatePhoneNumber(initialValue)
     }
@@ -92,5 +94,6 @@ export const usePhoneNumber = (
     phoneNumber,
     handlePhoneNumberChange,
     updatePhoneNumber,
+    checkAndUpdatePhoneNumber,
   }
 }

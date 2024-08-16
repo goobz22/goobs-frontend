@@ -1,82 +1,107 @@
-import { useCallback, useMemo, MutableRefObject } from 'react'
+'use client'
+
+import { useCallback, useMemo, MutableRefObject, useRef } from 'react'
 import { session } from 'goobs-cache'
 import { StyledComponentProps } from '../index'
 import { HelperFooterMessage } from './useInputHelperFooter'
+import { ClientLogger } from 'goobs-testing'
 
 type HelperFooterState = Record<string, HelperFooterMessage>
 
 export const useRequiredFieldsValidator = (
   formname: string,
   components: StyledComponentProps[],
-  hasInputRef: MutableRefObject<boolean>
+  hasInputRef: MutableRefObject<boolean>,
+  helperFooterAtom: ReturnType<typeof session.atom<HelperFooterState>>
 ) => {
-  console.log('useRequiredFieldsValidator called with:', {
+  ClientLogger.debug('useRequiredFieldsValidator called', {
     formname,
-    components,
-    hasInputRef,
+    componentsCount: components.length,
+    hasInputRefCurrent: hasInputRef.current,
   })
 
-  const helperFootersAtom = session.atom<HelperFooterState>({})
-  const [helperFooters, setHelperFooters] = session.useAtom(helperFootersAtom)
+  const [helperFooters, setHelperFooters] = session.useAtom(helperFooterAtom)
+  const failedAttempts = useRef<Record<string, number>>({})
 
   const initializeComponentStatuses = useCallback(() => {
-    console.log('initializeComponentStatuses called')
+    ClientLogger.debug('initializeComponentStatuses called')
 
-    const initialHelperFooters: HelperFooterState = { ...helperFooters }
-
-    components.forEach(component => {
-      if (
-        component.name &&
-        component.required &&
-        component.label &&
-        !initialHelperFooters[component.name]
-      ) {
-        initialHelperFooters[component.name] = {
-          status: 'emptyAndRequired',
-          statusMessage: `${component.label} is required.`,
-          spreadMessage: `${component.label} is required.`,
-          spreadMessagePriority: component.spreadMessagePriority || 1,
-          required: true,
-          hasInput: false,
-        }
-        console.log(
-          `Created new helper footer for ${component.name}:`,
-          initialHelperFooters[component.name]
-        )
+    try {
+      const initialHelperFooters: HelperFooterState = {
+        ...(helperFooters || {}),
       }
-    })
 
-    console.log('Setting helper footers in session atom')
-    setHelperFooters(initialHelperFooters)
+      components.forEach(component => {
+        if (
+          component.name &&
+          component.required &&
+          component.label &&
+          !initialHelperFooters[component.name]
+        ) {
+          initialHelperFooters[component.name] = {
+            status: 'emptyAndRequired',
+            statusMessage: `${component.label} is required.`,
+            spreadMessage: `${component.label} is required.`,
+            spreadMessagePriority: component.spreadMessagePriority || 1,
+            required: true,
+            hasInput: false,
+          }
+          ClientLogger.debug(`Created new helper footer`, {
+            componentName: component.name,
+            helperFooter: initialHelperFooters[component.name],
+          })
+        }
+      })
 
-    console.log(`Initialized helper footers:`, initialHelperFooters)
+      ClientLogger.debug('Setting helper footers in session atom')
+      setHelperFooters(initialHelperFooters)
+
+      ClientLogger.debug(`Initialized helper footers`, { initialHelperFooters })
+    } catch (error) {
+      ClientLogger.error('Error in initializeComponentStatuses', { error })
+    }
   }, [components, helperFooters, setHelperFooters])
 
   const checkFormStatus = useCallback(() => {
-    console.log('checkFormStatus called')
-    const requiredComponents = components.filter(
-      component => component.required
-    )
-    console.log('Required components:', requiredComponents)
+    ClientLogger.debug('checkFormStatus called')
+    try {
+      const requiredComponents = components.filter(
+        component => component.required
+      )
+      ClientLogger.debug('Required components', {
+        count: requiredComponents.length,
+      })
 
-    const allRequiredHaveInput = requiredComponents.every(
-      component =>
-        helperFooters[component.name || '']?.hasInput || hasInputRef.current
-    )
-    console.log('All required fields have input:', allRequiredHaveInput)
-    return allRequiredHaveInput
+      const allRequiredHaveInput = requiredComponents.every(
+        component =>
+          helperFooters[component.name || '']?.hasInput || hasInputRef.current
+      )
+      ClientLogger.debug('All required fields have input', {
+        allRequiredHaveInput,
+      })
+      return allRequiredHaveInput
+    } catch (error) {
+      ClientLogger.error('Error in checkFormStatus', { error })
+      return false
+    }
   }, [components, hasInputRef, helperFooters])
 
   const getEmptyRequiredFields = useCallback(() => {
-    console.log('getEmptyRequiredFields called')
+    ClientLogger.debug('getEmptyRequiredFields called')
 
-    const emptyFields = Object.entries(helperFooters)
-      .filter(
-        ([, value]) => value.required && !value.hasInput && !hasInputRef.current
-      )
-      .map(([key]) => key)
-    console.log('Empty required fields:', emptyFields)
-    return emptyFields
+    try {
+      const emptyFields = Object.entries(helperFooters)
+        .filter(
+          ([, value]) =>
+            value.required && !value.hasInput && !hasInputRef.current
+        )
+        .map(([key]) => key)
+      ClientLogger.debug('Empty required fields', { emptyFields })
+      return emptyFields
+    } catch (error) {
+      ClientLogger.error('Error in getEmptyRequiredFields', { error })
+      return []
+    }
   }, [hasInputRef, helperFooters])
 
   const validateRequiredField = useCallback(
@@ -86,30 +111,58 @@ export const useRequiredFieldsValidator = (
       required: boolean,
       spreadMessagePriority: number
     ) => {
-      console.log(`validateRequiredField called for ${name}`)
+      ClientLogger.debug('validateRequiredField called', {
+        name,
+        label,
+        required,
+        spreadMessagePriority,
+      })
 
-      if (required && !helperFooters[name]?.hasInput && !hasInputRef.current) {
-        console.log(`${name} is required and empty, updating helper footer`)
-        const newHelperFooter: HelperFooterMessage = {
-          status: 'emptyAndRequired',
-          statusMessage: `${label} is required.`,
-          spreadMessage: `${label} is required.`,
-          spreadMessagePriority,
-          required: true,
-          hasInput: false,
+      try {
+        if (failedAttempts.current[name] && failedAttempts.current[name] >= 3) {
+          ClientLogger.warn('Validation attempts exceeded for field', {
+            name,
+            attempts: failedAttempts.current[name],
+          })
+          return
         }
 
-        setHelperFooters(prev => ({
-          ...prev,
-          [name]: newHelperFooter,
-        }))
+        if (
+          required &&
+          !helperFooters[name]?.hasInput &&
+          !hasInputRef.current
+        ) {
+          ClientLogger.debug(
+            `${name} is required and empty, updating helper footer`
+          )
+          const newHelperFooter: HelperFooterMessage = {
+            status: 'emptyAndRequired',
+            statusMessage: `${label} is required.`,
+            spreadMessage: `${label} is required.`,
+            spreadMessagePriority,
+            required: true,
+            hasInput: false,
+          }
 
-        console.log('Updated helperFooters:', {
-          ...helperFooters,
-          [name]: newHelperFooter,
-        })
-      } else {
-        console.log(`${name} validation not needed or already has input`)
+          setHelperFooters((prev: HelperFooterState) => ({
+            ...prev,
+            [name]: newHelperFooter,
+          }))
+
+          ClientLogger.debug('Updated helperFooters', {
+            name,
+            newHelperFooter,
+          })
+
+          failedAttempts.current[name] = (failedAttempts.current[name] || 0) + 1
+        } else {
+          ClientLogger.debug(
+            `${name} validation not needed or already has input`
+          )
+        }
+      } catch (error) {
+        ClientLogger.error('Error in validateRequiredField', { error, name })
+        failedAttempts.current[name] = (failedAttempts.current[name] || 0) + 1
       }
     },
     [hasInputRef, helperFooters, setHelperFooters]
@@ -130,7 +183,7 @@ export const useRequiredFieldsValidator = (
     ]
   )
 
-  console.log('useRequiredFieldsValidator returning:', result)
+  ClientLogger.debug('useRequiredFieldsValidator returning', { result })
   return result
 }
 
