@@ -12,7 +12,8 @@ import {
   AccordionDetails,
   List,
 } from '@mui/material'
-import StyledComponent from '../../StyledComponent'
+import Dropdown from '../../Dropdown'
+import Searchbar from '../../Searchbar'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -390,26 +391,29 @@ function VerticalVariant({
         {(showDropdown || showSearchbar) && (
           <Stack mt={1} spacing={1}>
             {showDropdown && (
-              <StyledComponent
+              <Dropdown
                 label={dropdownLabel}
-                componentvariant="dropdown"
-                outlinecolor="none"
                 options={navOptions}
                 backgroundcolor={white.main}
-                shrunklabellocation="above"
+                outlinecolor="none"
+                fontcolor={black.main}
                 shrunkfontcolor={white.main}
-                unshrunkfontcolor={black.main}
+                onChange={() => {
+                  console.log('Dropdown selection changed')
+                }}
               />
             )}
             {showSearchbar && (
-              <StyledComponent
-                componentvariant="searchbar"
+              <Searchbar
                 label={searchbarLabel}
                 backgroundcolor={semiTransparentWhite.main}
                 iconcolor={white.main}
                 outlinecolor="none"
-                shrunklabellocation="onnotch"
-                combinedfontcolor={white.main}
+                fontcolor={white.main}
+                placeholder="Search..."
+                onChange={() => {
+                  console.log('Search value changed')
+                }}
               />
             )}
           </Stack>
