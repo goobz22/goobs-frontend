@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react'
 import { Box, styled } from '@mui/material'
-import StyledComponent, { StyledComponentProps } from '../StyledComponent'
 import CustomButton, { CustomButtonProps } from '../Button'
+import Searchbar, { SearchbarProps } from '../Searchbar'
+import Dropdown, { DropdownProps } from '../Dropdown'
 import { white, black, semiTransparentWhite } from '../../styles/palette'
 
 /**
@@ -18,8 +19,8 @@ const VerticalDivider = styled(Box)({
  */
 export interface ToolbarProps {
   buttons?: CustomButtonProps[]
-  dropdowns?: Omit<StyledComponentProps, 'componentvariant'>[]
-  searchbarProps?: Omit<StyledComponentProps, 'componentvariant'>
+  dropdowns?: DropdownProps[]
+  searchbarProps?: SearchbarProps
 }
 
 /**
@@ -30,7 +31,6 @@ export interface ToolbarProps {
 function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
   // State for checkbox width (set to 45px as default)
   const [checkboxWidth] = useState(45)
-
   // Explicitly set toolbar height to 56px
   const toolbarHeight = 56
 
@@ -101,12 +101,12 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
           height: '100%',
         }}
       >
-        <StyledComponent
-          componentvariant="searchbar"
+        <Searchbar
           backgroundcolor={semiTransparentWhite.main}
           label="Search the DataGrid"
-          combinedfontcolor={black.main}
+          fontcolor={black.main}
           iconcolor={black.main}
+          onChange={() => console.log('Search changed')}
           {...searchbarProps}
         />
       </Box>
@@ -122,11 +122,12 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
           }}
         >
           {dropdowns.map((dropdown, index) => (
-            <StyledComponent
+            <Dropdown
               key={index}
-              componentvariant="dropdown"
               outlinecolor={black.main}
-              combinedfontcolor={black.main}
+              fontcolor={black.main}
+              shrunkfontcolor={black.main}
+              onChange={() => console.log('Dropdown changed')}
               {...dropdown}
             />
           ))}
