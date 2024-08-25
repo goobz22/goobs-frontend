@@ -66,7 +66,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
       grid: {
         gridconfig: {
           gridname: 'formHeader',
-          marginbottom: 1,
+          marginbottom: 0.5,
           gridwidth: '100%',
         },
       },
