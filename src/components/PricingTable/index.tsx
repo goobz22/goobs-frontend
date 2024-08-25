@@ -6,7 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
-import StyledComponent from '../StyledComponent'
+import Dropdown from '../Dropdown'
 import CustomGrid from './../../components/Grid'
 import { columnconfig, gridconfig } from './../../components/Grid/'
 import defaultConfig from './defaultconfig'
@@ -117,15 +117,17 @@ const PricingTable: React.FC<PricingProps> = props => {
       headerColumnConfigs.push({
         ...config.packagecolumns.columnconfig,
         component: (
-          <StyledComponent
+          <Dropdown
             label="Packages"
-            shrunklabellocation="above"
-            componentvariant="dropdown"
-            shrunkfontcolor={black.main}
-            outlinecolor={black.main}
-            backgroundcolor={semiTransparentBlack.main}
-            defaultOption="ThothOS"
             options={['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise']}
+            defaultOption="ThothOS"
+            backgroundcolor={semiTransparentBlack.main}
+            outlinecolor={black.main}
+            fontcolor={black.main}
+            shrunkfontcolor={black.main}
+            onChange={() => {
+              console.log('Package selection changed')
+            }}
           />
         ),
       })
