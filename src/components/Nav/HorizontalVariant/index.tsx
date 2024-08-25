@@ -1,7 +1,6 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Tabs, Tab } from '@mui/material'
-import { session } from 'goobs-cache'
 import { NavProps, SubNav, View } from '../index'
 
 /**
@@ -42,24 +41,31 @@ function HorizontalVariant({
   items,
   height = '80px',
   alignment = 'left',
-  navname,
+  navname = '',
 }: HorizontalVariantProps) {
   /**
    * State to keep track of active tab values for different navigation components.
    */
-  const activeTabValuesAtom = session.atom<
-    Record<string, ActiveTabValue | null>
+  const [activeTabValues, setActiveTabValues] = useState<
+    Record<string, ActiveTabValue>
   >({})
-  const [activeTabValues, setActiveTabValues] =
-    session.useAtom(activeTabValuesAtom)
 
   /**
    * Effect hook to initialize the active tab values when the component mounts.
    */
   useEffect(() => {
-    // The initialization is now handled by the session atom
-    // No need to fetch from cache as it's automatically handled by goobs-cache
-  }, [])
+    if (!activeTabValues[navname]) {
+      const firstTab = items.find(item => 'orientation' in item) as
+        | NavProps
+        | undefined
+      if (firstTab && firstTab.title) {
+        setActiveTabValues(prev => ({
+          ...prev,
+          [navname]: { tabId: firstTab.title as string },
+        }))
+      }
+    }
+  }, [items, navname, activeTabValues])
 
   /**
    * Handles tab change events.
@@ -71,7 +77,7 @@ function HorizontalVariant({
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setActiveTabValues(prev => ({
       ...prev,
-      [navname ?? '']: { tabId: newValue },
+      [navname]: { tabId: newValue },
     }))
   }
 
@@ -110,7 +116,7 @@ function HorizontalVariant({
       }}
     >
       <Tabs
-        value={activeTabValues?.[navname ?? '']?.tabId || false}
+        value={activeTabValues[navname]?.tabId || ''}
         onChange={handleTabChange}
         aria-label="nav tabs"
         sx={{
