@@ -1,27 +1,27 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import Searchbar, { SearchbarProps } from './../../../Searchbar'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
+export interface ExtendedSearchbarProps extends SearchbarProps {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
+const useSearchbar = (grid: {
+  searchbar?: ExtendedSearchbarProps | ExtendedSearchbarProps[]
 }) => {
-  if (!grid.button) return null
+  if (!grid.searchbar) return null
 
-  const renderButton = (
-    buttonItem: ExtendedButtonProps,
+  const renderSearchbar = (
+    searchbarItem: ExtendedSearchbarProps,
     index: number
   ): columnconfig => {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = buttonItem
+    } = searchbarItem
 
     if (
       !itemColumnConfig ||
@@ -39,17 +39,17 @@ const useButton = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
+      component: <Searchbar key={`searchbar-${index}`} {...restProps} />,
     }
 
     return mergedConfig
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(grid.searchbar)) {
+    return grid.searchbar.map(renderSearchbar)
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderSearchbar(grid.searchbar, 0)]
   }
 }
 
-export default useButton
+export default useSearchbar

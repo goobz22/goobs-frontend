@@ -1,27 +1,27 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import NumberField, { NumberFieldProps } from './../../../NumberField'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
+export interface ExtendedNumberFieldProps extends NumberFieldProps {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
+const useNumberField = (grid: {
+  numberField?: ExtendedNumberFieldProps | ExtendedNumberFieldProps[]
 }) => {
-  if (!grid.button) return null
+  if (!grid.numberField) return null
 
-  const renderButton = (
-    buttonItem: ExtendedButtonProps,
+  const renderNumberField = (
+    numberFieldItem: ExtendedNumberFieldProps,
     index: number
   ): columnconfig => {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = buttonItem
+    } = numberFieldItem
 
     if (
       !itemColumnConfig ||
@@ -39,17 +39,17 @@ const useButton = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
+      component: <NumberField key={`number-field-${index}`} {...restProps} />,
     }
 
     return mergedConfig
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(grid.numberField)) {
+    return grid.numberField.map(renderNumberField)
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderNumberField(grid.numberField, 0)]
   }
 }
 
-export default useButton
+export default useNumberField

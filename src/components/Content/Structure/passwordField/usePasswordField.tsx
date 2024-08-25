@@ -1,27 +1,27 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import PasswordField, { PasswordFieldProps } from './../../../PasswordField'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
+export interface ExtendedPasswordFieldProps extends PasswordFieldProps {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
+const usePasswordField = (grid: {
+  passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
 }) => {
-  if (!grid.button) return null
+  if (!grid.passwordField) return null
 
-  const renderButton = (
-    buttonItem: ExtendedButtonProps,
+  const renderPasswordField = (
+    passwordFieldItem: ExtendedPasswordFieldProps,
     index: number
   ): columnconfig => {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = buttonItem
+    } = passwordFieldItem
 
     if (
       !itemColumnConfig ||
@@ -39,17 +39,19 @@ const useButton = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
+      component: (
+        <PasswordField key={`password-field-${index}`} {...restProps} />
+      ),
     }
 
     return mergedConfig
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(grid.passwordField)) {
+    return grid.passwordField.map(renderPasswordField)
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderPasswordField(grid.passwordField, 0)]
   }
 }
 
-export default useButton
+export default usePasswordField

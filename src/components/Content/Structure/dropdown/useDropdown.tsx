@@ -1,27 +1,27 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import Dropdown, { DropdownProps } from './../../../Dropdown'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
+export interface ExtendedDropdownProps extends DropdownProps {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
+const useDropdown = (grid: {
+  dropdown?: ExtendedDropdownProps | ExtendedDropdownProps[]
 }) => {
-  if (!grid.button) return null
+  if (!grid.dropdown) return null
 
-  const renderButton = (
-    buttonItem: ExtendedButtonProps,
+  const renderDropdown = (
+    dropdownItem: ExtendedDropdownProps,
     index: number
   ): columnconfig => {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = buttonItem
+    } = dropdownItem
 
     if (
       !itemColumnConfig ||
@@ -39,17 +39,17 @@ const useButton = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
+      component: <Dropdown key={`dropdown-${index}`} {...restProps} />,
     }
 
     return mergedConfig
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(grid.dropdown)) {
+    return grid.dropdown.map(renderDropdown)
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderDropdown(grid.dropdown, 0)]
   }
 }
 
-export default useButton
+export default useDropdown

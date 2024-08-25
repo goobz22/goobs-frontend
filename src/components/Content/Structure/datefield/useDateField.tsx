@@ -1,27 +1,27 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import DateField, { DateFieldProps } from './../../../DateField'
 import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
+export interface ExtendedDateFieldProps extends DateFieldProps {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }
 
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
+const useDateField = (grid: {
+  datefield?: ExtendedDateFieldProps | ExtendedDateFieldProps[]
 }) => {
-  if (!grid.button) return null
+  if (!grid.datefield) return null
 
-  const renderButton = (
-    buttonItem: ExtendedButtonProps,
+  const renderDateField = (
+    dateFieldItem: ExtendedDateFieldProps,
     index: number
   ): columnconfig => {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
-    } = buttonItem
+    } = dateFieldItem
 
     if (
       !itemColumnConfig ||
@@ -39,17 +39,17 @@ const useButton = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
+      component: <DateField key={`datefield-${index}`} {...restProps} />,
     }
 
     return mergedConfig
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(grid.datefield)) {
+    return grid.datefield.map(renderDateField)
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderDateField(grid.datefield, 0)]
   }
 }
 
-export default useButton
+export default useDateField

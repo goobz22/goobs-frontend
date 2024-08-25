@@ -5,9 +5,6 @@ import CustomGrid, { columnconfig, gridconfig } from '../../components/Grid'
 import useGridTypography, {
   ExtendedTypographyProps as TypographyProps,
 } from './Structure/typography/useGridTypography'
-import useStyledComponent, {
-  ExtendedStyledComponentProps,
-} from '../../components/Content/Structure/styledcomponent/useStyledComponent'
 import useGridRadioGroup, {
   ExtendedRadioGroupProps,
 } from './Structure/radiogroup/useRadioGroup'
@@ -38,6 +35,27 @@ import useCard, {
 import useCodeCopy, {
   ExtendedCodeCopyProps,
 } from './../../components/Content/Structure/codecopy/useCodeCopy'
+import useTextField, {
+  ExtendedTextFieldProps,
+} from './Structure/textfield/useTextField'
+import useDateField, {
+  ExtendedDateFieldProps,
+} from './Structure/datefield/useDateField'
+import useDropdown, {
+  ExtendedDropdownProps,
+} from './Structure/dropdown/useDropdown'
+import useIncrementNumberField, {
+  ExtendedIncrementNumberFieldProps,
+} from './Structure/incremementNumberField/useIncremementNumberField'
+import useSearchbar, {
+  ExtendedSearchbarProps,
+} from './Structure/searchbar/useSearchbar'
+import useNumberField, {
+  ExtendedNumberFieldProps,
+} from './Structure/numberField/useNumberField'
+import usePasswordField, {
+  ExtendedPasswordFieldProps,
+} from './Structure/passwordField/usePasswordField'
 
 /**
  * Props for the ContentSection component.
@@ -52,9 +70,6 @@ export interface ContentSectionProps {
       | ExtendedConfirmationCodeInputsProps
       | ExtendedConfirmationCodeInputsProps[]
     typography?: TypographyProps | TypographyProps[]
-    styledcomponent?:
-      | ExtendedStyledComponentProps
-      | ExtendedStyledComponentProps[]
     radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
     link?: LinkProps | LinkProps[]
     button?: ExtendedButtonProps | ExtendedButtonProps[]
@@ -64,6 +79,15 @@ export interface ContentSectionProps {
     transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
     card?: ExtendedCardProps | ExtendedCardProps[]
     codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
+    textfield?: ExtendedTextFieldProps | ExtendedTextFieldProps[]
+    datefield?: ExtendedDateFieldProps | ExtendedDateFieldProps[]
+    dropdown?: ExtendedDropdownProps | ExtendedDropdownProps[]
+    incrementNumberField?:
+      | ExtendedIncrementNumberFieldProps
+      | ExtendedIncrementNumberFieldProps[]
+    searchbar?: ExtendedSearchbarProps | ExtendedSearchbarProps[]
+    numberField?: ExtendedNumberFieldProps | ExtendedNumberFieldProps[]
+    passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
   }>
   width?: number
 }
@@ -90,7 +114,6 @@ const RenderContent: React.FC<
 
   // Add configurations for each content type
   addToColumnConfigs(useGridTypography(props))
-  addToColumnConfigs(useStyledComponent(props))
   addToColumnConfigs(useGridRadioGroup(props))
   addToColumnConfigs(
     useConfirmationInput({ confirmationcodeinput: props.confirmationcodeinput })
@@ -103,6 +126,17 @@ const RenderContent: React.FC<
   addToColumnConfigs(useTransferList(props))
   addToColumnConfigs(useCard(props))
   addToColumnConfigs(useCodeCopy(props))
+  addToColumnConfigs(useTextField(props))
+  addToColumnConfigs(useDateField(props))
+  addToColumnConfigs(useDropdown(props))
+  addToColumnConfigs(
+    useIncrementNumberField({
+      incrementNumberField: props.incrementNumberField,
+    })
+  )
+  addToColumnConfigs(useSearchbar(props))
+  addToColumnConfigs(useNumberField({ numberField: props.numberField }))
+  addToColumnConfigs(usePasswordField({ passwordField: props.passwordField }))
 
   const updatedGridConfig: gridconfig = {
     ...grid.gridconfig,
