@@ -1,5 +1,5 @@
 // Components
-import CustomButton, { ButtonAlignment } from './components/Button'
+import CustomButton from './components/Button'
 import CustomGrid, {
   Alignment,
   BorderProp,
@@ -7,9 +7,6 @@ import CustomGrid, {
   gridconfig,
   cellconfig,
 } from './components/Grid'
-import StyledComponent, {
-  StyledComponentProps,
-} from './components/StyledComponent'
 import Typography, {
   FontFamily,
   TypographyVariant,
@@ -39,11 +36,23 @@ import TransferList, { TransferListProps } from './components/TransferList'
 import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
 import React from 'react'
 
+// New imports
+import DateField from './components/DateField'
+import Dropdown from './components/Dropdown'
+import IncrementNumberField from './components/IncrementNumberField'
+import NumberField from './components/NumberField'
+import PasswordField from './components/PasswordField'
+import PhoneNumberField from './components/PhoneNumberField'
+import Searchbar from './components/Searchbar'
+import TextField from './components/TextField'
+
 // Animations
 import { Animation } from './components/Content/Structure/animations'
 
 // Importing ExtendedButtonProps from useButton
 import { ExtendedButtonProps } from './components/Content/Structure/button/useButton'
+import { ExtendedTypographyProps } from './components/Content/Structure/typography/useGridTypography'
+import { ExtendedTextFieldProps } from './components/Content/Structure/textfield/useTextField'
 
 // Colors
 import {
@@ -142,10 +151,23 @@ declare type StyledTooltipComponentProps = React.ComponentProps<
   typeof StyledTooltip
 >
 
+// New type declarations
+declare type DateFieldProps = React.ComponentProps<typeof DateField>
+declare type DropdownProps = React.ComponentProps<typeof Dropdown>
+declare type IncrementNumberFieldProps = React.ComponentProps<
+  typeof IncrementNumberField
+>
+declare type NumberFieldProps = React.ComponentProps<typeof NumberField>
+declare type PasswordFieldProps = React.ComponentProps<typeof PasswordField>
+declare type PhoneNumberFieldProps = React.ComponentProps<
+  typeof PhoneNumberField
+>
+declare type SearchbarProps = React.ComponentProps<typeof Searchbar>
+declare type TextFieldProps = React.ComponentProps<typeof TextField>
+
 // Named exports
 export { CustomButton }
 export { CustomGrid }
-export { StyledComponent }
 export { Typography }
 export { ConfirmationCodeInput }
 export { RadioGroup }
@@ -162,15 +184,24 @@ export { TransferList }
 export { StyledTooltip }
 export { formContainerStyle }
 
+// New named exports
+export { DateField }
+export { Dropdown }
+export { IncrementNumberField }
+export { NumberField }
+export { PasswordField }
+export { PhoneNumberField }
+export { Searchbar }
+export { TextField }
+
 // Exporting ExtendedButtonProps
 export type { ExtendedButtonProps }
-
+export type { ExtendedTypographyProps }
+export type { ExtendedTextFieldProps }
 // Type exports
 export type { CustomButtonProps }
-export type { ButtonAlignment }
 export type { CustomGridProps }
 export type { Alignment, BorderProp, columnconfig, gridconfig, cellconfig }
-export type { StyledComponentProps }
 export type { FontFamily, TypographyVariant, TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
@@ -200,6 +231,16 @@ export type { CustomStepperComponentProps }
 export type { CustomToolbarComponentProps }
 export type { TransferListComponentProps }
 export type { StyledTooltipComponentProps }
+
+// New type exports
+export type { DateFieldProps }
+export type { DropdownProps }
+export type { IncrementNumberFieldProps }
+export type { NumberFieldProps }
+export type { PasswordFieldProps }
+export type { PhoneNumberFieldProps }
+export type { SearchbarProps }
+export type { TextFieldProps }
 
 // Animation type export
 export type { Animation }
