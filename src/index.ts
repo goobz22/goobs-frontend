@@ -55,6 +55,7 @@ import { Animation } from './components/Content/Structure/animations'
 import { ExtendedButtonProps } from './components/Content/Structure/button/useButton'
 import { ExtendedTypographyProps } from './components/Content/Structure/typography/useGridTypography'
 import { ExtendedTextFieldProps } from './components/Content/Structure/textfield/useTextField'
+import { ExtendedQRCodeProps } from './components/Content/Structure/qrcode/useQRCode'
 
 // Colors
 import {
@@ -219,6 +220,7 @@ export type { ToolbarProps }
 export type { TransferListProps }
 export type { CustomTooltipProps }
 export type { QRCodeProps }
+export type { ExtendedQRCodeProps }
 
 // Additional type exports for the newly declared types
 export type { TypographyComponentProps }
