@@ -56,6 +56,7 @@ import useNumberField, {
 import usePasswordField, {
   ExtendedPasswordFieldProps,
 } from './Structure/passwordField/usePasswordField'
+import useQRCode, { ExtendedQRCodeProps } from './Structure/qrcode/useQRCode'
 
 /**
  * Props for the ContentSection component.
@@ -88,6 +89,7 @@ export interface ContentSectionProps {
     searchbar?: ExtendedSearchbarProps | ExtendedSearchbarProps[]
     numberField?: ExtendedNumberFieldProps | ExtendedNumberFieldProps[]
     passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
+    qrcode?: ExtendedQRCodeProps | ExtendedQRCodeProps[]
   }>
   width?: number
 }
@@ -137,6 +139,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useSearchbar(props))
   addToColumnConfigs(useNumberField({ numberField: props.numberField }))
   addToColumnConfigs(usePasswordField({ passwordField: props.passwordField }))
+  addToColumnConfigs(useQRCode({ qrcode: props.qrcode }))
 
   const updatedGridConfig: gridconfig = {
     ...grid.gridconfig,

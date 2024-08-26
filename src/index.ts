@@ -1,3 +1,5 @@
+import React from 'react'
+
 // Components
 import CustomButton from './components/Button'
 import CustomGrid, {
@@ -34,7 +36,7 @@ import { CustomStepper, CustomStepperProps } from './components/Stepper'
 import CustomToolbar, { ToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
 import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
-import React from 'react'
+import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 
 // New imports
 import DateField from './components/DateField'
@@ -183,6 +185,7 @@ export { CustomToolbar }
 export { TransferList }
 export { StyledTooltip }
 export { formContainerStyle }
+export { QRCodeComponent }
 
 // New named exports
 export { DateField }
@@ -215,6 +218,7 @@ export type { CustomStepperProps }
 export type { ToolbarProps }
 export type { TransferListProps }
 export type { CustomTooltipProps }
+export type { QRCodeProps }
 
 // Additional type exports for the newly declared types
 export type { TypographyComponentProps }
