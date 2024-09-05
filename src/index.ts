@@ -56,6 +56,20 @@ import { ExtendedButtonProps } from './components/Content/Structure/button/useBu
 import { ExtendedTypographyProps } from './components/Content/Structure/typography/useGridTypography'
 import { ExtendedTextFieldProps } from './components/Content/Structure/textfield/useTextField'
 import { ExtendedQRCodeProps } from './components/Content/Structure/qrcode/useQRCode'
+import { ExtendedDropdownProps } from './components/Content/Structure/dropdown/useDropdown'
+import { ExtendedDateFieldProps } from './components/Content/Structure/datefield/useDateField'
+import { ExtendedNumberFieldProps } from './components/Content/Structure/numberField/useNumberField'
+import { ExtendedIncrementNumberFieldProps } from './components/Content/Structure/incremementNumberField/useIncremementNumberField'
+import { ExtendedPasswordFieldProps } from './components/Content/Structure/passwordField/usePasswordField'
+import { ExtendedSearchbarProps } from './components/Content/Structure/searchbar/useSearchbar'
+import { ExtendedCodeCopyProps } from './components/Content/Structure/codecopy/useCodeCopy'
+import { ExtendedCardProps } from './components/Content/Structure/card/useCard'
+import { ExtendedTransferListProps } from './components/Content/Structure/transferlist/useTransferList'
+import { ExtendedStepperProps } from './components/Content/Structure/stepper/useStepper'
+import { ExtendedPricingProps } from './components/Content/Structure/pricing/usePricing'
+import { ExtendedImageProps } from './components/Content/Structure/image/useImage'
+import { ExtendedConfirmationCodeInputsProps } from './components/Content/Structure/confirmationinput/useConfirmationInput'
+import { ExtendedRadioGroupProps } from './components/Content/Structure/radiogroup/useRadioGroup'
 
 // Colors
 import {
@@ -202,6 +216,19 @@ export { TextField }
 export type { ExtendedButtonProps }
 export type { ExtendedTypographyProps }
 export type { ExtendedTextFieldProps }
+export type { ExtendedNumberFieldProps }
+export type { ExtendedIncrementNumberFieldProps }
+export type { ExtendedPasswordFieldProps }
+export type { ExtendedSearchbarProps }
+export type { ExtendedCodeCopyProps }
+export type { ExtendedCardProps }
+export type { ExtendedTransferListProps }
+export type { ExtendedStepperProps }
+export type { ExtendedPricingProps }
+export type { ExtendedImageProps }
+export type { ExtendedConfirmationCodeInputsProps }
+export type { ExtendedRadioGroupProps }
+
 // Type exports
 export type { CustomButtonProps }
 export type { CustomGridProps }
@@ -221,6 +248,8 @@ export type { TransferListProps }
 export type { CustomTooltipProps }
 export type { QRCodeProps }
 export type { ExtendedQRCodeProps }
+export type { ExtendedDropdownProps }
+export type { ExtendedDateFieldProps }
 
 // Additional type exports for the newly declared types
 export type { TypographyComponentProps }
