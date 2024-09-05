@@ -6,10 +6,6 @@ The NPM repo is available here - https://www.npmjs.com/package/goobs-frontend
 
 This entire repository is written in TypeScript, and there is no need for a separate types installation.
 
-## Version
-
-This is a beta release of the tools. It is available via npm to ensure functionality is as expected. We will iron out any kinks and expect version v1 to be production-ready for all components, while some components are already production-ready. Installation is confirmed working with the install instructions below.
-
 ## Integrating goobs-frontend with Next.js
 
 This guide explains how to integrate the goobs-frontend package with a Next.js project.
@@ -50,109 +46,157 @@ You can see more information on how we got here and how it was incorrectly done 
 
 **Step 3: Implement into project and build to confirm functionality**
 
-All components should be successfully building as of this release and are being used within production in one way or another. The props may not all work exactly as expected, but as we go through and find a way to document each of the components further, we will determine what needs to be removed or implemented now or in future versions.
+All components should be successfully building as of this release and are being used within production in one way or another.
 
-This README update, along with the following documentation updates, are all part of a push to better document the usage of this project. It is a hard requirement to move from .7-beta of this product to .8-beta as we are getting ready for release and establishing a product version release methodology.
+This README update, along with the following documentation updates, are all part of a push to better document the usage of this project.
 
 ## Components
 
-The following components are available within goobs-frontend:
+The following components are available within goobs-frontend. Each component has a dedicated wiki page with detailed documentation, usage examples, and best practices.
 
 ### Accordion
 
 The Accordion component provides an expandable panel for organizing and presenting content in a collapsible manner.
 
+[Accordion Wiki](https://github.com/goobz22/goobs-frontend/wiki/Accordion)
+
 ### Button
 
 The Button component is a customizable button with support for icons, variants, and styling props. It provides a flexible and reusable way to create buttons in your application.
+
+[Button Wiki](https://github.com/goobz22/goobs-frontend/wiki/Button)
 
 ### Card
 
 The Card component offers various card layouts for displaying content, including product cards, pricing cards, and more. It supports different variants such as default, inventory, pricing summary, detailed pricing summary, product, and product summary.
 
+[Card Wiki](https://github.com/goobz22/goobs-frontend/wiki/Card)
+
 ### CodeCopy
 
 The CodeCopy component renders a code block with syntax highlighting and a copy-to-clipboard functionality.
+
+[CodeCopy Wiki](https://github.com/goobz22/goobs-frontend/wiki/CodeCopy)
 
 ### ConfirmationCodeInput
 
 The ConfirmationCodeInput component provides an input field for entering confirmation codes, often used in two-factor authentication scenarios.
 
+[ConfirmationCodeInput Wiki](https://github.com/goobz22/goobs-frontend/wiki/ConfirmationCodeInput)
+
 ### Content
 
 The Content component is a flexible container for rendering various types of content within your application. It supports different content types including typography, radio groups, confirmation code inputs, links, buttons, images, pricing tables, steppers, transfer lists, cards, code copy blocks, text fields, date fields, dropdowns, increment number fields, searchbars, number fields, password fields, and QR codes.
+
+[Content Wiki](https://github.com/goobz22/goobs-frontend/wiki/Content)
 
 ### DateField
 
 The DateField component provides a date picker input field with customizable styling options.
 
+[DateField Wiki](https://github.com/goobz22/goobs-frontend/wiki/DateField)
+
 ### Dropdown
 
 The Dropdown component offers a customizable select input with various styling options.
 
-### Form
-
-The Form component includes the PopupForm subcomponent, which renders a customizable popup form.
+[Dropdown Wiki](https://github.com/goobz22/goobs-frontend/wiki/Dropdown)
 
 ### Grid
 
 The Grid component is a highly customizable and flexible grid system built with React and Material-UI. It allows you to create complex grid layouts with ease, providing a wide range of configuration options for grids, rows, columns, and cells.
 
+[Grid Wiki](https://github.com/goobz22/goobs-frontend/wiki/Grid)
+
 ### IncrementNumberField
 
 The IncrementNumberField component provides an input field for numeric values with increment and decrement buttons.
+
+[IncrementNumberField Wiki](https://github.com/goobz22/goobs-frontend/wiki/IncrementNumberField)
 
 ### Nav
 
 The Nav component provides navigation functionality, including both horizontal and vertical navigation options.
 
+[Nav Wiki](https://github.com/goobz22/goobs-frontend/wiki/Nav)
+
 ### NumberField
 
 The NumberField component offers an input field specifically designed for numeric input with optional minimum and maximum value constraints.
+
+[NumberField Wiki](https://github.com/goobz22/goobs-frontend/wiki/NumberField)
 
 ### PasswordField
 
 The PasswordField component provides a secure input field for password entry with a show/hide password toggle.
 
+[PasswordField Wiki](https://github.com/goobz22/goobs-frontend/wiki/PasswordField)
+
 ### PhoneNumberField
 
 The PhoneNumberField component offers an input field specifically formatted for phone number entry.
+
+[PhoneNumberField Wiki](https://github.com/goobz22/goobs-frontend/wiki/PhoneNumberField)
 
 ### PricingTable
 
 The PricingTable component renders a customizable pricing table for displaying product or service pricing information.
 
+[PricingTable Wiki](https://github.com/goobz22/goobs-frontend/wiki/PricingTable)
+
 ### QRCode
 
 The QRCode component generates and displays QR codes based on the provided value.
+
+[QRCode Wiki](https://github.com/goobz22/goobs-frontend/wiki/QRCode)
 
 ### RadioGroup
 
 The RadioGroup component renders a group of radio buttons for selecting a single option from multiple choices.
 
+[RadioGroup Wiki](https://github.com/goobz22/goobs-frontend/wiki/RadioGroup)
+
 ### Searchbar
 
 The Searchbar component provides a search input field with customizable styling options.
+
+[Searchbar Wiki](https://github.com/goobz22/goobs-frontend/wiki/Searchbar)
 
 ### Stepper
 
 The Stepper component provides a step-by-step interface for guiding users through a process or workflow.
 
+[Stepper Wiki](https://github.com/goobz22/goobs-frontend/wiki/Stepper)
+
 ### TextField
 
 The TextField component offers a customizable text input field with various styling and behavior options.
+
+[TextField Wiki](https://github.com/goobz22/goobs-frontend/wiki/TextField)
 
 ### Toolbar
 
 The Toolbar component offers a customizable toolbar for use in various UI scenarios.
 
+[Toolbar Wiki](https://github.com/goobz22/goobs-frontend/wiki/Toolbar)
+
+### Tooltip
+
+The Tooltip component is a customizable and styled version of the Material-UI Tooltip component. It provides a way to display informative text when users hover over, focus on, or tap an element.
+
+[Tooltip Wiki](https://github.com/goobz22/goobs-frontend/wiki/Tooltip)
+
 ### TransferList
 
 The TransferList component provides a dual-list interface for transferring items between two lists.
 
+[TransferList Wiki](https://github.com/goobz22/goobs-frontend/wiki/TransferList)
+
 ### Typography
 
 The Typography component is a text component for rendering customizable typography with support for different font families, variants, and colors.
+
+[Typography Wiki](https://github.com/goobz22/goobs-frontend/wiki/Typography)
 
 ## Usage
 
@@ -321,7 +365,7 @@ import {
 } from 'goobs-frontend'
 ```
 
-Please refer to the individual component and utility files for more details on their usage and available props. We are in the process of documenting each component in the [GitHub wiki](https://github.com/goobz22/goobs-frontend/wiki).
+Please refer to the individual component and utility files for more details on their usage and available props.
 
 ## License
 
