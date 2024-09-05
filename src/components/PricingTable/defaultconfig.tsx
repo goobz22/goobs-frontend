@@ -31,6 +31,7 @@ const defaultConfig: PricingProps = {
   },
   // Configuration for package columns
   packagecolumns: {
+    packagenames: ['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise'],
     columnconfig: {
       row: 1,
       column: 2,
@@ -43,7 +44,11 @@ const defaultConfig: PricingProps = {
   },
   // Configuration for monthly pricing
   monthlyprice: {
-    prices: 'Monthly Pricing - $10',
+    prices: [
+      'Monthly Pricing - $10',
+      'Monthly Pricing - $20',
+      'Monthly Pricing - $30',
+    ],
     columnconfig: {
       row: 2,
       column: 1,
@@ -56,7 +61,11 @@ const defaultConfig: PricingProps = {
   },
   // Configuration for annual pricing
   annualprice: {
-    annualprices: 'Annual Pricing - $100',
+    annualprices: [
+      'Annual Pricing - $100',
+      'Annual Pricing - $200',
+      'Annual Pricing - $300',
+    ],
     columnconfig: {
       row: 2,
       column: 2,
@@ -89,7 +98,7 @@ const defaultConfig: PricingProps = {
         alignment: 'left' as Alignment,
       },
       tiedtopackage: {
-        tiedtopackages: 'true',
+        tiedtopackages: ['true', 'true', 'true'],
         columnconfig: {
           row: 1,
           column: 2,
@@ -114,7 +123,7 @@ const defaultConfig: PricingProps = {
             alignment: 'left' as Alignment,
           },
           tiedtopackage: {
-            tiedtopackages: 'true',
+            tiedtopackages: ['true', 'true', 'true'],
             columnconfig: {
               row: 2,
               column: 2,
@@ -140,7 +149,7 @@ const defaultConfig: PricingProps = {
             alignment: 'left' as Alignment,
           },
           tiedtopackage: {
-            tiedtopackages: 'true',
+            tiedtopackages: ['true', 'true', 'true'],
             columnconfig: {
               row: 3,
               column: 2,
@@ -167,7 +176,7 @@ const defaultConfig: PricingProps = {
         alignment: 'left' as Alignment,
       },
       tiedtopackage: {
-        tiedtopackages: 'true',
+        tiedtopackages: ['true', 'true', 'true'],
         columnconfig: {
           row: 4,
           column: 2,
@@ -193,7 +202,7 @@ const defaultConfig: PricingProps = {
             alignment: 'left' as Alignment,
           },
           tiedtopackage: {
-            tiedtopackages: 'true',
+            tiedtopackages: ['true', 'true', 'true'],
             columnconfig: {
               row: 5,
               column: 2,
@@ -219,7 +228,7 @@ const defaultConfig: PricingProps = {
             alignment: 'left' as Alignment,
           },
           tiedtopackage: {
-            tiedtopackages: 'true',
+            tiedtopackages: ['true', 'true', 'true'],
             columnconfig: {
               row: 6,
               column: 2,
@@ -236,8 +245,12 @@ const defaultConfig: PricingProps = {
   ],
   // Configuration for button columns
   buttoncolumns: {
-    buttontexts: 'Learn More',
-    buttonlinks: '#goobs-frontend-unlimited',
+    buttontexts: ['Learn More', 'Learn More', 'Learn More'],
+    buttonlinks: [
+      '#goobs-frontend-unlimited',
+      '#goobs-frontend-unlimited',
+      '#goobs-frontend-unlimited',
+    ],
     columnconfig: {
       row: 7,
       column: 2,

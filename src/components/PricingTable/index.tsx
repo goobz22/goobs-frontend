@@ -1,6 +1,6 @@
 'use client'
-import React from 'react'
-import { Box, Paper } from '@mui/material'
+import React, { useState, useCallback, useMemo } from 'react'
+import { Box, Paper, SelectChangeEvent } from '@mui/material'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
@@ -20,13 +20,10 @@ import {
 } from '../../styles/palette'
 
 type TiedToPackage = {
-  tiedtopackages?: string
+  tiedtopackages?: string[]
   columnconfig?: Omit<columnconfig, 'component'>
 }
 
-/**
- * Interface for sub-features in the pricing table
- */
 interface SubFeature {
   title: string
   titlelink?: string
@@ -35,9 +32,6 @@ interface SubFeature {
   tiedtopackage?: TiedToPackage
 }
 
-/**
- * Interface for main features in the pricing table
- */
 interface Feature {
   title: string
   infopopuptext?: string
@@ -47,9 +41,6 @@ interface Feature {
   tiedtopackage?: TiedToPackage
 }
 
-/**
- * Interface for the props of the PricingTable component
- */
 export interface PricingProps {
   headerGridConfig?: gridconfig
   tabletitle?: {
@@ -58,46 +49,49 @@ export interface PricingProps {
   }
   packagecolumns?: {
     columnheaders?: string
-    packagenames?: string
+    packagenames?: string[]
     columnconfig?: columnconfig
   }
   monthlyprice?: {
-    prices?: string
+    prices?: string[]
     columnconfig?: columnconfig
   }
   annualprice?: {
-    annualprices?: string
+    annualprices?: string[]
     columnconfig?: columnconfig
   }
   featureGridConfig?: gridconfig
   features?: Feature[]
   buttoncolumns?: {
-    buttontexts?: string
-    buttonlinks?: string
+    buttontexts?: string[]
+    buttonlinks?: string[]
     columnconfig?: columnconfig
   }
 }
 
-/**
- * PricingTable component for rendering a customizable pricing table
- * @param {PricingProps} props - The props for the component
- * @returns {JSX.Element} The rendered PricingTable component
- */
 const PricingTable: React.FC<PricingProps> = props => {
-  // Merge default config with provided props
-  const config: PricingProps = { ...defaultConfig, ...props }
-
   const router = useRouter()
+  const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
 
-  /**
-   * Renders column configurations for the pricing table
-   * @returns {{ headerColumnConfigs: columnconfig[], featureColumnConfigs: columnconfig[] }}
-   */
-  const renderColumnConfigs = () => {
+  const config = useMemo(() => {
+    return { ...defaultConfig, ...props }
+  }, [props])
+
+  const handlePackageChange = useCallback(
+    (event: SelectChangeEvent<unknown>) => {
+      const newValue = event.target.value as string
+      const newIndex =
+        config.packagecolumns?.packagenames?.indexOf(newValue) ?? 0
+      setSelectedPackageIndex(newIndex)
+      console.log('Package selection changed to:', newValue)
+    },
+    [config.packagecolumns?.packagenames]
+  )
+
+  const renderColumnConfigs = useCallback(() => {
     const headerColumnConfigs: columnconfig[] = []
     const featureColumnConfigs: columnconfig[] = []
 
-    // Render table title
     if (config.tabletitle && config.tabletitle.columnconfig) {
       headerColumnConfigs.push({
         ...config.tabletitle.columnconfig,
@@ -112,34 +106,33 @@ const PricingTable: React.FC<PricingProps> = props => {
       })
     }
 
-    // Render package dropdown
     if (config.packagecolumns && config.packagecolumns.columnconfig) {
       headerColumnConfigs.push({
         ...config.packagecolumns.columnconfig,
         component: (
           <Dropdown
             label="Packages"
-            options={['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise']}
-            defaultOption="ThothOS"
+            options={(config.packagecolumns.packagenames || []).map(name => ({
+              value: name,
+              label: name,
+            }))}
+            defaultValue={config.packagecolumns.packagenames?.[0] || ''}
             backgroundcolor={semiTransparentBlack.main}
             outlinecolor={black.main}
             fontcolor={black.main}
             shrunkfontcolor={black.main}
-            onChange={() => {
-              console.log('Package selection changed')
-            }}
+            onChange={handlePackageChange}
           />
         ),
       })
     }
 
-    // Render monthly price
     if (config.monthlyprice && config.monthlyprice.columnconfig) {
       headerColumnConfigs.push({
         ...config.monthlyprice.columnconfig,
         component: (
           <Typography
-            text={config.monthlyprice.prices}
+            text={config.monthlyprice.prices?.[selectedPackageIndex] || ''}
             fontcolor={black.main}
             fontvariant="merrih5"
           />
@@ -147,13 +140,12 @@ const PricingTable: React.FC<PricingProps> = props => {
       })
     }
 
-    // Render annual price
     if (config.annualprice && config.annualprice.columnconfig) {
       headerColumnConfigs.push({
         ...config.annualprice.columnconfig,
         component: (
           <Typography
-            text={config.annualprice.annualprices}
+            text={config.annualprice.annualprices?.[selectedPackageIndex] || ''}
             fontcolor={black.main}
             fontvariant="merrih5"
           />
@@ -161,12 +153,7 @@ const PricingTable: React.FC<PricingProps> = props => {
       })
     }
 
-    /**
-     * Renders a feature and its subfeatures
-     * @param {Feature} feature - The feature to render
-     */
     const renderFeature = (feature: Feature) => {
-      // Render main feature
       if (feature.columnconfig) {
         featureColumnConfigs.push({
           ...feature.columnconfig,
@@ -197,14 +184,15 @@ const PricingTable: React.FC<PricingProps> = props => {
         } as columnconfig)
       }
 
-      // Render feature checkbox
       if (feature.tiedtopackage && feature.tiedtopackage.columnconfig) {
         const tiedConfig: columnconfig = {
           ...feature.tiedtopackage.columnconfig,
           cellconfig: {
             minHeight: '40px',
           },
-          component: feature.tiedtopackage.tiedtopackages ? (
+          component: feature.tiedtopackage.tiedtopackages?.[
+            selectedPackageIndex
+          ] ? (
             <CheckCircleIcon />
           ) : (
             <Box sx={{ width: '24px', height: '24px' }} />
@@ -213,7 +201,6 @@ const PricingTable: React.FC<PricingProps> = props => {
         featureColumnConfigs.push(tiedConfig)
       }
 
-      // Render subfeatures
       feature.subfeatures.forEach(subFeature => {
         if (subFeature.columnconfig) {
           featureColumnConfigs.push({
@@ -245,14 +232,15 @@ const PricingTable: React.FC<PricingProps> = props => {
           } as columnconfig)
         }
 
-        // Render subfeature checkbox
         if (subFeature.tiedtopackage && subFeature.tiedtopackage.columnconfig) {
           const tiedConfig: columnconfig = {
             ...subFeature.tiedtopackage.columnconfig,
             cellconfig: {
               minHeight: '40px',
             },
-            component: subFeature.tiedtopackage.tiedtopackages ? (
+            component: subFeature.tiedtopackage.tiedtopackages?.[
+              selectedPackageIndex
+            ] ? (
               <CheckCircleIcon />
             ) : (
               <Box sx={{ width: '24px', height: '24px' }} />
@@ -263,12 +251,11 @@ const PricingTable: React.FC<PricingProps> = props => {
       })
     }
 
-    // Render all features
     config.features?.forEach(renderFeature)
 
-    // Render button columns
     if (config.buttoncolumns && config.buttoncolumns.columnconfig) {
-      const buttonLink = config.buttoncolumns.buttonlinks || '#'
+      const buttonLink =
+        config.buttoncolumns.buttonlinks?.[selectedPackageIndex] || '#'
 
       featureColumnConfigs.push({
         ...config.buttoncolumns.columnconfig,
@@ -280,14 +267,16 @@ const PricingTable: React.FC<PricingProps> = props => {
             href={buttonLink}
             width="100%"
             onClick={() => router.push(buttonLink)}
-            text={config.buttoncolumns.buttontexts}
+            text={
+              config.buttoncolumns.buttontexts?.[selectedPackageIndex] || ''
+            }
           />
         ),
       })
     }
 
     return { headerColumnConfigs, featureColumnConfigs }
-  }
+  }, [config, selectedPackageIndex, router, handlePackageChange])
 
   const { headerColumnConfigs, featureColumnConfigs } = renderColumnConfigs()
 
