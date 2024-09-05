@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Grid, Box, GridProps, useMediaQuery, useTheme } from '@mui/material'
+import Grid2, { Grid2Props } from '@mui/material/Grid2'
+import { Box, useMediaQuery, useTheme } from '@mui/material'
 
 /** Defines the possible alignment options for grid content */
 export type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
@@ -47,7 +48,7 @@ export interface gridconfig {
 /**
  * Props for the CustomGrid component
  */
-export interface CustomGridProps extends GridProps {
+export interface CustomGridProps extends Grid2Props {
   gridconfig?: gridconfig
   columnconfig?: columnconfig[]
   cellconfig?: cellconfig
@@ -111,7 +112,6 @@ const CustomGrid: React.FC<CustomGridProps> = ({
       minWidth={minGridWidth}
     >
       <Box
-        // @ts-ignore
         mt={gridConfigValues?.margintop || 0}
         mb={gridConfigValues?.marginbottom || 0}
         ml={gridConfigValues?.marginleft || 0}
@@ -132,7 +132,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
           )
 
           return (
-            <Grid
+            <Grid2
               key={`row-${rowIndex}`}
               container
               alignItems="center"
@@ -194,8 +194,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                 const computerWidth = currentCellConfig?.computerwidth || '100%'
 
                 return (
-                  <Grid
-                    item
+                  <Grid2
                     key={`column-${columnIndex}`}
                     sx={{
                       display: 'flex',
@@ -250,10 +249,10 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                     >
                       {currentColumnConfig?.component || null}
                     </Box>
-                  </Grid>
+                  </Grid2>
                 )
               })}
-            </Grid>
+            </Grid2>
           )
         })}
       </Box>
