@@ -68,7 +68,7 @@ The Button component is a customizable button with support for icons, variants, 
 
 ### Card
 
-The Card component offers various card layouts for displaying content, including product cards, pricing cards, and more.
+The Card component offers various card layouts for displaying content, including product cards, pricing cards, and more. It supports different variants such as default, inventory, pricing summary, detailed pricing summary, product, and product summary.
 
 ### CodeCopy
 
@@ -80,7 +80,15 @@ The ConfirmationCodeInput component provides an input field for entering confirm
 
 ### Content
 
-The Content component is a flexible container for rendering various types of content within your application.
+The Content component is a flexible container for rendering various types of content within your application. It supports different content types including typography, radio groups, confirmation code inputs, links, buttons, images, pricing tables, steppers, transfer lists, cards, code copy blocks, text fields, date fields, dropdowns, increment number fields, searchbars, number fields, password fields, and QR codes.
+
+### DateField
+
+The DateField component provides a date picker input field with customizable styling options.
+
+### Dropdown
+
+The Dropdown component offers a customizable select input with various styling options.
 
 ### Form
 
@@ -90,25 +98,49 @@ The Form component includes the PopupForm subcomponent, which renders a customiz
 
 The Grid component is a highly customizable and flexible grid system built with React and Material-UI. It allows you to create complex grid layouts with ease, providing a wide range of configuration options for grids, rows, columns, and cells.
 
+### IncrementNumberField
+
+The IncrementNumberField component provides an input field for numeric values with increment and decrement buttons.
+
 ### Nav
 
 The Nav component provides navigation functionality, including both horizontal and vertical navigation options.
+
+### NumberField
+
+The NumberField component offers an input field specifically designed for numeric input with optional minimum and maximum value constraints.
+
+### PasswordField
+
+The PasswordField component provides a secure input field for password entry with a show/hide password toggle.
+
+### PhoneNumberField
+
+The PhoneNumberField component offers an input field specifically formatted for phone number entry.
 
 ### PricingTable
 
 The PricingTable component renders a customizable pricing table for displaying product or service pricing information.
 
+### QRCode
+
+The QRCode component generates and displays QR codes based on the provided value.
+
 ### RadioGroup
 
 The RadioGroup component renders a group of radio buttons for selecting a single option from multiple choices.
+
+### Searchbar
+
+The Searchbar component provides a search input field with customizable styling options.
 
 ### Stepper
 
 The Stepper component provides a step-by-step interface for guiding users through a process or workflow.
 
-### StyledComponent
+### TextField
 
-The StyledComponent is a versatile and customizable input component built with React and Material-UI. It provides a range of input variants and supports various styling options to match your application's design requirements.
+The TextField component offers a customizable text input field with various styling and behavior options.
 
 ### Toolbar
 
@@ -120,20 +152,25 @@ The TransferList component provides a dual-list interface for transferring items
 
 ### Typography
 
-The Typography component is a text component for rendering customizable typography.
+The Typography component is a text component for rendering customizable typography with support for different font families, variants, and colors.
 
 ## Usage
 
-To use the components and utilities in your project, you can import them from the `goobs-frontend` package. For example:
+To use the components, types, and utilities in your project, you can import them from the `goobs-frontend` package. Here's a comprehensive list of all available imports:
 
-```jsx
+```typescript
 import {
+  // Components
   CustomButton,
   CustomGrid,
-  StyledComponent,
   Typography,
-  RadioGroup,
   ConfirmationCodeInput,
+  RadioGroup,
+  PopupForm,
+  ContentSection,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Card,
   CodeCopy,
   Nav,
@@ -141,7 +178,146 @@ import {
   CustomStepper,
   CustomToolbar,
   TransferList,
-  Accordion,
+  StyledTooltip,
+  QRCodeComponent,
+  DateField,
+  Dropdown,
+  IncrementNumberField,
+  NumberField,
+  PasswordField,
+  PhoneNumberField,
+  Searchbar,
+  TextField,
+
+  // Types
+  CustomButtonProps,
+  CustomGridProps,
+  Alignment,
+  BorderProp,
+  columnconfig,
+  gridconfig,
+  cellconfig,
+  FontFamily,
+  TypographyVariant,
+  TypographyProps,
+  ConfirmationCodeInputsProps,
+  RadioOption,
+  RadioGroupProps,
+  PopupFormProps,
+  ContentSectionProps,
+  CardProps,
+  CodeCopyProps,
+  NavProps,
+  PricingProps,
+  CustomStepperProps,
+  ToolbarProps,
+  TransferListProps,
+  CustomTooltipProps,
+  QRCodeProps,
+  DateFieldProps,
+  DropdownProps,
+  IncrementNumberFieldProps,
+  NumberFieldProps,
+  PasswordFieldProps,
+  PhoneNumberFieldProps,
+  SearchbarProps,
+  TextFieldProps,
+
+  // Extended Types
+  ExtendedButtonProps,
+  ExtendedTypographyProps,
+  ExtendedTextFieldProps,
+  ExtendedQRCodeProps,
+  ExtendedDropdownProps,
+  ExtendedDateFieldProps,
+  ExtendedNumberFieldProps,
+  ExtendedIncrementNumberFieldProps,
+  ExtendedPasswordFieldProps,
+  ExtendedSearchbarProps,
+  ExtendedCodeCopyProps,
+  ExtendedCardProps,
+  ExtendedTransferListProps,
+  ExtendedStepperProps,
+  ExtendedPricingProps,
+  ExtendedImageProps,
+  ExtendedConfirmationCodeInputsProps,
+  ExtendedRadioGroupProps,
+
+  // Component Props Types
+  TypographyComponentProps,
+  ConfirmationCodeInputProps,
+  RadioGroupComponentProps,
+  PopupFormComponentProps,
+  ContentSectionComponentProps,
+  AccordionProps,
+  AccordionSummaryProps,
+  AccordionDetailsProps,
+  CardComponentProps,
+  CodeCopyComponentProps,
+  NavComponentProps,
+  PricingTableComponentProps,
+  CustomStepperComponentProps,
+  CustomToolbarComponentProps,
+  TransferListComponentProps,
+  StyledTooltipComponentProps,
+
+  // Styles
+  formContainerStyle,
+
+  // Animations
+  Animation,
+
+  // Colors
+  moss,
+  aqua,
+  madder,
+  woad,
+  marine,
+  pansy,
+  stainlessSteel,
+  coal,
+  ocean,
+  sky,
+  salmon,
+  lightning,
+  sage,
+  lilac,
+  gunpowder,
+  lightMadder,
+  black,
+  white,
+  none,
+  semiTransparentWhite,
+  semiTransparentBlack,
+  red,
+  green,
+  greyborder,
+
+  // Typography
+  arapeyh1,
+  arapeyh2,
+  arapeyh3,
+  arapeyh4,
+  arapeyh5,
+  arapeyh6,
+  arapeyparagraph,
+  interh1,
+  interh2,
+  interh3,
+  interh4,
+  interh5,
+  interh6,
+  interparagraph,
+  interhelperheader,
+  interhelperfooter,
+  merrih1,
+  merrih2,
+  merrih3,
+  merrih4,
+  merrih5,
+  merrih6,
+  merriparagraph,
+  merrihelperfooter,
 } from 'goobs-frontend'
 ```
 
