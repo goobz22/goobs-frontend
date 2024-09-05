@@ -10,40 +10,20 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 
-/**
- * Returns the elements in array 'a' that are not in array 'b'
- * @param {readonly string[]} a - The first array
- * @param {readonly string[]} b - The second array
- * @returns {string[]} The elements in 'a' that are not in 'b'
- */
 function not(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) === -1)
 }
 
-/**
- * Returns the common elements between arrays 'a' and 'b'
- * @param {readonly string[]} a - The first array
- * @param {readonly string[]} b - The second array
- * @returns {string[]} The common elements between 'a' and 'b'
- */
 function intersection(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) !== -1)
 }
 
-/**
- * Props interface for the TransferList component
- */
 export interface TransferListProps {
   leftItems: readonly string[]
   rightItems: readonly string[]
-  onChange?: (items: string[]) => void
+  onChange?: () => void
 }
 
-/**
- * TransferList component that allows moving items between two lists
- * @param {TransferListProps} props - The props for the TransferList component
- * @returns {JSX.Element} The rendered TransferList component
- */
 const TransferList: React.FC<TransferListProps> = ({
   leftItems,
   rightItems,
@@ -56,10 +36,6 @@ const TransferList: React.FC<TransferListProps> = ({
   const leftChecked = intersection(checked, left)
   const rightChecked = intersection(checked, right)
 
-  /**
-   * Toggles the checked state of an item
-   * @param {string} value - The value to toggle
-   */
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value)
     const newChecked = [...checked]
@@ -73,63 +49,40 @@ const TransferList: React.FC<TransferListProps> = ({
     setChecked(newChecked)
   }
 
-  /**
-   * Moves all items from left to right
-   */
   const handleAllRight = () => {
-    const newRight = right.concat(left)
-    setRight(newRight)
+    setRight(right.concat(left))
     setLeft([])
     if (onChange) {
-      onChange(newRight)
+      onChange()
     }
   }
 
-  /**
-   * Moves checked items from left to right
-   */
   const handleCheckedRight = () => {
-    const newRight = right.concat(leftChecked)
-    const newLeft = not(left, leftChecked)
-    setRight(newRight)
-    setLeft(newLeft)
+    setRight(right.concat(leftChecked))
+    setLeft(not(left, leftChecked))
     setChecked(not(checked, leftChecked))
     if (onChange) {
-      onChange(newRight)
+      onChange()
     }
   }
 
-  /**
-   * Moves checked items from right to left
-   */
   const handleCheckedLeft = () => {
-    const newLeft = left.concat(rightChecked)
-    const newRight = not(right, rightChecked)
-    setLeft(newLeft)
-    setRight(newRight)
+    setLeft(left.concat(rightChecked))
+    setRight(not(right, rightChecked))
     setChecked(not(checked, rightChecked))
     if (onChange) {
-      onChange(newRight)
+      onChange()
     }
   }
 
-  /**
-   * Moves all items from right to left
-   */
   const handleAllLeft = () => {
-    const newLeft = left.concat(right)
-    setLeft(newLeft)
+    setLeft(left.concat(right))
     setRight([])
     if (onChange) {
-      onChange([])
+      onChange()
     }
   }
 
-  /**
-   * Renders a custom list of items
-   * @param {readonly string[]} items - The items to render in the list
-   * @returns {JSX.Element} The rendered list
-   */
   const customList = (items: readonly string[]) => (
     <Paper sx={{ width: 200, height: 230, overflow: 'auto' }}>
       <List dense component="div" role="list">
