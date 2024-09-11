@@ -1,8 +1,5 @@
 import { PricingProps } from './index'
 
-// Type definition for alignment options
-type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
-
 /**
  * Default configuration for the PricingTable component
  */
@@ -10,7 +7,7 @@ const defaultConfig: PricingProps = {
   // Configuration for the header grid
   headerGridConfig: {
     gridname: 'pricingtableheader',
-    alignment: 'center' as Alignment,
+    alignment: 'center' as const,
     margintop: 1,
     gridwidth: '100%',
   },
@@ -21,7 +18,7 @@ const defaultConfig: PricingProps = {
       row: 3,
       column: 1,
       gridname: 'pricingtableheader',
-      alignment: 'left' as Alignment,
+      alignment: 'left' as const,
       marginleft: 3,
       marginbottom: 1,
       mobilewidth: '100%',
@@ -36,7 +33,7 @@ const defaultConfig: PricingProps = {
       row: 1,
       column: 2,
       gridname: 'pricingtableheader',
-      alignment: 'center' as Alignment,
+      alignment: 'center' as const,
       mobilewidth: '80%',
       tabletwidth: '48%',
       computerwidth: '48%',
@@ -56,7 +53,7 @@ const defaultConfig: PricingProps = {
       tabletwidth: '48%',
       computerwidth: '48%',
       gridname: 'pricingtableheader',
-      alignment: 'center' as Alignment,
+      alignment: 'center' as const,
     },
   },
   // Configuration for annual pricing
@@ -73,13 +70,13 @@ const defaultConfig: PricingProps = {
       tabletwidth: '48%',
       computerwidth: '48%',
       gridname: 'pricingtableheader',
-      alignment: 'center' as Alignment,
+      alignment: 'center' as const,
     },
   },
   // Configuration for the feature grid
   featureGridConfig: {
     gridname: 'pricingtablefeatures',
-    alignment: 'center' as Alignment,
+    alignment: 'center' as const,
     gridwidth: '100%',
   },
   // Configuration for features and subfeatures
@@ -95,7 +92,7 @@ const defaultConfig: PricingProps = {
         tabletwidth: '48%',
         computerwidth: '48%',
         gridname: 'pricingtablefeatures',
-        alignment: 'left' as Alignment,
+        alignment: 'left' as const,
       },
       tiedtopackage: {
         tiedtopackages: ['true', 'true', 'true'],
@@ -106,7 +103,7 @@ const defaultConfig: PricingProps = {
           tabletwidth: '48%',
           computerwidth: '48%',
           gridname: 'pricingtablefeatures',
-          alignment: 'center' as Alignment,
+          alignment: 'center' as const,
         },
       },
       subfeatures: [
@@ -120,7 +117,7 @@ const defaultConfig: PricingProps = {
             tabletwidth: '48%',
             computerwidth: '48%',
             gridname: 'pricingtablefeatures',
-            alignment: 'left' as Alignment,
+            alignment: 'left' as const,
           },
           tiedtopackage: {
             tiedtopackages: ['true', 'true', 'true'],
@@ -131,7 +128,7 @@ const defaultConfig: PricingProps = {
               tabletwidth: '48%',
               computerwidth: '48%',
               gridname: 'pricingtablefeatures',
-              alignment: 'center' as Alignment,
+              alignment: 'center' as const,
             },
           },
         },
@@ -146,7 +143,7 @@ const defaultConfig: PricingProps = {
             tabletwidth: '48%',
             computerwidth: '48%',
             gridname: 'pricingtablefeatures',
-            alignment: 'left' as Alignment,
+            alignment: 'left' as const,
           },
           tiedtopackage: {
             tiedtopackages: ['true', 'true', 'true'],
@@ -157,7 +154,7 @@ const defaultConfig: PricingProps = {
               tabletwidth: '48%',
               computerwidth: '48%',
               gridname: 'pricingtablefeatures',
-              alignment: 'center' as Alignment,
+              alignment: 'center' as const,
             },
           },
         },
@@ -173,7 +170,7 @@ const defaultConfig: PricingProps = {
         tabletwidth: '48%',
         computerwidth: '48%',
         gridname: 'pricingtablefeatures',
-        alignment: 'left' as Alignment,
+        alignment: 'left' as const,
       },
       tiedtopackage: {
         tiedtopackages: ['true', 'true', 'true'],
@@ -184,7 +181,7 @@ const defaultConfig: PricingProps = {
           tabletwidth: '48%',
           computerwidth: '48%',
           gridname: 'pricingtablefeatures',
-          alignment: 'center' as Alignment,
+          alignment: 'center' as const,
         },
       },
       subfeatures: [
@@ -199,7 +196,7 @@ const defaultConfig: PricingProps = {
             tabletwidth: '50%',
             computerwidth: '48%',
             gridname: 'pricingtablefeatures',
-            alignment: 'left' as Alignment,
+            alignment: 'left' as const,
           },
           tiedtopackage: {
             tiedtopackages: ['true', 'true', 'true'],
@@ -210,7 +207,7 @@ const defaultConfig: PricingProps = {
               tabletwidth: '48%',
               computerwidth: '48%',
               gridname: 'pricingtablefeatures',
-              alignment: 'center' as Alignment,
+              alignment: 'center' as const,
             },
           },
         },
@@ -225,7 +222,7 @@ const defaultConfig: PricingProps = {
             tabletwidth: '48%',
             computerwidth: '48%',
             gridname: 'pricingtablefeatures',
-            alignment: 'left' as Alignment,
+            alignment: 'left' as const,
           },
           tiedtopackage: {
             tiedtopackages: ['true', 'true', 'true'],
@@ -236,7 +233,7 @@ const defaultConfig: PricingProps = {
               tabletwidth: '48%',
               computerwidth: '48%',
               gridname: 'pricingtablefeatures',
-              alignment: 'center' as Alignment,
+              alignment: 'center' as const,
             },
           },
         },
@@ -260,7 +257,7 @@ const defaultConfig: PricingProps = {
       tabletwidth: '100%',
       computerwidth: '48%',
       gridname: 'pricingtablefeatures',
-      alignment: 'center' as Alignment,
+      alignment: 'center' as const,
     },
   },
 }
