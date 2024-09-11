@@ -70,6 +70,7 @@ import { ExtendedPricingProps } from './components/Content/Structure/pricing/use
 import { ExtendedImageProps } from './components/Content/Structure/image/useImage'
 import { ExtendedConfirmationCodeInputsProps } from './components/Content/Structure/confirmationinput/useConfirmationInput'
 import { ExtendedRadioGroupProps } from './components/Content/Structure/radiogroup/useRadioGroup'
+import { ExtendedPhoneNumberFieldProps } from './components/Content/Structure/phoneNumber/usePhoneNumber'
 
 // Colors
 import {
@@ -228,7 +229,7 @@ export type { ExtendedPricingProps }
 export type { ExtendedImageProps }
 export type { ExtendedConfirmationCodeInputsProps }
 export type { ExtendedRadioGroupProps }
-
+export type { ExtendedPhoneNumberFieldProps }
 // Type exports
 export type { CustomButtonProps }
 export type { CustomGridProps }

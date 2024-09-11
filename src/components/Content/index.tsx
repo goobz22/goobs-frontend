@@ -57,7 +57,9 @@ import usePasswordField, {
   ExtendedPasswordFieldProps,
 } from './Structure/passwordField/usePasswordField'
 import useQRCode, { ExtendedQRCodeProps } from './Structure/qrcode/useQRCode'
-
+import usePhoneNumber, {
+  ExtendedPhoneNumberFieldProps,
+} from './Structure/phoneNumber/usePhoneNumber'
 /**
  * Props for the ContentSection component.
  * Includes configuration for various content elements.
@@ -90,6 +92,9 @@ export interface ContentSectionProps {
     numberField?: ExtendedNumberFieldProps | ExtendedNumberFieldProps[]
     passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
     qrcode?: ExtendedQRCodeProps | ExtendedQRCodeProps[]
+    phoneNumberField?:
+      | ExtendedPhoneNumberFieldProps
+      | ExtendedPhoneNumberFieldProps[]
   }>
   width?: number
 }
@@ -130,6 +135,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useCodeCopy(props))
   addToColumnConfigs(useTextField(props))
   addToColumnConfigs(useDateField(props))
+  addToColumnConfigs(usePhoneNumber(props))
   addToColumnConfigs(useDropdown(props))
   addToColumnConfigs(
     useIncrementNumberField({

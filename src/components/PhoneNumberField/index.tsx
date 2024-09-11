@@ -3,7 +3,8 @@ import React, { useState, useCallback } from 'react'
 import { TextField, TextFieldProps } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
-interface PhoneNumberFieldProps extends Omit<TextFieldProps, 'onChange'> {
+export interface PhoneNumberFieldProps
+  extends Omit<TextFieldProps, 'onChange'> {
   initialValue?: string
   onChange?: () => void
   backgroundcolor?: string
