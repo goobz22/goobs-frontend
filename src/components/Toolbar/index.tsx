@@ -20,7 +20,7 @@ const VerticalDivider = styled(Box)({
 export interface ToolbarProps {
   buttons?: CustomButtonProps[]
   dropdowns?: DropdownProps[]
-  searchbarProps?: SearchbarProps
+  searchbarProps?: Partial<SearchbarProps>
 }
 
 /**
@@ -106,7 +106,8 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
           label="Search the DataGrid"
           fontcolor={black.main}
           iconcolor={black.main}
-          onChange={() => console.log('Search changed')}
+          value={searchbarProps?.value || ''}
+          onChange={searchbarProps?.onChange || (() => {})}
           {...searchbarProps}
         />
       </Box>
