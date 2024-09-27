@@ -62,6 +62,7 @@ function VerticalVariant({
 }: VerticalVariantProps) {
   const router = useRouter()
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
+  const [searchValue, setSearchValue] = useState('')
 
   const navOptions = items
     .filter((item): item is NavProps => 'title' in item && 'subnavs' in item)
@@ -88,6 +89,15 @@ function VerticalVariant({
       const newValue = event.target.value as string
       setSelectedNav(newValue)
       console.log('Dropdown selection changed to:', newValue)
+    },
+    []
+  )
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value
+      setSearchValue(newValue)
+      console.log('Search value changed to:', newValue)
     },
     []
   )
@@ -390,9 +400,8 @@ function VerticalVariant({
                 outlinecolor="none"
                 fontcolor={white.main}
                 placeholder="Search..."
-                onChange={() => {
-                  console.log('Search value changed')
-                }}
+                value={searchValue}
+                onChange={handleSearchChange}
               />
             )}
           </Stack>
