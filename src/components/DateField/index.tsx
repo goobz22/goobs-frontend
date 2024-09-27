@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 
 export interface DateFieldProps extends Omit<TextFieldProps, 'onChange'> {
-  onChange?: () => void
+  onChange?: (date: Date) => void
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
@@ -58,7 +58,9 @@ const DateField: React.FC<DateFieldProps> = ({
 
   const handleChange = (dates: [Date | null, Date | null]) => {
     setDateRange(dates)
-    onChange?.()
+    if (dates[0]) {
+      onChange?.(dates[0])
+    }
   }
 
   const formatDateRange = (range: [Date | null, Date | null]) => {
