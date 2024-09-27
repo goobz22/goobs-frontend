@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Grid from '@mui/material/Grid'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -21,7 +21,7 @@ function intersection(a: readonly string[], b: readonly string[]) {
 export interface TransferListProps {
   leftItems: readonly string[]
   rightItems: readonly string[]
-  onChange?: () => void
+  onChange: (leftItems: string[], rightItems: string[]) => void
 }
 
 const TransferList: React.FC<TransferListProps> = ({
@@ -32,6 +32,11 @@ const TransferList: React.FC<TransferListProps> = ({
   const [checked, setChecked] = React.useState<readonly string[]>([])
   const [left, setLeft] = React.useState<readonly string[]>(leftItems)
   const [right, setRight] = React.useState<readonly string[]>(rightItems)
+
+  useEffect(() => {
+    setLeft(leftItems)
+    setRight(rightItems)
+  }, [leftItems, rightItems])
 
   const leftChecked = intersection(checked, left)
   const rightChecked = intersection(checked, right)
@@ -50,37 +55,35 @@ const TransferList: React.FC<TransferListProps> = ({
   }
 
   const handleAllRight = () => {
-    setRight(right.concat(left))
+    const newRight = right.concat(left)
+    setRight(newRight)
     setLeft([])
-    if (onChange) {
-      onChange()
-    }
+    onChange([], newRight)
   }
 
   const handleCheckedRight = () => {
-    setRight(right.concat(leftChecked))
-    setLeft(not(left, leftChecked))
+    const newRight = right.concat(leftChecked)
+    const newLeft = not(left, leftChecked)
+    setRight(newRight)
+    setLeft(newLeft)
     setChecked(not(checked, leftChecked))
-    if (onChange) {
-      onChange()
-    }
+    onChange(newLeft, newRight)
   }
 
   const handleCheckedLeft = () => {
-    setLeft(left.concat(rightChecked))
-    setRight(not(right, rightChecked))
+    const newLeft = left.concat(rightChecked)
+    const newRight = not(right, rightChecked)
+    setLeft(newLeft)
+    setRight(newRight)
     setChecked(not(checked, rightChecked))
-    if (onChange) {
-      onChange()
-    }
+    onChange(newLeft, newRight)
   }
 
   const handleAllLeft = () => {
-    setLeft(left.concat(right))
+    const newLeft = left.concat(right)
+    setLeft(newLeft)
     setRight([])
-    if (onChange) {
-      onChange()
-    }
+    onChange(newLeft, [])
   }
 
   const customList = (items: readonly string[]) => (
