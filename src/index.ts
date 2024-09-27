@@ -40,7 +40,7 @@ import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 
 // New imports
 import DateField from './components/DateField'
-import Dropdown from './components/Dropdown'
+import Dropdown, { DropdownOption } from './components/Dropdown'
 import IncrementNumberField from './components/IncrementNumberField'
 import NumberField from './components/NumberField'
 import PasswordField from './components/PasswordField'
@@ -71,7 +71,7 @@ import { ExtendedImageProps } from './components/Content/Structure/image/useImag
 import { ExtendedConfirmationCodeInputsProps } from './components/Content/Structure/confirmationinput/useConfirmationInput'
 import { ExtendedRadioGroupProps } from './components/Content/Structure/radiogroup/useRadioGroup'
 import { ExtendedPhoneNumberFieldProps } from './components/Content/Structure/phoneNumber/usePhoneNumber'
-
+import { CustomTextFieldProps } from './components/TextField'
 // Colors
 import {
   moss,
@@ -267,6 +267,8 @@ export type { CustomStepperComponentProps }
 export type { CustomToolbarComponentProps }
 export type { TransferListComponentProps }
 export type { StyledTooltipComponentProps }
+export type { DropdownOption }
+export type { CustomTextFieldProps }
 
 // New type exports
 export type { DateFieldProps }
