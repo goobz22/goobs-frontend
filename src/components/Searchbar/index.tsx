@@ -9,13 +9,14 @@ export interface SearchbarProps {
   outlinecolor?: string
   fontcolor?: string
   placeholder?: string
-  onChange?: () => void
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 const StyledTextField = styled(TextField)<{
   backgroundcolor?: string
   outlinecolor?: string
-  $fontcolor?: string // Use $ prefix to avoid passing it as DOM attribute
+  $fontcolor?: string
 }>(({ theme, backgroundcolor, outlinecolor, $fontcolor }) => ({
   '& .MuiOutlinedInput-root': {
     backgroundColor: backgroundcolor || theme.palette.background.paper,
@@ -47,12 +48,9 @@ const Searchbar: React.FC<SearchbarProps> = ({
   outlinecolor,
   fontcolor,
   placeholder,
+  value,
   onChange,
 }) => {
-  const handleChange = () => {
-    onChange?.()
-  }
-
   return (
     <StyledTextField
       label={label}
@@ -62,14 +60,17 @@ const Searchbar: React.FC<SearchbarProps> = ({
       backgroundcolor={backgroundcolor}
       outlinecolor={outlinecolor}
       $fontcolor={fontcolor}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon style={{ color: iconcolor }} />
-          </InputAdornment>
-        ),
+      value={value}
+      onChange={onChange}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon style={{ color: iconcolor }} />
+            </InputAdornment>
+          ),
+        },
       }}
-      onChange={handleChange}
     />
   )
 }
