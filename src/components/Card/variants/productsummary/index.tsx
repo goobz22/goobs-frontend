@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { Box, Paper, Switch } from '@mui/material'
 import { CardProps } from '../../index'

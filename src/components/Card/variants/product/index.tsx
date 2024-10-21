@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { Box, Paper, BoxProps } from '@mui/material'
 import Typography from '../../../../components/Typography'
