@@ -6,7 +6,7 @@ type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
   component?: columnconfig['component']
 }
 
-export interface ExtendedQRCodeProps extends Omit<QRCodeProps, 'sx'> {
+export interface ExtendedQRCodeProps extends QRCodeProps {
   columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
@@ -21,9 +21,11 @@ const useQRCode = (grid: {
     index: number
   ): columnconfig => {
     const {
-      value,
+      username,
+      appName,
       size,
       title,
+      onSecretGenerated,
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
@@ -48,9 +50,11 @@ const useQRCode = (grid: {
       component: (
         <QRCodeComponent
           key={`qrcode-${index}`}
-          value={value}
+          username={username}
+          appName={appName}
           size={size}
           title={title}
+          onSecretGenerated={onSecretGenerated}
           {...restProps}
         />
       ),
