@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useRef, useEffect } from 'react'
 import { Box } from '@mui/material'
 import CustomButton from '../../components/Button'
