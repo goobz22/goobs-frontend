@@ -247,7 +247,9 @@ const CustomGrid: React.FC<CustomGridProps> = ({
                               : '100%',
                       }}
                     >
-                      {currentColumnConfig?.component || null}
+                      {React.isValidElement(currentColumnConfig?.component)
+                        ? currentColumnConfig?.component
+                        : null}
                     </Box>
                   </Grid2>
                 )
