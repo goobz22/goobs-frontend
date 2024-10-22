@@ -4,7 +4,7 @@ import tseslintParser from '@typescript-eslint/parser'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import prettierPlugin from 'eslint-plugin-prettier'
-import jestPlugin from 'eslint-plugin-jest'
+import nextPlugin from '@next/eslint-plugin-next'
 import globals from 'globals'
 
 export default [
@@ -16,7 +16,7 @@ export default [
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       prettier: prettierPlugin,
-      jest: jestPlugin,
+      '@next/next': nextPlugin,
     },
     languageOptions: {
       parser: tseslintParser,
@@ -28,7 +28,6 @@ export default [
         ...globals.browser,
         ...globals.es2021,
         ...globals.node,
-        ...globals.jest,
       },
     },
     settings: {
@@ -41,7 +40,7 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...prettierPlugin.configs.recommended.rules,
-      ...jestPlugin.configs.recommended.rules,
+      ...nextPlugin.configs.recommended.rules,
       'no-unused-vars': 'off',
       'no-undef': 'warn',
       'no-empty': 'warn',
