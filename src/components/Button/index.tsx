@@ -19,7 +19,6 @@ export interface CustomButtonProps extends ButtonProps {
 
 const CustomButton: React.FC<CustomButtonProps> = React.memo(
   props => {
-    console.log('[trace-button] CustomButton: Rendering component', { props })
     const {
       text,
       variant,
@@ -40,7 +39,6 @@ const CustomButton: React.FC<CustomButtonProps> = React.memo(
     const handleButtonClick = (
       event: React.MouseEvent<HTMLButtonElement>
     ): void => {
-      console.log('[trace-button] CustomButton: Button clicked')
       event.preventDefault()
       onClick?.(event)
     }
@@ -62,13 +60,6 @@ const CustomButton: React.FC<CustomButtonProps> = React.memo(
           style: { ...iconStyle, ...(icon as React.ReactElement).props.style },
         })
       : null
-
-    console.log('[trace-button] CustomButton: Rendering button', {
-      variant,
-      style: buttonStyle,
-      disableButton,
-      isDisabled,
-    })
 
     const buttonContent = (
       <>
@@ -140,15 +131,9 @@ const CustomButton: React.FC<CustomButtonProps> = React.memo(
       prevProps.iconlocation === nextProps.iconlocation &&
       prevProps.fontlocation === nextProps.fontlocation
 
-    console.log('[trace-button] CustomButton: Props comparison', {
-      propsAreEqual,
-      prevProps: Object.keys(prevProps),
-      nextProps: Object.keys(nextProps),
-    })
     return propsAreEqual
   }
 )
 
 CustomButton.displayName = 'CustomButton'
-console.log('[trace-button] CustomButton: Component defined')
 export default CustomButton
