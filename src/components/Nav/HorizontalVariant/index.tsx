@@ -2,78 +2,43 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Tabs, Tab } from '@mui/material'
 import { NavProps, SubNav, View } from '../index'
+import { usePathname } from 'next/navigation'
 
-/**
- * Represents the possible alignment options for the horizontal navigation.
- */
 type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
 
-/**
- * Represents the structure of an active tab value.
- */
 export interface ActiveTabValue {
-  /** The unique identifier of the active tab. */
-  tabId: string
+  tabId: string | false
 }
 
-/**
- * Props for the HorizontalVariant component.
- */
 export interface HorizontalVariantProps {
-  /** An array of navigation items, sub-navigation items, or views. */
   items: (NavProps | SubNav | View)[]
-  /** The height of the navigation bar. Defaults to '80px'. */
   height?: string
-  /** The alignment of the navigation items. Defaults to 'left'. */
   alignment?: Alignment
-  /** A unique name for this navigation component. Used for state management. */
   navname?: string
 }
 
-/**
- * HorizontalVariant component that renders a horizontal navigation bar.
- * It supports dynamic tab management, routing, and custom click handlers.
- *
- * @param {HorizontalVariantProps} props - The props for the HorizontalVariant component.
- * @returns {JSX.Element} The rendered HorizontalVariant component.
- */
 function HorizontalVariant({
   items,
   height = '80px',
   alignment = 'left',
   navname = '',
 }: HorizontalVariantProps) {
-  /**
-   * State to keep track of active tab values for different navigation components.
-   */
   const [activeTabValues, setActiveTabValues] = useState<
     Record<string, ActiveTabValue>
   >({})
+  const pathname = usePathname()
 
-  /**
-   * Effect hook to initialize the active tab values when the component mounts.
-   */
   useEffect(() => {
-    if (!activeTabValues[navname]) {
-      const firstTab = items.find(item => 'orientation' in item) as
-        | NavProps
-        | undefined
-      if (firstTab && firstTab.title) {
-        setActiveTabValues(prev => ({
-          ...prev,
-          [navname]: { tabId: firstTab.title as string },
-        }))
-      }
-    }
-  }, [items, navname, activeTabValues])
+    const currentTab = items.find(
+      item => 'orientation' in item && item.route === pathname
+    ) as NavProps | undefined
 
-  /**
-   * Handles tab change events.
-   * Updates the active tab values in the state.
-   *
-   * @param {React.SyntheticEvent} event - The event object.
-   * @param {string} newValue - The new value of the selected tab.
-   */
+    setActiveTabValues(prev => ({
+      ...prev,
+      [navname]: { tabId: currentTab?.title || false },
+    }))
+  }, [items, navname, pathname])
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setActiveTabValues(prev => ({
       ...prev,
@@ -81,12 +46,6 @@ function HorizontalVariant({
     }))
   }
 
-  /**
-   * Handles click events on individual tabs.
-   * Supports different trigger types: route, onClick, and routeonhorizontal.
-   *
-   * @param {NavProps} tab - The tab object that was clicked.
-   */
   const handleTabClick = (tab: NavProps) => {
     if (tab.trigger === 'route') {
       if (tab.route) {
@@ -116,7 +75,7 @@ function HorizontalVariant({
       }}
     >
       <Tabs
-        value={activeTabValues[navname]?.tabId || ''}
+        value={activeTabValues[navname]?.tabId || false}
         onChange={handleTabChange}
         aria-label="nav tabs"
         sx={{
@@ -136,8 +95,8 @@ function HorizontalVariant({
             return (
               <Tab
                 key={tab.title}
-                value={tab.title}
-                label={tab.title}
+                value={tab.title || ''}
+                label={tab.title || ''}
                 onClick={() => handleTabClick(tab)}
                 sx={{
                   minHeight: 0,
