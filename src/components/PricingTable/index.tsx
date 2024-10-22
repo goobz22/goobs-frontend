@@ -1,6 +1,6 @@
 'use client'
-import React, { useState, useCallback, useMemo } from 'react'
-import { Box, Paper, SelectChangeEvent } from '@mui/material'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { Box, Paper, SelectChangeEvent, CircularProgress } from '@mui/material'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
@@ -72,10 +72,29 @@ export interface PricingProps {
 const PricingTable: React.FC<PricingProps> = props => {
   const router = useRouter()
   const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
+  const [selectedPackage, setSelectedPackage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   const config = useMemo(() => {
     return { ...defaultConfig, ...props }
   }, [props])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 100) // Simulating a 100ms loading time
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (
+      config.packagecolumns?.packagenames &&
+      config.packagecolumns.packagenames.length > 0
+    ) {
+      setSelectedPackage(config.packagecolumns.packagenames[0])
+    }
+  }, [config.packagecolumns?.packagenames])
 
   const handlePackageChange = useCallback(
     (event: SelectChangeEvent<unknown>) => {
@@ -83,6 +102,7 @@ const PricingTable: React.FC<PricingProps> = props => {
       const newIndex =
         config.packagecolumns?.packagenames?.indexOf(newValue) ?? 0
       setSelectedPackageIndex(newIndex)
+      setSelectedPackage(newValue)
       console.log('Package selection changed to:', newValue)
     },
     [config.packagecolumns?.packagenames]
@@ -116,7 +136,7 @@ const PricingTable: React.FC<PricingProps> = props => {
               value: name,
               label: name,
             }))}
-            defaultValue={config.packagecolumns.packagenames?.[0] || ''}
+            defaultValue={selectedPackage}
             backgroundcolor={semiTransparentBlack.main}
             outlinecolor={black.main}
             fontcolor={black.main}
@@ -276,9 +296,45 @@ const PricingTable: React.FC<PricingProps> = props => {
     }
 
     return { headerColumnConfigs, featureColumnConfigs }
-  }, [config, selectedPackageIndex, router, handlePackageChange])
+  }, [
+    config,
+    selectedPackageIndex,
+    selectedPackage,
+    router,
+    handlePackageChange,
+  ])
 
   const { headerColumnConfigs, featureColumnConfigs } = renderColumnConfigs()
+
+  if (isLoading) {
+    return (
+      <CustomGrid
+        gridconfig={{
+          gridwidth: '100%',
+          alignment: 'center',
+        }}
+        columnconfig={[
+          {
+            row: 1,
+            column: 1,
+            alignment: 'center',
+            component: (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="350px"
+                width="100%"
+                overflow="auto"
+              >
+                <CircularProgress size={240} thickness={2} />
+              </Box>
+            ),
+          },
+        ]}
+      />
+    )
+  }
 
   return (
     <Paper
