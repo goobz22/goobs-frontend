@@ -53,7 +53,7 @@ const StyledBox = styled(Box)(() => ({
 const StyledFormControl = styled(FormControl)<{
   backgroundcolor?: string
   outlinecolor?: string
-}>(({ backgroundcolor, outlinecolor }) => ({
+}>(({ outlinecolor }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -75,7 +75,7 @@ const StyledFormControl = styled(FormControl)<{
 }))
 
 const StyledInputLabel = styled(InputLabel)<{ shrunkfontcolor?: string }>(
-  ({ shrunkfontcolor }) => ({
+  () => ({
     color: black.main,
     '&.Mui-focused': {
       color: black.main,
