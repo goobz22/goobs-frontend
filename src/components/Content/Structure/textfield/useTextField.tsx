@@ -1,15 +1,14 @@
+'use client'
 import React from 'react'
-import TextField, {
-  CustomTextFieldProps,
-} from '../../../../components/TextField'
+import TextField from '../../../../components/TextField'
 import { columnconfig, cellconfig } from '../../../Grid'
+import { TextFieldProps } from '@mui/material'
 
 type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
   component?: columnconfig['component']
 }
 
-export interface ExtendedTextFieldProps
-  extends Omit<CustomTextFieldProps, 'columnconfig'> {
+export type ExtendedTextFieldProps = TextFieldProps & {
   columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
 }
@@ -24,15 +23,6 @@ const useTextField = (grid: {
     index: number
   ): columnconfig => {
     const {
-      name,
-      label,
-      placeholder,
-      value,
-      onChange,
-      onFocus,
-      onBlur,
-      error,
-      InputProps,
       columnconfig: itemColumnConfig,
       cellconfig,
       ...restProps
@@ -54,21 +44,7 @@ const useTextField = (grid: {
       cellconfig: {
         ...cellconfig,
       },
-      component: (
-        <TextField
-          key={`textfield-${index}`}
-          name={name}
-          label={label}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          error={error}
-          InputProps={InputProps}
-          {...restProps}
-        />
-      ),
+      component: <TextField key={`textfield-${index}`} {...restProps} />,
     }
 
     return mergedConfig

@@ -1,11 +1,10 @@
 'use client'
 import React from 'react'
-import PhoneNumberField, {
-  PhoneNumberFieldProps,
-} from './../../../PhoneNumberField'
+import PhoneNumberField from '../../../PhoneNumberField'
 import { columnconfig, cellconfig } from '../../../Grid'
+import { TextFieldProps } from '@mui/material'
 
-export interface ExtendedPhoneNumberFieldProps extends PhoneNumberFieldProps {
+export type ExtendedPhoneNumberFieldProps = TextFieldProps & {
   columnconfig?: Partial<columnconfig>
   cellconfig?: cellconfig
 }

@@ -1,11 +1,8 @@
+'use client'
 import React, { useCallback, useMemo } from 'react'
 import { Box, TextField as MuiTextField, TextFieldProps } from '@mui/material'
 
-export interface CustomTextFieldProps extends Omit<TextFieldProps, 'name'> {
-  name: string
-}
-
-const TextField: React.FC<CustomTextFieldProps> = React.memo(props => {
+const TextField: React.FC<TextFieldProps> = React.memo(props => {
   const {
     name,
     label,
@@ -16,7 +13,6 @@ const TextField: React.FC<CustomTextFieldProps> = React.memo(props => {
     value,
     error,
     sx,
-    InputProps,
     ...restProps
   } = props
 
@@ -64,31 +60,27 @@ const TextField: React.FC<CustomTextFieldProps> = React.memo(props => {
     []
   )
 
-  const mergedInputProps = useMemo(
+  const slotProps = useMemo(
     () => ({
-      ...InputProps,
-      style: {
-        ...inputStyle,
-        ...InputProps?.style,
+      input: {
+        style: inputStyle,
+      },
+      inputLabel: {
+        sx: {
+          '&.MuiInputLabel-shrink': {
+            top: '0px',
+            left: '0px',
+          },
+          '&:not(.MuiInputLabel-shrink)': {
+            transform: 'scale(1)',
+            transformOrigin: 'top left',
+            top: '9px',
+            left: '12px',
+          },
+        },
       },
     }),
-    [InputProps, inputStyle]
-  )
-
-  const labelStyle = useMemo(
-    () => ({
-      '&.MuiInputLabel-shrink': {
-        top: '0px',
-        left: '0px',
-      },
-      '&:not(.MuiInputLabel-shrink)': {
-        transform: 'scale(1)',
-        transformOrigin: 'top left',
-        top: '9px',
-        left: '12px',
-      },
-    }),
-    []
+    [inputStyle]
   )
 
   return (
@@ -99,7 +91,7 @@ const TextField: React.FC<CustomTextFieldProps> = React.memo(props => {
         justifyContent: 'center',
         width: '100%',
         marginTop: '5px',
-        height: '62px',
+        height: '70px',
         ...sx,
       }}
       onClick={handleClick}
@@ -113,10 +105,7 @@ const TextField: React.FC<CustomTextFieldProps> = React.memo(props => {
         onBlur={handleBlur}
         value={value}
         error={error}
-        InputProps={mergedInputProps}
-        InputLabelProps={{
-          sx: labelStyle,
-        }}
+        slotProps={slotProps}
         fullWidth
         variant="outlined"
         {...restProps}

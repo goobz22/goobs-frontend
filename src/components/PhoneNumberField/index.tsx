@@ -1,45 +1,6 @@
 'use client'
-import React, { useState, useCallback } from 'react'
-import { TextField, TextFieldProps } from '@mui/material'
-import { styled } from '@mui/material/styles'
-
-export interface PhoneNumberFieldProps
-  extends Omit<TextFieldProps, 'onChange'> {
-  initialValue?: string
-  onChange?: () => void
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  label?: string
-}
-
-const StyledTextField = styled(TextField)<{
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-}>(({ theme, backgroundcolor, outlinecolor, fontcolor }) => ({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: backgroundcolor || theme.palette.background.paper,
-    '& fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
-    },
-    '&:hover fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: fontcolor || theme.palette.text.primary,
-    '&.Mui-focused': {
-      color: fontcolor || theme.palette.primary.main,
-    },
-  },
-  '& .MuiInputBase-input': {
-    color: fontcolor || theme.palette.text.primary,
-  },
-}))
+import React, { useCallback, useMemo, useState } from 'react'
+import { Box, TextField as MuiTextField, TextFieldProps } from '@mui/material'
 
 const formatPhoneNumber = (value: string): string => {
   const digits = value.replace(/\D/g, '')
@@ -57,47 +18,110 @@ const formatPhoneNumber = (value: string): string => {
   return formattedNumber.trim()
 }
 
-const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
-  initialValue = '',
-  onChange,
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
-  label = 'Phone Number',
-  ...rest
-}) => {
+const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
+  const {
+    name,
+    label = 'Phone Number',
+    placeholder,
+    onChange,
+    onFocus,
+    onBlur,
+    value = '',
+    error,
+    ...restProps
+  } = props
+
   const [phoneNumber, setPhoneNumber] = useState(
-    formatPhoneNumber(initialValue)
+    formatPhoneNumber(value as string)
   )
 
-  const handlePhoneNumberChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
       let strippedInput = input.replace(/^\+1\s?/, '').replace(/\D/g, '')
       strippedInput = strippedInput.slice(0, 10)
       const formattedValue =
         strippedInput.length > 0 ? formatPhoneNumber(strippedInput) : '+1 '
       setPhoneNumber(formattedValue)
-      onChange?.()
+      if (onChange) {
+        onChange(e)
+      }
     },
     [onChange]
   )
 
-  return (
-    <StyledTextField
-      label={label}
-      value={phoneNumber}
-      onChange={handlePhoneNumberChange}
-      backgroundcolor={backgroundcolor}
-      outlinecolor={outlinecolor}
-      fontcolor={fontcolor}
-      fullWidth
-      inputProps={{
-        maxLength: 16,
-      }}
-      {...rest}
-    />
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (onFocus) {
+        onFocus(e)
+      }
+    },
+    [onFocus]
   )
-}
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (onBlur) {
+        onBlur(e)
+      }
+    },
+    [onBlur]
+  )
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+  }, [])
+
+  const inputProps = useMemo(
+    () => ({
+      style: {
+        height: '40px',
+        padding: '8px 14px',
+      },
+    }),
+    []
+  )
+
+  const InputProps = useMemo(
+    () => ({
+      style: {
+        height: '45px',
+      },
+    }),
+    []
+  )
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        width: '100%',
+        marginTop: '5px',
+        height: '70px',
+      }}
+      onClick={handleClick}
+    >
+      <MuiTextField
+        name={name}
+        label={label}
+        placeholder={placeholder}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        value={phoneNumber}
+        error={error}
+        fullWidth
+        variant="outlined"
+        inputProps={inputProps}
+        InputProps={InputProps}
+        {...restProps}
+      />
+    </Box>
+  )
+})
+
+PhoneNumberField.displayName = 'PhoneNumberField'
 
 export default PhoneNumberField
