@@ -1,8 +1,7 @@
 'use client'
-import React, { ChangeEvent, KeyboardEvent, useState } from 'react'
+import React, { ChangeEvent, KeyboardEvent, useState, useCallback } from 'react'
 import { Input, Box } from '@mui/material'
-import { useCodeConfirmation } from './utils/useCodeConfirmation'
-import { columnconfig } from '../../components/Grid'
+import { columnconfig } from '../Grid'
 import { red, green } from '../../styles/palette'
 
 export interface ConfirmationCodeInputsProps {
@@ -13,59 +12,138 @@ export interface ConfirmationCodeInputsProps {
   'aria-label'?: string
   'aria-required'?: boolean
   'aria-invalid'?: boolean
+  onChange?: (value: string) => void
+  value?: string
 }
 
-/**
- * ConfirmationCodeInputs component renders a set of input fields for entering a confirmation code.
- * It uses the useCodeConfirmation hook to handle code changes and key events.
- * @param props The props for the ConfirmationCodeInputs component.
- * @returns The rendered ConfirmationCodeInputs component.
- */
+interface UseCodeConfirmationProps {
+  codeLength: number
+  onChange?: (value: string) => void
+}
+
+const useCodeConfirmation = ({
+  codeLength,
+  onChange,
+}: UseCodeConfirmationProps) => {
+  const [code, setCode] = useState<Record<string, string>>(
+    Object.fromEntries(
+      Array.from({ length: codeLength }, (_, i) => [`code${i + 1}`, ''])
+    )
+  )
+
+  const handleCodeChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const value = event.target.value.replace(/\D/g, '') // Only keep digits
+      if (value.length <= 1) {
+        // Only process if it's a single digit or empty
+        setCode(prevCode => {
+          const newCode = {
+            ...prevCode,
+            [`code${index + 1}`]: value,
+          }
+          const combinedValue = Object.values(newCode).join('')
+          onChange?.(combinedValue)
+          return newCode
+        })
+      }
+    },
+    [onChange]
+  )
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+      // Allow only numeric keys, navigation keys, and backspace
+      const allowedKeys = [
+        'Backspace',
+        'ArrowLeft',
+        'ArrowRight',
+        'Tab',
+        'Delete',
+        'Home',
+        'End',
+      ]
+
+      if (!allowedKeys.includes(event.key) && !/^\d$/.test(event.key)) {
+        event.preventDefault()
+        return
+      }
+
+      if (event.key === 'Backspace' && !code[`code${index + 1}`] && index > 0) {
+        setCode(prevCode => {
+          const newCode = {
+            ...prevCode,
+            [`code${index}`]: '',
+          }
+          const combinedValue = Object.values(newCode).join('')
+          onChange?.(combinedValue)
+          return newCode
+        })
+
+        const prevInput = document.querySelector(
+          `input[name=code${index}]`
+        ) as HTMLInputElement | null
+        if (prevInput) {
+          prevInput.focus()
+        }
+      } else if (event.key === 'ArrowLeft' && index > 0) {
+        const prevInput = document.querySelector(
+          `input[name=code${index}]`
+        ) as HTMLInputElement | null
+        if (prevInput) {
+          prevInput.focus()
+        }
+      } else if (event.key === 'ArrowRight' && index < codeLength - 1) {
+        const nextInput = document.querySelector(
+          `input[name=code${index + 2}]`
+        ) as HTMLInputElement | null
+        if (nextInput) {
+          nextInput.focus()
+        }
+      }
+    },
+    [code, codeLength, onChange]
+  )
+
+  return {
+    handleCodeChange,
+    handleKeyDown,
+  }
+}
+
 const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
   isValid,
+  onChange,
+  value,
   'aria-label': ariaLabel,
   'aria-required': ariaRequired,
   'aria-invalid': ariaInvalid,
   ...props
 }) => {
-  const [, setVerificationCode] = useState('')
+  const { handleCodeChange, handleKeyDown } = useCodeConfirmation({
+    codeLength,
+    onChange,
+  })
 
-  const { handleCodeChange, handleKeyDown, combinedCode } = useCodeConfirmation(
-    {
-      codeLength,
-      isValid,
-    }
-  )
-
-  /**
-   * handleChange function is called when the value of an input field changes.
-   * It updates the code state using the handleCodeChange function from the useCodeConfirmation hook.
-   * If the input field has a value, it focuses on the next input field.
-   * @param event The change event triggered by the input field.
-   * @param index The index of the input field.
-   */
   const handleChange = (
     event: ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    handleCodeChange(event, index)
-    if (event.target.value) {
-      const nextInput = document.querySelector(
-        `input[name=code${index + 2}]`
-      ) as HTMLInputElement | null
-      if (nextInput) {
-        nextInput.focus()
+    const inputValue = event.target.value.replace(/\D/g, '') // Only keep digits
+    if (inputValue.length <= 1) {
+      // Only process if it's a single digit or empty
+      handleCodeChange(event, index)
+      if (inputValue) {
+        const nextInput = document.querySelector(
+          `input[name=code${index + 2}]`
+        ) as HTMLInputElement | null
+        if (nextInput) {
+          nextInput.focus()
+        }
       }
     }
   }
 
-  /**
-   * handleKeyDownWrapper function is a wrapper for the handleKeyDown function from the useCodeConfirmation hook.
-   * It is called when a key is pressed while an input field is focused.
-   * @param event The keyboard event triggered by the input field.
-   * @param index The index of the input field.
-   */
   const handleKeyDownWrapper = (
     event: KeyboardEvent<HTMLInputElement>,
     index: number
@@ -73,15 +151,8 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
     handleKeyDown(event, index)
   }
 
-  /**
-   * useEffect hook is used to set the verification code into the state using useState.
-   * It sets the code whenever the combinedCode changes and the code is valid.
-   */
-  React.useEffect(() => {
-    if (isValid) {
-      setVerificationCode(combinedCode)
-    }
-  }, [combinedCode, isValid])
+  // Split the value into individual digits
+  const digits = value?.split('') || Array(codeLength).fill('')
 
   return (
     <Box
@@ -96,8 +167,11 @@ const ConfirmationCodeInputs: React.FC<ConfirmationCodeInputsProps> = ({
           <Input
             key={index}
             name={`code${index + 1}`}
+            value={digits[index] || ''}
             inputProps={{
               maxLength: 1,
+              pattern: '[0-9]*',
+              inputMode: 'numeric',
               'aria-label': `Code Digit ${index + 1}`,
               'aria-required': ariaRequired,
               'aria-invalid': ariaInvalid,
