@@ -55,7 +55,6 @@ const TextField: React.FC<TextFieldProps> = React.memo(props => {
       cursor: 'text',
       boxSizing: 'border-box',
       borderRadius: 5,
-      paddingRight: 6,
     }),
     []
   )
