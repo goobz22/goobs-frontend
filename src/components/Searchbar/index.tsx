@@ -1,6 +1,14 @@
-import React from 'react'
-import { TextField, InputAdornment, styled } from '@mui/material'
+'use client'
+import React, { useState } from 'react'
+import {
+  OutlinedInput,
+  styled,
+  FormControl,
+  InputLabel,
+  InputAdornment,
+} from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
+import * as palette from '../../styles/palette'
 
 export interface SearchbarProps {
   label?: string
@@ -13,31 +21,65 @@ export interface SearchbarProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-const StyledTextField = styled(TextField)<{
+const StyledFormControl = styled(FormControl)({
+  width: '100%',
+  position: 'relative',
+  height: '45px',
+  display: 'flex',
+  justifyContent: 'flex-end',
+})
+
+const StyledOutlinedInput = styled(OutlinedInput)<{
   backgroundcolor?: string
   outlinecolor?: string
-  $fontcolor?: string
-}>(({ theme, backgroundcolor, outlinecolor, $fontcolor }) => ({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: backgroundcolor || theme.palette.background.paper,
-    '& fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
-    },
-    '&:hover fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: outlinecolor || theme.palette.primary.main,
+  fontcolor?: string
+}>(({ backgroundcolor, outlinecolor, fontcolor }) => ({
+  height: '40px',
+  backgroundColor: backgroundcolor || palette.white.main,
+  '& .MuiOutlinedInput-notchedOutline': {
+    border:
+      outlinecolor === 'none'
+        ? 'none'
+        : `1px solid ${outlinecolor || palette.black.main}`,
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    border:
+      outlinecolor === 'none'
+        ? 'none'
+        : `1px solid ${outlinecolor || palette.black.main}`,
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    border:
+      outlinecolor === 'none'
+        ? 'none'
+        : `1px solid ${outlinecolor || palette.black.main}`,
+    borderWidth: outlinecolor === 'none' ? '0' : '1px',
+  },
+  '& input': {
+    color: fontcolor || palette.black.main,
+    padding: '0 12px',
+    paddingLeft: '7px',
+    height: '100%',
+    '&::placeholder': {
+      color: fontcolor || palette.black.main,
+      opacity: 0.7,
     },
   },
-  '& .MuiInputLabel-root': {
-    color: $fontcolor || theme.palette.text.primary,
-    '&.Mui-focused': {
-      color: $fontcolor || theme.palette.primary.main,
-    },
+}))
+
+const StyledInputLabel = styled(InputLabel)<{
+  fontcolor?: string
+}>(({ fontcolor }) => ({
+  color: fontcolor || palette.black.main,
+  transform: 'translate(44px, 20px) scale(1)',
+  position: 'absolute',
+  top: '-5px',
+  '&.Mui-focused': {
+    color: fontcolor || palette.black.main,
   },
-  '& .MuiInputBase-input': {
-    color: $fontcolor || theme.palette.text.primary,
+  '&.MuiInputLabel-shrink': {
+    transform: 'translate(14px, 3px) scale(0.75)',
+    color: fontcolor || palette.black.main,
   },
 }))
 
@@ -51,27 +93,41 @@ const Searchbar: React.FC<SearchbarProps> = ({
   value,
   onChange,
 }) => {
+  const [focused, setFocused] = useState(false)
+  const isLabelShrunken = focused || Boolean(value)
+
+  const handleFocus = () => setFocused(true)
+  const handleBlur = () => setFocused(false)
+
   return (
-    <StyledTextField
-      label={label}
-      variant="outlined"
-      fullWidth
-      placeholder={placeholder}
-      backgroundcolor={backgroundcolor}
-      outlinecolor={outlinecolor}
-      $fontcolor={fontcolor}
-      value={value}
-      onChange={onChange}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon style={{ color: iconcolor }} />
-            </InputAdornment>
-          ),
-        },
-      }}
-    />
+    <StyledFormControl variant="outlined">
+      <StyledInputLabel
+        variant="outlined"
+        htmlFor="search-input"
+        shrink={isLabelShrunken}
+        fontcolor={fontcolor}
+      >
+        {label}
+      </StyledInputLabel>
+      <StyledOutlinedInput
+        id="search-input"
+        label={label}
+        notched={isLabelShrunken}
+        placeholder={isLabelShrunken ? placeholder : ''}
+        value={value}
+        onChange={onChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        backgroundcolor={backgroundcolor}
+        outlinecolor={outlinecolor}
+        fontcolor={fontcolor}
+        startAdornment={
+          <InputAdornment position="start">
+            <SearchIcon sx={{ color: iconcolor || palette.black.main }} />
+          </InputAdornment>
+        }
+      />
+    </StyledFormControl>
   )
 }
 
