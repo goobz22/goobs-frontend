@@ -6,33 +6,20 @@ import Searchbar, { SearchbarProps } from '../Searchbar'
 import Dropdown, { DropdownProps } from '../Dropdown'
 import { white, black, semiTransparentWhite } from '../../styles/palette'
 
-/**
- * Styled component for a vertical divider
- */
 const VerticalDivider = styled(Box)({
   borderLeft: '2px solid black',
   height: '20px',
 })
 
-/**
- * Interface for the CustomToolbar component props
- */
 export interface ToolbarProps {
   buttons?: CustomButtonProps[]
   dropdowns?: DropdownProps[]
   searchbarProps?: Partial<SearchbarProps>
 }
 
-/**
- * CustomToolbar component that renders a toolbar with buttons, dropdowns, and a search bar
- * @param {ToolbarProps} props - The props for the CustomToolbar component
- * @returns {JSX.Element} The rendered CustomToolbar component
- */
 function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
-  // State for checkbox width (set to 45px as default)
   const [checkboxWidth] = useState(45)
-  // Explicitly set toolbar height to 56px
-  const toolbarHeight = 56
+  const toolbarHeight = 45
 
   return (
     <Box
@@ -41,12 +28,13 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         pl: `${checkboxWidth}px`,
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'stretch',
         height: `${toolbarHeight}px`,
+        width: '100%',
       }}
     >
-      {/* Left section of the toolbar */}
+      {/* Left section with buttons and divider */}
       <Box
         sx={{
           display: 'flex',
@@ -70,7 +58,8 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-end', // Changed from center to flex-end
+            paddingBottom: '13px', // Added padding to align with other elements
             gap: '10px',
             height: '100%',
             padding: '0 15px',
@@ -90,6 +79,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
             ))}
         </Box>
       </Box>
+
       {/* Search bar section */}
       <Box
         sx={{
@@ -99,10 +89,12 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
           width: '300px',
           minWidth: '200px',
           height: '100%',
+          padding: '0 15px',
         }}
       >
         <Searchbar
           backgroundcolor={semiTransparentWhite.main}
+          outlinecolor="none"
           label="Search the DataGrid"
           fontcolor={black.main}
           iconcolor={black.main}
@@ -111,15 +103,21 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
           {...searchbarProps}
         />
       </Box>
+
+      {/* Spacer to push dropdowns to the right */}
+      <Box sx={{ flexGrow: 1 }} />
+
       {/* Dropdowns section */}
       {dropdowns && dropdowns.length > 0 && (
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-end', // Changed from center to flex-end
+            paddingBottom: '13px', // Added padding to align with other elements
             height: '100%',
             padding: '0 15px',
             gap: '10px',
+            marginLeft: 'auto',
           }}
         >
           {dropdowns.map((dropdown, index) => (
