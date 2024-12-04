@@ -47,7 +47,9 @@ import PasswordField from './components/PasswordField'
 import PhoneNumberField from './components/PhoneNumberField'
 import Searchbar from './components/Searchbar'
 import TextField from './components/TextField'
-
+// Add FormDataGrid import
+import FormDataGrid from './components/Form/DataGrid'
+import type { FormDataGridProps } from './components/Form/DataGrid'
 // Animations
 import { Animation } from './components/Content/Structure/animations'
 
@@ -71,6 +73,10 @@ import { ExtendedImageProps } from './components/Content/Structure/image/useImag
 import { ExtendedConfirmationCodeInputsProps } from './components/Content/Structure/confirmationinput/useConfirmationInput'
 import { ExtendedRadioGroupProps } from './components/Content/Structure/radiogroup/useRadioGroup'
 import { ExtendedPhoneNumberFieldProps } from './components/Content/Structure/phoneNumber/usePhoneNumber'
+import { DatagridProps } from './components/DataGrid'
+import type { ColumnDef, RowData } from './components/DataGrid/Table'
+import type { CellParams, HeaderParams } from './components/DataGrid/Table'
+
 // Colors
 import {
   moss,
@@ -211,6 +217,15 @@ export { PasswordField }
 export { PhoneNumberField }
 export { Searchbar }
 export { TextField }
+
+// Add FormDataGrid to named exports
+export { FormDataGrid }
+
+// Add FormDataGrid type to type exports
+export type { FormDataGridProps }
+export type { DatagridProps }
+export type { ColumnDef, RowData }
+export type { CellParams, HeaderParams }
 
 // Exporting ExtendedButtonProps
 export type { ExtendedButtonProps }
