@@ -380,17 +380,21 @@ function VerticalVariant({
           </Box>
         )}
         {(showDropdown || showSearchbar) && (
-          <Stack mt={1} spacing={1}>
+          <Stack mt={2} spacing={1}>
             {showDropdown && (
-              <Dropdown
-                label={dropdownLabel}
-                options={navOptions}
-                backgroundcolor={white.main}
-                outlinecolor="none"
-                fontcolor={black.main}
-                shrunkfontcolor={white.main}
-                onChange={handleDropdownChange}
-              />
+              <Box mt="2px">
+                <Dropdown
+                  label={dropdownLabel}
+                  options={navOptions}
+                  backgroundcolor={white.main}
+                  outlinecolor="none"
+                  fontcolor={black.main}
+                  shrunkfontcolor={white.main}
+                  unshrunkfontcolor={black.main}
+                  shrunklabelposition="aboveNotch"
+                  onChange={handleDropdownChange}
+                />
+              </Box>
             )}
             {showSearchbar && (
               <Searchbar
