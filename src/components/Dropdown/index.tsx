@@ -34,6 +34,8 @@ export interface DropdownProps extends Omit<SelectProps, 'onChange'> {
   outlinecolor?: string
   fontcolor?: string
   shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
   onChange?: SelectProps['onChange']
   error?: boolean
   helperText?: string
@@ -46,7 +48,7 @@ export interface DropdownProps extends Omit<SelectProps, 'onChange'> {
 const StyledBox = styled(Box)(() => ({
   position: 'relative',
   width: '100%',
-  height: '50px',
+  height: '40px',
   marginTop: '5px',
 }))
 
@@ -74,18 +76,50 @@ const StyledFormControl = styled(FormControl)<{
   },
 }))
 
-const StyledInputLabel = styled(InputLabel)<{ shrunkfontcolor?: string }>(
-  () => ({
-    color: black.main,
-    '&.Mui-focused': {
-      color: black.main,
-    },
-    '&.MuiInputLabel-shrink': {
-      transform: 'translate(13px, -7px) scale(0.75)',
-      color: black.main,
-    },
-  })
-)
+const StyledInputLabel = styled(InputLabel, {
+  shouldForwardProp: prop =>
+    prop !== 'shrunkfontcolor' &&
+    prop !== 'unshrunkfontcolor' &&
+    prop !== 'shrunklabelposition' &&
+    prop !== 'hasvalue',
+})<{
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
+  hasvalue: 'true' | 'false'
+}>(({ shrunkfontcolor, unshrunkfontcolor, shrunklabelposition, hasvalue }) => ({
+  color: unshrunkfontcolor || black.main,
+  transform:
+    hasvalue === 'true'
+      ? shrunklabelposition === 'aboveNotch'
+        ? 'translate(13px, -20px) scale(0.75)'
+        : 'translate(13px, -7px) scale(0.75)'
+      : 'translate(14px, 12px)',
+  '&.Mui-focused': {
+    transform:
+      hasvalue === 'true'
+        ? shrunklabelposition === 'aboveNotch'
+          ? 'translate(13px, -20px) scale(0.75)'
+          : 'translate(13px, -7px) scale(0.75)'
+        : 'translate(14px, 12px)',
+    color:
+      hasvalue === 'true'
+        ? shrunkfontcolor || black.main
+        : unshrunkfontcolor || black.main,
+  },
+  '&.MuiInputLabel-shrink': {
+    transform:
+      hasvalue === 'true'
+        ? shrunklabelposition === 'aboveNotch'
+          ? 'translate(0px, -20px) scale(0.75)'
+          : 'translate(13px, -7px) scale(0.75)'
+        : 'translate(14px, 12px)',
+    color:
+      hasvalue === 'true'
+        ? shrunkfontcolor || black.main
+        : unshrunkfontcolor || black.main,
+  },
+}))
 
 const StyledMenuItem = styled(MenuItem)(() => ({
   display: 'flex',
@@ -113,6 +147,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   outlinecolor,
   fontcolor,
   shrunkfontcolor,
+  unshrunkfontcolor,
+  shrunklabelposition = 'onNotch',
   onChange,
   error = false,
   helperText,
@@ -124,16 +160,21 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
+  const [hasSelection, setHasSelection] = useState(false)
 
   useEffect(() => {
     const defaultOption = options.find(option => option.value === defaultValue)
-    setSelectedValue(defaultOption ? defaultOption.value : '')
+    if (defaultOption) {
+      setSelectedValue(defaultOption.value)
+      setHasSelection(true)
+    }
     setIsLoading(false)
   }, [defaultValue, options])
 
   const handleChange: SelectProps['onChange'] = (event, child) => {
     const newValue = event.target.value as string
     setSelectedValue(newValue)
+    setHasSelection(true)
     if (onChange) {
       onChange(event, child)
     }
@@ -193,6 +234,9 @@ const Dropdown: React.FC<DropdownProps> = ({
         <StyledInputLabel
           id={`${name}-label`}
           shrunkfontcolor={shrunkfontcolor}
+          unshrunkfontcolor={unshrunkfontcolor}
+          shrunklabelposition={shrunklabelposition}
+          hasvalue={hasSelection ? 'true' : 'false'}
         >
           {label}
         </StyledInputLabel>
@@ -216,6 +260,11 @@ const Dropdown: React.FC<DropdownProps> = ({
             },
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: black.main,
+              legend: {
+                width: hasSelection ? '0.01px' : 'auto',
+                display:
+                  shrunklabelposition === 'aboveNotch' ? 'none' : 'inherit',
+              },
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
               borderColor: black.main,
