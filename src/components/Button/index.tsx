@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
-import { Button, Box, ButtonProps } from '@mui/material'
+import { Button, Box, ButtonProps, SxProps, Theme } from '@mui/material'
 import Typography from '../Typography'
+import { SvgIconProps } from '@mui/material/SvgIcon'
 
 export interface CustomButtonProps extends ButtonProps {
   text?: string
@@ -9,131 +10,112 @@ export interface CustomButtonProps extends ButtonProps {
   fontcolor?: string
   fontvariant?: 'merriparagraph' | 'merrihelperfooter'
   width?: string
+  height?: string
   disableButton?: 'true' | 'false'
-  icon?: React.ReactNode
+  icon?: React.ReactElement<SvgIconProps>
   iconcolor?: string
   iconsize?: string
   iconlocation?: 'left' | 'right' | 'above'
   fontlocation?: 'left' | 'center' | 'right'
 }
 
-const CustomButton: React.FC<CustomButtonProps> = React.memo(
-  props => {
-    const {
-      text,
-      variant,
-      fontvariant = 'merriparagraph',
-      onClick,
-      fontcolor,
-      backgroundcolor,
-      width,
-      disableButton,
-      icon,
-      iconcolor,
-      iconsize,
-      iconlocation = 'left',
-      fontlocation = 'center',
-      ...restProps
-    } = props
+const CustomButton: React.FC<CustomButtonProps> = ({
+  text,
+  variant,
+  fontvariant = 'merriparagraph',
+  onClick,
+  fontcolor,
+  backgroundcolor,
+  width,
+  height,
+  disableButton,
+  icon,
+  iconcolor,
+  iconsize,
+  iconlocation = 'left',
+  fontlocation = 'center',
+  sx,
+  ...restProps
+}) => {
+  const handleButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): void => {
+    event.preventDefault()
+    onClick?.(event)
+  }
 
-    const handleButtonClick = (
-      event: React.MouseEvent<HTMLButtonElement>
-    ): void => {
-      event.preventDefault()
-      onClick?.(event)
-    }
+  const buttonSx: SxProps<Theme> = {
+    ...(backgroundcolor && { backgroundColor: backgroundcolor }),
+    ...(width && { width }),
+    ...(height && { height }),
+    flexDirection: iconlocation === 'above' ? 'column' : 'row',
+    justifyContent:
+      fontlocation === 'left'
+        ? 'flex-start'
+        : fontlocation === 'right'
+          ? 'flex-end'
+          : 'center',
+    ...(sx as object),
+  }
 
-    const buttonStyle = {
-      backgroundColor: backgroundcolor,
-      width: width,
-    }
+  const isDisabled = disableButton === 'true'
 
-    const isDisabled = disableButton === 'true'
+  const IconComponent = icon
+    ? React.cloneElement(icon, {
+        sx: {
+          color: iconcolor,
+          fontSize: iconsize,
+        },
+      } as Partial<SvgIconProps>)
+    : null
 
-    const iconStyle = {
-      color: iconcolor,
-      fontSize: iconsize,
-    }
-
-    const IconComponent = icon
-      ? React.cloneElement(icon as React.ReactElement, {
-          style: { ...iconStyle, ...(icon as React.ReactElement).props.style },
-        })
-      : null
-
-    const buttonContent = (
-      <>
-        {iconlocation === 'above' && IconComponent}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent={
-            fontlocation === 'left'
-              ? 'flex-start'
-              : fontlocation === 'right'
-                ? 'flex-end'
-                : 'center'
-          }
-          width="100%"
-        >
-          {iconlocation === 'left' && IconComponent}
-          <Typography
-            fontvariant={fontvariant}
-            fontcolor={isDisabled ? 'grey' : fontcolor}
-            text={text || ''}
-          />
-          {iconlocation === 'right' && IconComponent}
-        </Box>
-      </>
-    )
-
-    return (
+  const buttonContent = (
+    <>
+      {iconlocation === 'above' && IconComponent}
       <Box
         display="flex"
-        flexDirection="column"
         alignItems="center"
-        width={width}
+        justifyContent={
+          fontlocation === 'left'
+            ? 'flex-start'
+            : fontlocation === 'right'
+              ? 'flex-end'
+              : 'center'
+        }
+        width="100%"
+        height="100%"
       >
-        <Button
-          {...restProps}
-          variant={variant}
-          onClick={handleButtonClick}
-          style={{
-            ...buttonStyle,
-            flexDirection: iconlocation === 'above' ? 'column' : 'row',
-            justifyContent:
-              fontlocation === 'left'
-                ? 'flex-start'
-                : fontlocation === 'right'
-                  ? 'flex-end'
-                  : 'center',
-          }}
-          disabled={isDisabled}
-        >
-          {buttonContent}
-        </Button>
+        {iconlocation === 'left' && IconComponent}
+        <Typography
+          fontvariant={fontvariant}
+          fontcolor={isDisabled ? 'grey' : fontcolor}
+          text={text || ''}
+        />
+        {iconlocation === 'right' && IconComponent}
       </Box>
-    )
-  },
-  (prevProps, nextProps) => {
-    const propsAreEqual =
-      prevProps.text === nextProps.text &&
-      prevProps.variant === nextProps.variant &&
-      prevProps.fontvariant === nextProps.fontvariant &&
-      prevProps.onClick === nextProps.onClick &&
-      prevProps.fontcolor === nextProps.fontcolor &&
-      prevProps.backgroundcolor === nextProps.backgroundcolor &&
-      prevProps.width === nextProps.width &&
-      prevProps.disableButton === nextProps.disableButton &&
-      prevProps.icon === nextProps.icon &&
-      prevProps.iconcolor === nextProps.iconcolor &&
-      prevProps.iconsize === nextProps.iconsize &&
-      prevProps.iconlocation === nextProps.iconlocation &&
-      prevProps.fontlocation === nextProps.fontlocation
+    </>
+  )
 
-    return propsAreEqual
-  }
-)
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      width={width}
+      height={height}
+    >
+      <Button
+        {...restProps}
+        variant={variant}
+        onClick={handleButtonClick}
+        sx={buttonSx}
+        disabled={isDisabled}
+      >
+        {buttonContent}
+      </Button>
+    </Box>
+  )
+}
 
 CustomButton.displayName = 'CustomButton'
 export default CustomButton
