@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { Box, Alert, CircularProgress } from '@mui/material'
+import { Box, Alert } from '@mui/material'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   columnVisibilityAtom,
@@ -28,9 +28,15 @@ export interface DatagridProps {
   error?: Error | null
   onDuplicate?: () => void
   onDelete?: () => void
+  onManage?: () => void
+  onShow?: () => void
   checkboxSelection?: boolean
   selectedRows?: string[]
   onSelectionChange?: (selectedIds: string[]) => void
+}
+
+interface ExtendedRowData extends RowData {
+  _id: string
 }
 
 function DataGrid({
@@ -43,14 +49,23 @@ function DataGrid({
   error = null,
   onDuplicate,
   onDelete,
+  onManage,
+  onShow,
+  selectedRows: externalSelectedRows,
+  onSelectionChange: externalOnSelectionChange,
 }: DatagridProps) {
-  console.log('DataGrid render:', { columns, providedRows })
+  console.log('DataGrid render:', {
+    columns,
+    providedRows,
+    externalSelectedRows,
+  })
 
-  const [rows, setRows] = useState<RowData[]>(providedRows || [])
+  const [rows, setRows] = useState<ExtendedRowData[]>(
+    (providedRows as ExtendedRowData[]) || []
+  )
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const [manageRowOpen, setManageRowOpen] = useState(false)
+  const [internalSelectedRows, setInternalSelectedRows] = useState<string[]>([])
   const [searchValue, setSearchValue] = useState('')
   const tableRef = React.useRef(null)
   const initialized = React.useRef(false)
@@ -72,7 +87,6 @@ function DataGrid({
     setSearchValue,
   })
 
-  // Update Jotai visibility state when search changes columns visibility
   useEffect(() => {
     if (tags.length > 0) {
       const newVisibility: { [key: string]: boolean } = {}
@@ -88,16 +102,14 @@ function DataGrid({
   }, [searchVisibleColumns, columns, updateVisibility, tags])
 
   useEffect(() => {
-    setRows(providedRows || [])
+    setRows((providedRows as ExtendedRowData[]) || [])
   }, [providedRows])
 
-  // Initialize columns and visibility in Jotai
   useEffect(() => {
     if (!initialized.current) {
       console.log('Initializing columns and visibility:', columns)
       setColumns(columns.map(col => col.field))
 
-      // Initialize visibility for new columns
       const initialVisibility: { [key: string]: boolean } = {}
       columns.forEach(column => {
         if (columnVisibility[column.field] === undefined) {
@@ -120,20 +132,42 @@ function DataGrid({
     }
   }, [columns, setColumns, columnVisibility, updateVisibility])
 
-  const handleRowClick = (row: RowData) => {
-    console.log('Row clicked:', row)
-    const newSelection = selectedRows.includes(row.id)
-      ? selectedRows.filter(id => id !== row.id)
-      : [...selectedRows, row.id]
+  const selectedRows = externalSelectedRows || internalSelectedRows
 
-    setSelectedRows(newSelection)
-    setManageRowOpen(newSelection.length > 0)
+  const handleSelectionChange = (newSelectedIds: string[]) => {
+    console.log('Selection changed:', {
+      previous: selectedRows,
+      new: newSelectedIds,
+      timestamp: new Date().toISOString(),
+    })
+
+    if (externalOnSelectionChange) {
+      externalOnSelectionChange(newSelectedIds)
+    } else {
+      setInternalSelectedRows(newSelectedIds)
+    }
   }
 
-  const handleSelectionChange = (selectedIds: string[]) => {
-    console.log('Selection changed:', selectedIds)
-    setSelectedRows(selectedIds)
-    setManageRowOpen(selectedIds.length > 0)
+  const handleRowClick = (row: ExtendedRowData) => {
+    console.log('Row clicked:', row)
+    const newSelection = selectedRows.includes(row._id)
+      ? selectedRows.filter(id => id !== row._id)
+      : [...selectedRows, row._id]
+
+    handleSelectionChange(newSelection)
+  }
+
+  const handleManageRowClose = () => {
+    if (!onManage) {
+      handleSelectionChange([])
+    }
+  }
+
+  const handleManage = () => {
+    console.log('DataGrid handleManage called with selectedRows:', selectedRows)
+    if (onManage) {
+      onManage()
+    }
   }
 
   const updatedSearchbarProps = {
@@ -142,7 +176,6 @@ function DataGrid({
     onChange: handleSearchChange,
   }
 
-  // Get visible columns based on both Jotai state and search
   const visibleColumns = columns.filter(column => {
     const isVisibleInJotai = columnVisibility[column.field] !== false
     const isVisibleInSearch =
@@ -158,9 +191,11 @@ function DataGrid({
     return isVisible
   })
 
-  // Calculate visible rows based on current page and pageSize
   const startIndex = page * pageSize
-  const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize)
+  const visibleRows = (filteredRows as ExtendedRowData[]).slice(
+    startIndex,
+    startIndex + pageSize
+  )
 
   console.log('DataGrid rendering with:', {
     visibleColumns,
@@ -170,24 +205,11 @@ function DataGrid({
     selectedRows,
   })
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          position: 'relative',
-          marginTop: '60px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: 'calc(100vh - 60px)',
-          width: 'calc(100vh)',
-          backgroundColor: woad.main,
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    )
-  }
+  const updatedColumns = columns.map(column => ({
+    ...column,
+    headerName:
+      column.field === 'name' ? 'Administration Company' : column.headerName,
+  }))
 
   return (
     <>
@@ -216,6 +238,19 @@ function DataGrid({
           buttons={buttons}
           dropdowns={dropdowns}
           searchbarProps={updatedSearchbarProps}
+          middleComponent={
+            selectedRows.length > 0 ? (
+              <ManageRow
+                selectedRows={selectedRows}
+                rows={rows}
+                onDuplicate={onDuplicate}
+                onDelete={onDelete}
+                onManage={handleManage}
+                onShow={onShow}
+                handleClose={handleManageRowClose}
+              />
+            ) : null
+          }
         />
 
         <Box
@@ -225,11 +260,12 @@ function DataGrid({
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'flex-start',
           }}
         >
           <Table
             ref={tableRef}
-            columns={visibleColumns}
+            columns={updatedColumns}
             rows={visibleRows}
             loading={loading}
             page={page}
@@ -253,13 +289,6 @@ function DataGrid({
           />
         </Box>
       </Box>
-
-      <ManageRow
-        open={manageRowOpen}
-        handleClose={() => setManageRowOpen(false)}
-        onDuplicate={onDuplicate}
-        onDelete={onDelete}
-      />
     </>
   )
 }

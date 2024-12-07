@@ -4,9 +4,9 @@ import React from 'react'
 import { CircularProgress } from '@mui/material'
 import ContentSection from '../../Content'
 import type { ContentSectionProps } from '../../Content'
-import type { BorderProp } from '../../Grid'
 import { useAtomValue } from 'jotai'
 import { columnVisibilityAtom } from '../Jotai/atom'
+import * as palette from '../../../styles/palette'
 
 export interface ColumnDef {
   field: string
@@ -34,7 +34,7 @@ export interface HeaderParams {
 }
 
 export interface RowData {
-  id: string
+  _id: string
   [key: string]: unknown
 }
 
@@ -78,6 +78,8 @@ const Table = React.forwardRef<TableRef, TableProps>(
       rowHeight = DEFAULT_ROW_HEIGHT,
       onRowClick,
       selectedRows = [],
+      onSelectionChange,
+      checkboxSelection = false,
     },
     ref
   ) => {
@@ -90,7 +92,6 @@ const Table = React.forwardRef<TableRef, TableProps>(
       selectedRows,
     })
 
-    // Filter visible columns
     const visibleColumns = columns.filter(column => {
       const isVisible = columnVisibility[column.field] !== false
       console.log(`Column ${column.field} visibility:`, isVisible)
@@ -102,13 +103,13 @@ const Table = React.forwardRef<TableRef, TableProps>(
       getSelectedRows: () =>
         new Map(
           rows
-            .filter(row => selectedRows.includes(row.id))
-            .map(row => [row.id, row])
+            .filter(row => selectedRows.includes(row._id))
+            .map(row => [row._id, row])
         ),
       forceUpdate: () => {},
       setPage: () => {},
       setPageSize: () => {},
-      getRowIndex: (id: string) => rows.findIndex(row => row.id === id),
+      getRowIndex: (id: string) => rows.findIndex(row => row._id === id),
       isRowSelected: (id: string) => selectedRows.includes(id),
     }))
 
@@ -137,32 +138,30 @@ const Table = React.forwardRef<TableRef, TableProps>(
       )
     }
 
-    if (rows.length === 0) {
-      return (
-        <ContentSection
-          grids={[
-            {
-              grid: {
-                gridconfig: {
-                  gridwidth: '100%',
-                  gridname: 'empty-table',
-                  alignment: 'left',
-                },
-              },
-              typography: {
-                columnconfig: {
-                  row: 1,
-                  column: 1,
-                },
-                text: 'No data available',
-              },
-            },
-          ]}
-        />
-      )
+    const allRowsSelected =
+      rows.length > 0 && rows.every(row => selectedRows.includes(row._id))
+    const someRowsSelected =
+      rows.length > 0 && rows.some(row => selectedRows.includes(row._id))
+
+    const handleHeaderCheckboxChange = () => {
+      if (onSelectionChange) {
+        if (allRowsSelected) {
+          onSelectionChange([])
+        } else {
+          onSelectionChange(rows.map(row => row._id))
+        }
+      }
     }
 
-    console.log('Table config - visibleColumns:', visibleColumns)
+    const handleRowCheckboxChange = (rowId: string) => {
+      if (onSelectionChange) {
+        if (selectedRows.includes(rowId)) {
+          onSelectionChange(selectedRows.filter(id => id !== rowId))
+        } else {
+          onSelectionChange([...selectedRows, rowId])
+        }
+      }
+    }
 
     const tableConfig: ContentSectionProps = {
       grids: [
@@ -174,45 +173,94 @@ const Table = React.forwardRef<TableRef, TableProps>(
               alignment: 'left',
             },
           },
+          checkbox: checkboxSelection
+            ? [
+                // Header checkbox
+                {
+                  columnconfig: {
+                    row: 1,
+                    column: 1,
+                  },
+                  checked: allRowsSelected,
+                  indeterminate: !allRowsSelected && someRowsSelected,
+                  onChange: () => handleHeaderCheckboxChange(),
+                  cellconfig: {
+                    minHeight: `${rowHeight}px`,
+                    width: '60px',
+                  },
+                },
+                // Row checkboxes
+                ...rows.map((row, rowIndex) => ({
+                  columnconfig: {
+                    row: rowIndex + 2,
+                    column: 1,
+                  },
+                  checked: selectedRows.includes(row._id),
+                  onChange: () => handleRowCheckboxChange(row._id),
+                  cellconfig: {
+                    minHeight: `${rowHeight}px`,
+                    width: '60px',
+                  },
+                })),
+              ]
+            : [],
           typography: [
             // Header row
             ...visibleColumns.map((column, columnIndex) => ({
               columnconfig: {
                 row: 1,
-                column: columnIndex + 1,
+                column: checkboxSelection ? columnIndex + 2 : columnIndex + 1,
               },
               text: column.headerName,
               cellconfig: {
-                border: 'solid' as BorderProp,
                 minHeight: `${rowHeight}px`,
                 width: column.width ? `${column.width}px` : '200px',
                 mobilewidth: '100%',
                 tabletwidth: '100%',
                 computerwidth: '100%',
+                wrap: 'nowrap' as const,
               },
             })),
             // Data rows
-            ...rows.flatMap((row, rowIndex) =>
-              visibleColumns.map((column, columnIndex) => ({
-                columnconfig: {
-                  row: rowIndex + 2,
-                  column: columnIndex + 1,
-                },
-                text: String(row[column.field] || ''),
-                cellconfig: {
-                  border: 'solid' as BorderProp,
-                  minHeight: `${rowHeight}px`,
-                  width: column.width ? `${column.width}px` : '200px',
-                  mobilewidth: '100%',
-                  tabletwidth: '100%',
-                  computerwidth: '100%',
-                  onClick: onRowClick ? () => onRowClick(row) : undefined,
-                  backgroundColor: selectedRows.includes(row.id)
-                    ? 'rgba(0, 0, 0, 0.04)'
-                    : undefined,
-                },
-              }))
-            ),
+            ...(rows.length === 0
+              ? visibleColumns.map((_, columnIndex) => ({
+                  columnconfig: {
+                    row: 2,
+                    column: checkboxSelection
+                      ? columnIndex + 2
+                      : columnIndex + 1,
+                  },
+                  text: columnIndex === 0 ? 'No data available' : '',
+                  cellconfig: {
+                    minHeight: `${rowHeight}px`,
+                    width: '200px',
+                    mobilewidth: '100%',
+                    tabletwidth: '100%',
+                    computerwidth: '100%',
+                  },
+                }))
+              : rows.flatMap((row, rowIndex) =>
+                  visibleColumns.map((column, columnIndex) => ({
+                    columnconfig: {
+                      row: rowIndex + 2,
+                      column: checkboxSelection
+                        ? columnIndex + 2
+                        : columnIndex + 1,
+                    },
+                    text: String(row[column.field] || ''),
+                    cellconfig: {
+                      minHeight: `${rowHeight}px`,
+                      width: column.width ? `${column.width}px` : '200px',
+                      mobilewidth: '100%',
+                      tabletwidth: '100%',
+                      computerwidth: '100%',
+                      onClick: onRowClick ? () => onRowClick(row) : undefined,
+                      backgroundColor: selectedRows.includes(row._id)
+                        ? palette.marine.light
+                        : undefined,
+                    },
+                  }))
+                )),
           ],
         },
       ],
