@@ -7,48 +7,18 @@ import ContentSection, { ContentSectionProps } from '../../Content'
 import { formContainerStyle } from './../../../styles/Form'
 import { ExtendedTypographyProps } from '../../Content/Structure/typography/useGridTypography'
 
-/**
- * Props for the PopupForm component.
- * @interface PopupFormProps
- */
 export interface PopupFormProps {
-  /** The title of the popup form */
   title?: string
-  /** The description of the popup form */
   description?: string
-  /** The grid configuration for the form content */
   grids?: ContentSectionProps['grids']
-  /** Custom content to render inside the form */
   content?: React.ReactNode
-  /** The type of popup to render ('dialog' or 'modal') */
   popupType: 'dialog' | 'modal'
-  /** Whether the popup is open (only applicable for 'dialog' type) */
   open?: boolean
-  /** Callback function to handle closing the popup (only applicable for 'dialog' type) */
   onClose?: () => void
-  /** The width of the popup form in pixels */
   width?: number
 }
 
-/**
- * PopupForm Component
- *
- * A flexible popup form component that can be rendered as either a dialog or a modal.
- * It supports custom content, grids, and header configuration.
- *
- * @component
- * @example
- * <PopupForm
- *   title="Login"
- *   description="Please enter your credentials"
- *   popupType="dialog"
- *   open={isOpen}
- *   onClose={handleClose}
- *   content={<LoginForm />}
- *   width={400}
- * />
- */
-const PopupForm: React.FC<PopupFormProps> = ({
+function PopupForm({
   title,
   description,
   grids,
@@ -57,12 +27,9 @@ const PopupForm: React.FC<PopupFormProps> = ({
   open,
   onClose,
   width = 450,
-}) => {
-  /**
-   * Memoized header grid configuration
-   */
-  const headerGrid: ContentSectionProps['grids'][0] = useMemo(
-    () => ({
+}: PopupFormProps) {
+  const headerGrid = useMemo(
+    (): ContentSectionProps['grids'][0] => ({
       grid: {
         gridconfig: {
           gridname: 'formHeader',
@@ -101,29 +68,26 @@ const PopupForm: React.FC<PopupFormProps> = ({
     [title, description]
   )
 
-  /**
-   * Memoized header render function
-   */
   const renderHeader = useMemo(
     () => <ContentSection grids={[headerGrid]} />,
     [headerGrid]
   )
 
-  /**
-   * Memoized content render function
-   */
   const renderContent = useMemo(
     () => (
-      <Box
-        // @ts-ignore
-        sx={formContainerStyle}
-      >
+      <Box sx={formContainerStyle}>
         <Box mb={0}>{renderHeader}</Box>
         {React.isValidElement(content)
-          ? React.cloneElement(content as React.ReactElement, {
-              onClose: onClose,
-              open: open,
-            })
+          ? React.cloneElement(
+              content as React.ReactElement<{
+                onClose?: () => void
+                open?: boolean
+              }>,
+              {
+                onClose,
+                open,
+              }
+            )
           : content || (grids && <ContentSection grids={grids} />)}
       </Box>
     ),
@@ -131,7 +95,7 @@ const PopupForm: React.FC<PopupFormProps> = ({
   )
 
   const dialogProps: DialogProps = {
-    open: popupType === 'modal' ? true : open || false,
+    open: popupType === 'modal' ? true : (open ?? false),
     onClose: popupType === 'modal' ? undefined : onClose,
     fullWidth: true,
     maxWidth: false,
@@ -142,16 +106,8 @@ const PopupForm: React.FC<PopupFormProps> = ({
     },
   }
 
-  if (popupType === 'modal') {
-    return (
-      <Dialog {...dialogProps} disableEscapeKeyDown hideBackdrop>
-        {renderContent}
-      </Dialog>
-    )
-  }
-
-  return (
-    <Dialog {...dialogProps}>
+  const modalContent = (
+    <>
       {onClose && (
         <IconButton
           size="small"
@@ -167,8 +123,19 @@ const PopupForm: React.FC<PopupFormProps> = ({
         </IconButton>
       )}
       {renderContent}
-    </Dialog>
+    </>
   )
+
+  if (popupType === 'modal') {
+    return (
+      <Dialog {...dialogProps} disableEscapeKeyDown hideBackdrop>
+        {modalContent}
+      </Dialog>
+    )
+  }
+
+  return <Dialog {...dialogProps}>{modalContent}</Dialog>
 }
 
+// Export the component directly
 export default PopupForm
