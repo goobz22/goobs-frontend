@@ -4,7 +4,7 @@ import {
   Typography as MuiTypography,
   TypographyProps as MuiTypographyProps,
 } from '@mui/material'
-import React from 'react'
+import React, { JSX } from 'react'
 
 export type FontFamily = 'arapey' | 'inter' | 'merri'
 
@@ -26,6 +26,7 @@ export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   fontvariant?: CustomTypographyVariant
   fontcolor?: string
   variant?: CustomTypographyVariant | MuiTypographyProps['variant']
+  children?: React.ReactNode
 }
 
 const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
@@ -199,13 +200,14 @@ const merriStyles: Record<TypographyVariant, React.CSSProperties> = {
   },
 }
 
-export const Typography: React.FC<TypographyProps> = ({
+const Typography = ({
   text,
   fontcolor,
   fontvariant,
   variant,
+  children,
   ...rest
-}) => {
+}: TypographyProps): JSX.Element => {
   let variantStyle: React.CSSProperties = {}
   const actualVariant = fontvariant || variant
 
@@ -238,6 +240,7 @@ export const Typography: React.FC<TypographyProps> = ({
 
   return (
     <MuiTypography
+      component="span"
       style={{
         color: fontcolor,
         ...variantStyle,
@@ -245,9 +248,10 @@ export const Typography: React.FC<TypographyProps> = ({
       variant={actualVariant as MuiTypographyProps['variant']}
       {...rest}
     >
-      {text}
+      {text || children}
     </MuiTypography>
   )
 }
 
+export { Typography }
 export default Typography
