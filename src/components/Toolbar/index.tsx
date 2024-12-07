@@ -15,11 +15,18 @@ export interface ToolbarProps {
   buttons?: CustomButtonProps[]
   dropdowns?: DropdownProps[]
   searchbarProps?: Partial<SearchbarProps>
+  middleComponent?: React.ReactNode
 }
 
-function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
+function CustomToolbar({
+  buttons,
+  dropdowns,
+  searchbarProps,
+  middleComponent,
+}: ToolbarProps) {
   const [checkboxWidth] = useState(45)
-  const toolbarHeight = 45
+  const toolbarHeight = 60
+  const buttonHeight = '45px'
 
   return (
     <Box
@@ -29,7 +36,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        alignItems: 'stretch',
+        alignItems: 'center',
         height: `${toolbarHeight}px`,
         width: '100%',
       }}
@@ -39,7 +46,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         sx={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'stretch',
+          alignItems: 'center',
           height: '100%',
         }}
       >
@@ -58,8 +65,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'flex-end', // Changed from center to flex-end
-            paddingBottom: '13px', // Added padding to align with other elements
+            alignItems: 'center',
             gap: '10px',
             height: '100%',
             padding: '0 15px',
@@ -75,6 +81,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
                 fontvariant="merriparagraph"
                 variant="contained"
                 onClick={button.onClick}
+                height={buttonHeight}
               />
             ))}
         </Box>
@@ -104,6 +111,20 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         />
       </Box>
 
+      {/* Middle component section */}
+      {middleComponent && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            height: '100%',
+            padding: '0 15px',
+          }}
+        >
+          {middleComponent}
+        </Box>
+      )}
+
       {/* Spacer to push dropdowns to the right */}
       <Box sx={{ flexGrow: 1 }} />
 
@@ -112,8 +133,7 @@ function CustomToolbar({ buttons, dropdowns, searchbarProps }: ToolbarProps) {
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'flex-end', // Changed from center to flex-end
-            paddingBottom: '13px', // Added padding to align with other elements
+            alignItems: 'center',
             height: '100%',
             padding: '0 15px',
             gap: '10px',
