@@ -27,6 +27,7 @@ const useGridTypography = (grid: {
       fontvariant,
       columnconfig: itemColumnConfig,
       cellconfig,
+      component,
       ...restProps
     } = typographyItem
 
@@ -53,6 +54,7 @@ const useGridTypography = (grid: {
           text={text}
           fontvariant={fontvariant}
           fontcolor={fontcolor}
+          component={component || 'span'}
           {...restProps}
         />
       ),
