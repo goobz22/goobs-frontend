@@ -1,14 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { JSX } from 'react'
 import Grid2, { Grid2Props } from '@mui/material/Grid2'
 import { useMediaQuery, useTheme } from '@mui/material'
 
-export type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
-export type BorderProp = 'none' | 'solid'
-export type WrapProp = 'nowrap' | 'wrap'
+type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
+type BorderProp = 'none' | 'solid'
+type WrapProp = 'nowrap' | 'wrap'
 
-export interface columnconfig {
+type columnconfig = {
   row: number
   column: number
   gridname?: string
@@ -26,7 +26,7 @@ export interface columnconfig {
   computerwidth?: string
 }
 
-export interface gridconfig {
+type gridconfig = {
   gridname?: string
   alignment?: Alignment
   margintop?: number
@@ -37,13 +37,7 @@ export interface gridconfig {
   bordercolor?: string
 }
 
-export interface CustomGridProps extends Grid2Props {
-  gridconfig?: gridconfig
-  columnconfig?: columnconfig[]
-  cellconfig?: cellconfig
-}
-
-export interface cellconfig {
+type cellconfig = {
   border?: BorderProp
   minHeight?: string
   maxHeight?: string
@@ -57,12 +51,18 @@ export interface cellconfig {
   wrap?: WrapProp
 }
 
-const CustomGrid: React.FC<CustomGridProps> = ({
+type CustomGridProps = Omit<Grid2Props, 'children'> & {
+  gridconfig?: gridconfig
+  columnconfig?: columnconfig[]
+  cellconfig?: cellconfig
+}
+
+function CustomGrid({
   gridconfig,
   columnconfig,
   cellconfig,
   ...rest
-}) => {
+}: CustomGridProps): JSX.Element {
   const gridConfigValues = Array.isArray(gridconfig)
     ? gridconfig[0]
     : gridconfig
@@ -217,4 +217,7 @@ const CustomGrid: React.FC<CustomGridProps> = ({
   )
 }
 
+CustomGrid.displayName = 'CustomGrid'
+
 export default CustomGrid
+export type { CustomGridProps, columnconfig, gridconfig, cellconfig }
