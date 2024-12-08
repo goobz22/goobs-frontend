@@ -54,6 +54,7 @@ import type { FormDataGridProps } from './components/Form/DataGrid'
 import { Animation } from './components/Content/Structure/animations'
 
 // Importing ExtendedButtonProps from useButton
+import { ExtendedComplexEditorProps } from './components/Content/Structure/complexeditor/useComplexEditor'
 import { ExtendedButtonProps } from './components/Content/Structure/button/useButton'
 import { ExtendedTypographyProps } from './components/Content/Structure/typography/useGridTypography'
 import { ExtendedTextFieldProps } from './components/Content/Structure/textfield/useTextField'
@@ -244,6 +245,8 @@ export type { ExtendedImageProps }
 export type { ExtendedConfirmationCodeInputsProps }
 export type { ExtendedRadioGroupProps }
 export type { ExtendedPhoneNumberFieldProps }
+export type { ExtendedComplexEditorProps }
+
 // Type exports
 export type { CustomButtonProps }
 export type { CustomGridProps }
