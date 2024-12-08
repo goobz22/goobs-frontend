@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Grid2, { Grid2Props } from '@mui/material/Grid2'
-import { Box, useMediaQuery, useTheme } from '@mui/material'
+import { useMediaQuery, useTheme } from '@mui/material'
 
 export type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
 export type BorderProp = 'none' | 'solid'
@@ -79,168 +79,141 @@ const CustomGrid: React.FC<CustomGridProps> = ({
   const isTablet = useMediaQuery(theme.breakpoints.between(768, 1023))
   const isComputer = useMediaQuery(theme.breakpoints.up(1024))
 
-  const minGridWidth = '300px'
-
   const rows = Math.max(...(columnconfig || []).map(c => c.row || 1))
 
   return (
-    <Box
+    <Grid2
+      container
       width={gridConfigValues?.gridwidth || '100%'}
       display="flex"
+      flexDirection="column"
       justifyContent={gridJustifyContent}
-      minWidth={minGridWidth}
+      minWidth="300px"
       sx={{
-        borderSpacing: 0,
-        borderCollapse: 'collapse',
         padding: 0,
         margin: 0,
+        gap: 0,
         '& > *': {
           border: 'none !important',
           padding: 0,
           margin: 0,
         },
       }}
+      {...rest}
     >
-      <Box
-        width="100%"
-        height="100%"
-        display="flex"
-        flexDirection="column"
-        sx={{
-          padding: 0,
-          margin: 0,
-          '& > *': {
-            border: 'none !important',
-            padding: 0,
-            margin: 0,
-          },
-        }}
-        {...rest}
-      >
-        {Array.from({ length: rows }).map((_, rowIndex) => {
-          const columns = Math.max(
-            ...(columnconfig || [])
-              .filter(c => c.row === rowIndex + 1)
-              .map(c => c.column || 1)
-          )
+      {Array.from({ length: rows }).map((_, rowIndex) => {
+        const columns = Math.max(
+          ...(columnconfig || [])
+            .filter(c => c.row === rowIndex + 1)
+            .map(c => c.column || 1)
+        )
 
-          return (
-            <Grid2
-              key={`row-${rowIndex}`}
-              container
-              alignItems="center"
-              display="flex"
-              justifyContent="flex-start"
-              spacing={0}
-              sx={{
-                flexGrow: 1,
-                width: '100%',
-                gap: 0,
+        return (
+          <Grid2
+            key={`row-${rowIndex}`}
+            container
+            alignItems="center"
+            display="flex"
+            justifyContent="flex-start"
+            spacing={0}
+            sx={{
+              width: '100%',
+              gap: 0,
+              padding: 0,
+              margin: 0,
+              height: 'fit-content',
+              minHeight: 'min-content',
+              border: 'none',
+              '& > *': {
+                border: 'none !important',
                 padding: 0,
-                margin: 0,
-                border: 'none',
-                '& > *': {
-                  border: 'none !important',
-                  padding: 0,
-                  margin: 0,
-                },
-              }}
-            >
-              {Array.from({ length: columns }).map((_, columnIndex) => {
-                const currentColumnConfig = (columnconfig || []).find(
-                  c => c.row === rowIndex + 1 && c.column === columnIndex + 1
-                )
+              },
+            }}
+          >
+            {Array.from({ length: columns }).map((_, columnIndex) => {
+              const currentColumnConfig = (columnconfig || []).find(
+                c => c.row === rowIndex + 1 && c.column === columnIndex + 1
+              )
 
-                const currentCellConfig =
-                  currentColumnConfig?.cellconfig || cellconfig
+              const currentCellConfig =
+                currentColumnConfig?.cellconfig || cellconfig
 
-                const shouldWrap = currentCellConfig?.wrap !== 'nowrap'
+              const shouldWrap = currentCellConfig?.wrap !== 'nowrap'
 
-                const hasFixedWidth = currentCellConfig?.width !== undefined
-                const columnWidth = hasFixedWidth
-                  ? currentCellConfig.width
-                  : isMobile
-                    ? currentColumnConfig?.mobilewidth ||
+              const hasFixedWidth = currentCellConfig?.width !== undefined
+              const columnWidth = hasFixedWidth
+                ? currentCellConfig.width
+                : isMobile
+                  ? currentColumnConfig?.mobilewidth ||
+                    currentColumnConfig?.columnwidth ||
+                    `${100 / columns}%`
+                  : isTablet
+                    ? currentColumnConfig?.tabletwidth ||
                       currentColumnConfig?.columnwidth ||
                       `${100 / columns}%`
-                    : isTablet
-                      ? currentColumnConfig?.tabletwidth ||
+                    : isComputer
+                      ? currentColumnConfig?.computerwidth ||
                         currentColumnConfig?.columnwidth ||
                         `${100 / columns}%`
-                      : isComputer
-                        ? currentColumnConfig?.computerwidth ||
-                          currentColumnConfig?.columnwidth ||
-                          `${100 / columns}%`
-                        : currentColumnConfig?.columnwidth ||
-                          `${100 / columns}%`
+                      : currentColumnConfig?.columnwidth || `${100 / columns}%`
 
-                const justifyContent =
-                  currentColumnConfig?.alignment === 'left'
-                    ? 'flex-start'
-                    : currentColumnConfig?.alignment === 'right'
-                      ? 'flex-end'
-                      : 'center'
+              const justifyContent =
+                currentColumnConfig?.alignment === 'left'
+                  ? 'flex-start'
+                  : currentColumnConfig?.alignment === 'right'
+                    ? 'flex-end'
+                    : 'center'
 
-                return (
-                  <Grid2
-                    key={`column-${columnIndex}`}
-                    sx={{
-                      display: 'flex',
-                      justifyContent,
-                      width: columnWidth,
-                      position: 'relative',
-                      flexGrow: hasFixedWidth ? 0 : 1,
-                      flexShrink: hasFixedWidth ? 0 : 1,
-                      flexBasis: hasFixedWidth ? columnWidth : 'auto',
+              return (
+                <Grid2
+                  key={`column-${columnIndex}`}
+                  sx={{
+                    display: 'flex',
+                    justifyContent,
+                    alignItems: 'center',
+                    width: columnWidth,
+                    position: 'relative',
+                    flexGrow: hasFixedWidth ? 0 : 1,
+                    flexShrink: hasFixedWidth ? 0 : 1,
+                    flexBasis: hasFixedWidth ? columnWidth : 'auto',
+                    height: 'fit-content',
+                    padding: 0,
+                    marginLeft: currentColumnConfig?.marginleft
+                      ? `${currentColumnConfig.marginleft * 8}px`
+                      : 0,
+                    marginRight: currentColumnConfig?.marginright
+                      ? `${currentColumnConfig.marginright * 8}px`
+                      : 0,
+                    marginTop: currentColumnConfig?.margintop
+                      ? `${currentColumnConfig.margintop * 8}px`
+                      : 0,
+                    marginBottom: currentColumnConfig?.marginbottom
+                      ? `${currentColumnConfig.marginbottom * 8}px`
+                      : 0,
+                    border: 'none',
+                    backgroundColor: currentCellConfig?.backgroundColor,
+                    minHeight: 'min-content',
+                    overflow: 'hidden',
+                    whiteSpace: shouldWrap ? 'normal' : 'nowrap',
+                    textOverflow: shouldWrap ? 'clip' : 'ellipsis',
+                    '& > *': {
+                      border: 'none !important',
                       padding: 0,
                       margin: 0,
-                      border: 'none',
-                      '& > *': {
-                        border: 'none !important',
-                        padding: 0,
-                        margin: 0,
-                      },
-                    }}
-                  >
-                    <Box
-                      onClick={currentCellConfig?.onClick}
-                      sx={{
-                        backgroundColor: currentCellConfig?.backgroundColor,
-                        minHeight: currentCellConfig?.minHeight || 'auto',
-                        maxHeight: currentCellConfig?.maxHeight || 'none',
-                        height: currentCellConfig?.maxHeight || 'auto',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent,
-                        overflow: 'hidden',
-                        width: '100%',
-                        position: 'relative',
-                        zIndex: currentCellConfig?.backgroundColor ? 1 : 0,
-                        flexGrow: 1,
-                        padding: 0,
-                        margin: 0,
-                        boxSizing: 'border-box',
-                        whiteSpace: shouldWrap ? 'normal' : 'nowrap',
-                        textOverflow: shouldWrap ? 'clip' : 'ellipsis',
-                        border: 'none',
-                        outline: 'none',
-                        '&::before, &::after': {
-                          display: 'none',
-                        },
-                      }}
-                    >
-                      {React.isValidElement(currentColumnConfig?.component)
-                        ? currentColumnConfig?.component
-                        : null}
-                    </Box>
-                  </Grid2>
-                )
-              })}
-            </Grid2>
-          )
-        })}
-      </Box>
-    </Box>
+                    },
+                  }}
+                  onClick={currentCellConfig?.onClick}
+                >
+                  {React.isValidElement(currentColumnConfig?.component)
+                    ? currentColumnConfig?.component
+                    : null}
+                </Grid2>
+              )
+            })}
+          </Grid2>
+        )
+      })}
+    </Grid2>
   )
 }
 
