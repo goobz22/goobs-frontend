@@ -1,8 +1,9 @@
 'use client'
 import React from 'react'
-import { Button, Box, ButtonProps, SxProps, Theme } from '@mui/material'
+import { Button, Box, ButtonProps } from '@mui/material'
 import Typography from '../Typography'
 import { SvgIconProps } from '@mui/material/SvgIcon'
+import { styled } from '@mui/material/styles'
 
 export interface CustomButtonProps extends ButtonProps {
   text?: string
@@ -19,9 +20,73 @@ export interface CustomButtonProps extends ButtonProps {
   fontlocation?: 'left' | 'center' | 'right'
 }
 
+const StyledButton = styled(Button, {
+  shouldForwardProp: prop =>
+    prop !== 'backgroundcolor' &&
+    prop !== 'iconlocation' &&
+    prop !== 'fontlocation',
+})<{
+  backgroundcolor?: string
+  iconlocation?: 'left' | 'right' | 'above'
+  fontlocation?: 'left' | 'center' | 'right'
+}>(({ backgroundcolor, iconlocation, fontlocation }) => ({
+  minWidth: 'auto',
+  width: '100%',
+  height: '40px',
+  padding: '8px 16px',
+  display: 'flex',
+  flexDirection: iconlocation === 'above' ? 'column' : 'row',
+  alignItems: 'center',
+  justifyContent:
+    fontlocation === 'left'
+      ? 'flex-start'
+      : fontlocation === 'right'
+        ? 'flex-end'
+        : 'center',
+  gap: '8px',
+  ...(backgroundcolor && {
+    backgroundColor: backgroundcolor,
+    '&:hover': {
+      backgroundColor: backgroundcolor,
+      opacity: 0.9,
+    },
+  }),
+  '& .MuiButton-startIcon': {
+    margin: 0,
+  },
+  '& .MuiButton-endIcon': {
+    margin: 0,
+  },
+}))
+
+const StyledBox = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  width: '100%',
+  height: '40px',
+  minWidth: 'fit-content',
+})
+
+const ContentWrapper = styled(Box)<{
+  fontlocation?: 'left' | 'center' | 'right'
+}>(({ fontlocation }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent:
+    fontlocation === 'left'
+      ? 'flex-start'
+      : fontlocation === 'right'
+        ? 'flex-end'
+        : 'center',
+  width: '100%',
+  height: '100%',
+  gap: '8px',
+}))
+
 const CustomButton: React.FC<CustomButtonProps> = ({
   text,
-  variant,
+  variant = 'contained',
   fontvariant = 'merriparagraph',
   onClick,
   fontcolor,
@@ -44,27 +109,16 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     onClick?.(event)
   }
 
-  const buttonSx: SxProps<Theme> = {
-    ...(backgroundcolor && { backgroundColor: backgroundcolor }),
-    ...(width && { width }),
-    ...(height && { height }),
-    flexDirection: iconlocation === 'above' ? 'column' : 'row',
-    justifyContent:
-      fontlocation === 'left'
-        ? 'flex-start'
-        : fontlocation === 'right'
-          ? 'flex-end'
-          : 'center',
-    ...(sx as object),
-  }
-
   const isDisabled = disableButton === 'true'
 
   const IconComponent = icon
     ? React.cloneElement(icon, {
         sx: {
-          color: iconcolor,
-          fontSize: iconsize,
+          color: iconcolor || 'inherit',
+          fontSize: iconsize || '20px',
+          minWidth: iconsize || '20px',
+          minHeight: iconsize || '20px',
+          margin: 0,
         },
       } as Partial<SvgIconProps>)
     : null
@@ -72,48 +126,36 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   const buttonContent = (
     <>
       {iconlocation === 'above' && IconComponent}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent={
-          fontlocation === 'left'
-            ? 'flex-start'
-            : fontlocation === 'right'
-              ? 'flex-end'
-              : 'center'
-        }
-        width="100%"
-        height="100%"
-      >
+      <ContentWrapper fontlocation={fontlocation}>
         {iconlocation === 'left' && IconComponent}
         <Typography
           fontvariant={fontvariant}
-          fontcolor={isDisabled ? 'grey' : fontcolor}
+          fontcolor={isDisabled ? 'grey' : fontcolor || 'white'}
           text={text || ''}
         />
         {iconlocation === 'right' && IconComponent}
-      </Box>
+      </ContentWrapper>
     </>
   )
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      width={width}
-      height={height}
-    >
-      <Button
+    <StyledBox sx={{ width, height }}>
+      <StyledButton
         {...restProps}
         variant={variant}
         onClick={handleButtonClick}
-        sx={buttonSx}
         disabled={isDisabled}
+        disableElevation
+        disableRipple
+        fullWidth
+        backgroundcolor={backgroundcolor}
+        iconlocation={iconlocation}
+        fontlocation={fontlocation}
+        sx={sx}
       >
         {buttonContent}
-      </Button>
-    </Box>
+      </StyledButton>
+    </StyledBox>
   )
 }
 
