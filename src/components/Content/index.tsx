@@ -63,6 +63,10 @@ import usePhoneNumber, {
 import useCheckbox, {
   ExtendedCheckboxProps,
 } from './Structure/checkbox/useCheckbox'
+import useComplexEditor, {
+  ExtendedComplexEditorProps,
+} from './Structure/complexeditor/useComplexEditor'
+
 /**
  * Props for the ContentSection component.
  * Includes configuration for various content elements.
@@ -75,6 +79,7 @@ export interface ContentSectionProps {
     confirmationcodeinput?:
       | ExtendedConfirmationCodeInputsProps
       | ExtendedConfirmationCodeInputsProps[]
+    complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
     typography?: TypographyProps | TypographyProps[]
     radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
     link?: LinkProps | LinkProps[]
@@ -132,6 +137,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useLink(props))
   addToColumnConfigs(useButton(props))
   addToColumnConfigs(useImage(props))
+  addToColumnConfigs(useComplexEditor(props))
   addToColumnConfigs(usePricing(props.pricing))
   addToColumnConfigs(useStepper(props))
   addToColumnConfigs(useTransferList(props))
