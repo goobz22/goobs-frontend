@@ -49,7 +49,7 @@ const StyledBox = styled(Box)(() => ({
   position: 'relative',
   width: '100%',
   height: '40px',
-  marginTop: '5px',
+  marginTop: '10px',
 }))
 
 const StyledFormControl = styled(FormControl)<{
@@ -63,7 +63,7 @@ const StyledFormControl = styled(FormControl)<{
   bottom: 0,
   '& .MuiOutlinedInput-root': {
     backgroundColor: white.main,
-    height: '45px',
+    height: '40px',
     '& fieldset': {
       borderColor: outlinecolor || black.main,
     },
@@ -113,7 +113,7 @@ const StyledInputLabel = styled(InputLabel, {
         ? shrunklabelposition === 'aboveNotch'
           ? 'translate(0px, -20px) scale(0.75)'
           : 'translate(13px, -7px) scale(0.75)'
-        : 'translate(14px, 12px)',
+        : 'translate(14px, 10px)',
     color:
       hasvalue === 'true'
         ? shrunkfontcolor || black.main
@@ -138,6 +138,47 @@ const LoadingContainer = styled(Box)(() => ({
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
+
+const StyledSelect = styled(Select)<{
+  fontcolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
+}>(({ fontcolor, shrunklabelposition }) => ({
+  color: fontcolor || black.main,
+  height: '40px',
+  backgroundColor: white.main,
+  '& .MuiSelect-select': {
+    paddingTop: '10px',
+    paddingBottom: '10px',
+  },
+  '& .MuiSvgIcon-root': {
+    color: black.main,
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: black.main,
+    legend: {
+      display: shrunklabelposition === 'aboveNotch' ? 'none' : 'inherit',
+    },
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: black.main,
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: black.main,
+  },
+  '& .MuiInputBase-input': {
+    color: black.main,
+  },
+  '& .MuiInputBase-input::placeholder': {
+    color: black.main,
+    opacity: 1,
+  },
+  '& .MuiPaper-root': {
+    backgroundColor: white.main,
+  },
+  '& .MuiMenu-list': {
+    backgroundColor: white.main,
+  },
+}))
 
 const Dropdown: React.FC<DropdownProps> = ({
   label,
@@ -240,52 +281,15 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           {label}
         </StyledInputLabel>
-        <Select
+        <StyledSelect
           labelId={`${name}-label`}
           value={selectedValue}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
           label={label}
-          sx={{
-            color: fontcolor || black.main,
-            height: '45px',
-            backgroundColor: white.main,
-            '& .MuiSelect-select': {
-              paddingTop: '10px',
-              paddingBottom: '10px',
-            },
-            '& .MuiSvgIcon-root': {
-              color: black.main,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: black.main,
-              legend: {
-                width: hasSelection ? '0.01px' : 'auto',
-                display:
-                  shrunklabelposition === 'aboveNotch' ? 'none' : 'inherit',
-              },
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: black.main,
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: black.main,
-            },
-            '& .MuiInputBase-input': {
-              color: black.main,
-            },
-            '& .MuiInputBase-input::placeholder': {
-              color: black.main,
-              opacity: 1,
-            },
-            '& .MuiPaper-root': {
-              backgroundColor: white.main,
-            },
-            '& .MuiMenu-list': {
-              backgroundColor: white.main,
-            },
-          }}
+          fontcolor={fontcolor}
+          shrunklabelposition={shrunklabelposition}
           MenuProps={{
             PaperProps: {
               sx: {
@@ -298,7 +302,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           {...rest}
         >
           {options.map(renderMenuItem)}
-        </Select>
+        </StyledSelect>
         {helperText && (
           <FormHelperText>
             <Typography fontvariant="merriparagraph" text={helperText} />
