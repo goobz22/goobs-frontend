@@ -1,16 +1,19 @@
 'use client'
 import React from 'react'
-import TextField from '../../../../components/TextField'
+import TextField, { TextFieldProps } from '../../../../components/TextField'
 import { columnconfig, cellconfig } from '../../../Grid'
-import { TextFieldProps } from '@mui/material'
 
 type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
   component?: columnconfig['component']
 }
 
+// Extend the existing TextFieldProps
 export type ExtendedTextFieldProps = TextFieldProps & {
   columnconfig?: ExtendedColumnConfig
   cellconfig?: cellconfig
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
 }
 
 const useTextField = (grid: {
@@ -25,6 +28,7 @@ const useTextField = (grid: {
     const {
       columnconfig: itemColumnConfig,
       cellconfig,
+      backgroundcolor,
       ...restProps
     } = component
 
@@ -43,6 +47,7 @@ const useTextField = (grid: {
       ...itemColumnConfig,
       cellconfig: {
         ...cellconfig,
+        backgroundColor: backgroundcolor,
       },
       component: <TextField key={`textfield-${index}`} {...restProps} />,
     }
