@@ -11,62 +11,56 @@ import {
   AccordionSummary,
   AccordionDetails,
   List,
-  SelectChangeEvent,
 } from '@mui/material'
-import Dropdown from '../../Dropdown'
-import Searchbar from '../../Searchbar'
+import SearchableDropdown from '../../SearchableDropdown'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { NavProps, SubNav, View } from '../index'
-import {
-  white,
-  black,
-  ocean,
-  semiTransparentWhite,
-} from '../../../styles/palette'
+import { white, ocean, semiTransparentWhite } from '../../../styles/palette'
 import { Typography } from './../../Typography'
 
 export interface VerticalVariantProps {
   items: (NavProps | SubNav | View)[]
-  showSearchbar: boolean
-  showDropdown: boolean
+  showSearchableNav: boolean
   showTitle: boolean
   showLine: boolean
   verticalNavTitle: string
-  dropdownLabel: string
-  searchbarLabel: string
+  searchableNavLabel: string
   anchor: 'left' | 'right'
   expandedNavs: string[]
   setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>>
   expandedSubnavs: string[]
   setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
   verticalNavWidth: string
+  backgroundcolor?: string
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
 }
 
 function VerticalVariant({
   items,
-  showSearchbar,
-  showDropdown,
+  showSearchableNav,
   showTitle,
   showLine,
   verticalNavTitle,
-  dropdownLabel,
-  searchbarLabel,
+  searchableNavLabel,
   anchor,
   expandedNavs,
   setExpandedNavs,
   expandedSubnavs,
   setExpandedSubnavs,
   verticalNavWidth,
+  backgroundcolor,
+  shrunkfontcolor = white.main,
+  unshrunkfontcolor = white.main,
 }: VerticalVariantProps) {
   const router = useRouter()
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
-  const [searchValue, setSearchValue] = useState('')
 
   const navOptions = items
     .filter((item): item is NavProps => 'title' in item && 'subnavs' in item)
-    .map(nav => ({ value: nav.title ?? '', label: nav.title ?? '' }))
+    .map(nav => ({ value: nav.title ?? '' }))
 
   const handleNavClick = useCallback(
     (nav: NavProps) => {
@@ -84,20 +78,12 @@ function VerticalVariant({
     [router]
   )
 
-  const handleDropdownChange = useCallback(
-    (event: SelectChangeEvent<unknown>) => {
-      const newValue = event.target.value as string
-      setSelectedNav(newValue)
-      console.log('Dropdown selection changed to:', newValue)
-    },
-    []
-  )
-
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value
-      setSearchValue(newValue)
-      console.log('Search value changed to:', newValue)
+  // Adjusted handler to match the SearchableDropdown onChange signature
+  const handleSearchableNavChange = useCallback(
+    (newValue: { value: string } | null) => {
+      const newVal = newValue ? newValue.value : null
+      setSelectedNav(newVal)
+      console.log('SearchableNav selection changed to:', newVal)
     },
     []
   )
@@ -379,35 +365,29 @@ function VerticalVariant({
             </Link>
           </Box>
         )}
-        {(showDropdown || showSearchbar) && (
-          <Stack mt={2} spacing={1}>
-            {showDropdown && (
-              <Box mt="2px">
-                <Dropdown
-                  label={dropdownLabel}
-                  options={navOptions}
-                  backgroundcolor={white.main}
-                  outlinecolor="none"
-                  fontcolor={black.main}
-                  shrunkfontcolor={white.main}
-                  unshrunkfontcolor={black.main}
-                  shrunklabelposition="aboveNotch"
-                  onChange={handleDropdownChange}
-                />
-              </Box>
-            )}
-            {showSearchbar && (
-              <Searchbar
-                label={searchbarLabel}
-                backgroundcolor={semiTransparentWhite.main}
-                iconcolor={white.main}
+        {showSearchableNav && (
+          <Stack mt={0} spacing={0}>
+            <Box
+              sx={{
+                position: 'relative',
+                zIndex: theme => theme.zIndex.drawer + 1,
+                width: '100%',
+                minHeight: '40px',
+              }}
+            >
+              <SearchableDropdown
+                label={searchableNavLabel}
+                options={navOptions}
+                backgroundcolor={backgroundcolor || semiTransparentWhite.main}
                 outlinecolor="none"
                 fontcolor={white.main}
+                shrunkfontcolor={shrunkfontcolor}
+                unshrunkfontcolor={unshrunkfontcolor}
+                shrunklabelposition="aboveNotch"
+                onChange={handleSearchableNavChange}
                 placeholder="Search..."
-                value={searchValue}
-                onChange={handleSearchChange}
               />
-            )}
+            </Box>
           </Stack>
         )}
       </Box>

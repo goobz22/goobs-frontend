@@ -66,6 +66,9 @@ import useCheckbox, {
 import useComplexEditor, {
   ExtendedComplexEditorProps,
 } from './Structure/complexeditor/useComplexEditor'
+import useSearchableDropdown, {
+  ExtendedSearchableDropdownProps,
+} from './Structure/searchableDropdown/useSearchableDropdown'
 
 /**
  * Props for the ContentSection component.
@@ -79,6 +82,9 @@ export interface ContentSectionProps {
     confirmationcodeinput?:
       | ExtendedConfirmationCodeInputsProps
       | ExtendedConfirmationCodeInputsProps[]
+    searchableDropdown?:
+      | ExtendedSearchableDropdownProps
+      | ExtendedSearchableDropdownProps[]
     complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
     typography?: TypographyProps | TypographyProps[]
     radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
@@ -143,6 +149,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useTransferList(props))
   addToColumnConfigs(useCard(props))
   addToColumnConfigs(useCodeCopy(props))
+  addToColumnConfigs(useSearchableDropdown(props))
   addToColumnConfigs(useTextField(props))
   addToColumnConfigs(useDateField(props))
   addToColumnConfigs(useCheckbox(props))

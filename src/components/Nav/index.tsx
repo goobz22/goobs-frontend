@@ -12,13 +12,11 @@ type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
  */
 export interface NavProps {
   items?: (NavProps | SubNav | View)[] // Array of navigation items
-  showSearchbar?: boolean // Flag to show/hide search bar
-  showDropdown?: boolean // Flag to show/hide dropdown
+  showSearchableNav?: boolean // Flag to show/hide searchable navigation
   showTitle?: boolean // Flag to show/hide title
   showLine?: boolean // Flag to show/hide divider line
   verticalNavTitle?: string // Title for vertical navigation
-  dropdownLabel?: string // Label for dropdown
-  searchbarLabel?: string // Label for search bar
+  searchableNavLabel?: string // Label for searchable navigation
   anchor?: 'left' | 'right' // Position of vertical navigation
   orientation?: 'vertical' | 'horizontal' // Orientation of navigation
   height?: string // Height of navigation (for horizontal)
@@ -31,6 +29,9 @@ export interface NavProps {
   hasleftborder?: string // Flag for left border
   hasrightborder?: string // Flag for right border
   trigger?: 'route' | 'onClick' | 'routeonhorizontal' // Trigger type for the item
+  backgroundcolor?: string
+  shrunkfontcolor?: string // Color of the label when shrunk
+  unshrunkfontcolor?: string // Color of the label when not shrunk
 }
 
 /**
@@ -61,23 +62,24 @@ export type View = {
  */
 function Nav({
   items = [],
-  showSearchbar = true,
-  showDropdown = true,
+  showSearchableNav = true, // Combined showSearchbar and showDropdown
   showTitle = true,
   showLine = true,
   verticalNavTitle = 'Navigation',
-  dropdownLabel = 'Select a nav',
-  searchbarLabel = 'Search your navs',
+  searchableNavLabel = 'Search or select a nav', // Combined label
   anchor = 'left',
   orientation,
   height = '80px',
   alignment = 'left',
   navname,
+  shrunkfontcolor = 'black',
+  unshrunkfontcolor = 'black',
+  backgroundcolor,
 }: NavProps): JSX.Element {
   // State for expanded navigation items
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
   const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
-  const [verticalNavWidth] = useState<number>(250) // Default width, no longer using goobs-cache
+  const [verticalNavWidth] = useState<number>(250) // Default width
 
   // Memoized navigation items
   const navs = useMemo(() => {
@@ -101,19 +103,20 @@ function Nav({
     return (
       <VerticalVariant
         items={navs}
-        showSearchbar={showSearchbar}
-        showDropdown={showDropdown}
+        showSearchableNav={showSearchableNav}
         showTitle={showTitle}
         showLine={showLine}
         verticalNavTitle={verticalNavTitle}
-        dropdownLabel={dropdownLabel}
-        searchbarLabel={searchbarLabel}
+        searchableNavLabel={searchableNavLabel}
         anchor={anchor}
         expandedNavs={expandedNavs}
         setExpandedNavs={setExpandedNavs}
         expandedSubnavs={expandedSubnavs}
         setExpandedSubnavs={setExpandedSubnavs}
         verticalNavWidth={`${verticalNavWidth}px`}
+        shrunkfontcolor={shrunkfontcolor}
+        unshrunkfontcolor={unshrunkfontcolor}
+        backgroundcolor={backgroundcolor} // Pass backgroundcolor to VerticalVariant
       />
     )
   } else {

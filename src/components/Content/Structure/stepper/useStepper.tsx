@@ -1,18 +1,15 @@
+'use client'
+
 import React from 'react'
-import {
-  CustomStepper,
-  Step,
-  StepLabel,
-} from './../../../../components/Stepper'
+import { CustomStepper, CustomStepperProps } from '../../../Stepper'
 import { columnconfig, cellconfig } from '../../../Grid'
-import { CustomStepperProps as BaseCustomStepperProps } from './../../../../components/Stepper'
 
 type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
   component?: columnconfig['component']
 }
 
 export interface ExtendedStepperProps
-  extends Omit<BaseCustomStepperProps, 'columnconfig'> {
+  extends Omit<CustomStepperProps, 'columnconfig'> {
   cellconfig?: cellconfig
   columnconfig?: ExtendedColumnConfig
 }
@@ -50,13 +47,7 @@ const useStepper = (grid: {
         ...cellconfig,
       },
       component: (
-        <CustomStepper key={`stepper-${index}`} steps={steps} {...restProps}>
-          {steps.map(step => (
-            <Step key={step.label}>
-              <StepLabel>{step.label}</StepLabel>
-            </Step>
-          ))}
-        </CustomStepper>
+        <CustomStepper key={`stepper-${index}`} steps={steps} {...restProps} />
       ),
     }
     return mergedConfig

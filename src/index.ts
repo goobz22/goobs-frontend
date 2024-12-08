@@ -3,8 +3,6 @@ import React from 'react'
 // Components
 import CustomButton from './components/Button'
 import CustomGrid, {
-  Alignment,
-  BorderProp,
   columnconfig,
   gridconfig,
   cellconfig,
@@ -37,6 +35,9 @@ import CustomToolbar, { ToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
 import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
 import QRCodeComponent, { QRCodeProps } from './components/QRCode'
+import SearchableDropdown, {
+  SearchableDropdownProps,
+} from './components/SearchableDropdown'
 
 // New imports
 import DateField from './components/DateField'
@@ -208,6 +209,7 @@ export { TransferList }
 export { StyledTooltip }
 export { formContainerStyle }
 export { QRCodeComponent }
+export { SearchableDropdown }
 
 // New named exports
 export { DateField }
@@ -227,6 +229,7 @@ export type { FormDataGridProps }
 export type { DatagridProps }
 export type { ColumnDef, RowData }
 export type { CellParams, HeaderParams }
+export type { SearchableDropdownProps }
 
 // Exporting ExtendedButtonProps
 export type { ExtendedButtonProps }
@@ -250,7 +253,7 @@ export type { ExtendedComplexEditorProps }
 // Type exports
 export type { CustomButtonProps }
 export type { CustomGridProps }
-export type { Alignment, BorderProp, columnconfig, gridconfig, cellconfig }
+export type { columnconfig, gridconfig, cellconfig }
 export type { FontFamily, TypographyVariant, TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
