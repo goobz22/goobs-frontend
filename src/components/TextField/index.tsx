@@ -30,6 +30,7 @@ export type TextFieldProps = (
     top?: number
     left?: number
   }
+  backgroundcolor?: string
   sx?: MuiTextFieldProps['sx']
   slotProps?: MuiTextFieldProps['slotProps']
 }
@@ -79,18 +80,19 @@ const TextField = React.memo<TextFieldProps>(props => {
     endAdornment,
     textAlign = 'left',
     slotProps: customSlotProps = {},
+    backgroundcolor,
     ...restProps
   } = props
 
   const inputStyle = useMemo<React.CSSProperties>(
     () => ({
-      backgroundColor: 'inherit',
+      backgroundColor: backgroundcolor || 'inherit',
       width: '100%',
       cursor: 'text',
       boxSizing: 'border-box',
       borderRadius: 5,
     }),
-    []
+    [backgroundcolor]
   )
 
   const handleChange = useCallback(
