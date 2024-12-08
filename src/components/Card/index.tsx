@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { JSX } from 'react'
 import { BoxProps } from '@mui/material'
 import { CustomStepperProps } from '../Stepper'
 import InventoryCard from './variants/inventory'
@@ -10,11 +12,7 @@ import DefaultCard from './variants/defaultconfig'
 import { columnconfig } from '../Grid'
 import { CustomButtonProps } from '../Button'
 
-/**
- * Props for the Card component.
- * Extends BoxProps from Material-UI and includes additional custom properties.
- */
-export interface CardProps extends BoxProps {
+type CardProps = Omit<BoxProps, 'children'> & {
   /** Title of the card */
   title?: string
   /** Whether to show an underline for the title */
@@ -124,11 +122,7 @@ export interface CardProps extends BoxProps {
   columnconfig?: columnconfig
 }
 
-/**
- * Card component that renders different card variants based on the provided props.
- * It supports various card types including default, inventory, pricing summary, product, and more.
- */
-const Card: React.FC<CardProps> = ({
+function Card({
   title,
   titleUnderline = true,
   body,
@@ -154,8 +148,7 @@ const Card: React.FC<CardProps> = ({
   productProps,
   productSummaryProps,
   ...rest
-}) => {
-  // Render the default card variant
+}: CardProps): JSX.Element | null {
   if (variant === 'default') {
     return (
       <DefaultCard
@@ -182,7 +175,6 @@ const Card: React.FC<CardProps> = ({
     )
   }
 
-  // Render the inventory card variant
   if (variant === 'inventory') {
     return (
       <InventoryCard
@@ -196,7 +188,6 @@ const Card: React.FC<CardProps> = ({
     )
   }
 
-  // Render the simple pricing summary card variant
   if (variant === 'pricingsummary') {
     return (
       <SimplePricingSummary
@@ -208,7 +199,6 @@ const Card: React.FC<CardProps> = ({
     )
   }
 
-  // Render the detailed pricing summary card variant
   if (variant === 'detailedpricingsummary') {
     return (
       <DetailedPricingSummary
@@ -220,14 +210,12 @@ const Card: React.FC<CardProps> = ({
     )
   }
 
-  // Render the product card variant
   if (variant === 'product') {
     return (
       <ProductCard width={width} height={height} {...productProps} {...rest} />
     )
   }
 
-  // Render the product summary card variant
   if (variant === 'productsummary') {
     return (
       <ProductSummaryCard
@@ -244,8 +232,10 @@ const Card: React.FC<CardProps> = ({
     )
   }
 
-  // Return null if no matching variant is found
   return null
 }
 
+Card.displayName = 'Card'
+
 export default Card
+export type { CardProps }

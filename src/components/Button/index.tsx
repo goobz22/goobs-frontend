@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { JSX } from 'react'
 import { Button, Box, ButtonProps } from '@mui/material'
 import Typography from '../Typography'
 import { SvgIconProps } from '@mui/material/SvgIcon'
@@ -84,7 +84,7 @@ const ContentWrapper = styled(Box)<{
   gap: '8px',
 }))
 
-const CustomButton: React.FC<CustomButtonProps> = ({
+function CustomButton({
   text,
   variant = 'contained',
   fontvariant = 'merriparagraph',
@@ -101,7 +101,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   fontlocation = 'center',
   sx,
   ...restProps
-}) => {
+}: CustomButtonProps): JSX.Element {
   const handleButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
   ): void => {
@@ -159,5 +159,4 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   )
 }
 
-CustomButton.displayName = 'CustomButton'
 export default CustomButton
