@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "type": "module",
   "description": "A comprehensive React-based UI library built on Material-UI, offering a wide range of customizable components including grids, typography, buttons, cards, forms, navigation, pricing tables, steppers, tooltips, accordions, and more. Designed for building responsive and consistent user interfaces with advanced features like form validation, theming, and code syntax highlighting.",
   "license": "MIT",
@@ -25,13 +25,18 @@
     "@mui/icons-material": "^6.1.10",
     "@mui/material": "^6.1.10",
     "@types/lodash": "^4.17.13",
+    "@types/react-datepicker": "^7.0.0",
     "highlight.js": "^11.10.0",
     "jotai": "^2.10.3",
     "lodash": "^4.17.21",
     "next": "15.0.4",
     "otplib": "^12.0.1",
     "react-datepicker": "^7.5.0",
-    "react-qr-code": "^2.0.15"
+    "react-qr-code": "^2.0.15",
+    "slate": "^0.112.0",
+    "slate-dom": "^0.111.0",
+    "slate-history": "^0.110.3",
+    "slate-react": "^0.112.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.0.4",
