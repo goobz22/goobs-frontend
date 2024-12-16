@@ -2,7 +2,7 @@
 import React from 'react'
 import PhoneNumberField from '../../../PhoneNumberField'
 import { columnconfig, cellconfig } from '../../../Grid'
-import { TextFieldProps } from '@mui/material'
+import type { TextFieldProps } from '../../../TextField'
 
 export type ExtendedPhoneNumberFieldProps = TextFieldProps & {
   columnconfig?: Partial<columnconfig>
