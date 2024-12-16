@@ -31,40 +31,115 @@ export type TextFieldProps = (
     left?: number
   }
   backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  inputfontcolor?: string
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  placeholdercolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
   sx?: MuiTextFieldProps['sx']
   slotProps?: MuiTextFieldProps['slotProps']
 }
 
-const StyledMuiTextField = styled(MuiTextField)<{
+interface StyledTextFieldProps {
   hasvalue: string
   textalign?: string
   paddingleft?: number
   paddingtop?: number
-}>(({ hasvalue, textalign = 'left' }) => ({
-  '& .MuiOutlinedInput-root': {
-    minHeight: '40px',
-    height: '40px',
-    '& fieldset': {
-      borderColor: hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)',
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  inputfontcolor?: string
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  placeholdercolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
+}
+
+const StyledMuiTextField = styled(MuiTextField, {
+  shouldForwardProp: prop =>
+    ![
+      'hasvalue',
+      'textalign',
+      'paddingleft',
+      'paddingtop',
+      'backgroundcolor',
+      'outlinecolor',
+      'fontcolor',
+      'inputfontcolor',
+      'shrunkfontcolor',
+      'unshrunkfontcolor',
+      'placeholdercolor',
+      'shrunklabelposition',
+    ].includes(prop as string),
+})<StyledTextFieldProps>(
+  ({
+    hasvalue,
+    textalign = 'left',
+    backgroundcolor,
+    outlinecolor,
+    fontcolor,
+    inputfontcolor,
+    shrunkfontcolor,
+    unshrunkfontcolor,
+    placeholdercolor,
+    shrunklabelposition,
+  }) => ({
+    '& .MuiOutlinedInput-root': {
+      minHeight: '40px',
+      height: '40px',
+      backgroundColor: backgroundcolor || 'inherit',
+      color: fontcolor || 'black',
+      '& fieldset': {
+        borderColor:
+          outlinecolor ||
+          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        ...(shrunklabelposition === 'aboveNotch' && {
+          legend: {
+            width: '0px !important',
+          },
+        }),
+      },
+      '&:hover fieldset': {
+        borderColor:
+          outlinecolor ||
+          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+      },
+      '&.Mui-focused fieldset': {
+        borderColor:
+          outlinecolor ||
+          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+      },
+      '& input': {
+        color: inputfontcolor || fontcolor || 'black',
+        '&::placeholder': {
+          color: placeholdercolor || 'rgba(0, 0, 0, 0.54)',
+          opacity: 1,
+        },
+      },
     },
-    '&:hover fieldset': {
-      borderColor: hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)',
+    '& .MuiInputLabel-root': {
+      color: unshrunkfontcolor || 'black',
+      '&.Mui-focused': {
+        color: shrunkfontcolor || 'black',
+      },
+      '&.MuiInputLabel-shrink': {
+        color: shrunkfontcolor || 'black',
+        ...(shrunklabelposition === 'aboveNotch' && {
+          transform: 'translate(0px, -17px) scale(0.75)',
+        }),
+        ...(shrunklabelposition === 'onNotch' && {
+          transform: 'translate(13px, -4px) scale(0.75)',
+        }),
+      },
     },
-    '&.Mui-focused fieldset': {
-      borderColor: hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)',
+    '& .MuiOutlinedInput-input': {
+      padding: '8px 14px',
+      textAlign: textalign,
     },
-  },
-  '& .MuiInputLabel-root': {
-    color: 'black',
-    '&.Mui-focused': {
-      color: 'black',
-    },
-  },
-  '& .MuiOutlinedInput-input': {
-    padding: '8px 14px',
-    textAlign: textalign,
-  },
-}))
+  })
+)
 
 const TextField = React.memo<TextFieldProps>(props => {
   const {
@@ -81,6 +156,13 @@ const TextField = React.memo<TextFieldProps>(props => {
     textAlign = 'left',
     slotProps: customSlotProps = {},
     backgroundcolor,
+    outlinecolor,
+    fontcolor,
+    inputfontcolor,
+    shrunkfontcolor,
+    unshrunkfontcolor,
+    placeholdercolor,
+    shrunklabelposition,
     ...restProps
   } = props
 
@@ -193,6 +275,14 @@ const TextField = React.memo<TextFieldProps>(props => {
         variant="outlined"
         hasvalue={hasValue}
         textalign={textAlign}
+        backgroundcolor={backgroundcolor}
+        outlinecolor={outlinecolor}
+        fontcolor={fontcolor}
+        inputfontcolor={inputfontcolor}
+        shrunkfontcolor={shrunkfontcolor}
+        unshrunkfontcolor={unshrunkfontcolor}
+        placeholdercolor={placeholdercolor}
+        shrunklabelposition={shrunklabelposition}
         {...restProps}
       />
     </Box>
