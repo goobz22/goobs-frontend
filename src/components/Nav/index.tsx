@@ -32,6 +32,10 @@ export interface NavProps {
   backgroundcolor?: string
   shrunkfontcolor?: string // Color of the label when shrunk
   unshrunkfontcolor?: string // Color of the label when not shrunk
+  titleUrl?: string // Changed from url to titleUrl
+  mobileOpen?: boolean // Controls mobile drawer open state
+  onClose?: () => void // Handler for closing mobile drawer
+  variant?: 'temporary' | 'permanent' // Drawer variant for mobile/desktop
 }
 
 /**
@@ -75,6 +79,10 @@ function Nav({
   shrunkfontcolor = 'black',
   unshrunkfontcolor = 'black',
   backgroundcolor,
+  titleUrl, // Changed from url to titleUrl
+  mobileOpen = false,
+  onClose,
+  variant = 'permanent',
 }: NavProps): JSX.Element {
   // State for expanded navigation items
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
@@ -116,7 +124,11 @@ function Nav({
         verticalNavWidth={`${verticalNavWidth}px`}
         shrunkfontcolor={shrunkfontcolor}
         unshrunkfontcolor={unshrunkfontcolor}
-        backgroundcolor={backgroundcolor} // Pass backgroundcolor to VerticalVariant
+        backgroundcolor={backgroundcolor}
+        titleUrl={titleUrl}
+        mobileOpen={mobileOpen}
+        onClose={onClose}
+        variant={variant}
       />
     )
   } else {

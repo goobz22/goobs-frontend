@@ -36,6 +36,10 @@ export interface VerticalVariantProps {
   backgroundcolor?: string
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
+  titleUrl?: string
+  mobileOpen?: boolean
+  onClose?: () => void
+  variant?: 'temporary' | 'permanent'
 }
 
 function VerticalVariant({
@@ -54,6 +58,10 @@ function VerticalVariant({
   backgroundcolor,
   shrunkfontcolor = white.main,
   unshrunkfontcolor = white.main,
+  titleUrl = '/',
+  mobileOpen = false,
+  onClose,
+  variant = 'permanent',
 }: VerticalVariantProps) {
   const router = useRouter()
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
@@ -68,17 +76,22 @@ function VerticalVariant({
       if (nav.trigger === 'route') {
         if (nav.route) {
           router.push(nav.route)
+          if (variant === 'temporary' && onClose) {
+            onClose()
+          }
         }
       } else if (nav.trigger === 'onClick') {
         if (nav.onClick) {
           nav.onClick()
+          if (variant === 'temporary' && onClose) {
+            onClose()
+          }
         }
       }
     },
-    [router]
+    [router, variant, onClose]
   )
 
-  // Adjusted handler to match the SearchableDropdown onChange signature
   const handleSearchableNavChange = useCallback(
     (newValue: { value: string } | null) => {
       const newVal = newValue ? newValue.value : null
@@ -297,6 +310,7 @@ function VerticalVariant({
               color: 'white',
             }}
             href={view.route ?? ''}
+            onClick={variant === 'temporary' ? onClose : undefined}
           >
             <MenuItem
               sx={{
@@ -327,35 +341,21 @@ function VerticalVariant({
       expandedSubnavs,
       setExpandedSubnavs,
       handleNavClick,
+      variant,
+      onClose,
     ]
   )
 
-  return (
-    <Drawer
-      variant="permanent"
-      anchor={anchor}
-      elevation={0}
-      sx={{
-        width: verticalNavWidth,
-        height: '100%',
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: verticalNavWidth,
-          border: 0,
-          zIndex: theme => theme.zIndex.drawer - 1,
-          backgroundColor: ocean.main,
-          pt: '17px',
-          boxSizing: 'border-box',
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       <Box px={`15px`}>
         {showTitle && (
           <Box pt="0px" pb="0px">
             <Link
-              href="/dashboard/"
+              href={titleUrl || '/'}
               passHref
               style={{ textDecoration: 'none' }}
+              onClick={variant === 'temporary' ? onClose : undefined}
             >
               <Typography
                 fontvariant="merrih4"
@@ -366,7 +366,7 @@ function VerticalVariant({
           </Box>
         )}
         {showSearchableNav && (
-          <Stack mt={0} spacing={0}>
+          <Stack mt={{ xs: '10px', md: '10px', lg: 0 }} spacing={0}>
             <Box
               sx={{
                 position: 'relative',
@@ -408,6 +408,34 @@ function VerticalVariant({
             )
             .map(item => renderItem(item, 0))
         : items.map(item => renderItem(item, 0))}
+    </>
+  )
+
+  return (
+    <Drawer
+      variant={variant}
+      anchor={anchor}
+      open={variant === 'temporary' ? mobileOpen : true}
+      onClose={onClose}
+      elevation={0}
+      sx={{
+        width: variant === 'permanent' ? verticalNavWidth : 'auto',
+        height: '100%',
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: verticalNavWidth,
+          border: 0,
+          zIndex: theme =>
+            variant === 'temporary'
+              ? theme.zIndex.drawer + 2
+              : theme.zIndex.drawer - 1,
+          backgroundColor: ocean.main,
+          pt: '17px',
+          boxSizing: 'border-box',
+        },
+      }}
+    >
+      {drawerContent}
     </Drawer>
   )
 }
