@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, forwardRef } from 'react'
-import { styled } from '@mui/material/styles'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
@@ -9,35 +8,8 @@ import TextField, { TextFieldProps } from '../TextField'
 export interface DateFieldProps
   extends Omit<TextFieldProps, 'onChange' | 'value' | 'endAdornment'> {
   onChange?: (date: Date | null) => void
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  label?: string
   value?: Date | null
 }
-
-const StyledTextField = styled(TextField)<{
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-}>(({ backgroundcolor, outlinecolor }) => ({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: backgroundcolor,
-    height: '40px',
-    '& fieldset': {
-      borderColor: outlinecolor,
-    },
-    '&:hover fieldset': {
-      borderColor: outlinecolor,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: outlinecolor,
-    },
-  },
-  '& .MuiInputBase-input': {
-    padding: '8px 14px',
-  },
-}))
 
 interface CustomInputProps {
   value?: string
@@ -61,9 +33,6 @@ CustomInput.displayName = 'CustomInput'
 
 const DateField: React.FC<DateFieldProps> = ({
   onChange,
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
   label = 'Select Date',
   value,
   ...rest
@@ -100,10 +69,8 @@ const DateField: React.FC<DateFieldProps> = ({
     const newValue = e.target.value
     const selectionStart = input.selectionStart || 0
 
-    // Keep the original value
     setInputValue(newValue)
 
-    // Try to parse the date parts
     const parts = newValue.split('/')
     if (parts.length === 3) {
       const month = parseInt(parts[0], 10)
@@ -125,7 +92,6 @@ const DateField: React.FC<DateFieldProps> = ({
       }
     }
 
-    // Maintain cursor position
     setTimeout(() => {
       if (selectionStart <= 2) {
         input.setSelectionRange(selectionStart, selectionStart)
@@ -173,7 +139,6 @@ const DateField: React.FC<DateFieldProps> = ({
         onChange(newDate)
       }
 
-      // Maintain cursor position
       setTimeout(() => {
         switch (selectedPart) {
           case 'month':
@@ -224,14 +189,11 @@ const DateField: React.FC<DateFieldProps> = ({
 
   return (
     <>
-      <StyledTextField
+      <TextField
         label={label}
         value={inputValue}
         onChange={handleInputChange}
         endAdornment={calendarIcon}
-        backgroundcolor={backgroundcolor}
-        outlinecolor={outlinecolor}
-        fontcolor={fontcolor}
         slotProps={{
           input: {
             readOnly: false,
