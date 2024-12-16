@@ -1,6 +1,6 @@
 'use client'
 
-import React, { JSX } from 'react'
+import React from 'react'
 import { styled } from '@mui/material/styles'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
 import MuiAccordionSummary, {
@@ -12,16 +12,16 @@ import MuiAccordionDetails, {
 import { ExpandMore } from '@mui/icons-material'
 import { black } from '../../styles/palette'
 
-type CustomAccordionProps = Omit<AccordionProps, 'children'> & {
-  children: NonNullable<React.ReactNode>
+type CustomAccordionProps = AccordionProps & {
+  children: React.ReactNode
 }
 
-type CustomAccordionSummaryProps = Omit<AccordionSummaryProps, 'children'> & {
-  children: NonNullable<React.ReactNode>
+type CustomAccordionSummaryProps = AccordionSummaryProps & {
+  children: React.ReactNode
 }
 
-type CustomAccordionDetailsProps = Omit<AccordionDetailsProps, 'children'> & {
-  children: NonNullable<React.ReactNode>
+type CustomAccordionDetailsProps = AccordionDetailsProps & {
+  children: React.ReactNode
 }
 
 const StyledAccordion = styled(MuiAccordion)({
@@ -42,7 +42,7 @@ const StyledAccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2),
 }))
 
-function Accordion({ children, ...props }: CustomAccordionProps): JSX.Element {
+function Accordion({ children, ...props }: CustomAccordionProps) {
   return (
     <StyledAccordion disableGutters {...props}>
       {children}
@@ -50,10 +50,7 @@ function Accordion({ children, ...props }: CustomAccordionProps): JSX.Element {
   )
 }
 
-function AccordionSummary({
-  children,
-  ...props
-}: CustomAccordionSummaryProps): JSX.Element {
+function AccordionSummary({ children, ...props }: CustomAccordionSummaryProps) {
   return (
     <StyledAccordionSummary
       expandIcon={<ExpandMore sx={{ color: black.main }} />}
@@ -64,10 +61,7 @@ function AccordionSummary({
   )
 }
 
-function AccordionDetails({
-  children,
-  ...props
-}: CustomAccordionDetailsProps): JSX.Element {
+function AccordionDetails({ children, ...props }: CustomAccordionDetailsProps) {
   return <StyledAccordionDetails {...props}>{children}</StyledAccordionDetails>
 }
 
