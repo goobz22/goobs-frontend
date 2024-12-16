@@ -1,3 +1,5 @@
+// src\components\ComplexTextEditor\SimpleEditor.tsx
+
 import React from 'react'
 import { Box, TextField } from '@mui/material'
 

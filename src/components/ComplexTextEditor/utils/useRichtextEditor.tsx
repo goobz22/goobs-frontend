@@ -15,7 +15,7 @@ import {
   InlineFormat,
   BlockFormat,
   AlignmentFormat,
-} from '@/components/ComplexTextEditor/types'
+} from '../types'
 
 const RichTextEditorConfig: RichTextEditorTypes = {
   Block: {

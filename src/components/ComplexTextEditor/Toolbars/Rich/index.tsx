@@ -27,7 +27,7 @@ import {
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { AlignmentFormat } from '@/components/ComplexTextEditor/types'
+import { AlignmentFormat } from '../../types'
 
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
@@ -51,19 +51,6 @@ export const AlignmentMenuItem = styled(MenuItem)({
 
 export const TextTypeMenuItem = styled(MenuItem)({
   '& .Mui-selected': { backgroundColor: '#E7F5FF' },
-  ':hover': {
-    backgroundColor: '#E7F5FF',
-  },
-})
-
-export const AlignmentButton = styled(ToolbarButton)({
-  width: '100%',
-  borderRadius: 0,
-  justifyContent: 'flex-start',
-  '& .MuiTouchRipple-root .MuiTouchRipple-child': {
-    borderRadius: 0,
-    backgroundColor: '#E7F5FF',
-  },
   ':hover': {
     backgroundColor: '#E7F5FF',
   },
@@ -234,40 +221,61 @@ const Toolbar: React.FC<ToolbarProps> = ({
             }}
           >
             <AlignmentMenuItem value={'left'}>
-              <AlignmentButton
+              <ToolbarButton
                 format="left"
                 editor={editor}
-                activeBackgroundColor="#E7F5FF"
+                sx={{
+                  width: '100%',
+                  borderRadius: 0,
+                  justifyContent: 'flex-start',
+                  ':hover': {
+                    backgroundColor: '#E7F5FF',
+                  },
+                }}
               >
                 <FormatAlignLeft fontSize="small" />
                 <Typography fontSize={'14px'} mx={1}>
                   left
                 </Typography>
-              </AlignmentButton>
+              </ToolbarButton>
             </AlignmentMenuItem>
             <AlignmentMenuItem value={'center'}>
-              <AlignmentButton
+              <ToolbarButton
                 format="center"
                 editor={editor}
-                activeBackgroundColor="#E7F5FF"
+                sx={{
+                  width: '100%',
+                  borderRadius: 0,
+                  justifyContent: 'flex-start',
+                  ':hover': {
+                    backgroundColor: '#E7F5FF',
+                  },
+                }}
               >
                 <FormatAlignCenter fontSize="small" />
                 <Typography fontSize={'14px'} mx={1}>
                   center
                 </Typography>
-              </AlignmentButton>
+              </ToolbarButton>
             </AlignmentMenuItem>
             <AlignmentMenuItem value={'right'}>
-              <AlignmentButton
+              <ToolbarButton
                 format="right"
                 editor={editor}
-                activeBackgroundColor="#E7F5FF"
+                sx={{
+                  width: '100%',
+                  borderRadius: 0,
+                  justifyContent: 'flex-start',
+                  ':hover': {
+                    backgroundColor: '#E7F5FF',
+                  },
+                }}
               >
                 <FormatAlignRight fontSize="small" />
                 <Typography fontSize={'14px'} mx={1}>
                   right
                 </Typography>
-              </AlignmentButton>
+              </ToolbarButton>
             </AlignmentMenuItem>
           </Select>
           {/* buttons */}

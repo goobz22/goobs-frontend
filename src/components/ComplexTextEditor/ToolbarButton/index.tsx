@@ -7,7 +7,7 @@ import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { InlineFormat, BlockFormat, AlignmentFormat } from '../types'
 
-interface ToolbarButtonProps extends IconButtonProps {
+export interface ToolbarButtonProps extends IconButtonProps {
   format?: InlineFormat | BlockFormat | AlignmentFormat
   children: React.ReactNode
   editor?: BaseEditor & ReactEditor & HistoryEditor

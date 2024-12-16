@@ -1,17 +1,15 @@
-import React, { useState } from 'react'
+// src\components\ComplexTextEditor\index.tsx
+
+import React, { useState, useEffect } from 'react'
 import { Box } from '@mui/material'
-import { Descendant } from 'slate'
-import RichEditor from './RichEditor'
-import MarkdownEditor from './MarkdownEditor'
 import SimpleEditor from './SimpleEditor'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
-import { RichTextEditorTypes } from './types'
 
 export type EditorType = 'simple' | 'markdown' | 'rich' | 'complex'
 
 export interface ComplexTextEditorProps {
-  value: Descendant[]
-  onChange?: () => void
+  value: string
+  onChange?: (val: string) => void
   label?: string
   minRows?: number
   accordion?: boolean
@@ -23,55 +21,48 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   onChange,
   label,
   minRows = 5,
-  accordion = false,
   editorType = 'complex',
 }) => {
+  // If editorType is complex, start in simple mode
   const [mode, setMode] = useState<EditorMode>(
     editorType === 'complex' ? 'simple' : editorType
   )
-  const [markdownMode, setMarkdownMode] = useState(false)
-  const [markdown, setMarkdown] = useState('')
-  const [simpleText, setSimpleText] = useState('')
+  const [simpleText, setSimpleText] = useState(value)
 
-  const setNewSlateValue = (value: RichTextEditorTypes['CustomElement'][]) => {
-    // Handle conversion between markdown and rich text
-    console.log('Converting markdown to rich text:', value)
+  useEffect(() => {
+    // If the input value changes from outside, update simpleText
+    setSimpleText(value)
+  }, [value])
+
+  const handleSimpleTextChange = (newVal: string) => {
+    setSimpleText(newVal)
+    if (onChange) {
+      onChange(newVal)
+    }
   }
 
   const renderEditor = () => {
-    switch (mode) {
-      case 'simple':
-        return (
-          <SimpleEditor
-            value={simpleText}
-            setValue={setSimpleText}
-            minRows={minRows}
-            label={label}
-          />
-        )
-      case 'rich':
-        return (
-          <RichEditor
-            value={value}
-            onChange={onChange}
-            label={label}
-            minRows={minRows}
-            accordion={accordion}
-          />
-        )
-      case 'markdown':
-        return (
-          <MarkdownEditor
-            markdown={markdown}
-            setMarkdown={setMarkdown}
-            markdownMode={markdownMode}
-            setMarkdownMode={setMarkdownMode}
-            setNewSlateValue={setNewSlateValue}
-          />
-        )
-      default:
-        return null
+    // For now, we only support 'simple' directly. You can expand to 'rich'/'markdown' if needed.
+    if (mode === 'simple') {
+      return (
+        <SimpleEditor
+          value={simpleText}
+          setValue={handleSimpleTextChange}
+          minRows={minRows}
+          label={label}
+        />
+      )
     }
+
+    // If you implement other modes (rich, markdown), handle them here.
+    return (
+      <SimpleEditor
+        value={simpleText}
+        setValue={handleSimpleTextChange}
+        minRows={minRows}
+        label={label}
+      />
+    )
   }
 
   return (
@@ -88,9 +79,9 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         <ComplexToolbar
           mode={mode}
           setMode={setMode}
-          markdownMode={markdownMode}
-          setMarkdownMode={setMarkdownMode}
-          setMarkdown={setMarkdown}
+          markdownMode={false}
+          setMarkdownMode={() => {}}
+          setMarkdown={() => {}}
         />
       )}
 

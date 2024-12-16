@@ -1,6 +1,6 @@
 'use server'
 
-import { RichTextEditorTypes } from '@/components/ComplexTextEditor/types'
+import { RichTextEditorTypes } from '../types'
 import React from 'react'
 
 // Simple regex patterns to identify bold and italic in markdown

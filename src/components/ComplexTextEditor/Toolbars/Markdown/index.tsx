@@ -6,6 +6,7 @@ import {
   SelectChangeEvent,
   Stack,
   Typography,
+  MenuItem,
 } from '@mui/material'
 import {
   Link,
@@ -22,18 +23,14 @@ import {
   FormatListNumbered,
   FormatListBulleted,
 } from '@mui/icons-material'
-import {
-  AlignmentButton,
-  AlignmentMenuItem,
-  TextType,
-  TextTypeMenuItem,
-} from '../Rich/index'
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { AlignmentFormat } from '@/components/ComplexTextEditor/types'
+import { AlignmentFormat } from '../../types'
 
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
+
+export type TextType = 'p' | 'h1' | 'h2' | 'h3'
 
 interface ToolbarMarkdownProps {
   editor?: CustomEditor
@@ -67,20 +64,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        spacing={1}
-      >
+    <Box>
+      <Stack direction="row" spacing={1}>
         {/* undo / redo */}
         <Box>
           <ToolbarButton buttonAction="undo" editor={editor}>
@@ -93,12 +78,6 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             onClick={onSwitchMode}
             markdownMode={markdownMode}
             setMarkdown={setMarkdown}
-            sx={{
-              fontSize: '14px',
-              borderRadius: '4px',
-              color: 'black',
-              border: '1px solid black',
-            }}
           >
             {switchModeLabel}
           </ToolbarButton>
@@ -108,145 +87,44 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           value={textType}
           onChange={handleTextTypeChange}
           variant="outlined"
-          sx={{
-            p: '8px',
-            width: '150px',
-            ':hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            },
-            ':active': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            },
-            '& .MuiSelect-select': { padding: 0 },
-            height: '34px',
-            '.MuiOutlinedInput-notchedOutline': { border: '1px solid black' },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              border: '1px solid black',
-            },
-          }}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                boxSizing: 'border-box',
-                width: '150px',
-                border: '1px solid black',
-                minWidth: 0,
-              },
-            },
-          }}
-          renderValue={value => {
-            if (value === 'p') {
-              return (
-                <Box display="flex">
-                  <Typography fontSize="14px">Paragraph Text</Typography>
-                </Box>
-              )
-            } else if (value === 'h1') {
-              return (
-                <Box display="flex">
-                  <Typography fontSize="14px">Heading 1</Typography>
-                </Box>
-              )
-            } else if (value === 'h2') {
-              return (
-                <Box display="flex">
-                  <Typography fontSize="14px">Heading 2</Typography>
-                </Box>
-              )
-            } else if (value === 'h3') {
-              return (
-                <Box display="flex">
-                  <Typography fontSize="14px">Heading 3</Typography>
-                </Box>
-              )
-            } else return <></>
-          }}
         >
-          <TextTypeMenuItem value={'p'}>
-            <Typography fontSize="14px">Paragraph Text</Typography>
-          </TextTypeMenuItem>
-          <TextTypeMenuItem value={'h1'}>
-            <Typography fontSize="24px">Heading 1</Typography>
-          </TextTypeMenuItem>
-          <TextTypeMenuItem value={'h2'}>
-            <Typography fontSize="20px">Heading 2</Typography>
-          </TextTypeMenuItem>
-          <TextTypeMenuItem value={'h3'}>
-            <Typography fontSize="16px">Heading 3</Typography>
-          </TextTypeMenuItem>
+          <MenuItem value={'p'}>
+            <Typography>Paragraph Text</Typography>
+          </MenuItem>
+          <MenuItem value={'h1'}>
+            <Typography>Heading 1</Typography>
+          </MenuItem>
+          <MenuItem value={'h2'}>
+            <Typography>Heading 2</Typography>
+          </MenuItem>
+          <MenuItem value={'h3'}>
+            <Typography>Heading 3</Typography>
+          </MenuItem>
         </Select>
         {/* alignment dropdown */}
         <Select
           value={alignValue}
           onChange={handleAlignChange}
           variant="outlined"
-          sx={{
-            p: '8px',
-            ':hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            },
-            ':active': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            },
-            '& .MuiSelect-select': { padding: 0 },
-            '.MuiOutlinedInput-notchedOutline': { border: 0 },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              border: 'none !important',
-            },
-          }}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                minWidth: 0,
-              },
-            },
-          }}
-          renderValue={value => {
-            if (value === 'left') {
-              return (
-                <Box display="flex">
-                  <FormatAlignLeft fontSize="small" />
-                </Box>
-              )
-            } else if (value === 'center') {
-              return (
-                <Box display="flex">
-                  <FormatAlignCenter fontSize="small" />
-                </Box>
-              )
-            } else if (value === 'right') {
-              return (
-                <Box display="flex">
-                  <FormatAlignRight fontSize="small" />
-                </Box>
-              )
-            } else return <></>
-          }}
         >
-          <AlignmentMenuItem value={'left'}>
-            <AlignmentButton format="left" activeBackgroundColor="#E7F5FF">
+          <MenuItem value={'left'}>
+            <ToolbarButton format="left">
               <FormatAlignLeft fontSize="small" />
-              <Typography fontSize={'14px'} mx={1}>
-                left
-              </Typography>
-            </AlignmentButton>
-          </AlignmentMenuItem>
-          <AlignmentMenuItem value={'center'}>
-            <AlignmentButton format="center" activeBackgroundColor="#E7F5FF">
+              <Typography>left</Typography>
+            </ToolbarButton>
+          </MenuItem>
+          <MenuItem value={'center'}>
+            <ToolbarButton format="center">
               <FormatAlignCenter fontSize="small" />
-              <Typography fontSize={'14px'} mx={1}>
-                center
-              </Typography>
-            </AlignmentButton>
-          </AlignmentMenuItem>
-          <AlignmentMenuItem value={'right'}>
-            <AlignmentButton format="right" activeBackgroundColor="#E7F5FF">
+              <Typography>center</Typography>
+            </ToolbarButton>
+          </MenuItem>
+          <MenuItem value={'right'}>
+            <ToolbarButton format="right">
               <FormatAlignRight fontSize="small" />
-              <Typography fontSize={'14px'} mx={1}>
-                right
-              </Typography>
-            </AlignmentButton>
-          </AlignmentMenuItem>
+              <Typography>right</Typography>
+            </ToolbarButton>
+          </MenuItem>
         </Select>
         {/* buttons */}
         <Box>
