@@ -69,6 +69,9 @@ import useComplexEditor, {
 import useSearchableDropdown, {
   ExtendedSearchableDropdownProps,
 } from './Structure/searchableDropdown/useSearchableDropdown'
+import useAccordion, {
+  ExtendedAccordionProps,
+} from './Structure/accordion/useAccordion'
 
 /**
  * Props for the ContentSection component.
@@ -87,6 +90,7 @@ export interface ContentSectionProps {
       | ExtendedSearchableDropdownProps[]
     complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
     typography?: TypographyProps | TypographyProps[]
+    accordion?: ExtendedAccordionProps | ExtendedAccordionProps[]
     radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
     link?: LinkProps | LinkProps[]
     button?: ExtendedButtonProps | ExtendedButtonProps[]
@@ -152,6 +156,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useSearchableDropdown(props))
   addToColumnConfigs(useTextField(props))
   addToColumnConfigs(useDateField(props))
+  addToColumnConfigs(useAccordion(props))
   addToColumnConfigs(useCheckbox(props))
   addToColumnConfigs(usePhoneNumber(props))
   addToColumnConfigs(useDropdown(props))
