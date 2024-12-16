@@ -9,7 +9,6 @@ import {
   SelectProps,
   FormHelperText,
   Box,
-  CircularProgress,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../styles/palette'
@@ -128,13 +127,6 @@ const StyledMenuItem = styled(MenuItem)(() => ({
   backgroundColor: white.main,
 }))
 
-const LoadingContainer = styled(Box)(() => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '50px',
-}))
-
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
@@ -199,23 +191,37 @@ const Dropdown: React.FC<DropdownProps> = ({
   onFocus,
   ...rest
 }) => {
-  const [selectedValue, setSelectedValue] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasSelection, setHasSelection] = useState(false)
+  // Determine initial selectedValue and hasSelection immediately
+  const externalValue = rest.value as string | undefined
+  let initialSelected = ''
+  let initialHasSelection = false
 
-  useEffect(() => {
+  if (externalValue !== undefined && externalValue !== '') {
+    initialSelected = externalValue
+    initialHasSelection = true
+  } else if (defaultValue) {
     const defaultOption = options.find(option => option.value === defaultValue)
     if (defaultOption) {
-      setSelectedValue(defaultOption.value)
-      setHasSelection(true)
+      initialSelected = defaultOption.value
+      initialHasSelection = true
     }
-    setIsLoading(false)
-  }, [defaultValue, options])
+  }
+
+  const [selectedValue, setSelectedValue] = useState<string>(initialSelected)
+  const [hasSelection, setHasSelection] = useState(initialHasSelection)
+
+  // Add useEffect to handle external value changes
+  useEffect(() => {
+    if (externalValue !== undefined) {
+      setSelectedValue(externalValue)
+      setHasSelection(externalValue !== '')
+    }
+  }, [externalValue])
 
   const handleChange: SelectProps['onChange'] = (event, child) => {
     const newValue = event.target.value as string
     setSelectedValue(newValue)
-    setHasSelection(true)
+    setHasSelection(newValue !== '')
     if (onChange) {
       onChange(event, child)
     }
@@ -234,17 +240,17 @@ const Dropdown: React.FC<DropdownProps> = ({
   }
 
   const renderMenuItem = (option: DropdownOption) => {
-    const label = capitalizeFirstLetter(option.value.replace(/_/g, ' '))
+    const itemLabel = capitalizeFirstLetter(option.value.replace(/_/g, ' '))
     if (!('attribute1' in option)) {
       return (
         <MenuItem key={option.value} value={option.value}>
-          <Typography fontvariant="merriparagraph" text={label} />
+          <Typography fontvariant="merriparagraph" text={itemLabel} />
         </MenuItem>
       )
     } else {
       return (
         <StyledMenuItem key={option.value} value={option.value}>
-          <Typography fontvariant="merriparagraph" text={label} />
+          <Typography fontvariant="merriparagraph" text={itemLabel} />
           <Typography
             fontvariant="merriparagraph"
             text={`${option.attribute1}${option.attribute2 ? ` | ${option.attribute2}` : ''}`}
@@ -253,14 +259,6 @@ const Dropdown: React.FC<DropdownProps> = ({
         </StyledMenuItem>
       )
     }
-  }
-
-  if (isLoading) {
-    return (
-      <LoadingContainer>
-        <CircularProgress size={24} />
-      </LoadingContainer>
-    )
   }
 
   return (
@@ -278,6 +276,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           unshrunkfontcolor={unshrunkfontcolor}
           shrunklabelposition={shrunklabelposition}
           hasvalue={hasSelection ? 'true' : 'false'}
+          shrink={hasSelection || Boolean(selectedValue)}
         >
           {label}
         </StyledInputLabel>
