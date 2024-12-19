@@ -29,35 +29,52 @@ const StyledButton = styled(Button, {
   backgroundcolor?: string
   iconlocation?: 'left' | 'right' | 'above'
   fontlocation?: 'left' | 'center' | 'right'
-}>(({ backgroundcolor, iconlocation, fontlocation }) => ({
-  minWidth: 'auto',
-  width: '100%',
-  height: '40px',
-  padding: '8px 16px',
-  display: 'flex',
-  flexDirection: iconlocation === 'above' ? 'column' : 'row',
-  alignItems: 'center',
-  justifyContent:
-    fontlocation === 'left'
-      ? 'flex-start'
-      : fontlocation === 'right'
-        ? 'flex-end'
-        : 'center',
-  gap: '8px',
-  ...(backgroundcolor && {
-    backgroundColor: backgroundcolor,
-    '&:hover': {
+}>(({ backgroundcolor, iconlocation, fontlocation }) => {
+  // Determine styles based on backgroundcolor
+  let backgroundStyles = {}
+  if (backgroundcolor && backgroundcolor !== 'none') {
+    backgroundStyles = {
       backgroundColor: backgroundcolor,
-      opacity: 0.9,
+      '&:hover': {
+        backgroundColor: backgroundcolor,
+        opacity: 0.9,
+      },
+    }
+  } else if (backgroundcolor === 'none') {
+    // No background, behave like a text button
+    backgroundStyles = {
+      backgroundColor: 'transparent',
+      '&:hover': {
+        backgroundColor: 'transparent',
+        opacity: 0.9,
+      },
+    }
+  }
+
+  return {
+    minWidth: 'auto',
+    width: '100%',
+    height: '40px',
+    padding: '8px 16px',
+    display: 'flex',
+    flexDirection: iconlocation === 'above' ? 'column' : 'row',
+    alignItems: 'center',
+    justifyContent:
+      fontlocation === 'left'
+        ? 'flex-start'
+        : fontlocation === 'right'
+          ? 'flex-end'
+          : 'center',
+    gap: '8px',
+    ...backgroundStyles,
+    '& .MuiButton-startIcon': {
+      margin: 0,
     },
-  }),
-  '& .MuiButton-startIcon': {
-    margin: 0,
-  },
-  '& .MuiButton-endIcon': {
-    margin: 0,
-  },
-}))
+    '& .MuiButton-endIcon': {
+      margin: 0,
+    },
+  }
+})
 
 const StyledBox = styled(Box)({
   display: 'flex',
