@@ -129,6 +129,9 @@ const PricingTable: React.FC<PricingProps> = props => {
     if (config.packagecolumns && config.packagecolumns.columnconfig) {
       headerColumnConfigs.push({
         ...config.packagecolumns.columnconfig,
+        // Add 5px margin above (margintop: 0.625) and to the right (marginright: 0.625)
+        margintop: 1,
+        marginright: 0.625,
         component: (
           <Dropdown
             label="Packages"
@@ -138,6 +141,7 @@ const PricingTable: React.FC<PricingProps> = props => {
             }))}
             defaultValue={selectedPackage}
             backgroundcolor={semiTransparentBlack.main}
+            shrunklabelposition="aboveNotch"
             outlinecolor={black.main}
             fontcolor={black.main}
             shrunkfontcolor={black.main}
@@ -177,6 +181,8 @@ const PricingTable: React.FC<PricingProps> = props => {
       if (feature.columnconfig) {
         featureColumnConfigs.push({
           ...feature.columnconfig,
+          margintop: 1,
+          paddingleft: 2,
           component: (
             <Box display="flex" alignItems="center">
               <Typography
@@ -207,6 +213,7 @@ const PricingTable: React.FC<PricingProps> = props => {
       if (feature.tiedtopackage && feature.tiedtopackage.columnconfig) {
         const tiedConfig: columnconfig = {
           ...feature.tiedtopackage.columnconfig,
+          margintop: 1,
           cellconfig: {
             minHeight: '40px',
           },
@@ -225,6 +232,8 @@ const PricingTable: React.FC<PricingProps> = props => {
         if (subFeature.columnconfig) {
           featureColumnConfigs.push({
             ...subFeature.columnconfig,
+            margintop: 1,
+            paddingleft: 3,
             component: (
               <Box display="flex" alignItems="center">
                 <Typography
@@ -255,6 +264,7 @@ const PricingTable: React.FC<PricingProps> = props => {
         if (subFeature.tiedtopackage && subFeature.tiedtopackage.columnconfig) {
           const tiedConfig: columnconfig = {
             ...subFeature.tiedtopackage.columnconfig,
+            margintop: 1,
             cellconfig: {
               minHeight: '40px',
             },
@@ -279,6 +289,7 @@ const PricingTable: React.FC<PricingProps> = props => {
 
       featureColumnConfigs.push({
         ...config.buttoncolumns.columnconfig,
+        margintop: 1,
         component: (
           <CustomButton
             variant="contained"

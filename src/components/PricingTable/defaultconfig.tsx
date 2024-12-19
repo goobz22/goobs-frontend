@@ -2,13 +2,16 @@ import { PricingProps } from './index'
 
 /**
  * Default configuration for the PricingTable component
+ *
+ * All margin and padding values are now defined as ResponsiveObject<number> directly
+ * in the columnconfig, allowing you to edit each breakpoint value individually.
  */
+
 const defaultConfig: PricingProps = {
   // Configuration for the header grid
   headerGridConfig: {
     gridname: 'pricingtableheader',
     alignment: 'center' as const,
-    margintop: 1,
     gridwidth: '100%',
   },
   // Configuration for the table title
@@ -19,11 +22,27 @@ const defaultConfig: PricingProps = {
       column: 1,
       gridname: 'pricingtableheader',
       alignment: 'left' as const,
-      marginleft: 3,
-      marginbottom: 1,
+      paddingleft: {
+        xs: 2,
+        sm: 2,
+        md: 2,
+        ms: 2,
+        ml: 2,
+        lg: 2,
+        xl: 2,
+      },
+      paddingtop: {
+        xs: 1,
+        sm: 1,
+        md: 1,
+        ms: 1,
+        ml: 1,
+        lg: 1,
+        xl: 1,
+      },
       mobilewidth: '100%',
       tabletwidth: '100%',
-      computerwidth: '100%',
+      computerwidth: '50%',
     },
   },
   // Configuration for package columns
@@ -31,10 +50,46 @@ const defaultConfig: PricingProps = {
     packagenames: ['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise'],
     columnconfig: {
       row: 1,
-      column: 2,
+      column: 1,
       gridname: 'pricingtableheader',
       alignment: 'center' as const,
-      mobilewidth: '80%',
+      paddingleft: {
+        xs: 2,
+        sm: 2,
+        md: 2,
+        ms: 2,
+        ml: 2,
+        lg: 2,
+        xl: 2,
+      },
+      paddingright: {
+        xs: 2,
+        sm: 2,
+        md: 2,
+        ms: 2,
+        ml: 2,
+        lg: 2,
+        xl: 2,
+      },
+      paddingtop: {
+        xs: 2.5,
+        sm: 2.5,
+        md: 2.5,
+        ms: 2.5,
+        ml: 2.5,
+        lg: 2.5,
+        xl: 2.5,
+      },
+      paddingbottom: {
+        xs: 1,
+        sm: 2,
+        md: 2,
+        ms: 2,
+        ml: 2,
+        lg: 2,
+        xl: 2,
+      },
+      mobilewidth: '100%',
       tabletwidth: '48%',
       computerwidth: '48%',
     },
@@ -250,10 +305,35 @@ const defaultConfig: PricingProps = {
     ],
     columnconfig: {
       row: 7,
-      column: 2,
+      column: 1,
       mobilewidth: '100%',
-      marginbottom: 1,
-      marginright: 1,
+      marginbottom: {
+        xs: 1,
+        sm: 1,
+        md: 1,
+        ms: 1,
+        ml: 1,
+        lg: 1,
+        xl: 1,
+      },
+      marginright: {
+        xs: 1,
+        sm: 1,
+        md: 1,
+        ms: 1,
+        ml: 1,
+        lg: 1,
+        xl: 1,
+      },
+      marginleft: {
+        xs: 1,
+        sm: 1,
+        md: 1,
+        ms: 1,
+        ml: 1,
+        lg: 1,
+        xl: 1,
+      },
       tabletwidth: '100%',
       computerwidth: '48%',
       gridname: 'pricingtablefeatures',
