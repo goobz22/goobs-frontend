@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState, useCallback } from 'react'
 import {
   Drawer,
@@ -40,6 +39,7 @@ export interface VerticalVariantProps {
   mobileOpen?: boolean
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
+  spacingfromtopofscreen?: string
 }
 
 function VerticalVariant({
@@ -62,6 +62,7 @@ function VerticalVariant({
   mobileOpen = false,
   onClose,
   variant = 'permanent',
+  spacingfromtopofscreen = '0px',
 }: VerticalVariantProps) {
   const router = useRouter()
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
@@ -432,6 +433,7 @@ function VerticalVariant({
           backgroundColor: ocean.main,
           pt: '17px',
           boxSizing: 'border-box',
+          marginTop: spacingfromtopofscreen,
         },
       }}
     >

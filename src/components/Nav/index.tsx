@@ -36,6 +36,7 @@ export interface NavProps {
   mobileOpen?: boolean // Controls mobile drawer open state
   onClose?: () => void // Handler for closing mobile drawer
   variant?: 'temporary' | 'permanent' // Drawer variant for mobile/desktop
+  spacingfromtopofscreen?: string // Spacing from top of screen
 }
 
 /**
@@ -83,6 +84,7 @@ function Nav({
   mobileOpen = false,
   onClose,
   variant = 'permanent',
+  spacingfromtopofscreen,
 }: NavProps): JSX.Element {
   // State for expanded navigation items
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
@@ -129,6 +131,7 @@ function Nav({
         mobileOpen={mobileOpen}
         onClose={onClose}
         variant={variant}
+        spacingfromtopofscreen={spacingfromtopofscreen}
       />
     )
   } else {
