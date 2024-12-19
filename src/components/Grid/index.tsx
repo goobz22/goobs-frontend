@@ -4,9 +4,6 @@ import React from 'react'
 import Grid2, { Grid2Props } from '@mui/material/Grid2'
 import { useMediaQuery } from '@mui/material'
 
-// Remove all theme creation and usage
-// We will manually define our media queries instead of using createTheme or ThemeProvider
-
 type Alignment = 'left' | 'center' | 'right' | 'inherit' | 'justify'
 type BorderProp = 'none' | 'solid'
 type WrapProp = 'nowrap' | 'wrap'
@@ -24,16 +21,34 @@ interface ResponsiveObject<T> {
 
 type ResponsiveValue<T> = T | ResponsiveObject<T>
 
+type cellconfig = {
+  border?: BorderProp
+  minHeight?: string
+  maxHeight?: string
+  width?: string
+  mobilewidth?: string
+  tabletwidth?: string
+  computerwidth?: string
+  borderColor?: string
+  backgroundColor?: string
+  onClick?: () => void
+  wrap?: WrapProp
+}
+
 type columnconfig = {
   row: number
   column: number
   gridname?: string
   alignment?: Alignment
   margintop?: ResponsiveValue<number>
-  columnwidth?: string
   marginbottom?: ResponsiveValue<number>
   marginright?: ResponsiveValue<number>
   marginleft?: ResponsiveValue<number>
+  paddingtop?: ResponsiveValue<number>
+  paddingbottom?: ResponsiveValue<number>
+  paddingright?: ResponsiveValue<number>
+  paddingleft?: ResponsiveValue<number>
+  columnwidth?: string
   component?: React.ReactNode
   bordercolor?: string
   cellconfig?: cellconfig
@@ -49,22 +64,12 @@ type gridconfig = {
   marginbottom?: ResponsiveValue<number>
   marginright?: ResponsiveValue<number>
   marginleft?: ResponsiveValue<number>
+  paddingtop?: ResponsiveValue<number>
+  paddingbottom?: ResponsiveValue<number>
+  paddingright?: ResponsiveValue<number>
+  paddingleft?: ResponsiveValue<number>
   gridwidth?: string
   bordercolor?: string
-}
-
-type cellconfig = {
-  border?: BorderProp
-  minHeight?: string
-  maxHeight?: string
-  width?: string
-  mobilewidth?: string
-  tabletwidth?: string
-  computerwidth?: string
-  borderColor?: string
-  backgroundColor?: string
-  onClick?: () => void
-  wrap?: WrapProp
 }
 
 type CustomGridProps = Omit<Grid2Props, 'children'> & {
@@ -134,6 +139,41 @@ function CustomGrid({
         ? 'flex-end'
         : 'center'
 
+  // Get responsive margin and padding values for the overall grid
+  const gridMarginTop = getResponsiveValue(
+    gridConfigValues?.margintop,
+    currentBreakpoint
+  )
+  const gridMarginBottom = getResponsiveValue(
+    gridConfigValues?.marginbottom,
+    currentBreakpoint
+  )
+  const gridMarginLeft = getResponsiveValue(
+    gridConfigValues?.marginleft,
+    currentBreakpoint
+  )
+  const gridMarginRight = getResponsiveValue(
+    gridConfigValues?.marginright,
+    currentBreakpoint
+  )
+
+  const gridPaddingTop = getResponsiveValue(
+    gridConfigValues?.paddingtop,
+    currentBreakpoint
+  )
+  const gridPaddingBottom = getResponsiveValue(
+    gridConfigValues?.paddingbottom,
+    currentBreakpoint
+  )
+  const gridPaddingLeft = getResponsiveValue(
+    gridConfigValues?.paddingleft,
+    currentBreakpoint
+  )
+  const gridPaddingRight = getResponsiveValue(
+    gridConfigValues?.paddingright,
+    currentBreakpoint
+  )
+
   const rows = Math.max(...(columnconfig || []).map(c => c.row || 1))
 
   return (
@@ -148,10 +188,16 @@ function CustomGrid({
         padding: 0,
         margin: 0,
         gap: 0,
+        // Apply grid-level margins and paddings
+        marginTop: gridMarginTop ? `${gridMarginTop * 8}px` : 0,
+        marginBottom: gridMarginBottom ? `${gridMarginBottom * 8}px` : 0,
+        marginLeft: gridMarginLeft ? `${gridMarginLeft * 8}px` : 0,
+        marginRight: gridMarginRight ? `${gridMarginRight * 8}px` : 0,
+        paddingTop: gridPaddingTop ? `${gridPaddingTop * 8}px` : 0,
+        paddingBottom: gridPaddingBottom ? `${gridPaddingBottom * 8}px` : 0,
+        paddingLeft: gridPaddingLeft ? `${gridPaddingLeft * 8}px` : 0,
+        paddingRight: gridPaddingRight ? `${gridPaddingRight * 8}px` : 0,
         // Remove or adjust the child selector that sets margin:0
-        // If we must not remove code, we can make it more specific so it doesn't override column margins.
-        // Change '& > *' to a more specific selector that doesn't conflict with column Grid2 items:
-        // For example, limit it to direct child elements that are not Grid2:
         '& > *:not(.grid-column)': {
           border: 'none !important',
           padding: 0,
@@ -221,6 +267,7 @@ function CustomGrid({
                     ? 'flex-end'
                     : 'center'
 
+              // Get responsive margin and padding values for the column
               const marginTop = getResponsiveValue(
                 currentColumnConfig?.margintop,
                 currentBreakpoint
@@ -238,6 +285,23 @@ function CustomGrid({
                 currentBreakpoint
               )
 
+              const paddingTop = getResponsiveValue(
+                currentColumnConfig?.paddingtop,
+                currentBreakpoint
+              )
+              const paddingBottom = getResponsiveValue(
+                currentColumnConfig?.paddingbottom,
+                currentBreakpoint
+              )
+              const paddingLeft = getResponsiveValue(
+                currentColumnConfig?.paddingleft,
+                currentBreakpoint
+              )
+              const paddingRight = getResponsiveValue(
+                currentColumnConfig?.paddingright,
+                currentBreakpoint
+              )
+
               return (
                 <Grid2
                   key={`column-${columnIndex}`}
@@ -252,8 +316,8 @@ function CustomGrid({
                     flexShrink: hasFixedWidth ? 0 : 1,
                     flexBasis: hasFixedWidth ? columnWidth : 'auto',
                     height: 'fit-content',
-                    padding: 0,
-                    // Add !important to ensure we override any parent styles
+
+                    // Apply margin
                     marginLeft: marginLeft
                       ? `${marginLeft * 8}px !important`
                       : '0 !important',
@@ -266,6 +330,21 @@ function CustomGrid({
                     marginBottom: marginBottom
                       ? `${marginBottom * 8}px !important`
                       : '0 !important',
+
+                    // Apply padding
+                    paddingLeft: paddingLeft
+                      ? `${paddingLeft * 8}px !important`
+                      : '0 !important',
+                    paddingRight: paddingRight
+                      ? `${paddingRight * 8}px !important`
+                      : '0 !important',
+                    paddingTop: paddingTop
+                      ? `${paddingTop * 8}px !important`
+                      : '0 !important',
+                    paddingBottom: paddingBottom
+                      ? `${paddingBottom * 8}px !important`
+                      : '0 !important',
+
                     border: 'none',
                     backgroundColor: currentCellConfig?.backgroundColor,
                     minHeight: 'min-content',
