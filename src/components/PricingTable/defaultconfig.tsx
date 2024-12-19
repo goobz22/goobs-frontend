@@ -307,6 +307,15 @@ const defaultConfig: PricingProps = {
       row: 7,
       column: 1,
       mobilewidth: '100%',
+      margintop: {
+        xs: 2,
+        sm: 2,
+        md: 2,
+        ms: 2,
+        ml: 2,
+        lg: 2,
+        xl: 2,
+      },
       marginbottom: {
         xs: 1,
         sm: 1,
