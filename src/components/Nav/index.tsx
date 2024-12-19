@@ -37,6 +37,8 @@ export interface NavProps {
   onClose?: () => void // Handler for closing mobile drawer
   variant?: 'temporary' | 'permanent' // Drawer variant for mobile/desktop
   spacingfromtopofscreen?: string // Spacing from top of screen
+  marginabovetitle?: string // Margin above the title in vertical variant
+  marginbelowtitle?: string // Margin below the title in vertical variant
 }
 
 /**
@@ -85,6 +87,8 @@ function Nav({
   onClose,
   variant = 'permanent',
   spacingfromtopofscreen,
+  marginabovetitle = '0px',
+  marginbelowtitle = '0px',
 }: NavProps): JSX.Element {
   // State for expanded navigation items
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
@@ -132,6 +136,8 @@ function Nav({
         onClose={onClose}
         variant={variant}
         spacingfromtopofscreen={spacingfromtopofscreen}
+        marginabovetitle={marginabovetitle}
+        marginbelowtitle={marginbelowtitle}
       />
     )
   } else {

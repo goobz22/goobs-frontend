@@ -40,6 +40,8 @@ export interface VerticalVariantProps {
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
   spacingfromtopofscreen?: string
+  marginabovetitle?: string
+  marginbelowtitle?: string
 }
 
 function VerticalVariant({
@@ -63,6 +65,8 @@ function VerticalVariant({
   onClose,
   variant = 'permanent',
   spacingfromtopofscreen = '0px',
+  marginabovetitle = '0px',
+  marginbelowtitle = '0px',
 }: VerticalVariantProps) {
   const router = useRouter()
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
@@ -351,7 +355,7 @@ function VerticalVariant({
     <>
       <Box px={`15px`}>
         {showTitle && (
-          <Box pt="0px" pb="0px">
+          <Box mt={marginabovetitle} mb={marginbelowtitle}>
             <Link
               href={titleUrl || '/'}
               passHref

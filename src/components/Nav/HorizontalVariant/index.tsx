@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { Box, Tabs, Tab } from '@mui/material'
+import { AppBar, Toolbar, Box, Tabs, Tab } from '@mui/material'
 import { NavProps, SubNav, View } from '../index'
 import { usePathname } from 'next/navigation'
 
@@ -19,8 +19,7 @@ export interface HorizontalVariantProps {
 
 function HorizontalVariant({
   items,
-  height = '80px',
-  alignment = 'left',
+  height = '48px',
   navname = '',
 }: HorizontalVariantProps) {
   const [activeTabValues, setActiveTabValues] = useState<
@@ -63,83 +62,110 @@ function HorizontalVariant({
   }
 
   return (
-    <Box
+    <AppBar
+      position="sticky"
       sx={{
-        flexGrow: 1,
-        bgcolor: 'black',
-        display: 'flex',
-        height: height,
-        justifyContent: alignment,
-        paddingLeft: '5px',
-        paddingRight: '5px',
+        backgroundColor: 'black',
+        color: 'white',
       }}
     >
-      <Tabs
-        value={activeTabValues[navname]?.tabId || false}
-        onChange={handleTabChange}
-        aria-label="nav tabs"
+      <Toolbar
+        disableGutters
         sx={{
-          height: height,
-          '& .MuiTabs-flexContainer': {
-            height: '100%',
-          },
-          '& .MuiTab-root': {
-            height: '100%',
-            minHeight: 'unset',
-          },
+          paddingLeft: 0,
+          paddingRight: 0,
+          height: `${height} !important`,
+          minHeight: `${height} !important`,
+          borderTop: '1px solid white',
         }}
       >
-        {items.map((item: NavProps | SubNav | View) => {
-          if ('orientation' in item) {
-            const tab = item as NavProps
-            return (
-              <Tab
-                key={tab.title}
-                value={tab.title || ''}
-                label={tab.title || ''}
-                onClick={() => handleTabClick(tab)}
-                sx={{
-                  minHeight: 0,
-                  textTransform: 'none',
-                  border: 'none',
-                  boxSizing: 'border-box',
-                  backgroundColor: 'black',
-                  color: '#fff',
-                  fontWeight: 500,
-                  fontFamily: 'Merriweather',
-                  fontSize: 16,
-                  height: height,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                  '& .MuiTouchRipple-root': {
-                    color: '#fff',
-                  },
-                  '&.Mui-selected': {
-                    color: '#fff',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: '#fff',
-                  },
-                  ...(tab.hasleftborder === 'true' && {
-                    borderLeft: '1px solid white',
-                  }),
-                  ...(tab.hasrightborder === 'true' && {
-                    borderRight: '1px solid white',
-                  }),
-                  width: 'auto',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  px: 4,
-                }}
-              />
-            )
-          }
-          return null
-        })}
-      </Tabs>
-    </Box>
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              height: height,
+              justifyContent: 'flex-start',
+              paddingLeft: 0,
+              paddingRight: 0,
+            }}
+          >
+            <Tabs
+              value={activeTabValues[navname]?.tabId || false}
+              onChange={handleTabChange}
+              aria-label="nav tabs"
+              sx={{
+                height: height,
+                '& .MuiTabs-flexContainer': {
+                  height: '100%',
+                },
+                '& .MuiTab-root': {
+                  height: '100%',
+                  minHeight: 'unset',
+                },
+              }}
+            >
+              {items.map((item: NavProps | SubNav | View) => {
+                if ('orientation' in item) {
+                  const tab = item as NavProps
+                  return (
+                    <Tab
+                      key={tab.title}
+                      value={tab.title || ''}
+                      label={tab.title || ''}
+                      onClick={() => handleTabClick(tab)}
+                      sx={{
+                        minHeight: 0,
+                        textTransform: 'none',
+                        border: 'none',
+                        boxSizing: 'border-box',
+                        backgroundColor: 'black',
+                        color: '#fff',
+                        fontWeight: 500,
+                        fontFamily: 'Merriweather',
+                        fontSize: 16,
+                        height: height,
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        '& .MuiTouchRipple-root': {
+                          color: '#fff',
+                        },
+                        '&.Mui-selected': {
+                          color: '#fff',
+                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: '#fff',
+                        },
+                        ...(tab.hasleftborder === 'true' && {
+                          borderLeft: '1px solid white',
+                        }),
+                        ...(tab.hasrightborder === 'true' && {
+                          borderRight: '1px solid white',
+                        }),
+                        width: 'auto',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        px: 4,
+                      }}
+                    />
+                  )
+                }
+                return null
+              })}
+            </Tabs>
+          </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   )
 }
 
