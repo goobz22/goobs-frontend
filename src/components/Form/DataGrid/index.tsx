@@ -44,6 +44,7 @@ function FormDataGrid({ title, description, datagrid }: FormDataGridProps) {
             width: '100%',
             textAlign: 'left',
             fontFamily: 'Merriweather',
+            marginLeft: 2,
             fontSize: '1.5rem',
             fontWeight: 400,
             color: 'black',
@@ -57,6 +58,7 @@ function FormDataGrid({ title, description, datagrid }: FormDataGridProps) {
             textAlign: 'left',
             fontFamily: 'Merriweather',
             fontSize: '1.25rem',
+            marginLeft: 2,
             fontWeight: 400,
             color: 'black',
           }}
