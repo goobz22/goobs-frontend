@@ -98,6 +98,7 @@ function CustomFooter({
               text="Manage Columns"
               fontvariant="merriparagraph"
               fontcolor="black"
+              backgroundcolor="none"
               icon={<ShowHideEyeIcon visible={true} />}
               iconcolor="black"
               iconlocation="left"
