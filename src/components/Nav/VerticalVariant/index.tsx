@@ -113,6 +113,7 @@ function VerticalVariant({
       activeAndHoverColor = semiTransparentWhite.main
     ) => {
       if ('title' in item && 'subnavs' in item) {
+        // This is a NavProps item (top-level nav)
         const nav = item as NavProps
         const isExpanded = expandedNavs.includes(nav.title ?? '')
         return (
@@ -195,9 +196,11 @@ function VerticalVariant({
           </MuiAccordion>
         )
       } else if ('title' in item && 'views' in item) {
+        // This is a SubNav item
         const subnav = item as SubNav
         const isExpanded = expandedSubnavs.includes(subnav.title ?? '')
-        if (subnav.views?.length === 0) {
+        if (!subnav.views || subnav.views.length === 0) {
+          // SubNav with no views, just a route
           return (
             <Link
               key={subnav.title}
@@ -218,6 +221,15 @@ function VerticalVariant({
                     backgroundColor: activeAndHoverColor,
                   },
                 }}
+                onClick={() => {
+                  if (
+                    subnav.trigger === 'route' &&
+                    variant === 'temporary' &&
+                    onClose
+                  ) {
+                    onClose()
+                  }
+                }}
               >
                 <Typography
                   fontvariant="merrih6"
@@ -228,6 +240,7 @@ function VerticalVariant({
             </Link>
           )
         } else {
+          // SubNav with views
           return (
             <MuiAccordion
               key={subnav.title}
@@ -306,6 +319,7 @@ function VerticalVariant({
           )
         }
       } else if ('title' in item && 'route' in item) {
+        // This is a View item
         const view = item as View
         return (
           <Link
@@ -315,7 +329,15 @@ function VerticalVariant({
               color: 'white',
             }}
             href={view.route ?? ''}
-            onClick={variant === 'temporary' ? onClose : undefined}
+            onClick={() => {
+              if (
+                view.trigger === 'route' &&
+                variant === 'temporary' &&
+                onClose
+              ) {
+                onClose()
+              }
+            }}
           >
             <MenuItem
               sx={{

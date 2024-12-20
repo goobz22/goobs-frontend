@@ -50,6 +50,7 @@ export type SubNav = {
   subtitle?: string // Subtitle for the sub-nav
   views?: View[] // Views within the sub-nav
   navname?: string // Name of the sub-nav
+  trigger?: 'route' | 'onClick' | 'routeonhorizontal' // Trigger type for the sub-nav
 }
 
 /**
@@ -60,6 +61,7 @@ export type View = {
   title?: string // Title of the view
   subtitle?: string // Subtitle for the view
   navname?: string // Name of the view
+  trigger?: 'route' | 'onClick' | 'routeonhorizontal' // Trigger type for the view
 }
 
 /**
