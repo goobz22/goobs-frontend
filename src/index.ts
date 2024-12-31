@@ -28,7 +28,7 @@ import {
 } from './components/Accordion'
 import Card, { CardProps } from './components/Card'
 import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
-import Nav, { NavProps } from './components/Nav'
+import Nav, { NavProps, NavItem } from './components/Nav' // <-- Vertical-only Nav
 import PricingTable, { PricingProps } from './components/PricingTable'
 import { CustomStepper, CustomStepperProps } from './components/Stepper'
 import CustomToolbar, { ToolbarProps } from './components/Toolbar'
@@ -39,6 +39,9 @@ import SearchableDropdown, {
   SearchableDropdownProps,
 } from './components/SearchableDropdown'
 
+// Here is the new horizontal `Tabs` import
+import Tabs, { TabsProps } from './components/Tabs'
+
 // New imports
 import DateField from './components/DateField'
 import Dropdown, { DropdownOption } from './components/Dropdown'
@@ -48,13 +51,15 @@ import PasswordField from './components/PasswordField'
 import PhoneNumberField from './components/PhoneNumberField'
 import Searchbar from './components/Searchbar'
 import TextField from './components/TextField'
+
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
 import type { FormDataGridProps } from './components/Form/DataGrid'
+
 // Animations
 import { Animation } from './components/Content/Structure/animations'
 
-// Importing ExtendedButtonProps from useButton
+// Importing Extended Props
 import { ExtendedComplexEditorProps } from './components/Content/Structure/complexeditor/useComplexEditor'
 import { ExtendedButtonProps } from './components/Content/Structure/button/useButton'
 import { ExtendedTypographyProps } from './components/Content/Structure/typography/useGridTypography'
@@ -190,7 +195,10 @@ declare type PhoneNumberFieldProps = React.ComponentProps<
 declare type SearchbarProps = React.ComponentProps<typeof Searchbar>
 declare type TextFieldProps = React.ComponentProps<typeof TextField>
 
-// Named exports
+/* -------------------------------------------------------------------------- */
+/*                            Named Component Exports                         */
+/* -------------------------------------------------------------------------- */
+
 export { CustomButton }
 export { CustomGrid }
 export { Typography }
@@ -201,7 +209,7 @@ export { ContentSection }
 export { Accordion, AccordionSummary, AccordionDetails }
 export { Card }
 export { CodeCopy }
-export { Nav }
+export { Nav } // vertical-only Nav
 export { PricingTable }
 export { CustomStepper }
 export { CustomToolbar }
@@ -210,6 +218,9 @@ export { StyledTooltip }
 export { formContainerStyle }
 export { QRCodeComponent }
 export { SearchableDropdown }
+
+// Horizontal Tabs export
+export { Tabs }
 
 // New named exports
 export { DateField }
@@ -224,14 +235,17 @@ export { TextField }
 // Add FormDataGrid to named exports
 export { FormDataGrid }
 
-// Add FormDataGrid type to type exports
+/* -------------------------------------------------------------------------- */
+/*                           Named Type Exports                                */
+/* -------------------------------------------------------------------------- */
+
 export type { FormDataGridProps }
 export type { DatagridProps }
 export type { ColumnDef, RowData }
 export type { CellParams, HeaderParams }
 export type { SearchableDropdownProps }
 
-// Exporting ExtendedButtonProps
+// Extended Props
 export type { ExtendedButtonProps }
 export type { ExtendedTypographyProps }
 export type { ExtendedTextFieldProps }
@@ -250,7 +264,11 @@ export type { ExtendedRadioGroupProps }
 export type { ExtendedPhoneNumberFieldProps }
 export type { ExtendedComplexEditorProps }
 
-// Type exports
+/* -------------------------------------------------------------------------- */
+/*                           Additional Type Exports                           */
+/* -------------------------------------------------------------------------- */
+
+// "Local" type exports for existing components
 export type { CustomButtonProps }
 export type { CustomGridProps }
 export type { columnconfig, gridconfig, cellconfig }
@@ -261,7 +279,7 @@ export type { PopupFormProps }
 export type { ContentSectionProps }
 export type { CardProps }
 export type { CodeCopyProps }
-export type { NavProps }
+export type { NavProps } // vertical-only
 export type { PricingProps }
 export type { CustomStepperProps }
 export type { ToolbarProps }
@@ -272,7 +290,7 @@ export type { ExtendedQRCodeProps }
 export type { ExtendedDropdownProps }
 export type { ExtendedDateFieldProps }
 
-// Additional type exports for the newly declared types
+// Additional types for newly declared fields
 export type { TypographyComponentProps }
 export type { ConfirmationCodeInputProps }
 export type { RadioGroupComponentProps }
@@ -299,10 +317,19 @@ export type { PhoneNumberFieldProps }
 export type { SearchbarProps }
 export type { TextFieldProps }
 
-// Animation type export
+// Horizontal Tabs Props
+export type { TabsProps }
+export type { NavItem }
+
+/* -------------------------------------------------------------------------- */
+/*                             Animation Exports                               */
+/* -------------------------------------------------------------------------- */
+
 export type { Animation }
 
-// Color exports
+/* -------------------------------------------------------------------------- */
+/*                            Color Exports                                   */
+/* -------------------------------------------------------------------------- */
 export {
   moss,
   aqua,
@@ -330,7 +357,9 @@ export {
   greyborder,
 }
 
-// Typography exports
+/* -------------------------------------------------------------------------- */
+/*                           Typography Exports                                */
+/* -------------------------------------------------------------------------- */
 export {
   arapeyh1,
   arapeyh2,
