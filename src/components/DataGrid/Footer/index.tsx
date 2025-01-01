@@ -9,7 +9,7 @@ import TablePagination from '@mui/material/TablePagination'
 import ManageColumn from '../ManageColumn'
 import { ColumnDef } from '../Table'
 import CustomButton from '../../Button'
-import ShowHideEyeIcon from '@/components/Icons/ShowHideEye'
+import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
 export interface CustomFooterProps {
   page: number
