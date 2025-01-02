@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react'
 import { Box } from '@mui/material'
-import { useAtomValue } from 'jotai'
-import { columnVisibilityAtom } from '../Jotai/atom'
 import { VerticalDivider } from '../VerticalDivider'
 import TablePagination from '@mui/material/TablePagination'
 import ManageColumn from '../ManageColumn'
@@ -30,7 +28,6 @@ function CustomFooter({
 }: CustomFooterProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [checkboxWidth] = useState(45)
-  const columnVisibility = useAtomValue(columnVisibilityAtom)
 
   const handleOpen = () => {
     console.log('Footer handleOpen')
@@ -42,13 +39,8 @@ function CustomFooter({
     setIsOpen(false)
   }
 
-  // Calculate total width based on visible columns only
-  const totalWidth = columns.reduce((sum, col) => {
-    if (columnVisibility[col.field] !== false) {
-      return sum + (col.width || 150)
-    }
-    return sum
-  }, 0)
+  // We no longer compute or apply a totalWidth based on columns.
+  // The footer simply fills the view (100%).
 
   const totalPages = Math.ceil(rowCount / pageSize)
 
@@ -56,11 +48,13 @@ function CustomFooter({
     <Box
       className="custom-footer-container"
       sx={{
-        width: `${totalWidth}px`,
+        // Fill the view, ignoring any column widths
+        width: '100%',
         minWidth: '100%',
         height: '56px',
         position: 'sticky',
         left: 0,
+        // The margin-left offset can match your table's design (often equal to checkbox width)
         marginLeft: `${checkboxWidth}px`,
       }}
     >
@@ -162,6 +156,8 @@ function CustomFooter({
           />
         </Box>
       </Box>
+
+      {/* ManageColumn modal */}
       <ManageColumn open={isOpen} handleClose={handleClose} columns={columns} />
     </Box>
   )
