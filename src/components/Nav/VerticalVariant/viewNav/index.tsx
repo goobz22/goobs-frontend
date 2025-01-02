@@ -21,7 +21,6 @@ const ViewNav: FC<ViewNavProps> = ({
   route,
   trigger,
   onClick,
-  level,
   activeAndHoverColor = semiTransparentWhite.main,
   onClose,
   variant,
@@ -49,7 +48,8 @@ const ViewNav: FC<ViewNavProps> = ({
       <MenuItem
         sx={{
           color: white.main,
-          pl: level + 6,
+          // Replicates the SubNavComponent indentation:
+          marginLeft: '50px',
           whiteSpace: 'nowrap',
           '&:hover': {
             backgroundColor: activeAndHoverColor,

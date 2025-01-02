@@ -7,14 +7,16 @@ import { Typography } from '../Typography'
 import SearchableDropdown from '../SearchableDropdown'
 import { white, ocean, semiTransparentWhite } from '../../styles/palette'
 
-// Sub-components for mainNav, subNav, viewNav
-import MainNav from './VerticalVariant/mainNav'
-import SubNavComponent from './VerticalVariant/subNav'
+// New imports for split components
+import ExpandingNav from './VerticalVariant/mainNav/expanding'
+import ListNav from './VerticalVariant/mainNav/list'
+import ExpandingSubNav from './VerticalVariant/subNav/expanding'
+import ListSubNav from './VerticalVariant/subNav/list'
 import ViewNav from './VerticalVariant/viewNav'
 
-/* -------------------------------------------------------------------------- */
-/*                                 INTERFACES                                 */
-/* -------------------------------------------------------------------------- */
+// --------------------------------------------------------------------------
+// INTERFACES
+// --------------------------------------------------------------------------
 
 /**
  * A single interface that covers all vertical nav items:
@@ -90,9 +92,9 @@ export interface NavProps {
   marginbelowtitle?: string
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         SINGLE CONST NAV COMPONENT                         */
-/* -------------------------------------------------------------------------- */
+// --------------------------------------------------------------------------
+// SINGLE CONST NAV COMPONENT
+// --------------------------------------------------------------------------
 
 const Nav: FC<NavProps> = ({
   items = [],
@@ -171,46 +173,72 @@ const Nav: FC<NavProps> = ({
       activeAndHoverColor = semiTransparentWhite.main
     ) => {
       switch (item.navType) {
+        // 1) MAIN NAV
         case 'mainNav': {
           const hasChildren = !!item.subnavs?.length
-          return (
-            <MainNav
-              key={item.title}
-              title={item.title}
-              hasChildren={hasChildren}
-              expandedNavs={expandedNavs}
-              setExpandedNavs={setExpandedNavs}
-              onClick={() => handleNavClick(item)}
-              level={level}
-              activeAndHoverColor={activeAndHoverColor}
-            >
-              {item.subnavs?.map(subItem =>
-                renderItem(subItem, level + 1, activeAndHoverColor)
-              )}
-            </MainNav>
-          )
+          if (hasChildren) {
+            // Render the expanding version
+            return (
+              <ExpandingNav
+                key={item.title}
+                title={item.title}
+                expandedNavs={expandedNavs}
+                setExpandedNavs={setExpandedNavs}
+                onClick={() => handleNavClick(item)}
+                level={level}
+              >
+                {item.subnavs?.map(subItem =>
+                  renderItem(subItem, level + 1, activeAndHoverColor)
+                )}
+              </ExpandingNav>
+            )
+          } else {
+            // Render the simple list version (no children)
+            return (
+              <ListNav
+                key={item.title}
+                title={item.title}
+                onClick={() => handleNavClick(item)}
+                level={level}
+              />
+            )
+          }
         }
+
+        // 2) SUB NAV
         case 'subNav': {
           const hasChildren = !!item.views?.length
-          return (
-            <SubNavComponent
-              key={item.title}
-              title={item.title}
-              route={item.route}
-              trigger={item.trigger}
-              expandedSubnavs={expandedSubnavs}
-              setExpandedSubnavs={setExpandedSubnavs}
-              activeAndHoverColor={activeAndHoverColor}
-              onClose={onClose}
-              variant={variant}
-              hasChildren={hasChildren}
-            >
-              {item.views?.map(view =>
-                renderItem(view, level + 2, activeAndHoverColor)
-              )}
-            </SubNavComponent>
-          )
+          if (hasChildren) {
+            // Render the expanding subNav
+            return (
+              <ExpandingSubNav
+                key={item.title}
+                title={item.title}
+                expandedSubnavs={expandedSubnavs}
+                setExpandedSubnavs={setExpandedSubnavs}
+              >
+                {item.views?.map(view =>
+                  renderItem(view, level + 2, activeAndHoverColor)
+                )}
+              </ExpandingSubNav>
+            )
+          } else {
+            // Render the simple list subNav
+            return (
+              <ListSubNav
+                key={item.title}
+                title={item.title}
+                route={item.route}
+                trigger={item.trigger}
+                activeAndHoverColor={activeAndHoverColor}
+                onClose={onClose}
+                variant={variant}
+              />
+            )
+          }
         }
+
+        // 3) VIEW NAV
         case 'viewNav': {
           return (
             <ViewNav
@@ -226,6 +254,7 @@ const Nav: FC<NavProps> = ({
             />
           )
         }
+
         default:
           return null
       }
@@ -301,8 +330,10 @@ const Nav: FC<NavProps> = ({
       )}
 
       {selectedNav
-        ? items.filter(i => i.title === selectedNav).map(i => renderItem(i, 0))
-        : items.map(i => renderItem(i, 0))}
+        ? // If user picked a mainNav item from the search
+          items.filter(i => i.title === selectedNav).map(i => renderItem(i, 0))
+        : // Otherwise render all nav items
+          items.map(i => renderItem(i, 0))}
     </>
   )
 
@@ -320,9 +351,12 @@ const Nav: FC<NavProps> = ({
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           minWidth: verticalNavWidth,
-          width: 'auto',
+          width: '280px',
           whiteSpace: 'nowrap',
-          overflowX: 'auto',
+          // Remove horizontal scrollbar:
+          overflowX: 'hidden',
+          // Optionally allow vertical scrolling if content is taller:
+          overflowY: 'auto',
           border: 0,
           zIndex: theme =>
             variant === 'temporary'

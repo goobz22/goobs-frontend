@@ -1,3 +1,4 @@
+// src/components/Nav/VerticalVariant/mainNav/expanding.tsx
 'use client'
 import React, { FC } from 'react'
 import {
@@ -10,55 +11,35 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
 
-interface MainNavComponentProps {
-  /**
-   * The label/title for this main navigation item.
-   */
+interface ExpandingNavProps {
   title?: string
-
   /**
-   * If `true`, we show an expand icon and child subNav items.
-   */
-  hasChildren: boolean
-
-  /**
-   * Which top-level nav titles are expanded
+   * The titles that are currently expanded (top-level).
    */
   expandedNavs: string[]
-
   /**
-   * Setter for expandedNavs
+   * Setter for `expandedNavs`.
    */
   setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>>
-
   /**
-   * A callback for route or onClick triggers
+   * Click handler for route or other actions
    */
   onClick?: () => void
-
   /**
-   * The nesting level for indentation
+   * The nesting level for indentation.
    */
   level: number
-
   /**
-   * Child nodes (subNav) if `hasChildren` is true
+   * Child nodes (subNav) to show if expanded.
    */
   children?: React.ReactNode
-
-  /**
-   * Hover color (not used in the example styling, but available if needed)
-   */
-  activeAndHoverColor?: string
 }
 
-const MainNavComponent: FC<MainNavComponentProps> = ({
+const ExpandingNav: FC<ExpandingNavProps> = ({
   title,
-  hasChildren,
   expandedNavs,
   setExpandedNavs,
   onClick,
-  level,
   children,
 }) => {
   const isExpanded = expandedNavs.includes(title ?? '')
@@ -70,6 +51,7 @@ const MainNavComponent: FC<MainNavComponentProps> = ({
       square
       expanded={isExpanded}
       onChange={() => {
+        // Toggle expanded state for this title
         if (isExpanded) {
           setExpandedNavs(expandedNavs.filter(t => t !== title))
         } else {
@@ -81,22 +63,22 @@ const MainNavComponent: FC<MainNavComponentProps> = ({
         backgroundColor: 'transparent',
         '.MuiAccordionSummary-root': {
           pl: 0,
-          whiteSpace: 'nowrap', // no wrapping
+          whiteSpace: 'nowrap', // No wrapping
         },
         '&:before': {
-          display: 'none',
+          display: 'none', // Remove default Mui divider line
         },
       }}
     >
       <AccordionSummary
+        // Only show the expand icon if it has children
         expandIcon={
-          hasChildren ? (
-            <ExpandMoreIcon
-              sx={{
-                color: 'transparent',
-              }}
-            />
-          ) : null
+          <ExpandMoreIcon
+            sx={{
+              // Keep transparent if you only want it visible on hover/expand
+              color: 'transparent',
+            }}
+          />
         }
         aria-controls="accordion-content"
         id="accordion-header"
@@ -105,12 +87,19 @@ const MainNavComponent: FC<MainNavComponentProps> = ({
           border: 'none',
           py: '6px',
           mt: 2,
-          ml: 3,
+          ml: 1, // Indent from the left a bit
           minHeight: 0,
           height: '32px',
+          display: 'flex',
+          alignItems: 'center',
+          // Force icon to appear first
+          '& .MuiAccordionSummary-expandIconWrapper': {
+            order: -1,
+            marginRight: '8px',
+          },
           '& .MuiAccordionSummary-content': {
             m: 0,
-            whiteSpace: 'nowrap', // keep text on one line
+            whiteSpace: 'nowrap', // Keep text on one line
           },
           '&:hover': {
             '& .MuiSvgIcon-root': {
@@ -131,33 +120,30 @@ const MainNavComponent: FC<MainNavComponentProps> = ({
           fontvariant="merrih5"
           fontcolor={white.main}
           text={title ?? ''}
-          marginLeft={4 * level}
           sx={{
-            whiteSpace: 'nowrap', // no wrapping
+            whiteSpace: 'nowrap', // No wrapping
           }}
         />
       </AccordionSummary>
 
-      {hasChildren && (
-        <AccordionDetails
+      <AccordionDetails
+        sx={{
+          border: 'none',
+          p: 0,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <List
           sx={{
-            border: 'none',
-            p: 0,
+            py: 0,
             whiteSpace: 'nowrap',
           }}
         >
-          <List
-            sx={{
-              py: 0,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {children}
-          </List>
-        </AccordionDetails>
-      )}
+          {children}
+        </List>
+      </AccordionDetails>
     </MuiAccordion>
   )
 }
 
-export default MainNavComponent
+export default ExpandingNav
