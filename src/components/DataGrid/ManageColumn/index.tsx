@@ -7,7 +7,7 @@ import CustomButton from '../../Button'
 import Searchbar from '../../Searchbar'
 import Checkbox from '../../Checkbox'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
-import { ColumnDef } from '../Table'
+import { ColumnDef } from '../types'
 import Typography from '../../Typography'
 import * as palette from '../../../styles/palette'
 

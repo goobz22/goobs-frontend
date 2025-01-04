@@ -5,7 +5,7 @@ import { Box } from '@mui/material'
 import { VerticalDivider } from '../VerticalDivider'
 import TablePagination from '@mui/material/TablePagination'
 import ManageColumn from '../ManageColumn'
-import { ColumnDef } from '../Table'
+import { ColumnDef } from '../types'
 import CustomButton from '../../Button'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { columnVisibilityAtom, columnVisibilityActions } from '../Jotai/atom'
-import type { ColumnDef } from '../Table'
+import type { ColumnDef } from '../types'
 
 type ColumnVisibilityModel = { [key: string]: boolean }
 
