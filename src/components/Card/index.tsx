@@ -9,10 +9,19 @@ import DetailedPricingSummary from './variants/detailedpricingsummary'
 import ProductCard from './variants/product'
 import ProductSummaryCard from './variants/productsummary'
 import DefaultCard from './variants/defaultconfig'
+import TaskCard from './variants/task' // <-- NEW
 import { columnconfig } from '../Grid'
 import { CustomButtonProps } from '../Button'
 
-type CardProps = Omit<BoxProps, 'children'> & {
+/**
+ * We omit children, draggable, and the drag event props from BoxProps,
+ * to avoid conflicts with our custom "draggable" and "onDragX" logic
+ * for the task variant.
+ */
+type CardProps = Omit<
+  BoxProps,
+  'children' | 'draggable' | 'onDragStart' | 'onDragOver' | 'onDrop'
+> & {
   /** Title of the card */
   title?: string
   /** Whether to show an underline for the title */
@@ -57,6 +66,7 @@ type CardProps = Omit<BoxProps, 'children'> & {
     | 'detailedpricingsummary'
     | 'product'
     | 'productsummary'
+    | 'task' // <-- NEW
   /** Props for the pricing summary variant */
   pricingSummaryProps?: {
     subtotal?: string
@@ -118,6 +128,27 @@ type CardProps = Omit<BoxProps, 'children'> & {
     button1Props?: CustomButtonProps
     button2Props?: CustomButtonProps
   }
+  /** Props for the new "task" variant */
+  taskProps?: {
+    /** Title of the task */
+    title?: string
+    /** Description of the task */
+    description?: string
+    /** Whether the task is completed (checked) */
+    checked?: boolean
+    /** Callback when the checkbox changes */
+    onCheck?: (event: React.ChangeEvent<HTMLInputElement>) => void
+
+    /**
+     * Optional drag & drop props if you want the card itself
+     * to handle drag events.
+     * Must be booleans or DragEventHandlers, not strings like "true".
+     */
+    draggable?: boolean
+    onDragStart?: React.DragEventHandler<HTMLDivElement>
+    onDragOver?: React.DragEventHandler<HTMLDivElement>
+    onDrop?: React.DragEventHandler<HTMLDivElement>
+  }
   /** Configuration for grid columns */
   columnconfig?: columnconfig
 }
@@ -147,6 +178,7 @@ function Card({
   inventoryProps,
   productProps,
   productSummaryProps,
+  taskProps,
   ...rest
 }: CardProps): JSX.Element | null {
   if (variant === 'default') {
@@ -227,6 +259,25 @@ function Card({
         height={height}
         button1Props={productSummaryProps?.button1Props}
         button2Props={productSummaryProps?.button2Props}
+        {...rest}
+      />
+    )
+  }
+
+  // NEW: Return our "task" variant
+  if (variant === 'task') {
+    return (
+      <TaskCard
+        title={taskProps?.title}
+        description={taskProps?.description}
+        checked={taskProps?.checked}
+        onCheck={taskProps?.onCheck}
+        draggable={taskProps?.draggable}
+        onDragStart={taskProps?.onDragStart}
+        onDragOver={taskProps?.onDragOver}
+        onDrop={taskProps?.onDrop}
+        width={width}
+        height={height}
         {...rest}
       />
     )
