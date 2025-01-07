@@ -72,6 +72,9 @@ import useSearchableDropdown, {
 import useAccordion, {
   ExtendedAccordionProps,
 } from './Structure/accordion/useAccordion'
+import useProjectBoard, {
+  ExtendedProjectBoardProps,
+} from './Structure/projectboard/useProjectBoard'
 
 /**
  * Props for the ContentSection component.
@@ -88,6 +91,7 @@ export interface ContentSectionProps {
     searchableDropdown?:
       | ExtendedSearchableDropdownProps
       | ExtendedSearchableDropdownProps[]
+    projectboard?: ExtendedProjectBoardProps | ExtendedProjectBoardProps[]
     complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
     typography?: TypographyProps | TypographyProps[]
     accordion?: ExtendedAccordionProps | ExtendedAccordionProps[]
@@ -156,6 +160,7 @@ const RenderContent: React.FC<
   addToColumnConfigs(useSearchableDropdown(props))
   addToColumnConfigs(useTextField(props))
   addToColumnConfigs(useDateField(props))
+  addToColumnConfigs(useProjectBoard(props))
   addToColumnConfigs(useAccordion(props))
   addToColumnConfigs(useCheckbox(props))
   addToColumnConfigs(usePhoneNumber(props))
