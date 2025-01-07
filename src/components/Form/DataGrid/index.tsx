@@ -1,7 +1,10 @@
+// src\components\Form\DataGrid\index.tsx
+
 'use client'
 import React from 'react'
 import { Box } from '@mui/material'
-import type { DatagridProps } from '../../DataGrid'
+// IMPORTANT: Change the import to point to the types folder
+import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 
 export interface FormDataGridProps {
