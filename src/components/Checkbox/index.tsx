@@ -59,7 +59,7 @@ function DataGridCheckbox({
           color: palette.marine.main,
         },
         '&.Mui-disabled': {
-          color: palette.greyborder.main,
+          color: palette.grey.main,
         },
         '&:hover': {
           backgroundColor: palette.marine.light,
