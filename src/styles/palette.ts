@@ -136,7 +136,7 @@ export const green = {
   dark: '#00B300',
 }
 
-export const greyborder = {
+export const grey = {
   main: '#E8E8E8',
   light: '#F5F5F5',
   dark: '#BDBDBD',
