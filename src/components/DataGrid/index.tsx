@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState } from 'react'
 import { Box, Alert } from '@mui/material'
 import CustomToolbar from '../Toolbar'
@@ -6,15 +7,12 @@ import Table from './Table'
 import CustomFooter from './Footer'
 import ManageRow from './ManageRow'
 import { woad } from '../../styles/palette'
-import { useColumnSelection } from './utils/useColumn'
-import { useRowClick } from './utils/useRowClick'
-import { useSearchbar } from './utils/useSearchbar'
+import { useColumnSelection } from './utils/useSelectColumn'
+import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
-
-// --- Import all needed types from the types folder ---
-import { DatagridProps, RowData } from './types'
-import type { TableRef } from './types' // <-- import our TableRef
+import { selectAllRows, selectRow } from './utils/useSelectRows'
+import { DatagridProps, RowData, TableRef } from './types'
 
 function DataGrid({
   columns,
@@ -29,23 +27,15 @@ function DataGrid({
   onShow,
   selectedRows: externalSelectedRows,
   onSelectionChange: externalOnSelectionChange,
+  checkboxSelection = false,
 }: DatagridProps) {
-  console.log('DataGrid render:', {
-    columns,
-    providedRows,
-    externalSelectedRows,
-  })
-
-  // Local copies of rows, pagination, and selection
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [internalSelectedRows, setInternalSelectedRows] = useState<string[]>([])
-
-  // NOTE: Use the interface from TableRef, not HTMLDivElement
   const tableRef = React.useRef<TableRef>(null)
 
-  // Hook that encapsulates "sync rows" + "initialize columns in Jotai" logic
+  // Initialize grid data, columns, etc.
   useInitializeGrid({
     columns,
     providedRows,
@@ -55,13 +45,8 @@ function DataGrid({
   // Decide which row selection to use: external or internal
   const selectedRows = externalSelectedRows || internalSelectedRows
 
-  // Update row selection
+  // A single function to update selected row IDs
   const handleSelectionChange = (newSelectedIds: string[]) => {
-    console.log('Selection changed:', {
-      previous: selectedRows,
-      new: newSelectedIds,
-      timestamp: new Date().toISOString(),
-    })
     if (externalOnSelectionChange) {
       externalOnSelectionChange(newSelectedIds)
     } else {
@@ -69,26 +54,36 @@ function DataGrid({
     }
   }
 
-  // Hook for column selection (highlighting entire column)
-  const { selectedColumns, toggleColumnSelection, clearColumnSelection } =
-    useColumnSelection()
+  // Toggling a single row when user clicks on the row
+  const handleRowClick = (row: RowData) => {
+    selectRow(row, selectedRows, handleSelectionChange)
+  }
 
-  // Hook for searching (updating column visibility automatically if desired)
+  // Toggling a single row via the row checkbox
+  const handleRowCheckboxChange = (rowId: string) => {
+    if (selectedRows.includes(rowId)) {
+      handleSelectionChange(selectedRows.filter(id => id !== rowId))
+    } else {
+      handleSelectionChange([...selectedRows, rowId])
+    }
+  }
+
+  // Toggling all rows via the header checkbox
+  // Removed the unused 'e' parameter to avoid the warning:
+  const handleHeaderCheckboxChange: React.ChangeEventHandler<
+    HTMLInputElement
+  > = () => {
+    selectAllRows(rows, selectedRows, handleSelectionChange)
+  }
+
+  // Hook for column selection
+  const { selectedColumns, toggleColumnSelection } = useColumnSelection()
+
+  // Hook for searching
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
     columns,
     rows,
     searchbarProps,
-    // If you want to let the search hide columns automatically:
-    // updateVisibility: useSetAtom(columnVisibilityActions),
-  })
-
-  // Hook for row & column-header clicks
-  const { handleRowClick, handleColumnHeaderClick } = useRowClick({
-    selectedColumns,
-    clearColumnSelection,
-    selectedRows,
-    handleSelectionChange,
-    toggleColumnSelection,
   })
 
   // Hook for manage row
@@ -98,24 +93,16 @@ function DataGrid({
     handleSelectionChange,
   })
 
-  // Basic pagination logic for the final row subset
+  // Basic pagination logic
   const startIndex = page * pageSize
   const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize)
 
-  // Example tweak: rename the "name" field to "Administration Company"
-  const updatedColumns = columns.map(col => ({
-    ...col,
-    headerName:
-      col.field === 'name' ? 'Administration Company' : col.headerName,
-  }))
-
-  console.log('DataGrid final render with:', {
-    visibleRows,
-    selectedRows,
-    selectedColumns,
-    page,
-    pageSize,
-  })
+  // Compute the "all selected" / "some selected" booleans
+  const allRowsSelected = rows.length > 0 && selectedRows.length === rows.length
+  const someRowsSelected =
+    rows.length > 0 &&
+    selectedRows.length > 0 &&
+    selectedRows.length < rows.length
 
   return (
     <Box
@@ -142,7 +129,6 @@ function DataGrid({
       <CustomToolbar
         buttons={buttons}
         dropdowns={dropdowns}
-        // Pass the updated searchbar props from our hook
         searchbarProps={updatedSearchbarProps}
         middleComponent={
           selectedRows.length > 0 ? (
@@ -170,15 +156,20 @@ function DataGrid({
         }}
       >
         <Table
-          ref={tableRef} // <-- pass our ref to the Table
-          columns={updatedColumns}
+          ref={tableRef}
+          columns={columns}
           rows={visibleRows}
           onRowClick={handleRowClick}
+          // The parent is controlling row selection, so pass booleans + handlers:
+          checkboxSelection={checkboxSelection}
           selectedRows={selectedRows}
           onSelectionChange={handleSelectionChange}
-          checkboxSelection
+          allRowsSelected={allRowsSelected}
+          someRowsSelected={someRowsSelected}
+          onHeaderCheckboxChange={handleHeaderCheckboxChange}
+          onRowCheckboxChange={handleRowCheckboxChange}
           selectedColumns={selectedColumns}
-          onColumnHeaderClick={handleColumnHeaderClick}
+          onColumnHeaderClick={toggleColumnSelection}
         />
 
         <CustomFooter

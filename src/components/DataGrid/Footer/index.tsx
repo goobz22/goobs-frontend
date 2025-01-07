@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, useMediaQuery } from '@mui/material'
 import { VerticalDivider } from '../VerticalDivider'
 import TablePagination from '@mui/material/TablePagination'
 import ManageColumn from '../ManageColumn'
@@ -29,6 +29,9 @@ function CustomFooter({
   const [isOpen, setIsOpen] = useState(false)
   const [checkboxWidth] = useState(45)
 
+  // Use a media query for "tablet or below" (900px as an example).
+  const isTabletOrBelow = useMediaQuery('(max-width:900px)')
+
   const handleOpen = () => {
     console.log('Footer handleOpen')
     setIsOpen(true)
@@ -39,52 +42,63 @@ function CustomFooter({
     setIsOpen(false)
   }
 
-  // We no longer compute or apply a totalWidth based on columns.
-  // The footer simply fills the view (100%).
-
   const totalPages = Math.ceil(rowCount / pageSize)
 
   return (
     <Box
       className="custom-footer-container"
       sx={{
-        // Fill the view, ignoring any column widths
         width: '100%',
         minWidth: '100%',
-        height: '56px',
+        // On tablet/phone, let height auto-expand;
+        // on larger screens, keep a fixed 56px
+        height: isTabletOrBelow ? 'auto' : '56px',
         position: 'sticky',
         left: 0,
-        // The margin-left offset can match your table's design (often equal to checkbox width)
-        marginLeft: `${checkboxWidth}px`,
+        // Only add checkbox offset margin on larger screens
+        marginLeft: isTabletOrBelow ? 0 : `${checkboxWidth}px`,
       }}
     >
       <Box
         sx={{
           display: 'flex',
+          // On tablet/phone, stack them vertically;
+          // on desktop, lay them out in a row
+          flexDirection: isTabletOrBelow ? 'column' : 'row',
+          flexWrap: 'wrap',
           justifyContent: 'space-between',
           alignItems: 'center',
-          flexWrap: 'nowrap',
           width: '100%',
-          height: '100%',
           px: 2,
         }}
       >
+        {/* Left Section: Manage Columns Button */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
+            // For smaller screens, reduce bottom margin
+            mb: isTabletOrBelow ? '4px' : 0,
           }}
           className="left-box"
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: '10px' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              // Less margin on mobile
+              mr: isTabletOrBelow ? '5px' : '10px',
+            }}
+          >
             <VerticalDivider />
           </Box>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              pr: '8px',
+              // On mobile, smaller gap/padding
+              gap: isTabletOrBelow ? '5px' : '8px',
+              pr: isTabletOrBelow ? '5px' : '8px',
             }}
           >
             <CustomButton
@@ -110,18 +124,25 @@ function CustomFooter({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              ml: '10px',
-              mr: '10px',
+              ml: isTabletOrBelow ? '5px' : '10px',
+              mr: isTabletOrBelow ? '5px' : '10px',
             }}
           >
             <VerticalDivider />
           </Box>
         </Box>
+
+        {/* Right Section: Pagination */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            ml: 'auto',
+            // On smaller screens, minimal top margin so it sits closer
+            mt: isTabletOrBelow ? '4px' : 0,
+            // Center on mobile, right-align on desktop
+            justifyContent: isTabletOrBelow ? 'center' : 'flex-end',
+            // Eliminate the margin-left on mobile
+            ml: isTabletOrBelow ? 0 : 'auto',
           }}
           className="right-box"
         >

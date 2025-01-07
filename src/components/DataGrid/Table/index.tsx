@@ -1,86 +1,71 @@
 'use client'
 
-import React from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import {
   Box,
   useMediaQuery,
   Table as MuiTable,
-  TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
   Checkbox,
 } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { useAtomValue } from 'jotai'
-import { columnVisibilityAtom } from '../Jotai/atom'
-import Dropdown from '../../Dropdown'
-import type { DropdownProps } from '../../Dropdown'
-import * as palette from '../../../styles/palette'
+import SearchableDropdown from '../../SearchableDropdown'
+import type { SearchableDropdownProps } from '../../SearchableDropdown'
+import { white, black } from '../../../styles/palette'
 import type { TableProps, TableRef, RowData } from '../types'
+import { useComputeTableResize } from '../utils/useComputeTableResize'
+import ColumnHeaderRow from './ColumnHeaderRow'
+import Rows from './Rows'
 
-/**
- * Safely get the unique identifier for a given row, which must have _id.
- */
-function getRowId(row: RowData): string {
-  return String(row._id ?? '')
+// A utility to get a row's unique ID
+export function getRowId(row: RowData): string {
+  return String(row._id ?? row.id ?? '')
 }
 
-/**
- * A styled Box that completely hides any scrollbar—content beyond the box's boundaries is clipped.
- */
-const StyledScrollBox = styled(Box)(() => ({
-  width: '100%',
-  overflow: 'hidden', // Hides both horizontal and vertical scrollbars
-  scrollbarWidth: 'none', // Firefox
-  '&::-webkit-scrollbar': {
-    display: 'none', // Chrome, Safari
-  },
-}))
-
-const DEFAULT_ROW_HEIGHT = 40
-
-const Table = React.forwardRef<TableRef, TableProps>(
+const Table = forwardRef<TableRef, TableProps>(
   (
     {
       columns,
       rows,
-      rowHeight = DEFAULT_ROW_HEIGHT,
       onRowClick,
       selectedRows = [],
-      onSelectionChange,
+      // We assume these four props come from the parent (DataGrid)
+      allRowsSelected = false,
+      someRowsSelected = false,
+      onHeaderCheckboxChange,
+      onRowCheckboxChange,
+
       checkboxSelection = false,
       selectedColumns = [],
       onColumnHeaderClick,
     },
     ref
   ) => {
-    // ---------------------------------------------------------
-    // 1) Single-column layout on mobile/tablet <= 900px
-    // ---------------------------------------------------------
-    const isMobileOrTablet = useMediaQuery('(max-width:900px)')
+    // 1) Decide breakpoints
+    const isMobile = useMediaQuery('(max-width:600px)')
+    const showOverflowDropdown = useMediaQuery('(min-width:500px)')
 
-    // Which column is selected for the single-column view
-    const [mobileSelectedColumn, setMobileSelectedColumn] = React.useState(
-      () => columns[0]?.field || ''
+    // Mobile single-column
+    const [mobileSelectedColumn, setMobileSelectedColumn] = useState(
+      columns[0]?.field || ''
     )
 
-    React.useEffect(() => {
-      // If the previously selected column no longer exists, reset to first
-      if (!columns.some(col => col.field === mobileSelectedColumn)) {
-        setMobileSelectedColumn(columns[0]?.field || '')
-      }
-    }, [columns, mobileSelectedColumn])
+    // 2) Use custom hook for column sizing & overflow logic
+    const {
+      containerRef,
+      fittedDesktopColumns,
+      overflowDesktopColumns,
+      selectedOverflowField,
+      setSelectedOverflowField,
+    } = useComputeTableResize({
+      columns,
+      checkboxSelection,
+      showOverflowDropdown,
+    })
 
-    // ---------------------------------------------------------
-    // 2) Column visibility from Jotai
-    // ---------------------------------------------------------
-    const columnVisibility = useAtomValue(columnVisibilityAtom)
-
-    // ---------------------------------------------------------
-    // 3) Imperative methods exposed via ref
-    // ---------------------------------------------------------
+    // Expose imperative methods to parent
     React.useImperativeHandle(ref, () => ({
       getAllColumns: () => columns,
       getSelectedRows: () =>
@@ -96,59 +81,52 @@ const Table = React.forwardRef<TableRef, TableProps>(
       isRowSelected: (id: string) => selectedRows.includes(id),
     }))
 
-    // ---------------------------------------------------------
-    // 4) Selection logic
-    // ---------------------------------------------------------
-    const allRowsSelected =
-      rows.length > 0 && rows.every(r => selectedRows.includes(getRowId(r)))
-    const someRowsSelected =
-      rows.length > 0 && rows.some(r => selectedRows.includes(getRowId(r)))
-
-    const handleHeaderCheckboxChange = () => {
-      if (!onSelectionChange) return
-      if (allRowsSelected) {
-        onSelectionChange([])
-      } else {
-        const allIds = rows.map(r => getRowId(r))
-        onSelectionChange(allIds)
+    // If the previously selected column doesn't exist anymore, reset
+    useEffect(() => {
+      if (!columns.some(col => col.field === mobileSelectedColumn)) {
+        setMobileSelectedColumn(columns[0]?.field || '')
       }
+    }, [columns, mobileSelectedColumn])
+
+    // final set of columns => fitted + optional overflow
+    const finalDesktopColumns = [...fittedDesktopColumns]
+    if (overflowDesktopColumns.length > 0 && showOverflowDropdown) {
+      finalDesktopColumns.push({
+        field: '__overflow__',
+        headerName: 'More Columns',
+        width: 250, // forced 250px
+      })
     }
 
-    const handleRowCheckboxChange = (rowId: string) => {
-      if (!onSelectionChange) return
-      if (selectedRows.includes(rowId)) {
-        onSelectionChange(selectedRows.filter(id => id !== rowId))
-      } else {
-        onSelectionChange([...selectedRows, rowId])
-      }
-    }
+    // ----------------------------------------------------------------
+    // Render
+    // ----------------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // 5) Mobile / Tablet Table (single-column)
-    // ---------------------------------------------------------
-    if (isMobileOrTablet) {
-      // Dropdown props for selecting which column is displayed
-      const mobileDropdown: DropdownProps = {
+    // MOBILE LAYOUT
+    if (isMobile) {
+      const mobileDropdownProps: SearchableDropdownProps = {
         label: 'Select Column',
         options: columns.map(c => ({ value: c.field })),
-        value: mobileSelectedColumn,
-        onChange: e => {
-          const newField = e.target.value as string
-          setMobileSelectedColumn(newField)
-        },
+        backgroundcolor: white.main,
+        outlinecolor: 'none',
+        fontcolor: black.main,
+        shrunkfontcolor: black.main,
+        unshrunkfontcolor: black.main,
         shrunklabelposition: 'aboveNotch',
+        placeholder: 'Search...',
+        onChange: newVal => {
+          if (newVal) {
+            setMobileSelectedColumn(newVal.value)
+          } else {
+            setMobileSelectedColumn('')
+          }
+        },
       }
 
       return (
-        <StyledScrollBox>
-          <TableContainer>
-            <MuiTable
-              sx={{
-                minWidth: '300px',
-                // Let the row/cell height be controlled by rowHeight
-                '& td, & th': { height: `${rowHeight}px` },
-              }}
-            >
+        <Box sx={{ width: '100%', overflow: 'visible' }}>
+          <TableContainer ref={containerRef} sx={{ overflow: 'visible' }}>
+            <MuiTable sx={{ minWidth: '300px', overflow: 'visible' }}>
               <TableHead>
                 <TableRow>
                   {checkboxSelection && (
@@ -156,180 +134,86 @@ const Table = React.forwardRef<TableRef, TableProps>(
                       <Checkbox
                         checked={allRowsSelected}
                         indeterminate={!allRowsSelected && someRowsSelected}
-                        onChange={handleHeaderCheckboxChange}
+                        onChange={onHeaderCheckboxChange}
                       />
                     </TableCell>
                   )}
                   <TableCell>
-                    <Dropdown {...mobileDropdown} />
+                    {/* Force the dropdown's OutlinedInput to 45px */}
+                    <Box
+                      sx={{
+                        height: '45px',
+                        '& .MuiAutocomplete-root .MuiOutlinedInput-root': {
+                          height: '45px !important',
+                          minHeight: '45px !important',
+                          lineHeight: '45px !important',
+                          display: 'flex',
+                          alignItems: 'center',
+                          paddingLeft: '5px !important',
+                          paddingRight: '5px !important',
+                        },
+                      }}
+                    >
+                      <SearchableDropdown {...mobileDropdownProps} />
+                    </Box>
                   </TableCell>
                 </TableRow>
               </TableHead>
 
-              <TableBody>
-                {rows.length === 0 ? (
-                  <TableRow>
-                    {checkboxSelection && <TableCell />}
-                    <TableCell>No data available</TableCell>
-                  </TableRow>
-                ) : (
-                  rows.map(row => {
-                    const rowId = getRowId(row)
-                    return (
-                      <TableRow key={rowId}>
-                        {checkboxSelection && (
-                          <TableCell padding="checkbox">
-                            <Checkbox
-                              checked={selectedRows.includes(rowId)}
-                              onChange={() => handleRowCheckboxChange(rowId)}
-                            />
-                          </TableCell>
-                        )}
-                        <TableCell
-                          onClick={
-                            onRowClick ? () => onRowClick(row) : undefined
-                          }
-                        >
-                          {String(row[mobileSelectedColumn] ?? '')}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
+              {/* MOBILE ROWS */}
+              <Rows
+                rows={rows}
+                finalDesktopColumns={finalDesktopColumns}
+                overflowDesktopColumns={overflowDesktopColumns}
+                selectedOverflowField={selectedOverflowField}
+                isMobile
+                mobileSelectedColumn={mobileSelectedColumn}
+                checkboxSelection={checkboxSelection}
+                selectedRows={selectedRows}
+                handleRowCheckboxChange={onRowCheckboxChange}
+                onRowClick={onRowClick}
+              />
             </MuiTable>
           </TableContainer>
-        </StyledScrollBox>
+        </Box>
       )
     }
 
-    // ---------------------------------------------------------
-    // 6) Desktop Table (multi-column), no scroll
-    // ---------------------------------------------------------
-    const visibleColumns = columns.filter(
-      col => columnVisibility[col.field] !== false
-    )
-
+    // DESKTOP/TABLET LAYOUT
     return (
-      <StyledScrollBox>
-        <TableContainer>
-          <MuiTable
-            sx={{
-              // The table can expand, but no scrollbar to show the overflow
-              minWidth: 'max-content',
-              '& td, & th': { height: `${rowHeight}px` },
-            }}
-          >
+      <Box sx={{ width: '100%', overflow: 'visible' }}>
+        <TableContainer ref={containerRef} sx={{ overflow: 'visible' }}>
+          <MuiTable sx={{ minWidth: 'max-content', overflow: 'visible' }}>
             <TableHead>
-              <TableRow>
-                {checkboxSelection && (
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={allRowsSelected}
-                      indeterminate={!allRowsSelected && someRowsSelected}
-                      onChange={handleHeaderCheckboxChange}
-                    />
-                  </TableCell>
-                )}
-                {visibleColumns.map((col, colIndex) => (
-                  <TableCell
-                    key={`${col.field}-${colIndex}`}
-                    onClick={
-                      onColumnHeaderClick
-                        ? () => onColumnHeaderClick(col.field)
-                        : undefined
-                    }
-                    sx={{
-                      backgroundColor: selectedColumns.includes(col.field)
-                        ? palette.marine.light
-                        : undefined,
-                      cursor: onColumnHeaderClick ? 'pointer' : 'default',
-                      userSelect: 'none',
-                    }}
-                  >
-                    {col.headerName}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <ColumnHeaderRow
+                checkboxSelection={checkboxSelection}
+                allRowsSelected={allRowsSelected}
+                someRowsSelected={someRowsSelected}
+                handleHeaderCheckboxChange={onHeaderCheckboxChange}
+                finalDesktopColumns={finalDesktopColumns}
+                onColumnHeaderClick={onColumnHeaderClick}
+                selectedColumns={selectedColumns}
+                overflowDesktopColumns={overflowDesktopColumns}
+                selectedOverflowField={selectedOverflowField}
+                setSelectedOverflowField={setSelectedOverflowField}
+              />
             </TableHead>
 
-            <TableBody>
-              {rows.length === 0 ? (
-                <TableRow>
-                  {checkboxSelection && <TableCell />}
-                  <TableCell colSpan={visibleColumns.length}>
-                    No data available
-                  </TableCell>
-                </TableRow>
-              ) : (
-                rows.map((row, rowIndex) => {
-                  const rowId = getRowId(row)
-                  return (
-                    <TableRow
-                      key={rowId}
-                      hover
-                      onClick={onRowClick ? () => onRowClick(row) : undefined}
-                      sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
-                    >
-                      {checkboxSelection && (
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedRows.includes(rowId)}
-                            onChange={() => handleRowCheckboxChange(rowId)}
-                          />
-                        </TableCell>
-                      )}
-
-                      {visibleColumns.map((col, colIndex) => {
-                        // If there's a custom renderCell function:
-                        if (typeof col.renderCell === 'function') {
-                          const cellParams = {
-                            row,
-                            value: row[col.field],
-                            field: col.field,
-                            rowIndex,
-                            columnIndex: colIndex,
-                          }
-                          return (
-                            <TableCell
-                              key={`${col.field}-${colIndex}`}
-                              sx={{
-                                backgroundColor: selectedColumns.includes(
-                                  col.field
-                                )
-                                  ? palette.marine.light
-                                  : undefined,
-                              }}
-                            >
-                              {col.renderCell(cellParams)}
-                            </TableCell>
-                          )
-                        }
-
-                        // Otherwise, just show the raw data
-                        return (
-                          <TableCell
-                            key={`${col.field}-${colIndex}`}
-                            sx={{
-                              backgroundColor: selectedColumns.includes(
-                                col.field
-                              )
-                                ? palette.marine.light
-                                : undefined,
-                            }}
-                          >
-                            {String(row[col.field] ?? '')}
-                          </TableCell>
-                        )
-                      })}
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
+            <Rows
+              rows={rows}
+              finalDesktopColumns={finalDesktopColumns}
+              overflowDesktopColumns={overflowDesktopColumns}
+              selectedOverflowField={selectedOverflowField}
+              isMobile={false}
+              mobileSelectedColumn="" // not used in desktop
+              checkboxSelection={checkboxSelection}
+              selectedRows={selectedRows}
+              handleRowCheckboxChange={onRowCheckboxChange}
+              onRowClick={onRowClick}
+            />
           </MuiTable>
         </TableContainer>
-      </StyledScrollBox>
+      </Box>
     )
   }
 )

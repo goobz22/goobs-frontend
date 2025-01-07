@@ -1,6 +1,7 @@
 'use client'
+
 import React from 'react'
-import { Paper, Stack, Box } from '@mui/material'
+import { Paper, Stack, Box, useMediaQuery } from '@mui/material'
 import Typography from '../../Typography'
 import DuplicateIcon from '@mui/icons-material/FileCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -31,6 +32,9 @@ function ManageRow({
   onShow,
   onExport,
 }: ManageRowProps) {
+  // Determine if we're on a small screen (mobile)
+  const isMobile = useMediaQuery('(max-width:600px)')
+
   console.log('ManageRow rendered with props:', {
     selectedRowsCount: selectedRows.length,
     selectedRows,
@@ -103,6 +107,7 @@ function ManageRow({
     }
   }
 
+  // Build the action buttons
   const actionButtons = (
     <Stack
       component="div"
@@ -111,7 +116,7 @@ function ManageRow({
       justifyContent="center"
       sx={{ '& > div:not(:last-child)': { marginRight: '2px' } }}
     >
-      {/* First group: Manage, Show */}
+      {/* First group: Manage, Show (only if exactly 1 item selected) */}
       {(onManage || onShow) && selectedRows.length === 1 && (
         <Box
           display="flex"
@@ -195,7 +200,8 @@ function ManageRow({
       {/* Second group: Duplicate, Delete, Export */}
       {selectedRows.length > 0 && (
         <Box display="flex" flexDirection="row" alignItems="center">
-          {onDuplicate && (
+          {/* If not on mobile, show "Duplicate" */}
+          {!isMobile && onDuplicate && (
             <Box
               onClick={e => {
                 e.stopPropagation()
@@ -228,6 +234,8 @@ function ManageRow({
               </Box>
             </Box>
           )}
+
+          {/* Always show "Delete" if provided */}
           {onDelete && (
             <Box
               onClick={e => {
@@ -261,7 +269,9 @@ function ManageRow({
               </Box>
             </Box>
           )}
-          {(onExport || rows.length > 0) && (
+
+          {/* If not on mobile, show "Export" */}
+          {!isMobile && (onExport || rows.length > 0) && (
             <Box
               onClick={e => {
                 e.stopPropagation()
@@ -299,6 +309,7 @@ function ManageRow({
     </Stack>
   )
 
+  // If no items are selected, nothing to manage
   if (selectedRows.length === 0) return null
 
   return (
@@ -311,20 +322,14 @@ function ManageRow({
         alignItems: 'center',
         justifyContent: 'space-between',
         height: '60px',
-        minWidth: '560px',
-        padding: '0 10px',
+        // On mobile: reduce minWidth + 5px side padding
+        minWidth: isMobile ? 'auto' : '560px',
+        padding: isMobile ? '0 5px' : '0 10px',
         userSelect: 'none',
         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
       }}
     >
-      <Box
-        display="flex"
-        alignItems="center"
-        gap={1}
-        sx={{
-          width: '100%',
-        }}
-      >
+      <Box display="flex" alignItems="center" gap={1} sx={{ width: '100%' }}>
         <Box
           flexGrow={1}
           display="flex"
