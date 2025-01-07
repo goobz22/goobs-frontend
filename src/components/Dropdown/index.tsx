@@ -9,6 +9,7 @@ import {
   SelectProps,
   FormHelperText,
   Box,
+  OutlinedInput,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../styles/palette'
@@ -51,6 +52,10 @@ const StyledBox = styled(Box)(() => ({
   marginTop: '10px',
 }))
 
+/**
+ * We keep variant="outlined" to enable the notched outline.
+ * The notch is triggered by the OutlinedInput's "notched" prop.
+ */
 const StyledFormControl = styled(FormControl)<{
   backgroundcolor?: string
   outlinecolor?: string
@@ -75,6 +80,10 @@ const StyledFormControl = styled(FormControl)<{
   },
 }))
 
+/**
+ * We manually control <InputLabel> "shrink" so it only shrinks
+ * when there's a value, not on focus alone.
+ */
 const StyledInputLabel = styled(InputLabel, {
   shouldForwardProp: prop =>
     prop !== 'shrunkfontcolor' &&
@@ -127,10 +136,13 @@ const StyledMenuItem = styled(MenuItem)(() => ({
   backgroundColor: white.main,
 }))
 
-const capitalizeFirstLetter = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1)
-}
+const capitalizeFirstLetter = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1)
 
+/**
+ * We'll create our <Select> that uses <OutlinedInput notched={shrink} label={label}/> via the `input` prop.
+ * This is how we directly control the "notched" prop of the OutlinedInput.
+ */
 const StyledSelect = styled(Select)<{
   fontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
@@ -147,6 +159,7 @@ const StyledSelect = styled(Select)<{
   },
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: black.main,
+    // Hide the legend text if label is "aboveNotch"
     legend: {
       display: shrunklabelposition === 'aboveNotch' ? 'none' : 'inherit',
     },
@@ -191,7 +204,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   onFocus,
   ...rest
 }) => {
-  // Determine initial selectedValue and hasSelection immediately
+  // Figure out initial value
   const externalValue = rest.value as string | undefined
   let initialSelected = ''
   let initialHasSelection = false
@@ -200,7 +213,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     initialSelected = externalValue
     initialHasSelection = true
   } else if (defaultValue) {
-    const defaultOption = options.find(option => option.value === defaultValue)
+    const defaultOption = options.find(opt => opt.value === defaultValue)
     if (defaultOption) {
       initialSelected = defaultOption.value
       initialHasSelection = true
@@ -210,7 +223,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [selectedValue, setSelectedValue] = useState<string>(initialSelected)
   const [hasSelection, setHasSelection] = useState(initialHasSelection)
 
-  // Add useEffect to handle external value changes
+  // Update from externalValue changes
   useEffect(() => {
     if (externalValue !== undefined) {
       setSelectedValue(externalValue)
@@ -239,8 +252,12 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }
 
+  // Only shrink/notch if there's a selection
+  const shrink = hasSelection || Boolean(selectedValue)
+
   const renderMenuItem = (option: DropdownOption) => {
     const itemLabel = capitalizeFirstLetter(option.value.replace(/_/g, ' '))
+
     if (!('attribute1' in option)) {
       return (
         <MenuItem key={option.value} value={option.value}>
@@ -253,7 +270,9 @@ const Dropdown: React.FC<DropdownProps> = ({
           <Typography fontvariant="merriparagraph" text={itemLabel} />
           <Typography
             fontvariant="merriparagraph"
-            text={`${option.attribute1}${option.attribute2 ? ` | ${option.attribute2}` : ''}`}
+            text={`${option.attribute1}${
+              option.attribute2 ? ` | ${option.attribute2}` : ''
+            }`}
             fontcolor="textSecondary"
           />
         </StyledMenuItem>
@@ -264,31 +283,45 @@ const Dropdown: React.FC<DropdownProps> = ({
   return (
     <StyledBox>
       <StyledFormControl
+        variant="outlined"
         backgroundcolor={backgroundcolor}
         outlinecolor={outlinecolor}
         error={error}
         required={required}
         fullWidth
       >
+        {/* We pass shrink={shrink} to control whether the label is shrunk or not */}
         <StyledInputLabel
           id={`${name}-label`}
           shrunkfontcolor={shrunkfontcolor}
           unshrunkfontcolor={unshrunkfontcolor}
           shrunklabelposition={shrunklabelposition}
-          hasvalue={hasSelection ? 'true' : 'false'}
-          shrink={hasSelection || Boolean(selectedValue)}
+          shrink={shrink}
+          hasvalue={shrink ? 'true' : 'false'}
         >
           {label}
         </StyledInputLabel>
+
         <StyledSelect
+          // Do NOT pass "label" prop here (to avoid auto-notch on focus).
+          // Instead, pass the OutlinedInput as the "input".
           labelId={`${name}-label`}
           value={selectedValue}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          label={label}
           fontcolor={fontcolor}
           shrunklabelposition={shrunklabelposition}
+          // We pass <OutlinedInput> with "notched" set to {shrink}
+          // and label={label} so MUI calculates the correct notch width.
+          input={
+            <OutlinedInput
+              label={label}
+              notched={shrink}
+              // If you want to control the "labelWidth" manually,
+              // you could pass it here as well, but usually not needed.
+            />
+          }
           MenuProps={{
             PaperProps: {
               sx: {
@@ -302,6 +335,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           {options.map(renderMenuItem)}
         </StyledSelect>
+
         {helperText && (
           <FormHelperText>
             <Typography fontvariant="merriparagraph" text={helperText} />
