@@ -38,6 +38,9 @@ import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 import SearchableDropdown, {
   SearchableDropdownProps,
 } from './components/SearchableDropdown'
+import FormProjectBoard, {
+  FormProjectBoardProps,
+} from './components/Form/ProjectBoard'
 
 // Here is the new horizontal `Tabs` import
 import Tabs, { TabsProps } from './components/Tabs'
@@ -80,9 +83,19 @@ import { ExtendedImageProps } from './components/Content/Structure/image/useImag
 import { ExtendedConfirmationCodeInputsProps } from './components/Content/Structure/confirmationinput/useConfirmationInput'
 import { ExtendedRadioGroupProps } from './components/Content/Structure/radiogroup/useRadioGroup'
 import { ExtendedPhoneNumberFieldProps } from './components/Content/Structure/phoneNumber/usePhoneNumber'
-import { DatagridProps } from './components/DataGrid'
-import type { ColumnDef, RowData } from './components/DataGrid/Table'
-import type { CellParams, HeaderParams } from './components/DataGrid/Table'
+import { ExtendedProjectBoardProps } from './components/Content/Structure/projectboard/useProjectBoard'
+import { ProjectBoardProps } from './components/ProjectBoard'
+
+// Consolidated import of all DataGrid types
+import type {
+  DatagridProps,
+  ColumnDef,
+  RowData,
+  CellParams,
+  HeaderParams,
+  TableProps,
+  TableRef,
+} from './components/DataGrid/types'
 
 // Colors
 import {
@@ -109,7 +122,7 @@ import {
   semiTransparentBlack,
   red,
   green,
-  greyborder,
+  grey,
 } from './styles/palette'
 
 // Typography
@@ -143,7 +156,9 @@ import {
 // Styles
 import { formContainerStyle } from './styles/Form'
 
-// Type declarations
+/* -------------------------------------------------------------------------- */
+/*                            Type Declarations                               */
+/* -------------------------------------------------------------------------- */
 declare type CustomButtonProps = React.ComponentProps<typeof CustomButton>
 declare type CustomGridProps = React.ComponentProps<typeof CustomGrid>
 declare type TypographyComponentProps = React.ComponentProps<typeof Typography>
@@ -234,15 +249,23 @@ export { TextField }
 
 // Add FormDataGrid to named exports
 export { FormDataGrid }
+export { FormProjectBoard }
 
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                                */
 /* -------------------------------------------------------------------------- */
 
+// 1) Form DataGrid
 export type { FormDataGridProps }
+
+// 2) All DataGrid Types
 export type { DatagridProps }
 export type { ColumnDef, RowData }
 export type { CellParams, HeaderParams }
+export type { TableProps }
+export type { TableRef }
+
+// 3) SearchableDropdown
 export type { SearchableDropdownProps }
 
 // Extended Props
@@ -263,6 +286,7 @@ export type { ExtendedConfirmationCodeInputsProps }
 export type { ExtendedRadioGroupProps }
 export type { ExtendedPhoneNumberFieldProps }
 export type { ExtendedComplexEditorProps }
+export type { ExtendedProjectBoardProps }
 
 /* -------------------------------------------------------------------------- */
 /*                           Additional Type Exports                           */
@@ -283,8 +307,10 @@ export type { NavProps } // vertical-only
 export type { PricingProps }
 export type { CustomStepperProps }
 export type { ToolbarProps }
+export type { FormProjectBoardProps }
 export type { TransferListProps }
 export type { CustomTooltipProps }
+export type { ProjectBoardProps }
 export type { QRCodeProps }
 export type { ExtendedQRCodeProps }
 export type { ExtendedDropdownProps }
@@ -324,11 +350,10 @@ export type { NavItem }
 /* -------------------------------------------------------------------------- */
 /*                             Animation Exports                               */
 /* -------------------------------------------------------------------------- */
-
 export type { Animation }
 
 /* -------------------------------------------------------------------------- */
-/*                            Color Exports                                   */
+/*                             Color Exports                                  */
 /* -------------------------------------------------------------------------- */
 export {
   moss,
@@ -354,7 +379,7 @@ export {
   semiTransparentBlack,
   red,
   green,
-  greyborder,
+  grey,
 }
 
 /* -------------------------------------------------------------------------- */
