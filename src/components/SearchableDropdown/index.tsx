@@ -132,6 +132,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   }
 
   const handleBlur = () => {
+    // Only reset isFocused if there's no selection or typed input
     if (!value && !inputValue) {
       setIsFocused(false)
     }
@@ -150,7 +151,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       }}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      popupIcon={null}
+      forcePopupIcon
+      popupIcon={<ArrowDropDownIcon sx={{ color: black.main }} />}
       disablePortal={false}
       backgroundcolor={backgroundcolor}
       outlinecolor={outlinecolor}
@@ -200,13 +202,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           label={label}
           placeholder={placeholder}
           onFocus={handleFocus}
+          shrunkfontcolor={shrunkfontcolor}
           onBlur={handleBlur}
           backgroundcolor={backgroundcolor}
-          endAdornment={<ArrowDropDownIcon sx={{ color: black.main }} />}
           shrunklabelposition={shrunklabelposition}
           slotProps={{
             inputLabel: {
-              // Dynamically shrink the label if there's focus or a value
               shrink: isFocused || !!value || !!inputValue,
               sx: {
                 color: isFocused ? shrunkfontcolor : unshrunkfontcolor,
@@ -215,6 +216,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 overflow: 'visible',
                 '&.MuiInputLabel-shrink': {
                   color: shrunkfontcolor,
+                },
+                '&:not(.MuiInputLabel-shrink)': {
+                  transform: 'none',
+                  top: '10px',
+                  left: '14px',
                 },
               },
             },
@@ -230,8 +236,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             '& .MuiOutlinedInput-root': {
               backgroundColor: backgroundcolor || white.main,
               color: fontcolor,
-              minHeight: '45px',
-              height: '45px !important',
+              minHeight: '40px',
+              height: '40px !important',
               overflow: 'visible',
               '& fieldset': {
                 borderColor: outlinecolor || black.main,
@@ -259,34 +265,25 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               overflow: 'visible',
               zIndex: 1,
             },
+            // Hide any built-in clear indicator (just in case)
             '& .MuiAutocomplete-clearIndicator': {
-              color: fontcolor,
-            },
-            '& .MuiAutocomplete-input': {
-              color: inputfontcolor,
-              backgroundColor: backgroundcolor || white.main,
-              paddingTop: '0px',
-              paddingBottom: '0px',
-              '&::placeholder': {
-                color: placeholdercolor,
-                opacity: 1,
-              },
+              display: 'none',
             },
           }}
         />
       )}
       sx={{
-        '& .MuiPaper-root': {
-          backgroundColor: backgroundcolor || white.main,
-          color: black.main,
-          zIndex: 9999, // ensure it's on top
-        },
         '& .MuiAutocomplete-option': {
           color: black.main,
         },
         '& .MuiAutocomplete-option[aria-selected="true"]': {
           backgroundColor: `${black.main}08`,
         },
+        // The default rotation is 180deg; remove these lines if you want no rotation
+        // or override them as you like:
+        // '& .MuiAutocomplete-popupIndicatorOpen': {
+        //   transform: 'rotate(180deg)',
+        // },
       }}
     />
   )

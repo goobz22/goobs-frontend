@@ -91,6 +91,9 @@ const StyledMuiTextField = styled(MuiTextField, {
       height: '40px',
       backgroundColor: backgroundcolor || 'inherit',
       color: fontcolor || 'black',
+      '& .MuiSelect-icon': {
+        color: 'black !important',
+      },
       '& fieldset': {
         borderColor:
           outlinecolor ||
@@ -213,7 +216,20 @@ const TextField = React.memo<TextFieldProps>(props => {
       input: {
         style: inputStyle,
         endAdornment: endAdornment ? (
-          <InputAdornment position="end">{endAdornment}</InputAdornment>
+          <InputAdornment
+            position="end"
+            sx={{
+              // This styling ensures *all* icons (svg elements) in the end adornment are black
+              color: '#000000 !important',
+              '& svg': {
+                color: '#000000 !important',
+                fill: '#000000 !important',
+                stroke: '#000000 !important',
+              },
+            }}
+          >
+            {endAdornment}
+          </InputAdornment>
         ) : undefined,
       },
       inputLabel: {
@@ -254,8 +270,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         flexDirection: 'column',
         justifyContent: 'flex-end',
         width: '100%',
-        marginTop: '5px',
-        height: '50px',
+        height: '55px',
         overflow: 'hidden',
         ...sx,
       }}
