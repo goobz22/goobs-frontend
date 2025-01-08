@@ -31,13 +31,10 @@ import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
 import Nav, { NavProps, NavItem } from './components/Nav' // <-- Vertical-only Nav
 import PricingTable, { PricingProps } from './components/PricingTable'
 import { CustomStepper, CustomStepperProps } from './components/Stepper'
-import CustomToolbar, { ToolbarProps } from './components/Toolbar'
+import CustomToolbar, { CustomToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
 import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
 import QRCodeComponent, { QRCodeProps } from './components/QRCode'
-import SearchableDropdown, {
-  SearchableDropdownProps,
-} from './components/SearchableDropdown'
 import FormProjectBoard, {
   FormProjectBoardProps,
 } from './components/Form/ProjectBoard'
@@ -91,10 +88,7 @@ import type {
   DatagridProps,
   ColumnDef,
   RowData,
-  CellParams,
-  HeaderParams,
   TableProps,
-  TableRef,
 } from './components/DataGrid/types'
 
 // Colors
@@ -157,6 +151,17 @@ import {
 import { formContainerStyle } from './styles/Form'
 
 /* -------------------------------------------------------------------------- */
+/*                      NEW: ProjectBoard Sub-Components                      */
+/* -------------------------------------------------------------------------- */
+import AddTask, { AddTaskProps } from './components/ProjectBoard/AddTask/client'
+import ShowTask, {
+  ShowTaskProps,
+} from './components/ProjectBoard/ShowTask/client'
+import ManageTask, {
+  ManageTaskProps,
+} from './components/ProjectBoard/ManageTask/client'
+
+/* -------------------------------------------------------------------------- */
 /*                            Type Declarations                               */
 /* -------------------------------------------------------------------------- */
 declare type CustomButtonProps = React.ComponentProps<typeof CustomButton>
@@ -211,7 +216,7 @@ declare type SearchbarProps = React.ComponentProps<typeof Searchbar>
 declare type TextFieldProps = React.ComponentProps<typeof TextField>
 
 /* -------------------------------------------------------------------------- */
-/*                            Named Component Exports                         */
+/*                           Named Component Exports                          */
 /* -------------------------------------------------------------------------- */
 
 export { CustomButton }
@@ -232,7 +237,6 @@ export { TransferList }
 export { StyledTooltip }
 export { formContainerStyle }
 export { QRCodeComponent }
-export { SearchableDropdown }
 
 // Horizontal Tabs export
 export { Tabs }
@@ -251,8 +255,11 @@ export { TextField }
 export { FormDataGrid }
 export { FormProjectBoard }
 
+// NEW: Export AddTask / ShowTask / ManageTask
+export { AddTask, ShowTask, ManageTask }
+
 /* -------------------------------------------------------------------------- */
-/*                           Named Type Exports                                */
+/*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
 
 // 1) Form DataGrid
@@ -261,12 +268,7 @@ export type { FormDataGridProps }
 // 2) All DataGrid Types
 export type { DatagridProps }
 export type { ColumnDef, RowData }
-export type { CellParams, HeaderParams }
 export type { TableProps }
-export type { TableRef }
-
-// 3) SearchableDropdown
-export type { SearchableDropdownProps }
 
 // Extended Props
 export type { ExtendedButtonProps }
@@ -288,10 +290,6 @@ export type { ExtendedPhoneNumberFieldProps }
 export type { ExtendedComplexEditorProps }
 export type { ExtendedProjectBoardProps }
 
-/* -------------------------------------------------------------------------- */
-/*                           Additional Type Exports                           */
-/* -------------------------------------------------------------------------- */
-
 // "Local" type exports for existing components
 export type { CustomButtonProps }
 export type { CustomGridProps }
@@ -306,7 +304,7 @@ export type { CodeCopyProps }
 export type { NavProps } // vertical-only
 export type { PricingProps }
 export type { CustomStepperProps }
-export type { ToolbarProps }
+export type { CustomToolbarProps }
 export type { FormProjectBoardProps }
 export type { TransferListProps }
 export type { CustomTooltipProps }
@@ -347,13 +345,16 @@ export type { TextFieldProps }
 export type { TabsProps }
 export type { NavItem }
 
+// NEW: Export prop types for AddTask, ShowTask, ManageTask
+export type { AddTaskProps, ShowTaskProps, ManageTaskProps }
+
 /* -------------------------------------------------------------------------- */
-/*                             Animation Exports                               */
+/*                             Animation Exports                              */
 /* -------------------------------------------------------------------------- */
 export type { Animation }
 
 /* -------------------------------------------------------------------------- */
-/*                             Color Exports                                  */
+/*                              Color Exports                                 */
 /* -------------------------------------------------------------------------- */
 export {
   moss,
@@ -383,7 +384,7 @@ export {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                           Typography Exports                                */
+/*                           Typography Exports                               */
 /* -------------------------------------------------------------------------- */
 export {
   arapeyh1,
