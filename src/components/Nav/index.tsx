@@ -4,7 +4,10 @@ import { useRouter } from 'next/navigation'
 import { Drawer, Box, Stack, Divider } from '@mui/material'
 import Link from 'next/link'
 import { Typography } from '../Typography'
+
+// Replaced SearchableDropdown import with Dropdown import
 import SearchableDropdown from '../SearchableDropdown'
+
 import { white, ocean, semiTransparentWhite } from '../../styles/palette'
 
 // New imports for split components
@@ -104,8 +107,7 @@ const Nav: FC<NavProps> = ({
   verticalNavTitle = 'Navigation',
   searchableNavLabel = 'Search or select a nav',
   anchor = 'left',
-  shrunkfontcolor = 'black',
-  unshrunkfontcolor = 'black',
+  shrunkfontcolor = 'white',
   backgroundcolor,
   titleUrl,
   mobileOpen = false,
@@ -113,7 +115,7 @@ const Nav: FC<NavProps> = ({
   variant = 'permanent',
   spacingfromtopofscreen,
   marginabovetitle = '0px',
-  marginbelowtitle = '0px',
+  marginbelowtitle = '5px',
 }) => {
   // States for expanded mainNavs and subNavs
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
@@ -151,16 +153,6 @@ const Nav: FC<NavProps> = ({
       }
     },
     [router, variant, onClose]
-  )
-
-  /**
-   * When user selects a mainNav from the search dropdown
-   */
-  const handleSearchableNavChange = useCallback(
-    (newValue: { value: string } | null) => {
-      setSelectedNav(newValue?.value || null)
-    },
-    []
   )
 
   /**
@@ -273,7 +265,7 @@ const Nav: FC<NavProps> = ({
   // Drawer Content: Title, optional search, optional divider, then items
   const drawerContent = (
     <>
-      <Box px="15px" sx={{ whiteSpace: 'nowrap' /* no text wrapping */ }}>
+      <Box px="15px" sx={{ whiteSpace: 'nowrap' }}>
         {showTitle && (
           <Box mt={marginabovetitle} mb={marginbelowtitle}>
             <Link
@@ -292,7 +284,7 @@ const Nav: FC<NavProps> = ({
         )}
 
         {showSearchableNav && (
-          <Stack mt={{ xs: '10px', md: '10px', lg: 0 }} spacing={0}>
+          <Stack mt={{ lg: 0 }} spacing={0}>
             <Box
               sx={{
                 position: 'relative',
@@ -307,12 +299,11 @@ const Nav: FC<NavProps> = ({
                 options={navOptions}
                 backgroundcolor={backgroundcolor || semiTransparentWhite.main}
                 outlinecolor="none"
-                fontcolor={white.main}
                 shrunkfontcolor={shrunkfontcolor}
-                unshrunkfontcolor={unshrunkfontcolor}
                 shrunklabelposition="aboveNotch"
-                onChange={handleSearchableNavChange}
-                placeholder="Search..."
+                onChange={option => {
+                  setSelectedNav(option ? option.value : null)
+                }}
               />
             </Box>
           </Stack>
