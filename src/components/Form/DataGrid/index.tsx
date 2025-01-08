@@ -19,7 +19,6 @@ function FormDataGrid({ title, description, datagrid }: FormDataGridProps) {
     description,
     datagridProps: {
       onManage: datagrid.onManage,
-      selectedRows: datagrid.selectedRows,
     },
   })
 
@@ -29,9 +28,6 @@ function FormDataGrid({ title, description, datagrid }: FormDataGridProps) {
         width: '100%',
         height: 'auto',
         overflow: 'hidden',
-        '& *': {
-          overflow: 'hidden !important',
-        },
       }}
     >
       <Box

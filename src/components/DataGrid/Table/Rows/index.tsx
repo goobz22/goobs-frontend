@@ -4,13 +4,9 @@ import React from 'react'
 import { TableBody, TableRow, TableCell, Checkbox } from '@mui/material'
 import StyledTooltip from '../../../Tooltip'
 import type { RowData, ColumnDef } from '../../types'
-
-function getRowId(row: RowData): string {
-  return String(row._id ?? row.id ?? '')
-}
+import { getRowId } from '../index'
 
 interface RowsProps {
-  // Data & columns
   rows: RowData[]
   finalDesktopColumns: ColumnDef[]
   overflowDesktopColumns: ColumnDef[]
@@ -20,13 +16,14 @@ interface RowsProps {
   isMobile: boolean
   mobileSelectedColumn: string
 
-  // Selections
-  checkboxSelection: boolean
-  selectedRows: string[]
-  handleRowCheckboxChange: (rowId: string) => void
+  // Current selected row IDs
+  selectedRowIds: string[]
 
   // Row click
   onRowClick?: (row: RowData) => void
+
+  // Toggling row checkbox
+  onRowCheckboxChange: (rowId: string) => void
 }
 
 const Rows: React.FC<RowsProps> = ({
@@ -36,16 +33,16 @@ const Rows: React.FC<RowsProps> = ({
   selectedOverflowField,
   isMobile,
   mobileSelectedColumn,
-  checkboxSelection,
-  selectedRows,
-  handleRowCheckboxChange,
+  selectedRowIds,
   onRowClick,
+  onRowCheckboxChange,
 }) => {
   if (rows.length === 0) {
     return (
       <TableBody>
         <TableRow>
-          {checkboxSelection && <TableCell />}
+          {/* Extra cell for checkbox column */}
+          <TableCell />
           <TableCell colSpan={finalDesktopColumns.length || 1}>
             No data available
           </TableCell>
@@ -62,21 +59,26 @@ const Rows: React.FC<RowsProps> = ({
       <TableBody>
         {rows.map(row => {
           const rowId = getRowId(row)
+          const isSelected = selectedRowIds.includes(rowId)
           return (
             <TableRow
               key={rowId}
               hover
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
+              sx={{
+                cursor: onRowClick ? 'pointer' : 'default',
+                backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.08)' : 'unset',
+              }}
             >
-              {checkboxSelection && (
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedRows.includes(rowId)}
-                    onChange={() => handleRowCheckboxChange(rowId)}
-                  />
-                </TableCell>
-              )}
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={isSelected}
+                  onChange={e => {
+                    e.stopPropagation()
+                    onRowCheckboxChange(rowId)
+                  }}
+                />
+              </TableCell>
               <TableCell
                 sx={{
                   maxWidth: 200,
@@ -110,23 +112,30 @@ const Rows: React.FC<RowsProps> = ({
     <TableBody>
       {rows.map((row, rowIndex) => {
         const rowId = getRowId(row)
+        const isSelected = selectedRowIds.includes(rowId)
+
         return (
           <TableRow
             key={rowId}
             hover
             onClick={onRowClick ? () => onRowClick(row) : undefined}
-            sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
+            sx={{
+              cursor: onRowClick ? 'pointer' : 'default',
+              backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.08)' : 'unset',
+            }}
           >
-            {checkboxSelection && (
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedRows.includes(rowId)}
-                  onChange={() => handleRowCheckboxChange(rowId)}
-                />
-              </TableCell>
-            )}
+            {/* Checkbox cell */}
+            <TableCell padding="checkbox">
+              <Checkbox
+                checked={isSelected}
+                onChange={e => {
+                  e.stopPropagation()
+                  onRowCheckboxChange(rowId)
+                }}
+              />
+            </TableCell>
+
             {finalDesktopColumns.map((col, columnIndex) => {
-              // Handle overflow column
               if (col.field === '__overflow__') {
                 const actualCol = overflowDesktopColumns.find(
                   c => c.field === selectedOverflowField
@@ -178,7 +187,6 @@ const Rows: React.FC<RowsProps> = ({
                 <TableCell
                   key={`${col.field}-${rowId}-${columnIndex}`}
                   sx={{
-                    // Force ID columns to exactly 60px
                     ...(col.field === 'id' || col.field === '_id'
                       ? {
                           width: '60px',

@@ -32,22 +32,9 @@ function ManageRow({
   onShow,
   onExport,
 }: ManageRowProps) {
-  // Determine if we're on a small screen (mobile)
   const isMobile = useMediaQuery('(max-width:600px)')
 
-  console.log('ManageRow rendered with props:', {
-    selectedRowsCount: selectedRows.length,
-    selectedRows,
-    hasManageHandler: !!onManage,
-  })
-
   const handleActionSelection = (type: ModalType) => {
-    console.log('Action selected:', type, {
-      selectedRows,
-      hasManageHandler: !!onManage,
-      timestamp: new Date().toISOString(),
-    })
-
     switch (type) {
       case 'duplicate':
         onDuplicate?.()
@@ -67,15 +54,8 @@ function ManageRow({
         break
       case 'manage':
         if (selectedRows.length === 1 && onManage) {
-          console.log('Triggering manage with selection:', selectedRows[0])
           onManage()
-          // Don't call handleClose for manage
           return
-        } else {
-          console.warn('Invalid manage state:', {
-            selectedRows,
-            hasManageHandler: !!onManage,
-          })
         }
         break
       case 'show':
@@ -86,9 +66,8 @@ function ManageRow({
   }
 
   const handleExport = () => {
-    console.log('Exporting data for rows:', selectedRows)
     const selectedData = rows.filter(row =>
-      selectedRows.includes(row.id as string)
+      selectedRows.includes((row.id ?? row._id) as string)
     )
     const csvContent = selectedData
       .map(row => Object.values(row).join(','))
@@ -107,209 +86,6 @@ function ManageRow({
     }
   }
 
-  // Build the action buttons
-  const actionButtons = (
-    <Stack
-      component="div"
-      spacing={0}
-      direction="row"
-      justifyContent="center"
-      sx={{ '& > div:not(:last-child)': { marginRight: '2px' } }}
-    >
-      {/* First group: Manage, Show (only if exactly 1 item selected) */}
-      {(onManage || onShow) && selectedRows.length === 1 && (
-        <Box
-          display="flex"
-          flexDirection="row"
-          alignItems="center"
-          sx={{
-            borderRight: '1px solid #e0e0e0',
-            paddingRight: '8px',
-            marginRight: '8px',
-          }}
-        >
-          {onManage && (
-            <Box
-              onClick={e => {
-                e.stopPropagation()
-                handleActionSelection('manage')
-              }}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{
-                padding: '8px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-                borderRadius: '4px',
-                transition: 'background-color 0.2s',
-                userSelect: 'none',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'black',
-                }}
-              >
-                <EditIcon />
-                <Typography fontvariant="merriparagraph" text="Manage" />
-              </Box>
-            </Box>
-          )}
-          {onShow && (
-            <Box
-              onClick={e => {
-                e.stopPropagation()
-                handleActionSelection('show')
-              }}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{
-                padding: '8px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-                borderRadius: '4px',
-                transition: 'background-color 0.2s',
-                userSelect: 'none',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'black',
-                }}
-              >
-                <VisibilityIcon />
-                <Typography fontvariant="merriparagraph" text="Show" />
-              </Box>
-            </Box>
-          )}
-        </Box>
-      )}
-
-      {/* Second group: Duplicate, Delete, Export */}
-      {selectedRows.length > 0 && (
-        <Box display="flex" flexDirection="row" alignItems="center">
-          {/* If not on mobile, show "Duplicate" */}
-          {!isMobile && onDuplicate && (
-            <Box
-              onClick={e => {
-                e.stopPropagation()
-                handleActionSelection('duplicate')
-              }}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{
-                padding: '8px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-                borderRadius: '4px',
-                transition: 'background-color 0.2s',
-                userSelect: 'none',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'black',
-                }}
-              >
-                <DuplicateIcon />
-                <Typography fontvariant="merriparagraph" text="Duplicate" />
-              </Box>
-            </Box>
-          )}
-
-          {/* Always show "Delete" if provided */}
-          {onDelete && (
-            <Box
-              onClick={e => {
-                e.stopPropagation()
-                handleActionSelection('delete')
-              }}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{
-                padding: '8px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-                borderRadius: '4px',
-                transition: 'background-color 0.2s',
-                userSelect: 'none',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'black',
-                }}
-              >
-                <DeleteIcon />
-                <Typography fontvariant="merriparagraph" text="Delete" />
-              </Box>
-            </Box>
-          )}
-
-          {/* If not on mobile, show "Export" */}
-          {!isMobile && (onExport || rows.length > 0) && (
-            <Box
-              onClick={e => {
-                e.stopPropagation()
-                handleActionSelection('export')
-              }}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              sx={{
-                padding: '8px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-                borderRadius: '4px',
-                transition: 'background-color 0.2s',
-                userSelect: 'none',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  color: 'black',
-                }}
-              >
-                <ExportIcon />
-                <Typography fontvariant="merriparagraph" text="Export" />
-              </Box>
-            </Box>
-          )}
-        </Box>
-      )}
-    </Stack>
-  )
-
-  // If no items are selected, nothing to manage
   if (selectedRows.length === 0) return null
 
   return (
@@ -322,7 +98,6 @@ function ManageRow({
         alignItems: 'center',
         justifyContent: 'space-between',
         height: '60px',
-        // On mobile: reduce minWidth + 5px side padding
         minWidth: isMobile ? 'auto' : '560px',
         padding: isMobile ? '0 5px' : '0 10px',
         userSelect: 'none',
@@ -344,7 +119,203 @@ function ManageRow({
             } selected`}
           />
         </Box>
-        {actionButtons}
+
+        <Stack
+          component="div"
+          spacing={0}
+          direction="row"
+          justifyContent="center"
+          sx={{ '& > div:not(:last-child)': { marginRight: '2px' } }}
+        >
+          {/* If exactly 1 item selected, show Manage / Show */}
+          {selectedRows.length === 1 && (
+            <Box
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              sx={{
+                borderRight: '1px solid #e0e0e0',
+                paddingRight: '8px',
+                marginRight: '8px',
+              }}
+            >
+              {onManage && (
+                <Box
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleActionSelection('manage')
+                  }}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      color: 'black',
+                    }}
+                  >
+                    <EditIcon />
+                    <Typography fontvariant="merriparagraph" text="Manage" />
+                  </Box>
+                </Box>
+              )}
+
+              {onShow && (
+                <Box
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleActionSelection('show')
+                  }}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      color: 'black',
+                    }}
+                  >
+                    <VisibilityIcon />
+                    <Typography fontvariant="merriparagraph" text="Show" />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Duplicate, Delete, Export */}
+          {selectedRows.length > 0 && (
+            <Box display="flex" flexDirection="row" alignItems="center">
+              {onDuplicate && !isMobile && (
+                <Box
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleActionSelection('duplicate')
+                  }}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      color: 'black',
+                    }}
+                  >
+                    <DuplicateIcon />
+                    <Typography fontvariant="merriparagraph" text="Duplicate" />
+                  </Box>
+                </Box>
+              )}
+
+              {onDelete && (
+                <Box
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleActionSelection('delete')
+                  }}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      color: 'black',
+                    }}
+                  >
+                    <DeleteIcon />
+                    <Typography fontvariant="merriparagraph" text="Delete" />
+                  </Box>
+                </Box>
+              )}
+
+              {(!isMobile || onExport) && (
+                <Box
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleActionSelection('export')
+                  }}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: '4px',
+                    transition: 'background-color 0.2s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      color: 'black',
+                    }}
+                  >
+                    <ExportIcon />
+                    <Typography fontvariant="merriparagraph" text="Export" />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Stack>
       </Box>
     </Paper>
   )

@@ -1,74 +1,67 @@
 'use client'
 
 import React from 'react'
-import { TableRow, TableCell, Checkbox, Box } from '@mui/material'
+import { TableRow, TableCell, Checkbox } from '@mui/material'
 import type { ColumnDef } from '../../types'
-import * as palette from '../../../../styles/palette'
-import { black, white } from '../../../../styles/palette'
+import { white } from '../../../../styles/palette'
 import SearchableDropdown from '../../../SearchableDropdown'
-import type { SearchableDropdownProps } from '../../../SearchableDropdown'
 
 interface ColumnHeaderRowProps {
-  // For checkbox selection
-  checkboxSelection: boolean
+  isMobile: boolean
   allRowsSelected: boolean
   someRowsSelected: boolean
   handleHeaderCheckboxChange: React.ChangeEventHandler<HTMLInputElement>
 
-  // Columns
+  // Desktop columns
   finalDesktopColumns: ColumnDef[]
-  onColumnHeaderClick?: (field: string) => void
-  selectedColumns: string[]
-
-  // Overflow logic
   overflowDesktopColumns: ColumnDef[]
+
+  // The entire columns array if we need them on mobile
+  allColumns: ColumnDef[]
+
+  // The chosen “overflow” column or mobile column
   selectedOverflowField: string
   setSelectedOverflowField: React.Dispatch<React.SetStateAction<string>>
 }
 
 const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
-  checkboxSelection,
+  isMobile,
   allRowsSelected,
   someRowsSelected,
   handleHeaderCheckboxChange,
   finalDesktopColumns,
-  onColumnHeaderClick,
-  selectedColumns,
   overflowDesktopColumns,
+  allColumns,
+  selectedOverflowField,
   setSelectedOverflowField,
 }) => {
-  // This dropdown is for columns that overflow
-  const overflowDropdownProps: SearchableDropdownProps = {
-    label: 'More Columns',
-    options: overflowDesktopColumns.map(oc => ({ value: oc.field })),
-    backgroundcolor: white.main,
-    outlinecolor: 'none',
-    fontcolor: black.main,
-    shrunkfontcolor: black.main,
-    unshrunkfontcolor: black.main,
-    shrunklabelposition: 'aboveNotch',
-    placeholder: 'Search...',
-    onChange: newVal => {
-      if (newVal) {
-        setSelectedOverflowField(newVal.value)
-      } else {
-        setSelectedOverflowField('')
-      }
-    },
-  }
+  // If we're mobile, just render a single dropdown + “select all” checkbox
+  if (isMobile) {
+    const mobileOptions = allColumns.map(col => ({
+      value: col.field,
+      label: col.headerName ?? col.field,
+    }))
 
-  return (
-    <TableRow
-      sx={{
-        '& th.MuiTableCell-head': {
-          // Forced to 45px in the parent <TableHead> styles
-          lineHeight: '45px !important',
-          padding: '0px 5px !important',
-          verticalAlign: 'middle',
-        },
-      }}
-    >
-      {checkboxSelection && (
+    // Find the currently-selected column as an object
+    const currentMobileChoice =
+      mobileOptions.find(opt => opt.value === selectedOverflowField) || null
+
+    const handleMobileChange = (value: { value: string } | null) => {
+      setSelectedOverflowField(value?.value || '')
+    }
+
+    return (
+      <TableRow
+        sx={{
+          overflow: 'visible',
+          '& th.MuiTableCell-head': {
+            lineHeight: '45px !important',
+            padding: '0px 5px 5px !important',
+            verticalAlign: 'bottom',
+          },
+        }}
+      >
+        {/* "Select all" checkbox cell */}
         <TableCell padding="checkbox">
           <Checkbox
             checked={allRowsSelected}
@@ -76,60 +69,107 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             onChange={handleHeaderCheckboxChange}
           />
         </TableCell>
-      )}
+
+        {/* One cell for the single dropdown containing all columns */}
+        <TableCell
+          sx={{
+            // Enough width to hold the dropdown
+            width: 275,
+            boxSizing: 'border-box',
+            overflow: 'visible',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <SearchableDropdown
+            label="Columns"
+            options={mobileOptions}
+            // Set defaultValue or value depending on how you wrote your component:
+            defaultValue={currentMobileChoice?.value || ''}
+            onChange={handleMobileChange}
+            backgroundcolor={white.main}
+            fontcolor="black"
+            inputfontcolor="black"
+            shrunkfontcolor="black"
+            unshrunkfontcolor="black"
+            shrunklabelposition="aboveNotch"
+          />
+        </TableCell>
+      </TableRow>
+    )
+  }
+
+  // -------------------------------------
+  // Otherwise, DESKTOP logic remains the same
+  // -------------------------------------
+  const handleOverflowChange = (value: { value: string } | null) => {
+    setSelectedOverflowField(value?.value || '')
+  }
+
+  return (
+    <TableRow
+      sx={{
+        overflow: 'visible',
+        '& th.MuiTableCell-head': {
+          lineHeight: '45px !important',
+          padding: '0px 5px 5px !important',
+          verticalAlign: 'bottom',
+        },
+      }}
+    >
+      {/* "Select all" checkbox cell */}
+      <TableCell padding="checkbox">
+        <Checkbox
+          checked={allRowsSelected}
+          indeterminate={!allRowsSelected && someRowsSelected}
+          onChange={handleHeaderCheckboxChange}
+        />
+      </TableCell>
+
+      {/* Normal columns or the overflow dropdown cell */}
       {finalDesktopColumns.map(col => {
         if (col.field === '__overflow__') {
+          // Overflow cell with "More Columns" searchable dropdown
           return (
             <TableCell
               key="overflow-header"
               sx={{
-                width: 250,
-                verticalAlign: 'bottom',
+                width: 275,
+                boxSizing: 'border-box',
                 overflow: 'visible',
+                position: 'relative',
+                zIndex: 10,
               }}
             >
-              {/* Force the dropdown's OutlinedInput to 45px */}
-              <Box
-                sx={{
-                  width: '250px',
-                  position: 'relative',
-                  height: '45px',
-                  '& .MuiAutocomplete-root .MuiOutlinedInput-root': {
-                    height: '45px !important',
-                    minHeight: '45px !important',
-                    lineHeight: '45px !important',
-                    display: 'flex',
-                    alignItems: 'center',
-                    paddingLeft: '5px !important',
-                    paddingRight: '5px !important',
-                  },
-                }}
-              >
-                <SearchableDropdown {...overflowDropdownProps} />
-              </Box>
+              <SearchableDropdown
+                label="More Columns"
+                options={overflowDesktopColumns.map(oc => ({
+                  value: oc.field,
+                  label: oc.headerName ?? oc.field,
+                }))}
+                defaultValue={selectedOverflowField}
+                onChange={handleOverflowChange}
+                backgroundcolor={white.main}
+                fontcolor="black"
+                inputfontcolor="black"
+                shrunkfontcolor="black"
+                unshrunkfontcolor="black"
+                shrunklabelposition="aboveNotch"
+              />
             </TableCell>
           )
         }
 
+        // Normal (non-overflow) column cell
         return (
           <TableCell
             key={col.field}
-            onClick={
-              onColumnHeaderClick
-                ? () => onColumnHeaderClick(col.field)
-                : undefined
-            }
             sx={{
-              backgroundColor: selectedColumns.includes(col.field)
-                ? palette.marine.light
-                : undefined,
-              cursor: onColumnHeaderClick ? 'pointer' : 'default',
               userSelect: 'none',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               verticalAlign: 'bottom',
-              // Force ID columns to exactly 100px
               ...(col.field === 'id' || col.field === '_id'
                 ? {
                     width: '100px',
