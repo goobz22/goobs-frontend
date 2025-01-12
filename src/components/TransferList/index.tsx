@@ -1,4 +1,4 @@
-// src\components\TransferList\index.tsx
+// src/components/TransferList/index.tsx
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -12,14 +12,12 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import { Box, Typography } from '@mui/material'
-
 import Dropdown, { DropdownOption } from '../Dropdown'
 
 /** Utility functions for array handling */
 function not(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) === -1)
 }
-
 function intersection(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) !== -1)
 }
@@ -60,6 +58,14 @@ export interface TransferListProps {
   dropdownDataMap?: TransferListDropdownDataMap
 
   /**
+   * A map from item-value to label.
+   * e.g. { "HIGH": "High Priority", "LOW": "Low Priority" }.
+   * If provided, we'll display `itemLabelMap[value]` in the list
+   * rather than the raw `value`.
+   */
+  itemLabelMap?: Record<string, string>
+
+  /**
    * Fired whenever left/right arrays change (user clicks the arrows).
    * @param leftItems  Updated array for the "left" column
    * @param rightItems Updated array for the "right" column
@@ -92,8 +98,9 @@ const TransferList: React.FC<TransferListProps> = ({
   dropdownLabel,
   dropdownOptions = [],
   dropdownDataMap = {},
-  onChange,
+  itemLabelMap,
 
+  onChange,
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
 }) => {
@@ -161,7 +168,6 @@ const TransferList: React.FC<TransferListProps> = ({
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value)
     const newChecked = [...checked]
-
     if (currentIndex === -1) {
       newChecked.push(value)
     } else {
@@ -234,6 +240,10 @@ const TransferList: React.FC<TransferListProps> = ({
       <List dense component="div" role="list">
         {items.map(value => {
           const labelId = `transfer-list-item-${value}-label`
+          const isChecked = checked.indexOf(value) !== -1
+          const displayedLabel =
+            itemLabelMap && itemLabelMap[value] ? itemLabelMap[value] : value
+
           return (
             <ListItemButton
               key={value}
@@ -242,15 +252,13 @@ const TransferList: React.FC<TransferListProps> = ({
             >
               <ListItemIcon>
                 <Checkbox
-                  checked={checked.indexOf(value) !== -1}
+                  checked={isChecked}
                   tabIndex={-1}
                   disableRipple
-                  inputProps={{
-                    'aria-labelledby': labelId,
-                  }}
+                  inputProps={{ 'aria-labelledby': labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={value} />
+              <ListItemText id={labelId} primary={displayedLabel} />
             </ListItemButton>
           )
         })}
@@ -275,7 +283,7 @@ const TransferList: React.FC<TransferListProps> = ({
       )
     }
 
-    // multipleSelection => show the dropdown above
+    // multipleSelection => show the dropdown above the list
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Dropdown
@@ -295,14 +303,10 @@ const TransferList: React.FC<TransferListProps> = ({
 
   return (
     <CustomGrid
-      container // We set "container" so our CustomGrid is the outer container
+      container
       spacing={2}
       alignItems="flex-start"
       columnconfig={[
-        // We'll define a single "row" with 3 "columns": left, middle, right
-        // row=1, column=1 => left
-        // row=1, column=2 => middle
-        // row=1, column=3 => right
         {
           row: 1,
           column: 1,
