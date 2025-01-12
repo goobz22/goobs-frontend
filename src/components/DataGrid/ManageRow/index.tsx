@@ -15,6 +15,8 @@ interface ManageRowProps {
   handleClose?: () => void
   selectedRows?: string[]
   rows?: Array<{ [key: string]: unknown }>
+  // Update these to accept an array of strings if you want
+  // them to receive the selected row IDs directly:
   onDuplicate?: () => void
   onDelete?: () => void
   onManage?: () => void
@@ -37,11 +39,11 @@ function ManageRow({
   const handleActionSelection = (type: ModalType) => {
     switch (type) {
       case 'duplicate':
-        onDuplicate?.()
+        onDuplicate?.() // We've already passed selectedRows from DataGrid
         handleClose()
         break
       case 'delete':
-        onDelete?.()
+        onDelete?.() // same here
         handleClose()
         break
       case 'export':

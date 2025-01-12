@@ -44,12 +44,18 @@ export interface DatagridProps {
   columns: ColumnDef[]
   rows: RowData[]
   buttons?: CustomButtonProps[]
-  dropdowns?: Omit<DropdownProps, 'onChange'>[]
-  searchbarProps?: Omit<SearchbarProps, 'onChange' | 'value'>
+  dropdowns?: DropdownProps[]
+  searchbarProps?: SearchbarProps
   error?: Error | null
-  onDuplicate?: () => void
-  onDelete?: () => void
+
+  // Single or multi selection callbacks:
   onManage?: () => void
   onShow?: () => void
+
+  // This is critical: must accept selectedIds as an argument
+  onDuplicate?: (selectedIds: string[]) => void
+  onDelete?: (selectedIds: string[]) => void
+
+  // For capturing selection changes
   onSelectionChange?: (selectedIds: string[]) => void
 }

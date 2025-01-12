@@ -20,20 +20,25 @@ function DataGrid({
   dropdowns,
   searchbarProps,
   error = null,
-  onDuplicate,
-  onDelete,
+  onDuplicate, // note type: (selectedIds: string[]) => void
+  onDelete, // note type: (selectedIds: string[]) => void
   onManage,
   onShow,
+  onSelectionChange, // (selectedIds: string[]) => void
 }: DatagridProps) {
+  // Local state
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
 
+  // Initialize columns/rows if needed
   useInitializeGrid({ columns, providedRows, setRows })
 
+  // 1) When row selection changes
   const handleSelectionChange = (newSelectedIds: string[]) => {
     setSelectedRows(newSelectedIds)
+    onSelectionChange?.(newSelectedIds)
   }
 
   const handleRowClick = (row: RowData) => {
@@ -54,22 +59,28 @@ function DataGrid({
     selectAllRows(rows, selectedRows, handleSelectionChange)
   }
 
+  // 2) Search logic
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
     columns,
     rows,
     searchbarProps,
   })
 
+  // 3) Manage row logic
   const { handleManageRowClose, handleManage } = useManageRow({
     onManage,
     selectedRows,
     handleSelectionChange,
   })
 
+  // 4) Pagination
   const startIndex = page * pageSize
   const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize)
 
-  const allRowsSelected = rows.length > 0 && selectedRows.length === rows.length
+  // Determine if "all rows" are currently selected
+  const allRowsSelected =
+    rows.length > 0 &&
+    rows.every(r => selectedRows.includes(String(r._id ?? r.id)))
   const someRowsSelected =
     rows.length > 0 &&
     selectedRows.length > 0 &&
@@ -102,8 +113,16 @@ function DataGrid({
             <ManageRow
               selectedRows={selectedRows}
               rows={rows}
-              onDuplicate={onDuplicate}
-              onDelete={onDelete}
+              onDuplicate={
+                onDuplicate
+                  ? () => onDuplicate(selectedRows) // pass the selected IDs
+                  : undefined
+              }
+              onDelete={
+                onDelete
+                  ? () => onDelete(selectedRows) // pass the selected IDs
+                  : undefined
+              }
               onManage={handleManage}
               onShow={onShow}
               handleClose={handleManageRowClose}
