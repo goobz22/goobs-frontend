@@ -5,7 +5,11 @@ import { styled } from '@mui/material/styles'
 
 export interface NumberFieldProps extends Omit<TextFieldProps, 'onChange'> {
   initialValue?: string
-  onChange?: () => void
+  /**
+   * Now accepts a standard ChangeEvent<HTMLInputElement>
+   * so parent can do e.g. (event) => parseInt(event.target.value) ...
+   */
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
@@ -58,20 +62,24 @@ const NumberField: React.FC<NumberFieldProps> = ({
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value.replace(/[^0-9]/g, '')
+
       if (newValue === '') {
         setValue('')
-        onChange?.()
+        onChange?.(event) // Pass empty string up
         return
       }
+
       const numValue = parseInt(newValue, 10)
       if (min !== undefined && numValue < min) {
-        setValue(min.toString())
+        setValue(String(min))
       } else if (max !== undefined && numValue > max) {
-        setValue(max.toString())
+        setValue(String(max))
       } else {
         setValue(newValue)
       }
-      onChange?.()
+
+      // Call parent's onChange so it knows about the new event/value
+      onChange?.(event)
     },
     [onChange, min, max]
   )
