@@ -1,15 +1,13 @@
 // src\components\ProjectBoard\index.tsx
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { Box, Stack } from '@mui/material'
 import Toolbar from '../Toolbar'
 import Column from './Column'
 import AddTask from './AddTask/client'
 import ManageTask from './ManageTask/client'
 import ShowTask from './ShowTask/client'
-
-// Import the custom hook for drag+drop
 import { useDragAndDropColumns } from './utils/useDragandDropColumns'
 
 /** A minimal typed comment for any type of task. */
@@ -206,21 +204,16 @@ function mergeColumnsAndTasks(
   return columns.map(col => {
     const colId = col._id
 
-    // Based on boardType, decide if a given task belongs in this column
     const matchingTasks = tasks.filter(task => {
       switch (boardType) {
         case 'severityLevel':
           return task.severityId === colId
-
         case 'status':
           return task.statusId === colId
-
         case 'subStatus':
           return task.substatusId === colId
-
         case 'topic':
           return task.topicIds?.includes(colId)
-
         default:
           return false
       }
@@ -247,9 +240,7 @@ function ProjectBoard({
   onUpdateTask,
 }: ProjectBoardProps) {
   // 1) Merge columns + tasks based on boardType
-  const mergedColumns = useMemo(() => {
-    return mergeColumnsAndTasks(columns, tasks, boardType)
-  }, [columns, tasks, boardType])
+  const mergedColumns = mergeColumnsAndTasks(columns, tasks, boardType)
 
   // 2) Local columnState
   const [columnState, setColumnState] = useState<ColumnData[]>(mergedColumns)
@@ -272,9 +263,7 @@ function ProjectBoard({
   }
 
   // Flatten tasks
-  const allTasks = useMemo<Task[]>(() => {
-    return columnState.flatMap(col => col.tasks)
-  }, [columnState])
+  const allTasks: Task[] = columnState.flatMap(col => col.tasks)
 
   // 4) useDragAndDropColumns hook
   const {
