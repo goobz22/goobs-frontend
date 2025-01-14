@@ -35,7 +35,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   selectedOverflowField,
   setSelectedOverflowField,
 }) => {
-  // If we're mobile, just render a single dropdown + “select all” checkbox
+  // If we're mobile, just render a single dropdown + "select all" checkbox
   if (isMobile) {
     const mobileOptions = allColumns.map(col => ({
       value: col.field,
@@ -73,18 +73,18 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         {/* One cell for the single dropdown containing all columns */}
         <TableCell
           sx={{
-            // Enough width to hold the dropdown
             width: 275,
             boxSizing: 'border-box',
             overflow: 'visible',
             position: 'relative',
             zIndex: 10,
+            // If you want no left padding on mobile header as well:
+            paddingLeft: 0,
           }}
         >
           <SearchableDropdown
             label="Columns"
             options={mobileOptions}
-            // Set defaultValue or value depending on how you wrote your component:
             defaultValue={currentMobileChoice?.value || ''}
             onChange={handleMobileChange}
             backgroundcolor={white.main}
@@ -99,9 +99,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
     )
   }
 
-  // -------------------------------------
-  // Otherwise, DESKTOP logic remains the same
-  // -------------------------------------
+  // ---------------------------
+  // Desktop logic
+  // ---------------------------
   const handleOverflowChange = (value: { value: string } | null) => {
     setSelectedOverflowField(value?.value || '')
   }
@@ -129,7 +129,6 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
       {/* Normal columns or the overflow dropdown cell */}
       {finalDesktopColumns.map(col => {
         if (col.field === '__overflow__') {
-          // Overflow cell with "More Columns" searchable dropdown
           return (
             <TableCell
               key="overflow-header"
@@ -139,6 +138,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 overflow: 'visible',
                 position: 'relative',
                 zIndex: 10,
+                paddingLeft: 0, // <-- remove left padding here
               }}
             >
               <SearchableDropdown
@@ -160,7 +160,23 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
           )
         }
 
-        // Normal (non-overflow) column cell
+        // If col.width is set, we respect it; otherwise fallback.
+        const widthStyles = col.width
+          ? {
+              width: col.width,
+              minWidth: col.width,
+              maxWidth: col.width,
+            }
+          : col.field === 'id' || col.field === '_id'
+            ? {
+                width: '100px',
+                minWidth: '100px',
+                maxWidth: '100px',
+              }
+            : {
+                maxWidth: 200,
+              }
+
         return (
           <TableCell
             key={col.field}
@@ -170,15 +186,8 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               verticalAlign: 'bottom',
-              ...(col.field === 'id' || col.field === '_id'
-                ? {
-                    width: '100px',
-                    minWidth: '100px',
-                    maxWidth: '100px',
-                  }
-                : {
-                    maxWidth: 200,
-                  }),
+              paddingLeft: 0, // <-- remove left padding for normal columns
+              ...widthStyles,
             }}
           >
             {col.headerName ?? col.field}

@@ -20,11 +20,11 @@ function DataGrid({
   dropdowns,
   searchbarProps,
   error = null,
-  onDuplicate, // note type: (selectedIds: string[]) => void
-  onDelete, // note type: (selectedIds: string[]) => void
+  onDuplicate,
+  onDelete,
   onManage,
   onShow,
-  onSelectionChange, // (selectedIds: string[]) => void
+  onSelectionChange,
 }: DatagridProps) {
   // Local state
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
@@ -92,9 +92,10 @@ function DataGrid({
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
+        // Increase or remove height if you want more vertical space:
         height: 'calc(100vh - 60px)',
-        width: '100%',
-        overflow: 'hidden',
+        // The key: allow horizontal scroll so columns with big widths can be scrolled
+        overflow: 'auto',
         backgroundColor: woad.main,
       }}
     >
@@ -114,15 +115,9 @@ function DataGrid({
               selectedRows={selectedRows}
               rows={rows}
               onDuplicate={
-                onDuplicate
-                  ? () => onDuplicate(selectedRows) // pass the selected IDs
-                  : undefined
+                onDuplicate ? () => onDuplicate(selectedRows) : undefined
               }
-              onDelete={
-                onDelete
-                  ? () => onDelete(selectedRows) // pass the selected IDs
-                  : undefined
-              }
+              onDelete={onDelete ? () => onDelete(selectedRows) : undefined}
               onManage={handleManage}
               onShow={onShow}
               handleClose={handleManageRowClose}
@@ -140,6 +135,10 @@ function DataGrid({
           alignItems: 'flex-start',
         }}
       >
+        {/* 
+          This is the actual <Table/> component (not the file).
+          Just leaving it as-is, but inside it we do a horizontal scroll and tableLayout: 'auto'.
+        */}
         <Table
           columns={columns}
           rows={visibleRows}

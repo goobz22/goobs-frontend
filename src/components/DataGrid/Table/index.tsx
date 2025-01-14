@@ -39,29 +39,42 @@ function Table({
     selectedOverflowField,
     setSelectedOverflowField,
   } = useComputeTableResize({
-    columns,
-    checkboxSelection: true, // or false, depending on your config
-    showOverflowDropdown: !isMobile, // only show overflow column on desktop
+    columns: columns.map(col => {
+      // We keep this "computedWidth" approach if desired,
+      // but it's optional. It won't break anything.
+      if (col.width) {
+        return { ...col, computedWidth: col.width }
+      }
+      return col
+    }),
+    checkboxSelection: true,
+    showOverflowDropdown: !isMobile,
   })
 
-  // Decide which columns to actually render in the <TableHead /> for desktop.
-  // On mobile, skip the "__overflow__" approach entirely, relying on a single dropdown instead.
+  // Decide which columns to render in the <TableHead /> for desktop.
+  // On mobile, we skip the “__overflow__” approach and just show the single dropdown.
   const finalDesktopColumns = !isMobile
     ? overflowDesktopColumns.length > 0
       ? [
           ...fittedDesktopColumns,
-          {
-            field: '__overflow__',
-            headerName: 'More Columns',
-          },
+          { field: '__overflow__', headerName: 'More Columns' },
         ]
       : fittedDesktopColumns
     : []
 
   return (
-    <Box sx={{ width: '100%', overflow: 'visible' }}>
-      <TableContainer ref={containerRef} sx={{ overflow: 'visible' }}>
-        <MuiTable sx={{ minWidth: 'max-content', overflow: 'visible' }}>
+    // The main wrapper. Key: allow horizontal scroll if table is too wide.
+    <Box sx={{ width: '100%', overflowX: 'auto' }}>
+      {/* We set the "ref" here so that useComputeTableResize can measure width. */}
+      <TableContainer ref={containerRef} sx={{ overflowX: 'auto' }}>
+        <MuiTable
+          sx={{
+            // Let columns expand to their set widths
+            tableLayout: 'auto',
+            // Force the table's minimum width to accommodate large columns
+            minWidth: 'fit-content',
+          }}
+        >
           {/* Table Header */}
           <TableHead>
             <ColumnHeaderRow
@@ -85,16 +98,11 @@ function Table({
           {/* Table Rows */}
           <Rows
             rows={rows}
-            // Desktop columns
             finalDesktopColumns={finalDesktopColumns}
             overflowDesktopColumns={overflowDesktopColumns}
-            // Which column is “active” if we’re on mobile or using overflow
             selectedOverflowField={selectedOverflowField}
-            // If we are on mobile or not
             isMobile={isMobile}
-            // In mobile, Rows will display row[mobileSelectedColumn]
             mobileSelectedColumn={selectedOverflowField}
-            // Row selection
             selectedRowIds={selectedRowIds}
             onRowClick={onRowClick}
             onRowCheckboxChange={onRowCheckboxChange}

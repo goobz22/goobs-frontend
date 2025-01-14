@@ -52,7 +52,7 @@ const Rows: React.FC<RowsProps> = ({
   }
 
   // -------------------------------------
-  // Mobile rendering (single column)
+  // Mobile: single-column approach
   // -------------------------------------
   if (isMobile) {
     return (
@@ -60,6 +60,7 @@ const Rows: React.FC<RowsProps> = ({
         {rows.map(row => {
           const rowId = getRowId(row)
           const isSelected = selectedRowIds.includes(rowId)
+
           return (
             <TableRow
               key={rowId}
@@ -79,12 +80,14 @@ const Rows: React.FC<RowsProps> = ({
                   }}
                 />
               </TableCell>
+
               <TableCell
                 sx={{
                   maxWidth: 200,
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
+                  paddingLeft: 5, // <--- changed to 5
                 }}
               >
                 <StyledTooltip
@@ -106,7 +109,7 @@ const Rows: React.FC<RowsProps> = ({
   }
 
   // -------------------------------------
-  // Desktop/tablet rendering (multi column)
+  // Desktop/tablet: multi-column approach
   // -------------------------------------
   return (
     <TableBody>
@@ -136,6 +139,7 @@ const Rows: React.FC<RowsProps> = ({
             </TableCell>
 
             {finalDesktopColumns.map((col, columnIndex) => {
+              // Overflow logic
               if (col.field === '__overflow__') {
                 const actualCol = overflowDesktopColumns.find(
                   c => c.field === selectedOverflowField
@@ -152,6 +156,7 @@ const Rows: React.FC<RowsProps> = ({
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
+                      paddingLeft: 5, // <--- changed to 5
                     }}
                   >
                     <StyledTooltip
@@ -183,22 +188,32 @@ const Rows: React.FC<RowsProps> = ({
                 cellContent = String(row[col.field] ?? '')
               }
 
+              // Respect manual widths if present
+              const widthStyles = col.width
+                ? {
+                    width: col.width,
+                    minWidth: col.width,
+                    maxWidth: col.width,
+                  }
+                : col.field === 'id' || col.field === '_id'
+                  ? {
+                      width: '60px',
+                      minWidth: '60px',
+                      maxWidth: '60px',
+                    }
+                  : {
+                      maxWidth: 200,
+                    }
+
               return (
                 <TableCell
                   key={`${col.field}-${rowId}-${columnIndex}`}
                   sx={{
-                    ...(col.field === 'id' || col.field === '_id'
-                      ? {
-                          width: '60px',
-                          minWidth: '60px',
-                          maxWidth: '60px',
-                        }
-                      : {
-                          maxWidth: 200,
-                        }),
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    paddingLeft: 1, // <--- changed to 5
+                    ...widthStyles,
                   }}
                 >
                   <StyledTooltip

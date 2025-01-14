@@ -31,9 +31,9 @@ interface UseComputeTableResizeParams {
 
 /**
  * Custom hook to handle table resizing logic:
- * - measuring text widths
+ * - measuring text widths for columns without a manual width
  * - deciding which columns fit vs. overflow
- * - keeping track of the currently selected overflow column
+ * - tracking the currently selected overflow column
  */
 export function useComputeTableResize({
   columns,
@@ -58,7 +58,8 @@ export function useComputeTableResize({
   const columnVisibility = useAtomValue(columnVisibilityAtom)
 
   /**
-   * measureTextWidth: Use a canvas to measure text length for column headers.
+   * measureTextWidth: Use a canvas to measure text length for column headers,
+   * for columns that do NOT have a manual width.
    */
   const measureTextWidth = useCallback((text: string, font = '14px Roboto') => {
     const canvas = document.createElement('canvas')
@@ -70,23 +71,32 @@ export function useComputeTableResize({
 
   /**
    * measureColumnNeededWidth: For a given column, how many pixels does it need?
+   * - If the developer provided `col.width`, use that explicitly.
+   * - Otherwise, measure the header text plus some buffer.
    */
   const measureColumnNeededWidth = useCallback(
     (col: ColumnDef): number => {
-      // Force 60px for id or _id
+      if (col.width != null) {
+        // Developer-supplied width
+        return col.width
+      }
+
+      // Force 60px for id or _id if no manual width
       if (col.field === 'id' || col.field === '_id') {
         return 60
       }
       const header = col.headerName || col.field
       // +40 as a buffer for padding, sorting icons, etc.
-      const baseWidth = measureTextWidth(header) + 40
-      return col.width ?? baseWidth
+      return measureTextWidth(header) + 40
     },
     [measureTextWidth]
   )
 
   /**
-   * recalcColumns: Decide which columns fit & which overflow
+   * recalcColumns: Decide which columns fit & which overflow.
+   * - We skip the "does it fit?" check if a column has an explicit `width`.
+   * - Otherwise, we do your existing logic to see if columns can fit
+   *   before pushing the rest to overflow.
    */
   const recalcColumns = useCallback(() => {
     if (!containerRef.current) return
@@ -108,6 +118,14 @@ export function useComputeTableResize({
       const col = visibleCols[i]
       const needed = measureColumnNeededWidth(col)
 
+      if (col.width != null) {
+        // If the developer explicitly set a width, forcibly add to canFit
+        canFit.push(col)
+        usedWidth += needed
+        continue
+      }
+
+      // Otherwise, do the old "fit" check
       if (usedWidth + needed + overflowReservedWidth <= containerWidth) {
         canFit.push(col)
         usedWidth += needed
@@ -127,6 +145,8 @@ export function useComputeTableResize({
       }
     }
 
+    // If we found no overflow columns, reset them
+    // Else pick the first as default if needed
     let newSelected = selectedOverflowField
     if (
       theOverflow.length > 0 &&
