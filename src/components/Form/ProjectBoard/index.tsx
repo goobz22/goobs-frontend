@@ -1,5 +1,3 @@
-// src/components/FormProjectBoard/index.tsx
-
 'use client'
 
 import React from 'react'
@@ -94,49 +92,7 @@ function FormProjectBoard({
       <ContentSection
         grids={[
           {
-            grid: {
-              // If you want a specific width or other config, put it here
-              gridconfig: { gridwidth: '100%' },
-            },
-            projectboard: {
-              // Pass along all props that ProjectBoard needs:
-              variant: projectboard.variant,
-              boardType: projectboard.boardType,
-              company: projectboard.company,
-
-              columns: projectboard.columns,
-              tasks: projectboard.tasks,
-
-              rawStatuses: projectboard.rawStatuses,
-              rawSubStatuses: projectboard.rawSubStatuses,
-              rawTopics: projectboard.rawTopics,
-              rawQueues: projectboard.rawQueues,
-              rawArticles: projectboard.rawArticles,
-              rawCustomers: projectboard.rawCustomers,
-              rawEmployees: projectboard.rawEmployees,
-              rawSeverityLevels: projectboard.rawSeverityLevels,
-
-              // Callbacks / props that may be in ProjectBoardProps:
-              onComment: projectboard.onComment,
-              onEdit: projectboard.onEdit,
-              onDelete: projectboard.onDelete,
-              onDuplicate: projectboard.onDuplicate,
-              onCloseTask: projectboard.onCloseTask,
-              onEditComment: projectboard.onEditComment,
-
-              // If controlling ShowTask from a parent:
-              showTaskOpen: projectboard.showTaskOpen,
-
-              // For restricting comment edits, etc.
-              currentUserName: projectboard.currentUserName,
-
-              // Example column placement in your grid:
-              columnconfig: {
-                row: 1,
-                column: 1,
-                columnwidth: '100%',
-              },
-            },
+            projectboard: projectboard, // Pass the whole projectboard prop directly
           },
         ]}
       />

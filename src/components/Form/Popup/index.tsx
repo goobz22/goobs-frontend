@@ -5,7 +5,6 @@ import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { formContainerStyle } from '../../../styles/Form'
-import { ExtendedTypographyProps } from '../../Content/Structure/typography/useGridTypography'
 
 export interface PopupProps {
   open: boolean
@@ -27,24 +26,22 @@ export interface PopupProps {
 function Popup({
   open,
   close,
-  onClose, // <----- ADDED
+  onClose,
   title,
   description,
   grids,
   content,
   width = 450,
 }: PopupProps) {
-  // Local states that sync with props
+  // Local state syncing with props
   const [isOpen, setIsOpen] = useState(open)
   const [, setIsClosed] = useState(!open)
 
-  // Sync local state with `open` prop whenever it changes
   useEffect(() => {
     setIsOpen(open)
     setIsClosed(!open)
   }, [open])
 
-  // If the parent sets `close` explicitly, update local states accordingly
   useEffect(() => {
     if (typeof close === 'boolean') {
       setIsOpen(!close)
@@ -52,43 +49,23 @@ function Popup({
     }
   }, [close])
 
-  // Memoized grids for the header
+  // Create a header grid using the new ContentSection interface.
+  // We only supply the typography array without any layout properties.
   const headerGrid = useMemo(
     (): ContentSectionProps['grids'][0] => ({
-      grid: {
-        gridconfig: {
-          gridname: 'formHeader',
-          marginbottom: 0.5,
-          gridwidth: '100%',
-        },
-      },
       typography: [
         {
           text: title,
-          fontvariant: 'merrih5',
+          // Cast to literal type as expected by goobs-frontend.
+          fontvariant: 'merrih5' as const,
           fontcolor: 'black',
-          columnconfig: {
-            row: 1,
-            column: 1,
-            gridname: 'formHeader',
-            columnwidth: '100%',
-            alignment: 'left',
-            marginbottom: 1.5,
-          },
         },
         {
           text: description,
-          fontvariant: 'merriparagraph',
+          fontvariant: 'merriparagraph' as const,
           fontcolor: 'black',
-          columnconfig: {
-            row: 2,
-            column: 1,
-            alignment: 'left',
-            gridname: 'formHeader',
-            columnwidth: '100%',
-          },
         },
-      ] as ExtendedTypographyProps[],
+      ],
     }),
     [title, description]
   )
@@ -108,11 +85,10 @@ function Popup({
     [renderHeader, content, grids]
   )
 
-  // Handle close (icon & outside/backdrop)
   const handleClose = () => {
     setIsOpen(false)
     setIsClosed(true)
-    onClose?.() // <----- CALL PARENT onClose IF PROVIDED
+    onClose?.()
   }
 
   return (
@@ -124,7 +100,7 @@ function Popup({
       PaperProps={{
         style: {
           width: `${width}px`,
-          // ensure pointer events are enabled inside the Dialog
+          // Ensure pointer events are enabled inside the Dialog
           pointerEvents: 'auto',
         },
       }}
@@ -139,7 +115,7 @@ function Popup({
           color: theme => theme.palette.grey[500],
           // Ensure it's on top and clickable
           zIndex: theme => theme.zIndex.modal + 1,
-          cursor: 'pointer', // Explicitly show pointer
+          cursor: 'pointer',
           '&:hover': {
             color: theme => theme.palette.grey[700],
           },
