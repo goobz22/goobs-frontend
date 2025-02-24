@@ -7,12 +7,10 @@ import React, {
   FC,
 } from 'react'
 import { Input, Box } from '@mui/material'
-import { columnconfig } from '../Grid'
 import { red, green } from '../../styles/palette'
 
 export interface ConfirmationCodeInputsProps {
   identifier?: string
-  columnconfig?: columnconfig
   isValid: boolean
   codeLength?: number
   'aria-label'?: string
