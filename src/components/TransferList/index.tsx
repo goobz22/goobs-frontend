@@ -288,7 +288,6 @@ const TransferList: React.FC<TransferListProps> = ({
       <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Dropdown
           label={dropdownLabel || ''}
-          name="transferListDropdown"
           options={dropdownOptions}
           value={selectedDropdownValue}
           onChange={e => {
