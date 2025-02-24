@@ -163,7 +163,6 @@ export default function MobileBoard({
             options={overflowColumns?.map(col => ({ value: col.title })) ?? []}
             value={activeOverflowColumn?.title}
             onChange={handleOverflowDropdownChange}
-            name="overflowColumnSelect"
             fontcolor="#000"
             shrunkfontcolor={white.main}
             backgroundcolor={white.main}
@@ -304,7 +303,6 @@ export default function MobileBoard({
             options={columns.map(col => ({ value: col.title }))}
             value={currentColumn.title}
             onChange={handleColumnDropdownChange}
-            name="mobileColumnSelect"
             fontcolor="#000"
             shrunkfontcolor={white.main}
             backgroundcolor={white.main}

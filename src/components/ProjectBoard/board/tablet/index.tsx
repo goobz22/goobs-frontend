@@ -287,7 +287,6 @@ export default function TabletBoard({
               }
               value={activeOverflowColumn?.title}
               onChange={handleOverflowDropdownChange}
-              name="overflowColumnSelect"
               fontcolor="#000"
               shrunkfontcolor={white.main}
               backgroundcolor={white.main}

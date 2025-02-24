@@ -25,73 +25,67 @@ import TextField from '../../../TextField'
 // Colors
 import { gunpowder, woad, red, white, black } from '../../../../styles/palette'
 
-/** A single historical revision of a comment. */
-export interface CommentEditHistory {
-  _id: string
-  editedBy: string
-  editedAt: string
-  text?: string
-  /** We'll add a flag to distinguish "original" from "edit" in the dropdown label. */
-  isOriginal?: boolean
-}
+// Import shared types from the central types file
+import type {
+  Comment,
+  CommentEditHistory,
+  RawCustomer,
+  RawSeverityLevel,
+  RawQueue,
+  RawStatus,
+  RawSubStatus,
+  RawTopic,
+  RawArticle,
+  RawEmployee,
+} from '../../types'
 
-/** A single comment with creation/update times, optional edit history. */
-export interface ShowTaskComment {
-  _id: string
-  authorName: string
-  text: string
-
-  createdAt?: string
-  updatedAt?: string
-  lastEditedBy?: string
-
-  editHistory?: CommentEditHistory[]
-}
-
-/**
- * Props for ShowTask.
- */
+// ----------------------- ShowTaskProps -----------------------
 export interface ShowTaskProps {
   open: boolean
   onClose: () => void
 
-  // Main Task fields
-  taskTitle?: string
-  createdBy?: string
-  description?: string
+  // The Task ID (now used by onCloseTask).
+  taskId: string
 
-  // Comments array
-  comments?: ShowTaskComment[]
+  // Main Task fields
+  taskTitle: string
+  createdBy: string
+  description: string
+
+  // Comments array using shared Comment type
+  comments: Comment[]
 
   // Right-side fields
-  customerAssigned?: string
-  severity?: string
-  schedulingQueue?: string
-  status?: string
-  subStatus?: string
-  topics?: string[]
-  knowledgebaseArticles?: string[]
-  teamMemberAssigned?: string
-  nextActionDate?: string
+  customerAssigned: string
+  severity: string
+  schedulingQueue: string
+  status: string
+  subStatus: string
+  topics: string[]
+  knowledgebaseArticles: string[]
+  teamMemberAssigned: string
+  nextActionDate: string
 
-  // Options for dropdowns / multi-select
-  customerOptions?: string[]
-  severityOptions?: string[]
-  schedulingQueueOptions?: string[]
-  statusOptions?: string[]
-  subStatusOptions?: string[]
-  topicOptions?: string[]
-  knowledgebaseArticleOptions?: string[]
-  teamMemberOptions?: string[]
+  // Options for dropdowns / multi-select using raw types
+  customerOptions: RawCustomer[]
+  severityOptions: RawSeverityLevel[]
+  schedulingQueueOptions: RawQueue[]
+  statusOptions: RawStatus[]
+  subStatusOptions: RawSubStatus[]
+  topicOptions: RawTopic[]
+  knowledgebaseArticleOptions: RawArticle[]
+  teamMemberOptions: RawEmployee[]
 
-  // Which user is viewing / editing? If provided, only that user can edit
-  // comments they authored. We'll display "Last edited by {currentUserName}" if they do.
-  currentUserName?: string
+  // Which user is viewing / editing? Only that user can edit comments they authored.
+  currentUserName: string
 
   // Callback actions
-  onCloseTask?: () => void
-  onComment?: (commentText: string) => void
-  onEdit?: (updatedData: {
+  /**
+   * Now takes the taskId as a parameter so we can know which Task is being closed.
+   */
+  onCloseTask: (taskId: string) => void
+  onComment: (commentText: string, _id: string) => void
+  onEdit: (updatedData: {
     taskTitle: string
     description: string
     customerAssigned: string
@@ -104,21 +98,27 @@ export interface ShowTaskProps {
     teamMemberAssigned: string
     nextActionDate: string
   }) => void
-  onDelete?: () => void
-  onDuplicate?: () => void
+  onDelete: () => void
+  onDuplicate: () => void
+  onEditComment: (commentId: string, newText: string, taskId: string) => void
+
   /**
-   * Called when a comment’s text is edited. We pass (commentId, newText).
+   * New callback: Pass the full revision history of a comment (by commentId)
+   * to the parent component.
    */
-  onEditComment?: (commentId: string, newText: string) => void
+  onRevisionHistory: (
+    commentId: string,
+    revisionHistory: CommentEditHistory[]
+  ) => void
 }
 
-/** A small helper to format e.g. "3 hours ago" for creation/update times. */
-function formatRelativeTime(dateStr?: string): string {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return ''
+// ----------------------- Helper Functions -----------------------
+
+/** A helper to format a relative time (e.g. "3 hours ago") given a Date */
+function formatRelativeTime(date?: Date): string {
+  if (!date) return ''
   const now = new Date()
-  const diff = +now - +d
+  const diff = now.getTime() - date.getTime()
   if (diff < 0) return 'in the future?'
   const mins = Math.floor(diff / 60000)
   if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`
@@ -128,63 +128,56 @@ function formatRelativeTime(dateStr?: string): string {
   return `${days} day${days === 1 ? '' : 's'} ago`
 }
 
+/** Given a date string, safely returns a Date object or null */
 function safeParseDate(dateStr?: string): Date | null {
   if (!dateStr) return null
   const d = new Date(dateStr)
   return Number.isNaN(d.getTime()) ? null : d
 }
 
+// ----------------------- ShowTask Component -----------------------
+
 const ShowTask: React.FC<ShowTaskProps> = ({
   open,
   onClose,
-
-  // Main fields
-  taskTitle = '',
-  createdBy = '',
-  description = '',
-  comments = [],
-
-  // Right-side fields
-  customerAssigned = '',
-  severity = '',
-  schedulingQueue = '',
-  status = '',
-  subStatus = '',
-  topics = [],
-  knowledgebaseArticles = [],
-  teamMemberAssigned = '',
-  nextActionDate = '',
-
-  // Dropdown / multi-select options
-  customerOptions = [],
-  severityOptions = [],
-  schedulingQueueOptions = [],
-  statusOptions = [],
-  subStatusOptions = [],
-  topicOptions = [],
-  knowledgebaseArticleOptions = [],
-  teamMemberOptions = [],
-
+  taskId,
+  taskTitle,
+  createdBy,
+  description,
+  comments,
+  customerAssigned,
+  severity,
+  schedulingQueue,
+  status,
+  subStatus,
+  topics,
+  knowledgebaseArticles,
+  teamMemberAssigned,
+  nextActionDate,
+  customerOptions,
+  severityOptions,
+  schedulingQueueOptions,
+  statusOptions,
+  subStatusOptions,
+  topicOptions,
+  knowledgebaseArticleOptions,
+  teamMemberOptions,
   currentUserName,
-
-  // Actions
   onCloseTask,
   onComment,
   onEdit,
   onDelete,
   onDuplicate,
   onEditComment,
+  onRevisionHistory,
 }) => {
-  // -------------------- STATE --------------------
-  // 1) Local comment state => updates appear immediately
-  const [localComments, setLocalComments] =
-    useState<ShowTaskComment[]>(comments)
-
-  // 2) For adding new comment
+  // 1) Local comment state – these comments use our shared types.
+  const [localComments, setLocalComments] = useState<Comment[]>(comments)
+  // 2) For adding a new comment
   const [newComment, setNewComment] = useState('')
   // 3) Whether we are editing the left-side fields
   const [isEditing, setIsEditing] = useState(false)
-  // 4) formData for all left & right fields (including description)
+  // 4) formData for the left & right fields (including description)
   const [formData, setFormData] = useState({
     taskTitle,
     description,
@@ -198,127 +191,105 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     teamMemberAssigned,
     nextActionDate,
   })
-
   // 5) For editing an individual comment’s text
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
-
-  // 6) Let user flick through old revisions: selectedRevisions[commentId] = revisionId
+  // 6) For selecting revisions for each comment
   const [selectedRevisions, setSelectedRevisions] = useState<
     Record<string, string | null>
   >({})
 
-  // -------------------- SETUP ORIGINAL REVISIONS --------------------
+  // ------------------ SETUP ORIGINAL REVISIONS ------------------
   useEffect(() => {
     setLocalComments(prev =>
       prev.map(c => {
         if (!c.editHistory || c.editHistory.length === 0) {
-          // We'll treat the comment's createdAt as the time of the "original" version
-          const originalTime = c.createdAt || new Date().toISOString()
+          // Use the comment's createdAt as the "original" time
+          const originalTime = c.createdAt || new Date()
           const originalRev: CommentEditHistory = {
             _id: `rev-orig-${c._id}`,
-            editedBy: c.authorName,
+            editedBy: c.createdBy,
             editedAt: originalTime,
             text: c.text,
             isOriginal: true,
           }
-          return {
-            ...c,
-            editHistory: [originalRev],
-          }
+          return { ...c, editHistory: [originalRev] }
         }
         return c
       })
     )
   }, [])
 
-  // -------------------- MAIN COMMENT ACTIONS --------------------
-  /** Create a new comment in local state with `currentUserName` as author. */
+  // ------------------ COMMENT ACTIONS ------------------
+  /** Create a new comment in local state with the current user as author */
   const handleComment = () => {
     const trimmed = newComment.trim()
     if (!trimmed) return
 
-    // Build a new comment object
-    const newLocalComment: ShowTaskComment = {
+    const now = new Date()
+    const newLocalComment: Comment = {
       _id: `temp-${Date.now()}`,
-      authorName: currentUserName || 'UnknownUser',
+      createdBy: currentUserName || 'UnknownUser',
       text: trimmed,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastEditedBy: currentUserName || 'UnknownUser',
+      createdAt: now,
       editHistory: [
         {
           _id: `rev-orig-temp-${Date.now()}`,
           editedBy: currentUserName || 'UnknownUser',
-          editedAt: new Date().toISOString(),
+          editedAt: now,
           text: trimmed,
           isOriginal: true,
         },
       ],
     }
 
-    // Add to local state
     setLocalComments([...localComments, newLocalComment])
-
-    // Also call the parent’s onComment if provided
-    onComment?.(trimmed)
-
-    // Clear the input
+    onComment(trimmed, taskId)
     setNewComment('')
   }
 
-  /** Begin editing a comment’s text. */
+  /** Begin editing a comment’s text */
   const startEditingComment = (commentId: string, currentText: string) => {
     setEditingCommentId(commentId)
     setEditingCommentText(currentText)
   }
 
-  /** Save the edited text => call onEditComment + local update. */
+  /** Save the edited comment text and update the local state */
   const saveEditingComment = (commentId: string) => {
-    onEditComment?.(commentId, editingCommentText)
-
+    const now = new Date()
+    onEditComment(commentId, editingCommentText, taskId)
     setLocalComments(prev =>
       prev.map(c => {
         if (c._id !== commentId) return c
-
-        const newUpdatedAt = new Date().toISOString()
-        const newEditedBy = currentUserName || 'UnknownUser'
-
-        // Also push a new revision to editHistory
         const newRevision: CommentEditHistory = {
           _id: `rev-${Date.now()}`,
-          editedBy: newEditedBy,
-          editedAt: newUpdatedAt,
+          editedBy: currentUserName || 'UnknownUser',
+          editedAt: now,
           text: editingCommentText,
           isOriginal: false,
         }
-
         return {
           ...c,
           text: editingCommentText,
-          updatedAt: newUpdatedAt,
-          lastEditedBy: newEditedBy,
           editHistory: [...(c.editHistory || []), newRevision],
         }
       })
     )
     setEditingCommentId(null)
     setEditingCommentText('')
-    // Clear any selected revision
     setSelectedRevisions(prev => ({ ...prev, [commentId]: null }))
   }
 
-  /** Cancel editing a comment. */
+  /** Cancel editing a comment */
   const cancelEditingComment = () => {
     setEditingCommentId(null)
     setEditingCommentText('')
   }
 
-  // -------------------- RIGHT-SIDE "EDIT" TOGGLE --------------------
+  // ------------------ RIGHT-SIDE EDIT TOGGLE ------------------
   const handleEditToggle = () => {
     if (isEditing) {
-      // If we were editing, clicking "Save" calls onEdit with new fields (including description)
-      onEdit?.({
+      onEdit({
         taskTitle: formData.taskTitle,
         description: formData.description,
         customerAssigned: formData.customerAssigned,
@@ -337,18 +308,20 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     }
   }
 
-  // -------------------- REVISION SELECT --------------------
+  // ------------------ REVISION SELECT ------------------
   const handleSelectRevision = (
     commentId: string,
     revisionId: string | null
   ) => {
-    setSelectedRevisions(prev => ({
-      ...prev,
-      [commentId]: revisionId || null,
-    }))
+    setSelectedRevisions(prev => ({ ...prev, [commentId]: revisionId || null }))
+    // Find the comment and pass its revision history up via the new callback
+    const comment = localComments.find(c => c._id === commentId)
+    if (comment && comment.editHistory) {
+      onRevisionHistory(commentId, comment.editHistory)
+    }
   }
 
-  // Reusable style for each right-side row
+  // A reusable style for each right-side row
   const rightSideRowStyle = {
     display: 'flex',
     flexDirection: 'column' as const,
@@ -358,7 +331,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     px: 2,
   }
 
-  // ----- For the triple-dot menu on each comment -----
+  // ------------------ Comment Menu State ------------------
   interface CommentMenuState {
     anchor: HTMLElement | null
     commentId: string | null
@@ -377,12 +350,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   const closeCommentMenu = () => {
     setCommentMenu({ anchor: null, commentId: null })
   }
-
   const handleEditClick = (commentId: string, text: string) => {
     closeCommentMenu()
     startEditingComment(commentId, text)
   }
 
+  // ------------------ JSX ------------------
   return (
     <Dialog
       open={open}
@@ -399,7 +372,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
       }}
     >
       <DialogContent sx={{ p: 0 }}>
-        {/* =================== TOP ROW: Title + CreatedBy + Edit/Delete/Close =================== */}
+        {/* Top Row: Title + createdBy + action buttons */}
         <Box
           sx={{
             display: 'flex',
@@ -408,7 +381,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             borderBottom: '2px solid black',
           }}
         >
-          {/* LEFT: Title & createdBy */}
+          {/* Left: Title & createdBy */}
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             {isEditing ? (
               <TextField
@@ -438,43 +411,37 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             />
           </Box>
 
-          {/* RIGHT: Edit, Delete, Duplicate, Close */}
+          {/* Right: Action Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {onEdit && (
-              <CustomButton
-                text={isEditing ? 'Save' : 'Edit'}
-                fontcolor="black"
-                backgroundcolor="none"
-                onClick={handleEditToggle}
-              />
-            )}
-            {onDelete && (
-              <CustomButton
-                text="Delete"
-                fontcolor="black"
-                backgroundcolor="none"
-                onClick={onDelete}
-              />
-            )}
-            {onDuplicate && (
-              <CustomButton
-                text="Duplicate"
-                fontcolor="black"
-                backgroundcolor="none"
-                onClick={onDuplicate}
-              />
-            )}
+            <CustomButton
+              text={isEditing ? 'Save' : 'Edit'}
+              fontcolor="black"
+              backgroundcolor="none"
+              onClick={handleEditToggle}
+            />
+            <CustomButton
+              text="Delete"
+              fontcolor="black"
+              backgroundcolor="none"
+              onClick={onDelete}
+            />
+            <CustomButton
+              text="Duplicate"
+              fontcolor="black"
+              backgroundcolor="none"
+              onClick={onDuplicate}
+            />
             <IconButton onClick={onClose}>
               <CloseIcon />
             </IconButton>
           </Box>
         </Box>
 
-        {/* =================== MAIN CONTENT: LEFT (Description & Comments) + RIGHT (Fields) =================== */}
+        {/* Main Content: Left (Description & Comments) + Right (Additional Fields) */}
         <Box sx={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 0 }}>
           {/* LEFT COLUMN */}
           <Box sx={{ p: 2, pt: 0 }}>
-            {/* DESCRIPTION BOX */}
+            {/* DESCRIPTION */}
             <Box
               sx={{
                 border: '1px solid black',
@@ -486,7 +453,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 flexDirection: 'column',
               }}
             >
-              {/* If editing, show ComplexTextEditor. Otherwise, heading + text. */}
               {isEditing ? (
                 <>
                   <Typography
@@ -498,10 +464,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   <ComplexTextEditor
                     value={formData.description}
                     onChange={val =>
-                      setFormData(prev => ({
-                        ...prev,
-                        description: val,
-                      }))
+                      setFormData(prev => ({ ...prev, description: val }))
                     }
                     label="Task Description"
                     editorType="simple"
@@ -531,17 +494,17 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               const selectedRevId = selectedRevisions[comment._id] || null
 
               let displayedText = comment.text
-              let displayedTime = comment.updatedAt
-              let displayedAuthor = comment.lastEditedBy || comment.authorName
+              let displayedTime: Date = comment.createdAt
+              let displayedAuthor = comment.createdBy
 
               if (selectedRevId && comment.editHistory) {
                 const foundRev = comment.editHistory.find(
                   r => r._id === selectedRevId
                 )
                 if (foundRev) {
-                  displayedText = foundRev.text || ''
-                  displayedTime = foundRev.editedAt
-                  displayedAuthor = foundRev.editedBy
+                  displayedText = foundRev.text
+                  displayedTime = foundRev.editedAt ?? comment.createdAt
+                  displayedAuthor = foundRev.editedBy ?? comment.createdBy
                 }
               }
 
@@ -550,23 +513,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               const hasHistory =
                 comment.editHistory && comment.editHistory.length > 0
               const canEdit =
-                currentUserName && comment.authorName === currentUserName
-
+                currentUserName && comment.createdBy === currentUserName
               const isMenuOpen =
                 commentMenu.anchor && commentMenu.commentId === comment._id
 
-              // If user is editing THIS comment, show the editor; otherwise show the layout
               return (
                 <Box key={comment._id} sx={{ mb: 0 }}>
                   {editingCommentId === comment._id ? (
-                    // ========== EDITING THIS COMMENT ==========
                     <Box
-                      sx={{
-                        border: '1px solid black',
-                        mx: -2,
-                        px: 2,
-                        py: 1,
-                      }}
+                      sx={{ border: '1px solid black', mx: -2, px: 2, py: 1 }}
                     >
                       <ComplexTextEditor
                         value={editingCommentText}
@@ -598,7 +553,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       </Box>
                     </Box>
                   ) : (
-                    // ========== DISPLAY COMMENT (with top row & bottom-left text) ==========
                     <Box
                       sx={{
                         border: '1px solid black',
@@ -610,7 +564,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         minHeight: '80px',
                       }}
                     >
-                      {/* Top Row: Author + triple-dot menu */}
                       <Box
                         sx={{
                           display: 'flex',
@@ -618,15 +571,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                           alignItems: 'flex-start',
                         }}
                       >
-                        {/* Left side: Author name */}
                         <Typography
                           fontvariant="merrih5"
                           fontcolor="black"
-                          text={comment.authorName}
+                          text={comment.createdBy}
                           sx={{ fontWeight: 'bold' }}
                         />
-
-                        {/* Right side: triple-dot icon => menu */}
                         <IconButton
                           size="small"
                           onClick={e => openCommentMenu(e, comment._id)}
@@ -648,8 +598,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                             horizontal: 'right',
                           }}
                         >
-                          {/* Normal 'Edit' item with default hover style */}
-                          {onEditComment && canEdit && (
+                          {canEdit && (
                             <MenuItem
                               onClick={() =>
                                 handleEditClick(comment._id, comment.text)
@@ -658,16 +607,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                               Edit
                             </MenuItem>
                           )}
-                          {/* "Revision History" item => no grey hover */}
                           {hasHistory && (
                             <MenuItem
                               disableRipple
                               sx={{
                                 py: 0.5,
                                 cursor: 'default',
-                                '&:hover': {
-                                  backgroundColor: 'transparent',
-                                },
+                                '&:hover': { backgroundColor: 'transparent' },
                               }}
                             >
                               <Box sx={{ width: 220 }}>
@@ -675,24 +621,26 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                   label="Revision History"
                                   shrunklabelposition="aboveNotch"
                                   placeholder="Select revision..."
-                                  options={(comment.editHistory || []).map(
-                                    rev => {
+                                  options={
+                                    comment.editHistory.map(rev => {
                                       const revTime = formatRelativeTime(
-                                        rev.editedAt
+                                        rev.editedAt ?? comment.createdAt
                                       )
                                       const prefix = rev.isOriginal
                                         ? 'Original'
                                         : 'Edited'
+                                      const editedBy =
+                                        rev.editedBy ?? comment.createdBy
                                       return {
-                                        value: rev._id,
-                                        attribute1: `${prefix} ${revTime} by ${rev.editedBy}`,
+                                        value: `${prefix} ${revTime} by ${editedBy}`,
+                                        attribute1: rev._id,
                                       }
-                                    }
-                                  )}
+                                    }) || []
+                                  }
                                   onChange={opt =>
                                     handleSelectRevision(
                                       comment._id,
-                                      opt?.value || null
+                                      opt?.attribute1 || null
                                     )
                                   }
                                   outlinecolor={black.main}
@@ -705,7 +653,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         </Menu>
                       </Box>
 
-                      {/* Bottom area: comment text + creation/edit info */}
                       <Box sx={{ mt: 'auto' }}>
                         <Typography
                           fontvariant="merriparagraph"
@@ -716,7 +663,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <Box sx={{ fontSize: '12px', color: 'gray', mt: 0.5 }}>
                           {comment.createdAt && (
                             <span>
-                              Created {createdTime} by {comment.authorName}
+                              Created {createdTime} by {comment.createdBy}
                             </span>
                           )}
                           {displayedTime && displayedAuthor && (
@@ -750,14 +697,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   gap: 2,
                 }}
               >
-                {onCloseTask && (
-                  <CustomButton
-                    text="Close Task"
-                    backgroundcolor={gunpowder.main}
-                    fontcolor={white.main}
-                    onClick={onCloseTask}
-                  />
-                )}
+                {/* PASS THE TASK ID TO onCloseTask */}
+                <CustomButton
+                  text="Close Task"
+                  backgroundcolor={gunpowder.main}
+                  fontcolor={white.main}
+                  onClick={() => onCloseTask(taskId)}
+                />
                 <CustomButton
                   text="Comment"
                   backgroundcolor={woad.dark}
@@ -791,13 +737,19 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Customer Assigned"
-                  options={customerOptions.map(v => ({ value: v }))}
+                  options={customerOptions.map(cust => ({
+                    value:
+                      cust.firstName || cust.lastName
+                        ? `${cust.firstName || ''} ${cust.lastName || ''}`.trim()
+                        : cust._id,
+                    attribute1: cust._id,
+                  }))}
                   shrunklabelposition="aboveNotch"
                   defaultValue={formData.customerAssigned}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      customerAssigned: newVal?.value || '',
+                      customerAssigned: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -831,13 +783,16 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Severity"
-                  options={severityOptions.map(opt => ({ value: opt }))}
+                  options={severityOptions.map(s => ({
+                    value: String(s.severityLevel),
+                    attribute1: s._id,
+                  }))}
                   shrunklabelposition="aboveNotch"
                   defaultValue={formData.severity}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      severity: newVal?.value || '',
+                      severity: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -847,11 +802,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Chip
                   label={formData.severity}
                   variant="filled"
-                  sx={{
-                    backgroundColor: red.main,
-                    color: white.main,
-                    mt: 1,
-                  }}
+                  sx={{ backgroundColor: red.main, color: white.main, mt: 1 }}
                 />
               ) : null}
             </Box>
@@ -869,13 +820,16 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Scheduling Queue"
-                  options={schedulingQueueOptions.map(opt => ({ value: opt }))}
+                  options={schedulingQueueOptions.map(q => ({
+                    value: q.queueName,
+                    attribute1: q._id,
+                  }))}
                   shrunklabelposition="aboveNotch"
                   defaultValue={formData.schedulingQueue}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      schedulingQueue: newVal?.value || '',
+                      schedulingQueue: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -885,11 +839,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Chip
                   label={formData.schedulingQueue}
                   variant="filled"
-                  sx={{
-                    backgroundColor: '#C48EA6',
-                    color: white.main,
-                    mt: 1,
-                  }}
+                  sx={{ backgroundColor: '#C48EA6', color: white.main, mt: 1 }}
                 />
               ) : null}
             </Box>
@@ -907,13 +857,16 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Status"
-                  options={statusOptions.map(opt => ({ value: opt }))}
+                  options={statusOptions.map(s => ({
+                    value: s.status,
+                    attribute1: s._id,
+                  }))}
                   shrunklabelposition="aboveNotch"
                   defaultValue={formData.status}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      status: newVal?.value || '',
+                      status: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -923,11 +876,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Chip
                   label={formData.status}
                   variant="filled"
-                  sx={{
-                    backgroundColor: black.main,
-                    color: white.main,
-                    mt: 1,
-                  }}
+                  sx={{ backgroundColor: black.main, color: white.main, mt: 1 }}
                 />
               ) : null}
             </Box>
@@ -945,12 +894,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Sub Status"
-                  options={subStatusOptions.map(opt => ({ value: opt }))}
+                  options={subStatusOptions.map(s => ({
+                    value: s.subStatus,
+                    attribute1: s._id,
+                  }))}
                   defaultValue={formData.subStatus}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      subStatus: newVal?.value || '',
+                      subStatus: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -980,7 +932,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <MultipleSelectChip
                   label="Topics"
-                  options={topicOptions}
+                  options={topicOptions.map(t => t.topic)}
                   defaultSelected={formData.topics}
                   onChange={values =>
                     setFormData(prev => ({ ...prev, topics: values }))
@@ -1016,7 +968,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <MultipleSelectChip
                   label="Knowledgebase Articles"
-                  options={knowledgebaseArticleOptions}
+                  options={knowledgebaseArticleOptions.map(a => a.articleTitle)}
                   defaultSelected={formData.knowledgebaseArticles}
                   onChange={values =>
                     setFormData(prev => ({
@@ -1055,12 +1007,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {isEditing ? (
                 <SearchableDropdown
                   label="Team Member Assigned"
-                  options={teamMemberOptions.map(opt => ({ value: opt }))}
+                  options={teamMemberOptions.map(tm => ({
+                    value:
+                      tm.firstName && tm.lastName
+                        ? `${tm.firstName} ${tm.lastName}`
+                        : tm._id,
+                    attribute1: tm._id,
+                  }))}
                   defaultValue={formData.teamMemberAssigned}
                   onChange={newVal =>
                     setFormData(prev => ({
                       ...prev,
-                      teamMemberAssigned: newVal?.value || '',
+                      teamMemberAssigned: newVal?.attribute1 || '',
                     }))
                   }
                   outlinecolor={black.main}
@@ -1071,11 +1029,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Chip
                   label={formData.teamMemberAssigned}
                   variant="filled"
-                  sx={{
-                    backgroundColor: woad.main,
-                    color: white.main,
-                    mt: 1,
-                  }}
+                  sx={{ backgroundColor: woad.main, color: white.main, mt: 1 }}
                 />
               ) : null}
             </Box>

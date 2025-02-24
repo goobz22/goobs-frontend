@@ -33,11 +33,22 @@ export default function Board(props: BoardProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
 
+  // Wrap onSelectTask to add logging
+  const handleSelectTask = (colIndex: number, taskIndex: number) => {
+    props.onSelectTask(colIndex, taskIndex)
+  }
+
+  // Create modified props with our wrapped handler
+  const modifiedProps = {
+    ...props,
+    onSelectTask: handleSelectTask,
+  }
+
   if (isMobile) {
-    return <MobileBoard {...props} />
+    return <MobileBoard {...modifiedProps} />
   }
   if (isTablet) {
-    return <TabletBoard {...props} />
+    return <TabletBoard {...modifiedProps} />
   }
-  return <DesktopBoard {...props} />
+  return <DesktopBoard {...modifiedProps} />
 }
