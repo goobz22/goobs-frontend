@@ -8,7 +8,6 @@ import React, {
   FocusEvent,
 } from 'react'
 import {
-  Box,
   styled,
   MenuItem,
   FormControl,
@@ -20,11 +19,8 @@ import {
   SelectChangeEvent,
 } from '@mui/material'
 import Typography from '../Typography'
-import { white } from '../../styles/palette'
+import { black, white } from '../../styles/palette'
 
-// -----------------------------
-// Types
-// -----------------------------
 export interface SimpleDropdownOption {
   value: string
 }
@@ -36,7 +32,7 @@ export interface ComplexDropdownOption extends SimpleDropdownOption {
 
 export type DropdownOption = SimpleDropdownOption | ComplexDropdownOption
 
-export interface DropdownProps {
+export interface DropdownProps extends Omit<FormControlProps, 'onChange'> {
   label: string
   options: DropdownOption[]
   defaultValue?: string
@@ -45,304 +41,306 @@ export interface DropdownProps {
   fontcolor?: string
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
-  /**
-   * Positions the label text when shrunk.
-   * - `onNotch` = label sits on top of the outlined notch.
-   * - `aboveNotch` = label moves above the notch.
-   */
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   error?: boolean
   helperText?: string
-  name?: string
   required?: boolean
   onBlur?: FocusEventHandler<HTMLInputElement>
   onFocus?: FocusEventHandler<HTMLInputElement>
   value?: string
+  width?: string
+  disabled?: boolean
 }
 
-// -----------------------------
-// Utility
-// -----------------------------
-const capitalizeFirstLetter = (str: string) =>
-  str.charAt(0).toUpperCase() + str.slice(1)
-
-// -----------------------------
-// Styles
-// -----------------------------
-const StyledBox = styled(Box)(() => ({
-  width: '100%',
-  marginTop: '10px',
-}))
-
-const StyledMenuItem = styled(MenuItem)(() => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  backgroundColor: white.main,
-}))
-
-interface StyledFormControlProps extends FormControlProps {
-  $hasValue: boolean
-  $focused: boolean
-  $backgroundcolor?: string
-  $outlinecolor?: string
-  $fontcolor?: string
-  $shrunkfontcolor?: string
-  $unshrunkfontcolor?: string
-  $shrunklabelposition?: 'onNotch' | 'aboveNotch'
-  $error?: boolean
-}
-
-const StyledFormControl = styled(FormControl, {
-  shouldForwardProp: prop =>
-    ![
-      '$hasValue',
-      '$focused',
-      '$backgroundcolor',
-      '$outlinecolor',
-      '$fontcolor',
-      '$shrunkfontcolor',
-      '$unshrunkfontcolor',
-      '$shrunklabelposition',
-      '$error',
-    ].includes(prop as string),
-})<StyledFormControlProps>(
-  ({
-    $hasValue,
-    $backgroundcolor,
-    $outlinecolor,
-    $fontcolor,
-    $shrunkfontcolor,
-    $unshrunkfontcolor,
-    $shrunklabelposition,
-    $error,
-  }) => ({
-    minHeight: '55px',
-    '& .MuiInputLabel-root': {
-      // ----- UN-SHRUNK LABEL STYLES (Static) -----
-      '&:not(.MuiInputLabel-shrink)': {
-        transform: 'translate(14px, 9px) scale(1)',
-      },
-      color: $unshrunkfontcolor || 'black',
-      '&.Mui-focused': {
-        color: $shrunkfontcolor || 'black',
-      },
-      // ----- SHRUNK LABEL STYLES -----
-      '&.MuiInputLabel-shrink': {
-        color: $shrunkfontcolor || 'black',
-        ...(($shrunklabelposition === 'aboveNotch' && {
-          // Move label entirely above the outline
-          transform: 'translate(0px, -17px) scale(0.75)',
-        }) ||
-          ($shrunklabelposition === 'onNotch' && {
-            // Sits on top of the notched outline
-            transform: 'translate(14px, -9px) scale(0.75)',
-          })),
-      },
-    },
-    '& .MuiOutlinedInput-root': {
-      minHeight: '40px',
-      height: '40px',
-      backgroundColor: $backgroundcolor || 'inherit',
-      color: $fontcolor || 'black',
-      '& .MuiSelect-icon': {
-        color: $fontcolor || 'black',
-      },
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor:
-          $outlinecolor ||
-          ($error ? '' : $hasValue ? 'black' : 'rgba(0, 0, 0, 0.23)'),
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor:
-          $outlinecolor ||
-          ($error ? '' : $hasValue ? 'black' : 'rgba(0, 0, 0, 0.23)'),
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor:
-          $outlinecolor ||
-          ($error ? '' : $hasValue ? 'black' : 'rgba(0, 0, 0, 0.23)'),
-      },
-      '& .MuiOutlinedInput-input': {
-        padding: '8px 14px',
-        color: $fontcolor || 'black',
-      },
-    },
+const StyledFormControl = styled(FormControl)<{ width?: string }>(
+  ({ width }) => ({
+    width: width || '100%',
+    marginTop: '15px',
+    height: 'auto',
+    overflow: 'visible',
   })
 )
 
-const StyledOutlinedInput = styled(OutlinedInput, {
-  shouldForwardProp: prop =>
-    ![
-      '$backgroundcolor',
-      '$fontcolor',
-      '$hasValue',
-      '$focused',
-      '$outlinecolor',
-      '$error',
-    ].includes(prop as string),
-})(() => ({}))
+const StyledInputLabel = styled(InputLabel)<{
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
+  disabled?: boolean
+}>(({ shrunkfontcolor, unshrunkfontcolor, shrunklabelposition, disabled }) => ({
+  color: disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor || black.main,
+  '&.Mui-focused': {
+    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
+  },
+  '&.MuiInputLabel-shrink': {
+    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
+    ...(shrunklabelposition === 'aboveNotch' && {
+      top: '-8px',
+      left: '-14px',
+    }),
+    ...(shrunklabelposition === 'onNotch' && {
+      top: '2.5px',
+      left: '0px',
+    }),
+  },
+  '&:not(.MuiInputLabel-shrink)': {
+    transform: 'scale(1)',
+    transformOrigin: 'top left',
+    top: '10px',
+    left: '12px',
+  },
+}))
 
-// -----------------------------
-// Component
-// -----------------------------
+const StyledSelect = styled(Select)<{
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  disabled?: boolean
+}>(({ backgroundcolor, outlinecolor, fontcolor, disabled }) => ({
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+  },
+  backgroundColor: disabled
+    ? 'rgba(0, 0, 0, 0.12)'
+    : backgroundcolor || white.main,
+  color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
+  minHeight: '40px',
+  '& .MuiSelect-select': {
+    padding: '8px 14px',
+  },
+  '&.Mui-disabled': {
+    cursor: 'not-allowed',
+    pointerEvents: 'auto',
+  },
+  '& .MuiSelect-icon': {
+    color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main,
+  },
+}))
+
+const StyledMenuItem = styled(MenuItem)({
+  padding: '8px 14px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '2px',
+  width: '100%',
+  backgroundColor: white.main,
+  '&.Mui-selected': {
+    backgroundColor: `${black.main}08`,
+  },
+  '&:hover': {
+    backgroundColor: `${black.main}08`,
+  },
+  '& .MuiTypography-root': {
+    width: '100%',
+    textAlign: 'left',
+  },
+})
+
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: 48 * 4.5 + 8,
+      marginTop: 4,
+    },
+  },
+}
+
 const Dropdown: React.FC<DropdownProps> = ({
   label,
   options,
   defaultValue,
   backgroundcolor,
   outlinecolor,
-  fontcolor,
-  shrunkfontcolor,
-  unshrunkfontcolor,
+  fontcolor = black.main,
+  shrunkfontcolor = black.main,
+  unshrunkfontcolor = black.main,
   shrunklabelposition = 'onNotch',
   onChange,
   error = false,
   helperText,
-  name,
   required = false,
   onBlur,
   onFocus,
   value: externalValue,
+  width,
+  disabled = false,
 }) => {
-  // -----------------------------
-  // Determine initial value
-  // -----------------------------
-  let initialSelected = ''
-
-  if (externalValue !== undefined && externalValue !== '') {
-    initialSelected = externalValue
-  } else if (defaultValue) {
-    const defaultOption = options.find(opt => opt.value === defaultValue)
-    if (defaultOption) {
-      initialSelected = defaultOption.value
-    }
-  }
-
-  // -----------------------------
-  // Local State
-  // -----------------------------
-  const [selectedValue, setSelectedValue] = useState<string>(initialSelected)
+  const [selectedValue, setSelectedValue] = useState<string>('')
   const [focused, setFocused] = useState(false)
 
-  // -----------------------------
-  // Sync with external value
-  // -----------------------------
   useEffect(() => {
     if (externalValue !== undefined) {
       setSelectedValue(externalValue)
+    } else if (defaultValue) {
+      setSelectedValue(defaultValue)
     }
-  }, [externalValue])
+  }, [externalValue, defaultValue])
 
-  // -----------------------------
-  // Handlers
-  // -----------------------------
   const handleChange = useCallback(
-    (event: SelectChangeEvent<string>) => {
-      const newValue = event.target.value
+    (event: SelectChangeEvent<unknown>) => {
+      if (disabled) return
+
+      const newValue = event.target.value as string
       setSelectedValue(newValue)
 
       if (onChange) {
         onChange(event as unknown as React.ChangeEvent<HTMLInputElement>)
       }
     },
-    [onChange]
+    [onChange, disabled]
   )
 
   const handleBlur = useCallback(
     (e: FocusEvent<HTMLInputElement>) => {
+      if (disabled) return
+
       setFocused(false)
       onBlur?.(e)
     },
-    [onBlur]
+    [onBlur, disabled]
   )
 
   const handleFocus = useCallback(
     (e: FocusEvent<HTMLInputElement>) => {
+      if (disabled) return
+
       setFocused(true)
       onFocus?.(e)
     },
-    [onFocus]
+    [onFocus, disabled]
   )
 
-  // -----------------------------
-  // Render function
-  // -----------------------------
   const renderMenuItem = (option: DropdownOption) => {
-    const itemLabel = capitalizeFirstLetter(option.value.replace(/_/g, ' '))
+    const displayText = option.value
+      ? option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
+        option.value.replace(/_/g, ' ').slice(1)
+      : ''
 
     if (!('attribute1' in option)) {
-      // Simple
       return (
         <MenuItem key={option.value} value={option.value}>
-          <Typography fontvariant="merriparagraph" text={itemLabel} />
-        </MenuItem>
-      )
-    } else {
-      // Complex
-      return (
-        <StyledMenuItem key={option.value} value={option.value}>
-          <Typography fontvariant="merriparagraph" text={itemLabel} />
           <Typography
             fontvariant="merriparagraph"
-            text={`${option.attribute1}${
-              option.attribute2 ? ` | ${option.attribute2}` : ''
-            }`}
-            fontcolor="textSecondary"
+            text={displayText}
+            fontcolor={black.main}
+            sx={{
+              fontSize: '14px',
+              lineHeight: '20px',
+              width: '100%',
+              textAlign: 'left',
+            }}
           />
-        </StyledMenuItem>
+        </MenuItem>
       )
     }
+
+    return (
+      <StyledMenuItem key={option.value} value={option.value}>
+        <Typography
+          fontvariant="merriparagraph"
+          text={displayText}
+          fontcolor={black.main}
+          sx={{
+            fontSize: '14px',
+            lineHeight: '20px',
+            width: '100%',
+            textAlign: 'left',
+          }}
+        />
+        {(option.attribute1 || option.attribute2) && (
+          <Typography
+            fontvariant="merriparagraph"
+            text={[option.attribute1, option.attribute2]
+              .filter(Boolean)
+              .join(' | ')}
+            fontcolor="rgba(0, 0, 0, 0.6)"
+            sx={{
+              fontSize: '12px',
+              lineHeight: '16px',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          />
+        )}
+      </StyledMenuItem>
+    )
   }
 
-  const hasValue = Boolean(selectedValue && selectedValue.length)
+  const renderValue = (value: string) => {
+    const option = options.find(opt => opt.value === value)
+    if (!option) return ''
 
-  // Update the notching logic
-  const shouldNotch = shrunklabelposition === 'onNotch' && (hasValue || focused)
+    const displayText =
+      option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
+      option.value.replace(/_/g, ' ').slice(1)
+
+    return (
+      <Typography
+        fontvariant="merriparagraph"
+        text={displayText}
+        fontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : black.main}
+        sx={{
+          fontSize: '14px',
+          lineHeight: '20px',
+          width: '100%',
+          textAlign: 'left',
+        }}
+      />
+    )
+  }
+
+  const shouldNotch =
+    shrunklabelposition === 'onNotch' && (!!selectedValue || focused)
   const inputLabelForOutlined = shouldNotch ? label : ''
 
   return (
-    <StyledBox>
-      <StyledFormControl
-        fullWidth
-        variant="outlined"
+    <StyledFormControl error={error} width={width} disabled={disabled}>
+      <StyledInputLabel
+        shrink={!!selectedValue || focused}
         required={required}
         error={error}
-        $hasValue={hasValue}
-        $focused={focused}
-        $backgroundcolor={backgroundcolor}
-        $outlinecolor={outlinecolor}
-        $fontcolor={fontcolor}
-        $shrunkfontcolor={shrunkfontcolor}
-        $unshrunkfontcolor={unshrunkfontcolor}
-        $shrunklabelposition={shrunklabelposition}
-        $error={error}
+        shrunkfontcolor={shrunkfontcolor}
+        unshrunkfontcolor={unshrunkfontcolor}
+        shrunklabelposition={shrunklabelposition}
+        disabled={disabled}
       >
-        <InputLabel htmlFor={name}>{label}</InputLabel>
-
-        <Select
-          label={inputLabelForOutlined}
-          value={selectedValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          input={
-            <StyledOutlinedInput
-              label={inputLabelForOutlined}
-              notched={shouldNotch}
-            />
-          }
-          inputProps={{
-            name,
-          }}
-        >
-          {options.map(renderMenuItem)}
-        </Select>
-
-        {helperText && <FormHelperText>{helperText}</FormHelperText>}
-      </StyledFormControl>
-    </StyledBox>
+        {label}
+      </StyledInputLabel>
+      <StyledSelect
+        value={selectedValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        MenuProps={MenuProps}
+        renderValue={(value: unknown) => {
+          if (typeof value !== 'string') return ''
+          return renderValue(value)
+        }}
+        input={
+          <OutlinedInput
+            label={inputLabelForOutlined}
+            notched={shouldNotch}
+            disabled={disabled}
+          />
+        }
+        backgroundcolor={backgroundcolor}
+        outlinecolor={outlinecolor}
+        fontcolor={fontcolor}
+        disabled={disabled}
+      >
+        {options.map(renderMenuItem)}
+      </StyledSelect>
+      {helperText && (
+        <FormHelperText error={error}>{helperText}</FormHelperText>
+      )}
+    </StyledFormControl>
   )
 }
 
