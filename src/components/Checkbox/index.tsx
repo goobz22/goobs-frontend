@@ -4,7 +4,7 @@ import { Checkbox } from '@mui/material'
 import React from 'react'
 import * as palette from '../../styles/palette'
 
-interface DataGridCheckboxProps {
+export interface CheckboxProps {
   onClick?: (event: React.MouseEvent) => void
   checked?: boolean
   indeterminate?: boolean
@@ -12,23 +12,15 @@ interface DataGridCheckboxProps {
   disabled?: boolean
 }
 
-function DataGridCheckbox({
+function CustomCheckbox({
   onClick,
   checked,
   indeterminate,
   onChange,
   disabled,
   ...props
-}: DataGridCheckboxProps) {
-  console.log('DataGridCheckbox render:', { checked, indeterminate, disabled })
-
+}: CheckboxProps) {
   const handleClick = (event: React.MouseEvent) => {
-    console.log('Checkbox clicked:', {
-      checked,
-      indeterminate,
-      eventTarget: event.target,
-    })
-
     if (onClick) {
       onClick(event)
     }
@@ -36,12 +28,6 @@ function DataGridCheckbox({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.stopPropagation()
-
-    console.log('Checkbox changed:', {
-      newChecked: event.target.checked,
-      previousChecked: checked,
-      indeterminate,
-    })
 
     if (onChange) {
       onChange(event)
@@ -76,4 +62,4 @@ function DataGridCheckbox({
   )
 }
 
-export default DataGridCheckbox
+export default CustomCheckbox
