@@ -27,7 +27,6 @@ function Right({ dropdown }: RightProps) {
         outlinecolor={black.main}
         fontcolor={black.main}
         shrunkfontcolor={black.main}
-        onChange={() => console.log('Dropdown changed')}
         {...dropdown}
       />
     </Box>
