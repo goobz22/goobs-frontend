@@ -70,18 +70,12 @@ export const handleSwitchToRichText = async (
   setNewSlateValue: (value: RichTextEditorTypes['CustomElement'][]) => void,
   setMarkdownMode: (value: boolean) => void
 ): Promise<void> => {
-  try {
-    if (markdown !== '') {
-      const newSlateValue = await markdownToSlate(markdown)
-      setSlateValue(newSlateValue)
-      setNewSlateValue(newSlateValue)
-      console.log('New Slate Value: ', newSlateValue)
-    }
-    console.log('Before switching: markdownMode = ', false)
-    setMarkdownMode(false)
-  } catch (err) {
-    console.error('Error switching to RichText mode: ', err)
+  if (markdown !== '') {
+    const newSlateValue = await markdownToSlate(markdown)
+    setSlateValue(newSlateValue)
+    setNewSlateValue(newSlateValue)
   }
+  setMarkdownMode(false)
 }
 
 /**

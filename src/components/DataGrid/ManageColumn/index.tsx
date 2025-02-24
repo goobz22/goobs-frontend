@@ -22,8 +22,6 @@ function ManageColumns({
   handleClose = () => {},
   columns,
 }: ManageColumnProps) {
-  console.log('ManageColumns render:', { open, columns })
-
   const {
     handleAllCols,
     toggleColumnState,
@@ -47,49 +45,25 @@ function ManageColumns({
   }, [columns, visibleColumns])
 
   const handleEyeClick = (columnField: string) => {
-    console.log('Eye icon clicked:', {
-      field: columnField,
-      currentVisibility: visibleColumns[columnField],
-      allVisibility: visibleColumns,
-    })
     toggleColumnState(columnField)
   }
 
   const handleCloseAndUpdate = () => {
-    console.log('handleCloseAndUpdate called')
     handleClose?.()
     setSearchInput('')
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Search value changed:', e.target.value)
     setSearchInput(e.target.value)
   }
 
   const filteredColumns = columns.filter(column => {
-    const matches = formatColumnName(column.field)
+    return formatColumnName(column.field)
       .toLowerCase()
       .includes(searchInput.toLowerCase())
-    console.log('Filtering column:', {
-      field: column.field,
-      searchInput,
-      matches,
-    })
-    return matches
-  })
-
-  console.log('Rendering ManageColumns with:', {
-    filteredColumns,
-    searchInput,
-    visibleColumns,
   })
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Checkbox clicked in ManageColumns:', {
-      checked: event.target.checked,
-      indeterminate: event.target.indeterminate,
-      eventTarget: event.target,
-    })
     event.stopPropagation()
     handleAllCols(event.target.checked)
   }
@@ -168,10 +142,6 @@ function ManageColumns({
         >
           {filteredColumns.map((column, index) => {
             const isVisible = visibleColumns[column.field] === true
-            console.log('Rendering column row:', {
-              field: column.field,
-              visible: isVisible,
-            })
             return (
               <Box
                 key={index}

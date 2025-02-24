@@ -26,20 +26,12 @@ export const useManageColumn = ({
   const [isAllChecked, setIsAllChecked] = useState(true)
   const initialized = useRef(false)
 
-  console.log('useManageColumn hook render:', {
-    isPopupOpen,
-    columnVisibility,
-    tempVisibleColumns,
-    searchInput,
-  })
-
   useEffect(() => {
     if (isPopupOpen) {
       const currentVisibility: ColumnVisibilityModel = {}
       columns.forEach(column => {
         currentVisibility[column.field] = columnVisibility[column.field] ?? true
       })
-      console.log('Initializing tempVisibleColumns:', currentVisibility)
       setTempVisibleColumns(currentVisibility)
       setIsAllChecked(
         columns.every(column => currentVisibility[column.field] === true)
@@ -50,21 +42,13 @@ export const useManageColumn = ({
 
   const handleAllCols = useCallback(
     (checked: boolean) => {
-      console.log('handleAllCols called with checked:', checked)
       setIsAllChecked(checked)
 
-      setTempVisibleColumns(prev => {
+      setTempVisibleColumns(() => {
         const newVisibility: ColumnVisibilityModel = {}
         columns.forEach(column => {
           newVisibility[column.field] = checked
         })
-
-        console.log('handleAllCols:', {
-          before: prev,
-          after: newVisibility,
-          checked,
-        })
-
         return newVisibility
       })
     },
@@ -85,13 +69,6 @@ export const useManageColumn = ({
         )
         setIsAllChecked(areAllVisible)
 
-        console.log('toggleColumnState:', {
-          field,
-          before: prev[field],
-          after: newState[field],
-          allState: newState,
-          areAllVisible,
-        })
         return newState
       })
     },
@@ -99,22 +76,18 @@ export const useManageColumn = ({
   )
 
   const onSaveColumnView = useCallback(() => {
-    console.log('Saving column visibility state:', tempVisibleColumns)
     updateVisibility({ type: 'save', newState: tempVisibleColumns })
     handleClose()
   }, [tempVisibleColumns, updateVisibility, handleClose])
 
   const formatColumnName = useCallback((fieldName: string): string => {
-    const formatted = fieldName
+    return fieldName
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, str => str.toUpperCase())
       .trim()
-    console.log('Formatting column name:', { fieldName, formatted })
-    return formatted
   }, [])
 
   const handlePageUnload = useCallback(() => {
-    console.log('Page unload - closing manage columns')
     handleClose()
   }, [handleClose])
 

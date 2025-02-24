@@ -145,7 +145,6 @@ export const useSearchbar = ({
     columns.forEach(column => {
       newVisibility[column.field] = visibleColumns.has(column.field)
     })
-    console.log('Updating column visibility from search:', newVisibility)
     updateVisibility({
       type: 'save',
       newState: newVisibility,

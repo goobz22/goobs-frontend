@@ -24,7 +24,6 @@ export interface FormProjectBoardProps {
 
 /**
  * FormProjectBoard replicates the idea of FormDataGrid:
- * - Logs the props
  * - Displays title/description
  * - Renders the ProjectBoard through ContentSection (which uses useProjectBoard).
  */
@@ -33,13 +32,6 @@ function FormProjectBoard({
   description,
   projectboard,
 }: FormProjectBoardProps) {
-  // Logging, similar to FormDataGrid
-  console.log('FormProjectBoard props:', {
-    title,
-    description,
-    projectboard,
-  })
-
   return (
     <Box
       sx={{

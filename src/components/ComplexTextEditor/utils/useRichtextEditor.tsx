@@ -58,7 +58,7 @@ export const useRichTextEditor = (
     )
 
   useEffect(() => {
-    console.log('RichTextEditor: markdownMode = ', markdownMode)
+    // Effect for markdownMode changes
   }, [markdownMode])
 
   const handleChange = useCallback(

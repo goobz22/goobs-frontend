@@ -33,12 +33,10 @@ function CustomFooter({
   const isTabletOrBelow = useMediaQuery('(max-width:900px)')
 
   const handleOpen = () => {
-    console.log('Footer handleOpen')
     setIsOpen(true)
   }
 
   const handleClose = () => {
-    console.log('Footer handleClose')
     setIsOpen(false)
   }
 

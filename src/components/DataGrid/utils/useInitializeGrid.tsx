@@ -40,8 +40,6 @@ export function useInitializeGrid({
   // (2) Initialize columns in Jotai (only once)
   useEffect(() => {
     if (!initialized.current) {
-      console.log('Initializing columns and visibility:', columns)
-
       // Save column fields in columnsAtom
       setColumns(columns.map(col => col.field))
 
@@ -55,10 +53,6 @@ export function useInitializeGrid({
 
       // If we have at least one column that was never set, update our Jotai atom
       if (Object.keys(initialVisibility).length > 0) {
-        console.log(
-          'Setting initial visibility for columns:',
-          initialVisibility
-        )
         updateVisibility({
           type: 'save',
           newState: { ...columnVisibility, ...initialVisibility },

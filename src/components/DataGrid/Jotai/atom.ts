@@ -31,11 +31,6 @@ export const columnVisibilityActions = atom(
     const columns = get(columnsAtom)
     let newVisibility: ColumnVisibility = {}
 
-    console.log('columnVisibilityActions - before:', {
-      type: update.type,
-      currentVisibility,
-    })
-
     switch (update.type) {
       case 'toggle': {
         if (update.field) {
@@ -43,11 +38,6 @@ export const columnVisibilityActions = atom(
             ...currentVisibility,
             [update.field]: !currentVisibility[update.field],
           }
-          console.log('columnVisibilityActions - toggle:', {
-            field: update.field,
-            before: currentVisibility[update.field],
-            after: newVisibility[update.field],
-          })
           set(columnVisibilityAtom, newVisibility)
         }
         break
@@ -57,20 +47,12 @@ export const columnVisibilityActions = atom(
         columns.forEach(column => {
           newVisibility[column] = !!update.value
         })
-        console.log('columnVisibilityActions - setAll:', {
-          value: update.value,
-          newState: newVisibility,
-        })
         set(columnVisibilityAtom, newVisibility)
         break
       }
 
       case 'save': {
         if (update.newState) {
-          console.log('columnVisibilityActions - save:', {
-            before: currentVisibility,
-            after: update.newState,
-          })
           set(columnVisibilityAtom, update.newState)
         }
         break
@@ -80,12 +62,9 @@ export const columnVisibilityActions = atom(
         columns.forEach(column => {
           newVisibility[column] = true
         })
-        console.log('columnVisibilityActions - reset:', newVisibility)
         set(columnVisibilityAtom, newVisibility)
         break
       }
     }
-
-    console.log('columnVisibilityActions - after:', get(columnVisibilityAtom))
   }
 )

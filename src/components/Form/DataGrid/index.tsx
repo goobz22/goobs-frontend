@@ -14,14 +14,6 @@ export interface FormDataGridProps {
 }
 
 function FormDataGrid({ title, description, datagrid }: FormDataGridProps) {
-  console.log('FormDataGrid props:', {
-    title,
-    description,
-    datagridProps: {
-      onManage: datagrid.onManage,
-    },
-  })
-
   return (
     <Box
       sx={{

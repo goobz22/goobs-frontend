@@ -30,7 +30,6 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
   useEffect(() => {
     if (!markdownMode) {
-      console.log('MarkdownEditor: markdownMode = ', markdownMode)
       // Perform any action you want when markdownMode changes to false
     }
   }, [markdownMode])
