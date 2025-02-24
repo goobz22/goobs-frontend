@@ -40,11 +40,12 @@ export type TextFieldProps = (
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   sx?: MuiTextFieldProps['sx']
   slotProps?: MuiTextFieldProps['slotProps']
+  disabled?: boolean
 }
 
 interface StyledTextFieldProps {
   hasvalue: string
-  textalign?: string
+  textalign?: 'left' | 'center' | 'right'
   paddingleft?: number
   paddingtop?: number
   backgroundcolor?: string
@@ -154,6 +155,7 @@ const TextField = React.memo<TextFieldProps>(props => {
     onBlur,
     value,
     error,
+    disabled,
     sx,
     endAdornment,
     textAlign = 'left',
@@ -285,6 +287,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         onBlur={handleBlur}
         value={value}
         error={error}
+        disabled={disabled}
         slotProps={mergedSlotProps}
         fullWidth
         variant="outlined"
