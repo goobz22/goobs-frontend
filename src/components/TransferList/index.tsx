@@ -1,9 +1,6 @@
-// src/components/TransferList/index.tsx
 'use client'
 
 import React, { useEffect, useState } from 'react'
-// Import your custom Grid (which internally uses MUI Grid2):
-import CustomGrid from '../Grid'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
@@ -84,13 +81,6 @@ export interface TransferListProps {
   rightTitle?: string
 }
 
-/**
- * A TransferList with two columns:
- * - Left side: either static lists (singleSelection) or
- *   a dropdown + dynamic lists (multipleSelection).
- * - Middle: 4 buttons (≫, >, <, ≪) to move items.
- * - Right side: assigned items.
- */
 const TransferList: React.FC<TransferListProps> = ({
   variant = 'singleSelection',
   leftItems = [],
@@ -99,7 +89,6 @@ const TransferList: React.FC<TransferListProps> = ({
   dropdownOptions = [],
   dropdownDataMap = {},
   itemLabelMap,
-
   onChange,
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
@@ -269,7 +258,7 @@ const TransferList: React.FC<TransferListProps> = ({
   /**
    * Renders the left column:
    * - singleSelection => show "leftTitle" + the list
-   * - multipleSelection => show a dropdown + dynamic lists
+   * - multipleSelection => show a dropdown above the list
    */
   const renderLeftColumn = () => {
     if (variant === 'singleSelection') {
@@ -282,8 +271,6 @@ const TransferList: React.FC<TransferListProps> = ({
         </Box>
       )
     }
-
-    // multipleSelection => show the dropdown above the list
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Dropdown
@@ -301,82 +288,68 @@ const TransferList: React.FC<TransferListProps> = ({
   }
 
   return (
-    <CustomGrid
-      container
-      spacing={2}
-      alignItems="flex-start"
-      columnconfig={[
-        {
-          row: 1,
-          column: 1,
-          component: <Box sx={{ width: '100%' }}>{renderLeftColumn()}</Box>,
-        },
-        {
-          row: 1,
-          column: 2,
-          component: (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                mt: { xs: 2, sm: 4 },
-                gap: '4px',
-              }}
-            >
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleAllRight}
-                disabled={left.length === 0}
-                aria-label="move all right"
-              >
-                ≫
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleCheckedRight}
-                disabled={leftChecked.length === 0}
-                aria-label="move selected right"
-              >
-                &gt;
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleCheckedLeft}
-                disabled={rightChecked.length === 0}
-                aria-label="move selected left"
-              >
-                &lt;
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleAllLeft}
-                disabled={right.length === 0}
-                aria-label="move all left"
-              >
-                ≪
-              </Button>
-            </Box>
-          ),
-        },
-        {
-          row: 1,
-          column: 3,
-          component: (
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                {rightTitle}
-              </Typography>
-              {renderList(right)}
-            </Box>
-          ),
-        },
-      ]}
-    />
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 2,
+        alignItems: 'flex-start',
+      }}
+    >
+      <Box sx={{ width: '100%' }}>{renderLeftColumn()}</Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          mt: { xs: 2, sm: 4 },
+          gap: '4px',
+        }}
+      >
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleAllRight}
+          disabled={left.length === 0}
+          aria-label="move all right"
+        >
+          ≫
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleCheckedRight}
+          disabled={leftChecked.length === 0}
+          aria-label="move selected right"
+        >
+          &gt;
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleCheckedLeft}
+          disabled={rightChecked.length === 0}
+          aria-label="move selected left"
+        >
+          &lt;
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleAllLeft}
+          disabled={right.length === 0}
+          aria-label="move all left"
+        >
+          ≪
+        </Button>
+      </Box>
+      <Box sx={{ width: '100%' }}>
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          {rightTitle}
+        </Typography>
+        {renderList(right)}
+      </Box>
+    </Box>
   )
 }
 
