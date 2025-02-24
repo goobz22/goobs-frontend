@@ -1,27 +1,24 @@
+// src/components/Accordion/index.tsx
+
 'use client'
 
 import React from 'react'
 import { styled } from '@mui/material/styles'
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary'
-import MuiAccordionDetails, {
-  AccordionDetailsProps,
-} from '@mui/material/AccordionDetails'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import { ExpandMore } from '@mui/icons-material'
 import { black } from '../../styles/palette'
 
-type CustomAccordionProps = AccordionProps & {
-  children: React.ReactNode
-}
-
-type CustomAccordionSummaryProps = AccordionSummaryProps & {
-  children: React.ReactNode
-}
-
-type CustomAccordionDetailsProps = AccordionDetailsProps & {
-  children: React.ReactNode
+export interface AccordionProps {
+  summary: React.ReactNode
+  details: React.ReactNode
+  expanded?: boolean
+  /** Add this line: */
+  defaultExpanded?: boolean
+  onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
+  disabled?: boolean
+  style?: React.CSSProperties
 }
 
 const StyledAccordion = styled(MuiAccordion)({
@@ -42,36 +39,18 @@ const StyledAccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2),
 }))
 
-function Accordion({ children, ...props }: CustomAccordionProps) {
+function Accordion({ summary, details, style, ...props }: AccordionProps) {
   return (
-    <StyledAccordion disableGutters {...props}>
-      {children}
+    <StyledAccordion disableGutters style={style} {...props}>
+      <StyledAccordionSummary
+        expandIcon={<ExpandMore sx={{ color: black.main }} />}
+      >
+        {summary}
+      </StyledAccordionSummary>
+      <StyledAccordionDetails>{details}</StyledAccordionDetails>
     </StyledAccordion>
   )
 }
 
-function AccordionSummary({ children, ...props }: CustomAccordionSummaryProps) {
-  return (
-    <StyledAccordionSummary
-      expandIcon={<ExpandMore sx={{ color: black.main }} />}
-      {...props}
-    >
-      {children}
-    </StyledAccordionSummary>
-  )
-}
-
-function AccordionDetails({ children, ...props }: CustomAccordionDetailsProps) {
-  return <StyledAccordionDetails {...props}>{children}</StyledAccordionDetails>
-}
-
 Accordion.displayName = 'Accordion'
-AccordionSummary.displayName = 'AccordionSummary'
-AccordionDetails.displayName = 'AccordionDetails'
-
-export { Accordion, AccordionSummary, AccordionDetails }
-export type {
-  CustomAccordionProps,
-  CustomAccordionSummaryProps,
-  CustomAccordionDetailsProps,
-}
+export default Accordion
