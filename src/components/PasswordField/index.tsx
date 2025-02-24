@@ -74,10 +74,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   const [passwordVisible, setPasswordVisible] = useState(false)
 
   const togglePasswordVisibility = useCallback(() => {
-    setPasswordVisible(prev => {
-      console.log('togglePasswordVisibility', { passwordVisible: !prev })
-      return !prev
-    })
+    setPasswordVisible(prev => !prev)
   }, [])
 
   return (
