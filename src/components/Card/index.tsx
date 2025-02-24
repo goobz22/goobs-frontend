@@ -10,7 +10,6 @@ import ProductCard from './variants/product'
 import ProductSummaryCard from './variants/productsummary'
 import DefaultCard from './variants/defaultconfig'
 import TaskCard from './variants/task'
-import { columnconfig } from '../Grid'
 import { CustomButtonProps } from '../Button'
 
 /**
@@ -156,7 +155,7 @@ type CardProps = Omit<
     onCheck?: (event: React.ChangeEvent<HTMLInputElement>) => void
 
     /** Whether the task card is disabled */
-    disabled?: boolean // NEW
+    disabled?: boolean
 
     /**
      * Optional drag & drop props if you want the card itself
@@ -167,8 +166,8 @@ type CardProps = Omit<
     onDragOver?: React.DragEventHandler<HTMLDivElement>
     onDrop?: React.DragEventHandler<HTMLDivElement>
   }
-  /** Configuration for grid columns */
-  columnconfig?: columnconfig
+  /** Inline style for the root card container */
+  style?: React.CSSProperties
 }
 
 function Card({
@@ -197,6 +196,7 @@ function Card({
   productProps,
   productSummaryProps,
   taskProps,
+  style,
   ...rest
 }: CardProps): React.ReactNode | null {
   // --------------------------
@@ -204,7 +204,7 @@ function Card({
   // --------------------------
   if (variant === 'default') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <DefaultCard
           title={title}
           titleUnderline={titleUnderline}
@@ -233,7 +233,7 @@ function Card({
   // --------------------------
   if (variant === 'inventory') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <InventoryCard
           title={title}
           image={image}
@@ -249,7 +249,7 @@ function Card({
   // --------------------------
   if (variant === 'pricingsummary') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <SimplePricingSummary height={height} {...pricingSummaryProps} />
       </Box>
     )
@@ -260,7 +260,7 @@ function Card({
   // --------------------------
   if (variant === 'detailedpricingsummary') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <DetailedPricingSummary
           height={height}
           {...detailedPricingSummaryProps}
@@ -274,7 +274,7 @@ function Card({
   // --------------------------
   if (variant === 'product') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <ProductCard height={height} {...productProps} />
       </Box>
     )
@@ -285,7 +285,7 @@ function Card({
   // --------------------------
   if (variant === 'productsummary') {
     return (
-      <Box sx={{ width, height }} {...rest}>
+      <Box style={style} sx={{ width, height }} {...rest}>
         <ProductSummaryCard
           title={title}
           body={body}
@@ -306,6 +306,7 @@ function Card({
     // We handle drag & drop on this outer Box, plus the width/height here
     return (
       <Box
+        style={style}
         draggable={taskProps?.draggable}
         onDragStart={taskProps?.onDragStart}
         onDragOver={taskProps?.onDragOver}
@@ -318,7 +319,7 @@ function Card({
           description={taskProps?.description}
           checked={taskProps?.checked}
           onCheck={taskProps?.onCheck}
-          disabled={taskProps?.disabled} // NEW
+          disabled={taskProps?.disabled}
         />
       </Box>
     )
