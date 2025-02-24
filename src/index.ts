@@ -1,9 +1,4 @@
 import CustomButton, { CustomButtonProps } from './components/Button'
-import CustomGrid, {
-  columnconfig,
-  gridconfig,
-  cellconfig,
-} from './components/Grid'
 import Typography, {
   FontFamily,
   TypographyVariant,
@@ -148,7 +143,6 @@ import ShowTask, {
 } from './components/ProjectBoard/forms/ShowTask/client'
 
 export { CustomButton }
-export { CustomGrid }
 export { Typography }
 export { ConfirmationCodeInput }
 export { RadioGroup }
@@ -215,7 +209,6 @@ export type { DropdownProps }
 // "Local" type exports for existing components
 export type { CustomButtonProps }
 export type { ComplexTextEditorProps }
-export type { columnconfig, gridconfig, cellconfig }
 export type { FontFamily, TypographyVariant, TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
