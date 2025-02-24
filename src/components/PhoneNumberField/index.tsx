@@ -90,7 +90,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
       input: {
         sx: {
           height: '40px',
-          padding: '8px 0px',
+          padding: '0px 0px',
         },
       },
       inputLabel: {
