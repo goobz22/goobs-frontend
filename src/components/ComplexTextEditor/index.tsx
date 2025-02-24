@@ -1,5 +1,4 @@
-// src/components/ComplexTextEditor/index.tsx
-
+'use client'
 import React, { useState, useEffect } from 'react'
 import { Box } from '@mui/material'
 import SimpleEditor from './SimpleEditor'
@@ -7,11 +6,6 @@ import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
 
 export type EditorType = 'simple' | 'markdown' | 'rich' | 'complex'
 
-/**
- * We extend ComplexTextEditorProps to allow the same
- * text field behavior (error, helperText, required)
- * that we introduced in SimpleEditor.
- */
 export interface ComplexTextEditorProps {
   value: string
   onChange?: (val: string) => void
@@ -22,6 +16,7 @@ export interface ComplexTextEditorProps {
   error?: boolean
   helperText?: React.ReactNode
   required?: boolean
+  style?: React.CSSProperties
 }
 
 const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
@@ -33,6 +28,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   error,
   helperText,
   required,
+  style,
 }) => {
   const [mode, setMode] = useState<EditorMode>(
     editorType === 'complex' ? 'simple' : editorType
@@ -51,8 +47,6 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   }
 
   const renderEditor = () => {
-    // Currently, we only support "simple" mode directly (and the "else" path).
-    // If you implement "rich"/"markdown", you'd handle it similarly.
     if (mode === 'simple') {
       return (
         <SimpleEditor
@@ -63,11 +57,11 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           error={error}
           helperText={helperText}
           required={required}
+          style={style}
         />
       )
     }
 
-    // Default to "simple" if mode is something else unhandled
     return (
       <SimpleEditor
         value={simpleText}
@@ -77,20 +71,26 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         error={error}
         helperText={helperText}
         required={required}
+        style={style}
       />
     )
   }
 
+  const defaultStyles: React.CSSProperties = {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    marginTop: 1,
+    gap: 2,
+  }
+
+  const combinedStyles = {
+    ...defaultStyles,
+    ...style,
+  }
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        marginTop: 1,
-        gap: 2,
-      }}
-    >
+    <Box sx={combinedStyles}>
       {editorType === 'complex' && (
         <ComplexToolbar
           mode={mode}

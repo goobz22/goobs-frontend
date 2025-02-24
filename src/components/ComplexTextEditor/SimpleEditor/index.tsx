@@ -1,14 +1,6 @@
-// src/components/ComplexTextEditor/SimpleEditor.tsx
-
 import React from 'react'
 import { Box, TextField } from '@mui/material'
 
-/**
- * Extend the simple editor props to support TextField behaviors:
- * - error
- * - helperText
- * - required
- */
 type SimpleEditorProps = {
   value: string
   setValue: (value: string) => void
@@ -17,11 +9,9 @@ type SimpleEditorProps = {
   error?: boolean
   helperText?: React.ReactNode
   required?: boolean
+  style?: React.CSSProperties
 }
 
-/**
- * A simple multiline text editor.
- */
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
   value,
   setValue,
@@ -30,19 +20,49 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   error,
   helperText,
   required,
+  style,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value)
   }
 
+  const defaultStyles: React.CSSProperties = {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  }
+
+  const combinedStyles = {
+    ...defaultStyles,
+    ...style,
+  }
+
+  const textFieldStyles = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+      '& fieldset': {
+        borderColor: 'black',
+      },
+      '&:hover fieldset': {
+        borderColor: 'black',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'black',
+      },
+      '& .MuiInputBase-input': {
+        transform: 'translateY(-8px)',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: 'black',
+      '&.Mui-focused': {
+        color: 'black',
+      },
+    },
+  }
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <Box sx={combinedStyles}>
       <TextField
         fullWidth
         multiline
@@ -54,29 +74,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
         helperText={helperText}
         required={required}
         onChange={handleChange}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            '& fieldset': {
-              borderColor: 'black',
-            },
-            '&:hover fieldset': {
-              borderColor: 'black',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: 'black',
-            },
-            '& .MuiInputBase-input': {
-              transform: 'translateY(-8px)',
-            },
-          },
-          '& .MuiInputLabel-root': {
-            color: 'black',
-            '&.Mui-focused': {
-              color: 'black',
-            },
-          },
-        }}
+        sx={textFieldStyles}
       />
     </Box>
   )
