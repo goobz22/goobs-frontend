@@ -1,54 +1,23 @@
 'use client'
 import React from 'react'
 import Searchbar, { SearchbarProps } from './../../../Searchbar'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedSearchbarProps extends SearchbarProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const useSearchbar = (grid: {
-  searchbar?: ExtendedSearchbarProps | ExtendedSearchbarProps[]
-}) => {
-  if (!grid.searchbar) return null
+const useSearchbar = (props: {
+  searchbar?: SearchbarProps | SearchbarProps[]
+}): React.ReactElement[] | null => {
+  if (!props.searchbar) return null
 
   const renderSearchbar = (
-    searchbarItem: ExtendedSearchbarProps,
+    searchbarItem: SearchbarProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = searchbarItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: <Searchbar key={`searchbar-${index}`} {...restProps} />,
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <Searchbar key={`searchbar-${index}`} {...searchbarItem} />
   }
 
-  if (Array.isArray(grid.searchbar)) {
-    return grid.searchbar.map(renderSearchbar)
+  if (Array.isArray(props.searchbar)) {
+    return props.searchbar.map((item, index) => renderSearchbar(item, index))
   } else {
-    return [renderSearchbar(grid.searchbar, 0)]
+    return [renderSearchbar(props.searchbar, 0)]
   }
 }
 

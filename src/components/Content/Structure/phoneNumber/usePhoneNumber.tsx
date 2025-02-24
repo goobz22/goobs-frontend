@@ -1,59 +1,31 @@
 'use client'
 import React from 'react'
 import PhoneNumberField from '../../../PhoneNumberField'
-import { columnconfig, cellconfig } from '../../../Grid'
 import type { TextFieldProps } from '../../../TextField'
 
-export type ExtendedPhoneNumberFieldProps = TextFieldProps & {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const usePhoneNumber = (grid: {
-  phoneNumberField?:
-    | ExtendedPhoneNumberFieldProps
-    | ExtendedPhoneNumberFieldProps[]
-}) => {
-  if (!grid.phoneNumberField) return null
+const usePhoneNumber = (props: {
+  phoneNumberField?: TextFieldProps | TextFieldProps[]
+}): React.ReactElement[] | null => {
+  if (!props.phoneNumberField) return null
 
   const renderPhoneNumberField = (
-    phoneNumberFieldItem: ExtendedPhoneNumberFieldProps,
+    phoneNumberFieldItem: TextFieldProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = phoneNumberFieldItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: (
-        <PhoneNumberField key={`phone-number-field-${index}`} {...restProps} />
-      ),
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return (
+      <PhoneNumberField
+        key={`phone-number-field-${index}`}
+        {...phoneNumberFieldItem}
+      />
+    )
   }
 
-  if (Array.isArray(grid.phoneNumberField)) {
-    return grid.phoneNumberField.map(renderPhoneNumberField)
+  if (Array.isArray(props.phoneNumberField)) {
+    return props.phoneNumberField.map((item, index) =>
+      renderPhoneNumberField(item, index)
+    )
   } else {
-    return [renderPhoneNumberField(grid.phoneNumberField, 0)]
+    return [renderPhoneNumberField(props.phoneNumberField, 0)]
   }
 }
 

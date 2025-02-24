@@ -1,54 +1,23 @@
 'use client'
 import React from 'react'
 import DateField, { DateFieldProps } from './../../../DateField'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedDateFieldProps extends DateFieldProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const useDateField = (grid: {
-  datefield?: ExtendedDateFieldProps | ExtendedDateFieldProps[]
-}) => {
-  if (!grid.datefield) return null
+const useDateField = (props: {
+  datefield?: DateFieldProps | DateFieldProps[]
+}): React.ReactElement[] | null => {
+  if (!props.datefield) return null
 
   const renderDateField = (
-    dateFieldItem: ExtendedDateFieldProps,
+    dateFieldItem: DateFieldProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = dateFieldItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: <DateField key={`datefield-${index}`} {...restProps} />,
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <DateField key={`datefield-${index}`} {...dateFieldItem} />
   }
 
-  if (Array.isArray(grid.datefield)) {
-    return grid.datefield.map(renderDateField)
+  if (Array.isArray(props.datefield)) {
+    return props.datefield.map((item, index) => renderDateField(item, index))
   } else {
-    return [renderDateField(grid.datefield, 0)]
+    return [renderDateField(props.datefield, 0)]
   }
 }
 

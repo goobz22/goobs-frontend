@@ -1,78 +1,23 @@
 'use client'
 import React from 'react'
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  CustomAccordionProps,
-  CustomAccordionSummaryProps,
-  CustomAccordionDetailsProps,
-} from '../../../Accordion'
-import { columnconfig, cellconfig } from '../../../Grid'
+import Accordion, { AccordionProps } from '../../../Accordion'
 
-export interface ExtendedAccordionProps extends CustomAccordionProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-  summaryProps?: CustomAccordionSummaryProps
-  detailsProps?: CustomAccordionDetailsProps
-  summaryContent?: React.ReactNode
-  detailsContent?: React.ReactNode
-}
-
-const useAccordion = (grid: {
-  accordion?: ExtendedAccordionProps | ExtendedAccordionProps[]
-}) => {
-  if (!grid.accordion) return null
+const useAccordion = (props: {
+  accordion?: AccordionProps | AccordionProps[]
+}): React.ReactElement[] | null => {
+  if (!props.accordion) return null
 
   const renderAccordion = (
-    accordionItem: ExtendedAccordionProps,
+    accordionItem: AccordionProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      summaryProps,
-      detailsProps,
-      summaryContent,
-      detailsContent,
-      ...restProps
-    } = accordionItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: (
-        <Accordion key={`accordion-${index}`} {...restProps}>
-          <AccordionSummary {...summaryProps}>
-            {summaryContent}
-          </AccordionSummary>
-          <AccordionDetails {...detailsProps}>
-            {detailsContent}
-          </AccordionDetails>
-        </Accordion>
-      ),
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <Accordion key={`accordion-${index}`} {...accordionItem} />
   }
 
-  if (Array.isArray(grid.accordion)) {
-    return grid.accordion.map(renderAccordion)
+  if (Array.isArray(props.accordion)) {
+    return props.accordion.map((item, index) => renderAccordion(item, index))
   } else {
-    return [renderAccordion(grid.accordion, 0)]
+    return [renderAccordion(props.accordion, 0)]
   }
 }
 

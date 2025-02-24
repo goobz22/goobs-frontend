@@ -1,54 +1,23 @@
 'use client'
 import React from 'react'
 import Dropdown, { DropdownProps } from './../../../Dropdown'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedDropdownProps extends DropdownProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const useDropdown = (grid: {
-  dropdown?: ExtendedDropdownProps | ExtendedDropdownProps[]
-}) => {
-  if (!grid.dropdown) return null
+const useDropdown = (props: {
+  dropdown?: DropdownProps | DropdownProps[]
+}): React.ReactElement[] | null => {
+  if (!props.dropdown) return null
 
   const renderDropdown = (
-    dropdownItem: ExtendedDropdownProps,
+    dropdownItem: DropdownProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = dropdownItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: <Dropdown key={`dropdown-${index}`} {...restProps} />,
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <Dropdown key={`dropdown-${index}`} {...dropdownItem} />
   }
 
-  if (Array.isArray(grid.dropdown)) {
-    return grid.dropdown.map(renderDropdown)
+  if (Array.isArray(props.dropdown)) {
+    return props.dropdown.map((item, index) => renderDropdown(item, index))
   } else {
-    return [renderDropdown(grid.dropdown, 0)]
+    return [renderDropdown(props.dropdown, 0)]
   }
 }
 

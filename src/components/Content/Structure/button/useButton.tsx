@@ -1,54 +1,23 @@
 'use client'
 import React from 'react'
 import CustomButton, { CustomButtonProps } from './../../../Button'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedButtonProps extends CustomButtonProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const useButton = (grid: {
-  button?: ExtendedButtonProps | ExtendedButtonProps[]
-}) => {
-  if (!grid.button) return null
+const useButton = (props: {
+  button?: CustomButtonProps | CustomButtonProps[]
+}): React.ReactElement[] | null => {
+  if (!props.button) return null
 
   const renderButton = (
-    buttonItem: ExtendedButtonProps,
+    buttonItem: CustomButtonProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = buttonItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: <CustomButton key={`button-${index}`} {...restProps} />,
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <CustomButton key={`button-${index}`} {...buttonItem} />
   }
 
-  if (Array.isArray(grid.button)) {
-    return grid.button.map(renderButton)
+  if (Array.isArray(props.button)) {
+    return props.button.map((item, index) => renderButton(item, index))
   } else {
-    return [renderButton(grid.button, 0)]
+    return [renderButton(props.button, 0)]
   }
 }
 

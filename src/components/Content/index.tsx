@@ -1,205 +1,167 @@
 'use client'
 
 import React from 'react'
-import CustomGrid, { columnconfig, gridconfig } from '../../components/Grid'
-import useGridTypography, {
-  ExtendedTypographyProps as TypographyProps,
-} from './Structure/typography/useGridTypography'
-import useGridRadioGroup, {
-  ExtendedRadioGroupProps,
-} from './Structure/radiogroup/useRadioGroup'
-import useConfirmationInput, {
-  ExtendedConfirmationCodeInputsProps,
-} from '../../components/Content/Structure/confirmationinput/useConfirmationInput'
-import useLink, {
-  ExtendedTypographyProps as LinkProps,
-} from '../../components/Content/Structure/link/useLink'
-import useImage, {
-  ExtendedImageProps,
-} from '../../components/Content/Structure/image/useImage'
-import useButton, {
-  ExtendedButtonProps,
-} from '../../components/Content/Structure/button/useButton'
-import usePricing, {
-  ExtendedPricingProps,
-} from './../../components/Content/Structure/pricing/usePricing'
-import useStepper, {
-  ExtendedStepperProps,
-} from './../../components/Content/Structure/stepper/useStepper'
-import useTransferList, {
-  ExtendedTransferListProps,
-} from './../../components/Content/Structure/transferlist/useTransferList'
-import useCard, {
-  ExtendedCardProps,
-} from './../../components/Content/Structure/card/useCard'
-import useCodeCopy, {
-  ExtendedCodeCopyProps,
-} from './../../components/Content/Structure/codecopy/useCodeCopy'
-import useTextField, {
-  ExtendedTextFieldProps,
-} from './Structure/textfield/useTextField'
-import useDateField, {
-  ExtendedDateFieldProps,
-} from './Structure/datefield/useDateField'
-import useDropdown, {
-  ExtendedDropdownProps,
-} from './Structure/dropdown/useDropdown'
-import useIncrementNumberField, {
-  ExtendedIncrementNumberFieldProps,
-} from './Structure/incremementNumberField/useIncremementNumberField'
-import useSearchbar, {
-  ExtendedSearchbarProps,
-} from './Structure/searchbar/useSearchbar'
-import useNumberField, {
-  ExtendedNumberFieldProps,
-} from './Structure/numberField/useNumberField'
-import usePasswordField, {
-  ExtendedPasswordFieldProps,
-} from './Structure/passwordField/usePasswordField'
-import useQRCode, { ExtendedQRCodeProps } from './Structure/qrcode/useQRCode'
-import usePhoneNumber, {
-  ExtendedPhoneNumberFieldProps,
-} from './Structure/phoneNumber/usePhoneNumber'
-import useCheckbox, {
-  ExtendedCheckboxProps,
-} from './Structure/checkbox/useCheckbox'
-import useComplexEditor, {
-  ExtendedComplexEditorProps,
-} from './Structure/complexeditor/useComplexEditor'
-import useSearchableDropdown, {
-  ExtendedSearchableDropdownProps,
-} from './Structure/searchableDropdown/useSearchableDropdown'
-import useAccordion, {
-  ExtendedAccordionProps,
-} from './Structure/accordion/useAccordion'
-import useProjectBoard, {
-  ExtendedProjectBoardProps,
-} from './Structure/projectboard/useProjectBoard'
-import useMultiSelect, {
-  ExtendedMultiSelectProps,
-} from './Structure/multiSelect/useMultiSelect'
+import { Box, BoxProps } from '@mui/material'
+import { TypographyProps } from '../Typography'
+import { RadioGroupProps } from '../RadioGroup'
+import { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
+import { TextFieldProps } from '../TextField'
+import { CustomButtonProps } from '../Button'
+import { ImageProps } from './Structure/image/useImage'
+import { PricingProps } from '../PricingTable'
+import { CustomStepperProps } from '../Stepper'
+import { TransferListProps } from '../TransferList'
+import { CardProps } from '../Card'
+import { CodeCopyProps } from '../CodeCopy'
+import { DateFieldProps } from '../DateField'
+import { DropdownProps } from '../Dropdown'
+import { IncrementNumberFieldProps } from '../IncrementNumberField'
+import { SearchbarProps } from '../Searchbar'
+import { NumberFieldProps } from '../NumberField'
+import { PasswordFieldProps } from '../PasswordField'
+import { QRCodeProps } from '../QRCode'
+import { ComplexTextEditorProps } from '../ComplexTextEditor'
+import { SearchableDropdownProps } from '../SearchableDropdown'
+import { AccordionProps } from '../Accordion'
+import { ProjectBoardProps } from '../ProjectBoard/types'
+import { MultiSelectChipProps } from '../MultiSelect'
+import { CheckboxProps } from '../Checkbox'
+import { LinkProps } from './Structure/link/useLink'
 
-/**
- * Props for the ContentSection component.
- * Includes configuration for various content elements.
- */
+// Import hooks
+import useTypography from './Structure/typography/useTypography'
+import useRadioGroup from './Structure/radiogroup/useRadioGroup'
+import useConfirmationInput from './Structure/confirmationinput/useConfirmationInput'
+import useLink from './Structure/link/useLink'
+import useImage from './Structure/image/useImage'
+import useButton from './Structure/button/useButton'
+import usePricing from './Structure/pricing/usePricing'
+import useStepper from './Structure/stepper/useStepper'
+import useTransferList from './Structure/transferlist/useTransferList'
+import useCard from './Structure/card/useCard'
+import useCodeCopy from './Structure/codecopy/useCodeCopy'
+import useTextField from './Structure/textfield/useTextField'
+import useDateField from './Structure/datefield/useDateField'
+import useDropdown from './Structure/dropdown/useDropdown'
+import useIncrementNumberField from './Structure/incremementNumberField/useIncremementNumberField'
+import useSearchbar from './Structure/searchbar/useSearchbar'
+import useNumberField from './Structure/numberField/useNumberField'
+import usePasswordField from './Structure/passwordField/usePasswordField'
+import useQRCode from './Structure/qrcode/useQRCode'
+import usePhoneNumber from './Structure/phoneNumber/usePhoneNumber'
+import useCheckbox from './Structure/checkbox/useCheckbox'
+import useComplexEditor from './Structure/complexeditor/useComplexEditor'
+import useSearchableDropdown from './Structure/searchableDropdown/useSearchableDropdown'
+import useAccordion from './Structure/accordion/useAccordion'
+import useProjectBoard from './Structure/projectboard/useProjectBoard'
+import useMultiSelect from './Structure/multiSelect/useMultiSelect'
+
 export interface ContentSectionProps {
   grids: Array<{
-    grid: {
-      gridconfig?: gridconfig
-    }
+    boxProps?: BoxProps
     confirmationcodeinput?:
-      | ExtendedConfirmationCodeInputsProps
-      | ExtendedConfirmationCodeInputsProps[]
-    searchableDropdown?:
-      | ExtendedSearchableDropdownProps
-      | ExtendedSearchableDropdownProps[]
-    projectboard?: ExtendedProjectBoardProps | ExtendedProjectBoardProps[]
-    complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
+      | ConfirmationCodeInputsProps
+      | ConfirmationCodeInputsProps[]
+    searchableDropdown?: SearchableDropdownProps | SearchableDropdownProps[]
+    projectboard?: ProjectBoardProps | ProjectBoardProps[]
+    complexeditor?: ComplexTextEditorProps | ComplexTextEditorProps[]
     typography?: TypographyProps | TypographyProps[]
-    accordion?: ExtendedAccordionProps | ExtendedAccordionProps[]
-    radiogroup?: ExtendedRadioGroupProps | ExtendedRadioGroupProps[]
+    accordion?: AccordionProps | AccordionProps[]
+    radiogroup?: RadioGroupProps | RadioGroupProps[]
     link?: LinkProps | LinkProps[]
-    button?: ExtendedButtonProps | ExtendedButtonProps[]
-    image?: ExtendedImageProps | ExtendedImageProps[]
-    pricing?: ExtendedPricingProps
-    stepper?: ExtendedStepperProps | ExtendedStepperProps[]
-    transferlist?: ExtendedTransferListProps | ExtendedTransferListProps[]
-    card?: ExtendedCardProps | ExtendedCardProps[]
-    codecopy?: ExtendedCodeCopyProps | ExtendedCodeCopyProps[]
-    textfield?: ExtendedTextFieldProps | ExtendedTextFieldProps[]
-    datefield?: ExtendedDateFieldProps | ExtendedDateFieldProps[]
-    dropdown?: ExtendedDropdownProps | ExtendedDropdownProps[]
+    button?: CustomButtonProps | CustomButtonProps[]
+    image?: ImageProps | ImageProps[]
+    pricing?: PricingProps
+    stepper?: CustomStepperProps | CustomStepperProps[]
+    transferlist?: TransferListProps | TransferListProps[]
+    card?: CardProps | CardProps[]
+    codecopy?: CodeCopyProps | CodeCopyProps[]
+    textfield?: TextFieldProps | TextFieldProps[]
+    datefield?: DateFieldProps | DateFieldProps[]
+    dropdown?: DropdownProps | DropdownProps[]
     incrementNumberField?:
-      | ExtendedIncrementNumberFieldProps
-      | ExtendedIncrementNumberFieldProps[]
-    searchbar?: ExtendedSearchbarProps | ExtendedSearchbarProps[]
-    numberField?: ExtendedNumberFieldProps | ExtendedNumberFieldProps[]
-    passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
-    qrcode?: ExtendedQRCodeProps | ExtendedQRCodeProps[]
-    phoneNumberField?:
-      | ExtendedPhoneNumberFieldProps
-      | ExtendedPhoneNumberFieldProps[]
-    checkbox?: ExtendedCheckboxProps | ExtendedCheckboxProps[]
-    multiSelect?: ExtendedMultiSelectProps | ExtendedMultiSelectProps[]
+      | IncrementNumberFieldProps
+      | IncrementNumberFieldProps[]
+    searchbar?: SearchbarProps | SearchbarProps[]
+    numberField?: NumberFieldProps | NumberFieldProps[]
+    passwordField?: PasswordFieldProps | PasswordFieldProps[]
+    qrcode?: QRCodeProps | QRCodeProps[]
+    phoneNumberField?: TextFieldProps | TextFieldProps[]
+    checkbox?: CheckboxProps | CheckboxProps[]
+    multiSelect?: MultiSelectChipProps | MultiSelectChipProps[]
+    // Added optional style property for grid customization
+    style?: React.CSSProperties
   }>
   width?: number
 }
 
-/**
- * RenderContent component handles the rendering of various content elements
- * based on the provided configuration.
- */
-const RenderContent: React.FC<
-  ContentSectionProps['grids'][0] & { width?: number }
-> = ({ grid, width, ...props }) => {
-  let columnConfigs: columnconfig[] = []
+const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
+  boxProps,
+  style,
+  ...props
+}) => {
+  const elements: React.ReactElement[] = []
 
-  // Helper function to add configurations to columnConfigs
-  const addToColumnConfigs = (config: columnconfig | columnconfig[] | null) => {
-    if (config) {
-      if (Array.isArray(config)) {
-        columnConfigs = columnConfigs.concat(config)
-      } else {
-        columnConfigs.push(config)
-      }
+  // Helper function to add elements
+  const addElements = (newElements: React.ReactElement[] | null) => {
+    if (newElements) {
+      elements.push(...newElements)
     }
   }
 
-  // Add configurations for each content type
-  addToColumnConfigs(useGridTypography(props))
-  addToColumnConfigs(useGridRadioGroup(props))
-  addToColumnConfigs(
+  // Add elements for each content type
+  addElements(useTypography({ typography: props.typography }))
+  addElements(useRadioGroup({ radiogroup: props.radiogroup }))
+  addElements(
     useConfirmationInput({ confirmationcodeinput: props.confirmationcodeinput })
   )
-  addToColumnConfigs(useLink(props))
-  addToColumnConfigs(useButton(props))
-  addToColumnConfigs(useImage(props))
-  addToColumnConfigs(useComplexEditor(props))
-  addToColumnConfigs(usePricing(props.pricing))
-  addToColumnConfigs(useStepper(props))
-  addToColumnConfigs(useTransferList(props))
-  addToColumnConfigs(useCard(props))
-  addToColumnConfigs(useCodeCopy(props))
-  addToColumnConfigs(useSearchableDropdown(props))
-  addToColumnConfigs(useTextField(props))
-  addToColumnConfigs(useDateField(props))
-  addToColumnConfigs(useProjectBoard(props))
-  addToColumnConfigs(useAccordion(props))
-  addToColumnConfigs(useMultiSelect(props))
-  addToColumnConfigs(useCheckbox(props))
-  addToColumnConfigs(usePhoneNumber(props))
-  addToColumnConfigs(useDropdown(props))
-  addToColumnConfigs(
+  addElements(useLink({ link: props.link }))
+  addElements(useButton({ button: props.button }))
+  addElements(useImage({ image: props.image }))
+  addElements(useComplexEditor({ complexeditor: props.complexeditor }))
+  addElements(usePricing({ pricing: props.pricing }))
+  addElements(useStepper({ stepper: props.stepper }))
+  addElements(useTransferList({ transferlist: props.transferlist }))
+  addElements(useCard({ card: props.card }))
+  addElements(useCodeCopy({ codecopy: props.codecopy }))
+  addElements(
+    useSearchableDropdown({ searchableDropdown: props.searchableDropdown })
+  )
+  addElements(useTextField({ textfield: props.textfield }))
+  addElements(useDateField({ datefield: props.datefield }))
+  addElements(useProjectBoard({ projectboard: props.projectboard }))
+  addElements(useAccordion({ accordion: props.accordion }))
+  addElements(useMultiSelect({ multiSelect: props.multiSelect }))
+  addElements(useCheckbox({ checkbox: props.checkbox }))
+  addElements(usePhoneNumber({ phoneNumberField: props.phoneNumberField }))
+  addElements(useDropdown({ dropdown: props.dropdown }))
+  addElements(
     useIncrementNumberField({
       incrementNumberField: props.incrementNumberField,
     })
   )
-  addToColumnConfigs(useSearchbar(props))
-  addToColumnConfigs(useNumberField({ numberField: props.numberField }))
-  addToColumnConfigs(usePasswordField({ passwordField: props.passwordField }))
-  addToColumnConfigs(useQRCode({ qrcode: props.qrcode }))
+  addElements(useSearchbar({ searchbar: props.searchbar }))
+  addElements(useNumberField({ numberField: props.numberField }))
+  addElements(usePasswordField({ passwordField: props.passwordField }))
+  addElements(useQRCode({ qrcode: props.qrcode }))
 
-  const updatedGridConfig: gridconfig = {
-    ...grid.gridconfig,
-    gridwidth: width ? `${width}px` : grid.gridconfig?.gridwidth,
-  }
+  // Merge any style provided in boxProps with the grid's style property
+  const mergedStyle = { ...(boxProps?.style || {}), ...style }
 
   return (
-    <CustomGrid gridconfig={updatedGridConfig} columnconfig={columnConfigs} />
+    <Box {...boxProps} style={mergedStyle}>
+      {elements.map((element, index) => (
+        <Box key={index}>{element}</Box>
+      ))}
+    </Box>
   )
 }
 
-/**
- * ContentSection component renders multiple grids based on the provided configuration.
- * @param grids An array of ContentSectionProps, each representing a grid to be rendered.
- * @param width Optional width for the content section, defaults to 450px if not provided.
- */
-export default function ContentSection({ grids, width }: ContentSectionProps) {
+export default function ContentSection({ grids }: ContentSectionProps) {
   return (
     <>
       {grids.map((gridProps, index) => (
-        <RenderContent key={index} {...gridProps} width={width} />
+        <RenderContent key={index} {...gridProps} />
       ))}
     </>
   )

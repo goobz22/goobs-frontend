@@ -1,15 +1,8 @@
 'use client'
 import React from 'react'
-import { columnconfig, cellconfig } from '../../../Grid'
 import DataGridCheckbox from './../../../../components/Checkbox'
 
-type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
-  component?: columnconfig['component']
-}
-
-export interface ExtendedCheckboxProps {
-  columnconfig?: ExtendedColumnConfig
-  cellconfig?: cellconfig
+interface CheckboxProps {
   onClick?: (event: React.MouseEvent) => void
   checked?: boolean
   indeterminate?: boolean
@@ -17,48 +10,22 @@ export interface ExtendedCheckboxProps {
   disabled?: boolean
 }
 
-const useCheckbox = (grid: {
-  checkbox?: ExtendedCheckboxProps | ExtendedCheckboxProps[]
-}): columnconfig | columnconfig[] | null => {
-  if (!grid.checkbox) return null
+const useCheckbox = (props: {
+  checkbox?: CheckboxProps | CheckboxProps[]
+}): React.ReactElement[] | null => {
+  if (!props.checkbox) return null
 
   const renderCheckbox = (
-    checkboxProps: ExtendedCheckboxProps,
+    checkboxProps: CheckboxProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = checkboxProps
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    // Merge the existing columnconfig with the new props
-    const mergedConfig: columnconfig = {
-      ...itemColumnConfig,
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: <DataGridCheckbox key={`checkbox-${index}`} {...restProps} />,
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <DataGridCheckbox key={`checkbox-${index}`} {...checkboxProps} />
   }
 
-  if (Array.isArray(grid.checkbox)) {
-    return grid.checkbox.map(renderCheckbox)
+  if (Array.isArray(props.checkbox)) {
+    return props.checkbox.map((item, index) => renderCheckbox(item, index))
   } else {
-    return renderCheckbox(grid.checkbox, 0)
+    return [renderCheckbox(props.checkbox, 0)]
   }
 }
 

@@ -1,56 +1,27 @@
 'use client'
 import React from 'react'
 import PasswordField, { PasswordFieldProps } from './../../../PasswordField'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-export interface ExtendedPasswordFieldProps extends PasswordFieldProps {
-  columnconfig?: Partial<columnconfig>
-  cellconfig?: cellconfig
-}
-
-const usePasswordField = (grid: {
-  passwordField?: ExtendedPasswordFieldProps | ExtendedPasswordFieldProps[]
-}) => {
-  if (!grid.passwordField) return null
+const usePasswordField = (props: {
+  passwordField?: PasswordFieldProps | PasswordFieldProps[]
+}): React.ReactElement[] | null => {
+  if (!props.passwordField) return null
 
   const renderPasswordField = (
-    passwordFieldItem: ExtendedPasswordFieldProps,
+    passwordFieldItem: PasswordFieldProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = passwordFieldItem
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...(itemColumnConfig as columnconfig),
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: (
-        <PasswordField key={`password-field-${index}`} {...restProps} />
-      ),
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return (
+      <PasswordField key={`password-field-${index}`} {...passwordFieldItem} />
+    )
   }
 
-  if (Array.isArray(grid.passwordField)) {
-    return grid.passwordField.map(renderPasswordField)
+  if (Array.isArray(props.passwordField)) {
+    return props.passwordField.map((item, index) =>
+      renderPasswordField(item, index)
+    )
   } else {
-    return [renderPasswordField(grid.passwordField, 0)]
+    return [renderPasswordField(props.passwordField, 0)]
   }
 }
 

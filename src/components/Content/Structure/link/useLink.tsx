@@ -2,75 +2,42 @@
 import React from 'react'
 import Link from 'next/link'
 import { Typography, TypographyProps } from '../../../Typography'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
-  component?: columnconfig['component']
-}
-
-export interface ExtendedTypographyProps
-  extends Omit<TypographyProps, 'columnconfig'> {
-  columnconfig?: ExtendedColumnConfig
-  cellconfig?: cellconfig
+export interface LinkProps extends TypographyProps {
   link: string
 }
 
-const useLink = (grid: {
-  link?: ExtendedTypographyProps | ExtendedTypographyProps[]
-}): columnconfig | columnconfig[] | null => {
-  if (!grid.link) return null
+const useLink = (props: {
+  link?: LinkProps | LinkProps[]
+}): React.ReactElement[] | null => {
+  if (!props.link) return null
 
   const renderLink = (
-    linkItem: ExtendedTypographyProps,
+    linkItem: LinkProps,
     index: number
-  ): columnconfig => {
-    const {
-      link,
-      text,
-      fontcolor,
-      fontvariant,
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      ...restProps
-    } = linkItem
+  ): React.ReactElement => {
+    const { link, text, fontcolor, fontvariant, ...restProps } = linkItem
 
     if (!link) {
-      throw new Error('Link property is required in ExtendedTypographyProps')
+      throw new Error('Link property is required')
     }
 
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    return {
-      ...itemColumnConfig,
-      cellconfig: {
-        ...cellconfig,
-      },
-      component: (
-        <Link key={`link-${index}`} href={link} passHref>
-          <Typography
-            text={text}
-            fontvariant={fontvariant}
-            fontcolor={fontcolor}
-            {...restProps}
-          />
-        </Link>
-      ),
-    }
+    return (
+      <Link key={`link-${index}`} href={link} passHref>
+        <Typography
+          text={text}
+          fontvariant={fontvariant}
+          fontcolor={fontcolor}
+          {...restProps}
+        />
+      </Link>
+    )
   }
 
-  if (Array.isArray(grid.link)) {
-    return grid.link.map(renderLink)
+  if (Array.isArray(props.link)) {
+    return props.link.map((item, index) => renderLink(item, index))
   } else {
-    return renderLink(grid.link, 0)
+    return [renderLink(props.link, 0)]
   }
 }
 

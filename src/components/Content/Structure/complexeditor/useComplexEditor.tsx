@@ -3,66 +3,25 @@ import React from 'react'
 import ComplexTextEditor, {
   ComplexTextEditorProps,
 } from '../../../ComplexTextEditor'
-import { columnconfig, cellconfig } from '../../../Grid'
 
-type ExtendedColumnConfig = Omit<columnconfig, 'component'> & {
-  component?: columnconfig['component']
-}
-
-// Extend the existing ComplexTextEditorProps
-export type ExtendedComplexEditorProps = ComplexTextEditorProps & {
-  columnconfig?: ExtendedColumnConfig
-  cellconfig?: cellconfig
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-}
-
-const useComplexEditor = (grid: {
-  complexeditor?: ExtendedComplexEditorProps | ExtendedComplexEditorProps[]
-}): columnconfig | columnconfig[] | null => {
-  if (!grid.complexeditor) return null
+const useComplexEditor = (props: {
+  complexeditor?: ComplexTextEditorProps | ComplexTextEditorProps[]
+}): React.ReactElement[] | null => {
+  if (!props.complexeditor) return null
 
   const renderComplexEditor = (
-    component: ExtendedComplexEditorProps,
+    component: ComplexTextEditorProps,
     index: number
-  ): columnconfig => {
-    const {
-      columnconfig: itemColumnConfig,
-      cellconfig,
-      backgroundcolor,
-      ...restProps
-    } = component
-
-    if (
-      !itemColumnConfig ||
-      typeof itemColumnConfig !== 'object' ||
-      typeof itemColumnConfig.row !== 'number' ||
-      typeof itemColumnConfig.column !== 'number'
-    ) {
-      throw new Error(
-        'columnconfig must be an object with row and column as numbers'
-      )
-    }
-
-    const mergedConfig: columnconfig = {
-      ...itemColumnConfig,
-      cellconfig: {
-        ...cellconfig,
-        backgroundColor: backgroundcolor,
-      },
-      component: (
-        <ComplexTextEditor key={`complexeditor-${index}`} {...restProps} />
-      ),
-    }
-
-    return mergedConfig
+  ): React.ReactElement => {
+    return <ComplexTextEditor key={`complexeditor-${index}`} {...component} />
   }
 
-  if (Array.isArray(grid.complexeditor)) {
-    return grid.complexeditor.map(renderComplexEditor)
+  if (Array.isArray(props.complexeditor)) {
+    return props.complexeditor.map((item, index) =>
+      renderComplexEditor(item, index)
+    )
   } else {
-    return renderComplexEditor(grid.complexeditor, 0)
+    return [renderComplexEditor(props.complexeditor, 0)]
   }
 }
 
