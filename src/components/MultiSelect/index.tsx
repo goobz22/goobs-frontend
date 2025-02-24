@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { Theme, useTheme, styled, SxProps, alpha } from '@mui/material/styles'
 import Box from '@mui/material/Box'
@@ -87,7 +89,7 @@ const StyledFormControl = styled(FormControl, {
     hasvalue,
   }) => ({
     '& .MuiOutlinedInput-root': {
-      minHeight: '40px',
+      height: hasvalue === 'true' ? 'auto' : '39px',
       backgroundColor: backgroundcolor || 'inherit',
       color: fontcolor || 'inherit',
       '& fieldset': {
@@ -114,6 +116,9 @@ const StyledFormControl = styled(FormControl, {
     },
     '& .MuiInputLabel-root': {
       color: unshrunkfontcolor || fontcolor || 'inherit',
+      pointerEvents: 'none',
+      zIndex: 1,
+      overflow: 'visible',
       '&.Mui-focused': {
         color: shrunkfontcolor || fontcolor || 'inherit',
       },
@@ -125,6 +130,11 @@ const StyledFormControl = styled(FormControl, {
         ...(shrunklabelposition === 'onNotch' && {
           transform: 'translate(13px, -4px) scale(0.75)',
         }),
+      },
+      '&:not(.MuiInputLabel-shrink)': {
+        transform: 'none',
+        top: '9px',
+        left: '14px',
       },
     },
   })
@@ -145,7 +155,6 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
     unshrunkfontcolor,
     placeholdercolor,
     shrunklabelposition,
-
     sx,
     ...rest
   } = props
@@ -171,9 +180,20 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        width: '100%',
+        marginTop: '20px',
+        height: 'auto',
+        overflow: 'visible',
+        ...sx,
+      }}
+    >
       <StyledFormControl
-        sx={{ width: 300, ...sx }}
+        sx={{ ...sx }}
         variant="outlined"
         hasvalue={hasValue}
         backgroundcolor={backgroundcolor}
@@ -191,25 +211,22 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
           labelId="multi-select-chip-label"
           id="multi-select-chip"
           multiple
-          /**
-           * Remove any fixed height. Let the
-           * OutlinedInput's styles control minHeight.
-           */
           value={selectedValues}
           onChange={handleSelectChange}
           input={
             <OutlinedInput
               label={label}
-              /**
-               * Give the input an initial minHeight (e.g. 55px),
-               * and allow it to wrap chips, thus expanding the height
-               */
               sx={{
-                minHeight: 55,
+                height: selectedValues.length > 0 ? 'auto' : '35px',
+                minHeight: '35px',
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: 0.5,
                 alignItems: 'center',
+                ...(selectedValues.length > 0 && {
+                  pt: 0.5,
+                  pb: 0.5,
+                }),
               }}
               placeholder={placeholdercolor ? (label as string) : undefined}
             />
@@ -223,7 +240,12 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
               }}
             >
               {selected.map(val => (
-                <Chip key={val} label={val} />
+                <Chip
+                  key={val}
+                  label={val}
+                  size="small"
+                  sx={{ height: '24px' }}
+                />
               ))}
             </Box>
           )}
