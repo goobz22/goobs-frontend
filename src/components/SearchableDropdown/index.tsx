@@ -1,14 +1,19 @@
 'use client'
 
 import React, { useState, useEffect, SyntheticEvent } from 'react'
-import { Autocomplete } from '@mui/material'
+import {
+  Autocomplete,
+  InputLabel,
+  OutlinedInput,
+  FormHelperText,
+  FormControl,
+} from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../styles/palette'
 import Typography from '../Typography'
-import TextField from '../TextField'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
-interface DropdownOption {
+export interface DropdownOption {
   value: string
   attribute1?: string
   attribute2?: string
@@ -32,64 +37,157 @@ export interface SearchableDropdownProps {
   name?: string
   required?: boolean
   placeholder?: string
+  disabled?: boolean
+  width?: string
+  // Added style property to allow additional styling (e.g., marginBottom)
+  style?: React.CSSProperties
 }
 
-const StyledAutocomplete = styled(
-  Autocomplete<DropdownOption, false, false, true>
-)<{
+const StyledFormControl = styled(FormControl)<{ width?: string }>(
+  ({ width }) => ({
+    width: width || '100%',
+    marginTop: '15px',
+    height: 'auto',
+    overflow: 'visible',
+  })
+)
+
+const StyledInputLabel = styled(InputLabel)<{
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  shrunklabelposition?: 'onNotch' | 'aboveNotch'
+  disabled?: boolean
+}>(({ shrunkfontcolor, unshrunkfontcolor, shrunklabelposition, disabled }) => ({
+  color: disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor || black.main,
+  '&.Mui-focused': {
+    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
+  },
+  '&.MuiInputLabel-shrink': {
+    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
+    ...(shrunklabelposition === 'aboveNotch' && {
+      top: '-8px',
+      left: '-14px',
+    }),
+    ...(shrunklabelposition === 'onNotch' && {
+      top: '2.5px',
+      left: '0px',
+    }),
+  },
+  '&:not(.MuiInputLabel-shrink)': {
+    transform: 'scale(1)',
+    transformOrigin: 'top left',
+    top: '10px',
+    left: '12px',
+  },
+}))
+
+interface StyledAutocompleteProps {
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
   inputfontcolor?: string
-  shrunkfontcolor?: string
-  unshrunkfontcolor?: string
+  placeholdercolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
-}>(props => {
+  disabled?: boolean
+}
+
+const StyledAutocomplete = styled(
+  Autocomplete<DropdownOption, false, false, true>
+)<StyledAutocompleteProps>(props => {
   const {
+    backgroundcolor,
     outlinecolor,
     fontcolor,
     inputfontcolor,
-    shrunkfontcolor,
-    unshrunkfontcolor,
+    placeholdercolor,
     shrunklabelposition,
+    disabled,
   } = props
 
   return {
+    width: '100%',
     '& .MuiOutlinedInput-root': {
+      width: '100%',
       overflow: 'visible',
-      minHeight: '45px',
-      height: '45px !important',
+      minHeight: '40px',
+      height: '40px !important',
+      backgroundColor: disabled
+        ? 'rgba(0, 0, 0, 0.12)'
+        : backgroundcolor || white.main,
+      color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
       '& fieldset': {
-        borderColor: outlinecolor || black.main,
+        borderColor: disabled
+          ? 'rgba(0, 0, 0, 0.26)'
+          : outlinecolor || black.main,
+        ...(shrunklabelposition === 'aboveNotch' && {
+          legend: {
+            width: '0px !important',
+          },
+        }),
       },
       '&:hover fieldset': {
-        borderColor: outlinecolor || black.main,
+        borderColor: disabled
+          ? 'rgba(0, 0, 0, 0.26)'
+          : outlinecolor || black.main,
       },
       '&.Mui-focused fieldset': {
-        borderColor: outlinecolor || black.main,
+        borderColor: disabled
+          ? 'rgba(0, 0, 0, 0.26)'
+          : outlinecolor || black.main,
       },
-    },
-    '& .MuiAutocomplete-input': {
-      color: inputfontcolor || fontcolor || black.main,
-      paddingTop: '0px',
-      paddingBottom: '0px',
+      '& input': {
+        color: disabled
+          ? 'rgba(0, 0, 0, 0.38)'
+          : inputfontcolor || fontcolor || black.main,
+        '&::placeholder': {
+          color: disabled
+            ? 'rgba(0, 0, 0, 0.38)'
+            : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
+          opacity: 1,
+        },
+      },
+      cursor: disabled ? 'not-allowed' : 'text',
     },
     '& .MuiInputLabel-root': {
-      color: unshrunkfontcolor || 'black',
-      '&.Mui-focused': {
-        color: shrunkfontcolor || 'black',
-      },
+      color: black.main,
       '&.MuiInputLabel-shrink': {
-        color: shrunkfontcolor || 'black',
         ...(shrunklabelposition === 'aboveNotch' && {
           transform: 'translate(0px, -17px) scale(0.75)',
         }),
         ...(shrunklabelposition === 'onNotch' && {
-          transform: 'translate(13px, -5px) scale(0.75)',
+          transform: 'translate(13px, -4px) scale(0.75)',
         }),
       },
     },
+    '& .MuiAutocomplete-input': {
+      padding: '8px 14px',
+    },
+    '& .MuiAutocomplete-popper': {
+      width: '100% !important',
+      '& .MuiPaper-root': {
+        width: '100%',
+        marginTop: '4px',
+      },
+      '& .MuiAutocomplete-listbox': {
+        padding: '4px 0',
+        '& .MuiAutocomplete-option': {
+          padding: '8px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          textAlign: 'left',
+          '& .MuiTypography-root': {
+            width: '100%',
+            textAlign: 'left',
+          },
+        },
+      },
+    },
   }
+})
+
+const StyledFormHelperText = styled(FormHelperText)({
+  marginLeft: '14px',
 })
 
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
@@ -103,13 +201,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   shrunkfontcolor = black.main,
   unshrunkfontcolor = black.main,
   placeholdercolor = black.main,
-  shrunklabelposition = 'onNotch', // Defaults to 'onNotch'
+  shrunklabelposition = 'onNotch',
   onChange,
   error = false,
   helperText,
   name,
   required = false,
   placeholder,
+  disabled = false,
+  width,
+  style, // destructure the style prop
 }) => {
   const [value, setValue] = useState<DropdownOption | string | null>(null)
   const [inputValue, setInputValue] = useState('')
@@ -131,7 +232,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     newValue: DropdownOption | string | null
   ) => {
     if (typeof newValue === 'string') {
-      // freeSolo typed text
       setValue(newValue)
       setInputValue(newValue)
       onChange?.(null)
@@ -155,168 +255,166 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   }
 
   const handleBlur = () => {
-    // Only reset isFocused if there's no selection or typed input
     if (!value && !inputValue) {
       setIsFocused(false)
     }
   }
 
+  const labelId = `${name}-label`
+
   return (
-    <StyledAutocomplete
-      id={name}
-      options={options}
-      freeSolo
-      value={value}
-      onChange={handleChange}
-      inputValue={inputValue}
-      onInputChange={(_e, newInputValue) => {
-        setInputValue(newInputValue)
-      }}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      forcePopupIcon
-      popupIcon={<ArrowDropDownIcon sx={{ color: black.main }} />}
-      disablePortal={false}
-      backgroundcolor={backgroundcolor}
-      outlinecolor={outlinecolor}
-      fontcolor={fontcolor}
-      inputfontcolor={inputfontcolor}
-      filterOptions={(opts, state) => {
-        const input = state.inputValue.toLowerCase()
-        return opts.filter(o => o.value.toLowerCase().includes(input))
-      }}
-      getOptionLabel={(option: DropdownOption | string) => {
-        if (typeof option === 'string') {
-          return option
+    <StyledFormControl
+      error={error}
+      disabled={disabled}
+      width={width}
+      style={style} // pass the style prop here
+    >
+      <StyledInputLabel
+        id={labelId}
+        shrink={isFocused || !!value || !!inputValue || !!placeholder}
+        required={required}
+        error={error}
+        shrunkfontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor}
+        unshrunkfontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor}
+        shrunklabelposition={shrunklabelposition}
+        disabled={disabled}
+      >
+        {label}
+      </StyledInputLabel>
+      <StyledAutocomplete
+        id={name}
+        options={options}
+        freeSolo
+        value={value}
+        onChange={handleChange}
+        inputValue={inputValue}
+        onInputChange={(_e, newInputValue) => {
+          if (!disabled) {
+            setInputValue(newInputValue)
+          }
+        }}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        forcePopupIcon
+        popupIcon={
+          <ArrowDropDownIcon
+            sx={{ color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main }}
+          />
         }
-        return (
-          option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
-          option.value.replace(/_/g, ' ').slice(1)
-        )
-      }}
-      /**
-       * Add an explicit type to the `props` parameter here to avoid
-       * the “Unsafe array destructuring of a tuple element with an `any` value” error.
-       */
-      renderOption={(
-        liProps: React.HTMLAttributes<HTMLLIElement> & { key?: React.Key },
-        option: DropdownOption
-      ) => {
-        // Destructure `key` so it won't be spread
-        const { key, ...restLiProps } = liProps
-        return (
-          <li key={key} {...restLiProps} style={{ color: black.main }}>
-            <Typography
-              fontvariant="merriparagraph"
-              text={option.value.replace(/_/g, ' ')}
-              fontcolor={black.main}
-            />
-            {option.attribute1 && (
+        disablePortal={false}
+        disabled={disabled}
+        backgroundcolor={backgroundcolor}
+        outlinecolor={outlinecolor}
+        fontcolor={fontcolor}
+        inputfontcolor={inputfontcolor}
+        placeholdercolor={placeholdercolor}
+        filterOptions={(opts, state) => {
+          const input = state.inputValue.toLowerCase()
+          return opts.filter(o => o.value.toLowerCase().includes(input))
+        }}
+        getOptionLabel={(option: DropdownOption | string) => {
+          if (typeof option === 'string') {
+            return option
+          }
+          return (
+            option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
+            option.value.replace(/_/g, ' ').slice(1)
+          )
+        }}
+        renderOption={(
+          liProps: React.HTMLAttributes<HTMLLIElement>,
+          option
+        ) => {
+          const { key, ...restLiProps } = liProps as {
+            key: string
+          } & React.HTMLAttributes<HTMLLIElement>
+          return (
+            <li
+              key={key}
+              {...restLiProps}
+              style={{
+                color: black.main,
+                padding: '8px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '2px',
+                width: '100%',
+              }}
+            >
               <Typography
                 fontvariant="merriparagraph"
-                text={`${option.attribute1}${
-                  option.attribute2 ? ` | ${option.attribute2}` : ''
-                }`}
+                text={option.value.replace(/_/g, ' ')}
                 fontcolor={black.main}
+                sx={{
+                  fontSize: '14px',
+                  lineHeight: '20px',
+                  width: '100%',
+                  textAlign: 'left',
+                }}
               />
-            )}
-          </li>
-        )
-      }}
-      renderInput={params => (
-        <TextField
-          {...params}
-          required={required}
-          error={error}
-          helperText={helperText}
-          label={label}
-          placeholder={placeholder}
-          onFocus={handleFocus}
-          shrunkfontcolor={shrunkfontcolor}
-          onBlur={handleBlur}
-          backgroundcolor={backgroundcolor}
-          shrunklabelposition={shrunklabelposition}
-          slotProps={{
-            inputLabel: {
-              shrink: isFocused || !!value || !!inputValue,
-              sx: {
-                color: isFocused ? shrunkfontcolor : unshrunkfontcolor,
-                pointerEvents: 'none',
-                zIndex: 1,
-                overflow: 'visible',
-                '&.MuiInputLabel-shrink': {
-                  color: shrunkfontcolor,
-                  ...(shrunklabelposition === 'aboveNotch' && {
-                    transform: 'translate(0px, -17px) scale(0.75)',
-                  }),
-                  ...(shrunklabelposition === 'onNotch' && {
-                    transform: 'translate(15px, -15px) scale(0.75)',
-                  }),
-                },
-                '&:not(.MuiInputLabel-shrink)': {
-                  transform: 'none',
-                  top: '10px',
-                  left: '14px',
-                },
-              },
-            },
-            input: {
-              ...params.InputProps,
-              notched:
-                shrunklabelposition === 'onNotch' &&
-                (isFocused || !!value || !!inputValue),
-            },
-          }}
-          sx={{
-            overflow: 'visible',
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: backgroundcolor || white.main,
-              color: fontcolor,
-              minHeight: '40px',
-              height: '40px !important',
-              overflow: 'visible',
+              {(option.attribute1 || option.attribute2) && (
+                <Typography
+                  fontvariant="merriparagraph"
+                  text={[option.attribute1, option.attribute2]
+                    .filter(Boolean)
+                    .join(' | ')}
+                  fontcolor="rgba(0, 0, 0, 0.6)"
+                  sx={{
+                    fontSize: '12px',
+                    lineHeight: '16px',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                />
+              )}
+            </li>
+          )
+        }}
+        renderInput={params => (
+          <OutlinedInput
+            {...params.InputProps}
+            inputProps={{
+              ...params.inputProps,
+              'aria-labelledby': labelId,
+            }}
+            placeholder={placeholder}
+            error={error}
+            required={required}
+            notched={
+              shrunklabelposition === 'onNotch' &&
+              (isFocused || !!value || !!inputValue || !!placeholder)
+            }
+            label={label}
+            sx={{
               '& fieldset': {
-                borderColor: outlinecolor || black.main,
-                overflow: 'visible',
+                ...(shrunklabelposition === 'aboveNotch' && {
+                  legend: {
+                    width: '0px !important',
+                  },
+                }),
               },
-              '&:hover fieldset': {
-                borderColor: outlinecolor || black.main,
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: outlinecolor || black.main,
-              },
-              '& input': {
-                backgroundColor: backgroundcolor || white.main,
-                color: inputfontcolor,
-                paddingTop: '0px',
-                paddingBottom: '0px',
-                '&::placeholder': {
-                  color: placeholdercolor,
-                  opacity: 1,
-                },
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: unshrunkfontcolor,
-              overflow: 'visible',
-              zIndex: 1,
-            },
-            // Hide any built-in clear indicator (just in case)
-            '& .MuiAutocomplete-clearIndicator': {
-              display: 'none',
-            },
-          }}
-        />
+            }}
+          />
+        )}
+        sx={{
+          '& .MuiAutocomplete-option': {
+            color: black.main,
+          },
+          '& .MuiAutocomplete-option[aria-selected="true"]': {
+            backgroundColor: `${black.main}08`,
+          },
+          '& .MuiAutocomplete-clearIndicator': {
+            display: 'none',
+          },
+        }}
+      />
+      {helperText && (
+        <StyledFormHelperText error={error} disabled={disabled}>
+          {helperText}
+        </StyledFormHelperText>
       )}
-      sx={{
-        '& .MuiAutocomplete-option': {
-          color: black.main,
-        },
-        '& .MuiAutocomplete-option[aria-selected="true"]': {
-          backgroundColor: `${black.main}08`,
-        },
-      }}
-    />
+    </StyledFormControl>
   )
 }
 
