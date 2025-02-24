@@ -3,7 +3,77 @@
 import { Meta, StoryObj } from '@storybook/react'
 import { within, userEvent, expect } from '@storybook/test'
 import PricingTable, { PricingProps } from './index'
-import defaultConfig from './defaultconfig'
+
+/**
+ * Local default configuration for the PricingTable component.
+ * Only data properties (titles, pricing, features, and button capabilities) are defined.
+ */
+const defaultConfig: PricingProps = {
+  tabletitle: {
+    text: 'Features',
+  },
+  packagecolumns: {
+    packagenames: ['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise'],
+  },
+  monthlyprice: {
+    prices: [
+      'Monthly Pricing - $10',
+      'Monthly Pricing - $20',
+      'Monthly Pricing - $30',
+    ],
+  },
+  annualprice: {
+    annualprices: [
+      'Annual Pricing - $100',
+      'Annual Pricing - $200',
+      'Annual Pricing - $300',
+    ],
+  },
+  features: [
+    {
+      title: 'Frontend Components',
+      infopopuptext: 'How do I choose the right plan?',
+      subfeatures: [
+        {
+          title: 'Pricing Table',
+          infopopuptext: 'Pricing table subfeature info',
+        },
+        {
+          title: 'Feature Grid',
+          infopopuptext: 'Feature grid subfeature info',
+        },
+      ],
+      tiedtopackage: {
+        tiedtopackages: ['true', 'true', 'true'],
+      },
+    },
+    {
+      title: 'Backend Capabilities',
+      infopopuptext: 'What is the difference between the plans?',
+      subfeatures: [
+        {
+          title: 'API Integration',
+          infopopuptext: 'API integration subfeature info',
+        },
+        {
+          title: 'Database Support',
+          infopopuptext: 'Database support subfeature info',
+        },
+      ],
+      tiedtopackage: {
+        tiedtopackages: ['true', 'true', 'true'],
+      },
+    },
+  ],
+  buttoncolumns: {
+    buttontexts: ['Learn More', 'Learn More', 'Learn More'],
+    buttonlinks: [
+      '#goobs-frontend-unlimited',
+      '#goobs-frontend-unlimited',
+      '#goobs-frontend-unlimited',
+    ],
+  },
+}
 
 /**
  * Setup the Storybook metadata
@@ -61,7 +131,7 @@ export const SwitchPackages: Story = {
     await userEvent.click(proOption)
 
     // Step 3: Confirm that the monthly price text changes accordingly
-    // In defaultConfig, monthly is "Monthly Pricing - $20" for "ThothOS Pro"
+    // In defaultConfig, monthly pricing for "ThothOS Pro" is "Monthly Pricing - $20"
     expect(await canvas.findByText('Monthly Pricing - $20')).toBeInTheDocument()
   },
 }
@@ -75,7 +145,6 @@ export const CustomTitle: Story = {
     ...defaultConfig,
     tabletitle: {
       text: 'My Custom Pricing Table',
-      columnconfig: defaultConfig.tabletitle?.columnconfig,
     },
   },
   play: ({ canvasElement }) => {
@@ -100,7 +169,7 @@ export const NoFeatures: Story = {
     // "Frontend Components" won't exist because features is empty
     expect(canvas.queryByText('Frontend Components')).not.toBeInTheDocument()
 
-    // The rest of the layout still shows
+    // The rest of the layout still shows (e.g., the monthly pricing text)
     expect(canvas.getByText('Monthly Pricing - $10')).toBeInTheDocument()
   },
 }
@@ -114,20 +183,16 @@ export const TwoPackages: Story = {
     ...defaultConfig,
     packagecolumns: {
       packagenames: ['Basic', 'Advanced'],
-      columnconfig: defaultConfig.packagecolumns?.columnconfig,
     },
     monthlyprice: {
       prices: ['Monthly - $5', 'Monthly - $15'],
-      columnconfig: defaultConfig.monthlyprice?.columnconfig,
     },
     annualprice: {
       annualprices: ['Annually - $50', 'Annually - $150'],
-      columnconfig: defaultConfig.annualprice?.columnconfig,
     },
     buttoncolumns: {
       buttontexts: ['Get Basic', 'Get Advanced'],
       buttonlinks: ['#basic', '#advanced'],
-      columnconfig: defaultConfig.buttoncolumns?.columnconfig,
     },
   } as PricingProps,
   play: async ({ canvasElement }) => {

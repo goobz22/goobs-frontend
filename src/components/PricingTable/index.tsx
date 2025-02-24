@@ -1,104 +1,65 @@
 'use client'
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { Box, Paper, SelectChangeEvent, CircularProgress } from '@mui/material'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Box, Paper, SelectChangeEvent } from '@mui/material'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
 import Dropdown from '../Dropdown'
-import CustomGrid from './../../components/Grid'
-import { columnconfig, gridconfig } from './../../components/Grid/'
-import defaultConfig from './defaultconfig'
-// import { useRouter } from 'next/navigation'  <-- REMOVED!
-import {
-  black,
-  white,
-  semiTransparentBlack,
-  stainlessSteel,
-  aqua,
-} from '../../styles/palette'
+import { black, white, stainlessSteel, aqua } from '../../styles/palette'
 
-type TiedToPackage = {
-  tiedtopackages?: string[]
-  columnconfig?: Omit<columnconfig, 'component'>
-}
-
-interface SubFeature {
-  title: string
-  titlelink?: string
-  infopopuptext?: string
-  columnconfig?: Omit<columnconfig, 'component'>
-  tiedtopackage?: TiedToPackage
-}
-
-interface Feature {
-  title: string
-  infopopuptext?: string
-  titlelink?: string
-  subfeatures: SubFeature[]
-  columnconfig?: Omit<columnconfig, 'component'>
-  tiedtopackage?: TiedToPackage
-}
-
-/**
- * Optional router prop, so parent can pass in their router instance if desired.
- * If provided, PricingTable will use router.push(...) for navigation.
- */
 export interface PricingProps {
-  headerGridConfig?: gridconfig
   tabletitle?: {
-    text?: string
-    columnconfig?: columnconfig
+    text: string
   }
   packagecolumns?: {
-    columnheaders?: string
-    packagenames?: string[]
-    columnconfig?: columnconfig
+    packagenames: string[]
   }
   monthlyprice?: {
-    prices?: string[]
-    columnconfig?: columnconfig
+    prices: string[]
   }
   annualprice?: {
-    annualprices?: string[]
-    columnconfig?: columnconfig
+    annualprices: string[]
   }
-  featureGridConfig?: gridconfig
   features?: Feature[]
   buttoncolumns?: {
-    buttontexts?: string[]
-    buttonlinks?: string[]
-    columnconfig?: columnconfig
+    buttontexts: string[]
+    buttonlinks: string[]
   }
   /**
-   * The router object with a `.push()` method.
-   * In Next.js, this would typically come from `useRouter()` in the parent.
+   * A router with a push method (e.g. from Next.js) to handle navigation.
    */
   router?: {
     push(url: string): void
   }
 }
 
+export interface SubFeature {
+  title: string
+  infopopuptext?: string
+  tiedtopackage?: {
+    tiedtopackages: string[]
+  }
+}
+
+export interface Feature {
+  title: string
+  infopopuptext?: string
+  subfeatures?: SubFeature[]
+  tiedtopackage?: {
+    tiedtopackages: string[]
+  }
+}
+
 const PricingTable: React.FC<PricingProps> = props => {
-  // Removed: const router = useRouter()
   const { router } = props
 
   const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
   const [selectedPackage, setSelectedPackage] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
 
-  const config = useMemo(() => {
-    return { ...defaultConfig, ...props }
-  }, [props])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 100) // Simulating a 100ms loading time
-
-    return () => clearTimeout(timer)
-  }, [])
+  // Use props directly as the configuration
+  const config = props
 
   useEffect(() => {
     if (
@@ -116,255 +77,9 @@ const PricingTable: React.FC<PricingProps> = props => {
         config.packagecolumns?.packagenames?.indexOf(newValue) ?? 0
       setSelectedPackageIndex(newIndex)
       setSelectedPackage(newValue)
-      console.log('Package selection changed to:', newValue)
     },
     [config.packagecolumns?.packagenames]
   )
-
-  const renderColumnConfigs = useCallback(() => {
-    const headerColumnConfigs: columnconfig[] = []
-    const featureColumnConfigs: columnconfig[] = []
-
-    if (config.tabletitle && config.tabletitle.columnconfig) {
-      headerColumnConfigs.push({
-        ...config.tabletitle.columnconfig,
-        component: (
-          <Typography
-            text={config.tabletitle.text || ''}
-            fontcolor={black.main}
-            fontvariant="merrih4"
-            noWrap
-          />
-        ),
-      })
-    }
-
-    if (config.packagecolumns && config.packagecolumns.columnconfig) {
-      headerColumnConfigs.push({
-        ...config.packagecolumns.columnconfig,
-        margintop: 1,
-        marginright: 0.625,
-        component: (
-          <Dropdown
-            label="Packages"
-            options={(config.packagecolumns.packagenames || []).map(name => ({
-              value: name,
-              label: name,
-            }))}
-            defaultValue={selectedPackage}
-            backgroundcolor={semiTransparentBlack.main}
-            shrunklabelposition="aboveNotch"
-            outlinecolor={black.main}
-            fontcolor={black.main}
-            shrunkfontcolor={black.main}
-            onChange={handlePackageChange}
-          />
-        ),
-      })
-    }
-
-    if (config.monthlyprice && config.monthlyprice.columnconfig) {
-      headerColumnConfigs.push({
-        ...config.monthlyprice.columnconfig,
-        component: (
-          <Typography
-            text={config.monthlyprice.prices?.[selectedPackageIndex] || ''}
-            fontcolor={black.main}
-            fontvariant="merrih5"
-          />
-        ),
-      })
-    }
-
-    if (config.annualprice && config.annualprice.columnconfig) {
-      headerColumnConfigs.push({
-        ...config.annualprice.columnconfig,
-        component: (
-          <Typography
-            text={config.annualprice.annualprices?.[selectedPackageIndex] || ''}
-            fontcolor={black.main}
-            fontvariant="merrih5"
-          />
-        ),
-      })
-    }
-
-    const renderFeature = (feature: Feature) => {
-      if (feature.columnconfig) {
-        featureColumnConfigs.push({
-          ...feature.columnconfig,
-          margintop: 1,
-          paddingleft: 2,
-          component: (
-            <Box display="flex" alignItems="center">
-              <Typography
-                text={feature.title}
-                fontcolor={black.main}
-                fontvariant="merrih5"
-                noWrap
-              />
-              {feature.infopopuptext && (
-                <Box ml={1} display="flex" alignItems="center">
-                  <StyledTooltip
-                    arrow
-                    tooltipcolor={stainlessSteel.dark}
-                    tooltipplacement="right"
-                    title={feature.infopopuptext}
-                    offsetX={0}
-                    offsetY={0}
-                  >
-                    <InfoIcon fontSize="small" />
-                  </StyledTooltip>
-                </Box>
-              )}
-            </Box>
-          ),
-        } as columnconfig)
-      }
-
-      if (feature.tiedtopackage && feature.tiedtopackage.columnconfig) {
-        const tiedConfig: columnconfig = {
-          ...feature.tiedtopackage.columnconfig,
-          margintop: 1,
-          cellconfig: {
-            minHeight: '40px',
-          },
-          component: feature.tiedtopackage.tiedtopackages?.[
-            selectedPackageIndex
-          ] ? (
-            <CheckCircleIcon />
-          ) : (
-            <Box sx={{ width: '24px', height: '24px' }} />
-          ),
-        }
-        featureColumnConfigs.push(tiedConfig)
-      }
-
-      feature.subfeatures.forEach(subFeature => {
-        if (subFeature.columnconfig) {
-          featureColumnConfigs.push({
-            ...subFeature.columnconfig,
-            margintop: 1,
-            paddingleft: 3,
-            component: (
-              <Box display="flex" alignItems="center">
-                <Typography
-                  text={subFeature.title}
-                  fontcolor={black.main}
-                  fontvariant="merriparagraph"
-                  noWrap
-                />
-                {subFeature.infopopuptext && (
-                  <Box ml={1} display="flex" alignItems="center">
-                    <StyledTooltip
-                      arrow
-                      tooltipcolor={stainlessSteel.dark}
-                      tooltipplacement="right"
-                      title={subFeature.infopopuptext}
-                      offsetX={0}
-                      offsetY={0}
-                    >
-                      <InfoIcon fontSize="small" />
-                    </StyledTooltip>
-                  </Box>
-                )}
-              </Box>
-            ),
-          } as columnconfig)
-        }
-
-        if (subFeature.tiedtopackage && subFeature.tiedtopackage.columnconfig) {
-          const tiedConfig: columnconfig = {
-            ...subFeature.tiedtopackage.columnconfig,
-            margintop: 1,
-            cellconfig: {
-              minHeight: '40px',
-            },
-            component: subFeature.tiedtopackage.tiedtopackages?.[
-              selectedPackageIndex
-            ] ? (
-              <CheckCircleIcon />
-            ) : (
-              <Box sx={{ width: '24px', height: '24px' }} />
-            ),
-          }
-          featureColumnConfigs.push(tiedConfig)
-        }
-      })
-    }
-
-    config.features?.forEach(renderFeature)
-
-    if (config.buttoncolumns && config.buttoncolumns.columnconfig) {
-      const buttonLink =
-        config.buttoncolumns.buttonlinks?.[selectedPackageIndex] || '#'
-
-      featureColumnConfigs.push({
-        ...config.buttoncolumns.columnconfig,
-        margintop: 1,
-        component: (
-          <CustomButton
-            variant="contained"
-            fontcolor={white.main}
-            backgroundcolor={black.main}
-            href={buttonLink}
-            width="100%"
-            onClick={() => {
-              // Use passed-in router, if provided
-              if (router) {
-                router.push(buttonLink)
-              } else {
-                console.warn('No router provided; skipping navigation.')
-              }
-            }}
-            text={
-              config.buttoncolumns.buttontexts?.[selectedPackageIndex] || ''
-            }
-          />
-        ),
-      })
-    }
-
-    return { headerColumnConfigs, featureColumnConfigs }
-  }, [
-    config,
-    selectedPackageIndex,
-    selectedPackage,
-    router,
-    handlePackageChange,
-  ])
-
-  const { headerColumnConfigs, featureColumnConfigs } = renderColumnConfigs()
-
-  if (isLoading) {
-    return (
-      <CustomGrid
-        gridconfig={{
-          gridwidth: '100%',
-          alignment: 'center',
-        }}
-        columnconfig={[
-          {
-            row: 1,
-            column: 1,
-            alignment: 'center',
-            component: (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="350px"
-                width="100%"
-                overflow="auto"
-              >
-                <CircularProgress size={240} thickness={2} />
-              </Box>
-            ),
-          },
-        ]}
-      />
-    )
-  }
 
   return (
     <Paper
@@ -378,14 +93,136 @@ const PricingTable: React.FC<PricingProps> = props => {
         height: '100%',
       }}
     >
-      <CustomGrid
-        gridconfig={config.headerGridConfig}
-        columnconfig={headerColumnConfigs}
-      />
-      <CustomGrid
-        gridconfig={config.featureGridConfig}
-        columnconfig={featureColumnConfigs}
-      />
+      {/* Header Section */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          p: 2,
+          borderBottom: '1px solid #ccc',
+        }}
+      >
+        {config.tabletitle && (
+          <Typography text={config.tabletitle.text || ''} />
+        )}
+        {config.packagecolumns && (
+          <Dropdown
+            label="Packages"
+            options={(config.packagecolumns.packagenames || []).map(name => ({
+              value: name,
+            }))}
+            defaultValue={selectedPackage}
+            onChange={handlePackageChange}
+          />
+        )}
+        {config.monthlyprice && (
+          <Typography
+            text={config.monthlyprice.prices?.[selectedPackageIndex] || ''}
+          />
+        )}
+        {config.annualprice && (
+          <Typography
+            text={config.annualprice.annualprices?.[selectedPackageIndex] || ''}
+          />
+        )}
+      </Box>
+
+      {/* Features Section */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+        {config.features?.map((feature, featureIndex) => (
+          <Box key={`feature-${featureIndex}`} sx={{ mb: 2 }}>
+            <Box display="flex" alignItems="center">
+              <Typography text={feature.title} />
+              {feature.infopopuptext && (
+                <Box ml={1} display="flex" alignItems="center">
+                  <StyledTooltip
+                    arrow
+                    tooltipcolor={stainlessSteel.main}
+                    tooltipplacement="right"
+                    title={feature.infopopuptext}
+                    offsetX={0}
+                    offsetY={0}
+                  >
+                    <InfoIcon fontSize="small" />
+                  </StyledTooltip>
+                </Box>
+              )}
+              {feature.tiedtopackage && (
+                <Box ml={1} display="flex" alignItems="center">
+                  {feature.tiedtopackage.tiedtopackages?.[
+                    selectedPackageIndex
+                  ] ? (
+                    <CheckCircleIcon fontSize="small" />
+                  ) : (
+                    <Box sx={{ width: '24px', height: '24px' }} />
+                  )}
+                </Box>
+              )}
+            </Box>
+            {feature.subfeatures?.map((subFeature, subFeatureIndex) => (
+              <Box
+                key={`subfeature-${subFeatureIndex}`}
+                display="flex"
+                alignItems="center"
+                ml={3}
+                mt={1}
+              >
+                <Typography text={subFeature.title} />
+                {subFeature.infopopuptext && (
+                  <Box ml={1} display="flex" alignItems="center">
+                    <StyledTooltip
+                      arrow
+                      tooltipcolor={stainlessSteel.main}
+                      tooltipplacement="right"
+                      title={subFeature.infopopuptext}
+                      offsetX={0}
+                      offsetY={0}
+                    >
+                      <InfoIcon fontSize="small" />
+                    </StyledTooltip>
+                  </Box>
+                )}
+                {subFeature.tiedtopackage && (
+                  <Box ml={1} display="flex" alignItems="center">
+                    {subFeature.tiedtopackage.tiedtopackages?.[
+                      selectedPackageIndex
+                    ] ? (
+                      <CheckCircleIcon fontSize="small" />
+                    ) : (
+                      <Box sx={{ width: '24px', height: '24px' }} />
+                    )}
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </Box>
+        ))}
+      </Box>
+
+      {/* Button Section */}
+      {config.buttoncolumns && (
+        <Box sx={{ p: 2 }}>
+          <CustomButton
+            variant="contained"
+            backgroundcolor={black.main}
+            fontcolor={white.main}
+            href={config.buttoncolumns.buttonlinks[selectedPackageIndex] || '#'}
+            width="100%"
+            onClick={() => {
+              if (router && config.buttoncolumns) {
+                router.push(
+                  config.buttoncolumns.buttonlinks[selectedPackageIndex] || '#'
+                )
+              } else {
+                console.warn('No router provided; skipping navigation.')
+              }
+            }}
+            text={config.buttoncolumns.buttontexts[selectedPackageIndex] || ''}
+          />
+        </Box>
+      )}
     </Paper>
   )
 }
