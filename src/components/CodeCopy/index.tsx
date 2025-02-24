@@ -45,7 +45,6 @@ const CodeCopy: React.FC<CodeCopyProps> = ({ code, language }) => {
       textArea.select()
       document.execCommand('copy')
       textArea.remove()
-      console.log('Code copied to clipboard')
     }
   }
 
