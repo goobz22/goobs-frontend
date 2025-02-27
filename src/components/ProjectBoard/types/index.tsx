@@ -181,7 +181,7 @@ export interface ProjectBoardProps {
   rawArticles: RawArticle[]
   rawCustomers: RawCustomer[]
   rawEmployees: RawEmployee[]
-  rawCompanies: RawCompany[]
+  rawCompanies?: RawCompany[]
   rawSeverityLevels: RawSeverityLevel[]
   onEdit: (args: { _id: string }) => void
   onDelete: (args: { _id: string }) => void

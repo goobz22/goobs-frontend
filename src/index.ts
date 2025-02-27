@@ -39,7 +39,7 @@ import CompanyAddTaskCustomerDropdown from './components/ProjectBoard/forms/AddT
 import CompanyAddTaskCustomerProvided from './components/ProjectBoard/forms/AddTask/company/customerProvided'
 import CustomerAddTask from './components/ProjectBoard/forms/AddTask/customer'
 import NoUserAddTask from './components/ProjectBoard/forms/AddTask/noUser'
-
+import { RawSeverityLevel } from './components/ProjectBoard/types'
 // Here is the new horizontal `Tabs` import
 import Tabs, { TabsProps } from './components/Tabs'
 import { Task } from './components/ProjectBoard/types'
@@ -231,6 +231,7 @@ export type { NavItem }
 export type { ShowTaskProps }
 export type { Animation }
 export type { AccordionProps } // <-- Export AccordionProps
+export type { RawSeverityLevel }
 
 /* -------------------------------------------------------------------------- */
 /*                              Color Exports                                 */
