@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "type": "module",
   "description": "A comprehensive React-based libary that extends the functionality of Material-UI",
   "license": "MIT",
