@@ -9,7 +9,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import { Box, Typography } from '@mui/material'
-import Dropdown, { DropdownOption } from '../Dropdown'
+import Dropdown, { DropdownOption } from '../Field/Dropdown/Regular'
 
 /** Utility functions for array handling */
 function not(a: readonly string[], b: readonly string[]) {
