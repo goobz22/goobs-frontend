@@ -26,7 +26,9 @@ import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 import FormProjectBoard, {
   FormProjectBoardProps,
 } from './components/Form/ProjectBoard'
-import MultiSelectChip, { MultiSelectChipProps } from './components/MultiSelect'
+import MultiSelectChip, {
+  MultiSelectChipProps,
+} from './components/Field/Dropdown/MultiSelect'
 import ComplexEditor, {
   ComplexTextEditorProps,
 } from './components/ComplexTextEditor'
@@ -45,14 +47,16 @@ import Tabs, { TabsProps } from './components/Tabs'
 import { Task } from './components/ProjectBoard/types'
 
 // New imports
-import DateField, { DateFieldProps } from './components/DateField'
-import Dropdown, { DropdownProps } from './components/Dropdown'
-import IncrementNumberField from './components/IncrementNumberField'
-import NumberField, { NumberFieldProps } from './components/NumberField'
-import PasswordField, { PasswordFieldProps } from './components/PasswordField'
-import PhoneNumberField from './components/PhoneNumberField'
-import Searchbar, { SearchbarProps } from './components/Searchbar'
-import TextField, { TextFieldProps } from './components/TextField'
+import DateField, { DateFieldProps } from './components/Field/Date'
+import Dropdown, { DropdownProps } from './components/Field/Dropdown/Regular'
+import IncrementNumberField from './components/Field/Number/ExternalIncrement'
+import InternalIncrementNumberField, {
+  InternalIncrementNumberFieldProps,
+} from './components/Field/Number/InternalIncrement'
+import PasswordField, { PasswordFieldProps } from './components/Field/Password'
+import PhoneNumberField from './components/Field/PhoneNumber'
+import Searchbar, { SearchbarProps } from './components/Field/Search'
+import TextField, { TextFieldProps } from './components/Field/Text'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
@@ -60,7 +64,7 @@ import type { FormDataGridProps } from './components/Form/DataGrid'
 import type {
   SearchableDropdownProps,
   DropdownOption,
-} from './components/SearchableDropdown'
+} from './components/Field/Dropdown/Searchable'
 
 // Animations
 import { Animation } from './components/Content/Structure/animations'
@@ -173,7 +177,7 @@ export { NoUserAddTask }
 export { DateField }
 export { Dropdown }
 export { IncrementNumberField }
-export { NumberField }
+export { InternalIncrementNumberField }
 export { PasswordField }
 export { PhoneNumberField }
 export { Searchbar }
@@ -182,7 +186,7 @@ export { CustomDialog }
 // Add FormDataGrid to named exports
 export { FormDataGrid }
 export { FormProjectBoard }
-export type { NumberFieldProps }
+export type { InternalIncrementNumberFieldProps }
 export type { PasswordFieldProps }
 export type { SearchbarProps }
 export type { TextFieldProps }
