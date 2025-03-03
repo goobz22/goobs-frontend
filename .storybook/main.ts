@@ -12,13 +12,6 @@ const config: StorybookConfig = {
     name: '@storybook/nextjs',
     options: {},
   },
-  env: config => {
-    if (!config) return { GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || '' }
-    return {
-      ...config,
-      GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || '',
-    }
-  },
   docs: {
     autodocs: 'tag',
   },
