@@ -94,8 +94,12 @@ const VLANField: React.FC<VLANFieldProps> = ({
     undefined
   )
 
-  const incrementIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const decrementIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const incrementIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const decrementIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
 
   // Clean up any intervals on unmount
   useEffect(() => {

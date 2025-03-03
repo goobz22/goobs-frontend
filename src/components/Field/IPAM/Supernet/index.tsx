@@ -98,8 +98,8 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
     return Math.min(Math.max(initialNum, minCidr), subnetCidr - 1).toString()
   })
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const initialTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const supernetInfo = calculateSupernetInfo(
     parseInt(currentValue) || 16,

@@ -63,8 +63,8 @@ const InternalIncrementNumberField: React.FC<
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const initialTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) {
