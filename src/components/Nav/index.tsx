@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Typography } from '../Typography'
 
 // Replaced SearchableDropdown import with Dropdown import
-import SearchableDropdown from '../SearchableDropdown'
+import SearchableDropdown from '../Field/Dropdown/Searchable'
 import { white, ocean, semiTransparentWhite } from '../../styles/palette'
 
 // New imports for split components
