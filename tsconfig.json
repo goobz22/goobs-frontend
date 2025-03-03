@@ -32,7 +32,8 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    ".storybook/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
