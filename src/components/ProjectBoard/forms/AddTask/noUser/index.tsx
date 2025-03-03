@@ -53,7 +53,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
 
   // ------------------ RENDER ------------------
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 0 }}>
       <Typography variant="h5" sx={{ mb: 3 }}>
         Create Task
       </Typography>
