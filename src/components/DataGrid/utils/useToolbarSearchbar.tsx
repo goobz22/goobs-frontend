@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import type { ColumnDef, RowData } from '../types'
-import type { SearchbarProps } from '../../Searchbar'
+import type { SearchbarProps } from '../../Field/Search'
 import * as palette from '../../../styles/palette'
 
 interface UseSearchbarProps {

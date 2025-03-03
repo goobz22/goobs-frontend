@@ -4,7 +4,7 @@ import React from 'react'
 import { TableRow, TableCell, Checkbox } from '@mui/material'
 import type { ColumnDef } from '../../types'
 import { white } from '../../../../styles/palette'
-import SearchableDropdown from '../../../SearchableDropdown'
+import SearchableDropdown from '../../../Field/Dropdown/Searchable'
 
 interface ColumnHeaderRowProps {
   isMobile: boolean
