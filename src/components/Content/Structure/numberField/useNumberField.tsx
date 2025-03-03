@@ -1,14 +1,18 @@
 'use client'
 import React from 'react'
-import NumberField, { NumberFieldProps } from './../../../NumberField'
+import NumberField, {
+  InternalIncrementNumberFieldProps,
+} from '../../../Field/Number/InternalIncrement'
 
 const useNumberField = (props: {
-  numberField?: NumberFieldProps | NumberFieldProps[]
+  numberField?:
+    | InternalIncrementNumberFieldProps
+    | InternalIncrementNumberFieldProps[]
 }): React.ReactElement[] | null => {
   if (!props.numberField) return null
 
   const renderNumberField = (
-    numberFieldItem: NumberFieldProps,
+    numberFieldItem: InternalIncrementNumberFieldProps,
     index: number
   ): React.ReactElement => {
     return <NumberField key={`number-field-${index}`} {...numberFieldItem} />

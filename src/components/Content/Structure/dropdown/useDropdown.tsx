@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Dropdown, { DropdownProps } from './../../../Dropdown'
+import Dropdown, { DropdownProps } from '../../../Field/Dropdown/Regular'
 
 const useDropdown = (props: {
   dropdown?: DropdownProps | DropdownProps[]

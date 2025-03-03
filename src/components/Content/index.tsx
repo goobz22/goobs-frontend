@@ -5,7 +5,7 @@ import { Box, BoxProps } from '@mui/material'
 import { TypographyProps } from '../Typography'
 import { RadioGroupProps } from '../RadioGroup'
 import { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
-import { TextFieldProps } from '../TextField'
+import { TextFieldProps } from '../Field/Text'
 import { CustomButtonProps } from '../Button'
 import { ImageProps } from './Structure/image/useImage'
 import { PricingProps } from '../PricingTable'
@@ -13,20 +13,26 @@ import { CustomStepperProps } from '../Stepper'
 import { TransferListProps } from '../TransferList'
 import { CardProps } from '../Card'
 import { CodeCopyProps } from '../CodeCopy'
-import { DateFieldProps } from '../DateField'
-import { DropdownProps } from '../Dropdown'
-import { IncrementNumberFieldProps } from '../IncrementNumberField'
-import { SearchbarProps } from '../Searchbar'
-import { NumberFieldProps } from '../NumberField'
-import { PasswordFieldProps } from '../PasswordField'
+import { DateFieldProps } from '../Field/Date'
+import { DropdownProps } from '../Field/Dropdown/Regular'
+import { IncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
+import { SearchbarProps } from '../Field/Search'
+import { InternalIncrementNumberFieldProps } from '../Field/Number/InternalIncrement'
+import { InternalIncrementNumberFieldProps as SubnetFieldProps } from '../Field/IPAM/Subnet'
+import { InternalIncrementNumberFieldProps as SupernetFieldProps } from '../Field/IPAM/Subnet'
+import { PasswordFieldProps } from '../Field/Password'
 import { QRCodeProps } from '../QRCode'
 import { ComplexTextEditorProps } from '../ComplexTextEditor'
-import { SearchableDropdownProps } from '../SearchableDropdown'
+import { SearchableDropdownProps } from '../Field/Dropdown/Searchable'
 import { AccordionProps } from '../Accordion'
 import { ProjectBoardProps } from '../ProjectBoard/types'
-import { MultiSelectChipProps } from '../MultiSelect'
+import { MultiSelectChipProps } from '../Field/Dropdown/MultiSelect'
 import { CheckboxProps } from '../Checkbox'
 import { LinkProps } from './Structure/link/useLink'
+import type { USDFieldProps } from './Structure/USD/useUSD'
+import { CIDRFieldProps } from '../Field/IPAM/CIDR'
+import { IPAddressFieldProps } from '../Field/IPAM/Address'
+import { VLANFieldProps } from '../Field/IPAM/VLAN'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -55,6 +61,12 @@ import useSearchableDropdown from './Structure/searchableDropdown/useSearchableD
 import useAccordion from './Structure/accordion/useAccordion'
 import useProjectBoard from './Structure/projectboard/useProjectBoard'
 import useMultiSelect from './Structure/multiSelect/useMultiSelect'
+import useSubnet from './Structure/Subnet/useSubnet'
+import useSupernet from './Structure/Supernet/useSupernet'
+import useCIDR from './Structure/CIDR/useCIDR'
+import useAddress from './Structure/Address/useAddress'
+import useVLAN from './Structure/VLAN/useVLAN'
+import useUSD from './Structure/USD/useUSD'
 
 export interface ContentSectionProps {
   grids: Array<{
@@ -83,12 +95,20 @@ export interface ContentSectionProps {
       | IncrementNumberFieldProps
       | IncrementNumberFieldProps[]
     searchbar?: SearchbarProps | SearchbarProps[]
-    numberField?: NumberFieldProps | NumberFieldProps[]
+    numberField?:
+      | InternalIncrementNumberFieldProps
+      | InternalIncrementNumberFieldProps[]
     passwordField?: PasswordFieldProps | PasswordFieldProps[]
     qrcode?: QRCodeProps | QRCodeProps[]
     phoneNumberField?: TextFieldProps | TextFieldProps[]
     checkbox?: CheckboxProps | CheckboxProps[]
     multiSelect?: MultiSelectChipProps | MultiSelectChipProps[]
+    subnet?: SubnetFieldProps | SubnetFieldProps[]
+    supernet?: SupernetFieldProps | SupernetFieldProps[]
+    cidr?: CIDRFieldProps | CIDRFieldProps[]
+    address?: IPAddressFieldProps | IPAddressFieldProps[]
+    vlan?: VLANFieldProps | VLANFieldProps[]
+    usdField?: USDFieldProps | USDFieldProps[]
     // Added optional style property for grid customization
     style?: React.CSSProperties
   }>
@@ -144,6 +164,12 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   addElements(useNumberField({ numberField: props.numberField }))
   addElements(usePasswordField({ passwordField: props.passwordField }))
   addElements(useQRCode({ qrcode: props.qrcode }))
+  addElements(useSubnet({ subnet: props.subnet }))
+  addElements(useSupernet({ supernet: props.supernet }))
+  addElements(useCIDR({ cidr: props.cidr }))
+  addElements(useAddress({ address: props.address }))
+  addElements(useVLAN({ vlan: props.vlan }))
+  addElements(useUSD({ usdField: props.usdField }))
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }

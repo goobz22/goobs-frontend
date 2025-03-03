@@ -2,7 +2,7 @@
 import React from 'react'
 import SearchableDropdown, {
   SearchableDropdownProps,
-} from './../../../SearchableDropdown'
+} from '../../../Field/Dropdown/Searchable'
 
 const useSearchableDropdown = (props: {
   searchableDropdown?: SearchableDropdownProps | SearchableDropdownProps[]

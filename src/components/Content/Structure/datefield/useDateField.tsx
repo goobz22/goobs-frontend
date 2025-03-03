@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import DateField, { DateFieldProps } from './../../../DateField'
+import DateField, { DateFieldProps } from '../../../Field/Date'
 
 const useDateField = (props: {
   datefield?: DateFieldProps | DateFieldProps[]

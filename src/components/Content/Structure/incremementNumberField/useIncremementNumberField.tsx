@@ -2,7 +2,7 @@
 import React from 'react'
 import IncrementNumberField, {
   IncrementNumberFieldProps,
-} from './../../../IncrementNumberField'
+} from '../../../Field/Number/ExternalIncrement'
 
 const useIncrementNumberField = (props: {
   incrementNumberField?: IncrementNumberFieldProps | IncrementNumberFieldProps[]
