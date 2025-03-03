@@ -61,9 +61,11 @@ function CustomDialog({
       open={true}
       fullWidth
       maxWidth={false}
-      PaperProps={{
-        style: {
-          width: `${width}px`,
+      slotProps={{
+        paper: {
+          style: {
+            width: `${width}px`,
+          },
         },
       }}
     >

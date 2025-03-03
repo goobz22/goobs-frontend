@@ -4,7 +4,7 @@
 
 import React, { FC } from 'react'
 import { Box } from '@mui/material'
-import Searchbar, { SearchbarProps } from '../../Searchbar'
+import Searchbar, { SearchbarProps } from '../../Field/Search'
 
 const LeftCenter: FC<Partial<SearchbarProps>> = props => {
   const {

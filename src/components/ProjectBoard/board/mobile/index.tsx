@@ -7,7 +7,7 @@ import { columnsAtom } from '../../jotai/atom'
 
 import Typography from '../../../Typography'
 import Card from '../../../Card'
-import Dropdown from '../../../Dropdown'
+import Dropdown from '../../../Field/Dropdown/Regular'
 import { black, white } from '../../../../styles/palette'
 
 import type { BoardProps } from '../index'

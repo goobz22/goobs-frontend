@@ -4,11 +4,11 @@ import React, { useState, useCallback } from 'react'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box, useMediaQuery, useTheme } from '@mui/material'
 import Typography from '../../../../../Typography'
-import Dropdown from '../../../../../Dropdown'
-import MultiSelect from '../../../../../MultiSelect'
+import Dropdown from '../../../../../Field/Dropdown/Regular'
+import MultiSelect from '../../../../../Field/Dropdown/MultiSelect'
 import ComplexTextEditor from '../../../../../ComplexTextEditor'
 import CustomButton from '../../../../../Button'
-import TextField from '../../../../../TextField'
+import TextField from '../../../../../Field/Text'
 
 import type {
   Task,

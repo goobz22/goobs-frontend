@@ -97,11 +97,13 @@ function Popup({
       onClose={handleClose} // Clicking outside/backdrop or pressing ESC triggers this
       fullWidth
       maxWidth={false}
-      PaperProps={{
-        style: {
-          width: `${width}px`,
-          // Ensure pointer events are enabled inside the Dialog
-          pointerEvents: 'auto',
+      slotProps={{
+        paper: {
+          style: {
+            width: `${width}px`,
+            // Ensure pointer events are enabled inside the Dialog
+            pointerEvents: 'auto',
+          },
         },
       }}
     >

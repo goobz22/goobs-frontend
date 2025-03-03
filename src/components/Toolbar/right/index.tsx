@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Box } from '@mui/material'
-import Dropdown, { DropdownProps } from '../../Dropdown'
+import Dropdown, { DropdownProps } from '../../Field/Dropdown/Regular'
 import { black } from '../../../styles/palette'
 
 export interface RightProps {

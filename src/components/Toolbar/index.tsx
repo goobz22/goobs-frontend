@@ -7,8 +7,8 @@ import LeftCenter from './leftCenter'
 import Right from './right'
 import RightCenter, { RightCenterProps } from './rightCenter'
 import { CustomButtonProps } from '../Button'
-import { DropdownProps } from '../Dropdown'
-import { SearchbarProps } from '../Searchbar'
+import { DropdownProps } from '../Field/Dropdown/Regular'
+import { SearchbarProps } from '../Field/Search'
 
 /**
  * Props for CustomToolbar:

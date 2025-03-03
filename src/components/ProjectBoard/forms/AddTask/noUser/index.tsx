@@ -3,9 +3,9 @@
 import React, { useState, useCallback, FormEvent } from 'react'
 import { Box } from '@mui/material'
 import Typography from '../../../../Typography'
-import TextField from '../../../../TextField'
+import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
-import Dropdown from '../../../../Dropdown'
+import Dropdown from '../../../../Field/Dropdown/Regular'
 import CustomButton from '../../../../Button'
 
 import type { RawSeverityLevel } from '../../../types'

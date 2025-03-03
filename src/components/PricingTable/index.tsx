@@ -6,7 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
-import Dropdown from '../Dropdown'
+import Dropdown from '../Field/Dropdown/Regular'
 import { black, white, stainlessSteel, aqua } from '../../styles/palette'
 
 export interface PricingProps {

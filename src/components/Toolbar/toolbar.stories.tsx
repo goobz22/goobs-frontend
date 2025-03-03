@@ -4,8 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { within, userEvent, expect } from '@storybook/test'
 import CustomToolbar from './index'
 
-import type { SearchbarProps } from '../Searchbar'
-import type { DropdownProps } from '../Dropdown'
+import type { SearchbarProps } from '../Field/Search'
+import type { DropdownProps } from '../Field/Dropdown/Regular'
 import type { CustomButtonProps } from '../Button'
 
 /**
