@@ -1,7 +1,8 @@
-type TypographyConfig = {
+export type TypographyConfig = {
   fontSize: string
   fontWeight: number
   textTransform: string
+  fontFamily?: string
 }
 
 // Define base configurations for each heading level

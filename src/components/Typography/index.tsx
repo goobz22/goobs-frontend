@@ -3,6 +3,7 @@
 import {
   Typography as MuiTypography,
   TypographyProps as MuiTypographyProps,
+  useTheme,
 } from '@mui/material'
 import React, { JSX } from 'react'
 
@@ -19,7 +20,7 @@ export type TypographyVariant =
   | 'helperheader'
   | 'helperfooter'
 
-type CustomTypographyVariant = `${FontFamily}${TypographyVariant}`
+export type CustomTypographyVariant = `${FontFamily}${TypographyVariant}`
 
 export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   text?: string
@@ -27,6 +28,18 @@ export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   fontcolor?: string
   variant?: CustomTypographyVariant | MuiTypographyProps['variant']
   children?: React.ReactNode
+}
+
+// MUI's TextTransform type
+type TextTransform = 'none' | 'capitalize' | 'uppercase' | 'lowercase'
+
+// Define the structure expected for theme typography variants
+interface TypographyVariantStyle {
+  fontFamily?: string
+  fontSize?: string
+  fontWeight?: number
+  textTransform?: TextTransform
+  lineHeight?: string | number
 }
 
 const arapeyStyles: Record<TypographyVariant, React.CSSProperties> = {
@@ -206,48 +219,92 @@ const Typography = ({
   fontvariant,
   variant,
   children,
+  style,
   ...rest
 }: TypographyProps): JSX.Element => {
-  let variantStyle: React.CSSProperties = {}
+  const theme = useTheme()
+  let variantStyle: Record<string, unknown> = {}
   const actualVariant = fontvariant || variant
 
-  if (typeof actualVariant === 'string') {
-    const fontFamily = actualVariant.startsWith('arapey')
-      ? 'arapey'
-      : actualVariant.startsWith('inter')
-        ? 'inter'
-        : actualVariant.startsWith('merri')
-          ? 'merri'
-          : null
+  if (typeof actualVariant === 'string' && actualVariant.length > 0) {
+    // First, try to get the variant from the theme
+    try {
+      // Log the actual variant being used
+      console.log('Using variant:', actualVariant)
 
-    if (fontFamily) {
-      const variantPart = actualVariant.slice(
-        fontFamily.length
-      ) as TypographyVariant
-      switch (fontFamily) {
-        case 'arapey':
-          variantStyle = arapeyStyles[variantPart] || {}
-          break
-        case 'inter':
-          variantStyle = interStyles[variantPart] || {}
-          break
-        case 'merri':
-          variantStyle = merriStyles[variantPart] || {}
-          break
+      // Check if we're using a custom font variant (e.g., 'merrih2')
+      if (/^(arapey|inter|merri)/.test(actualVariant)) {
+        // For custom variants, we need to check if they exist in the theme
+        // Use Record to avoid TypeScript errors
+        const themeTypography = theme.typography as unknown as Record<
+          string,
+          unknown
+        >
+
+        if (themeTypography && actualVariant in themeTypography) {
+          // Custom variant exists in theme, use its properties
+          const themeVariant = themeTypography[
+            actualVariant
+          ] as TypographyVariantStyle
+          console.log('Found theme variant:', themeVariant)
+
+          if (themeVariant) {
+            variantStyle = {
+              fontFamily: themeVariant.fontFamily,
+              fontSize: themeVariant.fontSize,
+              fontWeight: themeVariant.fontWeight,
+              textTransform: themeVariant.textTransform,
+              lineHeight: themeVariant.lineHeight,
+            }
+          }
+        } else {
+          // Custom variant not in theme, fallback to hardcoded styles
+          console.log('Custom variant not found in theme, using fallback')
+
+          const fontFamily = actualVariant.startsWith('arapey')
+            ? 'arapey'
+            : actualVariant.startsWith('inter')
+              ? 'inter'
+              : actualVariant.startsWith('merri')
+                ? 'merri'
+                : null
+
+          if (fontFamily) {
+            const variantPart = actualVariant.slice(
+              fontFamily.length
+            ) as TypographyVariant
+
+            switch (fontFamily) {
+              case 'arapey':
+                variantStyle = { ...arapeyStyles[variantPart] }
+                break
+              case 'inter':
+                variantStyle = { ...interStyles[variantPart] }
+                break
+              case 'merri':
+                variantStyle = { ...merriStyles[variantPart] }
+                break
+            }
+          }
+        }
+      } else {
+        // Standard MUI variant (h1, h2, etc.)
+        // Let MUI handle these by setting the variant prop
       }
+    } catch (error) {
+      console.error('Error applying typography variant:', error)
     }
   }
 
+  // Combine custom styles with variant-derived styles
+  const combinedStyle = {
+    ...variantStyle,
+    ...(fontcolor ? { color: fontcolor } : {}),
+    ...(style || {}),
+  }
+
   return (
-    <MuiTypography
-      component="span"
-      style={{
-        color: fontcolor,
-        ...variantStyle,
-      }}
-      variant={actualVariant as MuiTypographyProps['variant']}
-      {...rest}
-    >
+    <MuiTypography component="div" style={combinedStyle} {...rest}>
       {text || children}
     </MuiTypography>
   )
