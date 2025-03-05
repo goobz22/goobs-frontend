@@ -5,6 +5,7 @@ import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import CustomButton, { CustomButtonProps } from '../../Button'
+import { white } from '../../../styles/palette'
 
 export interface PopupProps {
   open: boolean
@@ -115,7 +116,7 @@ function Popup({
           style: {
             width: `${width}px`,
             borderRadius: '16px',
-            backgroundColor: 'white',
+            backgroundColor: white.main,
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
             padding: '24px',
             // Ensure pointer events are enabled inside the Dialog

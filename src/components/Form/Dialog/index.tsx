@@ -5,6 +5,7 @@ import { Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { TypographyProps } from '../../Typography'
 import CustomButton, { CustomButtonProps } from '../../Button'
+import { white } from '../../../styles/palette'
 
 export interface CustomDialogProps {
   title?: string
@@ -76,7 +77,7 @@ function CustomDialog({
         boxShadow: 3,
         margin: '0 auto',
         padding: 3,
-        bgcolor: 'white',
+        bgcolor: white.main,
       }}
     >
       {renderHeader}
