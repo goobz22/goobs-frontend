@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { Dialog, Box } from '@mui/material'
+import { Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
-import { formContainerStyle } from '../../../styles/Form'
 import { TypographyProps } from '../../Typography'
+import CustomButton, { CustomButtonProps } from '../../Button'
 
 export interface CustomDialogProps {
   title?: string
@@ -12,6 +12,8 @@ export interface CustomDialogProps {
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
+  /** Optional array of button props for footer buttons */
+  buttons?: CustomButtonProps[]
 }
 
 function CustomDialog({
@@ -20,20 +22,19 @@ function CustomDialog({
   grids,
   content,
   width = 450,
+  buttons,
 }: CustomDialogProps) {
-  // We render this dialog as always open (embedded in pages).
-
   const headerGrid = useMemo(
     (): ContentSectionProps['grids'][0] => ({
       typography: [
         {
           text: title,
-          fontvariant: 'merrih5',
+          fontvariant: 'merrih4',
           fontcolor: 'black',
         },
         {
           text: description,
-          fontvariant: 'merriparagraph',
+          fontvariant: 'merrih5',
           fontcolor: 'black',
         },
       ] as TypographyProps[],
@@ -46,31 +47,42 @@ function CustomDialog({
     [headerGrid]
   )
 
-  const renderContent = useMemo(
-    () => (
-      <Box sx={formContainerStyle}>
-        <Box mb={0}>{renderHeader}</Box>
-        {content || (grids && <ContentSection grids={grids} />)}
+  const renderButtons = useMemo(() => {
+    if (!buttons || buttons.length === 0) return null
+
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          gap: 2,
+          marginTop: '15px',
+        }}
+      >
+        {buttons.map((buttonProps, index) => (
+          <CustomButton key={index} {...buttonProps} />
+        ))}
       </Box>
-    ),
-    [renderHeader, content, grids]
-  )
+    )
+  }, [buttons])
 
   return (
-    <Dialog
-      open={true}
-      fullWidth
-      maxWidth={false}
-      slotProps={{
-        paper: {
-          style: {
-            width: `${width}px`,
-          },
-        },
+    <Box
+      sx={{
+        width: `${width}px`,
+        maxWidth: '100%',
+        borderRadius: '16px',
+        boxShadow: 3,
+        margin: '0 auto',
+        padding: 3,
+        bgcolor: 'white',
       }}
     >
-      {renderContent}
-    </Dialog>
+      {renderHeader}
+      {content || (grids && <ContentSection grids={grids} />)}
+      {renderButtons}
+    </Box>
   )
 }
 

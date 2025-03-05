@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
-import { formContainerStyle } from '../../../styles/Form'
+import CustomButton, { CustomButtonProps } from '../../Button'
 
 export interface PopupProps {
   open: boolean
@@ -21,6 +21,8 @@ export interface PopupProps {
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
+  /** Optional array of button props for footer buttons */
+  buttons?: CustomButtonProps[]
 }
 
 function Popup({
@@ -32,6 +34,7 @@ function Popup({
   grids,
   content,
   width = 450,
+  buttons,
 }: PopupProps) {
   // Local state syncing with props
   const [isOpen, setIsOpen] = useState(open)
@@ -57,12 +60,12 @@ function Popup({
         {
           text: title,
           // Cast to literal type as expected by goobs-frontend.
-          fontvariant: 'merrih5' as const,
+          fontvariant: 'merrih4' as const,
           fontcolor: 'black',
         },
         {
           text: description,
-          fontvariant: 'merriparagraph' as const,
+          fontvariant: 'merrih5' as const,
           fontcolor: 'black',
         },
       ],
@@ -75,15 +78,25 @@ function Popup({
     [headerGrid]
   )
 
-  const renderContent = useMemo(
-    () => (
-      <Box sx={formContainerStyle}>
-        <Box mb={0}>{renderHeader}</Box>
-        {content || (grids && <ContentSection grids={grids} />)}
+  const renderButtons = useMemo(() => {
+    if (!buttons || buttons.length === 0) return null
+
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          gap: 2,
+          marginTop: '15px',
+        }}
+      >
+        {buttons.map((buttonProps, index) => (
+          <CustomButton key={index} {...buttonProps} />
+        ))}
       </Box>
-    ),
-    [renderHeader, content, grids]
-  )
+    )
+  }, [buttons])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -101,6 +114,10 @@ function Popup({
         paper: {
           style: {
             width: `${width}px`,
+            borderRadius: '16px',
+            backgroundColor: 'white',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+            padding: '24px',
             // Ensure pointer events are enabled inside the Dialog
             pointerEvents: 'auto',
           },
@@ -125,7 +142,9 @@ function Popup({
       >
         <Close />
       </IconButton>
-      {renderContent}
+      {renderHeader}
+      {content || (grids && <ContentSection grids={grids} />)}
+      {renderButtons}
     </Dialog>
   )
 }
