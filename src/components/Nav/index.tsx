@@ -14,6 +14,9 @@ import ListNav from './VerticalVariant/mainNav/list'
 import ExpandingSubNav from './VerticalVariant/subNav/expanding'
 import ListSubNav from './VerticalVariant/subNav/list'
 import ViewNav from './VerticalVariant/viewNav'
+// Import new components for subViewNav support
+import ExpandingViewNav from './VerticalVariant/viewNav/expanding'
+import SubViewNav from './VerticalVariant/subViewNav'
 
 // --------------------------------------------------------------------------
 // INTERFACES
@@ -23,18 +26,23 @@ import ViewNav from './VerticalVariant/viewNav'
  * A single interface that covers all vertical nav items:
  *   - navType = 'mainNav' => can have subnavs
  *   - navType = 'subNav' => can have views
- *   - navType = 'viewNav' => no children
+ *   - navType = 'viewNav' => can have subViewNavs
+ *   - navType = 'subViewNav' => no children
  */
 export interface NavItem {
-  navType: 'mainNav' | 'subNav' | 'viewNav'
+  navType: 'mainNav' | 'subNav' | 'viewNav' | 'subViewNav'
   title: string
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
+  // Explicit flag to indicate if this item should expand
+  expanding?: boolean
   // For mainNav items only:
   subnavs?: NavItem[]
   // For subNav items only:
   views?: NavItem[]
+  // For viewNav items only:
+  subViewNavs?: NavItem[]
 }
 
 /**
@@ -124,9 +132,10 @@ function Nav({
   marginbelowtitle = '5px',
   router,
 }: NavProps) {
-  // States for expanded mainNavs and subNavs
+  // States for expanded mainNavs, subNavs, and viewNavs
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
   const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
+  const [expandedViewNavs, setExpandedViewNavs] = useState<string[]>([])
 
   // Default width for the vertical nav
   const [verticalNavWidth] = useState<string>('250px')
@@ -139,7 +148,7 @@ function Nav({
     .filter(item => item.navType === 'mainNav')
     .map(item => ({ value: item.title }))
 
-  // Handle route or onClick triggers for mainNav/subNav/viewNav
+  // Handle route or onClick triggers for mainNav/subNav/viewNav/subViewNav
   function handleNavClick(item: NavItem) {
     if (item.trigger === 'route' && item.route && router) {
       router.push(item.route)
@@ -154,7 +163,7 @@ function Nav({
     }
   }
 
-  // Recursively render mainNav -> subNav -> viewNav
+  // Recursively render mainNav -> subNav -> viewNav -> subViewNav
   function renderItem(
     item: NavItem,
     level: number,
@@ -188,6 +197,10 @@ function Nav({
               title={item.title}
               onClick={() => handleNavClick(item)}
               level={level}
+              route={item.route}
+              trigger={item.trigger}
+              onClose={onClose}
+              variant={variant}
             />
           )
         }
@@ -228,14 +241,50 @@ function Nav({
 
       // 3) VIEW NAV
       case 'viewNav': {
+        // Use the explicit expanding property instead of checking for children
+        const shouldExpand = item.expanding === true
+        if (shouldExpand) {
+          // Render the expanding viewNav
+          return (
+            <ExpandingViewNav
+              key={item.title}
+              title={item.title}
+              expandedNavs={expandedViewNavs}
+              setExpandedNavs={setExpandedViewNavs}
+              level={level}
+            >
+              {item.subViewNavs?.map(subViewItem =>
+                renderItem(subViewItem, level + 1, activeAndHoverColor)
+              )}
+            </ExpandingViewNav>
+          )
+        } else {
+          // Render the simple viewNav
+          return (
+            <ViewNav
+              key={item.title}
+              title={item.title}
+              route={item.route}
+              trigger={item.trigger}
+              onClick={item.onClick}
+              level={level}
+              activeAndHoverColor={activeAndHoverColor}
+              onClose={onClose}
+              variant={variant}
+            />
+          )
+        }
+      }
+
+      // 4) SUB VIEW NAV
+      case 'subViewNav': {
         return (
-          <ViewNav
+          <SubViewNav
             key={item.title}
             title={item.title}
             route={item.route}
             trigger={item.trigger}
             onClick={item.onClick}
-            level={level}
             activeAndHoverColor={activeAndHoverColor}
             onClose={onClose}
             variant={variant}

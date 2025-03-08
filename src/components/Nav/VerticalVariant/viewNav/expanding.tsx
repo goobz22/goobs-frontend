@@ -1,4 +1,4 @@
-// src/components/Nav/VerticalVariant/subNav/expanding.tsx
+// src/components/Nav/VerticalVariant/viewNav/expanding.tsx
 'use client'
 import React, { FC } from 'react'
 import {
@@ -11,37 +11,51 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
 
-interface ExpandingSubNavProps {
+interface ExpandingViewNavProps {
   title?: string
-  expandedSubnavs: string[]
-  setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
-  onClose?: () => void
+  /**
+   * The titles that are currently expanded at the viewNav level.
+   */
+  expandedNavs: string[]
+  /**
+   * Setter for `expandedNavs`.
+   */
+  setExpandedNavs: React.Dispatch<React.SetStateAction<string[]>>
+  /**
+   * Click handler for route or other actions
+   */
+  onClick?: () => void
+  /**
+   * The nesting level for indentation.
+   */
+  level: number
+  /**
+   * Child nodes (subViewNav) to show if expanded.
+   */
   children?: React.ReactNode
 }
 
-/**
- * SubNav item that expands if it has children.
- */
-const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
+const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
   title,
-  expandedSubnavs,
-  setExpandedSubnavs,
+  expandedNavs,
+  setExpandedNavs,
+  onClick,
   children,
 }) => {
-  const isExpanded = expandedSubnavs.includes(title ?? '')
+  const isExpanded = expandedNavs.includes(title ?? '')
 
   return (
     <MuiAccordion
-      key={title}
       disableGutters
       elevation={0}
       square
       expanded={isExpanded}
       onChange={() => {
+        // Toggle expanded state for this title
         if (isExpanded) {
-          setExpandedSubnavs(expandedSubnavs.filter(t => t !== title))
+          setExpandedNavs(expandedNavs.filter(t => t !== title))
         } else {
-          setExpandedSubnavs([...expandedSubnavs, title ?? ''])
+          setExpandedNavs([...expandedNavs, title ?? ''])
         }
       }}
       sx={{
@@ -49,10 +63,10 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
         backgroundColor: 'transparent',
         '.MuiAccordionSummary-root': {
           pl: 0,
-          whiteSpace: 'nowrap',
+          whiteSpace: 'nowrap', // No wrapping
         },
         '&:before': {
-          display: 'none',
+          display: 'none', // Remove default Mui divider line
         },
       }}
     >
@@ -60,7 +74,7 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
         expandIcon={
           <ExpandMoreIcon
             sx={{
-              // Keep transparent if you only want icon to show on hover/expand
+              // Keep transparent if you only want it visible on hover/expand
               color: 'transparent',
             }}
           />
@@ -76,16 +90,16 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
           height: '32px',
           display: 'flex',
           alignItems: 'center',
-          // Indent the entire accordion summary using marginLeft
-          marginLeft: '22px',
-          // Move arrow to the left of text, minimal gap
+          // Match indentation with ViewNav component - more indented than subNav
+          marginLeft: '36px',
+          // Force icon to appear first
           '& .MuiAccordionSummary-expandIconWrapper': {
             order: -1,
-            marginRight: '4px',
+            marginRight: '8px',
           },
           '& .MuiAccordionSummary-content': {
             m: 0,
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap', // Keep text on one line
           },
           '&:hover': {
             '& .MuiSvgIcon-root': {
@@ -98,15 +112,16 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
             },
           },
         }}
+        onClick={() => {
+          if (onClick) onClick()
+        }}
       >
         <Typography
-          fontvariant="merrih6"
+          fontvariant="merriparagraph"
           fontcolor={white.main}
           text={title ?? ''}
           sx={{
-            whiteSpace: 'nowrap',
-            // Remove any left margin to keep text right next to arrow
-            marginLeft: 0,
+            whiteSpace: 'nowrap', // No wrapping
           }}
         />
       </AccordionSummary>
@@ -131,4 +146,4 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
   )
 }
 
-export default ExpandingSubNav
+export default ExpandingViewNav

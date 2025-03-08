@@ -35,7 +35,7 @@ const ListSubNav: FC<ListSubNavProps> = ({
       <MenuItem
         sx={{
           color: white.main,
-          ml: '40px', // Indent the single menu item if desired
+          ml: '35px', // Indent the single menu item if desired
           '&:hover': { backgroundColor: activeAndHoverColor },
           '&:active': { backgroundColor: activeAndHoverColor },
           whiteSpace: 'nowrap', // keep text on a single line

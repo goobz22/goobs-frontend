@@ -119,6 +119,127 @@ const complexNavItems: NavItem[] = [
 ]
 
 /**
+ * Complete navigation hierarchy example with all levels:
+ * - mainNav
+ * - subNav
+ * - viewNav (with expanding capability)
+ * - subViewNav
+ */
+const completeNavHierarchy: NavItem[] = [
+  {
+    navType: 'mainNav',
+    title: 'Enterprise',
+    route: '/enterprise',
+    trigger: 'route',
+    subnavs: [
+      {
+        navType: 'subNav',
+        title: 'Products',
+        route: '/enterprise/products',
+        trigger: 'route',
+        views: [
+          {
+            navType: 'viewNav',
+            title: 'Product Management',
+            route: '/enterprise/products/management',
+            trigger: 'route',
+            // Set expanding to true to show subViewNavs
+            expanding: true,
+            subViewNavs: [
+              {
+                navType: 'subViewNav',
+                title: 'Create Product',
+                route: '/enterprise/products/management/create',
+                trigger: 'route',
+              },
+              {
+                navType: 'subViewNav',
+                title: 'Edit Products',
+                route: '/enterprise/products/management/edit',
+                trigger: 'route',
+              },
+              {
+                navType: 'subViewNav',
+                title: 'Bulk Update',
+                route: '/enterprise/products/management/bulk',
+                trigger: 'route',
+              },
+            ],
+          },
+          {
+            navType: 'viewNav',
+            title: 'Product Catalog',
+            route: '/enterprise/products/catalog',
+            trigger: 'route',
+          },
+        ],
+      },
+      {
+        navType: 'subNav',
+        title: 'Customers',
+        route: '/enterprise/customers',
+        trigger: 'route',
+        views: [
+          {
+            navType: 'viewNav',
+            title: 'Customer Database',
+            route: '/enterprise/customers/database',
+            trigger: 'route',
+            expanding: true,
+            subViewNavs: [
+              {
+                navType: 'subViewNav',
+                title: 'Search Customers',
+                route: '/enterprise/customers/database/search',
+                trigger: 'route',
+              },
+              {
+                navType: 'subViewNav',
+                title: 'Add Customer',
+                route: '/enterprise/customers/database/add',
+                trigger: 'route',
+              },
+            ],
+          },
+          {
+            navType: 'viewNav',
+            title: 'Customer Support',
+            route: '/enterprise/customers/support',
+            trigger: 'route',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    navType: 'mainNav',
+    title: 'Analytics',
+    route: '/analytics',
+    trigger: 'route',
+    subnavs: [
+      {
+        navType: 'subNav',
+        title: 'Reports',
+        route: '/analytics/reports',
+        trigger: 'route',
+      },
+      {
+        navType: 'subNav',
+        title: 'Dashboards',
+        route: '/analytics/dashboards',
+        trigger: 'route',
+      },
+    ],
+  },
+  {
+    navType: 'mainNav',
+    title: 'Administration',
+    trigger: 'onClick',
+    onClick: () => console.log('Admin clicked'),
+  },
+]
+
+/**
  * Storybook Setup
  */
 const meta: Meta<typeof Nav> = {
@@ -278,6 +399,75 @@ export const Complex: Story = {
     expect(canvas.getByText('Deployment')).toBeInTheDocument()
 
     // Confirm the search label is there
+    expect(canvas.getByLabelText('Search or select a nav')).toBeInTheDocument()
+  },
+}
+
+/**
+ * 6) Complete Navigation Hierarchy
+ *    - Demonstrates all levels: mainNav > subNav > viewNav > subViewNav
+ */
+export const CompleteHierarchy: Story = {
+  name: 'Complete Hierarchy (All Navigation Levels)',
+  args: {
+    items: completeNavHierarchy,
+    showSearchableNav: true,
+    showTitle: true,
+    verticalNavTitle: 'Enterprise Portal',
+    variant: 'permanent',
+    showLine: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // 1. Check the navigation title is visible
+    expect(canvas.getByText('Enterprise Portal')).toBeInTheDocument()
+
+    // 2. Verify main nav items are visible
+    expect(canvas.getByText('Enterprise')).toBeInTheDocument()
+    expect(canvas.getByText('Analytics')).toBeInTheDocument()
+    expect(canvas.getByText('Administration')).toBeInTheDocument()
+
+    // 3. Expand "Enterprise" main nav
+    await userEvent.click(canvas.getByText('Enterprise'))
+
+    // 4. Verify subNav items appear
+    expect(canvas.getByText('Products')).toBeInTheDocument()
+    expect(canvas.getByText('Customers')).toBeInTheDocument()
+
+    // 5. Expand "Products" subNav
+    await userEvent.click(canvas.getByText('Products'))
+
+    // 6. Verify viewNav items appear
+    expect(canvas.getByText('Product Management')).toBeInTheDocument()
+    expect(canvas.getByText('Product Catalog')).toBeInTheDocument()
+
+    // 7. Expand "Product Management" viewNav (which has expanding=true)
+    await userEvent.click(canvas.getByText('Product Management'))
+
+    // 8. Verify subViewNav items appear (fourth level)
+    expect(canvas.getByText('Create Product')).toBeInTheDocument()
+    expect(canvas.getByText('Edit Products')).toBeInTheDocument()
+    expect(canvas.getByText('Bulk Update')).toBeInTheDocument()
+
+    // 9. Collapse the Product Management section
+    await userEvent.click(canvas.getByText('Product Management'))
+
+    // 10. Navigate back to main level and expand a different branch
+    await userEvent.click(canvas.getByText('Customers'))
+
+    // 11. Verify the Customer section subNavs
+    expect(canvas.getByText('Customer Database')).toBeInTheDocument()
+    expect(canvas.getByText('Customer Support')).toBeInTheDocument()
+
+    // 12. Expand the Customer Database viewNav (which also has expanding=true)
+    await userEvent.click(canvas.getByText('Customer Database'))
+
+    // 13. Verify those subViewNav items appear
+    expect(canvas.getByText('Search Customers')).toBeInTheDocument()
+    expect(canvas.getByText('Add Customer')).toBeInTheDocument()
+
+    // 14. Verify the search functionality is available
     expect(canvas.getByLabelText('Search or select a nav')).toBeInTheDocument()
   },
 }

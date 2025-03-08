@@ -5,18 +5,21 @@ import Link from 'next/link'
 import { semiTransparentWhite, white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
 
-interface ViewNavProps {
+interface SubViewNavProps {
   title?: string
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
-  level: number
   activeAndHoverColor?: string
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
 }
 
-const ViewNav: FC<ViewNavProps> = ({
+/**
+ * SubViewNav component for displaying a fourth-level navigation item
+ * This is meant to be used for items that are children of viewNav items
+ */
+const SubViewNav: FC<SubViewNavProps> = ({
   title,
   route,
   trigger,
@@ -25,6 +28,18 @@ const ViewNav: FC<ViewNavProps> = ({
   onClose,
   variant,
 }) => {
+  // Handle click to support both route and onClick
+  const handleClick = () => {
+    if (trigger === 'route' && variant === 'temporary' && onClose) {
+      onClose()
+    } else if (trigger === 'onClick' && onClick) {
+      onClick()
+      if (variant === 'temporary' && onClose) {
+        onClose()
+      }
+    }
+  }
+
   return (
     <Link
       key={title}
@@ -34,23 +49,16 @@ const ViewNav: FC<ViewNavProps> = ({
         color: 'white',
         whiteSpace: 'nowrap', // keep text in one line
       }}
-      onClick={() => {
-        if (trigger === 'route' && variant === 'temporary' && onClose) {
-          onClose()
-        } else if (trigger === 'onClick' && onClick) {
-          onClick()
-          if (variant === 'temporary' && onClose) {
-            onClose()
-          }
-        }
-      }}
+      onClick={handleClick}
     >
       <MenuItem
         sx={{
           color: white.main,
-          // Increased to align with ExpandingViewNav text (which has an icon)
-          marginLeft: '53px',
+          // Increased indentation by 15px compared to previous value
+          marginLeft: '68px',
           whiteSpace: 'nowrap',
+          padding: '6px 16px',
+          minHeight: '32px',
           '&:hover': {
             backgroundColor: activeAndHoverColor,
           },
@@ -65,6 +73,7 @@ const ViewNav: FC<ViewNavProps> = ({
           fontcolor={white.main}
           sx={{
             whiteSpace: 'nowrap',
+            fontSize: '0.85rem',
           }}
         />
       </MenuItem>
@@ -72,4 +81,4 @@ const ViewNav: FC<ViewNavProps> = ({
   )
 }
 
-export default ViewNav
+export default SubViewNav
