@@ -580,3 +580,167 @@ export const AllAttributesDisplay: Story = {
     expect(hasAllLevels).toBe(true)
   },
 }
+
+/**
+ * 15) With Search History
+ *    Uses userEvent => keep `async`.
+ */
+export const WithSearchHistory: Story = {
+  args: {
+    label: 'Search with History',
+    options: complexSampleOptions,
+    placeholder: 'Search with history...',
+    variant: 'complex',
+    // Provide pre-populated search history
+    searchHistory: [
+      { text: 'apple', timestamp: new Date(Date.now() - 5 * 60000) }, // 5 minutes ago
+      { text: 'broccoli', timestamp: new Date(Date.now() - 60 * 60000) }, // 1 hour ago
+      {
+        text: 'custom search',
+        timestamp: new Date(Date.now() - 24 * 60 * 60000),
+      }, // 1 day ago
+    ],
+    maxHistoryItems: 5,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Open the dropdown
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+
+    // Switch to history tab
+    const historyTab = canvas.getByRole('tab', { name: /HISTORY/i })
+    await userEvent.click(historyTab)
+
+    // Get dropdown options after switching to history tab
+    const listboxItems = getDropdownOptions()
+
+    // Check if history items are displayed
+    const hasAppleHistory = listboxItems.some(
+      item => item.textContent && item.textContent.includes('apple')
+    )
+
+    const hasTimestamp = listboxItems.some(
+      item =>
+        item.textContent &&
+        (item.textContent.includes('minutes ago') ||
+          item.textContent.includes('hour ago') ||
+          item.textContent.includes('day ago'))
+    )
+
+    expect(hasAppleHistory).toBe(true)
+    expect(hasTimestamp).toBe(true)
+
+    // Try entering a new search term
+    await userEvent.clear(input)
+    await userEvent.type(input, 'new search')
+    await userEvent.tab() // Blur to trigger adding to history
+
+    // Reopen and check history tab again
+    await userEvent.click(input)
+    await userEvent.click(historyTab)
+
+    // Should now include our new search
+    const updatedListboxItems = getDropdownOptions()
+    const hasNewSearch = updatedListboxItems.some(
+      item => item.textContent && item.textContent.includes('new search')
+    )
+
+    expect(hasNewSearch).toBe(true)
+  },
+}
+
+/**
+ * 16) With Search Callback
+ *    Uses userEvent => keep `async`.
+ */
+export const WithSearchCallback: Story = {
+  args: {
+    label: 'Search with Callback',
+    options: sampleOptions,
+    placeholder: 'Search with callback...',
+    variant: 'simple',
+    // This callback will be triggered when searches are performed
+    onSearch: (searchTerm: string, timestamp?: Date) => {
+      console.log(
+        `Search term: ${searchTerm}, Time: ${timestamp?.toISOString() || 'No timestamp'}`
+      )
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Perform a search
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+    await userEvent.type(input, 'test search')
+    await userEvent.tab() // Blur to trigger search
+
+    // Since we can't easily verify the callback in Storybook tests,
+    // we'll just ensure the component functions correctly
+    expect(input).toHaveValue('test search')
+  },
+}
+
+/**
+ * 17) Tab Navigation
+ *    Uses userEvent => keep `async`.
+ */
+export const TabNavigation: Story = {
+  args: {
+    label: 'Tab Navigation Demo',
+    options: sampleOptions,
+    placeholder: 'Explore tabs...',
+    variant: 'simple',
+    // Provide some search history
+    searchHistory: [
+      'previous search one',
+      'previous search two',
+      'previous search three',
+    ],
+    maxHistoryItems: 10,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Open the dropdown
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+
+    // First check that we're on the default "ALL OPTIONS" tab
+    // and can see the regular options
+    const allOptionsTab = canvas.getByRole('tab', { name: /ALL OPTIONS/i })
+    expect(allOptionsTab).toHaveAttribute('aria-selected', 'true')
+
+    // We should see the original options
+    const initialListboxItems = getDropdownOptions()
+    const hasAppleOption = initialListboxItems.some(
+      item => item.textContent && item.textContent.includes('apple')
+    )
+    expect(hasAppleOption).toBe(true)
+
+    // Now switch to the HISTORY tab
+    const historyTab = canvas.getByRole('tab', { name: /HISTORY/i })
+    await userEvent.click(historyTab)
+    expect(historyTab).toHaveAttribute('aria-selected', 'true')
+
+    // Now we should see the history items
+    const historyListboxItems = getDropdownOptions()
+    const hasHistoryItems = historyListboxItems.some(
+      item => item.textContent && item.textContent.includes('previous search')
+    )
+    expect(hasHistoryItems).toBe(true)
+
+    // Now switch back to ALL OPTIONS tab
+    await userEvent.click(allOptionsTab)
+    expect(allOptionsTab).toHaveAttribute('aria-selected', 'true')
+
+    // We should see the original options again
+    const finalListboxItems = getDropdownOptions()
+    const hasAppleOptionAgain = finalListboxItems.some(
+      item => item.textContent && item.textContent.includes('apple')
+    )
+    expect(hasAppleOptionAgain).toBe(true)
+  },
+}
