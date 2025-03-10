@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "type": "module",
   "description": "A comprehensive React-based libary that extends the functionality of Material-UI",
   "license": "MIT",
@@ -36,6 +36,7 @@
     "next": "15",
     "otplib": "^12",
     "react-datepicker": "^7",
+    "react-native": "^0.78.0",
     "react-qr-code": "^2",
     "slate": "^0.112",
     "slate-dom": "^0.111",
