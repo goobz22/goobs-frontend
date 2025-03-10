@@ -17,6 +17,79 @@ const sampleOptions = [
 ]
 
 /**
+ * Sample options with the complex variant attributes
+ */
+const complexSampleOptions = [
+  {
+    value: 'apple',
+    attribute1: 'Fruit',
+    attribute2: 'Green or Red',
+    attribute3: 'High Fiber',
+    attribute4: 'Seasonal: Fall',
+    attribute5: 'Origin: Worldwide',
+    attribute6: 'Storage: Cool, Dry',
+  },
+  {
+    value: 'banana',
+    attribute1: 'Fruit',
+    attribute2: 'Yellow',
+    attribute3: 'High Potassium',
+    attribute4: 'Year-round',
+    attribute5: 'Origin: Tropical',
+    attribute6: 'Storage: Room Temp',
+  },
+  {
+    value: 'carrot',
+    attribute1: 'Vegetable',
+    attribute2: 'Orange',
+    attribute3: 'High Vitamin A',
+    attribute4: 'Year-round',
+    attribute5: 'Origin: Middle East',
+    attribute6: 'Storage: Refrigerated',
+  },
+  {
+    value: 'potato',
+    attribute1: 'Vegetable',
+    attribute2: 'Brown',
+    attribute3: 'High Starch',
+    attribute4: 'Year-round',
+    attribute5: 'Origin: South America',
+    attribute6: 'Storage: Dark, Cool',
+  },
+  {
+    value: 'avocado',
+    attribute1: 'Fruit',
+    attribute2: 'Green',
+    attribute3: 'Healthy Fats',
+    attribute4: 'Seasonal: Spring',
+    attribute5: 'Origin: Mexico',
+    attribute6: 'Storage: Room Temp',
+  },
+  {
+    value: 'broccoli',
+    attribute1: 'Vegetable',
+    attribute2: 'Green',
+    attribute3: 'High Vitamin K',
+    attribute4: 'Seasonal: Winter',
+    attribute5: 'Origin: Mediterranean',
+    attribute6: 'Storage: Refrigerated',
+  },
+]
+
+/**
+ * Helper function to safely access dropdown options in tests
+ */
+const getDropdownOptions = () => {
+  const listboxElement = document.querySelector('[role="listbox"]')
+  if (listboxElement && listboxElement instanceof HTMLElement) {
+    const listbox = within(listboxElement)
+    return listbox.getAllByRole('option')
+  }
+  console.log('Listbox not found')
+  return []
+}
+
+/**
  * Storybook metadata
  */
 const meta: Meta<typeof SearchableDropdown> = {
@@ -34,6 +107,11 @@ const meta: Meta<typeof SearchableDropdown> = {
       control: 'select',
       options: ['onNotch', 'aboveNotch'],
     },
+    variant: {
+      control: 'select',
+      options: ['simple', 'complex'],
+      description: 'Dropdown display variant',
+    },
   },
 }
 export default meta
@@ -49,12 +127,15 @@ export const Basic: Story = {
     label: 'Basic SearchableDropdown',
     options: sampleOptions,
     placeholder: 'Start typing...',
+    variant: 'simple',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // Check for the label
-    expect(canvas.getByText('Basic SearchableDropdown')).toBeInTheDocument()
+    // Check for the label using a more specific query
+    expect(
+      canvas.getByRole('combobox', { name: 'Basic SearchableDropdown' })
+    ).toBeInTheDocument()
 
     // Click into the input
     const input = canvas.getByRole('combobox')
@@ -62,8 +143,15 @@ export const Basic: Story = {
 
     // Type a partial match
     await userEvent.type(input, 'car')
-    // 'carrot' should appear
-    expect(canvas.getByText('carrot')).toBeInTheDocument()
+
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
+
+    // Check if any option contains "carrot"
+    const hasCarrot = listboxItems.some(
+      item => item.textContent && item.textContent.includes('carrot')
+    )
+    expect(hasCarrot).toBe(true)
   },
 }
 
@@ -76,22 +164,23 @@ export const WithDefaultValue: Story = {
     label: 'Dropdown with Default Value',
     options: sampleOptions,
     defaultValue: 'banana',
+    variant: 'simple',
   },
   play: ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Expect the combobox to show the default item
+    // Expect the combobox to show the default item with first letter capitalized
     const input = canvas.getByRole('combobox')
-    expect(input).toHaveValue('banana')
+    expect(input).toHaveValue('Banana')
   },
 }
 
 /**
- * 3) Options with Complex Attributes
+ * 3) Simple Variant with Attributes
  *    Uses userEvent => keep `async`.
  */
-export const ComplexAttributes: Story = {
+export const SimpleVariant: Story = {
   args: {
-    label: 'Complex Attributes',
+    label: 'Simple Variant',
     options: [
       {
         value: 'item1',
@@ -110,20 +199,151 @@ export const ComplexAttributes: Story = {
       },
     ],
     placeholder: 'Search items...',
+    variant: 'simple',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // Open the dropdown
     const input = canvas.getByRole('combobox')
     await userEvent.click(input)
-    // item1, item2, item3 should be visible
-    expect(canvas.getByText('item1')).toBeInTheDocument()
-    expect(canvas.getByText('item3')).toBeInTheDocument()
+
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
+
+    // Check if the items we're looking for exist
+    const hasItem1 = listboxItems.some(
+      item => item.textContent && item.textContent.includes('item1')
+    )
+    const hasItem3 = listboxItems.some(
+      item => item.textContent && item.textContent.includes('item3')
+    )
+
+    expect(hasItem1).toBe(true)
+    expect(hasItem3).toBe(true)
   },
 }
 
 /**
- * 4) Error State
+ * 4) Complex Variant with Additional Attributes
+ *    Uses userEvent => keep `async`.
+ */
+export const ComplexVariant: Story = {
+  args: {
+    label: 'Complex Variant',
+    options: [
+      {
+        value: 'item1',
+        attribute1: 'Primary attribute #1',
+        attribute2: 'Secondary attribute #1',
+        attribute3: 'Tertiary attribute #1',
+        attribute4: 'Additional info #1',
+        attribute5: 'Extended data #1',
+        attribute6: 'Final info #1',
+      },
+      {
+        value: 'item2',
+        attribute1: 'Primary attribute #2',
+        attribute2: 'Secondary attribute #2',
+        attribute3: 'Tertiary attribute #2',
+        attribute4: 'Additional info #2',
+        attribute5: 'Extended data #2',
+        attribute6: 'Final info #2',
+      },
+      {
+        value: 'item3',
+        attribute1: 'Primary attribute #3',
+        attribute2: 'Secondary attribute #3',
+        attribute3: 'Tertiary attribute #3',
+        attribute4: 'Additional info #3',
+        attribute5: 'Extended data #3',
+        attribute6: 'Final info #3',
+      },
+    ],
+    placeholder: 'Search complex items...',
+    variant: 'complex',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Open the dropdown
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
+
+    // Check if the items and their attributes are present in any of the option items
+    const hasItem1 = listboxItems.some(
+      item => item.textContent && item.textContent.includes('item1')
+    )
+    const hasAttributes = listboxItems.some(
+      item =>
+        item.textContent &&
+        item.textContent.includes('Primary attribute') &&
+        item.textContent.includes('Secondary attribute')
+    )
+    const hasExtendedAttributes = listboxItems.some(
+      item =>
+        item.textContent &&
+        item.textContent.includes('Extended data') &&
+        item.textContent.includes('Final info')
+    )
+
+    expect(hasItem1).toBe(true)
+    expect(hasAttributes).toBe(true)
+    expect(hasExtendedAttributes).toBe(true)
+  },
+}
+
+/**
+ * 5) Complex Data Example
+ *    Uses userEvent => keep `async`.
+ */
+export const ComplexDataExample: Story = {
+  args: {
+    label: 'Food Items',
+    options: complexSampleOptions,
+    placeholder: 'Search foods...',
+    variant: 'complex',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Open the dropdown
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+    await userEvent.type(input, 'a')
+
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
+
+    // Check if avocado and its attributes are present
+    const hasAvocado = listboxItems.some(
+      item => item.textContent && item.textContent.includes('avocado')
+    )
+    const hasFruitGreen = listboxItems.some(
+      item =>
+        item.textContent &&
+        item.textContent.includes('Fruit') &&
+        item.textContent.includes('Green')
+    )
+    const hasHealthyFats = listboxItems.some(
+      item => item.textContent && item.textContent.includes('Healthy Fats')
+    )
+    const hasOriginStorage = listboxItems.some(
+      item =>
+        item.textContent &&
+        (item.textContent.includes('Origin: Mexico') ||
+          item.textContent.includes('Storage: Room Temp'))
+    )
+
+    expect(hasAvocado).toBe(true)
+    expect(hasFruitGreen).toBe(true)
+    expect(hasHealthyFats).toBe(true)
+    expect(hasOriginStorage).toBe(true)
+  },
+}
+
+/**
+ * 6) Error State
  *    No user interactions => remove `async`.
  */
 export const ErrorState: Story = {
@@ -132,6 +352,7 @@ export const ErrorState: Story = {
     options: sampleOptions,
     error: true,
     helperText: 'Something went wrong!',
+    variant: 'simple',
   },
   play: ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -141,7 +362,7 @@ export const ErrorState: Story = {
 }
 
 /**
- * 5) Required Dropdown
+ * 7) Required Dropdown
  *    No user interactions => remove `async`.
  */
 export const RequiredField: Story = {
@@ -149,16 +370,19 @@ export const RequiredField: Story = {
     label: 'Required Dropdown',
     options: sampleOptions,
     required: true,
+    variant: 'simple',
   },
   play: ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Check that label is present
-    expect(canvas.getByText('Required Dropdown')).toBeInTheDocument()
+    // Check that label is present with a more specific query
+    expect(
+      canvas.getByRole('combobox', { name: 'Required Dropdown' })
+    ).toBeInTheDocument()
   },
 }
 
 /**
- * 6) Custom Colors
+ * 8) Custom Colors
  *    Uses userEvent => keep `async`.
  */
 export const CustomColors: Story = {
@@ -174,6 +398,7 @@ export const CustomColors: Story = {
     shrunklabelposition: 'onNotch',
     placeholdercolor: '#42a5f5',
     placeholder: 'Enter something...',
+    variant: 'simple',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -185,7 +410,35 @@ export const CustomColors: Story = {
 }
 
 /**
- * 7) Searching & Selecting
+ * 9) Custom Colors - Complex Variant
+ *    Uses userEvent => keep `async`.
+ */
+export const CustomColorsComplex: Story = {
+  args: {
+    label: 'Custom Colors - Complex',
+    options: complexSampleOptions,
+    backgroundcolor: '#f0f8ff',
+    outlinecolor: '#ff5722',
+    fontcolor: '#4caf50',
+    inputfontcolor: '#e91e63',
+    shrunkfontcolor: '#673ab7',
+    unshrunkfontcolor: '#9c27b0',
+    shrunklabelposition: 'onNotch',
+    placeholdercolor: '#42a5f5',
+    placeholder: 'Enter something...',
+    variant: 'complex',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Interact just to ensure no errors
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+    expect(input).toBeInTheDocument()
+  },
+}
+
+/**
+ * 10) Searching & Selecting
  *    Uses userEvent => keep `async`.
  */
 export const SearchAndSelect: Story = {
@@ -193,6 +446,7 @@ export const SearchAndSelect: Story = {
     label: 'Search & Select',
     options: sampleOptions,
     placeholder: 'Find an item...',
+    variant: 'simple',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -202,20 +456,28 @@ export const SearchAndSelect: Story = {
     await userEvent.click(input)
     await userEvent.type(input, 'avo')
 
-    // 'avocado' should appear
-    const avocadoOption = canvas.getByText('avocado')
-    expect(avocadoOption).toBeInTheDocument()
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
 
-    // Click the option
-    await userEvent.click(avocadoOption)
+    // Find the avocado option
+    const avocadoOption = listboxItems.find(
+      item => item.textContent && item.textContent.includes('avocado')
+    )
 
-    // Now the combobox value should be "avocado"
-    expect(input).toHaveValue('avocado')
+    expect(avocadoOption).toBeTruthy()
+
+    // Click the option if found
+    if (avocadoOption) {
+      await userEvent.click(avocadoOption)
+
+      // Now the combobox value should be "Avocado" (with capitalization)
+      expect(input).toHaveValue('Avocado')
+    }
   },
 }
 
 /**
- * 8) No Options scenario
+ * 11) No Options scenario
  *    Uses userEvent => keep `async`.
  */
 export const NoOptions: Story = {
@@ -223,6 +485,7 @@ export const NoOptions: Story = {
     label: 'Empty Dropdown',
     options: [],
     placeholder: 'No items available...',
+    variant: 'simple',
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -231,5 +494,89 @@ export const NoOptions: Story = {
     await userEvent.click(input)
     // No items should appear
     expect(canvas.queryByText('apple')).not.toBeInTheDocument()
+  },
+}
+
+/**
+ * 12) Disabled State
+ *    No user interactions => remove `async`.
+ */
+export const DisabledState: Story = {
+  args: {
+    label: 'Disabled Dropdown',
+    options: sampleOptions,
+    placeholder: 'Cannot select',
+    disabled: true,
+    variant: 'simple',
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox')
+    expect(input).toBeDisabled()
+  },
+}
+
+/**
+ * 13) Complex Variant Disabled
+ *    No user interactions => remove `async`.
+ */
+export const ComplexVariantDisabled: Story = {
+  args: {
+    label: 'Complex Variant Disabled',
+    options: complexSampleOptions,
+    placeholder: 'Cannot select',
+    disabled: true,
+    variant: 'complex',
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox')
+    expect(input).toBeDisabled()
+  },
+}
+
+/**
+ * 14) All Attributes Display
+ *    Uses userEvent => keep `async`.
+ */
+export const AllAttributesDisplay: Story = {
+  args: {
+    label: 'All Attributes Display',
+    options: [
+      {
+        value: 'complete item',
+        attribute1: 'First level',
+        attribute2: 'Second level',
+        attribute3: 'Third level',
+        attribute4: 'Fourth level',
+        attribute5: 'Fifth level',
+        attribute6: 'Sixth level',
+      },
+    ],
+    placeholder: 'View all attributes...',
+    variant: 'complex',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Open the dropdown
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+
+    // Get dropdown options
+    const listboxItems = getDropdownOptions()
+
+    // Check if all attribute levels are displayed
+    const hasAllLevels = listboxItems.some(
+      item =>
+        item.textContent &&
+        item.textContent.includes('First level') &&
+        item.textContent.includes('Second level') &&
+        item.textContent.includes('Third level') &&
+        item.textContent.includes('Fourth level') &&
+        item.textContent.includes('Fifth level') &&
+        item.textContent.includes('Sixth level')
+    )
+
+    expect(hasAllLevels).toBe(true)
   },
 }

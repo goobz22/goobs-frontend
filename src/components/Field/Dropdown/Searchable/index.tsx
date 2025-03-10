@@ -17,6 +17,11 @@ export interface DropdownOption {
   value: string
   attribute1?: string
   attribute2?: string
+  attribute3?: string // New attribute for complex variant
+  attribute4?: string // New attribute for complex variant
+  attribute5?: string // Additional attribute for complex variant
+  attribute6?: string // Additional attribute for complex variant
+  uniqueKey?: string // Add uniqueKey for React key usage
 }
 
 export interface SearchableDropdownProps {
@@ -41,6 +46,8 @@ export interface SearchableDropdownProps {
   width?: string
   // Added style property to allow additional styling (e.g., marginBottom)
   style?: React.CSSProperties
+  // New variant property to determine display style
+  variant?: 'simple' | 'complex'
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -89,6 +96,7 @@ interface StyledAutocompleteProps {
   placeholdercolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   disabled?: boolean
+  variant?: 'simple' | 'complex'
 }
 
 const StyledAutocomplete = styled(
@@ -102,6 +110,7 @@ const StyledAutocomplete = styled(
     placeholdercolor,
     shrunklabelposition,
     disabled,
+    variant,
   } = props
 
   return {
@@ -162,16 +171,22 @@ const StyledAutocomplete = styled(
     '& .MuiAutocomplete-input': {
       padding: '8px 14px',
     },
+    // Improve dropdown menu positioning and styling
     '& .MuiAutocomplete-popper': {
       width: '100% !important',
+      zIndex: 9999, // Ensure high z-index for the popup
       '& .MuiPaper-root': {
         width: '100%',
         marginTop: '4px',
+        maxHeight: '300px', // Increase max height for better usability
+        overflowY: 'auto',
+        boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.2)', // Enhanced shadow
+        border: `1px solid ${black.light}`, // Add border to dropdown container
       },
       '& .MuiAutocomplete-listbox': {
-        padding: '4px 0',
+        padding: '0', // Remove default padding for cleaner lines
         '& .MuiAutocomplete-option': {
-          padding: '8px 14px',
+          padding: variant === 'complex' ? '10px 14px' : '8px 14px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
@@ -180,6 +195,15 @@ const StyledAutocomplete = styled(
             width: '100%',
             textAlign: 'left',
           },
+          '&:last-child': {
+            borderBottom: 'none', // Remove border from last item to avoid double borders
+          },
+        },
+        '& .MuiAutocomplete-option[aria-selected="true"]': {
+          backgroundColor: `${black.main}08`,
+        },
+        '& .MuiAutocomplete-option:hover': {
+          backgroundColor: `${black.main}15`, // Slightly darker hover state
         },
       },
     },
@@ -210,7 +234,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   placeholder,
   disabled = false,
   width,
-  style, // destructure the style prop
+  style,
+  variant = 'simple', // Default to simple variant
 }) => {
   const [value, setValue] = useState<DropdownOption | string | null>(null)
   const [inputValue, setInputValue] = useState('')
@@ -267,7 +292,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       error={error}
       disabled={disabled}
       width={width}
-      style={style} // pass the style prop here
+      style={style}
     >
       <StyledInputLabel
         id={labelId}
@@ -302,12 +327,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           />
         }
         disablePortal={false}
+        ListboxProps={{
+          style: { maxHeight: '300px', overflowY: 'auto' },
+        }}
         disabled={disabled}
         backgroundcolor={backgroundcolor}
         outlinecolor={outlinecolor}
         fontcolor={fontcolor}
         inputfontcolor={inputfontcolor}
         placeholdercolor={placeholdercolor}
+        variant={variant}
         filterOptions={(opts, state) => {
           const input = state.inputValue.toLowerCase()
           return opts.filter(o => o.value.toLowerCase().includes(input))
@@ -328,45 +357,110 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           const { key, ...restLiProps } = liProps as {
             key: string
           } & React.HTMLAttributes<HTMLLIElement>
+
+          // Common styles for both variants
+          const liStyle = {
+            color: black.main,
+            padding: variant === 'complex' ? '10px 14px' : '8px 14px',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            alignItems: 'flex-start' as const,
+            gap: variant === 'complex' ? '4px' : '2px',
+            width: '100%',
+            borderBottom: `1px solid ${black.light}`,
+          }
+
+          // Use the uniqueKey prop if available, otherwise fall back to the provided key
+          const optionKey = option.uniqueKey || key
+
           return (
-            <li
-              key={key}
-              {...restLiProps}
-              style={{
-                color: black.main,
-                padding: '8px 14px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '2px',
-                width: '100%',
-              }}
-            >
+            <li key={optionKey} {...restLiProps} style={liStyle}>
+              {/* Main value - both variants */}
               <Typography
                 fontvariant="merriparagraph"
                 text={option.value.replace(/_/g, ' ')}
                 fontcolor={black.main}
                 sx={{
                   fontSize: '14px',
+                  fontWeight: variant === 'complex' ? '500' : 'normal',
                   lineHeight: '20px',
                   width: '100%',
                   textAlign: 'left',
                 }}
               />
-              {(option.attribute1 || option.attribute2) && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  text={[option.attribute1, option.attribute2]
-                    .filter(Boolean)
-                    .join(' | ')}
-                  fontcolor="rgba(0, 0, 0, 0.6)"
-                  sx={{
-                    fontSize: '12px',
-                    lineHeight: '16px',
-                    width: '100%',
-                    textAlign: 'left',
-                  }}
-                />
+
+              {/* For simple variant - show attribute1 and attribute2 on one line */}
+              {variant === 'simple' &&
+                (option.attribute1 || option.attribute2) && (
+                  <Typography
+                    fontvariant="merriparagraph"
+                    text={[option.attribute1, option.attribute2]
+                      .filter(Boolean)
+                      .join(' | ')}
+                    fontcolor="rgba(0, 0, 0, 0.6)"
+                    sx={{
+                      fontSize: '12px',
+                      lineHeight: '16px',
+                      width: '100%',
+                      textAlign: 'left',
+                    }}
+                  />
+                )}
+
+              {/* For complex variant - show attributes on separate lines */}
+              {variant === 'complex' && (
+                <>
+                  {/* First line of attributes */}
+                  {(option.attribute1 || option.attribute2) && (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={[option.attribute1, option.attribute2]
+                        .filter(Boolean)
+                        .join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  )}
+
+                  {/* Second line of attributes */}
+                  {(option.attribute3 || option.attribute4) && (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={[option.attribute3, option.attribute4]
+                        .filter(Boolean)
+                        .join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  )}
+
+                  {/* Third line of attributes */}
+                  {(option.attribute5 || option.attribute6) && (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={[option.attribute5, option.attribute6]
+                        .filter(Boolean)
+                        .join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  )}
+                </>
               )}
             </li>
           )
