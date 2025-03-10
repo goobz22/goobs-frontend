@@ -6,9 +6,9 @@ import {
   handleBoldClick,
   handleItalicClick,
 } from '../utils/useMarkdownEditor'
-import Toolbar from '../Toolbars/Markdown'
+import Toolbar from '../Toolbars/Editor'
 import { Box, Divider, TextField } from '@mui/material'
-import { RichTextEditorTypes } from '../types'
+import { RichTextEditorTypes } from '../utils/useRichtextEditor'
 
 type MarkdownEditorProps = {
   markdown: string
@@ -84,8 +84,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         handleItalicClick={() =>
           void handleItalicClick(selectedText, markdown, setMarkdown)
         }
-        switchModeLabel="RichText Mode"
-        onSwitchMode={handleSwitchMode}
+        toolbarType="markdown"
       />
       <Divider sx={{ backgroundColor: 'black' }} />
       <TextField

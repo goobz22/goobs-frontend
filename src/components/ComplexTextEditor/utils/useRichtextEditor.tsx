@@ -10,12 +10,43 @@ import {
 } from 'slate'
 import { withReact, ReactEditor } from 'slate-react'
 import { withHistory } from 'slate-history'
-import {
-  RichTextEditorTypes,
-  InlineFormat,
-  BlockFormat,
-  AlignmentFormat,
-} from '../types'
+
+// Define types locally instead of importing from external files
+export type AlignmentFormat = 'left' | 'center' | 'right' | 'justify'
+export type InlineFormat =
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikethrough'
+  | 'code'
+  | 'link'
+export type BlockFormat =
+  | 'paragraph'
+  | 'list-item'
+  | 'bulleted-list'
+  | 'numbered-list'
+  | 'link'
+
+export interface RichTextEditorTypes {
+  Block: Record<string, BlockFormat>
+  Inline: Record<string, InlineFormat>
+  Alignment: AlignmentFormat
+  CustomElement: {
+    type: BlockFormat
+    align?: AlignmentFormat
+    url?: string
+    children: Array<{ text: string } & Partial<Record<InlineFormat, boolean>>>
+  }
+  CustomText: {
+    text: string
+    bold?: boolean
+    italic?: boolean
+    underline?: boolean
+    strikethrough?: boolean
+    code?: boolean
+    link?: string
+  }
+}
 
 const RichTextEditorConfig: RichTextEditorTypes = {
   Block: {
@@ -278,6 +309,113 @@ export const useRichTextEditor = (
     }
   }
 
+  /**
+   * Convert Slate value to Markdown string and switch to markdown mode
+   */
+  const handleSwitchToMarkdown = (
+    editor: ReactEditor,
+    setMarkdown: (value: string) => void,
+    setMarkdownMode: (value: boolean) => void
+  ): void => {
+    // Simple conversion from Slate to Markdown
+    const markdown = slateToMarkdown()
+    setMarkdown(markdown)
+    setMarkdownMode(true)
+  }
+
+  /**
+   * Convert Slate nodes to Markdown format
+   */
+  const slateToMarkdown = (): string => {
+    // Get the current content from the editor
+    const nodes = internalValue as RichTextEditorTypes['CustomElement'][]
+
+    // Transform nodes to markdown
+    const markdownLines = nodes.map(node => {
+      // Handle different block types
+      switch (node.type) {
+        case 'bulleted-list':
+          // Handle bulleted lists
+          return node.children
+            .map(
+              (item: RichTextEditorTypes['CustomElement'] | { text: string }) =>
+                `* ${serializeLeaf(item)}`
+            )
+            .join('\n')
+        case 'numbered-list':
+          // Handle numbered lists
+          return node.children
+            .map(
+              (
+                item: RichTextEditorTypes['CustomElement'] | { text: string },
+                index: number
+              ) => `${index + 1}. ${serializeLeaf(item)}`
+            )
+            .join('\n')
+        case 'list-item':
+          // If list item appears directly (unlikely), render as paragraph
+          return serializeLeaf(node)
+        case 'link':
+          // Handle links
+          return `[${serializeLeaf(node)}](${node.url})`
+        case 'paragraph':
+        default:
+          // Default case handles paragraphs
+          return serializeLeaf(node)
+      }
+    })
+
+    return markdownLines.join('\n\n')
+  }
+
+  /**
+   * Serialize leaf nodes with their text formatting
+   */
+  const serializeLeaf = (
+    node:
+      | RichTextEditorTypes['CustomElement']
+      | RichTextEditorTypes['CustomText']
+      | { text: string }
+  ): string => {
+    // If node is a text leaf
+    if ('text' in node && typeof node.text === 'string') {
+      let text = node.text
+
+      // Apply formatting
+      if ('bold' in node && 'italic' in node && node.bold && node.italic) {
+        text = `***${text}***`
+      } else if ('bold' in node && node.bold) {
+        text = `**${text}**`
+      } else if ('italic' in node && node.italic) {
+        text = `*${text}*`
+      }
+      if ('code' in node && node.code) {
+        text = `\`${text}\``
+      }
+      if ('strikethrough' in node && node.strikethrough) {
+        text = `~~${text}~~`
+      }
+
+      return text
+    }
+
+    // If node has children, process each child
+    if ('children' in node && Array.isArray(node.children)) {
+      return node.children
+        .map(child =>
+          serializeLeaf(
+            child as
+              | RichTextEditorTypes['CustomElement']
+              | RichTextEditorTypes['CustomText']
+              | { text: string }
+          )
+        )
+        .join('')
+    }
+
+    return ''
+  }
+
   return {
     editor,
     markdownMode,
@@ -297,5 +435,6 @@ export const useRichTextEditor = (
     isMarkActive,
     isBlockActive,
     toggleAlignment,
+    handleSwitchToMarkdown,
   }
 }

@@ -60,16 +60,20 @@ export const DisabledButton: Story = {
     text: 'I am disabled',
     disableButton: 'true',
   },
-  // Add an 'await' call or remove `async`
-  play: async ({ canvasElement }) => {
+  play: ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const buttonEl = canvas.getByRole('button', { name: /i am disabled/i })
 
-    // Attempt a click just to satisfy 'await'
-    await userEvent.click(buttonEl)
-
-    // This button should be disabled
+    // For disabled buttons, we just verify it exists and is disabled
+    // rather than trying to click it (which would fail due to pointer-events: none)
+    expect(buttonEl).toBeInTheDocument()
     expect(buttonEl).toBeDisabled()
+
+    // We can also verify the visual styling is correct
+    expect(buttonEl).toHaveStyle({
+      backgroundColor: '#cccccc', // Verify the disabled gray color
+      cursor: 'not-allowed',
+    })
   },
 }
 
@@ -129,10 +133,24 @@ export const WithIconRight: Story = {
  */
 export const WithIconAbove: Story = {
   args: {
-    text: 'Send',
+    text: 'Send Message',
     icon: <Send />,
     iconlocation: 'above', // Icon stacked on top
     fontlocation: 'center', // Center text
+    iconsize: '24px', // Slightly larger icon
+    backgroundcolor: '#3f51b5', // Indigo background
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const buttonEl = canvas.getByRole('button', { name: /send message/i })
+
+    // Verify the button exists
+    expect(buttonEl).toBeInTheDocument()
+
+    // For visual testing, no need to click, just verify styling
+    expect(buttonEl).toHaveStyle({
+      flexDirection: 'column', // Stacked layout
+    })
   },
 }
 

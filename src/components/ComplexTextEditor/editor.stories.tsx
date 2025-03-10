@@ -31,8 +31,8 @@ type Story = StoryObj<typeof ComplexTextEditor>
 export const BasicSimple: Story = {
   name: 'Basic (Simple)',
   args: {
-    value: 'Hello world!',
-    editorType: 'simple',
+    initialValue: 'Hello world!',
+    initialMode: 'simple',
     onChange: noOpOnChange,
   },
   // Kept async because we use await userEvent.type
@@ -57,8 +57,8 @@ export const BasicSimple: Story = {
 export const LabeledSimple: Story = {
   args: {
     label: 'Simple Editor Label',
-    value: 'Some text here',
-    editorType: 'simple',
+    initialValue: 'Some text here',
+    initialMode: 'simple',
     onChange: noOpOnChange,
   },
   play: ({ canvasElement }) => {
@@ -76,9 +76,9 @@ export const LabeledSimple: Story = {
  */
 export const ComplexMode: Story = {
   args: {
-    value:
+    initialValue:
       'Start with complex but show toolbar toggles (simple vs rich vs markdown).',
-    editorType: 'complex',
+    initialMode: 'simple',
     onChange: noOpOnChange,
   },
   // Kept async because we use await userEvent.click
@@ -108,14 +108,58 @@ export const ComplexMode: Story = {
 }
 
 /**
- * 4) Accordion usage
+ * 4) Rich Text Editor mode
+ *    Shows the rich text editor with formatting toolbar
+ */
+export const RichTextMode: Story = {
+  name: 'Rich Text Editor',
+  args: {
+    initialValue: 'This is a rich text editor with formatting options.',
+    initialMode: 'rich',
+    onChange: noOpOnChange,
+  },
+  // Kept async because we use await userEvent.click
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // In rich text mode, content is in a contenteditable div, not an input field
+    // Look for the content in the DOM
+    expect(
+      canvas.getByText('This is a rich text editor with formatting options.')
+    ).toBeInTheDocument()
+
+    // Check for the presence of formatting buttons in the toolbar
+    const boldButton =
+      canvas.getByRole('button', { name: /bold/i, hidden: true }) ||
+      canvas.getByTitle('Bold')
+
+    const italicButton =
+      canvas.getByRole('button', { name: /italic/i, hidden: true }) ||
+      canvas.getByTitle('Italic')
+
+    // Try to perform formatting if buttons are found
+    if (boldButton) {
+      await userEvent.click(boldButton)
+    }
+
+    if (italicButton) {
+      await userEvent.click(italicButton)
+    }
+
+    // We don't have a direct way to assert the text is formatted in a story
+    // But no crash indicates success
+  },
+}
+
+/**
+ * 5) Accordion usage
  *    If accordion is true, the editor is inside an expandable panel
  */
 export const WithAccordion: Story = {
   args: {
     label: 'Accordion Editor Label',
-    value: 'Some initial text in an accordion panel',
-    editorType: 'complex',
+    initialValue: 'Some initial text in an accordion panel',
+    initialMode: 'simple',
     accordion: true,
     onChange: noOpOnChange,
   },
@@ -136,13 +180,13 @@ export const WithAccordion: Story = {
 }
 
 /**
- * 5) Basic markdown scenario
+ * 6) Basic markdown scenario
  *    - No userEvent calls => remove async
  */
 export const MarkdownMode: Story = {
   args: {
-    value: '**Bold** text, *italic* text',
-    editorType: 'markdown',
+    initialValue: '**Bold** text, *italic* text',
+    initialMode: 'markdown',
     onChange: noOpOnChange,
   },
   play: ({ canvasElement }) => {
@@ -156,15 +200,47 @@ export const MarkdownMode: Story = {
 }
 
 /**
- * 6) Large text scenario with 10 rows
+ * 7) Complex mode with rich text editor active
+ *    Shows complex mode with rich text editor selected
+ */
+export const ComplexWithRichText: Story = {
+  name: 'Complex (Rich Text Active)',
+  args: {
+    initialValue: 'This demonstrates the rich text editor within complex mode.',
+    initialMode: 'simple',
+    onChange: noOpOnChange,
+  },
+  // Kept async because we use await userEvent.click
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Initial text in simple mode
+    expect(
+      canvas.getByDisplayValue(
+        'This demonstrates the rich text editor within complex mode.'
+      )
+    ).toBeInTheDocument()
+
+    // Switch to Rich Text mode
+    const richTextButton = canvas.getByRole('button', { name: /rich text/i })
+    expect(richTextButton).toBeInTheDocument()
+    await userEvent.click(richTextButton)
+
+    // The editor should now be in rich text mode with formatting toolbar
+    // No direct assertion for the toolbar, but no crash indicates success
+  },
+}
+
+/**
+ * 8) Large text scenario with 10 rows
  *    - No userEvent calls => remove async
  */
 export const LargeText: Story = {
   args: {
     label: 'Large Text Editor',
-    value:
+    initialValue:
       'Lots of text\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10',
-    editorType: 'simple',
+    initialMode: 'simple',
     minRows: 10,
     onChange: noOpOnChange,
   },

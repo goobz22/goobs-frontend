@@ -129,7 +129,7 @@ function ManageRow({
           justifyContent="center"
           sx={{ '& > div:not(:last-child)': { marginRight: '2px' } }}
         >
-          {/* If exactly 1 item selected, show Manage / Show */}
+          {/* If exactly 1 item selected, show Manage / Show / Duplicate */}
           {selectedRows.length === 1 && (
             <Box
               display="flex"
@@ -208,12 +208,7 @@ function ManageRow({
                   </Box>
                 </Box>
               )}
-            </Box>
-          )}
 
-          {/* Duplicate, Delete, Export */}
-          {selectedRows.length > 0 && (
-            <Box display="flex" flexDirection="row" alignItems="center">
               {onDuplicate && !isMobile && (
                 <Box
                   onClick={e => {
@@ -247,76 +242,79 @@ function ManageRow({
                   </Box>
                 </Box>
               )}
-
-              {onDelete && (
-                <Box
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('delete')
-                  }}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  sx={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                    },
-                    borderRadius: '4px',
-                    transition: 'background-color 0.2s',
-                    userSelect: 'none',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      color: 'black',
-                    }}
-                  >
-                    <DeleteIcon />
-                    <Typography fontvariant="merriparagraph" text="Delete" />
-                  </Box>
-                </Box>
-              )}
-
-              {(!isMobile || onExport) && (
-                <Box
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('export')
-                  }}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  sx={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                    },
-                    borderRadius: '4px',
-                    transition: 'background-color 0.2s',
-                    userSelect: 'none',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      color: 'black',
-                    }}
-                  >
-                    <ExportIcon />
-                    <Typography fontvariant="merriparagraph" text="Export" />
-                  </Box>
-                </Box>
-              )}
             </Box>
           )}
+
+          {/* Delete and Export - shown for any number of selected rows */}
+          <Box display="flex" flexDirection="row" alignItems="center">
+            {onDelete && (
+              <Box
+                onClick={e => {
+                  e.stopPropagation()
+                  handleActionSelection('delete')
+                }}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                sx={{
+                  padding: '8px',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                  borderRadius: '4px',
+                  transition: 'background-color 0.2s',
+                  userSelect: 'none',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    color: 'black',
+                  }}
+                >
+                  <DeleteIcon />
+                  <Typography fontvariant="merriparagraph" text="Delete" />
+                </Box>
+              </Box>
+            )}
+
+            {(!isMobile || onExport) && (
+              <Box
+                onClick={e => {
+                  e.stopPropagation()
+                  handleActionSelection('export')
+                }}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                sx={{
+                  padding: '8px',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                  borderRadius: '4px',
+                  transition: 'background-color 0.2s',
+                  userSelect: 'none',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    color: 'black',
+                  }}
+                >
+                  <ExportIcon />
+                  <Typography fontvariant="merriparagraph" text="Export" />
+                </Box>
+              </Box>
+            )}
+          </Box>
         </Stack>
       </Box>
     </Paper>

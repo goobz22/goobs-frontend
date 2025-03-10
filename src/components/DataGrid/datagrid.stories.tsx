@@ -88,6 +88,53 @@ function createManyRows(count: number): RowData[] {
 const largeRows = createManyRows(55)
 
 /**
+ * Columns and rows for resize testing (20 columns)
+ */
+const resizeTestColumns: ColumnDef[] = [
+  { field: '_id', headerName: 'ID', width: 80 },
+  { field: 'col1', headerName: 'Column 1', width: 120 },
+  { field: 'col2', headerName: 'Column 2', width: 120 },
+  { field: 'col3', headerName: 'Column 3', width: 120 },
+  { field: 'col4', headerName: 'Column 4', width: 120 },
+  { field: 'col5', headerName: 'Column 5', width: 120 },
+  { field: 'col6', headerName: 'Column 6', width: 120 },
+  { field: 'col7', headerName: 'Column 7', width: 120 },
+  { field: 'col8', headerName: 'Column 8', width: 120 },
+  { field: 'col9', headerName: 'Column 9', width: 120 },
+  { field: 'col10', headerName: 'Column 10', width: 120 },
+  { field: 'col11', headerName: 'Column 11', width: 120 },
+  { field: 'col12', headerName: 'Column 12', width: 120 },
+  { field: 'col13', headerName: 'Column 13', width: 120 },
+  { field: 'col14', headerName: 'Column 14', width: 120 },
+  { field: 'col15', headerName: 'Column 15', width: 120 },
+  { field: 'col16', headerName: 'Column 16', width: 120 },
+  { field: 'col17', headerName: 'Column 17', width: 120 },
+  { field: 'col18', headerName: 'Column 18', width: 120 },
+  { field: 'col19', headerName: 'Column 19', width: 120 },
+  { field: 'col20', headerName: 'Column 20', width: 120 },
+]
+
+function createResizeTestRows(count: number): RowData[] {
+  const rows: RowData[] = []
+  for (let i = 1; i <= count; i++) {
+    const row: Record<string, unknown> = {
+      _id: randomUUID(),
+    }
+
+    // Generate data for each column
+    for (let col = 1; col <= 20; col++) {
+      const colName = `col${col}`
+      row[colName] = `Row ${i}, Data ${col}`
+    }
+
+    rows.push(row as RowData)
+  }
+  return rows
+}
+
+const resizeTestRows = createResizeTestRows(10)
+
+/**
  * 4) Sample toolbar props (buttons + dropdowns)
  */
 const sampleButtons = [
@@ -191,8 +238,8 @@ export const WithToolbar: Story = {
     const canvas = within(canvasElement)
     // Check for "Refresh" button
     expect(canvas.getByText('Refresh')).toBeInTheDocument()
-    // Type in the searchbar labeled "Search rows"
-    const searchField = canvas.getByLabelText('Search rows')
+    // Type in the searchbar labeled "Search DataGrid" instead of "Search rows"
+    const searchField = canvas.getByLabelText('Search DataGrid')
     await userEvent.type(searchField, 'Alpha')
     expect(searchField).toHaveValue('Alpha')
     // "Alpha" might remain, others might hide if your search logic is triggered
@@ -294,7 +341,10 @@ export const FullFeatures: Story = {
     // Confirm all UI elements are present
     expect(canvas.getByText('Refresh')).toBeInTheDocument()
     expect(canvas.getByText('New Item')).toBeInTheDocument()
-    expect(canvas.getByText('Filter Status')).toBeInTheDocument()
+
+    // Instead of using getByLabelText to find the Filter Status dropdown,
+    // verify that the text is present somewhere in the document
+    expect(canvas.getAllByText('Filter Status')[0]).toBeInTheDocument()
 
     // Rows are displayed, plus search, row manage, etc.
     await userEvent.click(canvas.getByText('Gamma'))
@@ -303,5 +353,139 @@ export const FullFeatures: Story = {
     // There's a "Manage" button for single-row actions
     await userEvent.click(canvas.getByText('Manage'))
     // Logs "Manage row pressed"
+  },
+}
+
+/**
+ * 8) Mobile View with many columns
+ */
+export const MobileView: Story = {
+  name: 'Mobile View (20 Columns)',
+  args: {
+    columns: resizeTestColumns,
+    rows: resizeTestRows.slice(0, 5), // Fewer rows for mobile
+    onSelectionChange: ids => console.log('Mobile selection =>', ids),
+  },
+  parameters: {
+    // Force mobile viewport - improved configuration
+    chromatic: { viewports: [375] }, // iPhone viewport width
+    viewport: {
+      defaultViewport: 'mobile1',
+      viewports: {
+        mobile1: {
+          name: 'Mobile',
+          styles: {
+            width: '375px',
+            height: '667px',
+          },
+          type: 'mobile',
+        },
+      },
+    },
+    // Add layout parameter explicitly
+    layout: 'fullscreen',
+    backgrounds: {
+      default: 'white',
+    },
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Verify basic content is visible
+    expect(canvas.getByText('Column 1')).toBeInTheDocument()
+    // The rest might require scrolling on mobile
+  },
+}
+
+/**
+ * 9) Tablet View with many columns
+ */
+export const TabletView: Story = {
+  name: 'Tablet View (20 Columns)',
+  args: {
+    columns: resizeTestColumns,
+    rows: resizeTestRows, // Full set of rows
+    onSelectionChange: ids => console.log('Tablet selection =>', ids),
+    buttons: sampleButtons, // Include some buttons to test toolbar on tablet
+  },
+  parameters: {
+    // Force tablet viewport with explicit configuration
+    chromatic: { viewports: [768] }, // iPad mini width
+    viewport: {
+      defaultViewport: 'tablet1',
+      viewports: {
+        tablet1: {
+          name: 'Tablet',
+          styles: {
+            width: '768px',
+            height: '1024px',
+          },
+          type: 'tablet',
+        },
+      },
+    },
+    layout: 'fullscreen',
+    backgrounds: {
+      default: 'white',
+    },
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Verify multiple columns are visible
+    expect(canvas.getByText('Column 1')).toBeInTheDocument()
+    expect(canvas.getByText('Column 5')).toBeInTheDocument()
+    // Buttons should be visible on tablet
+    expect(canvas.getByText('Refresh')).toBeInTheDocument()
+  },
+}
+
+/**
+ * 10) Desktop View with many columns
+ */
+export const DesktopView: Story = {
+  name: 'Desktop View (20 Columns)',
+  args: {
+    columns: resizeTestColumns,
+    rows: resizeTestRows, // Full set of rows
+    onSelectionChange: ids => console.log('Desktop selection =>', ids),
+    buttons: sampleButtons,
+    dropdowns: sampleDropdowns,
+    searchbarProps: {
+      label: 'Search columns',
+      placeholder: 'Search in data...',
+      value: '',
+      onChange: () => {}, // No-op to fix TS error
+    },
+  },
+  parameters: {
+    // Use a large viewport for desktop with explicit configuration
+    chromatic: { viewports: [1280] }, // Standard desktop width
+    viewport: {
+      defaultViewport: 'desktop1',
+      viewports: {
+        desktop1: {
+          name: 'Desktop',
+          styles: {
+            width: '1280px',
+            height: '800px',
+          },
+          type: 'desktop',
+        },
+      },
+    },
+    layout: 'fullscreen',
+    backgrounds: {
+      default: 'white',
+    },
+  },
+  play: ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Many columns should be visible on desktop
+    expect(canvas.getByText('Column 1')).toBeInTheDocument()
+    expect(canvas.getByText('Column 5')).toBeInTheDocument()
+    expect(canvas.getByText('Column 10')).toBeInTheDocument()
+    expect(canvas.getByText('Column 15')).toBeInTheDocument()
+    // Full UI should be available
+    expect(canvas.getByText('Refresh')).toBeInTheDocument()
+    expect(canvas.getAllByText('Filter Status')[0]).toBeInTheDocument()
   },
 }

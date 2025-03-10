@@ -6,7 +6,7 @@ import {
   RenderElementProps,
 } from 'slate-react'
 import { Descendant } from 'slate'
-import Toolbar from '../Toolbars/Rich'
+import Toolbar from '../Toolbars/Editor'
 import {
   Box,
   Divider,
@@ -15,8 +15,10 @@ import {
   AccordionDetails,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { useRichTextEditor } from '../utils/useRichtextEditor'
-import { RichTextEditorTypes } from '../types'
+import {
+  useRichTextEditor,
+  RichTextEditorTypes,
+} from '../utils/useRichtextEditor'
 import Typography from '../../Typography'
 
 export interface RichTextEditorProps {
@@ -28,6 +30,9 @@ export interface RichTextEditorProps {
   onSelectionChange?: () => void
   onValueChange?: () => void
   accordion?: boolean
+  markdownMode: boolean
+  setMarkdownMode: (value: boolean) => void
+  setMarkdown: (value: string) => void
 }
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
@@ -60,16 +65,16 @@ export function RichTextEditor({
   label,
   minRows = 5,
   accordion = false,
+  markdownMode,
+  setMarkdownMode,
+  setMarkdown,
 }: RichTextEditorProps) {
   const {
     editor,
-    markdownMode,
-    setMarkdown,
     internalValue,
     handleChange,
     handleBoldClick,
     handleItalicClick,
-    insertLink,
     onKeyDown,
   } = useRichTextEditor(value, onChange ? () => onChange() : undefined)
 
@@ -117,12 +122,13 @@ export function RichTextEditor({
                 onChange={handleChange}
               >
                 <Toolbar
-                  editor={editor}
                   markdownMode={markdownMode}
+                  setMarkdownMode={setMarkdownMode}
                   setMarkdown={setMarkdown}
                   handleBoldClick={handleBoldClick}
                   handleItalicClick={handleItalicClick}
-                  handleLinkClick={insertLink}
+                  toolbarType="richtext"
+                  editor={editor}
                 />
                 <Divider sx={{ backgroundColor: 'black' }} />
                 <Editable
@@ -151,12 +157,13 @@ export function RichTextEditor({
               onChange={handleChange}
             >
               <Toolbar
-                editor={editor}
                 markdownMode={markdownMode}
+                setMarkdownMode={setMarkdownMode}
                 setMarkdown={setMarkdown}
                 handleBoldClick={handleBoldClick}
                 handleItalicClick={handleItalicClick}
-                handleLinkClick={insertLink}
+                toolbarType="richtext"
+                editor={editor}
               />
               <Divider sx={{ backgroundColor: 'black' }} />
               <Editable

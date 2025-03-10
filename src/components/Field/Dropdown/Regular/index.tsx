@@ -17,12 +17,14 @@ import {
   InputLabel,
   OutlinedInput,
   SelectChangeEvent,
+  Box,
 } from '@mui/material'
 import Typography from '../../../Typography'
 import { black, white } from '../../../../styles/palette'
 
 export interface SimpleDropdownOption {
   value: string
+  icon?: React.ReactNode
 }
 
 export interface ComplexDropdownOption extends SimpleDropdownOption {
@@ -226,17 +228,24 @@ const Dropdown: React.FC<DropdownProps> = ({
     if (!('attribute1' in option)) {
       return (
         <MenuItem key={option.value} value={option.value}>
-          <Typography
-            fontvariant="merriparagraph"
-            text={displayText}
-            fontcolor={black.main}
-            sx={{
-              fontSize: '14px',
-              lineHeight: '20px',
-              width: '100%',
-              textAlign: 'left',
-            }}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            {option.icon && (
+              <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                {option.icon}
+              </Box>
+            )}
+            <Typography
+              fontvariant="merriparagraph"
+              text={displayText}
+              fontcolor={black.main}
+              sx={{
+                fontSize: '14px',
+                lineHeight: '20px',
+                width: '100%',
+                textAlign: 'left',
+              }}
+            />
+          </Box>
         </MenuItem>
       )
     }
@@ -282,17 +291,24 @@ const Dropdown: React.FC<DropdownProps> = ({
       option.value.replace(/_/g, ' ').slice(1)
 
     return (
-      <Typography
-        fontvariant="merriparagraph"
-        text={displayText}
-        fontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : black.main}
-        sx={{
-          fontSize: '14px',
-          lineHeight: '20px',
-          width: '100%',
-          textAlign: 'left',
-        }}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {option.icon && (
+          <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+            {option.icon}
+          </Box>
+        )}
+        <Typography
+          fontvariant="merriparagraph"
+          text={displayText}
+          fontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : black.main}
+          sx={{
+            fontSize: '14px',
+            lineHeight: '20px',
+            width: '100%',
+            textAlign: 'left',
+          }}
+        />
+      </Box>
     )
   }
 

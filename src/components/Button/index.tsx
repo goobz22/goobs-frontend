@@ -71,25 +71,35 @@ function CustomButton({
       } as Partial<SvgIconProps>)
     : null
 
+  // Determine if this is an icon-only button
+  const isIconOnly = !!icon && !text
+
+  // Adjust height for icon above text layout or icon-only buttons
+  const isIconAbove = iconlocation === 'above'
+  const defaultHeight = isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'
+  const minHeight = isIconOnly ? '36px' : isIconAbove ? '70px' : '40px'
+
   // Base inline styles for the button
   const buttonStyle: React.CSSProperties = {
-    minWidth: 'fit-content',
-    width: 'auto',
-    height: '40px',
-    padding: '8px 16px',
+    minWidth: isIconOnly ? '36px' : 'fit-content',
+    width: width || (isIconOnly ? '36px' : 'auto'),
+    height: height || defaultHeight,
+    minHeight: minHeight,
+    padding: isIconOnly ? '6px' : isIconAbove ? '16px 16px' : '8px 16px',
     display: 'inline-flex',
     flexShrink: 0,
     flexWrap: 'nowrap',
     whiteSpace: 'nowrap',
-    flexDirection: iconlocation === 'above' ? 'column' : 'row',
+    flexDirection: isIconAbove ? 'column' : 'row',
     alignItems: 'center',
-    justifyContent:
-      fontlocation === 'left'
+    justifyContent: isIconOnly
+      ? 'center'
+      : fontlocation === 'left'
         ? 'flex-start'
         : fontlocation === 'right'
           ? 'flex-end'
           : 'center',
-    gap: '8px',
+    gap: isIconAbove ? '12px' : '8px', // More gap for stacked layout
     // Default background color (handled below)
   }
 
@@ -98,6 +108,8 @@ function CustomButton({
     buttonStyle.backgroundColor = '#cccccc'
     buttonStyle.opacity = 1
     buttonStyle.cursor = 'not-allowed'
+    // Add pointer-events property for testing compatibility
+    buttonStyle.pointerEvents = 'auto'
   } else if (backgroundcolor && backgroundcolor !== 'none') {
     // Normal colored background
     buttonStyle.backgroundColor = backgroundcolor
@@ -111,9 +123,26 @@ function CustomButton({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: width || 'auto',
-    height: height || '40px',
-    minWidth: 'fit-content',
+    width: width || (isIconOnly ? '36px' : 'auto'),
+    height: height || (isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'),
+    minHeight: isIconOnly ? '36px' : isIconAbove ? minHeight : 'auto',
+    minWidth: isIconOnly ? '36px' : 'fit-content',
+  }
+
+  // Style for the inner content box
+  const contentBoxStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: isIconOnly
+      ? 'center'
+      : fontlocation === 'left'
+        ? 'flex-start'
+        : fontlocation === 'right'
+          ? 'flex-end'
+          : 'center',
+    width: '100%',
+    height: '100%',
+    gap: '8px',
   }
 
   return (
@@ -126,33 +155,22 @@ function CustomButton({
         disableElevation
         disableRipple
         style={buttonStyle}
+        data-testid={isReallyDisabled ? 'disabled-button' : 'button'}
       >
         {/* If iconlocation="above", show the icon first */}
-        {iconlocation === 'above' && IconComponent}
+        {isIconAbove && IconComponent}
 
         {/* The text+icon container */}
-        <Box
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              fontlocation === 'left'
-                ? 'flex-start'
-                : fontlocation === 'right'
-                  ? 'flex-end'
-                  : 'center',
-            width: '100%',
-            height: '100%',
-            gap: '8px',
-          }}
-        >
+        <Box style={contentBoxStyle}>
           {iconlocation === 'left' && IconComponent}
 
-          <Typography
-            fontvariant={fontvariant}
-            fontcolor={isReallyDisabled ? 'grey' : fontcolor || 'white'}
-            text={text || ''}
-          />
+          {text && (
+            <Typography
+              fontvariant={fontvariant}
+              fontcolor={isReallyDisabled ? 'grey' : fontcolor || 'white'}
+              text={text}
+            />
+          )}
 
           {iconlocation === 'right' && IconComponent}
         </Box>

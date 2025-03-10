@@ -1,30 +1,72 @@
 import React from 'react'
-import RichToolbar from '../Rich'
-import MarkdownToolbar from '../Markdown'
+import RichEditor from '../../RichEditor'
+import MarkdownEditor from '../../MarkdownEditor'
+import SimpleEditor from '../../SimpleEditor'
 import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { RichTextEditorTypes } from '../../utils/useRichtextEditor'
+import { Descendant } from 'slate'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
 
 interface ComplexToolbarProps {
+  // Common props
   mode: EditorMode
   setMode: (mode: EditorMode) => void
+  label?: string
+  minRows?: number
+
+  // Simple editor props
+  simpleValue: string
+  setSimpleValue: (value: string) => void
+
+  // Rich editor props
+  richValue: Descendant[]
+  onRichChange?: () => void
+
+  // Markdown editor props
+  markdown: string
+  setMarkdown: (value: string) => void
+
+  // Shared editor state
   markdownMode: boolean
   setMarkdownMode: React.Dispatch<React.SetStateAction<boolean>>
-  setMarkdown: React.Dispatch<React.SetStateAction<string>>
+
+  // Optional toolbar handlers
   handleBoldClick?: () => void
   handleItalicClick?: () => void
   handleLinkClick?: () => void
+
+  // Optional styling props
+  error?: boolean
+  helperText?: React.ReactNode
+  required?: boolean
+  style?: React.CSSProperties
+
+  // Optional accordion props
+  accordion?: boolean
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   mode,
   setMode,
+  label,
+  minRows = 5,
+  simpleValue,
+  setSimpleValue,
+  richValue,
+  onRichChange,
+  markdown,
+  setMarkdown,
   markdownMode,
   setMarkdownMode,
-  setMarkdown,
   handleBoldClick,
   handleItalicClick,
   handleLinkClick,
+  error,
+  helperText,
+  required,
+  style,
+  accordion = false,
 }) => {
   const handleModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -33,6 +75,14 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
     if (newMode !== null) {
       setMode(newMode)
     }
+  }
+
+  // Function to set Slate value when switching from markdown to rich text
+  const setNewSlateValue = (value: RichTextEditorTypes['CustomElement'][]) => {
+    // This function would ideally update the richValue
+    // For now, it's a placeholder as we would need to implement proper conversion
+    console.log('Setting new slate value:', value)
+    // Here you would convert and update richValue
   }
 
   return (
@@ -101,24 +151,41 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-      {mode === 'rich' && (
-        <RichToolbar
-          markdownMode={markdownMode}
-          setMarkdown={setMarkdown}
-          handleBoldClick={handleBoldClick}
-          handleItalicClick={handleItalicClick}
-          handleLinkClick={handleLinkClick}
+
+      {/* Render the appropriate editor based on mode */}
+      {mode === 'simple' && (
+        <SimpleEditor
+          value={simpleValue}
+          setValue={setSimpleValue}
+          minRows={minRows}
+          label={label}
+          error={error}
+          helperText={helperText}
+          required={required}
+          style={style}
         />
       )}
-      {mode === 'markdown' && (
-        <MarkdownToolbar
+
+      {mode === 'rich' && (
+        <RichEditor
+          value={richValue}
+          onChange={onRichChange}
+          label={label}
+          minRows={minRows}
+          accordion={accordion}
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setMarkdown={setMarkdown}
-          handleBoldClick={handleBoldClick}
-          handleItalicClick={handleItalicClick}
-          switchModeLabel="Rich Text Mode"
-          onSwitchMode={() => setMode('rich')}
+        />
+      )}
+
+      {mode === 'markdown' && (
+        <MarkdownEditor
+          markdown={markdown}
+          setMarkdown={setMarkdown}
+          markdownMode={markdownMode}
+          setMarkdownMode={setMarkdownMode}
+          setNewSlateValue={setNewSlateValue}
         />
       )}
     </Box>

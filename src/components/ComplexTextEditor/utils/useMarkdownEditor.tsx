@@ -1,4 +1,4 @@
-import { RichTextEditorTypes } from '../types'
+import { RichTextEditorTypes } from './useRichtextEditor'
 import React from 'react'
 
 // Simple regex patterns to identify bold and italic in markdown
