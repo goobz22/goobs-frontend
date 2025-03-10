@@ -57,14 +57,14 @@ import PasswordField, { PasswordFieldProps } from './components/Field/Password'
 import PhoneNumberField from './components/Field/PhoneNumber'
 import Searchbar, { SearchbarProps } from './components/Field/Search'
 import TextField, { TextFieldProps } from './components/Field/Text'
+import SearchableDropdown, {
+  SearchableDropdownProps,
+  DropdownOption,
+} from './components/Field/Dropdown/Searchable'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
 import type { FormDataGridProps } from './components/Form/DataGrid'
-import type {
-  SearchableDropdownProps,
-  DropdownOption,
-} from './components/Field/Dropdown/Searchable'
 
 // Animations
 import { Animation } from './components/Content/Structure/animations'
@@ -199,6 +199,7 @@ export type { RawCustomer }
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
 
+export { SearchableDropdown }
 // 1) Form DataGrid
 export type { FormDataGridProps }
 export type { CustomDialogProps }
