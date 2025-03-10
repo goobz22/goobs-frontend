@@ -31,7 +31,7 @@ const LeftCenter: FC<Partial<SearchbarProps>> = props => {
         height: '55px',
       }}
     >
-      <Box sx={{ marginBottom: '10px' }}>
+      <Box sx={{ marginBottom: '7px' }}>
         <Searchbar
           shrunklabelposition={shrunklabelposition}
           shrunkfontcolor={shrunkfontcolor}

@@ -48,7 +48,6 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           flexWrap: 'wrap',
           gap: 2,
           width: '100%',
-          mb: 2,
         }}
       >
         {/* Left half: Buttons + Searchbar */}
@@ -92,7 +91,6 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           flexWrap: 'wrap',
           gap: 2,
           width: '100%',
-          mb: 2,
         }}
       >
         {/* Left half: Buttons */}
