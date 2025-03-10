@@ -52,7 +52,7 @@ function Table({
   })
 
   // Decide which columns to render in the <TableHead /> for desktop.
-  // On mobile, we skip the “__overflow__” approach and just show the single dropdown.
+  // On mobile, we skip the "__overflow__" approach and just show the single dropdown.
   const finalDesktopColumns = !isMobile
     ? overflowDesktopColumns.length > 0
       ? [
@@ -63,16 +63,23 @@ function Table({
     : []
 
   return (
-    // The main wrapper. Key: allow horizontal scroll if table is too wide.
-    <Box sx={{ width: '100%', overflowX: 'auto' }}>
+    // The main wrapper - Using overflowX: 'hidden' to prevent horizontal scrollbar
+    <Box sx={{ width: '100%', overflowX: 'hidden' }}>
       {/* We set the "ref" here so that useComputeTableResize can measure width. */}
-      <TableContainer ref={containerRef} sx={{ overflowX: 'auto' }}>
+      <TableContainer
+        ref={containerRef}
+        sx={{
+          overflowX: 'visible', // Changed from 'auto' to 'visible'
+        }}
+      >
         <MuiTable
           sx={{
-            // Let columns expand to their set widths
+            // Set width to 100% to fit container
+            width: '100%',
+            // Keep tableLayout as 'auto' to respect column widths
             tableLayout: 'auto',
             // Force the table's minimum width to accommodate large columns
-            minWidth: 'fit-content',
+            minWidth: isMobile ? 'auto' : 'fit-content',
           }}
         >
           {/* Table Header */}
@@ -87,7 +94,7 @@ function Table({
               finalDesktopColumns={finalDesktopColumns}
               // Overflow columns (desktop)
               overflowDesktopColumns={overflowDesktopColumns}
-              // Current “selected” column for overflow or mobile
+              // Current "selected" column for overflow or mobile
               selectedOverflowField={selectedOverflowField}
               setSelectedOverflowField={setSelectedOverflowField}
               // The entire columns array so we can present them all on mobile

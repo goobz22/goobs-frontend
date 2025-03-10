@@ -93,8 +93,8 @@ function DataGrid({
         flexDirection: 'column',
         // Increase or remove height if you want more vertical space:
         height: 'calc(100vh - 60px)',
-        // The key: allow horizontal scroll so columns with big widths can be scrolled
-        overflow: 'auto',
+        // Add overflow hidden at the DataGrid level to prevent horizontal scrollbars
+        overflow: 'hidden',
         backgroundColor: woad.main,
       }}
     >
@@ -132,12 +132,11 @@ function DataGrid({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
+          // Ensure this container doesn't create scrollbars
+          overflow: 'hidden',
         }}
       >
-        {/* 
-          This is the actual <Table/> component (not the file).
-          Just leaving it as-is, but inside it we do a horizontal scroll and tableLayout: 'auto'.
-        */}
+        {/* Table component */}
         <Table
           columns={columns}
           rows={visibleRows}

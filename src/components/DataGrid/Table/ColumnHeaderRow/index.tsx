@@ -19,7 +19,7 @@ interface ColumnHeaderRowProps {
   // The entire columns array if we need them on mobile
   allColumns: ColumnDef[]
 
-  // The chosen “overflow” column or mobile column
+  // The chosen "overflow" column or mobile column
   selectedOverflowField: string
   setSelectedOverflowField: React.Dispatch<React.SetStateAction<string>>
 }
@@ -77,7 +77,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             boxSizing: 'border-box',
             overflow: 'visible',
             position: 'relative',
-            zIndex: 10,
+            zIndex: 100, // Increased z-index for mobile dropdown
             // If you want no left padding on mobile header as well:
             paddingLeft: 0,
           }}
@@ -93,6 +93,10 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             shrunkfontcolor="black"
             unshrunkfontcolor="black"
             shrunklabelposition="aboveNotch"
+            style={{
+              marginBottom: 0,
+              marginTop: 0,
+            }}
           />
         </TableCell>
       </TableRow>
@@ -133,12 +137,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             <TableCell
               key="overflow-header"
               sx={{
-                width: 275,
+                width: 275, // Increased width for dropdown (was 200)
+                minWidth: 275,
                 boxSizing: 'border-box',
                 overflow: 'visible',
                 position: 'relative',
-                zIndex: 10,
+                zIndex: 100, // Increased z-index to ensure dropdown appears above other elements
                 paddingLeft: 0, // <-- remove left padding here
+                height: '55px',
               }}
             >
               <SearchableDropdown
@@ -154,7 +160,11 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 inputfontcolor="black"
                 shrunkfontcolor="black"
                 unshrunkfontcolor="black"
-                shrunklabelposition="aboveNotch"
+                shrunklabelposition="onNotch"
+                style={{
+                  marginBottom: 0,
+                  marginTop: 0,
+                }}
               />
             </TableCell>
           )

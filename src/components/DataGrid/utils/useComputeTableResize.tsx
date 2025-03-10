@@ -86,8 +86,8 @@ export function useComputeTableResize({
         return 60
       }
       const header = col.headerName || col.field
-      // +40 as a buffer for padding, sorting icons, etc.
-      return measureTextWidth(header) + 40
+      // +60 as a larger buffer for padding, sorting icons, etc. to prevent premature overflow
+      return measureTextWidth(header) + 60
     },
     [measureTextWidth]
   )
@@ -102,14 +102,17 @@ export function useComputeTableResize({
     if (!containerRef.current) return
     const containerWidth = containerRef.current.offsetWidth
 
+    // Add a buffer zone to make transitions smoother
+    const COLUMN_TRANSITION_BUFFER = 50 // pixels of buffer
+
     // Only consider columns that are visible
     const visibleCols = columns.filter(
       col => columnVisibility[col.field] !== false
     )
 
     let usedWidth = checkboxSelection ? 50 : 0
-    // ~180 px for the "overflow" column if needed
-    const overflowReservedWidth = showOverflowDropdown ? 180 : 0
+    // Increase overflow column width for better usability (was 180)
+    const overflowReservedWidth = showOverflowDropdown ? 275 : 0
 
     const canFit: ColumnDef[] = []
     let theOverflow: ColumnDef[] = []
@@ -120,28 +123,43 @@ export function useComputeTableResize({
 
       if (col.width != null) {
         // If the developer explicitly set a width, forcibly add to canFit
-        canFit.push(col)
-        usedWidth += needed
-        continue
-      }
-
-      // Otherwise, do the old "fit" check
-      if (usedWidth + needed + overflowReservedWidth <= containerWidth) {
-        canFit.push(col)
-        usedWidth += needed
-      } else {
-        // everything else is overflow
-        theOverflow = visibleCols.slice(i)
-
-        // If we can't fit i-th column, let's see if we can also move
-        // the last fitted column to overflow
-        if (theOverflow.length > 0 && canFit.length > 1) {
-          const lastFitted = canFit.pop()
-          if (lastFitted) {
-            theOverflow = [lastFitted, ...theOverflow]
-          }
+        // only if we have enough space with our buffer
+        if (
+          usedWidth +
+            needed +
+            overflowReservedWidth +
+            COLUMN_TRANSITION_BUFFER <=
+          containerWidth
+        ) {
+          canFit.push(col)
+          usedWidth += needed
+        } else {
+          // Not enough space, all remaining columns go to overflow
+          theOverflow = visibleCols.slice(i)
+          break
         }
-        break
+      } else {
+        // Standard "does it fit?" check with buffer to prevent flickering/jumping
+        if (
+          usedWidth + needed + overflowReservedWidth <=
+          containerWidth - COLUMN_TRANSITION_BUFFER
+        ) {
+          canFit.push(col)
+          usedWidth += needed
+        } else {
+          // everything else is overflow
+          theOverflow = visibleCols.slice(i)
+
+          // If we can't fit i-th column, let's see if we can also move
+          // the last fitted column to overflow to make more room
+          if (theOverflow.length > 0 && canFit.length > 1) {
+            const lastFitted = canFit.pop()
+            if (lastFitted) {
+              theOverflow = [lastFitted, ...theOverflow]
+            }
+          }
+          break
+        }
       }
     }
 
