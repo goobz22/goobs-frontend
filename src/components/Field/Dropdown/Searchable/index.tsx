@@ -565,8 +565,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const getFilteredOptions = React.useCallback(() => {
     const currentInputVal = inputValue.trim()
 
-    // HISTORY TAB
-    if (activeTab === 1) {
+    // HISTORY TAB - only apply when variant is complex
+    if (activeTab === 1 && variant === 'complex') {
       if (combinedHistory.length === 0) {
         // Show a placeholder message if no history
         return [
@@ -654,7 +654,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     return filteredOpts
-  }, [inputValue, combinedHistory, options, activeTab])
+  }, [inputValue, combinedHistory, options, activeTab, variant])
 
   // Create the footer component for the dropdown with tabs
   const ListboxFooter = React.forwardRef<HTMLDivElement>((_, ref) => (
@@ -733,7 +733,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         style={{ pointerEvents: 'auto' }}
       >
         <ul {...other}>{children}</ul>
-        <ListboxFooter />
+        {variant === 'complex' && <ListboxFooter />}
       </div>
     )
   })
@@ -746,6 +746,13 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     () => getFilteredOptions(),
     [getFilteredOptions]
   )
+
+  // Ensure activeTab is always 0 for simple variant
+  useEffect(() => {
+    if (variant === 'simple' && activeTab !== 0) {
+      setActiveTab(0)
+    }
+  }, [variant, activeTab])
 
   return (
     <StyledFormControl
