@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { columnVisibilityAtom, columnVisibilityActions } from '../Jotai/atom'
 import type { ColumnDef } from '../types'
+import { dataGridStore } from './useInitializeGrid'
 
 type ColumnVisibilityModel = { [key: string]: boolean }
 
@@ -20,8 +21,12 @@ export const useManageColumn = ({
 }: UseManageColumnProps) => {
   const [tempVisibleColumns, setTempVisibleColumns] =
     useState<ColumnVisibilityModel>({})
-  const [columnVisibility] = useAtom(columnVisibilityAtom)
-  const updateVisibility = useSetAtom(columnVisibilityActions)
+  const [columnVisibility] = useAtom(columnVisibilityAtom, {
+    store: dataGridStore,
+  })
+  const updateVisibility = useSetAtom(columnVisibilityActions, {
+    store: dataGridStore,
+  })
   const [searchInput, setSearchInput] = useState(initialSearchInput)
   const [isAllChecked, setIsAllChecked] = useState(true)
   const initialized = useRef(false)

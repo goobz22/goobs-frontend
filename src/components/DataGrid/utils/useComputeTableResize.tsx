@@ -10,6 +10,7 @@ import {
 import type { ColumnDef } from '../types'
 import { useAtomValue } from 'jotai'
 import { columnVisibilityAtom } from '../Jotai/atom'
+import { dataGridStore } from './useInitializeGrid'
 
 /**
  * A simple check to see if two arrays of ColumnDef differ
@@ -55,7 +56,9 @@ export function useComputeTableResize({
   const [selectedOverflowField, setSelectedOverflowField] = useState('')
 
   // We rely on Jotai for column visibility
-  const columnVisibility = useAtomValue(columnVisibilityAtom)
+  const columnVisibility = useAtomValue(columnVisibilityAtom, {
+    store: dataGridStore,
+  })
 
   /**
    * measureTextWidth: Use a canvas to measure text length for column headers,

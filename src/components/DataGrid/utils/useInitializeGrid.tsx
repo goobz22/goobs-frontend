@@ -1,12 +1,15 @@
 'use client'
 import { useRef, useEffect } from 'react'
-import { useSetAtom, useAtomValue } from 'jotai'
+import { useSetAtom, useAtomValue, createStore } from 'jotai'
 import {
   columnsAtom,
   columnVisibilityAtom,
   columnVisibilityActions,
 } from '../Jotai/atom'
 import type { ColumnDef, RowData } from '../types'
+
+// Create a single shared store instance
+export const dataGridStore = createStore()
 
 interface UseInitializeGridProps {
   columns: ColumnDef[]
@@ -25,9 +28,14 @@ export function useInitializeGrid({
   setRows,
 }: UseInitializeGridProps) {
   // We retrieve or modify atoms here, so that DataGrid doesn't need its own useEffect.
-  const setColumns = useSetAtom(columnsAtom)
-  const columnVisibility = useAtomValue(columnVisibilityAtom)
-  const updateVisibility = useSetAtom(columnVisibilityActions)
+  // Use the custom store instead of the default one
+  const setColumns = useSetAtom(columnsAtom, { store: dataGridStore })
+  const columnVisibility = useAtomValue(columnVisibilityAtom, {
+    store: dataGridStore,
+  })
+  const updateVisibility = useSetAtom(columnVisibilityActions, {
+    store: dataGridStore,
+  })
 
   // We'll track whether we've run the "first-time" logic for columns and visibility
   const initialized = useRef(false)
