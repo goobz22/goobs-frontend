@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import QRCode from 'react-qr-code'
-import { Box, Typography, Paper, Theme, CircularProgress } from '@mui/material'
+import { Box, Paper } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { authenticator } from 'otplib'
+import Typography from '../Typography'
 
 /**
  * Props for the QRCodeComponent
@@ -11,7 +12,7 @@ import { authenticator } from 'otplib'
  * @property {string} appName - The name of the application for MFA
  * @property {number} [size] - The size of the QR code in pixels
  * @property {string} [title] - An optional title to display above the QR code
- * @property {SxProps<Theme>} [sx] - Custom styles to apply to the component
+ * @property {SxProps} [sx] - Custom styles to apply to the component
  * @property {(secret: string) => void} [onSecretGenerated] - Callback function to receive the generated secret
  */
 export interface QRCodeProps {
@@ -19,7 +20,7 @@ export interface QRCodeProps {
   appName: string
   size?: number
   title?: string
-  sx?: SxProps<Theme>
+  sx?: SxProps
   onSecretGenerated?: (secret: string) => void
 }
 
@@ -38,11 +39,15 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
         encodeURIComponent(appName),
         generatedSecret
       )
-      if (onSecretGenerated) {
-        onSecretGenerated(generatedSecret)
-      }
       return { secret: generatedSecret, otpAuth: otpAuthUrl }
-    }, [username, appName, onSecretGenerated])
+    }, [username, appName])
+
+    // Move the callback to useEffect to avoid state updates during render
+    useEffect(() => {
+      if (onSecretGenerated && secret) {
+        onSecretGenerated(secret)
+      }
+    }, [secret, onSecretGenerated])
 
     // Calculate responsive size
     const responsiveSize = useMemo(() => {
@@ -52,9 +57,11 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
     if (!otpAuth) {
       return (
         <Box sx={{ ...sx, p: 2 }} role="alert">
-          <Typography color="error">
-            Error: Failed to generate QR code
-          </Typography>
+          <Typography
+            text="Error: Failed to generate QR code"
+            fontcolor="error"
+            fontvariant="merriparagraph"
+          />
         </Box>
       )
     }
@@ -63,17 +70,20 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
       <Paper
         elevation={3}
         sx={{
-          ...sx,
           p: 3,
           display: 'inline-block',
           maxWidth: '100%',
           boxSizing: 'border-box',
+          ...sx,
         }}
       >
         {title && (
-          <Typography variant="h6" gutterBottom align="center">
-            {title}
-          </Typography>
+          <Typography
+            text={title}
+            fontvariant="merrih5"
+            align="center"
+            gutterBottom
+          />
         )}
         <Box
           sx={{
@@ -85,25 +95,13 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             margin: 'auto',
           }}
         >
-          <React.Suspense
-            fallback={
-              <CircularProgress
-                size={responsiveSize / 4}
-                aria-label="Loading QR Code"
-              />
-            }
-          >
-            <QRCode
-              value={otpAuth}
-              size={responsiveSize}
-              style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-              aria-label={`QR Code for ${title || 'MFA Setup'}`}
-            />
-          </React.Suspense>
+          <QRCode
+            value={otpAuth}
+            size={responsiveSize}
+            style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+            aria-label={`QR Code for ${title || 'MFA Setup'}`}
+          />
         </Box>
-        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-          Secret: {secret}
-        </Typography>
       </Paper>
     )
   }
