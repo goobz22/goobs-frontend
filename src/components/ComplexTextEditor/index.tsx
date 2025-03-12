@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { Box } from '@mui/material'
 import { Descendant } from 'slate'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
+import SimpleEditor from './SimpleEditor'
 
 export interface ComplexTextEditorProps {
   // For backward compatibility
@@ -108,6 +109,25 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     ...style,
   }
 
+  // If editorType is explicitly set to 'simple', only render the SimpleEditor without toolbar
+  if (editorType === 'simple') {
+    return (
+      <Box sx={combinedStyles}>
+        <SimpleEditor
+          value={simpleValue}
+          setValue={handleSimpleValueChange}
+          minRows={minRows}
+          label={label}
+          error={error}
+          helperText={helperText}
+          required={required}
+          style={style}
+        />
+      </Box>
+    )
+  }
+
+  // Otherwise, render the ComplexToolbar with mode toggling options
   return (
     <Box sx={combinedStyles}>
       <ComplexToolbar
