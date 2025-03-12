@@ -4,6 +4,7 @@ import React, { useMemo, useEffect, useState, useCallback } from 'react'
 import { Box, Stack } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from './jotai/atom'
+import { JotaiProvider } from './jotai/provider'
 
 import Toolbar from '../Toolbar'
 // Removed old generic AddTask import
@@ -57,7 +58,7 @@ function mergeColumnsAndTasks(
   })
 }
 
-function ProjectBoard({
+function ProjectBoardContent({
   variant,
   boardType,
   columns,
@@ -158,7 +159,7 @@ function ProjectBoard({
       setColumnState(newCols)
       setAddTaskOpen(false)
 
-      // 5.b) Also call the parent’s onAdd, passing the same newTask data
+      // 5.b) Also call the parent's onAdd, passing the same newTask data
       onAdd(newTask)
     },
     [columnState, boardType, setColumnState, onAdd]
@@ -457,6 +458,15 @@ function ProjectBoard({
         />
       )}
     </Box>
+  )
+}
+
+// Wrap the component with our custom JotaiProvider to avoid the "multiple instances" error
+function ProjectBoard(props: ProjectBoardProps) {
+  return (
+    <JotaiProvider>
+      <ProjectBoardContent {...props} />
+    </JotaiProvider>
   )
 }
 
