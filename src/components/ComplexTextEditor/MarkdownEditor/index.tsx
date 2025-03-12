@@ -1,11 +1,7 @@
 // File: src/components/RichTextEditor/MarkdownEditor/index.tsx
 
 import React, { useEffect, useState } from 'react'
-import {
-  handleSwitchToRichText,
-  handleBoldClick,
-  handleItalicClick,
-} from '../utils/useMarkdownEditor'
+import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
 import { Box, Divider, TextField } from '@mui/material'
 import { RichTextEditorTypes } from '../utils/useRichtextEditor'
@@ -23,7 +19,6 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   setMarkdown,
   markdownMode,
   setMarkdownMode,
-  setNewSlateValue,
 }) => {
   const [markdownValue, setMarkdownValue] = useState(markdown)
   const [selectedText, setSelectedText] = useState('')
@@ -46,16 +41,6 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const newValue = event.target.value
     setMarkdownValue(newValue)
     setMarkdown(newValue)
-  }
-
-  const handleSwitchMode = () => {
-    // Mark the returned Promise as intentionally ignored:
-    void handleSwitchToRichText(
-      markdown,
-      setNewSlateValue,
-      setNewSlateValue,
-      setMarkdownMode
-    )
   }
 
   const handleSelect = (event: React.SyntheticEvent<HTMLDivElement>) => {
