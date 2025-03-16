@@ -5,7 +5,7 @@ import { within, userEvent, expect, fireEvent } from '@storybook/test'
 import ConfirmationCodeInputs from './index'
 
 // Helper function to set input values directly without relying on userEvent.clear()
-const setInputValue = (input: HTMLInputElement, value: string) => {
+const setInputValue = (input: HTMLInputElement, value: string): void => {
   // Use fireEvent directly which is more reliable in test environments
   fireEvent.change(input, { target: { value } })
 
@@ -14,7 +14,8 @@ const setInputValue = (input: HTMLInputElement, value: string) => {
 }
 
 // Helper function to wait for a specific time
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms))
 
 /**
  * Configure Storybook metadata
@@ -35,7 +36,8 @@ const meta: Meta<typeof ConfirmationCodeInputs> = {
     onVerify: { action: 'onVerify clicked' },
     onSendResend: { action: 'onSendResend clicked' },
   },
-}
+} as const
+
 export default meta
 
 type Story = StoryObj<typeof ConfirmationCodeInputs>
@@ -53,6 +55,7 @@ export const Basic: Story = {
       isValid={false}
       aria-label="Basic Confirmation Code"
       showActionButtons={false}
+      onDisableVerification={() => {}}
     />
   ),
   play: ({ canvasElement }) => {
@@ -85,6 +88,7 @@ export const PrefilledValue: Story = {
       value="1234"
       aria-label="Prefilled Confirmation Code"
       showActionButtons={false}
+      onDisableVerification={() => {}}
     />
   ),
   play: ({ canvasElement }) => {
@@ -120,6 +124,7 @@ export const ValidCode: Story = {
       isValid={true}
       aria-label="Valid Confirmation Code"
       showActionButtons={false}
+      onDisableVerification={() => {}}
     />
   ),
   play: ({ canvasElement }) => {
@@ -158,6 +163,7 @@ export const ManualTyping: Story = {
       value=""
       aria-label="Manual Code Entry"
       showActionButtons={false}
+      onDisableVerification={() => {}}
     />
   ),
   play: async ({ canvasElement, step }) => {
@@ -168,7 +174,7 @@ export const ManualTyping: Story = {
       // Get each input element
       const element = canvas.getByTestId(`code-input-${i + 1}`)
       // Convert to HTMLInputElement for proper typing
-      return element as unknown as HTMLInputElement
+      return element as HTMLInputElement
     })
 
     // Step 1: Verify initial state
@@ -213,6 +219,7 @@ export const ArrowAndBackspace: Story = {
       value=""
       aria-label="Arrow Navigation Code"
       showActionButtons={false}
+      onDisableVerification={() => {}}
     />
   ),
   play: async ({ canvasElement, step }) => {
@@ -223,7 +230,7 @@ export const ArrowAndBackspace: Story = {
       // Get each input element
       const element = canvas.getByTestId(`code-input-${i + 1}`)
       // Convert to HTMLInputElement for proper typing
-      return element as unknown as HTMLInputElement
+      return element as HTMLInputElement
     })
 
     // Use individual variables for clarity
@@ -281,6 +288,7 @@ export const WithSendCodeButton: Story = {
     codeSent: false,
     onVerify: () => console.log('Verify clicked'),
     onSendResend: () => console.log('Send Code clicked'),
+    onDisableVerification: () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -312,6 +320,7 @@ export const WithResendCodeButton: Story = {
     codeSent: true,
     onVerify: () => console.log('Verify clicked'),
     onSendResend: () => console.log('Resend Code clicked'),
+    onDisableVerification: () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -339,6 +348,7 @@ export const ValidCodeWithButtons: Story = {
     codeSent: true,
     onVerify: () => console.log('Verify clicked'),
     onSendResend: () => console.log('Resend Code clicked'),
+    onDisableVerification: () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -384,6 +394,7 @@ export const WithCustomButtonProps: Story = {
       backgroundcolor: 'green',
       fontvariant: 'merrihelperfooter',
     },
+    onDisableVerification: () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -417,6 +428,7 @@ export const ButtonBehaviorTest: Story = {
       codeSent={false}
       onVerify={() => console.log('Verify clicked')}
       onSendResend={() => console.log('Send/Resend Code clicked')}
+      onDisableVerification={() => {}}
     />
   ),
   play: async ({ canvasElement, step }) => {
@@ -449,7 +461,7 @@ export const ButtonBehaviorTest: Story = {
       // Get all inputs by testId
       const inputs = Array.from({ length: 4 }, (_, i) => {
         const element = canvas.getByTestId(`code-input-${i + 1}`)
-        return element as unknown as HTMLInputElement
+        return element as HTMLInputElement
       })
 
       // Fill each input individually and force blur/change events
@@ -551,6 +563,7 @@ export const WithCodeSentFalse: Story = {
     codeSent: false,
     onVerify: () => console.log('Verify clicked'),
     onSendResend: () => console.log('Send/Resend Code clicked'),
+    onDisableVerification: () => {},
   },
   play: ({ canvasElement }) => {
     // Get buttons with direct DOM queries to be more reliable
@@ -579,6 +592,7 @@ export const WithCodeSentTrue: Story = {
     codeSent: true, // This is the key difference
     onVerify: () => console.log('Verify clicked'),
     onSendResend: () => console.log('Send/Resend Code clicked'),
+    onDisableVerification: () => {},
   },
   play: ({ canvasElement }) => {
     // Get buttons with direct DOM queries to be more reliable
