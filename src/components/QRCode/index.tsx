@@ -8,8 +8,8 @@ import Typography from '../Typography'
 /**
  * Props for the QRCodeComponent
  * @typedef {Object} QRCodeProps
- * @property {string} username - The username for the MFA setup
- * @property {string} appName - The name of the application for MFA
+ * @property {string} username - The username/email for the MFA setup
+ * @property {string} [appName] - The name of the application for MFA (defaults to "ThothOS")
  * @property {number} [size] - The size of the QR code in pixels
  * @property {string} [title] - An optional title to display above the QR code
  * @property {SxProps} [sx] - Custom styles to apply to the component
@@ -17,7 +17,7 @@ import Typography from '../Typography'
  */
 export interface QRCodeProps {
   username: string
-  appName: string
+  appName?: string
   size?: number
   title?: string
   sx?: SxProps
@@ -30,13 +30,22 @@ export interface QRCodeProps {
  * @returns {React.ReactElement} The rendered QR code component
  */
 const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
-  ({ username, appName, size = 256, title, sx, onSecretGenerated }) => {
+  ({
+    username,
+    appName = 'ThothOS',
+    size = 256,
+    title,
+    sx,
+    onSecretGenerated,
+  }) => {
     // Generate the secret and OTP auth URL
     const { secret, otpAuth } = useMemo(() => {
       const generatedSecret = authenticator.generateSecret()
+
+      // We're using the raw username (likely email) directly instead of "your%20account"
       const otpAuthUrl = authenticator.keyuri(
-        encodeURIComponent(username),
-        encodeURIComponent(appName),
+        username, // Use the raw username/email without encoding
+        appName, // Now defaulting to "ThothOS"
         generatedSecret
       )
       return { secret: generatedSecret, otpAuth: otpAuthUrl }
@@ -100,6 +109,14 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             size={responsiveSize}
             style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
+            data-testid="mfa-qrcode"
+          />
+        </Box>
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography
+            text={`${appName}: ${username}`}
+            fontvariant="merriparagraph"
+            align="center"
           />
         </Box>
       </Paper>
@@ -127,5 +144,17 @@ export function verifyMFAToken(token: string, secret: string): boolean {
     throw new Error('Invalid secret')
   }
 
-  return authenticator.verify({ token, secret })
+  try {
+    // Configure authenticator options to match Microsoft Authenticator
+    authenticator.options = {
+      window: 1, // Allow codes from 1 step before and after
+      digits: 6, // Microsoft Authenticator uses 6-digit codes
+      step: 30, // 30-second interval for code generation
+    }
+
+    return authenticator.verify({ token, secret })
+  } catch (error) {
+    console.error('MFA verification error:', error)
+    return false
+  }
 }
