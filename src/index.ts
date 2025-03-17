@@ -45,6 +45,7 @@ import { RawSeverityLevel } from './components/ProjectBoard/types'
 // Here is the new horizontal `Tabs` import
 import Tabs, { TabsProps } from './components/Tabs'
 import { Task } from './components/ProjectBoard/types'
+import Checkbox, { CheckboxProps } from './components/Checkbox'
 
 // New imports
 import DateField, { DateFieldProps } from './components/Field/Date'
@@ -172,7 +173,7 @@ export { CompanyAddTaskCustomerDropdown }
 export { CompanyAddTaskCustomerProvided }
 export { CustomerAddTask }
 export { NoUserAddTask }
-
+export { Checkbox }
 // New named exports
 export { DateField }
 export { Dropdown }
@@ -195,6 +196,7 @@ export type { SearchableDropdownProps }
 export { ShowTask }
 export type { Task }
 export type { RawCustomer }
+export type { CheckboxProps }
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
