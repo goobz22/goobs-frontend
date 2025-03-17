@@ -229,9 +229,6 @@ const Typography = ({
   if (typeof actualVariant === 'string' && actualVariant.length > 0) {
     // First, try to get the variant from the theme
     try {
-      // Log the actual variant being used
-      console.log('Using variant:', actualVariant)
-
       // Check if we're using a custom font variant (e.g., 'merrih2')
       if (/^(arapey|inter|merri)/.test(actualVariant)) {
         // For custom variants, we need to check if they exist in the theme
@@ -246,7 +243,6 @@ const Typography = ({
           const themeVariant = themeTypography[
             actualVariant
           ] as TypographyVariantStyle
-          console.log('Found theme variant:', themeVariant)
 
           if (themeVariant) {
             variantStyle = {
@@ -259,8 +255,6 @@ const Typography = ({
           }
         } else {
           // Custom variant not in theme, fallback to hardcoded styles
-          console.log('Custom variant not found in theme, using fallback')
-
           const fontFamily = actualVariant.startsWith('arapey')
             ? 'arapey'
             : actualVariant.startsWith('inter')
