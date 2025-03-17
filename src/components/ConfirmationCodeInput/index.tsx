@@ -1,8 +1,7 @@
 'use client'
-import React, { ChangeEvent, useState, useEffect, FC } from 'react'
-import { Box, Typography } from '@mui/material'
+import React, { useState, useEffect, FC, useRef } from 'react'
+import { Box, Typography, styled } from '@mui/material'
 import { CheckCircleOutline } from '@mui/icons-material'
-import { red, grey } from '../../styles/palette'
 import CustomButton, { CustomButtonProps } from '../Button'
 
 export interface ConfirmationCodeInputsProps {
@@ -47,7 +46,30 @@ export interface ConfirmationCodeInputsProps {
 
   /** Whether to show the success state UI */
   showSuccessState?: boolean
+
+  /** Custom styling for the input fields */
+  inputStyle?: React.CSSProperties
 }
+
+// Custom styled input for verification code digits
+const CodeInput = styled('input')(() => ({
+  width: '40px',
+  height: '50px',
+  padding: '0',
+  textAlign: 'center',
+  fontSize: '16px',
+  fontWeight: 'normal',
+  color: 'black',
+  backgroundColor: 'white',
+  border: '1px solid black',
+  borderRadius: '4px',
+  outline: 'none',
+  // The cursor is visible (not hiding with caretColor)
+  '&:focus': {
+    borderColor: 'black',
+    borderWidth: '2px',
+  },
+}))
 
 const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
@@ -68,40 +90,190 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSendResendButton = true,
   successMessage = 'Verification Successful',
   showSuccessState = false,
-  ...props
+  inputStyle = {},
 }) => {
   // Initialize internal state with the value prop
   const [internalValue, setInternalValue] = useState(value)
-  const [isFocused, setIsFocused] = useState(false)
-  const [cursorPosition, setCursorPosition] = useState(value.length)
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  // Initialize refs array
+  useEffect(() => {
+    inputRefs.current = Array(codeLength).fill(
+      null
+    ) as (HTMLInputElement | null)[]
+  }, [codeLength])
 
   // Update internal state when value prop changes
   useEffect(() => {
     if (internalValue !== value) {
       setInternalValue(value)
-      setCursorPosition(value.length)
     }
   }, [value, internalValue])
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // Only allow digits and limit to codeLength
-    const newValue = event.target.value.replace(/\D/g, '').slice(0, codeLength)
+  // Auto-focus first input field when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (inputRefs.current[0] && internalValue.length === 0) {
+        inputRefs.current[0].focus()
+      }
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [internalValue.length])
 
-    if (internalValue !== newValue) {
+  // Handle input change for a specific digit
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const target = e.target
+    const val = target.value
+
+    // Only accept numbers
+    if (!/^\d*$/.test(val)) {
+      return
+    }
+
+    // Create a copy of the current value as an array of characters
+    let newValueArr = internalValue.padEnd(codeLength, '').split('')
+
+    // If input has multiple characters (from paste), process them
+    if (val.length > 1) {
+      const digits = val.split('')
+      for (let i = 0; i < digits.length; i++) {
+        if (index + i < codeLength) {
+          newValueArr[index + i] = digits[i]
+        }
+      }
+    } else {
+      // Only replace the single character at the index
+      newValueArr[index] = val.charAt(val.length - 1)
+    }
+
+    // Convert back to string and remove trailing spaces
+    const newValue = newValueArr.join('').trimEnd()
+
+    // Update internal state and call onChange
+    setInternalValue(newValue)
+    onChange?.(newValue)
+
+    // Move focus to next input if we have a value and there's a next input
+    if (val && index < codeLength - 1) {
+      inputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  // Handle key down events for navigation
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const target = e.target as HTMLInputElement
+
+    switch (e.key) {
+      case 'Backspace': {
+        if (target.value === '') {
+          // If current field is empty and not the first field, move to previous field
+          if (index > 0) {
+            e.preventDefault()
+            inputRefs.current[index - 1]?.focus()
+
+            // Also clear the previous field if needed
+            const newValueArr = internalValue.split('')
+            newValueArr[index - 1] = ''
+            const newValue = newValueArr.join('').trimEnd()
+            setInternalValue(newValue)
+            onChange?.(newValue)
+          }
+        } else {
+          // Clear current field but don't move
+          const newValueArr = internalValue.split('')
+          newValueArr[index] = ''
+          const newValue = newValueArr.join('').trimEnd()
+          setInternalValue(newValue)
+          onChange?.(newValue)
+        }
+        break
+      }
+
+      case 'Delete': {
+        // Clear current field
+        const newValueArr = internalValue.split('')
+        newValueArr[index] = ''
+        const newValue = newValueArr.join('').trimEnd()
+        setInternalValue(newValue)
+        onChange?.(newValue)
+        break
+      }
+
+      case 'ArrowLeft':
+        // Move to previous input if exists
+        if (index > 0) {
+          e.preventDefault()
+          inputRefs.current[index - 1]?.focus()
+        }
+        break
+
+      case 'ArrowRight':
+        // Move to next input if exists
+        if (index < codeLength - 1) {
+          e.preventDefault()
+          inputRefs.current[index + 1]?.focus()
+        }
+        break
+
+      default: {
+        // For number keys, handle them directly
+        if (/^\d$/.test(e.key)) {
+          e.preventDefault()
+
+          // Update the value at this index
+          const newValueArr = internalValue.padEnd(codeLength, '').split('')
+          newValueArr[index] = e.key
+          const newValue = newValueArr.join('').trimEnd()
+
+          setInternalValue(newValue)
+          onChange?.(newValue)
+
+          // Move to next input if there's one
+          if (index < codeLength - 1) {
+            inputRefs.current[index + 1]?.focus()
+          }
+        }
+        break
+      }
+    }
+  }
+
+  // Handle paste event to distribute digits across inputs
+  const handlePaste = (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text')
+    const digits = pastedData.replace(/\D/g, '').slice(0, codeLength - index)
+
+    if (digits) {
+      // Update the value from the current index onwards
+      const newValueArr = internalValue.padEnd(codeLength, '').split('')
+
+      for (let i = 0; i < digits.length; i++) {
+        if (index + i < codeLength) {
+          newValueArr[index + i] = digits[i]
+        }
+      }
+
+      const newValue = newValueArr.join('').trimEnd()
       setInternalValue(newValue)
-      setCursorPosition(event.target.selectionStart || newValue.length)
       onChange?.(newValue)
+
+      // Focus the input after the last pasted digit or the last input
+      const focusIndex = Math.min(index + digits.length, codeLength - 1)
+      inputRefs.current[focusIndex]?.focus()
     }
   }
 
-  const handleSelect = () => {
-    if (inputRef.current) {
-      setCursorPosition(inputRef.current.selectionStart || internalValue.length)
-    }
-  }
-
-  // Calculate container width based on number of inputs
+  // Calculate container width based on number of inputs and spacing
   const inputAreaWidth = codeLength * 40 + (codeLength - 1) * 8 + 44
 
   // Calculate button container width
@@ -110,8 +282,8 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     ? Math.max(inputAreaWidth, minButtonWidth * 2 + 16)
     : Math.max(inputAreaWidth, minButtonWidth)
 
-  // Split the value into individual digits for display
-  const digits = internalValue.padEnd(codeLength, ' ').split('')
+  // Split the value into individual digits
+  const digits = internalValue.padEnd(codeLength, '').split('')
 
   // Check if all code fields are filled
   const allFieldsFilled = internalValue.length >= codeLength
@@ -149,6 +321,17 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     )
   }
 
+  const statusIndicator = (
+    <Box
+      width={20}
+      height={20}
+      borderRadius="50%"
+      bgcolor={isValid ? 'green' : 'red'}
+      role="status"
+      aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
+    />
+  )
+
   return (
     <Box
       display="flex"
@@ -166,111 +349,33 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         position="relative"
         marginBottom={2}
       >
-        <Box
-          display="flex"
-          gap={1}
-          sx={{
-            position: 'relative',
-            width: '100%',
-          }}
-        >
-          {/* Hidden input for actual value */}
-          <input
-            ref={inputRef}
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={internalValue}
-            onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onSelect={handleSelect}
-            onKeyUp={handleSelect}
-            onMouseUp={handleSelect}
-            aria-label={ariaLabel || 'Confirmation Code'}
-            aria-required={ariaRequired}
-            aria-invalid={ariaInvalid}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '50px',
-              opacity: 0,
-              cursor: 'text',
-              fontSize: '16px',
-              letterSpacing: '39px',
-              paddingLeft: '15px',
-              zIndex: 1,
-            }}
-            {...props}
-          />
-
-          {/* Visual segments */}
-          {digits.map((digit, index) => (
-            <Box
-              key={index}
-              sx={{
-                border: '1px solid black',
-                borderRadius: 1,
-                width: 40,
-                height: 50,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'black',
-                backgroundColor: 'white',
-                fontSize: '16px',
-                userSelect: 'none',
-                pointerEvents: 'none',
-                position: 'relative',
-                '&::after':
-                  isFocused && index === cursorPosition
-                    ? {
-                        content: '""',
-                        position: 'absolute',
-                        right:
-                          index === cursorPosition && cursorPosition > 0
-                            ? '0'
-                            : 'auto',
-                        left:
-                          index === cursorPosition && cursorPosition === 0
-                            ? '0'
-                            : 'auto',
-                        transform: 'none',
-                        top: '15%',
-                        height: '70%',
-                        width: '1px',
-                        backgroundColor: 'black',
-                        animation: 'blink 1s step-end infinite',
-                      }
-                    : {},
-                '@keyframes blink': {
-                  'from, to': {
-                    opacity: 1,
-                  },
-                  '50%': {
-                    opacity: 0,
-                  },
-                },
-              }}
-            >
-              {digit.trim()}
-            </Box>
-          ))}
+        <Box display="flex" alignItems="center" width="100%">
+          <Box display="flex" gap={1} width="100%">
+            {Array.from({ length: codeLength }).map((_, index) => (
+              <CodeInput
+                key={index}
+                ref={el => {
+                  inputRefs.current[index] = el
+                }}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={1}
+                value={digits[index] || ''}
+                onChange={e => handleInputChange(e, index)}
+                onKeyDown={e => handleKeyDown(e, index)}
+                onPaste={e => handlePaste(e, index)}
+                aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
+                aria-required={ariaRequired}
+                aria-invalid={ariaInvalid}
+                style={{
+                  ...inputStyle,
+                }}
+              />
+            ))}
+          </Box>
+          <Box ml={2}>{statusIndicator}</Box>
         </Box>
-
-        <Box
-          width={20}
-          height={20}
-          borderRadius="50%"
-          bgcolor={isValid ? grey.main : red.main}
-          position="static"
-          role="status"
-          aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
-          alignSelf="center"
-          marginRight={2}
-        />
       </Box>
 
       {showActionButtons && (
