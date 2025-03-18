@@ -4,6 +4,11 @@ import { Box, Paper } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { authenticator } from 'otplib'
 import Typography from '../Typography'
+import CustomButton, { CustomButtonProps } from '../Button'
+import { CheckCircleOutline } from '@mui/icons-material'
+import ConfirmationCodeInputs, {
+  ConfirmationCodeInputsProps,
+} from '../ConfirmationCodeInput'
 
 /**
  * Props for the QRCodeComponent
@@ -14,6 +19,18 @@ import Typography from '../Typography'
  * @property {string} [title] - An optional title to display above the QR code
  * @property {SxProps} [sx] - Custom styles to apply to the component
  * @property {(secret: string) => void} [onSecretGenerated] - Callback function to receive the generated secret
+ * @property {boolean} [showVerifyButton] - Whether to show the verify button
+ * @property {() => void | Promise<void>} [onVerify] - Callback function for when the Verify button is clicked
+ * @property {() => void | Promise<void>} [onDisableVerification] - Required callback function for when verification is disabled
+ * @property {Partial<CustomButtonProps>} [verifyButtonProps] - Custom props for the Verify button
+ * @property {Partial<CustomButtonProps>} [disableVerificationButtonProps] - Custom props for the Disable Verification button
+ * @property {boolean} [showSuccessState] - Whether to show the success state UI
+ * @property {string} [successMessage] - Custom success message to display
+ * @property {boolean} [showConfirmationInput] - Whether to show the confirmation code input
+ * @property {string} [confirmationCode] - The current confirmation code value
+ * @property {(value: string) => void} [onConfirmationCodeChange] - Callback for when confirmation code changes
+ * @property {ConfirmationCodeInputsProps} [confirmationCodeProps] - Custom props for the confirmation code input
+ * @property {boolean} [showDisableConfirmation] - Whether to show the disable confirmation state
  */
 export interface QRCodeProps {
   username: string
@@ -22,6 +39,18 @@ export interface QRCodeProps {
   title?: string
   sx?: SxProps
   onSecretGenerated?: (secret: string) => void
+  showVerifyButton?: boolean
+  onVerify?: () => void | Promise<void>
+  onDisableVerification?: () => void | Promise<void>
+  verifyButtonProps?: Partial<CustomButtonProps>
+  disableVerificationButtonProps?: Partial<CustomButtonProps>
+  showSuccessState?: boolean
+  successMessage?: string
+  showConfirmationInput?: boolean
+  confirmationCode?: string
+  onConfirmationCodeChange?: (value: string) => void
+  confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
+  showDisableConfirmation?: boolean
 }
 
 /**
@@ -37,6 +66,18 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
     title,
     sx,
     onSecretGenerated,
+    showVerifyButton = false,
+    onVerify,
+    onDisableVerification,
+    verifyButtonProps = {},
+    disableVerificationButtonProps = {},
+    showSuccessState = false,
+    successMessage = 'Verification Successful',
+    showConfirmationInput = false,
+    confirmationCode = '',
+    onConfirmationCodeChange,
+    confirmationCodeProps = {},
+    showDisableConfirmation = false,
   }) => {
     // Generate the secret and OTP auth URL
     const { secret, otpAuth } = useMemo(() => {
@@ -75,6 +116,128 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
       )
     }
 
+    // If showing success state, render the success UI
+    if (showSuccessState) {
+      return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          gap={2}
+          padding={3}
+          width="100%"
+        >
+          <CheckCircleOutline sx={{ fontSize: 60, color: 'green' }} />
+          <Typography
+            text={successMessage}
+            fontvariant="merrih5"
+            align="center"
+          />
+          <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+            <CustomButton
+              text="Disable Verification"
+              fontcolor="white"
+              backgroundcolor="black"
+              width="100%"
+              height="40px"
+              variant="outlined"
+              {...disableVerificationButtonProps}
+              onClick={() => {
+                if (onDisableVerification) void onDisableVerification()
+              }}
+            />
+          </Box>
+        </Box>
+      )
+    }
+
+    // If showing disable confirmation state, render QR with confirmation input
+    if (showDisableConfirmation) {
+      return (
+        <Paper
+          elevation={3}
+          sx={{
+            p: 3,
+            display: 'inline-block',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            ...sx,
+          }}
+        >
+          {title && (
+            <Typography
+              text={title}
+              fontvariant="merrih5"
+              align="center"
+              gutterBottom
+            />
+          )}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: responsiveSize,
+              height: responsiveSize,
+              margin: 'auto',
+            }}
+          >
+            <QRCode
+              value={otpAuth}
+              size={responsiveSize}
+              style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+              aria-label={`QR Code for ${title || 'MFA Setup'}`}
+              data-testid="mfa-qrcode"
+            />
+          </Box>
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography
+              text={`${appName}: ${username}`}
+              fontvariant="merriparagraph"
+              align="center"
+            />
+          </Box>
+
+          <Box
+            sx={{
+              mt: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <ConfirmationCodeInputs
+              isValid={false}
+              codeLength={6}
+              value={confirmationCode}
+              onChange={onConfirmationCodeChange}
+              showActionButtons={false}
+              onDisableVerification={() => {}}
+              {...confirmationCodeProps}
+            />
+
+            <CustomButton
+              text="Verify & Disable"
+              fontcolor="white"
+              backgroundcolor="black"
+              width="100%"
+              height="40px"
+              {...verifyButtonProps}
+              onClick={() => {
+                if (onVerify) void onVerify()
+              }}
+              disableButton={
+                verifyButtonProps?.disableButton ||
+                (confirmationCode.length < 6 ? 'true' : 'false')
+              }
+            />
+          </Box>
+        </Paper>
+      )
+    }
+
+    // Default QR code view with optional confirmation input and buttons
     return (
       <Paper
         elevation={3}
@@ -119,6 +282,44 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             align="center"
           />
         </Box>
+
+        {showConfirmationInput && (
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+            <ConfirmationCodeInputs
+              isValid={false}
+              codeLength={6}
+              value={confirmationCode}
+              onChange={onConfirmationCodeChange}
+              showActionButtons={false}
+              onDisableVerification={() => {}}
+              {...confirmationCodeProps}
+            />
+          </Box>
+        )}
+
+        {showVerifyButton && (
+          <Box
+            sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}
+          >
+            <CustomButton
+              text="Verify Code"
+              fontcolor="white"
+              backgroundcolor="black"
+              width="100%"
+              height="40px"
+              {...verifyButtonProps}
+              onClick={() => {
+                if (onVerify) void onVerify()
+              }}
+              disableButton={
+                verifyButtonProps?.disableButton ||
+                (showConfirmationInput && confirmationCode.length < 6
+                  ? 'true'
+                  : 'false')
+              }
+            />
+          </Box>
+        )}
       </Paper>
     )
   }
@@ -148,8 +349,8 @@ export function verifyMFAToken(token: string, secret: string): boolean {
     // Configure authenticator options to match Microsoft Authenticator
     authenticator.options = {
       window: 1, // Allow codes from 1 step before and after
-      digits: 6, // Microsoft Authenticator uses 6-digit codes
       step: 30, // 30-second interval for code generation
+      digits: 6, // Microsoft Authenticator uses 6-digit codes
     }
 
     return authenticator.verify({ token, secret })
