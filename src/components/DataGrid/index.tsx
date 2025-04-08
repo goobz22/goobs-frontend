@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Box, Alert } from '@mui/material'
 import CustomToolbar from '../Toolbar'
 import Table from './Table'
@@ -24,7 +24,16 @@ function DataGrid({
   onManage,
   onShow,
   onSelectionChange,
+  showIdColumns = false,
 }: DatagridProps) {
+  // Filter columns to hide ID columns based on showIdColumns prop
+  const filteredColumns = useMemo(() => {
+    if (showIdColumns) {
+      return columns
+    }
+    return columns.filter(col => col.field !== 'id' && col.field !== '_id')
+  }, [columns, showIdColumns])
+
   // Local state
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
   const [selectedRows, setSelectedRows] = useState<string[]>([])
@@ -32,7 +41,7 @@ function DataGrid({
   const [pageSize, setPageSize] = useState(10)
 
   // Initialize columns/rows if needed
-  useInitializeGrid({ columns, providedRows, setRows })
+  useInitializeGrid({ columns: filteredColumns, providedRows, setRows })
 
   // 1) When row selection changes
   const handleSelectionChange = (newSelectedIds: string[]) => {
@@ -60,7 +69,7 @@ function DataGrid({
 
   // 2) Search logic
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
-    columns,
+    columns: filteredColumns,
     rows,
     searchbarProps,
   })
@@ -138,7 +147,7 @@ function DataGrid({
       >
         {/* Table component */}
         <Table
-          columns={columns}
+          columns={filteredColumns}
           rows={visibleRows}
           selectedRowIds={selectedRows}
           onRowClick={handleRowClick}
@@ -154,7 +163,7 @@ function DataGrid({
           rowCount={filteredRows.length}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
-          columns={columns}
+          columns={filteredColumns}
         />
       </Box>
     </Box>

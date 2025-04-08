@@ -53,6 +53,8 @@ export interface DropdownProps extends Omit<FormControlProps, 'onChange'> {
   value?: string
   width?: string
   disabled?: boolean
+  // Controls whether ID columns (containing 'id' or '_id') are visible by default
+  showIdColumns?: boolean
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -173,9 +175,27 @@ const Dropdown: React.FC<DropdownProps> = ({
   value: externalValue,
   width,
   disabled = false,
+  showIdColumns = false, // Default to hiding ID columns for security
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [focused, setFocused] = useState(false)
+
+  // Filter out options with id values if showIdColumns is false
+  const filteredOptions = React.useMemo(() => {
+    if (showIdColumns) {
+      return options;
+    }
+    // Hide options where the value is exactly 'id' or '_id', or looks like a database ID
+    return options.filter(opt => {
+      const value = opt.value.toLowerCase();
+      // Check if value is an ID field or looks like an ObjectId
+      return !(
+        value === 'id' || 
+        value === '_id' || 
+        /^[0-9a-f]{24}$/.test(value) // MongoDB ObjectId format
+      );
+    });
+  }, [options, showIdColumns]);
 
   useEffect(() => {
     if (externalValue !== undefined) {
@@ -351,7 +371,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         fontcolor={fontcolor}
         disabled={disabled}
       >
-        {options.map(renderMenuItem)}
+        {filteredOptions.map(renderMenuItem)}
       </StyledSelect>
       {helperText && (
         <FormHelperText error={error}>{helperText}</FormHelperText>

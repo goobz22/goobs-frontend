@@ -66,6 +66,8 @@ export interface SearchableDropdownProps {
   searchHistory?: HistoryItem[] | string[]
   onSearch?: (searchTerm: string, timestamp?: Date) => void
   maxHistoryItems?: number
+  // Controls whether ID columns (containing 'id' or '_id') are visible by default
+  showIdColumns?: boolean
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -277,6 +279,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   searchHistory = [], // Default to empty array
   onSearch,
   maxHistoryItems = 5, // Default to showing 5 history items
+  showIdColumns = false, // Default to hiding ID columns for security
 }) => {
   const [value, setValue] = useState<DropdownOption | string | null>(null)
   const [inputValue, setInputValue] = useState('')
@@ -561,6 +564,23 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     return localHistory
   }, [searchHistory, localHistory])
 
+  // Filter out options with id values if showIdColumns is false
+  const filteredBaseOptions = React.useMemo(() => {
+    if (showIdColumns) {
+      return options;
+    }
+    // Hide options where the value is exactly 'id' or '_id', or looks like a database ID
+    return options.filter(opt => {
+      const value = opt.value.toLowerCase();
+      // Check if value is an ID field or looks like an ObjectId (MongoDB ID format)
+      return !(
+        value === 'id' || 
+        value === '_id' || 
+        /^[0-9a-f]{24}$/.test(value)
+      );
+    });
+  }, [options, showIdColumns]);
+
   // Create a combined options array based on active tab and input value
   const getFilteredOptions = React.useCallback(() => {
     const currentInputVal = inputValue.trim()
@@ -581,7 +601,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       // Map history items to dropdown options
       return combinedHistory.map(item => {
         // Check if this history item matches any of the original options
-        const matchingOption = options.find(
+        const matchingOption = filteredBaseOptions.find(
           opt =>
             opt.value.toLowerCase() === item.text.toLowerCase() ||
             (
@@ -617,11 +637,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     // ALL OPTIONS TAB (activeTab === 0)
     // If input is empty, return all options
     if (!currentInputVal) {
-      return options
+      return filteredBaseOptions
     }
 
     // Filter options based on current input
-    const filteredOpts = options.filter(opt =>
+    const filteredOpts = filteredBaseOptions.filter(opt =>
       opt.value.toLowerCase().includes(currentInputVal.toLowerCase())
     )
 
@@ -654,7 +674,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     return filteredOpts
-  }, [inputValue, combinedHistory, options, activeTab, variant])
+  }, [inputValue, combinedHistory, filteredBaseOptions, activeTab, variant])
 
   // Create the footer component for the dropdown with tabs
   const ListboxFooter = React.forwardRef<HTMLDivElement>((_, ref) => (

@@ -48,6 +48,9 @@ export interface DatagridProps {
   searchbarProps?: SearchbarProps
   error?: Error | null
 
+  // Controls whether ID columns (id/_id) are visible
+  showIdColumns?: boolean
+
   // Single or multi selection callbacks:
   onManage?: () => void
   onShow?: () => void
