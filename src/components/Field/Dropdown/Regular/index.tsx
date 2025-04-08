@@ -183,19 +183,19 @@ const Dropdown: React.FC<DropdownProps> = ({
   // Filter out options with id values if showIdColumns is false
   const filteredOptions = React.useMemo(() => {
     if (showIdColumns) {
-      return options;
+      return options
     }
     // Hide options where the value is exactly 'id' or '_id', or looks like a database ID
     return options.filter(opt => {
-      const value = opt.value.toLowerCase();
+      const value = opt.value.toLowerCase()
       // Check if value is an ID field or looks like an ObjectId
       return !(
-        value === 'id' || 
-        value === '_id' || 
+        value === 'id' ||
+        value === '_id' ||
         /^[0-9a-f]{24}$/.test(value) // MongoDB ObjectId format
-      );
-    });
-  }, [options, showIdColumns]);
+      )
+    })
+  }, [options, showIdColumns])
 
   useEffect(() => {
     if (externalValue !== undefined) {

@@ -567,19 +567,19 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   // Filter out options with id values if showIdColumns is false
   const filteredBaseOptions = React.useMemo(() => {
     if (showIdColumns) {
-      return options;
+      return options
     }
     // Hide options where the value is exactly 'id' or '_id', or looks like a database ID
     return options.filter(opt => {
-      const value = opt.value.toLowerCase();
+      const value = opt.value.toLowerCase()
       // Check if value is an ID field or looks like an ObjectId (MongoDB ID format)
       return !(
-        value === 'id' || 
-        value === '_id' || 
+        value === 'id' ||
+        value === '_id' ||
         /^[0-9a-f]{24}$/.test(value)
-      );
-    });
-  }, [options, showIdColumns]);
+      )
+    })
+  }, [options, showIdColumns])
 
   // Create a combined options array based on active tab and input value
   const getFilteredOptions = React.useCallback(() => {
