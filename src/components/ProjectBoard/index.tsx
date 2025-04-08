@@ -82,6 +82,7 @@ function ProjectBoardContent({
   currentUser,
   customerId,
   companyId,
+  preferDropdown,
 }: ProjectBoardProps) {
   // 1) Atom state for columns + tasks
   const [columnState, setColumnState] = useAtom(columnsAtom)
@@ -335,10 +336,13 @@ function ProjectBoardContent({
         />
       </Stack>
 
-      {/* Conditionally render AddTask based on the variant */}
+      {/* Conditionally render AddTask based on the variant and preferDropdown prop */}
       {variant === 'administrator' && (
         <>
-          {rawCompanies && rawCompanies.length > 0 ? (
+          {preferDropdown === true ||
+          (preferDropdown !== false &&
+            rawCompanies &&
+            rawCompanies.length > 0) ? (
             <AdministratorAddTaskCompanyDropdown
               open={addTaskOpen}
               onClose={() => setAddTaskOpen(false)}
@@ -350,7 +354,7 @@ function ProjectBoardContent({
               knowledgebaseArticles={rawArticles}
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
-              rawCompanies={rawCompanies}
+              rawCompanies={rawCompanies || []}
             />
           ) : (
             <AdministratorAddTaskCompanyProvided
@@ -371,7 +375,10 @@ function ProjectBoardContent({
       )}
       {variant === 'company' && (
         <>
-          {rawCustomers && rawCustomers.length > 0 ? (
+          {preferDropdown === true ||
+          (preferDropdown !== false &&
+            rawCustomers &&
+            rawCustomers.length > 0) ? (
             <CompanyAddTaskCustomerDropdown
               open={addTaskOpen}
               onClose={() => setAddTaskOpen(false)}
@@ -383,7 +390,7 @@ function ProjectBoardContent({
               knowledgebaseArticles={rawArticles}
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
-              rawCustomers={rawCustomers}
+              rawCustomers={rawCustomers || []}
             />
           ) : (
             <CompanyAddTaskCustomerProvided

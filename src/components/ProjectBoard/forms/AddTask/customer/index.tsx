@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react'
 import { Close } from '@mui/icons-material'
 import { Dialog, IconButton, Box, useMediaQuery, useTheme } from '@mui/material'
 import Typography from '../../../../Typography'
-import Dropdown from '../../../../Field/Dropdown/Regular'
+import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
 import MultiSelect from '../../../../Field/Dropdown/MultiSelect'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
 import CustomButton from '../../../../Button'
@@ -43,26 +43,42 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
 
+  // Debug logging for incoming props
+  console.log('CustomerAddTask - Props received:', {
+    topicsCount: topics?.length || 0,
+    queuesCount: schedulingQueues?.length || 0,
+    severityLevelsCount: severityLevels?.length || 0,
+  })
+
   // ------------------ DROPDOWN OPTIONS ------------------
-  // Format: { value, attribute1 } where attribute1 holds the _id.
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
-    attribute1: sl._id,
+    attribute1: sl.description || '',
   }))
+
   const queueOptions = schedulingQueues.map(q => ({
     value: q.queueName,
-    attribute1: q._id,
   }))
 
   // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(() => {
+    // Find the IDs from the selected values
+    const selectedQueueId =
+      schedulingQueues.find(q => q.queueName === selectedQueue)?._id || ''
+
+    console.log('Submitting task with mapped IDs:', {
+      severityId: selectedSeverity,
+      queueValue: selectedQueue,
+      queueId: selectedQueueId,
+    })
+
     const newTaskData: Omit<Task, '_id'> = {
       title: taskTitle,
       description: taskDescription,
       topicIds: selectedTopicIds,
       articleIds: [],
       severityId: selectedSeverity || '',
-      schedulingQueueId: selectedQueue || '',
+      schedulingQueueId: selectedQueueId,
       statusId: '',
       substatusId: '',
       employeeIds: [],
@@ -81,7 +97,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
       kbArticles: [],
       teamMember: '',
       nextActionDate: '',
-      companyId: companyId,
+      companyId,
       customerId: createdUserId,
     }
     onAdd(newTaskData)
@@ -94,6 +110,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
     companyId,
     createdUserId,
     onAdd,
+    schedulingQueues,
   ])
 
   // ------------------ RENDER ------------------
@@ -118,12 +135,10 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
           position: 'absolute',
           right: 8,
           top: 8,
-          color: theme => theme.palette.grey[500],
-          zIndex: theme => theme.zIndex.modal + 1,
+          color: theme.palette.grey[500],
+          zIndex: theme.zIndex.modal + 1,
           cursor: 'pointer',
-          '&:hover': {
-            color: theme => theme.palette.grey[700],
-          },
+          '&:hover': { color: theme.palette.grey[700] },
         }}
       >
         <Close />
@@ -167,11 +182,18 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                 gap: 1,
               }}
             >
-              <Dropdown
+              <SearchableDropdown
                 label="Severity Level"
                 options={severityOptions}
-                value={selectedSeverity}
-                onChange={e => setSelectedSeverity(e.target.value)}
+                defaultValue={
+                  severityOptions.find(
+                    opt => opt.attribute1 === selectedSeverity
+                  )?.value
+                }
+                onChange={option => {
+                  setSelectedSeverity(option?.attribute1 || '')
+                }}
+                placeholder="Select severity level"
               />
             </Box>
 
@@ -183,11 +205,16 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                 gap: 1,
               }}
             >
-              <Dropdown
+              <SearchableDropdown
                 label="Associated Product (Queue)"
                 options={queueOptions}
-                value={selectedQueue}
-                onChange={e => setSelectedQueue(e.target.value)}
+                defaultValue={
+                  queueOptions.find(opt => opt.value === selectedQueue)?.value
+                }
+                onChange={option => {
+                  setSelectedQueue(option?.value || '')
+                }}
+                placeholder="Select product queue"
               />
             </Box>
           </Box>

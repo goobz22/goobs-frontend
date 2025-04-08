@@ -112,6 +112,7 @@ export type RawSubStatus = {
   _id: string
   subStatus: string
   description?: string
+  statusId: string
 }
 
 /** Raw typed data for "topics." */
@@ -138,6 +139,7 @@ export type RawCustomer = {
   _id: string
   firstName?: string
   lastName?: string
+  email?: string
 }
 
 /** Raw typed data for "employees." */
@@ -191,9 +193,11 @@ export interface ProjectBoardProps {
   currentUser: CurrentUser
   customerId?: string
   companyId?: string
+  /** Whether to prefer the dropdown version of AddTask forms instead of using the 'provided' version. */
+  preferDropdown?: boolean
   /**
    * If ShowTask calls onComment with both commentText and _id,
-   * define the signature here. You can also do (text: string) => void if that’s your design.
+   * define the signature here. You can also do (text: string) => void if that's your design.
    */
   onComment: (commentText: string, _id: string) => void
   /**

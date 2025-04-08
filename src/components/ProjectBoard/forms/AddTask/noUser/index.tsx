@@ -5,7 +5,7 @@ import { Box } from '@mui/material'
 import Typography from '../../../../Typography'
 import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
-import Dropdown from '../../../../Field/Dropdown/Regular'
+import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
 import CustomButton from '../../../../Button'
 
 import type { RawSeverityLevel } from '../../../types'
@@ -34,7 +34,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   // Format: { value, attribute1 } where attribute1 is the original _id.
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
-    attribute1: sl._id,
+    attribute1: sl.description || '',
   }))
 
   // ------------------ SUBMIT HANDLER ------------------
@@ -85,24 +85,17 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           placeholder="Enter your email"
         />
 
-        <Dropdown
+        <SearchableDropdown
           label="Severity Level"
           options={severityOptions}
-          onChange={event => {
-            const selectedValue = event.target.value
-            const option = severityOptions.find(
-              opt => opt.value === selectedValue
-            )
-            if (option) {
-              setSelectedSeverity(option.attribute1)
-            } else {
-              setSelectedSeverity('')
-            }
-          }}
-          value={
+          defaultValue={
             severityOptions.find(opt => opt.attribute1 === selectedSeverity)
-              ?.value || ''
+              ?.value
           }
+          onChange={option => {
+            setSelectedSeverity(option?.attribute1 || '')
+          }}
+          placeholder="Select severity level"
         />
 
         <CustomButton
