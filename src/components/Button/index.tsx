@@ -46,6 +46,7 @@ function CustomButton({
   iconlocation = 'left',
   fontlocation = 'center',
   disabled,
+  style = {},
   ...restProps
 }: CustomButtonProps) {
   // Merge MUI's "disabled" with our "disableButton"
@@ -119,6 +120,7 @@ function CustomButton({
   }
 
   // Inline styles for the top-level container (Box)
+  // Merge the passed style prop with our containerStyle
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -127,6 +129,7 @@ function CustomButton({
     height: height || (isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'),
     minHeight: isIconOnly ? '36px' : isIconAbove ? minHeight : 'auto',
     minWidth: isIconOnly ? '36px' : 'fit-content',
+    ...style, // Apply any custom styles passed through the style prop
   }
 
   // Style for the inner content box

@@ -254,6 +254,28 @@ const StyledFormHelperText = styled(FormHelperText)({
   marginLeft: '14px',
 })
 
+// Create a utility function to check if a field is an ID field
+const isIdField = (fieldName: string): boolean => {
+  if (!fieldName) return false
+
+  // Check if it's a common ID field name
+  if (fieldName.toLowerCase() === 'id' || fieldName.toLowerCase() === '_id') {
+    return true
+  }
+
+  // Check if it contains "id" or "_id" as a standalone word or suffix
+  if (/(\b|_)id$/i.test(fieldName)) {
+    return true
+  }
+
+  // Check if it looks like a MongoDB ObjectId
+  if (/^[0-9a-f]{24}$/.test(fieldName)) {
+    return true
+  }
+
+  return false
+}
+
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   label,
   options,
@@ -982,124 +1004,165 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 />
               )}
 
-              {/* For simple variant - show attribute1 and attribute2 on one line */}
+              {/* For simple variant - show attribute1 and attribute2 on one line (excluding ID fields) */}
               {variant === 'simple' &&
                 !isHistoryItem &&
                 !isCurrentInput &&
                 !isNoHistoryPlaceholder &&
-                (option.attribute1 || option.attribute2) && (
-                  <Typography
-                    fontvariant="merriparagraph"
-                    text={[option.attribute1, option.attribute2]
-                      .filter(Boolean)
-                      .join(' | ')}
-                    fontcolor="rgba(0, 0, 0, 0.6)"
-                    sx={{
-                      fontSize: '12px',
-                      lineHeight: '16px',
-                      width: '100%',
-                      textAlign: 'left',
-                    }}
-                  />
-                )}
+                (() => {
+                  // Filter out ID attributes if showIdColumns is false
+                  const filteredAttributes = [
+                    option.attribute1,
+                    option.attribute2,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
 
-              {/* For complex variant - show attributes on separate lines */}
+                  return filteredAttributes.length > 0 ? (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={filteredAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  ) : null
+                })()}
+
+              {/* For complex variant - show attributes on separate lines (excluding ID fields) */}
               {variant === 'complex' &&
                 !isHistoryItem &&
                 !isCurrentInput &&
                 !isNoHistoryPlaceholder && (
                   <>
                     {/* First line of attributes */}
-                    {(option.attribute1 || option.attribute2) && (
-                      <Typography
-                        fontvariant="merriparagraph"
-                        text={[option.attribute1, option.attribute2]
-                          .filter(Boolean)
-                          .join(' | ')}
-                        fontcolor="rgba(0, 0, 0, 0.6)"
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          width: '100%',
-                          textAlign: 'left',
-                        }}
-                      />
-                    )}
+                    {(() => {
+                      const filteredAttributes = [
+                        option.attribute1,
+                        option.attribute2,
+                      ].filter(
+                        attr => showIdColumns || (attr && !isIdField(attr))
+                      )
+
+                      return filteredAttributes.length > 0 ? (
+                        <Typography
+                          fontvariant="merriparagraph"
+                          text={filteredAttributes.join(' | ')}
+                          fontcolor="rgba(0, 0, 0, 0.6)"
+                          sx={{
+                            fontSize: '12px',
+                            lineHeight: '16px',
+                            width: '100%',
+                            textAlign: 'left',
+                          }}
+                        />
+                      ) : null
+                    })()}
 
                     {/* Second line of attributes */}
-                    {(option.attribute3 || option.attribute4) && (
-                      <Typography
-                        fontvariant="merriparagraph"
-                        text={[option.attribute3, option.attribute4]
-                          .filter(Boolean)
-                          .join(' | ')}
-                        fontcolor="rgba(0, 0, 0, 0.6)"
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          width: '100%',
-                          textAlign: 'left',
-                        }}
-                      />
-                    )}
+                    {(() => {
+                      const filteredAttributes = [
+                        option.attribute3,
+                        option.attribute4,
+                      ].filter(
+                        attr => showIdColumns || (attr && !isIdField(attr))
+                      )
+
+                      return filteredAttributes.length > 0 ? (
+                        <Typography
+                          fontvariant="merriparagraph"
+                          text={filteredAttributes.join(' | ')}
+                          fontcolor="rgba(0, 0, 0, 0.6)"
+                          sx={{
+                            fontSize: '12px',
+                            lineHeight: '16px',
+                            width: '100%',
+                            textAlign: 'left',
+                          }}
+                        />
+                      ) : null
+                    })()}
 
                     {/* Third line of attributes */}
-                    {(option.attribute5 || option.attribute6) && (
-                      <Typography
-                        fontvariant="merriparagraph"
-                        text={[option.attribute5, option.attribute6]
-                          .filter(Boolean)
-                          .join(' | ')}
-                        fontcolor="rgba(0, 0, 0, 0.6)"
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          width: '100%',
-                          textAlign: 'left',
-                        }}
-                      />
-                    )}
+                    {(() => {
+                      const filteredAttributes = [
+                        option.attribute5,
+                        option.attribute6,
+                      ].filter(
+                        attr => showIdColumns || (attr && !isIdField(attr))
+                      )
+
+                      return filteredAttributes.length > 0 ? (
+                        <Typography
+                          fontvariant="merriparagraph"
+                          text={filteredAttributes.join(' | ')}
+                          fontcolor="rgba(0, 0, 0, 0.6)"
+                          sx={{
+                            fontSize: '12px',
+                            lineHeight: '16px',
+                            width: '100%',
+                            textAlign: 'left',
+                          }}
+                        />
+                      ) : null
+                    })()}
                   </>
                 )}
 
-              {/* For history items, show additional attributes from original options */}
+              {/* For history items, show additional attributes from original options (excluding ID fields) */}
               {isHistoryItem && variant === 'complex' && (
                 <>
                   {/* Show attribute3/4 as first additional line for history */}
-                  {(option.attribute3 || option.attribute4) && (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={[option.attribute3, option.attribute4]
-                        .filter(Boolean)
-                        .join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '12px',
-                        lineHeight: '16px',
-                        width: '100%',
-                        textAlign: 'left',
-                        fontStyle: 'italic',
-                      }}
-                    />
-                  )}
+                  {(() => {
+                    const filteredAttributes = [
+                      option.attribute3,
+                      option.attribute4,
+                    ].filter(
+                      attr => showIdColumns || (attr && !isIdField(attr))
+                    )
+
+                    return filteredAttributes.length > 0 ? (
+                      <Typography
+                        fontvariant="merriparagraph"
+                        text={filteredAttributes.join(' | ')}
+                        fontcolor="rgba(0, 0, 0, 0.6)"
+                        sx={{
+                          fontSize: '12px',
+                          lineHeight: '16px',
+                          width: '100%',
+                          textAlign: 'left',
+                          fontStyle: 'italic',
+                        }}
+                      />
+                    ) : null
+                  })()}
 
                   {/* Show attribute5/6 as second additional line for history */}
-                  {(option.attribute5 || option.attribute6) && (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={[option.attribute5, option.attribute6]
-                        .filter(Boolean)
-                        .join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '12px',
-                        lineHeight: '16px',
-                        width: '100%',
-                        textAlign: 'left',
-                        fontStyle: 'italic',
-                      }}
-                    />
-                  )}
+                  {(() => {
+                    const filteredAttributes = [
+                      option.attribute5,
+                      option.attribute6,
+                    ].filter(
+                      attr => showIdColumns || (attr && !isIdField(attr))
+                    )
+
+                    return filteredAttributes.length > 0 ? (
+                      <Typography
+                        fontvariant="merriparagraph"
+                        text={filteredAttributes.join(' | ')}
+                        fontcolor="rgba(0, 0, 0, 0.6)"
+                        sx={{
+                          fontSize: '12px',
+                          lineHeight: '16px',
+                          width: '100%',
+                          textAlign: 'left',
+                          fontStyle: 'italic',
+                        }}
+                      />
+                    ) : null
+                  })()}
                 </>
               )}
 

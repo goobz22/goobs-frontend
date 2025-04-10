@@ -125,7 +125,14 @@ function DataGrid({
                 onDuplicate: onDuplicate
                   ? () => onDuplicate(selectedRows)
                   : undefined,
-                onDelete: onDelete ? () => onDelete(selectedRows) : undefined,
+                onDelete: onDelete
+                  ? () => {
+                      // Call the onDelete handler and clear selection after it completes
+                      onDelete(selectedRows)
+                      // Clear the selection after delete operation
+                      handleSelectionChange([])
+                    }
+                  : undefined,
                 onManage: handleManage,
                 onShow: onShow,
                 handleClose: handleManageRowClose,

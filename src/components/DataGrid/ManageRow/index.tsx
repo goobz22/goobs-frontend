@@ -43,8 +43,15 @@ function ManageRow({
         handleClose()
         break
       case 'delete':
-        onDelete?.() // same here
-        handleClose()
+        if (onDelete) {
+          // Execute the delete operation
+          onDelete()
+          // Clear the selection by setting it to empty array
+          if (selectedRows.length > 0) {
+            // This will properly close the ManageRow component
+            handleClose()
+          }
+        }
         break
       case 'export':
         if (onExport) {
