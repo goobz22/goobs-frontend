@@ -46,6 +46,9 @@ import { RawSeverityLevel } from './components/ProjectBoard/types'
 import Tabs, { TabsProps } from './components/Tabs'
 import { Task } from './components/ProjectBoard/types'
 import Checkbox, { CheckboxProps } from './components/Checkbox'
+import MACAddressField, {
+  MACAddressFieldProps,
+} from './components/Field/IPAM/MACAddress'
 
 // New imports
 import DateField, { DateFieldProps } from './components/Field/Date'
@@ -184,6 +187,8 @@ export { PhoneNumberField }
 export { Searchbar }
 export { TextField }
 export { CustomDialog }
+export { MACAddressField }
+
 // Add FormDataGrid to named exports
 export { FormDataGrid }
 export { FormProjectBoard }
@@ -192,6 +197,7 @@ export type { PasswordFieldProps }
 export type { SearchbarProps }
 export type { TextFieldProps }
 export type { SearchableDropdownProps }
+export type { MACAddressFieldProps }
 // NEW: Export AddTask / ShowTask / ManageTask
 export { ShowTask }
 export type { Task }

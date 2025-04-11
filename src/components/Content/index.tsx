@@ -33,6 +33,7 @@ import type { USDFieldProps } from './Structure/USD/useUSD'
 import { CIDRFieldProps } from '../Field/IPAM/CIDR'
 import { IPAddressFieldProps } from '../Field/IPAM/Address'
 import { VLANFieldProps } from '../Field/IPAM/VLAN'
+import { MACAddressFieldProps } from '../Field/IPAM/MACAddress'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -67,6 +68,7 @@ import useCIDR from './Structure/CIDR/useCIDR'
 import useAddress from './Structure/Address/useAddress'
 import useVLAN from './Structure/VLAN/useVLAN'
 import useUSD from './Structure/USD/useUSD'
+import useMacAddress from './Structure/macaddress/useMacAddress'
 
 export interface ContentSectionProps {
   grids: Array<{
@@ -109,6 +111,7 @@ export interface ContentSectionProps {
     address?: IPAddressFieldProps | IPAddressFieldProps[]
     vlan?: VLANFieldProps | VLANFieldProps[]
     usdField?: USDFieldProps | USDFieldProps[]
+    macAddressField?: MACAddressFieldProps | MACAddressFieldProps[]
     // Added optional style property for grid customization
     style?: React.CSSProperties
   }>
@@ -170,6 +173,7 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   addElements(useAddress({ address: props.address }))
   addElements(useVLAN({ vlan: props.vlan }))
   addElements(useUSD({ usdField: props.usdField }))
+  addElements(useMacAddress({ macAddressField: props.macAddressField }))
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
