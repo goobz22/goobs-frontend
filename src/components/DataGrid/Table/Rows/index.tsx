@@ -248,28 +248,36 @@ const Rows: React.FC<RowsProps> = ({
                       maxWidth: 200,
                     }
 
+              // Adjust cell styles for custom rendered cells that may contain lists
+              const isCustomRendered = typeof col.renderCell === 'function'
+              const cellStyles = {
+                whiteSpace: isCustomRendered ? 'normal' : 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                paddingLeft: 1, // or 5 if desired
+                ...(isCustomRendered ? { padding: '8px 4px' } : {}),
+                ...widthStyles,
+              }
+
               return (
                 <TableCell
                   key={`${col.field}-${rowId}-${columnIndex}`}
-                  sx={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    paddingLeft: 1, // or 5 if desired
-                    ...widthStyles,
-                  }}
+                  sx={cellStyles}
                 >
-                  <StyledTooltip
-                    title={cellContentStr}
-                    tooltipcolor="#444"
-                    tooltipplacement="top"
-                    offsetX={0}
-                    offsetY={5}
-                    arrow
-                  >
-                    {/* If renderCell gave a React node, show that; otherwise it's a string. */}
-                    <span>{cellContent}</span>
-                  </StyledTooltip>
+                  {React.isValidElement(cellContent) ? (
+                    cellContent // Directly render React elements without wrapping in tooltip
+                  ) : (
+                    <StyledTooltip
+                      title={cellContentStr}
+                      tooltipcolor="#444"
+                      tooltipplacement="top"
+                      offsetX={0}
+                      offsetY={5}
+                      arrow
+                    >
+                      <span>{cellContent}</span>
+                    </StyledTooltip>
+                  )}
                 </TableCell>
               )
             })}
