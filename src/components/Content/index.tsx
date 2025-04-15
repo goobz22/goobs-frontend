@@ -18,8 +18,7 @@ import { DropdownProps } from '../Field/Dropdown/Regular'
 import { IncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
 import { SearchbarProps } from '../Field/Search'
 import { InternalIncrementNumberFieldProps } from '../Field/Number/InternalIncrement'
-import { InternalIncrementNumberFieldProps as SubnetFieldProps } from '../Field/IPAM/Subnet'
-import { InternalIncrementNumberFieldProps as SupernetFieldProps } from '../Field/IPAM/Subnet'
+import { SubnetFieldProps } from '../Field/IPAM/Subnet'
 import { PasswordFieldProps } from '../Field/Password'
 import { QRCodeProps } from '../QRCode'
 import { ComplexTextEditorProps } from '../ComplexTextEditor'
@@ -69,6 +68,7 @@ import useAddress from './Structure/Address/useAddress'
 import useVLAN from './Structure/VLAN/useVLAN'
 import useUSD from './Structure/USD/useUSD'
 import useMacAddress from './Structure/macaddress/useMacAddress'
+import type { SupernetFieldProps } from '../Field/IPAM/Supernet'
 
 export interface ContentSectionProps {
   grids: Array<{

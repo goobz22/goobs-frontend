@@ -1,6 +1,7 @@
 import React from 'react'
-import SupernetField from '../../../../components/Field/IPAM/Subnet'
-import type { InternalIncrementNumberFieldProps as SupernetFieldProps } from '../../../../components/Field/IPAM/Subnet'
+import SupernetField, {
+  SupernetFieldProps,
+} from '../../../../components/Field/IPAM/Supernet'
 
 interface UseSupernet {
   supernet?: SupernetFieldProps | SupernetFieldProps[]

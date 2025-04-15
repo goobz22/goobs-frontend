@@ -49,7 +49,7 @@ import Checkbox, { CheckboxProps } from './components/Checkbox'
 import MACAddressField, {
   MACAddressFieldProps,
 } from './components/Field/IPAM/MACAddress'
-
+import VLANField, { VLANFieldProps } from './components/Field/IPAM/VLAN'
 // New imports
 import DateField, { DateFieldProps } from './components/Field/Date'
 import Dropdown, { DropdownProps } from './components/Field/Dropdown/Regular'
@@ -188,7 +188,7 @@ export { Searchbar }
 export { TextField }
 export { CustomDialog }
 export { MACAddressField }
-
+export { VLANField }
 // Add FormDataGrid to named exports
 export { FormDataGrid }
 export { FormProjectBoard }
@@ -198,6 +198,7 @@ export type { SearchbarProps }
 export type { TextFieldProps }
 export type { SearchableDropdownProps }
 export type { MACAddressFieldProps }
+export type { VLANFieldProps }
 // NEW: Export AddTask / ShowTask / ManageTask
 export { ShowTask }
 export type { Task }
