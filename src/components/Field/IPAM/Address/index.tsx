@@ -139,15 +139,15 @@ const isIPInSubnetCIDR = (
 
   // Convert CIDR to subnet mask
   const mask = cidrToMask(cidr)
-  
+
   // Get the subnet range
   const range = calculateNetworkRange(subnetAddr, mask)
-  
+
   // Check if IP is numerically within the range
   const ipNum = ipToNumber(ip)
   const startNum = ipToNumber(range.start)
   const endNum = ipToNumber(range.end)
-  
+
   // The IP is in the subnet range if it's between start and end
   return ipNum >= startNum && ipNum <= endNum
 }
@@ -167,12 +167,12 @@ const isIPInUsableRange = (
   // Calculate the usable range
   const usableRange = calculateUsableIPRange(subnetAddr, cidr)
   if (!usableRange) return true // Skip if we can't calculate the range
-  
+
   // Check if IP is within the usable range
   const ipNum = ipToNumber(ip)
   const startNum = ipToNumber(usableRange.start)
   const endNum = ipToNumber(usableRange.end)
-  
+
   return ipNum >= startNum && ipNum <= endNum
 }
 
@@ -330,15 +330,15 @@ const calculateUsableIPRange = (
 
   // Calculate subnet range (network and broadcast addresses)
   const range = calculateNetworkRange(subnetAddress, subnetMask)
-  
+
   // Convert to numeric values
   const networkNum = ipToNumber(range.start)
   const broadcastNum = ipToNumber(range.end)
-  
+
   // Usable range starts from network+1 and ends at broadcast-1
   let usableStart = networkNum + 1
   let usableEnd = broadcastNum - 1
-  
+
   // If gateway is provided and valid, make sure it's excluded from the range
   // For simplicity, we don't modify the range bounds but just note that gateway is excluded
   if (gatewayIP && isValidIPAddress(gatewayIP)) {
@@ -346,14 +346,16 @@ const calculateUsableIPRange = (
     // Check if gateway is within the usable range
     if (gatewayNum >= usableStart && gatewayNum <= usableEnd) {
       // Gateway is within the usable range, consider it excluded
-      console.log(`Gateway IP ${gatewayIP} is in the usable range and will be excluded`)
+      console.log(
+        `Gateway IP ${gatewayIP} is in the usable range and will be excluded`
+      )
     }
   }
-  
+
   // Convert back to IP strings
   const firstUsable = numToIP(usableStart)
   const lastUsable = numToIP(usableEnd)
-  
+
   return {
     start: firstUsable,
     end: lastUsable,
@@ -421,23 +423,23 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     end: string
     cidr: number
   } | null>(null)
-  
+
   // Store references to prevent infinite loops
   const valueRef = useRef(value)
   const subnetAddressRef = useRef(subnetAddress)
   const subnetCIDRRef = useRef(subnetCIDR)
   const startIPValueRef = useRef(startIPValue)
   const endIPValueRef = useRef(endIPValue)
-  
+
   // Calculate if range is valid for the renderAsRange view
-  const isRangeValid = 
-    !isValidIPAddress(initialValue) || 
-    !isValidIPAddress(endIP) || 
+  const isRangeValid =
+    !isValidIPAddress(initialValue) ||
+    !isValidIPAddress(endIP) ||
     isValidIPRange(initialValue, endIP)
-  
+
   // Custom error text for range validation in the renderAsRange view
-  const startHelperText = !isRangeValid 
-    ? 'Start IP must be less than or equal to End IP' 
+  const startHelperText = !isRangeValid
+    ? 'Start IP must be less than or equal to End IP'
     : rest.helperText
 
   // Update refs when props change
@@ -504,9 +506,19 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
 
         // For range validation
         if (isRange) {
-          if (isStartIP && endIPValue && validIP && isValidIPAddress(endIPValue)) {
+          if (
+            isStartIP &&
+            endIPValue &&
+            validIP &&
+            isValidIPAddress(endIPValue)
+          ) {
             setIsValidRange(isValidIPRange(initialValue, endIPValue))
-          } else if (isEndIP && startIPValue && validIP && isValidIPAddress(startIPValue)) {
+          } else if (
+            isEndIP &&
+            startIPValue &&
+            validIP &&
+            isValidIPAddress(startIPValue)
+          ) {
             setIsValidRange(isValidIPRange(startIPValue, initialValue))
           }
         }
@@ -545,54 +557,94 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       if (isStartIP && endIPValue && isValidIPAddress(endIPValue)) {
         // 1. Check numeric order - start <= end
         const rangeOrderValid = isValidIPRange(value, endIPValue)
-        
+
         // 2. Check both IPs are in subnet (if provided)
         let bothInSubnet = true
         if (subnetAddress && subnetCIDR !== undefined) {
-          const startInSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
-          const endInSubnet = isIPInSubnetCIDR(endIPValue, subnetAddress, subnetCIDR)
-          
+          const startInSubnet = isIPInSubnetCIDR(
+            value,
+            subnetAddress,
+            subnetCIDR
+          )
+          const endInSubnet = isIPInSubnetCIDR(
+            endIPValue,
+            subnetAddress,
+            subnetCIDR
+          )
+
           // Also check usable range
-          const startInUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR)
-          const endInUsable = isIPInUsableRange(endIPValue, subnetAddress, subnetCIDR)
-          
-          bothInSubnet = startInSubnet && endInSubnet && startInUsable && endInUsable
+          const startInUsable = isIPInUsableRange(
+            value,
+            subnetAddress,
+            subnetCIDR
+          )
+          const endInUsable = isIPInUsableRange(
+            endIPValue,
+            subnetAddress,
+            subnetCIDR
+          )
+
+          bothInSubnet =
+            startInSubnet && endInSubnet && startInUsable && endInUsable
         }
-        
+
         // Both conditions must be true
         const rangeValid = rangeOrderValid && bothInSubnet
-        
+
         if (rangeValid !== isValidRange) {
           setIsValidRange(rangeValid)
         }
-      } 
+      }
       // For end IP field
       else if (isEndIP && startIPValue && isValidIPAddress(startIPValue)) {
         // 1. Check numeric order - start <= end
         const rangeOrderValid = isValidIPRange(startIPValue, value)
-        
+
         // 2. Check both IPs are in subnet (if provided)
         let bothInSubnet = true
         if (subnetAddress && subnetCIDR !== undefined) {
-          const startInSubnet = isIPInSubnetCIDR(startIPValue, subnetAddress, subnetCIDR)
+          const startInSubnet = isIPInSubnetCIDR(
+            startIPValue,
+            subnetAddress,
+            subnetCIDR
+          )
           const endInSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
-          
+
           // Also check usable range
-          const startInUsable = isIPInUsableRange(startIPValue, subnetAddress, subnetCIDR)
-          const endInUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR)
-          
-          bothInSubnet = startInSubnet && endInSubnet && startInUsable && endInUsable
+          const startInUsable = isIPInUsableRange(
+            startIPValue,
+            subnetAddress,
+            subnetCIDR
+          )
+          const endInUsable = isIPInUsableRange(
+            value,
+            subnetAddress,
+            subnetCIDR
+          )
+
+          bothInSubnet =
+            startInSubnet && endInSubnet && startInUsable && endInUsable
         }
-        
+
         // Both conditions must be true
         const rangeValid = rangeOrderValid && bothInSubnet
-        
+
         if (rangeValid !== isValidRange) {
           setIsValidRange(rangeValid)
         }
       }
     }
-  }, [isRange, isStartIP, isEndIP, value, startIPValue, endIPValue, isValidRange, subnetAddress, subnetCIDR])
+  }, [
+    isRange,
+    isStartIP,
+    isEndIP,
+    value,
+    startIPValue,
+    endIPValue,
+    isValidRange,
+    subnetAddress,
+    subnetCIDR,
+  ])
 
   const formatIPAddress = useCallback(
     (input: string, wasDelete: boolean): string => {
@@ -680,40 +732,47 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       // Don't do subnet validation if the IP is incomplete
       if (!isValidIPAddress(ip)) {
         setIsInNetwork(true)
-        return valid;
+        return valid
       }
 
       // Always check subnet constraints for complete IPs
       if (subnetAddress && subnetCIDR !== undefined) {
         // Check if IP is in the subnet range
         const inSubnet = isIPInSubnetCIDR(ip, subnetAddress, subnetCIDR)
-        
+
         // Check if IP is in the usable range (excludes network and broadcast addresses)
         const inUsableRange = isIPInUsableRange(ip, subnetAddress, subnetCIDR)
-        
+
         // We require the IP to be within both the subnet range and usable range
         const isValidIPInSubnet = inSubnet && (isGateway || inUsableRange)
-        
+
         // Update the validation state
         setIsInNetwork(isValidIPInSubnet)
-        
+
         // If the IP is not valid within the subnet context, return false
         if (!isValidIPInSubnet) {
-          return false;
+          return false
         }
       } else if (defaultNetwork && subnetMask) {
         // Legacy check for default network and subnet mask
         const networkValid = isIPInNetwork(ip, defaultNetwork, subnetMask)
         setIsInNetwork(networkValid)
         if (!networkValid) {
-          return false;
+          return false
         }
       }
 
       // Range validation is handled separately in useEffect
-      return valid;
+      return valid
     },
-    [allowIncomplete, defaultNetwork, subnetMask, subnetAddress, subnetCIDR, isGateway]
+    [
+      allowIncomplete,
+      defaultNetwork,
+      subnetMask,
+      subnetAddress,
+      subnetCIDR,
+      isGateway,
+    ]
   )
 
   const handleChange = useCallback(
@@ -728,44 +787,54 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       )
 
       // Check immediately if this is a complete IP address that needs validation
-      const isCompleteIP = isValidIPAddress(formattedValue);
-      
+      const isCompleteIP = isValidIPAddress(formattedValue)
+
       // Validate the basic IP format
       const valid = validateIPAddress(formattedValue)
       setValue(formattedValue)
       setIsValid(valid)
-      
+
       // Immediate validation for complete IPs when subnet info is available
       if (isCompleteIP && subnetAddress && subnetCIDR) {
         // Check if IP is in subnet range
-        const inSubnet = isIPInSubnetCIDR(formattedValue, subnetAddress, subnetCIDR);
-        
+        const inSubnet = isIPInSubnetCIDR(
+          formattedValue,
+          subnetAddress,
+          subnetCIDR
+        )
+
         // Check if IP is in usable range (for non-gateway IPs)
-        const inUsable = isGateway ? true : isIPInUsableRange(formattedValue, subnetAddress, subnetCIDR);
-        
+        const inUsable = isGateway
+          ? true
+          : isIPInUsableRange(formattedValue, subnetAddress, subnetCIDR)
+
         // Set subnet validation state
-        setIsInNetwork(inSubnet && inUsable);
-        
+        setIsInNetwork(inSubnet && inUsable)
+
         // For gateway, also set specific gateway validation
         if (isGateway) {
-          const mask = cidrToMask(subnetCIDR);
-          const range = calculateNetworkRange(subnetAddress, mask);
+          const mask = cidrToMask(subnetCIDR)
+          const range = calculateNetworkRange(subnetAddress, mask)
           // Gateway can't be network or broadcast address
-          const isNetworkAddress = formattedValue === range.start;
-          const isBroadcastAddress = formattedValue === range.end;
-          setIsInSubnet(inSubnet && !isNetworkAddress && !isBroadcastAddress);
+          const isNetworkAddress = formattedValue === range.start
+          const isBroadcastAddress = formattedValue === range.end
+          setIsInSubnet(inSubnet && !isNetworkAddress && !isBroadcastAddress)
         }
-        
+
         // For ranges, check order too
         if (isRange) {
-          let rangeOrderValid = true;
+          let rangeOrderValid = true
           if (isStartIP && endIPValue && isValidIPAddress(endIPValue)) {
-            rangeOrderValid = isValidIPRange(formattedValue, endIPValue);
-          } else if (isEndIP && startIPValue && isValidIPAddress(startIPValue)) {
-            rangeOrderValid = isValidIPRange(startIPValue, formattedValue);
+            rangeOrderValid = isValidIPRange(formattedValue, endIPValue)
+          } else if (
+            isEndIP &&
+            startIPValue &&
+            isValidIPAddress(startIPValue)
+          ) {
+            rangeOrderValid = isValidIPRange(startIPValue, formattedValue)
           }
-          
-          setIsValidRange(rangeOrderValid && inSubnet && inUsable);
+
+          setIsValidRange(rangeOrderValid && inSubnet && inUsable)
         }
       }
 
@@ -780,8 +849,20 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
 
       onChange?.(clonedEvent)
     },
-    [onChange, formatIPAddress, validateIPAddress, value, isGateway, isRange, isStartIP, isEndIP, 
-     subnetAddress, subnetCIDR, endIPValue, startIPValue]
+    [
+      onChange,
+      formatIPAddress,
+      validateIPAddress,
+      value,
+      isGateway,
+      isRange,
+      isStartIP,
+      isEndIP,
+      subnetAddress,
+      subnetCIDR,
+      endIPValue,
+      startIPValue,
+    ]
   )
 
   // Handle paste events to format them properly
@@ -811,36 +892,43 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   // Determine error message based on validation state
   const getErrorMessage = useCallback(() => {
     // Check if the IP is complete and valid in format
-    const isCompleteIP = isValidIPAddress(value);
-    
+    const isCompleteIP = isValidIPAddress(value)
+
     if (!isValid) {
-      return 'Please enter a valid IP address';
+      return 'Please enter a valid IP address'
     }
-    
+
     // IP not in subnet range - only show for complete IPs
     if (isCompleteIP && subnetAddress && subnetCIDR !== undefined) {
       // Check in subnet
-      const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR);
+      const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
       if (!inSubnet) {
         // Not in subnet at all
-        const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR));
-        return `IP must be within the subnet range ${range.start} - ${range.end} (${subnetAddress}/${subnetCIDR})`;
+        const range = calculateNetworkRange(
+          subnetAddress,
+          cidrToMask(subnetCIDR)
+        )
+        return `IP must be within the subnet range ${range.start} - ${range.end} (${subnetAddress}/${subnetCIDR})`
       }
-      
+
       // Check in usable range - for non-gateway IPs
       if (!isGateway) {
-        const inUsableRange = isIPInUsableRange(value, subnetAddress, subnetCIDR);
+        const inUsableRange = isIPInUsableRange(
+          value,
+          subnetAddress,
+          subnetCIDR
+        )
         if (!inUsableRange) {
           // In subnet but not in usable range
-          const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR);
+          const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR)
           if (usableRange) {
-            return `IP must be within the usable range ${usableRange.start} - ${usableRange.end}`;
+            return `IP must be within the usable range ${usableRange.start} - ${usableRange.end}`
           }
         }
       }
     } else if (isCompleteIP && !isInNetwork && networkRange) {
       // Legacy network range error
-      return `IP must be within the range ${networkRange.start} - ${networkRange.end} (${defaultNetwork}/${networkRange.cidr})`;
+      return `IP must be within the range ${networkRange.start} - ${networkRange.end} (${defaultNetwork}/${networkRange.cidr})`
     }
 
     // Range validation errors - show immediately when typing if possible
@@ -848,48 +936,60 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       if (isStartIP && endIPValue && isValidIPAddress(endIPValue)) {
         // Check if start IP is outside subnet range
         if (subnetAddress && subnetCIDR) {
-          const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR);
+          const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
           if (!inSubnet) {
-            const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR));
-            return `Start IP must be within the subnet range ${range.start} - ${range.end}`;
+            const range = calculateNetworkRange(
+              subnetAddress,
+              cidrToMask(subnetCIDR)
+            )
+            return `Start IP must be within the subnet range ${range.start} - ${range.end}`
           }
-          
-          const inUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR);
+
+          const inUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR)
           if (!inUsable) {
-            const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR);
+            const usableRange = calculateUsableIPRange(
+              subnetAddress,
+              subnetCIDR
+            )
             if (usableRange) {
-              return `Start IP must be within the usable range ${usableRange.start} - ${usableRange.end}`;
+              return `Start IP must be within the usable range ${usableRange.start} - ${usableRange.end}`
             }
           }
         }
-        
+
         // Check order even if in range
         if (!isValidIPRange(value, endIPValue)) {
-          return 'Start IP must be less than or equal to End IP';
+          return 'Start IP must be less than or equal to End IP'
         }
       }
-      
+
       if (isEndIP && startIPValue && isValidIPAddress(startIPValue)) {
         // Check if end IP is outside subnet range
         if (subnetAddress && subnetCIDR) {
-          const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR);
+          const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
           if (!inSubnet) {
-            const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR));
-            return `End IP must be within the subnet range ${range.start} - ${range.end}`;
+            const range = calculateNetworkRange(
+              subnetAddress,
+              cidrToMask(subnetCIDR)
+            )
+            return `End IP must be within the subnet range ${range.start} - ${range.end}`
           }
-          
-          const inUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR);
+
+          const inUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR)
           if (!inUsable) {
-            const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR);
+            const usableRange = calculateUsableIPRange(
+              subnetAddress,
+              subnetCIDR
+            )
             if (usableRange) {
-              return `End IP must be within the usable range ${usableRange.start} - ${usableRange.end}`;
+              return `End IP must be within the usable range ${usableRange.start} - ${usableRange.end}`
             }
           }
         }
-        
+
         // Check order even if in range
         if (!isValidIPRange(startIPValue, value)) {
-          return 'End IP must be greater than or equal to Start IP';
+          return 'End IP must be greater than or equal to Start IP'
         }
       }
     }
@@ -897,22 +997,25 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     // Gateway validation errors - only show for complete IPs
     if (isGateway && isCompleteIP && subnetAddress && subnetCIDR) {
       // Check if IP is within subnet range
-      const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR);
+      const inSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
       if (!inSubnet) {
-        const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR));
-        return `Gateway must be within the subnet range ${range.start} - ${range.end}`;
+        const range = calculateNetworkRange(
+          subnetAddress,
+          cidrToMask(subnetCIDR)
+        )
+        return `Gateway must be within the subnet range ${range.start} - ${range.end}`
       }
-      
+
       // Check if it's the network or broadcast address
-      const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR));
+      const range = calculateNetworkRange(subnetAddress, cidrToMask(subnetCIDR))
       if (value === range.start) {
-        return `Gateway cannot be the network address (${range.start})`;
+        return `Gateway cannot be the network address (${range.start})`
       } else if (value === range.end) {
-        return `Gateway cannot be the broadcast address (${range.end})`;
+        return `Gateway cannot be the broadcast address (${range.end})`
       }
     }
 
-    return undefined;
+    return undefined
   }, [
     isValid,
     isInNetwork,
@@ -934,20 +1037,25 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     // Get the usable IP range if we have subnet info and showAvailableRange is true
     let usableRangeInfo = null
     if (showAvailableRange && subnetAddress && subnetCIDR !== undefined) {
-      const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR, gatewayIP)
+      const usableRange = calculateUsableIPRange(
+        subnetAddress,
+        subnetCIDR,
+        gatewayIP
+      )
       if (usableRange) {
         // Format the usable range information
-        const rangeText = availableRangeMessage || 
+        const rangeText =
+          availableRangeMessage ||
           `Available IPs: ${usableRange.start} to ${usableRange.end} (excluding gateway)`
         usableRangeInfo = (
-          <Typography 
-            variant="caption" 
-            color="textSecondary" 
-            sx={{ 
-              display: 'block', 
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            sx={{
+              display: 'block',
               mt: -0.5,
               mb: 1,
-              fontStyle: 'italic'
+              fontStyle: 'italic',
             }}
           >
             {rangeText}
@@ -959,7 +1067,9 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     return (
       <Box sx={{ width: '100%', ...rest.style }}>
         {usableRangeInfo}
-        <Box sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'center' }}>
+        <Box
+          sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'center' }}
+        >
           <Box sx={{ flex: 1 }}>
             <IPAddressField
               label=""
@@ -973,14 +1083,23 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
               disabled={rest.disabled}
               subnetAddress={subnetAddress}
               subnetCIDR={subnetCIDR}
-              placeholder={rest.placeholder || "e.g., 192.168.1.100"}
+              placeholder={rest.placeholder || 'e.g., 192.168.1.100'}
               isRange={true}
               isStartIP={true}
               endIPValue={endIP}
             />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', px: 2 }}>
-            <Typography variant="body1" sx={{ marginTop: '15px' }}>-</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              px: 2,
+            }}
+          >
+            <Typography variant="body1" sx={{ marginTop: '15px' }}>
+              -
+            </Typography>
           </Box>
           <Box sx={{ flex: 1 }}>
             <IPAddressField
@@ -995,7 +1114,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
               disabled={rest.disabled}
               subnetAddress={subnetAddress}
               subnetCIDR={subnetCIDR}
-              placeholder={rest.placeholder || "e.g., 192.168.1.200"}
+              placeholder={rest.placeholder || 'e.g., 192.168.1.200'}
               isRange={true}
               isEndIP={true}
               startIPValue={initialValue}
@@ -1010,20 +1129,25 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   // Get the usable IP range if we have subnet info and showAvailableRange is true
   let usableRangeInfo = null
   if (showAvailableRange && subnetAddress && subnetCIDR !== undefined) {
-    const usableRange = calculateUsableIPRange(subnetAddress, subnetCIDR, gatewayIP)
+    const usableRange = calculateUsableIPRange(
+      subnetAddress,
+      subnetCIDR,
+      gatewayIP
+    )
     if (usableRange) {
       // Format the usable range information
-      const rangeText = availableRangeMessage || 
+      const rangeText =
+        availableRangeMessage ||
         `Available IPs: ${usableRange.start} to ${usableRange.end} (excluding gateway)`
       usableRangeInfo = (
-        <Typography 
-          variant="caption" 
-          color="textSecondary" 
-          sx={{ 
-            display: 'block', 
+        <Typography
+          variant="caption"
+          color="textSecondary"
+          sx={{
+            display: 'block',
             mt: -0.5,
             mb: 1,
-            fontStyle: 'italic'
+            fontStyle: 'italic',
           }}
         >
           {rangeText}
@@ -1044,28 +1168,36 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
         error={Boolean(
           // Basic IP format validation
           (!isValid && value !== '') ||
-          
-          // Validation when a complete IP is entered
-          (isValidIPAddress(value) && (
-            // Check if IP is outside subnet range
-            (subnetAddress && subnetCIDR && !isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)) ||
-            
-            // Check if non-gateway IP is outside usable range (exclude network/broadcast)
-            (!isGateway && subnetAddress && subnetCIDR && !isIPInUsableRange(value, subnetAddress, subnetCIDR)) ||
-            
-            // Gateway-specific validation (can't be network/broadcast)
-            (isGateway && subnetAddress && subnetCIDR && (() => {
-              const mask = cidrToMask(subnetCIDR);
-              const range = calculateNetworkRange(subnetAddress, mask);
-              return value === range.start || value === range.end;
-            })()) ||
-            
-            // Range order validation
-            (isRange && (
-              (isStartIP && endIPValue && isValidIPAddress(endIPValue) && !isValidIPRange(value, endIPValue)) ||
-              (isEndIP && startIPValue && isValidIPAddress(startIPValue) && !isValidIPRange(startIPValue, value))
-            ))
-          ))
+            // Validation when a complete IP is entered
+            (isValidIPAddress(value) &&
+              // Check if IP is outside subnet range
+              ((subnetAddress &&
+                subnetCIDR &&
+                !isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)) ||
+                // Check if non-gateway IP is outside usable range (exclude network/broadcast)
+                (!isGateway &&
+                  subnetAddress &&
+                  subnetCIDR &&
+                  !isIPInUsableRange(value, subnetAddress, subnetCIDR)) ||
+                // Gateway-specific validation (can't be network/broadcast)
+                (isGateway &&
+                  subnetAddress &&
+                  subnetCIDR &&
+                  (() => {
+                    const mask = cidrToMask(subnetCIDR)
+                    const range = calculateNetworkRange(subnetAddress, mask)
+                    return value === range.start || value === range.end
+                  })()) ||
+                // Range order validation
+                (isRange &&
+                  ((isStartIP &&
+                    endIPValue &&
+                    isValidIPAddress(endIPValue) &&
+                    !isValidIPRange(value, endIPValue)) ||
+                    (isEndIP &&
+                      startIPValue &&
+                      isValidIPAddress(startIPValue) &&
+                      !isValidIPRange(startIPValue, value))))))
         )}
         helperText={getErrorMessage()}
         placeholder={
