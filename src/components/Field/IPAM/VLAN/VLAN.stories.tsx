@@ -9,6 +9,9 @@ const meta: Meta<typeof VLANField> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  argTypes: {
+    onChange: { action: 'changed' },
+  },
 }
 
 export default meta
@@ -17,6 +20,7 @@ type Story = StoryObj<typeof VLANField>
 export const Default: Story = {
   args: {
     label: 'VLAN ID',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
 }
 
@@ -24,6 +28,7 @@ export const WithInitialValue: Story = {
   args: {
     label: 'VLAN with Initial Value',
     initialValue: '100',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
 }
 
@@ -31,6 +36,7 @@ export const WithReservedVLANs: Story = {
   args: {
     label: 'VLAN with Reserved IDs',
     reservedVLANs: [1, 4094, 1000, 1001, 1002],
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -45,8 +51,8 @@ export const WithReservedVLANs: Story = {
 export const WithCustomStep: Story = {
   args: {
     label: 'VLAN with Custom Step',
-    step: 10,
     initialValue: '100',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -64,6 +70,7 @@ export const WithCustomTimings: Story = {
     initialDelay: 100,
     repeatInterval: 50,
     initialValue: '100',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -86,10 +93,26 @@ export const WithBoundaryValues: Story = {
         maxWidth: '300px',
       }}
     >
-      <VLANField label="VLAN Near Minimum" initialValue="2" />
-      <VLANField label="VLAN Near Maximum" initialValue="4093" />
-      <VLANField label="Invalid VLAN (Below Min)" initialValue="0" />
-      <VLANField label="Invalid VLAN (Above Max)" initialValue="5000" />
+      <VLANField
+        label="VLAN Near Minimum"
+        initialValue="2"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
+      <VLANField
+        label="VLAN Near Maximum"
+        initialValue="4093"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
+      <VLANField
+        label="Invalid VLAN (Below Min)"
+        initialValue="0"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
+      <VLANField
+        label="Invalid VLAN (Above Max)"
+        initialValue="5000"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
     </div>
   ),
 }
@@ -105,9 +128,21 @@ export const TypicalRanges: Story = {
       }}
     >
       <p style={{ marginBottom: '0' }}>Common VLAN Ranges</p>
-      <VLANField label="Normal Range VLAN" initialValue="100" />
-      <VLANField label="Extended Range VLAN" initialValue="2000" />
-      <VLANField label="Default Native VLAN" initialValue="1" />
+      <VLANField
+        label="Normal Range VLAN"
+        initialValue="100"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
+      <VLANField
+        label="Extended Range VLAN"
+        initialValue="2000"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
+      <VLANField
+        label="Default Native VLAN"
+        initialValue="1"
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
     </div>
   ),
 }

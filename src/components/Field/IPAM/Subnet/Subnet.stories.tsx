@@ -20,6 +20,8 @@ type Story = StoryObj<typeof SubnetField>
 export const Default: Story = {
   args: {
     label: 'Subnet Mask',
+    value: { address: '', mask: 24 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -34,7 +36,8 @@ export const Default: Story = {
 export const WithClass16Mask: Story = {
   args: {
     label: 'Class B Subnet Mask',
-    initialValue: '16',
+    value: { address: '', mask: 16 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -48,7 +51,8 @@ export const WithClass16Mask: Story = {
 export const WithClass24Mask: Story = {
   args: {
     label: 'Class C Subnet Mask',
-    initialValue: '24',
+    value: { address: '', mask: 24 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -62,7 +66,8 @@ export const WithClass24Mask: Story = {
 export const WithClass28Mask: Story = {
   args: {
     label: 'Small Network Subnet Mask',
-    initialValue: '28',
+    value: { address: '', mask: 28 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -77,9 +82,8 @@ export const WithClass28Mask: Story = {
 export const CustomTimingSettings: Story = {
   args: {
     label: 'Custom Timing Settings',
-    initialValue: '24',
-    initialDelay: 200,
-    repeatInterval: 50,
+    value: { address: '', mask: 24 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -113,10 +117,26 @@ export const ComparisonDemo: Story = {
           Shows both the subnet mask and CIDR notation with host information.
         </p>
       </div>
-      <SubnetField label="Class B Network" initialValue="16" />
-      <SubnetField label="Class C Network" initialValue="24" />
-      <SubnetField label="Small Network (16 hosts)" initialValue="28" />
-      <SubnetField label="Very Small Network (2 hosts)" initialValue="30" />
+      <SubnetField
+        label="Class B Network"
+        value={{ address: '', mask: 16 }}
+        onChange={value => console.log('Value changed:', value)}
+      />
+      <SubnetField
+        label="Class C Network"
+        value={{ address: '', mask: 24 }}
+        onChange={value => console.log('Value changed:', value)}
+      />
+      <SubnetField
+        label="Small Network (16 hosts)"
+        value={{ address: '', mask: 28 }}
+        onChange={value => console.log('Value changed:', value)}
+      />
+      <SubnetField
+        label="Very Small Network (2 hosts)"
+        value={{ address: '', mask: 30 }}
+        onChange={value => console.log('Value changed:', value)}
+      />
     </div>
   ),
   parameters: {

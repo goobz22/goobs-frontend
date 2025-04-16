@@ -85,8 +85,14 @@ export const BasicStatusBoard: Story = {
         _id: 'sub-1',
         subStatus: 'Pending Info',
         description: 'Waiting on info',
+        statusId: 'stat-1',
       },
-      { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+      {
+        _id: 'sub-2',
+        subStatus: 'In Progress',
+        description: 'Working',
+        statusId: 'stat-1',
+      },
     ],
     rawTopics: [
       { _id: 'topic-1', topic: 'Frontend' },
@@ -218,8 +224,14 @@ export const SeverityBoard: Story = {
         _id: 'sub-1',
         subStatus: 'Pending Info',
         description: 'Waiting on info',
+        statusId: 'stat-1',
       },
-      { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+      {
+        _id: 'sub-2',
+        subStatus: 'In Progress',
+        description: 'Working',
+        statusId: 'stat-1',
+      },
     ],
     rawTopics: [
       { _id: 'topic-1', topic: 'Frontend' },
@@ -347,8 +359,14 @@ export const SubStatusBoard: Story = {
         _id: 'sub-1',
         subStatus: 'Pending Info',
         description: 'Waiting on info',
+        statusId: 'stat-1',
       },
-      { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+      {
+        _id: 'sub-2',
+        subStatus: 'In Progress',
+        description: 'Working',
+        statusId: 'stat-1',
+      },
     ],
     rawTopics: [
       { _id: 'topic-1', topic: 'Frontend' },
@@ -466,8 +484,14 @@ export const TopicBoard: Story = {
         _id: 'sub-1',
         subStatus: 'Pending Info',
         description: 'Waiting on info',
+        statusId: 'stat-1',
       },
-      { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+      {
+        _id: 'sub-2',
+        subStatus: 'In Progress',
+        description: 'Working',
+        statusId: 'stat-1',
+      },
     ],
     rawTopics: [
       { _id: 'topic-1', topic: 'Frontend' },
@@ -548,8 +572,18 @@ const addTaskCommonProps = {
     { _id: 'stat-2', status: 'Closed', description: 'Closed tasks' },
   ],
   subStatuses: [
-    { _id: 'sub-1', subStatus: 'Pending Info', description: 'Waiting' },
-    { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+    {
+      _id: 'sub-1',
+      subStatus: 'Pending Info',
+      description: 'Waiting',
+      statusId: 'stat-1',
+    },
+    {
+      _id: 'sub-2',
+      subStatus: 'In Progress',
+      description: 'Working',
+      statusId: 'stat-1',
+    },
   ],
   topics: [
     { _id: 'topic-1', topic: 'Frontend' },
@@ -817,8 +851,18 @@ export const ShowTaskPopup: StoryObj<typeof ShowTask> = {
         { _id: 'stat-2', status: 'Closed', description: 'Closed tasks' },
       ]}
       subStatusOptions={[
-        { _id: 'sub-1', subStatus: 'Pending Info', description: 'Waiting' },
-        { _id: 'sub-2', subStatus: 'In Progress', description: 'Working' },
+        {
+          _id: 'sub-1',
+          subStatus: 'Pending Info',
+          description: 'Waiting',
+          statusId: 'stat-1',
+        },
+        {
+          _id: 'sub-2',
+          subStatus: 'In Progress',
+          description: 'Working',
+          statusId: 'stat-1',
+        },
       ]}
       topicOptions={[
         { _id: 'topic-1', topic: 'Frontend' },

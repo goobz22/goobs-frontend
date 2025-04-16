@@ -20,8 +20,8 @@ type Story = StoryObj<typeof SupernetField>
 export const Default: Story = {
   args: {
     label: 'Supernet Mask',
-    subnetCidr: 24,
-    minCidr: 8,
+    value: { address: '', mask: 16 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -36,8 +36,8 @@ export const Default: Story = {
 export const ForClass28Subnet: Story = {
   args: {
     label: 'Supernet Mask',
-    subnetCidr: 28,
-    minCidr: 8,
+    value: { address: '', mask: 16 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -52,8 +52,8 @@ export const ForClass28Subnet: Story = {
 export const ForClass30Subnet: Story = {
   args: {
     label: 'Supernet Mask',
-    subnetCidr: 30,
-    minCidr: 8,
+    value: { address: '', mask: 16 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -68,10 +68,8 @@ export const ForClass30Subnet: Story = {
 export const CustomTimingSettings: Story = {
   args: {
     label: 'Custom Timing Settings',
-    subnetCidr: 24,
-    minCidr: 8,
-    initialDelay: 200,
-    repeatInterval: 50,
+    value: { address: '', mask: 16 },
+    onChange: value => console.log('Value changed:', value),
   },
   parameters: {
     docs: {
@@ -104,21 +102,18 @@ export const ComparisonDemo: Story = {
       </div>
       <SupernetField
         label="Parent Networks for /24 Subnet"
-        subnetCidr={24}
-        minCidr={8}
-        initialValue="16"
+        value={{ address: '', mask: 16 }}
+        onChange={value => console.log('Value changed:', value)}
       />
       <SupernetField
         label="Parent Networks for /28 Subnet"
-        subnetCidr={28}
-        minCidr={8}
-        initialValue="16"
+        value={{ address: '', mask: 16 }}
+        onChange={value => console.log('Value changed:', value)}
       />
       <SupernetField
         label="Parent Networks for /30 Subnet"
-        subnetCidr={30}
-        minCidr={8}
-        initialValue="16"
+        value={{ address: '', mask: 16 }}
+        onChange={value => console.log('Value changed:', value)}
       />
     </div>
   ),
@@ -152,15 +147,13 @@ export const LargeNetworkDemo: Story = {
       </div>
       <SupernetField
         label="Parent Networks for /16 Subnet"
-        subnetCidr={16}
-        minCidr={8}
-        initialValue="8"
+        value={{ address: '', mask: 8 }}
+        onChange={value => console.log('Value changed:', value)}
       />
       <SupernetField
         label="Parent Networks for /20 Subnet"
-        subnetCidr={20}
-        minCidr={8}
-        initialValue="8"
+        value={{ address: '', mask: 8 }}
+        onChange={value => console.log('Value changed:', value)}
       />
     </div>
   ),

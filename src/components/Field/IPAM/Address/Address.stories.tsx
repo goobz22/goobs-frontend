@@ -9,6 +9,9 @@ const meta: Meta<typeof IPAddressField> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  argTypes: {
+    onChange: { action: 'changed' },
+  },
 }
 
 export default meta
@@ -17,6 +20,7 @@ type Story = StoryObj<typeof IPAddressField>
 export const Default: Story = {
   args: {
     label: 'IP Address',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
 }
 
@@ -24,6 +28,7 @@ export const WithInitialValue: Story = {
   args: {
     label: 'IP with Initial Value',
     initialValue: '192.168.1.1',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
 }
 
@@ -32,6 +37,7 @@ export const SubnetValidation: Story = {
     label: 'IP with Subnet Validation',
     defaultNetwork: '10.0.0.0',
     subnetMask: '255.255.0.0',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -47,6 +53,7 @@ export const DisableAutoInsertDots: Story = {
   args: {
     label: 'Manual Dot Entry',
     autoInsertDots: false,
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -62,6 +69,7 @@ export const AllowIncomplete: Story = {
   args: {
     label: 'Allow Incomplete Entry',
     allowIncomplete: true,
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -77,6 +85,7 @@ export const StrictValidation: Story = {
   args: {
     label: 'Strict Validation',
     allowIncomplete: false,
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -94,6 +103,7 @@ export const ReservedIPValidation: Story = {
     defaultNetwork: '192.168.1.0',
     subnetMask: '255.255.255.0',
     initialValue: '192.168.1.0',
+    onChange: event => console.log('Value changed:', event.target.value),
   },
   render: args => (
     <div>
@@ -119,19 +129,26 @@ export const ComparisonDemo: Story = {
       <IPAddressField
         label="Auto-insert dots (default)"
         autoInsertDots={true}
+        onChange={event => console.log('Value changed:', event.target.value)}
       />
-      <IPAddressField label="Manual dot entry" autoInsertDots={false} />
+      <IPAddressField
+        label="Manual dot entry"
+        autoInsertDots={false}
+        onChange={event => console.log('Value changed:', event.target.value)}
+      />
       <IPAddressField
         label="Within subnet (valid)"
         initialValue="192.168.1.10"
         defaultNetwork="192.168.1.0"
         subnetMask="255.255.255.0"
+        onChange={event => console.log('Value changed:', event.target.value)}
       />
       <IPAddressField
         label="Outside subnet (invalid)"
         initialValue="10.0.0.1"
         defaultNetwork="192.168.1.0"
         subnetMask="255.255.255.0"
+        onChange={event => console.log('Value changed:', event.target.value)}
       />
     </div>
   ),
