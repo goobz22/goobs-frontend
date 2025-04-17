@@ -14,9 +14,11 @@ import ListNav from './VerticalVariant/mainNav/list'
 import ExpandingSubNav from './VerticalVariant/subNav/expanding'
 import ListSubNav from './VerticalVariant/subNav/list'
 import ViewNav from './VerticalVariant/viewNav'
-// Import new components for subViewNav support
+// Import new components for subViewNav and subSubViewNav support
 import ExpandingViewNav from './VerticalVariant/viewNav/expanding'
-import SubViewNav from './VerticalVariant/subViewNav'
+import SubViewNav from './VerticalVariant/subViewNav/list'
+import ExpandingSubViewNav from './VerticalVariant/subViewNav/expanding'
+import SubSubViewNav from './VerticalVariant/subSubViewNav/list'
 
 // --------------------------------------------------------------------------
 // INTERFACES
@@ -27,10 +29,11 @@ import SubViewNav from './VerticalVariant/subViewNav'
  *   - navType = 'mainNav' => can have subnavs
  *   - navType = 'subNav' => can have views
  *   - navType = 'viewNav' => can have subViewNavs
- *   - navType = 'subViewNav' => no children
+ *   - navType = 'subViewNav' => can have subSubViewNavs
+ *   - navType = 'subSubViewNav' => no children
  */
 export interface NavItem {
-  navType: 'mainNav' | 'subNav' | 'viewNav' | 'subViewNav'
+  navType: 'mainNav' | 'subNav' | 'viewNav' | 'subViewNav' | 'subSubViewNav'
   title: string
   route?: string
   trigger?: 'route' | 'onClick'
@@ -43,6 +46,8 @@ export interface NavItem {
   views?: NavItem[]
   // For viewNav items only:
   subViewNavs?: NavItem[]
+  // For subViewNav items only:
+  subSubViewNavs?: NavItem[]
 }
 
 /**
@@ -132,10 +137,11 @@ function Nav({
   marginbelowtitle = '5px',
   router,
 }: NavProps) {
-  // States for expanded mainNavs, subNavs, and viewNavs
+  // States for expanded mainNavs, subNavs, viewNavs, and subViewNavs
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
   const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
   const [expandedViewNavs, setExpandedViewNavs] = useState<string[]>([])
+  const [expandedSubViewNavs, setExpandedSubViewNavs] = useState<string[]>([])
 
   // Default width for the vertical nav
   const [verticalNavWidth] = useState<string>('250px')
@@ -148,7 +154,7 @@ function Nav({
     .filter(item => item.navType === 'mainNav')
     .map(item => ({ value: item.title }))
 
-  // Handle route or onClick triggers for mainNav/subNav/viewNav/subViewNav
+  // Handle route or onClick triggers for mainNav/subNav/viewNav/subViewNav/subSubViewNav
   function handleNavClick(item: NavItem) {
     if (item.trigger === 'route' && item.route && router) {
       router.push(item.route)
@@ -163,7 +169,7 @@ function Nav({
     }
   }
 
-  // Recursively render mainNav -> subNav -> viewNav -> subViewNav
+  // Recursively render mainNav -> subNav -> viewNav -> subViewNav -> subSubViewNav
   function renderItem(
     item: NavItem,
     level: number,
@@ -278,8 +284,46 @@ function Nav({
 
       // 4) SUB VIEW NAV
       case 'subViewNav': {
+        // Check if this subViewNav has children and should expand
+        const shouldExpand =
+          item.expanding === true && !!item.subSubViewNavs?.length
+
+        if (shouldExpand) {
+          // Render the expanding subViewNav
+          return (
+            <ExpandingSubViewNav
+              key={item.title}
+              title={item.title}
+              expandedNavs={expandedSubViewNavs}
+              setExpandedNavs={setExpandedSubViewNavs}
+              onClick={() => handleNavClick(item)}
+            >
+              {item.subSubViewNavs?.map(subSubViewItem =>
+                renderItem(subSubViewItem, level + 1, activeAndHoverColor)
+              )}
+            </ExpandingSubViewNav>
+          )
+        } else {
+          // Render the standard subViewNav item
+          return (
+            <SubViewNav
+              key={item.title}
+              title={item.title}
+              route={item.route}
+              trigger={item.trigger}
+              onClick={item.onClick}
+              activeAndHoverColor={activeAndHoverColor}
+              onClose={onClose}
+              variant={variant}
+            />
+          )
+        }
+      }
+
+      // 5) SUB SUB VIEW NAV
+      case 'subSubViewNav': {
         return (
-          <SubViewNav
+          <SubSubViewNav
             key={item.title}
             title={item.title}
             route={item.route}
@@ -337,7 +381,26 @@ function Nav({
                 shrunkfontcolor={shrunkfontcolor}
                 shrunklabelposition="aboveNotch"
                 onChange={option => {
-                  setSelectedNav(option ? option.value : null)
+                  const selectedValue = option ? option.value : null
+                  setSelectedNav(selectedValue)
+
+                  // If a nav is selected, automatically expand it
+                  if (selectedValue) {
+                    // Find the selected nav item
+                    const selectedNavItem = items.find(
+                      item =>
+                        item.navType === 'mainNav' &&
+                        item.title === selectedValue
+                    )
+
+                    // If the item has subnavs, expand it
+                    if (selectedNavItem?.subnavs?.length) {
+                      // Add to expandedNavs if not already there
+                      if (!expandedNavs.includes(selectedValue)) {
+                        setExpandedNavs([...expandedNavs, selectedValue])
+                      }
+                    }
+                  }
                 }}
               />
             </Box>

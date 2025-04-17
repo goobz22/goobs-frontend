@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { Box, Alert } from '@mui/material'
 import CustomToolbar from '../Toolbar'
 import Table from './Table'
@@ -10,6 +10,7 @@ import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
+import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import { DatagridProps, RowData } from './types'
 
 function DataGrid({
@@ -26,6 +27,9 @@ function DataGrid({
   onSelectionChange,
   showIdColumns = false,
 }: DatagridProps) {
+  // Create ref for the container to measure available height
+  const containerRef = useRef<HTMLDivElement>(null)
+
   // Filter columns to hide ID columns based on showIdColumns prop
   const filteredColumns = useMemo(() => {
     if (showIdColumns) {
@@ -38,7 +42,25 @@ function DataGrid({
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
-  const [pageSize, setPageSize] = useState(10)
+
+  // Automatically calculate the number of rows that can fit in the container
+  const autoPageSize = useAutoRowHeight(containerRef, {
+    // Adjust these values based on your actual layout measurements
+    headerHeight: 150, // Toolbar + table header
+    footerHeight: 56, // Footer height
+    rowHeight: 53, // Average row height
+    minRows: 5, // Minimum number of rows to show
+  })
+
+  // Use calculated pageSize instead of fixed value
+  const [pageSize, setPageSize] = useState<number>(10) // Initial default value
+
+  // Update pageSize when autoPageSize changes
+  useEffect(() => {
+    if (autoPageSize > 0) {
+      setPageSize(autoPageSize)
+    }
+  }, [autoPageSize])
 
   // Initialize columns/rows if needed
   useInitializeGrid({ columns: filteredColumns, providedRows, setRows })
@@ -85,6 +107,14 @@ function DataGrid({
   const startIndex = page * pageSize
   const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize)
 
+  // Reset page when rowCount or pageSize changes to prevent empty pages
+  useEffect(() => {
+    const totalPages = Math.ceil(filteredRows.length / pageSize)
+    if (page >= totalPages && totalPages > 0) {
+      setPage(totalPages - 1)
+    }
+  }, [filteredRows.length, pageSize, page])
+
   // Determine if "all rows" are currently selected
   const allRowsSelected =
     rows.length > 0 &&
@@ -96,6 +126,7 @@ function DataGrid({
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         position: 'relative',
         display: 'flex',

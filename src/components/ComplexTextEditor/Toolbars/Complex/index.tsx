@@ -44,6 +44,8 @@ interface ComplexToolbarProps {
 
   // Optional accordion props
   accordion?: boolean
+  accordionSummary?: React.ReactNode
+  defaultExpanded?: boolean
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -64,6 +66,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   required,
   style,
   accordion = false,
+  accordionSummary,
+  defaultExpanded,
 }) => {
   const handleModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -173,6 +177,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setMarkdown={setMarkdown}
+          accordionSummary={accordionSummary}
+          defaultExpanded={defaultExpanded}
         />
       )}
 

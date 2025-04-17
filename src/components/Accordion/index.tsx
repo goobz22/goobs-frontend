@@ -138,10 +138,29 @@ const StyledAccordion = styled(StrictAccordion)({
     '&:before': {
       display: 'none',
     },
+    // Improved styling for stacked accordions
+    marginBottom: '8px',
+    borderRadius: '8px',
+    boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+    transition: 'box-shadow 0.3s ease, transform 0.2s ease',
+    overflow: 'hidden',
+
+    // Add subtle hover effect
+    '&:hover': {
+      boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.15)',
+      transform: 'translateY(-1px)',
+    },
+
     // Mobile styles
     '@media (max-width: 600px)': {
-      borderRadius: '4px',
-      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+      borderRadius: '6px',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+    },
+
+    // Apply different styling to expanded accordion
+    '&.accordion-expanded': {
+      boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.12)',
+      backgroundColor: '#fafafa',
     },
   },
   '&.Mui-disabled': {
@@ -167,6 +186,13 @@ const StyledAccordionSummary = styled(MuiAccordionSummary)({
   fontSize: '20px',
   fontFamily: 'merriweather',
   fontWeight: 500,
+  borderRadius: '8px 8px 0 0',
+  backgroundColor: '#f5f7fa', // Subtle background color for the header
+  transition: 'background-color 0.2s ease',
+  '&:hover': {
+    backgroundColor: '#e8f0fe', // Slightly darker on hover
+  },
+
   // Mobile styles
   '@media (max-width: 600px)': {
     padding: '12px 16px',
@@ -188,10 +214,17 @@ const StyledAccordionSummary = styled(MuiAccordionSummary)({
       pointerEvents: 'auto !important',
     },
   },
+  // Style when expanded
+  '&.Mui-expanded': {
+    backgroundColor: '#e3f2fd', // Highlight color when expanded
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+  },
 })
 
 const StyledAccordionDetails = styled(MuiAccordionDetails)({
   padding: '16px',
+  backgroundColor: 'white',
+  borderTop: '1px solid rgba(0, 0, 0, 0.08)',
   // Mobile styles
   '@media (max-width: 600px)': {
     padding: '12px 16px',

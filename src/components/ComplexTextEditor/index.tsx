@@ -4,6 +4,7 @@ import { Box } from '@mui/material'
 import { Descendant } from 'slate'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
+import Accordion from '../Accordion'
 
 export interface ComplexTextEditorProps {
   // For backward compatibility
@@ -22,7 +23,11 @@ export interface ComplexTextEditorProps {
   helperText?: React.ReactNode
   required?: boolean
   style?: React.CSSProperties
+
+  // Accordion props
   accordion?: boolean
+  accordionSummary?: React.ReactNode
+  defaultExpanded?: boolean
 }
 
 // Initial empty slate value
@@ -47,7 +52,11 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   helperText,
   required,
   style,
+
+  // Accordion props
   accordion = false,
+  accordionSummary = 'Text Editor',
+  defaultExpanded = false,
 }) => {
   // Determine initial values based on either new or old API
   const startValue = value !== undefined ? value : initialValue
@@ -109,31 +118,33 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     ...style,
   }
 
-  // If editorType is explicitly set to 'simple', only render the SimpleEditor without toolbar
-  if (editorType === 'simple') {
-    return (
-      <Box sx={combinedStyles}>
+  // Create the editor content component
+  const createEditorContent = () => {
+    // When in accordion mode, don't pass the label to avoid duplication
+    const editorLabel = accordion ? undefined : label
+
+    // If editorType is explicitly set to 'simple', only render the SimpleEditor without toolbar
+    if (editorType === 'simple') {
+      return (
         <SimpleEditor
           value={simpleValue}
           setValue={handleSimpleValueChange}
           minRows={minRows}
-          label={label}
+          label={editorLabel}
           error={error}
           helperText={helperText}
           required={required}
           style={style}
         />
-      </Box>
-    )
-  }
+      )
+    }
 
-  // Otherwise, render the ComplexToolbar with mode toggling options
-  return (
-    <Box sx={combinedStyles}>
+    // Otherwise, render the ComplexToolbar with mode toggling options
+    return (
       <ComplexToolbar
         mode={mode}
         setMode={setMode}
-        label={label}
+        label={editorLabel}
         minRows={minRows}
         // Simple editor props
         simpleValue={simpleValue}
@@ -154,9 +165,29 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         style={style}
         // Optional accordion props
         accordion={accordion}
+        accordionSummary={accordionSummary}
+        defaultExpanded={defaultExpanded}
       />
-    </Box>
-  )
+    )
+  }
+
+  // If accordion is enabled, wrap the editor with the Accordion component
+  if (accordion) {
+    const summaryText = accordionSummary || label || 'Text Editor'
+
+    return (
+      <Box sx={combinedStyles}>
+        <Accordion
+          summary={summaryText}
+          details={createEditorContent()}
+          defaultExpanded={defaultExpanded}
+        />
+      </Box>
+    )
+  }
+
+  // Otherwise, render the editor content directly
+  return <Box sx={combinedStyles}>{createEditorContent()}</Box>
 }
 
 // Helper function to determine the initial mode

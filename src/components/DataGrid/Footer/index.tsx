@@ -48,9 +48,8 @@ function CustomFooter({
       sx={{
         width: '100%',
         minWidth: '100%',
-        // On tablet/phone, let height auto-expand;
-        // on larger screens, keep a fixed 56px
-        height: isTabletOrBelow ? 'auto' : '56px',
+        // Fixed height on all devices
+        height: '56px',
         position: 'sticky',
         left: 0,
         // Only add checkbox offset margin on larger screens
@@ -62,12 +61,14 @@ function CustomFooter({
           display: 'flex',
           // On tablet/phone, stack them vertically;
           // on desktop, lay them out in a row
-          flexDirection: isTabletOrBelow ? 'column' : 'row',
-          flexWrap: 'wrap',
+          flexDirection: isTabletOrBelow ? 'row' : 'row',
+          flexWrap: 'nowrap',
           justifyContent: 'space-between',
           alignItems: 'center',
           width: '100%',
+          height: '100%',
           px: 2,
+          overflow: 'hidden',
         }}
       >
         {/* Left Section: Manage Columns Button */}
@@ -75,8 +76,9 @@ function CustomFooter({
           sx={{
             display: 'flex',
             alignItems: 'center',
+            height: '100%',
             // For smaller screens, reduce bottom margin
-            mb: isTabletOrBelow ? '4px' : 0,
+            mb: 0,
           }}
           className="left-box"
         >
@@ -84,6 +86,7 @@ function CustomFooter({
             sx={{
               display: 'flex',
               alignItems: 'center',
+              height: '100%',
               // Less margin on mobile
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
@@ -94,14 +97,16 @@ function CustomFooter({
             sx={{
               display: 'flex',
               alignItems: 'center',
+              height: '100%',
               // On mobile, smaller gap/padding
               gap: isTabletOrBelow ? '5px' : '8px',
               pr: isTabletOrBelow ? '5px' : '8px',
+              overflow: 'hidden',
             }}
           >
             <CustomButton
               onClick={handleOpen}
-              text="Manage Columns"
+              text={isTabletOrBelow ? 'Columns' : 'Manage Columns'}
               fontvariant="merriparagraph"
               fontcolor="black"
               backgroundcolor="none"
@@ -122,6 +127,7 @@ function CustomFooter({
             sx={{
               display: 'flex',
               alignItems: 'center',
+              height: '100%',
               ml: isTabletOrBelow ? '5px' : '10px',
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
@@ -135,12 +141,15 @@ function CustomFooter({
           sx={{
             display: 'flex',
             alignItems: 'center',
+            height: '100%',
             // On smaller screens, minimal top margin so it sits closer
-            mt: isTabletOrBelow ? '4px' : 0,
+            mt: 0,
             // Center on mobile, right-align on desktop
-            justifyContent: isTabletOrBelow ? 'center' : 'flex-end',
+            justifyContent: isTabletOrBelow ? 'flex-end' : 'flex-end',
             // Eliminate the margin-left on mobile
-            ml: isTabletOrBelow ? 0 : 'auto',
+            ml: 'auto',
+            overflow: 'hidden',
+            paddingRight: '15px',
           }}
           className="right-box"
         >
@@ -156,7 +165,10 @@ function CustomFooter({
               const newPageSize = parseInt(event.target.value, 10)
               onPageSizeChange(newPageSize)
             }}
-            rowsPerPageOptions={[10, 25, 50, 100]}
+            // Remove rows per page options to hide the selector
+            rowsPerPageOptions={[]}
+            // Hide the rows per page label
+            labelRowsPerPage=""
             slotProps={{
               actions: {
                 previousButton: {
@@ -166,12 +178,25 @@ function CustomFooter({
                   disabled: page >= totalPages - 1,
                 },
               },
+              select: {
+                sx: { display: 'none' },
+              },
             }}
             showFirstButton
             showLastButton
             labelDisplayedRows={({ from, to, count }) =>
               `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
             }
+            sx={{
+              '.MuiTablePagination-toolbar': {
+                minHeight: '56px',
+                height: '56px',
+                padding: isTabletOrBelow ? '0 8px' : '0 16px',
+              },
+              '.MuiTablePagination-displayedRows': {
+                margin: 0,
+              },
+            }}
           />
         </Box>
       </Box>

@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, SyntheticEvent, useRef } from 'react'
+import React, { useState, useEffect, SyntheticEvent } from 'react'
 import {
-  Autocomplete,
   InputLabel,
   OutlinedInput,
   FormHelperText,
@@ -10,8 +9,10 @@ import {
   Box,
   Tabs,
   Tab,
-  styled as muiStyled,
-  Popper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../../../styles/palette'
@@ -19,7 +20,23 @@ import Typography from '../../../Typography'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import HistoryIcon from '@mui/icons-material/History'
 import SearchIcon from '@mui/icons-material/Search'
-import { unstable_useEnhancedEffect as useEnhancedEffect } from '@mui/utils'
+import CloseIcon from '@mui/icons-material/Close'
+import Searchbar from '../../Search'
+
+// Define custom colors since palette doesn't have them
+const customColors = {
+  blue: {
+    main: '#1976d2',
+    light: '#42a5f5',
+    dark: '#1565c0',
+    lighter: '#bbdefb',
+  },
+  skyBlue: {
+    main: '#03a9f4',
+    light: '#e1f5fe',
+    lighter: '#f0f8ff',
+  },
+}
 
 // Define a history item type with timestamp
 interface HistoryItem {
@@ -108,147 +125,35 @@ const StyledInputLabel = styled(InputLabel)<{
   },
 }))
 
-interface StyledAutocompleteProps {
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  inputfontcolor?: string
-  placeholdercolor?: string
-  shrunklabelposition?: 'onNotch' | 'aboveNotch'
-  disabled?: boolean
-  variant?: 'simple' | 'complex'
-}
-
-// Styled tab component for the dropdown footer
-const StyledTab = muiStyled(Tab)(() => ({
-  minHeight: '36px',
-  fontSize: '12px',
-  padding: '6px 12px',
-  color: black.main,
-  '&.Mui-selected': {
-    color: black.main,
-    fontWeight: 'bold',
-  },
-}))
-
-const StyledTabs = muiStyled(Tabs)(() => ({
-  minHeight: '36px',
-  borderTop: `1px solid ${black.light}`,
-  '& .MuiTabs-indicator': {
-    backgroundColor: black.main,
-  },
-}))
-
-const StyledAutocomplete = styled(
-  Autocomplete<DropdownOption, false, false, true>
-)<StyledAutocompleteProps>(props => {
-  const {
-    backgroundcolor,
-    outlinecolor,
-    fontcolor,
-    inputfontcolor,
-    placeholdercolor,
-    shrunklabelposition,
-    disabled,
-    variant,
-  } = props
-
-  return {
+const StyledDialog = styled(Dialog)(() => ({
+  '& .MuiDialog-paper': {
+    margin: 0,
     width: '100%',
-    '& .MuiOutlinedInput-root': {
-      width: '100%',
-      overflow: 'visible',
-      minHeight: '40px',
-      height: '40px !important',
-      backgroundColor: disabled
-        ? 'rgba(0, 0, 0, 0.12)'
-        : backgroundcolor || white.main,
-      color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
-      '& fieldset': {
-        borderColor: disabled
-          ? 'rgba(0, 0, 0, 0.26)'
-          : outlinecolor || black.main,
-        ...(shrunklabelposition === 'aboveNotch' && {
-          legend: {
-            width: '0px !important',
-          },
-        }),
-      },
-      '&:hover fieldset': {
-        borderColor: disabled
-          ? 'rgba(0, 0, 0, 0.26)'
-          : outlinecolor || black.main,
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: disabled
-          ? 'rgba(0, 0, 0, 0.26)'
-          : outlinecolor || black.main,
-      },
-      '& input': {
-        color: disabled
-          ? 'rgba(0, 0, 0, 0.38)'
-          : inputfontcolor || fontcolor || black.main,
-        '&::placeholder': {
-          color: disabled
-            ? 'rgba(0, 0, 0, 0.38)'
-            : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
-          opacity: 1,
-        },
-      },
-      cursor: disabled ? 'not-allowed' : 'text',
-    },
-    '& .MuiInputLabel-root': {
-      color: black.main,
-      '&.MuiInputLabel-shrink': {
-        ...(shrunklabelposition === 'aboveNotch' && {
-          transform: 'translate(0px, -17px) scale(0.75)',
-        }),
-        ...(shrunklabelposition === 'onNotch' && {
-          transform: 'translate(13px, -4px) scale(0.75)',
-        }),
-      },
-    },
-    '& .MuiAutocomplete-input': {
-      padding: '8px 14px',
-    },
-    // Improve dropdown menu positioning and styling
-    '& .MuiAutocomplete-popper': {
-      width: '100% !important',
-      zIndex: 9999, // Ensure high z-index for the popup
-      '& .MuiPaper-root': {
-        width: '100%',
-        marginTop: '4px',
-        maxHeight: '300px', // Increase max height for better usability
-        overflowY: 'auto',
-        boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.2)', // Enhanced shadow
-        border: `1px solid ${black.light}`, // Add border to dropdown container
-      },
-      '& .MuiAutocomplete-listbox': {
-        padding: '0', // Remove default padding for cleaner lines
-        '& .MuiAutocomplete-option': {
-          padding: variant === 'complex' ? '10px 14px' : '8px 14px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          textAlign: 'left',
-          '& .MuiTypography-root': {
-            width: '100%',
-            textAlign: 'left',
-          },
-          '&:last-child': {
-            borderBottom: 'none', // Remove border from last item to avoid double borders
-          },
-        },
-        '& .MuiAutocomplete-option[aria-selected="true"]': {
-          backgroundColor: `${black.main}08`,
-        },
-        '& .MuiAutocomplete-option:hover': {
-          backgroundColor: `${black.main}15`, // Slightly darker hover state
-        },
-      },
-    },
-  }
-})
+    maxWidth: '100%',
+    height: '100%',
+    maxHeight: '100%',
+    borderRadius: 0,
+    backgroundColor: customColors.skyBlue.lighter, // Light blue background
+  },
+}))
+
+const StyledDialogTitle = styled(DialogTitle)(() => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '16px',
+  borderBottom: `1px solid ${customColors.blue.light}`,
+  backgroundColor: customColors.blue.main, // Blue header
+  color: white.main,
+}))
+
+const StyledDialogContent = styled(DialogContent)(() => ({
+  padding: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflowY: 'auto',
+  backgroundColor: customColors.skyBlue.lighter, // Light blue background
+}))
 
 const StyledFormHelperText = styled(FormHelperText)({
   marginLeft: '14px',
@@ -306,6 +211,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const [value, setValue] = useState<DropdownOption | string | null>(null)
   const [inputValue, setInputValue] = useState('')
   const [isFocused, setIsFocused] = useState(false)
+  // Controls whether input filtering is active
+  const [isFilteringEnabled, setIsFilteringEnabled] = useState(true)
   // Update local history state to support timestamps
   const [localHistory, setLocalHistory] = useState<HistoryItem[]>([])
 
@@ -315,38 +222,217 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   // Use ref to track if we've done initial history setup to avoid loops
   const initializedRef = React.useRef(false)
 
-  // Always use controlled open state
-  const [isOpen, setIsOpen] = useState(false)
+  // Replace open/onOpen/onClose logic with dialog state
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  // Reference to the tab container
-  const tabsRef = useRef<HTMLDivElement | null>(null)
+  // Add state variables to store the original input value
+  const [storedInputValue, setStoredInputValue] = useState('')
+  const [tempInputValue, setTempInputValue] = useState('')
 
-  // Ref for the input/autocomplete
-  const autocompleteRef = useRef<HTMLDivElement>(null)
+  // Handle dialog open/close
+  const handleOpenDialog = () => {
+    setDialogOpen(true)
+    // Temporarily disable filtering when opening the dialog
+    setIsFilteringEnabled(false)
+    // Store current input value to restore it later if needed
+    setStoredInputValue(inputValue)
+    // Clear input temporarily to show all options
+    setTempInputValue('')
+  }
 
-  // Use enhanced effect to handle tab clicks without closing dropdown
-  useEnhancedEffect(() => {
-    // If tabs aren't mounted yet, do nothing
-    if (!tabsRef.current) return
+  const handleCloseDialog = () => {
+    setDialogOpen(false)
 
-    const tabsElement = tabsRef.current
-
-    // Prevent any click inside the tabs from bubbling up
-    const preventClose = (e: MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
+    // If no new search was performed, restore the original input value
+    if (tempInputValue === '' && inputValue !== storedInputValue) {
+      setInputValue(storedInputValue)
     }
 
-    // Add click handler to the tabs element
-    tabsElement.addEventListener('mousedown', preventClose, true)
-    tabsElement.addEventListener('click', preventClose, true)
+    // Reset the temporary input value
+    setTempInputValue('')
+  }
 
-    // Cleanup
-    return () => {
-      tabsElement.removeEventListener('mousedown', preventClose, true)
-      tabsElement.removeEventListener('click', preventClose, true)
-    }
-  }, [tabsRef.current])
+  // Handle selection from dialog
+  const handleDialogSelection = (option: DropdownOption) => {
+    // Set the selected value
+    handleChange({} as SyntheticEvent, option)
+    // Close the dialog
+    handleCloseDialog()
+  }
+
+  // Create the list of options to show in the dialog
+  const renderOptionsList = () => {
+    return displayOptions.map(option => {
+      // Check if this is a history item
+      const isHistoryItem = option.uniqueKey?.startsWith('history-')
+      const isCurrentInput = option.uniqueKey?.startsWith('current-')
+      const isNoHistoryPlaceholder = option.uniqueKey === 'no-history'
+
+      return (
+        <Box
+          key={option.uniqueKey || option.value}
+          sx={{
+            padding: variant === 'complex' ? '14px 16px' : '12px 16px',
+            borderBottom: `1px solid ${customColors.blue.lighter}`,
+            cursor: 'pointer',
+            '&:hover': {
+              backgroundColor: customColors.skyBlue.light,
+            },
+            '&:active': {
+              backgroundColor: customColors.blue.lighter,
+            },
+          }}
+          onClick={() => handleDialogSelection(option)}
+        >
+          {/* Main value - both variants */}
+          <Typography
+            fontvariant="merriparagraph"
+            text={
+              isNoHistoryPlaceholder
+                ? option.value
+                : isCurrentInput
+                  ? `Search: "${option.value}"`
+                  : isHistoryItem
+                    ? `History: ${option.value.replace(/_/g, ' ')}`
+                    : option.value.replace(/_/g, ' ')
+            }
+            fontcolor={customColors.blue.dark}
+            sx={{
+              fontSize: '16px',
+              fontWeight: isCurrentInput
+                ? '500'
+                : isHistoryItem
+                  ? '400'
+                  : variant === 'complex'
+                    ? '500'
+                    : 'normal',
+              fontStyle: isHistoryItem ? 'italic' : 'normal',
+              lineHeight: '22px',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          />
+
+          {/* For history items, show the timestamp */}
+          {isHistoryItem && option.attribute2 && (
+            <Typography
+              fontvariant="merriparagraph"
+              text={option.attribute2}
+              fontcolor="rgba(0, 0, 0, 0.6)"
+              sx={{
+                fontSize: '13px',
+                lineHeight: '16px',
+                width: '100%',
+                textAlign: 'left',
+                fontStyle: 'italic',
+              }}
+            />
+          )}
+
+          {/* For simple variant - show attribute1 and attribute2 on one line (excluding ID fields) */}
+          {variant === 'simple' &&
+            !isHistoryItem &&
+            !isCurrentInput &&
+            !isNoHistoryPlaceholder &&
+            (() => {
+              // Filter out ID attributes if showIdColumns is false
+              const filteredAttributes = [
+                option.attribute1,
+                option.attribute2,
+              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+              return filteredAttributes.length > 0 ? (
+                <Typography
+                  fontvariant="merriparagraph"
+                  text={filteredAttributes.join(' | ')}
+                  fontcolor="rgba(0, 0, 0, 0.6)"
+                  sx={{
+                    fontSize: '14px',
+                    lineHeight: '18px',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                />
+              ) : null
+            })()}
+
+          {/* For complex variant - show attributes on separate lines (excluding ID fields) */}
+          {variant === 'complex' &&
+            !isHistoryItem &&
+            !isCurrentInput &&
+            !isNoHistoryPlaceholder && (
+              <>
+                {/* First line of attributes */}
+                {(() => {
+                  const filteredAttributes = [
+                    option.attribute1,
+                    option.attribute2,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+                  return filteredAttributes.length > 0 ? (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={filteredAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '14px',
+                        lineHeight: '18px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  ) : null
+                })()}
+
+                {/* Second line of attributes */}
+                {(() => {
+                  const filteredAttributes = [
+                    option.attribute3,
+                    option.attribute4,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+                  return filteredAttributes.length > 0 ? (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={filteredAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '14px',
+                        lineHeight: '18px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  ) : null
+                })()}
+
+                {/* Additional attributes if needed */}
+                {(() => {
+                  const filteredAttributes = [
+                    option.attribute5,
+                    option.attribute6,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+                  return filteredAttributes.length > 0 ? (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={filteredAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '14px',
+                        lineHeight: '18px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  ) : null
+                })()}
+              </>
+            )}
+        </Box>
+      )
+    })
+  }
 
   // Function to format date for display
   const formatDate = (date: Date): string => {
@@ -447,6 +533,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     event: SyntheticEvent<Element, Event>,
     newValue: DropdownOption | string | null
   ) => {
+    // Reset filtering after selection is made
+    setIsFilteringEnabled(true)
+
     if (typeof newValue === 'string') {
       setValue(newValue)
       setInputValue(newValue)
@@ -526,12 +615,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      handleInputSubmit()
-    }
-  }
-
   const handleFocus = () => {
     setIsFocused(true)
   }
@@ -544,6 +627,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     if (inputValue.trim()) {
       handleInputSubmit()
     }
+    // Reset filtering when dropdown closes
+    setIsFilteringEnabled(true)
   }
 
   // Function to handle tab change
@@ -552,11 +637,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     setActiveTab(newValue)
 
     // Keep the dropdown open when switching tabs
-    setIsOpen(true)
-
-    // Prevent any bubbling that might close the dropdown
-    _event.preventDefault()
-    _event.stopPropagation()
+    setIsFilteringEnabled(true)
   }
 
   const labelId = `${name}-label`
@@ -605,7 +686,29 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Create a combined options array based on active tab and input value
   const getFilteredOptions = React.useCallback(() => {
-    const currentInputVal = inputValue.trim()
+    // When dialog is open and no search input, show all options with selected at top
+    if (dialogOpen && !tempInputValue.trim()) {
+      // Find the currently selected option if any
+      const selectedOption =
+        value && typeof value !== 'string'
+          ? filteredBaseOptions.find(opt => opt.value === value.value)
+          : null
+
+      // If there's a selected option, put it at the top
+      if (selectedOption) {
+        const otherOptions = filteredBaseOptions.filter(
+          opt => opt.value !== selectedOption.value
+        )
+        return [selectedOption, ...otherOptions]
+      }
+
+      // Otherwise just return all options
+      return filteredBaseOptions
+    }
+
+    const currentInputVal = dialogOpen
+      ? tempInputValue.trim()
+      : inputValue.trim()
 
     // HISTORY TAB - only apply when variant is complex
     if (activeTab === 1 && variant === 'complex') {
@@ -657,8 +760,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     // ALL OPTIONS TAB (activeTab === 0)
-    // If input is empty, return all options
-    if (!currentInputVal) {
+    // If filtering is disabled or input is empty, return all options
+    if (!isFilteringEnabled || !currentInputVal) {
+      // If dialog is open and there's a selected value, prioritize it
+      if (dialogOpen && value && typeof value !== 'string') {
+        const selectedOption = filteredBaseOptions.find(
+          opt => opt.value === value.value
+        )
+        if (selectedOption) {
+          const otherOptions = filteredBaseOptions.filter(
+            opt => opt.value !== selectedOption.value
+          )
+          return [selectedOption, ...otherOptions]
+        }
+      }
       return filteredBaseOptions
     }
 
@@ -696,98 +811,26 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     return filteredOpts
-  }, [inputValue, combinedHistory, filteredBaseOptions, activeTab, variant])
-
-  // Create the footer component for the dropdown with tabs
-  const ListboxFooter = React.forwardRef<HTMLDivElement>((_, ref) => (
-    <Box
-      ref={(node: HTMLDivElement | null) => {
-        // Set both refs
-        if (ref) {
-          if (typeof ref === 'function') {
-            ref(node)
-          } else {
-            ref.current = node
-          }
-        }
-        tabsRef.current = node
-      }}
-      sx={{
-        position: 'sticky',
-        bottom: 0,
-        backgroundColor: white.main,
-        zIndex: 2,
-        borderTop: `1px solid ${black.light}`,
-      }}
-      onClick={e => {
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-      onMouseDown={e => {
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-    >
-      <StyledTabs
-        value={activeTab}
-        onChange={handleTabChange}
-        centered
-        sx={{
-          pointerEvents: 'all',
-        }}
-      >
-        <StyledTab
-          icon={<SearchIcon fontSize="small" />}
-          label="ALL OPTIONS"
-          iconPosition="start"
-          sx={{
-            pointerEvents: 'all',
-          }}
-        />
-        <StyledTab
-          icon={<HistoryIcon fontSize="small" />}
-          label="HISTORY"
-          iconPosition="start"
-          sx={{
-            pointerEvents: 'all',
-          }}
-        />
-      </StyledTabs>
-    </Box>
-  ))
-
-  // Add display name to ListboxFooter
-  ListboxFooter.displayName = 'ListboxFooter'
-
-  // Custom Listbox component that adds the footer
-  const CustomListbox = React.forwardRef<
-    HTMLElement,
-    React.HTMLAttributes<HTMLElement>
-  >((props, ref) => {
-    const { children, ...other } = props
-    return (
-      <div
-        ref={ref as React.Ref<HTMLDivElement>}
-        onClick={e => {
-          e.stopPropagation()
-          return false
-        }}
-        style={{ pointerEvents: 'auto' }}
-      >
-        <ul {...other}>{children}</ul>
-        {variant === 'complex' && <ListboxFooter />}
-      </div>
-    )
-  })
-
-  // Add display name to CustomListbox
-  CustomListbox.displayName = 'CustomListbox'
+  }, [
+    inputValue,
+    tempInputValue,
+    combinedHistory,
+    filteredBaseOptions,
+    activeTab,
+    variant,
+    isFilteringEnabled,
+    dialogOpen,
+    value,
+  ])
 
   // Memoize the filtered options to prevent recreation on every render
   const filteredOptions = React.useMemo(
     () => getFilteredOptions(),
     [getFilteredOptions]
   )
+
+  // Use filtered options in both the dialog and autocomplete
+  const displayOptions = filteredOptions
 
   // Ensure activeTab is always 0 for simple variant
   useEffect(() => {
@@ -797,453 +840,208 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   }, [variant, activeTab])
 
   return (
-    <StyledFormControl
-      error={error}
-      disabled={disabled}
-      width={width}
-      style={style}
-    >
-      <StyledInputLabel
-        id={labelId}
-        shrink={isFocused || !!value || !!inputValue || !!placeholder}
-        required={required}
+    <>
+      <StyledFormControl
         error={error}
-        shrunkfontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor}
-        unshrunkfontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor}
-        shrunklabelposition={shrunklabelposition}
         disabled={disabled}
+        width={width}
+        style={style}
       >
-        {label}
-      </StyledInputLabel>
-      <StyledAutocomplete
-        id={name}
-        options={filteredOptions}
-        freeSolo
-        value={value}
-        onChange={handleChange}
-        inputValue={inputValue}
-        onInputChange={(_e, newInputValue) => {
-          if (!disabled) {
-            setInputValue(newInputValue)
+        <StyledInputLabel
+          id={labelId}
+          shrink={isFocused || !!value || !!inputValue || !!placeholder}
+          required={required}
+          error={error}
+          shrunkfontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor}
+          unshrunkfontcolor={
+            disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor
           }
-        }}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        forcePopupIcon
-        open={isOpen}
-        onOpen={() => {
-          setIsOpen(true)
-        }}
-        onClose={event => {
-          // Don't close when clicking tabs
-          if (tabsRef.current?.contains(event.target as Node)) {
-            return
-          }
+          shrunklabelposition={shrunklabelposition}
+          disabled={disabled}
+        >
+          {label}
+        </StyledInputLabel>
 
-          setIsOpen(false)
-        }}
-        popupIcon={
-          <ArrowDropDownIcon
-            sx={{ color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main }}
-          />
-        }
-        disablePortal={false}
-        ListboxProps={{
-          style: {
-            maxHeight: '300px',
-            overflowY: 'auto',
-            pointerEvents: 'all',
-          },
-        }}
-        ListboxComponent={CustomListbox}
-        componentsProps={{
-          popper: {
-            onClick: e => {
-              // Prevent clicks in the popper from closing the dropdown
-              e.stopPropagation()
-            },
-            style: {
-              pointerEvents: 'all',
-              // Ensure clicks inside the popper don't close it
-              inset: '0px auto auto 0px',
-              zIndex: 9999,
-            },
-          },
-          paper: {
-            onClick: e => {
-              // Prevent clicks on the paper from closing the dropdown
-              e.stopPropagation()
-            },
-            style: { pointerEvents: 'all' },
-          },
-        }}
-        ref={autocompleteRef}
-        PopperComponent={props => (
-          <Popper
-            {...props}
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            style={{
-              ...props.style,
-              pointerEvents: 'all',
-              zIndex: 9999,
-            }}
-            modifiers={[
-              {
-                name: 'preventOverflow',
-                enabled: true,
-                options: {
-                  altAxis: true,
-                  altBoundary: true,
-                  tether: true,
-                  rootBoundary: 'document',
-                  padding: 8,
-                },
-              },
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 0],
-                },
-              },
-            ]}
-          >
-            {props.children}
-          </Popper>
-        )}
-        disabled={disabled}
-        backgroundcolor={backgroundcolor}
-        outlinecolor={outlinecolor}
-        fontcolor={fontcolor}
-        inputfontcolor={inputfontcolor}
-        placeholdercolor={placeholdercolor}
-        variant={variant}
-        filterOptions={opts => opts} // We're handling filtering ourselves
-        getOptionLabel={(option: DropdownOption | string) => {
-          if (typeof option === 'string') {
-            return option
+        {/* The input field with click handler to open dialog */}
+        <OutlinedInput
+          id={name}
+          value={inputValue}
+          onChange={e => {
+            if (!disabled) {
+              setInputValue(e.target.value)
+            }
+          }}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onClick={handleOpenDialog}
+          placeholder={placeholder}
+          error={error}
+          required={required}
+          notched={
+            shrunklabelposition === 'onNotch' &&
+            (isFocused || !!value || !!inputValue || !!placeholder)
           }
-          return (
-            option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
-            option.value.replace(/_/g, ' ').slice(1)
-          )
-        }}
-        renderOption={(
-          liProps: React.HTMLAttributes<HTMLLIElement>,
-          option
-        ) => {
-          const { key, ...restLiProps } = liProps as {
-            key: string
-          } & React.HTMLAttributes<HTMLLIElement>
-
-          // Common styles for both variants
-          const liStyle = {
-            color: black.main,
-            padding: variant === 'complex' ? '10px 14px' : '8px 14px',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            alignItems: 'flex-start' as const,
-            gap: variant === 'complex' ? '4px' : '2px',
+          label={label}
+          endAdornment={
+            <ArrowDropDownIcon
+              sx={{
+                color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main,
+                cursor: 'pointer',
+              }}
+              onClick={handleOpenDialog}
+            />
+          }
+          sx={{
             width: '100%',
-            borderBottom: `1px solid ${black.light}`,
-          }
+            minHeight: '40px',
+            height: '40px !important',
+            backgroundColor: disabled
+              ? 'rgba(0, 0, 0, 0.12)'
+              : backgroundcolor || white.main,
+            color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            '& fieldset': {
+              borderColor: disabled
+                ? 'rgba(0, 0, 0, 0.26)'
+                : outlinecolor || black.main,
+              ...(shrunklabelposition === 'aboveNotch' && {
+                legend: {
+                  width: '0px !important',
+                },
+              }),
+            },
+            '&:hover fieldset': {
+              borderColor: disabled
+                ? 'rgba(0, 0, 0, 0.26)'
+                : outlinecolor || black.main,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: disabled
+                ? 'rgba(0, 0, 0, 0.26)'
+                : outlinecolor || black.main,
+            },
+            '& input': {
+              color: disabled
+                ? 'rgba(0, 0, 0, 0.38)'
+                : inputfontcolor || fontcolor || black.main,
+              '&::placeholder': {
+                color: disabled
+                  ? 'rgba(0, 0, 0, 0.38)'
+                  : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
+                opacity: 1,
+              },
+              cursor: disabled ? 'not-allowed' : 'pointer',
+            },
+          }}
+        />
 
-          // Use the uniqueKey prop if available, otherwise fall back to the provided key
-          const optionKey = option.uniqueKey || key
+        {helperText && (
+          <StyledFormHelperText error={error} disabled={disabled}>
+            {helperText}
+          </StyledFormHelperText>
+        )}
+      </StyledFormControl>
 
-          // Check if this is a history item
-          const isHistoryItem = option.uniqueKey?.startsWith('history-')
-          const isCurrentInput = option.uniqueKey?.startsWith('current-')
-          const isNoHistoryPlaceholder = option.uniqueKey === 'no-history'
+      {/* Fullscreen Dialog for option selection - moved outside FormControl */}
+      <StyledDialog open={dialogOpen} onClose={handleCloseDialog} fullScreen>
+        <StyledDialogTitle>
+          <Typography
+            fontvariant="merriparagraph"
+            text={label}
+            fontcolor={white.main}
+            sx={{ fontSize: '18px', fontWeight: 'bold' }}
+          />
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleCloseDialog}
+            aria-label="close"
+            sx={{ color: white.main }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </StyledDialogTitle>
 
-          return (
-            <li key={optionKey} {...restLiProps} style={liStyle}>
-              {/* Main value - both variants */}
+        {/* Search input for filtering inside dialog - using Searchbar component */}
+        <Box
+          sx={{
+            padding: '16px',
+            borderBottom: `1px solid ${customColors.blue.light}`,
+            backgroundColor: customColors.skyBlue.light,
+          }}
+        >
+          <Searchbar
+            placeholder="Search options..."
+            value={tempInputValue}
+            onChange={e => {
+              setTempInputValue(e.target.value)
+              setIsFilteringEnabled(true)
+            }}
+            backgroundcolor={white.main}
+            iconcolor={customColors.blue.main}
+            outlinecolor={customColors.blue.light}
+            fontcolor={customColors.blue.dark}
+          />
+        </Box>
+
+        {/* Tabs for complex variant */}
+        {variant === 'complex' && (
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            centered
+            sx={{
+              borderBottom: `1px solid ${customColors.blue.light}`,
+              backgroundColor: customColors.blue.light,
+              '& .MuiTabs-indicator': {
+                backgroundColor: white.main,
+              },
+            }}
+          >
+            <Tab
+              icon={<SearchIcon fontSize="small" />}
+              label="ALL OPTIONS"
+              iconPosition="start"
+              sx={{
+                color: customColors.blue.dark,
+                '&.Mui-selected': {
+                  color: white.main,
+                  fontWeight: 'bold',
+                },
+              }}
+            />
+            <Tab
+              icon={<HistoryIcon fontSize="small" />}
+              label="HISTORY"
+              iconPosition="start"
+              sx={{
+                color: customColors.blue.dark,
+                '&.Mui-selected': {
+                  color: white.main,
+                  fontWeight: 'bold',
+                },
+              }}
+            />
+          </Tabs>
+        )}
+
+        <StyledDialogContent>
+          {/* Options List */}
+          {renderOptionsList()}
+
+          {/* No results message */}
+          {displayOptions.length === 0 && (
+            <Box sx={{ padding: '20px', textAlign: 'center' }}>
               <Typography
                 fontvariant="merriparagraph"
-                text={
-                  isNoHistoryPlaceholder
-                    ? option.value
-                    : isCurrentInput
-                      ? `Search: "${option.value}"`
-                      : isHistoryItem
-                        ? `History: ${option.value.replace(/_/g, ' ')}`
-                        : option.value.replace(/_/g, ' ')
-                }
-                fontcolor={black.main}
-                sx={{
-                  fontSize: '14px',
-                  fontWeight: isCurrentInput
-                    ? '500'
-                    : isHistoryItem
-                      ? '400'
-                      : variant === 'complex'
-                        ? '500'
-                        : 'normal',
-                  fontStyle: isHistoryItem ? 'italic' : 'normal',
-                  lineHeight: '20px',
-                  width: '100%',
-                  textAlign: 'left',
-                }}
+                text="No matching options found"
+                fontcolor="rgba(0, 0, 0, 0.6)"
               />
-
-              {/* For history items, show the timestamp */}
-              {isHistoryItem && option.attribute2 && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  text={option.attribute2}
-                  fontcolor="rgba(0, 0, 0, 0.6)"
-                  sx={{
-                    fontSize: '11px',
-                    lineHeight: '14px',
-                    width: '100%',
-                    textAlign: 'left',
-                    fontStyle: 'italic',
-                  }}
-                />
-              )}
-
-              {/* For simple variant - show attribute1 and attribute2 on one line (excluding ID fields) */}
-              {variant === 'simple' &&
-                !isHistoryItem &&
-                !isCurrentInput &&
-                !isNoHistoryPlaceholder &&
-                (() => {
-                  // Filter out ID attributes if showIdColumns is false
-                  const filteredAttributes = [
-                    option.attribute1,
-                    option.attribute2,
-                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
-
-                  return filteredAttributes.length > 0 ? (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={filteredAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '12px',
-                        lineHeight: '16px',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    />
-                  ) : null
-                })()}
-
-              {/* For complex variant - show attributes on separate lines (excluding ID fields) */}
-              {variant === 'complex' &&
-                !isHistoryItem &&
-                !isCurrentInput &&
-                !isNoHistoryPlaceholder && (
-                  <>
-                    {/* First line of attributes */}
-                    {(() => {
-                      const filteredAttributes = [
-                        option.attribute1,
-                        option.attribute2,
-                      ].filter(
-                        attr => showIdColumns || (attr && !isIdField(attr))
-                      )
-
-                      return filteredAttributes.length > 0 ? (
-                        <Typography
-                          fontvariant="merriparagraph"
-                          text={filteredAttributes.join(' | ')}
-                          fontcolor="rgba(0, 0, 0, 0.6)"
-                          sx={{
-                            fontSize: '12px',
-                            lineHeight: '16px',
-                            width: '100%',
-                            textAlign: 'left',
-                          }}
-                        />
-                      ) : null
-                    })()}
-
-                    {/* Second line of attributes */}
-                    {(() => {
-                      const filteredAttributes = [
-                        option.attribute3,
-                        option.attribute4,
-                      ].filter(
-                        attr => showIdColumns || (attr && !isIdField(attr))
-                      )
-
-                      return filteredAttributes.length > 0 ? (
-                        <Typography
-                          fontvariant="merriparagraph"
-                          text={filteredAttributes.join(' | ')}
-                          fontcolor="rgba(0, 0, 0, 0.6)"
-                          sx={{
-                            fontSize: '12px',
-                            lineHeight: '16px',
-                            width: '100%',
-                            textAlign: 'left',
-                          }}
-                        />
-                      ) : null
-                    })()}
-
-                    {/* Third line of attributes */}
-                    {(() => {
-                      const filteredAttributes = [
-                        option.attribute5,
-                        option.attribute6,
-                      ].filter(
-                        attr => showIdColumns || (attr && !isIdField(attr))
-                      )
-
-                      return filteredAttributes.length > 0 ? (
-                        <Typography
-                          fontvariant="merriparagraph"
-                          text={filteredAttributes.join(' | ')}
-                          fontcolor="rgba(0, 0, 0, 0.6)"
-                          sx={{
-                            fontSize: '12px',
-                            lineHeight: '16px',
-                            width: '100%',
-                            textAlign: 'left',
-                          }}
-                        />
-                      ) : null
-                    })()}
-                  </>
-                )}
-
-              {/* For history items, show additional attributes from original options (excluding ID fields) */}
-              {isHistoryItem && variant === 'complex' && (
-                <>
-                  {/* Show attribute3/4 as first additional line for history */}
-                  {(() => {
-                    const filteredAttributes = [
-                      option.attribute3,
-                      option.attribute4,
-                    ].filter(
-                      attr => showIdColumns || (attr && !isIdField(attr))
-                    )
-
-                    return filteredAttributes.length > 0 ? (
-                      <Typography
-                        fontvariant="merriparagraph"
-                        text={filteredAttributes.join(' | ')}
-                        fontcolor="rgba(0, 0, 0, 0.6)"
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          width: '100%',
-                          textAlign: 'left',
-                          fontStyle: 'italic',
-                        }}
-                      />
-                    ) : null
-                  })()}
-
-                  {/* Show attribute5/6 as second additional line for history */}
-                  {(() => {
-                    const filteredAttributes = [
-                      option.attribute5,
-                      option.attribute6,
-                    ].filter(
-                      attr => showIdColumns || (attr && !isIdField(attr))
-                    )
-
-                    return filteredAttributes.length > 0 ? (
-                      <Typography
-                        fontvariant="merriparagraph"
-                        text={filteredAttributes.join(' | ')}
-                        fontcolor="rgba(0, 0, 0, 0.6)"
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          width: '100%',
-                          textAlign: 'left',
-                          fontStyle: 'italic',
-                        }}
-                      />
-                    ) : null
-                  })()}
-                </>
-              )}
-
-              {/* For current input search, show a simpler display */}
-              {isCurrentInput && option.attribute1 && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  text={option.attribute1}
-                  fontcolor="rgba(0, 0, 0, 0.6)"
-                  sx={{
-                    fontSize: '12px',
-                    lineHeight: '16px',
-                    width: '100%',
-                    textAlign: 'left',
-                  }}
-                />
-              )}
-
-              {/* For no history placeholder, show the instructions */}
-              {isNoHistoryPlaceholder && option.attribute1 && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  text={option.attribute1}
-                  fontcolor="rgba(0, 0, 0, 0.6)"
-                  sx={{
-                    fontSize: '12px',
-                    lineHeight: '16px',
-                    width: '100%',
-                    textAlign: 'left',
-                    fontStyle: 'italic',
-                  }}
-                />
-              )}
-            </li>
-          )
-        }}
-        renderInput={params => (
-          <OutlinedInput
-            {...params.InputProps}
-            inputProps={{
-              ...params.inputProps,
-              'aria-labelledby': labelId,
-              onKeyDown: handleKeyDown,
-            }}
-            placeholder={placeholder}
-            error={error}
-            required={required}
-            notched={
-              shrunklabelposition === 'onNotch' &&
-              (isFocused || !!value || !!inputValue || !!placeholder)
-            }
-            label={label}
-            sx={{
-              '& fieldset': {
-                ...(shrunklabelposition === 'aboveNotch' && {
-                  legend: {
-                    width: '0px !important',
-                  },
-                }),
-              },
-            }}
-          />
-        )}
-        sx={{
-          '& .MuiAutocomplete-option': {
-            color: black.main,
-          },
-          '& .MuiAutocomplete-option[aria-selected="true"]': {
-            backgroundColor: `${black.main}08`,
-          },
-          '& .MuiAutocomplete-clearIndicator': {
-            display: 'none',
-          },
-        }}
-      />
-      {helperText && (
-        <StyledFormHelperText error={error} disabled={disabled}>
-          {helperText}
-        </StyledFormHelperText>
-      )}
-    </StyledFormControl>
+            </Box>
+          )}
+        </StyledDialogContent>
+      </StyledDialog>
+    </>
   )
 }
 

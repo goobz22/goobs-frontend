@@ -33,6 +33,9 @@ export interface RichTextEditorProps {
   markdownMode: boolean
   setMarkdownMode: (value: boolean) => void
   setMarkdown: (value: string) => void
+  // Accordion related props
+  accordionSummary?: React.ReactNode
+  defaultExpanded?: boolean
 }
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
@@ -68,6 +71,8 @@ export function RichTextEditor({
   markdownMode,
   setMarkdownMode,
   setMarkdown,
+  accordionSummary,
+  defaultExpanded = false,
 }: RichTextEditorProps) {
   const {
     editor,
@@ -78,7 +83,7 @@ export function RichTextEditor({
     onKeyDown,
   } = useRichTextEditor(value, onChange ? () => onChange() : undefined)
 
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   const renderElement = useCallback(
     (props: RenderElementProps) => <Element {...props} />,
@@ -106,7 +111,9 @@ export function RichTextEditor({
       {accordion ? (
         <Accordion expanded={expanded} onChange={handleAccordionChange}>
           <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontvariant="merrih4">{label}</Typography>
+            <Typography fontvariant="merrih4">
+              {accordionSummary || label || 'Rich Text Editor'}
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Box

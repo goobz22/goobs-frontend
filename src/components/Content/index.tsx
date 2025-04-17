@@ -33,6 +33,8 @@ import { CIDRFieldProps } from '../Field/IPAM/CIDR'
 import { IPAddressFieldProps } from '../Field/IPAM/Address'
 import { VLANFieldProps } from '../Field/IPAM/VLAN'
 import { MACAddressFieldProps } from '../Field/IPAM/MACAddress'
+import { RoutingNumberProps } from '../Field/Number/RoutingNumber'
+import { AccountNumberProps } from '../Field/Number/AccountNumber'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -68,6 +70,8 @@ import useAddress from './Structure/Address/useAddress'
 import useVLAN from './Structure/VLAN/useVLAN'
 import useUSD from './Structure/USD/useUSD'
 import useMacAddress from './Structure/macaddress/useMacAddress'
+import useRoutingNumber from './Structure/routingnumber/useRoutingNumber'
+import useAccountNumber from './Structure/accountnumber/useAccountNumber'
 import type { SupernetFieldProps } from '../Field/IPAM/Supernet'
 
 export interface ContentSectionProps {
@@ -112,6 +116,10 @@ export interface ContentSectionProps {
     vlan?: VLANFieldProps | VLANFieldProps[]
     usdField?: USDFieldProps | USDFieldProps[]
     macAddressField?: MACAddressFieldProps | MACAddressFieldProps[]
+    routingnumber?: RoutingNumberProps | RoutingNumberProps[]
+    accountnumber?: AccountNumberProps | AccountNumberProps[]
+    // Support for custom React components
+    customComponent?: React.ReactNode
     // Added optional style property for grid customization
     style?: React.CSSProperties
   }>
@@ -121,6 +129,7 @@ export interface ContentSectionProps {
 const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   boxProps,
   style,
+  customComponent,
   ...props
 }) => {
   const elements: React.ReactElement[] = []
@@ -174,6 +183,8 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   addElements(useVLAN({ vlan: props.vlan }))
   addElements(useUSD({ usdField: props.usdField }))
   addElements(useMacAddress({ macAddressField: props.macAddressField }))
+  addElements(useRoutingNumber({ routingnumber: props.routingnumber }))
+  addElements(useAccountNumber({ accountnumber: props.accountnumber }))
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
@@ -183,6 +194,8 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
       {elements.map((element, index) => (
         <Box key={index}>{element}</Box>
       ))}
+      {/* Render custom component if provided */}
+      {customComponent}
     </Box>
   )
 }

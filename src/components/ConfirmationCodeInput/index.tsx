@@ -221,6 +221,18 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         }
         break
 
+      case 'Enter':
+        // If on the last input field and all fields are filled, trigger verify action
+        if (
+          index === codeLength - 1 &&
+          internalValue.length >= codeLength &&
+          onVerify
+        ) {
+          e.preventDefault()
+          void onVerify()
+        }
+        break
+
       default: {
         // For number keys, handle them directly
         if (/^\d$/.test(e.key)) {

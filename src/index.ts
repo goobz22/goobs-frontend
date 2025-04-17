@@ -65,6 +65,12 @@ import SearchableDropdown, {
   SearchableDropdownProps,
   DropdownOption,
 } from './components/Field/Dropdown/Searchable'
+import AccountNumber, {
+  AccountNumberProps,
+} from './components/Field/Number/AccountNumber'
+import RoutingNumber, {
+  RoutingNumberProps,
+} from './components/Field/Number/RoutingNumber'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
@@ -204,11 +210,15 @@ export { ShowTask }
 export type { Task }
 export type { RawCustomer }
 export type { CheckboxProps }
+export type { AccountNumberProps }
+export type { RoutingNumberProps }
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
 
 export { SearchableDropdown }
+export { AccountNumber }
+export { RoutingNumber }
 // 1) Form DataGrid
 export type { FormDataGridProps }
 export type { CustomDialogProps }
