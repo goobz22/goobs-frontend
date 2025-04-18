@@ -29,26 +29,69 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   const [taskDescription, setTaskDescription] = useState('')
   const [email, setEmail] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState('')
+  const [selectedSeverityId, setSelectedSeverityId] = useState('')
 
   // ------------------ DROPDOWN OPTIONS ------------------
-  // Format: { value, attribute1 } where attribute1 is the original _id.
+  // Format: { value, attribute1, attribute2 } where attribute1 is the description and attribute2 is the ID.
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
     attribute1: sl.description || '',
+    attribute2: sl._id, // Added _id as attribute2
   }))
 
   // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(
     (e?: FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault()
+
+      // Validate required fields before submission
+      if (!taskTitle) {
+        console.error('Error: Task Title is required')
+        alert('Please enter a Task Title')
+        return
+      }
+
+      if (!taskDescription) {
+        console.error('Error: Task Description is required')
+        alert('Please enter a Task Description')
+        return
+      }
+
+      if (!email) {
+        console.error('Error: Email is required')
+        alert('Please enter your Email')
+        return
+      }
+
+      if (!selectedSeverityId) {
+        console.error('Error: Severity Level is required')
+        alert('Please select a Severity Level')
+        return
+      }
+
+      console.log('Submitting task with:', {
+        title: taskTitle,
+        description: taskDescription,
+        email,
+        severityValue: selectedSeverity,
+        severityId: selectedSeverityId,
+      })
+
       onAdd({
         title: taskTitle,
         description: taskDescription,
         email,
-        severityId: selectedSeverity || '',
+        severityId: selectedSeverityId || '',
       })
     },
-    [taskTitle, taskDescription, email, selectedSeverity, onAdd]
+    [
+      taskTitle,
+      taskDescription,
+      email,
+      selectedSeverityId,
+      selectedSeverity,
+      onAdd,
+    ]
   )
 
   // ------------------ RENDER ------------------
@@ -89,11 +132,14 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           label="Severity Level"
           options={severityOptions}
           defaultValue={
-            severityOptions.find(opt => opt.attribute1 === selectedSeverity)
+            severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
               ?.value
           }
           onChange={option => {
-            setSelectedSeverity(option?.attribute1 || '')
+            // Store the severity level as display value and the ID properly
+            setSelectedSeverity(option?.value || '')
+            setSelectedSeverityId(option?.attribute2 || '')
+            console.log('Selected severity ID:', option?.attribute2)
           }}
           placeholder="Select severity level"
         />

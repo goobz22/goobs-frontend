@@ -38,7 +38,9 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
 
   // ------------------ FORM STATE ------------------
   const [selectedSeverity, setSelectedSeverity] = useState('')
+  const [selectedSeverityId, setSelectedSeverityId] = useState('')
   const [selectedQueue, setSelectedQueue] = useState('')
+  const [selectedQueueId, setSelectedQueueId] = useState('')
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([])
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
@@ -54,30 +56,48 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
     attribute1: sl.description || '',
+    attribute2: sl._id,
   }))
 
   const queueOptions = schedulingQueues.map(q => ({
     value: q.queueName,
+    attribute1: q._id,
   }))
 
   // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(() => {
-    // Find the IDs from the selected values
-    const selectedQueueId =
-      schedulingQueues.find(q => q.queueName === selectedQueue)?._id || ''
-
-    console.log('Submitting task with mapped IDs:', {
-      severityId: selectedSeverity,
+    console.log('Submitting task with stored IDs:', {
+      severityValue: selectedSeverity,
+      severityId: selectedSeverityId,
       queueValue: selectedQueue,
       queueId: selectedQueueId,
     })
+
+    // Validate required fields before submission
+    if (!selectedSeverityId) {
+      console.error('Error: Severity Level is required')
+      alert('Please select a Severity Level')
+      return
+    }
+
+    if (!taskTitle) {
+      console.error('Error: Task Title is required')
+      alert('Please enter a Task Title')
+      return
+    }
+
+    if (!taskDescription) {
+      console.error('Error: Task Description is required')
+      alert('Please enter a Task Description')
+      return
+    }
 
     const newTaskData: Omit<Task, '_id'> = {
       title: taskTitle,
       description: taskDescription,
       topicIds: selectedTopicIds,
       articleIds: [],
-      severityId: selectedSeverity || '',
+      severityId: selectedSeverityId,
       schedulingQueueId: selectedQueueId,
       statusId: '',
       substatusId: '',
@@ -105,12 +125,13 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
     taskTitle,
     taskDescription,
     selectedTopicIds,
-    selectedSeverity,
+    selectedSeverityId,
+    selectedQueueId,
     selectedQueue,
+    selectedSeverity,
     companyId,
     createdUserId,
     onAdd,
-    schedulingQueues,
   ])
 
   // ------------------ RENDER ------------------
@@ -187,11 +208,14 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                 options={severityOptions}
                 defaultValue={
                   severityOptions.find(
-                    opt => opt.attribute1 === selectedSeverity
+                    opt => opt.attribute2 === selectedSeverityId
                   )?.value
                 }
                 onChange={option => {
-                  setSelectedSeverity(option?.attribute1 || '')
+                  // Store the severity level as display value and the ID properly
+                  setSelectedSeverity(option?.value || '')
+                  setSelectedSeverityId(option?.attribute2 || '')
+                  console.log('Selected severity ID:', option?.attribute2)
                 }}
                 placeholder="Select severity level"
               />
@@ -209,23 +233,60 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                 label="Associated Product (Queue)"
                 options={queueOptions}
                 defaultValue={
-                  queueOptions.find(opt => opt.value === selectedQueue)?.value
+                  queueOptions.find(opt => opt.attribute1 === selectedQueueId)
+                    ?.value
                 }
                 onChange={option => {
                   setSelectedQueue(option?.value || '')
+                  setSelectedQueueId(option?.attribute1 || '')
+                  console.log('Selected queue ID:', option?.attribute1)
                 }}
                 placeholder="Select product queue"
               />
             </Box>
           </Box>
 
-          {/* Topics multi-select – raw topics mapped to their _id strings */}
-          <MultiSelect
-            label="Topics"
-            options={topics.map(t => t._id)}
-            defaultSelected={selectedTopicIds}
-            onChange={setSelectedTopicIds}
-          />
+          {/* Topics multi-select – using complex options with IDs in attribute1 */}
+          {React.useMemo(() => {
+            console.log('Topics being mapped for dropdown:', topics)
+
+            // Create complex options for topics with _id as attribute1
+            const topicOptions = topics.map(t => ({
+              value: t.topic || `Topic ${t._id}`,
+              attribute1: t._id, // Store ID in attribute1
+            }))
+
+            console.log('Topic options created:', topicOptions)
+
+            // Translate selected IDs to names for display
+            const selectedTopicValues = selectedTopicIds.map(id => {
+              const topic = topics.find(t => t._id === id)
+              return topic ? topic.topic || `Topic ${topic._id}` : id
+            })
+
+            return (
+              <MultiSelect
+                label="Topics"
+                options={topicOptions}
+                defaultSelected={selectedTopicValues}
+                onChange={selectedValues => {
+                  console.log('Selected topic values:', selectedValues)
+
+                  // Find the selected topics and get their IDs
+                  const newSelectedIds = selectedValues.map(value => {
+                    const matchingTopic = topicOptions.find(
+                      opt => opt.value === value
+                    )
+                    return matchingTopic?.attribute1 || value // Fall back to value if no match
+                  })
+
+                  console.log('Mapped to topic IDs:', newSelectedIds)
+                  setSelectedTopicIds(newSelectedIds)
+                }}
+                complexOptions={true} // Explicitly set to use complex options
+              />
+            )
+          }, [topics, selectedTopicIds])}
 
           {/* Action Buttons */}
           <Box

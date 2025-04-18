@@ -55,10 +55,15 @@ const CompanyAddTaskCustomerDropdown: React.FC<
 
   // ------------------ FORM STATE ------------------
   const [selectedCustomer, setSelectedCustomer] = useState('')
+  const [selectedCustomerId, setSelectedCustomerId] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState('')
+  const [selectedSeverityId, setSelectedSeverityId] = useState('')
   const [selectedQueue, setSelectedQueue] = useState('')
+  const [selectedQueueId, setSelectedQueueId] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('')
+  const [selectedStatusId, setSelectedStatusId] = useState('')
   const [selectedSubStatus, setSelectedSubStatus] = useState('')
+  const [selectedSubStatusId, setSelectedSubStatusId] = useState('')
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([])
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
   const [taskTitle, setTaskTitle] = useState('')
@@ -80,15 +85,18 @@ const CompanyAddTaskCustomerDropdown: React.FC<
         ? `${c.firstName || ''} ${c.lastName || ''}`.trim()
         : '',
     attribute1: c.email || '', // Now using email as attribute1
+    attribute2: c._id, // Added _id as attribute2
   }))
 
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
     attribute1: sl.description || '',
+    attribute2: sl._id, // Added _id as attribute2
   }))
 
   const statusOptions = statuses.map(s => ({
     value: s.status,
+    attribute1: s._id, // Added _id as attribute1
   }))
 
   // Filter substatuses based on the selected status
@@ -119,6 +127,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
       return {
         value: s.subStatus,
         attribute1: associatedStatus, // Use the status name as attribute1
+        attribute2: s._id, // Added _id as attribute2
       }
     })
 
@@ -131,6 +140,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
             {
               value: 'No substatuses available for this status',
               attribute1: '',
+              attribute2: '', // Added empty attribute2 to match structure
             },
           ]
         : []
@@ -139,46 +149,65 @@ const CompanyAddTaskCustomerDropdown: React.FC<
 
   const queueOptions = schedulingQueues.map(q => ({
     value: q.queueName,
+    attribute1: q._id, // Added _id as attribute1
   }))
 
   // Effect to reset substatus when status changes
   React.useEffect(() => {
     // Clear the selected substatus when the status changes
     setSelectedSubStatus('')
+    setSelectedSubStatusId('') // Also clear the ID when status changes
   }, [selectedStatus])
 
   // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(() => {
-    // Find the IDs from the selected values
-    const selectedStatusId =
-      statuses.find(s => s.status === selectedStatus)?._id || ''
-    const selectedSubStatusId =
-      subStatuses.find(s => s.subStatus === selectedSubStatus)?._id || ''
-    const selectedQueueId =
-      schedulingQueues.find(q => q.queueName === selectedQueue)?._id || ''
-    const selectedCustomerId =
-      rawCustomers.find(c => c.email === selectedCustomer)?._id || ''
-
-    console.log('Submitting task with mapped IDs:', {
+    console.log('Submitting task with stored IDs:', {
       statusValue: selectedStatus,
       statusId: selectedStatusId,
       subStatusValue: selectedSubStatus,
       subStatusId: selectedSubStatusId,
       queueValue: selectedQueue,
       queueId: selectedQueueId,
-      customerEmail: selectedCustomer,
+      customerName: selectedCustomer,
       customerId: selectedCustomerId,
+      severityValue: selectedSeverity,
+      severityId: selectedSeverityId,
     })
+
+    // Validate required fields before submission
+    if (!selectedCustomerId) {
+      console.error('Error: Customer is required')
+      alert('Please select a Customer')
+      return
+    }
+
+    if (!selectedSeverityId) {
+      console.error('Error: Severity Level is required')
+      alert('Please select a Severity Level')
+      return
+    }
+
+    if (!selectedStatusId) {
+      console.error('Error: Status is required')
+      alert('Please select a Status')
+      return
+    }
+
+    if (!selectedSubStatusId) {
+      console.error('Error: Substatus is required')
+      alert('Please select a Substatus')
+      return
+    }
 
     const newTaskData: Omit<Task, '_id'> = {
       title: taskTitle,
       description: taskDescription,
       topicIds: selectedTopicIds,
       articleIds: selectedArticleIds,
-      severityId: selectedSeverity || '',
-      schedulingQueueId: selectedQueueId, // Use ID from mapping
-      statusId: selectedStatusId, // Use ID from mapping
-      substatusId: selectedSubStatusId, // Use ID from mapping
+      severityId: selectedSeverityId,
+      schedulingQueueId: selectedQueueId,
+      statusId: selectedStatusId,
+      substatusId: selectedSubStatusId,
       employeeIds: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -196,7 +225,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
       teamMember: '',
       nextActionDate: '',
       companyId: '', // Company variant: no company selection
-      customerId: selectedCustomerId, // Use ID from mapping
+      customerId: selectedCustomerId,
     }
 
     onAdd(newTaskData)
@@ -205,17 +234,18 @@ const CompanyAddTaskCustomerDropdown: React.FC<
     taskDescription,
     selectedTopicIds,
     selectedArticleIds,
-    selectedSeverity,
-    selectedQueue,
+    selectedSeverityId,
+    selectedQueueId,
+    selectedStatusId,
+    selectedSubStatusId,
+    selectedCustomerId,
     selectedStatus,
     selectedSubStatus,
+    selectedQueue,
     selectedCustomer,
+    selectedSeverity,
     createdUserId,
     onAdd,
-    statuses,
-    subStatuses,
-    schedulingQueues,
-    rawCustomers,
   ])
 
   // ------------------ RENDER ------------------
@@ -276,11 +306,13 @@ const CompanyAddTaskCustomerDropdown: React.FC<
             label="Customer"
             options={customerOptions}
             defaultValue={
-              customerOptions.find(opt => opt.attribute1 === selectedCustomer)
+              customerOptions.find(opt => opt.attribute2 === selectedCustomerId)
                 ?.value
             }
             onChange={option => {
-              setSelectedCustomer(option?.attribute1 || '')
+              setSelectedCustomer(option?.value || '')
+              setSelectedCustomerId(option?.attribute2 || '')
+              console.log('Selected customer ID:', option?.attribute2)
             }}
             placeholder="Select a customer"
           />
@@ -307,11 +339,14 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 options={severityOptions}
                 defaultValue={
                   severityOptions.find(
-                    opt => opt.attribute1 === selectedSeverity
+                    opt => opt.attribute2 === selectedSeverityId
                   )?.value
                 }
                 onChange={option => {
-                  setSelectedSeverity(option?.attribute1 || '')
+                  // Store the severity level as display value and the ID properly
+                  setSelectedSeverity(option?.value || '')
+                  setSelectedSeverityId(option?.attribute2 || '')
+                  console.log('Selected severity ID:', option?.attribute2)
                 }}
                 placeholder="Select severity level"
               />
@@ -319,17 +354,19 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 label="Status"
                 options={statusOptions}
                 defaultValue={
-                  statusOptions.find(opt => opt.value === selectedStatus)?.value
+                  statusOptions.find(opt => opt.attribute1 === selectedStatusId)
+                    ?.value
                 }
                 onChange={option => {
                   const newStatus = option?.value || ''
                   console.log('Status selected:', newStatus)
 
-                  // Find the status ID for the selected status
-                  const statusObj = statuses.find(s => s.status === newStatus)
-                  console.log('Selected status object:', statusObj)
-
                   setSelectedStatus(newStatus)
+                  setSelectedStatusId(option?.attribute1 || '')
+                  console.log(
+                    'Selected status ID from attribute1:',
+                    option?.attribute1
+                  )
                 }}
                 placeholder="Select status"
               />
@@ -348,10 +385,13 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 label="Associated Product (Queue)"
                 options={queueOptions}
                 defaultValue={
-                  queueOptions.find(opt => opt.value === selectedQueue)?.value
+                  queueOptions.find(opt => opt.attribute1 === selectedQueueId)
+                    ?.value
                 }
                 onChange={option => {
                   setSelectedQueue(option?.value || '')
+                  setSelectedQueueId(option?.attribute1 || '')
+                  console.log('Selected queue ID:', option?.attribute1)
                 }}
                 placeholder="Select product queue"
               />
@@ -360,11 +400,13 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 options={finalSubStatusOptions}
                 defaultValue={
                   finalSubStatusOptions.find(
-                    opt => opt.value === selectedSubStatus
+                    opt => opt.attribute2 === selectedSubStatusId
                   )?.value
                 }
                 onChange={option => {
                   setSelectedSubStatus(option?.value || '')
+                  setSelectedSubStatusId(option?.attribute2 || '')
+                  console.log('Selected substatus ID:', option?.attribute2)
                 }}
                 placeholder={
                   selectedStatus
@@ -381,87 +423,80 @@ const CompanyAddTaskCustomerDropdown: React.FC<
           {React.useMemo(() => {
             console.log('Topics being mapped for dropdown:', topics)
 
-            // Create mappings for topic names to IDs and back
-            const topicNameToId: Record<string, string> = {}
-            const topicIdToName: Record<string, string> = {}
+            // Create complex options for topics with _id as attribute1
+            const topicOptions = topics.map(t => ({
+              value: t.topic || `Topic ${t._id}`,
+              attribute1: t._id, // Store ID in attribute1
+            }))
 
-            topics.forEach(t => {
-              const displayName = t.topic || `Topic ${t._id}`
-              topicNameToId[displayName] = t._id
-              topicIdToName[t._id] = displayName
-            })
-
-            console.log('Topic mappings created:', {
-              topicNameToId,
-              topicIdToName,
-            })
-
-            // Create user-friendly display options for topics
-            const topicOptions = topics.map(t => t.topic || `Topic ${t._id}`)
+            console.log('Topic options created:', topicOptions)
 
             // Translate selected IDs to names for display
-            const selectedTopicNames = selectedTopicIds.map(
-              id => topicIdToName[id] || id
-            )
+            const selectedTopicValues = selectedTopicIds.map(id => {
+              const topic = topics.find(t => t._id === id)
+              return topic ? topic.topic || `Topic ${topic._id}` : id
+            })
 
             return (
               <>
-                {/* Topics multi-select – using topic names with ID mapping */}
+                {/* Topics multi-select – using complex options with IDs in attribute1 */}
                 <MultiSelect
                   label="Topics"
                   options={topicOptions}
-                  defaultSelected={selectedTopicNames}
-                  onChange={selectedNames => {
-                    console.log('Selected topic names:', selectedNames)
+                  defaultSelected={selectedTopicValues}
+                  onChange={selectedValues => {
+                    console.log('Selected topic values:', selectedValues)
 
-                    // Map the selected names back to IDs
-                    const newSelectedIds = selectedNames.map(
-                      name => topicNameToId[name] || name // Fallback to name if mapping not found
-                    )
+                    // Find the selected topics and get their IDs
+                    const newSelectedIds = selectedValues.map(value => {
+                      const matchingTopic = topicOptions.find(
+                        opt => opt.value === value
+                      )
+                      return matchingTopic?.attribute1 || value // Fall back to value if no match
+                    })
+
                     console.log('Mapped to topic IDs:', newSelectedIds)
-
                     setSelectedTopicIds(newSelectedIds)
                   }}
+                  complexOptions={true} // Explicitly set to use complex options
                 />
               </>
             )
           }, [topics, selectedTopicIds])}
 
-          {/* Knowledgebase Articles multi-select – using article titles now instead of IDs */}
+          {/* Knowledgebase Articles multi-select – using article titles with IDs in attribute1 */}
           {React.useMemo(() => {
-            // Create mappings for article titles to IDs and back
-            const articleTitleToId: Record<string, string> = {}
-            const articleIdToTitle: Record<string, string> = {}
-
-            knowledgebaseArticles.forEach(a => {
-              const title = a.articleTitle || `Article ${a._id}`
-              articleTitleToId[title] = a._id
-              articleIdToTitle[a._id] = title
-            })
-
-            // Create user-friendly display options for articles
-            const articleOptions = knowledgebaseArticles.map(
-              a => a.articleTitle || `Article ${a._id}`
-            )
+            // Create complex options with article IDs
+            const articleOptions = knowledgebaseArticles.map(a => ({
+              value: a.articleTitle || `Article ${a._id}`,
+              attribute1: a._id, // Store ID in attribute1
+            }))
 
             // Translate selected IDs to titles for display
-            const selectedArticleTitles = selectedArticleIds.map(
-              id => articleIdToTitle[id] || id
-            )
+            const selectedArticleValues = selectedArticleIds.map(id => {
+              const article = knowledgebaseArticles.find(a => a._id === id)
+              return article
+                ? article.articleTitle || `Article ${article._id}`
+                : id
+            })
 
             return (
               <MultiSelect
                 label="Knowledgebase Articles"
                 options={articleOptions}
-                defaultSelected={selectedArticleTitles}
-                onChange={selectedTitles => {
-                  // Map the selected titles back to IDs
-                  const newSelectedIds = selectedTitles.map(
-                    title => articleTitleToId[title] || title // Fallback to title if mapping not found
-                  )
+                defaultSelected={selectedArticleValues}
+                onChange={selectedValues => {
+                  // Map the selected values to IDs using attribute1
+                  const newSelectedIds = selectedValues.map(value => {
+                    const matchingArticle = articleOptions.find(
+                      opt => opt.value === value
+                    )
+                    return matchingArticle?.attribute1 || value // Fall back to value if no match
+                  })
 
                   setSelectedArticleIds(newSelectedIds)
                 }}
+                complexOptions={true} // Explicitly set to use complex options
               />
             )
           }, [knowledgebaseArticles, selectedArticleIds])}
