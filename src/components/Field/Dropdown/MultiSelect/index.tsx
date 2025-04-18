@@ -10,12 +10,42 @@ import FormControl, { FormControlProps } from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import Chip from '@mui/material/Chip'
 
+/**
+ * Interface for dropdown options with attributes, matching SearchableDropdown format
+ */
+export interface DropdownOption {
+  value: string
+  attribute1?: string
+  attribute2?: string
+  attribute3?: string
+  attribute4?: string
+  attribute5?: string
+  attribute6?: string
+  uniqueKey?: string
+}
+
 export interface MultiSelectChipProps
   extends Omit<FormControlProps, 'onChange'> {
   label?: React.ReactNode
-  options?: string[]
+  /**
+   * Can be either:
+   * - string[] for simple options
+   * - DropdownOption[] for complex options with attributes
+   */
+  options?: string[] | DropdownOption[]
+  /**
+   * The values of the selected items
+   */
   defaultSelected?: string[]
+  /**
+   * Callback when selection changes - returns array of selected values
+   */
   onChange?: (values: string[]) => void
+  /**
+   * Whether options are complex DropdownOption objects or simple strings
+   * Defaults to auto-detect
+   */
+  complexOptions?: boolean
 
   backgroundcolor?: string
   outlinecolor?: string
@@ -27,6 +57,10 @@ export interface MultiSelectChipProps
 
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   sx?: SxProps
+  /**
+   * Whether to show option details in the dropdown - only applies to complex options
+   */
+  showOptionDetails?: boolean
 }
 
 const ITEM_HEIGHT = 40
@@ -146,6 +180,8 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
     options = [],
     defaultSelected = [],
     onChange,
+    complexOptions: userSpecifiedComplexOptions,
+    showOptionDetails = false,
 
     backgroundcolor,
     outlinecolor,
@@ -163,6 +199,48 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
   const [selectedValues, setSelectedValues] =
     React.useState<string[]>(defaultSelected)
 
+  // Auto-detect if options are complex (DropdownOption[]) or simple (string[])
+  const isComplexOptions = React.useMemo(() => {
+    if (userSpecifiedComplexOptions !== undefined) {
+      return userSpecifiedComplexOptions
+    }
+    // Check if options is an array and the first item is an object with a value property
+    return (
+      options.length > 0 &&
+      typeof options[0] !== 'string' &&
+      'value' in options[0]
+    )
+  }, [options, userSpecifiedComplexOptions])
+
+  // Parse options to get display values and lookup
+  const optionsData = React.useMemo(() => {
+    if (!isComplexOptions) {
+      // Simple string options
+      return {
+        displayOptions: options as string[],
+        optionsMap: new Map<string, string>(),
+      }
+    }
+
+    // Complex options with attributes
+    const complexOptions = options as DropdownOption[]
+    // Use DropdownOption type explicitly for the map
+    const optionsMap = new Map<string, DropdownOption>()
+
+    // Create a map of value to original option object for quick lookups
+    complexOptions.forEach(option => {
+      optionsMap.set(option.value, option)
+    })
+
+    // Extract just the values for the dropdown
+    const displayOptions = complexOptions.map(option => option.value)
+
+    return {
+      displayOptions,
+      optionsMap,
+    }
+  }, [options, isComplexOptions])
+
   const hasValue = React.useMemo(
     () => (selectedValues.length > 0).toString(),
     [selectedValues]
@@ -177,6 +255,35 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
     if (onChange) {
       onChange(newValue)
     }
+  }
+
+  // Render menu item text appropriately based on option type
+  const renderMenuItemText = (value: string) => {
+    if (!isComplexOptions) {
+      return value
+    }
+
+    // Cast optionsMap to the correct type with DropdownOption
+    const optionsMap = optionsData.optionsMap as Map<string, DropdownOption>
+    const option = optionsMap.get(value)
+
+    // If no option found in the map, just return the value
+    if (!option) return value
+
+    // Check if we should show details and if attribute1 exists
+    if (!showOptionDetails || typeof option.attribute1 === 'undefined') {
+      return value
+    }
+
+    // If showing details, include attribute1 (typically description/department)
+    return (
+      <Box>
+        <Box>{value}</Box>
+        <Box sx={{ fontSize: '0.8em', color: 'text.secondary' }}>
+          {option.attribute1}
+        </Box>
+      </Box>
+    )
   }
 
   return (
@@ -251,13 +358,13 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
           )}
           MenuProps={MenuProps}
         >
-          {options.map(name => (
+          {optionsData.displayOptions.map(value => (
             <MenuItem
-              key={name}
-              value={name}
-              style={getStyles(name, selectedValues, theme)}
+              key={value}
+              value={value}
+              style={getStyles(value, selectedValues, theme)}
             >
-              {name}
+              {renderMenuItemText(value)}
             </MenuItem>
           ))}
         </Select>
