@@ -71,6 +71,10 @@ import AccountNumber, {
 import RoutingNumber, {
   RoutingNumberProps,
 } from './components/Field/Number/RoutingNumber'
+import PercentageField, {
+  PercentageFieldProps,
+} from './components/Field/Percentage'
+import { DateRange } from './components/Field/Date'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
@@ -207,11 +211,14 @@ export type { MACAddressFieldProps }
 export type { VLANFieldProps }
 // NEW: Export AddTask / ShowTask / ManageTask
 export { ShowTask }
+export { PercentageField }
+
 export type { Task }
 export type { RawCustomer }
 export type { CheckboxProps }
 export type { AccountNumberProps }
 export type { RoutingNumberProps }
+export type { PercentageFieldProps }
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
@@ -223,6 +230,7 @@ export { RoutingNumber }
 export type { FormDataGridProps }
 export type { CustomDialogProps }
 
+export type { DateRange }
 // 2) All DataGrid Types
 export type { DatagridProps }
 export type { ColumnDef, RowData }

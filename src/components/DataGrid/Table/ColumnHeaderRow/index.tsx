@@ -38,8 +38,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   // If we're mobile, just render a single dropdown + "select all" checkbox
   if (isMobile) {
     const mobileOptions = allColumns.map(col => ({
-      value: col.field,
-      label: col.headerName ?? col.field,
+      value: col.headerName ?? col.field,
     }))
 
     // Find the currently-selected column as an object
@@ -47,7 +46,19 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
       mobileOptions.find(opt => opt.value === selectedOverflowField) || null
 
     const handleMobileChange = (value: { value: string } | null) => {
-      setSelectedOverflowField(value?.value || '')
+      if (value && value.value) {
+        // Try to find a column with matching headerName first
+        const matchingColumn = allColumns.find(
+          col => col.headerName === value.value || col.field === value.value
+        )
+
+        // If found, use its field property, otherwise use the value directly
+        setSelectedOverflowField(
+          matchingColumn ? matchingColumn.field : value.value
+        )
+      } else {
+        setSelectedOverflowField('')
+      }
     }
 
     return (
@@ -107,7 +118,20 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   // Desktop logic
   // ---------------------------
   const handleOverflowChange = (value: { value: string } | null) => {
-    setSelectedOverflowField(value?.value || '')
+    // If using headerName for value in dropdown, we need to find the corresponding field
+    if (value && value.value) {
+      // Try to find a column with matching headerName first
+      const matchingColumn = overflowDesktopColumns.find(
+        col => col.headerName === value.value || col.field === value.value
+      )
+
+      // If found, use its field property, otherwise use the value directly
+      setSelectedOverflowField(
+        matchingColumn ? matchingColumn.field : value.value
+      )
+    } else {
+      setSelectedOverflowField('')
+    }
   }
 
   return (
@@ -150,8 +174,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
               <SearchableDropdown
                 label="More Columns"
                 options={overflowDesktopColumns.map(oc => ({
-                  value: oc.field,
-                  label: oc.headerName ?? oc.field,
+                  value: oc.headerName ?? oc.field,
                 }))}
                 defaultValue={selectedOverflowField}
                 onChange={handleOverflowChange}

@@ -16,6 +16,9 @@ export type TextFieldProps = (
   | OutlinedTextFieldProps
   | FilledTextFieldProps
 ) & {
+  /** element rendered on the left side of the input */
+  startAdornment?: React.ReactNode
+  /** element rendered on the right side of the input */
   endAdornment?: React.ReactNode
   value?: string | number | readonly string[] | undefined
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -89,7 +92,7 @@ const StyledMuiTextField = styled(MuiTextField, {
   }) => ({
     '& .MuiOutlinedInput-root': {
       minHeight: '40px',
-      height: 'auto', // allow vertical expansion
+      height: 'auto',
       backgroundColor: backgroundcolor || 'inherit',
       color: fontcolor || 'black',
       '& .MuiSelect-icon': {
@@ -100,9 +103,7 @@ const StyledMuiTextField = styled(MuiTextField, {
           outlinecolor ||
           (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
         ...(shrunklabelposition === 'aboveNotch' && {
-          legend: {
-            width: '0px !important',
-          },
+          legend: { width: '0px !important' },
         }),
       },
       '&:hover fieldset': {
@@ -125,9 +126,7 @@ const StyledMuiTextField = styled(MuiTextField, {
     },
     '& .MuiInputLabel-root': {
       color: unshrunkfontcolor || 'black',
-      '&.Mui-focused': {
-        color: shrunkfontcolor || 'black',
-      },
+      '&.Mui-focused': { color: shrunkfontcolor || 'black' },
       '&.MuiInputLabel-shrink': {
         color: shrunkfontcolor || 'black',
         ...(shrunklabelposition === 'aboveNotch' && {
@@ -157,6 +156,7 @@ const TextField = React.memo<TextFieldProps>(props => {
     error,
     disabled,
     sx,
+    startAdornment,
     endAdornment,
     textAlign = 'left',
     slotProps: customSlotProps = {},
@@ -183,29 +183,15 @@ const TextField = React.memo<TextFieldProps>(props => {
   )
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (onChange) {
-        onChange(e)
-      }
-    },
+    (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e),
     [onChange]
   )
-
   const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      if (onFocus) {
-        onFocus(e)
-      }
-    },
+    (e: React.FocusEvent<HTMLInputElement>) => onFocus?.(e),
     [onFocus]
   )
-
   const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      if (onBlur) {
-        onBlur(e)
-      }
-    },
+    (e: React.FocusEvent<HTMLInputElement>) => onBlur?.(e),
     [onBlur]
   )
 
@@ -214,31 +200,36 @@ const TextField = React.memo<TextFieldProps>(props => {
   }, [])
 
   const mergedSlotProps = useMemo(() => {
+    const adornmentSx = {
+      color: '#000000 !important',
+      '& svg': {
+        color: '#000000 !important',
+        fill: '#000000 !important',
+        stroke: '#000000 !important',
+      },
+    }
+
     const defaultSlotProps = {
       input: {
         style: inputStyle,
-        endAdornment: endAdornment ? (
-          <InputAdornment
-            position="end"
-            sx={{
-              color: '#000000 !important',
-              '& svg': {
-                color: '#000000 !important',
-                fill: '#000000 !important',
-                stroke: '#000000 !important',
-              },
-            }}
-          >
-            {endAdornment}
-          </InputAdornment>
-        ) : undefined,
+        ...(startAdornment && {
+          startAdornment: (
+            <InputAdornment position="start" sx={adornmentSx}>
+              {startAdornment}
+            </InputAdornment>
+          ),
+        }),
+        ...(endAdornment && {
+          endAdornment: (
+            <InputAdornment position="end" sx={adornmentSx}>
+              {endAdornment}
+            </InputAdornment>
+          ),
+        }),
       },
       inputLabel: {
         sx: {
-          '&.MuiInputLabel-shrink': {
-            top: '0px',
-            left: '0px',
-          },
+          '&.MuiInputLabel-shrink': { top: '0px', left: '0px' },
           '&:not(.MuiInputLabel-shrink)': {
             transform: 'scale(1)',
             transformOrigin: 'top left',
@@ -260,7 +251,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         ...(customSlotProps.inputLabel || {}),
       },
     }
-  }, [inputStyle, endAdornment, customSlotProps])
+  }, [inputStyle, startAdornment, endAdornment, customSlotProps])
 
   const hasValue = Boolean(value?.toString().length).toString()
 
@@ -269,11 +260,11 @@ const TextField = React.memo<TextFieldProps>(props => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-start', // top-aligned so errors appear below
+        justifyContent: 'flex-start',
         width: '100%',
         marginTop: '15px',
-        height: 'auto', // allow expansion
-        overflow: 'visible', // ensure error messages are visible
+        height: 'auto',
+        overflow: 'visible',
         ...sx,
       }}
       onClick={handleClick}
@@ -308,5 +299,4 @@ const TextField = React.memo<TextFieldProps>(props => {
 })
 
 TextField.displayName = 'TextField'
-
 export default TextField

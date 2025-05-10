@@ -191,7 +191,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     teamMemberAssigned,
     nextActionDate,
   })
-  // 5) For editing an individual comment’s text
+  // 5) For editing an individual comment's text
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
   // 6) For selecting revisions for each comment
@@ -248,7 +248,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     setNewComment('')
   }
 
-  /** Begin editing a comment’s text */
+  /** Begin editing a comment's text */
   const startEditingComment = (commentId: string, currentText: string) => {
     setEditingCommentId(commentId)
     setEditingCommentText(currentText)
@@ -1050,7 +1050,14 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     label="Next Action Date"
                     value={safeParseDate(formData.nextActionDate)}
                     onChange={date => {
-                      if (date) {
+                      // Check if date is a DateRange or a Date
+                      if (date && 'start' in date) {
+                        // It's a DateRange, but we're not using range mode
+                        return
+                      }
+
+                      // Handle Date type
+                      if (date instanceof Date) {
                         const mm = String(date.getMonth() + 1).padStart(2, '0')
                         const dd = String(date.getDate()).padStart(2, '0')
                         const yyyy = date.getFullYear()
