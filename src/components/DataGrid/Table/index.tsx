@@ -51,6 +51,13 @@ function Table({
     showOverflowDropdown: !isMobile,
   })
 
+  // Initialize selectedOverflowField if it's empty but we have overflow columns
+  React.useEffect(() => {
+    if (!selectedOverflowField && overflowDesktopColumns.length > 0) {
+      setSelectedOverflowField(overflowDesktopColumns[0].field)
+    }
+  }, [selectedOverflowField, overflowDesktopColumns, setSelectedOverflowField])
+
   // Decide which columns to render in the <TableHead /> for desktop.
   // On mobile, we skip the "__overflow__" approach and just show the single dropdown.
   const finalDesktopColumns = !isMobile

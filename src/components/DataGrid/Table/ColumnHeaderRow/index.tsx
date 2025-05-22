@@ -176,7 +176,18 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 options={overflowDesktopColumns.map(oc => ({
                   value: oc.headerName ?? oc.field,
                 }))}
-                defaultValue={selectedOverflowField}
+                defaultValue={
+                  selectedOverflowField
+                    ? // Find the matching column's display name
+                      (overflowDesktopColumns.find(
+                        oc => oc.field === selectedOverflowField
+                      )?.headerName ?? selectedOverflowField)
+                    : // If no selection yet, use the first option's value
+                      overflowDesktopColumns.length > 0
+                      ? (overflowDesktopColumns[0].headerName ??
+                        overflowDesktopColumns[0].field)
+                      : ''
+                }
                 onChange={handleOverflowChange}
                 backgroundcolor={white.main}
                 fontcolor="black"
