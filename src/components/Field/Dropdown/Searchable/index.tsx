@@ -9,10 +9,8 @@ import {
   Box,
   Tabs,
   Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../../../styles/palette'
@@ -20,8 +18,6 @@ import Typography from '../../../Typography'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import HistoryIcon from '@mui/icons-material/History'
 import SearchIcon from '@mui/icons-material/Search'
-import CloseIcon from '@mui/icons-material/Close'
-import Searchbar from '../../Search'
 
 // Define custom colors since palette doesn't have them
 const customColors = {
@@ -113,7 +109,7 @@ const StyledInputLabel = styled(InputLabel)<{
       left: '-14px',
     }),
     ...(shrunklabelposition === 'onNotch' && {
-      top: '2.5px',
+      top: '2px',
       left: '0px',
     }),
   },
@@ -123,36 +119,6 @@ const StyledInputLabel = styled(InputLabel)<{
     top: '10px',
     left: '12px',
   },
-}))
-
-const StyledDialog = styled(Dialog)(() => ({
-  '& .MuiDialog-paper': {
-    margin: 0,
-    width: '100%',
-    maxWidth: '100%',
-    height: '100%',
-    maxHeight: '100%',
-    borderRadius: 0,
-    backgroundColor: customColors.skyBlue.lighter, // Light blue background
-  },
-}))
-
-const StyledDialogTitle = styled(DialogTitle)(() => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '16px',
-  borderBottom: `1px solid ${customColors.blue.light}`,
-  backgroundColor: customColors.blue.main, // Blue header
-  color: white.main,
-}))
-
-const StyledDialogContent = styled(DialogContent)(() => ({
-  padding: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  overflowY: 'auto',
-  backgroundColor: customColors.skyBlue.lighter, // Light blue background
 }))
 
 const StyledFormHelperText = styled(FormHelperText)({
@@ -222,26 +188,33 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   // Use ref to track if we've done initial history setup to avoid loops
   const initializedRef = React.useRef(false)
 
-  // Replace open/onOpen/onClose logic with dialog state
-  const [dialogOpen, setDialogOpen] = useState(false)
-
   // Add state variables to store the original input value
   const [storedInputValue, setStoredInputValue] = useState('')
   const [tempInputValue, setTempInputValue] = useState('')
 
-  // Handle dialog open/close
-  const handleOpenDialog = () => {
-    setDialogOpen(true)
-    // Temporarily disable filtering when opening the dialog
-    setIsFilteringEnabled(false)
-    // Store current input value to restore it later if needed
-    setStoredInputValue(inputValue)
-    // Clear input temporarily to show all options
-    setTempInputValue('')
+  // Add state for menu anchor
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+
+  // Determine whether to use dialog or menu
+  const menuOpen = Boolean(menuAnchorEl)
+
+  // Handle menu open/close
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+    if (!disabled) {
+      setMenuAnchorEl(event.currentTarget)
+      // Store current input value to restore it later if needed
+      setStoredInputValue(inputValue)
+      // Clear temp input value to show all options
+      setTempInputValue('')
+      // Always disable filtering when opening the menu to show all options
+      setIsFilteringEnabled(false)
+      // Reset activeTab to 0 (All Options) when opening the menu
+      setActiveTab(0)
+    }
   }
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false)
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null)
 
     // If no new search was performed, restore the original input value
     if (tempInputValue === '' && inputValue !== storedInputValue) {
@@ -252,186 +225,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     setTempInputValue('')
   }
 
-  // Handle selection from dialog
-  const handleDialogSelection = (option: DropdownOption) => {
+  // Handle selection from menu
+  const handleMenuSelection = (option: DropdownOption) => {
     // Set the selected value
     handleChange({} as SyntheticEvent, option)
-    // Close the dialog
-    handleCloseDialog()
-  }
-
-  // Create the list of options to show in the dialog
-  const renderOptionsList = () => {
-    return displayOptions.map(option => {
-      // Check if this is a history item
-      const isHistoryItem = option.uniqueKey?.startsWith('history-')
-      const isCurrentInput = option.uniqueKey?.startsWith('current-')
-      const isNoHistoryPlaceholder = option.uniqueKey === 'no-history'
-
-      return (
-        <Box
-          key={option.uniqueKey || option.value}
-          sx={{
-            padding: variant === 'complex' ? '14px 16px' : '12px 16px',
-            borderBottom: `1px solid ${customColors.blue.lighter}`,
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: customColors.skyBlue.light,
-            },
-            '&:active': {
-              backgroundColor: customColors.blue.lighter,
-            },
-          }}
-          onClick={() => handleDialogSelection(option)}
-        >
-          {/* Main value - both variants */}
-          <Typography
-            fontvariant="merriparagraph"
-            text={
-              isNoHistoryPlaceholder
-                ? option.value
-                : isCurrentInput
-                  ? `Search: "${option.value}"`
-                  : isHistoryItem
-                    ? `History: ${option.value.replace(/_/g, ' ')}`
-                    : option.value.replace(/_/g, ' ')
-            }
-            fontcolor={customColors.blue.dark}
-            sx={{
-              fontSize: '16px',
-              fontWeight: isCurrentInput
-                ? '500'
-                : isHistoryItem
-                  ? '400'
-                  : variant === 'complex'
-                    ? '500'
-                    : 'normal',
-              fontStyle: isHistoryItem ? 'italic' : 'normal',
-              lineHeight: '22px',
-              width: '100%',
-              textAlign: 'left',
-            }}
-          />
-
-          {/* For history items, show the timestamp */}
-          {isHistoryItem && option.attribute2 && (
-            <Typography
-              fontvariant="merriparagraph"
-              text={option.attribute2}
-              fontcolor="rgba(0, 0, 0, 0.6)"
-              sx={{
-                fontSize: '13px',
-                lineHeight: '16px',
-                width: '100%',
-                textAlign: 'left',
-                fontStyle: 'italic',
-              }}
-            />
-          )}
-
-          {/* For simple variant - show attribute1 and attribute2 on one line (excluding ID fields) */}
-          {variant === 'simple' &&
-            !isHistoryItem &&
-            !isCurrentInput &&
-            !isNoHistoryPlaceholder &&
-            (() => {
-              // Filter out ID attributes if showIdColumns is false
-              const filteredAttributes = [
-                option.attribute1,
-                option.attribute2,
-              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
-
-              return filteredAttributes.length > 0 ? (
-                <Typography
-                  fontvariant="merriparagraph"
-                  text={filteredAttributes.join(' | ')}
-                  fontcolor="rgba(0, 0, 0, 0.6)"
-                  sx={{
-                    fontSize: '14px',
-                    lineHeight: '18px',
-                    width: '100%',
-                    textAlign: 'left',
-                  }}
-                />
-              ) : null
-            })()}
-
-          {/* For complex variant - show attributes on separate lines (excluding ID fields) */}
-          {variant === 'complex' &&
-            !isHistoryItem &&
-            !isCurrentInput &&
-            !isNoHistoryPlaceholder && (
-              <>
-                {/* First line of attributes */}
-                {(() => {
-                  const filteredAttributes = [
-                    option.attribute1,
-                    option.attribute2,
-                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
-
-                  return filteredAttributes.length > 0 ? (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={filteredAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '14px',
-                        lineHeight: '18px',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    />
-                  ) : null
-                })()}
-
-                {/* Second line of attributes */}
-                {(() => {
-                  const filteredAttributes = [
-                    option.attribute3,
-                    option.attribute4,
-                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
-
-                  return filteredAttributes.length > 0 ? (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={filteredAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '14px',
-                        lineHeight: '18px',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    />
-                  ) : null
-                })()}
-
-                {/* Additional attributes if needed */}
-                {(() => {
-                  const filteredAttributes = [
-                    option.attribute5,
-                    option.attribute6,
-                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
-
-                  return filteredAttributes.length > 0 ? (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={filteredAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '14px',
-                        lineHeight: '18px',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    />
-                  ) : null
-                })()}
-              </>
-            )}
-        </Box>
-      )
-    })
+    // Close the menu
+    handleCloseMenu()
   }
 
   // Function to format date for display
@@ -521,9 +320,51 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   useEffect(() => {
     const defaultOption = options.find(option => option.value === defaultValue)
     if (defaultOption) {
-      const displayText =
-        defaultOption.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
-        defaultOption.value.replace(/_/g, ' ').slice(1)
+      // Format display text based on value and available attributes
+      let displayText = defaultOption.value
+
+      // Include more comprehensive information if attributes are available
+      if (
+        defaultOption.attribute1 ||
+        defaultOption.attribute2 ||
+        defaultOption.attribute3 ||
+        defaultOption.attribute4 ||
+        defaultOption.attribute5 ||
+        defaultOption.attribute6
+      ) {
+        const contactInfo = []
+
+        // Add all available attributes to provide complete context
+        if (defaultOption.attribute1) {
+          contactInfo.push(`${defaultOption.attribute1}`)
+        }
+
+        if (defaultOption.attribute2) {
+          contactInfo.push(`${defaultOption.attribute2}`)
+        }
+
+        if (defaultOption.attribute3) {
+          contactInfo.push(`${defaultOption.attribute3}`)
+        }
+
+        if (defaultOption.attribute4) {
+          contactInfo.push(`${defaultOption.attribute4}`)
+        }
+
+        if (defaultOption.attribute5) {
+          contactInfo.push(`${defaultOption.attribute5}`)
+        }
+
+        if (defaultOption.attribute6) {
+          contactInfo.push(`${defaultOption.attribute6}`)
+        }
+
+        // If we have contact info to display alongside the value
+        if (contactInfo.length > 0) {
+          displayText = `${defaultOption.value} (${contactInfo.join(' | ')})`
+        }
+      }
+
       setValue(defaultOption)
       setInputValue(displayText)
     }
@@ -533,8 +374,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     event: SyntheticEvent<Element, Event>,
     newValue: DropdownOption | string | null
   ) => {
-    // Reset filtering after selection is made
-    setIsFilteringEnabled(true)
+    // Don't enable filtering when selection is made
+    // Keep filtering disabled to show all options
+    setIsFilteringEnabled(false)
 
     if (typeof newValue === 'string') {
       setValue(newValue)
@@ -563,9 +405,58 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     } else {
       setValue(newValue)
       if (newValue) {
-        const displayText =
-          newValue.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
-          newValue.value.replace(/_/g, ' ').slice(1)
+        // Format display text based on value and available attributes
+        // Include more comprehensive information including attributes
+        let displayText = newValue.value
+
+        // Check if we have attributes to display in a more informative format
+        if (
+          newValue.attribute1 ||
+          newValue.attribute2 ||
+          newValue.attribute3 ||
+          newValue.attribute4 ||
+          newValue.attribute5 ||
+          newValue.attribute6
+        ) {
+          // For contact-like entries, try to create a more comprehensive display
+          // Include available attributes based on what's available
+          // This supports formats like the address/contact example in the screenshot
+
+          // For addresses, phone numbers, etc., we want to keep the original value visible
+          // but also show additional context if available
+          const contactInfo = []
+
+          // Add all available attributes to provide complete context
+          if (newValue.attribute1) {
+            contactInfo.push(`${newValue.attribute1}`)
+          }
+
+          if (newValue.attribute2) {
+            contactInfo.push(`${newValue.attribute2}`)
+          }
+
+          if (newValue.attribute3) {
+            contactInfo.push(`${newValue.attribute3}`)
+          }
+
+          if (newValue.attribute4) {
+            contactInfo.push(`${newValue.attribute4}`)
+          }
+
+          if (newValue.attribute5) {
+            contactInfo.push(`${newValue.attribute5}`)
+          }
+
+          if (newValue.attribute6) {
+            contactInfo.push(`${newValue.attribute6}`)
+          }
+
+          // If we have contact info to display alongside the value
+          if (contactInfo.length > 0) {
+            displayText = `${newValue.value} (${contactInfo.join(' | ')})`
+          }
+        }
+
         setInputValue(displayText)
         onChange?.(newValue)
 
@@ -627,8 +518,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     if (inputValue.trim()) {
       handleInputSubmit()
     }
-    // Reset filtering when dropdown closes
-    setIsFilteringEnabled(true)
+    // Keep filtering disabled to always show all options
+    setIsFilteringEnabled(false)
   }
 
   // Function to handle tab change
@@ -637,7 +528,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     setActiveTab(newValue)
 
     // Keep the dropdown open when switching tabs
-    setIsFilteringEnabled(true)
+    // But disable filtering to show all options
+    setIsFilteringEnabled(false)
   }
 
   const labelId = `${name}-label`
@@ -686,41 +578,13 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Create a combined options array based on active tab and input value
   const getFilteredOptions = React.useCallback(() => {
-    // When dialog is open and no search input, show all options with selected at top
-    if (dialogOpen && !tempInputValue.trim()) {
-      // Find the currently selected option if any
-      const selectedOption =
-        value && typeof value !== 'string'
-          ? filteredBaseOptions.find(opt => opt.value === value.value)
-          : null
-
-      // If there's a selected option, put it at the top
-      if (selectedOption) {
-        const otherOptions = filteredBaseOptions.filter(
-          opt => opt.value !== selectedOption.value
-        )
-        return [selectedOption, ...otherOptions]
-      }
-
-      // Otherwise just return all options
-      return filteredBaseOptions
-    }
-
-    const currentInputVal = dialogOpen
-      ? tempInputValue.trim()
-      : inputValue.trim()
+    const currentInputVal = inputValue.trim()
 
     // HISTORY TAB - only apply when variant is complex
     if (activeTab === 1 && variant === 'complex') {
       if (combinedHistory.length === 0) {
-        // Show a placeholder message if no history
-        return [
-          {
-            value: 'No search history',
-            uniqueKey: 'no-history',
-            attribute1: 'Try searching for something first',
-          },
-        ]
+        // Return empty array - we'll handle the empty state with custom UI
+        return []
       }
 
       // Map history items to dropdown options
@@ -760,68 +624,72 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     // ALL OPTIONS TAB (activeTab === 0)
-    // If filtering is disabled or input is empty, return all options
-    if (!isFilteringEnabled || !currentInputVal) {
-      // If dialog is open and there's a selected value, prioritize it
-      if (dialogOpen && value && typeof value !== 'string') {
-        const selectedOption = filteredBaseOptions.find(
-          opt => opt.value === value.value
-        )
-        if (selectedOption) {
-          const otherOptions = filteredBaseOptions.filter(
-            opt => opt.value !== selectedOption.value
-          )
-          return [selectedOption, ...otherOptions]
-        }
+    // Start with all base options
+    const allOptions = [...filteredBaseOptions]
+
+    // Only apply filtering if filtering is enabled and there's input text
+    if (isFilteringEnabled && currentInputVal) {
+      const filteredOpts = filteredBaseOptions.filter(opt =>
+        opt.value.toLowerCase().includes(currentInputVal.toLowerCase())
+      )
+
+      // If no matches found, add the current input as a custom option
+      if (filteredOpts.length === 0) {
+        return [
+          {
+            value: currentInputVal,
+            uniqueKey: `current-${currentInputVal}`,
+            attribute1: 'Search',
+          },
+        ]
       }
-      return filteredBaseOptions
+
+      // Check if the input exactly matches any option
+      const exactMatch = filteredOpts.some(
+        opt => opt.value.toLowerCase() === currentInputVal.toLowerCase()
+      )
+
+      // If no exact match, add the current input as the first option
+      if (!exactMatch) {
+        return [
+          {
+            value: currentInputVal,
+            uniqueKey: `current-${currentInputVal}`,
+            attribute1: 'Search',
+          },
+          ...filteredOpts,
+        ]
+      }
+
+      // Also filter out the currently selected option from filtered results
+      if (value && typeof value !== 'string') {
+        return filteredOpts.filter(option => option.value !== value.value)
+      }
+      return filteredOpts
     }
 
-    // Filter options based on current input
-    const filteredOpts = filteredBaseOptions.filter(opt =>
-      opt.value.toLowerCase().includes(currentInputVal.toLowerCase())
-    )
-
-    // If no matches found, add the current input as a custom option
-    if (filteredOpts.length === 0) {
-      return [
-        {
-          value: currentInputVal,
-          uniqueKey: `current-${currentInputVal}`,
-          attribute1: 'Search',
-        },
-      ]
+    // When not filtering, return all options except the currently selected one
+    // This prevents the selected item from appearing twice (in Selected section and in options list)
+    if (value && typeof value !== 'string') {
+      return allOptions.filter(option => option.value !== value.value)
     }
-
-    // Check if the input exactly matches any option
-    const exactMatch = filteredOpts.some(
-      opt => opt.value.toLowerCase() === currentInputVal.toLowerCase()
-    )
-
-    // If no exact match, add the current input as the first option
-    if (!exactMatch) {
-      return [
-        {
-          value: currentInputVal,
-          uniqueKey: `current-${currentInputVal}`,
-          attribute1: 'Search',
-        },
-        ...filteredOpts,
-      ]
-    }
-
-    return filteredOpts
+    return allOptions
   }, [
     inputValue,
-    tempInputValue,
     combinedHistory,
     filteredBaseOptions,
     activeTab,
     variant,
     isFilteringEnabled,
-    dialogOpen,
-    value,
+    value, // Add value to dependencies to update when selection changes
   ])
+
+  // Get the currently selected option if any
+  const selectedOption = React.useMemo(() => {
+    if (!value || typeof value === 'string') return null
+
+    return filteredBaseOptions.find(opt => opt.value === value.value) || null
+  }, [value, filteredBaseOptions])
 
   // Memoize the filtered options to prevent recreation on every render
   const filteredOptions = React.useMemo(
@@ -862,18 +730,21 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           {label}
         </StyledInputLabel>
 
-        {/* The input field with click handler to open dialog */}
+        {/* Input field for the dropdown */}
         <OutlinedInput
           id={name}
           value={inputValue}
           onChange={e => {
             if (!disabled) {
               setInputValue(e.target.value)
+              setTempInputValue(e.target.value)
+              // Only enable filtering when typing in search box
+              setIsFilteringEnabled(e.target.value.trim() !== '')
             }
           }}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          onClick={handleOpenDialog}
+          onClick={handleOpenMenu}
           placeholder={placeholder}
           error={error}
           required={required}
@@ -888,7 +759,14 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main,
                 cursor: 'pointer',
               }}
-              onClick={handleOpenDialog}
+              onClick={(e: React.MouseEvent<SVGSVGElement>) => {
+                // Prevent event from bubbling to parent
+                e.stopPropagation()
+                // Pass the event's current target as the anchor element
+                if (!disabled) {
+                  handleOpenMenu(e as unknown as React.MouseEvent<HTMLElement>)
+                }
+              }}
             />
           }
           sx={{
@@ -942,105 +820,408 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         )}
       </StyledFormControl>
 
-      {/* Fullscreen Dialog for option selection - moved outside FormControl */}
-      <StyledDialog open={dialogOpen} onClose={handleCloseDialog} fullScreen>
-        <StyledDialogTitle>
-          <Typography
-            fontvariant="merriparagraph"
-            text={label}
-            fontcolor={white.main}
-            sx={{ fontSize: '18px', fontWeight: 'bold' }}
-          />
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={handleCloseDialog}
-            aria-label="close"
-            sx={{ color: white.main }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </StyledDialogTitle>
-
-        {/* Search input for filtering inside dialog - using Searchbar component */}
-        <Box
-          sx={{
-            padding: '16px',
-            borderBottom: `1px solid ${customColors.blue.light}`,
-            backgroundColor: customColors.skyBlue.light,
-          }}
-        >
-          <Searchbar
-            placeholder="Search options..."
-            value={tempInputValue}
-            onChange={e => {
-              setTempInputValue(e.target.value)
-              setIsFilteringEnabled(true)
-            }}
-            backgroundcolor={white.main}
-            iconcolor={customColors.blue.main}
-            outlinecolor={customColors.blue.light}
-            fontcolor={customColors.blue.dark}
-          />
-        </Box>
-
-        {/* Tabs for complex variant */}
-        {variant === 'complex' && (
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            centered
+      {/* Standard Material UI Menu */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={menuOpen}
+        onClose={handleCloseMenu}
+        sx={{
+          '& .MuiPaper-root': {
+            boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.2)',
+            width: menuAnchorEl?.offsetWidth
+              ? `${menuAnchorEl.offsetWidth}px`
+              : 'auto',
+            position: 'relative', // Ensure proper positioning context for absolute elements
+            display: 'flex', // Add flexbox for proper layout
+            flexDirection: 'column', // Stack children vertically
+            overflow: 'hidden', // Hide overflow to prevent double scrollbars
+            maxHeight: '400px', // Set max height on the paper
+          },
+          '& .MuiMenu-list': {
+            padding: 0, // Remove default padding
+            paddingBottom: variant === 'complex' ? '40px' : 0, // Space for tabs
+            flex: '1 1 auto', // Allow list to fill available space
+            overflowY: 'auto', // Only the list should scroll
+            width: '100%', // Ensure full width
+            ...(activeTab === 1 &&
+              combinedHistory.length === 0 && {
+                overflowY: 'hidden', // Hide scrollbar when showing empty history state
+                flex: 'none', // Don't flex when showing empty history
+              }),
+          },
+        }}
+        MenuListProps={{
+          style: {
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+        PaperProps={{
+          style: {
+            // Always match the width of the anchor element exactly
+            width: menuAnchorEl?.offsetWidth
+              ? `${menuAnchorEl.offsetWidth}px`
+              : 'auto',
+            minWidth: 'auto', // Override any min-width
+            maxWidth: 'none', // Override any max-width constraints
+          },
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        {/* Selected item display at top of menu when a value is selected */}
+        {selectedOption && (
+          <Box
             sx={{
+              bgcolor: customColors.blue.lighter,
               borderBottom: `1px solid ${customColors.blue.light}`,
-              backgroundColor: customColors.blue.light,
-              '& .MuiTabs-indicator': {
-                backgroundColor: white.main,
-              },
+              borderLeft: `3px solid ${customColors.blue.main}`,
+              p: 1.5,
+              pl: 1.2,
+              position: 'sticky',
+              top: 0,
+              zIndex: 5,
             }}
           >
-            <Tab
-              icon={<SearchIcon fontSize="small" />}
-              label="ALL OPTIONS"
-              iconPosition="start"
+            <Typography
+              fontvariant="merriparagraph"
+              text="Selected"
+              fontcolor={customColors.blue.main}
               sx={{
-                color: customColors.blue.dark,
-                '&.Mui-selected': {
-                  color: white.main,
-                  fontWeight: 'bold',
-                },
+                fontSize: '12px',
+                fontWeight: 'bold',
+                mb: 0.5,
+                textTransform: 'uppercase',
               }}
             />
-            <Tab
-              icon={<HistoryIcon fontSize="small" />}
-              label="HISTORY"
-              iconPosition="start"
+            <Typography
+              fontvariant="merriparagraph"
+              text={selectedOption.value}
+              fontcolor={customColors.blue.dark}
               sx={{
-                color: customColors.blue.dark,
-                '&.Mui-selected': {
-                  color: white.main,
-                  fontWeight: 'bold',
-                },
+                fontSize: '16px',
+                fontWeight: 500,
+                lineHeight: '22px',
+                width: '100%',
+                textAlign: 'left',
               }}
             />
-          </Tabs>
+            {/* Display attributes for selected item */}
+            {(() => {
+              // First line: attribute1 and attribute2
+              const firstLineAttributes = [
+                selectedOption.attribute1,
+                selectedOption.attribute2,
+              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+              // Second line: attribute3 and attribute4
+              const secondLineAttributes = [
+                selectedOption.attribute3,
+                selectedOption.attribute4,
+              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+
+              return (
+                <>
+                  {firstLineAttributes.length > 0 && (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={firstLineAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '14px',
+                        lineHeight: '18px',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    />
+                  )}
+
+                  {secondLineAttributes.length > 0 && (
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text={secondLineAttributes.join(' | ')}
+                      fontcolor="rgba(0, 0, 0, 0.6)"
+                      sx={{
+                        fontSize: '14px',
+                        lineHeight: '18px',
+                        width: '100%',
+                        textAlign: 'left',
+                        mt: 0.5,
+                      }}
+                    />
+                  )}
+                </>
+              )
+            })()}
+          </Box>
         )}
 
-        <StyledDialogContent>
-          {/* Options List */}
-          {renderOptionsList()}
+        {/* Menu items - without nested scrollable container */}
+        {displayOptions.map(option => {
+          const isHistoryItem = option.uniqueKey?.startsWith('history-')
+          const isCurrentInput = option.uniqueKey?.startsWith('current-')
+          // Don't highlight selected items in the regular list anymore
 
-          {/* No results message */}
-          {displayOptions.length === 0 && (
-            <Box sx={{ padding: '20px', textAlign: 'center' }}>
+          return (
+            <MenuItem
+              key={option.uniqueKey || option.value}
+              onClick={() => handleMenuSelection(option)}
+              sx={{
+                py: 1,
+                px: 2,
+                borderBottom: '1px solid #f0f0f0',
+                '&:hover': {
+                  backgroundColor: customColors.skyBlue.light,
+                },
+              }}
+            >
+              <Box sx={{ width: '100%' }}>
+                {/* Main value text */}
+                <Typography
+                  fontvariant="merriparagraph"
+                  text={
+                    isCurrentInput
+                      ? `Search: "${option.value}"`
+                      : isHistoryItem
+                        ? `History: ${option.value}`
+                        : option.value
+                  }
+                  fontcolor={customColors.blue.dark}
+                  sx={{
+                    fontSize: '16px',
+                    fontWeight: isCurrentInput ? '500' : 'normal',
+                    lineHeight: '22px',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                />
+
+                {/* Display attribute1 and attribute2 side by side */}
+                {!isHistoryItem &&
+                  !isCurrentInput &&
+                  (() => {
+                    // First line: attribute1 and attribute2
+                    const firstLineAttributes = [
+                      option.attribute1,
+                      option.attribute2,
+                    ].filter(
+                      attr => showIdColumns || (attr && !isIdField(attr))
+                    )
+
+                    // Second line: attribute3 and attribute4
+                    const secondLineAttributes = [
+                      option.attribute3,
+                      option.attribute4,
+                    ].filter(
+                      attr => showIdColumns || (attr && !isIdField(attr))
+                    )
+
+                    // Third line: attribute5 and attribute6
+                    const thirdLineAttributes = [
+                      option.attribute5,
+                      option.attribute6,
+                    ].filter(
+                      attr => showIdColumns || (attr && !isIdField(attr))
+                    )
+
+                    return (
+                      <>
+                        {firstLineAttributes.length > 0 && (
+                          <Typography
+                            fontvariant="merriparagraph"
+                            text={firstLineAttributes.join(' | ')}
+                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            sx={{
+                              fontSize: '14px',
+                              lineHeight: '18px',
+                              width: '100%',
+                              textAlign: 'left',
+                            }}
+                          />
+                        )}
+
+                        {secondLineAttributes.length > 0 && (
+                          <Typography
+                            fontvariant="merriparagraph"
+                            text={secondLineAttributes.join(' | ')}
+                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            sx={{
+                              fontSize: '14px',
+                              lineHeight: '18px',
+                              width: '100%',
+                              textAlign: 'left',
+                              mt: 0.5,
+                            }}
+                          />
+                        )}
+
+                        {thirdLineAttributes.length > 0 && (
+                          <Typography
+                            fontvariant="merriparagraph"
+                            text={thirdLineAttributes.join(' | ')}
+                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            sx={{
+                              fontSize: '14px',
+                              lineHeight: '18px',
+                              width: '100%',
+                              textAlign: 'left',
+                              mt: 0.5,
+                            }}
+                          />
+                        )}
+                      </>
+                    )
+                  })()}
+              </Box>
+            </MenuItem>
+          )
+        })}
+
+        {/* No results message - only show when not on history tab or when history tab has items */}
+        {displayOptions.length === 0 &&
+          !(activeTab === 1 && combinedHistory.length === 0) && (
+            <MenuItem disabled>
               <Typography
                 fontvariant="merriparagraph"
                 text="No matching options found"
                 fontcolor="rgba(0, 0, 0, 0.6)"
               />
-            </Box>
+            </MenuItem>
           )}
-        </StyledDialogContent>
-      </StyledDialog>
+
+        {/* Custom empty history state */}
+        {activeTab === 1 && combinedHistory.length === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 16px',
+              paddingBottom: '24px',
+              textAlign: 'center',
+              height: '300px', // Fixed height to match screenshot
+              overflow: 'hidden', // Prevent scrolling
+            }}
+          >
+            <HistoryIcon
+              sx={{
+                fontSize: '64px',
+                color: 'rgba(0, 0, 0, 0.2)',
+                mb: 2,
+                opacity: 0.5,
+              }}
+            />
+            <Typography
+              fontvariant="merriparagraph"
+              text="No search history"
+              fontcolor={customColors.blue.main}
+              sx={{
+                fontSize: '16px',
+                fontWeight: 500,
+                mb: 1,
+              }}
+            />
+            <Typography
+              fontvariant="merriparagraph"
+              text="Items you search for will appear here"
+              fontcolor="rgba(0, 0, 0, 0.6)"
+              sx={{
+                fontSize: '14px',
+                maxWidth: '240px',
+                lineHeight: 1.4,
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Tabs for complex variant at the bottom of the menu - fixed position */}
+        {variant === 'complex' && (
+          <Box
+            sx={{
+              position: 'sticky', // Use sticky positioning
+              bottom: 0,
+              left: 0,
+              right: 0,
+              borderTop: `1px solid rgba(0, 0, 0, 0.1)`,
+              bgcolor: white.main,
+              zIndex: 9999, // Use very high z-index
+              height: '40px',
+              boxShadow: '0px -2px 8px rgba(0, 0, 0, 0.08)',
+              width: '100%', // Full width
+              marginTop: 'auto', // Push to the bottom when content is short
+            }}
+          >
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              centered
+              variant="fullWidth"
+              sx={{
+                minHeight: '40px',
+                height: '40px',
+                '& .MuiTabs-indicator': {
+                  backgroundColor: customColors.blue.main,
+                  height: '3px',
+                  borderRadius: '3px 3px 0 0',
+                },
+                '& .MuiTab-root': {
+                  minHeight: '40px',
+                  height: '40px',
+                  padding: '8px',
+                  fontWeight: 500,
+                  textTransform: 'none',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                    color: customColors.blue.main,
+                  },
+                },
+              }}
+            >
+              <Tab
+                icon={<SearchIcon fontSize="small" />}
+                label="All Options"
+                iconPosition="start"
+                sx={{
+                  color:
+                    activeTab === 0
+                      ? customColors.blue.main
+                      : 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '13px',
+                  fontWeight: activeTab === 0 ? 600 : 400,
+                  '&.Mui-selected': {
+                    color: customColors.blue.main,
+                  },
+                }}
+              />
+              <Tab
+                icon={<HistoryIcon fontSize="small" />}
+                label="History"
+                iconPosition="start"
+                sx={{
+                  color:
+                    activeTab === 1
+                      ? customColors.blue.main
+                      : 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '13px',
+                  fontWeight: activeTab === 1 ? 600 : 400,
+                  '&.Mui-selected': {
+                    color: customColors.blue.main,
+                  },
+                }}
+              />
+            </Tabs>
+          </Box>
+        )}
+      </Menu>
     </>
   )
 }
