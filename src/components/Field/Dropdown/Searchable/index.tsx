@@ -11,6 +11,8 @@ import {
   Tab,
   Menu,
   MenuItem,
+  keyframes,
+  alpha,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { black, white } from '../../../../styles/palette'
@@ -18,6 +20,7 @@ import Typography from '../../../Typography'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import HistoryIcon from '@mui/icons-material/History'
 import SearchIcon from '@mui/icons-material/Search'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
 // Define custom colors since palette doesn't have them
 const customColors = {
@@ -33,6 +36,56 @@ const customColors = {
     lighter: '#f0f8ff',
   },
 }
+
+// Sacred theming constants and animations
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+const sacredGlowPulse = keyframes`
+  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const sacredFloat = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
+  100% { transform: translateY(0px); }
+`
+
+const sacredShimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
 
 // Define a history item type with timestamp
 interface HistoryItem {
@@ -81,6 +134,10 @@ export interface SearchableDropdownProps {
   maxHistoryItems?: number
   // Controls whether ID columns (containing 'id' or '_id') are visible by default
   showIdColumns?: boolean
+  // NEW: Sacred theme support
+  sacredTheme?: boolean
+  sacredTitle?: string
+  sacredSubtitle?: string
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -97,29 +154,63 @@ const StyledInputLabel = styled(InputLabel)<{
   unshrunkfontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   disabled?: boolean
-}>(({ shrunkfontcolor, unshrunkfontcolor, shrunklabelposition, disabled }) => ({
-  color: disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor || black.main,
-  '&.Mui-focused': {
-    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
-  },
-  '&.MuiInputLabel-shrink': {
-    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
-    ...(shrunklabelposition === 'aboveNotch' && {
-      top: '-8px',
-      left: '-14px',
+  sacredtheme?: boolean
+}>(
+  ({
+    shrunkfontcolor,
+    unshrunkfontcolor,
+    shrunklabelposition,
+    disabled,
+    sacredtheme,
+  }) => ({
+    color: disabled
+      ? 'rgba(0, 0, 0, 0.38)'
+      : sacredtheme
+        ? alpha('#FFD700', 0.8)
+        : unshrunkfontcolor || black.main,
+    transition: 'all 0.3s ease',
+    ...(sacredtheme && {
+      textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
     }),
-    ...(shrunklabelposition === 'onNotch' && {
-      top: '2px',
-      left: '0px',
-    }),
-  },
-  '&:not(.MuiInputLabel-shrink)': {
-    transform: 'scale(1)',
-    transformOrigin: 'top left',
-    top: '10px',
-    left: '12px',
-  },
-}))
+    '&.Mui-focused': {
+      color: disabled
+        ? 'rgba(0, 0, 0, 0.38)'
+        : sacredtheme
+          ? '#FFD700'
+          : shrunkfontcolor || black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
+      }),
+    },
+    '&.MuiInputLabel-shrink': {
+      color: disabled
+        ? 'rgba(0, 0, 0, 0.38)'
+        : sacredtheme
+          ? '#FFD700'
+          : shrunkfontcolor || black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+        fontWeight: 600,
+      }),
+      ...(shrunklabelposition === 'aboveNotch' && {
+        top: '-8px',
+        left: '-14px',
+      }),
+      ...(shrunklabelposition === 'onNotch' && {
+        top: '2px',
+        left: '0px',
+      }),
+    },
+    '&:not(.MuiInputLabel-shrink)': {
+      transform: 'scale(1)',
+      transformOrigin: 'top left',
+      top: '10px',
+      left: '12px',
+    },
+  })
+)
 
 const StyledFormHelperText = styled(FormHelperText)({
   marginLeft: '14px',
@@ -173,6 +264,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   onSearch,
   maxHistoryItems = 5, // Default to showing 5 history items
   showIdColumns = false, // Default to hiding ID columns for security
+  sacredTheme = false,
+  sacredTitle = '',
+  sacredSubtitle = '',
 }) => {
   const [value, setValue] = useState<DropdownOption | string | null>(null)
   const [inputValue, setInputValue] = useState('')
@@ -726,6 +820,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           }
           shrunklabelposition={shrunklabelposition}
           disabled={disabled}
+          sacredtheme={sacredTheme}
         >
           {label}
         </StyledInputLabel>
@@ -745,7 +840,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           onClick={handleOpenMenu}
-          placeholder={placeholder}
+          placeholder={sacredTheme ? 'Seek divine wisdom...' : placeholder}
           error={error}
           required={required}
           notched={
@@ -756,8 +851,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           endAdornment={
             <ArrowDropDownIcon
               sx={{
-                color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main,
+                color: disabled
+                  ? 'rgba(0, 0, 0, 0.38)'
+                  : sacredTheme
+                    ? '#FFD700'
+                    : black.main,
                 cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                ...(sacredTheme && {
+                  '&:hover': {
+                    color: '#FFD700',
+                    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+                    transform: 'scale(1.1)',
+                  },
+                }),
               }}
               onClick={(e: React.MouseEvent<SVGSVGElement>) => {
                 // Prevent event from bubbling to parent
@@ -774,14 +881,47 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             minHeight: '40px',
             height: '40px !important',
             backgroundColor: disabled
-              ? 'rgba(0, 0, 0, 0.12)'
-              : backgroundcolor || white.main,
-            color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
+              ? 'rgba(0, 0, 0, 0.12) !important'
+              : sacredTheme
+                ? `${alpha('#000000', 0.8)} !important`
+                : `${backgroundcolor || white.main} !important`,
+            borderRadius: '4px',
+            color: disabled
+              ? 'rgba(0, 0, 0, 0.38)'
+              : sacredTheme
+                ? '#FFD700'
+                : fontcolor || black.main,
             cursor: disabled ? 'not-allowed' : 'pointer',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            ...(sacredTheme && {
+              backgroundImage: `
+                linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
+                radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+              `,
+              '&::before': {
+                content: '"𓊹"',
+                position: 'absolute',
+                top: '50%',
+                right: '45px',
+                transform: 'translateY(-50%)',
+                color: alpha('#FFD700', 0.3),
+                fontSize: '14px',
+                pointerEvents: 'none',
+                zIndex: 1,
+                animation: `${rotateGlyph} 20s linear infinite`,
+              },
+            }),
             '& fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : outlinecolor || black.main,
+                : sacredTheme
+                  ? '#FFD700'
+                  : outlinecolor || black.main,
+              ...(sacredTheme && {
+                borderWidth: '2px',
+                boxShadow: '0 0 10px rgba(255, 215, 0, 0.2)',
+              }),
               ...(shrunklabelposition === 'aboveNotch' && {
                 legend: {
                   width: '0px !important',
@@ -791,24 +931,47 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             '&:hover fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : outlinecolor || black.main,
+                : sacredTheme
+                  ? '#FFD700'
+                  : outlinecolor || black.main,
+              ...(sacredTheme && {
+                boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
+              }),
             },
             '&.Mui-focused fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : outlinecolor || black.main,
+                : sacredTheme
+                  ? '#FFD700'
+                  : outlinecolor || black.main,
+              ...(sacredTheme && {
+                boxShadow: '0 0 20px rgba(255, 215, 0, 0.6)',
+                animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
+              }),
             },
             '& input': {
+              backgroundColor: 'transparent !important',
               color: disabled
                 ? 'rgba(0, 0, 0, 0.38)'
-                : inputfontcolor || fontcolor || black.main,
+                : sacredTheme
+                  ? '#FFD700'
+                  : inputfontcolor || fontcolor || black.main,
+              zIndex: 2,
               '&::placeholder': {
                 color: disabled
                   ? 'rgba(0, 0, 0, 0.38)'
-                  : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
+                  : sacredTheme
+                    ? alpha('#FFD700', 0.7)
+                    : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
                 opacity: 1,
+                fontStyle: sacredTheme ? 'italic' : 'normal',
+                letterSpacing: sacredTheme ? '0.5px' : 'normal',
               },
               cursor: disabled ? 'not-allowed' : 'pointer',
+              ...(sacredTheme && {
+                textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
+                fontWeight: 500,
+              }),
             },
           }}
         />
@@ -827,26 +990,70 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         onClose={handleCloseMenu}
         sx={{
           '& .MuiPaper-root': {
-            boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.2)',
+            boxShadow: sacredTheme
+              ? '0px 10px 30px rgba(255, 215, 0, 0.3), 0px 0px 20px rgba(0, 0, 0, 0.8)'
+              : '0px 5px 15px rgba(0, 0, 0, 0.2)',
             width: menuAnchorEl?.offsetWidth
               ? `${menuAnchorEl.offsetWidth}px`
               : 'auto',
-            position: 'relative', // Ensure proper positioning context for absolute elements
-            display: 'flex', // Add flexbox for proper layout
-            flexDirection: 'column', // Stack children vertically
-            overflow: 'hidden', // Hide overflow to prevent double scrollbars
-            maxHeight: '400px', // Set max height on the paper
+            maxWidth: menuAnchorEl?.offsetWidth
+              ? `${menuAnchorEl.offsetWidth}px`
+              : 'auto',
+            minWidth: menuAnchorEl?.offsetWidth
+              ? `${menuAnchorEl.offsetWidth}px`
+              : 'auto',
+            maxHeight: '400px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+            ...(sacredTheme && {
+              backgroundImage: `
+                linear-gradient(rgba(255, 215, 0, 0.03), rgba(255, 215, 0, 0.03)),
+                radial-gradient(circle at top center, rgba(255, 215, 0, 0.1) 0%, transparent 70%)
+              `,
+              border: `2px solid ${alpha('#FFD700', 0.4)}`,
+              borderRadius: '8px',
+              '&::before': {
+                content: `"${SACRED_GLYPHS[0]}"`,
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                color: alpha('#FFD700', 0.3),
+                fontSize: '12px',
+                animation: `${rotateGlyph} 15s linear infinite`,
+                zIndex: 1,
+              },
+            }),
           },
           '& .MuiMenu-list': {
-            padding: 0, // Remove default padding
-            paddingBottom: variant === 'complex' ? '40px' : 0, // Space for tabs
-            flex: '1 1 auto', // Allow list to fill available space
-            overflowY: 'auto', // Only the list should scroll
-            width: '100%', // Ensure full width
+            padding: 0,
+            paddingBottom: variant === 'complex' ? '40px' : 0,
+            maxHeight: variant === 'complex' ? '360px' : '400px', // Account for tabs height
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            width: '100%',
+            flexShrink: 0, // Prevent shrinking
+            ...(sacredTheme && {
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(255, 215, 0, 0.6)',
+                borderRadius: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 215, 0, 0.8)',
+                },
+              },
+            }),
             ...(activeTab === 1 &&
               combinedHistory.length === 0 && {
-                overflowY: 'hidden', // Hide scrollbar when showing empty history state
-                flex: 'none', // Don't flex when showing empty history
+                overflowY: 'hidden',
+                maxHeight: '360px',
               }),
           },
         }}
@@ -880,86 +1087,160 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         {selectedOption && (
           <Box
             sx={{
-              bgcolor: customColors.blue.lighter,
-              borderBottom: `1px solid ${customColors.blue.light}`,
-              borderLeft: `3px solid ${customColors.blue.main}`,
-              p: 1.5,
-              pl: 1.2,
+              background: sacredTheme
+                ? `linear-gradient(135deg, ${alpha('#FFD700', 0.15)} 0%, ${alpha('#000000', 0.9)} 100%)`
+                : `linear-gradient(135deg, ${customColors.blue.lighter} 0%, rgba(187, 222, 251, 0.7) 100%)`,
+              borderBottom: sacredTheme
+                ? `2px solid ${alpha('#FFD700', 0.4)}`
+                : `2px solid ${customColors.blue.light}`,
+              borderRadius: '8px 8px 0 0',
+              p: 2,
               position: 'sticky',
               top: 0,
               zIndex: 5,
+              boxShadow: sacredTheme
+                ? '0 2px 12px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.05)'
+                : '0 2px 8px rgba(25, 118, 210, 0.15)',
+              ...(sacredTheme && {
+                backgroundImage: `
+                  radial-gradient(circle at top left, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
+                `,
+                '&::before': {
+                  content: '"𓊹"',
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  color: alpha('#FFD700', 0.4),
+                  fontSize: '16px',
+                  animation: `${rotateGlyph} 12s linear infinite`,
+                },
+              }),
             }}
           >
-            <Typography
-              fontvariant="merriparagraph"
-              text="Selected"
-              fontcolor={customColors.blue.main}
-              sx={{
-                fontSize: '12px',
-                fontWeight: 'bold',
-                mb: 0.5,
-                textTransform: 'uppercase',
-              }}
-            />
-            <Typography
-              fontvariant="merriparagraph"
-              text={selectedOption.value}
-              fontcolor={customColors.blue.dark}
-              sx={{
-                fontSize: '16px',
-                fontWeight: 500,
-                lineHeight: '22px',
-                width: '100%',
-                textAlign: 'left',
-              }}
-            />
-            {/* Display attributes for selected item */}
-            {(() => {
-              // First line: attribute1 and attribute2
-              const firstLineAttributes = [
-                selectedOption.attribute1,
-                selectedOption.attribute2,
-              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+              <CheckCircleIcon
+                sx={{
+                  color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                  fontSize: '20px',
+                  mt: 0.2,
+                  flexShrink: 0,
+                  ...(sacredTheme && {
+                    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.6))',
+                    animation: `${sacredFloat} 2s ease-in-out infinite`,
+                  }),
+                }}
+              />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  fontvariant="merriparagraph"
+                  text={selectedOption.value}
+                  fontcolor={sacredTheme ? '#FFD700' : customColors.blue.dark}
+                  sx={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    lineHeight: '22px',
+                    width: '100%',
+                    textAlign: 'left',
+                    mb: 0.5,
+                    ...(sacredTheme && {
+                      textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
+                      letterSpacing: '0.8px',
+                    }),
+                  }}
+                />
+                {/* Display attributes for selected item */}
+                {(() => {
+                  // First line: attribute1 and attribute2
+                  const firstLineAttributes = [
+                    selectedOption.attribute1,
+                    selectedOption.attribute2,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
 
-              // Second line: attribute3 and attribute4
-              const secondLineAttributes = [
-                selectedOption.attribute3,
-                selectedOption.attribute4,
-              ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
+                  // Second line: attribute3 and attribute4
+                  const secondLineAttributes = [
+                    selectedOption.attribute3,
+                    selectedOption.attribute4,
+                  ].filter(attr => showIdColumns || (attr && !isIdField(attr)))
 
-              return (
-                <>
-                  {firstLineAttributes.length > 0 && (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={firstLineAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '14px',
-                        lineHeight: '18px',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    />
-                  )}
+                  return (
+                    <>
+                      {firstLineAttributes.length > 0 && (
+                        <Typography
+                          fontvariant="merriparagraph"
+                          text={firstLineAttributes.join(' | ')}
+                          fontcolor={
+                            sacredTheme
+                              ? alpha('#FFD700', 0.8)
+                              : 'rgba(25, 118, 210, 0.8)'
+                          }
+                          sx={{
+                            fontSize: '13px',
+                            lineHeight: '18px',
+                            width: '100%',
+                            textAlign: 'left',
+                            fontWeight: 500,
+                            ...(sacredTheme && {
+                              fontStyle: 'italic',
+                              letterSpacing: '0.4px',
+                            }),
+                          }}
+                        />
+                      )}
 
-                  {secondLineAttributes.length > 0 && (
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text={secondLineAttributes.join(' | ')}
-                      fontcolor="rgba(0, 0, 0, 0.6)"
-                      sx={{
-                        fontSize: '14px',
-                        lineHeight: '18px',
-                        width: '100%',
-                        textAlign: 'left',
-                        mt: 0.5,
-                      }}
-                    />
-                  )}
-                </>
-              )
-            })()}
+                      {secondLineAttributes.length > 0 && (
+                        <Typography
+                          fontvariant="merriparagraph"
+                          text={secondLineAttributes.join(' | ')}
+                          fontcolor={
+                            sacredTheme
+                              ? alpha('#FFD700', 0.7)
+                              : 'rgba(25, 118, 210, 0.7)'
+                          }
+                          sx={{
+                            fontSize: '13px',
+                            lineHeight: '18px',
+                            width: '100%',
+                            textAlign: 'left',
+                            mt: 0.25,
+                            fontWeight: 400,
+                            ...(sacredTheme && {
+                              fontStyle: 'italic',
+                              letterSpacing: '0.3px',
+                            }),
+                          }}
+                        />
+                      )}
+                    </>
+                  )
+                })()}
+              </Box>
+            </Box>
+            {/* Sacred decorative elements */}
+            {sacredTheme && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: '4px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  gap: 0.5,
+                }}
+              >
+                {['𓂀', '𓊖', '𓂀'].map((glyph, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      color: alpha('#FFD700', 0.3),
+                      fontSize: 8,
+                      animation: `${sacredFloat} ${2 + i * 0.3}s ease-in-out infinite`,
+                    }}
+                  >
+                    {glyph}
+                  </Box>
+                ))}
+              </Box>
+            )}
           </Box>
         )}
 
@@ -976,13 +1257,57 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               sx={{
                 py: 1,
                 px: 2,
-                borderBottom: '1px solid #f0f0f0',
+                borderBottom: sacredTheme
+                  ? `1px solid ${alpha('#FFD700', 0.2)}`
+                  : '1px solid #f0f0f0',
+                backgroundColor: sacredTheme ? 'transparent' : 'white',
+                color: sacredTheme ? alpha('#FFD700', 0.9) : 'inherit',
+                position: 'relative',
+                transition: 'all 0.3s ease',
+                ...(sacredTheme && {
+                  '&::before': {
+                    content: `"${SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]}"`,
+                    position: 'absolute',
+                    left: '4px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    opacity: 0,
+                    transition: 'all 0.3s ease',
+                    color: '#FFD700',
+                    fontSize: '12px',
+                    animation: `${sacredFloat} 3s ease-in-out infinite`,
+                  },
+                }),
                 '&:hover': {
-                  backgroundColor: customColors.skyBlue.light,
+                  backgroundColor: sacredTheme
+                    ? alpha('#FFD700', 0.1)
+                    : customColors.skyBlue.light,
+                  ...(sacredTheme && {
+                    color: '#FFD700',
+                    textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+                    transform: 'translateX(8px)',
+                    '&::before': {
+                      opacity: 1,
+                      transform: 'translateY(-50%) translateX(-2px) scale(1.2)',
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      background:
+                        'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: `${sacredShimmer} 1.5s ease-in-out`,
+                      pointerEvents: 'none',
+                    },
+                  }),
                 },
               }}
             >
-              <Box sx={{ width: '100%' }}>
+              <Box sx={{ width: '100%', pl: sacredTheme ? 2 : 0 }}>
                 {/* Main value text */}
                 <Typography
                   fontvariant="merriparagraph"
@@ -993,13 +1318,19 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                         ? `History: ${option.value}`
                         : option.value
                   }
-                  fontcolor={customColors.blue.dark}
+                  fontcolor={
+                    sacredTheme ? alpha('#FFD700', 0.9) : customColors.blue.dark
+                  }
                   sx={{
                     fontSize: '16px',
                     fontWeight: isCurrentInput ? '500' : 'normal',
                     lineHeight: '22px',
                     width: '100%',
                     textAlign: 'left',
+                    ...(sacredTheme && {
+                      letterSpacing: '0.5px',
+                      fontWeight: 500,
+                    }),
                   }}
                 />
 
@@ -1037,12 +1368,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                           <Typography
                             fontvariant="merriparagraph"
                             text={firstLineAttributes.join(' | ')}
-                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            fontcolor={
+                              sacredTheme
+                                ? alpha('#FFD700', 0.7)
+                                : 'rgba(0, 0, 0, 0.6)'
+                            }
                             sx={{
                               fontSize: '14px',
                               lineHeight: '18px',
                               width: '100%',
                               textAlign: 'left',
+                              ...(sacredTheme && {
+                                fontStyle: 'italic',
+                                letterSpacing: '0.3px',
+                              }),
                             }}
                           />
                         )}
@@ -1051,13 +1390,21 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                           <Typography
                             fontvariant="merriparagraph"
                             text={secondLineAttributes.join(' | ')}
-                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            fontcolor={
+                              sacredTheme
+                                ? alpha('#FFD700', 0.6)
+                                : 'rgba(0, 0, 0, 0.6)'
+                            }
                             sx={{
                               fontSize: '14px',
                               lineHeight: '18px',
                               width: '100%',
                               textAlign: 'left',
                               mt: 0.5,
+                              ...(sacredTheme && {
+                                fontStyle: 'italic',
+                                letterSpacing: '0.3px',
+                              }),
                             }}
                           />
                         )}
@@ -1066,13 +1413,21 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                           <Typography
                             fontvariant="merriparagraph"
                             text={thirdLineAttributes.join(' | ')}
-                            fontcolor="rgba(0, 0, 0, 0.6)"
+                            fontcolor={
+                              sacredTheme
+                                ? alpha('#FFD700', 0.5)
+                                : 'rgba(0, 0, 0, 0.6)'
+                            }
                             sx={{
                               fontSize: '14px',
                               lineHeight: '18px',
                               width: '100%',
                               textAlign: 'left',
                               mt: 0.5,
+                              ...(sacredTheme && {
+                                fontStyle: 'italic',
+                                letterSpacing: '0.3px',
+                              }),
                             }}
                           />
                         )}
@@ -1088,11 +1443,57 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         {displayOptions.length === 0 &&
           !(activeTab === 1 && combinedHistory.length === 0) && (
             <MenuItem disabled>
-              <Typography
-                fontvariant="merriparagraph"
-                text="No matching options found"
-                fontcolor="rgba(0, 0, 0, 0.6)"
-              />
+              <Box
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 2,
+                  ...(sacredTheme && {
+                    backgroundImage: `
+                    radial-gradient(circle at center, rgba(255, 215, 0, 0.03) 0%, transparent 70%)
+                  `,
+                  }),
+                }}
+              >
+                {sacredTheme && (
+                  <Box
+                    sx={{
+                      mr: 1,
+                      color: alpha('#FFD700', 0.5),
+                      fontSize: '16px',
+                    }}
+                  >
+                    𓊗
+                  </Box>
+                )}
+                <Typography
+                  fontvariant="merriparagraph"
+                  text="No matching options found"
+                  fontcolor={
+                    sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+                  }
+                  sx={{
+                    ...(sacredTheme && {
+                      fontStyle: 'italic',
+                      letterSpacing: '0.5px',
+                      textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
+                    }),
+                  }}
+                />
+                {sacredTheme && (
+                  <Box
+                    sx={{
+                      ml: 1,
+                      color: alpha('#FFD700', 0.5),
+                      fontSize: '16px',
+                    }}
+                  >
+                    𓊗
+                  </Box>
+                )}
+              </Box>
             </MenuItem>
           )}
 
@@ -1109,36 +1510,82 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               textAlign: 'center',
               height: '300px', // Fixed height to match screenshot
               overflow: 'hidden', // Prevent scrolling
+              backgroundColor: sacredTheme ? 'transparent' : 'white',
+              ...(sacredTheme && {
+                backgroundImage: `
+                  radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%)
+                `,
+              }),
             }}
           >
             <HistoryIcon
               sx={{
                 fontSize: '64px',
-                color: 'rgba(0, 0, 0, 0.2)',
+                color: sacredTheme
+                  ? alpha('#FFD700', 0.4)
+                  : 'rgba(0, 0, 0, 0.2)',
                 mb: 2,
                 opacity: 0.5,
+                ...(sacredTheme && {
+                  filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.3))',
+                  animation: `${sacredFloat} 4s ease-in-out infinite`,
+                }),
               }}
             />
             <Typography
               fontvariant="merriparagraph"
-              text="No search history"
-              fontcolor={customColors.blue.main}
+              text={sacredTitle || 'No search history'}
+              fontcolor={sacredTheme ? '#FFD700' : customColors.blue.main}
               sx={{
                 fontSize: '16px',
                 fontWeight: 500,
                 mb: 1,
+                ...(sacredTheme && {
+                  textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
+                  letterSpacing: '1px',
+                }),
               }}
             />
             <Typography
               fontvariant="merriparagraph"
-              text="Items you search for will appear here"
-              fontcolor="rgba(0, 0, 0, 0.6)"
+              text={sacredSubtitle || 'Items you search for will appear here'}
+              fontcolor={
+                sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+              }
               sx={{
                 fontSize: '14px',
                 maxWidth: '240px',
                 lineHeight: 1.4,
+                ...(sacredTheme && {
+                  fontStyle: 'italic',
+                  letterSpacing: '0.5px',
+                }),
               }}
             />
+            {/* Sacred decorative glyphs */}
+            {sacredTheme && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: 1,
+                  mt: 2,
+                }}
+              >
+                {['𓅨', '𓂋', '𓏭'].map((glyph, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      color: alpha('#FFD700', 0.4),
+                      fontSize: 14,
+                      animation: `${sacredFloat} ${3 + i * 0.5}s ease-in-out infinite`,
+                    }}
+                  >
+                    {glyph}
+                  </Box>
+                ))}
+              </Box>
+            )}
           </Box>
         )}
 
@@ -1150,13 +1597,22 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               bottom: 0,
               left: 0,
               right: 0,
-              borderTop: `1px solid rgba(0, 0, 0, 0.1)`,
-              bgcolor: white.main,
+              borderTop: sacredTheme
+                ? `1px solid ${alpha('#FFD700', 0.3)}`
+                : `1px solid rgba(0, 0, 0, 0.1)`,
+              bgcolor: sacredTheme ? '#0a0a0a' : white.main,
               zIndex: 9999, // Use very high z-index
               height: '40px',
-              boxShadow: '0px -2px 8px rgba(0, 0, 0, 0.08)',
+              boxShadow: sacredTheme
+                ? '0px -2px 8px rgba(255, 215, 0, 0.2)'
+                : '0px -2px 8px rgba(0, 0, 0, 0.08)',
               width: '100%', // Full width
               marginTop: 'auto', // Push to the bottom when content is short
+              ...(sacredTheme && {
+                backgroundImage: `
+                  linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02))
+                `,
+              }),
             }}
           >
             <Tabs
@@ -1168,9 +1624,14 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 minHeight: '40px',
                 height: '40px',
                 '& .MuiTabs-indicator': {
-                  backgroundColor: customColors.blue.main,
+                  backgroundColor: sacredTheme
+                    ? '#FFD700'
+                    : customColors.blue.main,
                   height: '3px',
                   borderRadius: '3px 3px 0 0',
+                  ...(sacredTheme && {
+                    boxShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+                  }),
                 },
                 '& .MuiTab-root': {
                   minHeight: '40px',
@@ -1179,9 +1640,24 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   fontWeight: 500,
                   textTransform: 'none',
                   transition: 'all 0.2s ease',
+                  color: sacredTheme
+                    ? alpha('#FFD700', 0.7)
+                    : 'rgba(0, 0, 0, 0.6)',
                   '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                    color: customColors.blue.main,
+                    backgroundColor: sacredTheme
+                      ? alpha('#FFD700', 0.1)
+                      : 'rgba(25, 118, 210, 0.04)',
+                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                    ...(sacredTheme && {
+                      textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
+                    }),
+                  },
+                  '&.Mui-selected': {
+                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                    ...(sacredTheme && {
+                      textShadow: '0 0 8px rgba(255, 215, 0, 0.7)',
+                      fontWeight: 600,
+                    }),
                   },
                 },
               }}
@@ -1193,12 +1669,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 sx={{
                   color:
                     activeTab === 0
-                      ? customColors.blue.main
-                      : 'rgba(0, 0, 0, 0.6)',
+                      ? sacredTheme
+                        ? '#FFD700'
+                        : customColors.blue.main
+                      : sacredTheme
+                        ? alpha('#FFD700', 0.6)
+                        : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '13px',
                   fontWeight: activeTab === 0 ? 600 : 400,
                   '&.Mui-selected': {
-                    color: customColors.blue.main,
+                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
                   },
                 }}
               />
@@ -1209,12 +1689,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 sx={{
                   color:
                     activeTab === 1
-                      ? customColors.blue.main
-                      : 'rgba(0, 0, 0, 0.6)',
+                      ? sacredTheme
+                        ? '#FFD700'
+                        : customColors.blue.main
+                      : sacredTheme
+                        ? alpha('#FFD700', 0.6)
+                        : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '13px',
                   fontWeight: activeTab === 1 ? 600 : 400,
                   '&.Mui-selected': {
-                    color: customColors.blue.main,
+                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
                   },
                 }}
               />

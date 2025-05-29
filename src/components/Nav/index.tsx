@@ -1,6 +1,6 @@
 'use client'
-import React, { useState } from 'react'
-import { Drawer, Box, Stack, Divider } from '@mui/material'
+import React, { useState, useRef, useEffect } from 'react'
+import { Drawer, Box, Stack, Divider, keyframes, alpha } from '@mui/material'
 import Link from 'next/link'
 import { Typography } from '../Typography'
 
@@ -19,6 +19,54 @@ import ExpandingViewNav from './VerticalVariant/viewNav/expanding'
 import SubViewNav from './VerticalVariant/subViewNav/list'
 import ExpandingSubViewNav from './VerticalVariant/subViewNav/expanding'
 import SubSubViewNav from './VerticalVariant/subSubViewNav/list'
+
+// --------------------------------------------------------------------------
+// EGYPTIAN THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+const glowPulse = keyframes`
+  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0px); }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
 
 // --------------------------------------------------------------------------
 // INTERFACES
@@ -112,10 +160,129 @@ export interface NavProps {
   router?: {
     push: (route: string) => void
   }
+
+  /** NEW: Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
+
+  /** NEW: Custom sacred title (overrides verticalNavTitle when sacred theme is enabled) */
+  sacredTitle?: string
+
+  /** NEW: Sacred subtitle */
+  sacredSubtitle?: string
 }
 
 // --------------------------------------------------------------------------
-// SINGLE CONST NAV COMPONENT
+// SACRED BACKGROUND COMPONENT
+// --------------------------------------------------------------------------
+
+interface SacredBackgroundProps {
+  width: number
+  height: number
+}
+
+const SacredBackground: React.FC<SacredBackgroundProps> = ({
+  width,
+  height,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animationRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    canvas.width = width
+    canvas.height = height
+
+    const particles: Array<{
+      x: number
+      y: number
+      vx: number
+      vy: number
+      glyph: string
+      size: number
+      opacity: number
+      maxOpacity: number
+    }> = []
+
+    // Initialize floating hieroglyphs
+    for (let i = 0; i < 15; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        glyph: SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
+        size: 12 + Math.random() * 8,
+        opacity: Math.random() * 0.2 + 0.1,
+        maxOpacity: Math.random() * 0.3 + 0.2,
+      })
+    }
+
+    const animate = (time: number) => {
+      ctx.clearRect(0, 0, width, height)
+
+      particles.forEach(particle => {
+        particle.x += particle.vx
+        particle.y += particle.vy
+
+        // Gentle pulsing opacity
+        particle.opacity =
+          particle.maxOpacity *
+          (0.7 + 0.3 * Math.sin(time * 0.001 + particle.x * 0.01))
+
+        // Wrap around edges
+        if (particle.x < -20) particle.x = width + 20
+        if (particle.x > width + 20) particle.x = -20
+        if (particle.y < -20) particle.y = height + 20
+        if (particle.y > height + 20) particle.y = -20
+
+        // Draw glyph with golden glow
+        ctx.save()
+        ctx.globalAlpha = particle.opacity
+        ctx.fillStyle = '#FFD700'
+        ctx.font = `${particle.size}px serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.5)'
+        ctx.shadowBlur = 4
+        ctx.fillText(particle.glyph, particle.x, particle.y)
+        ctx.restore()
+      })
+
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animate(0)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [width, height])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        opacity: 0.4,
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
+
+// --------------------------------------------------------------------------
+// MAIN NAV COMPONENT
 // --------------------------------------------------------------------------
 
 function Nav({
@@ -136,6 +303,9 @@ function Nav({
   marginabovetitle = '0px',
   marginbelowtitle = '5px',
   router,
+  sacredTheme = false,
+  sacredTitle,
+  sacredSubtitle,
 }: NavProps) {
   // States for expanded mainNavs, subNavs, viewNavs, and subViewNavs
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
@@ -148,6 +318,32 @@ function Nav({
 
   // For search dropdown
   const [selectedNav, setSelectedNav] = useState<string | null>(null)
+
+  // Sacred theme container ref for background
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({
+    width: 280,
+    height: 600,
+  })
+
+  // Update container size for sacred background
+  useEffect(() => {
+    if (!sacredTheme || !containerRef.current) return
+
+    const updateSize = () => {
+      const container = containerRef.current
+      if (container) {
+        setContainerSize({
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+        })
+      }
+    }
+
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [sacredTheme])
 
   // Build search dropdown options from mainNav items
   const navOptions = items
@@ -173,7 +369,9 @@ function Nav({
   function renderItem(
     item: NavItem,
     level: number,
-    activeAndHoverColor = semiTransparentWhite.main
+    activeAndHoverColor = sacredTheme
+      ? alpha('#FFD700', 0.15)
+      : semiTransparentWhite.main
   ) {
     switch (item.navType) {
       // 1) MAIN NAV
@@ -341,89 +539,346 @@ function Nav({
     }
   }
 
-  // Drawer Content: Title, optional search, optional divider, then items
-  const drawerContent = (
-    <>
-      <Box px="15px" sx={{ whiteSpace: 'nowrap' }}>
-        {showTitle && (
-          <Box mt={marginabovetitle} mb={marginbelowtitle}>
-            <Link
-              href={titleUrl || '/'}
-              passHref
-              style={{ textDecoration: 'none' }}
-              onClick={variant === 'temporary' ? onClose : undefined}
-            >
-              <Typography
-                fontvariant="merrih4"
-                fontcolor={white.main}
-                text={verticalNavTitle}
-              />
-            </Link>
-          </Box>
-        )}
-
-        {showSearchableNav && (
-          <Stack mt={{ lg: 0 }} spacing={0}>
-            <Box
-              sx={{
-                position: 'relative',
-                zIndex: theme => theme.zIndex.drawer + 1,
-                width: '100%',
-                minHeight: '40px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <SearchableDropdown
-                label={searchableNavLabel}
-                options={navOptions}
-                backgroundcolor={backgroundcolor || semiTransparentWhite.main}
-                outlinecolor="none"
-                shrunkfontcolor={shrunkfontcolor}
-                shrunklabelposition="aboveNotch"
-                onChange={option => {
-                  const selectedValue = option ? option.value : null
-                  setSelectedNav(selectedValue)
-
-                  // If a nav is selected, automatically expand it
-                  if (selectedValue) {
-                    // Find the selected nav item
-                    const selectedNavItem = items.find(
-                      item =>
-                        item.navType === 'mainNav' &&
-                        item.title === selectedValue
-                    )
-
-                    // If the item has subnavs, expand it
-                    if (selectedNavItem?.subnavs?.length) {
-                      // Add to expandedNavs if not already there
-                      if (!expandedNavs.includes(selectedValue)) {
-                        setExpandedNavs([...expandedNavs, selectedValue])
-                      }
-                    }
-                  }
-                }}
-              />
-            </Box>
-          </Stack>
-        )}
+  // Sacred Title Component
+  const SacredTitle = () => (
+    <Box
+      sx={{
+        textAlign: 'center',
+        py: 2,
+        px: 1,
+        position: 'relative',
+      }}
+    >
+      {/* Decorative header */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2,
+          gap: 1,
+        }}
+      >
+        <Box
+          sx={{
+            width: 40,
+            height: 1,
+            background:
+              'linear-gradient(to right, transparent, #FFD700, transparent)',
+          }}
+        />
+        <Box
+          sx={{
+            color: '#FFD700',
+            fontSize: 16,
+            animation: `${rotateGlyph} 20s linear infinite`,
+          }}
+        >
+          𓊹
+        </Box>
+        <Box
+          sx={{
+            width: 40,
+            height: 1,
+            background:
+              'linear-gradient(to right, transparent, #FFD700, transparent)',
+          }}
+        />
       </Box>
 
-      {showLine && (
-        <Divider
+      {/* Main title */}
+      <Link
+        href={titleUrl || '/'}
+        passHref
+        style={{ textDecoration: 'none' }}
+        onClick={variant === 'temporary' ? onClose : undefined}
+      >
+        <Typography
           sx={{
-            width: '100%',
-            backgroundColor: white.main,
-            mt: 2.5,
+            color: '#FFD700',
+            fontSize: 18,
+            fontWeight: 700,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            animation: `${glowPulse} 3s ease-in-out infinite`,
+            fontFamily: '"Cinzel", serif',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              textShadow: '0 0 20px rgba(255, 215, 0, 0.8)',
+            },
           }}
+        >
+          {sacredTitle || verticalNavTitle}
+        </Typography>
+      </Link>
+
+      {/* Subtitle if provided */}
+      {sacredSubtitle && (
+        <Typography
+          sx={{
+            color: alpha('#FFD700', 0.7),
+            fontSize: 12,
+            fontStyle: 'italic',
+            mt: 0.5,
+            letterSpacing: 1,
+          }}
+        >
+          {sacredSubtitle}
+        </Typography>
+      )}
+
+      {/* Sacred hieroglyphs */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 1,
+          gap: 0.5,
+        }}
+      >
+        {['𓏏', '𓊖', '𓍯', '𓏏', '𓊖'].map((glyph, i) => (
+          <Box
+            key={i}
+            sx={{
+              color: alpha('#FFD700', 0.6),
+              fontSize: 10,
+              animation: `${floatAnimation} ${2 + i * 0.3}s ease-in-out infinite`,
+            }}
+          >
+            {glyph}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  )
+
+  // Sacred Divider Component
+  const SacredDivider = () => (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 1,
+        px: 2,
+      }}
+    >
+      <Box
+        sx={{
+          width: '30%',
+          height: 1,
+          background:
+            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.5), transparent)',
+        }}
+      />
+      <Box
+        sx={{
+          color: '#FFD700',
+          fontSize: 14,
+          px: 1,
+          animation: `${rotateGlyph} 15s linear infinite reverse`,
+        }}
+      >
+        𓋹
+      </Box>
+      <Box
+        sx={{
+          width: '30%',
+          height: 1,
+          background:
+            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.5), transparent)',
+        }}
+      />
+    </Box>
+  )
+
+  // Drawer Content: Title, optional search, optional divider, then items
+  const drawerContent = (
+    <Box
+      ref={containerRef}
+      sx={{
+        position: 'relative',
+        height: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Sacred background animation */}
+      {sacredTheme && (
+        <SacredBackground
+          width={containerSize.width}
+          height={containerSize.height}
         />
       )}
 
-      {selectedNav
-        ? // If user picked a mainNav item from the search
-          items.filter(i => i.title === selectedNav).map(i => renderItem(i, 0))
-        : // Otherwise render all nav items
-          items.map(i => renderItem(i, 0))}
-    </>
+      {/* Main content */}
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          height: '100%',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          // Custom scrollbar for sacred theme
+          ...(sacredTheme && {
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(255, 215, 0, 0.5)',
+              borderRadius: '4px',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 215, 0, 0.7)',
+              },
+            },
+          }),
+        }}
+      >
+        <Box px="15px" sx={{ whiteSpace: 'nowrap' }}>
+          {showTitle && (
+            <Box mt={marginabovetitle} mb={marginbelowtitle}>
+              {sacredTheme ? (
+                <SacredTitle />
+              ) : (
+                <Link
+                  href={titleUrl || '/'}
+                  passHref
+                  style={{ textDecoration: 'none' }}
+                  onClick={variant === 'temporary' ? onClose : undefined}
+                >
+                  <Typography
+                    fontvariant="merrih4"
+                    fontcolor={white.main}
+                    text={verticalNavTitle}
+                  />
+                </Link>
+              )}
+            </Box>
+          )}
+
+          {showSearchableNav && (
+            <Stack mt={{ lg: 0 }} spacing={0}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  zIndex: theme => theme.zIndex.drawer + 1,
+                  width: '100%',
+                  minHeight: '40px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <SearchableDropdown
+                  label={searchableNavLabel}
+                  options={navOptions}
+                  backgroundcolor={
+                    sacredTheme
+                      ? alpha('#000000', 0.6)
+                      : backgroundcolor || semiTransparentWhite.main
+                  }
+                  outlinecolor={sacredTheme ? '#FFD700' : 'none'}
+                  shrunkfontcolor={sacredTheme ? '#FFD700' : shrunkfontcolor}
+                  shrunklabelposition="aboveNotch"
+                  sacredTheme={sacredTheme}
+                  sacredTitle="No Divine Paths"
+                  sacredSubtitle="Ancient wisdom awaits your search"
+                  onChange={option => {
+                    const selectedValue = option ? option.value : null
+                    setSelectedNav(selectedValue)
+
+                    // If a nav is selected, automatically expand it
+                    if (selectedValue) {
+                      // Find the selected nav item
+                      const selectedNavItem = items.find(
+                        item =>
+                          item.navType === 'mainNav' &&
+                          item.title === selectedValue
+                      )
+
+                      // If the item has subnavs, expand it
+                      if (selectedNavItem?.subnavs?.length) {
+                        // Add to expandedNavs if not already there
+                        if (!expandedNavs.includes(selectedValue)) {
+                          setExpandedNavs([...expandedNavs, selectedValue])
+                        }
+                      }
+                    }
+                  }}
+                />
+              </Box>
+            </Stack>
+          )}
+        </Box>
+
+        {showLine &&
+          (sacredTheme ? (
+            <SacredDivider />
+          ) : (
+            <Divider
+              sx={{
+                width: '100%',
+                backgroundColor: white.main,
+                mt: 2.5,
+              }}
+            />
+          ))}
+
+        {selectedNav
+          ? // If user picked a mainNav item from the search
+            items
+              .filter(i => i.title === selectedNav)
+              .map(i => renderItem(i, 0))
+          : // Otherwise render all nav items
+            items.map(i => renderItem(i, 0))}
+
+        {/* Sacred footer for sacred theme */}
+        {sacredTheme && (
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 3,
+              px: 2,
+            }}
+          >
+            <Typography
+              sx={{
+                color: alpha('#FFD700', 0.6),
+                fontSize: 10,
+                fontStyle: 'italic',
+                letterSpacing: 1,
+                mb: 1,
+              }}
+            >
+              "Through wisdom, navigate the divine"
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 1,
+              }}
+            >
+              {['𓅨', '𓂋', '𓏭', '𓊵'].map((glyph, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    color: alpha('#FFD700', 0.4),
+                    fontSize: 12,
+                    animation: `${glowPulse} ${4 + i * 0.5}s ease-in-out infinite`,
+                  }}
+                >
+                  {glyph}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+      </Box>
+    </Box>
   )
 
   // Render the Drawer
@@ -451,7 +906,18 @@ function Nav({
             variant === 'temporary'
               ? theme.zIndex.drawer + 2
               : theme.zIndex.drawer - 1,
-          backgroundColor: ocean.main,
+          backgroundColor: sacredTheme ? '#0a0a0a' : ocean.main,
+          ...(sacredTheme && {
+            backgroundImage: `
+              linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+              radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+            `,
+            border: `1px solid ${alpha('#FFD700', 0.2)}`,
+            boxShadow: `
+              0 0 30px rgba(255, 215, 0, 0.1),
+              inset 0 0 60px rgba(255, 215, 0, 0.03)
+            `,
+          }),
           pt: '17px',
           boxSizing: 'border-box',
           marginTop: spacingfromtopofscreen,

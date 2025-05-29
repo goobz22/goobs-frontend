@@ -1,6 +1,6 @@
 'use client'
 import React, { FC } from 'react'
-import { MenuItem } from '@mui/material'
+import { MenuItem, alpha } from '@mui/material'
 import Link from 'next/link'
 import { semiTransparentWhite, white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
@@ -40,6 +40,11 @@ const SubViewNav: FC<SubViewNavProps> = ({
     }
   }
 
+  // Check if we're using sacred theming based on hover color
+  const isSacredTheme =
+    activeAndHoverColor.includes('255, 215, 0') ||
+    activeAndHoverColor === alpha('#FFD700', 0.15)
+
   return (
     <Link
       key={title}
@@ -53,14 +58,47 @@ const SubViewNav: FC<SubViewNavProps> = ({
     >
       <MenuItem
         sx={{
-          color: white.main,
+          color: isSacredTheme ? alpha('#FFD700', 0.9) : white.main,
           // Increased indentation by 15px compared to previous value
           marginLeft: '68px',
           whiteSpace: 'nowrap',
           padding: '6px 16px',
           minHeight: '32px',
+          position: 'relative',
+          transition: 'all 0.3s ease',
+          ...(isSacredTheme && {
+            '&::before': {
+              content: '"𓊖"',
+              position: 'absolute',
+              left: '8px',
+              opacity: 0,
+              transition: 'all 0.3s ease',
+              color: '#FFD700',
+              fontSize: '13px',
+            },
+          }),
           '&:hover': {
             backgroundColor: activeAndHoverColor,
+            ...(isSacredTheme && {
+              color: '#FFD700',
+              transform: 'translateX(5px)',
+              textShadow: '0 0 9px rgba(255, 215, 0, 0.65)',
+              '&::before': {
+                opacity: 1,
+                transform: 'translateX(-2px) scale(1.15)',
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.12), transparent)',
+                animation: 'shimmer 1.3s ease-in-out',
+              },
+            }),
           },
           '&:active': {
             backgroundColor: activeAndHoverColor,
@@ -70,10 +108,15 @@ const SubViewNav: FC<SubViewNavProps> = ({
         <Typography
           fontvariant="merriparagraph"
           text={title ?? ''}
-          fontcolor={white.main}
+          fontcolor={isSacredTheme ? alpha('#FFD700', 0.9) : white.main}
           sx={{
             whiteSpace: 'nowrap',
             fontSize: '0.85rem',
+            ...(isSacredTheme && {
+              fontWeight: 500,
+              letterSpacing: 0.6,
+              transition: 'all 0.3s ease',
+            }),
           }}
         />
       </MenuItem>
