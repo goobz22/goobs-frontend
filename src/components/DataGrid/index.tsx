@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useRef, useEffect } from 'react'
-import { Box, Alert } from '@mui/material'
+import { Box, Alert, useMediaQuery } from '@mui/material'
 import CustomToolbar from '../Toolbar'
 import Table from './Table'
 import CustomFooter from './Footer'
@@ -27,6 +27,9 @@ function DataGrid({
   onSelectionChange,
   showIdColumns = false,
 }: DatagridProps) {
+  // Detect mobile devices for responsive behavior
+  const isMobile = !useMediaQuery('(min-width:500px)')
+
   // Create ref for the container to measure available height
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -133,8 +136,8 @@ function DataGrid({
         flexDirection: 'column',
         // Increase or remove height if you want more vertical space:
         height: 'calc(100vh - 60px)',
-        // Add overflow hidden at the DataGrid level to prevent horizontal scrollbars
-        overflow: 'hidden',
+        // Allow horizontal scroll on mobile for content visibility
+        overflow: isMobile ? 'auto' : 'hidden',
         backgroundColor: woad.main,
       }}
     >
@@ -179,8 +182,8 @@ function DataGrid({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          // Ensure this container doesn't create scrollbars
-          overflow: 'hidden',
+          // Ensure this container doesn't create scrollbars on mobile
+          overflow: isMobile ? 'visible' : 'hidden',
         }}
       >
         {/* Table component */}

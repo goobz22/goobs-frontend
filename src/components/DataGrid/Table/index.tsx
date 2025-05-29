@@ -58,6 +58,13 @@ function Table({
     }
   }, [selectedOverflowField, overflowDesktopColumns, setSelectedOverflowField])
 
+  // Initialize selectedOverflowField for mobile if nothing is selected
+  React.useEffect(() => {
+    if (isMobile && !selectedOverflowField && columns.length > 0) {
+      setSelectedOverflowField(columns[0].field)
+    }
+  }, [isMobile, selectedOverflowField, columns, setSelectedOverflowField])
+
   // Decide which columns to render in the <TableHead /> for desktop.
   // On mobile, we skip the "__overflow__" approach and just show the single dropdown.
   const finalDesktopColumns = !isMobile
@@ -70,13 +77,23 @@ function Table({
     : []
 
   return (
-    // The main wrapper - Using overflowX: 'hidden' to prevent horizontal scrollbar
-    <Box sx={{ width: '100%', overflowX: 'hidden' }}>
+    // The main wrapper - Allow horizontal scroll on mobile for content visibility
+    <Box
+      sx={{
+        width: '100%',
+        overflowX: isMobile ? 'auto' : 'hidden',
+        // Ensure minimum width for mobile content
+        minWidth: isMobile ? '100%' : 'auto',
+      }}
+    >
       {/* We set the "ref" here so that useComputeTableResize can measure width. */}
       <TableContainer
         ref={containerRef}
         sx={{
-          overflowX: 'visible', // Changed from 'auto' to 'visible'
+          overflowX: isMobile ? 'auto' : 'visible',
+          // Ensure proper width on mobile
+          width: '100%',
+          minWidth: isMobile ? '100%' : 'auto',
         }}
       >
         <MuiTable
@@ -85,8 +102,8 @@ function Table({
             width: '100%',
             // Keep tableLayout as 'auto' to respect column widths
             tableLayout: 'auto',
-            // Force the table's minimum width to accommodate large columns
-            minWidth: isMobile ? 'auto' : 'fit-content',
+            // Force the table's minimum width to accommodate content
+            minWidth: isMobile ? '100%' : 'fit-content',
           }}
         >
           {/* Table Header */}
@@ -120,6 +137,7 @@ function Table({
             selectedRowIds={selectedRowIds}
             onRowClick={onRowClick}
             onRowCheckboxChange={onRowCheckboxChange}
+            allColumns={columns}
           />
         </MuiTable>
       </TableContainer>

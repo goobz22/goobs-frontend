@@ -38,26 +38,36 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   // If we're mobile, just render a single dropdown + "select all" checkbox
   if (isMobile) {
     const mobileOptions = allColumns.map(col => ({
-      value: col.headerName ?? col.field,
+      value: col.headerName ?? col.field, // Use headerName for display consistency
     }))
 
     // Find the currently-selected column as an object
     const currentMobileChoice =
-      mobileOptions.find(opt => opt.value === selectedOverflowField) || null
+      mobileOptions.find(opt => {
+        // Find by matching either headerName or field
+        const matchingColumn = allColumns.find(
+          c => c.field === selectedOverflowField
+        )
+        return (
+          matchingColumn &&
+          opt.value === (matchingColumn.headerName ?? matchingColumn.field)
+        )
+      }) || (mobileOptions.length > 0 ? mobileOptions[0] : null)
 
     const handleMobileChange = (value: { value: string } | null) => {
       if (value && value.value) {
-        // Try to find a column with matching headerName first
+        // Find the column that matches the selected headerName/field
         const matchingColumn = allColumns.find(
-          col => col.headerName === value.value || col.field === value.value
+          col => (col.headerName ?? col.field) === value.value
         )
-
-        // If found, use its field property, otherwise use the value directly
-        setSelectedOverflowField(
-          matchingColumn ? matchingColumn.field : value.value
-        )
+        if (matchingColumn) {
+          setSelectedOverflowField(matchingColumn.field)
+        }
       } else {
-        setSelectedOverflowField('')
+        // Default to first column if no selection
+        setSelectedOverflowField(
+          allColumns.length > 0 ? allColumns[0].field : ''
+        )
       }
     }
 
@@ -84,13 +94,16 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         {/* One cell for the single dropdown containing all columns */}
         <TableCell
           sx={{
-            width: 275,
+            // Match the data cell width for consistency
+            width: '100%',
+            minWidth: 200,
+            maxWidth: '100%',
             boxSizing: 'border-box',
             overflow: 'visible',
             position: 'relative',
-            zIndex: 100, // Increased z-index for mobile dropdown
-            // If you want no left padding on mobile header as well:
+            zIndex: 100,
             paddingLeft: 0,
+            paddingRight: 8,
           }}
         >
           <SearchableDropdown
@@ -107,6 +120,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             style={{
               marginBottom: 0,
               marginTop: 0,
+              width: '100%',
             }}
           />
         </TableCell>

@@ -12,6 +12,16 @@ export interface ColumnDef {
   headerText?: string
   index?: number
   width?: number
+  // Format the column values as USD currency
+  formatCurrency?: boolean
+  // Format the column values as masked credit card numbers
+  formatCreditCard?: boolean
+  // Format the column values as styled expiration dates
+  formatExpirationDate?: boolean
+  // Format the column values as masked account numbers
+  formatAccountNumber?: boolean
+  // Format the column values as styled routing numbers
+  formatRoutingNumber?: boolean
 
   renderCell?: (params: {
     row: RowData
