@@ -1,10 +1,28 @@
+// src/components/ComplexTextEditor/Toolbars/Complex/index.tsx
+
 import React from 'react'
 import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
-import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import {
+  Box,
+  ToggleButton,
+  ToggleButtonGroup,
+  keyframes,
+  alpha,
+} from '@mui/material'
 import { RichTextEditorTypes } from '../../utils/useRichtextEditor'
 import { Descendant } from 'slate'
+
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const sacredButtonGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+`
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
 
@@ -46,6 +64,9 @@ interface ComplexToolbarProps {
   accordion?: boolean
   accordionSummary?: React.ReactNode
   defaultExpanded?: boolean
+
+  // Sacred theme
+  sacredTheme?: boolean
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -68,6 +89,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   accordion = false,
   accordionSummary,
   defaultExpanded,
+  sacredTheme = false,
 }) => {
   const handleModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -100,6 +122,10 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           display: 'flex',
           justifyContent: 'flex-end',
           padding: '8px',
+          ...(sacredTheme && {
+            backgroundColor: alpha('#000000', 0.5),
+            borderRadius: '8px 8px 0 0',
+          }),
         }}
       >
         <ToggleButtonGroup
@@ -107,49 +133,44 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           exclusive
           onChange={handleModeChange}
           size="small"
+          sx={
+            sacredTheme
+              ? {
+                  '& .MuiToggleButton-root': {
+                    color: alpha('#FFD700', 0.7),
+                    borderColor: alpha('#FFD700', 0.3),
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: alpha('#FFD700', 0.1),
+                      borderColor: alpha('#FFD700', 0.5),
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: alpha('#FFD700', 0.2),
+                      color: '#FFD700',
+                      borderColor: '#FFD700',
+                      animation: `${sacredButtonGlow} 2s ease-in-out infinite`,
+                      '&:hover': {
+                        backgroundColor: alpha('#FFD700', 0.3),
+                      },
+                    },
+                  },
+                }
+              : {
+                  '& .MuiToggleButton-root': {
+                    '&.Mui-selected': {
+                      backgroundColor: '#E7F5FF',
+                      color: 'black',
+                      '&:hover': {
+                        backgroundColor: '#E7F5FF',
+                      },
+                    },
+                  },
+                }
+          }
         >
-          <ToggleButton
-            value="simple"
-            sx={{
-              '&.Mui-selected': {
-                backgroundColor: '#E7F5FF',
-                color: 'black',
-              },
-              '&.Mui-selected:hover': {
-                backgroundColor: '#E7F5FF',
-              },
-            }}
-          >
-            Simple
-          </ToggleButton>
-          <ToggleButton
-            value="rich"
-            sx={{
-              '&.Mui-selected': {
-                backgroundColor: '#E7F5FF',
-                color: 'black',
-              },
-              '&.Mui-selected:hover': {
-                backgroundColor: '#E7F5FF',
-              },
-            }}
-          >
-            Rich Text
-          </ToggleButton>
-          <ToggleButton
-            value="markdown"
-            sx={{
-              '&.Mui-selected': {
-                backgroundColor: '#E7F5FF',
-                color: 'black',
-              },
-              '&.Mui-selected:hover': {
-                backgroundColor: '#E7F5FF',
-              },
-            }}
-          >
-            Markdown
-          </ToggleButton>
+          <ToggleButton value="simple">Simple</ToggleButton>
+          <ToggleButton value="rich">Rich Text</ToggleButton>
+          <ToggleButton value="markdown">Markdown</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
@@ -164,6 +185,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           helperText={helperText}
           required={required}
           style={style}
+          sacredTheme={sacredTheme}
         />
       )}
 
@@ -179,6 +201,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           setMarkdown={setMarkdown}
           accordionSummary={accordionSummary}
           defaultExpanded={defaultExpanded}
+          sacredTheme={sacredTheme}
         />
       )}
 
@@ -189,6 +212,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setNewSlateValue={setNewSlateValue}
+          sacredTheme={sacredTheme}
         />
       )}
     </Box>

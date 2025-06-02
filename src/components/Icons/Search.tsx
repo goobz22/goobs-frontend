@@ -1,10 +1,18 @@
 import React from 'react'
 import Search from '@mui/icons-material/Search'
+import { keyframes } from '@mui/material'
+
+const glowPulse = keyframes`
+  0% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); }
+  100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+`
 
 const SearchIcon: React.FC<{
   size?: number | 'small' | 'medium' | 'large'
   color?: string
-}> = ({ size = 'medium', color = 'black' }) => {
+  sacredTheme?: boolean
+}> = ({ size = 'medium', color = 'black', sacredTheme }) => {
   let fontSize = '20px'
 
   if (typeof size === 'number') {
@@ -23,7 +31,17 @@ const SearchIcon: React.FC<{
     }
   }
 
-  return <Search style={{ fontSize, color }} />
+  return (
+    <Search
+      style={{
+        fontSize,
+        color: sacredTheme ? '#FFD700' : color,
+        ...(sacredTheme && {
+          animation: `${glowPulse} 2s ease-in-out infinite`,
+        }),
+      }}
+    />
+  )
 }
 
 export default SearchIcon

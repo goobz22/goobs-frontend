@@ -4,7 +4,14 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import TextField, { TextFieldProps } from '../../Field/Text'
-import { Box } from '@mui/material'
+import { Box, alpha, keyframes } from '@mui/material'
+
+// Sacred animations
+const glowPulse = keyframes`
+  0% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
+  100% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
+`
 
 /**
  * DateRange interface for range mode
@@ -36,6 +43,10 @@ export interface DateFieldProps
    * End date label (for range mode)
    */
   endLabel?: string
+  /**
+   * Enable sacred Egyptian theme
+   */
+  sacredTheme?: boolean
 }
 
 interface CustomInputProps {
@@ -65,6 +76,7 @@ const DateField: React.FC<DateFieldProps> = ({
   isRange = false,
   startLabel = 'Start Date',
   endLabel = 'End Date',
+  sacredTheme = false,
   ...rest
 }) => {
   const formatDate = (date: Date | null) => {
@@ -468,45 +480,117 @@ const DateField: React.FC<DateFieldProps> = ({
   }
 
   const calendarIcon = (
-    <CalendarTodayIcon
-      onClick={handleIconClick}
+    <Box
       sx={{
-        cursor: 'pointer',
-        '&:hover': {
-          opacity: 0.8,
-        },
-        fontSize: '20px',
-        color: 'black',
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
       }}
-    />
+    >
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '-20px',
+            color: alpha('#FFD700', 0.4),
+            fontSize: '12px',
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }}
+        >
+          𓇳
+        </Box>
+      )}
+      <CalendarTodayIcon
+        onClick={handleIconClick}
+        sx={{
+          cursor: 'pointer',
+          '&:hover': {
+            opacity: 0.8,
+          },
+          fontSize: '20px',
+          color: sacredTheme ? '#FFD700' : 'black',
+          ...(sacredTheme && {
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }),
+        }}
+      />
+    </Box>
   )
 
   const startCalendarIcon = (
-    <CalendarTodayIcon
-      onClick={handleStartIconClick}
+    <Box
       sx={{
-        cursor: 'pointer',
-        '&:hover': {
-          opacity: 0.8,
-        },
-        fontSize: '20px',
-        color: 'black',
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
       }}
-    />
+    >
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '-20px',
+            color: alpha('#FFD700', 0.4),
+            fontSize: '12px',
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }}
+        >
+          𓇳
+        </Box>
+      )}
+      <CalendarTodayIcon
+        onClick={handleStartIconClick}
+        sx={{
+          cursor: 'pointer',
+          '&:hover': {
+            opacity: 0.8,
+          },
+          fontSize: '20px',
+          color: sacredTheme ? '#FFD700' : 'black',
+          ...(sacredTheme && {
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }),
+        }}
+      />
+    </Box>
   )
 
   const endCalendarIcon = (
-    <CalendarTodayIcon
-      onClick={handleEndIconClick}
+    <Box
       sx={{
-        cursor: 'pointer',
-        '&:hover': {
-          opacity: 0.8,
-        },
-        fontSize: '20px',
-        color: 'black',
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
       }}
-    />
+    >
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '-20px',
+            color: alpha('#FFD700', 0.4),
+            fontSize: '12px',
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }}
+        >
+          𓇳
+        </Box>
+      )}
+      <CalendarTodayIcon
+        onClick={handleEndIconClick}
+        sx={{
+          cursor: 'pointer',
+          '&:hover': {
+            opacity: 0.8,
+          },
+          fontSize: '20px',
+          color: sacredTheme ? '#FFD700' : 'black',
+          ...(sacredTheme && {
+            animation: `${glowPulse} 2s ease-in-out infinite`,
+          }),
+        }}
+      />
+    </Box>
   )
 
   if (isRange) {
@@ -526,6 +610,8 @@ const DateField: React.FC<DateFieldProps> = ({
                 onClick: handleClick,
               },
             }}
+            sacredTheme={sacredTheme}
+            placeholder={sacredTheme ? 'Sacred beginning...' : undefined}
             {...rest}
           />
           <DatePicker
@@ -552,6 +638,8 @@ const DateField: React.FC<DateFieldProps> = ({
                 onClick: handleClick,
               },
             }}
+            sacredTheme={sacredTheme}
+            placeholder={sacredTheme ? 'Sacred ending...' : undefined}
             {...rest}
           />
           <DatePicker
@@ -584,6 +672,8 @@ const DateField: React.FC<DateFieldProps> = ({
             onClick: handleClick,
           },
         }}
+        sacredTheme={sacredTheme}
+        placeholder={sacredTheme ? 'Sacred date...' : undefined}
         {...rest}
       />
       <DatePicker

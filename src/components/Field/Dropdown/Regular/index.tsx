@@ -18,9 +18,24 @@ import {
   OutlinedInput,
   SelectChangeEvent,
   Box,
+  alpha,
+  keyframes,
 } from '@mui/material'
 import Typography from '../../../Typography'
 import { black, white } from '../../../../styles/palette'
+
+// Sacred animations
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(180deg); }
+  100% { transform: translateY(0px) rotate(360deg); }
+`
 
 export interface SimpleDropdownOption {
   value: string
@@ -55,6 +70,8 @@ export interface DropdownProps extends Omit<FormControlProps, 'onChange'> {
   disabled?: boolean
   // Controls whether ID columns (containing 'id' or '_id') are visible by default
   showIdColumns?: boolean
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -71,81 +88,186 @@ const StyledInputLabel = styled(InputLabel)<{
   unshrunkfontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   disabled?: boolean
-}>(({ shrunkfontcolor, unshrunkfontcolor, shrunklabelposition, disabled }) => ({
-  color: disabled ? 'rgba(0, 0, 0, 0.38)' : unshrunkfontcolor || black.main,
-  '&.Mui-focused': {
-    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
-  },
-  '&.MuiInputLabel-shrink': {
-    color: disabled ? 'rgba(0, 0, 0, 0.38)' : shrunkfontcolor || black.main,
-    ...(shrunklabelposition === 'aboveNotch' && {
-      top: '-8px',
-      left: '-14px',
+  sacredtheme?: boolean
+}>(
+  ({
+    shrunkfontcolor,
+    unshrunkfontcolor,
+    shrunklabelposition,
+    disabled,
+    sacredtheme,
+  }) => ({
+    color: disabled
+      ? 'rgba(0, 0, 0, 0.38)'
+      : sacredtheme
+        ? alpha('#FFD700', 0.8)
+        : unshrunkfontcolor || black.main,
+    position: 'absolute',
+    top: '-5px',
+    overflow: 'visible',
+    zIndex: 1,
+    ...(sacredtheme && {
+      textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
     }),
-    ...(shrunklabelposition === 'onNotch' && {
-      top: '2.5px',
-      left: '0px',
-    }),
-  },
-  '&:not(.MuiInputLabel-shrink)': {
-    transform: 'scale(1)',
-    transformOrigin: 'top left',
-    top: '10px',
-    left: '12px',
-  },
-}))
+    '&.Mui-focused': {
+      color: disabled
+        ? 'rgba(0, 0, 0, 0.38)'
+        : sacredtheme
+          ? '#FFD700'
+          : shrunkfontcolor || black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
+      }),
+    },
+    '&.MuiInputLabel-shrink': {
+      color: disabled
+        ? 'rgba(0, 0, 0, 0.38)'
+        : sacredtheme
+          ? '#FFD700'
+          : shrunkfontcolor || black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+        fontWeight: 600,
+      }),
+      ...(shrunklabelposition === 'aboveNotch' && {
+        top: '-8px',
+        left: '-14px',
+      }),
+      ...(shrunklabelposition === 'onNotch' && {
+        top: '2.5px',
+        left: '0px',
+      }),
+    },
+    '&:not(.MuiInputLabel-shrink)': {
+      transform: 'scale(1)',
+      transformOrigin: 'top left',
+      top: '10px',
+      left: '12px',
+    },
+  })
+)
 
 const StyledSelect = styled(Select)<{
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
   disabled?: boolean
-}>(({ backgroundcolor, outlinecolor, fontcolor, disabled }) => ({
+  sacredtheme?: boolean
+}>(({ backgroundcolor, outlinecolor, fontcolor, disabled, sacredtheme }) => ({
+  position: 'relative',
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+    borderColor: disabled
+      ? 'rgba(0, 0, 0, 0.26)'
+      : sacredtheme
+        ? '#FFD700'
+        : outlinecolor || black.main,
+    ...(sacredtheme && {
+      borderWidth: '2px',
+    }),
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+    borderColor: disabled
+      ? 'rgba(0, 0, 0, 0.26)'
+      : sacredtheme
+        ? '#FFD700'
+        : outlinecolor || black.main,
+    ...(sacredtheme && {
+      boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
+    }),
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: disabled ? 'rgba(0, 0, 0, 0.26)' : outlinecolor || black.main,
+    borderColor: disabled
+      ? 'rgba(0, 0, 0, 0.26)'
+      : sacredtheme
+        ? '#FFD700'
+        : outlinecolor || black.main,
+    ...(sacredtheme && {
+      animation: `${sacredGlow} 2s ease-in-out infinite`,
+    }),
   },
   backgroundColor: disabled
     ? 'rgba(0, 0, 0, 0.12)'
-    : backgroundcolor || white.main,
-  color: disabled ? 'rgba(0, 0, 0, 0.38)' : fontcolor || black.main,
+    : sacredtheme
+      ? alpha('#000000', 0.8)
+      : backgroundcolor || white.main,
+  color: disabled
+    ? 'rgba(0, 0, 0, 0.38)'
+    : sacredtheme
+      ? '#FFD700'
+      : fontcolor || black.main,
   minHeight: '40px',
+  ...(sacredtheme && {
+    backgroundImage: `
+      linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+    `,
+    '&::before': {
+      content: '"𓊗"',
+      position: 'absolute',
+      top: '50%',
+      right: '45px',
+      transform: 'translateY(-50%)',
+      color: alpha('#FFD700', 0.3),
+      fontSize: '14px',
+      pointerEvents: 'none',
+      zIndex: 1,
+      animation: `${floatGlyph} 4s ease-in-out infinite`,
+    },
+  }),
   '& .MuiSelect-select': {
     padding: '8px 14px',
+    ...(sacredtheme && {
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
+      fontWeight: 500,
+    }),
   },
   '&.Mui-disabled': {
     cursor: 'not-allowed',
     pointerEvents: 'auto',
   },
   '& .MuiSelect-icon': {
-    color: disabled ? 'rgba(0, 0, 0, 0.38)' : black.main,
+    color: disabled
+      ? 'rgba(0, 0, 0, 0.38)'
+      : sacredtheme
+        ? '#FFD700'
+        : black.main,
+    ...(sacredtheme && {
+      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+    }),
   },
 }))
 
-const StyledMenuItem = styled(MenuItem)({
-  padding: '8px 14px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: '2px',
-  width: '100%',
-  backgroundColor: white.main,
-  '&.Mui-selected': {
-    backgroundColor: `${black.main}08`,
-  },
-  '&:hover': {
-    backgroundColor: `${black.main}08`,
-  },
-  '& .MuiTypography-root': {
+const StyledMenuItem = styled(MenuItem)<{ sacredtheme?: boolean }>(
+  ({ sacredtheme }) => ({
+    padding: '8px 14px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '2px',
     width: '100%',
-    textAlign: 'left',
-  },
-})
+    backgroundColor: sacredtheme ? alpha('#000000', 0.9) : white.main,
+    transition: 'all 0.3s ease',
+    '&.Mui-selected': {
+      backgroundColor: sacredtheme ? alpha('#FFD700', 0.2) : `${black.main}08`,
+      ...(sacredtheme && {
+        color: '#FFD700',
+      }),
+    },
+    '&:hover': {
+      backgroundColor: sacredtheme ? alpha('#FFD700', 0.15) : `${black.main}08`,
+      ...(sacredtheme && {
+        color: '#FFD700',
+        transform: 'translateX(4px)',
+      }),
+    },
+    '& .MuiTypography-root': {
+      width: '100%',
+      textAlign: 'left',
+    },
+  })
+)
 
 const MenuProps = {
   PaperProps: {
@@ -176,6 +298,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   width,
   disabled = false,
   showIdColumns = false, // Default to hiding ID columns for security
+  sacredTheme = false,
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [focused, setFocused] = useState(false)
@@ -257,12 +380,15 @@ const Dropdown: React.FC<DropdownProps> = ({
             <Typography
               fontvariant="merriparagraph"
               text={displayText}
-              fontcolor={black.main}
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : black.main}
               sx={{
                 fontSize: '14px',
                 lineHeight: '20px',
                 width: '100%',
                 textAlign: 'left',
+                ...(sacredTheme && {
+                  fontWeight: 500,
+                }),
               }}
             />
           </Box>
@@ -271,16 +397,23 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
 
     return (
-      <StyledMenuItem key={option.value} value={option.value}>
+      <StyledMenuItem
+        key={option.value}
+        value={option.value}
+        sacredtheme={sacredTheme}
+      >
         <Typography
           fontvariant="merriparagraph"
           text={displayText}
-          fontcolor={black.main}
+          fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : black.main}
           sx={{
             fontSize: '14px',
             lineHeight: '20px',
             width: '100%',
             textAlign: 'left',
+            ...(sacredTheme && {
+              fontWeight: 500,
+            }),
           }}
         />
         {(option.attribute1 || option.attribute2) && (
@@ -289,12 +422,17 @@ const Dropdown: React.FC<DropdownProps> = ({
             text={[option.attribute1, option.attribute2]
               .filter(Boolean)
               .join(' | ')}
-            fontcolor="rgba(0, 0, 0, 0.6)"
+            fontcolor={
+              sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+            }
             sx={{
               fontSize: '12px',
               lineHeight: '16px',
               width: '100%',
               textAlign: 'left',
+              ...(sacredTheme && {
+                fontStyle: 'italic',
+              }),
             }}
           />
         )}
@@ -320,12 +458,22 @@ const Dropdown: React.FC<DropdownProps> = ({
         <Typography
           fontvariant="merriparagraph"
           text={displayText}
-          fontcolor={disabled ? 'rgba(0, 0, 0, 0.38)' : black.main}
+          fontcolor={
+            disabled
+              ? 'rgba(0, 0, 0, 0.38)'
+              : sacredTheme
+                ? '#FFD700'
+                : black.main
+          }
           sx={{
             fontSize: '14px',
             lineHeight: '20px',
             width: '100%',
             textAlign: 'left',
+            ...(sacredTheme && {
+              fontWeight: 500,
+              textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
+            }),
           }}
         />
       </Box>
@@ -346,15 +494,41 @@ const Dropdown: React.FC<DropdownProps> = ({
         unshrunkfontcolor={unshrunkfontcolor}
         shrunklabelposition={shrunklabelposition}
         disabled={disabled}
+        sacredtheme={sacredTheme}
       >
-        {label}
+        {sacredTheme ? 'Divine Selection' : label}
       </StyledInputLabel>
       <StyledSelect
         value={selectedValue}
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
-        MenuProps={MenuProps}
+        MenuProps={{
+          ...MenuProps,
+          PaperProps: {
+            ...MenuProps.PaperProps,
+            sx: sacredTheme
+              ? {
+                  backgroundColor: alpha('#000000', 0.95),
+                  border: `1px solid ${alpha('#FFD700', 0.3)}`,
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    borderRadius: '4px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(255, 215, 0, 0.5)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 215, 0, 0.7)',
+                    },
+                  },
+                }
+              : {},
+          },
+        }}
         renderValue={(value: unknown) => {
           if (typeof value !== 'string') return ''
           return renderValue(value)
@@ -370,6 +544,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         outlinecolor={outlinecolor}
         fontcolor={fontcolor}
         disabled={disabled}
+        sacredtheme={sacredTheme}
       >
         {filteredOptions.map(renderMenuItem)}
       </StyledSelect>

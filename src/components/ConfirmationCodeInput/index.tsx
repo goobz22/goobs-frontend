@@ -1,8 +1,89 @@
+// src/components/ConfirmationCodeInputs/index.tsx
+
 'use client'
 import React, { useState, useEffect, FC, useRef } from 'react'
-import { Box, Typography, styled } from '@mui/material'
+import { Box, Typography, styled, keyframes, alpha } from '@mui/material'
 import { CheckCircleOutline } from '@mui/icons-material'
 import CustomButton, { CustomButtonProps } from '../Button'
+
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+const sacredInputGlow = keyframes`
+  0% { 
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
+    border-color: ${alpha('#FFD700', 0.5)};
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    border-color: ${alpha('#FFD700', 0.8)};
+  }
+  100% { 
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
+    border-color: ${alpha('#FFD700', 0.5)};
+  }
+`
+
+const sacredPulse = keyframes`
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+`
+
+const glyphFloat = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-5px) rotate(180deg); opacity: 0.5; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+`
+
+const sacredSuccessGlow = keyframes`
+  0% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+    transform: scale(1.05);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    transform: scale(1);
+  }
+`
+
+const statusGlow = keyframes`
+  0% { box-shadow: 0 0 5px currentColor; }
+  50% { box-shadow: 0 0 15px currentColor, 0 0 25px currentColor; }
+  100% { box-shadow: 0 0 5px currentColor; }
+`
 
 export interface ConfirmationCodeInputsProps {
   identifier?: string
@@ -49,27 +130,49 @@ export interface ConfirmationCodeInputsProps {
 
   /** Custom styling for the input fields */
   inputStyle?: React.CSSProperties
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 // Custom styled input for verification code digits
-const CodeInput = styled('input')(() => ({
-  width: '40px',
-  height: '50px',
-  padding: '0',
-  textAlign: 'center',
-  fontSize: '16px',
-  fontWeight: 'normal',
-  color: 'black',
-  backgroundColor: 'white',
-  border: '1px solid black',
-  borderRadius: '4px',
-  outline: 'none',
-  // The cursor is visible (not hiding with caretColor)
-  '&:focus': {
-    borderColor: 'black',
-    borderWidth: '2px',
-  },
-}))
+const CodeInput = styled('input')<{ sacredtheme?: boolean }>(
+  ({ sacredtheme }) => ({
+    width: '40px',
+    height: '50px',
+    padding: '0',
+    textAlign: 'center',
+    fontSize: '16px',
+    fontWeight: sacredtheme ? 'bold' : 'normal',
+    color: sacredtheme ? '#FFD700' : 'black',
+    backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+    border: sacredtheme
+      ? `2px solid ${alpha('#FFD700', 0.5)}`
+      : '1px solid black',
+    borderRadius: '4px',
+    outline: 'none',
+    position: 'relative',
+    transition: 'all 0.3s ease',
+    ...(sacredtheme && {
+      fontFamily: 'monospace',
+      letterSpacing: '2px',
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+      animation: `${sacredInputGlow} 4s ease-in-out infinite`,
+    }),
+    '&:focus': {
+      borderColor: sacredtheme ? '#FFD700' : 'black',
+      borderWidth: '2px',
+      ...(sacredtheme && {
+        boxShadow:
+          '0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3)',
+        transform: 'scale(1.05)',
+      }),
+    },
+    '&::placeholder': {
+      color: sacredtheme ? alpha('#FFD700', 0.3) : undefined,
+    },
+  })
+)
 
 const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
@@ -91,6 +194,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   successMessage = 'Verification Successful',
   showSuccessState = false,
   inputStyle = {},
+  sacredTheme = false,
 }) => {
   // Initialize internal state with the value prop
   const [internalValue, setInternalValue] = useState(value)
@@ -310,19 +414,74 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         gap={2}
         padding={3}
         width="100%"
+        sx={
+          sacredTheme
+            ? {
+                position: 'relative',
+                backgroundColor: '#0a0a0a',
+                border: `2px solid ${alpha('#FFD700', 0.5)}`,
+                borderRadius: '8px',
+                animation: `${sacredSuccessGlow} 3s ease-in-out infinite`,
+                backgroundImage: `
+            radial-gradient(circle at center, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
+          `,
+              }
+            : undefined
+        }
       >
-        <CheckCircleOutline sx={{ fontSize: 60, color: 'green' }} />
-        <Typography variant="h5" align="center">
+        <CheckCircleOutline
+          sx={{
+            fontSize: 60,
+            color: sacredTheme ? '#FFD700' : 'green',
+            ...(sacredTheme && {
+              filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))',
+              animation: `${sacredPulse} 2s ease-in-out infinite`,
+            }),
+          }}
+        />
+        <Typography
+          variant="h5"
+          align="center"
+          sx={
+            sacredTheme
+              ? {
+                  color: '#FFD700',
+                  fontFamily: '"Cinzel", serif',
+                  fontWeight: 700,
+                  letterSpacing: '2px',
+                  textShadow: '0 0 15px rgba(255, 215, 0, 0.6)',
+                  textTransform: 'uppercase',
+                }
+              : undefined
+          }
+        >
           {successMessage}
         </Typography>
+        {sacredTheme && (
+          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+            {['𓅨', '𓂋', '𓏭'].map((glyph, i) => (
+              <Box
+                key={i}
+                sx={{
+                  color: alpha('#FFD700', 0.6),
+                  fontSize: '20px',
+                  animation: `${glyphFloat} ${3 + i * 0.5}s ease-in-out infinite`,
+                }}
+              >
+                {glyph}
+              </Box>
+            ))}
+          </Box>
+        )}
         <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
           <CustomButton
             text="Disable Verification"
-            fontcolor="white"
-            backgroundcolor="black"
+            fontcolor={sacredTheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
             width="100%"
             height="40px"
             variant="outlined"
+            sacredTheme={sacredTheme}
             {...disableVerificationButtonProps}
             onClick={() => {
               void onDisableVerification()
@@ -338,9 +497,25 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       width={20}
       height={20}
       borderRadius="50%"
-      bgcolor={isValid ? 'green' : 'red'}
+      bgcolor={
+        sacredTheme
+          ? isValid
+            ? '#FFD700'
+            : alpha('#FFD700', 0.3)
+          : isValid
+            ? 'green'
+            : 'red'
+      }
       role="status"
       aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
+      sx={
+        sacredTheme
+          ? {
+              animation: `${statusGlow} 2s ease-in-out infinite`,
+              transition: 'all 0.3s ease',
+            }
+          : undefined
+      }
     />
   )
 
@@ -353,7 +528,51 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       aria-label={ariaLabel || 'Confirmation Code'}
       width={`${inputAreaWidth}px`}
       position="relative"
+      sx={
+        sacredTheme
+          ? {
+              padding: '20px',
+              backgroundColor: alpha('#000000', 0.8),
+              border: `1px solid ${alpha('#FFD700', 0.3)}`,
+              borderRadius: '8px',
+              backgroundImage: `
+          linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+          radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
+        `,
+            }
+          : undefined
+      }
     >
+      {/* Sacred decorative elements */}
+      {sacredTheme && (
+        <>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '5px',
+              left: '5px',
+              color: alpha('#FFD700', 0.2),
+              fontSize: '16px',
+              animation: `${glyphFloat} 6s ease-in-out infinite`,
+            }}
+          >
+            {SACRED_GLYPHS[8]}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '5px',
+              right: '5px',
+              color: alpha('#FFD700', 0.2),
+              fontSize: '16px',
+              animation: `${glyphFloat} 6s ease-in-out infinite 3s`,
+            }}
+          >
+            {SACRED_GLYPHS[12]}
+          </Box>
+        </>
+      )}
+
       <Box
         display="flex"
         justifyContent="space-between"
@@ -380,6 +599,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
                 aria-required={ariaRequired}
                 aria-invalid={ariaInvalid}
+                sacredtheme={sacredTheme}
                 style={{
                   ...inputStyle,
                 }}
@@ -406,14 +626,15 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           {showSendResendButton && (
             <CustomButton
               text={codeSent ? 'Resend Code' : 'Send Code'}
-              fontcolor="white"
-              backgroundcolor="black"
+              fontcolor={sacredTheme ? '#FFD700' : 'white'}
+              backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
               width={
                 showSendResendButton
                   ? `${buttonContainerWidth / 2 - 8}px`
                   : '100%'
               }
               height="40px"
+              sacredTheme={sacredTheme}
               {...sendResendButtonProps}
               onClick={() => {
                 if (onSendResend) void onSendResend()
@@ -423,20 +644,48 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           )}
           <CustomButton
             text="Verify"
-            fontcolor="white"
-            backgroundcolor="black"
+            fontcolor={sacredTheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
             width={
               showSendResendButton
                 ? `${buttonContainerWidth / 2 - 8}px`
                 : '100%'
             }
             height="40px"
+            sacredTheme={sacredTheme}
             {...verifyButtonProps}
             onClick={() => {
               if (onVerify) void onVerify()
             }}
             disableButton={allFieldsFilled ? 'false' : 'true'}
           />
+        </Box>
+      )}
+
+      {/* Sacred bottom decoration */}
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '-10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: 0.5,
+          }}
+        >
+          {['𓊖', '𓊗', '𓊖'].map((glyph, i) => (
+            <Box
+              key={i}
+              sx={{
+                color: alpha('#FFD700', 0.3),
+                fontSize: '10px',
+                animation: `${sacredPulse} ${2 + i * 0.3}s ease-in-out infinite`,
+              }}
+            >
+              {glyph}
+            </Box>
+          ))}
         </Box>
       )}
     </Box>

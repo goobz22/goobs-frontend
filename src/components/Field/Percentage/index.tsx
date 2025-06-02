@@ -1,10 +1,22 @@
 'use client'
 import React, { useState, useCallback, useRef } from 'react'
-import { Box, IconButton } from '@mui/material'
+import { Box, IconButton, alpha, keyframes } from '@mui/material'
 import TextField, { TextFieldProps } from '../../Field/Text'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { styled } from '@mui/material/styles'
+
+// Sacred animations
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
 
 export interface PercentageFieldProps extends Omit<TextFieldProps, 'onChange'> {
   initialValue?: string | number
@@ -25,19 +37,30 @@ export interface PercentageFieldProps extends Omit<TextFieldProps, 'onChange'> {
   repeatInterval?: number
   /** Whether to display the % symbol (default: true) */
   showPercentSymbol?: boolean
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
 }
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  padding: 0,
-  width: '16px',
-  height: '16px',
-  minWidth: '16px',
-  minHeight: '16px',
-  borderRadius: '2px',
-  '&:hover': {
-    backgroundColor: theme.palette.grey[200],
-  },
-}))
+const StyledIconButton = styled(IconButton)<{ sacredtheme?: boolean }>(
+  ({ theme, sacredtheme }) => ({
+    padding: 0,
+    width: '16px',
+    height: '16px',
+    minWidth: '16px',
+    minHeight: '16px',
+    borderRadius: '2px',
+    transition: 'all 0.3s ease',
+    color: sacredtheme ? '#FFD700' : 'inherit',
+    '&:hover': {
+      backgroundColor: sacredtheme
+        ? alpha('#FFD700', 0.1)
+        : theme.palette.grey[200],
+      ...(sacredtheme && {
+        animation: `${sacredGlow} 1s ease-in-out infinite`,
+      }),
+    },
+  })
+)
 
 const ArrowIcon = styled(Box)({
   display: 'flex',
@@ -63,6 +86,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   initialDelay = 500,
   repeatInterval = 100,
   showPercentSymbol = true,
+  sacredTheme = false,
   ...rest
 }) => {
   // Convert initialValue to string if it's a number
@@ -216,47 +240,70 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   // Format the displayed value to include the % sign
   const displayValue = showPercentSymbol && value ? `${value}%` : value
 
+  const SacredEndAdornment = () => (
+    <Box sx={{ position: 'relative' }}>
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            right: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: alpha('#FFD700', 0.3),
+            fontSize: '12px',
+            animation: `${rotateGlyph} 10s linear infinite`,
+          }}
+        >
+          𓏏
+        </Box>
+      )}
+      <Box
+        display="flex"
+        flexDirection="column"
+        sx={{
+          marginRight: '-4px',
+          height: '32px',
+          justifyContent: 'center',
+        }}
+      >
+        <StyledIconButton
+          size="small"
+          onMouseDown={handleIncrementMouseDown}
+          edge="end"
+          aria-label="increment"
+          sx={{ marginBottom: '-2px' }}
+          sacredtheme={sacredTheme}
+        >
+          <ArrowIcon>
+            <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
+          </ArrowIcon>
+        </StyledIconButton>
+        <StyledIconButton
+          size="small"
+          onMouseDown={handleDecrementMouseDown}
+          edge="end"
+          aria-label="decrement"
+          sacredtheme={sacredTheme}
+        >
+          <ArrowIcon>
+            <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
+          </ArrowIcon>
+        </StyledIconButton>
+      </Box>
+    </Box>
+  )
+
   return (
     <TextField
       value={displayValue}
       onChange={handleChange}
-      label={label}
+      label={sacredTheme ? 'Sacred Portion' : label}
       type="text"
       inputMode="numeric"
       variant="outlined"
-      endAdornment={
-        <Box
-          display="flex"
-          flexDirection="column"
-          sx={{
-            marginRight: '-4px',
-            height: '32px',
-            justifyContent: 'center',
-          }}
-        >
-          <StyledIconButton
-            size="small"
-            onMouseDown={handleIncrementMouseDown}
-            edge="end"
-            aria-label="increment"
-            sx={{ marginBottom: '-2px' }}
-          >
-            <ArrowIcon>
-              <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
-            </ArrowIcon>
-          </StyledIconButton>
-          <StyledIconButton
-            size="small"
-            onMouseDown={handleDecrementMouseDown}
-            edge="end"
-            aria-label="decrement"
-          >
-            <ArrowIcon>
-              <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
-            </ArrowIcon>
-          </StyledIconButton>
-        </Box>
-      }
+      placeholder={sacredTheme ? 'Divine percentage...' : undefined}
+      sacredTheme={sacredTheme}
+      endAdornment={<SacredEndAdornment />}
       {...rest}
     />
   )

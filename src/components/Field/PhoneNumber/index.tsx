@@ -1,7 +1,19 @@
 'use client'
 import React, { useCallback, useState, useMemo } from 'react'
-import { Box } from '@mui/material'
+import { Box, alpha, keyframes } from '@mui/material'
 import TextField, { TextFieldProps } from '../Text'
+
+// Sacred animations
+const glowPulse = keyframes`
+  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+interface PhoneNumberFieldProps extends TextFieldProps {
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
+}
 
 const formatPhoneNumber = (inputValue: string): string => {
   let digits = inputValue.replace(/\D/g, '')
@@ -24,7 +36,7 @@ const formatPhoneNumber = (inputValue: string): string => {
   return formattedNumber.trim()
 }
 
-const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
+const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
   const {
     name,
     label = 'Phone Number',
@@ -34,6 +46,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
     onBlur,
     value = '',
     error,
+    sacredTheme = false,
     ...restProps
   } = props
 
@@ -91,6 +104,19 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
         sx: {
           height: '40px',
           padding: '0px 0px',
+          ...(sacredTheme && {
+            '&::before': {
+              content: '"𓋴"',
+              position: 'absolute',
+              left: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: alpha('#FFD700', 0.4),
+              fontSize: '14px',
+              animation: `${glowPulse} 3s ease-in-out infinite`,
+            },
+            paddingLeft: '30px',
+          }),
         },
       },
       inputLabel: {
@@ -108,7 +134,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
         },
       },
     }
-  }, [])
+  }, [sacredTheme])
 
   return (
     <Box
@@ -122,8 +148,8 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
     >
       <TextField
         name={name}
-        label={label}
-        placeholder={placeholder}
+        label={sacredTheme ? 'Sacred Connection' : label}
+        placeholder={sacredTheme ? 'Divine number...' : placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -132,6 +158,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
         fullWidth
         variant="outlined"
         slotProps={mergedSlotProps}
+        sacredTheme={sacredTheme}
         {...restProps}
       />
     </Box>

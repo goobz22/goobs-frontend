@@ -1,17 +1,41 @@
+// src/components/Card/variants/product/index.tsx
+
 'use client'
 
 import React, { useState } from 'react'
-import { Box, Paper, BoxProps } from '@mui/material'
+import { Box, Paper, keyframes, alpha } from '@mui/material'
 import Typography from '../../../../components/Typography'
 import CustomButton from '../../../../components/Button'
 import RemoveIcon from '@mui/icons-material/Remove'
 import AddIcon from '@mui/icons-material/Add'
 
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = ['𓅓', '𓆄', '𓇳', '𓈖', '𓊹', '𓊺']
+
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
+
+const sacredCounterGlow = keyframes`
+  0% { box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.3); }
+`
+
 /**
  * Props for the ProductCard component.
- * Extends BoxProps from Material-UI and includes additional custom properties.
  */
-interface ProductCardProps extends BoxProps {
+interface ProductCardProps {
   /** Title of the product */
   title?: string
   /** Initial number of developers */
@@ -38,6 +62,10 @@ interface ProductCardProps extends BoxProps {
   onContact?: () => void
   /** Creator of the product */
   createdBy?: string
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
+  /** Height of the card */
+  height?: string | number
 }
 
 /**
@@ -57,7 +85,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   releaseDate,
   onContact,
   createdBy,
-  ...rest
+  sacredTheme = false,
+  height,
 }) => {
   // State for number of developers input
   const [numDevelopersInput, setNumDevelopersInput] = useState(
@@ -68,7 +97,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   /**
    * Handles the action of adding a developer.
-   * Increments the number of developers and updates licenses accordingly.
    */
   const handleAddDeveloper = () => {
     const newNumDevelopers = parseInt(numDevelopersInput, 10) + 1
@@ -79,7 +107,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   /**
    * Handles the action of removing a developer.
-   * Decrements the number of developers and updates licenses accordingly.
    */
   const handleRemoveDeveloper = () => {
     const newNumDevelopers = parseInt(numDevelopersInput, 10) - 1
@@ -92,7 +119,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   /**
    * Handles changes in the number of developers input field.
-   * @param event - The change event from the input field
    */
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -110,15 +136,46 @@ const ProductCard: React.FC<ProductCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         padding: '16px',
-        ...rest.sx,
+        minHeight: height,
+        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        border: sacredTheme
+          ? `1px solid ${alpha('#FFD700', 0.3)}`
+          : '1px solid #e8e8e8',
+        overflow: 'hidden',
+        ...(sacredTheme && {
+          backgroundImage: `
+            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+            radial-gradient(circle at top left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
+          `,
+          animation: `${sacredGlow} 4s ease-in-out infinite`,
+          '&::before': {
+            content: `"${SACRED_GLYPHS[4]}"`,
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            color: alpha('#FFD700', 0.2),
+            fontSize: '48px',
+            animation: `${rotateGlyph} 20s linear infinite`,
+            zIndex: 0,
+          },
+        }),
       }}
     >
       {/* Number of developers section */}
-      <Box
-        // @ts-ignore
-        sx={{ mb: 2 }}
-      >
-        <Typography text="Number of developers" fontvariant="merriparagraph" />
+      <Box sx={{ mb: 2, position: 'relative', zIndex: 1 }}>
+        <Typography
+          text="Number of developers"
+          fontvariant="merriparagraph"
+          fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+          sx={
+            sacredTheme
+              ? {
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                }
+              : undefined
+          }
+        />
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
           {/* Remove developer button */}
           <Box
@@ -129,6 +186,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
               width: '24px',
               height: '24px',
               cursor: 'pointer',
+              borderRadius: '4px',
+              transition: 'all 0.3s ease',
+              ...(sacredTheme && {
+                color: '#FFD700',
+                '&:hover': {
+                  backgroundColor: alpha('#FFD700', 0.1),
+                  transform: 'scale(1.1)',
+                },
+              }),
             }}
             onClick={handleRemoveDeveloper}
           >
@@ -144,9 +210,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
               onChange={handleInputChange}
               style={{
                 width: '100%',
-                border: '1px solid #ccc',
+                border: sacredTheme
+                  ? `1px solid ${alpha('#FFD700', 0.5)}`
+                  : '1px solid #ccc',
                 borderRadius: '4px',
                 padding: '4px',
+                backgroundColor: sacredTheme ? alpha('#000000', 0.8) : 'white',
+                color: sacredTheme ? '#FFD700' : 'black',
+                textAlign: 'center',
+                fontWeight: sacredTheme ? 600 : 400,
+                ...(sacredTheme && {
+                  boxShadow: `inset 0 0 5px ${alpha('#FFD700', 0.2)}`,
+                  animation: `${sacredCounterGlow} 3s ease-in-out infinite`,
+                }),
               }}
             />
           </Box>
@@ -159,6 +235,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
               width: '24px',
               height: '24px',
               cursor: 'pointer',
+              borderRadius: '4px',
+              transition: 'all 0.3s ease',
+              ...(sacredTheme && {
+                color: '#FFD700',
+                '&:hover': {
+                  backgroundColor: alpha('#FFD700', 0.1),
+                  transform: 'scale(1.1)',
+                },
+              }),
             }}
             onClick={handleAddDeveloper}
           >
@@ -168,74 +253,122 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </Box>
 
       {/* Pricing information section */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, position: 'relative', zIndex: 1 }}>
         <Box>
           <Typography
             text={`Licenses: ${numLicenses}`}
             fontvariant="merriparagraph"
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
           />
         </Box>
         <Box>
           <Typography
             text={`Unit price: $ ${unitPrice}`}
             fontvariant="merriparagraph"
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
           />
         </Box>
         <Box sx={{ fontWeight: 'bold' }}>
           <Typography
             text={`Total: $ ${(unitPrice * numLicenses).toFixed(2)}`}
             fontvariant="merriparagraph"
+            fontcolor={sacredTheme ? '#FFD700' : 'black'}
+            sx={
+              sacredTheme
+                ? {
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+                  }
+                : undefined
+            }
           />
         </Box>
       </Box>
 
       {/* Action buttons section */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: 'flex',
+          justifyContent: 'flex-start',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         <Box sx={{ mr: '2px' }}>
           <CustomButton
             text="Buy now"
-            fontcolor="white"
-            backgroundcolor="black"
+            fontcolor={sacredTheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
             onClick={onBuy}
+            sacredTheme={sacredTheme}
           />
         </Box>
         <Box sx={{ ml: '2px' }}>
           <CustomButton
             text="Live Preview"
-            fontcolor="white"
-            backgroundcolor="black"
+            fontcolor={sacredTheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
             onClick={onLivePreview}
+            sacredTheme={sacredTheme}
           />
         </Box>
       </Box>
 
       {/* Feature descriptions section */}
-      <Box>
+      <Box sx={{ position: 'relative', zIndex: 1 }}>
         {featuredescriptions.map((feature, index) => (
           <Box key={index}>
-            <Typography text={`✓ ${feature}`} fontvariant="merriparagraph" />
+            <Typography
+              text={`✓ ${feature}`}
+              fontvariant="merriparagraph"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            />
           </Box>
         ))}
       </Box>
 
       {/* Release date section */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, position: 'relative', zIndex: 1 }}>
         <Typography
           text={`First release: ${releaseDate}`}
           fontvariant="merriparagraph"
+          fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
         />
       </Box>
 
       {/* Contact section */}
-      <Box sx={{ mt: 2, cursor: 'pointer' }} onClick={onContact}>
-        <Typography text="Questions? Contact us" fontvariant="merriparagraph" />
+      <Box
+        sx={{
+          mt: 2,
+          cursor: 'pointer',
+          position: 'relative',
+          zIndex: 1,
+          ...(sacredTheme && {
+            '&:hover': {
+              '& .MuiTypography-root': {
+                color: '#FFD700',
+                textShadow: '0 0 6px rgba(255, 215, 0, 0.6)',
+              },
+            },
+          }),
+        }}
+        onClick={onContact}
+      >
+        <Typography
+          text="Questions? Contact us"
+          fontvariant="merriparagraph"
+          fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+        />
       </Box>
 
       {/* Creator information section */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, position: 'relative', zIndex: 1 }}>
         <Typography
           text={`Created by ${createdBy}`}
           fontvariant="merriparagraph"
+          fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
         />
       </Box>
     </Paper>

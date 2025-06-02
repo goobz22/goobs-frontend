@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react'
-import { Box, Paper, SelectChangeEvent } from '@mui/material'
+import { Box, Paper, SelectChangeEvent, keyframes, alpha } from '@mui/material'
 import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Typography } from '../Typography'
@@ -8,6 +8,26 @@ import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
 import Dropdown from '../Field/Dropdown/Regular'
 import { black, white, stainlessSteel, aqua } from '../../styles/palette'
+
+// Sacred theming constants
+const SACRED_GLYPHS = ['𓁟', '𓂀', '𓃀', '𓄿', '𓊖', '𓊗', '𓋴', '𓏏', '𓊨', '𓁦']
+
+const sacredGlowPulse = keyframes`
+  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0px); }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
 
 export interface PricingProps {
   tabletitle?: {
@@ -33,6 +53,8 @@ export interface PricingProps {
   router?: {
     push(url: string): void
   }
+  /** NEW: Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 export interface SubFeature {
@@ -53,7 +75,7 @@ export interface Feature {
 }
 
 const PricingTable: React.FC<PricingProps> = props => {
-  const { router } = props
+  const { router, sacredTheme } = props
 
   const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
   const [selectedPackage, setSelectedPackage] = useState('')
@@ -86,11 +108,33 @@ const PricingTable: React.FC<PricingProps> = props => {
       elevation={1}
       sx={{
         borderRadius: '6px',
-        borderTop: `12px solid ${aqua.main}`,
+        borderTop: sacredTheme
+          ? `12px solid #FFD700`
+          : `12px solid ${aqua.main}`,
         display: 'flex',
         width: '100%',
         flexDirection: 'column',
         height: '100%',
+        ...(sacredTheme && {
+          backgroundColor: '#0a0a0a',
+          backgroundImage: `
+            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+            radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+          `,
+          border: `1px solid ${alpha('#FFD700', 0.3)}`,
+          boxShadow: '0 0 30px rgba(255, 215, 0, 0.2)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: `"${SACRED_GLYPHS[0]}"`,
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            fontSize: '24px',
+            color: alpha('#FFD700', 0.2),
+            animation: `${rotateGlyph} 15s linear infinite`,
+          },
+        }),
       }}
     >
       {/* Header Section */}
@@ -101,45 +145,108 @@ const PricingTable: React.FC<PricingProps> = props => {
           alignItems: 'center',
           justifyContent: 'space-between',
           p: 2,
-          borderBottom: '1px solid #ccc',
+          borderBottom: sacredTheme
+            ? `1px solid ${alpha('#FFD700', 0.3)}`
+            : '1px solid #ccc',
+          ...(sacredTheme && {
+            background: `linear-gradient(135deg, ${alpha('#FFD700', 0.1)} 0%, transparent 100%)`,
+          }),
         }}
       >
         {config.tabletitle && (
-          <Typography text={config.tabletitle.text || ''} />
+          <Typography
+            text={config.tabletitle.text || ''}
+            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    animation: `${sacredGlowPulse} 3s ease-in-out infinite`,
+                    fontWeight: 600,
+                    letterSpacing: '1px',
+                  }
+                : undefined
+            }
+          />
         )}
         {config.packagecolumns && (
-          <Dropdown
-            label="Packages"
-            options={(config.packagecolumns.packagenames || []).map(name => ({
-              value: name,
-            }))}
-            defaultValue={selectedPackage}
-            onChange={handlePackageChange}
-          />
+          <Box sx={sacredTheme ? { minWidth: '200px' } : undefined}>
+            <Dropdown
+              label="Packages"
+              options={(config.packagecolumns.packagenames || []).map(name => ({
+                value: name,
+              }))}
+              defaultValue={selectedPackage}
+              onChange={handlePackageChange}
+              backgroundcolor={sacredTheme ? alpha('#000000', 0.6) : undefined}
+              outlinecolor={sacredTheme ? '#FFD700' : undefined}
+              fontcolor={sacredTheme ? '#FFD700' : undefined}
+              shrunkfontcolor={sacredTheme ? '#FFD700' : undefined}
+            />
+          </Box>
         )}
         {config.monthlyprice && (
           <Typography
             text={config.monthlyprice.prices?.[selectedPackageIndex] || ''}
+            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    fontWeight: 500,
+                    letterSpacing: '0.5px',
+                  }
+                : undefined
+            }
           />
         )}
         {config.annualprice && (
           <Typography
             text={config.annualprice.annualprices?.[selectedPackageIndex] || ''}
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    fontStyle: 'italic',
+                  }
+                : undefined
+            }
           />
         )}
       </Box>
 
       {/* Features Section */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          p: 2,
+          ...(sacredTheme && {
+            '& .MuiSvgIcon-root': {
+              color: '#FFD700',
+              filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+            },
+          }),
+        }}
+      >
         {config.features?.map((feature, featureIndex) => (
           <Box key={`feature-${featureIndex}`} sx={{ mb: 2 }}>
             <Box display="flex" alignItems="center">
-              <Typography text={feature.title} />
+              <Typography
+                text={feature.title}
+                fontcolor={sacredTheme ? '#FFD700' : undefined}
+                sx={
+                  sacredTheme
+                    ? {
+                        fontWeight: 500,
+                        letterSpacing: '0.5px',
+                      }
+                    : undefined
+                }
+              />
               {feature.infopopuptext && (
                 <Box ml={1} display="flex" alignItems="center">
                   <StyledTooltip
                     arrow
-                    tooltipcolor={stainlessSteel.main}
+                    tooltipcolor={sacredTheme ? '#FFD700' : stainlessSteel.main}
                     tooltipplacement="right"
                     title={feature.infopopuptext}
                     offsetX={0}
@@ -154,7 +261,16 @@ const PricingTable: React.FC<PricingProps> = props => {
                   {feature.tiedtopackage.tiedtopackages?.[
                     selectedPackageIndex
                   ] ? (
-                    <CheckCircleIcon fontSize="small" />
+                    <CheckCircleIcon
+                      fontSize="small"
+                      sx={
+                        sacredTheme
+                          ? {
+                              animation: `${floatAnimation} 2s ease-in-out infinite`,
+                            }
+                          : undefined
+                      }
+                    />
                   ) : (
                     <Box sx={{ width: '24px', height: '24px' }} />
                   )}
@@ -169,12 +285,17 @@ const PricingTable: React.FC<PricingProps> = props => {
                 ml={3}
                 mt={1}
               >
-                <Typography text={subFeature.title} />
+                <Typography
+                  text={subFeature.title}
+                  fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : undefined}
+                />
                 {subFeature.infopopuptext && (
                   <Box ml={1} display="flex" alignItems="center">
                     <StyledTooltip
                       arrow
-                      tooltipcolor={stainlessSteel.main}
+                      tooltipcolor={
+                        sacredTheme ? '#FFD700' : stainlessSteel.main
+                      }
                       tooltipplacement="right"
                       title={subFeature.infopopuptext}
                       offsetX={0}
@@ -203,11 +324,19 @@ const PricingTable: React.FC<PricingProps> = props => {
 
       {/* Button Section */}
       {config.buttoncolumns && (
-        <Box sx={{ p: 2 }}>
+        <Box
+          sx={{
+            p: 2,
+            ...(sacredTheme && {
+              borderTop: `1px solid ${alpha('#FFD700', 0.3)}`,
+              background: `linear-gradient(0deg, ${alpha('#FFD700', 0.05)} 0%, transparent 100%)`,
+            }),
+          }}
+        >
           <CustomButton
             variant="contained"
-            backgroundcolor={black.main}
-            fontcolor={white.main}
+            backgroundcolor={sacredTheme ? '#FFD700' : black.main}
+            fontcolor={sacredTheme ? '#000000' : white.main}
             href={config.buttoncolumns.buttonlinks[selectedPackageIndex] || '#'}
             width="100%"
             onClick={() => {
@@ -220,7 +349,33 @@ const PricingTable: React.FC<PricingProps> = props => {
               }
             }}
             text={config.buttoncolumns.buttontexts[selectedPackageIndex] || ''}
+            sacredTheme={sacredTheme}
           />
+        </Box>
+      )}
+
+      {/* Sacred decorative footer */}
+      {sacredTheme && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 1,
+            pb: 1,
+          }}
+        >
+          {['𓊹', '𓋹', '𓊹'].map((glyph, i) => (
+            <Box
+              key={i}
+              sx={{
+                color: alpha('#FFD700', 0.3),
+                fontSize: 12,
+                animation: `${floatAnimation} ${2 + i * 0.3}s ease-in-out infinite`,
+              }}
+            >
+              {glyph}
+            </Box>
+          ))}
         </Box>
       )}
     </Paper>

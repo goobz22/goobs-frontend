@@ -1,9 +1,21 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { AppBar, Tabs as MuiTabs, Tab } from '@mui/material'
+import { AppBar, Tabs as MuiTabs, Tab, keyframes, alpha } from '@mui/material'
 import { usePathname } from 'next/navigation'
 // Import your black palette color
 import { black } from '../../styles/palette'
+
+// Sacred theming animations
+const sacredShimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`
+
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+`
 
 export interface TabsItem {
   title?: string
@@ -23,6 +35,7 @@ export interface TabsProps {
   height?: string
   alignment?: 'left' | 'center' | 'right' | 'inherit' | 'justify'
   navname?: string
+  sacredTheme?: boolean
 }
 
 /**
@@ -33,6 +46,7 @@ function Tabs({
   height = '48px',
   alignment = 'left',
   navname = '',
+  sacredTheme = false,
 }: TabsProps) {
   const [activeTabValues, setActiveTabValues] = useState<
     Record<string, ActiveTabValue>
@@ -76,14 +90,22 @@ function Tabs({
       position="sticky"
       elevation={0} // Remove MUI's default shadow
       sx={{
-        backgroundColor: black.main, // Ensure the AppBar is black
-        color: '#fff',
-        overflow: 'hidden', // Prevent hover effects from spilling
+        backgroundColor: sacredTheme ? '#0a0a0a' : black.main,
+        color: sacredTheme ? '#FFD700' : '#fff',
+        overflow: 'hidden',
         height,
         minHeight: height,
         display: 'flex',
         justifyContent: 'center',
-        boxShadow: 'none',
+        boxShadow: sacredTheme ? `0 0 20px ${alpha('#FFD700', 0.3)}` : 'none',
+        ...(sacredTheme && {
+          borderBottom: `2px solid ${alpha('#FFD700', 0.4)}`,
+          backgroundImage: `
+            linear-gradient(rgba(255, 215, 0, 0.03), rgba(255, 215, 0, 0.03)),
+            radial-gradient(circle at top center, rgba(255, 215, 0, 0.1) 0%, transparent 70%)
+          `,
+          animation: `${glowPulse} 3s ease-in-out infinite`,
+        }),
       }}
     >
       <MuiTabs
@@ -92,15 +114,20 @@ function Tabs({
         variant="fullWidth"
         aria-label="nav tabs"
         sx={{
-          // Make the entire Tabs area black too
-          backgroundColor: black.main,
+          backgroundColor: sacredTheme ? 'transparent' : black.main,
           height: '100%',
           '& .MuiTabs-flexContainer': {
             height: '100%',
             display: 'flex',
             justifyContent: alignment === 'left' ? 'flex-start' : alignment,
-            // The container is also black
-            backgroundColor: black.main,
+            backgroundColor: sacredTheme ? 'transparent' : black.main,
+          },
+          '& .MuiTabs-indicator': {
+            backgroundColor: sacredTheme ? '#FFD700' : '#fff',
+            height: sacredTheme ? '3px' : '2px',
+            ...(sacredTheme && {
+              boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
+            }),
           },
           '& .MuiTab-root': {
             height: '100%',
@@ -109,32 +136,90 @@ function Tabs({
             alignItems: 'center',
             textTransform: 'none',
             boxSizing: 'border-box',
-            backgroundColor: black.main,
-            color: '#fff',
+            backgroundColor: sacredTheme ? 'transparent' : black.main,
+            color: sacredTheme ? alpha('#FFD700', 0.8) : '#fff',
             fontWeight: 500,
-            fontFamily: 'Merriweather',
+            fontFamily: sacredTheme ? '"Cinzel", serif' : 'Merriweather',
             fontSize: 16,
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            ...(sacredTheme && {
+              letterSpacing: '1px',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
+                backgroundSize: '200% 100%',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+            }),
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: sacredTheme
+                ? 'transparent'
+                : 'rgba(255, 255, 255, 0.1)',
+              ...(sacredTheme && {
+                color: '#FFD700',
+                textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
+                '&::before': {
+                  opacity: 1,
+                  animation: `${sacredShimmer} 1.5s ease-in-out`,
+                },
+              }),
             },
             '&.Mui-selected': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backgroundColor: sacredTheme
+                ? alpha('#FFD700', 0.1)
+                : 'rgba(255, 255, 255, 0.2)',
+              ...(sacredTheme && {
+                color: '#FFD700',
+                textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
+                fontWeight: 600,
+              }),
             },
           },
         }}
       >
-        {items.map(item => (
+        {items.map((item, index) => (
           <Tab
             key={item.title}
             value={item.title || ''}
-            label={item.title || ''}
+            label={
+              sacredTheme ? (
+                <span
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      opacity: 0.6,
+                      animation: `rotate ${10 + index * 2}s linear infinite`,
+                    }}
+                  >
+                    {index % 2 === 0 ? '𓊹' : '𓋹'}
+                  </span>
+                  {item.title || ''}
+                </span>
+              ) : (
+                item.title || ''
+              )
+            }
             onClick={() => handleTabClick(item)}
             sx={{
               ...(item.hasleftborder === 'true' && {
-                borderLeft: '1px solid white',
+                borderLeft: sacredTheme
+                  ? `1px solid ${alpha('#FFD700', 0.3)}`
+                  : '1px solid white',
               }),
               ...(item.hasrightborder === 'true' && {
-                borderRight: '1px solid white',
+                borderRight: sacredTheme
+                  ? `1px solid ${alpha('#FFD700', 0.3)}`
+                  : '1px solid white',
               }),
             }}
           />

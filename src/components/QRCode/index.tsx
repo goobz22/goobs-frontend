@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react'
 import QRCode from 'react-qr-code'
-import { Box, Paper } from '@mui/material'
+import { Box, Paper, keyframes, alpha } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { authenticator } from 'otplib'
 import Typography from '../Typography'
@@ -9,6 +9,24 @@ import { CheckCircleOutline } from '@mui/icons-material'
 import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
 } from '../ConfirmationCodeInput'
+
+// Sacred theming constants
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); }
+`
+
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0px); }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
 
 /**
  * Props for the QRCodeComponent
@@ -31,6 +49,7 @@ import ConfirmationCodeInputs, {
  * @property {(value: string) => void} [onConfirmationCodeChange] - Callback for when confirmation code changes
  * @property {ConfirmationCodeInputsProps} [confirmationCodeProps] - Custom props for the confirmation code input
  * @property {boolean} [showDisableConfirmation] - Whether to show the disable confirmation state
+ * @property {boolean} [sacredTheme] - Enable Egyptian/Sacred theming
  */
 export interface QRCodeProps {
   username: string
@@ -51,6 +70,7 @@ export interface QRCodeProps {
   onConfirmationCodeChange?: (value: string) => void
   confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
   showDisableConfirmation?: boolean
+  sacredTheme?: boolean
 }
 
 /**
@@ -77,7 +97,7 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
     confirmationCode = '',
     onConfirmationCodeChange,
     confirmationCodeProps = {},
-    showDisableConfirmation = false,
+    sacredTheme = false,
   }) => {
     // Generate the secret and OTP auth URL
     const { secret, otpAuth } = useMemo(() => {
@@ -109,7 +129,7 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
         <Box sx={{ ...sx, p: 2 }} role="alert">
           <Typography
             text="Error: Failed to generate QR code"
-            fontcolor="error"
+            fontcolor={sacredTheme ? '#FFD700' : 'error'}
             fontvariant="merriparagraph"
           />
         </Box>
@@ -126,18 +146,52 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
           gap={2}
           padding={3}
           width="100%"
+          sx={
+            sacredTheme
+              ? {
+                  position: 'relative',
+                  '&::before': {
+                    content: '"𓊹"',
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    fontSize: '20px',
+                    color: alpha('#FFD700', 0.3),
+                    animation: `${rotateGlyph} 15s linear infinite`,
+                  },
+                }
+              : undefined
+          }
         >
-          <CheckCircleOutline sx={{ fontSize: 60, color: 'green' }} />
+          <CheckCircleOutline
+            sx={{
+              fontSize: 60,
+              color: sacredTheme ? '#FFD700' : 'green',
+              ...(sacredTheme && {
+                filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
+                animation: `${floatAnimation} 2s ease-in-out infinite`,
+              }),
+            }}
+          />
           <Typography
             text={successMessage}
             fontvariant="merrih5"
             align="center"
+            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                    fontWeight: 600,
+                  }
+                : undefined
+            }
           />
           <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
             <CustomButton
               text="Disable Verification"
-              fontcolor="white"
-              backgroundcolor="black"
+              fontcolor={sacredTheme ? '#000000' : 'white'}
+              backgroundcolor={sacredTheme ? '#FFD700' : 'black'}
               width="100%"
               height="40px"
               variant="outlined"
@@ -145,95 +199,10 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
               onClick={() => {
                 if (onDisableVerification) void onDisableVerification()
               }}
+              sacredTheme={sacredTheme}
             />
           </Box>
         </Box>
-      )
-    }
-
-    // If showing disable confirmation state, render QR with confirmation input
-    if (showDisableConfirmation) {
-      return (
-        <Paper
-          elevation={3}
-          sx={{
-            p: 3,
-            display: 'inline-block',
-            maxWidth: '100%',
-            boxSizing: 'border-box',
-            ...sx,
-          }}
-        >
-          {title && (
-            <Typography
-              text={title}
-              fontvariant="merrih5"
-              align="center"
-              gutterBottom
-            />
-          )}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: responsiveSize,
-              height: responsiveSize,
-              margin: 'auto',
-            }}
-          >
-            <QRCode
-              value={otpAuth}
-              size={responsiveSize}
-              style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-              aria-label={`QR Code for ${title || 'MFA Setup'}`}
-              data-testid="mfa-qrcode"
-            />
-          </Box>
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography
-              text={`${appName}: ${username}`}
-              fontvariant="merriparagraph"
-              align="center"
-            />
-          </Box>
-
-          <Box
-            sx={{
-              mt: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2,
-            }}
-          >
-            <ConfirmationCodeInputs
-              isValid={false}
-              codeLength={6}
-              value={confirmationCode}
-              onChange={onConfirmationCodeChange}
-              showActionButtons={false}
-              onDisableVerification={() => {}}
-              {...confirmationCodeProps}
-            />
-
-            <CustomButton
-              text="Verify & Disable"
-              fontcolor="white"
-              backgroundcolor="black"
-              width="100%"
-              height="40px"
-              {...verifyButtonProps}
-              onClick={() => {
-                if (onVerify) void onVerify()
-              }}
-              disableButton={
-                verifyButtonProps?.disableButton ||
-                (confirmationCode.length < 6 ? 'true' : 'false')
-              }
-            />
-          </Box>
-        </Paper>
       )
     }
 
@@ -246,6 +215,17 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
           display: 'inline-block',
           maxWidth: '100%',
           boxSizing: 'border-box',
+          ...(sacredTheme && {
+            backgroundColor: '#0a0a0a',
+            backgroundImage: `
+              linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+              radial-gradient(circle at center, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+            `,
+            border: `2px solid ${alpha('#FFD700', 0.4)}`,
+            animation: `${glowPulse} 3s ease-in-out infinite`,
+            position: 'relative',
+            overflow: 'hidden',
+          }),
           ...sx,
         }}
       >
@@ -255,6 +235,17 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             fontvariant="merrih5"
             align="center"
             gutterBottom
+            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                    fontWeight: 600,
+                    letterSpacing: '1px',
+                    mb: 3,
+                  }
+                : undefined
+            }
           />
         )}
         <Box
@@ -265,11 +256,18 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             width: responsiveSize,
             height: responsiveSize,
             margin: 'auto',
+            ...(sacredTheme && {
+              p: 2,
+              backgroundColor: 'white',
+              borderRadius: 2,
+              border: `2px solid ${alpha('#FFD700', 0.6)}`,
+              boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
+            }),
           }}
         >
           <QRCode
             value={otpAuth}
-            size={responsiveSize}
+            size={sacredTheme ? responsiveSize - 32 : responsiveSize}
             style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
             data-testid="mfa-qrcode"
@@ -280,6 +278,15 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             text={`${appName}: ${username}`}
             fontvariant="merriparagraph"
             align="center"
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    fontStyle: 'italic',
+                    letterSpacing: '0.5px',
+                  }
+                : undefined
+            }
           />
         </Box>
 
@@ -292,6 +299,7 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
               onChange={onConfirmationCodeChange}
               showActionButtons={false}
               onDisableVerification={() => {}}
+              sacredTheme={sacredTheme}
               {...confirmationCodeProps}
             />
           </Box>
@@ -303,8 +311,8 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
           >
             <CustomButton
               text="Verify Code"
-              fontcolor="white"
-              backgroundcolor="black"
+              fontcolor={sacredTheme ? '#000000' : 'white'}
+              backgroundcolor={sacredTheme ? '#FFD700' : 'black'}
               width="100%"
               height="40px"
               {...verifyButtonProps}
@@ -317,7 +325,33 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
                   ? 'true'
                   : 'false')
               }
+              sacredTheme={sacredTheme}
             />
+          </Box>
+        )}
+
+        {/* Sacred decorative elements */}
+        {sacredTheme && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 1,
+              mt: 3,
+            }}
+          >
+            {['𓂀', '𓊖', '𓏏'].map((glyph, i) => (
+              <Box
+                key={i}
+                sx={{
+                  color: alpha('#FFD700', 0.4),
+                  fontSize: 14,
+                  animation: `${floatAnimation} ${2.5 + i * 0.5}s ease-in-out infinite`,
+                }}
+              >
+                {glyph}
+              </Box>
+            ))}
           </Box>
         )}
       </Paper>

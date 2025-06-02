@@ -1,10 +1,55 @@
+// src/components/ComplexTextEditor/index.tsx
+
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
-import { Box } from '@mui/material'
+import { Box, keyframes, alpha } from '@mui/material'
 import { Descendant } from 'slate'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
+
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.2); }
+`
+
+const glyphFloat = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+  50% { transform: translateY(-5px) rotate(180deg); opacity: 0.4; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.2; }
+`
 
 export interface ComplexTextEditorProps {
   // For backward compatibility
@@ -28,6 +73,9 @@ export interface ComplexTextEditorProps {
   accordion?: boolean
   accordionSummary?: React.ReactNode
   defaultExpanded?: boolean
+
+  // Sacred theme
+  sacredTheme?: boolean
 }
 
 // Initial empty slate value
@@ -57,6 +105,9 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   accordion = false,
   accordionSummary = 'Text Editor',
   defaultExpanded = false,
+
+  // Sacred theme
+  sacredTheme = false,
 }) => {
   // Determine initial values based on either new or old API
   const startValue = value !== undefined ? value : initialValue
@@ -111,6 +162,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
+    position: 'relative',
   }
 
   const combinedStyles = {
@@ -135,6 +187,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           helperText={helperText}
           required={required}
           style={style}
+          sacredTheme={sacredTheme}
         />
       )
     }
@@ -167,6 +220,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         accordion={accordion}
         accordionSummary={accordionSummary}
         defaultExpanded={defaultExpanded}
+        // Sacred theme
+        sacredTheme={sacredTheme}
       />
     )
   }
@@ -181,13 +236,52 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           summary={summaryText}
           details={createEditorContent()}
           defaultExpanded={defaultExpanded}
+          sacredTheme={sacredTheme}
         />
+        {/* Sacred decorative elements */}
+        {sacredTheme && (
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '-20px',
+              right: '20px',
+              color: alpha('#FFD700', 0.2),
+              fontSize: '48px',
+              animation: `${glyphFloat} 10s ease-in-out infinite`,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          >
+            {SACRED_GLYPHS[14]}
+          </Box>
+        )}
       </Box>
     )
   }
 
   // Otherwise, render the editor content directly
-  return <Box sx={combinedStyles}>{createEditorContent()}</Box>
+  return (
+    <Box sx={combinedStyles}>
+      {createEditorContent()}
+      {/* Sacred decorative elements */}
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '-20px',
+            right: '20px',
+            color: alpha('#FFD700', 0.2),
+            fontSize: '48px',
+            animation: `${glyphFloat} 10s ease-in-out infinite`,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          {SACRED_GLYPHS[14]}
+        </Box>
+      )}
+    </Box>
+  )
 }
 
 // Helper function to determine the initial mode

@@ -1,8 +1,78 @@
+// src/components/Button/index.tsx
+
 'use client'
 import React from 'react'
-import { Button, Box, ButtonProps } from '@mui/material'
+import { Button, Box, ButtonProps, keyframes, alpha } from '@mui/material'
 import Typography from '../Typography'
 import { SvgIconProps } from '@mui/material/SvgIcon'
+
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+const sacredGlowPulse = keyframes`
+  0% { 
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  }
+  100% { 
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+`
+
+const sacredShimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`
+
+const rotateGlyph = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
+
+const sacredFloat = keyframes`
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-2px) scale(1.05); }
+  100% { transform: translateY(0px) scale(1); }
+`
+
+const sacredIconGlow = keyframes`
+  0% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
+  50% { filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.9)); }
+  100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
+`
 
 export interface CustomButtonProps extends ButtonProps {
   text?: string
@@ -28,6 +98,9 @@ export interface CustomButtonProps extends ButtonProps {
   iconsize?: string
   iconlocation?: 'left' | 'right' | 'above'
   fontlocation?: 'left' | 'center' | 'right'
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 function CustomButton({
@@ -47,6 +120,7 @@ function CustomButton({
   fontlocation = 'center',
   disabled,
   style = {},
+  sacredTheme = false,
   ...restProps
 }: CustomButtonProps) {
   // Merge MUI's "disabled" with our "disableButton"
@@ -61,13 +135,19 @@ function CustomButton({
   const IconComponent = icon
     ? React.cloneElement(icon, {
         sx: {
-          // MUI icons accept a `sx` prop, but it's optional.
-          // If you do NOT want to rely on sx, you could remove this.
-          color: iconcolor || 'inherit',
+          color: sacredTheme
+            ? isReallyDisabled
+              ? alpha('#FFD700', 0.3)
+              : iconcolor || '#FFD700'
+            : iconcolor || 'inherit',
           fontSize: iconsize || '20px',
           minWidth: iconsize || '20px',
           minHeight: iconsize || '20px',
           margin: 0,
+          ...(sacredTheme &&
+            !isReallyDisabled && {
+              animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+            }),
         },
       } as Partial<SvgIconProps>)
     : null
@@ -79,6 +159,12 @@ function CustomButton({
   const isIconAbove = iconlocation === 'above'
   const defaultHeight = isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'
   const minHeight = isIconOnly ? '36px' : isIconAbove ? '70px' : '40px'
+
+  // Random glyph selection for sacred theme
+  const leftGlyph =
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  const rightGlyph =
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
 
   // Base inline styles for the button
   const buttonStyle: React.CSSProperties = {
@@ -100,27 +186,58 @@ function CustomButton({
         : fontlocation === 'right'
           ? 'flex-end'
           : 'center',
-    gap: isIconAbove ? '12px' : '8px', // More gap for stacked layout
-    // Default background color (handled below)
+    gap: isIconAbove ? '12px' : '8px',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.3s ease',
   }
 
-  // If disabled, force a grey background
+  // Sacred theme styles
+  if (sacredTheme && !isReallyDisabled) {
+    buttonStyle.backgroundColor =
+      backgroundcolor === 'none'
+        ? 'transparent'
+        : backgroundcolor || alpha('#000000', 0.9)
+    buttonStyle.border = `2px solid ${alpha('#FFD700', 0.8)}`
+    buttonStyle.borderRadius = '8px'
+    buttonStyle.color = '#FFD700'
+    buttonStyle.fontFamily = '"Cinzel", serif'
+    buttonStyle.fontWeight = 600
+    buttonStyle.letterSpacing = '1px'
+    buttonStyle.textTransform = 'uppercase'
+    buttonStyle.animation = `${sacredGlowPulse} 3s ease-in-out infinite`
+    buttonStyle.backgroundImage =
+      backgroundcolor !== 'none'
+        ? `
+      linear-gradient(135deg, 
+        ${alpha('#FFD700', 0.1)} 0%, 
+        ${alpha('#000000', 0.9)} 50%,
+        ${alpha('#FFD700', 0.1)} 100%)
+    `
+        : undefined
+  }
+
+  // If disabled, force styling
   if (isReallyDisabled) {
-    buttonStyle.backgroundColor = '#cccccc'
+    if (sacredTheme) {
+      buttonStyle.backgroundColor = alpha('#000000', 0.6)
+      buttonStyle.border = `2px solid ${alpha('#FFD700', 0.2)}`
+      buttonStyle.color = alpha('#FFD700', 0.3)
+      buttonStyle.animation = 'none'
+      buttonStyle.backgroundImage = 'none'
+    } else {
+      buttonStyle.backgroundColor = '#cccccc'
+    }
     buttonStyle.opacity = 1
     buttonStyle.cursor = 'not-allowed'
-    // Add pointer-events property for testing compatibility
     buttonStyle.pointerEvents = 'auto'
-  } else if (backgroundcolor && backgroundcolor !== 'none') {
-    // Normal colored background
+  } else if (!sacredTheme && backgroundcolor && backgroundcolor !== 'none') {
     buttonStyle.backgroundColor = backgroundcolor
-  } else if (backgroundcolor === 'none') {
-    // No background => text button
+  } else if (!sacredTheme && backgroundcolor === 'none') {
     buttonStyle.backgroundColor = 'transparent'
   }
 
   // Inline styles for the top-level container (Box)
-  // Merge the passed style prop with our containerStyle
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -129,7 +246,8 @@ function CustomButton({
     height: height || (isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'),
     minHeight: isIconOnly ? '36px' : isIconAbove ? minHeight : 'auto',
     minWidth: isIconOnly ? '36px' : 'fit-content',
-    ...style, // Apply any custom styles passed through the style prop
+    position: 'relative',
+    ...style,
   }
 
   // Style for the inner content box
@@ -146,6 +264,8 @@ function CustomButton({
     width: '100%',
     height: '100%',
     gap: '8px',
+    position: 'relative',
+    zIndex: 2,
   }
 
   return (
@@ -159,7 +279,72 @@ function CustomButton({
         disableRipple
         style={buttonStyle}
         data-testid={isReallyDisabled ? 'disabled-button' : 'button'}
+        sx={{
+          ...(sacredTheme &&
+            !isReallyDisabled && {
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `linear-gradient(90deg, transparent, ${alpha('#FFD700', 0.2)}, transparent)`,
+                backgroundSize: '200% 100%',
+                animation: `${sacredShimmer} 2s ease-in-out infinite`,
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+              '&::after': {
+                content: `"${leftGlyph}"`,
+                position: 'absolute',
+                left: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: alpha('#FFD700', 0.3),
+                fontSize: '14px',
+                animation: `${rotateGlyph} 20s linear infinite`,
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                borderColor: '#FFD700',
+                boxShadow:
+                  '0 0 20px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4)',
+                '&::before': {
+                  opacity: 1,
+                },
+                '&::after': {
+                  opacity: 1,
+                },
+                '& .sacred-glyph-right': {
+                  opacity: 1,
+                },
+              },
+            }),
+        }}
       >
+        {/* Sacred floating glyph on the right */}
+        {sacredTheme && !isReallyDisabled && (
+          <Box
+            className="sacred-glyph-right"
+            sx={{
+              position: 'absolute',
+              right: '8px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: alpha('#FFD700', 0.3),
+              fontSize: '14px',
+              animation: `${rotateGlyph} 15s linear infinite reverse`,
+              opacity: 0,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
+            {rightGlyph}
+          </Box>
+        )}
+
         {/* If iconlocation="above", show the icon first */}
         {isIconAbove && IconComponent}
 
@@ -169,9 +354,30 @@ function CustomButton({
 
           {text && (
             <Typography
-              fontvariant={fontvariant}
-              fontcolor={isReallyDisabled ? 'grey' : fontcolor || 'white'}
+              fontvariant={sacredTheme ? undefined : fontvariant}
+              fontcolor={
+                isReallyDisabled
+                  ? sacredTheme
+                    ? alpha('#FFD700', 0.3)
+                    : 'grey'
+                  : sacredTheme
+                    ? '#FFD700'
+                    : fontcolor || 'white'
+              }
               text={text}
+              sx={
+                sacredTheme
+                  ? {
+                      fontFamily: '"Cinzel", serif',
+                      fontWeight: 600,
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase',
+                      animation: isReallyDisabled
+                        ? 'none'
+                        : `${sacredFloat} 2s ease-in-out infinite`,
+                    }
+                  : undefined
+              }
             />
           )}
 

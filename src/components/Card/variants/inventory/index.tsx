@@ -1,7 +1,32 @@
+// src/components/Card/variants/inventory/index.tsx
+
 import React from 'react'
-import { Box, Paper } from '@mui/material'
+import { Box, Paper, keyframes, alpha } from '@mui/material'
 import Typography from '../../../../components/Typography'
 import Link from 'next/link'
+
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = ['𓊖', '𓊗', '𓋴', '𓏏', '𓊨', '𓁦']
+
+const sacredPulse = keyframes`
+  0% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0.3; transform: scale(1); }
+`
+
+const sacredBorderGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.1); }
+  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.2); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.1); }
+`
+
+const sacredShimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`
 
 /**
  * Props for the InventoryCard component.
@@ -26,6 +51,10 @@ interface InventoryCardProps {
   price?: string
   /** Quantity of the item */
   quantity?: number
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
+  /** Callback for remove action */
+  onRemove?: () => void
 }
 
 /**
@@ -43,6 +72,8 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   support,
   price,
   quantity,
+  sacredTheme = false,
+  onRemove,
 }) => {
   return (
     <Paper
@@ -53,8 +84,28 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'stretch',
-        border: '1px solid #e8e8e8',
+        border: sacredTheme
+          ? `1px solid ${alpha('#FFD700', 0.3)}`
+          : '1px solid #e8e8e8',
         minHeight: height,
+        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        overflow: 'hidden',
+        ...(sacredTheme && {
+          animation: `${sacredBorderGlow} 4s ease-in-out infinite`,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `linear-gradient(135deg, transparent, ${alpha('#FFD700', 0.05)}, transparent)`,
+            backgroundSize: '200% 100%',
+            animation: `${sacredShimmer} 3s ease-in-out infinite`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          },
+        }),
       }}
     >
       {/* Image section */}
@@ -67,6 +118,19 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           flexShrink: 0,
+          position: 'relative',
+          zIndex: 2,
+          ...(sacredTheme && {
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `linear-gradient(to right, transparent 50%, ${alpha('#000000', 0.8)} 100%)`,
+            },
+          }),
         }}
       />
 
@@ -77,8 +141,26 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
+          zIndex: 2,
         }}
       >
+        {/* Sacred decorative glyph */}
+        {sacredTheme && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              color: alpha('#FFD700', 0.2),
+              fontSize: '32px',
+              animation: `${sacredPulse} 3s ease-in-out infinite`,
+            }}
+          >
+            {SACRED_GLYPHS[2]}
+          </Box>
+        )}
+
         {/* Title and Price section */}
         <Box
           sx={{
@@ -88,7 +170,21 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           }}
         >
           {title && (
-            <Typography text={title} fontcolor="black" fontvariant="merrih5" />
+            <Typography
+              text={title}
+              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontvariant="merrih5"
+              sx={
+                sacredTheme
+                  ? {
+                      fontFamily: '"Cinzel", serif',
+                      fontWeight: 600,
+                      letterSpacing: '1px',
+                      textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                    }
+                  : undefined
+              }
+            />
           )}
           <Box
             sx={{
@@ -99,8 +195,16 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           >
             <Typography
               text={`${quantity} x ${price}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
               fontvariant="merriparagraph"
+              sx={
+                sacredTheme
+                  ? {
+                      fontWeight: 600,
+                      textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
+                    }
+                  : undefined
+              }
             />
           </Box>
         </Box>
@@ -111,7 +215,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '8px' }}>
             <Typography
               text={`License: ${license || ''}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -119,7 +223,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Development use: ${developmentUse || ''}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -127,7 +231,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Production use: ${productionUse || ''}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -135,7 +239,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Updates: ${updates || ''}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -143,7 +247,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Support: ${support || ''}`}
-              fontcolor="black"
+              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -151,11 +255,29 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
 
         {/* Remove link */}
         <Box sx={{ marginTop: 'auto', alignSelf: 'flex-end' }}>
-          <Link href="#" passHref>
+          <Link
+            href="#"
+            passHref
+            onClick={e => {
+              e.preventDefault()
+              onRemove?.()
+            }}
+          >
             <Typography
               text="Remove"
-              fontcolor="black"
+              fontcolor={sacredTheme ? '#FFD700' : 'black'}
               fontvariant="merriparagraph"
+              sx={
+                sacredTheme
+                  ? {
+                      textDecoration: 'underline',
+                      '&:hover': {
+                        color: '#FFD700',
+                        textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+                      },
+                    }
+                  : undefined
+              }
             />
           </Link>
         </Box>

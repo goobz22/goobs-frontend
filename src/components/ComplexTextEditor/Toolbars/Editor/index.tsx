@@ -1,5 +1,7 @@
+// src/components/ComplexTextEditor/Toolbars/Editor/index.tsx
+
 import React, { useState } from 'react'
-import { Box, Stack } from '@mui/material'
+import { Box, Stack, keyframes, alpha } from '@mui/material'
 import {
   Link,
   Undo,
@@ -33,6 +35,16 @@ import {
   BlockFormat,
 } from '../../utils/useRichtextEditor'
 
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
+
+const sacredIconGlow = keyframes`
+  0% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
+  50% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8)); }
+  100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
+`
+
 // Define types directly in this file that aren't already imported
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 export type TextType = 'paragraph' | 'h1' | 'h2' | 'h3'
@@ -44,7 +56,8 @@ interface ToolbarMarkdownProps {
   markdownMode: boolean
   setMarkdownMode?: (value: boolean) => void
   setMarkdown: (value: string) => void
-  toolbarType?: 'markdown' | 'richtext' // New prop to indicate the toolbar type
+  toolbarType?: 'markdown' | 'richtext'
+  sacredTheme?: boolean
 }
 
 const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
@@ -53,7 +66,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   handleItalicClick,
   markdownMode,
   setMarkdown,
-  toolbarType = 'richtext', // Default to richtext
+  toolbarType = 'richtext',
+  sacredTheme = false,
 }) => {
   const [alignValue, setAlignValue] = useState<AlignmentFormat>('left')
   const [textType, setTextType] = useState<TextType>('paragraph')
@@ -272,30 +286,53 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     margin: '2px',
   }
 
+  const sacredButtonStyle = sacredTheme
+    ? {
+        '& .MuiSvgIcon-root': {
+          animation: isFormatActive('')
+            ? `${sacredIconGlow} 2s ease-in-out infinite`
+            : 'none',
+        },
+      }
+    : {}
+
   return (
-    <Box>
+    <Box
+      sx={{
+        padding: '8px',
+        backgroundColor: sacredTheme ? alpha('#000000', 0.5) : 'transparent',
+      }}
+    >
       <Stack direction="row" spacing={1}>
         {/* undo / redo */}
         <Box sx={{ display: 'flex', gap: '4px' }}>
           <CustomButton
             icon={<Undo fontSize="small" />}
             backgroundcolor="none"
-            fontcolor={black.main}
-            iconcolor={black.main}
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : black.main}
+            iconcolor={sacredTheme ? alpha('#FFD700', 0.8) : black.main}
             onClick={handleEditorAction('undo')}
             variant="text"
-            sx={iconButtonStyle}
-            disabled={markdownMode} // Disable in markdown mode as it's not supported
+            sx={{
+              ...iconButtonStyle,
+              ...sacredButtonStyle,
+            }}
+            disabled={markdownMode}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<Redo fontSize="small" />}
             backgroundcolor="none"
-            fontcolor={black.main}
-            iconcolor={black.main}
+            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : black.main}
+            iconcolor={sacredTheme ? alpha('#FFD700', 0.8) : black.main}
             onClick={handleEditorAction('redo')}
             variant="text"
-            sx={iconButtonStyle}
-            disabled={markdownMode} // Disable in markdown mode as it's not supported
+            sx={{
+              ...iconButtonStyle,
+              ...sacredButtonStyle,
+            }}
+            disabled={markdownMode}
+            sacredTheme={sacredTheme}
           />
         </Box>
         {/* text dropdown - only show in rich text mode */}
@@ -306,6 +343,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             value={textType}
             onChange={handleTextTypeChange}
             width="200px"
+            sacredTheme={sacredTheme}
           />
         )}
         {/* alignment dropdown - only show in rich text mode */}
@@ -316,6 +354,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             value={alignValue}
             onChange={handleAlignChange}
             width="150px"
+            sacredTheme={sacredTheme}
           />
         )}
         {/* buttons */}
@@ -323,91 +362,323 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={<FormatBold fontSize="small" />}
             backgroundcolor={
-              isFormatActive('bold') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('bold')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('bold') ? grey.dark : black.main}
-            iconcolor={isFormatActive('bold') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('bold')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('bold')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('bold')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('bold') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<FormatItalic fontSize="small" />}
             backgroundcolor={
-              isFormatActive('italic') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('italic')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('italic') ? grey.dark : black.main}
-            iconcolor={isFormatActive('italic') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('italic')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('italic')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('italic')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('italic') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<FormatUnderlined fontSize="small" />}
             backgroundcolor={
-              isFormatActive('underline') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('underline')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('underline') ? grey.dark : black.main}
-            iconcolor={isFormatActive('underline') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('underline')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('underline')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('underline')}
             variant="text"
-            sx={iconButtonStyle}
-            disabled={markdownMode} // Underline is not standard markdown
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('underline') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            disabled={markdownMode}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<StrikethroughS fontSize="small" />}
             backgroundcolor={
-              isFormatActive('strikethrough') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('strikethrough')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('strikethrough') ? grey.dark : black.main}
-            iconcolor={isFormatActive('strikethrough') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('strikethrough')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('strikethrough')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('strikethrough')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('strikethrough') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<Code fontSize="small" />}
             backgroundcolor={
-              isFormatActive('code') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('code')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('code') ? grey.dark : black.main}
-            iconcolor={isFormatActive('code') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('code')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('code')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('code')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('code') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<Link fontSize="small" />}
             backgroundcolor={
-              isFormatActive('link') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('link')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('link') ? grey.dark : black.main}
-            iconcolor={isFormatActive('link') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('link')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('link')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('link')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('link') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<FormatListNumbered fontSize="small" />}
             backgroundcolor={
-              isFormatActive('numbered-list') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('numbered-list')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('numbered-list') ? grey.dark : black.main}
-            iconcolor={isFormatActive('numbered-list') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('numbered-list')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('numbered-list')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('numbered-list')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('numbered-list') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
           <CustomButton
             icon={<FormatListBulleted fontSize="small" />}
             backgroundcolor={
-              isFormatActive('bulleted-list') ? 'rgba(0, 0, 0, 0.10)' : 'none'
+              isFormatActive('bulleted-list')
+                ? sacredTheme
+                  ? alpha('#FFD700', 0.2)
+                  : 'rgba(0, 0, 0, 0.10)'
+                : 'none'
             }
-            fontcolor={isFormatActive('bulleted-list') ? grey.dark : black.main}
-            iconcolor={isFormatActive('bulleted-list') ? grey.dark : black.main}
+            fontcolor={
+              isFormatActive('bulleted-list')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
+            iconcolor={
+              isFormatActive('bulleted-list')
+                ? sacredTheme
+                  ? '#FFD700'
+                  : grey.dark
+                : sacredTheme
+                  ? alpha('#FFD700', 0.8)
+                  : black.main
+            }
             onClick={handleEditorAction('bulleted-list')}
             variant="text"
-            sx={iconButtonStyle}
+            sx={{
+              ...iconButtonStyle,
+              ...(isFormatActive('bulleted-list') &&
+                sacredTheme && {
+                  '& .MuiSvgIcon-root': {
+                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
+                  },
+                }),
+            }}
+            sacredTheme={sacredTheme}
           />
         </Box>
       </Stack>

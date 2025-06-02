@@ -3,29 +3,37 @@
 'use client'
 
 import React, { FC } from 'react'
-import { Box, styled } from '@mui/material'
+import { Box, styled, alpha } from '@mui/material'
 import CustomButton, { CustomButtonProps } from '../../Button'
 import { white, grey, black } from '../../../styles/palette'
 
 /** A simple vertical divider */
-const VerticalDivider = styled(Box)({
-  borderLeft: '2px solid black',
-  height: '20px',
-})
+const VerticalDivider = styled(Box)<{ sacredTheme?: boolean }>(
+  ({ sacredTheme }) => ({
+    borderLeft: sacredTheme
+      ? `2px solid ${alpha('#FFD700', 0.6)}`
+      : '2px solid black',
+    height: '20px',
+    ...(sacredTheme && {
+      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
+    }),
+  })
+)
 
 export interface LeftProps {
   /** Array of button configs to render on the left side */
   buttons?: CustomButtonProps[]
+  sacredTheme?: boolean
 }
 
-const Left: FC<LeftProps> = ({ buttons }) => {
+const Left: FC<LeftProps> = ({ buttons, sacredTheme }) => {
   const buttonHeight = '45px'
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       {/* Vertical Divider */}
       <Box sx={{ display: 'flex', alignItems: 'center', padding: '0 15px' }}>
-        <VerticalDivider />
+        <VerticalDivider sacredTheme={sacredTheme} />
       </Box>
 
       {/* Buttons */}
@@ -46,11 +54,20 @@ const Left: FC<LeftProps> = ({ buttons }) => {
               onClick={btn.onClick}
               disabled={isDisabled}
               disableButton={isDisabled ? 'true' : 'false'}
-              fontcolor={white.main}
-              backgroundcolor={isDisabled ? grey.main : black.main}
+              fontcolor={sacredTheme ? '#000000' : white.main}
+              backgroundcolor={
+                isDisabled
+                  ? sacredTheme
+                    ? alpha('#FFD700', 0.3)
+                    : grey.main
+                  : sacredTheme
+                    ? '#FFD700'
+                    : black.main
+              }
               fontvariant="merriparagraph"
               variant="contained"
               height={buttonHeight}
+              sacredTheme={sacredTheme}
             />
           )
         })}

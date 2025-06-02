@@ -9,7 +9,22 @@ import {
   OutlinedTextFieldProps,
   FilledTextFieldProps,
   styled,
+  keyframes,
+  alpha,
 } from '@mui/material'
+
+// Sacred theme animations
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
+  100% { transform: translateY(0px); }
+`
 
 export type TextFieldProps = (
   | StandardTextFieldProps
@@ -44,6 +59,8 @@ export type TextFieldProps = (
   sx?: MuiTextFieldProps['sx']
   slotProps?: MuiTextFieldProps['slotProps']
   disabled?: boolean
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
 }
 
 interface StyledTextFieldProps {
@@ -59,6 +76,7 @@ interface StyledTextFieldProps {
   unshrunkfontcolor?: string
   placeholdercolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
+  sacredtheme?: boolean
 }
 
 const StyledMuiTextField = styled(MuiTextField, {
@@ -76,6 +94,7 @@ const StyledMuiTextField = styled(MuiTextField, {
       'unshrunkfontcolor',
       'placeholdercolor',
       'shrunklabelposition',
+      'sacredtheme',
     ].includes(prop as string),
 })<StyledTextFieldProps>(
   ({
@@ -89,46 +108,105 @@ const StyledMuiTextField = styled(MuiTextField, {
     unshrunkfontcolor,
     placeholdercolor,
     shrunklabelposition,
+    sacredtheme,
   }) => ({
+    position: 'relative',
     '& .MuiOutlinedInput-root': {
       minHeight: '40px',
       height: 'auto',
-      backgroundColor: backgroundcolor || 'inherit',
-      color: fontcolor || 'black',
+      backgroundColor: sacredtheme
+        ? alpha('#000000', 0.8)
+        : backgroundcolor || 'inherit',
+      color: sacredtheme ? '#FFD700' : fontcolor || 'black',
+      transition: 'all 0.3s ease',
+      ...(sacredtheme && {
+        backgroundImage: `
+          linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
+          radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+        `,
+        '&::before': {
+          content: '"𓊹"',
+          position: 'absolute',
+          top: '50%',
+          right: '45px',
+          transform: 'translateY(-50%)',
+          color: alpha('#FFD700', 0.3),
+          fontSize: '14px',
+          pointerEvents: 'none',
+          zIndex: 1,
+          animation: `${floatGlyph} 3s ease-in-out infinite`,
+        },
+      }),
       '& .MuiSelect-icon': {
-        color: 'black !important',
+        color: sacredtheme ? '#FFD700' : 'black !important',
       },
       '& fieldset': {
-        borderColor:
-          outlinecolor ||
-          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        borderColor: sacredtheme
+          ? '#FFD700'
+          : outlinecolor ||
+            (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        ...(sacredtheme && {
+          borderWidth: '2px',
+        }),
         ...(shrunklabelposition === 'aboveNotch' && {
           legend: { width: '0px !important' },
         }),
       },
       '&:hover fieldset': {
-        borderColor:
-          outlinecolor ||
-          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        borderColor: sacredtheme
+          ? '#FFD700'
+          : outlinecolor ||
+            (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        ...(sacredtheme && {
+          boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
+        }),
       },
       '&.Mui-focused fieldset': {
-        borderColor:
-          outlinecolor ||
-          (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        borderColor: sacredtheme
+          ? '#FFD700'
+          : outlinecolor ||
+            (hasvalue === 'true' ? 'black' : 'rgba(0, 0, 0, 0.23)'),
+        ...(sacredtheme && {
+          animation: `${sacredGlow} 2s ease-in-out infinite`,
+        }),
       },
       '& input': {
-        color: inputfontcolor || fontcolor || 'black',
+        color: sacredtheme ? '#FFD700' : inputfontcolor || fontcolor || 'black',
+        ...(sacredtheme && {
+          textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
+          fontWeight: 500,
+        }),
         '&::placeholder': {
-          color: placeholdercolor || 'rgba(0, 0, 0, 0.54)',
+          color: sacredtheme
+            ? alpha('#FFD700', 0.7)
+            : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
           opacity: 1,
+          ...(sacredtheme && {
+            fontStyle: 'italic',
+            letterSpacing: '0.5px',
+          }),
         },
       },
     },
     '& .MuiInputLabel-root': {
-      color: unshrunkfontcolor || 'black',
-      '&.Mui-focused': { color: shrunkfontcolor || 'black' },
+      color: sacredtheme ? alpha('#FFD700', 0.8) : unshrunkfontcolor || 'black',
+      ...(sacredtheme && {
+        textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
+        fontWeight: 500,
+        letterSpacing: '0.5px',
+      }),
+      '&.Mui-focused': {
+        color: sacredtheme ? '#FFD700' : shrunkfontcolor || 'black',
+        ...(sacredtheme && {
+          textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
+        }),
+      },
       '&.MuiInputLabel-shrink': {
-        color: shrunkfontcolor || 'black',
+        color: sacredtheme ? '#FFD700' : shrunkfontcolor || 'black',
+        ...(sacredtheme && {
+          textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+          fontWeight: 600,
+        }),
         ...(shrunklabelposition === 'aboveNotch' && {
           transform: 'translate(0px, -17px) scale(0.75)',
         }),
@@ -140,6 +218,16 @@ const StyledMuiTextField = styled(MuiTextField, {
     '& .MuiOutlinedInput-input': {
       padding: '8px 14px',
       textAlign: textalign,
+    },
+    // Sacred adornment styling
+    '& .MuiInputAdornment-root': {
+      ...(sacredtheme && {
+        color: '#FFD700',
+        '& svg': {
+          color: '#FFD700',
+          filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+        },
+      }),
     },
   })
 )
@@ -168,18 +256,21 @@ const TextField = React.memo<TextFieldProps>(props => {
     unshrunkfontcolor,
     placeholdercolor,
     shrunklabelposition,
+    sacredTheme = false,
     ...restProps
   } = props
 
   const inputStyle = useMemo<React.CSSProperties>(
     () => ({
-      backgroundColor: backgroundcolor || 'inherit',
+      backgroundColor: sacredTheme
+        ? alpha('#000000', 0.8)
+        : backgroundcolor || 'inherit',
       width: '100%',
       cursor: 'text',
       boxSizing: 'border-box',
       borderRadius: 5,
     }),
-    [backgroundcolor]
+    [backgroundcolor, sacredTheme]
   )
 
   const handleChange = useCallback(
@@ -201,11 +292,14 @@ const TextField = React.memo<TextFieldProps>(props => {
 
   const mergedSlotProps = useMemo(() => {
     const adornmentSx = {
-      color: '#000000 !important',
+      color: sacredTheme ? '#FFD700 !important' : '#000000 !important',
       '& svg': {
-        color: '#000000 !important',
-        fill: '#000000 !important',
-        stroke: '#000000 !important',
+        color: sacredTheme ? '#FFD700 !important' : '#000000 !important',
+        fill: sacredTheme ? '#FFD700 !important' : '#000000 !important',
+        stroke: sacredTheme ? '#FFD700 !important' : '#000000 !important',
+        ...(sacredTheme && {
+          filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+        }),
       },
     }
 
@@ -251,7 +345,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         ...(customSlotProps.inputLabel || {}),
       },
     }
-  }, [inputStyle, startAdornment, endAdornment, customSlotProps])
+  }, [inputStyle, startAdornment, endAdornment, customSlotProps, sacredTheme])
 
   const hasValue = Boolean(value?.toString().length).toString()
 
@@ -265,6 +359,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         marginTop: '15px',
         height: 'auto',
         overflow: 'visible',
+        position: 'relative',
         ...sx,
       }}
       onClick={handleClick}
@@ -272,7 +367,7 @@ const TextField = React.memo<TextFieldProps>(props => {
       <StyledMuiTextField
         name={name}
         label={label}
-        placeholder={placeholder}
+        placeholder={sacredTheme ? 'Enter sacred text...' : placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -292,6 +387,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         unshrunkfontcolor={unshrunkfontcolor}
         placeholdercolor={placeholdercolor}
         shrunklabelposition={shrunklabelposition}
+        sacredtheme={sacredTheme}
         {...restProps}
       />
     </Box>

@@ -149,7 +149,13 @@ const StyledFormControl = styled(FormControl)<{ width?: string }>(
   })
 )
 
-const StyledInputLabel = styled(InputLabel)<{
+const StyledInputLabel = styled(InputLabel, {
+  shouldForwardProp: (prop) => 
+    prop !== 'shrunkfontcolor' && 
+    prop !== 'unshrunkfontcolor' && 
+    prop !== 'shrunklabelposition' && 
+    prop !== 'sacredtheme'
+})<{
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'

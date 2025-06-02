@@ -1,7 +1,7 @@
 'use client'
 
 import React, { FC } from 'react'
-import { Box, useMediaQuery } from '@mui/material'
+import { Box, useMediaQuery, keyframes, alpha } from '@mui/material'
 import Left from './left'
 import LeftCenter from './leftCenter'
 import Right from './right'
@@ -9,6 +9,13 @@ import RightCenter, { RightCenterProps } from './rightCenter'
 import { CustomButtonProps } from '../Button'
 import { DropdownProps } from '../Field/Dropdown/Regular'
 import { SearchbarProps } from '../Field/Search'
+
+// Sacred theming animations
+const sacredBorderPulse = keyframes`
+  0% { border-color: ${alpha('#FFD700', 0.3)}; }
+  50% { border-color: ${alpha('#FFD700', 0.6)}; }
+  100% { border-color: ${alpha('#FFD700', 0.3)}; }
+`
 
 /**
  * Props for CustomToolbar:
@@ -22,6 +29,7 @@ export interface CustomToolbarProps {
   searchbarProps?: SearchbarProps
   rightCenterProps?: RightCenterProps
   dropdowns?: DropdownProps[] // <-- changed from "dropdown?" to "dropdowns?"
+  sacredTheme?: boolean
 }
 
 const CustomToolbar: FC<CustomToolbarProps> = ({
@@ -29,12 +37,37 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   searchbarProps,
   rightCenterProps,
   dropdowns,
+  sacredTheme,
 }) => {
   // 1) Mobile:  <= 600px
   // 2) Tablet:  600px < width <= 1024px
   // 3) Desktop: > 1024px
   const isMobile = useMediaQuery('(max-width:600px)')
   const isTabletOrBelow = useMediaQuery('(max-width:1024px)')
+
+  const containerStyles = sacredTheme
+    ? {
+        backgroundColor: alpha('#000000', 0.8),
+        border: `1px solid ${alpha('#FFD700', 0.3)}`,
+        borderRadius: 2,
+        padding: 2,
+        backgroundImage: `
+      linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+      radial-gradient(circle at top left, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+    `,
+        animation: `${sacredBorderPulse} 3s ease-in-out infinite`,
+        position: 'relative' as const,
+        '&::before': {
+          content: '"𓊗"',
+          position: 'absolute',
+          top: '5px',
+          right: '10px',
+          fontSize: '16px',
+          color: alpha('#FFD700', 0.2),
+          animation: 'rotate 20s linear infinite',
+        },
+      }
+    : undefined
 
   // ================== DESKTOP (width > 1024px) ==================
   // Keep the searchbar visible, everything in one row.
@@ -48,6 +81,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           flexWrap: 'wrap',
           gap: 2,
           width: '100%',
+          ...containerStyles,
         }}
       >
         {/* Left half: Buttons + Searchbar */}
@@ -59,8 +93,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          <Left buttons={buttons} />
-          {searchbarProps && <LeftCenter {...searchbarProps} />}
+          <Left buttons={buttons} sacredTheme={sacredTheme} />
+          {searchbarProps && (
+            <LeftCenter {...searchbarProps} sacredTheme={sacredTheme} />
+          )}
         </Box>
 
         {/* Right half: RightCenter + (multiple) dropdowns */}
@@ -72,8 +108,12 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          {rightCenterProps && <RightCenter {...rightCenterProps} />}
-          {dropdowns?.map((dd, index) => <Right key={index} dropdown={dd} />)}
+          {rightCenterProps && (
+            <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
+          )}
+          {dropdowns?.map((dd, index) => (
+            <Right key={index} dropdown={dd} sacredTheme={sacredTheme} />
+          ))}
         </Box>
       </Box>
     )
@@ -91,6 +131,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           flexWrap: 'wrap',
           gap: 2,
           width: '100%',
+          ...containerStyles,
         }}
       >
         {/* Left half: Buttons */}
@@ -102,7 +143,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          <Left buttons={buttons} />
+          <Left buttons={buttons} sacredTheme={sacredTheme} />
         </Box>
 
         {/* Right half: RightCenter + (multiple) dropdowns */}
@@ -114,8 +155,12 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          {rightCenterProps && <RightCenter {...rightCenterProps} />}
-          {dropdowns?.map((dd, index) => <Right key={index} dropdown={dd} />)}
+          {rightCenterProps && (
+            <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
+          )}
+          {dropdowns?.map((dd, index) => (
+            <Right key={index} dropdown={dd} sacredTheme={sacredTheme} />
+          ))}
         </Box>
       </Box>
     )
@@ -125,24 +170,30 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   // Hide the searchbar, stack everything vertically.
   return (
     <Box
-      sx={{ display: 'flex', flexDirection: 'column', width: '100%', mb: 2 }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        mb: 2,
+        ...containerStyles,
+      }}
     >
       {/* Row 1: Buttons */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Left buttons={buttons} />
+        <Left buttons={buttons} sacredTheme={sacredTheme} />
       </Box>
 
       {/* Row 2: RightCenter (selected rows actions) */}
       {rightCenterProps && (
         <Box sx={{ mt: 2 }}>
-          <RightCenter {...rightCenterProps} />
+          <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
         </Box>
       )}
 
       {/* Row 3: (multiple) Dropdowns */}
       {dropdowns?.map((dd, index) => (
         <Box sx={{ mt: 2 }} key={index}>
-          <Right dropdown={dd} />
+          <Right dropdown={dd} sacredTheme={sacredTheme} />
         </Box>
       ))}
     </Box>

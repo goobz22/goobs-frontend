@@ -6,9 +6,25 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
+  alpha,
+  keyframes,
+  Box,
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import * as palette from '../../../styles/palette'
+
+// Sacred animations
+const sacredPulse = keyframes`
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+`
+
+const goldShimmer = keyframes`
+  0% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
+  100% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
+`
 
 export interface SearchbarProps {
   label?: string
@@ -22,6 +38,8 @@ export interface SearchbarProps {
   value: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
 }
 
 const StyledFormControl = styled(FormControl)({
@@ -36,36 +54,65 @@ const StyledOutlinedInput = styled(OutlinedInput)<{
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
-}>(({ backgroundcolor, outlinecolor, fontcolor }) => ({
+  sacredtheme?: boolean
+}>(({ backgroundcolor, outlinecolor, fontcolor, sacredtheme }) => ({
   height: '40px',
-  backgroundColor: backgroundcolor || palette.white.main,
+  backgroundColor: sacredtheme
+    ? alpha('#000000', 0.8)
+    : backgroundcolor || palette.white.main,
+  position: 'relative',
+  ...(sacredtheme && {
+    backgroundImage: `
+      linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+    `,
+  }),
   '& .MuiOutlinedInput-notchedOutline': {
     border:
       outlinecolor === 'none'
         ? 'none'
-        : `1px solid ${outlinecolor || palette.black.main}`,
+        : `1px solid ${outlinecolor || (sacredtheme ? '#FFD700' : palette.black.main)}`,
+    ...(sacredtheme && {
+      borderWidth: '2px',
+    }),
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
     border:
       outlinecolor === 'none'
         ? 'none'
-        : `1px solid ${outlinecolor || palette.black.main}`,
+        : `1px solid ${outlinecolor || (sacredtheme ? '#FFD700' : palette.black.main)}`,
+    ...(sacredtheme && {
+      boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
+    }),
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     border:
       outlinecolor === 'none'
         ? 'none'
-        : `1px solid ${outlinecolor || palette.black.main}`,
-    borderWidth: outlinecolor === 'none' ? '0' : '1px',
+        : `1px solid ${outlinecolor || (sacredtheme ? '#FFD700' : palette.black.main)}`,
+    borderWidth: outlinecolor === 'none' ? '0' : sacredtheme ? '2px' : '1px',
+    ...(sacredtheme && {
+      boxShadow: '0 0 20px rgba(255, 215, 0, 0.6)',
+    }),
   },
   '& input': {
-    color: fontcolor || palette.black.main,
+    color: sacredtheme ? '#FFD700' : fontcolor || palette.black.main,
     padding: '0 12px',
     paddingLeft: '0px',
     height: '100%',
+    ...(sacredtheme && {
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
+      fontWeight: 500,
+    }),
     '&::placeholder': {
-      color: fontcolor || palette.black.main,
-      opacity: 0.7,
+      color: sacredtheme
+        ? alpha('#FFD700', 0.7)
+        : fontcolor || palette.black.main,
+      opacity: sacredtheme ? 1 : 0.7,
+      ...(sacredtheme && {
+        fontStyle: 'italic',
+        letterSpacing: '0.5px',
+      }),
     },
   },
 }))
@@ -75,18 +122,43 @@ const StyledInputLabel = styled(InputLabel)<{
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
+  sacredtheme?: boolean
 }>(
-  ({ fontcolor, shrunkfontcolor, unshrunkfontcolor, shrunklabelposition }) => ({
-    color: unshrunkfontcolor || fontcolor || palette.black.main,
+  ({
+    fontcolor,
+    shrunkfontcolor,
+    unshrunkfontcolor,
+    shrunklabelposition,
+    sacredtheme,
+  }) => ({
+    color: sacredtheme
+      ? alpha('#FFD700', 0.8)
+      : unshrunkfontcolor || fontcolor || palette.black.main,
     position: 'absolute',
     top: '-5px',
     overflow: 'visible',
     zIndex: 1,
+    ...(sacredtheme && {
+      textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+    }),
     '&.Mui-focused': {
-      color: shrunkfontcolor || fontcolor || palette.black.main,
+      color: sacredtheme
+        ? '#FFD700'
+        : shrunkfontcolor || fontcolor || palette.black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
+      }),
     },
     '&.MuiInputLabel-shrink': {
-      color: shrunkfontcolor || fontcolor || palette.black.main,
+      color: sacredtheme
+        ? '#FFD700'
+        : shrunkfontcolor || fontcolor || palette.black.main,
+      ...(sacredtheme && {
+        textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+        fontWeight: 600,
+      }),
       ...(shrunklabelposition === 'aboveNotch' && {
         transform: 'translate(0px, 0px) scale(0.75)',
       }),
@@ -114,12 +186,39 @@ const Searchbar: React.FC<SearchbarProps> = ({
   value,
   shrunklabelposition = 'onNotch',
   onChange,
+  sacredTheme = false,
 }) => {
   const [focused, setFocused] = useState(false)
   const isLabelShrunken = focused || Boolean(value)
 
   const handleFocus = () => setFocused(true)
   const handleBlur = () => setFocused(false)
+
+  const SearchAdornment = () => (
+    <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '-20px',
+            color: alpha('#FFD700', 0.4),
+            fontSize: '12px',
+            animation: `${sacredPulse} 3s ease-in-out infinite`,
+          }}
+        >
+          𓂀
+        </Box>
+      )}
+      <SearchIcon
+        sx={{
+          color: sacredTheme ? '#FFD700' : iconcolor || palette.black.main,
+          ...(sacredTheme && {
+            animation: `${goldShimmer} 2s ease-in-out infinite`,
+          }),
+        }}
+      />
+    </Box>
+  )
 
   return (
     <StyledFormControl variant="outlined">
@@ -131,14 +230,21 @@ const Searchbar: React.FC<SearchbarProps> = ({
         shrunkfontcolor={shrunkfontcolor}
         unshrunkfontcolor={unshrunkfontcolor}
         shrunklabelposition={shrunklabelposition}
+        sacredtheme={sacredTheme}
       >
-        {label}
+        {sacredTheme ? 'Divine Search' : label}
       </StyledInputLabel>
       <StyledOutlinedInput
         id="search-input"
         label={label}
         notched={shrunklabelposition === 'onNotch' && isLabelShrunken}
-        placeholder={isLabelShrunken ? placeholder : ''}
+        placeholder={
+          isLabelShrunken
+            ? sacredTheme
+              ? 'Seek ancient wisdom...'
+              : placeholder
+            : ''
+        }
         value={value}
         onChange={onChange}
         onFocus={handleFocus}
@@ -146,9 +252,10 @@ const Searchbar: React.FC<SearchbarProps> = ({
         backgroundcolor={backgroundcolor}
         outlinecolor={outlinecolor}
         fontcolor={fontcolor}
+        sacredtheme={sacredTheme}
         startAdornment={
           <InputAdornment position="start">
-            <SearchIcon sx={{ color: iconcolor || palette.black.main }} />
+            <SearchAdornment />
           </InputAdornment>
         }
       />

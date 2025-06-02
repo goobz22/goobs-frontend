@@ -1,7 +1,20 @@
 'use client'
-import { Tooltip, TooltipProps, tooltipClasses } from '@mui/material'
+import {
+  Tooltip,
+  TooltipProps,
+  tooltipClasses,
+  keyframes,
+  alpha,
+} from '@mui/material'
 import { styled } from '@mui/material/styles'
 import React from 'react'
+
+// Sacred theming animation
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+`
 
 /**
  * Interface extending TooltipProps with custom properties for StyledTooltip
@@ -11,6 +24,7 @@ export interface CustomTooltipProps extends TooltipProps {
   tooltipplacement: 'left' | 'right' | 'top' | 'bottom'
   offsetX: number
   offsetY: number
+  sacredTheme?: boolean
 }
 
 /**
@@ -45,18 +59,27 @@ const StyledTooltip = styled(
       }}
     />
   )
-)(({ tooltipcolor }) => ({
+)(({ tooltipcolor, sacredTheme }) => ({
   // Styling for the tooltip content
   [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: tooltipcolor,
+    backgroundColor: sacredTheme ? '#FFD700' : tooltipcolor,
     fontSize: '16px',
-    fontFamily: 'Merriweather',
-    fontWeight: 400,
+    fontFamily: sacredTheme ? '"Cinzel", serif' : 'Merriweather',
+    fontWeight: sacredTheme ? 600 : 400,
     padding: '5px 8px',
+    ...(sacredTheme && {
+      color: '#000000',
+      letterSpacing: '0.5px',
+      animation: `${sacredGlow} 2s ease-in-out infinite`,
+      border: `1px solid ${alpha('#FFD700', 0.8)}`,
+    }),
   },
   // Styling for the tooltip arrow
   [`& .${tooltipClasses.arrow}`]: {
-    color: tooltipcolor,
+    color: sacredTheme ? '#FFD700' : tooltipcolor,
+    ...(sacredTheme && {
+      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+    }),
   },
 }))
 
