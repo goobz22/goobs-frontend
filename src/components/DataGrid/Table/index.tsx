@@ -7,6 +7,7 @@ import {
   Table as MuiTable,
   TableContainer,
   TableHead,
+  alpha,
 } from '@mui/material'
 import type { TableProps, RowData } from '../types'
 import { useComputeTableResize } from '../utils/useComputeTableResize'
@@ -27,6 +28,7 @@ function Table({
   someRowsSelected = false,
   onHeaderCheckboxChange,
   onRowCheckboxChange,
+  sacredTheme = false,
 }: TableProps) {
   // We'll consider mobile if screen width < 500px
   const isMobile = !useMediaQuery('(min-width:500px)')
@@ -84,6 +86,12 @@ function Table({
         overflowX: isMobile ? 'auto' : 'hidden',
         // Ensure minimum width for mobile content
         minWidth: isMobile ? '100%' : 'auto',
+        ...(sacredTheme && {
+          borderRadius: '8px',
+          overflow: 'hidden',
+          border: `1px solid ${alpha('#FFD700', 0.3)}`,
+          backgroundColor: alpha('#000000', 0.5),
+        }),
       }}
     >
       {/* We set the "ref" here so that useComputeTableResize can measure width. */}
@@ -94,6 +102,23 @@ function Table({
           // Ensure proper width on mobile
           width: '100%',
           minWidth: isMobile ? '100%' : 'auto',
+          ...(sacredTheme && {
+            backgroundColor: 'transparent',
+            '&::-webkit-scrollbar': {
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(255, 215, 0, 0.5)',
+              borderRadius: '4px',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 215, 0, 0.7)',
+              },
+            },
+          }),
         }}
       >
         <MuiTable
@@ -104,6 +129,43 @@ function Table({
             tableLayout: 'auto',
             // Force the table's minimum width to accommodate content
             minWidth: isMobile ? '100%' : 'fit-content',
+            ...(sacredTheme && {
+              backgroundColor: 'transparent',
+              '& .MuiTableCell-root': {
+                borderBottom: `1px solid ${alpha('#FFD700', 0.2)}`,
+                color: alpha('#ffffff', 0.9),
+                fontFamily: '"Crimson Text", serif',
+              },
+              '& .MuiTableCell-head': {
+                backgroundColor: alpha('#FFD700', 0.1),
+                color: '#FFD700',
+                fontFamily: '"Cinzel", serif',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                borderBottom: `2px solid ${alpha('#FFD700', 0.3)}`,
+              },
+              '& .MuiTableRow-root': {
+                '&:hover': {
+                  backgroundColor: alpha('#FFD700', 0.05),
+                },
+                '&.Mui-selected': {
+                  backgroundColor: alpha('#FFD700', 0.15),
+                  '&:hover': {
+                    backgroundColor: alpha('#FFD700', 0.2),
+                  },
+                },
+              },
+              '& .MuiCheckbox-root': {
+                color: alpha('#FFD700', 0.6),
+                '&.Mui-checked': {
+                  color: '#FFD700',
+                },
+                '&.MuiCheckbox-indeterminate': {
+                  color: '#FFD700',
+                },
+              },
+            }),
           }}
         >
           {/* Table Header */}
@@ -123,6 +185,7 @@ function Table({
               setSelectedOverflowField={setSelectedOverflowField}
               // The entire columns array so we can present them all on mobile
               allColumns={columns}
+              sacredTheme={sacredTheme}
             />
           </TableHead>
 
@@ -138,6 +201,7 @@ function Table({
             onRowClick={onRowClick}
             onRowCheckboxChange={onRowCheckboxChange}
             allColumns={columns}
+            sacredTheme={sacredTheme}
           />
         </MuiTable>
       </TableContainer>

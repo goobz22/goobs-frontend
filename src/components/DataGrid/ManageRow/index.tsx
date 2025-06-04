@@ -1,13 +1,32 @@
 'use client'
 
 import React from 'react'
-import { Paper, Stack, Box, useMediaQuery } from '@mui/material'
+import {
+  Paper,
+  Stack,
+  Box,
+  useMediaQuery,
+  alpha,
+  keyframes,
+} from '@mui/material'
 import Typography from '../../Typography'
 import DuplicateIcon from '@mui/icons-material/FileCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ExportIcon from '@mui/icons-material/Download'
 import EditIcon from '@mui/icons-material/Edit'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+
+// Sacred animations
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+`
+
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  cardBackground: alpha('#000000', 0.9),
+}
 
 type ModalType = 'duplicate' | 'delete' | 'export' | 'manage' | 'show'
 
@@ -22,6 +41,8 @@ interface ManageRowProps {
   onManage?: () => void
   onShow?: () => void
   onExport?: () => void
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 function ManageRow({
@@ -33,6 +54,7 @@ function ManageRow({
   onManage,
   onShow,
   onExport,
+  sacredTheme = false,
 }: ManageRowProps) {
   const isMobile = useMediaQuery('(max-width:600px)')
 
@@ -110,7 +132,15 @@ function ManageRow({
         minWidth: isMobile ? 'auto' : '560px',
         padding: isMobile ? '0 5px' : '0 10px',
         userSelect: 'none',
-        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+        boxShadow: sacredTheme
+          ? `0 0 20px ${alpha(egyptianStyles.goldColor, 0.3)}`
+          : '0px 4px 10px rgba(0, 0, 0, 0.1)',
+        ...(sacredTheme && {
+          backgroundColor: egyptianStyles.cardBackground,
+          border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+          backdropFilter: 'blur(10px)',
+          animation: `${glowPulse} 3s ease-in-out infinite`,
+        }),
       }}
     >
       <Box display="flex" alignItems="center" gap={1} sx={{ width: '100%' }}>
@@ -126,6 +156,17 @@ function ManageRow({
             text={`${selectedRows.length} ${
               selectedRows.length === 1 ? 'item' : 'items'
             } selected`}
+            fontcolor={sacredTheme ? egyptianStyles.goldColor : undefined}
+            sx={
+              sacredTheme
+                ? {
+                    fontFamily: '"Cinzel", serif',
+                    fontWeight: 600,
+                    letterSpacing: '0.05em',
+                    textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
+                  }
+                : {}
+            }
           />
         </Box>
 
@@ -143,7 +184,9 @@ function ManageRow({
               flexDirection="row"
               alignItems="center"
               sx={{
-                borderRight: '1px solid #e0e0e0',
+                borderRight: sacredTheme
+                  ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
+                  : '1px solid #e0e0e0',
                 paddingRight: '8px',
                 marginRight: '8px',
               }}
@@ -161,7 +204,9 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      backgroundColor: sacredTheme
+                        ? alpha(egyptianStyles.goldColor, 0.1)
+                        : 'rgba(0, 0, 0, 0.04)',
                     },
                     borderRadius: '4px',
                     transition: 'background-color 0.2s',
@@ -173,11 +218,22 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: 'black',
+                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <EditIcon />
-                    <Typography fontvariant="merriparagraph" text="Manage" />
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text="Manage"
+                      fontcolor={
+                        sacredTheme ? egyptianStyles.goldColor : undefined
+                      }
+                      sx={
+                        sacredTheme
+                          ? { fontFamily: '"Crimson Text", serif' }
+                          : {}
+                      }
+                    />
                   </Box>
                 </Box>
               )}
@@ -195,7 +251,9 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      backgroundColor: sacredTheme
+                        ? alpha(egyptianStyles.goldColor, 0.1)
+                        : 'rgba(0, 0, 0, 0.04)',
                     },
                     borderRadius: '4px',
                     transition: 'background-color 0.2s',
@@ -207,11 +265,22 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: 'black',
+                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <VisibilityIcon />
-                    <Typography fontvariant="merriparagraph" text="Show" />
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text="Show"
+                      fontcolor={
+                        sacredTheme ? egyptianStyles.goldColor : undefined
+                      }
+                      sx={
+                        sacredTheme
+                          ? { fontFamily: '"Crimson Text", serif' }
+                          : {}
+                      }
+                    />
                   </Box>
                 </Box>
               )}
@@ -229,7 +298,9 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      backgroundColor: sacredTheme
+                        ? alpha(egyptianStyles.goldColor, 0.1)
+                        : 'rgba(0, 0, 0, 0.04)',
                     },
                     borderRadius: '4px',
                     transition: 'background-color 0.2s',
@@ -241,11 +312,22 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: 'black',
+                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <DuplicateIcon />
-                    <Typography fontvariant="merriparagraph" text="Duplicate" />
+                    <Typography
+                      fontvariant="merriparagraph"
+                      text="Duplicate"
+                      fontcolor={
+                        sacredTheme ? egyptianStyles.goldColor : undefined
+                      }
+                      sx={
+                        sacredTheme
+                          ? { fontFamily: '"Crimson Text", serif' }
+                          : {}
+                      }
+                    />
                   </Box>
                 </Box>
               )}
@@ -267,7 +349,9 @@ function ManageRow({
                   padding: '8px',
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    backgroundColor: sacredTheme
+                      ? alpha(egyptianStyles.goldColor, 0.1)
+                      : 'rgba(0, 0, 0, 0.04)',
                   },
                   borderRadius: '4px',
                   transition: 'background-color 0.2s',
@@ -279,11 +363,20 @@ function ManageRow({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    color: 'black',
+                    color: sacredTheme ? egyptianStyles.goldColor : 'black',
                   }}
                 >
                   <DeleteIcon />
-                  <Typography fontvariant="merriparagraph" text="Delete" />
+                  <Typography
+                    fontvariant="merriparagraph"
+                    text="Delete"
+                    fontcolor={
+                      sacredTheme ? egyptianStyles.goldColor : undefined
+                    }
+                    sx={
+                      sacredTheme ? { fontFamily: '"Crimson Text", serif' } : {}
+                    }
+                  />
                 </Box>
               </Box>
             )}
@@ -301,7 +394,9 @@ function ManageRow({
                   padding: '8px',
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    backgroundColor: sacredTheme
+                      ? alpha(egyptianStyles.goldColor, 0.1)
+                      : 'rgba(0, 0, 0, 0.04)',
                   },
                   borderRadius: '4px',
                   transition: 'background-color 0.2s',
@@ -313,11 +408,20 @@ function ManageRow({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    color: 'black',
+                    color: sacredTheme ? egyptianStyles.goldColor : 'black',
                   }}
                 >
                   <ExportIcon />
-                  <Typography fontvariant="merriparagraph" text="Export" />
+                  <Typography
+                    fontvariant="merriparagraph"
+                    text="Export"
+                    fontcolor={
+                      sacredTheme ? egyptianStyles.goldColor : undefined
+                    }
+                    sx={
+                      sacredTheme ? { fontFamily: '"Crimson Text", serif' } : {}
+                    }
+                  />
                 </Box>
               </Box>
             )}

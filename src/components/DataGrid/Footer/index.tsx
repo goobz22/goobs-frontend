@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Box, useMediaQuery } from '@mui/material'
+import { Box, useMediaQuery, alpha } from '@mui/material'
 import { VerticalDivider } from '../VerticalDivider'
 import TablePagination from '@mui/material/TablePagination'
 import ManageColumn from '../ManageColumn'
@@ -16,6 +16,8 @@ export interface CustomFooterProps {
   onPageChange: (newPage: number) => void
   onPageSizeChange: (newPageSize: number) => void
   columns: ColumnDef[]
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 function CustomFooter({
@@ -25,6 +27,7 @@ function CustomFooter({
   onPageChange,
   onPageSizeChange,
   columns,
+  sacredTheme = false,
 }: CustomFooterProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [checkboxWidth] = useState(45)
@@ -54,6 +57,11 @@ function CustomFooter({
         left: 0,
         // Only add checkbox offset margin on larger screens
         marginLeft: isTabletOrBelow ? 0 : `${checkboxWidth}px`,
+        ...(sacredTheme && {
+          backgroundColor: alpha('#000000', 0.7),
+          borderTop: `2px solid ${alpha('#FFD700', 0.3)}`,
+          backdropFilter: 'blur(10px)',
+        }),
       }}
     >
       <Box
@@ -91,7 +99,7 @@ function CustomFooter({
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
           >
-            <VerticalDivider />
+            <VerticalDivider sacredTheme={sacredTheme} />
           </Box>
           <Box
             sx={{
@@ -108,18 +116,28 @@ function CustomFooter({
               onClick={handleOpen}
               text={isTabletOrBelow ? 'Columns' : 'Manage Columns'}
               fontvariant="merriparagraph"
-              fontcolor="black"
+              fontcolor={sacredTheme ? '#FFD700' : 'black'}
               backgroundcolor="none"
-              icon={<ShowHideEyeIcon visible={true} />}
-              iconcolor="black"
+              icon={
+                <ShowHideEyeIcon visible={true} sacredTheme={sacredTheme} />
+              }
+              iconcolor={sacredTheme ? '#FFD700' : 'black'}
               iconlocation="left"
               disableButton="false"
+              sacredTheme={sacredTheme}
               sx={{
                 minWidth: 'unset',
                 padding: '8px',
                 '& .MuiTypography-root': {
                   marginLeft: '16px',
                 },
+                ...(sacredTheme && {
+                  border: `1px solid ${alpha('#FFD700', 0.3)}`,
+                  '&:hover': {
+                    backgroundColor: alpha('#FFD700', 0.1),
+                    borderColor: '#FFD700',
+                  },
+                }),
               }}
             />
           </Box>
@@ -132,7 +150,7 @@ function CustomFooter({
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
           >
-            <VerticalDivider />
+            <VerticalDivider sacredTheme={sacredTheme} />
           </Box>
         </Box>
 
@@ -192,17 +210,40 @@ function CustomFooter({
                 minHeight: '56px',
                 height: '56px',
                 padding: isTabletOrBelow ? '0 8px' : '0 16px',
+                ...(sacredTheme && {
+                  color: '#FFD700',
+                }),
               },
               '.MuiTablePagination-displayedRows': {
                 margin: 0,
+                ...(sacredTheme && {
+                  color: alpha('#FFD700', 0.9),
+                  fontFamily: '"Crimson Text", serif',
+                }),
               },
+              ...(sacredTheme && {
+                '& .MuiIconButton-root': {
+                  color: '#FFD700',
+                  '&:hover': {
+                    backgroundColor: alpha('#FFD700', 0.1),
+                  },
+                  '&.Mui-disabled': {
+                    color: alpha('#FFD700', 0.3),
+                  },
+                },
+              }),
             }}
           />
         </Box>
       </Box>
 
       {/* ManageColumn modal */}
-      <ManageColumn open={isOpen} handleClose={handleClose} columns={columns} />
+      <ManageColumn
+        open={isOpen}
+        handleClose={handleClose}
+        columns={columns}
+        sacredTheme={sacredTheme}
+      />
     </Box>
   )
 }

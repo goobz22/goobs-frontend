@@ -22,6 +22,9 @@ interface ColumnHeaderRowProps {
   // The chosen "overflow" column or mobile column
   selectedOverflowField: string
   setSelectedOverflowField: React.Dispatch<React.SetStateAction<string>>
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
@@ -34,6 +37,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   allColumns,
   selectedOverflowField,
   setSelectedOverflowField,
+  sacredTheme = false,
 }) => {
   // If we're mobile, just render a single dropdown + "select all" checkbox
   if (isMobile) {
@@ -111,17 +115,18 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             options={mobileOptions}
             defaultValue={currentMobileChoice?.value || ''}
             onChange={handleMobileChange}
-            backgroundcolor={white.main}
-            fontcolor="black"
-            inputfontcolor="black"
-            shrunkfontcolor="black"
-            unshrunkfontcolor="black"
+            backgroundcolor={sacredTheme ? 'transparent' : white.main}
+            fontcolor={sacredTheme ? '#FFD700' : 'black'}
+            inputfontcolor={sacredTheme ? '#FFD700' : 'black'}
+            shrunkfontcolor={sacredTheme ? '#FFD700' : 'black'}
+            unshrunkfontcolor={sacredTheme ? '#FFD700' : 'black'}
             shrunklabelposition="aboveNotch"
             style={{
               marginBottom: 0,
               marginTop: 0,
               width: '100%',
             }}
+            sacredTheme={sacredTheme}
           />
         </TableCell>
       </TableRow>
@@ -203,16 +208,17 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                       : ''
                 }
                 onChange={handleOverflowChange}
-                backgroundcolor={white.main}
-                fontcolor="black"
-                inputfontcolor="black"
-                shrunkfontcolor="black"
-                unshrunkfontcolor="black"
+                backgroundcolor={sacredTheme ? 'transparent' : white.main}
+                fontcolor={sacredTheme ? '#FFD700' : 'black'}
+                inputfontcolor={sacredTheme ? '#FFD700' : 'black'}
+                shrunkfontcolor={sacredTheme ? '#FFD700' : 'black'}
+                unshrunkfontcolor={sacredTheme ? '#FFD700' : 'black'}
                 shrunklabelposition="onNotch"
                 style={{
                   marginBottom: 0,
                   marginTop: 0,
                 }}
+                sacredTheme={sacredTheme}
               />
             </TableCell>
           )

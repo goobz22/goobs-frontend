@@ -40,7 +40,10 @@ function safeString(value: unknown): string {
  * Format a value as USD currency with premium UI/UX styling
  * Returns both the formatted string and a React element for display
  */
-function formatCurrency(value: unknown): {
+function formatCurrency(
+  value: unknown,
+  sacredTheme: boolean = false
+): {
   formatted: string
   element: React.ReactNode
 } {
@@ -72,6 +75,62 @@ function formatCurrency(value: unknown): {
 
   // Premium color palette with better psychology
   const getColorScheme = () => {
+    if (sacredTheme) {
+      // Sacred theme colors
+      if (isZero) {
+        return {
+          text: '#9CA3AF',
+          background:
+            'linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(55, 65, 81, 0.8) 100%)',
+          border: 'rgba(156, 163, 175, 0.5)',
+          shadow: '0 2px 6px rgba(255, 215, 0, 0.1)',
+          pulse: false,
+        }
+      }
+
+      if (isNegative) {
+        return {
+          text: '#EF4444',
+          background:
+            'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.8) 100%)',
+          border: 'rgba(239, 68, 68, 0.6)',
+          shadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+          pulse: isLarge,
+        }
+      }
+
+      // Positive values for sacred theme
+      if (isLarge) {
+        return {
+          text: '#FFD700',
+          background:
+            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.25) 100%)',
+          border: '#FFD700',
+          shadow: '0 4px 12px rgba(255, 215, 0, 0.4)',
+          pulse: true,
+        }
+      } else if (isMedium) {
+        return {
+          text: '#F59E0B',
+          background:
+            'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%)',
+          border: 'rgba(245, 158, 11, 0.6)',
+          shadow: '0 3px 8px rgba(245, 158, 11, 0.2)',
+          pulse: false,
+        }
+      } else {
+        return {
+          text: '#D97706',
+          background:
+            'linear-gradient(135deg, rgba(217, 119, 6, 0.05) 0%, rgba(217, 119, 6, 0.15) 100%)',
+          border: 'rgba(217, 119, 6, 0.5)',
+          shadow: '0 2px 6px rgba(217, 119, 6, 0.15)',
+          pulse: false,
+        }
+      }
+    }
+
+    // Original color scheme for non-sacred theme
     if (isZero) {
       return {
         text: '#6B7280',
@@ -194,7 +253,7 @@ function formatCurrency(value: unknown): {
             marginRight: '4px',
             fontSize: '0.75em',
             opacity: 0.7,
-            color: '#10B981',
+            color: sacredTheme ? '#FFD700' : '#10B981',
           }}
         >
           ▲
@@ -258,7 +317,10 @@ function formatCurrency(value: unknown): {
  * Format a value as a masked credit card number with premium security styling
  * Returns both the formatted string and a React element for display
  */
-function formatCreditCard(value: unknown): {
+function formatCreditCard(
+  value: unknown,
+  sacredTheme: boolean = false
+): {
   formatted: string
   element: React.ReactNode
 } {
@@ -286,9 +348,13 @@ function formatCreditCard(value: unknown): {
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.1em',
-          color: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
-          border: '1px solid rgba(156, 163, 175, 0.3)',
+          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredTheme
+            ? 'rgba(255, 215, 0, 0.05)'
+            : 'rgba(156, 163, 175, 0.1)',
+          border: sacredTheme
+            ? '1px solid rgba(255, 215, 0, 0.3)'
+            : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
           padding: '5px 10px',
           minWidth: '140px',
@@ -310,12 +376,19 @@ function formatCreditCard(value: unknown): {
   const formatted = maskedDigits.replace(/(.{4})/g, '$1 ').trim()
 
   // Clean, security-focused styling without card type detection
-  const cardInfo = {
-    color: '#1F2937',
-    bgGradient:
-      'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 30%, #CBD5E1 100%)',
-    borderColor: '#475569',
-  }
+  const cardInfo = sacredTheme
+    ? {
+        color: '#FFD700',
+        bgGradient:
+          'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)',
+        borderColor: 'rgba(255, 215, 0, 0.6)',
+      }
+    : {
+        color: '#1F2937',
+        bgGradient:
+          'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 30%, #CBD5E1 100%)',
+        borderColor: '#475569',
+      }
 
   const formatId = `card-${Math.random().toString(36).substr(2, 9)}`
 
@@ -340,7 +413,9 @@ function formatCreditCard(value: unknown): {
         padding: '6px 12px',
         minWidth: '140px',
         textAlign: 'center' as const,
-        boxShadow: `0 2px 8px rgba(0, 0, 0, 0.1)`,
+        boxShadow: sacredTheme
+          ? `0 2px 8px rgba(255, 215, 0, 0.2)`
+          : `0 2px 8px rgba(0, 0, 0, 0.1)`,
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -350,11 +425,15 @@ function formatCreditCard(value: unknown): {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
+          : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
     >
       {/* Card number with special styling for masked vs visible digits */}
@@ -387,7 +466,7 @@ function formatCreditCard(value: unknown): {
           fontSize: '0.75rem',
           opacity: 0.5,
           marginLeft: '8px',
-          color: '#6B7280',
+          color: sacredTheme ? '#FFD700' : '#6B7280',
         }}
       >
         🔒
@@ -416,7 +495,10 @@ function formatCreditCard(value: unknown): {
  * Format a value as a styled expiration date with status indication
  * Returns both the formatted string and a React element for display
  */
-function formatExpirationDate(value: unknown): {
+function formatExpirationDate(
+  value: unknown,
+  sacredTheme: boolean = false
+): {
   formatted: string
   element: React.ReactNode
 } {
@@ -444,9 +526,13 @@ function formatExpirationDate(value: unknown): {
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.05em',
-          color: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
-          border: '1px solid rgba(156, 163, 175, 0.3)',
+          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredTheme
+            ? 'rgba(255, 215, 0, 0.05)'
+            : 'rgba(156, 163, 175, 0.1)',
+          border: sacredTheme
+            ? '1px solid rgba(255, 215, 0, 0.3)'
+            : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
           padding: '5px 10px',
           minWidth: '80px',
@@ -534,6 +620,38 @@ function formatExpirationDate(value: unknown): {
 
   // Get styling based on expiration status
   const getStatusStyling = () => {
+    if (sacredTheme) {
+      if (isExpired) {
+        return {
+          color: '#EF4444',
+          bgGradient:
+            'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.5) 50%, rgba(127, 29, 29, 0.8) 100%)',
+          borderColor: '#DC2626',
+          icon: '⚠️',
+          status: 'EXPIRED',
+        }
+      } else if (isExpiringSoon) {
+        return {
+          color: '#F59E0B',
+          bgGradient:
+            'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.1) 50%, rgba(245, 158, 11, 0.2) 100%)',
+          borderColor: '#D97706',
+          icon: '⏰',
+          status: 'EXPIRING',
+        }
+      } else {
+        return {
+          color: '#FFD700',
+          bgGradient:
+            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 50%, rgba(255, 215, 0, 0.15) 100%)',
+          borderColor: 'rgba(255, 215, 0, 0.6)',
+          icon: '✓',
+          status: 'VALID',
+        }
+      }
+    }
+
+    // Original theme styling
     if (isExpired) {
       return {
         color: '#DC2626',
@@ -588,7 +706,9 @@ function formatExpirationDate(value: unknown): {
         padding: '6px 12px',
         minWidth: '100px',
         textAlign: 'center' as const,
-        boxShadow: `0 2px 8px rgba(0, 0, 0, 0.1)`,
+        boxShadow: sacredTheme
+          ? `0 2px 8px rgba(255, 215, 0, 0.2)`
+          : `0 2px 8px rgba(0, 0, 0, 0.1)`,
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -598,11 +718,15 @@ function formatExpirationDate(value: unknown): {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
+          : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
     >
       {/* Status icon */}
@@ -667,7 +791,10 @@ function formatExpirationDate(value: unknown): {
  * Format a value as a masked account number with banking security styling
  * Returns both the formatted string and a React element for display
  */
-function formatAccountNumber(value: unknown): {
+function formatAccountNumber(
+  value: unknown,
+  sacredTheme: boolean = false
+): {
   formatted: string
   element: React.ReactNode
 } {
@@ -695,9 +822,13 @@ function formatAccountNumber(value: unknown): {
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.1em',
-          color: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
-          border: '1px solid rgba(156, 163, 175, 0.3)',
+          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredTheme
+            ? 'rgba(255, 215, 0, 0.05)'
+            : 'rgba(156, 163, 175, 0.1)',
+          border: sacredTheme
+            ? '1px solid rgba(255, 215, 0, 0.3)'
+            : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
           padding: '5px 10px',
           minWidth: '120px',
@@ -734,15 +865,20 @@ function formatAccountNumber(value: unknown): {
         fontSize: '0.875rem',
         lineHeight: 1.3,
         letterSpacing: '0.08em',
-        color: '#1E40AF',
-        background:
-          'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 30%, #BFDBFE 100%)',
-        border: '1.5px solid #3B82F6',
+        color: sacredTheme ? '#FFD700' : '#1E40AF',
+        background: sacredTheme
+          ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)'
+          : 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 30%, #BFDBFE 100%)',
+        border: sacredTheme
+          ? '1.5px solid rgba(255, 215, 0, 0.6)'
+          : '1.5px solid #3B82F6',
         borderRadius: '8px',
         padding: '6px 12px',
         minWidth: '130px',
         textAlign: 'center' as const,
-        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
+        boxShadow: sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(59, 130, 246, 0.1)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -752,11 +888,15 @@ function formatAccountNumber(value: unknown): {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
+          : '0 4px 12px rgba(59, 130, 246, 0.2)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.1)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(59, 130, 246, 0.1)'
       }}
     >
       {/* Bank icon */}
@@ -765,7 +905,7 @@ function formatAccountNumber(value: unknown): {
           fontSize: '0.75rem',
           opacity: 0.7,
           marginRight: '6px',
-          color: '#1D4ED8',
+          color: sacredTheme ? '#FFD700' : '#1D4ED8',
         }}
       >
         🏦
@@ -818,7 +958,10 @@ function formatAccountNumber(value: unknown): {
  * Format a value as a styled routing number for banking
  * Returns both the formatted string and a React element for display
  */
-function formatRoutingNumber(value: unknown): {
+function formatRoutingNumber(
+  value: unknown,
+  sacredTheme: boolean = false
+): {
   formatted: string
   element: React.ReactNode
 } {
@@ -846,9 +989,13 @@ function formatRoutingNumber(value: unknown): {
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.05em',
-          color: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
-          border: '1px solid rgba(156, 163, 175, 0.3)',
+          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredTheme
+            ? 'rgba(255, 215, 0, 0.05)'
+            : 'rgba(156, 163, 175, 0.1)',
+          border: sacredTheme
+            ? '1px solid rgba(255, 215, 0, 0.3)'
+            : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
           padding: '5px 10px',
           minWidth: '100px',
@@ -876,21 +1023,37 @@ function formatRoutingNumber(value: unknown): {
   const formatId = `routing-${Math.random().toString(36).substr(2, 9)}`
 
   // Styling based on validation
-  const colorScheme = isValidLength
-    ? {
-        color: '#059669',
-        bgGradient:
-          'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 30%, #A7F3D0 100%)',
-        borderColor: '#10B981',
-        icon: '✓',
-      }
-    : {
-        color: '#DC2626',
-        bgGradient:
-          'linear-gradient(135deg, #FEF2F2 0%, #FECACA 30%, #FCA5A5 100%)',
-        borderColor: '#EF4444',
-        icon: '⚠️',
-      }
+  const colorScheme = sacredTheme
+    ? isValidLength
+      ? {
+          color: '#FFD700',
+          bgGradient:
+            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)',
+          borderColor: 'rgba(255, 215, 0, 0.6)',
+          icon: '✓',
+        }
+      : {
+          color: '#EF4444',
+          bgGradient:
+            'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.5) 30%, rgba(127, 29, 29, 0.8) 100%)',
+          borderColor: '#DC2626',
+          icon: '⚠️',
+        }
+    : isValidLength
+      ? {
+          color: '#059669',
+          bgGradient:
+            'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 30%, #A7F3D0 100%)',
+          borderColor: '#10B981',
+          icon: '✓',
+        }
+      : {
+          color: '#DC2626',
+          bgGradient:
+            'linear-gradient(135deg, #FEF2F2 0%, #FECACA 30%, #FCA5A5 100%)',
+          borderColor: '#EF4444',
+          icon: '⚠️',
+        }
 
   // Professional routing number styled element
   const element = (
@@ -913,7 +1076,9 @@ function formatRoutingNumber(value: unknown): {
         padding: '6px 12px',
         minWidth: '110px',
         textAlign: 'center' as const,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        boxShadow: sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(0, 0, 0, 0.1)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -923,11 +1088,15 @@ function formatRoutingNumber(value: unknown): {
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
+          : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+        e.currentTarget.style.boxShadow = sacredTheme
+          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
+          : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
     >
       {/* Validation icon */}
@@ -992,6 +1161,9 @@ interface RowsProps {
 
   // Toggling row checkbox
   onRowCheckboxChange: (rowId: string) => void
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 const Rows: React.FC<RowsProps> = ({
@@ -1005,6 +1177,7 @@ const Rows: React.FC<RowsProps> = ({
   selectedRowIds,
   onRowClick,
   onRowCheckboxChange,
+  sacredTheme = false,
 }) => {
   if (rows.length === 0) {
     return (
@@ -1048,31 +1221,36 @@ const Rows: React.FC<RowsProps> = ({
 
           if (effectiveColumn?.formatCurrency) {
             const { formatted, element } = formatCurrency(
-              row[effectiveColumnField]
+              row[effectiveColumnField],
+              sacredTheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatCreditCard) {
             const { formatted, element } = formatCreditCard(
-              row[effectiveColumnField]
+              row[effectiveColumnField],
+              sacredTheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatExpirationDate) {
             const { formatted, element } = formatExpirationDate(
-              row[effectiveColumnField]
+              row[effectiveColumnField],
+              sacredTheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatAccountNumber) {
             const { formatted, element } = formatAccountNumber(
-              row[effectiveColumnField]
+              row[effectiveColumnField],
+              sacredTheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatRoutingNumber) {
             const { formatted, element } = formatRoutingNumber(
-              row[effectiveColumnField]
+              row[effectiveColumnField],
+              sacredTheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
@@ -1089,7 +1267,16 @@ const Rows: React.FC<RowsProps> = ({
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               sx={{
                 cursor: onRowClick ? 'pointer' : 'default',
-                backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.08)' : 'unset',
+                backgroundColor: isSelected
+                  ? sacredTheme
+                    ? 'rgba(255, 215, 0, 0.15)'
+                    : 'rgba(0, 0, 255, 0.08)'
+                  : 'unset',
+                ...(sacredTheme && {
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+                  },
+                }),
               }}
             >
               <TableCell padding="checkbox">
@@ -1118,11 +1305,12 @@ const Rows: React.FC<RowsProps> = ({
               >
                 <StyledTooltip
                   title={cellValueStr}
-                  tooltipcolor="#444"
+                  tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
                   tooltipplacement="top"
                   offsetX={0}
                   offsetY={5}
                   arrow
+                  sacredTheme={sacredTheme}
                 >
                   <span>{cellDisplayValue}</span>
                 </StyledTooltip>
@@ -1150,7 +1338,16 @@ const Rows: React.FC<RowsProps> = ({
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             sx={{
               cursor: onRowClick ? 'pointer' : 'default',
-              backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.08)' : 'unset',
+              backgroundColor: isSelected
+                ? sacredTheme
+                  ? 'rgba(255, 215, 0, 0.15)'
+                  : 'rgba(0, 0, 255, 0.08)'
+                : 'unset',
+              ...(sacredTheme && {
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 215, 0, 0.05)',
+                },
+              }),
             }}
           >
             {/* Checkbox cell */}
@@ -1179,23 +1376,38 @@ const Rows: React.FC<RowsProps> = ({
                 let cellValueStr: string
 
                 if (actualCol?.formatCurrency) {
-                  const { formatted, element } = formatCurrency(cellValue)
+                  const { formatted, element } = formatCurrency(
+                    cellValue,
+                    sacredTheme
+                  )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatCreditCard) {
-                  const { formatted, element } = formatCreditCard(cellValue)
+                  const { formatted, element } = formatCreditCard(
+                    cellValue,
+                    sacredTheme
+                  )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatExpirationDate) {
-                  const { formatted, element } = formatExpirationDate(cellValue)
+                  const { formatted, element } = formatExpirationDate(
+                    cellValue,
+                    sacredTheme
+                  )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatAccountNumber) {
-                  const { formatted, element } = formatAccountNumber(cellValue)
+                  const { formatted, element } = formatAccountNumber(
+                    cellValue,
+                    sacredTheme
+                  )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatRoutingNumber) {
-                  const { formatted, element } = formatRoutingNumber(cellValue)
+                  const { formatted, element } = formatRoutingNumber(
+                    cellValue,
+                    sacredTheme
+                  )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else {
@@ -1216,11 +1428,12 @@ const Rows: React.FC<RowsProps> = ({
                   >
                     <StyledTooltip
                       title={cellValueStr}
-                      tooltipcolor="#444"
+                      tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
                       tooltipplacement="top"
                       offsetX={0}
                       offsetY={5}
                       arrow
+                      sacredTheme={sacredTheme}
                     >
                       <span>{cellDisplayValue}</span>
                     </StyledTooltip>
@@ -1241,23 +1454,35 @@ const Rows: React.FC<RowsProps> = ({
                 cellContent = col.renderCell(cellParams)
               } else if (col.formatCurrency) {
                 // Handle currency formatting
-                const { element } = formatCurrency(row[col.field])
+                const { element } = formatCurrency(row[col.field], sacredTheme)
                 cellContent = element
               } else if (col.formatCreditCard) {
                 // Handle credit card formatting
-                const { element } = formatCreditCard(row[col.field])
+                const { element } = formatCreditCard(
+                  row[col.field],
+                  sacredTheme
+                )
                 cellContent = element
               } else if (col.formatExpirationDate) {
                 // Handle expiration date formatting
-                const { element } = formatExpirationDate(row[col.field])
+                const { element } = formatExpirationDate(
+                  row[col.field],
+                  sacredTheme
+                )
                 cellContent = element
               } else if (col.formatAccountNumber) {
                 // Handle account number formatting
-                const { element } = formatAccountNumber(row[col.field])
+                const { element } = formatAccountNumber(
+                  row[col.field],
+                  sacredTheme
+                )
                 cellContent = element
               } else if (col.formatRoutingNumber) {
                 // Handle routing number formatting
-                const { element } = formatRoutingNumber(row[col.field])
+                const { element } = formatRoutingNumber(
+                  row[col.field],
+                  sacredTheme
+                )
                 cellContent = element
               } else {
                 // Because row[col.field] is unknown, cast to ReactNode or fallback to a string
@@ -1272,15 +1497,18 @@ const Rows: React.FC<RowsProps> = ({
               // Tooltip text needs a string, so convert cellContent safely
               // For special formatting columns, use the formatted string; otherwise use safeString
               const cellContentStr = col.formatCurrency
-                ? formatCurrency(row[col.field]).formatted
+                ? formatCurrency(row[col.field], sacredTheme).formatted
                 : col.formatCreditCard
-                  ? formatCreditCard(row[col.field]).formatted
+                  ? formatCreditCard(row[col.field], sacredTheme).formatted
                   : col.formatExpirationDate
-                    ? formatExpirationDate(row[col.field]).formatted
+                    ? formatExpirationDate(row[col.field], sacredTheme)
+                        .formatted
                     : col.formatAccountNumber
-                      ? formatAccountNumber(row[col.field]).formatted
+                      ? formatAccountNumber(row[col.field], sacredTheme)
+                          .formatted
                       : col.formatRoutingNumber
-                        ? formatRoutingNumber(row[col.field]).formatted
+                        ? formatRoutingNumber(row[col.field], sacredTheme)
+                            .formatted
                         : safeString(cellContent)
 
               // Respect manual widths if present
@@ -1338,11 +1566,12 @@ const Rows: React.FC<RowsProps> = ({
                   ) : (
                     <StyledTooltip
                       title={cellContentStr}
-                      tooltipcolor="#444"
+                      tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
                       tooltipplacement="top"
                       offsetX={0}
                       offsetY={5}
                       arrow
+                      sacredTheme={sacredTheme}
                     >
                       <span>{cellContent}</span>
                     </StyledTooltip>

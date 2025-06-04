@@ -48,6 +48,8 @@ export interface TableProps {
   someRowsSelected?: boolean
   onHeaderCheckboxChange: React.ChangeEventHandler<HTMLInputElement>
   onRowCheckboxChange: (rowId: string) => void
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 export interface DatagridProps {
@@ -71,4 +73,7 @@ export interface DatagridProps {
 
   // For capturing selection changes
   onSelectionChange?: (selectedIds: string[]) => void
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
