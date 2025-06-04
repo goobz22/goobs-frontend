@@ -138,11 +138,11 @@ export interface ConfirmationCodeInputsProps {
 // Custom styled input for verification code digits
 const CodeInput = styled('input')<{ sacredtheme?: boolean }>(
   ({ sacredtheme }) => ({
-    width: '40px',
-    height: '50px',
+    width: '48px',
+    height: '56px',
     padding: '0',
     textAlign: 'center',
-    fontSize: '16px',
+    fontSize: '20px',
     fontWeight: sacredtheme ? 'bold' : 'normal',
     color: sacredtheme ? '#FFD700' : 'black',
     backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
@@ -389,15 +389,6 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     }
   }
 
-  // Calculate container width based on number of inputs and spacing
-  const inputAreaWidth = codeLength * 40 + (codeLength - 1) * 8 + 44
-
-  // Calculate button container width
-  const minButtonWidth = 120
-  const buttonContainerWidth = showSendResendButton
-    ? Math.max(inputAreaWidth, minButtonWidth * 2 + 16)
-    : Math.max(inputAreaWidth, minButtonWidth)
-
   // Split the value into individual digits
   const digits = internalValue.padEnd(codeLength, '').split('')
 
@@ -523,15 +514,14 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     <Box
       display="flex"
       flexDirection="column"
-      alignItems="flex-start"
+      alignItems="center"
       role="group"
       aria-label={ariaLabel || 'Confirmation Code'}
-      width={`${inputAreaWidth}px`}
       position="relative"
       sx={
         sacredTheme
           ? {
-              padding: '20px',
+              padding: '24px',
               backgroundColor: alpha('#000000', 0.8),
               border: `1px solid ${alpha('#FFD700', 0.3)}`,
               borderRadius: '8px',
@@ -540,7 +530,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
         `,
             }
-          : undefined
+          : { padding: '16px' }
       }
     >
       {/* Sacred decorative elements */}
@@ -549,8 +539,8 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           <Box
             sx={{
               position: 'absolute',
-              top: '5px',
-              left: '5px',
+              top: '8px',
+              left: '8px',
               color: alpha('#FFD700', 0.2),
               fontSize: '16px',
               animation: `${glyphFloat} 6s ease-in-out infinite`,
@@ -561,8 +551,8 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           <Box
             sx={{
               position: 'absolute',
-              top: '5px',
-              right: '5px',
+              top: '8px',
+              right: '8px',
               color: alpha('#FFD700', 0.2),
               fontSize: '16px',
               animation: `${glyphFloat} 6s ease-in-out infinite 3s`,
@@ -575,13 +565,14 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
 
       <Box
         display="flex"
-        justifyContent="space-between"
+        flexDirection="column"
+        alignItems="center"
         width="100%"
-        position="relative"
-        marginBottom={2}
+        gap={2.5}
       >
-        <Box display="flex" alignItems="center" width="100%">
-          <Box display="flex" gap={1} width="100%">
+        {/* Input fields row */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" gap={1.5}>
             {Array.from({ length: codeLength }).map((_, index) => (
               <CodeInput
                 key={index}
@@ -606,68 +597,56 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
               />
             ))}
           </Box>
-          <Box ml={2}>{statusIndicator}</Box>
+          {statusIndicator}
         </Box>
-      </Box>
 
-      {showActionButtons && (
-        <Box
-          display="flex"
-          justifyContent={showSendResendButton ? 'space-between' : 'center'}
-          width={`${buttonContainerWidth}px`}
-          marginTop={1}
-          sx={{
-            marginLeft:
-              buttonContainerWidth > inputAreaWidth
-                ? `${-(buttonContainerWidth - inputAreaWidth) / 2}px`
-                : 0,
-          }}
-        >
-          {showSendResendButton && (
+        {/* Action buttons */}
+        {showActionButtons && (
+          <Box
+            display="flex"
+            gap={2}
+            width="100%"
+            maxWidth="400px"
+            justifyContent="center"
+          >
+            {showSendResendButton && (
+              <CustomButton
+                text={codeSent ? 'Resend Code' : 'Send Code'}
+                fontcolor={sacredTheme ? '#FFD700' : 'white'}
+                backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+                width="180px"
+                height="44px"
+                sacredTheme={sacredTheme}
+                {...sendResendButtonProps}
+                onClick={() => {
+                  if (onSendResend) void onSendResend()
+                }}
+                disableButton={sendResendButtonProps?.disableButton || 'false'}
+              />
+            )}
             <CustomButton
-              text={codeSent ? 'Resend Code' : 'Send Code'}
+              text="Verify"
               fontcolor={sacredTheme ? '#FFD700' : 'white'}
               backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
-              width={
-                showSendResendButton
-                  ? `${buttonContainerWidth / 2 - 8}px`
-                  : '100%'
-              }
-              height="40px"
+              width="180px"
+              height="44px"
               sacredTheme={sacredTheme}
-              {...sendResendButtonProps}
+              {...verifyButtonProps}
               onClick={() => {
-                if (onSendResend) void onSendResend()
+                if (onVerify) void onVerify()
               }}
-              disableButton={sendResendButtonProps?.disableButton || 'false'}
+              disableButton={allFieldsFilled ? 'false' : 'true'}
             />
-          )}
-          <CustomButton
-            text="Verify"
-            fontcolor={sacredTheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
-            width={
-              showSendResendButton
-                ? `${buttonContainerWidth / 2 - 8}px`
-                : '100%'
-            }
-            height="40px"
-            sacredTheme={sacredTheme}
-            {...verifyButtonProps}
-            onClick={() => {
-              if (onVerify) void onVerify()
-            }}
-            disableButton={allFieldsFilled ? 'false' : 'true'}
-          />
-        </Box>
-      )}
+          </Box>
+        )}
+      </Box>
 
       {/* Sacred bottom decoration */}
       {sacredTheme && (
         <Box
           sx={{
             position: 'absolute',
-            bottom: '-10px',
+            bottom: '4px',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
@@ -679,7 +658,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
               key={i}
               sx={{
                 color: alpha('#FFD700', 0.3),
-                fontSize: '10px',
+                fontSize: '12px',
                 animation: `${sacredPulse} ${2 + i * 0.3}s ease-in-out infinite`,
               }}
             >

@@ -195,24 +195,19 @@ export default function MobileBoard({
                   <Card
                     key={task._id}
                     variant="task"
-                    sx={{ mx: '5px', width: { xs: '250px', sm: '250px' } }}
-                    taskProps={{
-                      title: task.title,
-                      description: task.description,
-                      checked: isSelected,
-                      disabled: false,
-                      onCheck: () => onSelectTask(overflowColIndex, taskIndex),
-                      draggable: isTaskDraggable(overflowColIndex, taskIndex),
-                      onDragStart: e =>
-                        handleLocalTaskDragStart(
-                          e,
-                          overflowColIndex,
-                          taskIndex
-                        ),
-                      onDragOver: handleTaskDragOver,
-                      onDrop: e =>
-                        handleLocalTaskDrop(e, overflowColIndex, taskIndex),
-                    }}
+                    title={task.title}
+                    description={task.description}
+                    checked={isSelected}
+                    disabled={false}
+                    onCheck={() => onSelectTask(overflowColIndex, taskIndex)}
+                    draggable={isTaskDraggable(overflowColIndex, taskIndex)}
+                    onDragStart={e =>
+                      handleLocalTaskDragStart(e, overflowColIndex, taskIndex)
+                    }
+                    onDragOver={handleTaskDragOver}
+                    onDrop={e =>
+                      handleLocalTaskDrop(e, overflowColIndex, taskIndex)
+                    }
                   />
                 )
               })}
@@ -329,27 +324,22 @@ export default function MobileBoard({
                   <Card
                     key={task._id}
                     variant="task"
-                    sx={{ mx: '5px', width: { xs: '250px', sm: '250px' } }}
-                    taskProps={{
-                      title: task.title,
-                      description: task.description,
-                      checked: isSelected,
-                      disabled: isTaskCheckboxDisabled(),
-                      onCheck: () => {
-                        if (selectedColumnIndex !== null) return
-                        onSelectTask(mobileColumnIndex, taskIndex)
-                      },
-                      draggable: isTaskDraggable(mobileColumnIndex, taskIndex),
-                      onDragStart: e =>
-                        handleLocalTaskDragStart(
-                          e,
-                          mobileColumnIndex,
-                          taskIndex
-                        ),
-                      onDragOver: handleTaskDragOver,
-                      onDrop: e =>
-                        handleLocalTaskDrop(e, mobileColumnIndex, taskIndex),
+                    title={task.title}
+                    description={task.description}
+                    checked={isSelected}
+                    disabled={isTaskCheckboxDisabled()}
+                    onCheck={() => {
+                      if (selectedColumnIndex !== null) return
+                      onSelectTask(mobileColumnIndex, taskIndex)
                     }}
+                    draggable={isTaskDraggable(mobileColumnIndex, taskIndex)}
+                    onDragStart={e =>
+                      handleLocalTaskDragStart(e, mobileColumnIndex, taskIndex)
+                    }
+                    onDragOver={handleTaskDragOver}
+                    onDrop={e =>
+                      handleLocalTaskDrop(e, mobileColumnIndex, taskIndex)
+                    }
                   />
                 )
               })}

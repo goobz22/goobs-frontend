@@ -10,11 +10,6 @@ const glowPulse = keyframes`
   100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
 `
 
-interface PhoneNumberFieldProps extends TextFieldProps {
-  /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
-}
-
 const formatPhoneNumber = (inputValue: string): string => {
   let digits = inputValue.replace(/\D/g, '')
   // If it starts with '1', remove it because we already provide '+1'
@@ -36,7 +31,7 @@ const formatPhoneNumber = (inputValue: string): string => {
   return formattedNumber.trim()
 }
 
-const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
+const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
   const {
     name,
     label = 'Phone Number',

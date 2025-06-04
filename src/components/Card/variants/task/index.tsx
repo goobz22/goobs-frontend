@@ -19,12 +19,6 @@ const sacredTaskGlow = keyframes`
   100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
 `
 
-const checkmarkPulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-`
-
 const glyphFloat = keyframes`
   0% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
   33% { transform: translateY(-2px) translateX(2px); opacity: 0.3; }
@@ -45,6 +39,14 @@ interface TaskCardProps {
   height?: string | number
   /** Enable Egyptian/Sacred theming */
   sacredTheme?: boolean
+  /** Whether the task card is draggable */
+  draggable?: boolean
+  /** Called when drag starts */
+  onDragStart?: (event: React.DragEvent) => void
+  /** Called when dragging over */
+  onDragOver?: (event: React.DragEvent) => void
+  /** Called when dropping */
+  onDrop?: (event: React.DragEvent) => void
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -55,10 +57,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onCheck,
   height = 'auto',
   sacredTheme = false,
+  draggable = false,
+  onDragStart,
+  onDragOver,
+  onDrop,
 }) => {
   return (
     <Paper
       elevation={1}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       sx={{
         position: 'relative',
         display: 'flex',
@@ -73,6 +83,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
         transition: 'all 0.3s ease',
         overflow: 'hidden',
+        cursor: draggable ? 'grab' : 'default',
         ...(sacredTheme && {
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02))

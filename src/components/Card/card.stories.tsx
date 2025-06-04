@@ -1,6 +1,6 @@
 // src/components/Card/card.stories.tsx
 
-// Removed "import React from 'react'" because it's unused
+import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from '@storybook/test'
 import Card from './index'
@@ -12,20 +12,6 @@ const meta: Meta<typeof Card> = {
   parameters: {
     a11y: {
       disable: false,
-    },
-  },
-  argTypes: {
-    variant: {
-      control: { type: 'select' },
-      options: [
-        'default',
-        'inventory',
-        'pricingsummary',
-        'detailedpricingsummary',
-        'product',
-        'productsummary',
-        'task',
-      ],
     },
   },
 }
@@ -160,15 +146,13 @@ export const InventoryVariant: Story = {
     variant: 'inventory',
     title: 'Inventory Card Title',
     image: sampleImage,
-    inventoryProps: {
-      license: 'Single-Use',
-      developmentUse: 'Yes',
-      productionUse: 'Yes',
-      updates: '3 months',
-      support: 'Email only',
-      price: '$100.00',
-      quantity: 2,
-    },
+    license: 'Single-Use',
+    developmentUse: 'Yes',
+    productionUse: 'Yes',
+    updates: '3 months',
+    support: 'Email only',
+    price: '$100.00',
+    quantity: 2,
     width: '600px',
     height: '240px',
   } as CardProps,
@@ -188,16 +172,14 @@ export const InventoryVariant: Story = {
  */
 export const SimplePricingSummaryVariant: Story = {
   args: {
-    variant: 'pricingsummary',
-    pricingSummaryProps: {
-      subtotal: 'USD 200.00',
-      total: 'USD 250.00',
-      proceedText: 'Proceed',
-      taxText: 'Tax might apply.',
-      discountText: 'Coupons can be applied next step.',
-      onProceed: () => {
-        alert('Proceed clicked!')
-      },
+    variant: 'simplepricingsummary',
+    subtotal: 'USD 200.00',
+    totalPrice: 'USD 250.00',
+    proceedText: 'Proceed',
+    taxText: 'Tax might apply.',
+    discountText: 'Coupons can be applied next step.',
+    onProceed: () => {
+      alert('Proceed clicked!')
     },
     width: '400px',
     height: 'auto',
@@ -222,17 +204,15 @@ export const SimplePricingSummaryVariant: Story = {
 export const DetailedPricingSummaryVariant: Story = {
   args: {
     variant: 'detailedpricingsummary',
-    detailedPricingSummaryProps: {
-      product: 'Sample Product × 2',
-      vendor: 'Example Vendor LLC',
-      vendorPrice: '$180.00',
-      subtotal: '$180.00',
-      vat: '$0.00',
-      total: '$180.00',
-      proceedText: 'Confirm Purchase',
-      onProceed: () => {
-        alert('Confirm Purchase clicked!')
-      },
+    product: 'Sample Product × 2',
+    vendor: 'Example Vendor LLC',
+    vendorPrice: '$180.00',
+    subtotal: '$180.00',
+    vat: '$0.00',
+    totalPrice: '$180.00',
+    proceedText: 'Confirm Purchase',
+    onProceed: () => {
+      alert('Confirm Purchase clicked!')
     },
     width: '400px',
     height: 'auto',
@@ -260,19 +240,17 @@ export const DetailedPricingSummaryVariant: Story = {
 export const ProductVariant: Story = {
   args: {
     variant: 'product',
-    productProps: {
-      title: 'Awesome Product',
-      featuredescriptions: [
-        'Feature #1: Speed',
-        'Feature #2: Reliability',
-        'Feature #3: Scalability',
-      ],
-      releaseDate: '2023-01-01',
-      createdBy: 'MyCompany',
-      onBuy: () => alert('Buy now clicked'),
-      onLivePreview: () => alert('Live preview clicked'),
-      onContact: () => alert('Contact clicked'),
-    },
+    title: 'Awesome Product',
+    featuredescriptions: [
+      'Feature #1: Speed',
+      'Feature #2: Reliability',
+      'Feature #3: Scalability',
+    ],
+    releaseDate: '2023-01-01',
+    createdBy: 'MyCompany',
+    onBuy: () => alert('Buy now clicked'),
+    onLivePreview: () => alert('Live preview clicked'),
+    onContact: () => alert('Contact clicked'),
     width: '500px',
     height: 'auto',
   } as CardProps,
@@ -295,21 +273,19 @@ export const ProductSummaryVariant: Story = {
     variant: 'productsummary',
     title: 'Amazing SaaS Product',
     body: 'Choose between monthly or annual billing.',
-    productSummaryProps: {
-      annualPrice: '99.99',
-      monthlyPrice: '9.99',
-      button1Props: {
-        text: 'Get Started',
-        backgroundcolor: 'black',
-        fontcolor: 'white',
-        onClick: () => alert('Get Started clicked!'),
-      },
-      button2Props: {
-        text: 'More Info',
-        backgroundcolor: '#0066cc',
-        fontcolor: 'white',
-        onClick: () => alert('More Info clicked!'),
-      },
+    annualPrice: '99.99',
+    monthlyPrice: '9.99',
+    button1Props: {
+      text: 'Get Started',
+      backgroundcolor: 'black',
+      fontcolor: 'white',
+      onClick: () => alert('Get Started clicked!'),
+    },
+    button2Props: {
+      text: 'More Info',
+      backgroundcolor: '#0066cc',
+      fontcolor: 'white',
+      onClick: () => alert('More Info clicked!'),
     },
     width: '450px',
     height: 'auto',
@@ -338,17 +314,11 @@ export const ProductSummaryVariant: Story = {
 export const TaskVariant: Story = {
   args: {
     variant: 'task',
-    taskProps: {
-      title: 'My Task',
-      description: 'Complete the documentation.',
-      checked: false,
-      onCheck: e => {
-        alert(`Checkbox changed! Now: ${e.target.checked}`)
-      },
-      draggable: true,
-      onDragStart: () => console.log('Drag start'),
-      onDragOver: () => console.log('Drag over'),
-      onDrop: () => console.log('Drop'),
+    title: 'My Task',
+    description: 'Complete the documentation.',
+    checked: false,
+    onCheck: (e: React.ChangeEvent<HTMLInputElement>) => {
+      alert(`Checkbox changed! Now: ${e.target.checked}`)
     },
     width: '400px',
     height: 'auto',

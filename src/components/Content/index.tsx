@@ -124,15 +124,35 @@ export interface ContentSectionProps {
     style?: React.CSSProperties
   }>
   width?: number
+  /** Enable Egyptian/Sacred theming for all components */
+  sacredTheme?: boolean
 }
 
-const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
-  boxProps,
-  style,
-  customComponent,
-  ...props
-}) => {
+const RenderContent: React.FC<
+  ContentSectionProps['grids'][0] & { sacredTheme?: boolean }
+> = ({ boxProps, style, customComponent, sacredTheme, ...props }) => {
   const elements: React.ReactElement[] = []
+
+  // Helper function to inject sacredTheme into component props
+  const injectSacredTheme = <T extends object>(
+    componentProps: T | T[] | undefined
+  ): T | T[] | undefined => {
+    if (!componentProps || !sacredTheme) return componentProps
+
+    if (Array.isArray(componentProps)) {
+      return componentProps.map(prop => ({ ...prop, sacredTheme }))
+    }
+
+    return { ...componentProps, sacredTheme }
+  }
+
+  // Special handling for single-object props
+  const injectSacredThemeSingle = <T extends object>(
+    componentProps: T | undefined
+  ): T | undefined => {
+    if (!componentProps || !sacredTheme) return componentProps
+    return { ...componentProps, sacredTheme }
+  }
 
   // Helper function to add elements
   const addElements = (newElements: React.ReactElement[] | null) => {
@@ -141,50 +161,80 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
     }
   }
 
-  // Add elements for each content type
-  addElements(useTypography({ typography: props.typography }))
-  addElements(useRadioGroup({ radiogroup: props.radiogroup }))
+  // Add elements for each content type, injecting sacredTheme where applicable
   addElements(
-    useConfirmationInput({ confirmationcodeinput: props.confirmationcodeinput })
+    useTypography({ typography: injectSacredTheme(props.typography) })
   )
-  addElements(useLink({ link: props.link }))
-  addElements(useButton({ button: props.button }))
-  addElements(useImage({ image: props.image }))
-  addElements(useComplexEditor({ complexeditor: props.complexeditor }))
-  addElements(usePricing({ pricing: props.pricing }))
-  addElements(useStepper({ stepper: props.stepper }))
-  addElements(useTransferList({ transferlist: props.transferlist }))
-  addElements(useCard({ card: props.card }))
-  addElements(useCodeCopy({ codecopy: props.codecopy }))
   addElements(
-    useSearchableDropdown({ searchableDropdown: props.searchableDropdown })
+    useRadioGroup({ radiogroup: injectSacredTheme(props.radiogroup) })
   )
-  addElements(useTextField({ textfield: props.textfield }))
-  addElements(useDateField({ datefield: props.datefield }))
-  addElements(useProjectBoard({ projectboard: props.projectboard }))
-  addElements(useAccordion({ accordion: props.accordion }))
-  addElements(useMultiSelect({ multiSelect: props.multiSelect }))
-  addElements(useCheckbox({ checkbox: props.checkbox }))
-  addElements(usePhoneNumber({ phoneNumberField: props.phoneNumberField }))
-  addElements(useDropdown({ dropdown: props.dropdown }))
   addElements(
-    useIncrementNumberField({
-      incrementNumberField: props.incrementNumberField,
+    useConfirmationInput({
+      confirmationcodeinput: injectSacredTheme(props.confirmationcodeinput),
     })
   )
-  addElements(useSearchbar({ searchbar: props.searchbar }))
-  addElements(useNumberField({ numberField: props.numberField }))
-  addElements(usePasswordField({ passwordField: props.passwordField }))
-  addElements(useQRCode({ qrcode: props.qrcode }))
-  addElements(useSubnet({ subnet: props.subnet }))
-  addElements(useSupernet({ supernet: props.supernet }))
-  addElements(useCIDR({ cidr: props.cidr }))
-  addElements(useAddress({ address: props.address }))
-  addElements(useVLAN({ vlan: props.vlan }))
-  addElements(useUSD({ usdField: props.usdField }))
-  addElements(useMacAddress({ macAddressField: props.macAddressField }))
-  addElements(useRoutingNumber({ routingnumber: props.routingnumber }))
-  addElements(useAccountNumber({ accountnumber: props.accountnumber }))
+  addElements(useLink({ link: injectSacredTheme(props.link) }))
+  addElements(useButton({ button: injectSacredTheme(props.button) }))
+  addElements(useImage({ image: injectSacredTheme(props.image) }))
+  addElements(
+    useComplexEditor({ complexeditor: injectSacredTheme(props.complexeditor) })
+  )
+  addElements(usePricing({ pricing: injectSacredThemeSingle(props.pricing) }))
+  addElements(useStepper({ stepper: injectSacredTheme(props.stepper) }))
+  addElements(
+    useTransferList({ transferlist: injectSacredTheme(props.transferlist) })
+  )
+  addElements(useCard({ card: injectSacredTheme(props.card) }))
+  addElements(useCodeCopy({ codecopy: injectSacredTheme(props.codecopy) }))
+  addElements(
+    useSearchableDropdown({
+      searchableDropdown: injectSacredTheme(props.searchableDropdown),
+    })
+  )
+  addElements(useTextField({ textfield: injectSacredTheme(props.textfield) }))
+  addElements(useDateField({ datefield: injectSacredTheme(props.datefield) }))
+  addElements(
+    useProjectBoard({ projectboard: injectSacredTheme(props.projectboard) })
+  )
+  addElements(useAccordion({ accordion: injectSacredTheme(props.accordion) }))
+  addElements(
+    useMultiSelect({ multiSelect: injectSacredTheme(props.multiSelect) })
+  )
+  addElements(useCheckbox({ checkbox: injectSacredTheme(props.checkbox) }))
+  addElements(
+    usePhoneNumber({
+      phoneNumberField: injectSacredTheme(props.phoneNumberField),
+    })
+  )
+  addElements(useDropdown({ dropdown: injectSacredTheme(props.dropdown) }))
+  addElements(
+    useIncrementNumberField({
+      incrementNumberField: injectSacredTheme(props.incrementNumberField),
+    })
+  )
+  addElements(useSearchbar({ searchbar: injectSacredTheme(props.searchbar) }))
+  addElements(
+    useNumberField({ numberField: injectSacredTheme(props.numberField) })
+  )
+  addElements(
+    usePasswordField({ passwordField: injectSacredTheme(props.passwordField) })
+  )
+  addElements(useQRCode({ qrcode: injectSacredTheme(props.qrcode) }))
+  addElements(useSubnet({ subnet: injectSacredTheme(props.subnet) }))
+  addElements(useSupernet({ supernet: injectSacredTheme(props.supernet) }))
+  addElements(useCIDR({ cidr: injectSacredTheme(props.cidr) }))
+  addElements(useAddress({ address: injectSacredTheme(props.address) }))
+  addElements(useVLAN({ vlan: injectSacredTheme(props.vlan) }))
+  addElements(useUSD({ usdField: injectSacredTheme(props.usdField) }))
+  addElements(
+    useMacAddress({ macAddressField: injectSacredTheme(props.macAddressField) })
+  )
+  addElements(
+    useRoutingNumber({ routingnumber: injectSacredTheme(props.routingnumber) })
+  )
+  addElements(
+    useAccountNumber({ accountnumber: injectSacredTheme(props.accountnumber) })
+  )
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
@@ -200,11 +250,14 @@ const RenderContent: React.FC<ContentSectionProps['grids'][0]> = ({
   )
 }
 
-export default function ContentSection({ grids }: ContentSectionProps) {
+export default function ContentSection({
+  grids,
+  sacredTheme,
+}: ContentSectionProps) {
   return (
     <>
       {grids.map((gridProps, index) => (
-        <RenderContent key={index} {...gridProps} />
+        <RenderContent key={index} {...gridProps} sacredTheme={sacredTheme} />
       ))}
     </>
   )

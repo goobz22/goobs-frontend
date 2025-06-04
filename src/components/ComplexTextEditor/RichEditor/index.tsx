@@ -9,21 +9,13 @@ import {
 } from 'slate-react'
 import { Descendant } from 'slate'
 import Toolbar from '../Toolbars/Editor'
-import {
-  Box,
-  Divider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  keyframes,
-  alpha,
-} from '@mui/material'
-import { ExpandMore } from '@mui/icons-material'
+import { Box, Divider, keyframes, alpha } from '@mui/material'
 import {
   useRichTextEditor,
   RichTextEditorTypes,
 } from '../utils/useRichtextEditor'
 import Typography from '../../Typography'
+import Accordion from '../../Accordion'
 
 // --------------------------------------------------------------------------
 // SACRED THEMING CONSTANTS AND ANIMATIONS
@@ -69,7 +61,7 @@ const Leaf: React.FC<RenderLeafProps & { sacredTheme?: boolean }> = ({
 }) => {
   const customLeaf = leaf as RichTextEditorTypes['CustomText']
 
-  let formattedChildren = children
+  let formattedChildren: React.ReactNode = children as React.ReactNode
 
   if (customLeaf.bold) {
     formattedChildren = <strong>{formattedChildren}</strong>
@@ -273,8 +265,7 @@ export function RichTextEditor({
           expanded={expanded}
           onChange={handleAccordionChange}
           sacredTheme={sacredTheme}
-        >
-          <AccordionSummary expandIcon={<ExpandMore />}>
+          summary={
             <Typography
               fontvariant="merrih4"
               sx={
@@ -290,9 +281,9 @@ export function RichTextEditor({
             >
               {accordionSummary || label || 'Rich Text Editor'}
             </Typography>
-          </AccordionSummary>
-          <AccordionDetails>{editorContent}</AccordionDetails>
-        </Accordion>
+          }
+          details={editorContent}
+        />
       ) : (
         <>
           {label && (

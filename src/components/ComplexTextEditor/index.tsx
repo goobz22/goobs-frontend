@@ -39,12 +39,6 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.2); }
-`
-
 const glyphFloat = keyframes`
   0% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
   50% { transform: translateY(-5px) rotate(180deg); opacity: 0.4; }

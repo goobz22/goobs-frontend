@@ -12,12 +12,6 @@ import { styled } from '@mui/material/styles'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
 // Sacred animations
-const sacredGlow = keyframes`
-  0% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
-  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
-  100% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)); }
-`
-
 const floatGlyph = keyframes`
   0% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-2px) rotate(180deg); }
@@ -158,12 +152,7 @@ const EndAdornment: React.FC<AdornmentProps> = ({
           )}
           <ShowHideEyeIcon
             visible={passwordVisible}
-            sx={{
-              color: sacredTheme ? '#FFD700' : 'inherit',
-              ...(sacredTheme && {
-                animation: `${sacredGlow} 2s ease-in-out infinite`,
-              }),
-            }}
+            sacredTheme={sacredTheme}
           />
         </Box>
       </InputAdornment>
