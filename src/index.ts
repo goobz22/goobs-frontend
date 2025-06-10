@@ -51,7 +51,13 @@ import MACAddressField, {
 } from './components/Field/IPAM/MACAddress'
 import VLANField, { VLANFieldProps } from './components/Field/IPAM/VLAN'
 // New imports
-import DateField, { DateFieldProps } from './components/Field/Date'
+import DateField, { DateFieldProps } from './components/Field/Date/DateField'
+import DateRangeComponent, {
+  DateRangeProps,
+} from './components/Field/Date/DateRange'
+import CreditCardExpiration, {
+  CreditCardExpirationProps,
+} from './components/Field/Date/CreditCardExpiration'
 import Dropdown, { DropdownProps } from './components/Field/Dropdown/Regular'
 import IncrementNumberField from './components/Field/Number/ExternalIncrement'
 import InternalIncrementNumberField, {
@@ -61,6 +67,7 @@ import PasswordField, { PasswordFieldProps } from './components/Field/Password'
 import PhoneNumberField from './components/Field/PhoneNumber'
 import Searchbar, { SearchbarProps } from './components/Field/Search'
 import TextField, { TextFieldProps } from './components/Field/Text'
+import USDField, { USDFieldProps } from './components/Field/USD'
 import SearchableDropdown, {
   SearchableDropdownProps,
   DropdownOption,
@@ -71,10 +78,14 @@ import AccountNumber, {
 import RoutingNumber, {
   RoutingNumberProps,
 } from './components/Field/Number/RoutingNumber'
+import CVV, { CVVProps } from './components/Field/Number/CVV'
+import CreditCardNumber, {
+  CreditCardNumberProps,
+  CardType,
+} from './components/Field/Number/CreditCardNumber'
 import PercentageField, {
   PercentageFieldProps,
 } from './components/Field/Percentage'
-import { DateRange } from './components/Field/Date'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
@@ -189,6 +200,8 @@ export { NoUserAddTask }
 export { Checkbox }
 // New named exports
 export { DateField }
+export { DateRangeComponent as DateRange }
+export { CreditCardExpiration }
 export { Dropdown }
 export { IncrementNumberField }
 export { InternalIncrementNumberField }
@@ -196,6 +209,7 @@ export { PasswordField }
 export { PhoneNumberField }
 export { Searchbar }
 export { TextField }
+export { USDField }
 export { CustomDialog }
 export { MACAddressField }
 export { VLANField }
@@ -206,6 +220,7 @@ export type { InternalIncrementNumberFieldProps }
 export type { PasswordFieldProps }
 export type { SearchbarProps }
 export type { TextFieldProps }
+export type { USDFieldProps }
 export type { SearchableDropdownProps }
 export type { MACAddressFieldProps }
 export type { VLANFieldProps }
@@ -218,6 +233,11 @@ export type { RawCustomer }
 export type { CheckboxProps }
 export type { AccountNumberProps }
 export type { RoutingNumberProps }
+export type { CVVProps }
+export type { CreditCardNumberProps }
+export type { CardType }
+export type { DateRangeProps }
+export type { CreditCardExpirationProps }
 export type { PercentageFieldProps }
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
@@ -226,11 +246,12 @@ export type { PercentageFieldProps }
 export { SearchableDropdown }
 export { AccountNumber }
 export { RoutingNumber }
+export { CVV }
+export { CreditCardNumber }
 // 1) Form DataGrid
 export type { FormDataGridProps }
 export type { CustomDialogProps }
 
-export type { DateRange }
 // 2) All DataGrid Types
 export type { DatagridProps }
 export type { ColumnDef, RowData }
