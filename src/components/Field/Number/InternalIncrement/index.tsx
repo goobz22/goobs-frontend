@@ -5,7 +5,20 @@ import { Box, IconButton } from '@mui/material'
 import TextField, { TextFieldProps } from '../../../Field/Text'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import { styled } from '@mui/material/styles'
+import { styled, keyframes, alpha } from '@mui/material/styles'
+
+// Sacred theme animations matching TextField
+const sacredGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
+`
+
+const hieroglyphPulse = keyframes`
+  0% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+  100% { opacity: 0.3; transform: scale(1); }
+`
 
 export interface InternalIncrementNumberFieldProps
   extends Omit<TextFieldProps, 'onChange'> {
@@ -22,28 +35,80 @@ export interface InternalIncrementNumberFieldProps
   initialDelay?: number
   /** Interval between continuous increment/decrement actions (ms) */
   repeatInterval?: number
+  /** Enable sacred Egyptian theme */
+  sacredTheme?: boolean
 }
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+interface StyledIconButtonProps {
+  sacredtheme?: boolean
+}
+
+const StyledIconButton = styled(IconButton, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<StyledIconButtonProps>(({ theme, sacredtheme }) => ({
   padding: 0,
   width: '16px',
   height: '16px',
   minWidth: '16px',
   minHeight: '16px',
   borderRadius: '2px',
-  '&:hover': {
-    backgroundColor: theme.palette.grey[200],
-  },
+  transition: 'all 0.3s ease',
+  ...(sacredtheme
+    ? {
+        backgroundColor: alpha('#FFD700', 0.1),
+        color: '#FFD700',
+        border: `1px solid ${alpha('#FFD700', 0.3)}`,
+        position: 'relative',
+        '&::before': {
+          content: '"𓆙"',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: '8px',
+          opacity: 0.3,
+          pointerEvents: 'none',
+          zIndex: 0,
+          animation: `${hieroglyphPulse} 3s ease-in-out infinite`,
+        },
+        '&:hover': {
+          backgroundColor: alpha('#FFD700', 0.2),
+          boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
+          transform: 'scale(1.05)',
+          '&::before': {
+            opacity: 0.6,
+          },
+        },
+        '&:active': {
+          animation: `${sacredGlow} 0.3s ease-in-out`,
+          transform: 'scale(0.95)',
+        },
+      }
+    : {
+        '&:hover': {
+          backgroundColor: theme.palette.grey[200],
+        },
+      }),
 }))
 
-const ArrowIcon = styled(Box)({
+const ArrowIcon = styled(Box, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   height: '16px',
   width: '16px',
   lineHeight: 1,
-})
+  zIndex: 1,
+  position: 'relative',
+  ...(sacredtheme && {
+    '& svg': {
+      filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.6))',
+      color: '#FFD700',
+    },
+  }),
+}))
 
 /**
  * A controlled numeric field that allows digits with increment/decrement buttons
@@ -60,6 +125,7 @@ const InternalIncrementNumberField: React.FC<
   max,
   initialDelay = 500, // wait 500ms before starting continuous increment/decrement
   repeatInterval = 100, // then repeat every 100ms
+  sacredTheme = false,
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
@@ -185,6 +251,7 @@ const InternalIncrementNumberField: React.FC<
       type="text"
       inputMode="numeric"
       variant="outlined"
+      sacredTheme={sacredTheme}
       endAdornment={
         <Box
           display="flex"
@@ -193,6 +260,11 @@ const InternalIncrementNumberField: React.FC<
             marginRight: '-4px',
             height: '32px',
             justifyContent: 'center',
+            ...(sacredTheme && {
+              background: `linear-gradient(135deg, ${alpha('#FFD700', 0.05)} 0%, ${alpha('#FFD700', 0.15)} 100%)`,
+              borderRadius: '4px',
+              padding: '2px',
+            }),
           }}
         >
           <StyledIconButton
@@ -200,9 +272,10 @@ const InternalIncrementNumberField: React.FC<
             onMouseDown={handleIncrementMouseDown}
             edge="end"
             aria-label="increment"
+            sacredtheme={sacredTheme}
             sx={{ marginBottom: '-2px' }}
           >
-            <ArrowIcon>
+            <ArrowIcon sacredtheme={sacredTheme}>
               <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
             </ArrowIcon>
           </StyledIconButton>
@@ -211,8 +284,9 @@ const InternalIncrementNumberField: React.FC<
             onMouseDown={handleDecrementMouseDown}
             edge="end"
             aria-label="decrement"
+            sacredtheme={sacredTheme}
           >
-            <ArrowIcon>
+            <ArrowIcon sacredtheme={sacredTheme}>
               <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
             </ArrowIcon>
           </StyledIconButton>

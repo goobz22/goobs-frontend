@@ -1,6 +1,19 @@
 'use client'
 import React, { useCallback, useState, useEffect } from 'react'
+import { Box, alpha, keyframes } from '@mui/material'
 import TextField, { TextFieldProps } from '../../../Field/Text'
+
+// Sacred animations from USD component
+const goldShimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-2px) scale(1.1); }
+  100% { transform: translateY(0px) scale(1); }
+`
 
 /**
  * Props interface for the AccountNumber component
@@ -23,6 +36,14 @@ export interface AccountNumberProps extends Omit<TextFieldProps, 'onChange'> {
    * Custom error message for invalid account numbers
    */
   errorMessage?: string
+  /**
+   * Enable sacred Egyptian theme
+   */
+  sacredTheme?: boolean
+  /**
+   * Whether this is a default/existing value that should be partially masked
+   */
+  isDefaultValue?: boolean
 }
 
 /**
@@ -34,10 +55,14 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   minLength = 8,
   maxLength = 17,
   errorMessage = 'Invalid account number format',
+  sacredTheme = false,
+  isDefaultValue = false,
   ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value as string)
   const [isValid, setIsValid] = useState<boolean>(true)
+  const [isFocused, setIsFocused] = useState<boolean>(false)
+  const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
 
   /**
    * Validates an account number string
@@ -70,6 +95,28 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
     return input.replace(/[^\d-]/g, '')
   }, [])
 
+  // Mask account number for security - show only last 4 digits
+  const maskAccountNumber = useCallback((accountNumber: string): string => {
+    if (!accountNumber || accountNumber.length < 4) return accountNumber
+    const lastFour = accountNumber.slice(-4)
+    const maskedPortion = '*'.repeat(Math.max(0, accountNumber.length - 4))
+    return maskedPortion + lastFour
+  }, [])
+
+  // Get display value based on focus state and default value status
+  const getDisplayValue = useCallback(() => {
+    if (isDefaultValue && !isFocused && !hasBeenEdited && internalValue) {
+      return maskAccountNumber(internalValue)
+    }
+    return internalValue
+  }, [
+    isDefaultValue,
+    isFocused,
+    hasBeenEdited,
+    internalValue,
+    maskAccountNumber,
+  ])
+
   useEffect(() => {
     // Update internal value when prop value changes
     setInternalValue(value as string)
@@ -83,6 +130,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       const formattedValue = formatInput(rawValue)
 
       setInternalValue(formattedValue)
+      setHasBeenEdited(true)
 
       const valid = validateAccountNumber(formattedValue)
       setIsValid(valid)
@@ -94,18 +142,89 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
     [onChange, validateAccountNumber, formatInput]
   )
 
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true)
+      props.onFocus?.(e)
+    },
+    [props]
+  )
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false)
+      props.onBlur?.(e)
+    },
+    [props]
+  )
+
+  const AccountAdornment = () => (
+    <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      {sacredTheme && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '-15px',
+            color: alpha('#FFD700', 0.4),
+            fontSize: '12px',
+            animation: `${floatGlyph} 3s ease-in-out infinite`,
+          }}
+        >
+          𓊖
+        </Box>
+      )}
+      <Box
+        sx={{
+          color: sacredTheme ? '#FFD700' : 'inherit',
+          fontWeight: sacredTheme ? 600 : 400,
+          fontSize: sacredTheme ? '14px' : '12px',
+          ...(sacredTheme && {
+            background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
+            backgroundSize: '200% 100%',
+            animation: `${goldShimmer} 3s linear infinite`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
+          }),
+        }}
+      >
+        #
+      </Box>
+    </Box>
+  )
+
   return (
     <TextField
       {...props}
-      value={internalValue}
+      value={getDisplayValue()}
       onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       error={!isValid && internalValue !== ''}
       helperText={
         !isValid && internalValue !== '' ? errorMessage : props.helperText
       }
+      label={props.label || 'Account Number'}
+      placeholder={sacredTheme ? '1234567890' : props.placeholder}
+      sacredTheme={sacredTheme}
+      startAdornment={<AccountAdornment />}
       inputProps={{
         ...props.inputProps,
         maxLength: maxLength + 5, // Allow extra chars for potential hyphens
+      }}
+      slotProps={{
+        input: {
+          sx: {
+            '& .MuiInputBase-input': {
+              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginTop: '2px',
+            },
+            '&::placeholder': {
+              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginTop: '2px',
+            },
+          },
+        },
       }}
     />
   )
