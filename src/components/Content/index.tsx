@@ -13,7 +13,7 @@ import { CustomStepperProps } from '../Stepper'
 import { TransferListProps } from '../TransferList'
 import { CardProps } from '../Card'
 import { CodeCopyProps } from '../CodeCopy'
-import { DateFieldProps } from '../Field/Date'
+import { DateFieldProps } from '../Field/Date/DateField'
 import { DropdownProps } from '../Field/Dropdown/Regular'
 import { IncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
 import { SearchbarProps } from '../Field/Search'
@@ -35,6 +35,10 @@ import { VLANFieldProps } from '../Field/IPAM/VLAN'
 import { MACAddressFieldProps } from '../Field/IPAM/MACAddress'
 import { RoutingNumberProps } from '../Field/Number/RoutingNumber'
 import { AccountNumberProps } from '../Field/Number/AccountNumber'
+import { CVVProps } from '../Field/Number/CVV'
+import { CreditCardNumberProps } from '../Field/Number/CreditCardNumber'
+import { DateRangeProps } from '../Field/Date/DateRange'
+import { CreditCardExpirationProps } from '../Field/Date/CreditCardExpiration'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -72,6 +76,10 @@ import useUSD from './Structure/USD/useUSD'
 import useMacAddress from './Structure/macaddress/useMacAddress'
 import useRoutingNumber from './Structure/routingnumber/useRoutingNumber'
 import useAccountNumber from './Structure/accountnumber/useAccountNumber'
+import useCVV from './Structure/CVV/useCVV'
+import useCreditCardNumber from './Structure/CreditCardNumber/useCreditCardNumber'
+import useDateRange from './Structure/DateRange/useDateRange'
+import useCreditCardExpiration from './Structure/CreditCardExpiration/useCreditCardExpiration'
 import type { SupernetFieldProps } from '../Field/IPAM/Supernet'
 
 export interface ContentSectionProps {
@@ -118,6 +126,12 @@ export interface ContentSectionProps {
     macAddressField?: MACAddressFieldProps | MACAddressFieldProps[]
     routingnumber?: RoutingNumberProps | RoutingNumberProps[]
     accountnumber?: AccountNumberProps | AccountNumberProps[]
+    cvv?: CVVProps | CVVProps[]
+    creditCardNumber?: CreditCardNumberProps | CreditCardNumberProps[]
+    dateRange?: DateRangeProps | DateRangeProps[]
+    creditCardExpiration?:
+      | CreditCardExpirationProps
+      | CreditCardExpirationProps[]
     // Support for custom React components
     customComponent?: React.ReactNode
     // Added optional style property for grid customization
@@ -192,7 +206,7 @@ const RenderContent: React.FC<
     })
   )
   addElements(useTextField({ textfield: injectSacredTheme(props.textfield) }))
-  addElements(useDateField({ datefield: injectSacredTheme(props.datefield) }))
+  addElements(useDateField({ dateField: injectSacredTheme(props.datefield) }))
   addElements(
     useProjectBoard({ projectboard: injectSacredTheme(props.projectboard) })
   )
@@ -234,6 +248,18 @@ const RenderContent: React.FC<
   )
   addElements(
     useAccountNumber({ accountnumber: injectSacredTheme(props.accountnumber) })
+  )
+  addElements(useCVV({ cvv: injectSacredTheme(props.cvv) }))
+  addElements(
+    useCreditCardNumber({
+      creditCardNumber: injectSacredTheme(props.creditCardNumber),
+    })
+  )
+  addElements(useDateRange({ dateRange: injectSacredTheme(props.dateRange) }))
+  addElements(
+    useCreditCardExpiration({
+      creditCardExpiration: injectSacredTheme(props.creditCardExpiration),
+    })
   )
 
   // Merge any style provided in boxProps with the grid's style property
