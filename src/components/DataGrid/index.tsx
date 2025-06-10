@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useRef, useEffect } from 'react'
-import {
-  Box,
-  Alert,
-  useMediaQuery,
-  alpha,
-  keyframes,
-  Typography,
-} from '@mui/material'
+import { Box, Alert, alpha, keyframes, Typography } from '@mui/material'
 import CustomToolbar from '../Toolbar'
 import Table from './Table'
 import CustomFooter from './Footer'
@@ -117,7 +110,6 @@ function DataGrid({
   sacredTheme = false,
 }: DatagridProps) {
   // Detect mobile devices for responsive behavior
-  const isMobile = !useMediaQuery('(min-width:500px)')
 
   // Create ref for the container to measure available height
   const containerRef = useRef<HTMLDivElement>(null)
@@ -221,8 +213,7 @@ function DataGrid({
       position: 'relative' as const,
       display: 'flex',
       flexDirection: 'column' as const,
-      height: 'calc(100vh - 60px)',
-      overflow: isMobile ? 'auto' : 'hidden',
+      width: '100%',
       backgroundColor: woad.main,
     }
 
@@ -259,7 +250,7 @@ function DataGrid({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme, isMobile])
+  }, [sacredTheme])
 
   return (
     <Box ref={containerRef} sx={containerStyles}>
@@ -345,12 +336,10 @@ function DataGrid({
 
       <Box
         sx={{
-          flexGrow: 1,
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          overflow: isMobile ? 'visible' : 'hidden',
           position: 'relative',
           ...(sacredTheme && {
             '&::before': {
