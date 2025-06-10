@@ -367,7 +367,7 @@ const TextField = React.memo<TextFieldProps>(props => {
       <StyledMuiTextField
         name={name}
         label={label}
-        placeholder={sacredTheme ? 'Enter sacred text...' : placeholder}
+        placeholder={placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

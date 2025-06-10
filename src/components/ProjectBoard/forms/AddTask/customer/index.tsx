@@ -2,7 +2,15 @@
 
 import React, { useState, useCallback } from 'react'
 import { Close } from '@mui/icons-material'
-import { Dialog, IconButton, Box, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Dialog,
+  IconButton,
+  Box,
+  useMediaQuery,
+  useTheme,
+  alpha,
+  keyframes,
+} from '@mui/material'
 import Typography from '../../../../Typography'
 import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
 import MultiSelect from '../../../../Field/Dropdown/MultiSelect'
@@ -11,6 +19,27 @@ import CustomButton from '../../../../Button'
 import TextField from '../../../../Field/Text'
 
 import type { Task, RawTopic, RawQueue, RawSeverityLevel } from '../../../types'
+
+// Sacred animations
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-2px) rotate(180deg); opacity: 0.5; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+`
+
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  darkGold: '#B8860B',
+  cardBackground: alpha('#000000', 0.95),
+}
+
+const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
 interface CustomerAddTaskProps {
   open: boolean
@@ -21,6 +50,7 @@ interface CustomerAddTaskProps {
   severityLevels: RawSeverityLevel[]
   companyId: string
   createdUserId: string
+  sacredTheme?: boolean
 }
 
 const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
@@ -32,6 +62,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   severityLevels,
   companyId,
   createdUserId,
+  sacredTheme = false,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -142,13 +173,51 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
       fullWidth
       maxWidth={false}
       PaperProps={{
-        style: {
+        sx: {
           width: isMobile ? '100%' : '700px',
           margin: isMobile ? '16px' : 'auto',
           pointerEvents: 'auto',
+          ...(sacredTheme && {
+            border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+            borderRadius: '8px',
+            overflow: 'hidden',
+            boxShadow: `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`,
+            backgroundColor: egyptianStyles.cardBackground,
+            animation: `${glowPulse} 3s ease-in-out infinite`,
+          }),
         },
       }}
     >
+      {sacredTheme && (
+        <>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              left: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatGlyph} 4s ease-in-out infinite`,
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[0]}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              right: '48px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatGlyph} 4s ease-in-out infinite reverse`,
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[1]}
+          </Box>
+        </>
+      )}
       <IconButton
         size="small"
         onClick={onClose}
@@ -156,17 +225,42 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
           position: 'absolute',
           right: 8,
           top: 8,
-          color: theme.palette.grey[500],
+          color: sacredTheme
+            ? egyptianStyles.goldColor
+            : theme.palette.grey[500],
           zIndex: theme.zIndex.modal + 1,
           cursor: 'pointer',
-          '&:hover': { color: theme.palette.grey[700] },
+          '&:hover': {
+            color: sacredTheme
+              ? egyptianStyles.goldColor
+              : theme.palette.grey[700],
+          },
         }}
       >
         <Close />
       </IconButton>
 
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          p: 3,
+          ...(sacredTheme && {
+            borderBottom: `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`,
+            backgroundColor: alpha(egyptianStyles.goldColor, 0.05),
+          }),
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            ...(sacredTheme && {
+              fontFamily: '"Cinzel", serif',
+              letterSpacing: '0.05em',
+              textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+              color: egyptianStyles.goldColor,
+            }),
+          }}
+        >
           Create Task
         </Typography>
 
@@ -177,6 +271,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
             value={taskTitle}
             onChange={e => setTaskTitle(e.target.value)}
             placeholder="Enter Task Title"
+            sacredTheme={sacredTheme}
           />
 
           <ComplexTextEditor
@@ -185,6 +280,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
             onChange={setTaskDescription}
             editorType="simple"
             minRows={5}
+            sacredTheme={sacredTheme}
           />
 
           {/* Top row of fields */}
@@ -218,6 +314,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                   console.log('Selected severity ID:', option?.attribute2)
                 }}
                 placeholder="Select severity level"
+                sacredTheme={sacredTheme}
               />
             </Box>
 
@@ -242,6 +339,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                   console.log('Selected queue ID:', option?.attribute1)
                 }}
                 placeholder="Select product queue"
+                sacredTheme={sacredTheme}
               />
             </Box>
           </Box>
@@ -284,9 +382,10 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                   setSelectedTopicIds(newSelectedIds)
                 }}
                 complexOptions={true} // Explicitly set to use complex options
+                sacredTheme={sacredTheme}
               />
             )
-          }, [topics, selectedTopicIds])}
+          }, [topics, selectedTopicIds, sacredTheme])}
 
           {/* Action Buttons */}
           <Box
@@ -302,13 +401,15 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
               text="Cancel"
               onClick={onClose}
               backgroundcolor="none"
-              fontcolor="black"
+              fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+              sacredTheme={sacredTheme}
             />
             <CustomButton
               text="Create Task"
               onClick={handleSubmit}
-              backgroundcolor="#000000"
-              fontcolor="white"
+              backgroundcolor={sacredTheme ? egyptianStyles.goldColor : '#000'}
+              fontcolor={sacredTheme ? '#000' : 'white'}
+              sacredTheme={sacredTheme}
             />
           </Box>
         </Box>

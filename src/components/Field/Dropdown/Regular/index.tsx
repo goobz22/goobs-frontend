@@ -83,7 +83,15 @@ const StyledFormControl = styled(FormControl)<{ width?: string }>(
   })
 )
 
-const StyledInputLabel = styled(InputLabel)<{
+const StyledInputLabel = styled(InputLabel, {
+  shouldForwardProp: prop =>
+    ![
+      'shrunkfontcolor',
+      'unshrunkfontcolor',
+      'shrunklabelposition',
+      'sacredtheme',
+    ].includes(prop as string),
+})<{
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
@@ -149,7 +157,12 @@ const StyledInputLabel = styled(InputLabel)<{
   })
 )
 
-const StyledSelect = styled(Select)<{
+const StyledSelect = styled(Select, {
+  shouldForwardProp: prop =>
+    !['backgroundcolor', 'outlinecolor', 'fontcolor', 'sacredtheme'].includes(
+      prop as string
+    ),
+})<{
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
@@ -239,35 +252,35 @@ const StyledSelect = styled(Select)<{
   },
 }))
 
-const StyledMenuItem = styled(MenuItem)<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    padding: '8px 14px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: '2px',
+const StyledMenuItem = styled(MenuItem, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  padding: '8px 14px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '2px',
+  width: '100%',
+  backgroundColor: sacredtheme ? alpha('#000000', 0.9) : white.main,
+  transition: 'all 0.3s ease',
+  '&.Mui-selected': {
+    backgroundColor: sacredtheme ? alpha('#FFD700', 0.2) : `${black.main}08`,
+    ...(sacredtheme && {
+      color: '#FFD700',
+    }),
+  },
+  '&:hover': {
+    backgroundColor: sacredtheme ? alpha('#FFD700', 0.15) : `${black.main}08`,
+    ...(sacredtheme && {
+      color: '#FFD700',
+      transform: 'translateX(4px)',
+    }),
+  },
+  '& .MuiTypography-root': {
     width: '100%',
-    backgroundColor: sacredtheme ? alpha('#000000', 0.9) : white.main,
-    transition: 'all 0.3s ease',
-    '&.Mui-selected': {
-      backgroundColor: sacredtheme ? alpha('#FFD700', 0.2) : `${black.main}08`,
-      ...(sacredtheme && {
-        color: '#FFD700',
-      }),
-    },
-    '&:hover': {
-      backgroundColor: sacredtheme ? alpha('#FFD700', 0.15) : `${black.main}08`,
-      ...(sacredtheme && {
-        color: '#FFD700',
-        transform: 'translateX(4px)',
-      }),
-    },
-    '& .MuiTypography-root': {
-      width: '100%',
-      textAlign: 'left',
-    },
-  })
-)
+    textAlign: 'left',
+  },
+}))
 
 const MenuProps = {
   PaperProps: {

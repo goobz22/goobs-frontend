@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useMemo, useState, useEffect } from 'react'
-import { Close } from '@mui/icons-material'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import { Close, DragIndicator } from '@mui/icons-material'
 import {
   Dialog,
   IconButton,
@@ -40,6 +40,12 @@ const floatAnimation = keyframes`
 const sacredShimmer = keyframes`
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
+`
+
+const scrollbarGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
 `
 
 const closeButtonGlow = keyframes`
@@ -133,6 +139,11 @@ function Popup({
   const [isOpen, setIsOpen] = useState(open)
   const [, setIsClosed] = useState(!open)
 
+  // Drag functionality state
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+
   useEffect(() => {
     setIsOpen(open)
     setIsClosed(!open)
@@ -144,6 +155,89 @@ function Popup({
       setIsClosed(close)
     }
   }, [close])
+
+  // Reset drag position when opening
+  useEffect(() => {
+    if (open) {
+      setDragPosition({ x: 0, y: 0 })
+    }
+  }, [open])
+
+  // Drag handlers
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      setIsDragging(true)
+
+      // If starting from center (0,0), convert to absolute coordinates
+      let currentX = dragPosition.x
+      let currentY = dragPosition.y
+
+      if (dragPosition.x === 0 && dragPosition.y === 0) {
+        // Get the actual popup element position when centered
+        const popup = document.querySelector('.MuiDialog-paper') as HTMLElement
+        if (popup) {
+          const rect = popup.getBoundingClientRect()
+          currentX = rect.left
+          currentY = rect.top
+        } else {
+          // Fallback to calculated center
+          currentX = window.innerWidth / 2 - width / 2
+          currentY = window.innerHeight / 2 - 300 // estimated height
+        }
+      }
+
+      setDragOffset({
+        x: e.clientX - currentX,
+        y: e.clientY - currentY,
+      })
+    },
+    [dragPosition, width]
+  )
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging) {
+        const newX = e.clientX - dragOffset.x
+        const newY = e.clientY - dragOffset.y
+
+        // Keep within reasonable bounds (allow some off-screen movement)
+        const maxX = window.innerWidth - 100
+        const minX = -width + 100
+        const maxY = window.innerHeight - 100
+        const minY = -200
+
+        setDragPosition({
+          x: Math.max(minX, Math.min(maxX, newX)),
+          y: Math.max(minY, Math.min(maxY, newY)),
+        })
+      }
+    },
+    [isDragging, dragOffset, width]
+  )
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  // Add and remove mouse event listeners
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.body.style.userSelect = 'none' // Prevent text selection while dragging
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.userSelect = ''
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.userSelect = ''
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp])
 
   // Create a header grid using the new ContentSection interface.
   // We only supply the typography array without any layout properties.
@@ -269,6 +363,7 @@ function Popup({
   const dialogPaperStyles = useMemo(() => {
     const baseStyles = {
       width: `${width}px`,
+      maxHeight: '90vh',
       borderRadius: sacredTheme ? '12px' : '16px',
       backgroundColor: sacredTheme ? egyptianStyles.cardBackground : white.main,
       boxShadow: sacredTheme
@@ -276,8 +371,18 @@ function Popup({
         : '0px 4px 10px rgba(0, 0, 0, 0.2)',
       padding: sacredTheme ? '24px 32px 20px 32px' : '24px',
       pointerEvents: 'auto' as const,
-      position: 'relative' as const,
-      overflow: 'visible' as const,
+      position: 'fixed' as const,
+      overflow: 'auto' as const,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      // Drag positioning
+      top: dragPosition.y === 0 ? '50%' : `${dragPosition.y}px`,
+      left: dragPosition.x === 0 ? '50%' : `${dragPosition.x}px`,
+      transform:
+        dragPosition.x === 0 && dragPosition.y === 0
+          ? 'translate(-50%, -50%)'
+          : 'none',
+      cursor: isDragging ? 'grabbing' : 'default',
     }
 
     if (!sacredTheme) return baseStyles
@@ -287,6 +392,33 @@ function Popup({
       backdropFilter: 'blur(20px)',
       border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
       animation: `${glowPulse} 4s ease-in-out infinite`,
+      // Sacred scrollbar styling for the main container
+      '&::-webkit-scrollbar': {
+        width: '12px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: alpha('#000000', 0.3),
+        borderRadius: '6px',
+        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
+        borderRadius: '6px',
+        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
+        boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
+        animation: `${scrollbarGlow} 3s ease-in-out infinite`,
+        '&:hover': {
+          backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
+          boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
+        },
+      },
+      '&::-webkit-scrollbar-thumb:active': {
+        backgroundColor: egyptianStyles.goldColor,
+        boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
+      },
+      // Firefox scrollbar styling
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -311,7 +443,7 @@ function Popup({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme, width])
+  }, [sacredTheme, width, dragPosition, isDragging])
 
   return (
     <Dialog
@@ -363,41 +495,122 @@ function Popup({
         </>
       )}
 
-      <IconButton
-        size="small"
-        onClick={handleClose}
+      {/* Top-right controls: Drag icon and Close button */}
+      <Box
         sx={{
           position: 'absolute',
           right: 8,
           top: 8,
-          color: sacredTheme
-            ? egyptianStyles.goldColor
-            : theme => theme.palette.grey[500],
-          // Ensure it's on top and clickable
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
           zIndex: theme => theme.zIndex.modal + 1,
-          cursor: 'pointer',
-          ...(sacredTheme && {
-            animation: `${closeButtonGlow} 6s ease-in-out infinite`,
-            '&:hover': {
-              color: egyptianStyles.goldColor,
-              backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-              transform: 'scale(1.1)',
-              transition: 'all 0.3s ease',
-            },
-          }),
-          ...(!sacredTheme && {
-            '&:hover': {
-              color: theme => theme.palette.grey[700],
-            },
-          }),
         }}
       >
-        <Close />
-      </IconButton>
+        {/* Drag indicator */}
+        <IconButton
+          size="small"
+          onMouseDown={handleMouseDown}
+          sx={{
+            color: sacredTheme
+              ? egyptianStyles.goldColor
+              : theme => theme.palette.grey[500],
+            cursor: isDragging ? 'grabbing' : 'grab',
+            ...(sacredTheme && {
+              animation: `${closeButtonGlow} 6s ease-in-out infinite`,
+              animationDelay: '1s',
+              '&:hover': {
+                color: egyptianStyles.goldColor,
+                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
+                transform: 'scale(1.1)',
+                transition: 'all 0.3s ease',
+              },
+            }),
+            ...(!sacredTheme && {
+              '&:hover': {
+                color: theme => theme.palette.grey[700],
+                backgroundColor: alpha('#000', 0.04),
+              },
+            }),
+          }}
+        >
+          <DragIndicator />
+        </IconButton>
+
+        {/* Close button */}
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          onMouseDown={e => e.stopPropagation()} // Prevent drag when clicking close
+          sx={{
+            color: sacredTheme
+              ? egyptianStyles.goldColor
+              : theme => theme.palette.grey[500],
+            cursor: 'pointer',
+            ...(sacredTheme && {
+              animation: `${closeButtonGlow} 6s ease-in-out infinite`,
+              '&:hover': {
+                color: egyptianStyles.goldColor,
+                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
+                transform: 'scale(1.1)',
+                transition: 'all 0.3s ease',
+              },
+            }),
+            ...(!sacredTheme && {
+              '&:hover': {
+                color: theme => theme.palette.grey[700],
+                backgroundColor: alpha('#000', 0.04),
+              },
+            }),
+          }}
+        >
+          <Close />
+        </IconButton>
+      </Box>
 
       {renderHeader}
 
-      <Box sx={sacredTheme ? { position: 'relative', zIndex: 1 } : undefined}>
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          minHeight: 0,
+          paddingRight: '10px',
+          ...(sacredTheme
+            ? {
+                position: 'relative',
+                zIndex: 1,
+                // Custom scrollbar styling for sacred theme
+                '&::-webkit-scrollbar': {
+                  width: '12px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: alpha('#000000', 0.3),
+                  borderRadius: '6px',
+                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
+                  borderRadius: '6px',
+                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
+                  boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
+                  animation: `${scrollbarGlow} 3s ease-in-out infinite`,
+                  '&:hover': {
+                    backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
+                    boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
+                  },
+                },
+                '&::-webkit-scrollbar-thumb:active': {
+                  backgroundColor: egyptianStyles.goldColor,
+                  boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
+                },
+                // Firefox scrollbar styling
+                scrollbarWidth: 'thin',
+                scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
+              }
+            : {}),
+        }}
+      >
         {content ||
           (grids && <ContentSection grids={grids} sacredTheme={sacredTheme} />)}
       </Box>

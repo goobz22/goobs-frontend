@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, FormEvent } from 'react'
-import { Box } from '@mui/material'
+import { Box, alpha, keyframes } from '@mui/material'
 import Typography from '../../../../Typography'
 import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
@@ -9,6 +9,25 @@ import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
 import CustomButton from '../../../../Button'
 
 import type { RawSeverityLevel } from '../../../types'
+
+// Sacred animations
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-2px) rotate(180deg); opacity: 0.5; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+`
+
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  darkGold: '#B8860B',
+  cardBackground: alpha('#000000', 0.95),
+}
 
 interface NoUserAddTaskProps {
   onAdd: (newTask: {
@@ -18,11 +37,13 @@ interface NoUserAddTaskProps {
     severityId: string
   }) => void
   severityLevels: RawSeverityLevel[]
+  sacredTheme?: boolean
 }
 
 const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   onAdd,
   severityLevels,
+  sacredTheme = false,
 }) => {
   // ------------------ FORM STATE ------------------
   const [taskTitle, setTaskTitle] = useState('')
@@ -96,8 +117,62 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
 
   // ------------------ RENDER ------------------
   return (
-    <Box sx={{ p: 0 }}>
-      <Typography variant="h5" sx={{ mb: 3 }}>
+    <Box
+      sx={{
+        p: 3,
+        position: 'relative',
+        ...(sacredTheme && {
+          border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`,
+          backgroundColor: egyptianStyles.cardBackground,
+          animation: `${glowPulse} 3s ease-in-out infinite`,
+        }),
+      }}
+    >
+      {sacredTheme && (
+        <>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              left: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatGlyph} 4s ease-in-out infinite`,
+              zIndex: 1,
+            }}
+          >
+            𓁹
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatGlyph} 4s ease-in-out infinite reverse`,
+              zIndex: 1,
+            }}
+          >
+            𓂀
+          </Box>
+        </>
+      )}
+      <Typography
+        variant="h5"
+        sx={{
+          mb: 3,
+          ...(sacredTheme && {
+            fontFamily: '"Cinzel", serif',
+            letterSpacing: '0.05em',
+            textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+            color: egyptianStyles.goldColor,
+          }),
+        }}
+      >
         Create Task
       </Typography>
 
@@ -111,6 +186,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           value={taskTitle}
           onChange={e => setTaskTitle(e.target.value)}
           placeholder="Enter Task Title"
+          sacredTheme={sacredTheme}
         />
 
         <ComplexTextEditor
@@ -119,6 +195,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           onChange={setTaskDescription}
           editorType="simple"
           minRows={5}
+          sacredTheme={sacredTheme}
         />
 
         <TextField
@@ -126,6 +203,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Enter your email"
+          sacredTheme={sacredTheme}
         />
 
         <SearchableDropdown
@@ -142,13 +220,15 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
             console.log('Selected severity ID:', option?.attribute2)
           }}
           placeholder="Select severity level"
+          sacredTheme={sacredTheme}
         />
 
         <CustomButton
           text="Create Task"
           onClick={() => handleSubmit()}
-          backgroundcolor="#000000"
-          fontcolor="white"
+          backgroundcolor={sacredTheme ? egyptianStyles.goldColor : '#000'}
+          fontcolor={sacredTheme ? '#000' : 'white'}
+          sacredTheme={sacredTheme}
         />
       </Box>
     </Box>

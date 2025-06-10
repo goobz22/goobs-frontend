@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react'
-import { Box, Stack } from '@mui/material'
+import { Box, Stack, alpha, keyframes } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from './jotai/atom'
 import { JotaiProvider } from './jotai/provider'
@@ -23,6 +23,56 @@ import { useComputeBoardResize } from './utils/useComputeBoard'
 import Board from './board'
 
 import * as palette from '../../styles/palette'
+
+// Sacred geometry animations
+const glowPulse = keyframes`
+  0% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    border-color: ${alpha('#FFD700', 0.5)};
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+    border-color: ${alpha('#FFD700', 0.8)};
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    border-color: ${alpha('#FFD700', 0.5)};
+  }
+`
+
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  33% { transform: translateY(-5px) rotate(120deg); opacity: 0.5; }
+  66% { transform: translateY(2px) rotate(240deg); opacity: 0.4; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+`
+
+// Egyptian styling constants
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  darkGold: '#B8860B',
+  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
+  cardBackground: alpha('#000000', 0.85),
+  glowEffect: `0 0 30px ${alpha('#FFD700', 0.3)}, 0 0 60px ${alpha('#FFD700', 0.1)}`,
+}
+
+// Sacred hieroglyphs for decoration
+const SACRED_GLYPHS = [
+  '𓁟', // Eye of Horus
+  '𓂀', // Eye
+  '𓄿', // Vulture
+  '𓊖', // House
+  '𓊗', // Road
+  '𓋴', // Life/Ankh symbol
+  '𓏏', // Bread
+  '𓊨', // Gate
+  '𓅓', // Owl
+  '𓇳', // Sun
+  '𓊹', // Shrine
+  '𓂋', // Mouth
+  '𓏭', // Scribe's kit
+  '𓊵', // Cartouche
+]
 
 /**
  * Merge the incoming tasks into columns based on the boardType.
@@ -83,6 +133,7 @@ function ProjectBoardContent({
   customerId,
   companyId,
   preferDropdown,
+  sacredTheme = false,
 }: ProjectBoardProps) {
   // 1) Atom state for columns + tasks
   const [columnState, setColumnState] = useAtom(columnsAtom)
@@ -307,19 +358,99 @@ function ProjectBoardContent({
   return (
     <Box
       ref={containerRef}
-      sx={{ boxSizing: 'border-box', width: '100%', height: '100%' }}
+      sx={{
+        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        ...(sacredTheme && {
+          backgroundColor: egyptianStyles.cardBackground,
+          border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+          borderRadius: '12px',
+          animation: `${glowPulse} 4s ease-in-out infinite`,
+          overflow: 'hidden',
+        }),
+      }}
     >
+      {/* Sacred corner decorations */}
+      {sacredTheme && (
+        <>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              left: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '24px',
+              animation: `${floatAnimation} 5s ease-in-out infinite`,
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[0]} {/* Eye of Horus */}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '24px',
+              animation: `${floatAnimation} 5s ease-in-out infinite reverse`,
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[13]} {/* Cartouche */}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '12px',
+              left: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatAnimation} 6s ease-in-out infinite`,
+              animationDelay: '1s',
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[5]} {/* Ankh */}
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '12px',
+              right: '12px',
+              color: alpha(egyptianStyles.goldColor, 0.3),
+              fontSize: '18px',
+              animation: `${floatAnimation} 6s ease-in-out infinite reverse`,
+              animationDelay: '1s',
+              zIndex: 1,
+            }}
+          >
+            {SACRED_GLYPHS[9]} {/* Sun */}
+          </Box>
+        </>
+      )}
+
       <Toolbar
         buttons={buttons}
         searchbarProps={{
           label: 'Search...',
           value: searchTerm,
           onChange: handleSearchChange,
-          backgroundcolor: palette.semiTransparentWhite.main,
-          shrunkfontcolor: palette.white.main,
-          unshrunkfontcolor: palette.white.main,
+          backgroundcolor: sacredTheme
+            ? alpha(egyptianStyles.goldColor, 0.1)
+            : palette.semiTransparentWhite.main,
+          shrunkfontcolor: sacredTheme
+            ? egyptianStyles.goldColor
+            : palette.white.main,
+          unshrunkfontcolor: sacredTheme
+            ? egyptianStyles.goldColor
+            : palette.white.main,
           shrunklabelposition: 'onNotch',
+          sacredTheme: sacredTheme,
         }}
+        sacredTheme={sacredTheme}
       />
 
       <Stack direction="row" spacing={3} mt={1} pl={4}>
@@ -333,6 +464,7 @@ function ProjectBoardContent({
           onColumnDragStart={handleColumnDragStart}
           onColumnDragOver={handleColumnDragOver}
           onColumnDrop={handleColumnDrop}
+          sacredTheme={sacredTheme}
         />
       </Stack>
 
@@ -355,6 +487,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCompanies={rawCompanies || []}
+              sacredTheme={sacredTheme}
             />
           ) : (
             <AdministratorAddTaskCompanyProvided
@@ -369,6 +502,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               companyId={companyId || ''}
+              sacredTheme={sacredTheme}
             />
           )}
         </>
@@ -391,6 +525,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCustomers={rawCustomers || []}
+              sacredTheme={sacredTheme}
             />
           ) : (
             <CompanyAddTaskCustomerProvided
@@ -405,6 +540,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               customerId={customerId || ''}
+              sacredTheme={sacredTheme}
             />
           )}
         </>
@@ -419,6 +555,7 @@ function ProjectBoardContent({
           severityLevels={rawSeverityLevels}
           createdUserId={currentUser._id}
           companyId={companyId || ''}
+          sacredTheme={sacredTheme}
         />
       )}
 
@@ -462,6 +599,7 @@ function ProjectBoardContent({
           topicOptions={rawTopics}
           knowledgebaseArticleOptions={rawArticles}
           teamMemberOptions={rawEmployees}
+          sacredTheme={sacredTheme}
         />
       )}
     </Box>

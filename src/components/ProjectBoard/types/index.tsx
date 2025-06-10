@@ -207,4 +207,6 @@ export interface ProjectBoardProps {
     commentId: string,
     revisionHistory: CommentEditHistory[]
   ) => void
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }

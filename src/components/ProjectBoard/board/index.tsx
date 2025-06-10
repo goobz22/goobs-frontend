@@ -26,6 +26,9 @@ export interface BoardProps {
   onColumnDragStart: (e: React.DragEvent, columnIndex: number) => void
   onColumnDragOver: (e: React.DragEvent, columnIndex: number) => void
   onColumnDrop: (e: React.DragEvent, columnIndex: number) => void
+
+  /** Enable Egyptian/Sacred theming */
+  sacredTheme?: boolean
 }
 
 export default function Board(props: BoardProps) {

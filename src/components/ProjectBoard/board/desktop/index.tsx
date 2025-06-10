@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Box, Stack, Checkbox } from '@mui/material'
+import { Box, Stack, Checkbox, alpha, keyframes } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from '../../jotai/atom'
 
@@ -14,6 +14,26 @@ import type { BoardProps } from '../index'
 import type { ColumnData } from '../../types'
 import { useTaskDragAndDrop } from '../../../ProjectBoard/utils/useDragandDrop/tasks'
 
+// Sacred animations
+const glowPulse = keyframes`
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+`
+
+const floatGlyph = keyframes`
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(180deg); }
+  100% { transform: translateY(0px) rotate(360deg); }
+`
+
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  cardBackground: alpha('#000000', 0.9),
+}
+
+const SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
+
 export default function DesktopBoard({
   columns,
   overflowColumns,
@@ -24,6 +44,7 @@ export default function DesktopBoard({
   onColumnDragStart,
   onColumnDragOver,
   onColumnDrop,
+  sacredTheme = false,
 }: BoardProps) {
   // We read/write the entire array of columns from the global store for tasks
   const [allColumns, setAllColumns] = useAtom(columnsAtom)
@@ -153,21 +174,52 @@ export default function DesktopBoard({
               boxSizing: 'border-box',
               width: '300px',
               height: '70vh',
-              backgroundColor: black.main,
+              backgroundColor: sacredTheme
+                ? egyptianStyles.cardBackground
+                : black.main,
               borderRadius: '5px',
               display: 'flex',
               flexDirection: 'column',
               overflowX: 'hidden',
               overflowY: 'auto',
               position: 'relative',
+              ...(sacredTheme && {
+                border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+                animation: `${glowPulse} 3s ease-in-out infinite`,
+                backdropFilter: 'blur(10px)',
+              }),
             }}
           >
+            {/* Sacred corner glyphs */}
+            {sacredTheme && (
+              <>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    color: alpha(egyptianStyles.goldColor, 0.3),
+                    fontSize: '14px',
+                    animation: `${floatGlyph} 4s ease-in-out infinite`,
+                    zIndex: 1,
+                  }}
+                >
+                  {SACRED_GLYPHS[colIndex % SACRED_GLYPHS.length]}
+                </Box>
+              </>
+            )}
+
             {/* Column Header */}
             <Box
               sx={{
-                borderBottom: `1px solid ${white.main}`,
+                borderBottom: sacredTheme
+                  ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
+                  : `1px solid ${white.main}`,
                 p: 2,
                 position: 'relative',
+                ...(sacredTheme && {
+                  backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
+                }),
               }}
             >
               <Checkbox
@@ -178,18 +230,52 @@ export default function DesktopBoard({
                   position: 'absolute',
                   top: 2,
                   right: 2,
-                  color: white.main,
+                  color: sacredTheme ? egyptianStyles.goldColor : white.main,
                   '&.Mui-checked': {
-                    color: white.main,
+                    color: sacredTheme ? egyptianStyles.goldColor : white.main,
                   },
+                  ...(sacredTheme && {
+                    '&.Mui-disabled': {
+                      color: alpha(egyptianStyles.goldColor, 0.3),
+                    },
+                  }),
                 }}
               />
 
               <Stack direction="column" spacing={0.5}>
-                <Typography fontvariant="merrih4" fontcolor={white.main}>
+                <Typography
+                  fontvariant="merrih4"
+                  fontcolor={
+                    sacredTheme ? egyptianStyles.goldColor : white.main
+                  }
+                  sx={
+                    sacredTheme
+                      ? {
+                          fontFamily: '"Cinzel", serif',
+                          fontWeight: 600,
+                          letterSpacing: '0.05em',
+                          textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                        }
+                      : {}
+                  }
+                >
                   {col.title}
                 </Typography>
-                <Typography fontvariant="merrih6" fontcolor={white.main}>
+                <Typography
+                  fontvariant="merrih6"
+                  fontcolor={
+                    sacredTheme
+                      ? alpha(egyptianStyles.goldColor, 0.8)
+                      : white.main
+                  }
+                  sx={
+                    sacredTheme
+                      ? {
+                          fontFamily: '"Crimson Text", serif',
+                        }
+                      : {}
+                  }
+                >
                   {col.description}
                 </Typography>
               </Stack>
@@ -198,7 +284,23 @@ export default function DesktopBoard({
             {/* Column Body: tasks */}
             <Box sx={{ p: 2, flex: 1 }}>
               {!col.tasks?.length ? (
-                <Typography fontcolor={white.main}>No tasks yet</Typography>
+                <Typography
+                  fontcolor={
+                    sacredTheme
+                      ? alpha(egyptianStyles.goldColor, 0.6)
+                      : white.main
+                  }
+                  sx={
+                    sacredTheme
+                      ? {
+                          fontFamily: '"Crimson Text", serif',
+                          fontStyle: 'italic',
+                        }
+                      : {}
+                  }
+                >
+                  No tasks yet
+                </Typography>
               ) : (
                 <Stack spacing={1}>
                   {col.tasks.map((task, taskIndex) => {
@@ -226,6 +328,7 @@ export default function DesktopBoard({
                         onDrop={e =>
                           handleLocalTaskDrop(e, colIndex, taskIndex)
                         }
+                        sacredTheme={sacredTheme}
                       />
                     )
                   })}
@@ -251,21 +354,34 @@ export default function DesktopBoard({
             boxSizing: 'border-box',
             width: '300px',
             height: '70vh',
-            backgroundColor: black.main,
+            backgroundColor: sacredTheme
+              ? egyptianStyles.cardBackground
+              : black.main,
             borderRadius: '5px',
             display: 'flex',
             flexDirection: 'column',
             overflowX: 'hidden',
             overflowY: 'auto',
             position: 'relative',
+            ...(sacredTheme && {
+              border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
+              animation: `${glowPulse} 3s ease-in-out infinite`,
+              animationDelay: '0.5s',
+              backdropFilter: 'blur(10px)',
+            }),
           }}
         >
           {/* Overflow Column Header */}
           <Box
             sx={{
-              borderBottom: `1px solid ${white.main}`,
+              borderBottom: sacredTheme
+                ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
+                : `1px solid ${white.main}`,
               p: 2,
               position: 'relative',
+              ...(sacredTheme && {
+                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
+              }),
             }}
           >
             <Dropdown
@@ -275,10 +391,16 @@ export default function DesktopBoard({
               }
               value={activeOverflowColumn?.title}
               onChange={handleOverflowDropdownChange}
-              fontcolor="#000"
-              shrunkfontcolor={white.main}
-              backgroundcolor={white.main}
+              fontcolor={sacredTheme ? egyptianStyles.goldColor : '#000'}
+              shrunkfontcolor={
+                sacredTheme ? egyptianStyles.goldColor : white.main
+              }
+              backgroundcolor={
+                sacredTheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
+              }
               shrunklabelposition="aboveNotch"
+              outlinecolor={sacredTheme ? egyptianStyles.goldColor : white.main}
+              sacredTheme={sacredTheme}
             />
 
             {/* 
@@ -286,7 +408,21 @@ export default function DesktopBoard({
             */}
             <Stack direction="column" spacing={0.5} mt={1}>
               {/* We omit activeOverflowColumn.title */}
-              <Typography fontvariant="merrih6" fontcolor={white.main}>
+              <Typography
+                fontvariant="merrih6"
+                fontcolor={
+                  sacredTheme
+                    ? alpha(egyptianStyles.goldColor, 0.8)
+                    : white.main
+                }
+                sx={
+                  sacredTheme
+                    ? {
+                        fontFamily: '"Crimson Text", serif',
+                      }
+                    : {}
+                }
+              >
                 {activeOverflowColumn.description}
               </Typography>
             </Stack>
@@ -295,7 +431,23 @@ export default function DesktopBoard({
           {/* Overflow Column Tasks */}
           <Box sx={{ p: 2, flex: 1 }}>
             {!activeOverflowColumn.tasks?.length ? (
-              <Typography fontcolor={white.main}>No tasks yet</Typography>
+              <Typography
+                fontcolor={
+                  sacredTheme
+                    ? alpha(egyptianStyles.goldColor, 0.6)
+                    : white.main
+                }
+                sx={
+                  sacredTheme
+                    ? {
+                        fontFamily: '"Crimson Text", serif',
+                        fontStyle: 'italic',
+                      }
+                    : {}
+                }
+              >
+                No tasks yet
+              </Typography>
             ) : (
               <Stack spacing={1}>
                 {activeOverflowColumn.tasks.map((task, taskIndex) => {
@@ -321,6 +473,7 @@ export default function DesktopBoard({
                       onDrop={e =>
                         handleLocalTaskDrop(e, overflowColIndex, taskIndex)
                       }
+                      sacredTheme={sacredTheme}
                     />
                   )
                 })}

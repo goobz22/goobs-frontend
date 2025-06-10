@@ -35,6 +35,12 @@ const sacredShimmer = keyframes`
   100% { background-position: 200% center; }
 `
 
+const scrollbarGlow = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+`
+
 // Egyptian styling constants
 const egyptianStyles = {
   goldColor: '#FFD700',
@@ -208,30 +214,62 @@ function CustomDialog({
   }, [buttons, sacredTheme])
 
   const containerStyles = useMemo(() => {
+    const baseStyles = {
+      width: `${width}px`,
+      maxWidth: '100%',
+      maxHeight: '90vh',
+      margin: '0 auto',
+      overflow: 'auto' as const,
+      display: 'flex',
+      flexDirection: 'column' as const,
+    }
+
     if (!sacredTheme) {
       return {
-        width: `${width}px`,
-        maxWidth: '100%',
+        ...baseStyles,
         borderRadius: '16px',
         boxShadow: 3,
-        margin: '0 auto',
         padding: 3,
         bgcolor: white.main,
       }
     }
 
     return {
-      width: `${width}px`,
-      maxWidth: '100%',
+      ...baseStyles,
       borderRadius: '12px',
-      margin: '0 auto',
       padding: '24px 32px 20px 32px',
       position: 'relative' as const,
       bgcolor: egyptianStyles.cardBackground,
       backdropFilter: 'blur(20px)',
       border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
       animation: `${glowPulse} 4s ease-in-out infinite`,
-      overflow: 'hidden',
+      // Sacred scrollbar styling for the main container
+      '&::-webkit-scrollbar': {
+        width: '12px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: alpha('#000000', 0.3),
+        borderRadius: '6px',
+        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
+        borderRadius: '6px',
+        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
+        boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
+        animation: `${scrollbarGlow} 3s ease-in-out infinite`,
+        '&:hover': {
+          backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
+          boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
+        },
+      },
+      '&::-webkit-scrollbar-thumb:active': {
+        backgroundColor: egyptianStyles.goldColor,
+        boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
+      },
+      // Firefox scrollbar styling
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -292,7 +330,47 @@ function CustomDialog({
 
       {renderHeader}
 
-      <Box sx={sacredTheme ? { position: 'relative', zIndex: 1 } : undefined}>
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          minHeight: 0,
+          paddingRight: '10px',
+          ...(sacredTheme
+            ? {
+                position: 'relative',
+                zIndex: 1,
+                // Custom scrollbar styling for sacred theme
+                '&::-webkit-scrollbar': {
+                  width: '12px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: alpha('#000000', 0.3),
+                  borderRadius: '6px',
+                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
+                  borderRadius: '6px',
+                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
+                  boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
+                  animation: `${scrollbarGlow} 3s ease-in-out infinite`,
+                  '&:hover': {
+                    backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
+                    boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
+                  },
+                },
+                '&::-webkit-scrollbar-thumb:active': {
+                  backgroundColor: egyptianStyles.goldColor,
+                  boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
+                },
+                // Firefox scrollbar styling
+                scrollbarWidth: 'thin',
+                scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
+              }
+            : {}),
+        }}
+      >
         {content ||
           (grids && <ContentSection grids={grids} sacredTheme={sacredTheme} />)}
       </Box>
