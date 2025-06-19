@@ -4,6 +4,7 @@ import Typography, {
   TypographyVariant,
   TypographyProps,
 } from './components/Typography'
+import Widget, { WidgetProps } from './components/Widget'
 import ConfirmationCodeInput, {
   ConfirmationCodeInputsProps,
 } from './components/ConfirmationCodeInput'
@@ -173,6 +174,7 @@ import ShowTask, {
 
 export { CustomButton }
 export { Typography }
+export { Widget }
 export { ConfirmationCodeInput }
 export { RadioGroup }
 export { Popup }
@@ -263,6 +265,7 @@ export type { DropdownProps }
 export type { CustomButtonProps }
 export type { ComplexTextEditorProps }
 export type { FontFamily, TypographyVariant, TypographyProps }
+export type { WidgetProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
 export type { PopupProps }
