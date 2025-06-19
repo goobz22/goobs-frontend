@@ -8,8 +8,10 @@ import {
   alpha,
   keyframes,
 } from '@mui/material'
-import { Typography } from './../../components/Typography'
-import { TypographyPropsVariantOverrides } from '@mui/material'
+import {
+  Typography,
+  CustomTypographyVariant,
+} from './../../components/Typography'
 
 const glowPulse = keyframes`
   0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
@@ -23,7 +25,7 @@ const glowPulse = keyframes`
 export interface RadioOption {
   label: string
   fontColor?: string
-  fontVariant?: string
+  fontVariant?: CustomTypographyVariant
 }
 
 /**
@@ -34,7 +36,7 @@ export interface RadioGroupProps {
   options: RadioOption[]
   defaultValue?: string
   name: string
-  labelFontVariant?: keyof TypographyPropsVariantOverrides
+  labelFontVariant?: CustomTypographyVariant
   labelFontColor?: string
   labelText?: string
   sacredTheme?: boolean
@@ -91,9 +93,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
         <Typography
           text={labelText || label}
           fontcolor={sacredTheme ? '#FFD700' : labelFontColor}
-          fontvariant={
-            labelFontVariant as keyof TypographyPropsVariantOverrides
-          }
+          fontvariant={labelFontVariant}
         />
       </FormLabel>
       {/* Render the radio group */}
@@ -130,9 +130,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
                 fontcolor={
                   sacredTheme ? alpha('#FFD700', 0.9) : option.fontColor
                 }
-                fontvariant={
-                  option.fontVariant as keyof TypographyPropsVariantOverrides
-                }
+                fontvariant={option.fontVariant}
                 sx={
                   sacredTheme
                     ? {
