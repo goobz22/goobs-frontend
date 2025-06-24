@@ -7,16 +7,16 @@ const rotateGlyph = keyframes`
 `
 
 interface InfoIconProps extends SvgIconProps {
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
-const InfoIcon: React.FC<InfoIconProps> = ({ sacredTheme, ...props }) => {
+const InfoIcon: React.FC<InfoIconProps> = ({ sacredtheme, ...props }) => {
   return (
     <SvgIcon
       viewBox="0 0 24 24"
       {...props}
       sx={{
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           color: '#FFD700',
           animation: `${rotateGlyph} 20s linear infinite`,
           filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',

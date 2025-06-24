@@ -14,6 +14,10 @@ interface ViewNavProps {
   activeAndHoverColor?: string
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
+  /**
+   * Whether the nav item is currently active/selected.
+   */
+  isActive?: boolean
 }
 
 const ViewNav: FC<ViewNavProps> = ({
@@ -24,9 +28,10 @@ const ViewNav: FC<ViewNavProps> = ({
   activeAndHoverColor = semiTransparentWhite.main,
   onClose,
   variant,
+  isActive,
 }) => {
   // Check if we're using sacred theming based on hover color
-  const isSacredTheme =
+  const issacredtheme =
     activeAndHoverColor.includes('255, 215, 0') ||
     activeAndHoverColor === alpha('#FFD700', 0.15)
 
@@ -52,13 +57,14 @@ const ViewNav: FC<ViewNavProps> = ({
     >
       <MenuItem
         sx={{
-          color: isSacredTheme ? alpha('#FFD700', 0.9) : white.main,
+          color: issacredtheme ? alpha('#FFD700', 0.9) : white.main,
           // Increased to align with ExpandingViewNav text (which has an icon)
           marginLeft: '53px',
           whiteSpace: 'nowrap',
           position: 'relative',
           transition: 'all 0.3s ease',
-          ...(isSacredTheme && {
+          backgroundColor: isActive ? activeAndHoverColor : 'transparent',
+          ...(issacredtheme && {
             '&::before': {
               content: '"𓏏"',
               position: 'absolute',
@@ -71,7 +77,7 @@ const ViewNav: FC<ViewNavProps> = ({
           }),
           '&:hover': {
             backgroundColor: activeAndHoverColor,
-            ...(isSacredTheme && {
+            ...(issacredtheme && {
               color: '#FFD700',
               transform: 'translateX(6px)',
               textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
@@ -100,10 +106,10 @@ const ViewNav: FC<ViewNavProps> = ({
         <Typography
           fontvariant="merriparagraph"
           text={title ?? ''}
-          fontcolor={isSacredTheme ? alpha('#FFD700', 0.9) : white.main}
+          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
           sx={{
             whiteSpace: 'nowrap',
-            ...(isSacredTheme && {
+            ...(issacredtheme && {
               fontWeight: 500,
               letterSpacing: 0.8,
               transition: 'all 0.3s ease',

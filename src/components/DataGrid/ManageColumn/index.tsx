@@ -36,14 +36,14 @@ interface ManageColumnProps {
   handleClose?: () => void
   columns: ColumnDef[]
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function ManageColumns({
   open = false,
   handleClose = () => {},
   columns,
-  sacredTheme = false,
+  sacredtheme = false,
 }: ManageColumnProps) {
   const {
     handleAllCols,
@@ -106,15 +106,15 @@ function ManageColumns({
       }}
       sx={{
         '& .MuiPaper-root': {
-          border: sacredTheme
+          border: sacredtheme
             ? `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`
             : `1px solid ${palette.black.main}`,
-          borderRadius: sacredTheme ? 3 : 2,
+          borderRadius: sacredtheme ? 3 : 2,
           minWidth: '250px',
-          boxShadow: sacredTheme
+          boxShadow: sacredtheme
             ? `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`
             : 24,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             animation: `${glowPulse} 3s ease-in-out infinite`,
           }),
         },
@@ -123,19 +123,19 @@ function ManageColumns({
       <Box
         sx={{
           p: 2,
-          bgcolor: sacredTheme
+          bgcolor: sacredtheme
             ? egyptianStyles.cardBackground
             : palette.white.main,
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             backdropFilter: 'blur(10px)',
           }),
         }}
       >
         {/* Sacred corner glyphs */}
-        {sacredTheme && (
+        {sacredtheme && (
           <>
             <Box
               sx={{
@@ -165,15 +165,15 @@ function ManageColumns({
         )}
 
         <Typography
-          text={sacredTheme ? 'Sacred Columns' : 'Manage Columns'}
+          text={sacredtheme ? 'Sacred Columns' : 'Manage Columns'}
           fontvariant="merriparagraph"
           fontcolor={
-            sacredTheme ? egyptianStyles.goldColor : palette.black.main
+            sacredtheme ? egyptianStyles.goldColor : palette.black.main
           }
           align="center"
           sx={{
             mb: 0,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               fontFamily: '"Cinzel", serif',
               fontWeight: 600,
               letterSpacing: '0.05em',
@@ -185,14 +185,14 @@ function ManageColumns({
           <Searchbar
             value={searchInput}
             onChange={handleSearchChange}
-            placeholder={sacredTheme ? 'Seek columns...' : 'Search Columns'}
+            placeholder={sacredtheme ? 'Seek columns...' : 'Search Columns'}
             iconcolor={
-              sacredTheme ? egyptianStyles.goldColor : palette.black.main
+              sacredtheme ? egyptianStyles.goldColor : palette.black.main
             }
             outlinecolor={
-              sacredTheme ? egyptianStyles.goldColor : palette.black.main
+              sacredtheme ? egyptianStyles.goldColor : palette.black.main
             }
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </Box>
         <Box
@@ -208,13 +208,13 @@ function ManageColumns({
             text="All Columns"
             fontvariant="merriparagraph"
             fontcolor={
-              sacredTheme
+              sacredtheme
                 ? alpha(egyptianStyles.goldColor, 0.9)
                 : palette.black.main
             }
             sx={{
               fontWeight: 'bold',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 fontFamily: '"Crimson Text", serif',
               }),
             }}
@@ -224,7 +224,7 @@ function ManageColumns({
               checked={isAllChecked}
               indeterminate={someColumnsVisible && !isAllChecked}
               onChange={handleCheckboxChange}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           </Box>
         </Box>
@@ -233,7 +233,7 @@ function ManageColumns({
             maxHeight: '160px',
             overflowY: 'auto',
             marginBottom: '10px',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               '&::-webkit-scrollbar': {
                 width: '6px',
               },
@@ -260,7 +260,7 @@ function ManageColumns({
                   display: 'flex',
                   alignItems: 'center',
                   mb: 1,
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     '&:hover': {
                       backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
                       borderRadius: 1,
@@ -274,12 +274,12 @@ function ManageColumns({
                   text={formatColumnName(column.field)}
                   fontvariant="merriparagraph"
                   fontcolor={
-                    sacredTheme ? alpha('#ffffff', 0.9) : palette.black.main
+                    sacredtheme ? alpha('#ffffff', 0.9) : palette.black.main
                   }
                   sx={{
                     flexGrow: 1,
                     mr: 1,
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Crimson Text", serif',
                     }),
                   }}
@@ -288,7 +288,7 @@ function ManageColumns({
                   onClick={() => handleEyeClick(column.field)}
                   size="small"
                   sx={
-                    sacredTheme
+                    sacredtheme
                       ? {
                           color: egyptianStyles.goldColor,
                           '&:hover': {
@@ -303,7 +303,7 @@ function ManageColumns({
                 >
                   <ShowHideEyeIcon
                     visible={isVisible}
-                    sacredTheme={sacredTheme}
+                    sacredtheme={sacredtheme}
                   />
                 </IconButton>
               </Box>
@@ -313,15 +313,15 @@ function ManageColumns({
         <CustomButton
           text="Save"
           backgroundcolor={
-            sacredTheme ? egyptianStyles.goldColor : palette.black.main
+            sacredtheme ? egyptianStyles.goldColor : palette.black.main
           }
           variant="contained"
-          fontcolor={sacredTheme ? palette.black.main : palette.white.main}
+          fontcolor={sacredtheme ? palette.black.main : palette.white.main}
           fontvariant="merriparagraph"
           sx={{ mt: 0 }}
           fullWidth
           onClick={onSaveColumnView}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
     </Popover>

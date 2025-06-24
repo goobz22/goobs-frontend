@@ -89,7 +89,7 @@ export interface CustomDialogProps {
   /** Optional array of button props for footer buttons */
   buttons?: CustomButtonProps[]
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function CustomDialog({
@@ -99,7 +99,7 @@ function CustomDialog({
   content,
   width = 450,
   buttons,
-  sacredTheme = true,
+  sacredtheme = true,
 }: CustomDialogProps) {
   const headerGrid = useMemo(
     (): ContentSectionProps['grids'][0] => ({
@@ -107,8 +107,8 @@ function CustomDialog({
         {
           text: title,
           fontvariant: 'merrih4',
-          fontcolor: sacredTheme ? egyptianStyles.goldColor : 'black',
-          style: sacredTheme
+          fontcolor: sacredtheme ? egyptianStyles.goldColor : 'black',
+          style: sacredtheme
             ? {
                 fontFamily: '"Cinzel", serif',
                 textShadow: egyptianStyles.textShadow,
@@ -116,29 +116,29 @@ function CustomDialog({
                 textAlign: 'center',
               }
             : undefined,
-          sacredTheme: sacredTheme,
+          sacredtheme: sacredtheme,
         },
         {
           text: description,
           fontvariant: 'merrih5',
-          fontcolor: sacredTheme ? alpha('#ffffff', 0.9) : 'black',
-          style: sacredTheme
+          fontcolor: sacredtheme ? alpha('#ffffff', 0.9) : 'black',
+          style: sacredtheme
             ? {
                 fontFamily: '"Crimson Text", serif',
                 textAlign: 'center',
                 marginTop: '8px',
               }
             : undefined,
-          sacredTheme: sacredTheme,
+          sacredtheme: sacredtheme,
         },
       ] as TypographyProps[],
-      style: sacredTheme
+      style: sacredtheme
         ? {
             marginBottom: '16px',
           }
         : undefined,
     }),
-    [title, description, sacredTheme]
+    [title, description, sacredtheme]
   )
 
   const renderHeader = useMemo(() => {
@@ -146,7 +146,7 @@ function CustomDialog({
 
     return (
       <>
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               display: 'flex',
@@ -173,7 +173,7 @@ function CustomDialog({
         <ContentSection grids={[headerGrid]} />
       </>
     )
-  }, [headerGrid, sacredTheme, title, description])
+  }, [headerGrid, sacredtheme, title, description])
 
   const renderButtons = useMemo(() => {
     if (!buttons || buttons.length === 0) return null
@@ -185,8 +185,8 @@ function CustomDialog({
           flexDirection: 'row',
           justifyContent: 'space-between',
           gap: 2,
-          marginTop: sacredTheme ? '16px' : '15px',
-          ...(sacredTheme && {
+          marginTop: sacredtheme ? '16px' : '15px',
+          ...(sacredtheme && {
             borderTop: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
             paddingTop: '16px',
           }),
@@ -196,9 +196,9 @@ function CustomDialog({
           <CustomButton
             key={index}
             {...buttonProps}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
             style={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontFamily: '"Cinzel", serif',
                     letterSpacing: '0.05em',
@@ -211,7 +211,7 @@ function CustomDialog({
         ))}
       </Box>
     )
-  }, [buttons, sacredTheme])
+  }, [buttons, sacredtheme])
 
   const containerStyles = useMemo(() => {
     const baseStyles = {
@@ -224,7 +224,7 @@ function CustomDialog({
       flexDirection: 'column' as const,
     }
 
-    if (!sacredTheme) {
+    if (!sacredtheme) {
       return {
         ...baseStyles,
         borderRadius: '16px',
@@ -294,12 +294,12 @@ function CustomDialog({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme, width])
+  }, [sacredtheme, width])
 
   return (
     <Box sx={containerStyles}>
       {/* Top corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -336,7 +336,7 @@ function CustomDialog({
           overflow: 'auto',
           minHeight: 0,
           paddingRight: '10px',
-          ...(sacredTheme
+          ...(sacredtheme
             ? {
                 position: 'relative',
                 zIndex: 1,
@@ -372,13 +372,13 @@ function CustomDialog({
         }}
       >
         {content ||
-          (grids && <ContentSection grids={grids} sacredTheme={sacredTheme} />)}
+          (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
       </Box>
 
       {renderButtons}
 
       {/* Bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

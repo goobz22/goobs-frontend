@@ -39,7 +39,7 @@ export interface AccountNumberProps extends Omit<TextFieldProps, 'onChange'> {
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /**
    * Whether this is a default/existing value that should be partially masked
    */
@@ -55,7 +55,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   minLength = 8,
   maxLength = 17,
   errorMessage = 'Invalid account number format',
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   ...props
 }) => {
@@ -160,7 +160,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
 
   const AccountAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -175,10 +175,10 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       )}
       <Box
         sx={{
-          color: sacredTheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredTheme ? 600 : 400,
-          fontSize: sacredTheme ? '14px' : '12px',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'inherit',
+          fontWeight: sacredtheme ? 600 : 400,
+          fontSize: sacredtheme ? '14px' : '12px',
+          ...(sacredtheme && {
             background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
             backgroundSize: '200% 100%',
             animation: `${goldShimmer} 3s linear infinite`,
@@ -205,8 +205,8 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
         !isValid && internalValue !== '' ? errorMessage : props.helperText
       }
       label={props.label || 'Account Number'}
-      placeholder={sacredTheme ? '1234567890' : props.placeholder}
-      sacredTheme={sacredTheme}
+      placeholder={sacredtheme ? '1234567890' : props.placeholder}
+      sacredtheme={sacredtheme}
       startAdornment={<AccountAdornment />}
       inputProps={{
         ...props.inputProps,
@@ -216,11 +216,11 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
         input: {
           sx: {
             '& .MuiInputBase-input': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
             '&::placeholder': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
           },

@@ -58,7 +58,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
     onBlur,
     value = '',
     error,
-    sacredTheme = false,
+    sacredtheme = false,
     ...restProps
   } = props
 
@@ -129,7 +129,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
   // No longer need startAdornment since +1 is part of the value
   const endAdornment = useMemo(
     () =>
-      sacredTheme ? (
+      sacredtheme ? (
         <Typography
           sx={{
             color: alpha('#FFD700', 0.4),
@@ -140,7 +140,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
           𓋴
         </Typography>
       ) : undefined,
-    [sacredTheme]
+    [sacredtheme]
   )
 
   const mergedSlotProps = useMemo(() => {
@@ -186,8 +186,8 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
     >
       <TextField
         name={name}
-        label={sacredTheme ? 'Sacred Connection' : label}
-        placeholder={sacredTheme ? 'Divine number...' : placeholder}
+        label={sacredtheme ? 'Sacred Connection' : label}
+        placeholder={sacredtheme ? 'Divine number...' : placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -197,7 +197,7 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
         variant="outlined"
         slotProps={mergedSlotProps}
         endAdornment={endAdornment}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         {...restProps}
       />
     </Box>

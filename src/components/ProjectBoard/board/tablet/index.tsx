@@ -49,7 +49,7 @@ export default function TabletBoard({
   onColumnDragStart,
   onColumnDragOver,
   onColumnDrop,
-  sacredTheme = false,
+  sacredtheme = false,
 }: BoardProps) {
   // Jotai columns store
   const [allColumns, setAllColumns] = useAtom(columnsAtom)
@@ -183,7 +183,7 @@ export default function TabletBoard({
               boxSizing: 'border-box',
               width: '300px',
               height: '70vh',
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? egyptianStyles.cardBackground
                 : black.main,
               borderRadius: '5px',
@@ -192,7 +192,7 @@ export default function TabletBoard({
               overflowX: 'hidden',
               overflowY: 'auto',
               position: 'relative',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
                 animation: `${glowPulse} 3s ease-in-out infinite`,
                 backdropFilter: 'blur(10px)',
@@ -200,7 +200,7 @@ export default function TabletBoard({
             }}
           >
             {/* Sacred corner glyphs */}
-            {sacredTheme && (
+            {sacredtheme && (
               <Box
                 sx={{
                   position: 'absolute',
@@ -219,12 +219,12 @@ export default function TabletBoard({
             {/* Column Header */}
             <Box
               sx={{
-                borderBottom: sacredTheme
+                borderBottom: sacredtheme
                   ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                   : `1px solid ${white.main}`,
                 p: 2,
                 position: 'relative',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
                 }),
               }}
@@ -237,11 +237,11 @@ export default function TabletBoard({
                   position: 'absolute',
                   top: 2,
                   right: 2,
-                  color: sacredTheme ? egyptianStyles.goldColor : white.main,
+                  color: sacredtheme ? egyptianStyles.goldColor : white.main,
                   '&.Mui-checked': {
-                    color: sacredTheme ? egyptianStyles.goldColor : white.main,
+                    color: sacredtheme ? egyptianStyles.goldColor : white.main,
                   },
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     '&.Mui-disabled': {
                       color: alpha(egyptianStyles.goldColor, 0.3),
                     },
@@ -253,10 +253,10 @@ export default function TabletBoard({
                 <Typography
                   fontvariant="merrih4"
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : white.main
+                    sacredtheme ? egyptianStyles.goldColor : white.main
                   }
                   sx={
-                    sacredTheme
+                    sacredtheme
                       ? {
                           fontFamily: '"Cinzel", serif',
                           fontWeight: 600,
@@ -271,12 +271,12 @@ export default function TabletBoard({
                 <Typography
                   fontvariant="merrih6"
                   fontcolor={
-                    sacredTheme
+                    sacredtheme
                       ? alpha(egyptianStyles.goldColor, 0.8)
                       : white.main
                   }
                   sx={
-                    sacredTheme
+                    sacredtheme
                       ? {
                           fontFamily: '"Crimson Text", serif',
                         }
@@ -293,12 +293,12 @@ export default function TabletBoard({
               {!col.tasks?.length ? (
                 <Typography
                   fontcolor={
-                    sacredTheme
+                    sacredtheme
                       ? alpha(egyptianStyles.goldColor, 0.6)
                       : white.main
                   }
                   sx={
-                    sacredTheme
+                    sacredtheme
                       ? {
                           fontFamily: '"Crimson Text", serif',
                           fontStyle: 'italic',
@@ -335,7 +335,7 @@ export default function TabletBoard({
                         onDrop={e =>
                           handleLocalTaskDrop(e, colIndex, taskIndex)
                         }
-                        sacredTheme={sacredTheme}
+                        sacredtheme={sacredtheme}
                       />
                     )
                   })}
@@ -360,7 +360,7 @@ export default function TabletBoard({
             boxSizing: 'border-box',
             width: '300px',
             height: '70vh',
-            backgroundColor: sacredTheme
+            backgroundColor: sacredtheme
               ? egyptianStyles.cardBackground
               : black.main,
             borderRadius: '5px',
@@ -369,7 +369,7 @@ export default function TabletBoard({
             overflowX: 'hidden',
             overflowY: 'auto',
             position: 'relative',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
               animation: `${glowPulse} 3s ease-in-out infinite`,
               animationDelay: '0.5s',
@@ -380,12 +380,12 @@ export default function TabletBoard({
           {/* Overflow Column Header */}
           <Box
             sx={{
-              borderBottom: sacredTheme
+              borderBottom: sacredtheme
                 ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                 : `1px solid ${white.main}`,
               p: 2,
               position: 'relative',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
               }),
             }}
@@ -397,16 +397,16 @@ export default function TabletBoard({
               }
               value={activeOverflowColumn?.title}
               onChange={handleOverflowDropdownChange}
-              fontcolor={sacredTheme ? egyptianStyles.goldColor : '#000'}
+              fontcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
               shrunkfontcolor={
-                sacredTheme ? egyptianStyles.goldColor : white.main
+                sacredtheme ? egyptianStyles.goldColor : white.main
               }
               backgroundcolor={
-                sacredTheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
+                sacredtheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
               }
               shrunklabelposition="aboveNotch"
-              outlinecolor={sacredTheme ? egyptianStyles.goldColor : white.main}
-              sacredTheme={sacredTheme}
+              outlinecolor={sacredtheme ? egyptianStyles.goldColor : white.main}
+              sacredtheme={sacredtheme}
             />
 
             {/* 
@@ -417,12 +417,12 @@ export default function TabletBoard({
               <Typography
                 fontvariant="merrih6"
                 fontcolor={
-                  sacredTheme
+                  sacredtheme
                     ? alpha(egyptianStyles.goldColor, 0.8)
                     : white.main
                 }
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         fontFamily: '"Crimson Text", serif',
                       }
@@ -439,12 +439,12 @@ export default function TabletBoard({
             {!activeOverflowColumn.tasks?.length ? (
               <Typography
                 fontcolor={
-                  sacredTheme
+                  sacredtheme
                     ? alpha(egyptianStyles.goldColor, 0.6)
                     : white.main
                 }
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         fontFamily: '"Crimson Text", serif',
                         fontStyle: 'italic',
@@ -482,7 +482,7 @@ export default function TabletBoard({
                       onDrop={e =>
                         handleLocalTaskDrop(e, overflowColIndex, taskIndex)
                       }
-                      sacredTheme={sacredTheme}
+                      sacredtheme={sacredtheme}
                     />
                   )
                 })}

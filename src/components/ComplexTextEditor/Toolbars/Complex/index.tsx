@@ -66,7 +66,7 @@ interface ComplexToolbarProps {
   defaultExpanded?: boolean
 
   // Sacred theme
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -89,7 +89,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   accordion = false,
   accordionSummary,
   defaultExpanded,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const handleModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -122,7 +122,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           display: 'flex',
           justifyContent: 'flex-end',
           padding: '8px',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             backgroundColor: alpha('#000000', 0.5),
             borderRadius: '8px 8px 0 0',
           }),
@@ -134,7 +134,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           onChange={handleModeChange}
           size="small"
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   '& .MuiToggleButton-root': {
                     color: alpha('#FFD700', 0.7),
@@ -185,7 +185,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           helperText={helperText}
           required={required}
           style={style}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )}
 
@@ -201,7 +201,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           setMarkdown={setMarkdown}
           accordionSummary={accordionSummary}
           defaultExpanded={defaultExpanded}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )}
 
@@ -212,7 +212,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setNewSlateValue={setNewSlateValue}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )}
     </Box>

@@ -9,13 +9,13 @@ const floatAnimation = keyframes`
 `
 
 interface DragIconProps {
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
-const DragIcon: React.FC<DragIconProps> = ({ sacredTheme }) => {
+const DragIcon: React.FC<DragIconProps> = ({ sacredtheme }) => {
   const iconStyle = {
-    color: sacredTheme ? '#FFD700' : 'black',
-    ...(sacredTheme && {
+    color: sacredtheme ? '#FFD700' : 'black',
+    ...(sacredtheme && {
       animation: `${floatAnimation} 3s ease-in-out infinite`,
       filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
     }),

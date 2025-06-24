@@ -28,7 +28,7 @@ function Table({
   someRowsSelected = false,
   onHeaderCheckboxChange,
   onRowCheckboxChange,
-  sacredTheme = false,
+  sacredtheme = false,
 }: TableProps) {
   // We'll consider mobile if screen width < 500px
   const isMobile = !useMediaQuery('(min-width:500px)')
@@ -86,7 +86,7 @@ function Table({
         overflowX: isMobile ? 'auto' : 'hidden',
         // Ensure minimum width for mobile content
         minWidth: isMobile ? '100%' : 'auto',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           borderRadius: '8px',
           overflow: 'hidden',
           border: `1px solid ${alpha('#FFD700', 0.3)}`,
@@ -102,7 +102,7 @@ function Table({
           // Ensure proper width on mobile
           width: '100%',
           minWidth: isMobile ? '100%' : 'auto',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             backgroundColor: 'transparent',
             '&::-webkit-scrollbar': {
               height: '8px',
@@ -129,7 +129,7 @@ function Table({
             tableLayout: 'auto',
             // Force the table's minimum width to accommodate content
             minWidth: isMobile ? '100%' : 'fit-content',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               backgroundColor: 'transparent',
               '& .MuiTableCell-root': {
                 borderBottom: `1px solid ${alpha('#FFD700', 0.2)}`,
@@ -185,7 +185,7 @@ function Table({
               setSelectedOverflowField={setSelectedOverflowField}
               // The entire columns array so we can present them all on mobile
               allColumns={columns}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           </TableHead>
 
@@ -201,7 +201,7 @@ function Table({
             onRowClick={onRowClick}
             onRowCheckboxChange={onRowCheckboxChange}
             allColumns={columns}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </MuiTable>
       </TableContainer>

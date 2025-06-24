@@ -49,7 +49,7 @@ export interface TableProps {
   onHeaderCheckboxChange: React.ChangeEventHandler<HTMLInputElement>
   onRowCheckboxChange: (rowId: string) => void
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 export interface DatagridProps {
@@ -75,5 +75,5 @@ export interface DatagridProps {
   onSelectionChange?: (selectedIds: string[]) => void
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }

@@ -37,7 +37,7 @@ export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   fontcolor?: string
   variant?: CustomTypographyVariant | MuiTypographyProps['variant']
   children?: React.ReactNode
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // MUI's TextTransform type
@@ -308,15 +308,15 @@ const Typography = ({
   variant,
   children,
   style,
-  sacredTheme,
+  sacredtheme,
   ...rest
 }: TypographyProps): JSX.Element => {
   const theme = useTheme()
   let variantStyle: Record<string, unknown> = {}
   const actualVariant = fontvariant || variant
 
-  // If sacredTheme is enabled and no specific variant is provided, use sacred styles
-  if (sacredTheme && !actualVariant) {
+  // If sacredtheme is enabled and no specific variant is provided, use sacred styles
+  if (sacredtheme && !actualVariant) {
     variantStyle = { ...sacredStyles.paragraph }
   } else if (typeof actualVariant === 'string' && actualVariant.length > 0) {
     // First, try to get the variant from the theme
@@ -388,7 +388,7 @@ const Typography = ({
   }
 
   // Apply sacred theme overrides if enabled
-  if (sacredTheme && !actualVariant?.startsWith('sacred')) {
+  if (sacredtheme && !actualVariant?.startsWith('sacred')) {
     variantStyle = {
       ...variantStyle,
       color: '#FFD700',

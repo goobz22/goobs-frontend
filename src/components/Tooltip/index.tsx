@@ -24,7 +24,7 @@ export interface CustomTooltipProps extends TooltipProps {
   tooltipplacement: 'left' | 'right' | 'top' | 'bottom'
   offsetX: number
   offsetY: number
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -59,15 +59,15 @@ const StyledTooltip = styled(
       }}
     />
   )
-)(({ tooltipcolor, sacredTheme }) => ({
+)(({ tooltipcolor, sacredtheme }) => ({
   // Styling for the tooltip content
   [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: sacredTheme ? '#FFD700' : tooltipcolor,
+    backgroundColor: sacredtheme ? '#FFD700' : tooltipcolor,
     fontSize: '16px',
-    fontFamily: sacredTheme ? '"Cinzel", serif' : 'Merriweather',
-    fontWeight: sacredTheme ? 600 : 400,
+    fontFamily: sacredtheme ? '"Cinzel", serif' : 'Merriweather',
+    fontWeight: sacredtheme ? 600 : 400,
     padding: '5px 8px',
-    ...(sacredTheme && {
+    ...(sacredtheme && {
       color: '#000000',
       letterSpacing: '0.5px',
       animation: `${sacredGlow} 2s ease-in-out infinite`,
@@ -76,8 +76,8 @@ const StyledTooltip = styled(
   },
   // Styling for the tooltip arrow
   [`& .${tooltipClasses.arrow}`]: {
-    color: sacredTheme ? '#FFD700' : tooltipcolor,
-    ...(sacredTheme && {
+    color: sacredtheme ? '#FFD700' : tooltipcolor,
+    ...(sacredtheme && {
       filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
     }),
   },

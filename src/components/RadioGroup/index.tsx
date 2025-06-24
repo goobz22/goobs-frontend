@@ -39,7 +39,7 @@ export interface RadioGroupProps {
   labelFontVariant?: CustomTypographyVariant
   labelFontColor?: string
   labelText?: string
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -56,12 +56,12 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   labelFontVariant,
   labelFontColor,
   labelText,
-  sacredTheme,
+  sacredtheme,
 }) => {
   return (
     <FormControl
       sx={
-        sacredTheme
+        sacredtheme
           ? {
               position: 'relative',
               '&::before': {
@@ -82,7 +82,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
         id={`${name}-label`}
         sx={{
           marginBottom: '8px',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             color: '#FFD700',
             fontWeight: 600,
             letterSpacing: '0.5px',
@@ -92,7 +92,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       >
         <Typography
           text={labelText || label}
-          fontcolor={sacredTheme ? '#FFD700' : labelFontColor}
+          fontcolor={sacredtheme ? '#FFD700' : labelFontColor}
           fontvariant={labelFontVariant}
         />
       </FormLabel>
@@ -109,7 +109,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
             control={
               <Radio
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         color: alpha('#FFD700', 0.6),
                         '&.Mui-checked': {
@@ -128,11 +128,11 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
               <Typography
                 text={option.label}
                 fontcolor={
-                  sacredTheme ? alpha('#FFD700', 0.9) : option.fontColor
+                  sacredtheme ? alpha('#FFD700', 0.9) : option.fontColor
                 }
                 fontvariant={option.fontVariant}
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         transition: 'all 0.3s ease',
                         '&:hover': {
@@ -145,7 +145,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
               />
             }
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     transition: 'all 0.3s ease',
                     '&:hover': {

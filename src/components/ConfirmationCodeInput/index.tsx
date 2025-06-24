@@ -132,7 +132,7 @@ export interface ConfirmationCodeInputsProps {
   inputStyle?: React.CSSProperties
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // Custom styled input for verification code digits
@@ -194,7 +194,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   successMessage = 'Verification Successful',
   showSuccessState = false,
   inputStyle = {},
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   // Initialize internal state with the value prop
   const [internalValue, setInternalValue] = useState(value)
@@ -406,7 +406,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         padding={3}
         width="100%"
         sx={
-          sacredTheme
+          sacredtheme
             ? {
                 position: 'relative',
                 backgroundColor: '#0a0a0a',
@@ -423,8 +423,8 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         <CheckCircleOutline
           sx={{
             fontSize: 60,
-            color: sacredTheme ? '#FFD700' : 'green',
-            ...(sacredTheme && {
+            color: sacredtheme ? '#FFD700' : 'green',
+            ...(sacredtheme && {
               filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))',
               animation: `${sacredPulse} 2s ease-in-out infinite`,
             }),
@@ -434,7 +434,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           variant="h5"
           align="center"
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   color: '#FFD700',
                   fontFamily: '"Cinzel", serif',
@@ -448,7 +448,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         >
           {successMessage}
         </Typography>
-        {sacredTheme && (
+        {sacredtheme && (
           <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
             {['𓅨', '𓂋', '𓏭'].map((glyph, i) => (
               <Box
@@ -467,12 +467,12 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
           <CustomButton
             text="Disable Verification"
-            fontcolor={sacredTheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+            fontcolor={sacredtheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
             width="100%"
             height="40px"
             variant="outlined"
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
             {...disableVerificationButtonProps}
             onClick={() => {
               void onDisableVerification()
@@ -489,7 +489,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       height={20}
       borderRadius="50%"
       bgcolor={
-        sacredTheme
+        sacredtheme
           ? isValid
             ? '#FFD700'
             : alpha('#FFD700', 0.3)
@@ -500,7 +500,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       role="status"
       aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
       sx={
-        sacredTheme
+        sacredtheme
           ? {
               animation: `${statusGlow} 2s ease-in-out infinite`,
               transition: 'all 0.3s ease',
@@ -519,7 +519,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       aria-label={ariaLabel || 'Confirmation Code'}
       position="relative"
       sx={
-        sacredTheme
+        sacredtheme
           ? {
               padding: '24px',
               backgroundColor: alpha('#000000', 0.8),
@@ -534,7 +534,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       }
     >
       {/* Sacred decorative elements */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -590,7 +590,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
                 aria-required={ariaRequired}
                 aria-invalid={ariaInvalid}
-                sacredtheme={sacredTheme}
+                sacredtheme={sacredtheme}
                 style={{
                   ...inputStyle,
                 }}
@@ -612,11 +612,11 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
             {showSendResendButton && (
               <CustomButton
                 text={codeSent ? 'Resend Code' : 'Send Code'}
-                fontcolor={sacredTheme ? '#FFD700' : 'white'}
-                backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+                fontcolor={sacredtheme ? '#FFD700' : 'white'}
+                backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
                 width="180px"
                 height="44px"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
                 {...sendResendButtonProps}
                 onClick={() => {
                   if (onSendResend) void onSendResend()
@@ -626,11 +626,11 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
             )}
             <CustomButton
               text="Verify"
-              fontcolor={sacredTheme ? '#FFD700' : 'white'}
-              backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'white'}
+              backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
               width="180px"
               height="44px"
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
               {...verifyButtonProps}
               onClick={() => {
                 if (onVerify) void onVerify()
@@ -642,7 +642,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       </Box>
 
       {/* Sacred bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',

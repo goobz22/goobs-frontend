@@ -29,7 +29,7 @@ export interface CustomToolbarProps {
   searchbarProps?: SearchbarProps
   rightCenterProps?: RightCenterProps
   dropdowns?: DropdownProps[] // <-- changed from "dropdown?" to "dropdowns?"
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const CustomToolbar: FC<CustomToolbarProps> = ({
@@ -37,7 +37,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   searchbarProps,
   rightCenterProps,
   dropdowns,
-  sacredTheme,
+  sacredtheme,
 }) => {
   // 1) Mobile:  <= 600px
   // 2) Tablet:  600px < width <= 1024px
@@ -45,7 +45,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   const isMobile = useMediaQuery('(max-width:600px)')
   const isTabletOrBelow = useMediaQuery('(max-width:1024px)')
 
-  const containerStyles = sacredTheme
+  const containerStyles = sacredtheme
     ? {
         backgroundColor: alpha('#000000', 0.8),
         border: `1px solid ${alpha('#FFD700', 0.3)}`,
@@ -93,9 +93,9 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          <Left buttons={buttons} sacredTheme={sacredTheme} />
+          <Left buttons={buttons} sacredtheme={sacredtheme} />
           {searchbarProps && (
-            <LeftCenter {...searchbarProps} sacredTheme={sacredTheme} />
+            <LeftCenter {...searchbarProps} sacredtheme={sacredtheme} />
           )}
         </Box>
 
@@ -109,10 +109,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           }}
         >
           {rightCenterProps && (
-            <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
+            <RightCenter {...rightCenterProps} sacredtheme={sacredtheme} />
           )}
           {dropdowns?.map((dd, index) => (
-            <Right key={index} dropdown={dd} sacredTheme={sacredTheme} />
+            <Right key={index} dropdown={dd} sacredtheme={sacredtheme} />
           ))}
         </Box>
       </Box>
@@ -143,7 +143,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          <Left buttons={buttons} sacredTheme={sacredTheme} />
+          <Left buttons={buttons} sacredtheme={sacredtheme} />
         </Box>
 
         {/* Right half: RightCenter + (multiple) dropdowns */}
@@ -156,10 +156,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           }}
         >
           {rightCenterProps && (
-            <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
+            <RightCenter {...rightCenterProps} sacredtheme={sacredtheme} />
           )}
           {dropdowns?.map((dd, index) => (
-            <Right key={index} dropdown={dd} sacredTheme={sacredTheme} />
+            <Right key={index} dropdown={dd} sacredtheme={sacredtheme} />
           ))}
         </Box>
       </Box>
@@ -180,20 +180,20 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
     >
       {/* Row 1: Buttons */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Left buttons={buttons} sacredTheme={sacredTheme} />
+        <Left buttons={buttons} sacredtheme={sacredtheme} />
       </Box>
 
       {/* Row 2: RightCenter (selected rows actions) */}
       {rightCenterProps && (
         <Box sx={{ mt: 2 }}>
-          <RightCenter {...rightCenterProps} sacredTheme={sacredTheme} />
+          <RightCenter {...rightCenterProps} sacredtheme={sacredtheme} />
         </Box>
       )}
 
       {/* Row 3: (multiple) Dropdowns */}
       {dropdowns?.map((dd, index) => (
         <Box sx={{ mt: 2 }} key={index}>
-          <Right dropdown={dd} sacredTheme={sacredTheme} />
+          <Right dropdown={dd} sacredtheme={sacredtheme} />
         </Box>
       ))}
     </Box>

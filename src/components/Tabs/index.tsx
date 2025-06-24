@@ -35,7 +35,7 @@ export interface TabsProps {
   height?: string
   alignment?: 'left' | 'center' | 'right' | 'inherit' | 'justify'
   navname?: string
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -46,7 +46,7 @@ function Tabs({
   height = '48px',
   alignment = 'left',
   navname = '',
-  sacredTheme = false,
+  sacredtheme = false,
 }: TabsProps) {
   const [activeTabValues, setActiveTabValues] = useState<
     Record<string, ActiveTabValue>
@@ -90,15 +90,15 @@ function Tabs({
       position="sticky"
       elevation={0} // Remove MUI's default shadow
       sx={{
-        backgroundColor: sacredTheme ? '#0a0a0a' : black.main,
-        color: sacredTheme ? '#FFD700' : '#fff',
+        backgroundColor: sacredtheme ? '#0a0a0a' : black.main,
+        color: sacredtheme ? '#FFD700' : '#fff',
         overflow: 'hidden',
         height,
         minHeight: height,
         display: 'flex',
         justifyContent: 'center',
-        boxShadow: sacredTheme ? `0 0 20px ${alpha('#FFD700', 0.3)}` : 'none',
-        ...(sacredTheme && {
+        boxShadow: sacredtheme ? `0 0 20px ${alpha('#FFD700', 0.3)}` : 'none',
+        ...(sacredtheme && {
           borderBottom: `2px solid ${alpha('#FFD700', 0.4)}`,
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.03), rgba(255, 215, 0, 0.03)),
@@ -114,18 +114,18 @@ function Tabs({
         variant="fullWidth"
         aria-label="nav tabs"
         sx={{
-          backgroundColor: sacredTheme ? 'transparent' : black.main,
+          backgroundColor: sacredtheme ? 'transparent' : black.main,
           height: '100%',
           '& .MuiTabs-flexContainer': {
             height: '100%',
             display: 'flex',
             justifyContent: alignment === 'left' ? 'flex-start' : alignment,
-            backgroundColor: sacredTheme ? 'transparent' : black.main,
+            backgroundColor: sacredtheme ? 'transparent' : black.main,
           },
           '& .MuiTabs-indicator': {
-            backgroundColor: sacredTheme ? '#FFD700' : '#fff',
-            height: sacredTheme ? '3px' : '2px',
-            ...(sacredTheme && {
+            backgroundColor: sacredtheme ? '#FFD700' : '#fff',
+            height: sacredtheme ? '3px' : '2px',
+            ...(sacredtheme && {
               boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
             }),
           },
@@ -136,14 +136,14 @@ function Tabs({
             alignItems: 'center',
             textTransform: 'none',
             boxSizing: 'border-box',
-            backgroundColor: sacredTheme ? 'transparent' : black.main,
-            color: sacredTheme ? alpha('#FFD700', 0.8) : '#fff',
+            backgroundColor: sacredtheme ? 'transparent' : black.main,
+            color: sacredtheme ? alpha('#FFD700', 0.8) : '#fff',
             fontWeight: 500,
-            fontFamily: sacredTheme ? '"Cinzel", serif' : 'Merriweather',
+            fontFamily: sacredtheme ? '"Cinzel", serif' : 'Merriweather',
             fontSize: 16,
             transition: 'all 0.3s ease',
             position: 'relative',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               letterSpacing: '1px',
               '&::before': {
                 content: '""',
@@ -160,10 +160,10 @@ function Tabs({
               },
             }),
             '&:hover': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? 'transparent'
                 : 'rgba(255, 255, 255, 0.1)',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 color: '#FFD700',
                 textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
                 '&::before': {
@@ -173,10 +173,10 @@ function Tabs({
               }),
             },
             '&.Mui-selected': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? alpha('#FFD700', 0.1)
                 : 'rgba(255, 255, 255, 0.2)',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 color: '#FFD700',
                 textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
                 fontWeight: 600,
@@ -190,7 +190,7 @@ function Tabs({
             key={item.title}
             value={item.title || ''}
             label={
-              sacredTheme ? (
+              sacredtheme ? (
                 <span
                   style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
@@ -212,12 +212,12 @@ function Tabs({
             onClick={() => handleTabClick(item)}
             sx={{
               ...(item.hasleftborder === 'true' && {
-                borderLeft: sacredTheme
+                borderLeft: sacredtheme
                   ? `1px solid ${alpha('#FFD700', 0.3)}`
                   : '1px solid white',
               }),
               ...(item.hasrightborder === 'true' && {
-                borderRight: sacredTheme
+                borderRight: sacredtheme
                   ? `1px solid ${alpha('#FFD700', 0.3)}`
                   : '1px solid white',
               }),

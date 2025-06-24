@@ -1,7 +1,9 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import { Drawer, Box, Stack, Divider, keyframes, alpha } from '@mui/material'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Typography } from '../Typography'
 
 // Replaced SearchableDropdown import with Dropdown import
@@ -67,6 +69,49 @@ const rotateGlyph = keyframes`
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 `
+
+// --------------------------------------------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------------------------------------------
+
+/**
+ * Recursively searches for the active navigation item based on the current path
+ * and returns the trail of parent items leading to it.
+ */
+const findActiveItemPath = (
+  items: NavItem[],
+  currentPath: string
+): NavItem[] | null => {
+  for (const item of items) {
+    if (item.route && item.route === currentPath) {
+      return [item]
+    }
+
+    let children: NavItem[] | undefined
+    switch (item.navType) {
+      case 'mainNav':
+        children = item.subnavs
+        break
+      case 'subNav':
+        children = item.views
+        break
+      case 'viewNav':
+        children = item.subViewNavs
+        break
+      case 'subViewNav':
+        children = item.subSubViewNavs
+        break
+    }
+
+    if (children && children.length > 0) {
+      const childPath = findActiveItemPath(children, currentPath)
+      if (childPath) {
+        return [item, ...childPath]
+      }
+    }
+  }
+  return null
+}
 
 // --------------------------------------------------------------------------
 // INTERFACES
@@ -162,13 +207,16 @@ export interface NavProps {
   }
 
   /** NEW: Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 
   /** NEW: Custom sacred title (overrides verticalNavTitle when sacred theme is enabled) */
   sacredTitle?: string
 
   /** NEW: Sacred subtitle */
   sacredSubtitle?: string
+
+  /** The current path, to determine the active nav item. If not provided, will use Next.js's usePathname. */
+  pathname?: string
 }
 
 // --------------------------------------------------------------------------
@@ -303,21 +351,25 @@ function Nav({
   marginabovetitle = '0px',
   marginbelowtitle = '5px',
   router,
-  sacredTheme = false,
+  sacredtheme = false,
   sacredTitle,
   sacredSubtitle,
+  pathname: propPathname,
 }: NavProps) {
   // States for expanded mainNavs, subNavs, viewNavs, and subViewNavs
   const [expandedNavs, setExpandedNavs] = useState<string[]>([])
   const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
   const [expandedViewNavs, setExpandedViewNavs] = useState<string[]>([])
   const [expandedSubViewNavs, setExpandedSubViewNavs] = useState<string[]>([])
+  const [dropdownSelection, setDropdownSelection] = useState<
+    string | undefined
+  >()
+
+  const nextPathname = usePathname()
+  const pathname = propPathname || nextPathname
 
   // Default width for the vertical nav
   const [verticalNavWidth] = useState<string>('250px')
-
-  // For search dropdown
-  const [selectedNav, setSelectedNav] = useState<string | null>(null)
 
   // Sacred theme container ref for background
   const containerRef = useRef<HTMLDivElement>(null)
@@ -326,9 +378,57 @@ function Nav({
     height: 600,
   })
 
+  useEffect(() => {
+    const activePath = findActiveItemPath(items, pathname)
+
+    if (activePath) {
+      const mainNavItemTitle = activePath[0]?.title
+      setDropdownSelection(mainNavItemTitle)
+      const newExpandedNavs: string[] = []
+      const newExpandedSubnavs: string[] = []
+      const newExpandedViewNavs: string[] = []
+      const newExpandedSubViewNavs: string[] = []
+
+      activePath.forEach(pathItem => {
+        const hasChildren =
+          pathItem.subnavs?.length ||
+          pathItem.views?.length ||
+          pathItem.subViewNavs?.length ||
+          pathItem.subSubViewNavs?.length
+        if (hasChildren) {
+          switch (pathItem.navType) {
+            case 'mainNav':
+              newExpandedNavs.push(pathItem.title)
+              break
+            case 'subNav':
+              newExpandedSubnavs.push(pathItem.title)
+              break
+            case 'viewNav':
+              newExpandedViewNavs.push(pathItem.title)
+              break
+            case 'subViewNav':
+              newExpandedSubViewNavs.push(pathItem.title)
+              break
+          }
+        }
+      })
+
+      setExpandedNavs(current => [...new Set([...current, ...newExpandedNavs])])
+      setExpandedSubnavs(current => [
+        ...new Set([...current, ...newExpandedSubnavs]),
+      ])
+      setExpandedViewNavs(current => [
+        ...new Set([...current, ...newExpandedViewNavs]),
+      ])
+      setExpandedSubViewNavs(current => [
+        ...new Set([...current, ...newExpandedSubViewNavs]),
+      ])
+    }
+  }, [pathname, items])
+
   // Update container size for sacred background
   useEffect(() => {
-    if (!sacredTheme || !containerRef.current) return
+    if (!sacredtheme || !containerRef.current) return
 
     const updateSize = () => {
       const container = containerRef.current
@@ -343,7 +443,7 @@ function Nav({
     updateSize()
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   // Build search dropdown options from mainNav items
   const navOptions = items
@@ -369,10 +469,11 @@ function Nav({
   function renderItem(
     item: NavItem,
     level: number,
-    activeAndHoverColor = sacredTheme
+    activeAndHoverColor = sacredtheme
       ? alpha('#FFD700', 0.15)
       : semiTransparentWhite.main
   ) {
+    const isActive = item.route === pathname
     switch (item.navType) {
       // 1) MAIN NAV
       case 'mainNav': {
@@ -405,6 +506,8 @@ function Nav({
               trigger={item.trigger}
               onClose={onClose}
               variant={variant}
+              isActive={isActive}
+              activeAndHoverColor={activeAndHoverColor}
             />
           )
         }
@@ -421,6 +524,7 @@ function Nav({
               title={item.title}
               expandedSubnavs={expandedSubnavs}
               setExpandedSubnavs={setExpandedSubnavs}
+              onClick={() => handleNavClick(item)}
             >
               {item.views?.map(view =>
                 renderItem(view, level + 2, activeAndHoverColor)
@@ -438,6 +542,7 @@ function Nav({
               activeAndHoverColor={activeAndHoverColor}
               onClose={onClose}
               variant={variant}
+              isActive={isActive}
             />
           )
         }
@@ -455,6 +560,7 @@ function Nav({
               title={item.title}
               expandedNavs={expandedViewNavs}
               setExpandedNavs={setExpandedViewNavs}
+              onClick={() => handleNavClick(item)}
               level={level}
             >
               {item.subViewNavs?.map(subViewItem =>
@@ -475,6 +581,7 @@ function Nav({
               activeAndHoverColor={activeAndHoverColor}
               onClose={onClose}
               variant={variant}
+              isActive={isActive}
             />
           )
         }
@@ -513,6 +620,7 @@ function Nav({
               activeAndHoverColor={activeAndHoverColor}
               onClose={onClose}
               variant={variant}
+              isActive={isActive}
             />
           )
         }
@@ -530,6 +638,7 @@ function Nav({
             activeAndHoverColor={activeAndHoverColor}
             onClose={onClose}
             variant={variant}
+            isActive={isActive}
           />
         )
       }
@@ -705,7 +814,7 @@ function Nav({
       }}
     >
       {/* Sacred background animation */}
-      {sacredTheme && (
+      {sacredtheme && (
         <SacredBackground
           width={containerSize.width}
           height={containerSize.height}
@@ -721,7 +830,7 @@ function Nav({
           overflowY: 'auto',
           overflowX: 'hidden',
           // Custom scrollbar for sacred theme
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '&::-webkit-scrollbar': {
               width: '8px',
             },
@@ -742,7 +851,7 @@ function Nav({
         <Box px="15px" sx={{ whiteSpace: 'nowrap' }}>
           {showTitle && (
             <Box mt={marginabovetitle} mb={marginbelowtitle}>
-              {sacredTheme ? (
+              {sacredtheme ? (
                 <SacredTitle />
               ) : (
                 <Link
@@ -775,20 +884,21 @@ function Nav({
                 <SearchableDropdown
                   label={searchableNavLabel}
                   options={navOptions}
+                  defaultValue={dropdownSelection}
                   backgroundcolor={
-                    sacredTheme
+                    sacredtheme
                       ? alpha('#000000', 0.6)
                       : backgroundcolor || semiTransparentWhite.main
                   }
-                  outlinecolor={sacredTheme ? '#FFD700' : 'none'}
-                  shrunkfontcolor={sacredTheme ? '#FFD700' : shrunkfontcolor}
+                  outlinecolor={sacredtheme ? '#FFD700' : 'none'}
+                  shrunkfontcolor={sacredtheme ? '#FFD700' : shrunkfontcolor}
                   shrunklabelposition="aboveNotch"
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                   sacredTitle="No Divine Paths"
                   sacredSubtitle="Ancient wisdom awaits your search"
                   onChange={option => {
                     const selectedValue = option ? option.value : null
-                    setSelectedNav(selectedValue)
+                    setDropdownSelection(selectedValue || undefined)
 
                     // If a nav is selected, automatically expand it
                     if (selectedValue) {
@@ -815,7 +925,7 @@ function Nav({
         </Box>
 
         {showLine &&
-          (sacredTheme ? (
+          (sacredtheme ? (
             <SacredDivider />
           ) : (
             <Divider
@@ -827,16 +937,10 @@ function Nav({
             />
           ))}
 
-        {selectedNav
-          ? // If user picked a mainNav item from the search
-            items
-              .filter(i => i.title === selectedNav)
-              .map(i => renderItem(i, 0))
-          : // Otherwise render all nav items
-            items.map(i => renderItem(i, 0))}
+        {items.map(i => renderItem(i, 0))}
 
         {/* Sacred footer for sacred theme */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               textAlign: 'center',
@@ -906,8 +1010,8 @@ function Nav({
             variant === 'temporary'
               ? theme.zIndex.drawer + 2
               : theme.zIndex.drawer - 1,
-          backgroundColor: sacredTheme ? '#0a0a0a' : ocean.main,
-          ...(sacredTheme && {
+          backgroundColor: sacredtheme ? '#0a0a0a' : ocean.main,
+          ...(sacredtheme && {
             backgroundImage: `
               linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
               radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)

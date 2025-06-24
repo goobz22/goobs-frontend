@@ -42,7 +42,7 @@ interface ManageRowProps {
   onShow?: () => void
   onExport?: () => void
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function ManageRow({
@@ -54,7 +54,7 @@ function ManageRow({
   onManage,
   onShow,
   onExport,
-  sacredTheme = false,
+  sacredtheme = false,
 }: ManageRowProps) {
   const isMobile = useMediaQuery('(max-width:600px)')
 
@@ -132,10 +132,10 @@ function ManageRow({
         minWidth: isMobile ? 'auto' : '560px',
         padding: isMobile ? '0 5px' : '0 10px',
         userSelect: 'none',
-        boxShadow: sacredTheme
+        boxShadow: sacredtheme
           ? `0 0 20px ${alpha(egyptianStyles.goldColor, 0.3)}`
           : '0px 4px 10px rgba(0, 0, 0, 0.1)',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundColor: egyptianStyles.cardBackground,
           border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
           backdropFilter: 'blur(10px)',
@@ -156,9 +156,9 @@ function ManageRow({
             text={`${selectedRows.length} ${
               selectedRows.length === 1 ? 'item' : 'items'
             } selected`}
-            fontcolor={sacredTheme ? egyptianStyles.goldColor : undefined}
+            fontcolor={sacredtheme ? egyptianStyles.goldColor : undefined}
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontFamily: '"Cinzel", serif',
                     fontWeight: 600,
@@ -184,7 +184,7 @@ function ManageRow({
               flexDirection="row"
               alignItems="center"
               sx={{
-                borderRight: sacredTheme
+                borderRight: sacredtheme
                   ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                   : '1px solid #e0e0e0',
                 paddingRight: '8px',
@@ -204,7 +204,7 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: sacredTheme
+                      backgroundColor: sacredtheme
                         ? alpha(egyptianStyles.goldColor, 0.1)
                         : 'rgba(0, 0, 0, 0.04)',
                     },
@@ -218,7 +218,7 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
+                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <EditIcon />
@@ -226,10 +226,10 @@ function ManageRow({
                       fontvariant="merriparagraph"
                       text="Manage"
                       fontcolor={
-                        sacredTheme ? egyptianStyles.goldColor : undefined
+                        sacredtheme ? egyptianStyles.goldColor : undefined
                       }
                       sx={
-                        sacredTheme
+                        sacredtheme
                           ? { fontFamily: '"Crimson Text", serif' }
                           : {}
                       }
@@ -251,7 +251,7 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: sacredTheme
+                      backgroundColor: sacredtheme
                         ? alpha(egyptianStyles.goldColor, 0.1)
                         : 'rgba(0, 0, 0, 0.04)',
                     },
@@ -265,7 +265,7 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
+                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <VisibilityIcon />
@@ -273,10 +273,10 @@ function ManageRow({
                       fontvariant="merriparagraph"
                       text="Show"
                       fontcolor={
-                        sacredTheme ? egyptianStyles.goldColor : undefined
+                        sacredtheme ? egyptianStyles.goldColor : undefined
                       }
                       sx={
-                        sacredTheme
+                        sacredtheme
                           ? { fontFamily: '"Crimson Text", serif' }
                           : {}
                       }
@@ -298,7 +298,7 @@ function ManageRow({
                     padding: '8px',
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: sacredTheme
+                      backgroundColor: sacredtheme
                         ? alpha(egyptianStyles.goldColor, 0.1)
                         : 'rgba(0, 0, 0, 0.04)',
                     },
@@ -312,7 +312,7 @@ function ManageRow({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      color: sacredTheme ? egyptianStyles.goldColor : 'black',
+                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
                     }}
                   >
                     <DuplicateIcon />
@@ -320,10 +320,10 @@ function ManageRow({
                       fontvariant="merriparagraph"
                       text="Duplicate"
                       fontcolor={
-                        sacredTheme ? egyptianStyles.goldColor : undefined
+                        sacredtheme ? egyptianStyles.goldColor : undefined
                       }
                       sx={
-                        sacredTheme
+                        sacredtheme
                           ? { fontFamily: '"Crimson Text", serif' }
                           : {}
                       }
@@ -349,7 +349,7 @@ function ManageRow({
                   padding: '8px',
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha(egyptianStyles.goldColor, 0.1)
                       : 'rgba(0, 0, 0, 0.04)',
                   },
@@ -363,7 +363,7 @@ function ManageRow({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    color: sacredTheme ? egyptianStyles.goldColor : 'black',
+                    color: sacredtheme ? egyptianStyles.goldColor : 'black',
                   }}
                 >
                   <DeleteIcon />
@@ -371,10 +371,10 @@ function ManageRow({
                     fontvariant="merriparagraph"
                     text="Delete"
                     fontcolor={
-                      sacredTheme ? egyptianStyles.goldColor : undefined
+                      sacredtheme ? egyptianStyles.goldColor : undefined
                     }
                     sx={
-                      sacredTheme ? { fontFamily: '"Crimson Text", serif' } : {}
+                      sacredtheme ? { fontFamily: '"Crimson Text", serif' } : {}
                     }
                   />
                 </Box>
@@ -394,7 +394,7 @@ function ManageRow({
                   padding: '8px',
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha(egyptianStyles.goldColor, 0.1)
                       : 'rgba(0, 0, 0, 0.04)',
                   },
@@ -408,7 +408,7 @@ function ManageRow({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    color: sacredTheme ? egyptianStyles.goldColor : 'black',
+                    color: sacredtheme ? egyptianStyles.goldColor : 'black',
                   }}
                 >
                   <ExportIcon />
@@ -416,10 +416,10 @@ function ManageRow({
                     fontvariant="merriparagraph"
                     text="Export"
                     fontcolor={
-                      sacredTheme ? egyptianStyles.goldColor : undefined
+                      sacredtheme ? egyptianStyles.goldColor : undefined
                     }
                     sx={
-                      sacredTheme ? { fontFamily: '"Crimson Text", serif' } : {}
+                      sacredtheme ? { fontFamily: '"Crimson Text", serif' } : {}
                     }
                   />
                 </Box>

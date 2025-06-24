@@ -120,7 +120,7 @@ export interface PopupProps {
   /** Optional array of button props for footer buttons */
   buttons?: CustomButtonProps[]
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function Popup({
@@ -133,7 +133,7 @@ function Popup({
   content,
   width = 450,
   buttons,
-  sacredTheme = true,
+  sacredtheme = true,
 }: PopupProps) {
   // Local state syncing with props
   const [isOpen, setIsOpen] = useState(open)
@@ -248,8 +248,8 @@ function Popup({
           text: title,
           // Cast to literal type as expected by goobs-frontend.
           fontvariant: 'merrih4' as const,
-          fontcolor: sacredTheme ? egyptianStyles.goldColor : 'black',
-          style: sacredTheme
+          fontcolor: sacredtheme ? egyptianStyles.goldColor : 'black',
+          style: sacredtheme
             ? {
                 fontFamily: '"Cinzel", serif',
                 textShadow: egyptianStyles.textShadow,
@@ -257,29 +257,29 @@ function Popup({
                 textAlign: 'center',
               }
             : undefined,
-          sacredTheme: sacredTheme,
+          sacredtheme: sacredtheme,
         },
         {
           text: description,
           fontvariant: 'merrih5' as const,
-          fontcolor: sacredTheme ? alpha('#ffffff', 0.9) : 'black',
-          style: sacredTheme
+          fontcolor: sacredtheme ? alpha('#ffffff', 0.9) : 'black',
+          style: sacredtheme
             ? {
                 fontFamily: '"Crimson Text", serif',
                 textAlign: 'center',
                 marginTop: '8px',
               }
             : undefined,
-          sacredTheme: sacredTheme,
+          sacredtheme: sacredtheme,
         },
       ],
-      style: sacredTheme
+      style: sacredtheme
         ? {
             marginBottom: '16px',
           }
         : undefined,
     }),
-    [title, description, sacredTheme]
+    [title, description, sacredtheme]
   )
 
   const renderHeader = useMemo(() => {
@@ -287,7 +287,7 @@ function Popup({
 
     return (
       <>
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               display: 'flex',
@@ -314,7 +314,7 @@ function Popup({
         <ContentSection grids={[headerGrid]} />
       </>
     )
-  }, [headerGrid, sacredTheme, title, description])
+  }, [headerGrid, sacredtheme, title, description])
 
   const renderButtons = useMemo(() => {
     if (!buttons || buttons.length === 0) return null
@@ -326,8 +326,8 @@ function Popup({
           flexDirection: 'row',
           justifyContent: 'space-between',
           gap: 2,
-          marginTop: sacredTheme ? '16px' : '15px',
-          ...(sacredTheme && {
+          marginTop: sacredtheme ? '16px' : '15px',
+          ...(sacredtheme && {
             borderTop: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
             paddingTop: '16px',
           }),
@@ -337,9 +337,9 @@ function Popup({
           <CustomButton
             key={index}
             {...buttonProps}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
             style={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontFamily: '"Cinzel", serif',
                     letterSpacing: '0.05em',
@@ -352,7 +352,7 @@ function Popup({
         ))}
       </Box>
     )
-  }, [buttons, sacredTheme])
+  }, [buttons, sacredtheme])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -364,12 +364,12 @@ function Popup({
     const baseStyles = {
       width: `${width}px`,
       maxHeight: '90vh',
-      borderRadius: sacredTheme ? '12px' : '16px',
-      backgroundColor: sacredTheme ? egyptianStyles.cardBackground : white.main,
-      boxShadow: sacredTheme
+      borderRadius: sacredtheme ? '12px' : '16px',
+      backgroundColor: sacredtheme ? egyptianStyles.cardBackground : white.main,
+      boxShadow: sacredtheme
         ? egyptianStyles.glowEffect
         : '0px 4px 10px rgba(0, 0, 0, 0.2)',
-      padding: sacredTheme ? '24px 32px 20px 32px' : '24px',
+      padding: sacredtheme ? '24px 32px 20px 32px' : '24px',
       pointerEvents: 'auto' as const,
       position: 'fixed' as const,
       overflow: 'auto' as const,
@@ -385,7 +385,7 @@ function Popup({
       cursor: isDragging ? 'grabbing' : 'default',
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -443,7 +443,7 @@ function Popup({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme, width, dragPosition, isDragging])
+  }, [sacredtheme, width, dragPosition, isDragging])
 
   return (
     <Dialog
@@ -455,7 +455,7 @@ function Popup({
         paper: {
           sx: dialogPaperStyles,
         },
-        backdrop: sacredTheme
+        backdrop: sacredtheme
           ? {
               sx: {
                 backgroundColor: alpha('#000000', 0.85),
@@ -466,7 +466,7 @@ function Popup({
       }}
     >
       {/* Top corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -512,11 +512,11 @@ function Popup({
           size="small"
           onMouseDown={handleMouseDown}
           sx={{
-            color: sacredTheme
+            color: sacredtheme
               ? egyptianStyles.goldColor
               : theme => theme.palette.grey[500],
             cursor: isDragging ? 'grabbing' : 'grab',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               animation: `${closeButtonGlow} 6s ease-in-out infinite`,
               animationDelay: '1s',
               '&:hover': {
@@ -526,7 +526,7 @@ function Popup({
                 transition: 'all 0.3s ease',
               },
             }),
-            ...(!sacredTheme && {
+            ...(!sacredtheme && {
               '&:hover': {
                 color: theme => theme.palette.grey[700],
                 backgroundColor: alpha('#000', 0.04),
@@ -543,11 +543,11 @@ function Popup({
           onClick={handleClose}
           onMouseDown={e => e.stopPropagation()} // Prevent drag when clicking close
           sx={{
-            color: sacredTheme
+            color: sacredtheme
               ? egyptianStyles.goldColor
               : theme => theme.palette.grey[500],
             cursor: 'pointer',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               animation: `${closeButtonGlow} 6s ease-in-out infinite`,
               '&:hover': {
                 color: egyptianStyles.goldColor,
@@ -556,7 +556,7 @@ function Popup({
                 transition: 'all 0.3s ease',
               },
             }),
-            ...(!sacredTheme && {
+            ...(!sacredtheme && {
               '&:hover': {
                 color: theme => theme.palette.grey[700],
                 backgroundColor: alpha('#000', 0.04),
@@ -576,7 +576,7 @@ function Popup({
           overflow: 'auto',
           minHeight: 0,
           paddingRight: '10px',
-          ...(sacredTheme
+          ...(sacredtheme
             ? {
                 position: 'relative',
                 zIndex: 1,
@@ -612,13 +612,13 @@ function Popup({
         }}
       >
         {content ||
-          (grids && <ContentSection grids={grids} sacredTheme={sacredTheme} />)}
+          (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
       </Box>
 
       {renderButtons}
 
       {/* Bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

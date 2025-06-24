@@ -135,7 +135,7 @@ export interface SearchableDropdownProps {
   // Controls whether ID columns (containing 'id' or '_id') are visible by default
   showIdColumns?: boolean
   // NEW: Sacred theme support
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   sacredTitle?: string
   sacredSubtitle?: string
 }
@@ -270,7 +270,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   onSearch,
   maxHistoryItems = 5, // Default to showing 5 history items
   showIdColumns = false, // Default to hiding ID columns for security
-  sacredTheme = false,
+  sacredtheme = false,
   sacredTitle = '',
   sacredSubtitle = '',
 }) => {
@@ -826,7 +826,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           }
           shrunklabelposition={shrunklabelposition}
           disabled={disabled}
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
         >
           {label}
         </StyledInputLabel>
@@ -846,7 +846,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           onClick={handleOpenMenu}
-          placeholder={sacredTheme ? 'Seek divine wisdom...' : placeholder}
+          placeholder={sacredtheme ? 'Seek divine wisdom...' : placeholder}
           error={error}
           required={required}
           notched={
@@ -859,12 +859,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               sx={{
                 color: disabled
                   ? 'rgba(0, 0, 0, 0.38)'
-                  : sacredTheme
+                  : sacredtheme
                     ? '#FFD700'
                     : black.main,
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   '&:hover': {
                     color: '#FFD700',
                     filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
@@ -888,19 +888,19 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             height: '40px !important',
             backgroundColor: disabled
               ? 'rgba(0, 0, 0, 0.12) !important'
-              : sacredTheme
+              : sacredtheme
                 ? `${alpha('#000000', 0.8)} !important`
                 : `${backgroundcolor || white.main} !important`,
             borderRadius: '4px',
             color: disabled
               ? 'rgba(0, 0, 0, 0.38)'
-              : sacredTheme
+              : sacredtheme
                 ? '#FFD700'
                 : fontcolor || black.main,
             cursor: disabled ? 'not-allowed' : 'pointer',
             transition: 'all 0.3s ease',
             position: 'relative',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               backgroundImage: `
                 linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
                 radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
@@ -921,10 +921,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             '& fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : sacredTheme
+                : sacredtheme
                   ? '#FFD700'
                   : outlinecolor || black.main,
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 borderWidth: '2px',
                 boxShadow: '0 0 10px rgba(255, 215, 0, 0.2)',
               }),
@@ -937,20 +937,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             '&:hover fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : sacredTheme
+                : sacredtheme
                   ? '#FFD700'
                   : outlinecolor || black.main,
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
               }),
             },
             '&.Mui-focused fieldset': {
               borderColor: disabled
                 ? 'rgba(0, 0, 0, 0.26)'
-                : sacredTheme
+                : sacredtheme
                   ? '#FFD700'
                   : outlinecolor || black.main,
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 boxShadow: '0 0 20px rgba(255, 215, 0, 0.6)',
                 animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
               }),
@@ -959,22 +959,22 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               backgroundColor: 'transparent !important',
               color: disabled
                 ? 'rgba(0, 0, 0, 0.38)'
-                : sacredTheme
+                : sacredtheme
                   ? '#FFD700'
                   : inputfontcolor || fontcolor || black.main,
               zIndex: 2,
               '&::placeholder': {
                 color: disabled
                   ? 'rgba(0, 0, 0, 0.38)'
-                  : sacredTheme
+                  : sacredtheme
                     ? alpha('#FFD700', 0.7)
                     : placeholdercolor || 'rgba(0, 0, 0, 0.54)',
                 opacity: 1,
-                fontStyle: sacredTheme ? 'italic' : 'normal',
-                letterSpacing: sacredTheme ? '0.5px' : 'normal',
+                fontStyle: sacredtheme ? 'italic' : 'normal',
+                letterSpacing: sacredtheme ? '0.5px' : 'normal',
               },
               cursor: disabled ? 'not-allowed' : 'pointer',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
                 fontWeight: 500,
               }),
@@ -996,7 +996,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         onClose={handleCloseMenu}
         sx={{
           '& .MuiPaper-root': {
-            boxShadow: sacredTheme
+            boxShadow: sacredtheme
               ? '0px 10px 30px rgba(255, 215, 0, 0.3), 0px 0px 20px rgba(0, 0, 0, 0.8)'
               : '0px 5px 15px rgba(0, 0, 0, 0.2)',
             width: menuAnchorEl?.offsetWidth
@@ -1012,8 +1012,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
-            ...(sacredTheme && {
+            backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+            ...(sacredtheme && {
               backgroundImage: `
                 linear-gradient(rgba(255, 215, 0, 0.03), rgba(255, 215, 0, 0.03)),
                 radial-gradient(circle at top center, rgba(255, 215, 0, 0.1) 0%, transparent 70%)
@@ -1040,7 +1040,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             overflowX: 'hidden',
             width: '100%',
             flexShrink: 0, // Prevent shrinking
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               '&::-webkit-scrollbar': {
                 width: '8px',
               },
@@ -1093,10 +1093,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         {selectedOption && (
           <Box
             sx={{
-              background: sacredTheme
+              background: sacredtheme
                 ? `linear-gradient(135deg, ${alpha('#FFD700', 0.15)} 0%, ${alpha('#000000', 0.9)} 100%)`
                 : `linear-gradient(135deg, ${customColors.blue.lighter} 0%, rgba(187, 222, 251, 0.7) 100%)`,
-              borderBottom: sacredTheme
+              borderBottom: sacredtheme
                 ? `2px solid ${alpha('#FFD700', 0.4)}`
                 : `2px solid ${customColors.blue.light}`,
               borderRadius: '8px 8px 0 0',
@@ -1104,10 +1104,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               position: 'sticky',
               top: 0,
               zIndex: 5,
-              boxShadow: sacredTheme
+              boxShadow: sacredtheme
                 ? '0 2px 12px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.05)'
                 : '0 2px 8px rgba(25, 118, 210, 0.15)',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 backgroundImage: `
                   radial-gradient(circle at top left, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
                 `,
@@ -1126,11 +1126,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
               <CheckCircleIcon
                 sx={{
-                  color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                  color: sacredtheme ? '#FFD700' : customColors.blue.main,
                   fontSize: '20px',
                   mt: 0.2,
                   flexShrink: 0,
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.6))',
                     animation: `${sacredFloat} 2s ease-in-out infinite`,
                   }),
@@ -1140,7 +1140,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 <Typography
                   fontvariant="merriparagraph"
                   text={selectedOption.value}
-                  fontcolor={sacredTheme ? '#FFD700' : customColors.blue.dark}
+                  fontcolor={sacredtheme ? '#FFD700' : customColors.blue.dark}
                   sx={{
                     fontSize: '16px',
                     fontWeight: 600,
@@ -1148,7 +1148,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     width: '100%',
                     textAlign: 'left',
                     mb: 0.5,
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
                       letterSpacing: '0.8px',
                     }),
@@ -1175,7 +1175,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                           fontvariant="merriparagraph"
                           text={firstLineAttributes.join(' | ')}
                           fontcolor={
-                            sacredTheme
+                            sacredtheme
                               ? alpha('#FFD700', 0.8)
                               : 'rgba(25, 118, 210, 0.8)'
                           }
@@ -1185,7 +1185,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             width: '100%',
                             textAlign: 'left',
                             fontWeight: 500,
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               fontStyle: 'italic',
                               letterSpacing: '0.4px',
                             }),
@@ -1198,7 +1198,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                           fontvariant="merriparagraph"
                           text={secondLineAttributes.join(' | ')}
                           fontcolor={
-                            sacredTheme
+                            sacredtheme
                               ? alpha('#FFD700', 0.7)
                               : 'rgba(25, 118, 210, 0.7)'
                           }
@@ -1209,7 +1209,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             textAlign: 'left',
                             mt: 0.25,
                             fontWeight: 400,
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               fontStyle: 'italic',
                               letterSpacing: '0.3px',
                             }),
@@ -1222,7 +1222,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               </Box>
             </Box>
             {/* Sacred decorative elements */}
-            {sacredTheme && (
+            {sacredtheme && (
               <Box
                 sx={{
                   position: 'absolute',
@@ -1263,14 +1263,14 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               sx={{
                 py: 1,
                 px: 2,
-                borderBottom: sacredTheme
+                borderBottom: sacredtheme
                   ? `1px solid ${alpha('#FFD700', 0.2)}`
                   : '1px solid #f0f0f0',
-                backgroundColor: sacredTheme ? 'transparent' : 'white',
-                color: sacredTheme ? alpha('#FFD700', 0.9) : 'inherit',
+                backgroundColor: sacredtheme ? 'transparent' : 'white',
+                color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
                 position: 'relative',
                 transition: 'all 0.3s ease',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   '&::before': {
                     content: `"${SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]}"`,
                     position: 'absolute',
@@ -1285,10 +1285,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   },
                 }),
                 '&:hover': {
-                  backgroundColor: sacredTheme
+                  backgroundColor: sacredtheme
                     ? alpha('#FFD700', 0.1)
                     : customColors.skyBlue.light,
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     color: '#FFD700',
                     textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
                     transform: 'translateX(8px)',
@@ -1313,7 +1313,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 },
               }}
             >
-              <Box sx={{ width: '100%', pl: sacredTheme ? 2 : 0 }}>
+              <Box sx={{ width: '100%', pl: sacredtheme ? 2 : 0 }}>
                 {/* Main value text */}
                 <Typography
                   fontvariant="merriparagraph"
@@ -1325,7 +1325,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                         : option.value
                   }
                   fontcolor={
-                    sacredTheme ? alpha('#FFD700', 0.9) : customColors.blue.dark
+                    sacredtheme ? alpha('#FFD700', 0.9) : customColors.blue.dark
                   }
                   sx={{
                     fontSize: '16px',
@@ -1333,7 +1333,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     lineHeight: '22px',
                     width: '100%',
                     textAlign: 'left',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       letterSpacing: '0.5px',
                       fontWeight: 500,
                     }),
@@ -1375,7 +1375,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             fontvariant="merriparagraph"
                             text={firstLineAttributes.join(' | ')}
                             fontcolor={
-                              sacredTheme
+                              sacredtheme
                                 ? alpha('#FFD700', 0.7)
                                 : 'rgba(0, 0, 0, 0.6)'
                             }
@@ -1384,7 +1384,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                               lineHeight: '18px',
                               width: '100%',
                               textAlign: 'left',
-                              ...(sacredTheme && {
+                              ...(sacredtheme && {
                                 fontStyle: 'italic',
                                 letterSpacing: '0.3px',
                               }),
@@ -1397,7 +1397,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             fontvariant="merriparagraph"
                             text={secondLineAttributes.join(' | ')}
                             fontcolor={
-                              sacredTheme
+                              sacredtheme
                                 ? alpha('#FFD700', 0.6)
                                 : 'rgba(0, 0, 0, 0.6)'
                             }
@@ -1407,7 +1407,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                               width: '100%',
                               textAlign: 'left',
                               mt: 0.5,
-                              ...(sacredTheme && {
+                              ...(sacredtheme && {
                                 fontStyle: 'italic',
                                 letterSpacing: '0.3px',
                               }),
@@ -1420,7 +1420,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             fontvariant="merriparagraph"
                             text={thirdLineAttributes.join(' | ')}
                             fontcolor={
-                              sacredTheme
+                              sacredtheme
                                 ? alpha('#FFD700', 0.5)
                                 : 'rgba(0, 0, 0, 0.6)'
                             }
@@ -1430,7 +1430,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                               width: '100%',
                               textAlign: 'left',
                               mt: 0.5,
-                              ...(sacredTheme && {
+                              ...(sacredtheme && {
                                 fontStyle: 'italic',
                                 letterSpacing: '0.3px',
                               }),
@@ -1456,14 +1456,14 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   py: 2,
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     backgroundImage: `
                     radial-gradient(circle at center, rgba(255, 215, 0, 0.03) 0%, transparent 70%)
                   `,
                   }),
                 }}
               >
-                {sacredTheme && (
+                {sacredtheme && (
                   <Box
                     sx={{
                       mr: 1,
@@ -1478,17 +1478,17 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   fontvariant="merriparagraph"
                   text="No matching options found"
                   fontcolor={
-                    sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+                    sacredtheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
                   }
                   sx={{
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontStyle: 'italic',
                       letterSpacing: '0.5px',
                       textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
                     }),
                   }}
                 />
-                {sacredTheme && (
+                {sacredtheme && (
                   <Box
                     sx={{
                       ml: 1,
@@ -1516,8 +1516,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               textAlign: 'center',
               height: '300px', // Fixed height to match screenshot
               overflow: 'hidden', // Prevent scrolling
-              backgroundColor: sacredTheme ? 'transparent' : 'white',
-              ...(sacredTheme && {
+              backgroundColor: sacredtheme ? 'transparent' : 'white',
+              ...(sacredtheme && {
                 backgroundImage: `
                   radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%)
                 `,
@@ -1527,12 +1527,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             <HistoryIcon
               sx={{
                 fontSize: '64px',
-                color: sacredTheme
+                color: sacredtheme
                   ? alpha('#FFD700', 0.4)
                   : 'rgba(0, 0, 0, 0.2)',
                 mb: 2,
                 opacity: 0.5,
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.3))',
                   animation: `${sacredFloat} 4s ease-in-out infinite`,
                 }),
@@ -1541,12 +1541,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             <Typography
               fontvariant="merriparagraph"
               text={sacredTitle || 'No search history'}
-              fontcolor={sacredTheme ? '#FFD700' : customColors.blue.main}
+              fontcolor={sacredtheme ? '#FFD700' : customColors.blue.main}
               sx={{
                 fontSize: '16px',
                 fontWeight: 500,
                 mb: 1,
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
                   letterSpacing: '1px',
                 }),
@@ -1556,20 +1556,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               fontvariant="merriparagraph"
               text={sacredSubtitle || 'Items you search for will appear here'}
               fontcolor={
-                sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+                sacredtheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
               }
               sx={{
                 fontSize: '14px',
                 maxWidth: '240px',
                 lineHeight: 1.4,
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   fontStyle: 'italic',
                   letterSpacing: '0.5px',
                 }),
               }}
             />
             {/* Sacred decorative glyphs */}
-            {sacredTheme && (
+            {sacredtheme && (
               <Box
                 sx={{
                   display: 'flex',
@@ -1603,18 +1603,18 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               bottom: 0,
               left: 0,
               right: 0,
-              borderTop: sacredTheme
+              borderTop: sacredtheme
                 ? `1px solid ${alpha('#FFD700', 0.3)}`
                 : `1px solid rgba(0, 0, 0, 0.1)`,
-              bgcolor: sacredTheme ? '#0a0a0a' : white.main,
+              bgcolor: sacredtheme ? '#0a0a0a' : white.main,
               zIndex: 9999, // Use very high z-index
               height: '40px',
-              boxShadow: sacredTheme
+              boxShadow: sacredtheme
                 ? '0px -2px 8px rgba(255, 215, 0, 0.2)'
                 : '0px -2px 8px rgba(0, 0, 0, 0.08)',
               width: '100%', // Full width
               marginTop: 'auto', // Push to the bottom when content is short
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 backgroundImage: `
                   linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02))
                 `,
@@ -1630,12 +1630,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 minHeight: '40px',
                 height: '40px',
                 '& .MuiTabs-indicator': {
-                  backgroundColor: sacredTheme
+                  backgroundColor: sacredtheme
                     ? '#FFD700'
                     : customColors.blue.main,
                   height: '3px',
                   borderRadius: '3px 3px 0 0',
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     boxShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
                   }),
                 },
@@ -1646,21 +1646,21 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   fontWeight: 500,
                   textTransform: 'none',
                   transition: 'all 0.2s ease',
-                  color: sacredTheme
+                  color: sacredtheme
                     ? alpha('#FFD700', 0.7)
                     : 'rgba(0, 0, 0, 0.6)',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha('#FFD700', 0.1)
                       : 'rgba(25, 118, 210, 0.04)',
-                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
-                    ...(sacredTheme && {
+                    color: sacredtheme ? '#FFD700' : customColors.blue.main,
+                    ...(sacredtheme && {
                       textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
                     }),
                   },
                   '&.Mui-selected': {
-                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
-                    ...(sacredTheme && {
+                    color: sacredtheme ? '#FFD700' : customColors.blue.main,
+                    ...(sacredtheme && {
                       textShadow: '0 0 8px rgba(255, 215, 0, 0.7)',
                       fontWeight: 600,
                     }),
@@ -1675,16 +1675,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 sx={{
                   color:
                     activeTab === 0
-                      ? sacredTheme
+                      ? sacredtheme
                         ? '#FFD700'
                         : customColors.blue.main
-                      : sacredTheme
+                      : sacredtheme
                         ? alpha('#FFD700', 0.6)
                         : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '13px',
                   fontWeight: activeTab === 0 ? 600 : 400,
                   '&.Mui-selected': {
-                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                    color: sacredtheme ? '#FFD700' : customColors.blue.main,
                   },
                 }}
               />
@@ -1695,16 +1695,16 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 sx={{
                   color:
                     activeTab === 1
-                      ? sacredTheme
+                      ? sacredtheme
                         ? '#FFD700'
                         : customColors.blue.main
-                      : sacredTheme
+                      : sacredtheme
                         ? alpha('#FFD700', 0.6)
                         : 'rgba(0, 0, 0, 0.6)',
                   fontSize: '13px',
                   fontWeight: activeTab === 1 ? 600 : 400,
                   '&.Mui-selected': {
-                    color: sacredTheme ? '#FFD700' : customColors.blue.main,
+                    color: sacredtheme ? '#FFD700' : customColors.blue.main,
                   },
                 }}
               />

@@ -40,7 +40,7 @@ export interface CardProps {
   /** Width of the card */
   width?: string | number
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 
   // Default card specific props
   /** Whether to show an underline for the title */
@@ -188,7 +188,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
               ? `${props.height}px`
               : props.height
           }
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
           draggable={props.draggable}
           onDragStart={props.onDragStart}
           onDragOver={props.onDragOver}
@@ -212,7 +212,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
           releaseDate={props.releaseDate}
           onContact={props.onContact}
           createdBy={props.createdBy}
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
           height={
             typeof props.height === 'number'
               ? `${props.height}px`
@@ -238,7 +238,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
           support={props.support}
           price={props.price}
           quantity={props.quantity}
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
           onRemove={props.onRemove}
         />
       )
@@ -257,7 +257,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
               ? `${props.height}px`
               : props.height
           }
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
         />
       )
 
@@ -275,7 +275,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
           taxText={props.taxText}
           discountText={props.discountText}
           onProceed={props.onProceed}
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
         />
       )
 
@@ -298,7 +298,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
           total={props.totalPrice}
           proceedText={props.proceedText}
           onProceed={props.onProceed}
-          sacredTheme={props.sacredTheme}
+          sacredtheme={props.sacredtheme}
         />
       )
 

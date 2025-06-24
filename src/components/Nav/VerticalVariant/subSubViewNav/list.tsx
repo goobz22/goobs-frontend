@@ -13,6 +13,10 @@ interface SubSubViewNavProps {
   activeAndHoverColor?: string
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
+  /**
+   * Whether the nav item is currently active/selected.
+   */
+  isActive?: boolean
 }
 
 /**
@@ -27,6 +31,7 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
   activeAndHoverColor = semiTransparentWhite.main,
   onClose,
   variant,
+  isActive,
 }) => {
   // Handle click to support both route and onClick
   const handleClick = () => {
@@ -41,7 +46,7 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
   }
 
   // Check if we're using sacred theming based on hover color
-  const isSacredTheme =
+  const issacredtheme =
     activeAndHoverColor.includes('255, 215, 0') ||
     activeAndHoverColor === alpha('#FFD700', 0.15)
 
@@ -58,7 +63,7 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
     >
       <MenuItem
         sx={{
-          color: isSacredTheme ? alpha('#FFD700', 0.9) : white.main,
+          color: issacredtheme ? alpha('#FFD700', 0.9) : white.main,
           // Increased indentation compared to subViewNav
           marginLeft: '85px',
           whiteSpace: 'nowrap',
@@ -66,7 +71,8 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
           minHeight: '32px',
           position: 'relative',
           transition: 'all 0.3s ease',
-          ...(isSacredTheme && {
+          backgroundColor: isActive ? activeAndHoverColor : 'transparent',
+          ...(issacredtheme && {
             '&::before': {
               content: '"𓂀"',
               position: 'absolute',
@@ -79,7 +85,7 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
           }),
           '&:hover': {
             backgroundColor: activeAndHoverColor,
-            ...(isSacredTheme && {
+            ...(issacredtheme && {
               color: '#FFD700',
               transform: 'translateX(4px)',
               textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
@@ -108,11 +114,11 @@ const SubSubViewNav: FC<SubSubViewNavProps> = ({
         <Typography
           fontvariant="merriparagraph"
           text={title ?? ''}
-          fontcolor={isSacredTheme ? alpha('#FFD700', 0.9) : white.main}
+          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
           sx={{
             whiteSpace: 'nowrap',
             fontSize: '0.8rem', // Slightly smaller than SubViewNav
-            ...(isSacredTheme && {
+            ...(issacredtheme && {
               fontWeight: 500,
               letterSpacing: 0.5,
               transition: 'all 0.3s ease',

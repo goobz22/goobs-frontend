@@ -17,6 +17,10 @@ interface ExpandingSubNavProps {
   setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
   onClose?: () => void
   children?: React.ReactNode
+  /**
+   * Click handler for the accordion summary.
+   */
+  onClick?: () => void
 }
 
 /**
@@ -27,6 +31,7 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
   expandedSubnavs,
   setExpandedSubnavs,
   children,
+  onClick,
 }) => {
   const isExpanded = expandedSubnavs.includes(title ?? '')
 
@@ -98,6 +103,7 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
             },
           },
         }}
+        onClick={onClick}
       >
         <Typography
           fontvariant="merrih6"

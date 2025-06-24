@@ -13,16 +13,16 @@ const glowPulse = keyframes`
 
 interface ShowHideEyeIconProps {
   visible?: boolean
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
   visible = false,
-  sacredTheme,
+  sacredtheme,
 }) => {
   const iconStyle = {
-    color: sacredTheme ? '#FFD700' : 'black',
-    ...(sacredTheme && {
+    color: sacredtheme ? '#FFD700' : 'black',
+    ...(sacredtheme && {
       animation: `${glowPulse} 2s ease-in-out infinite`,
     }),
   }

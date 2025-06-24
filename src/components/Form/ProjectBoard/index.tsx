@@ -103,7 +103,7 @@ export interface FormProjectBoardProps {
   projectboard: ProjectBoardProps
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -115,7 +115,7 @@ function FormProjectBoard({
   title,
   description,
   projectboard,
-  sacredTheme = true,
+  sacredtheme = true,
 }: FormProjectBoardProps) {
   const containerStyles = useMemo(() => {
     const baseStyles = {
@@ -127,7 +127,7 @@ function FormProjectBoard({
       },
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -162,7 +162,7 @@ function FormProjectBoard({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   const titleStyles = useMemo(() => {
     const baseStyles = {
@@ -170,13 +170,13 @@ function FormProjectBoard({
       width: '100%',
       textAlign: 'left' as const,
       fontFamily: 'Merriweather',
-      marginLeft: sacredTheme ? 0 : 2,
+      marginLeft: sacredtheme ? 0 : 2,
       fontSize: '1.5rem',
       fontWeight: 400,
       color: 'black',
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -189,7 +189,7 @@ function FormProjectBoard({
       textAlign: 'center' as const,
       marginBottom: 1,
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   const descriptionStyles = useMemo(() => {
     const baseStyles = {
@@ -197,12 +197,12 @@ function FormProjectBoard({
       textAlign: 'left' as const,
       fontFamily: 'Merriweather',
       fontSize: '1.25rem',
-      marginLeft: sacredTheme ? 0 : 2,
+      marginLeft: sacredtheme ? 0 : 2,
       fontWeight: 400,
       color: 'black',
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -213,12 +213,12 @@ function FormProjectBoard({
       letterSpacing: '0.05em',
       marginBottom: 2,
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   return (
     <Box sx={containerStyles}>
       {/* Top corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -251,7 +251,7 @@ function FormProjectBoard({
       )}
 
       {/* Sacred glyphs decoration for header */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',
@@ -286,7 +286,7 @@ function FormProjectBoard({
       <Box
         sx={{
           marginTop: 1,
-          marginBottom: sacredTheme ? 3 : 1,
+          marginBottom: sacredtheme ? 3 : 1,
           width: '100%',
           position: 'relative',
         }}
@@ -295,7 +295,7 @@ function FormProjectBoard({
         <Box sx={descriptionStyles}>{description}</Box>
 
         {/* Task flow animation */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               position: 'absolute',
@@ -322,7 +322,7 @@ function FormProjectBoard({
       {/* ProjectBoard wrapper with sacred styling */}
       <Box
         sx={
-          sacredTheme
+          sacredtheme
             ? {
                 position: 'relative',
                 borderRadius: '8px',
@@ -393,12 +393,12 @@ function FormProjectBoard({
               projectboard: projectboard, // Pass the whole projectboard prop directly
             },
           ]}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
 
       {/* Bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

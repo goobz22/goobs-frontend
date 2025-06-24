@@ -14,7 +14,7 @@ const CreditCardExpirationComponent: React.FC<CreditCardExpirationProps> = ({
   onChange,
   value = '',
   errorMessage = 'Invalid expiration date',
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   label,
   placeholder,
@@ -31,7 +31,7 @@ const CreditCardExpirationComponent: React.FC<CreditCardExpirationProps> = ({
         onChange={onChange}
         value={value}
         errorMessage={errorMessage}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         isDefaultValue={isDefaultValue}
         label={label}
         placeholder={placeholder}

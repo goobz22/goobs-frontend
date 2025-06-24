@@ -13,7 +13,7 @@ export interface RightCenterProps {
   onShow?: () => void
   onExport?: () => void
   handleClose?: () => void
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function RightCenter({
@@ -25,7 +25,7 @@ function RightCenter({
   onShow,
   onExport,
   handleClose,
-  sacredTheme,
+  sacredtheme,
 }: RightCenterProps) {
   const isTabletOrBelow = useMediaQuery('(max-width:1024px)')
 
@@ -49,7 +49,7 @@ function RightCenter({
         onShow={onShow}
         onExport={onExport}
         handleClose={handleClose}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
     </Box>
   )

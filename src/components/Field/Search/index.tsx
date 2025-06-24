@@ -39,7 +39,7 @@ export interface SearchbarProps {
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const StyledFormControl = styled(FormControl)({
@@ -186,7 +186,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
   value,
   shrunklabelposition = 'onNotch',
   onChange,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const [focused, setFocused] = useState(false)
   const isLabelShrunken = focused || Boolean(value)
@@ -196,7 +196,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
 
   const SearchAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -211,8 +211,8 @@ const Searchbar: React.FC<SearchbarProps> = ({
       )}
       <SearchIcon
         sx={{
-          color: sacredTheme ? '#FFD700' : iconcolor || palette.black.main,
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : iconcolor || palette.black.main,
+          ...(sacredtheme && {
             animation: `${goldShimmer} 2s ease-in-out infinite`,
           }),
         }}
@@ -230,9 +230,9 @@ const Searchbar: React.FC<SearchbarProps> = ({
         shrunkfontcolor={shrunkfontcolor}
         unshrunkfontcolor={unshrunkfontcolor}
         shrunklabelposition={shrunklabelposition}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
-        {sacredTheme ? 'Divine Search' : label}
+        {sacredtheme ? 'Divine Search' : label}
       </StyledInputLabel>
       <StyledOutlinedInput
         id="search-input"
@@ -240,7 +240,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
         notched={shrunklabelposition === 'onNotch' && isLabelShrunken}
         placeholder={
           isLabelShrunken
-            ? sacredTheme
+            ? sacredtheme
               ? 'Seek ancient wisdom...'
               : placeholder
             : ''
@@ -252,7 +252,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
         backgroundcolor={backgroundcolor}
         outlinecolor={outlinecolor}
         fontcolor={fontcolor}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
         startAdornment={
           <InputAdornment position="start">
             <SearchAdornment />

@@ -135,7 +135,7 @@ export interface ShowTaskProps {
   ) => void
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // ----------------------- Helper Functions -----------------------
@@ -196,7 +196,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   onDuplicate,
   onEditComment,
   onRevisionHistory,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   // 1) Local comment state – these comments use our shared types.
   const [localComments, setLocalComments] = useState<Comment[]>(comments)
@@ -353,7 +353,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     display: 'flex',
     flexDirection: 'column' as const,
     pb: 2,
-    borderBottom: sacredTheme
+    borderBottom: sacredtheme
       ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
       : '1px solid black',
     mx: -2,
@@ -393,15 +393,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          border: sacredTheme
+          border: sacredtheme
             ? `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`
             : '2px solid black',
           borderRadius: '8px',
           overflow: 'hidden',
-          boxShadow: sacredTheme
+          boxShadow: sacredtheme
             ? `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`
             : 'none',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             backgroundColor: egyptianStyles.cardBackground,
             animation: `${glowPulse} 3s ease-in-out infinite`,
           }),
@@ -410,7 +410,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     >
       <DialogContent sx={{ p: 0 }}>
         {/* Sacred corner glyphs */}
-        {sacredTheme && (
+        {sacredtheme && (
           <>
             <Box
               sx={{
@@ -447,10 +447,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             display: 'flex',
             justifyContent: 'space-between',
             p: 2,
-            borderBottom: sacredTheme
+            borderBottom: sacredtheme
               ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
               : '2px solid black',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               backgroundColor: alpha(egyptianStyles.goldColor, 0.05),
             }),
           }}
@@ -465,22 +465,22 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   setFormData(prev => ({ ...prev, taskTitle: e.target.value }))
                 }
                 outlinecolor={
-                  sacredTheme ? egyptianStyles.goldColor : black.main
+                  sacredtheme ? egyptianStyles.goldColor : black.main
                 }
-                fontcolor={sacredTheme ? egyptianStyles.goldColor : black.main}
+                fontcolor={sacredtheme ? egyptianStyles.goldColor : black.main}
                 shrunklabelposition="aboveNotch"
                 sx={{ mb: 1 }}
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
             ) : (
               <Typography
                 fontvariant="merrih4"
-                fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                 text={formData.taskTitle}
                 sx={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     fontFamily: '"Cinzel", serif',
                     letterSpacing: '0.05em',
                     textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
@@ -491,13 +491,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <Typography
               fontvariant="merrih5"
               fontcolor={
-                sacredTheme ? alpha(egyptianStyles.goldColor, 0.7) : 'gray'
+                sacredtheme ? alpha(egyptianStyles.goldColor, 0.7) : 'gray'
               }
               text={`created by ${createdBy}`}
               sx={{
                 fontSize: '14px',
                 mt: 0.5,
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   fontFamily: '"Crimson Text", serif',
                 }),
               }}
@@ -508,29 +508,29 @@ const ShowTask: React.FC<ShowTaskProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CustomButton
               text={isEditing ? 'Save' : 'Edit'}
-              fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
               backgroundcolor="none"
               onClick={handleEditToggle}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
             <CustomButton
               text="Delete"
-              fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
               backgroundcolor="none"
               onClick={onDelete}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
             <CustomButton
               text="Duplicate"
-              fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
               backgroundcolor="none"
               onClick={onDuplicate}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
             <IconButton
               onClick={onClose}
               sx={{
-                color: sacredTheme ? egyptianStyles.goldColor : 'inherit',
+                color: sacredtheme ? egyptianStyles.goldColor : 'inherit',
               }}
             >
               <CloseIcon />
@@ -545,7 +545,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             {/* DESCRIPTION */}
             <Box
               sx={{
-                border: sacredTheme
+                border: sacredtheme
                   ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                   : '1px solid black',
                 mx: -2,
@@ -554,7 +554,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 pb: '10px',
                 display: 'flex',
                 flexDirection: 'column',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   backgroundColor: alpha(egyptianStyles.goldColor, 0.02),
                 }),
               }}
@@ -563,12 +563,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <>
                   <Typography
                     fontvariant="merrih5"
-                    fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                    fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                     text="Task Description"
                     sx={{
                       fontWeight: 'bold',
                       mb: 1,
-                      ...(sacredTheme && {
+                      ...(sacredtheme && {
                         fontFamily: '"Cinzel", serif',
                       }),
                     }}
@@ -581,19 +581,19 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     label="Task Description"
                     editorType="simple"
                     minRows={3}
-                    sacredTheme={sacredTheme}
+                    sacredtheme={sacredtheme}
                   />
                 </>
               ) : (
                 <>
                   <Typography
                     fontvariant="merrih5"
-                    fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                    fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                     text="Task Description"
                     sx={{
                       fontWeight: 'bold',
                       mb: 1,
-                      ...(sacredTheme && {
+                      ...(sacredtheme && {
                         fontFamily: '"Cinzel", serif',
                       }),
                     }}
@@ -601,7 +601,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   <Typography
                     fontvariant="merrih6"
                     fontcolor={
-                      sacredTheme
+                      sacredtheme
                         ? alpha(egyptianStyles.goldColor, 0.9)
                         : 'black'
                     }
@@ -609,7 +609,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     sx={{
                       fontSize: '14px',
                       whiteSpace: 'pre-wrap',
-                      ...(sacredTheme && {
+                      ...(sacredtheme && {
                         fontFamily: '"Crimson Text", serif',
                       }),
                     }}
@@ -651,13 +651,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   {editingCommentId === comment._id ? (
                     <Box
                       sx={{
-                        border: sacredTheme
+                        border: sacredtheme
                           ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                           : '1px solid black',
                         mx: -2,
                         px: 2,
                         py: 1,
-                        ...(sacredTheme && {
+                        ...(sacredtheme && {
                           backgroundColor: alpha(
                             egyptianStyles.goldColor,
                             0.02
@@ -671,7 +671,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         label="Edit Comment"
                         minRows={3}
                         editorType="simple"
-                        sacredTheme={sacredTheme}
+                        sacredtheme={sacredtheme}
                       />
                       <Box
                         sx={{
@@ -684,27 +684,27 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <CustomButton
                           text="Save"
                           backgroundcolor={
-                            sacredTheme ? egyptianStyles.goldColor : woad.dark
+                            sacredtheme ? egyptianStyles.goldColor : woad.dark
                           }
-                          fontcolor={sacredTheme ? black.main : white.main}
+                          fontcolor={sacredtheme ? black.main : white.main}
                           onClick={() => saveEditingComment(comment._id)}
-                          sacredTheme={sacredTheme}
+                          sacredtheme={sacredtheme}
                         />
                         <CustomButton
                           text="Cancel"
                           backgroundcolor="none"
                           fontcolor={
-                            sacredTheme ? egyptianStyles.goldColor : 'black'
+                            sacredtheme ? egyptianStyles.goldColor : 'black'
                           }
                           onClick={cancelEditingComment}
-                          sacredTheme={sacredTheme}
+                          sacredtheme={sacredtheme}
                         />
                       </Box>
                     </Box>
                   ) : (
                     <Box
                       sx={{
-                        border: sacredTheme
+                        border: sacredtheme
                           ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                           : '1px solid black',
                         mx: -2,
@@ -713,7 +713,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         display: 'flex',
                         flexDirection: 'column',
                         minHeight: '80px',
-                        ...(sacredTheme && {
+                        ...(sacredtheme && {
                           backgroundColor: alpha(
                             egyptianStyles.goldColor,
                             0.02
@@ -731,12 +731,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <Typography
                           fontvariant="merrih5"
                           fontcolor={
-                            sacredTheme ? egyptianStyles.goldColor : 'black'
+                            sacredtheme ? egyptianStyles.goldColor : 'black'
                           }
                           text={comment.createdBy}
                           sx={{
                             fontWeight: 'bold',
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               fontFamily: '"Cinzel", serif',
                             }),
                           }}
@@ -746,7 +746,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                           onClick={e => openCommentMenu(e, comment._id)}
                           sx={{
                             mb: 1,
-                            color: sacredTheme
+                            color: sacredtheme
                               ? egyptianStyles.goldColor
                               : 'inherit',
                           }}
@@ -767,7 +767,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                             horizontal: 'right',
                           }}
                           sx={{
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               '& .MuiPaper-root': {
                                 backgroundColor: egyptianStyles.cardBackground,
                                 border: `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`,
@@ -830,17 +830,17 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                     )
                                   }
                                   outlinecolor={
-                                    sacredTheme
+                                    sacredtheme
                                       ? egyptianStyles.goldColor
                                       : black.main
                                   }
                                   fontcolor={
-                                    sacredTheme
+                                    sacredtheme
                                       ? egyptianStyles.goldColor
                                       : black.main
                                   }
                                   defaultValue={selectedRevId || undefined}
-                                  sacredTheme={sacredTheme}
+                                  sacredtheme={sacredtheme}
                                 />
                               </Box>
                             </MenuItem>
@@ -852,7 +852,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <Typography
                           fontvariant="merriparagraph"
                           fontcolor={
-                            sacredTheme
+                            sacredtheme
                               ? alpha(egyptianStyles.goldColor, 0.9)
                               : 'black'
                           }
@@ -860,7 +860,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                           sx={{
                             fontSize: '14px',
                             mt: 0.5,
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               fontFamily: '"Crimson Text", serif',
                             }),
                           }}
@@ -868,11 +868,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <Box
                           sx={{
                             fontSize: '12px',
-                            color: sacredTheme
+                            color: sacredtheme
                               ? alpha(egyptianStyles.goldColor, 0.6)
                               : 'gray',
                             mt: 0.5,
-                            ...(sacredTheme && {
+                            ...(sacredtheme && {
                               fontFamily: '"Crimson Text", serif',
                             }),
                           }}
@@ -904,7 +904,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 label="Add Comment"
                 minRows={3}
                 editorType="simple"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
               <Box
                 sx={{
@@ -918,22 +918,22 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <CustomButton
                   text="Close Task"
                   backgroundcolor={
-                    sacredTheme
+                    sacredtheme
                       ? alpha(egyptianStyles.goldColor, 0.8)
                       : gunpowder.main
                   }
-                  fontcolor={sacredTheme ? black.main : white.main}
+                  fontcolor={sacredtheme ? black.main : white.main}
                   onClick={() => onCloseTask(taskId)}
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
                 <CustomButton
                   text="Comment"
                   backgroundcolor={
-                    sacredTheme ? egyptianStyles.goldColor : woad.dark
+                    sacredtheme ? egyptianStyles.goldColor : woad.dark
                   }
-                  fontcolor={sacredTheme ? black.main : white.main}
+                  fontcolor={sacredtheme ? black.main : white.main}
                   onClick={handleComment}
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               </Box>
             </Box>
@@ -942,14 +942,14 @@ const ShowTask: React.FC<ShowTaskProps> = ({
           {/* RIGHT COLUMN */}
           <Box
             sx={{
-              borderLeft: sacredTheme
+              borderLeft: sacredtheme
                 ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
                 : '2px solid black',
               p: 2,
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 backgroundColor: alpha(egyptianStyles.goldColor, 0.02),
               }),
             }}
@@ -959,12 +959,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Customer Assigned"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -989,12 +989,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : (
                 formData.customerAssigned && (
@@ -1002,10 +1002,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     label={formData.customerAssigned}
                     variant="filled"
                     sx={{
-                      backgroundColor: sacredTheme
+                      backgroundColor: sacredtheme
                         ? egyptianStyles.goldColor
                         : woad.main,
-                      color: sacredTheme ? black.main : white.main,
+                      color: sacredtheme ? black.main : white.main,
                       mt: 1,
                     }}
                   />
@@ -1018,12 +1018,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Severity"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1045,19 +1045,19 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.severity ? (
                 <Chip
                   label={formData.severity}
                   variant="filled"
                   sx={{
-                    backgroundColor: sacredTheme ? '#DC2626' : red.main,
+                    backgroundColor: sacredtheme ? '#DC2626' : red.main,
                     color: white.main,
                     mt: 1,
                   }}
@@ -1070,12 +1070,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Scheduling Queue"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1097,19 +1097,19 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.schedulingQueue ? (
                 <Chip
                   label={formData.schedulingQueue}
                   variant="filled"
                   sx={{
-                    backgroundColor: sacredTheme ? '#8B4513' : '#C48EA6',
+                    backgroundColor: sacredtheme ? '#8B4513' : '#C48EA6',
                     color: white.main,
                     mt: 1,
                   }}
@@ -1122,12 +1122,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Status"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1149,22 +1149,22 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.status ? (
                 <Chip
                   label={formData.status}
                   variant="filled"
                   sx={{
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? egyptianStyles.darkGold
                       : black.main,
-                    color: sacredTheme ? black.main : white.main,
+                    color: sacredtheme ? black.main : white.main,
                     mt: 1,
                   }}
                 />
@@ -1176,12 +1176,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Sub Status"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1202,19 +1202,19 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   shrunklabelposition="aboveNotch"
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.subStatus ? (
                 <Chip
                   label={formData.subStatus}
                   variant="filled"
-                  color={sacredTheme ? 'warning' : 'info'}
+                  color={sacredtheme ? 'warning' : 'info'}
                   sx={{ mt: 1 }}
                 />
               ) : null}
@@ -1225,12 +1225,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Topics"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1245,13 +1245,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     setFormData(prev => ({ ...prev, topics: values }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   sx={{ mt: 1 }}
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.topics.length > 0 ? (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -1262,7 +1262,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       variant="filled"
                       color="success"
                       sx={{
-                        ...(sacredTheme && {
+                        ...(sacredtheme && {
                           backgroundColor: '#059669',
                           color: white.main,
                         }),
@@ -1278,12 +1278,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Knowledgebase Articles"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1301,13 +1301,13 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   sx={{ mt: 1 }}
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.knowledgebaseArticles.length > 0 ? (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -1318,7 +1318,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       variant="filled"
                       color="warning"
                       sx={{
-                        ...(sacredTheme && {
+                        ...(sacredtheme && {
                           backgroundColor: '#D97706',
                           color: white.main,
                         }),
@@ -1334,12 +1334,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Team Member Assigned"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1363,23 +1363,23 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }))
                   }
                   outlinecolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   fontcolor={
-                    sacredTheme ? egyptianStyles.goldColor : black.main
+                    sacredtheme ? egyptianStyles.goldColor : black.main
                   }
                   shrunklabelposition="aboveNotch"
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               ) : formData.teamMemberAssigned ? (
                 <Chip
                   label={formData.teamMemberAssigned}
                   variant="filled"
                   sx={{
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? egyptianStyles.goldColor
                       : woad.main,
-                    color: sacredTheme ? black.main : white.main,
+                    color: sacredtheme ? black.main : white.main,
                     mt: 1,
                   }}
                 />
@@ -1391,12 +1391,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
                   text="Next Action Date"
                   sx={{
                     fontWeight: 'bold',
                     fontSize: '14px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Cinzel", serif',
                     }),
                   }}
@@ -1430,20 +1430,20 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         }))
                       }
                     }}
-                    sacredTheme={sacredTheme}
+                    sacredtheme={sacredtheme}
                   />
                 </Box>
               ) : formData.nextActionDate ? (
                 <Typography
                   fontvariant="merriparagraph"
                   fontcolor={
-                    sacredTheme ? alpha(egyptianStyles.goldColor, 0.9) : 'black'
+                    sacredtheme ? alpha(egyptianStyles.goldColor, 0.9) : 'black'
                   }
                   text={formData.nextActionDate}
                   sx={{
                     fontSize: '14px',
                     mt: 1,
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       fontFamily: '"Crimson Text", serif',
                     }),
                   }}

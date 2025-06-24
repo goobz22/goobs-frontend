@@ -62,7 +62,7 @@ interface AdministratorAddTaskCompanyDropdownProps {
   severityLevels: RawSeverityLevel[]
   rawCompanies: RawCompany[]
   createdUserId: string
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const AdministratorAddTaskCompanyDropdown: React.FC<
@@ -79,7 +79,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
   severityLevels,
   rawCompanies,
   createdUserId,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -280,7 +280,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
           width: isMobile ? '100%' : '700px',
           margin: isMobile ? '16px' : 'auto',
           pointerEvents: 'auto',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
             borderRadius: '8px',
             overflow: 'hidden',
@@ -291,7 +291,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
         },
       }}
     >
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -328,13 +328,13 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
           position: 'absolute',
           right: 8,
           top: 8,
-          color: sacredTheme
+          color: sacredtheme
             ? egyptianStyles.goldColor
             : theme.palette.grey[500],
           zIndex: theme.zIndex.modal + 1,
           cursor: 'pointer',
           '&:hover': {
-            color: sacredTheme
+            color: sacredtheme
               ? egyptianStyles.goldColor
               : theme.palette.grey[700],
           },
@@ -346,7 +346,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
       <Box
         sx={{
           p: 3,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             borderBottom: `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`,
             backgroundColor: alpha(egyptianStyles.goldColor, 0.05),
           }),
@@ -356,7 +356,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
           variant="h5"
           sx={{
             mb: 3,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               fontFamily: '"Cinzel", serif',
               letterSpacing: '0.05em',
               textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
@@ -374,7 +374,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
             value={taskTitle}
             onChange={e => setTaskTitle(e.target.value)}
             placeholder="Enter Task Title"
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
 
           <ComplexTextEditor
@@ -383,7 +383,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
             onChange={setTaskDescription}
             editorType="simple"
             minRows={5}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
 
           {/* Company Dropdown */}
@@ -398,7 +398,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
               setSelectedCompanyId(option?.attribute1 || '')
             }}
             placeholder="Select a company"
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
 
           {/* Top row of fields */}
@@ -433,7 +433,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                   console.log('Selected severity ID:', option?.attribute2)
                 }}
                 placeholder="Select severity level"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
               <SearchableDropdown
                 label="Status"
@@ -454,7 +454,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                   )
                 }}
                 placeholder="Select status"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
             </Box>
 
@@ -480,7 +480,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                   console.log('Selected queue ID:', option?.attribute1)
                 }}
                 placeholder="Select product queue"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
               <SearchableDropdown
                 label="Substatus"
@@ -501,7 +501,7 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                     : 'Please select a status first'
                 }
                 disabled={!selectedStatus}
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
             </Box>
           </Box>
@@ -547,11 +547,11 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                     setSelectedTopicIds(newSelectedIds)
                   }}
                   complexOptions={true} // Explicitly set to use complex options
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 />
               </>
             )
-          }, [topics, selectedTopicIds, sacredTheme])}
+          }, [topics, selectedTopicIds, sacredtheme])}
 
           {/* Knowledgebase Articles multi-select – using article titles with IDs in attribute1 */}
           {React.useMemo(() => {
@@ -586,10 +586,10 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
                   setSelectedArticleIds(newSelectedIds)
                 }}
                 complexOptions={true} // Explicitly set to use complex options
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
               />
             )
-          }, [knowledgebaseArticles, selectedArticleIds, sacredTheme])}
+          }, [knowledgebaseArticles, selectedArticleIds, sacredtheme])}
 
           {/* Action Buttons */}
           <Box
@@ -605,15 +605,15 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
               text="Cancel"
               onClick={onClose}
               backgroundcolor="none"
-              fontcolor={sacredTheme ? egyptianStyles.goldColor : 'black'}
-              sacredTheme={sacredTheme}
+              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+              sacredtheme={sacredtheme}
             />
             <CustomButton
               text="Create Task"
               onClick={handleSubmit}
-              backgroundcolor={sacredTheme ? egyptianStyles.goldColor : '#000'}
-              fontcolor={sacredTheme ? '#000' : 'white'}
-              sacredTheme={sacredTheme}
+              backgroundcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
+              fontcolor={sacredtheme ? '#000' : 'white'}
+              sacredtheme={sacredtheme}
             />
           </Box>
         </Box>

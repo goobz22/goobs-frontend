@@ -20,11 +20,11 @@ const glowPulse = keyframes`
 `
 
 interface FavoriteIconComponentProps {
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const FavoriteIconComponent: React.FC<FavoriteIconComponentProps> = ({
-  sacredTheme,
+  sacredtheme,
 }) => {
   const [isFavorite, setIsFavorite] = useState(false)
 
@@ -37,7 +37,7 @@ const FavoriteIconComponent: React.FC<FavoriteIconComponentProps> = ({
       onClick={handleFavoriteClick}
       size="small"
       sx={{
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           '&:hover': {
             backgroundColor: alpha('#FFD700', 0.1),
           },
@@ -47,8 +47,8 @@ const FavoriteIconComponent: React.FC<FavoriteIconComponentProps> = ({
       {isFavorite ? (
         <FavoriteIcon
           style={{
-            color: sacredTheme ? '#FFD700' : 'red',
-            ...(sacredTheme && {
+            color: sacredtheme ? '#FFD700' : 'red',
+            ...(sacredtheme && {
               animation: `${heartbeat} 1.5s ease-in-out infinite, ${glowPulse} 2s ease-in-out infinite`,
             }),
           }}
@@ -56,8 +56,8 @@ const FavoriteIconComponent: React.FC<FavoriteIconComponentProps> = ({
       ) : (
         <FavoriteBorderIcon
           style={{
-            color: sacredTheme ? alpha('#FFD700', 0.7) : undefined,
-            ...(sacredTheme && {
+            color: sacredtheme ? alpha('#FFD700', 0.7) : undefined,
+            ...(sacredtheme && {
               transition: 'all 0.3s ease',
               '&:hover': {
                 color: '#FFD700',

@@ -75,7 +75,7 @@ export interface WidgetProps {
   /** Enable hieroglyphic decoration */
   hieroglyphicDecoration?: boolean
   /** Enable sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /** Widget content */
   children: ReactNode
   /** Animation delay for entrance */
@@ -96,7 +96,7 @@ const Widget: React.FC<WidgetProps> = ({
   actions,
   cornerGlyphs,
   hieroglyphicDecoration = false,
-  sacredTheme = false,
+  sacredtheme = false,
   children,
   delay = 0,
   fullWidth = false,
@@ -105,7 +105,7 @@ const Widget: React.FC<WidgetProps> = ({
 }) => {
   // Generate random glyphs if not provided and sacred theme is enabled
   const glyphs =
-    sacredTheme && hieroglyphicDecoration
+    sacredtheme && hieroglyphicDecoration
       ? cornerGlyphs || [
           SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
           SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
@@ -139,7 +139,7 @@ const Widget: React.FC<WidgetProps> = ({
   }
 
   // Base styles
-  const baseStyles = sacredTheme
+  const baseStyles = sacredtheme
     ? {
         backgroundColor: alpha(sacredColors.temple, 0.95),
         border: `2px solid ${alpha(sacredColors.gold, glowLevels[glowIntensity].borderOpacity)}`,
@@ -216,7 +216,7 @@ const Widget: React.FC<WidgetProps> = ({
       }}
     >
       {/* Sacred corner glyphs */}
-      {sacredTheme && hieroglyphicDecoration && glyphs.length >= 2 && (
+      {sacredtheme && hieroglyphicDecoration && glyphs.length >= 2 && (
         <>
           <Box
             sx={{
@@ -254,11 +254,11 @@ const Widget: React.FC<WidgetProps> = ({
             icon && (
               <Box
                 sx={{
-                  color: sacredTheme ? sacredColors.gold : 'inherit',
+                  color: sacredtheme ? sacredColors.gold : 'inherit',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     filter: 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.6))',
                     transition: 'all 0.3s ease',
                   }),
@@ -272,11 +272,11 @@ const Widget: React.FC<WidgetProps> = ({
             title && (
               <Typography
                 variant="h6"
-                sacredTheme={sacredTheme}
+                sacredtheme={sacredtheme}
                 sx={{
                   fontSize: '1.25rem',
                   fontWeight: 600,
-                  ...(sacredTheme && {
+                  ...(sacredtheme && {
                     fontFamily: '"Cinzel", serif',
                     letterSpacing: '1px',
                     textTransform: 'uppercase',
@@ -292,7 +292,7 @@ const Widget: React.FC<WidgetProps> = ({
             zIndex: 1,
             borderBottom:
               title && actions
-                ? `1px solid ${alpha(sacredTheme ? sacredColors.gold : '#000', 0.1)}`
+                ? `1px solid ${alpha(sacredtheme ? sacredColors.gold : '#000', 0.1)}`
                 : 'none',
           }}
         />
@@ -303,7 +303,7 @@ const Widget: React.FC<WidgetProps> = ({
         sx={{
           position: 'relative',
           zIndex: 1,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '& *': {
               fontFamily: '"Cinzel", serif',
             },
@@ -319,7 +319,7 @@ const Widget: React.FC<WidgetProps> = ({
           sx={{
             position: 'relative',
             zIndex: 1,
-            borderTop: `1px solid ${alpha(sacredTheme ? sacredColors.gold : '#000', 0.1)}`,
+            borderTop: `1px solid ${alpha(sacredtheme ? sacredColors.gold : '#000', 0.1)}`,
             justifyContent: 'center',
           }}
         >

@@ -92,7 +92,7 @@ export interface CreditCardNumberProps
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /**
    * Whether this is a default/existing value that should be partially masked
    */
@@ -111,7 +111,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   value = '',
   errorMessage = 'Invalid credit card number',
   useLuhnValidation = true,
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   enableFormatting = true,
   ...props
@@ -305,7 +305,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
 
   // Get card icon based on type
   const getCardIcon = useCallback(() => {
-    if (sacredTheme) {
+    if (sacredtheme) {
       return '𓊪' // Egyptian hieroglyph for "card/tablet"
     }
 
@@ -325,11 +325,11 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       default:
         return '💳'
     }
-  }, [cardType, sacredTheme])
+  }, [cardType, sacredtheme])
 
   const CardAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -344,10 +344,10 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       )}
       <Box
         sx={{
-          color: sacredTheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredTheme ? 600 : 400,
-          fontSize: sacredTheme ? '14px' : '12px',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'inherit',
+          fontWeight: sacredtheme ? 600 : 400,
+          fontSize: sacredtheme ? '14px' : '12px',
+          ...(sacredtheme && {
             background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
             backgroundSize: '200% 100%',
             animation: `${goldShimmer} 3s linear infinite`,
@@ -375,7 +375,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       }
       label={props.label || 'Card Number'}
       placeholder={props.placeholder || '1234 5678 9012 3456'}
-      sacredTheme={sacredTheme}
+      sacredtheme={sacredtheme}
       startAdornment={<CardAdornment />}
       inputProps={{
         ...props.inputProps,
@@ -387,11 +387,11 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
         input: {
           sx: {
             '& .MuiInputBase-input': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
             '&::placeholder': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
           },

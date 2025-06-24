@@ -133,7 +133,7 @@ function ProjectBoardContent({
   customerId,
   companyId,
   preferDropdown,
-  sacredTheme = false,
+  sacredtheme = false,
 }: ProjectBoardProps) {
   // 1) Atom state for columns + tasks
   const [columnState, setColumnState] = useAtom(columnsAtom)
@@ -363,7 +363,7 @@ function ProjectBoardContent({
         width: '100%',
         height: '100%',
         position: 'relative',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundColor: egyptianStyles.cardBackground,
           border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
           borderRadius: '12px',
@@ -373,7 +373,7 @@ function ProjectBoardContent({
       }}
     >
       {/* Sacred corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -438,19 +438,19 @@ function ProjectBoardContent({
           label: 'Search...',
           value: searchTerm,
           onChange: handleSearchChange,
-          backgroundcolor: sacredTheme
+          backgroundcolor: sacredtheme
             ? alpha(egyptianStyles.goldColor, 0.1)
             : palette.semiTransparentWhite.main,
-          shrunkfontcolor: sacredTheme
+          shrunkfontcolor: sacredtheme
             ? egyptianStyles.goldColor
             : palette.white.main,
-          unshrunkfontcolor: sacredTheme
+          unshrunkfontcolor: sacredtheme
             ? egyptianStyles.goldColor
             : palette.white.main,
           shrunklabelposition: 'onNotch',
-          sacredTheme: sacredTheme,
+          sacredtheme: sacredtheme,
         }}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
 
       <Stack direction="row" spacing={3} mt={1} pl={4}>
@@ -464,7 +464,7 @@ function ProjectBoardContent({
           onColumnDragStart={handleColumnDragStart}
           onColumnDragOver={handleColumnDragOver}
           onColumnDrop={handleColumnDrop}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Stack>
 
@@ -487,7 +487,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCompanies={rawCompanies || []}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           ) : (
             <AdministratorAddTaskCompanyProvided
@@ -502,7 +502,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               companyId={companyId || ''}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           )}
         </>
@@ -525,7 +525,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCustomers={rawCustomers || []}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           ) : (
             <CompanyAddTaskCustomerProvided
@@ -540,7 +540,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               customerId={customerId || ''}
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
             />
           )}
         </>
@@ -555,7 +555,7 @@ function ProjectBoardContent({
           severityLevels={rawSeverityLevels}
           createdUserId={currentUser._id}
           companyId={companyId || ''}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )}
 
@@ -599,7 +599,7 @@ function ProjectBoardContent({
           topicOptions={rawTopics}
           knowledgebaseArticleOptions={rawArticles}
           teamMemberOptions={rawEmployees}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )}
     </Box>

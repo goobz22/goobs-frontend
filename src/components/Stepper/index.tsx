@@ -96,20 +96,20 @@ type CustomStepperProps = Omit<StepperProps, 'children'> & {
     description?: string
   }[]
   activeStep: number
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function CustomStepper({
   steps,
   activeStep,
-  sacredTheme,
+  sacredtheme,
   ...rest
 }: CustomStepperProps): JSX.Element {
   const getStepIcon = (
     status: 'completed' | 'active' | 'error' | 'inactive'
   ): JSX.Element => {
-    const iconColor = sacredTheme ? '#FFD700' : 'black'
-    const iconStyle = sacredTheme
+    const iconColor = sacredtheme ? '#FFD700' : 'black'
+    const iconStyle = sacredtheme
       ? {
           animation: `${glowPulse} 2s ease-in-out infinite`,
         }
@@ -124,8 +124,8 @@ function CustomStepper({
         return (
           <LockOutlined
             sx={{
-              color: sacredTheme ? alpha('#FFD700', 0.5) : 'black',
-              ...(sacredTheme && {
+              color: sacredtheme ? alpha('#FFD700', 0.5) : 'black',
+              ...(sacredtheme && {
                 filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
               }),
             }}
@@ -147,12 +147,12 @@ function CustomStepper({
     return step.status !== 'inactive'
   }
 
-  const TooltipComponent = sacredTheme ? SacredTooltip : BlackTooltip
+  const TooltipComponent = sacredtheme ? SacredTooltip : BlackTooltip
 
   return (
     <Box
       sx={
-        sacredTheme
+        sacredtheme
           ? {
               position: 'relative',
               padding: 2,
@@ -181,7 +181,7 @@ function CustomStepper({
         connector={
           <StepConnector
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     '& .MuiStepConnector-line': {
                       borderColor: alpha('#FFD700', 0.3),
@@ -198,7 +198,7 @@ function CustomStepper({
             <StepLabel
               slots={{ stepIcon: () => getStepIcon(step.status) }}
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       '& .MuiStepLabel-label': {
                         color: alpha('#FFD700', 0.9),
@@ -225,10 +225,10 @@ function CustomStepper({
                 <CustomButton
                   text={step.label}
                   variant="text"
-                  fontcolor={sacredTheme ? '#FFD700' : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
                   fontlocation="left"
                   href={isStepClickable(step) ? getStepLink(step) : undefined}
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                   sx={{
                     padding: 0,
                     minWidth: 0,
@@ -236,7 +236,7 @@ function CustomStepper({
                     justifyContent: 'flex-start',
                     textTransform: 'none',
                     '&:hover': {
-                      backgroundColor: sacredTheme
+                      backgroundColor: sacredtheme
                         ? alpha('#FFD700', 0.1)
                         : 'transparent',
                     },
@@ -252,13 +252,13 @@ function CustomStepper({
                       size="small"
                       sx={{
                         padding: 0,
-                        color: sacredTheme ? '#FFD700' : 'black',
+                        color: sacredtheme ? '#FFD700' : 'black',
                         '&:hover': {
-                          backgroundColor: sacredTheme
+                          backgroundColor: sacredtheme
                             ? alpha('#FFD700', 0.1)
                             : 'transparent',
                         },
-                        ...(sacredTheme && {
+                        ...(sacredtheme && {
                           animation: `${floatAnimation} 2s ease-in-out infinite`,
                         }),
                       }}

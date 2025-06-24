@@ -48,7 +48,7 @@ interface DetailedPricingSummaryProps {
   /** Function to call when the proceed button is clicked */
   onProceed?: () => void
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -65,7 +65,7 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
   total = '$180.00',
   proceedText = 'Proceed to checkout',
   onProceed,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   return (
     <Paper
@@ -76,14 +76,14 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'stretch',
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid #e8e8e8',
         minHeight: height,
         padding: '16px',
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
             radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
@@ -105,10 +105,10 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         {/* Product section */}
         <Typography
           text="Product"
-          fontcolor={sacredTheme ? '#FFD700' : 'black'}
+          fontcolor={sacredtheme ? '#FFD700' : 'black'}
           fontvariant="merriparagraph"
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   fontFamily: '"Cinzel", serif',
                   fontWeight: 600,
@@ -120,7 +120,7 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         />
         <Typography
           text={product}
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
           fontvariant="merriparagraph"
           sx={{ marginTop: '8px' }}
         />
@@ -136,12 +136,12 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
           >
             <Typography
               text="Vendor:"
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
               fontvariant="merriparagraph"
             />
             <Typography
               text={vendor}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -154,10 +154,10 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
           >
             <Typography
               text={vendorPrice}
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merriparagraph"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontWeight: 600,
                       textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
@@ -172,12 +172,12 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         <Box sx={{ marginTop: '16px' }}>
           <Typography
             text="Subtotal"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
             fontvariant="merriparagraph"
           />
           <Typography
             text={subtotal}
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
             fontvariant="merriparagraph"
             align="right"
           />
@@ -187,12 +187,12 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         <Box sx={{ marginTop: '8px' }}>
           <Typography
             text="VAT"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
             fontvariant="merriparagraph"
           />
           <Typography
             text={vat}
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
             fontvariant="merriparagraph"
             align="right"
           />
@@ -201,12 +201,12 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         {/* Total section */}
         <Box
           sx={{
-            borderTop: sacredTheme
+            borderTop: sacredtheme
               ? `1px solid ${alpha('#FFD700', 0.3)}`
               : '1px solid #e8e8e8',
             marginTop: '8px',
             paddingTop: '8px',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               background: `linear-gradient(to right, ${alpha('#FFD700', 0.05)}, transparent)`,
             }),
           }}
@@ -220,10 +220,10 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
           >
             <Typography
               text="Total"
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merrih5"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontFamily: '"Cinzel", serif',
                       fontWeight: 700,
@@ -234,10 +234,10 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
             />
             <Typography
               text={total}
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merrih5"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontFamily: '"Cinzel", serif',
                       fontWeight: 700,
@@ -255,12 +255,12 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
         <CustomButton
           text={proceedText}
           variant="contained"
-          backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
-          fontcolor={sacredTheme ? '#FFD700' : 'white'}
+          backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
+          fontcolor={sacredtheme ? '#FFD700' : 'white'}
           fontvariant="merriparagraph"
           onClick={onProceed}
           width="100%"
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
     </Paper>

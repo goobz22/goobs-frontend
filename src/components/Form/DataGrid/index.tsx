@@ -93,17 +93,17 @@ export interface FormDataGridProps {
   description: string
   datagrid: DatagridProps
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function FormDataGrid({
   title,
   description,
   datagrid,
-  sacredTheme = true,
+  sacredtheme = true,
 }: FormDataGridProps) {
   const containerStyles = useMemo(() => {
-    if (!sacredTheme) {
+    if (!sacredtheme) {
       return {
         width: '100%',
         height: 'auto',
@@ -146,7 +146,7 @@ function FormDataGrid({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   const titleStyles = useMemo(() => {
     const baseStyles = {
@@ -154,13 +154,13 @@ function FormDataGrid({
       width: '100%',
       textAlign: 'left' as const,
       fontFamily: 'Merriweather',
-      marginLeft: sacredTheme ? 0 : 2,
+      marginLeft: sacredtheme ? 0 : 2,
       fontSize: '1.5rem',
       fontWeight: 400,
       color: 'black',
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -173,7 +173,7 @@ function FormDataGrid({
       textAlign: 'center' as const,
       marginBottom: 1,
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   const descriptionStyles = useMemo(() => {
     const baseStyles = {
@@ -181,12 +181,12 @@ function FormDataGrid({
       textAlign: 'left' as const,
       fontFamily: 'Merriweather',
       fontSize: '1.25rem',
-      marginLeft: sacredTheme ? 0 : 2,
+      marginLeft: sacredtheme ? 0 : 2,
       fontWeight: 400,
       color: 'black',
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -197,12 +197,12 @@ function FormDataGrid({
       letterSpacing: '0.05em',
       marginBottom: 2,
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   return (
     <Box sx={containerStyles}>
       {/* Top corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -234,7 +234,7 @@ function FormDataGrid({
       )}
 
       {/* Sacred glyphs decoration for header */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',
@@ -268,7 +268,7 @@ function FormDataGrid({
       <Box
         sx={{
           marginTop: 1,
-          marginBottom: sacredTheme ? 3 : 1,
+          marginBottom: sacredtheme ? 3 : 1,
           width: '100%',
           position: 'relative',
         }}
@@ -277,7 +277,7 @@ function FormDataGrid({
         <Box sx={descriptionStyles}>{description}</Box>
 
         {/* Data flow animation */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               position: 'absolute',
@@ -304,7 +304,7 @@ function FormDataGrid({
       {/* DataGrid wrapper with sacred styling */}
       <Box
         sx={
-          sacredTheme
+          sacredtheme
             ? {
                 position: 'relative',
                 borderRadius: '8px',
@@ -355,11 +355,11 @@ function FormDataGrid({
             : {}
         }
       >
-        <DataGrid {...datagrid} sacredTheme={sacredTheme} />
+        <DataGrid {...datagrid} sacredtheme={sacredtheme} />
       </Box>
 
       {/* Bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

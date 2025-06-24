@@ -16,7 +16,7 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
   value = '',
   errorMessage = 'Invalid credit card number',
   useLuhnValidation = true,
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   enableFormatting = true,
   label,
@@ -35,7 +35,7 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
         value={value}
         errorMessage={errorMessage}
         useLuhnValidation={useLuhnValidation}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         isDefaultValue={isDefaultValue}
         enableFormatting={enableFormatting}
         label={label}

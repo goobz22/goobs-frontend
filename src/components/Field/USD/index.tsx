@@ -48,7 +48,7 @@ export interface USDFieldProps extends Omit<TextFieldProps, 'onChange'> {
   /** Interval between continuous increment/decrement actions (ms) */
   repeatInterval?: number
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 interface StyledIconButtonProps {
@@ -162,7 +162,7 @@ const USDField: React.FC<USDFieldProps> = ({
   incrementStep = 1,
   initialDelay = 500,
   repeatInterval = 100,
-  sacredTheme = false,
+  sacredtheme = false,
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
@@ -273,7 +273,7 @@ const USDField: React.FC<USDFieldProps> = ({
 
   const DollarAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -288,10 +288,10 @@ const USDField: React.FC<USDFieldProps> = ({
       )}
       <Box
         sx={{
-          color: sacredTheme ? '#FFD700' : black.main,
-          fontWeight: sacredTheme ? 600 : 400,
-          fontSize: sacredTheme ? '18px' : '16px',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : black.main,
+          fontWeight: sacredtheme ? 600 : 400,
+          fontSize: sacredtheme ? '18px' : '16px',
+          ...(sacredtheme && {
             background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
             backgroundSize: '200% 100%',
             animation: `${goldShimmer} 3s linear infinite`,
@@ -317,7 +317,7 @@ const USDField: React.FC<USDFieldProps> = ({
           marginRight: '-4px',
           height: '32px',
           justifyContent: 'center',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             background: `linear-gradient(135deg, ${alpha('#FFD700', 0.05)} 0%, ${alpha('#FFD700', 0.15)} 100%)`,
             borderRadius: '4px',
             padding: '2px',
@@ -329,11 +329,11 @@ const USDField: React.FC<USDFieldProps> = ({
           onMouseDown={handleIncrementMouseDown}
           edge="end"
           aria-label="increment"
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
           disabled={readOnly}
           sx={{ marginBottom: '-2px' }}
         >
-          <ArrowIcon sacredtheme={sacredTheme}>
+          <ArrowIcon sacredtheme={sacredtheme}>
             <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
           </ArrowIcon>
         </StyledIconButton>
@@ -342,10 +342,10 @@ const USDField: React.FC<USDFieldProps> = ({
           onMouseDown={handleDecrementMouseDown}
           edge="end"
           aria-label="decrement"
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
           disabled={readOnly}
         >
-          <ArrowIcon sacredtheme={sacredTheme}>
+          <ArrowIcon sacredtheme={sacredtheme}>
             <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
           </ArrowIcon>
         </StyledIconButton>
@@ -358,12 +358,12 @@ const USDField: React.FC<USDFieldProps> = ({
       <TextField
         value={value}
         onChange={handleChange}
-        label={sacredTheme ? 'Sacred Treasury' : label}
+        label={sacredtheme ? 'Sacred Treasury' : label}
         type="text"
         inputMode="decimal"
         variant="outlined"
-        placeholder={sacredTheme ? 'Divine wealth...' : undefined}
-        sacredTheme={sacredTheme}
+        placeholder={sacredtheme ? 'Divine wealth...' : undefined}
+        sacredtheme={sacredtheme}
         startAdornment={<DollarAdornment />}
         endAdornment={enableIncrement ? <IncrementAdornment /> : undefined}
         slotProps={{
@@ -371,11 +371,11 @@ const USDField: React.FC<USDFieldProps> = ({
             readOnly,
             sx: {
               '& .MuiInputBase-input': {
-                marginLeft: sacredTheme ? '-10px' : '-15px',
+                marginLeft: sacredtheme ? '-10px' : '-15px',
                 marginTop: '2px',
               },
               '&::placeholder': {
-                marginLeft: sacredTheme ? '-10px' : '-15px',
+                marginLeft: sacredtheme ? '-10px' : '-15px',
                 marginTop: '2px',
               },
             },

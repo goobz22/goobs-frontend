@@ -11,11 +11,11 @@ const glowPulse = keyframes`
 `
 
 interface CalendarIconProps extends SvgIconProps {
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const CalendarIcon: React.FC<CalendarIconProps> = ({
-  sacredTheme,
+  sacredtheme,
   ...props
 }) => {
   // Set a default size for the icon
@@ -26,7 +26,7 @@ const CalendarIcon: React.FC<CalendarIconProps> = ({
       {...props}
       style={{
         fontSize: iconSize, // Set the size of the icon
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           color: '#FFD700',
           animation: `${glowPulse} 2s ease-in-out infinite`,
         }),

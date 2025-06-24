@@ -97,7 +97,7 @@ const expandGlyphGlow = keyframes`
  * <Accordion
  *   summary="Ancient Knowledge"
  *   details="Sacred wisdom revealed..."
- *   sacredTheme
+ *   sacredtheme
  * />
  * ```
  *
@@ -182,7 +182,7 @@ export interface AccordionProps {
   /** Custom styles applied to the accordion */
   style?: React.CSSProperties
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // Enhanced version of MuiAccordion with stricter content unmounting
@@ -472,12 +472,12 @@ const SacredGlyphDecoration = styled('div')({
 })
 
 // Sacred expand icon component
-const SacredExpandIcon = ({ sacredTheme }: { sacredTheme?: boolean }) => (
+const SacredExpandIcon = ({ sacredtheme }: { sacredtheme?: boolean }) => (
   <ExpandMore
     sx={{
-      color: sacredTheme ? '#FFD700' : black.main,
+      color: sacredtheme ? '#FFD700' : black.main,
       transition: 'all 0.3s ease',
-      ...(sacredTheme && {
+      ...(sacredtheme && {
         filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
         '&:hover': {
           filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
@@ -506,7 +506,7 @@ function Accordion({
   defaultExpanded = false,
   onChange,
   disabled = false,
-  sacredTheme = false,
+  sacredtheme = false,
 }: AccordionProps) {
   // Check if component is in controlled mode (expanded prop is provided)
   const isControlled = controlledExpanded !== undefined
@@ -563,14 +563,14 @@ function Accordion({
         expanded={false}
         onChange={handleToggle}
         className="controlled-accordion-collapsed"
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
         <StyledAccordionSummary
-          expandIcon={<SacredExpandIcon sacredTheme={sacredTheme} />}
+          expandIcon={<SacredExpandIcon sacredtheme={sacredtheme} />}
           aria-controls="accordion-content"
           id="accordion-header"
           data-testid="accordion-summary-controlled"
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
         >
           {summary}
         </StyledAccordionSummary>
@@ -587,7 +587,7 @@ function Accordion({
         style={style}
         expanded={false} // Always collapsed when disabled
         className="disabled-accordion"
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
         <DisabledSummaryWrapper
           onClick={handleDisabledClick}
@@ -597,12 +597,12 @@ function Accordion({
             expandIcon={
               <ExpandMore
                 sx={{
-                  color: sacredTheme ? alpha('#FFD700', 0.3) : '#999',
+                  color: sacredtheme ? alpha('#FFD700', 0.3) : '#999',
                 }}
               />
             }
             aria-disabled="true"
-            sacredtheme={sacredTheme}
+            sacredtheme={sacredtheme}
           >
             {summary}
           </StyledAccordionSummary>
@@ -620,20 +620,20 @@ function Accordion({
       expanded={expanded}
       onChange={handleToggle}
       className={`accordion-${expanded ? 'expanded' : 'collapsed'}`}
-      sacredtheme={sacredTheme}
+      sacredtheme={sacredtheme}
     >
       <StyledAccordionSummary
-        expandIcon={<SacredExpandIcon sacredTheme={sacredTheme} />}
+        expandIcon={<SacredExpandIcon sacredtheme={sacredtheme} />}
         aria-controls="accordion-content"
         id="accordion-header"
         data-testid="accordion-summary"
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
         {summary}
       </StyledAccordionSummary>
       {expanded && (
-        <StyledAccordionDetails sacredtheme={sacredTheme}>
-          {sacredTheme ? (
+        <StyledAccordionDetails sacredtheme={sacredtheme}>
+          {sacredtheme ? (
             <SacredContentWrapper>
               {details}
               <SacredGlyphDecoration>

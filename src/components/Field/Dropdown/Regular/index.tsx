@@ -71,7 +71,7 @@ export interface DropdownProps extends Omit<FormControlProps, 'onChange'> {
   // Controls whether ID columns (containing 'id' or '_id') are visible by default
   showIdColumns?: boolean
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const StyledFormControl = styled(FormControl)<{ width?: string }>(
@@ -311,7 +311,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   width,
   disabled = false,
   showIdColumns = false, // Default to hiding ID columns for security
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>('')
   const [focused, setFocused] = useState(false)
@@ -393,13 +393,13 @@ const Dropdown: React.FC<DropdownProps> = ({
             <Typography
               fontvariant="merriparagraph"
               text={displayText}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : black.main}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : black.main}
               sx={{
                 fontSize: '14px',
                 lineHeight: '20px',
                 width: '100%',
                 textAlign: 'left',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   fontWeight: 500,
                 }),
               }}
@@ -413,18 +413,18 @@ const Dropdown: React.FC<DropdownProps> = ({
       <StyledMenuItem
         key={option.value}
         value={option.value}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
         <Typography
           fontvariant="merriparagraph"
           text={displayText}
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : black.main}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : black.main}
           sx={{
             fontSize: '14px',
             lineHeight: '20px',
             width: '100%',
             textAlign: 'left',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               fontWeight: 500,
             }),
           }}
@@ -436,14 +436,14 @@ const Dropdown: React.FC<DropdownProps> = ({
               .filter(Boolean)
               .join(' | ')}
             fontcolor={
-              sacredTheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
+              sacredtheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.6)'
             }
             sx={{
               fontSize: '12px',
               lineHeight: '16px',
               width: '100%',
               textAlign: 'left',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 fontStyle: 'italic',
               }),
             }}
@@ -474,7 +474,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           fontcolor={
             disabled
               ? 'rgba(0, 0, 0, 0.38)'
-              : sacredTheme
+              : sacredtheme
                 ? '#FFD700'
                 : black.main
           }
@@ -483,7 +483,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             lineHeight: '20px',
             width: '100%',
             textAlign: 'left',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               fontWeight: 500,
               textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
             }),
@@ -507,9 +507,9 @@ const Dropdown: React.FC<DropdownProps> = ({
         unshrunkfontcolor={unshrunkfontcolor}
         shrunklabelposition={shrunklabelposition}
         disabled={disabled}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
-        {sacredTheme ? 'Divine Selection' : label}
+        {sacredtheme ? 'Divine Selection' : label}
       </StyledInputLabel>
       <StyledSelect
         value={selectedValue}
@@ -520,7 +520,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           ...MenuProps,
           PaperProps: {
             ...MenuProps.PaperProps,
-            sx: sacredTheme
+            sx: sacredtheme
               ? {
                   backgroundColor: alpha('#000000', 0.95),
                   border: `1px solid ${alpha('#FFD700', 0.3)}`,
@@ -557,7 +557,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         outlinecolor={outlinecolor}
         fontcolor={fontcolor}
         disabled={disabled}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
       >
         {filteredOptions.map(renderMenuItem)}
       </StyledSelect>

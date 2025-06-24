@@ -14,7 +14,7 @@ const CVVComponent: React.FC<CVVProps> = ({
   minLength = 3,
   maxLength = 4,
   errorMessage = 'Invalid CVV format',
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   label,
   placeholder,
@@ -33,7 +33,7 @@ const CVVComponent: React.FC<CVVProps> = ({
         minLength={minLength}
         maxLength={maxLength}
         errorMessage={errorMessage}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         isDefaultValue={isDefaultValue}
         label={label}
         placeholder={placeholder}

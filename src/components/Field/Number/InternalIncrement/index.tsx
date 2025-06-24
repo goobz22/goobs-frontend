@@ -36,7 +36,7 @@ export interface InternalIncrementNumberFieldProps
   /** Interval between continuous increment/decrement actions (ms) */
   repeatInterval?: number
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 interface StyledIconButtonProps {
@@ -125,7 +125,7 @@ const InternalIncrementNumberField: React.FC<
   max,
   initialDelay = 500, // wait 500ms before starting continuous increment/decrement
   repeatInterval = 100, // then repeat every 100ms
-  sacredTheme = false,
+  sacredtheme = false,
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
@@ -251,7 +251,7 @@ const InternalIncrementNumberField: React.FC<
       type="text"
       inputMode="numeric"
       variant="outlined"
-      sacredTheme={sacredTheme}
+      sacredtheme={sacredtheme}
       endAdornment={
         <Box
           display="flex"
@@ -260,7 +260,7 @@ const InternalIncrementNumberField: React.FC<
             marginRight: '-4px',
             height: '32px',
             justifyContent: 'center',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               background: `linear-gradient(135deg, ${alpha('#FFD700', 0.05)} 0%, ${alpha('#FFD700', 0.15)} 100%)`,
               borderRadius: '4px',
               padding: '2px',
@@ -272,10 +272,10 @@ const InternalIncrementNumberField: React.FC<
             onMouseDown={handleIncrementMouseDown}
             edge="end"
             aria-label="increment"
-            sacredtheme={sacredTheme}
+            sacredtheme={sacredtheme}
             sx={{ marginBottom: '-2px' }}
           >
-            <ArrowIcon sacredtheme={sacredTheme}>
+            <ArrowIcon sacredtheme={sacredtheme}>
               <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
             </ArrowIcon>
           </StyledIconButton>
@@ -284,9 +284,9 @@ const InternalIncrementNumberField: React.FC<
             onMouseDown={handleDecrementMouseDown}
             edge="end"
             aria-label="decrement"
-            sacredtheme={sacredTheme}
+            sacredtheme={sacredtheme}
           >
-            <ArrowIcon sacredtheme={sacredTheme}>
+            <ArrowIcon sacredtheme={sacredtheme}>
               <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
             </ArrowIcon>
           </StyledIconButton>

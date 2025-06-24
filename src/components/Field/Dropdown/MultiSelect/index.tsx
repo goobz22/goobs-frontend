@@ -82,7 +82,7 @@ export interface MultiSelectChipProps
    */
   showOptionDetails?: boolean
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const ITEM_HEIGHT = 40
@@ -287,7 +287,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
     placeholdercolor,
     shrunklabelposition,
     sx,
-    sacredTheme = false,
+    sacredtheme = false,
     ...rest
   } = props
 
@@ -376,8 +376,8 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
       <Box>
         <Box
           sx={{
-            color: sacredTheme ? '#FFD700' : 'inherit',
-            ...(sacredTheme && {
+            color: sacredtheme ? '#FFD700' : 'inherit',
+            ...(sacredtheme && {
               fontWeight: 500,
             }),
           }}
@@ -387,8 +387,8 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
         <Box
           sx={{
             fontSize: '0.8em',
-            color: sacredTheme ? alpha('#FFD700', 0.7) : 'text.secondary',
-            ...(sacredTheme && {
+            color: sacredtheme ? alpha('#FFD700', 0.7) : 'text.secondary',
+            ...(sacredtheme && {
               fontStyle: 'italic',
             }),
           }}
@@ -424,11 +424,11 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
         unshrunkfontcolor={unshrunkfontcolor}
         placeholdercolor={placeholdercolor}
         shrunklabelposition={shrunklabelposition}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
         {...rest}
       >
         <InputLabel id="multi-select-chip-label">
-          {sacredTheme ? 'Sacred Selections' : label}
+          {sacredtheme ? 'Sacred Selections' : label}
         </InputLabel>
         <Select
           labelId="multi-select-chip-label"
@@ -438,7 +438,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
           onChange={handleSelectChange}
           input={
             <OutlinedInput
-              label={sacredTheme ? 'Sacred Selections' : label}
+              label={sacredtheme ? 'Sacred Selections' : label}
               sx={{
                 height: selectedValues.length > 0 ? 'auto' : '35px',
                 minHeight: '35px',
@@ -452,7 +452,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
                 }),
               }}
               placeholder={
-                sacredTheme
+                sacredtheme
                   ? 'Divine choices...'
                   : placeholdercolor
                     ? (label as string)
@@ -475,7 +475,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
                   size="small"
                   sx={{
                     height: '24px',
-                    ...(sacredTheme && {
+                    ...(sacredtheme && {
                       backgroundColor: alpha('#FFD700', 0.2),
                       color: '#FFD700',
                       border: `1px solid ${alpha('#FFD700', 0.4)}`,
@@ -495,7 +495,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
             ...MenuProps,
             PaperProps: {
               ...MenuProps.PaperProps,
-              sx: sacredTheme
+              sx: sacredtheme
                 ? {
                     backgroundColor: alpha('#000000', 0.95),
                     border: `1px solid ${alpha('#FFD700', 0.3)}`,
@@ -524,7 +524,7 @@ export default function MultipleSelectChip(props: MultiSelectChipProps) {
               value={value}
               style={getStyles(value, selectedValues, theme)}
               sx={{
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   color: alpha('#FFD700', 0.9),
                   backgroundColor: selectedValues.includes(value)
                     ? alpha('#FFD700', 0.2)

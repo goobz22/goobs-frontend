@@ -38,7 +38,7 @@ interface TaskCardProps {
   /** Height of the card. */
   height?: string | number
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /** Whether the task card is draggable */
   draggable?: boolean
   /** Called when drag starts */
@@ -56,7 +56,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   disabled = false,
   onCheck,
   height = 'auto',
-  sacredTheme = false,
+  sacredtheme = false,
   draggable = false,
   onDragStart,
   onDragOver,
@@ -77,14 +77,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
         alignItems: 'flex-start',
         height,
         p: 2,
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${checked ? '#FFD700' : alpha('#FFD700', 0.3)}`
           : '1px solid #e8e8e8',
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         transition: 'all 0.3s ease',
         overflow: 'hidden',
         cursor: draggable ? 'grab' : 'default',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02))
           `,
@@ -116,14 +116,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
         checked={checked}
         disabled={disabled}
         onChange={onCheck}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', marginRight: 4 }}>
         <Typography
           text={title}
           fontcolor={
-            sacredTheme
+            sacredtheme
               ? checked
                 ? '#FFD700'
                 : alpha('#FFD700', 0.9)
@@ -132,7 +132,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           fontvariant="merrih5"
           sx={{
             marginBottom: '4px',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               fontFamily: '"Cinzel", serif',
               fontWeight: checked ? 700 : 600,
               letterSpacing: '0.5px',
@@ -146,7 +146,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <Typography
           text={description}
           fontcolor={
-            sacredTheme
+            sacredtheme
               ? checked
                 ? alpha('#FFD700', 0.6)
                 : alpha('#FFD700', 0.8)
@@ -154,7 +154,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           }
           fontvariant="merriparagraph"
           sx={{
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               textDecoration: checked ? 'line-through' : 'none',
               textDecorationColor: alpha('#FFD700', 0.3),
               opacity: checked ? 0.8 : 1,
@@ -165,7 +165,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       </Box>
 
       {/* Sacred completion indicator */}
-      {sacredTheme && checked && (
+      {sacredtheme && checked && (
         <Box
           sx={{
             position: 'absolute',

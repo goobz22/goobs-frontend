@@ -29,7 +29,7 @@ type MarkdownEditorProps = {
   markdownMode: boolean
   setMarkdownMode: (value: boolean) => void
   setNewSlateValue: (value: RichTextEditorTypes['CustomElement'][]) => void
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -37,7 +37,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   setMarkdown,
   markdownMode,
   setMarkdownMode,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const [markdownValue, setMarkdownValue] = useState(markdown)
   const [selectedText, setSelectedText] = useState('')
@@ -72,15 +72,15 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   return (
     <Box
       sx={{
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid black',
         borderRadius: '8px',
         width: 'auto',
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         position: 'relative',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)',
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
@@ -101,12 +101,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           void handleItalicClick(selectedText, markdown, setMarkdown)
         }
         toolbarType="markdown"
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
       <Divider
         sx={{
-          backgroundColor: sacredTheme ? alpha('#FFD700', 0.3) : 'black',
-          ...(sacredTheme && {
+          backgroundColor: sacredtheme ? alpha('#FFD700', 0.3) : 'black',
+          ...(sacredtheme && {
             boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
           }),
         }}
@@ -120,21 +120,21 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         onChange={handleLocalMarkdownChange}
         onSelect={handleSelect}
         placeholder={
-          sacredTheme ? 'Compose your markdown scripture...' : undefined
+          sacredtheme ? 'Compose your markdown scripture...' : undefined
         }
         sx={{
           boxSizing: 'border-box',
           p: 1,
           '& .MuiInputBase-root': {
-            color: sacredTheme ? alpha('#FFD700', 0.9) : 'inherit',
+            color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
             fontFamily: 'monospace',
             fontSize: '14px',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               animation: `${sacredCodeGlow} 4s ease-in-out infinite`,
             }),
           },
           '& .MuiInputBase-input': {
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               letterSpacing: '0.5px',
               '&::placeholder': {
                 color: alpha('#FFD700', 0.5),
@@ -149,7 +149,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         }}
       />
       {/* Sacred decorative elements */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',

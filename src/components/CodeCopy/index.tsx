@@ -97,7 +97,7 @@ export interface CodeCopyProps {
   /** The programming language of the code (for syntax highlighting) */
   language: string
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -107,7 +107,7 @@ export interface CodeCopyProps {
 const CodeCopy: React.FC<CodeCopyProps> = ({
   code,
   language,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   /** Reference to the code element for applying syntax highlighting */
   const codeRef = useRef<HTMLElement>(null)
@@ -122,7 +122,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
       hljs.highlightElement(codeRef.current)
 
       // Apply sacred theme styles to highlighted code
-      if (sacredTheme && codeRef.current) {
+      if (sacredtheme && codeRef.current) {
         // Add golden tint to syntax highlighting
         const keywords = codeRef.current.querySelectorAll('.hljs-keyword')
         keywords.forEach(el => {
@@ -150,7 +150,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
         })
       }
     }
-  }, [code, language, sacredTheme])
+  }, [code, language, sacredtheme])
 
   /**
    * Handles the copying of code to clipboard
@@ -180,13 +180,13 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
       sx={{
         position: 'relative',
         borderRadius: 1,
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'black',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'black',
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        border: sacredTheme ? `1px solid ${alpha('#FFD700', 0.3)}` : 'none',
+        border: sacredtheme ? `1px solid ${alpha('#FFD700', 0.3)}` : 'none',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           animation: `${sacredGlow} 4s ease-in-out infinite`,
           '&::before': {
             content: '""',
@@ -209,7 +209,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
         sx={{
           height: '40px',
           width: '100%',
-          backgroundColor: sacredTheme ? alpha('#000000', 0.9) : 'grey.300',
+          backgroundColor: sacredtheme ? alpha('#000000', 0.9) : 'grey.300',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -219,7 +219,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
           borderTopRightRadius: 'inherit',
           position: 'relative',
           zIndex: 2,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             borderBottom: `1px solid ${alpha('#FFD700', 0.3)}`,
             background: `linear-gradient(to right, ${alpha('#FFD700', 0.1)}, transparent)`,
           }),
@@ -227,7 +227,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
       >
         {/* Language indicator */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {sacredTheme && (
+          {sacredtheme && (
             <Box
               sx={{
                 color: alpha('#FFD700', 0.6),
@@ -240,13 +240,13 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
           )}
           <Box
             sx={{
-              color: sacredTheme ? alpha('#FFD700', 0.8) : 'black',
+              color: sacredtheme ? alpha('#FFD700', 0.8) : 'black',
               fontSize: '12px',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'monospace',
-              fontWeight: sacredTheme ? 600 : 400,
-              letterSpacing: sacredTheme ? '1px' : 'normal',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'monospace',
+              fontWeight: sacredtheme ? 600 : 400,
+              letterSpacing: sacredtheme ? '1px' : 'normal',
               textTransform: 'uppercase',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
               }),
             }}
@@ -261,7 +261,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
           icon={
             <ContentCopyIcon
               sx={
-                copied && sacredTheme
+                copied && sacredtheme
                   ? {
                       animation: `${copySuccess} 0.5s ease-out`,
                     }
@@ -270,18 +270,18 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
             />
           }
           iconlocation="left"
-          fontcolor={sacredTheme ? '#FFD700' : 'black'}
-          iconcolor={sacredTheme ? '#FFD700' : 'black'}
+          fontcolor={sacredtheme ? '#FFD700' : 'black'}
+          iconcolor={sacredtheme ? '#FFD700' : 'black'}
           onClick={handleCopy}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
 
       {/* Code Block */}
       <Box
         sx={{
-          backgroundColor: sacredTheme ? 'transparent' : 'black',
-          color: sacredTheme ? alpha('#FFD700', 0.9) : 'white',
+          backgroundColor: sacredtheme ? 'transparent' : 'black',
+          color: sacredtheme ? alpha('#FFD700', 0.9) : 'white',
           flexGrow: 1,
           width: '100%',
           display: 'flex',
@@ -290,7 +290,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
         }}
       >
         {/* Line numbers */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               backgroundColor: alpha('#000000', 0.5),
@@ -332,7 +332,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
         <pre
           style={{
             backgroundColor: 'transparent',
-            color: sacredTheme ? alpha('#FFD700', 0.9) : 'white',
+            color: sacredtheme ? alpha('#FFD700', 0.9) : 'white',
             margin: 0,
             flexGrow: 1,
             padding: '16px',
@@ -346,7 +346,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
             ref={codeRef}
             className={`language-${language}`}
             style={
-              sacredTheme
+              sacredtheme
                 ? {
                     textShadow: '0 0 2px rgba(255, 215, 0, 0.3)',
                   }
@@ -358,7 +358,7 @@ const CodeCopy: React.FC<CodeCopyProps> = ({
         </pre>
 
         {/* Sacred decorative elements */}
-        {sacredTheme && (
+        {sacredtheme && (
           <>
             <Box
               sx={{

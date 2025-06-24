@@ -139,33 +139,33 @@ export interface ContentSectionProps {
   }>
   width?: number
   /** Enable Egyptian/Sacred theming for all components */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const RenderContent: React.FC<
-  ContentSectionProps['grids'][0] & { sacredTheme?: boolean }
-> = ({ boxProps, style, customComponent, sacredTheme, ...props }) => {
+  ContentSectionProps['grids'][0] & { sacredtheme?: boolean }
+> = ({ boxProps, style, customComponent, sacredtheme, ...props }) => {
   const elements: React.ReactElement[] = []
 
-  // Helper function to inject sacredTheme into component props
-  const injectSacredTheme = <T extends object>(
+  // Helper function to inject sacredtheme into component props
+  const injectsacredtheme = <T extends object>(
     componentProps: T | T[] | undefined
   ): T | T[] | undefined => {
-    if (!componentProps || !sacredTheme) return componentProps
+    if (!componentProps || !sacredtheme) return componentProps
 
     if (Array.isArray(componentProps)) {
-      return componentProps.map(prop => ({ ...prop, sacredTheme }))
+      return componentProps.map(prop => ({ ...prop, sacredtheme }))
     }
 
-    return { ...componentProps, sacredTheme }
+    return { ...componentProps, sacredtheme }
   }
 
   // Special handling for single-object props
-  const injectSacredThemeSingle = <T extends object>(
+  const injectsacredthemeSingle = <T extends object>(
     componentProps: T | undefined
   ): T | undefined => {
-    if (!componentProps || !sacredTheme) return componentProps
-    return { ...componentProps, sacredTheme }
+    if (!componentProps || !sacredtheme) return componentProps
+    return { ...componentProps, sacredtheme }
   }
 
   // Helper function to add elements
@@ -175,90 +175,90 @@ const RenderContent: React.FC<
     }
   }
 
-  // Add elements for each content type, injecting sacredTheme where applicable
+  // Add elements for each content type, injecting sacredtheme where applicable
   addElements(
-    useTypography({ typography: injectSacredTheme(props.typography) })
+    useTypography({ typography: injectsacredtheme(props.typography) })
   )
   addElements(
-    useRadioGroup({ radiogroup: injectSacredTheme(props.radiogroup) })
+    useRadioGroup({ radiogroup: injectsacredtheme(props.radiogroup) })
   )
   addElements(
     useConfirmationInput({
-      confirmationcodeinput: injectSacredTheme(props.confirmationcodeinput),
+      confirmationcodeinput: injectsacredtheme(props.confirmationcodeinput),
     })
   )
-  addElements(useLink({ link: injectSacredTheme(props.link) }))
-  addElements(useButton({ button: injectSacredTheme(props.button) }))
-  addElements(useImage({ image: injectSacredTheme(props.image) }))
+  addElements(useLink({ link: injectsacredtheme(props.link) }))
+  addElements(useButton({ button: injectsacredtheme(props.button) }))
+  addElements(useImage({ image: injectsacredtheme(props.image) }))
   addElements(
-    useComplexEditor({ complexeditor: injectSacredTheme(props.complexeditor) })
+    useComplexEditor({ complexeditor: injectsacredtheme(props.complexeditor) })
   )
-  addElements(usePricing({ pricing: injectSacredThemeSingle(props.pricing) }))
-  addElements(useStepper({ stepper: injectSacredTheme(props.stepper) }))
+  addElements(usePricing({ pricing: injectsacredthemeSingle(props.pricing) }))
+  addElements(useStepper({ stepper: injectsacredtheme(props.stepper) }))
   addElements(
-    useTransferList({ transferlist: injectSacredTheme(props.transferlist) })
+    useTransferList({ transferlist: injectsacredtheme(props.transferlist) })
   )
-  addElements(useCard({ card: injectSacredTheme(props.card) }))
-  addElements(useCodeCopy({ codecopy: injectSacredTheme(props.codecopy) }))
+  addElements(useCard({ card: injectsacredtheme(props.card) }))
+  addElements(useCodeCopy({ codecopy: injectsacredtheme(props.codecopy) }))
   addElements(
     useSearchableDropdown({
-      searchableDropdown: injectSacredTheme(props.searchableDropdown),
+      searchableDropdown: injectsacredtheme(props.searchableDropdown),
     })
   )
-  addElements(useTextField({ textfield: injectSacredTheme(props.textfield) }))
-  addElements(useDateField({ dateField: injectSacredTheme(props.datefield) }))
+  addElements(useTextField({ textfield: injectsacredtheme(props.textfield) }))
+  addElements(useDateField({ dateField: injectsacredtheme(props.datefield) }))
   addElements(
-    useProjectBoard({ projectboard: injectSacredTheme(props.projectboard) })
+    useProjectBoard({ projectboard: injectsacredtheme(props.projectboard) })
   )
-  addElements(useAccordion({ accordion: injectSacredTheme(props.accordion) }))
+  addElements(useAccordion({ accordion: injectsacredtheme(props.accordion) }))
   addElements(
-    useMultiSelect({ multiSelect: injectSacredTheme(props.multiSelect) })
+    useMultiSelect({ multiSelect: injectsacredtheme(props.multiSelect) })
   )
-  addElements(useCheckbox({ checkbox: injectSacredTheme(props.checkbox) }))
+  addElements(useCheckbox({ checkbox: injectsacredtheme(props.checkbox) }))
   addElements(
     usePhoneNumber({
-      phoneNumberField: injectSacredTheme(props.phoneNumberField),
+      phoneNumberField: injectsacredtheme(props.phoneNumberField),
     })
   )
-  addElements(useDropdown({ dropdown: injectSacredTheme(props.dropdown) }))
+  addElements(useDropdown({ dropdown: injectsacredtheme(props.dropdown) }))
   addElements(
     useIncrementNumberField({
-      incrementNumberField: injectSacredTheme(props.incrementNumberField),
+      incrementNumberField: injectsacredtheme(props.incrementNumberField),
     })
   )
-  addElements(useSearchbar({ searchbar: injectSacredTheme(props.searchbar) }))
+  addElements(useSearchbar({ searchbar: injectsacredtheme(props.searchbar) }))
   addElements(
-    useNumberField({ numberField: injectSacredTheme(props.numberField) })
+    useNumberField({ numberField: injectsacredtheme(props.numberField) })
   )
   addElements(
-    usePasswordField({ passwordField: injectSacredTheme(props.passwordField) })
+    usePasswordField({ passwordField: injectsacredtheme(props.passwordField) })
   )
-  addElements(useQRCode({ qrcode: injectSacredTheme(props.qrcode) }))
-  addElements(useSubnet({ subnet: injectSacredTheme(props.subnet) }))
-  addElements(useSupernet({ supernet: injectSacredTheme(props.supernet) }))
-  addElements(useCIDR({ cidr: injectSacredTheme(props.cidr) }))
-  addElements(useAddress({ address: injectSacredTheme(props.address) }))
-  addElements(useVLAN({ vlan: injectSacredTheme(props.vlan) }))
-  addElements(useUSD({ usdField: injectSacredTheme(props.usdField) }))
+  addElements(useQRCode({ qrcode: injectsacredtheme(props.qrcode) }))
+  addElements(useSubnet({ subnet: injectsacredtheme(props.subnet) }))
+  addElements(useSupernet({ supernet: injectsacredtheme(props.supernet) }))
+  addElements(useCIDR({ cidr: injectsacredtheme(props.cidr) }))
+  addElements(useAddress({ address: injectsacredtheme(props.address) }))
+  addElements(useVLAN({ vlan: injectsacredtheme(props.vlan) }))
+  addElements(useUSD({ usdField: injectsacredtheme(props.usdField) }))
   addElements(
-    useMacAddress({ macAddressField: injectSacredTheme(props.macAddressField) })
-  )
-  addElements(
-    useRoutingNumber({ routingnumber: injectSacredTheme(props.routingnumber) })
+    useMacAddress({ macAddressField: injectsacredtheme(props.macAddressField) })
   )
   addElements(
-    useAccountNumber({ accountnumber: injectSacredTheme(props.accountnumber) })
+    useRoutingNumber({ routingnumber: injectsacredtheme(props.routingnumber) })
   )
-  addElements(useCVV({ cvv: injectSacredTheme(props.cvv) }))
+  addElements(
+    useAccountNumber({ accountnumber: injectsacredtheme(props.accountnumber) })
+  )
+  addElements(useCVV({ cvv: injectsacredtheme(props.cvv) }))
   addElements(
     useCreditCardNumber({
-      creditCardNumber: injectSacredTheme(props.creditCardNumber),
+      creditCardNumber: injectsacredtheme(props.creditCardNumber),
     })
   )
-  addElements(useDateRange({ dateRange: injectSacredTheme(props.dateRange) }))
+  addElements(useDateRange({ dateRange: injectsacredtheme(props.dateRange) }))
   addElements(
     useCreditCardExpiration({
-      creditCardExpiration: injectSacredTheme(props.creditCardExpiration),
+      creditCardExpiration: injectsacredtheme(props.creditCardExpiration),
     })
   )
 
@@ -278,12 +278,12 @@ const RenderContent: React.FC<
 
 export default function ContentSection({
   grids,
-  sacredTheme,
+  sacredtheme,
 }: ContentSectionProps) {
   return (
     <>
       {grids.map((gridProps, index) => (
-        <RenderContent key={index} {...gridProps} sacredTheme={sacredTheme} />
+        <RenderContent key={index} {...gridProps} sacredtheme={sacredtheme} />
       ))}
     </>
   )

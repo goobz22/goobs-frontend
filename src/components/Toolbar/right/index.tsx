@@ -8,10 +8,10 @@ import { black } from '../../../styles/palette'
 export interface RightProps {
   /** A single dropdown to render. (We'll render multiple <Right> if needed.) */
   dropdown: DropdownProps
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
-function Right({ dropdown, sacredTheme }: RightProps) {
+function Right({ dropdown, sacredtheme }: RightProps) {
   return (
     <Box
       sx={{
@@ -26,14 +26,14 @@ function Right({ dropdown, sacredTheme }: RightProps) {
     >
       <Dropdown
         outlinecolor={
-          sacredTheme ? '#FFD700' : dropdown.outlinecolor || black.main
+          sacredtheme ? '#FFD700' : dropdown.outlinecolor || black.main
         }
-        fontcolor={sacredTheme ? '#FFD700' : dropdown.fontcolor || black.main}
+        fontcolor={sacredtheme ? '#FFD700' : dropdown.fontcolor || black.main}
         shrunkfontcolor={
-          sacredTheme ? '#FFD700' : dropdown.shrunkfontcolor || black.main
+          sacredtheme ? '#FFD700' : dropdown.shrunkfontcolor || black.main
         }
         backgroundcolor={
-          sacredTheme ? alpha('#000000', 0.6) : dropdown.backgroundcolor
+          sacredtheme ? alpha('#000000', 0.6) : dropdown.backgroundcolor
         }
         {...dropdown}
       />

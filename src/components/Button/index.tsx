@@ -100,7 +100,7 @@ export interface CustomButtonProps extends ButtonProps {
   fontlocation?: 'left' | 'center' | 'right'
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function CustomButton({
@@ -120,7 +120,7 @@ function CustomButton({
   fontlocation = 'center',
   disabled,
   style = {},
-  sacredTheme = false,
+  sacredtheme = false,
   ...restProps
 }: CustomButtonProps) {
   // Merge MUI's "disabled" with our "disableButton"
@@ -135,7 +135,7 @@ function CustomButton({
   const IconComponent = icon
     ? React.cloneElement(icon, {
         sx: {
-          color: sacredTheme
+          color: sacredtheme
             ? isReallyDisabled
               ? alpha('#FFD700', 0.3)
               : iconcolor || '#FFD700'
@@ -144,7 +144,7 @@ function CustomButton({
           minWidth: iconsize || '20px',
           minHeight: iconsize || '20px',
           margin: 0,
-          ...(sacredTheme &&
+          ...(sacredtheme &&
             !isReallyDisabled && {
               animation: `${sacredIconGlow} 2s ease-in-out infinite`,
             }),
@@ -193,7 +193,7 @@ function CustomButton({
   }
 
   // Sacred theme styles
-  if (sacredTheme && !isReallyDisabled) {
+  if (sacredtheme && !isReallyDisabled) {
     buttonStyle.backgroundColor =
       backgroundcolor === 'none'
         ? 'transparent'
@@ -219,7 +219,7 @@ function CustomButton({
 
   // If disabled, force styling
   if (isReallyDisabled) {
-    if (sacredTheme) {
+    if (sacredtheme) {
       buttonStyle.backgroundColor = alpha('#000000', 0.6)
       buttonStyle.border = `2px solid ${alpha('#FFD700', 0.2)}`
       buttonStyle.color = alpha('#FFD700', 0.3)
@@ -231,9 +231,9 @@ function CustomButton({
     buttonStyle.opacity = 1
     buttonStyle.cursor = 'not-allowed'
     buttonStyle.pointerEvents = 'auto'
-  } else if (!sacredTheme && backgroundcolor && backgroundcolor !== 'none') {
+  } else if (!sacredtheme && backgroundcolor && backgroundcolor !== 'none') {
     buttonStyle.backgroundColor = backgroundcolor
-  } else if (!sacredTheme && backgroundcolor === 'none') {
+  } else if (!sacredtheme && backgroundcolor === 'none') {
     buttonStyle.backgroundColor = 'transparent'
   }
 
@@ -280,7 +280,7 @@ function CustomButton({
         style={buttonStyle}
         data-testid={isReallyDisabled ? 'disabled-button' : 'button'}
         sx={{
-          ...(sacredTheme &&
+          ...(sacredtheme &&
             !isReallyDisabled && {
               '&::before': {
                 content: '""',
@@ -326,7 +326,7 @@ function CustomButton({
         }}
       >
         {/* Sacred floating glyph on the right */}
-        {sacredTheme && !isReallyDisabled && (
+        {sacredtheme && !isReallyDisabled && (
           <Box
             className="sacred-glyph-right"
             sx={{
@@ -354,19 +354,19 @@ function CustomButton({
 
           {text && (
             <Typography
-              fontvariant={sacredTheme ? undefined : fontvariant}
+              fontvariant={sacredtheme ? undefined : fontvariant}
               fontcolor={
                 isReallyDisabled
-                  ? sacredTheme
+                  ? sacredtheme
                     ? alpha('#FFD700', 0.3)
                     : 'grey'
-                  : sacredTheme
+                  : sacredtheme
                     ? '#FFD700'
                     : fontcolor || 'white'
               }
               text={text}
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontFamily: '"Cinzel", serif',
                       fontWeight: 600,

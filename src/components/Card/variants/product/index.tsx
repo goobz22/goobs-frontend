@@ -63,7 +63,7 @@ interface ProductCardProps {
   /** Creator of the product */
   createdBy?: string
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /** Height of the card */
   height?: string | number
 }
@@ -85,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   releaseDate,
   onContact,
   createdBy,
-  sacredTheme = false,
+  sacredtheme = false,
   height,
 }) => {
   // State for number of developers input
@@ -137,12 +137,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         flexDirection: 'column',
         padding: '16px',
         minHeight: height,
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
-        border: sacredTheme
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid #e8e8e8',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
             radial-gradient(circle at top left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
@@ -166,9 +166,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Typography
           text="Number of developers"
           fontvariant="merriparagraph"
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   fontWeight: 600,
                   letterSpacing: '0.5px',
@@ -188,7 +188,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               cursor: 'pointer',
               borderRadius: '4px',
               transition: 'all 0.3s ease',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 color: '#FFD700',
                 '&:hover': {
                   backgroundColor: alpha('#FFD700', 0.1),
@@ -210,16 +210,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
               onChange={handleInputChange}
               style={{
                 width: '100%',
-                border: sacredTheme
+                border: sacredtheme
                   ? `1px solid ${alpha('#FFD700', 0.5)}`
                   : '1px solid #ccc',
                 borderRadius: '4px',
                 padding: '4px',
-                backgroundColor: sacredTheme ? alpha('#000000', 0.8) : 'white',
-                color: sacredTheme ? '#FFD700' : 'black',
+                backgroundColor: sacredtheme ? alpha('#000000', 0.8) : 'white',
+                color: sacredtheme ? '#FFD700' : 'black',
                 textAlign: 'center',
-                fontWeight: sacredTheme ? 600 : 400,
-                ...(sacredTheme && {
+                fontWeight: sacredtheme ? 600 : 400,
+                ...(sacredtheme && {
                   boxShadow: `inset 0 0 5px ${alpha('#FFD700', 0.2)}`,
                   animation: `${sacredCounterGlow} 3s ease-in-out infinite`,
                 }),
@@ -237,7 +237,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               cursor: 'pointer',
               borderRadius: '4px',
               transition: 'all 0.3s ease',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 color: '#FFD700',
                 '&:hover': {
                   backgroundColor: alpha('#FFD700', 0.1),
@@ -258,23 +258,23 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <Typography
             text={`Licenses: ${numLicenses}`}
             fontvariant="merriparagraph"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
           />
         </Box>
         <Box>
           <Typography
             text={`Unit price: $ ${unitPrice}`}
             fontvariant="merriparagraph"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
           />
         </Box>
         <Box sx={{ fontWeight: 'bold' }}>
           <Typography
             text={`Total: $ ${(unitPrice * numLicenses).toFixed(2)}`}
             fontvariant="merriparagraph"
-            fontcolor={sacredTheme ? '#FFD700' : 'black'}
+            fontcolor={sacredtheme ? '#FFD700' : 'black'}
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontSize: '1.1rem',
                     fontWeight: 700,
@@ -299,19 +299,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Box sx={{ mr: '2px' }}>
           <CustomButton
             text="Buy now"
-            fontcolor={sacredTheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+            fontcolor={sacredtheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
             onClick={onBuy}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </Box>
         <Box sx={{ ml: '2px' }}>
           <CustomButton
             text="Live Preview"
-            fontcolor={sacredTheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredTheme ? alpha('#000000', 0.9) : 'black'}
+            fontcolor={sacredtheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
             onClick={onLivePreview}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </Box>
       </Box>
@@ -323,7 +323,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <Typography
               text={`✓ ${feature}`}
               fontvariant="merriparagraph"
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
             />
           </Box>
         ))}
@@ -334,7 +334,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Typography
           text={`First release: ${releaseDate}`}
           fontvariant="merriparagraph"
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
         />
       </Box>
 
@@ -345,7 +345,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           cursor: 'pointer',
           position: 'relative',
           zIndex: 1,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '&:hover': {
               '& .MuiTypography-root': {
                 color: '#FFD700',
@@ -359,7 +359,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Typography
           text="Questions? Contact us"
           fontvariant="merriparagraph"
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
         />
       </Box>
 
@@ -368,7 +368,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Typography
           text={`Created by ${createdBy}`}
           fontvariant="merriparagraph"
-          fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
+          fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
         />
       </Box>
     </Paper>

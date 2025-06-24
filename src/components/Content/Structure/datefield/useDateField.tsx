@@ -13,7 +13,7 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
   onChange,
   label = 'Select Date',
   value,
-  sacredTheme = false,
+  sacredtheme = false,
   disabled = false,
   error = false,
   helperText,
@@ -27,7 +27,7 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
         onChange={onChange}
         label={label}
         value={value}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         disabled={disabled}
         error={error}
         helperText={helperText}

@@ -50,7 +50,7 @@ interface ProductSummaryCardProps {
   /** Height of the card */
   height?: string | number
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 /**
@@ -65,7 +65,7 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
   height,
   button1Props,
   button2Props,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   /** State to track whether annual or monthly pricing is selected */
   const [isAnnualPricing, setIsAnnualPricing] = useState(true)
@@ -86,13 +86,13 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'stretch',
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid #e8e8e8',
         height: height,
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
             radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
@@ -114,7 +114,7 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
       {/* Title and Price section */}
       <Box
         sx={{
-          borderBottom: sacredTheme
+          borderBottom: sacredtheme
             ? `1px solid ${alpha('#FFD700', 0.3)}`
             : '1px solid #e8e8e8',
           width: '100%',
@@ -127,17 +127,17 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
           alignItems: 'center',
           position: 'relative',
           zIndex: 1,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             background: `linear-gradient(to right, ${alpha('#FFD700', 0.05)}, transparent)`,
           }),
         }}
       >
         <Typography
           text={title}
-          fontcolor={sacredTheme ? '#FFD700' : 'black'}
+          fontcolor={sacredtheme ? '#FFD700' : 'black'}
           fontvariant="merrih5"
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   fontFamily: '"Cinzel", serif',
                   fontWeight: 600,
@@ -149,10 +149,10 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
         />
         <Typography
           text={isAnnualPricing ? `$${annualPrice}` : `$${monthlyPrice}`}
-          fontcolor={sacredTheme ? '#FFD700' : 'primary'}
+          fontcolor={sacredtheme ? '#FFD700' : 'primary'}
           fontvariant="merrih6"
           sx={
-            sacredTheme
+            sacredtheme
               ? {
                   fontWeight: 700,
                   textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
@@ -168,10 +168,10 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
         <Box sx={{ padding: '16px 15px', position: 'relative', zIndex: 1 }}>
           <Typography
             text={body}
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
             fontvariant="merriparagraph"
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     letterSpacing: '0.5px',
                   }
@@ -197,7 +197,7 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
       >
         {/* First button */}
         {button1Props && (
-          <CustomButton {...button1Props} sacredTheme={sacredTheme} />
+          <CustomButton {...button1Props} sacredtheme={sacredtheme} />
         )}
 
         {/* Pricing toggle switch */}
@@ -211,10 +211,10 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
           <Typography
             text="Monthly"
             fontvariant="merriparagraph"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
             sx={{
               marginRight: '8px',
-              ...(sacredTheme &&
+              ...(sacredtheme &&
                 !isAnnualPricing && {
                   color: '#FFD700',
                   textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
@@ -226,7 +226,7 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
             onChange={handlePricingToggle}
             color="primary"
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     '& .MuiSwitch-switchBase': {
                       color: alpha('#FFD700', 0.7),
@@ -250,10 +250,10 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
           <Typography
             text="Annual"
             fontvariant="merriparagraph"
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.7) : 'black'}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
             sx={{
               marginLeft: '8px',
-              ...(sacredTheme &&
+              ...(sacredtheme &&
                 isAnnualPricing && {
                   color: '#FFD700',
                   textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
@@ -264,7 +264,7 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
 
         {/* Second button */}
         {button2Props && (
-          <CustomButton {...button2Props} sacredTheme={sacredTheme} />
+          <CustomButton {...button2Props} sacredtheme={sacredtheme} />
         )}
       </Box>
     </Paper>

@@ -35,7 +35,7 @@ export interface RoutingNumberProps extends Omit<TextFieldProps, 'onChange'> {
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /**
    * Whether this is a default/existing value that should be partially masked
    */
@@ -51,7 +51,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   value = '',
   errorMessage = 'Invalid routing number format',
   useChecksum = true,
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   ...props
 }) => {
@@ -182,7 +182,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
 
   const RoutingAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -197,10 +197,10 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       )}
       <Box
         sx={{
-          color: sacredTheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredTheme ? 600 : 400,
-          fontSize: sacredTheme ? '14px' : '12px',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'inherit',
+          fontWeight: sacredtheme ? 600 : 400,
+          fontSize: sacredtheme ? '14px' : '12px',
+          ...(sacredtheme && {
             background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
             backgroundSize: '200% 100%',
             animation: `${goldShimmer} 3s linear infinite`,
@@ -227,8 +227,8 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
         !isValid && internalValue !== '' ? errorMessage : props.helperText
       }
       label={props.label || 'Routing Number'}
-      placeholder={sacredTheme ? '021000021' : props.placeholder}
-      sacredTheme={sacredTheme}
+      placeholder={sacredtheme ? '021000021' : props.placeholder}
+      sacredtheme={sacredtheme}
       startAdornment={<RoutingAdornment />}
       inputProps={{
         ...props.inputProps,
@@ -238,11 +238,11 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
         input: {
           sx: {
             '& .MuiInputBase-input': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
             '&::placeholder': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
           },

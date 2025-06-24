@@ -30,7 +30,7 @@ type SimpleEditorProps = {
   helperText?: React.ReactNode
   required?: boolean
   style?: React.CSSProperties
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
@@ -42,7 +42,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   helperText,
   required,
   style,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value)
@@ -63,26 +63,26 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   const textFieldStyles = {
     '& .MuiOutlinedInput-root': {
       borderRadius: '8px',
-      backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
-      color: sacredTheme ? alpha('#FFD700', 0.9) : 'inherit',
-      ...(sacredTheme && {
+      backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+      color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
+      ...(sacredtheme && {
         animation: `${sacredInputGlow} 4s ease-in-out infinite`,
       }),
       '& fieldset': {
-        borderColor: sacredTheme ? alpha('#FFD700', 0.3) : 'black',
+        borderColor: sacredtheme ? alpha('#FFD700', 0.3) : 'black',
       },
       '&:hover fieldset': {
-        borderColor: sacredTheme ? alpha('#FFD700', 0.5) : 'black',
+        borderColor: sacredtheme ? alpha('#FFD700', 0.5) : 'black',
       },
       '&.Mui-focused fieldset': {
-        borderColor: sacredTheme ? '#FFD700' : 'black',
-        ...(sacredTheme && {
+        borderColor: sacredtheme ? '#FFD700' : 'black',
+        ...(sacredtheme && {
           borderWidth: '2px',
         }),
       },
       '& .MuiInputBase-input': {
         transform: 'translateY(-8px)',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           fontFamily: 'monospace',
           letterSpacing: '0.5px',
           textShadow: '0 0 2px rgba(255, 215, 0, 0.3)',
@@ -94,22 +94,22 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
       },
     },
     '& .MuiInputLabel-root': {
-      color: sacredTheme ? alpha('#FFD700', 0.8) : 'black',
-      ...(sacredTheme && {
+      color: sacredtheme ? alpha('#FFD700', 0.8) : 'black',
+      ...(sacredtheme && {
         fontFamily: '"Cinzel", serif',
         fontWeight: 600,
         letterSpacing: '1px',
       }),
       '&.Mui-focused': {
-        color: sacredTheme ? '#FFD700' : 'black',
-        ...(sacredTheme && {
+        color: sacredtheme ? '#FFD700' : 'black',
+        ...(sacredtheme && {
           textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
         }),
       },
     },
     '& .MuiFormHelperText-root': {
-      color: sacredTheme ? alpha('#FFD700', 0.7) : undefined,
-      ...(sacredTheme && {
+      color: sacredtheme ? alpha('#FFD700', 0.7) : undefined,
+      ...(sacredtheme && {
         fontStyle: 'italic',
       }),
     },
@@ -129,10 +129,10 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
         required={required}
         onChange={handleChange}
         sx={textFieldStyles}
-        placeholder={sacredTheme ? 'Inscribe your sacred text...' : undefined}
+        placeholder={sacredtheme ? 'Inscribe your sacred text...' : undefined}
       />
       {/* Sacred decorative elements */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{

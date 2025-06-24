@@ -14,7 +14,7 @@ const sacredGlow = keyframes`
 `
 
 interface LeftCenterProps extends Partial<SearchbarProps> {
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const LeftCenter: FC<LeftCenterProps> = props => {
@@ -28,7 +28,7 @@ const LeftCenter: FC<LeftCenterProps> = props => {
     outlinecolor,
     fontcolor,
     placeholder,
-    sacredTheme,
+    sacredtheme,
     // Provide sensible defaults:
     value = '',
     onChange = () => {},
@@ -42,7 +42,7 @@ const LeftCenter: FC<LeftCenterProps> = props => {
         width: '400px',
         height: '55px',
         position: 'relative',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           '&::before': {
             content: '"𓂀"',
             position: 'absolute',
@@ -60,7 +60,7 @@ const LeftCenter: FC<LeftCenterProps> = props => {
         sx={{
           marginBottom: '7px',
           width: '100%',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             animation: `${sacredGlow} 3s ease-in-out infinite`,
             borderRadius: '4px',
           }),
@@ -68,21 +68,21 @@ const LeftCenter: FC<LeftCenterProps> = props => {
       >
         <Searchbar
           shrunklabelposition={shrunklabelposition}
-          shrunkfontcolor={sacredTheme ? '#FFD700' : shrunkfontcolor}
+          shrunkfontcolor={sacredtheme ? '#FFD700' : shrunkfontcolor}
           unshrunkfontcolor={
-            sacredTheme ? alpha('#FFD700', 0.8) : unshrunkfontcolor
+            sacredtheme ? alpha('#FFD700', 0.8) : unshrunkfontcolor
           }
-          label={sacredTheme ? 'Divine Search' : label}
+          label={sacredtheme ? 'Divine Search' : label}
           backgroundcolor={
-            sacredTheme ? alpha('#000000', 0.6) : backgroundcolor
+            sacredtheme ? alpha('#000000', 0.6) : backgroundcolor
           }
-          iconcolor={sacredTheme ? '#FFD700' : iconcolor}
-          outlinecolor={sacredTheme ? '#FFD700' : outlinecolor}
-          fontcolor={sacredTheme ? '#FFD700' : fontcolor}
-          placeholder={sacredTheme ? 'Seek ancient wisdom...' : placeholder}
+          iconcolor={sacredtheme ? '#FFD700' : iconcolor}
+          outlinecolor={sacredtheme ? '#FFD700' : outlinecolor}
+          fontcolor={sacredtheme ? '#FFD700' : fontcolor}
+          placeholder={sacredtheme ? 'Seek ancient wisdom...' : placeholder}
           value={value}
           onChange={onChange}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
     </Box>

@@ -11,8 +11,8 @@ const glowPulse = keyframes`
 const SearchIcon: React.FC<{
   size?: number | 'small' | 'medium' | 'large'
   color?: string
-  sacredTheme?: boolean
-}> = ({ size = 'medium', color = 'black', sacredTheme }) => {
+  sacredtheme?: boolean
+}> = ({ size = 'medium', color = 'black', sacredtheme }) => {
   let fontSize = '20px'
 
   if (typeof size === 'number') {
@@ -35,8 +35,8 @@ const SearchIcon: React.FC<{
     <Search
       style={{
         fontSize,
-        color: sacredTheme ? '#FFD700' : color,
-        ...(sacredTheme && {
+        color: sacredtheme ? '#FFD700' : color,
+        ...(sacredtheme && {
           animation: `${glowPulse} 2s ease-in-out infinite`,
         }),
       }}

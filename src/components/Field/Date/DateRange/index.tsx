@@ -158,7 +158,7 @@ export interface DateRangeProps
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 type PickerStep = 'year' | 'month' | 'day' | 'confirmation'
@@ -169,7 +169,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   value,
   startLabel = 'Start Date',
   endLabel = 'End Date',
-  sacredTheme = false,
+  sacredtheme = false,
   ...rest
 }) => {
   const formatDate = (date: Date | null) => {
@@ -467,15 +467,15 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   const CustomDatePicker = () => (
     <Paper
       sx={{
-        backgroundColor: sacredTheme ? alpha('#000000', 0.95) : '#ffffff',
-        border: sacredTheme
+        backgroundColor: sacredtheme ? alpha('#000000', 0.95) : '#ffffff',
+        border: sacredtheme
           ? `2px solid ${alpha('#FFD700', 0.5)}`
           : '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '20px',
         minWidth: '300px',
         maxWidth: '400px',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           boxShadow:
             '0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)',
           animation: `${sacredGlow} 4s ease-in-out infinite`,
@@ -501,13 +501,13 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             }}
             onMouseDown={e => e.stopPropagation()}
             sx={{
-              color: sacredTheme ? '#FFD700' : '#666',
+              color: sacredtheme ? '#FFD700' : '#666',
               mr: 1,
               '&:hover': {
-                backgroundColor: sacredTheme
+                backgroundColor: sacredtheme
                   ? alpha('#FFD700', 0.1)
                   : alpha('#666', 0.1),
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
                 }),
               },
@@ -519,10 +519,10 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             <Typography
               variant="h6"
               sx={{
-                color: sacredTheme ? '#FFD700' : '#333',
-                fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                color: sacredtheme ? '#FFD700' : '#333',
+                fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                 fontWeight: '600',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
                 }),
               }}
@@ -534,8 +534,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             <Typography
               variant="caption"
               sx={{
-                color: sacredTheme ? alpha('#FFD700', 0.7) : '#666',
-                fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+                color: sacredtheme ? alpha('#FFD700', 0.7) : '#666',
+                fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
                 display: 'block',
                 mt: 0.5,
               }}
@@ -557,7 +557,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             margin: '-8px -8px 16px -8px',
             borderRadius: '8px',
             '&:hover': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? alpha('#FFD700', 0.05)
                 : alpha('#000', 0.02),
             },
@@ -568,11 +568,11 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             variant="h6"
             sx={{
               textAlign: 'center',
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '600',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
               }),
             }}
@@ -584,8 +584,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             sx={{
               display: 'block',
               textAlign: 'center',
-              color: sacredTheme ? alpha('#FFD700', 0.6) : '#999',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.6) : '#999',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               mt: 0.5,
               pointerEvents: 'none',
             }}
@@ -604,7 +604,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             cursor: isDragging ? 'grabbing' : 'grab',
             userSelect: 'none',
             '&:hover': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? alpha('#FFD700', 0.02)
                 : alpha('#000', 0.01),
             },
@@ -615,11 +615,11 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             variant="h5"
             sx={{
               mb: 2,
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '700',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
               }),
             }}
@@ -630,12 +630,12 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             variant="h4"
             sx={{
               mb: 1,
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '600',
               letterSpacing: '0.1em',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 20px rgba(255, 215, 0, 0.9)',
               }),
             }}
@@ -645,8 +645,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: sacredTheme ? alpha('#FFD700', 0.8) : '#666',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.8) : '#666',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               pointerEvents: 'none',
             }}
           >
@@ -657,8 +657,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             variant="caption"
             sx={{
               display: 'block',
-              color: sacredTheme ? alpha('#FFD700', 0.5) : '#999',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.5) : '#999',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               mt: 1,
               pointerEvents: 'none',
             }}
@@ -683,7 +683,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             maxHeight: '300px',
             overflowY: 'auto',
             overflowX: 'hidden',
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               '&::-webkit-scrollbar': {
                 width: '8px',
               },
@@ -718,36 +718,36 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                     textTransform: 'none',
                     letterSpacing: '0.05em',
                     color: isDisabled
-                      ? sacredTheme
+                      ? sacredtheme
                         ? 'rgba(255, 255, 255, 0.3)'
                         : 'rgba(0, 0, 0, 0.3)'
-                      : sacredTheme
+                      : sacredtheme
                         ? 'rgba(255, 255, 255, 0.9)'
                         : '#333',
                     borderColor: isDisabled
-                      ? sacredTheme
+                      ? sacredtheme
                         ? alpha('#FFD700', 0.1)
                         : '#e0e0e0'
-                      : sacredTheme
+                      : sacredtheme
                         ? alpha('#FFD700', 0.3)
                         : '#e0e0e0',
                     backgroundColor: isDisabled
-                      ? sacredTheme
+                      ? sacredtheme
                         ? alpha('#000', 0.2)
                         : alpha('#000', 0.05)
-                      : sacredTheme
+                      : sacredtheme
                         ? alpha('#FFD700', 0.05)
                         : 'transparent',
-                    fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                    fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                     cursor: isDisabled ? 'not-allowed' : 'pointer',
                     '&:hover': !isDisabled
                       ? {
-                          backgroundColor: sacredTheme
+                          backgroundColor: sacredtheme
                             ? alpha('#FFD700', 0.2)
                             : alpha('#000', 0.04),
-                          borderColor: sacredTheme ? '#FFD700' : '#000',
-                          color: sacredTheme ? '#FFD700' : '#000',
-                          ...(sacredTheme && {
+                          borderColor: sacredtheme ? '#FFD700' : '#000',
+                          color: sacredtheme ? '#FFD700' : '#000',
+                          ...(sacredtheme && {
                             boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)',
                             transform: 'scale(1.05)',
                           }),
@@ -774,19 +774,19 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                   fontSize: '12px',
                   fontWeight: '500',
                   borderRadius: '8px',
-                  color: sacredTheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
-                  borderColor: sacredTheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
-                  backgroundColor: sacredTheme
+                  color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
+                  borderColor: sacredtheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
+                  backgroundColor: sacredtheme
                     ? alpha('#FFD700', 0.05)
                     : 'transparent',
-                  fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                  fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha('#FFD700', 0.2)
                       : alpha('#000', 0.04),
-                    borderColor: sacredTheme ? '#FFD700' : '#000',
-                    color: sacredTheme ? '#FFD700' : '#000',
-                    ...(sacredTheme && {
+                    borderColor: sacredtheme ? '#FFD700' : '#000',
+                    color: sacredtheme ? '#FFD700' : '#000',
+                    ...(sacredtheme && {
                       boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
                       transform: 'scale(1.05)',
                     }),
@@ -810,19 +810,19 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                   borderRadius: '8px',
                   textTransform: 'none',
                   letterSpacing: '0.05em',
-                  color: sacredTheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
-                  borderColor: sacredTheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
-                  backgroundColor: sacredTheme
+                  color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
+                  borderColor: sacredtheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
+                  backgroundColor: sacredtheme
                     ? alpha('#FFD700', 0.05)
                     : 'transparent',
-                  fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                  fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha('#FFD700', 0.2)
                       : alpha('#000', 0.04),
-                    borderColor: sacredTheme ? '#FFD700' : '#000',
-                    color: sacredTheme ? '#FFD700' : '#000',
-                    ...(sacredTheme && {
+                    borderColor: sacredtheme ? '#FFD700' : '#000',
+                    color: sacredtheme ? '#FFD700' : '#000',
+                    ...(sacredtheme && {
                       boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)',
                       transform: 'scale(1.02)',
                     }),
@@ -845,7 +845,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
         alignItems: 'center',
       }}
     >
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -866,8 +866,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             opacity: 0.8,
           },
           fontSize: '20px',
-          color: sacredTheme ? '#FFD700' : 'black',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'black',
+          ...(sacredtheme && {
             animation: `${glowPulse} 2s ease-in-out infinite`,
           }),
         }}
@@ -883,7 +883,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
         alignItems: 'center',
       }}
     >
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -904,8 +904,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
             opacity: 0.8,
           },
           fontSize: '20px',
-          color: sacredTheme ? '#FFD700' : 'black',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'black',
+          ...(sacredtheme && {
             animation: `${glowPulse} 2s ease-in-out infinite`,
           }),
         }}
@@ -928,8 +928,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                 style: { cursor: 'text', height: '40px' },
               },
             }}
-            sacredTheme={sacredTheme}
-            placeholder={sacredTheme ? 'Sacred beginning...' : 'MM/DD/YYYY'}
+            sacredtheme={sacredtheme}
+            placeholder={sacredtheme ? 'Sacred beginning...' : 'MM/DD/YYYY'}
             {...rest}
           />
         </Box>
@@ -945,8 +945,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                 style: { cursor: 'text', height: '40px' },
               },
             }}
-            sacredTheme={sacredTheme}
-            placeholder={sacredTheme ? 'Sacred ending...' : 'MM/DD/YYYY'}
+            sacredtheme={sacredtheme}
+            placeholder={sacredtheme ? 'Sacred ending...' : 'MM/DD/YYYY'}
             {...rest}
           />
         </Box>

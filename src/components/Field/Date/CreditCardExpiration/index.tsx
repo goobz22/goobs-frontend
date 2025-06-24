@@ -422,7 +422,7 @@ export interface CreditCardExpirationProps
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /**
    * Whether this is a default/existing value that should be partially masked
    */
@@ -433,7 +433,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
   onChange,
   value = '',
   errorMessage = 'Invalid expiration date',
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   ...props
 }) => {
@@ -848,15 +848,15 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
   const CustomMonthYearPicker = () => (
     <Paper
       sx={{
-        backgroundColor: sacredTheme ? alpha('#000000', 0.95) : '#ffffff',
-        border: sacredTheme
+        backgroundColor: sacredtheme ? alpha('#000000', 0.95) : '#ffffff',
+        border: sacredtheme
           ? `2px solid ${alpha('#FFD700', 0.5)}`
           : '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '20px',
         minWidth: '300px',
         maxWidth: '350px',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           boxShadow:
             '0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)',
           animation: `${glowPulse} 4s ease-in-out infinite`,
@@ -878,13 +878,13 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             onClick={() => setStep('month')}
             onMouseDown={e => e.stopPropagation()} // Prevent drag when clicking back button
             sx={{
-              color: sacredTheme ? '#FFD700' : '#666',
+              color: sacredtheme ? '#FFD700' : '#666',
               mr: 1,
               '&:hover': {
-                backgroundColor: sacredTheme
+                backgroundColor: sacredtheme
                   ? alpha('#FFD700', 0.1)
                   : alpha('#666', 0.1),
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
                 }),
               },
@@ -896,10 +896,10 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             <Typography
               variant="h6"
               sx={{
-                color: sacredTheme ? '#FFD700' : '#333',
-                fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                color: sacredtheme ? '#FFD700' : '#333',
+                fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                 fontWeight: '600',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
                 }),
               }}
@@ -909,8 +909,8 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             <Typography
               variant="caption"
               sx={{
-                color: sacredTheme ? alpha('#FFD700', 0.7) : '#666',
-                fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+                color: sacredtheme ? alpha('#FFD700', 0.7) : '#666',
+                fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
                 display: 'block',
                 mt: 0.5,
               }}
@@ -931,7 +931,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             margin: '-8px -8px 16px -8px',
             borderRadius: '8px',
             '&:hover': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? alpha('#FFD700', 0.05)
                 : alpha('#000', 0.02),
             },
@@ -942,11 +942,11 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             variant="h6"
             sx={{
               textAlign: 'center',
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '600',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
               }),
             }}
@@ -958,8 +958,8 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             sx={{
               display: 'block',
               textAlign: 'center',
-              color: sacredTheme ? alpha('#FFD700', 0.6) : '#999',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.6) : '#999',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               mt: 0.5,
               pointerEvents: 'none',
             }}
@@ -977,7 +977,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             cursor: isDragging ? 'grabbing' : 'grab',
             userSelect: 'none',
             '&:hover': {
-              backgroundColor: sacredTheme
+              backgroundColor: sacredtheme
                 ? alpha('#FFD700', 0.02)
                 : alpha('#000', 0.01),
             },
@@ -988,11 +988,11 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             variant="h5"
             sx={{
               mb: 2,
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '700',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
               }),
             }}
@@ -1003,12 +1003,12 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             variant="h4"
             sx={{
               mb: 1,
-              color: sacredTheme ? '#FFD700' : '#333',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+              color: sacredtheme ? '#FFD700' : '#333',
+              fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
               fontWeight: '600',
               letterSpacing: '0.1em',
               pointerEvents: 'none',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 textShadow: '0 0 20px rgba(255, 215, 0, 0.9)',
               }),
             }}
@@ -1018,8 +1018,8 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: sacredTheme ? alpha('#FFD700', 0.8) : '#666',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.8) : '#666',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               pointerEvents: 'none',
             }}
           >
@@ -1030,8 +1030,8 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             variant="caption"
             sx={{
               display: 'block',
-              color: sacredTheme ? alpha('#FFD700', 0.5) : '#999',
-              fontFamily: sacredTheme ? '"Crimson Text", serif' : 'inherit',
+              color: sacredtheme ? alpha('#FFD700', 0.5) : '#999',
+              fontFamily: sacredtheme ? '"Crimson Text", serif' : 'inherit',
               mt: 1,
               pointerEvents: 'none',
             }}
@@ -1051,7 +1051,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
               maxHeight: '250px',
               overflowY: 'auto',
               overflowX: 'hidden',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 '&::-webkit-scrollbar': {
                   width: '8px',
                 },
@@ -1083,36 +1083,36 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
                   textTransform: 'none',
                   letterSpacing: '0.05em',
                   color: isDisabled
-                    ? sacredTheme
+                    ? sacredtheme
                       ? 'rgba(255, 255, 255, 0.3)'
                       : 'rgba(0, 0, 0, 0.3)'
-                    : sacredTheme
+                    : sacredtheme
                       ? 'rgba(255, 255, 255, 0.9)'
                       : '#333',
                   borderColor: isDisabled
-                    ? sacredTheme
+                    ? sacredtheme
                       ? alpha('#FFD700', 0.1)
                       : '#e0e0e0'
-                    : sacredTheme
+                    : sacredtheme
                       ? alpha('#FFD700', 0.3)
                       : '#e0e0e0',
                   backgroundColor: isDisabled
-                    ? sacredTheme
+                    ? sacredtheme
                       ? alpha('#000', 0.2)
                       : alpha('#000', 0.05)
-                    : sacredTheme
+                    : sacredtheme
                       ? alpha('#FFD700', 0.05)
                       : 'transparent',
-                  fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                  fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
                   '&:hover': !isDisabled
                     ? {
-                        backgroundColor: sacredTheme
+                        backgroundColor: sacredtheme
                           ? alpha('#FFD700', 0.2)
                           : alpha('#000', 0.04),
-                        borderColor: sacredTheme ? '#FFD700' : '#000',
-                        color: sacredTheme ? '#FFD700' : '#000',
-                        ...(sacredTheme && {
+                        borderColor: sacredtheme ? '#FFD700' : '#000',
+                        color: sacredtheme ? '#FFD700' : '#000',
+                        ...(sacredtheme && {
                           boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)',
                           transform: 'scale(1.05)',
                         }),
@@ -1133,7 +1133,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
               maxHeight: '300px',
               overflowY: 'auto',
               overflowX: 'hidden',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 '&::-webkit-scrollbar': {
                   width: '8px',
                 },
@@ -1164,19 +1164,19 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
                   textTransform: 'none',
                   letterSpacing: '0.05em',
                   width: '100%',
-                  color: sacredTheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
-                  borderColor: sacredTheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
-                  backgroundColor: sacredTheme
+                  color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : '#333',
+                  borderColor: sacredtheme ? alpha('#FFD700', 0.3) : '#e0e0e0',
+                  backgroundColor: sacredtheme
                     ? alpha('#FFD700', 0.05)
                     : 'transparent',
-                  fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
+                  fontFamily: sacredtheme ? '"Cinzel", serif' : 'inherit',
                   '&:hover': {
-                    backgroundColor: sacredTheme
+                    backgroundColor: sacredtheme
                       ? alpha('#FFD700', 0.2)
                       : alpha('#000', 0.04),
-                    borderColor: sacredTheme ? '#FFD700' : '#000',
-                    color: sacredTheme ? '#FFD700' : '#000',
-                    ...(sacredTheme && {
+                    borderColor: sacredtheme ? '#FFD700' : '#000',
+                    color: sacredtheme ? '#FFD700' : '#000',
+                    ...(sacredtheme && {
                       boxShadow: '0 0 12px rgba(255, 215, 0, 0.4)',
                       transform: 'scale(1.02)',
                     }),
@@ -1200,7 +1200,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
         gap: 1,
       }}
     >
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -1221,8 +1221,8 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
             opacity: 0.8,
           },
           fontSize: '20px',
-          color: sacredTheme ? '#FFD700' : 'inherit',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'inherit',
+          ...(sacredtheme && {
             animation: `${floatGlyph} 2s ease-in-out infinite`,
             filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
           }),
@@ -1233,7 +1233,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
 
   return (
     <>
-      {sacredTheme && <EgyptianCalendarStyles />}
+      {sacredtheme && <EgyptianCalendarStyles />}
       <TextField
         {...props}
         value={getDisplayValue()}
@@ -1248,7 +1248,7 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
         }
         label={props.label || 'Expiration Date'}
         placeholder={props.placeholder || 'MM/YY'}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         endAdornment={<ExpirationAdornment />}
         inputProps={{
           ...props.inputProps,
@@ -1260,11 +1260,11 @@ const CreditCardExpiration: React.FC<CreditCardExpirationProps> = ({
           input: {
             sx: {
               '& .MuiInputBase-input': {
-                paddingLeft: sacredTheme ? '12px' : '14px',
+                paddingLeft: sacredtheme ? '12px' : '14px',
                 marginTop: '2px',
               },
               '&::placeholder': {
-                paddingLeft: sacredTheme ? '12px' : '14px',
+                paddingLeft: sacredtheme ? '12px' : '14px',
                 marginTop: '2px',
               },
             },

@@ -50,14 +50,14 @@ export interface RichTextEditorProps {
   // Accordion related props
   accordionSummary?: React.ReactNode
   defaultExpanded?: boolean
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
-const Leaf: React.FC<RenderLeafProps & { sacredTheme?: boolean }> = ({
+const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
   attributes,
   children,
   leaf,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   const customLeaf = leaf as RichTextEditorTypes['CustomText']
 
@@ -80,7 +80,7 @@ const Leaf: React.FC<RenderLeafProps & { sacredTheme?: boolean }> = ({
       <a
         href={customLeaf.link}
         style={
-          sacredTheme
+          sacredtheme
             ? {
                 color: '#FFD700',
                 textDecoration: 'underline',
@@ -97,7 +97,7 @@ const Leaf: React.FC<RenderLeafProps & { sacredTheme?: boolean }> = ({
     formattedChildren = (
       <code
         style={
-          sacredTheme
+          sacredtheme
             ? {
                 backgroundColor: alpha('#FFD700', 0.1),
                 color: '#FFD700',
@@ -117,7 +117,7 @@ const Leaf: React.FC<RenderLeafProps & { sacredTheme?: boolean }> = ({
     <span
       {...attributes}
       style={
-        sacredTheme
+        sacredtheme
           ? {
               color: alpha('#FFD700', 0.9),
             }
@@ -140,7 +140,7 @@ export function RichTextEditor({
   setMarkdown,
   accordionSummary,
   defaultExpanded = false,
-  sacredTheme = false,
+  sacredtheme = false,
 }: RichTextEditorProps) {
   const {
     editor,
@@ -155,14 +155,14 @@ export function RichTextEditor({
 
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <Element {...props} sacredTheme={sacredTheme} />
+      <Element {...props} sacredtheme={sacredtheme} />
     ),
-    [sacredTheme]
+    [sacredtheme]
   )
 
   const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} sacredTheme={sacredTheme} />,
-    [sacredTheme]
+    (props: RenderLeafProps) => <Leaf {...props} sacredtheme={sacredtheme} />,
+    [sacredtheme]
   )
 
   const handleAccordionChange = () => {
@@ -172,15 +172,15 @@ export function RichTextEditor({
   const editorContent = (
     <Box
       sx={{
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid black',
         borderRadius: '8px',
         width: 'auto',
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         position: 'relative',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           animation: `${sacredBorderPulse} 4s ease-in-out infinite`,
           boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)',
           backgroundImage: `
@@ -203,12 +203,12 @@ export function RichTextEditor({
           handleItalicClick={handleItalicClick}
           toolbarType="richtext"
           editor={editor}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
         <Divider
           sx={{
-            backgroundColor: sacredTheme ? alpha('#FFD700', 0.3) : 'black',
-            ...(sacredTheme && {
+            backgroundColor: sacredtheme ? alpha('#FFD700', 0.3) : 'black',
+            ...(sacredtheme && {
               boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
             }),
           }}
@@ -218,20 +218,20 @@ export function RichTextEditor({
             style={{
               minHeight: `${minRows * 20}px`,
               padding: '16px',
-              color: sacredTheme ? alpha('#FFD700', 0.9) : 'inherit',
-              ...(sacredTheme && {
+              color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
+              ...(sacredtheme && {
                 animation: `${sacredTextGlow} 3s ease-in-out infinite`,
               }),
             }}
             placeholder={
-              sacredTheme ? 'Channel divine wisdom...' : 'Enter text...'
+              sacredtheme ? 'Channel divine wisdom...' : 'Enter text...'
             }
             onKeyDown={onKeyDown}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
           />
           {/* Sacred decorative element */}
-          {sacredTheme && (
+          {sacredtheme && (
             <Box
               sx={{
                 position: 'absolute',
@@ -264,12 +264,12 @@ export function RichTextEditor({
         <Accordion
           expanded={expanded}
           onChange={handleAccordionChange}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
           summary={
             <Typography
               fontvariant="merrih4"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       color: '#FFD700',
                       fontFamily: '"Cinzel", serif',
@@ -290,7 +290,7 @@ export function RichTextEditor({
             <Typography
               fontvariant="merrih4"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       color: '#FFD700',
                       fontFamily: '"Cinzel", serif',
@@ -315,13 +315,13 @@ const Element = ({
   attributes,
   children,
   element,
-  sacredTheme = false,
-}: RenderElementProps & { sacredTheme?: boolean }) => {
+  sacredtheme = false,
+}: RenderElementProps & { sacredtheme?: boolean }) => {
   const customElement = element as RichTextEditorTypes['CustomElement']
   if (!customElement.type) return null
   const style = {
     textAlign: customElement.align,
-    ...(sacredTheme && {
+    ...(sacredtheme && {
       color: alpha('#FFD700', 0.9),
     }),
   }
@@ -339,7 +339,7 @@ const Element = ({
           href={customElement.url}
           {...attributes}
           style={
-            sacredTheme
+            sacredtheme
               ? {
                   color: '#FFD700',
                   textDecoration: 'underline',

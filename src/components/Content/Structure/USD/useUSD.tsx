@@ -25,7 +25,7 @@ const USDComponent: React.FC<USDFieldProps> = ({
   incrementStep = 1,
   initialDelay = 500,
   repeatInterval = 100,
-  sacredTheme = false,
+  sacredtheme = false,
   style,
   ...rest
 }) => {
@@ -47,7 +47,7 @@ const USDComponent: React.FC<USDFieldProps> = ({
         incrementStep={incrementStep}
         initialDelay={initialDelay}
         repeatInterval={repeatInterval}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
         sx={sx}
         {...rest}
       />

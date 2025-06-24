@@ -94,7 +94,7 @@ export interface TransferListProps {
   rightTitle?: string
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const TransferList: React.FC<TransferListProps> = ({
@@ -108,7 +108,7 @@ const TransferList: React.FC<TransferListProps> = ({
   onChange,
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   // The currently selected dropdown value (multipleSelection only)
   const [selectedDropdownValue, setSelectedDropdownValue] = useState<string>('')
@@ -248,7 +248,7 @@ const TransferList: React.FC<TransferListProps> = ({
         height: 230,
         overflow: 'auto',
         mt: 1,
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundColor: alpha('#000000', 0.8),
           border: `1px solid ${alpha('#FFD700', 0.3)}`,
           animation: `${glowPulse} 3s ease-in-out infinite`,
@@ -281,7 +281,7 @@ const TransferList: React.FC<TransferListProps> = ({
               role="listitem"
               onClick={handleToggle(value)}
               sx={{
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   color: alpha('#FFD700', 0.9),
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -302,7 +302,7 @@ const TransferList: React.FC<TransferListProps> = ({
                   disableRipple
                   inputProps={{ 'aria-labelledby': labelId }}
                   sx={
-                    sacredTheme
+                    sacredtheme
                       ? {
                           color: alpha('#FFD700', 0.6),
                           '&.Mui-checked': {
@@ -319,7 +319,7 @@ const TransferList: React.FC<TransferListProps> = ({
                 id={labelId}
                 primary={displayedLabel}
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         '& .MuiListItemText-primary': {
                           color: alpha('#FFD700', 0.9),
@@ -349,7 +349,7 @@ const TransferList: React.FC<TransferListProps> = ({
             variant="subtitle1"
             sx={{
               mb: 1,
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 color: '#FFD700',
                 fontWeight: 600,
                 letterSpacing: '0.5px',
@@ -373,17 +373,17 @@ const TransferList: React.FC<TransferListProps> = ({
             const newValue = e.target.value
             setSelectedDropdownValue(newValue)
           }}
-          backgroundcolor={sacredTheme ? alpha('#000000', 0.6) : undefined}
-          outlinecolor={sacredTheme ? '#FFD700' : undefined}
-          fontcolor={sacredTheme ? '#FFD700' : undefined}
-          shrunkfontcolor={sacredTheme ? '#FFD700' : undefined}
+          backgroundcolor={sacredtheme ? alpha('#000000', 0.6) : undefined}
+          outlinecolor={sacredtheme ? '#FFD700' : undefined}
+          fontcolor={sacredtheme ? '#FFD700' : undefined}
+          shrunkfontcolor={sacredtheme ? '#FFD700' : undefined}
         />
         {renderList(left)}
       </Box>
     )
   }
 
-  const buttonStyles = sacredTheme
+  const buttonStyles = sacredtheme
     ? {
         color: '#FFD700',
         borderColor: '#FFD700',
@@ -408,7 +408,7 @@ const TransferList: React.FC<TransferListProps> = ({
         flexDirection: 'row',
         gap: 2,
         alignItems: 'flex-start',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           padding: 2,
           backgroundColor: alpha('#000000', 0.6),
           borderRadius: 2,
@@ -448,7 +448,7 @@ const TransferList: React.FC<TransferListProps> = ({
           aria-label="move all right"
           sx={{
             ...buttonStyles,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               animation: `${floatAnimation} 2s ease-in-out infinite`,
             }),
           }}
@@ -483,7 +483,7 @@ const TransferList: React.FC<TransferListProps> = ({
           aria-label="move all left"
           sx={{
             ...buttonStyles,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               animation: `${floatAnimation} 2.5s ease-in-out infinite`,
             }),
           }}
@@ -496,7 +496,7 @@ const TransferList: React.FC<TransferListProps> = ({
           variant="subtitle1"
           sx={{
             mb: 1,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               color: '#FFD700',
               fontWeight: 600,
               letterSpacing: '0.5px',

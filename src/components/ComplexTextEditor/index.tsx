@@ -69,7 +69,7 @@ export interface ComplexTextEditorProps {
   defaultExpanded?: boolean
 
   // Sacred theme
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // Initial empty slate value
@@ -101,7 +101,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   defaultExpanded = false,
 
   // Sacred theme
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   // Determine initial values based on either new or old API
   const startValue = value !== undefined ? value : initialValue
@@ -181,7 +181,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           helperText={helperText}
           required={required}
           style={style}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       )
     }
@@ -215,7 +215,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         accordionSummary={accordionSummary}
         defaultExpanded={defaultExpanded}
         // Sacred theme
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
     )
   }
@@ -230,10 +230,10 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           summary={summaryText}
           details={createEditorContent()}
           defaultExpanded={defaultExpanded}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
         {/* Sacred decorative elements */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               position: 'absolute',
@@ -258,7 +258,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     <Box sx={combinedStyles}>
       {createEditorContent()}
       {/* Sacred decorative elements */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',

@@ -54,7 +54,7 @@ export interface PricingProps {
     push(url: string): void
   }
   /** NEW: Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 export interface SubFeature {
@@ -75,7 +75,7 @@ export interface Feature {
 }
 
 const PricingTable: React.FC<PricingProps> = props => {
-  const { router, sacredTheme } = props
+  const { router, sacredtheme } = props
 
   const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
   const [selectedPackage, setSelectedPackage] = useState('')
@@ -108,14 +108,14 @@ const PricingTable: React.FC<PricingProps> = props => {
       elevation={1}
       sx={{
         borderRadius: '6px',
-        borderTop: sacredTheme
+        borderTop: sacredtheme
           ? `12px solid #FFD700`
           : `12px solid ${aqua.main}`,
         display: 'flex',
         width: '100%',
         flexDirection: 'column',
         height: '100%',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundColor: '#0a0a0a',
           backgroundImage: `
             linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
@@ -145,10 +145,10 @@ const PricingTable: React.FC<PricingProps> = props => {
           alignItems: 'center',
           justifyContent: 'space-between',
           p: 2,
-          borderBottom: sacredTheme
+          borderBottom: sacredtheme
             ? `1px solid ${alpha('#FFD700', 0.3)}`
             : '1px solid #ccc',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             background: `linear-gradient(135deg, ${alpha('#FFD700', 0.1)} 0%, transparent 100%)`,
           }),
         }}
@@ -156,9 +156,9 @@ const PricingTable: React.FC<PricingProps> = props => {
         {config.tabletitle && (
           <Typography
             text={config.tabletitle.text || ''}
-            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            fontcolor={sacredtheme ? '#FFD700' : undefined}
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     animation: `${sacredGlowPulse} 3s ease-in-out infinite`,
                     fontWeight: 600,
@@ -169,7 +169,7 @@ const PricingTable: React.FC<PricingProps> = props => {
           />
         )}
         {config.packagecolumns && (
-          <Box sx={sacredTheme ? { minWidth: '200px' } : undefined}>
+          <Box sx={sacredtheme ? { minWidth: '200px' } : undefined}>
             <Dropdown
               label="Packages"
               options={(config.packagecolumns.packagenames || []).map(name => ({
@@ -177,19 +177,19 @@ const PricingTable: React.FC<PricingProps> = props => {
               }))}
               defaultValue={selectedPackage}
               onChange={handlePackageChange}
-              backgroundcolor={sacredTheme ? alpha('#000000', 0.6) : undefined}
-              outlinecolor={sacredTheme ? '#FFD700' : undefined}
-              fontcolor={sacredTheme ? '#FFD700' : undefined}
-              shrunkfontcolor={sacredTheme ? '#FFD700' : undefined}
+              backgroundcolor={sacredtheme ? alpha('#000000', 0.6) : undefined}
+              outlinecolor={sacredtheme ? '#FFD700' : undefined}
+              fontcolor={sacredtheme ? '#FFD700' : undefined}
+              shrunkfontcolor={sacredtheme ? '#FFD700' : undefined}
             />
           </Box>
         )}
         {config.monthlyprice && (
           <Typography
             text={config.monthlyprice.prices?.[selectedPackageIndex] || ''}
-            fontcolor={sacredTheme ? '#FFD700' : undefined}
+            fontcolor={sacredtheme ? '#FFD700' : undefined}
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontWeight: 500,
                     letterSpacing: '0.5px',
@@ -201,9 +201,9 @@ const PricingTable: React.FC<PricingProps> = props => {
         {config.annualprice && (
           <Typography
             text={config.annualprice.annualprices?.[selectedPackageIndex] || ''}
-            fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : undefined}
+            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : undefined}
             sx={
-              sacredTheme
+              sacredtheme
                 ? {
                     fontStyle: 'italic',
                   }
@@ -219,7 +219,7 @@ const PricingTable: React.FC<PricingProps> = props => {
           display: 'flex',
           flexDirection: 'column',
           p: 2,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '& .MuiSvgIcon-root': {
               color: '#FFD700',
               filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
@@ -232,9 +232,9 @@ const PricingTable: React.FC<PricingProps> = props => {
             <Box display="flex" alignItems="center">
               <Typography
                 text={feature.title}
-                fontcolor={sacredTheme ? '#FFD700' : undefined}
+                fontcolor={sacredtheme ? '#FFD700' : undefined}
                 sx={
-                  sacredTheme
+                  sacredtheme
                     ? {
                         fontWeight: 500,
                         letterSpacing: '0.5px',
@@ -246,7 +246,7 @@ const PricingTable: React.FC<PricingProps> = props => {
                 <Box ml={1} display="flex" alignItems="center">
                   <StyledTooltip
                     arrow
-                    tooltipcolor={sacredTheme ? '#FFD700' : stainlessSteel.main}
+                    tooltipcolor={sacredtheme ? '#FFD700' : stainlessSteel.main}
                     tooltipplacement="right"
                     title={feature.infopopuptext}
                     offsetX={0}
@@ -264,7 +264,7 @@ const PricingTable: React.FC<PricingProps> = props => {
                     <CheckCircleIcon
                       fontSize="small"
                       sx={
-                        sacredTheme
+                        sacredtheme
                           ? {
                               animation: `${floatAnimation} 2s ease-in-out infinite`,
                             }
@@ -287,14 +287,14 @@ const PricingTable: React.FC<PricingProps> = props => {
               >
                 <Typography
                   text={subFeature.title}
-                  fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : undefined}
+                  fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : undefined}
                 />
                 {subFeature.infopopuptext && (
                   <Box ml={1} display="flex" alignItems="center">
                     <StyledTooltip
                       arrow
                       tooltipcolor={
-                        sacredTheme ? '#FFD700' : stainlessSteel.main
+                        sacredtheme ? '#FFD700' : stainlessSteel.main
                       }
                       tooltipplacement="right"
                       title={subFeature.infopopuptext}
@@ -327,7 +327,7 @@ const PricingTable: React.FC<PricingProps> = props => {
         <Box
           sx={{
             p: 2,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               borderTop: `1px solid ${alpha('#FFD700', 0.3)}`,
               background: `linear-gradient(0deg, ${alpha('#FFD700', 0.05)} 0%, transparent 100%)`,
             }),
@@ -335,8 +335,8 @@ const PricingTable: React.FC<PricingProps> = props => {
         >
           <CustomButton
             variant="contained"
-            backgroundcolor={sacredTheme ? '#FFD700' : black.main}
-            fontcolor={sacredTheme ? '#000000' : white.main}
+            backgroundcolor={sacredtheme ? '#FFD700' : black.main}
+            fontcolor={sacredtheme ? '#000000' : white.main}
             href={config.buttoncolumns.buttonlinks[selectedPackageIndex] || '#'}
             width="100%"
             onClick={() => {
@@ -349,13 +349,13 @@ const PricingTable: React.FC<PricingProps> = props => {
               }
             }}
             text={config.buttoncolumns.buttontexts[selectedPackageIndex] || ''}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </Box>
       )}
 
       {/* Sacred decorative footer */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

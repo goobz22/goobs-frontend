@@ -24,7 +24,7 @@ export interface PasswordFieldProps extends Omit<TextFieldProps, 'type'> {
   fontcolor?: string
   label?: string
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const StyledTextField = styled(TextField)<{
@@ -118,14 +118,14 @@ interface AdornmentProps {
   componentvariant: string
   passwordVisible?: boolean
   togglePasswordVisibility?: () => void
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const EndAdornment: React.FC<AdornmentProps> = ({
   componentvariant,
   passwordVisible,
   togglePasswordVisibility,
-  sacredTheme,
+  sacredtheme,
 }) => {
   if (componentvariant === 'password') {
     return (
@@ -135,7 +135,7 @@ const EndAdornment: React.FC<AdornmentProps> = ({
         style={{ cursor: 'pointer' }}
       >
         <Box sx={{ position: 'relative' }}>
-          {sacredTheme && (
+          {sacredtheme && (
             <Box
               sx={{
                 position: 'absolute',
@@ -152,7 +152,7 @@ const EndAdornment: React.FC<AdornmentProps> = ({
           )}
           <ShowHideEyeIcon
             visible={passwordVisible}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         </Box>
       </InputAdornment>
@@ -166,7 +166,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   outlinecolor,
   fontcolor,
   label = 'Password',
-  sacredTheme = false,
+  sacredtheme = false,
   ...rest
 }) => {
   const [passwordVisible, setPasswordVisible] = useState(false)
@@ -178,20 +178,20 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   return (
     <StyledTextField
       type={passwordVisible ? 'text' : 'password'}
-      label={sacredTheme ? 'Sacred Key' : label}
+      label={sacredtheme ? 'Sacred Key' : label}
       backgroundcolor={backgroundcolor}
       outlinecolor={outlinecolor}
       fontcolor={fontcolor}
-      sacredtheme={sacredTheme}
+      sacredtheme={sacredtheme}
       fullWidth
-      placeholder={sacredTheme ? 'Enter divine secret...' : undefined}
+      placeholder={sacredtheme ? 'Enter divine secret...' : undefined}
       InputProps={{
         endAdornment: (
           <EndAdornment
             componentvariant="password"
             passwordVisible={passwordVisible}
             togglePasswordVisibility={togglePasswordVisibility}
-            sacredTheme={sacredTheme}
+            sacredtheme={sacredtheme}
           />
         ),
       }}

@@ -1,7 +1,7 @@
 // src/components/Nav/VerticalVariant/mainNav/list.tsx
 'use client'
 import React, { FC } from 'react'
-import { Box } from '@mui/material'
+import { MenuItem } from '@mui/material'
 import Link from 'next/link'
 import { white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
@@ -32,6 +32,14 @@ interface ListNavProps {
    * Drawer variant
    */
   variant?: 'temporary' | 'permanent'
+  /**
+   * Whether the nav item is currently active/selected.
+   */
+  isActive?: boolean
+  /**
+   * Color for the active and hover states.
+   */
+  activeAndHoverColor: string
 }
 
 /**
@@ -44,21 +52,32 @@ const ListNav: FC<ListNavProps> = ({
   trigger,
   onClose,
   variant,
+  isActive,
+  activeAndHoverColor,
 }) => {
-  const content = (
-    <Box
-      // You can style this however you like
+  const menuItemContent = (
+    <Typography
+      fontvariant="merrih5"
+      fontcolor={white.main}
+      text={title ?? ''}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
+        whiteSpace: 'nowrap', // No wrapping
+      }}
+    />
+  )
+
+  const menuItem = (
+    <MenuItem
+      sx={{
+        // Match indentation of ExpandingNav text
+        // (AccordionSummary ml=1 + icon)
+        marginLeft: '24px',
+        marginTop: 2,
         height: '32px',
-        cursor: onClick || route ? 'pointer' : 'default',
-        // Indent from the left
-        ml: 5,
-        mt: 2,
+        borderRadius: '4px',
+        backgroundColor: isActive ? activeAndHoverColor : 'transparent',
         '&:hover': {
-          // Example: highlight on hover
-          color: white.main,
+          backgroundColor: activeAndHoverColor,
         },
       }}
       onClick={() => {
@@ -68,28 +87,21 @@ const ListNav: FC<ListNavProps> = ({
         }
       }}
     >
-      <Typography
-        fontvariant="merrih5"
-        fontcolor={white.main}
-        text={title ?? ''}
-        sx={{
-          whiteSpace: 'nowrap', // No wrapping
-        }}
-      />
-    </Box>
+      {menuItemContent}
+    </MenuItem>
   )
 
   // If we have a route and it's a route trigger, wrap in Link
   if (route && trigger === 'route') {
     return (
-      <Link href={route} style={{ textDecoration: 'none' }}>
-        {content}
+      <Link href={route} style={{ textDecoration: 'none', color: 'inherit' }}>
+        {menuItem}
       </Link>
     )
   }
 
-  // Otherwise just return the Box
-  return content
+  // Otherwise just return the MenuItem
+  return menuItem
 }
 
 export default ListNav

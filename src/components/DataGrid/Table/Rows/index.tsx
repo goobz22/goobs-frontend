@@ -42,7 +42,7 @@ function safeString(value: unknown): string {
  */
 function formatCurrency(
   value: unknown,
-  sacredTheme: boolean = false
+  sacredtheme: boolean = false
 ): {
   formatted: string
   element: React.ReactNode
@@ -75,7 +75,7 @@ function formatCurrency(
 
   // Premium color palette with better psychology
   const getColorScheme = () => {
-    if (sacredTheme) {
+    if (sacredtheme) {
       // Sacred theme colors
       if (isZero) {
         return {
@@ -253,7 +253,7 @@ function formatCurrency(
             marginRight: '4px',
             fontSize: '0.75em',
             opacity: 0.7,
-            color: sacredTheme ? '#FFD700' : '#10B981',
+            color: sacredtheme ? '#FFD700' : '#10B981',
           }}
         >
           ▲
@@ -319,7 +319,7 @@ function formatCurrency(
  */
 function formatCreditCard(
   value: unknown,
-  sacredTheme: boolean = false
+  sacredtheme: boolean = false
 ): {
   formatted: string
   element: React.ReactNode
@@ -348,11 +348,11 @@ function formatCreditCard(
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.1em',
-          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredTheme
+          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredtheme
             ? 'rgba(255, 215, 0, 0.05)'
             : 'rgba(156, 163, 175, 0.1)',
-          border: sacredTheme
+          border: sacredtheme
             ? '1px solid rgba(255, 215, 0, 0.3)'
             : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
@@ -376,7 +376,7 @@ function formatCreditCard(
   const formatted = maskedDigits.replace(/(.{4})/g, '$1 ').trim()
 
   // Clean, security-focused styling without card type detection
-  const cardInfo = sacredTheme
+  const cardInfo = sacredtheme
     ? {
         color: '#FFD700',
         bgGradient:
@@ -413,7 +413,7 @@ function formatCreditCard(
         padding: '6px 12px',
         minWidth: '140px',
         textAlign: 'center' as const,
-        boxShadow: sacredTheme
+        boxShadow: sacredtheme
           ? `0 2px 8px rgba(255, 215, 0, 0.2)`
           : `0 2px 8px rgba(0, 0, 0, 0.1)`,
         backdropFilter: 'blur(4px)',
@@ -425,13 +425,13 @@ function formatCreditCard(
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 4px 12px rgba(255, 215, 0, 0.3)'
           : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
@@ -466,7 +466,7 @@ function formatCreditCard(
           fontSize: '0.75rem',
           opacity: 0.5,
           marginLeft: '8px',
-          color: sacredTheme ? '#FFD700' : '#6B7280',
+          color: sacredtheme ? '#FFD700' : '#6B7280',
         }}
       >
         🔒
@@ -497,7 +497,7 @@ function formatCreditCard(
  */
 function formatExpirationDate(
   value: unknown,
-  sacredTheme: boolean = false
+  sacredtheme: boolean = false
 ): {
   formatted: string
   element: React.ReactNode
@@ -526,11 +526,11 @@ function formatExpirationDate(
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.05em',
-          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredTheme
+          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredtheme
             ? 'rgba(255, 215, 0, 0.05)'
             : 'rgba(156, 163, 175, 0.1)',
-          border: sacredTheme
+          border: sacredtheme
             ? '1px solid rgba(255, 215, 0, 0.3)'
             : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
@@ -620,7 +620,7 @@ function formatExpirationDate(
 
   // Get styling based on expiration status
   const getStatusStyling = () => {
-    if (sacredTheme) {
+    if (sacredtheme) {
       if (isExpired) {
         return {
           color: '#EF4444',
@@ -706,7 +706,7 @@ function formatExpirationDate(
         padding: '6px 12px',
         minWidth: '100px',
         textAlign: 'center' as const,
-        boxShadow: sacredTheme
+        boxShadow: sacredtheme
           ? `0 2px 8px rgba(255, 215, 0, 0.2)`
           : `0 2px 8px rgba(0, 0, 0, 0.1)`,
         backdropFilter: 'blur(4px)',
@@ -718,13 +718,13 @@ function formatExpirationDate(
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 4px 12px rgba(255, 215, 0, 0.3)'
           : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
@@ -793,7 +793,7 @@ function formatExpirationDate(
  */
 function formatAccountNumber(
   value: unknown,
-  sacredTheme: boolean = false
+  sacredtheme: boolean = false
 ): {
   formatted: string
   element: React.ReactNode
@@ -822,11 +822,11 @@ function formatAccountNumber(
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.1em',
-          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredTheme
+          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredtheme
             ? 'rgba(255, 215, 0, 0.05)'
             : 'rgba(156, 163, 175, 0.1)',
-          border: sacredTheme
+          border: sacredtheme
             ? '1px solid rgba(255, 215, 0, 0.3)'
             : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
@@ -865,18 +865,18 @@ function formatAccountNumber(
         fontSize: '0.875rem',
         lineHeight: 1.3,
         letterSpacing: '0.08em',
-        color: sacredTheme ? '#FFD700' : '#1E40AF',
-        background: sacredTheme
+        color: sacredtheme ? '#FFD700' : '#1E40AF',
+        background: sacredtheme
           ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)'
           : 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 30%, #BFDBFE 100%)',
-        border: sacredTheme
+        border: sacredtheme
           ? '1.5px solid rgba(255, 215, 0, 0.6)'
           : '1.5px solid #3B82F6',
         borderRadius: '8px',
         padding: '6px 12px',
         minWidth: '130px',
         textAlign: 'center' as const,
-        boxShadow: sacredTheme
+        boxShadow: sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(59, 130, 246, 0.1)',
         backdropFilter: 'blur(4px)',
@@ -888,13 +888,13 @@ function formatAccountNumber(
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 4px 12px rgba(255, 215, 0, 0.3)'
           : '0 4px 12px rgba(59, 130, 246, 0.2)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(59, 130, 246, 0.1)'
       }}
@@ -905,7 +905,7 @@ function formatAccountNumber(
           fontSize: '0.75rem',
           opacity: 0.7,
           marginRight: '6px',
-          color: sacredTheme ? '#FFD700' : '#1D4ED8',
+          color: sacredtheme ? '#FFD700' : '#1D4ED8',
         }}
       >
         🏦
@@ -960,7 +960,7 @@ function formatAccountNumber(
  */
 function formatRoutingNumber(
   value: unknown,
-  sacredTheme: boolean = false
+  sacredtheme: boolean = false
 ): {
   formatted: string
   element: React.ReactNode
@@ -989,11 +989,11 @@ function formatRoutingNumber(
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.05em',
-          color: sacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredTheme
+          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          backgroundColor: sacredtheme
             ? 'rgba(255, 215, 0, 0.05)'
             : 'rgba(156, 163, 175, 0.1)',
-          border: sacredTheme
+          border: sacredtheme
             ? '1px solid rgba(255, 215, 0, 0.3)'
             : '1px solid rgba(156, 163, 175, 0.3)',
           borderRadius: '6px',
@@ -1023,7 +1023,7 @@ function formatRoutingNumber(
   const formatId = `routing-${Math.random().toString(36).substr(2, 9)}`
 
   // Styling based on validation
-  const colorScheme = sacredTheme
+  const colorScheme = sacredtheme
     ? isValidLength
       ? {
           color: '#FFD700',
@@ -1076,7 +1076,7 @@ function formatRoutingNumber(
         padding: '6px 12px',
         minWidth: '110px',
         textAlign: 'center' as const,
-        boxShadow: sacredTheme
+        boxShadow: sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(0, 0, 0, 0.1)',
         backdropFilter: 'blur(4px)',
@@ -1088,13 +1088,13 @@ function formatRoutingNumber(
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 4px 12px rgba(255, 215, 0, 0.3)'
           : '0 4px 12px rgba(0, 0, 0, 0.15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredTheme
+        e.currentTarget.style.boxShadow = sacredtheme
           ? '0 2px 8px rgba(255, 215, 0, 0.2)'
           : '0 2px 8px rgba(0, 0, 0, 0.1)'
       }}
@@ -1163,7 +1163,7 @@ interface RowsProps {
   onRowCheckboxChange: (rowId: string) => void
 
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const Rows: React.FC<RowsProps> = ({
@@ -1177,7 +1177,7 @@ const Rows: React.FC<RowsProps> = ({
   selectedRowIds,
   onRowClick,
   onRowCheckboxChange,
-  sacredTheme = false,
+  sacredtheme = false,
 }) => {
   if (rows.length === 0) {
     return (
@@ -1222,35 +1222,35 @@ const Rows: React.FC<RowsProps> = ({
           if (effectiveColumn?.formatCurrency) {
             const { formatted, element } = formatCurrency(
               row[effectiveColumnField],
-              sacredTheme
+              sacredtheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatCreditCard) {
             const { formatted, element } = formatCreditCard(
               row[effectiveColumnField],
-              sacredTheme
+              sacredtheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatExpirationDate) {
             const { formatted, element } = formatExpirationDate(
               row[effectiveColumnField],
-              sacredTheme
+              sacredtheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatAccountNumber) {
             const { formatted, element } = formatAccountNumber(
               row[effectiveColumnField],
-              sacredTheme
+              sacredtheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
           } else if (effectiveColumn?.formatRoutingNumber) {
             const { formatted, element } = formatRoutingNumber(
               row[effectiveColumnField],
-              sacredTheme
+              sacredtheme
             )
             cellDisplayValue = element
             cellValueStr = formatted
@@ -1268,11 +1268,11 @@ const Rows: React.FC<RowsProps> = ({
               sx={{
                 cursor: onRowClick ? 'pointer' : 'default',
                 backgroundColor: isSelected
-                  ? sacredTheme
+                  ? sacredtheme
                     ? 'rgba(255, 215, 0, 0.15)'
                     : 'rgba(0, 0, 255, 0.08)'
                   : 'unset',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   '&:hover': {
                     backgroundColor: 'rgba(255, 215, 0, 0.05)',
                   },
@@ -1305,12 +1305,12 @@ const Rows: React.FC<RowsProps> = ({
               >
                 <StyledTooltip
                   title={cellValueStr}
-                  tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
+                  tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
                   tooltipplacement="top"
                   offsetX={0}
                   offsetY={5}
                   arrow
-                  sacredTheme={sacredTheme}
+                  sacredtheme={sacredtheme}
                 >
                   <span>{cellDisplayValue}</span>
                 </StyledTooltip>
@@ -1339,11 +1339,11 @@ const Rows: React.FC<RowsProps> = ({
             sx={{
               cursor: onRowClick ? 'pointer' : 'default',
               backgroundColor: isSelected
-                ? sacredTheme
+                ? sacredtheme
                   ? 'rgba(255, 215, 0, 0.15)'
                   : 'rgba(0, 0, 255, 0.08)'
                 : 'unset',
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 '&:hover': {
                   backgroundColor: 'rgba(255, 215, 0, 0.05)',
                 },
@@ -1378,35 +1378,35 @@ const Rows: React.FC<RowsProps> = ({
                 if (actualCol?.formatCurrency) {
                   const { formatted, element } = formatCurrency(
                     cellValue,
-                    sacredTheme
+                    sacredtheme
                   )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatCreditCard) {
                   const { formatted, element } = formatCreditCard(
                     cellValue,
-                    sacredTheme
+                    sacredtheme
                   )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatExpirationDate) {
                   const { formatted, element } = formatExpirationDate(
                     cellValue,
-                    sacredTheme
+                    sacredtheme
                   )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatAccountNumber) {
                   const { formatted, element } = formatAccountNumber(
                     cellValue,
-                    sacredTheme
+                    sacredtheme
                   )
                   cellDisplayValue = element
                   cellValueStr = formatted
                 } else if (actualCol?.formatRoutingNumber) {
                   const { formatted, element } = formatRoutingNumber(
                     cellValue,
-                    sacredTheme
+                    sacredtheme
                   )
                   cellDisplayValue = element
                   cellValueStr = formatted
@@ -1428,12 +1428,12 @@ const Rows: React.FC<RowsProps> = ({
                   >
                     <StyledTooltip
                       title={cellValueStr}
-                      tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
+                      tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
                       tooltipplacement="top"
                       offsetX={0}
                       offsetY={5}
                       arrow
-                      sacredTheme={sacredTheme}
+                      sacredtheme={sacredtheme}
                     >
                       <span>{cellDisplayValue}</span>
                     </StyledTooltip>
@@ -1454,34 +1454,34 @@ const Rows: React.FC<RowsProps> = ({
                 cellContent = col.renderCell(cellParams)
               } else if (col.formatCurrency) {
                 // Handle currency formatting
-                const { element } = formatCurrency(row[col.field], sacredTheme)
+                const { element } = formatCurrency(row[col.field], sacredtheme)
                 cellContent = element
               } else if (col.formatCreditCard) {
                 // Handle credit card formatting
                 const { element } = formatCreditCard(
                   row[col.field],
-                  sacredTheme
+                  sacredtheme
                 )
                 cellContent = element
               } else if (col.formatExpirationDate) {
                 // Handle expiration date formatting
                 const { element } = formatExpirationDate(
                   row[col.field],
-                  sacredTheme
+                  sacredtheme
                 )
                 cellContent = element
               } else if (col.formatAccountNumber) {
                 // Handle account number formatting
                 const { element } = formatAccountNumber(
                   row[col.field],
-                  sacredTheme
+                  sacredtheme
                 )
                 cellContent = element
               } else if (col.formatRoutingNumber) {
                 // Handle routing number formatting
                 const { element } = formatRoutingNumber(
                   row[col.field],
-                  sacredTheme
+                  sacredtheme
                 )
                 cellContent = element
               } else {
@@ -1497,17 +1497,17 @@ const Rows: React.FC<RowsProps> = ({
               // Tooltip text needs a string, so convert cellContent safely
               // For special formatting columns, use the formatted string; otherwise use safeString
               const cellContentStr = col.formatCurrency
-                ? formatCurrency(row[col.field], sacredTheme).formatted
+                ? formatCurrency(row[col.field], sacredtheme).formatted
                 : col.formatCreditCard
-                  ? formatCreditCard(row[col.field], sacredTheme).formatted
+                  ? formatCreditCard(row[col.field], sacredtheme).formatted
                   : col.formatExpirationDate
-                    ? formatExpirationDate(row[col.field], sacredTheme)
+                    ? formatExpirationDate(row[col.field], sacredtheme)
                         .formatted
                     : col.formatAccountNumber
-                      ? formatAccountNumber(row[col.field], sacredTheme)
+                      ? formatAccountNumber(row[col.field], sacredtheme)
                           .formatted
                       : col.formatRoutingNumber
-                        ? formatRoutingNumber(row[col.field], sacredTheme)
+                        ? formatRoutingNumber(row[col.field], sacredtheme)
                             .formatted
                         : safeString(cellContent)
 
@@ -1566,12 +1566,12 @@ const Rows: React.FC<RowsProps> = ({
                   ) : (
                     <StyledTooltip
                       title={cellContentStr}
-                      tooltipcolor={sacredTheme ? '#FFD700' : '#444'}
+                      tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
                       tooltipplacement="top"
                       offsetX={0}
                       offsetY={5}
                       arrow
-                      sacredTheme={sacredTheme}
+                      sacredtheme={sacredtheme}
                     >
                       <span>{cellContent}</span>
                     </StyledTooltip>

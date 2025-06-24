@@ -38,7 +38,7 @@ export interface PercentageFieldProps extends Omit<TextFieldProps, 'onChange'> {
   /** Whether to display the % symbol (default: true) */
   showPercentSymbol?: boolean
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 const StyledIconButton = styled(IconButton)<{ sacredtheme?: boolean }>(
@@ -86,7 +86,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   initialDelay = 500,
   repeatInterval = 100,
   showPercentSymbol = true,
-  sacredTheme = false,
+  sacredtheme = false,
   ...rest
 }) => {
   // Convert initialValue to string if it's a number
@@ -242,7 +242,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
 
   const SacredEndAdornment = () => (
     <Box sx={{ position: 'relative' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -272,7 +272,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           edge="end"
           aria-label="increment"
           sx={{ marginBottom: '-2px' }}
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
         >
           <ArrowIcon>
             <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
@@ -283,7 +283,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           onMouseDown={handleDecrementMouseDown}
           edge="end"
           aria-label="decrement"
-          sacredtheme={sacredTheme}
+          sacredtheme={sacredtheme}
         >
           <ArrowIcon>
             <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
@@ -297,12 +297,12 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     <TextField
       value={displayValue}
       onChange={handleChange}
-      label={sacredTheme ? 'Sacred Portion' : label}
+      label={sacredtheme ? 'Sacred Portion' : label}
       type="text"
       inputMode="numeric"
       variant="outlined"
-      placeholder={sacredTheme ? 'Divine percentage...' : undefined}
-      sacredTheme={sacredTheme}
+      placeholder={sacredtheme ? 'Divine percentage...' : undefined}
+      sacredtheme={sacredtheme}
       endAdornment={<SacredEndAdornment />}
       {...rest}
     />

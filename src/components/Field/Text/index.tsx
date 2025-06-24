@@ -60,7 +60,7 @@ export type TextFieldProps = (
   slotProps?: MuiTextFieldProps['slotProps']
   disabled?: boolean
   /** Enable sacred Egyptian theme */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 interface StyledTextFieldProps {
@@ -256,13 +256,13 @@ const TextField = React.memo<TextFieldProps>(props => {
     unshrunkfontcolor,
     placeholdercolor,
     shrunklabelposition,
-    sacredTheme = false,
+    sacredtheme = false,
     ...restProps
   } = props
 
   const inputStyle = useMemo<React.CSSProperties>(
     () => ({
-      backgroundColor: sacredTheme
+      backgroundColor: sacredtheme
         ? alpha('#000000', 0.8)
         : backgroundcolor || 'inherit',
       width: '100%',
@@ -270,7 +270,7 @@ const TextField = React.memo<TextFieldProps>(props => {
       boxSizing: 'border-box',
       borderRadius: 5,
     }),
-    [backgroundcolor, sacredTheme]
+    [backgroundcolor, sacredtheme]
   )
 
   const handleChange = useCallback(
@@ -292,12 +292,12 @@ const TextField = React.memo<TextFieldProps>(props => {
 
   const mergedSlotProps = useMemo(() => {
     const adornmentSx = {
-      color: sacredTheme ? '#FFD700 !important' : '#000000 !important',
+      color: sacredtheme ? '#FFD700 !important' : '#000000 !important',
       '& svg': {
-        color: sacredTheme ? '#FFD700 !important' : '#000000 !important',
-        fill: sacredTheme ? '#FFD700 !important' : '#000000 !important',
-        stroke: sacredTheme ? '#FFD700 !important' : '#000000 !important',
-        ...(sacredTheme && {
+        color: sacredtheme ? '#FFD700 !important' : '#000000 !important',
+        fill: sacredtheme ? '#FFD700 !important' : '#000000 !important',
+        stroke: sacredtheme ? '#FFD700 !important' : '#000000 !important',
+        ...(sacredtheme && {
           filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
         }),
       },
@@ -345,7 +345,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         ...(customSlotProps.inputLabel || {}),
       },
     }
-  }, [inputStyle, startAdornment, endAdornment, customSlotProps, sacredTheme])
+  }, [inputStyle, startAdornment, endAdornment, customSlotProps, sacredtheme])
 
   const hasValue = Boolean(value?.toString().length).toString()
 
@@ -387,7 +387,7 @@ const TextField = React.memo<TextFieldProps>(props => {
         unshrunkfontcolor={unshrunkfontcolor}
         placeholdercolor={placeholdercolor}
         shrunklabelposition={shrunklabelposition}
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
         {...restProps}
       />
     </Box>

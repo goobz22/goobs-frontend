@@ -39,7 +39,7 @@ export interface CVVProps extends Omit<TextFieldProps, 'onChange'> {
   /**
    * Enable sacred Egyptian theme
    */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /**
    * Whether this is a default/existing value that should be partially masked
    */
@@ -55,7 +55,7 @@ const CVV: React.FC<CVVProps> = ({
   minLength = 3,
   maxLength = 4,
   errorMessage = 'Invalid CVV format',
-  sacredTheme = false,
+  sacredtheme = false,
   isDefaultValue = false,
   ...props
 }) => {
@@ -153,7 +153,7 @@ const CVV: React.FC<CVVProps> = ({
 
   const CVVAdornment = () => (
     <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             position: 'absolute',
@@ -168,10 +168,10 @@ const CVV: React.FC<CVVProps> = ({
       )}
       <Box
         sx={{
-          color: sacredTheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredTheme ? 600 : 400,
-          fontSize: sacredTheme ? '14px' : '12px',
-          ...(sacredTheme && {
+          color: sacredtheme ? '#FFD700' : 'inherit',
+          fontWeight: sacredtheme ? 600 : 400,
+          fontSize: sacredtheme ? '14px' : '12px',
+          ...(sacredtheme && {
             background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
             backgroundSize: '200% 100%',
             animation: `${goldShimmer} 3s linear infinite`,
@@ -199,7 +199,7 @@ const CVV: React.FC<CVVProps> = ({
       }
       label={props.label || 'CVV'}
       placeholder={props.placeholder || '123'}
-      sacredTheme={sacredTheme}
+      sacredtheme={sacredtheme}
       startAdornment={<CVVAdornment />}
       inputProps={{
         ...props.inputProps,
@@ -211,11 +211,11 @@ const CVV: React.FC<CVVProps> = ({
         input: {
           sx: {
             '& .MuiInputBase-input': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
             '&::placeholder': {
-              marginLeft: sacredTheme ? '-10px' : '-15px',
+              marginLeft: sacredtheme ? '-10px' : '-15px',
               marginTop: '2px',
             },
           },

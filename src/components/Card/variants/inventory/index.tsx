@@ -52,7 +52,7 @@ interface InventoryCardProps {
   /** Quantity of the item */
   quantity?: number
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
   /** Callback for remove action */
   onRemove?: () => void
 }
@@ -72,7 +72,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   support,
   price,
   quantity,
-  sacredTheme = false,
+  sacredtheme = false,
   onRemove,
 }) => {
   return (
@@ -84,13 +84,13 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'stretch',
-        border: sacredTheme
+        border: sacredtheme
           ? `1px solid ${alpha('#FFD700', 0.3)}`
           : '1px solid #e8e8e8',
         minHeight: height,
-        backgroundColor: sacredTheme ? '#0a0a0a' : 'white',
+        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
         overflow: 'hidden',
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           animation: `${sacredBorderGlow} 4s ease-in-out infinite`,
           '&::before': {
             content: '""',
@@ -120,7 +120,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           flexShrink: 0,
           position: 'relative',
           zIndex: 2,
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '&::after': {
               content: '""',
               position: 'absolute',
@@ -146,7 +146,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
         }}
       >
         {/* Sacred decorative glyph */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               position: 'absolute',
@@ -172,10 +172,10 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           {title && (
             <Typography
               text={title}
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merrih5"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontFamily: '"Cinzel", serif',
                       fontWeight: 600,
@@ -195,10 +195,10 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           >
             <Typography
               text={`${quantity} x ${price}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.9) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
               fontvariant="merriparagraph"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       fontWeight: 600,
                       textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
@@ -215,7 +215,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '8px' }}>
             <Typography
               text={`License: ${license || ''}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -223,7 +223,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Development use: ${developmentUse || ''}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -231,7 +231,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Production use: ${productionUse || ''}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -239,7 +239,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Updates: ${updates || ''}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -247,7 +247,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <Box sx={{ marginTop: '4px' }}>
             <Typography
               text={`Support: ${support || ''}`}
-              fontcolor={sacredTheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
               fontvariant="merriparagraph"
             />
           </Box>
@@ -265,10 +265,10 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           >
             <Typography
               text="Remove"
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merriparagraph"
               sx={
-                sacredTheme
+                sacredtheme
                   ? {
                       textDecoration: 'underline',
                       '&:hover': {

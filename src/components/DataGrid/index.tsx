@@ -107,7 +107,7 @@ function DataGrid({
   onShow,
   onSelectionChange,
   showIdColumns = false,
-  sacredTheme = false,
+  sacredtheme = false,
 }: DatagridProps) {
   // Detect mobile devices for responsive behavior
 
@@ -217,7 +217,7 @@ function DataGrid({
       backgroundColor: woad.main,
     }
 
-    if (!sacredTheme) return baseStyles
+    if (!sacredtheme) return baseStyles
 
     return {
       ...baseStyles,
@@ -250,12 +250,12 @@ function DataGrid({
         animationDelay: '1.5s',
       },
     }
-  }, [sacredTheme])
+  }, [sacredtheme])
 
   return (
     <Box ref={containerRef} sx={containerStyles}>
       {/* Top corner decorations */}
-      {sacredTheme && (
+      {sacredtheme && (
         <>
           <Box
             sx={{
@@ -291,7 +291,7 @@ function DataGrid({
           severity="error"
           sx={{
             mb: 2,
-            ...(sacredTheme && {
+            ...(sacredtheme && {
               backgroundColor: alpha('#DC2626', 0.1),
               color: '#DC2626',
               border: `1px solid ${alpha('#DC2626', 0.3)}`,
@@ -331,7 +331,7 @@ function DataGrid({
               }
             : undefined
         }
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
 
       <Box
@@ -341,7 +341,7 @@ function DataGrid({
           flexDirection: 'column',
           alignItems: 'flex-start',
           position: 'relative',
-          ...(sacredTheme && {
+          ...(sacredtheme && {
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -366,7 +366,7 @@ function DataGrid({
         }}
       >
         {/* Sacred header glyphs */}
-        {sacredTheme && (
+        {sacredtheme && (
           <Box
             sx={{
               display: 'flex',
@@ -408,7 +408,7 @@ function DataGrid({
           someRowsSelected={someRowsSelected}
           onHeaderCheckboxChange={handleHeaderCheckboxChange}
           onRowCheckboxChange={handleRowCheckboxChange}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
 
         <CustomFooter
@@ -418,12 +418,12 @@ function DataGrid({
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
           columns={filteredColumns}
-          sacredTheme={sacredTheme}
+          sacredtheme={sacredtheme}
         />
       </Box>
 
       {/* Bottom decoration */}
-      {sacredTheme && (
+      {sacredtheme && (
         <Box
           sx={{
             display: 'flex',

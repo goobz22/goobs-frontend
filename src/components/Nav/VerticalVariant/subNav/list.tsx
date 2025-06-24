@@ -13,6 +13,10 @@ interface ListSubNavProps {
   activeAndHoverColor: string
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
+  /**
+   * Whether the nav item is currently active/selected.
+   */
+  isActive?: boolean
 }
 
 /**
@@ -25,6 +29,7 @@ const ListSubNav: FC<ListSubNavProps> = ({
   activeAndHoverColor,
   onClose,
   variant,
+  isActive,
 }) => {
   return (
     <Link
@@ -36,6 +41,7 @@ const ListSubNav: FC<ListSubNavProps> = ({
         sx={{
           color: white.main,
           ml: '35px', // Indent the single menu item if desired
+          backgroundColor: isActive ? activeAndHoverColor : 'transparent',
           '&:hover': { backgroundColor: activeAndHoverColor },
           '&:active': { backgroundColor: activeAndHoverColor },
           whiteSpace: 'nowrap', // keep text on a single line

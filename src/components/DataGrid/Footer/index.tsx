@@ -17,7 +17,7 @@ export interface CustomFooterProps {
   onPageSizeChange: (newPageSize: number) => void
   columns: ColumnDef[]
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 function CustomFooter({
@@ -27,7 +27,7 @@ function CustomFooter({
   onPageChange,
   onPageSizeChange,
   columns,
-  sacredTheme = false,
+  sacredtheme = false,
 }: CustomFooterProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [checkboxWidth] = useState(45)
@@ -57,7 +57,7 @@ function CustomFooter({
         left: 0,
         // Only add checkbox offset margin on larger screens
         marginLeft: isTabletOrBelow ? 0 : `${checkboxWidth}px`,
-        ...(sacredTheme && {
+        ...(sacredtheme && {
           backgroundColor: alpha('#000000', 0.7),
           borderTop: `2px solid ${alpha('#FFD700', 0.3)}`,
           backdropFilter: 'blur(10px)',
@@ -99,7 +99,7 @@ function CustomFooter({
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
           >
-            <VerticalDivider sacredTheme={sacredTheme} />
+            <VerticalDivider sacredtheme={sacredtheme} />
           </Box>
           <Box
             sx={{
@@ -116,22 +116,22 @@ function CustomFooter({
               onClick={handleOpen}
               text={isTabletOrBelow ? 'Columns' : 'Manage Columns'}
               fontvariant="merriparagraph"
-              fontcolor={sacredTheme ? '#FFD700' : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               backgroundcolor="none"
               icon={
-                <ShowHideEyeIcon visible={true} sacredTheme={sacredTheme} />
+                <ShowHideEyeIcon visible={true} sacredtheme={sacredtheme} />
               }
-              iconcolor={sacredTheme ? '#FFD700' : 'black'}
+              iconcolor={sacredtheme ? '#FFD700' : 'black'}
               iconlocation="left"
               disableButton="false"
-              sacredTheme={sacredTheme}
+              sacredtheme={sacredtheme}
               sx={{
                 minWidth: 'unset',
                 padding: '8px',
                 '& .MuiTypography-root': {
                   marginLeft: '16px',
                 },
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   border: `1px solid ${alpha('#FFD700', 0.3)}`,
                   '&:hover': {
                     backgroundColor: alpha('#FFD700', 0.1),
@@ -150,7 +150,7 @@ function CustomFooter({
               mr: isTabletOrBelow ? '5px' : '10px',
             }}
           >
-            <VerticalDivider sacredTheme={sacredTheme} />
+            <VerticalDivider sacredtheme={sacredtheme} />
           </Box>
         </Box>
 
@@ -210,18 +210,18 @@ function CustomFooter({
                 minHeight: '56px',
                 height: '56px',
                 padding: isTabletOrBelow ? '0 8px' : '0 16px',
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   color: '#FFD700',
                 }),
               },
               '.MuiTablePagination-displayedRows': {
                 margin: 0,
-                ...(sacredTheme && {
+                ...(sacredtheme && {
                   color: alpha('#FFD700', 0.9),
                   fontFamily: '"Crimson Text", serif',
                 }),
               },
-              ...(sacredTheme && {
+              ...(sacredtheme && {
                 '& .MuiIconButton-root': {
                   color: '#FFD700',
                   '&:hover': {
@@ -242,7 +242,7 @@ function CustomFooter({
         open={isOpen}
         handleClose={handleClose}
         columns={columns}
-        sacredTheme={sacredTheme}
+        sacredtheme={sacredtheme}
       />
     </Box>
   )

@@ -91,7 +91,7 @@ export interface CheckboxProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   disabled?: boolean
   /** Enable Egyptian/Sacred theming */
-  sacredTheme?: boolean
+  sacredtheme?: boolean
 }
 
 // Create a styled version of MUI Checkbox with our custom styles
@@ -234,7 +234,7 @@ function CustomCheckbox({
   indeterminate,
   onChange,
   disabled,
-  sacredTheme = false,
+  sacredtheme = false,
   ...props
 }: CheckboxProps) {
   const handleClick = (event: React.MouseEvent) => {
@@ -252,7 +252,7 @@ function CustomCheckbox({
   }
 
   return (
-    <SacredCheckboxWrapper sacredtheme={sacredTheme}>
+    <SacredCheckboxWrapper sacredtheme={sacredtheme}>
       <StyledCheckbox
         checked={checked}
         indeterminate={indeterminate}
@@ -260,7 +260,7 @@ function CustomCheckbox({
         onChange={handleChange}
         disabled={disabled}
         disableRipple
-        sacredtheme={sacredTheme}
+        sacredtheme={sacredtheme}
         {...props}
       />
     </SacredCheckboxWrapper>
