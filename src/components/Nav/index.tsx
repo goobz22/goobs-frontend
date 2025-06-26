@@ -349,7 +349,7 @@ function Nav({
   variant = 'permanent',
   spacingfromtopofscreen,
   marginabovetitle = '0px',
-  marginbelowtitle = '5px',
+  marginbelowtitle = '0px',
   router,
   sacredtheme = false,
   sacredTitle,
@@ -486,8 +486,13 @@ function Nav({
               title={item.title}
               expandedNavs={expandedNavs}
               setExpandedNavs={setExpandedNavs}
-              onClick={() => handleNavClick(item)}
+              onClick={
+                item.trigger !== 'route'
+                  ? () => handleNavClick(item)
+                  : undefined
+              }
               level={level}
+              activeAndHoverColor={activeAndHoverColor}
             >
               {item.subnavs?.map(subItem =>
                 renderItem(subItem, level + 1, activeAndHoverColor)
@@ -524,7 +529,12 @@ function Nav({
               title={item.title}
               expandedSubnavs={expandedSubnavs}
               setExpandedSubnavs={setExpandedSubnavs}
-              onClick={() => handleNavClick(item)}
+              onClick={
+                item.trigger !== 'route'
+                  ? () => handleNavClick(item)
+                  : undefined
+              }
+              activeAndHoverColor={activeAndHoverColor}
             >
               {item.views?.map(view =>
                 renderItem(view, level + 2, activeAndHoverColor)
@@ -559,9 +569,14 @@ function Nav({
               key={item.title}
               title={item.title}
               expandedNavs={expandedViewNavs}
-              setExpandedNavs={setExpandedViewNavs}
-              onClick={() => handleNavClick(item)}
+              setExpandedNavs={setExpandedNavs}
+              onClick={
+                item.trigger !== 'route'
+                  ? () => handleNavClick(item)
+                  : undefined
+              }
               level={level}
+              activeAndHoverColor={activeAndHoverColor}
             >
               {item.subViewNavs?.map(subViewItem =>
                 renderItem(subViewItem, level + 1, activeAndHoverColor)
@@ -601,7 +616,12 @@ function Nav({
               title={item.title}
               expandedNavs={expandedSubViewNavs}
               setExpandedNavs={setExpandedSubViewNavs}
-              onClick={() => handleNavClick(item)}
+              onClick={
+                item.trigger !== 'route'
+                  ? () => handleNavClick(item)
+                  : undefined
+              }
+              activeAndHoverColor={activeAndHoverColor}
             >
               {item.subSubViewNavs?.map(subSubViewItem =>
                 renderItem(subSubViewItem, level + 1, activeAndHoverColor)
@@ -653,7 +673,7 @@ function Nav({
     <Box
       sx={{
         textAlign: 'center',
-        py: 2,
+        py: 1,
         px: 1,
         position: 'relative',
       }}
@@ -664,7 +684,7 @@ function Nav({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          mb: 2,
+          mb: 1,
           gap: 1,
         }}
       >
@@ -743,7 +763,6 @@ function Nav({
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          mt: 1,
           gap: 0.5,
         }}
       >
@@ -770,7 +789,8 @@ function Nav({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        py: 1,
+        py: 0,
+        mb: -1.5,
         px: 2,
       }}
     >

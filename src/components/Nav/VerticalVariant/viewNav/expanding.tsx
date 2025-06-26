@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   List,
+  alpha,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { white } from '../../../../styles/palette'
@@ -33,6 +34,7 @@ interface ExpandingViewNavProps {
    * Child nodes (subViewNav) to show if expanded.
    */
   children?: React.ReactNode
+  activeAndHoverColor?: string
 }
 
 const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
@@ -41,8 +43,13 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
   setExpandedNavs,
   onClick,
   children,
+  activeAndHoverColor,
 }) => {
   const isExpanded = expandedNavs.includes(title ?? '')
+  const issacredtheme =
+    activeAndHoverColor &&
+    (activeAndHoverColor.includes('255, 215, 0') ||
+      activeAndHoverColor === alpha('#FFD700', 0.15))
 
   return (
     <MuiAccordion
@@ -76,6 +83,10 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
             sx={{
               // Keep transparent if you only want it visible on hover/expand
               color: 'transparent',
+              ...(issacredtheme && {
+                color: isExpanded ? '#FFD700' : 'transparent',
+                transition: 'color 0.3s ease',
+              }),
             }}
           />
         }
@@ -103,12 +114,12 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
           },
           '&:hover': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
           '&.Mui-expanded': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
         }}
@@ -118,10 +129,18 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
       >
         <Typography
           fontvariant="merriparagraph"
-          fontcolor={white.main}
+          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
           text={title ?? ''}
           sx={{
             whiteSpace: 'nowrap', // No wrapping
+            ...(issacredtheme && {
+              fontWeight: 500,
+              letterSpacing: 0.8,
+              transition: 'all 0.3s ease',
+              textShadow: isExpanded
+                ? '0 0 8px rgba(255, 215, 0, 0.7)'
+                : 'none',
+            }),
           }}
         />
       </AccordionSummary>

@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   List,
+  alpha,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { white } from '../../../../styles/palette'
@@ -21,6 +22,7 @@ interface ExpandingSubNavProps {
    * Click handler for the accordion summary.
    */
   onClick?: () => void
+  activeAndHoverColor?: string
 }
 
 /**
@@ -32,8 +34,13 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
   setExpandedSubnavs,
   children,
   onClick,
+  activeAndHoverColor,
 }) => {
   const isExpanded = expandedSubnavs.includes(title ?? '')
+  const issacredtheme =
+    activeAndHoverColor &&
+    (activeAndHoverColor.includes('255, 215, 0') ||
+      activeAndHoverColor === alpha('#FFD700', 0.15))
 
   return (
     <MuiAccordion
@@ -67,6 +74,10 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
             sx={{
               // Keep transparent if you only want icon to show on hover/expand
               color: 'transparent',
+              ...(issacredtheme && {
+                color: isExpanded ? '#FFD700' : 'transparent',
+                transition: 'color 0.3s ease',
+              }),
             }}
           />
         }
@@ -94,12 +105,12 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
           },
           '&:hover': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
           '&.Mui-expanded': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
         }}
@@ -107,12 +118,20 @@ const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
       >
         <Typography
           fontvariant="merrih6"
-          fontcolor={white.main}
+          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
           text={title ?? ''}
           sx={{
             whiteSpace: 'nowrap',
             // Remove any left margin to keep text right next to arrow
             marginLeft: 0,
+            ...(issacredtheme && {
+              fontWeight: 500,
+              letterSpacing: 0.8,
+              transition: 'all 0.3s ease',
+              textShadow: isExpanded
+                ? '0 0 8px rgba(255, 215, 0, 0.7)'
+                : 'none',
+            }),
           }}
         />
       </AccordionSummary>

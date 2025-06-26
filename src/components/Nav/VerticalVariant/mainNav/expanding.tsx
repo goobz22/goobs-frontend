@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   List,
+  alpha,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { white } from '../../../../styles/palette'
@@ -33,6 +34,7 @@ interface ExpandingNavProps {
    * Child nodes (subNav) to show if expanded.
    */
   children?: React.ReactNode
+  activeAndHoverColor?: string
 }
 
 const ExpandingNav: FC<ExpandingNavProps> = ({
@@ -41,8 +43,13 @@ const ExpandingNav: FC<ExpandingNavProps> = ({
   setExpandedNavs,
   onClick,
   children,
+  activeAndHoverColor,
 }) => {
   const isExpanded = expandedNavs.includes(title ?? '')
+  const issacredtheme =
+    activeAndHoverColor &&
+    (activeAndHoverColor.includes('255, 215, 0') ||
+      activeAndHoverColor === alpha('#FFD700', 0.15))
 
   return (
     <MuiAccordion
@@ -77,6 +84,10 @@ const ExpandingNav: FC<ExpandingNavProps> = ({
             sx={{
               // Keep transparent if you only want it visible on hover/expand
               color: 'transparent',
+              ...(issacredtheme && {
+                color: isExpanded ? '#FFD700' : 'transparent',
+                transition: 'color 0.3s ease',
+              }),
             }}
           />
         }
@@ -103,12 +114,12 @@ const ExpandingNav: FC<ExpandingNavProps> = ({
           },
           '&:hover': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
           '&.Mui-expanded': {
             '& .MuiSvgIcon-root': {
-              color: white.main,
+              color: issacredtheme ? '#FFD700' : white.main,
             },
           },
         }}
@@ -118,10 +129,18 @@ const ExpandingNav: FC<ExpandingNavProps> = ({
       >
         <Typography
           fontvariant="merrih5"
-          fontcolor={white.main}
+          fontcolor={issacredtheme ? '#FFD700' : white.main}
           text={title ?? ''}
           sx={{
             whiteSpace: 'nowrap', // No wrapping
+            ...(issacredtheme && {
+              fontWeight: 600,
+              letterSpacing: 1.2,
+              transition: 'all 0.3s ease',
+              textShadow: isExpanded
+                ? '0 0 8px rgba(255, 215, 0, 0.7)'
+                : '0 0 5px rgba(255, 215, 0, 0.5)',
+            }),
           }}
         />
       </AccordionSummary>
