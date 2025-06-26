@@ -9,6 +9,7 @@ import {
   Button,
   Paper,
   IconButton,
+  InputAdornment,
 } from '@mui/material'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -805,41 +806,43 @@ const DateField: React.FC<DateFieldProps> = ({
   )
 
   const calendarIcon = (
-    <Box
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-      }}
-    >
-      {sacredtheme && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-20px',
-            color: alpha('#FFD700', 0.4),
-            fontSize: '12px',
-            animation: `${floatGlyph} 2s ease-in-out infinite`,
-          }}
-        >
-          𓇳
-        </Box>
-      )}
-      <CalendarTodayIcon
-        onClick={handleIconClick}
+    <InputAdornment position="end">
+      <Box
         sx={{
-          cursor: 'pointer',
-          '&:hover': {
-            opacity: 0.8,
-          },
-          fontSize: '20px',
-          color: sacredtheme ? '#FFD700' : 'black',
-          ...(sacredtheme && {
-            animation: `${glowPulse} 2s ease-in-out infinite`,
-          }),
+          position: 'relative',
+          display: 'inline-flex',
+          alignItems: 'center',
         }}
-      />
-    </Box>
+      >
+        {sacredtheme && (
+          <Box
+            sx={{
+              position: 'absolute',
+              left: '-20px',
+              color: alpha('#FFD700', 0.4),
+              fontSize: '12px',
+              animation: `${floatGlyph} 2s ease-in-out infinite`,
+            }}
+          >
+            𓇳
+          </Box>
+        )}
+        <CalendarTodayIcon
+          onClick={handleIconClick}
+          sx={{
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.8,
+            },
+            fontSize: '20px',
+            color: sacredtheme ? '#FFD700' : 'black',
+            ...(sacredtheme && {
+              animation: `${glowPulse} 2s ease-in-out infinite`,
+            }),
+          }}
+        />
+      </Box>
+    </InputAdornment>
   )
 
   return (
@@ -848,11 +851,11 @@ const DateField: React.FC<DateFieldProps> = ({
         label={label}
         value={inputValue}
         onChange={handleInputChange}
-        endAdornment={calendarIcon}
         slotProps={{
           input: {
             readOnly: false,
             style: { cursor: 'text', height: '40px' },
+            endAdornment: calendarIcon,
           },
         }}
         sacredtheme={sacredtheme}

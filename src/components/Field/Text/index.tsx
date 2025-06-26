@@ -1,10 +1,9 @@
 'use client'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback } from 'react'
 import {
   Box,
   TextField as MuiTextField,
   TextFieldProps as MuiTextFieldProps,
-  InputAdornment,
   StandardTextFieldProps,
   OutlinedTextFieldProps,
   FilledTextFieldProps,
@@ -128,12 +127,12 @@ const StyledMuiTextField = styled(MuiTextField, {
           content: '"𓊹"',
           position: 'absolute',
           top: '50%',
-          right: '45px',
+          right: '15px',
           transform: 'translateY(-50%)',
           color: alpha('#FFD700', 0.3),
           fontSize: '14px',
           pointerEvents: 'none',
-          zIndex: 1,
+          zIndex: 0,
           animation: `${floatGlyph} 3s ease-in-out infinite`,
         },
       }),
@@ -247,7 +246,6 @@ const TextField = React.memo<TextFieldProps>(props => {
     startAdornment,
     endAdornment,
     textAlign = 'left',
-    slotProps: customSlotProps = {},
     backgroundcolor,
     outlinecolor,
     fontcolor,
@@ -259,19 +257,6 @@ const TextField = React.memo<TextFieldProps>(props => {
     sacredtheme = false,
     ...restProps
   } = props
-
-  const inputStyle = useMemo<React.CSSProperties>(
-    () => ({
-      backgroundColor: sacredtheme
-        ? alpha('#000000', 0.8)
-        : backgroundcolor || 'inherit',
-      width: '100%',
-      cursor: 'text',
-      boxSizing: 'border-box',
-      borderRadius: 5,
-    }),
-    [backgroundcolor, sacredtheme]
-  )
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e),
@@ -289,63 +274,6 @@ const TextField = React.memo<TextFieldProps>(props => {
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault()
   }, [])
-
-  const mergedSlotProps = useMemo(() => {
-    const adornmentSx = {
-      color: sacredtheme ? '#FFD700 !important' : '#000000 !important',
-      '& svg': {
-        color: sacredtheme ? '#FFD700 !important' : '#000000 !important',
-        fill: sacredtheme ? '#FFD700 !important' : '#000000 !important',
-        stroke: sacredtheme ? '#FFD700 !important' : '#000000 !important',
-        ...(sacredtheme && {
-          filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-        }),
-      },
-    }
-
-    const defaultSlotProps = {
-      input: {
-        style: inputStyle,
-        ...(startAdornment && {
-          startAdornment: (
-            <InputAdornment position="start" sx={adornmentSx}>
-              {startAdornment}
-            </InputAdornment>
-          ),
-        }),
-        ...(endAdornment && {
-          endAdornment: (
-            <InputAdornment position="end" sx={adornmentSx}>
-              {endAdornment}
-            </InputAdornment>
-          ),
-        }),
-      },
-      inputLabel: {
-        sx: {
-          '&.MuiInputLabel-shrink': { top: '0px', left: '0px' },
-          '&:not(.MuiInputLabel-shrink)': {
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
-            top: '9px',
-            left: '12px',
-          },
-        },
-      },
-    }
-
-    return {
-      ...defaultSlotProps,
-      input: {
-        ...defaultSlotProps.input,
-        ...(customSlotProps.input || {}),
-      },
-      inputLabel: {
-        ...defaultSlotProps.inputLabel,
-        ...(customSlotProps.inputLabel || {}),
-      },
-    }
-  }, [inputStyle, startAdornment, endAdornment, customSlotProps, sacredtheme])
 
   const hasValue = Boolean(value?.toString().length).toString()
 
@@ -374,7 +302,19 @@ const TextField = React.memo<TextFieldProps>(props => {
         value={value}
         error={error}
         disabled={disabled}
-        slotProps={mergedSlotProps}
+        InputProps={{
+          startAdornment,
+          endAdornment,
+        }}
+        sx={{
+          // Hide the sacred hieroglyph when there's an endAdornment
+          ...(sacredtheme &&
+            endAdornment && {
+              '& .MuiOutlinedInput-root::before': {
+                display: 'none !important',
+              },
+            }),
+        }}
         fullWidth
         variant="outlined"
         hasvalue={hasValue}
