@@ -56,6 +56,10 @@ import DateField, { DateFieldProps } from './components/Field/Date/DateField'
 import DateRangeComponent, {
   DateRangeProps,
 } from './components/Field/Date/DateRange'
+import TimeRangeComponent, {
+  TimeRangeProps,
+  AMERICAN_TIMEZONES,
+} from './components/Field/Time/TimeRange'
 import CreditCardExpiration, {
   CreditCardExpirationProps,
 } from './components/Field/Date/CreditCardExpiration'
@@ -203,6 +207,8 @@ export { Checkbox }
 // New named exports
 export { DateField }
 export { DateRangeComponent as DateRange }
+export { TimeRangeComponent as TimeRange }
+export { AMERICAN_TIMEZONES }
 export { CreditCardExpiration }
 export { Dropdown }
 export { IncrementNumberField }
@@ -239,6 +245,7 @@ export type { CVVProps }
 export type { CreditCardNumberProps }
 export type { CardType }
 export type { DateRangeProps }
+export type { TimeRangeProps }
 export type { CreditCardExpirationProps }
 export type { PercentageFieldProps }
 /* -------------------------------------------------------------------------- */
