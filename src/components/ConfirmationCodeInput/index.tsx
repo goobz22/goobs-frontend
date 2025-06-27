@@ -136,43 +136,43 @@ export interface ConfirmationCodeInputsProps {
 }
 
 // Custom styled input for verification code digits
-const CodeInput = styled('input')<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    width: '48px',
-    height: '56px',
-    padding: '0',
-    textAlign: 'center',
-    fontSize: '20px',
-    fontWeight: sacredtheme ? 'bold' : 'normal',
-    color: sacredtheme ? '#FFD700' : 'black',
-    backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-    border: sacredtheme
-      ? `2px solid ${alpha('#FFD700', 0.5)}`
-      : '1px solid black',
-    borderRadius: '4px',
-    outline: 'none',
-    position: 'relative',
-    transition: 'all 0.3s ease',
+const CodeInput = styled('input', {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  width: '48px',
+  height: '56px',
+  padding: '0',
+  textAlign: 'center',
+  fontSize: '20px',
+  fontWeight: sacredtheme ? 'bold' : 'normal',
+  color: sacredtheme ? '#FFD700' : 'black',
+  backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+  border: sacredtheme
+    ? `2px solid ${alpha('#FFD700', 0.5)}`
+    : '1px solid black',
+  borderRadius: '4px',
+  outline: 'none',
+  position: 'relative',
+  transition: 'all 0.3s ease',
+  ...(sacredtheme && {
+    fontFamily: 'monospace',
+    letterSpacing: '2px',
+    textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+    animation: `${sacredInputGlow} 4s ease-in-out infinite`,
+  }),
+  '&:focus': {
+    borderColor: sacredtheme ? '#FFD700' : 'black',
+    borderWidth: '2px',
     ...(sacredtheme && {
-      fontFamily: 'monospace',
-      letterSpacing: '2px',
-      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-      animation: `${sacredInputGlow} 4s ease-in-out infinite`,
+      boxShadow:
+        '0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3)',
+      transform: 'scale(1.05)',
     }),
-    '&:focus': {
-      borderColor: sacredtheme ? '#FFD700' : 'black',
-      borderWidth: '2px',
-      ...(sacredtheme && {
-        boxShadow:
-          '0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3)',
-        transform: 'scale(1.05)',
-      }),
-    },
-    '&::placeholder': {
-      color: sacredtheme ? alpha('#FFD700', 0.3) : undefined,
-    },
-  })
-)
+  },
+  '&::placeholder': {
+    color: sacredtheme ? alpha('#FFD700', 0.3) : undefined,
+  },
+}))
 
 const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,

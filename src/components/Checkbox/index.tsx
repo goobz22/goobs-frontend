@@ -95,138 +95,136 @@ export interface CheckboxProps {
 }
 
 // Create a styled version of MUI Checkbox with our custom styles
-const StyledCheckbox = styled(Checkbox)<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    padding: '8px',
-    position: 'relative',
+const StyledCheckbox = styled(Checkbox, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  padding: '8px',
+  position: 'relative',
+  '& .MuiSvgIcon-root': {
+    fontSize: '24px',
+  },
+
+  // Style for unchecked state
+  '&:not(.Mui-checked):not(.Mui-indeterminate):not(.Mui-disabled)': {
     '& .MuiSvgIcon-root': {
-      fontSize: '24px',
-    },
-
-    // Style for unchecked state
-    '&:not(.Mui-checked):not(.Mui-indeterminate):not(.Mui-disabled)': {
-      '& .MuiSvgIcon-root': {
-        color: 'transparent',
-        backgroundColor: sacredtheme
-          ? alpha('#000000', 0.8)
-          : palette.grey.light,
-        border: `2px solid ${sacredtheme ? alpha('#FFD700', 0.6) : palette.marine.main}`,
-        borderRadius: '3px',
-        transition: 'all 0.3s ease',
-        ...(sacredtheme && {
-          animation: `${sacredBorderGlow} 3s ease-in-out infinite`,
-        }),
-      },
-    },
-
-    // Checked state
-    '&.Mui-checked .MuiSvgIcon-root': {
-      color: sacredtheme ? '#FFD700' : palette.marine.main,
-      backgroundColor: sacredtheme ? alpha('#000000', 0.9) : 'transparent',
-      border: sacredtheme ? `2px solid #FFD700` : 'none',
-      borderRadius: sacredtheme ? '3px' : '0',
-      ...(sacredtheme && {
-        animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
-        filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-      }),
-    },
-
-    // Checked animation
-    '&.Mui-checked': {
-      ...(sacredtheme && {
-        '& .MuiSvgIcon-root path': {
-          animation: `${sacredCheckAppear} 0.4s ease-out`,
-        },
-      }),
-    },
-
-    // Indeterminate state
-    '&.Mui-indeterminate .MuiSvgIcon-root': {
-      color: sacredtheme ? '#FFD700' : palette.marine.main,
-      backgroundColor: sacredtheme ? alpha('#000000', 0.9) : 'transparent',
-      border: sacredtheme ? `2px solid #FFD700` : 'none',
-      borderRadius: sacredtheme ? '3px' : '0',
-      ...(sacredtheme && {
-        animation: `${sacredGlowPulse} 1.5s ease-in-out infinite`,
-        filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-      }),
-    },
-
-    // Disabled state
-    '&.Mui-disabled .MuiSvgIcon-root': {
-      color: sacredtheme ? alpha('#FFD700', 0.2) : palette.grey.main,
-      backgroundColor: sacredtheme ? alpha('#000000', 0.6) : 'transparent',
-      border: `2px solid ${sacredtheme ? alpha('#FFD700', 0.2) : palette.grey.main}`,
+      color: 'transparent',
+      backgroundColor: sacredtheme ? alpha('#000000', 0.8) : palette.grey.light,
+      border: `2px solid ${sacredtheme ? alpha('#FFD700', 0.6) : palette.marine.main}`,
       borderRadius: '3px',
-    },
-
-    // Hover state
-    '&:hover': {
-      backgroundColor: sacredtheme
-        ? alpha('#FFD700', 0.1)
-        : `${palette.marine.light}33`,
+      transition: 'all 0.3s ease',
       ...(sacredtheme && {
-        '& .MuiSvgIcon-root': {
-          borderColor: '#FFD700',
-          transform: 'scale(1.1)',
-        },
+        animation: `${sacredBorderGlow} 3s ease-in-out infinite`,
       }),
     },
+  },
 
-    // Sacred decorative elements
+  // Checked state
+  '&.Mui-checked .MuiSvgIcon-root': {
+    color: sacredtheme ? '#FFD700' : palette.marine.main,
+    backgroundColor: sacredtheme ? alpha('#000000', 0.9) : 'transparent',
+    border: sacredtheme ? `2px solid #FFD700` : 'none',
+    borderRadius: sacredtheme ? '3px' : '0',
     ...(sacredtheme && {
-      '&::before': {
-        content: `"${SACRED_GLYPHS[11]}"`,
-        position: 'absolute',
-        left: '-20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: alpha('#FFD700', 0.3),
-        fontSize: '12px',
-        animation: `${floatGlyph} 3s ease-in-out infinite`,
-      },
-      '&::after': {
-        content: `"${SACRED_GLYPHS[15]}"`,
-        position: 'absolute',
-        right: '-20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: alpha('#FFD700', 0.3),
-        fontSize: '12px',
-        animation: `${floatGlyph} 3s ease-in-out infinite 1.5s`,
+      animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
+      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
+    }),
+  },
+
+  // Checked animation
+  '&.Mui-checked': {
+    ...(sacredtheme && {
+      '& .MuiSvgIcon-root path': {
+        animation: `${sacredCheckAppear} 0.4s ease-out`,
       },
     }),
-  })
-)
+  },
+
+  // Indeterminate state
+  '&.Mui-indeterminate .MuiSvgIcon-root': {
+    color: sacredtheme ? '#FFD700' : palette.marine.main,
+    backgroundColor: sacredtheme ? alpha('#000000', 0.9) : 'transparent',
+    border: sacredtheme ? `2px solid #FFD700` : 'none',
+    borderRadius: sacredtheme ? '3px' : '0',
+    ...(sacredtheme && {
+      animation: `${sacredGlowPulse} 1.5s ease-in-out infinite`,
+      filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+    }),
+  },
+
+  // Disabled state
+  '&.Mui-disabled .MuiSvgIcon-root': {
+    color: sacredtheme ? alpha('#FFD700', 0.2) : palette.grey.main,
+    backgroundColor: sacredtheme ? alpha('#000000', 0.6) : 'transparent',
+    border: `2px solid ${sacredtheme ? alpha('#FFD700', 0.2) : palette.grey.main}`,
+    borderRadius: '3px',
+  },
+
+  // Hover state
+  '&:hover': {
+    backgroundColor: sacredtheme
+      ? alpha('#FFD700', 0.1)
+      : `${palette.marine.light}33`,
+    ...(sacredtheme && {
+      '& .MuiSvgIcon-root': {
+        borderColor: '#FFD700',
+        transform: 'scale(1.1)',
+      },
+    }),
+  },
+
+  // Sacred decorative elements
+  ...(sacredtheme && {
+    '&::before': {
+      content: `"${SACRED_GLYPHS[11]}"`,
+      position: 'absolute',
+      left: '-20px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: alpha('#FFD700', 0.3),
+      fontSize: '12px',
+      animation: `${floatGlyph} 3s ease-in-out infinite`,
+    },
+    '&::after': {
+      content: `"${SACRED_GLYPHS[15]}"`,
+      position: 'absolute',
+      right: '-20px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: alpha('#FFD700', 0.3),
+      fontSize: '12px',
+      animation: `${floatGlyph} 3s ease-in-out infinite 1.5s`,
+    },
+  }),
+}))
 
 // Sacred wrapper for additional effects
-const SacredCheckboxWrapper = styled('div')<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    ...(sacredtheme && {
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        background: `radial-gradient(circle, ${alpha('#FFD700', 0.1)} 0%, transparent 70%)`,
-        opacity: 0,
-        transition: 'opacity 0.3s ease',
-        pointerEvents: 'none',
-      },
-      '&:hover::before': {
-        opacity: 1,
-      },
-    }),
-  })
-)
+const SacredCheckboxWrapper = styled('div', {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  ...(sacredtheme && {
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      background: `radial-gradient(circle, ${alpha('#FFD700', 0.1)} 0%, transparent 70%)`,
+      opacity: 0,
+      transition: 'opacity 0.3s ease',
+      pointerEvents: 'none',
+    },
+    '&:hover::before': {
+      opacity: 1,
+    },
+  }),
+}))
 
 function CustomCheckbox({
   onClick,

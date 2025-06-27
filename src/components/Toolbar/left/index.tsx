@@ -8,17 +8,17 @@ import CustomButton, { CustomButtonProps } from '../../Button'
 import { white, grey, black } from '../../../styles/palette'
 
 /** A simple vertical divider */
-const VerticalDivider = styled(Box)<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    borderLeft: sacredtheme
-      ? `2px solid ${alpha('#FFD700', 0.6)}`
-      : '2px solid black',
-    height: '20px',
-    ...(sacredtheme && {
-      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
-    }),
-  })
-)
+const VerticalDivider = styled(Box, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  borderLeft: sacredtheme
+    ? `2px solid ${alpha('#FFD700', 0.6)}`
+    : '2px solid black',
+  height: '20px',
+  ...(sacredtheme && {
+    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
+  }),
+}))
 
 export interface LeftProps {
   /** Array of button configs to render on the left side */

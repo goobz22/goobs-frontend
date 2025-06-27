@@ -204,92 +204,92 @@ const StrictAccordion = React.forwardRef<HTMLDivElement, MuiAccordionProps>(
 StrictAccordion.displayName = 'StrictAccordion'
 
 // Styled components with direct media queries
-const StyledAccordion = styled(StrictAccordion)<{ sacredtheme?: boolean }>(
-  ({ sacredtheme }) => ({
-    '&.MuiAccordion-root': {
-      '&:before': {
-        display: 'none',
-      },
-      // Improved styling for stacked accordions
-      marginBottom: '8px',
-      borderRadius: '8px',
-      boxShadow: sacredtheme
-        ? '0 0 15px rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3)'
-        : '0px 1px 3px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s ease',
-      overflow: 'hidden',
-      position: 'relative',
-      backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-      border: sacredtheme ? `1px solid ${alpha('#FFD700', 0.3)}` : 'none',
+const StyledAccordion = styled(StrictAccordion, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
+  '&.MuiAccordion-root': {
+    '&:before': {
+      display: 'none',
+    },
+    // Improved styling for stacked accordions
+    marginBottom: '8px',
+    borderRadius: '8px',
+    boxShadow: sacredtheme
+      ? '0 0 15px rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3)'
+      : '0px 1px 3px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s ease',
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
+    border: sacredtheme ? `1px solid ${alpha('#FFD700', 0.3)}` : 'none',
 
-      ...(sacredtheme && {
-        backgroundImage: `
+    ...(sacredtheme && {
+      backgroundImage: `
           linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
           radial-gradient(circle at top left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
         `,
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        opacity: 0,
+        background:
+          'linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
+        transition: 'opacity 0.3s ease',
+        pointerEvents: 'none',
+      },
+    }),
+
+    // Add subtle hover effect
+    '&:hover': {
+      boxShadow: sacredtheme
+        ? '0 0 25px rgba(255, 215, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)'
+        : '0px 3px 6px rgba(0, 0, 0, 0.15)',
+      transform: 'translateY(-1px)',
+      ...(sacredtheme && {
+        borderColor: alpha('#FFD700', 0.5),
         '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          opacity: 0,
-          background:
-            'linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-          transition: 'opacity 0.3s ease',
-          pointerEvents: 'none',
+          opacity: 1,
         },
       }),
-
-      // Add subtle hover effect
-      '&:hover': {
-        boxShadow: sacredtheme
-          ? '0 0 25px rgba(255, 215, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)'
-          : '0px 3px 6px rgba(0, 0, 0, 0.15)',
-        transform: 'translateY(-1px)',
-        ...(sacredtheme && {
-          borderColor: alpha('#FFD700', 0.5),
-          '&::before': {
-            opacity: 1,
-          },
-        }),
-      },
-
-      // Mobile styles
-      '@media (max-width: 600px)': {
-        borderRadius: '6px',
-        boxShadow: sacredtheme
-          ? '0 0 10px rgba(255, 215, 0, 0.2)'
-          : '0px 1px 3px rgba(0, 0, 0, 0.1)',
-      },
-
-      // Apply different styling to expanded accordion
-      '&.accordion-expanded': {
-        boxShadow: sacredtheme
-          ? '0 0 30px rgba(255, 215, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.5)'
-          : '0px 3px 8px rgba(0, 0, 0, 0.12)',
-        backgroundColor: sacredtheme ? '#0a0a0a' : '#fafafa',
-        ...(sacredtheme && {
-          borderColor: '#FFD700',
-          '&::before': {
-            opacity: 1,
-            animation: `${sacredShimmer} 3s ease-in-out infinite`,
-          },
-        }),
-      },
     },
-    '&.Mui-disabled': {
-      backgroundColor: sacredtheme ? alpha('#000000', 0.8) : '#f8f8f8',
-      opacity: sacredtheme ? 0.6 : 0.8,
-      // Override Material UI's disabled styles
-      pointerEvents: 'auto !important',
+
+    // Mobile styles
+    '@media (max-width: 600px)': {
+      borderRadius: '6px',
+      boxShadow: sacredtheme
+        ? '0 0 10px rgba(255, 215, 0, 0.2)'
+        : '0px 1px 3px rgba(0, 0, 0, 0.1)',
+    },
+
+    // Apply different styling to expanded accordion
+    '&.accordion-expanded': {
+      boxShadow: sacredtheme
+        ? '0 0 30px rgba(255, 215, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.5)'
+        : '0px 3px 8px rgba(0, 0, 0, 0.12)',
+      backgroundColor: sacredtheme ? '#0a0a0a' : '#fafafa',
       ...(sacredtheme && {
-        borderColor: alpha('#FFD700', 0.1),
+        borderColor: '#FFD700',
+        '&::before': {
+          opacity: 1,
+          animation: `${sacredShimmer} 3s ease-in-out infinite`,
+        },
       }),
     },
-  })
-)
+  },
+  '&.Mui-disabled': {
+    backgroundColor: sacredtheme ? alpha('#000000', 0.8) : '#f8f8f8',
+    opacity: sacredtheme ? 0.6 : 0.8,
+    // Override Material UI's disabled styles
+    pointerEvents: 'auto !important',
+    ...(sacredtheme && {
+      borderColor: alpha('#FFD700', 0.1),
+    }),
+  },
+}))
 
 // Wrapper for disabled summary to ensure it's testable
 const DisabledSummaryWrapper = styled('div')({
@@ -302,7 +302,9 @@ const DisabledSummaryWrapper = styled('div')({
   },
 })
 
-const StyledAccordionSummary = styled(MuiAccordionSummary)<{
+const StyledAccordionSummary = styled(MuiAccordionSummary, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{
   sacredtheme?: boolean
 }>(({ sacredtheme }) => ({
   fontSize: '20px',
@@ -402,7 +404,9 @@ const StyledAccordionSummary = styled(MuiAccordionSummary)<{
   },
 }))
 
-const StyledAccordionDetails = styled(MuiAccordionDetails)<{
+const StyledAccordionDetails = styled(MuiAccordionDetails, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{
   sacredtheme?: boolean
 }>(({ sacredtheme }) => ({
   padding: '16px',

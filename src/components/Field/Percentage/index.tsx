@@ -41,26 +41,26 @@ export interface PercentageFieldProps extends Omit<TextFieldProps, 'onChange'> {
   sacredtheme?: boolean
 }
 
-const StyledIconButton = styled(IconButton)<{ sacredtheme?: boolean }>(
-  ({ theme, sacredtheme }) => ({
-    padding: 0,
-    width: '16px',
-    height: '16px',
-    minWidth: '16px',
-    minHeight: '16px',
-    borderRadius: '2px',
-    transition: 'all 0.3s ease',
-    color: sacredtheme ? '#FFD700' : 'inherit',
-    '&:hover': {
-      backgroundColor: sacredtheme
-        ? alpha('#FFD700', 0.1)
-        : theme.palette.grey[200],
-      ...(sacredtheme && {
-        animation: `${sacredGlow} 1s ease-in-out infinite`,
-      }),
-    },
-  })
-)
+const StyledIconButton = styled(IconButton, {
+  shouldForwardProp: prop => prop !== 'sacredtheme',
+})<{ sacredtheme?: boolean }>(({ theme, sacredtheme }) => ({
+  padding: 0,
+  width: '16px',
+  height: '16px',
+  minWidth: '16px',
+  minHeight: '16px',
+  borderRadius: '2px',
+  transition: 'all 0.3s ease',
+  color: sacredtheme ? '#FFD700' : 'inherit',
+  '&:hover': {
+    backgroundColor: sacredtheme
+      ? alpha('#FFD700', 0.1)
+      : theme.palette.grey[200],
+    ...(sacredtheme && {
+      animation: `${sacredGlow} 1s ease-in-out infinite`,
+    }),
+  },
+}))
 
 const ArrowIcon = styled(Box)({
   display: 'flex',

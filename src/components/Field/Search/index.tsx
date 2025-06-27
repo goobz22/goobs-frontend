@@ -50,7 +50,12 @@ const StyledFormControl = styled(FormControl)({
   justifyContent: 'flex-end',
 })
 
-const StyledOutlinedInput = styled(OutlinedInput)<{
+const StyledOutlinedInput = styled(OutlinedInput, {
+  shouldForwardProp: prop =>
+    !['backgroundcolor', 'outlinecolor', 'fontcolor', 'sacredtheme'].includes(
+      prop as string
+    ),
+})<{
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
@@ -117,7 +122,16 @@ const StyledOutlinedInput = styled(OutlinedInput)<{
   },
 }))
 
-const StyledInputLabel = styled(InputLabel)<{
+const StyledInputLabel = styled(InputLabel, {
+  shouldForwardProp: prop =>
+    ![
+      'fontcolor',
+      'shrunkfontcolor',
+      'unshrunkfontcolor',
+      'shrunklabelposition',
+      'sacredtheme',
+    ].includes(prop as string),
+})<{
   fontcolor?: string
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
