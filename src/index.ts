@@ -108,6 +108,8 @@ import type {
   ColumnDef,
   RowData,
   TableProps,
+  DataGridFilter,
+  MetricCardData,
 } from './components/DataGrid/types'
 
 // Colors
@@ -265,6 +267,8 @@ export type { CustomDialogProps }
 export type { DatagridProps }
 export type { ColumnDef, RowData }
 export type { TableProps }
+export type { DataGridFilter }
+export type { MetricCardData }
 export type { MultiSelectChipProps }
 export type { DateFieldProps }
 export type { DropdownProps }
