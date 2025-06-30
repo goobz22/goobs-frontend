@@ -16,7 +16,7 @@ import Rows from './Rows'
 
 // Replace "any" with "RowData" to fix "Unexpected any" error
 export function getRowId(row: RowData): string {
-  return String(row._id ?? row.id ?? '')
+  return String(row.id ?? row._id ?? '')
 }
 
 function Table({

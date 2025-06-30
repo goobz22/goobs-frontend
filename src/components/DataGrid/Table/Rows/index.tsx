@@ -1254,6 +1254,16 @@ const Rows: React.FC<RowsProps> = ({
             )
             cellDisplayValue = element
             cellValueStr = formatted
+          } else if (typeof effectiveColumn?.renderCell === 'function') {
+            const cellParams = {
+              row,
+              value: row[effectiveColumnField],
+              field: effectiveColumnField,
+              rowIndex: rows.indexOf(row),
+              columnIndex: 0,
+            }
+            cellDisplayValue = effectiveColumn.renderCell(cellParams)
+            cellValueStr = safeString(cellDisplayValue)
           } else {
             const rawValue = safeString(row[effectiveColumnField])
             cellDisplayValue = rawValue || 'No data'
