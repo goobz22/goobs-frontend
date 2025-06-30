@@ -178,161 +178,162 @@ function ManageRow({
           sx={{ '& > div:not(:last-child)': { marginRight: '2px' } }}
         >
           {/* If exactly 1 item selected, show Manage / Show / Duplicate */}
-          {selectedRows.length === 1 && (
-            <Box
-              display="flex"
-              flexDirection="row"
-              alignItems="center"
-              sx={{
-                borderRight: sacredtheme
-                  ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                  : '1px solid #e0e0e0',
-                paddingRight: '8px',
-                marginRight: '8px',
-              }}
-            >
-              {onManage && (
-                <Box
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('manage')
-                  }}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  sx={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: sacredtheme
-                        ? alpha(egyptianStyles.goldColor, 0.1)
-                        : 'rgba(0, 0, 0, 0.04)',
-                    },
-                    borderRadius: '4px',
-                    transition: 'background-color 0.2s',
-                    userSelect: 'none',
-                  }}
-                >
+          {selectedRows.length === 1 &&
+            (onManage || onShow || (onDuplicate && !isMobile)) && (
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                sx={{
+                  borderRight: sacredtheme
+                    ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
+                    : '1px solid #e0e0e0',
+                  paddingRight: '8px',
+                  marginRight: '8px',
+                }}
+              >
+                {onManage && (
                   <Box
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleActionSelection('manage')
+                    }}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      padding: '8px',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: sacredtheme
+                          ? alpha(egyptianStyles.goldColor, 0.1)
+                          : 'rgba(0, 0, 0, 0.04)',
+                      },
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s',
+                      userSelect: 'none',
                     }}
                   >
-                    <EditIcon />
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text="Manage"
-                      fontcolor={
-                        sacredtheme ? egyptianStyles.goldColor : undefined
-                      }
-                      sx={
-                        sacredtheme
-                          ? { fontFamily: '"Crimson Text", serif' }
-                          : {}
-                      }
-                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      }}
+                    >
+                      <EditIcon />
+                      <Typography
+                        fontvariant="merriparagraph"
+                        text="Manage"
+                        fontcolor={
+                          sacredtheme ? egyptianStyles.goldColor : undefined
+                        }
+                        sx={
+                          sacredtheme
+                            ? { fontFamily: '"Crimson Text", serif' }
+                            : {}
+                        }
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
 
-              {onShow && (
-                <Box
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('show')
-                  }}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  sx={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: sacredtheme
-                        ? alpha(egyptianStyles.goldColor, 0.1)
-                        : 'rgba(0, 0, 0, 0.04)',
-                    },
-                    borderRadius: '4px',
-                    transition: 'background-color 0.2s',
-                    userSelect: 'none',
-                  }}
-                >
+                {onShow && (
                   <Box
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleActionSelection('show')
+                    }}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      padding: '8px',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: sacredtheme
+                          ? alpha(egyptianStyles.goldColor, 0.1)
+                          : 'rgba(0, 0, 0, 0.04)',
+                      },
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s',
+                      userSelect: 'none',
                     }}
                   >
-                    <VisibilityIcon />
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text="Show"
-                      fontcolor={
-                        sacredtheme ? egyptianStyles.goldColor : undefined
-                      }
-                      sx={
-                        sacredtheme
-                          ? { fontFamily: '"Crimson Text", serif' }
-                          : {}
-                      }
-                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      }}
+                    >
+                      <VisibilityIcon />
+                      <Typography
+                        fontvariant="merriparagraph"
+                        text="Show"
+                        fontcolor={
+                          sacredtheme ? egyptianStyles.goldColor : undefined
+                        }
+                        sx={
+                          sacredtheme
+                            ? { fontFamily: '"Crimson Text", serif' }
+                            : {}
+                        }
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
 
-              {onDuplicate && !isMobile && (
-                <Box
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('duplicate')
-                  }}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  sx={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: sacredtheme
-                        ? alpha(egyptianStyles.goldColor, 0.1)
-                        : 'rgba(0, 0, 0, 0.04)',
-                    },
-                    borderRadius: '4px',
-                    transition: 'background-color 0.2s',
-                    userSelect: 'none',
-                  }}
-                >
+                {onDuplicate && !isMobile && (
                   <Box
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleActionSelection('duplicate')
+                    }}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      padding: '8px',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: sacredtheme
+                          ? alpha(egyptianStyles.goldColor, 0.1)
+                          : 'rgba(0, 0, 0, 0.04)',
+                      },
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s',
+                      userSelect: 'none',
                     }}
                   >
-                    <DuplicateIcon />
-                    <Typography
-                      fontvariant="merriparagraph"
-                      text="Duplicate"
-                      fontcolor={
-                        sacredtheme ? egyptianStyles.goldColor : undefined
-                      }
-                      sx={
-                        sacredtheme
-                          ? { fontFamily: '"Crimson Text", serif' }
-                          : {}
-                      }
-                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: sacredtheme ? egyptianStyles.goldColor : 'black',
+                      }}
+                    >
+                      <DuplicateIcon />
+                      <Typography
+                        fontvariant="merriparagraph"
+                        text="Duplicate"
+                        fontcolor={
+                          sacredtheme ? egyptianStyles.goldColor : undefined
+                        }
+                        sx={
+                          sacredtheme
+                            ? { fontFamily: '"Crimson Text", serif' }
+                            : {}
+                        }
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              )}
-            </Box>
-          )}
+                )}
+              </Box>
+            )}
 
           {/* Delete and Export - shown for any number of selected rows */}
           <Box display="flex" flexDirection="row" alignItems="center">
