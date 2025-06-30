@@ -5,6 +5,8 @@ import { Box, Alert, alpha, keyframes, Typography } from '@mui/material'
 import CustomToolbar from '../Toolbar'
 import Table from './Table'
 import CustomFooter from './Footer'
+import FilterSection from './FilterSection'
+import MetricSection from './MetricSection'
 import { woad } from '../../styles/palette'
 import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
@@ -107,6 +109,8 @@ function DataGrid({
   onShow,
   onSelectionChange,
   showIdColumns = false,
+  filters,
+  metrics,
   sacredtheme = false,
 }: DatagridProps) {
   // Detect mobile devices for responsive behavior
@@ -130,7 +134,10 @@ function DataGrid({
   // Automatically calculate the number of rows that can fit in the container
   const autoPageSize = useAutoRowHeight(containerRef, {
     // Adjust these values based on your actual layout measurements
-    headerHeight: 150, // Toolbar + table header
+    headerHeight:
+      (filters && Array.isArray(filters) && filters.length > 0 ? 50 : 0) +
+      (metrics && Array.isArray(metrics) && metrics.length > 0 ? 120 : 0) +
+      150, // Base header + filters + metrics + toolbar
     footerHeight: 56, // Footer height
     rowHeight: 53, // Average row height
     minRows: 5, // Minimum number of rows to show
@@ -325,14 +332,24 @@ function DataGrid({
                       handleSelectionChange([])
                     }
                   : undefined,
-                onManage: handleManage,
-                onShow: onShow,
+                onManage: onManage ? handleManage : undefined,
+                onShow: onShow ? () => onShow(selectedRows) : undefined,
                 handleClose: handleManageRowClose,
               }
             : undefined
         }
         sacredtheme={sacredtheme}
       />
+
+      {/* Embedded Metric Section */}
+      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
+        <MetricSection metrics={metrics} sacredtheme={sacredtheme} />
+      )}
+
+      {/* Embedded Filter Section */}
+      {filters && Array.isArray(filters) && filters.length > 0 && (
+        <FilterSection filters={filters} sacredtheme={sacredtheme} />
+      )}
 
       <Box
         sx={{
@@ -341,6 +358,8 @@ function DataGrid({
           flexDirection: 'column',
           alignItems: 'flex-start',
           position: 'relative',
+          margin: 0,
+          padding: 0,
           ...(sacredtheme && {
             '&::before': {
               content: '""',
@@ -365,39 +384,6 @@ function DataGrid({
           }),
         }}
       >
-        {/* Sacred header glyphs */}
-        {sacredtheme && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 1.5,
-              mb: 1,
-              width: '100%',
-            }}
-          >
-            {[
-              SACRED_GLYPHS[13],
-              SACRED_GLYPHS[3],
-              SACRED_GLYPHS[6],
-              SACRED_GLYPHS[3],
-              SACRED_GLYPHS[13],
-            ].map((glyph, index) => (
-              <Typography
-                key={index}
-                sx={{
-                  color: alpha(egyptianStyles.goldColor, 0.6),
-                  fontSize: '1rem',
-                  animation: `${floatAnimation} ${3 + index * 0.5}s ease-in-out infinite`,
-                  animationDelay: `${index * 0.2}s`,
-                }}
-              >
-                {glyph}
-              </Typography>
-            ))}
-          </Box>
-        )}
-
         {/* Table component */}
         <Table
           columns={filteredColumns}
