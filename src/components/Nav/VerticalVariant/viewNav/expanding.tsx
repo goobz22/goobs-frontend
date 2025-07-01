@@ -123,9 +123,6 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
             },
           },
         }}
-        onClick={() => {
-          if (onClick) onClick()
-        }}
       >
         <Typography
           fontvariant="merriparagraph"

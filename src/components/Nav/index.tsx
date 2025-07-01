@@ -569,7 +569,7 @@ function Nav({
               key={item.title}
               title={item.title}
               expandedNavs={expandedViewNavs}
-              setExpandedNavs={setExpandedNavs}
+              setExpandedNavs={setExpandedViewNavs}
               onClick={
                 item.trigger !== 'route'
                   ? () => handleNavClick(item)
