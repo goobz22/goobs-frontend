@@ -41,7 +41,6 @@ const ExpandingViewNav: FC<ExpandingViewNavProps> = ({
   title,
   expandedNavs,
   setExpandedNavs,
-  onClick,
   children,
   activeAndHoverColor,
 }) => {
