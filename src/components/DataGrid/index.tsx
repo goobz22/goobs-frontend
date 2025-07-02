@@ -6,7 +6,6 @@ import CustomToolbar from '../Toolbar'
 import Table from './Table'
 import CustomFooter from './Footer'
 import FilterSection from './FilterSection'
-import MetricSection from './MetricSection'
 import { woad } from '../../styles/palette'
 import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
@@ -14,6 +13,35 @@ import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import { DatagridProps, RowData } from './types'
+
+// A simple but effective deep-equal function for props comparison using JSON.stringify.
+// This acts as a "circuit breaker" to prevent re-renders if props are deeply equal.
+function arePropsEqual(
+  prevProps: Readonly<DatagridProps>,
+  nextProps: Readonly<DatagridProps>
+) {
+  const keysToCompare: (keyof DatagridProps)[] = [
+    'columns',
+    'rows',
+    'buttons',
+    'dropdowns',
+    'searchbarProps',
+    'error',
+    'showIdColumns',
+    'filters',
+    'metrics',
+    'sacredtheme',
+  ]
+
+  for (const key of keysToCompare) {
+    if (JSON.stringify(prevProps[key]) !== JSON.stringify(nextProps[key])) {
+      return false
+    }
+  }
+
+  // Assume function props are stable and memoized by the parent.
+  return true
+}
 
 // Sacred geometry animations
 const glowPulse = keyframes`
@@ -113,8 +141,6 @@ function DataGrid({
   metrics,
   sacredtheme = false,
 }: DatagridProps) {
-  // Detect mobile devices for responsive behavior
-
   // Create ref for the container to measure available height
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -341,11 +367,6 @@ function DataGrid({
         sacredtheme={sacredtheme}
       />
 
-      {/* Embedded Metric Section */}
-      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-        <MetricSection metrics={metrics} sacredtheme={sacredtheme} />
-      )}
-
       {/* Embedded Filter Section */}
       {filters && Array.isArray(filters) && filters.length > 0 && (
         <FilterSection filters={filters} sacredtheme={sacredtheme} />
@@ -437,4 +458,4 @@ function DataGrid({
   )
 }
 
-export default DataGrid
+export default React.memo(DataGrid, arePropsEqual)

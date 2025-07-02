@@ -56,11 +56,15 @@ export interface TableProps {
 // New filter interface for embedded DataGrid filtering
 export interface DataGridFilter {
   label: string
-  value: string
-  options: DropdownOption[]
-  onChange: (value: { value: string } | null) => void
+  value: string | { start: Date | null; end: Date | null }
+  options?: DropdownOption[]
+  onChange:
+    | ((value: { value: string } | null) => void)
+    | ((value: { start: Date | null; end: Date | null }) => void)
+    | ((date: Date | null) => void)
   placeholder?: string
   width?: string
+  type?: 'dropdown' | 'date' | 'daterange'
 }
 
 export interface MetricCardData {

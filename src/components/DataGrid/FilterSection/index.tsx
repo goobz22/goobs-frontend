@@ -3,6 +3,8 @@
 import React from 'react'
 import { Box, Grid, useMediaQuery, keyframes, alpha } from '@mui/material'
 import SearchableDropdown from '../../Field/Dropdown/Searchable'
+import DateField from '../../Field/Date/DateField'
+import DateRange from '../../Field/Date/DateRange'
 import { DataGridFilter } from '../types'
 
 // Sacred theming animations
@@ -84,6 +86,70 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   const gridSize = getGridSize()
 
+  // Helper function to render the appropriate filter component
+  const renderFilterComponent = (filter: DataGridFilter) => {
+    // Check if this is a date range filter
+    if (filter.type === 'daterange') {
+      return (
+        <DateRange
+          startLabel="From Date"
+          endLabel="To Date"
+          value={filter.value as { start: Date | null; end: Date | null }}
+          onChange={
+            filter.onChange as (value: {
+              start: Date | null
+              end: Date | null
+            }) => void
+          }
+          sacredtheme={sacredtheme}
+          style={{
+            marginBottom: '8px',
+            width: filter.width || '100%',
+          }}
+        />
+      )
+    }
+
+    // Check if this is a date filter
+    if (filter.type === 'date') {
+      return (
+        <DateField
+          label={filter.label}
+          value={
+            (filter.value as string) ? new Date(filter.value as string) : null
+          }
+          onChange={filter.onChange as (date: Date | null) => void}
+          placeholder={filter.placeholder}
+          sacredtheme={sacredtheme}
+          disableFutureDateValidation={true}
+          style={{
+            marginBottom: '8px',
+            width: filter.width || '100%',
+          }}
+        />
+      )
+    }
+
+    // Default to SearchableDropdown for regular filters
+    return (
+      <SearchableDropdown
+        label={filter.label}
+        options={filter.options || []}
+        defaultValue={filter.value === 'all' ? '' : (filter.value as string)}
+        onChange={filter.onChange as (value: { value: string } | null) => void}
+        placeholder={filter.placeholder}
+        width={filter.width || '100%'}
+        variant="simple"
+        sacredtheme={sacredtheme}
+        sacredTitle={sacredtheme ? 'Divine Filtering' : ''}
+        sacredSubtitle={sacredtheme ? 'Channel cosmic data streams' : ''}
+        style={{
+          marginBottom: '8px',
+        }}
+      />
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -148,23 +214,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         {filters.map((filter, index) => (
           <Grid
             key={`${filter.label}-${index}`}
-            size={{ xs: isMobile ? 12 : gridSize }}
+            size={{
+              xs: isMobile ? 12 : filter.type === 'daterange' ? 6 : gridSize,
+            }}
           >
-            <SearchableDropdown
-              label={filter.label}
-              options={filter.options}
-              defaultValue={filter.value === 'all' ? '' : filter.value}
-              onChange={filter.onChange}
-              placeholder={filter.placeholder}
-              width={filter.width || '100%'}
-              variant="simple"
-              sacredtheme={sacredtheme}
-              sacredTitle={sacredtheme ? 'Divine Filtering' : ''}
-              sacredSubtitle={sacredtheme ? 'Channel cosmic data streams' : ''}
-              style={{
-                marginBottom: '8px',
-              }}
-            />
+            {renderFilterComponent(filter)}
           </Grid>
         ))}
       </Grid>

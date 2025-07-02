@@ -2,10 +2,18 @@
 
 'use client'
 import React, { useMemo } from 'react'
-import { Box, alpha, keyframes, Typography } from '@mui/material'
+import {
+  Box,
+  alpha,
+  keyframes,
+  Typography,
+  Alert,
+  LinearProgress,
+} from '@mui/material'
 // IMPORTANT: Change the import to point to the types folder
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
+import MetricSection from '../../DataGrid/MetricSection'
 
 // Sacred geometry animations
 const glowPulse = keyframes`
@@ -88,12 +96,22 @@ const SACRED_GLYPHS = [
   '𓊵', // Cartouche
 ]
 
+export interface AlertProps {
+  severity: 'error' | 'warning' | 'info' | 'success'
+  message: string
+  onClose?: () => void
+}
+
 export interface FormDataGridProps {
   title: string
   description: string
   datagrid: DatagridProps
   /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
+  /** Show loading state */
+  isLoading?: boolean
+  /** Show error or other alert */
+  alert?: AlertProps
 }
 
 function FormDataGrid({
@@ -101,7 +119,12 @@ function FormDataGrid({
   description,
   datagrid,
   sacredtheme = true,
+  isLoading = false,
+  alert,
 }: FormDataGridProps) {
+  // Extract metrics from datagrid props
+  const { metrics, ...dataGridPropsWithoutMetrics } = datagrid
+
   const containerStyles = useMemo(() => {
     if (!sacredtheme) {
       return {
@@ -198,6 +221,104 @@ function FormDataGrid({
       marginBottom: 2,
     }
   }, [sacredtheme])
+
+  // Early return for loading state
+  if (isLoading) {
+    return (
+      <Box sx={containerStyles}>
+        {/* Top corner decorations */}
+        {sacredtheme && (
+          <>
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                color: alpha(egyptianStyles.goldColor, 0.3),
+                fontSize: '18px',
+                animation: `${floatAnimation} 5s ease-in-out infinite`,
+                zIndex: 1,
+              }}
+            >
+              {SACRED_GLYPHS[10]}
+            </Box>
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                color: alpha(egyptianStyles.goldColor, 0.3),
+                fontSize: '18px',
+                animation: `${floatAnimation} 5s ease-in-out infinite reverse`,
+                zIndex: 1,
+              }}
+            >
+              {SACRED_GLYPHS[11]}
+            </Box>
+          </>
+        )}
+
+        {/* Sacred glyphs decoration for header */}
+        {sacredtheme && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 1.5,
+              mb: 1,
+            }}
+          >
+            {[
+              SACRED_GLYPHS[13],
+              SACRED_GLYPHS[3],
+              SACRED_GLYPHS[23],
+              SACRED_GLYPHS[3],
+              SACRED_GLYPHS[13],
+            ].map((glyph, index) => (
+              <Typography
+                key={index}
+                sx={{
+                  color: alpha(egyptianStyles.goldColor, 0.6),
+                  fontSize: '1rem',
+                  animation: `${floatAnimation} ${3 + index * 0.5}s ease-in-out infinite`,
+                  animationDelay: `${index * 0.2}s`,
+                }}
+              >
+                {glyph}
+              </Typography>
+            ))}
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            marginTop: 1,
+            marginBottom: sacredtheme ? 3 : 1,
+            width: '100%',
+          }}
+        >
+          <Box sx={titleStyles}>{title}</Box>
+          <Box sx={descriptionStyles}>{description}</Box>
+        </Box>
+
+        {/* Loading Progress */}
+        <Box sx={{ mt: 3 }}>
+          <LinearProgress
+            sx={
+              sacredtheme
+                ? {
+                    '& .MuiLinearProgress-bar': {
+                      background: egyptianStyles.goldGradient,
+                    },
+                    backgroundColor: alpha(egyptianStyles.goldColor, 0.2),
+                  }
+                : {}
+            }
+          />
+        </Box>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={containerStyles}>
@@ -301,6 +422,73 @@ function FormDataGrid({
         )}
       </Box>
 
+      {/* Metric Section */}
+      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
+        <Box sx={{ mb: sacredtheme ? 3 : 2 }}>
+          <MetricSection metrics={metrics} sacredtheme={sacredtheme} />
+        </Box>
+      )}
+
+      {/* Alert Section - shown in normal state with data */}
+      {alert && !isLoading && (
+        <Box sx={{ mb: sacredtheme ? 3 : 2 }}>
+          <Alert
+            severity={alert.severity}
+            onClose={alert.onClose}
+            sx={
+              sacredtheme
+                ? {
+                    backgroundColor: alpha(
+                      alert.severity === 'error'
+                        ? '#EF4444'
+                        : alert.severity === 'warning'
+                          ? '#F59E0B'
+                          : alert.severity === 'info'
+                            ? '#3B82F6'
+                            : '#10B981',
+                      0.1
+                    ),
+                    color:
+                      alert.severity === 'error'
+                        ? '#EF4444'
+                        : alert.severity === 'warning'
+                          ? '#F59E0B'
+                          : alert.severity === 'info'
+                            ? '#3B82F6'
+                            : '#10B981',
+                    border: `1px solid ${alpha(
+                      alert.severity === 'error'
+                        ? '#EF4444'
+                        : alert.severity === 'warning'
+                          ? '#F59E0B'
+                          : alert.severity === 'info'
+                            ? '#3B82F6'
+                            : '#10B981',
+                      0.3
+                    )}`,
+                    '& .MuiAlert-icon': {
+                      color:
+                        alert.severity === 'error'
+                          ? '#EF4444'
+                          : alert.severity === 'warning'
+                            ? '#F59E0B'
+                            : alert.severity === 'info'
+                              ? '#3B82F6'
+                              : '#10B981',
+                    },
+                    '& .MuiAlert-message': {
+                      fontFamily: '"Crimson Text", serif',
+                      fontSize: '1rem',
+                    },
+                  }
+                : {}
+            }
+          >
+            {alert.message}
+          </Alert>
+        </Box>
+      )}
+
       {/* DataGrid wrapper with sacred styling */}
       <Box
         sx={
@@ -355,7 +543,7 @@ function FormDataGrid({
             : {}
         }
       >
-        <DataGrid {...datagrid} sacredtheme={sacredtheme} />
+        <DataGrid {...dataGridPropsWithoutMetrics} sacredtheme={sacredtheme} />
       </Box>
 
       {/* Bottom decoration */}
