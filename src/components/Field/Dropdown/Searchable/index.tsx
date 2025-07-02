@@ -403,6 +403,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Refresh formatted dates every minute for "minutes ago" style timestamps
   useEffect(() => {
+    if (variant !== 'complex') return
     const intervalId = setInterval(() => {
       if (localHistory.length > 0) {
         setLocalHistory(prev =>
@@ -415,10 +416,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }, 60000) // Update every minute
 
     return () => clearInterval(intervalId)
-  }, [localHistory.length])
+  }, [localHistory.length, variant])
 
   useEffect(() => {
     const defaultOption = options.find(option => option.value === defaultValue)
+
     if (defaultOption) {
       // Format display text based on value and available attributes
       let displayText = defaultOption.value
@@ -432,43 +434,33 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         defaultOption.attribute5 ||
         defaultOption.attribute6
       ) {
-        const contactInfo = []
+        const contactInfo = [
+          defaultOption.attribute1,
+          defaultOption.attribute2,
+          defaultOption.attribute3,
+          defaultOption.attribute4,
+          defaultOption.attribute5,
+          defaultOption.attribute6,
+        ].filter(Boolean)
 
-        // Add all available attributes to provide complete context
-        if (defaultOption.attribute1) {
-          contactInfo.push(`${defaultOption.attribute1}`)
-        }
-
-        if (defaultOption.attribute2) {
-          contactInfo.push(`${defaultOption.attribute2}`)
-        }
-
-        if (defaultOption.attribute3) {
-          contactInfo.push(`${defaultOption.attribute3}`)
-        }
-
-        if (defaultOption.attribute4) {
-          contactInfo.push(`${defaultOption.attribute4}`)
-        }
-
-        if (defaultOption.attribute5) {
-          contactInfo.push(`${defaultOption.attribute5}`)
-        }
-
-        if (defaultOption.attribute6) {
-          contactInfo.push(`${defaultOption.attribute6}`)
-        }
-
-        // If we have contact info to display alongside the value
         if (contactInfo.length > 0) {
           displayText = `${defaultOption.value} (${contactInfo.join(' | ')})`
         }
       }
 
-      setValue(defaultOption)
-      setInputValue(displayText)
+      // Circuit Breaker: Only update state if the derived value is different.
+      const isValueDifferent =
+        !value ||
+        typeof value !== 'object' ||
+        value.value !== defaultOption.value
+      const isInputValueDifferent = inputValue !== displayText
+
+      if (isValueDifferent || isInputValueDifferent) {
+        setValue(defaultOption)
+        setInputValue(displayText)
+      }
     }
-  }, [defaultValue, options])
+  }, [defaultValue, options, value, inputValue])
 
   const handleChange = (
     event: SyntheticEvent<Element, Event>,
