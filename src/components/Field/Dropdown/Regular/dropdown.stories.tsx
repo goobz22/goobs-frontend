@@ -1,8 +1,11 @@
 // src/components/Dropdown/dropdown.stories.tsx
 
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from '@storybook/test'
-import Dropdown from './index'
+import { within } from '@storybook/test'
+import { userEvent } from '@storybook/test'
+import { expect } from '@storybook/test'
+import Dropdown, { DropdownOption } from './index'
 
 /**
  * Setup story metadata
@@ -21,8 +24,12 @@ const meta: Meta<typeof Dropdown> = {
       control: 'select',
       options: ['onNotch', 'aboveNotch'],
     },
+    sacredtheme: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    error: { control: 'boolean' },
   },
   parameters: {
+    layout: 'centered',
     // Example: If you want to turn on the a11y addon's checks or
     // other custom test-runner settings for all stories, you can do so here.
     a11y: {
@@ -37,10 +44,15 @@ type Story = StoryObj<typeof Dropdown>
 /**
  * Reusable mock options
  */
-const sampleOptions = [
-  { value: 'option_1' },
-  { value: 'option_2', attribute1: 'Detail for #2' },
-  { value: 'option_3', attribute1: 'Detail for #3', attribute2: 'Secondary' },
+const sampleOptions: DropdownOption[] = [
+  { value: 'option_1', icon: '🚀' },
+  { value: 'option_2', attribute1: 'Detail for #2', icon: '✨' },
+  {
+    value: 'option_3',
+    attribute1: 'Detail for #3',
+    attribute2: 'Secondary',
+    icon: '🎉',
+  },
 ]
 
 /**
@@ -265,4 +277,129 @@ export const ComplexOptionsSelected: Story = {
     // Verify basic option is also visible
     await expect(canvas.getByText('Basic Option')).toBeInTheDocument()
   },
+}
+
+export const Premium: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: '#f3f4f6',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <Dropdown {...args} />
+    </div>
+  ),
+  args: {
+    label: 'Select an Option',
+    options: sampleOptions,
+    sacredtheme: false,
+    helperText: 'This is a helper text.',
+  },
+}
+
+export const Sacred: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: 'black',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <Dropdown {...args} />
+    </div>
+  ),
+  args: {
+    ...Premium.args,
+    sacredtheme: true,
+  },
+}
+
+const InteractiveDropdownDemo: React.FC = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const [value, setValue] = React.useState('option_1')
+
+  return (
+    <div
+      style={{
+        width: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+      }}
+    >
+      <div
+        style={{
+          padding: '1rem',
+          border: '1px solid #ccc',
+          borderRadius: '0.5rem',
+        }}
+      >
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '0.5rem',
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={error}
+              onChange={e => setError(e.target.checked)}
+            />{' '}
+            Error
+          </label>
+        </div>
+      </div>
+      <div
+        style={{
+          padding: '2rem',
+          borderRadius: '0.5rem',
+          backgroundColor: sacred ? 'black' : '#f3f4f6',
+        }}
+      >
+        <Dropdown
+          label="Interactive Dropdown"
+          options={sampleOptions}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          sacredtheme={sacred}
+          disabled={disabled}
+          error={error}
+          helperText={error ? 'There is an error' : 'Looking good'}
+        />
+      </div>
+    </div>
+  )
+}
+
+export const Interactive: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDropdownDemo />,
 }

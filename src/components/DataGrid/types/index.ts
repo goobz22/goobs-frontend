@@ -13,6 +13,14 @@ export interface ColumnDef {
   headerText?: string
   index?: number
   width?: number
+  // Column type for formatting
+  type?:
+    | 'currency'
+    | 'credit_card'
+    | 'expiration_date'
+    | 'account_number'
+    | 'routing_number'
+    | 'default'
   // Format the column values as USD currency
   formatCurrency?: boolean
   // Format the column values as masked credit card numbers

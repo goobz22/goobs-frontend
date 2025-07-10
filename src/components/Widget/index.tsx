@@ -1,343 +1,285 @@
 'use client'
 
-import React, { ReactNode } from 'react'
-import {
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  CardActions,
-  alpha,
-  keyframes,
-  Fade,
-} from '@mui/material'
-import Typography from '../Typography'
+import React, { useState, useEffect } from 'react'
+import { SACRED_GLYPHS } from '../../styles/sacredGlyphs'
 
-// Sacred theming constants
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
-
-const sacredFloat = keyframes`
-  0% { transform: translateY(0px) scale(1); opacity: 0.6; }
-  50% { transform: translateY(-3px) scale(1.05); opacity: 0.8; }
-  100% { transform: translateY(0px) scale(1); opacity: 0.6; }
-`
-
-const sacredGlowPulse = keyframes`
-  0% { 
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
-  }
-  50% { 
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.3);
-  }
-  100% { 
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
-  }
-`
-
-export interface WidgetProps {
-  /** The title of the widget */
-  title?: string
-  /** Optional icon to display in the header */
-  icon?: ReactNode
-  /** Widget variant for different styling */
-  variant?: 'standard' | 'highlighted' | 'temple'
-  /** Glow intensity for sacred theming */
-  glowIntensity?: 'low' | 'medium' | 'high'
-  /** Actions to display in the widget footer */
-  actions?: ReactNode
-  /** Corner glyphs for sacred theming */
-  cornerGlyphs?: string[]
-  /** Enable hieroglyphic decoration */
-  hieroglyphicDecoration?: boolean
-  /** Enable sacred theming */
+interface WidgetProps {
+  children: React.ReactNode
   sacredtheme?: boolean
-  /** Widget content */
-  children: ReactNode
-  /** Animation delay for entrance */
-  delay?: number
-  /** Full width */
-  fullWidth?: boolean
-  /** Custom height */
-  height?: string | number
-  /** Disable elevation */
-  flat?: boolean
+  outline?: boolean
+  disabled?: boolean
+}
+
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  widget: {
+    position: 'relative',
+    padding: '24px',
+    borderRadius: '12px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(229, 231, 235, 0.5)',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+  } as React.CSSProperties,
+
+  widgetNoOutline: {
+    border: 'none',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+  } as React.CSSProperties,
+
+  widgetHover: {
+    transform: 'translateY(-2px)',
+    boxShadow:
+      '0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08)',
+  } as React.CSSProperties,
+
+  widgetDisabled: {
+    backgroundColor: 'rgba(249, 250, 251, 0.5)',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+    transform: 'none',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+  } as React.CSSProperties,
+
+  content: {
+    position: 'relative',
+    zIndex: 1,
+  } as React.CSSProperties,
+
+  accent: {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    right: '0',
+    height: '3px',
+    background: 'linear-gradient(90deg, rgb(59, 130, 246), rgb(147, 197, 253))',
+    borderRadius: '12px 12px 0 0',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  widget: {
+    position: 'relative',
+    padding: '32px',
+    borderRadius: '16px',
+    transition: 'all 0.4s ease',
+    backgroundColor: 'rgba(10, 10, 10, 0.9)',
+    backdropFilter: 'blur(12px)',
+    border: '2px solid rgba(255, 215, 0, 0.4)',
+    boxShadow:
+      '0 0 30px rgba(255, 215, 0, 0.2), 0 0 60px rgba(255, 215, 0, 0.1)',
+    fontFamily: 'Cinzel, serif',
+    backgroundImage: `
+      radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
+    `,
+    overflow: 'hidden',
+  } as React.CSSProperties,
+
+  widgetNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+  } as React.CSSProperties,
+
+  widgetHover: {
+    transform: 'translateY(-4px) scale(1.02)',
+    borderColor: 'rgba(255, 215, 0, 0.8)',
+    boxShadow:
+      '0 0 50px rgba(255, 215, 0, 0.4), 0 0 100px rgba(255, 215, 0, 0.2)',
+    backgroundImage: `
+      radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.15) 0%, transparent 50%)
+    `,
+  } as React.CSSProperties,
+
+  widgetDisabled: {
+    backgroundColor: 'rgba(10, 10, 10, 0.6)',
+    borderColor: 'rgba(255, 215, 0, 0.2)',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+    transform: 'none',
+    boxShadow: 'none',
+  } as React.CSSProperties,
+
+  content: {
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+
+  glyphContainer: {
+    position: 'absolute',
+    inset: '0',
+    overflow: 'hidden',
+    borderRadius: '16px',
+    pointerEvents: 'none',
+    zIndex: 1,
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    color: 'rgba(255, 215, 0, 0.2)',
+    userSelect: 'none',
+    pointerEvents: 'none',
+    animation: 'sacredWidgetFloat 8s ease-in-out infinite',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    color: 'rgba(255, 215, 0, 0.4)',
+  } as React.CSSProperties,
+
+  statusIndicator: {
+    position: 'absolute',
+    bottom: '12px',
+    right: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    opacity: 0.6,
+    zIndex: 10,
+  } as React.CSSProperties,
+
+  statusDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 215, 0, 0.6)',
+    animation: 'sacredWidgetPulse 2s ease-in-out infinite',
+  } as React.CSSProperties,
+
+  statusText: {
+    fontSize: '10px',
+    color: 'rgba(255, 215, 0, 0.6)',
+    fontWeight: '500',
+  } as React.CSSProperties,
+
+  shimmer: {
+    position: 'absolute',
+    top: '0',
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background:
+      'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
+    animation: 'sacredWidgetShimmer 4s ease-in-out infinite',
+    zIndex: 2,
+  } as React.CSSProperties,
 }
 
 const Widget: React.FC<WidgetProps> = ({
-  title,
-  icon,
-  variant = 'standard',
-  glowIntensity = 'medium',
-  actions,
-  cornerGlyphs,
-  hieroglyphicDecoration = false,
-  sacredtheme = false,
   children,
-  delay = 0,
-  fullWidth = false,
-  height,
-  flat = false,
+  sacredtheme = false,
+  outline = true,
+  disabled = false,
 }) => {
-  // Generate random glyphs if not provided and sacred theme is enabled
-  const glyphs =
-    sacredtheme && hieroglyphicDecoration
-      ? cornerGlyphs || [
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
-        ]
-      : []
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyphPositions, setGlyphPositions] = useState<
+    Array<{
+      top: number
+      left: number
+      glyph: string
+      delay: number
+      size: number
+    }>
+  >([])
 
-  // Glow intensity levels
-  const glowLevels = {
-    low: {
-      borderOpacity: 0.3,
-      shadowOpacity: 0.2,
-      glowSize: '10px',
-    },
-    medium: {
-      borderOpacity: 0.5,
-      shadowOpacity: 0.3,
-      glowSize: '15px',
-    },
-    high: {
-      borderOpacity: 0.7,
-      shadowOpacity: 0.4,
-      glowSize: '20px',
-    },
-  }
+  // Generate random glyph positions for sacred theme
+  useEffect(() => {
+    if (sacredtheme) {
+      const positions = Array.from({ length: 8 }, () => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        glyph: SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
+        delay: Math.random() * 8,
+        size: Math.random() * 8 + 10,
+      }))
+      setGlyphPositions(positions)
+    }
+  }, [sacredtheme])
 
-  // Sacred color scheme
-  const sacredColors = {
-    gold: '#FFD700',
-    temple: '#0a0a0a',
-    obsidian: '#1a1a1a',
-  }
-
-  // Base styles
-  const baseStyles = sacredtheme
-    ? {
-        backgroundColor: alpha(sacredColors.temple, 0.95),
-        border: `2px solid ${alpha(sacredColors.gold, glowLevels[glowIntensity].borderOpacity)}`,
-        borderRadius: '12px',
-        color: sacredColors.gold,
-        backgroundImage:
-          variant === 'highlighted'
-            ? `linear-gradient(135deg, 
-          ${alpha(sacredColors.gold, 0.12)} 0%, 
-          ${alpha(sacredColors.temple, 0.95)} 30%,
-          ${alpha(sacredColors.gold, 0.08)} 70%,
-          ${alpha(sacredColors.temple, 0.97)} 100%
-        )`
-            : variant === 'temple'
-              ? `radial-gradient(circle at top right, ${alpha(sacredColors.gold, 0.07)} 0%, transparent 60%),
-           radial-gradient(circle at bottom left, ${alpha(sacredColors.gold, 0.05)} 0%, transparent 60%),
-           linear-gradient(135deg, 
-             ${alpha(sacredColors.gold, 0.03)} 0%, 
-             ${alpha(sacredColors.temple, 0.97)} 50%,
-             ${alpha(sacredColors.gold, 0.02)} 100%
-           )`
-              : `linear-gradient(135deg, 
-            ${alpha(sacredColors.gold, 0.05)} 0%, 
-            ${alpha(sacredColors.temple, 0.98)} 50%,
-            ${alpha(sacredColors.gold, 0.03)} 100%
-          )`,
-        boxShadow: `0 4px 20px ${alpha(sacredColors.gold, glowLevels[glowIntensity].shadowOpacity)}`,
-        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        '&:hover': {
-          transform: 'translateY(-5px)',
-          borderColor: alpha(
-            sacredColors.gold,
-            glowLevels[glowIntensity].borderOpacity + 0.2
-          ),
-          boxShadow: `0 15px 30px ${alpha('#000000', 0.6)}, 0 0 30px ${alpha(sacredColors.gold, glowLevels[glowIntensity].shadowOpacity + 0.15)}`,
-          animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
-        },
-        '&::before': hieroglyphicDecoration
-          ? {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              borderRadius: 'inherit',
-              background: `
-        conic-gradient(from 0deg at 50% 50%, 
-          ${alpha(sacredColors.gold, 0.1)} 0deg,
-          transparent 60deg,
-          ${alpha(sacredColors.gold, 0.05)} 120deg,
-          transparent 180deg,
-          ${alpha(sacredColors.gold, 0.1)} 240deg,
-          transparent 300deg,
-          ${alpha(sacredColors.gold, 0.05)} 360deg
-        )
-      `,
-              opacity: 0.3,
-              zIndex: 0,
-            }
-          : {},
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes sacredWidgetFloat {
+          0%, 100% { transform: translateY(0px) rotateZ(0deg); opacity: 0.2; }
+          25% { transform: translateY(-10px) rotateZ(2deg); opacity: 0.4; }
+          50% { transform: translateY(-5px) rotateZ(-1deg); opacity: 0.3; }
+          75% { transform: translateY(-8px) rotateZ(1deg); opacity: 0.4; }
+        }
+        @keyframes sacredWidgetPulse {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.2); }
+        }
+        @keyframes sacredWidgetShimmer {
+          0% { left: '-100%'; }
+          50% { left: '100%'; }
+          100% { left: '100%'; }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
       }
-    : {}
+    }
+  }, [sacredtheme])
 
-  const cardContent = (
-    <Card
-      elevation={flat ? 0 : 3}
-      sx={{
-        position: 'relative',
-        overflow: 'visible',
-        width: fullWidth ? '100%' : 'auto',
-        height: height || 'auto',
-        ...baseStyles,
-      }}
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const widgetStyle = {
+    ...styles.widget,
+    ...(!outline && styles.widgetNoOutline),
+    ...(isHovered && !disabled && styles.widgetHover),
+    ...(disabled && styles.widgetDisabled),
+  }
+
+  return (
+    <div
+      style={widgetStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Sacred corner glyphs */}
-      {sacredtheme && hieroglyphicDecoration && glyphs.length >= 2 && (
+      {/* Premium theme accent */}
+      {!sacredtheme && outline && <div style={premiumStyles.accent} />}
+
+      {/* Sacred theme effects */}
+      {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              color: alpha(sacredColors.gold, 0.3),
-              fontSize: '18px',
-              animation: `${sacredFloat} 5s ease-in-out infinite`,
-              zIndex: 1,
-            }}
-          >
-            {glyphs[0]}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              color: alpha(sacredColors.gold, 0.3),
-              fontSize: '18px',
-              animation: `${sacredFloat} 6s ease-in-out infinite reverse`,
-              zIndex: 1,
-            }}
-          >
-            {glyphs[1]}
-          </Box>
+          <div style={sacredStyles.glyphContainer}>
+            {glyphPositions.map((pos, i) => (
+              <div
+                key={i}
+                style={{
+                  ...sacredStyles.glyph,
+                  ...(isHovered && sacredStyles.glyphVisible),
+                  top: `${pos.top}%`,
+                  left: `${pos.left}%`,
+                  fontSize: `${pos.size}px`,
+                  animationDelay: `${pos.delay}s`,
+                }}
+              >
+                {pos.glyph}
+              </div>
+            ))}
+          </div>
+
+          {isHovered && <div style={sacredStyles.shimmer} />}
+
+          <div style={sacredStyles.statusIndicator}>
+            <div style={sacredStyles.statusDot} />
+            <div style={sacredStyles.statusText}>Sacred Widget</div>
+          </div>
         </>
       )}
 
-      {/* Header */}
-      {(title || icon) && (
-        <CardHeader
-          avatar={
-            icon && (
-              <Box
-                sx={{
-                  color: sacredtheme ? sacredColors.gold : 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ...(sacredtheme && {
-                    filter: 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.6))',
-                    transition: 'all 0.3s ease',
-                  }),
-                }}
-              >
-                {icon}
-              </Box>
-            )
-          }
-          title={
-            title && (
-              <Typography
-                variant="h6"
-                sacredtheme={sacredtheme}
-                sx={{
-                  fontSize: '1.25rem',
-                  fontWeight: 600,
-                  ...(sacredtheme && {
-                    fontFamily: '"Cinzel", serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                  }),
-                }}
-              >
-                {title}
-              </Typography>
-            )
-          }
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            borderBottom:
-              title && actions
-                ? `1px solid ${alpha(sacredtheme ? sacredColors.gold : '#000', 0.1)}`
-                : 'none',
-          }}
-        />
-      )}
-
-      {/* Content */}
-      <CardContent
-        sx={{
-          position: 'relative',
-          zIndex: 1,
-          ...(sacredtheme && {
-            '& *': {
-              fontFamily: '"Cinzel", serif',
-            },
-          }),
-        }}
-      >
-        {children}
-      </CardContent>
-
-      {/* Actions */}
-      {actions && (
-        <CardActions
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            borderTop: `1px solid ${alpha(sacredtheme ? sacredColors.gold : '#000', 0.1)}`,
-            justifyContent: 'center',
-          }}
-        >
-          {actions}
-        </CardActions>
-      )}
-    </Card>
+      <div style={styles.content}>{children}</div>
+    </div>
   )
-
-  if (delay > 0) {
-    return (
-      <Fade in timeout={1000 + delay}>
-        <Box>{cardContent}</Box>
-      </Fade>
-    )
-  }
-
-  return cardContent
 }
 
 export default Widget
+export type { WidgetProps }

@@ -1,92 +1,12 @@
 'use client'
 
-import React, { JSX } from 'react'
-import { styled, keyframes, alpha } from '@mui/material/styles'
-import MuiStepper, { StepperProps } from '@mui/material/Stepper'
-import MuiStep, { StepProps } from '@mui/material/Step'
-import MuiStepLabel, { StepLabelProps } from '@mui/material/StepLabel'
-import CustomButton from '../Button'
-import StepConnector from '@mui/material/StepConnector'
-import {
-  Check,
-  CircleOutlined,
-  LockOutlined,
-  InfoOutlined,
-} from '@mui/icons-material'
-import {
-  Box,
-  Tooltip,
-  IconButton,
-  tooltipClasses,
-  TooltipProps,
-} from '@mui/material'
+import React, { JSX, useState } from 'react'
+import Check from '../Icons/Check'
+import CircleOutline from '../Icons/CircleOutline'
+import Lock from '../Icons/Lock'
+import InfoOutline from '../Icons/InfoOutline'
 
-// Sacred theming animations
-const glowPulse = keyframes`
-  0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-  50% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
-  100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0px); }
-`
-
-const StyledStepper = styled((props: StepperProps) => (
-  <MuiStepper {...props} />
-))({})
-
-const Step = styled((props: StepProps) => <MuiStep {...props} />)({})
-
-const StepLabel = styled((props: StepLabelProps) => (
-  <MuiStepLabel
-    {...props}
-    slots={{ stepIcon: props.slots?.stepIcon }}
-    sx={{
-      '.MuiStepLabel-labelContainer': {
-        display: 'flex',
-        alignItems: 'center',
-        width: '100%',
-        '.MuiStepLabel-label': {
-          marginLeft: '15px',
-          flex: 1,
-        },
-      },
-    }}
-  />
-))({})
-
-const BlackTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: 'black',
-    color: 'white',
-    fontSize: 14,
-  },
-  [`& .${tooltipClasses.arrow}`]: {
-    color: 'black',
-  },
-})
-
-const SacredTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: '#FFD700',
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: 500,
-    boxShadow: '0 0 15px rgba(255, 215, 0, 0.6)',
-  },
-  [`& .${tooltipClasses.arrow}`]: {
-    color: '#FFD700',
-  },
-})
-
-type CustomStepperProps = Omit<StepperProps, 'children'> & {
+type CustomStepperProps = {
   steps: {
     stepNumber: number
     label: string
@@ -95,184 +15,320 @@ type CustomStepperProps = Omit<StepperProps, 'children'> & {
     statusLink?: string
     description?: string
   }[]
-  activeStep: number
   sacredtheme?: boolean
+  orientation?: 'horizontal' | 'vertical'
+  alternativeLabel?: boolean
 }
+
+const premiumTooltipStyles = {
+  container: {
+    position: 'relative',
+    display: 'inline-block',
+  } as React.CSSProperties,
+  tooltip: {
+    position: 'absolute',
+    zIndex: 50,
+    padding: '4px 8px',
+    fontSize: '14px',
+    borderRadius: '4px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    whitespace: 'nowrap',
+    bottom: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    marginBottom: '8px',
+    backgroundColor: 'black',
+    color: 'white',
+  } as React.CSSProperties,
+  arrow: {
+    position: 'absolute',
+    top: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    border: '4px solid transparent',
+    borderTopColor: 'black',
+  } as React.CSSProperties,
+}
+
+const sacredTooltipStyles = {
+  ...premiumTooltipStyles,
+  tooltip: {
+    ...premiumTooltipStyles.tooltip,
+    backgroundColor: '#FFD700',
+    color: 'black',
+    fontWeight: 'bold',
+    boxShadow: '0 0 15px rgba(255, 215, 0, 0.6)',
+  } as React.CSSProperties,
+  arrow: {
+    ...premiumTooltipStyles.arrow,
+    borderTopColor: '#FFD700',
+  } as React.CSSProperties,
+}
+
+const Tooltip: React.FC<{
+  children: React.ReactNode
+  title: string
+  sacredtheme?: boolean
+}> = ({ children, title, sacredtheme }) => {
+  const [isVisible, setIsVisible] = useState(false)
+  const styles = sacredtheme ? sacredTooltipStyles : premiumTooltipStyles
+
+  return (
+    <div
+      style={styles.container}
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      {isVisible && (
+        <div style={styles.tooltip}>
+          {title}
+          <div style={styles.arrow} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    position: 'relative',
+    padding: '1rem',
+    ...(sacredtheme && {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      borderRadius: '0.5rem',
+      border: '1px solid rgba(255, 215, 0, 0.3)',
+    }),
+  } as React.CSSProperties,
+  sacredGlyph: {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    fontSize: '1.25rem',
+    color: 'rgba(255, 215, 0, 0.2)',
+    animation: 'glyph-rotate 10s linear infinite',
+  } as React.CSSProperties,
+  stepperContainer: {
+    display: 'flex',
+  } as React.CSSProperties,
+  stepContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  stepContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+  } as React.CSSProperties,
+  stepIconContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '2.5rem',
+    height: '2.5rem',
+    borderRadius: '9999px',
+    borderWidth: '2px',
+  } as React.CSSProperties,
+  stepButton: {
+    textAlign: 'left',
+    fontWeight: 500,
+    transition: 'all 0.3s ease',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black',
+  } as React.CSSProperties,
+  stepButtonHover: {
+    color: sacredtheme ? '#FFD700' : '#2563EB',
+    textShadow: sacredtheme ? '0 0 10px rgba(255, 215, 0, 0.5)' : 'none',
+  } as React.CSSProperties,
+  stepButtonDisabled: {
+    cursor: 'not-allowed',
+    opacity: 0.5,
+  } as React.CSSProperties,
+  infoButton: {
+    padding: '0.25rem',
+    borderRadius: '9999px',
+    transition: 'all 0.3s ease',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: sacredtheme ? '#FFD700' : 'black',
+  } as React.CSSProperties,
+  infoButtonHover: {
+    backgroundColor: sacredtheme
+      ? 'rgba(255, 215, 0, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)',
+  } as React.CSSProperties,
+  connector: {
+    flex: 1,
+    height: '2px',
+    margin: '0 1rem',
+    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#D1D5DB',
+  } as React.CSSProperties,
+  verticalConnector: {
+    width: '2px',
+    height: '2rem',
+    marginLeft: '1.25rem',
+    marginRight: '0.5rem',
+    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#D1D5DB',
+  } as React.CSSProperties,
+  icon: {
+    width: '1.5rem',
+    height: '1.5rem',
+    color: sacredtheme ? '#FFD700' : 'black',
+    animation: sacredtheme
+      ? 'sacred-icon-glow 1.5s infinite alternate'
+      : 'none',
+  } as React.CSSProperties,
+  inactiveIcon: {
+    width: '1.5rem',
+    height: '1.5rem',
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : 'black',
+    filter: sacredtheme
+      ? 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))'
+      : 'none',
+  } as React.CSSProperties,
+})
 
 function CustomStepper({
   steps,
-  activeStep,
   sacredtheme,
-  ...rest
+  orientation = 'horizontal',
 }: CustomStepperProps): JSX.Element {
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+  const styles = getStyles(sacredtheme)
+
   const getStepIcon = (
     status: 'completed' | 'active' | 'error' | 'inactive'
   ): JSX.Element => {
-    const iconColor = sacredtheme ? '#FFD700' : 'black'
-    const iconStyle = sacredtheme
-      ? {
-          animation: `${glowPulse} 2s ease-in-out infinite`,
-        }
-      : undefined
-
     switch (status) {
       case 'completed':
-        return <Check sx={{ color: iconColor, ...iconStyle }} />
+        return <Check style={styles.icon} />
       case 'error':
-        return <CircleOutlined sx={{ color: iconColor, ...iconStyle }} />
+        return <CircleOutline style={styles.icon} />
       case 'inactive':
-        return (
-          <LockOutlined
-            sx={{
-              color: sacredtheme ? alpha('#FFD700', 0.5) : 'black',
-              ...(sacredtheme && {
-                filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
-              }),
-            }}
-          />
-        )
+        return <Lock style={styles.inactiveIcon} />
       default:
-        return <CircleOutlined sx={{ color: iconColor, ...iconStyle }} />
+        return <CircleOutline style={styles.icon} />
     }
   }
 
   const getStepLink = (step: CustomStepperProps['steps'][0]): string => {
-    if (step.statusLink) {
-      return step.statusLink
-    }
-    return step.stepLink
+    return step.statusLink || step.stepLink
   }
 
   const isStepClickable = (step: CustomStepperProps['steps'][0]): boolean => {
     return step.status !== 'inactive'
   }
 
-  const TooltipComponent = sacredtheme ? SacredTooltip : BlackTooltip
+  const handleStepClick = (step: CustomStepperProps['steps'][0]) => {
+    if (isStepClickable(step)) {
+      window.location.href = getStepLink(step)
+    }
+  }
 
   return (
-    <Box
-      sx={
-        sacredtheme
-          ? {
-              position: 'relative',
-              padding: 2,
-              backgroundColor: alpha('#000000', 0.8),
-              borderRadius: 2,
-              border: `1px solid ${alpha('#FFD700', 0.3)}`,
-              backgroundImage: `
-        linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-        radial-gradient(circle at top left, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-      `,
-              '&::before': {
-                content: '"𓊻"',
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                fontSize: '20px',
-                color: alpha('#FFD700', 0.2),
-                animation: `rotate 25s linear infinite`,
-              },
-            }
-          : undefined
-      }
-    >
-      <StyledStepper
-        {...rest}
-        connector={
-          <StepConnector
-            sx={
-              sacredtheme
-                ? {
-                    '& .MuiStepConnector-line': {
-                      borderColor: alpha('#FFD700', 0.3),
-                      borderWidth: 2,
-                    },
-                  }
-                : undefined
-            }
-          />
-        }
+    <div style={styles.container}>
+      {sacredtheme && <div style={styles.sacredGlyph}>𓊻</div>}
+      <div
+        style={{
+          ...styles.stepperContainer,
+          flexDirection: orientation === 'vertical' ? 'column' : 'row',
+          gap: orientation === 'vertical' ? '1rem' : '0',
+        }}
       >
-        {steps.map(step => (
-          <Step key={step.label} active={step.stepNumber === activeStep}>
-            <StepLabel
-              slots={{ stepIcon: () => getStepIcon(step.status) }}
-              sx={
-                sacredtheme
-                  ? {
-                      '& .MuiStepLabel-label': {
-                        color: alpha('#FFD700', 0.9),
-                        fontWeight: 500,
-                        letterSpacing: '0.5px',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          color: '#FFD700',
-                          textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-                        },
-                      },
-                    }
-                  : undefined
-              }
+        {steps.map((step, index) => {
+          const isClickable = isStepClickable(step)
+          const isHovered = hoveredStep === step.stepNumber
+
+          const stepIconContainerStyle = {
+            ...styles.stepIconContainer,
+            ...(step.status === 'completed' && {
+              backgroundColor: sacredtheme
+                ? 'rgba(255, 215, 0, 0.2)'
+                : '#F3F4F6',
+              borderColor: sacredtheme ? '#FFD700' : 'black',
+            }),
+            ...(step.status === 'active' && {
+              backgroundColor: sacredtheme
+                ? 'rgba(255, 215, 0, 0.1)'
+                : '#EFF6FF',
+              borderColor: sacredtheme ? '#FFD700' : '#3B82F6',
+              animation: sacredtheme
+                ? 'sacred-glow-pulse 1.5s infinite alternate'
+                : 'none',
+            }),
+            ...(step.status === 'error' && {
+              backgroundColor: '#FEF2F2',
+              borderColor: '#EF4444',
+            }),
+            ...(step.status === 'inactive' && {
+              backgroundColor: sacredtheme ? 'rgba(0, 0, 0, 0.4)' : '#F9FAFB',
+              borderColor: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#D1D5DB',
+            }),
+          }
+
+          return (
+            <div
+              key={step.label}
+              style={{
+                ...styles.stepContainer,
+                flex: orientation === 'horizontal' ? 1 : 'none',
+                width: orientation === 'vertical' ? '100%' : 'auto',
+              }}
             >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  gap: 1,
-                }}
-              >
-                <CustomButton
-                  text={step.label}
-                  variant="text"
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                  fontlocation="left"
-                  href={isStepClickable(step) ? getStepLink(step) : undefined}
-                  sacredtheme={sacredtheme}
-                  sx={{
-                    padding: 0,
-                    minWidth: 0,
-                    flex: 1,
-                    justifyContent: 'flex-start',
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: sacredtheme
-                        ? alpha('#FFD700', 0.1)
-                        : 'transparent',
-                    },
+              <div style={styles.stepContent}>
+                <div style={stepIconContainerStyle}>
+                  {getStepIcon(step.status)}
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
                   }}
-                />
-                {step.description && (
-                  <TooltipComponent
-                    title={step.description}
-                    arrow
-                    placement="right"
+                >
+                  <button
+                    onClick={() => handleStepClick(step)}
+                    disabled={!isClickable}
+                    style={{
+                      ...styles.stepButton,
+                      ...(isHovered && isClickable && styles.stepButtonHover),
+                      ...(!isClickable && styles.stepButtonDisabled),
+                    }}
+                    onMouseEnter={() => setHoveredStep(step.stepNumber)}
+                    onMouseLeave={() => setHoveredStep(null)}
                   >
-                    <IconButton
-                      size="small"
-                      sx={{
-                        padding: 0,
-                        color: sacredtheme ? '#FFD700' : 'black',
-                        '&:hover': {
-                          backgroundColor: sacredtheme
-                            ? alpha('#FFD700', 0.1)
-                            : 'transparent',
-                        },
-                        ...(sacredtheme && {
-                          animation: `${floatAnimation} 2s ease-in-out infinite`,
-                        }),
-                      }}
-                    >
-                      <InfoOutlined fontSize="small" />
-                    </IconButton>
-                  </TooltipComponent>
-                )}
-              </Box>
-            </StepLabel>
-          </Step>
-        ))}
-      </StyledStepper>
-    </Box>
+                    {step.label}
+                  </button>
+
+                  {step.description && (
+                    <Tooltip title={step.description} sacredtheme={sacredtheme}>
+                      <button style={styles.infoButton}>
+                        <InfoOutline
+                          style={{ width: '1rem', height: '1rem' }}
+                        />
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
+
+              {index < steps.length - 1 && orientation === 'horizontal' && (
+                <div style={styles.connector} />
+              )}
+
+              {index < steps.length - 1 && orientation === 'vertical' && (
+                <div style={styles.verticalConnector} />
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

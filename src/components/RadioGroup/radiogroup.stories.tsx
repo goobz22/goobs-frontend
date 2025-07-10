@@ -1,98 +1,111 @@
-// src/components/RadioGroup/radiogroup.stories.tsx
+import React from 'react'
+import { Meta, StoryObj } from '@storybook/react'
+import RadioGroup from './index'
 
-import type { Meta, StoryObj } from '@storybook/react'
-import RadioGroup, { RadioOption } from './index'
-
-/**
- * Example options to be used across stories
- */
-const sampleOptions: RadioOption[] = [
-  { label: 'Option A' },
-  { label: 'Option B' },
-  { label: 'Option C' },
-]
-
-/**
- * Setup Storybook metadata
- */
 const meta: Meta<typeof RadioGroup> = {
   title: 'Components/RadioGroup',
   component: RadioGroup,
-  parameters: {
-    a11y: {
-      disable: false,
-    },
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    label: { control: 'text' },
   },
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
 }
-export default meta
 
+export default meta
 type Story = StoryObj<typeof RadioGroup>
 
-/**
- * 1) Basic usage
- */
-export const Basic: Story = {
+const premiumOptions = [
+  { label: 'Option 1' },
+  { label: 'Option 2' },
+  { label: 'Option 3' },
+]
+
+const sacredOptions = [
+  { label: 'Ankh of Life' },
+  { label: 'Scarab of Rebirth' },
+  { label: 'Eye of Horus' },
+]
+
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="p-8 bg-gray-50 rounded-xl">
+      <h3 className="text-xl font-bold text-gray-900 mb-6 font-inter">
+        Premium RadioGroup
+      </h3>
+      <RadioGroup {...args} />
+    </div>
+  ),
   args: {
-    name: 'basicExample',
-    labelText: 'Choose an Option',
-    options: sampleOptions,
+    name: 'premium-radio-group',
+    labelText: 'Choose an option',
+    options: premiumOptions,
+    defaultValue: 'Option 1',
+    sacredtheme: false,
   },
 }
 
-/**
- * 2) With a default selected value
- */
-export const WithDefaultValue: Story = {
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div className="p-8 bg-black/90 rounded-xl">
+      <h3 className="text-xl font-bold text-yellow-400 mb-6 font-cinzel animate-sacred-glow">
+        Sacred RadioGroup
+      </h3>
+      <RadioGroup {...args} />
+    </div>
+  ),
   args: {
-    name: 'defaultExample',
-    labelText: 'Select your favorite',
-    defaultValue: 'Option B',
-    options: sampleOptions,
+    name: 'sacred-radio-group',
+    labelText: 'Select a Sacred Relic',
+    sacredtheme: true,
+    options: sacredOptions,
+    defaultValue: 'Scarab of Rebirth',
   },
 }
 
-/**
- * 3) Custom Label Styles
- */
-export const CustomLabelStyles: Story = {
-  args: {
-    name: 'customStyles',
-    labelText: 'Which flavor do you prefer?',
-    options: [
-      { label: 'Vanilla', fontColor: '#3f51b5', fontVariant: 'merriparagraph' },
-      {
-        label: 'Chocolate',
-        fontColor: '#f44336',
-        fontVariant: 'merriparagraph',
-      },
-      {
-        label: 'Strawberry',
-        fontColor: '#009688',
-        fontVariant: 'merriparagraph',
-      },
-    ],
-  },
+const InteractiveDemoRenderer = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [value, setValue] = React.useState('Option 1')
+
+  return (
+    <div className="w-[500px] space-y-6">
+      <div className="p-6 bg-white rounded-lg border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          RadioGroup Configuration
+        </h3>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />
+            <span className="ml-2">Sacred Theme</span>
+          </label>
+        </div>
+      </div>
+      <div
+        className={`p-8 rounded-xl flex justify-center items-center ${sacred ? 'bg-black/90' : 'bg-gray-50'}`}
+      >
+        <RadioGroup
+          name="interactive-radio-group"
+          labelText={sacred ? 'Choose your destiny' : 'Select an option'}
+          options={sacred ? sacredOptions : premiumOptions}
+          defaultValue={value}
+          onChange={e => setValue(e.target.value)}
+          sacredtheme={sacred}
+        />
+      </div>
+    </div>
+  )
 }
 
-/**
- * 4) Label variant & color from the top-level props
- */
-export const TopLevelLabelStyling: Story = {
-  args: {
-    name: 'topLevelStyling',
-    labelText: 'Survey Question',
-    labelFontColor: '#673ab7', // Deep Purple
-    options: sampleOptions,
-  },
-}
-
-/**
- * 5) Interaction: Selecting an Option
- */
-export const SelectingOption: Story = {
-  args: {
-    name: 'interactionExample',
-    labelText: 'Pick a letter',
-    options: sampleOptions,
-  },
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoRenderer />,
 }

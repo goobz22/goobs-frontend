@@ -1,62 +1,18 @@
-import React, { useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect, FC } from 'react'
 import QRCode from 'react-qr-code'
-import { Box, Paper, keyframes, alpha } from '@mui/material'
-import { SxProps } from '@mui/system'
 import { authenticator } from 'otplib'
-import Typography from '../Typography'
 import CustomButton, { CustomButtonProps } from '../Button'
-import { CheckCircleOutline } from '@mui/icons-material'
+import CheckCircle from '../Icons/CheckCircle'
 import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
 } from '../ConfirmationCodeInput'
 
-// Sacred theming constants
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-  100% { transform: translateY(0px); }
-`
-
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
-
-/**
- * Props for the QRCodeComponent
- * @typedef {Object} QRCodeProps
- * @property {string} username - The username/email for the MFA setup
- * @property {string} [appName] - The name of the application for MFA (defaults to "ThothOS")
- * @property {number} [size] - The size of the QR code in pixels
- * @property {string} [title] - An optional title to display above the QR code
- * @property {SxProps} [sx] - Custom styles to apply to the component
- * @property {(secret: string) => void} [onSecretGenerated] - Callback function to receive the generated secret
- * @property {boolean} [showVerifyButton] - Whether to show the verify button
- * @property {() => void | Promise<void>} [onVerify] - Callback function for when the Verify button is clicked
- * @property {() => void | Promise<void>} [onDisableVerification] - Required callback function for when verification is disabled
- * @property {Partial<CustomButtonProps>} [verifyButtonProps] - Custom props for the Verify button
- * @property {Partial<CustomButtonProps>} [disableVerificationButtonProps] - Custom props for the Disable Verification button
- * @property {boolean} [showSuccessState] - Whether to show the success state UI
- * @property {string} [successMessage] - Custom success message to display
- * @property {boolean} [showConfirmationInput] - Whether to show the confirmation code input
- * @property {string} [confirmationCode] - The current confirmation code value
- * @property {(value: string) => void} [onConfirmationCodeChange] - Callback for when confirmation code changes
- * @property {ConfirmationCodeInputsProps} [confirmationCodeProps] - Custom props for the confirmation code input
- * @property {boolean} [showDisableConfirmation] - Whether to show the disable confirmation state
- * @property {boolean} [sacredtheme] - Enable Egyptian/Sacred theming
- */
 export interface QRCodeProps {
   username: string
   appName?: string
   size?: number
   title?: string
-  sx?: SxProps
+  style?: React.CSSProperties
   onSecretGenerated?: (secret: string) => void
   showVerifyButton?: boolean
   onVerify?: () => void | Promise<void>
@@ -73,18 +29,162 @@ export interface QRCodeProps {
   sacredtheme?: boolean
 }
 
-/**
- * A component that displays a QR code for MFA setup with Material-UI styling
- * @param {QRCodeProps} props - The props for the component
- * @returns {React.ReactElement} The rendered QR code component
- */
-const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
+const premiumStyles = {
+  container: {
+    padding: '1.5rem',
+    display: 'inline-block',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    borderRadius: '0.5rem',
+    boxShadow:
+      '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+    backgroundColor: 'white',
+    border: '1px solid #E5E7EB',
+  } as React.CSSProperties,
+  title: {
+    marginBottom: '1rem',
+    textAlign: 'center',
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1.25rem',
+  } as React.CSSProperties,
+  qrCodeContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: '0 auto',
+  } as React.CSSProperties,
+  infoText: {
+    marginTop: '1rem',
+    textAlign: 'center',
+    fontFamily: 'Merriweather, serif',
+  } as React.CSSProperties,
+  successContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1.5rem',
+    width: '100%',
+  } as React.CSSProperties,
+  successIcon: {
+    width: '60px',
+    height: '60px',
+    color: '#22C55E',
+  } as React.CSSProperties,
+  successMessage: {
+    textAlign: 'center',
+    fontFamily: 'Merriweather, serif',
+    fontSize: '1.25rem',
+  } as React.CSSProperties,
+  buttonContainer: {
+    marginTop: '1.5rem',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+  } as React.CSSProperties,
+  confirmationContainer: {
+    marginTop: '1.5rem',
+    display: 'flex',
+    justifyContent: 'center',
+  } as React.CSSProperties,
+  errorContainer: {
+    padding: '1rem',
+  } as React.CSSProperties,
+  errorText: {
+    fontFamily: 'Merriweather, serif',
+    color: '#DC2626',
+  } as React.CSSProperties,
+  glyph: {
+    display: 'none',
+  } as React.CSSProperties,
+  decorativeGlyphs: {
+    display: 'none',
+  } as React.CSSProperties,
+  decorativeGlyph: {
+    display: 'none',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  ...premiumStyles,
+  container: {
+    ...premiumStyles.container,
+    backgroundColor: 'black',
+    border: '2px solid rgba(255, 215, 0, 0.4)',
+    animation: 'sacred-glow-pulse 2s infinite alternate',
+    position: 'relative',
+    overflow: 'hidden',
+  } as React.CSSProperties,
+  title: {
+    ...premiumStyles.title,
+    color: '#FFD700',
+    fontWeight: 600,
+    letterSpacing: '0.05em',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+  qrCodeContainer: {
+    ...premiumStyles.qrCodeContainer,
+    padding: '1rem',
+    backgroundColor: 'white',
+    borderRadius: '0.5rem',
+    border: '2px solid rgba(255, 215, 0, 0.6)',
+    boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
+  } as React.CSSProperties,
+  infoText: {
+    ...premiumStyles.infoText,
+    fontStyle: 'italic',
+    letterSpacing: '0.05em',
+    color: 'rgba(255, 215, 0, 0.9)',
+  } as React.CSSProperties,
+  successContainer: {
+    ...premiumStyles.successContainer,
+    position: 'relative',
+  } as React.CSSProperties,
+  successIcon: {
+    width: '60px',
+    height: '60px',
+    color: '#FFD700',
+    filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
+    animation: 'sacred-float 3s infinite ease-in-out',
+  } as React.CSSProperties,
+  successMessage: {
+    ...premiumStyles.successMessage,
+    fontWeight: 600,
+    color: '#FFD700',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    fontSize: '1.25rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'glyph-rotate 10s linear infinite',
+  } as React.CSSProperties,
+  decorativeGlyphs: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    marginTop: '1.5rem',
+  } as React.CSSProperties,
+  decorativeGlyph: {
+    color: 'rgba(255, 215, 0, 0.4)',
+    fontSize: '0.875rem',
+    animation: 'float-glyph 3s infinite ease-in-out',
+  } as React.CSSProperties,
+  errorText: {
+    ...premiumStyles.errorText,
+    color: '#FFD700',
+  } as React.CSSProperties,
+}
+
+const QRCodeComponent: FC<QRCodeProps> = React.memo(
   ({
     username,
     appName = 'ThothOS',
     size = 256,
     title,
-    sx,
+    style,
     onSecretGenerated,
     showVerifyButton = false,
     onVerify,
@@ -99,170 +199,76 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
     confirmationCodeProps = {},
     sacredtheme = false,
   }) => {
-    // Generate the secret and OTP auth URL
     const { secret, otpAuth } = useMemo(() => {
       const generatedSecret = authenticator.generateSecret()
-
-      // We're using the raw username (likely email) directly instead of "your%20account"
       const otpAuthUrl = authenticator.keyuri(
-        username, // Use the raw username/email without encoding
-        appName, // Now defaulting to "ThothOS"
+        username,
+        appName,
         generatedSecret
       )
       return { secret: generatedSecret, otpAuth: otpAuthUrl }
     }, [username, appName])
 
-    // Move the callback to useEffect to avoid state updates during render
     useEffect(() => {
       if (onSecretGenerated && secret) {
         onSecretGenerated(secret)
       }
     }, [secret, onSecretGenerated])
 
-    // Calculate responsive size
     const responsiveSize = useMemo(() => {
-      return Math.min(size, window.innerWidth - 32) // 32px for padding
+      if (typeof window !== 'undefined') {
+        return Math.min(size, window.innerWidth - 32)
+      }
+      return size
     }, [size])
+
+    const styles = sacredtheme ? sacredStyles : premiumStyles
 
     if (!otpAuth) {
       return (
-        <Box sx={{ ...sx, p: 2 }} role="alert">
-          <Typography
-            text="Error: Failed to generate QR code"
-            fontcolor={sacredtheme ? '#FFD700' : 'error'}
-            fontvariant="merriparagraph"
-          />
-        </Box>
+        <div style={{ ...styles.errorContainer, ...style }} role="alert">
+          <span style={styles.errorText}>
+            Error: Failed to generate QR code
+          </span>
+        </div>
       )
     }
 
-    // If showing success state, render the success UI
     if (showSuccessState) {
       return (
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          gap={2}
-          padding={3}
-          width="100%"
-          sx={
-            sacredtheme
-              ? {
-                  position: 'relative',
-                  '&::before': {
-                    content: '"𓊹"',
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    fontSize: '20px',
-                    color: alpha('#FFD700', 0.3),
-                    animation: `${rotateGlyph} 15s linear infinite`,
-                  },
-                }
-              : undefined
-          }
-        >
-          <CheckCircleOutline
-            sx={{
-              fontSize: 60,
-              color: sacredtheme ? '#FFD700' : 'green',
-              ...(sacredtheme && {
-                filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
-                animation: `${floatAnimation} 2s ease-in-out infinite`,
-              }),
-            }}
-          />
-          <Typography
-            text={successMessage}
-            fontvariant="merrih5"
-            align="center"
-            fontcolor={sacredtheme ? '#FFD700' : undefined}
-            sx={
-              sacredtheme
-                ? {
-                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                    fontWeight: 600,
-                  }
-                : undefined
-            }
-          />
-          <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+        <div style={{ ...styles.successContainer, ...style }}>
+          {sacredtheme && <span style={styles.glyph}>𓊹</span>}
+          <CheckCircle style={styles.successIcon} />
+          <h5 style={styles.successMessage}>{successMessage}</h5>
+          <div style={{ ...styles.buttonContainer, width: '100%' }}>
             <CustomButton
               text="Disable Verification"
               fontcolor={sacredtheme ? '#000000' : 'white'}
               backgroundcolor={sacredtheme ? '#FFD700' : 'black'}
               width="100%"
               height="40px"
-              variant="outlined"
               {...disableVerificationButtonProps}
               onClick={() => {
-                if (onDisableVerification) void onDisableVerification()
+                const result = onDisableVerification?.()
+                if (result instanceof Promise) {
+                  result.catch(console.error)
+                }
               }}
               sacredtheme={sacredtheme}
             />
-          </Box>
-        </Box>
+          </div>
+        </div>
       )
     }
 
-    // Default QR code view with optional confirmation input and buttons
     return (
-      <Paper
-        elevation={3}
-        sx={{
-          p: 3,
-          display: 'inline-block',
-          maxWidth: '100%',
-          boxSizing: 'border-box',
-          ...(sacredtheme && {
-            backgroundColor: '#0a0a0a',
-            backgroundImage: `
-              linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-              radial-gradient(circle at center, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-            `,
-            border: `2px solid ${alpha('#FFD700', 0.4)}`,
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-            position: 'relative',
-            overflow: 'hidden',
-          }),
-          ...sx,
-        }}
-      >
-        {title && (
-          <Typography
-            text={title}
-            fontvariant="merrih5"
-            align="center"
-            gutterBottom
-            fontcolor={sacredtheme ? '#FFD700' : undefined}
-            sx={
-              sacredtheme
-                ? {
-                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                    fontWeight: 600,
-                    letterSpacing: '1px',
-                    mb: 3,
-                  }
-                : undefined
-            }
-          />
-        )}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+      <div style={{ ...styles.container, ...style }}>
+        {title && <h5 style={styles.title}>{title}</h5>}
+        <div
+          style={{
+            ...styles.qrCodeContainer,
             width: responsiveSize,
             height: responsiveSize,
-            margin: 'auto',
-            ...(sacredtheme && {
-              p: 2,
-              backgroundColor: 'white',
-              borderRadius: 2,
-              border: `2px solid ${alpha('#FFD700', 0.6)}`,
-              boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
-            }),
           }}
         >
           <QRCode
@@ -272,26 +278,10 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
             data-testid="mfa-qrcode"
           />
-        </Box>
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography
-            text={`${appName}: ${username}`}
-            fontvariant="merriparagraph"
-            align="center"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : undefined}
-            sx={
-              sacredtheme
-                ? {
-                    fontStyle: 'italic',
-                    letterSpacing: '0.5px',
-                  }
-                : undefined
-            }
-          />
-        </Box>
-
+        </div>
+        <div style={styles.infoText}>{`${appName}: ${username}`}</div>
         {showConfirmationInput && (
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <div style={styles.confirmationContainer}>
             <ConfirmationCodeInputs
               isValid={false}
               codeLength={6}
@@ -302,13 +292,10 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
               sacredtheme={sacredtheme}
               {...confirmationCodeProps}
             />
-          </Box>
+          </div>
         )}
-
         {showVerifyButton && (
-          <Box
-            sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}
-          >
+          <div style={styles.buttonContainer}>
             <CustomButton
               text="Verify Code"
               fontcolor={sacredtheme ? '#000000' : 'white'}
@@ -317,7 +304,10 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
               height="40px"
               {...verifyButtonProps}
               onClick={() => {
-                if (onVerify) void onVerify()
+                const result = onVerify?.()
+                if (result instanceof Promise) {
+                  result.catch(console.error)
+                }
               }}
               disableButton={
                 verifyButtonProps?.disableButton ||
@@ -327,34 +317,25 @@ const QRCodeComponent: React.FC<QRCodeProps> = React.memo(
               }
               sacredtheme={sacredtheme}
             />
-          </Box>
+          </div>
         )}
-
-        {/* Sacred decorative elements */}
         {sacredtheme && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 1,
-              mt: 3,
-            }}
-          >
+          <div style={styles.decorativeGlyphs}>
             {['𓂀', '𓊖', '𓏏'].map((glyph, i) => (
-              <Box
+              <span
                 key={i}
-                sx={{
-                  color: alpha('#FFD700', 0.4),
-                  fontSize: 14,
-                  animation: `${floatAnimation} ${2.5 + i * 0.5}s ease-in-out infinite`,
+                style={{
+                  ...styles.decorativeGlyph,
+                  animationDelay: `${i * 0.5}s`,
+                  animationDuration: `${2.5 + i * 0.5}s`,
                 }}
               >
                 {glyph}
-              </Box>
+              </span>
             ))}
-          </Box>
+          </div>
         )}
-      </Paper>
+      </div>
     )
   }
 )
@@ -363,14 +344,6 @@ QRCodeComponent.displayName = 'QRCodeComponent'
 
 export default QRCodeComponent
 
-/**
- * Verifies a MFA token against a secret.
- *
- * @param token - The token to verify.
- * @param secret - The secret key to verify against.
- * @returns A boolean indicating whether the token is valid.
- * @throws Error if inputs are invalid.
- */
 export function verifyMFAToken(token: string, secret: string): boolean {
   if (!token || typeof token !== 'string') {
     throw new Error('Invalid token')
@@ -380,13 +353,11 @@ export function verifyMFAToken(token: string, secret: string): boolean {
   }
 
   try {
-    // Configure authenticator options to match Microsoft Authenticator
     authenticator.options = {
-      window: 1, // Allow codes from 1 step before and after
-      step: 30, // 30-second interval for code generation
-      digits: 6, // Microsoft Authenticator uses 6-digit codes
+      window: 1,
+      step: 30,
+      digits: 6,
     }
-
     return authenticator.verify({ token, secret })
   } catch (error) {
     console.error('MFA verification error:', error)

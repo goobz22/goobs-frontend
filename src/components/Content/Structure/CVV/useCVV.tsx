@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import CVV, { CVVProps } from '../../../Field/Number/CVV'
 
 export interface UseCVVProps {
@@ -21,12 +20,11 @@ const CVVComponent: React.FC<CVVProps> = ({
   disabled = false,
   error = false,
   helperText,
-  sx,
   style,
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <CVV
         onChange={onChange}
         value={value}
@@ -40,10 +38,9 @@ const CVVComponent: React.FC<CVVProps> = ({
         disabled={disabled}
         error={error}
         helperText={helperText}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

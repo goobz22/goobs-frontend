@@ -1,14 +1,8 @@
 // src/components/Nav/VerticalVariant/subNav/expanding.tsx
 'use client'
 import React, { FC } from 'react'
-import {
-  Accordion as MuiAccordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  alpha,
-} from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Accordion from '../../../Accordion'
+import ExpandMoreIcon from '../../../Icons/ExpandMore'
 import { white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
 
@@ -18,141 +12,163 @@ interface ExpandingSubNavProps {
   setExpandedSubnavs: React.Dispatch<React.SetStateAction<string[]>>
   onClose?: () => void
   children?: React.ReactNode
-  /**
-   * Click handler for the accordion summary.
-   */
-  onClick?: () => void
   activeAndHoverColor?: string
 }
 
-/**
- * SubNav item that expands if it has children.
- */
+// Premium theme styles (when not sacred theme)
+const premiumStyles = {
+  container: {
+    width: '100%',
+    paddingLeft: 0,
+  } as React.CSSProperties,
+
+  iconContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+
+  icon: {
+    transform: 'rotate(0deg)',
+    transition: 'transform 0.2s ease',
+    marginRight: '4px',
+    color: 'transparent',
+  } as React.CSSProperties,
+
+  iconExpanded: {
+    transform: 'rotate(180deg)',
+  } as React.CSSProperties,
+
+  iconCollapsed: {
+    color: 'transparent',
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    transition: 'all 0.3s ease',
+  } as React.CSSProperties,
+
+  typographyExpanded: {
+    // No special styles for premium theme when expanded
+  } as React.CSSProperties,
+
+  childrenContainer: {
+    paddingLeft: '16px',
+  } as React.CSSProperties,
+
+  summaryStyle: {
+    padding: 0,
+    marginLeft: '20px',
+    marginTop: 0,
+    height: '32px',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles
+const sacredStyles = {
+  container: {
+    width: '100%',
+    paddingLeft: 0,
+  } as React.CSSProperties,
+
+  iconContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+
+  icon: {
+    transform: 'rotate(0deg)',
+    transition: 'transform 0.2s ease',
+    marginRight: '4px',
+    color: 'transparent',
+  } as React.CSSProperties,
+
+  iconExpanded: {
+    transform: 'rotate(180deg)',
+    color: 'rgba(255, 215, 0, 1)',
+  } as React.CSSProperties,
+
+  iconCollapsed: {
+    color: 'transparent',
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    transition: 'all 0.3s ease',
+    fontWeight: 500,
+    letterSpacing: '0.015em',
+  } as React.CSSProperties,
+
+  typographyExpanded: {
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+
+  childrenContainer: {
+    paddingLeft: '16px',
+  } as React.CSSProperties,
+
+  summaryStyle: {
+    padding: 0,
+    marginLeft: '20px',
+    marginTop: 0,
+    height: '32px',
+  } as React.CSSProperties,
+}
+
 const ExpandingSubNav: FC<ExpandingSubNavProps> = ({
   title,
   expandedSubnavs,
   setExpandedSubnavs,
   children,
-  onClick,
   activeAndHoverColor,
 }) => {
   const isExpanded = expandedSubnavs.includes(title ?? '')
   const issacredtheme =
     activeAndHoverColor &&
-    (activeAndHoverColor.includes('255, 215, 0') ||
-      activeAndHoverColor === alpha('#FFD700', 0.15))
+    activeAndHoverColor.includes('rgba(255, 215, 0, 0.15)')
+
+  const handleToggle = () => {
+    if (isExpanded) {
+      setExpandedSubnavs(expandedSubnavs.filter(t => t !== title))
+    } else {
+      setExpandedSubnavs([...expandedSubnavs, title ?? ''])
+    }
+  }
+
+  const styles = issacredtheme ? sacredStyles : premiumStyles
+
+  const iconStyle = {
+    ...styles.icon,
+    ...(isExpanded ? styles.iconExpanded : {}),
+    ...(issacredtheme && !isExpanded ? styles.iconCollapsed : {}),
+  }
+
+  const typographyStyle = {
+    ...styles.typography,
+    ...(issacredtheme && isExpanded ? styles.typographyExpanded : {}),
+  }
+
+  const summaryContent = (
+    <div style={styles.iconContainer}>
+      <ExpandMoreIcon style={iconStyle} />
+      <Typography
+        fontvariant="merrih6"
+        fontcolor={issacredtheme ? 'rgba(255, 215, 0, 0.9)' : white.main}
+        text={title ?? ''}
+        style={typographyStyle}
+      />
+    </div>
+  )
 
   return (
-    <MuiAccordion
+    <Accordion
       key={title}
-      disableGutters
-      elevation={0}
-      square
       expanded={isExpanded}
-      onChange={() => {
-        if (isExpanded) {
-          setExpandedSubnavs(expandedSubnavs.filter(t => t !== title))
-        } else {
-          setExpandedSubnavs([...expandedSubnavs, title ?? ''])
-        }
-      }}
-      sx={{
-        pl: 0,
-        backgroundColor: 'transparent',
-        '.MuiAccordionSummary-root': {
-          pl: 0,
-          whiteSpace: 'nowrap',
-        },
-        '&:before': {
-          display: 'none',
-        },
-      }}
-    >
-      <AccordionSummary
-        expandIcon={
-          <ExpandMoreIcon
-            sx={{
-              // Keep transparent if you only want icon to show on hover/expand
-              color: 'transparent',
-              ...(issacredtheme && {
-                color: isExpanded ? '#FFD700' : 'transparent',
-                transition: 'color 0.3s ease',
-              }),
-            }}
-          />
-        }
-        aria-controls="accordion-content"
-        id="accordion-header"
-        sx={{
-          boxSizing: 'border-box',
-          border: 'none',
-          py: '6px',
-          mt: 0,
-          minHeight: 0,
-          height: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          // Indent the entire accordion summary using marginLeft
-          marginLeft: '22px',
-          // Move arrow to the left of text, minimal gap
-          '& .MuiAccordionSummary-expandIconWrapper': {
-            order: -1,
-            marginRight: '4px',
-          },
-          '& .MuiAccordionSummary-content': {
-            m: 0,
-            whiteSpace: 'nowrap',
-          },
-          '&:hover': {
-            '& .MuiSvgIcon-root': {
-              color: issacredtheme ? '#FFD700' : white.main,
-            },
-          },
-          '&.Mui-expanded': {
-            '& .MuiSvgIcon-root': {
-              color: issacredtheme ? '#FFD700' : white.main,
-            },
-          },
-        }}
-        onClick={onClick}
-      >
-        <Typography
-          fontvariant="merrih6"
-          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
-          text={title ?? ''}
-          sx={{
-            whiteSpace: 'nowrap',
-            // Remove any left margin to keep text right next to arrow
-            marginLeft: 0,
-            ...(issacredtheme && {
-              fontWeight: 500,
-              letterSpacing: 0.8,
-              transition: 'all 0.3s ease',
-              textShadow: isExpanded
-                ? '0 0 8px rgba(255, 215, 0, 0.7)'
-                : 'none',
-            }),
-          }}
-        />
-      </AccordionSummary>
-
-      <AccordionDetails
-        sx={{
-          border: 'none',
-          p: 0,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <List
-          sx={{
-            py: 0,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {children}
-        </List>
-      </AccordionDetails>
-    </MuiAccordion>
+      onChange={handleToggle}
+      summary={summaryContent}
+      details={<div style={styles.childrenContainer}>{children}</div>}
+      style={styles.container}
+      sacredtheme={!!issacredtheme}
+    />
   )
 }
 

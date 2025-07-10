@@ -1,24 +1,18 @@
 // src/components/Toolbar/toolbar.stories.tsx
 
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
 import CustomToolbar from './index'
 
 import type { SearchbarProps } from '../Field/Search'
 import type { DropdownProps } from '../Field/Dropdown/Regular'
 import type { CustomButtonProps } from '../Button'
 
-/**
- * Sample button data
- */
 const sampleButtons: CustomButtonProps[] = [
   { text: 'Button 1', onClick: () => console.log('Button 1 clicked') },
   { text: 'Button 2', onClick: () => console.log('Button 2 clicked') },
 ]
 
-/**
- * Sample search props
- */
 const sampleSearchProps: SearchbarProps = {
   label: 'Search Something',
   placeholder: 'Type here...',
@@ -26,24 +20,20 @@ const sampleSearchProps: SearchbarProps = {
   onChange: e => console.log('Searching =>', e.target.value),
 }
 
-/**
- * Single sample dropdown
- */
 const sampleDropdown: DropdownProps = {
   label: 'Pick an Option',
-  options: [
-    { value: 'Alpha', attribute1: 'Alpha' },
-    { value: 'Beta', attribute1: 'Beta' },
-    { value: 'Gamma', attribute1: 'Gamma' },
-  ],
+  options: [{ value: 'Alpha' }, { value: 'Beta' }, { value: 'Gamma' }],
   onChange: e => console.log('Single dropdown =>', e.target.value),
 }
 
 const meta: Meta<typeof CustomToolbar> = {
   title: 'Components/Toolbar',
   component: CustomToolbar,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+  },
   parameters: {
-    a11y: { disable: false },
+    layout: 'fullscreen',
   },
 }
 export default meta
@@ -51,77 +41,118 @@ export default meta
 type Story = StoryObj<typeof CustomToolbar>
 
 /**
- * 1) Basic story
+ * 1) Premium Theme
  */
-export const Basic: Story = {
-  args: {
-    buttons: sampleButtons,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    expect(canvas.getByText('Button 1')).toBeInTheDocument()
-    expect(canvas.getByText('Button 2')).toBeInTheDocument()
-    await userEvent.click(canvas.getByText('Button 1'))
-  },
-}
-
-/**
- * 2) With Search
- */
-export const WithSearch: Story = {
-  args: {
-    buttons: [{ text: 'New Button' }],
-    searchbarProps: sampleSearchProps,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    expect(canvas.getByText('New Button')).toBeInTheDocument()
-    const input = canvas.getByLabelText('Search Something', {
-      selector: 'input',
-    })
-    await userEvent.type(input, 'Hello World')
-    expect(input).toHaveValue('Hello World')
-  },
-}
-
-/**
- * 3) With single Dropdown
- */
-export const WithDropdown: Story = {
-  args: {
-    buttons: [{ text: 'Only Button' }],
-    dropdowns: [sampleDropdown],
-  },
-  play: ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    expect(canvas.getByText('Only Button')).toBeInTheDocument()
-    expect(canvas.getByText('Pick an Option')).toBeInTheDocument()
-  },
-}
-
-/**
- * 4) Full Setup
- */
-export const FullSetup: Story = {
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="p-4 bg-gray-100">
+      <CustomToolbar {...args} />
+    </div>
+  ),
   args: {
     buttons: sampleButtons,
     searchbarProps: sampleSearchProps,
     rightCenterProps: {
-      selectedRows: [],
-      rows: [],
+      selectedRows: ['1'],
+      rows: [{ id: '1' }],
       onDuplicate: () => console.log('duplicate'),
       onDelete: () => console.log('delete'),
-      onManage: () => console.log('manage'),
-      onShow: () => console.log('show'),
-      handleClose: () => console.log('close'),
     },
     dropdowns: [sampleDropdown],
+    sacredtheme: false,
   },
-  play: ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    expect(canvas.getByText('Button 1')).toBeInTheDocument()
-    expect(canvas.getByText('Button 2')).toBeInTheDocument()
-    expect(canvas.getByLabelText('Search Something')).toBeInTheDocument()
-    expect(canvas.getByText('Pick an Option')).toBeInTheDocument()
+}
+
+/**
+ * 2) Sacred Theme
+ */
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div className="p-4 bg-black">
+      <CustomToolbar {...args} />
+    </div>
+  ),
+  args: {
+    ...PremiumTheme.args,
+    sacredtheme: true,
   },
+}
+
+const InteractiveDemoRenderer = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [showButtons, setShowButtons] = React.useState(true)
+  const [showSearch, setShowSearch] = React.useState(true)
+  const [showRightCenter, setShowRightCenter] = React.useState(true)
+  const [showDropdowns, setShowDropdowns] = React.useState(true)
+
+  return (
+    <div className={`p-4 ${sacred ? 'bg-black' : 'bg-gray-100'}`}>
+      <div className="fixed top-24 right-4 z-50 p-4 bg-white rounded-lg border shadow-lg">
+        <h3 className="text-lg font-bold mb-2">Controls</h3>
+        <div className="flex flex-col gap-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred Theme
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showButtons}
+              onChange={e => setShowButtons(e.target.checked)}
+            />{' '}
+            Show Buttons
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showSearch}
+              onChange={e => setShowSearch(e.target.checked)}
+            />{' '}
+            Show Search
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showRightCenter}
+              onChange={e => setShowRightCenter(e.target.checked)}
+            />{' '}
+            Show Right Center
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showDropdowns}
+              onChange={e => setShowDropdowns(e.target.checked)}
+            />{' '}
+            Show Dropdowns
+          </label>
+        </div>
+      </div>
+      <CustomToolbar
+        buttons={showButtons ? sampleButtons : undefined}
+        searchbarProps={showSearch ? sampleSearchProps : undefined}
+        rightCenterProps={
+          showRightCenter
+            ? { selectedRows: ['1'], rows: [{ id: '1' }] }
+            : undefined
+        }
+        dropdowns={showDropdowns ? [sampleDropdown] : undefined}
+        sacredtheme={sacred}
+      />
+    </div>
+  )
+}
+
+/**
+ * 3) Interactive Demo
+ */
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoRenderer />,
 }

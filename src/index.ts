@@ -1,7 +1,6 @@
 import CustomButton, { CustomButtonProps } from './components/Button'
 import Typography, {
-  FontFamily,
-  TypographyVariant,
+  CustomTypographyVariant,
   TypographyProps,
 } from './components/Typography'
 import Widget, { WidgetProps } from './components/Widget'
@@ -275,7 +274,7 @@ export type { DropdownProps }
 // "Local" type exports for existing components
 export type { CustomButtonProps }
 export type { ComplexTextEditorProps }
-export type { FontFamily, TypographyVariant, TypographyProps }
+export type { CustomTypographyVariant, TypographyProps }
 export type { WidgetProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }

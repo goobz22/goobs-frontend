@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Box, useMediaQuery } from '@mui/material'
 import ManageRow from '../../DataGrid/ManageRow'
 
 export interface RightCenterProps {
@@ -16,6 +15,22 @@ export interface RightCenterProps {
   sacredtheme?: boolean
 }
 
+const premiumStyles = {
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+    height: '100%',
+    padding: '0 16px',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  container: {
+    ...premiumStyles.container,
+  } as React.CSSProperties,
+}
+
 function RightCenter({
   selectedRows = [],
   rows = [],
@@ -27,19 +42,9 @@ function RightCenter({
   handleClose,
   sacredtheme,
 }: RightCenterProps) {
-  const isTabletOrBelow = useMediaQuery('(max-width:1024px)')
-
+  const styles = sacredtheme ? sacredStyles : premiumStyles
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        flexShrink: 0,
-        mt: isTabletOrBelow ? '5px' : 0,
-        height: isTabletOrBelow ? 'auto' : '100%',
-        padding: isTabletOrBelow ? '0 5px' : '0 15px',
-      }}
-    >
+    <div style={styles.container}>
       <ManageRow
         selectedRows={selectedRows}
         rows={rows}
@@ -51,7 +56,7 @@ function RightCenter({
         handleClose={handleClose}
         sacredtheme={sacredtheme}
       />
-    </Box>
+    </div>
   )
 }
 

@@ -51,6 +51,7 @@ export type Task = {
   closedAt: Date
   updatedAt: Date
   createdBy: string
+  editHistory: CommentEditHistory[]
   /**
    * If you want to store the actual comments (rather than just commentIds),
    * so ShowTask can display them directly.

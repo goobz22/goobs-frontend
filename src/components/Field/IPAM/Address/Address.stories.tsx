@@ -5,151 +5,99 @@ import IPAddressField from '.'
 const meta: Meta<typeof IPAddressField> = {
   title: 'Components/Field/IPAM/Address',
   component: IPAddressField,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    label: { control: 'text' },
+    error: { control: 'boolean' },
+    helperText: { control: 'text' },
+  },
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
-  argTypes: {
-    onChange: { action: 'changed' },
-  },
 }
-
 export default meta
+
 type Story = StoryObj<typeof IPAddressField>
 
-export const Default: Story = {
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
+      <IPAddressField {...args} />
+    </div>
+  ),
   args: {
     label: 'IP Address',
-    onChange: event => console.log('Value changed:', event.target.value),
+    sacredtheme: false,
   },
 }
 
-export const WithInitialValue: Story = {
-  args: {
-    label: 'IP with Initial Value',
-    initialValue: '192.168.1.1',
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-}
-
-export const SubnetValidation: Story = {
-  args: {
-    label: 'IP with Subnet Validation',
-    defaultNetwork: '10.0.0.0',
-    subnetMask: '255.255.0.0',
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
   render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Only IP addresses in the 10.0.0.0/16 subnet are valid
-      </p>
+    <div className="w-[400px] p-6 bg-black rounded-lg">
       <IPAddressField {...args} />
     </div>
   ),
-}
-
-export const DisableAutoInsertDots: Story = {
   args: {
-    label: 'Manual Dot Entry',
-    autoInsertDots: false,
-    onChange: event => console.log('Value changed:', event.target.value),
+    ...PremiumTheme.args,
+    sacredtheme: true,
   },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Auto-insertion of dots is disabled (you must type the dots)
-      </p>
-      <IPAddressField {...args} />
-    </div>
-  ),
 }
 
-export const AllowIncomplete: Story = {
-  args: {
-    label: 'Allow Incomplete Entry',
-    allowIncomplete: true,
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Allows incomplete IP addresses during input
-      </p>
-      <IPAddressField {...args} />
+const InteractiveAddressDemo: React.FC = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const [value, setValue] = React.useState('192.168.1.1')
+
+  return (
+    <div className="w-[500px] space-y-4">
+      <div className="p-4 bg-white rounded-lg border">
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div className="grid grid-cols-3 gap-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={error}
+              onChange={e => setError(e.target.checked)}
+            />{' '}
+            Error
+          </label>
+        </div>
+      </div>
+      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+        <IPAddressField
+          label="Interactive IP Address"
+          initialValue={value}
+          onChange={e => setValue(e.target.value)}
+          sacredtheme={sacred}
+          disabled={disabled}
+          error={error}
+        />
+      </div>
     </div>
-  ),
+  )
 }
 
-export const StrictValidation: Story = {
-  args: {
-    label: 'Strict Validation',
-    allowIncomplete: false,
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Requires complete, valid IP addresses
-      </p>
-      <IPAddressField {...args} />
-    </div>
-  ),
-}
-
-export const ReservedIPValidation: Story = {
-  args: {
-    label: 'Reserved IP Check',
-    defaultNetwork: '192.168.1.0',
-    subnetMask: '255.255.255.0',
-    initialValue: '192.168.1.0',
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Network address (192.168.1.0) and broadcast address (192.168.1.255) are
-        invalid
-      </p>
-      <IPAddressField {...args} />
-    </div>
-  ),
-}
-
-export const ComparisonDemo: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        maxWidth: '300px',
-      }}
-    >
-      <IPAddressField
-        label="Auto-insert dots (default)"
-        autoInsertDots={true}
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <IPAddressField
-        label="Manual dot entry"
-        autoInsertDots={false}
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <IPAddressField
-        label="Within subnet (valid)"
-        initialValue="192.168.1.10"
-        defaultNetwork="192.168.1.0"
-        subnetMask="255.255.255.0"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <IPAddressField
-        label="Outside subnet (invalid)"
-        initialValue="10.0.0.1"
-        defaultNetwork="192.168.1.0"
-        subnetMask="255.255.255.0"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-    </div>
-  ),
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveAddressDemo />,
 }

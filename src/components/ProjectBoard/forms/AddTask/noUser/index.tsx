@@ -1,33 +1,12 @@
 'use client'
 
 import React, { useState, useCallback, FormEvent } from 'react'
-import { Box, alpha, keyframes } from '@mui/material'
 import Typography from '../../../../Typography'
 import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
 import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
 import CustomButton from '../../../../Button'
-
 import type { RawSeverityLevel } from '../../../types'
-
-// Sacred animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  50% { transform: translateY(-2px) rotate(180deg); opacity: 0.5; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  darkGold: '#B8860B',
-  cardBackground: alpha('#000000', 0.95),
-}
 
 interface NoUserAddTaskProps {
   onAdd: (newTask: {
@@ -40,147 +19,97 @@ interface NoUserAddTaskProps {
   sacredtheme?: boolean
 }
 
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    padding: '0.75rem',
+    position: 'relative',
+    ...(sacredtheme && {
+      border: '2px solid rgba(255, 215, 0, 0.5)',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      boxShadow: '0 0 1rem rgba(255, 215, 0, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      animation: 'no-user-add-task-glow-pulse 2s infinite alternate',
+    }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.75rem',
+    fontSize: '1.125rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    zIndex: 10,
+    animation: 'no-user-add-task-float-glyph 5s infinite alternate',
+  } as React.CSSProperties,
+  title: {
+    marginBottom: '0.75rem',
+    fontSize: '1.25rem',
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+      color: '#FFD700',
+    }),
+  } as React.CSSProperties,
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  } as React.CSSProperties,
+})
+
 const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   onAdd,
   severityLevels,
   sacredtheme = false,
 }) => {
-  // ------------------ FORM STATE ------------------
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
   const [email, setEmail] = useState('')
-  const [selectedSeverity, setSelectedSeverity] = useState('')
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
+  const styles = getStyles(sacredtheme)
 
-  // ------------------ DROPDOWN OPTIONS ------------------
-  // Format: { value, attribute1, attribute2 } where attribute1 is the description and attribute2 is the ID.
-  const severityOptions = severityLevels.map(sl => ({
+  const severityOptions = severityLevels.map((sl: RawSeverityLevel) => ({
     value: String(sl.severityLevel),
     attribute1: sl.description || '',
-    attribute2: sl._id, // Added _id as attribute2
+    attribute2: sl._id,
   }))
 
-  // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(
     (e?: FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault()
-
-      // Validate required fields before submission
-      if (!taskTitle) {
-        console.error('Error: Task Title is required')
-        alert('Please enter a Task Title')
+      if (!taskTitle || !taskDescription || !email || !selectedSeverityId) {
+        alert('Please fill out all fields.')
         return
       }
-
-      if (!taskDescription) {
-        console.error('Error: Task Description is required')
-        alert('Please enter a Task Description')
-        return
-      }
-
-      if (!email) {
-        console.error('Error: Email is required')
-        alert('Please enter your Email')
-        return
-      }
-
-      if (!selectedSeverityId) {
-        console.error('Error: Severity Level is required')
-        alert('Please select a Severity Level')
-        return
-      }
-
-      console.log('Submitting task with:', {
-        title: taskTitle,
-        description: taskDescription,
-        email,
-        severityValue: selectedSeverity,
-        severityId: selectedSeverityId,
-      })
-
       onAdd({
         title: taskTitle,
         description: taskDescription,
         email,
-        severityId: selectedSeverityId || '',
+        severityId: selectedSeverityId,
       })
     },
-    [
-      taskTitle,
-      taskDescription,
-      email,
-      selectedSeverityId,
-      selectedSeverity,
-      onAdd,
-    ]
+    [taskTitle, taskDescription, email, selectedSeverityId, onAdd]
   )
 
-  // ------------------ RENDER ------------------
   return (
-    <Box
-      sx={{
-        p: 3,
-        position: 'relative',
-        ...(sacredtheme && {
-          border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`,
-          backgroundColor: egyptianStyles.cardBackground,
-          animation: `${glowPulse} 3s ease-in-out infinite`,
-        }),
-      }}
-    >
+    <div style={styles.container}>
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatGlyph} 4s ease-in-out infinite`,
-              zIndex: 1,
-            }}
-          >
-            𓁹
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatGlyph} 4s ease-in-out infinite reverse`,
-              zIndex: 1,
+          <div style={{ ...styles.glyph, left: '0.75rem' }}>𓁹</div>
+          <div
+            style={{
+              ...styles.glyph,
+              right: '0.75rem',
+              animationDirection: 'reverse',
             }}
           >
             𓂀
-          </Box>
+          </div>
         </>
       )}
-      <Typography
-        variant="h5"
-        sx={{
-          mb: 3,
-          ...(sacredtheme && {
-            fontFamily: '"Cinzel", serif',
-            letterSpacing: '0.05em',
-            textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-            color: egyptianStyles.goldColor,
-          }),
-        }}
-      >
-        Create Task
-      </Typography>
+      <Typography style={styles.title}>Create Task</Typography>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-      >
+      <form onSubmit={handleSubmit} style={styles.form}>
         <TextField
           label="Task Title"
           value={taskTitle}
@@ -188,7 +117,6 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           placeholder="Enter Task Title"
           sacredtheme={sacredtheme}
         />
-
         <ComplexTextEditor
           label="Task Description"
           value={taskDescription}
@@ -197,7 +125,6 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           minRows={5}
           sacredtheme={sacredtheme}
         />
-
         <TextField
           label="Email"
           value={email}
@@ -205,7 +132,6 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           placeholder="Enter your email"
           sacredtheme={sacredtheme}
         />
-
         <SearchableDropdown
           label="Severity Level"
           options={severityOptions}
@@ -213,25 +139,23 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
             severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
               ?.value
           }
-          onChange={option => {
-            // Store the severity level as display value and the ID properly
-            setSelectedSeverity(option?.value || '')
-            setSelectedSeverityId(option?.attribute2 || '')
-            console.log('Selected severity ID:', option?.attribute2)
-          }}
+          onChange={option =>
+            setSelectedSeverityId(
+              (option as { attribute2: string })?.attribute2 || ''
+            )
+          }
           placeholder="Select severity level"
           sacredtheme={sacredtheme}
         />
-
         <CustomButton
           text="Create Task"
           onClick={() => handleSubmit()}
-          backgroundcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
+          backgroundcolor={sacredtheme ? '#FFD700' : '#000'}
           fontcolor={sacredtheme ? '#000' : 'white'}
           sacredtheme={sacredtheme}
         />
-      </Box>
-    </Box>
+      </form>
+    </div>
   )
 }
 

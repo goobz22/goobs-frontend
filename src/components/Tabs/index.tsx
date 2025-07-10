@@ -1,29 +1,14 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { AppBar, Tabs as MuiTabs, Tab, keyframes, alpha } from '@mui/material'
 import { usePathname } from 'next/navigation'
-// Import your black palette color
-import { black } from '../../styles/palette'
-
-// Sacred theming animations
-const sacredShimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`
-
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-`
 
 export interface TabsItem {
   title?: string
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
-  hasleftborder?: string
-  hasrightborder?: string
+  hasleftborder?: boolean
+  hasrightborder?: boolean
 }
 
 export interface ActiveTabValue {
@@ -33,28 +18,144 @@ export interface ActiveTabValue {
 export interface TabsProps {
   items: TabsItem[]
   height?: string
-  alignment?: 'left' | 'center' | 'right' | 'inherit' | 'justify'
+  alignment?: 'left' | 'center' | 'right' | 'justify'
   navname?: string
   sacredtheme?: boolean
+  className?: string
+  style?: React.CSSProperties
 }
 
-/**
- * A horizontal navigation component, built with MUI Tabs.
- */
+const premiumStyles = {
+  container: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 50,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgb(0,0,0)',
+    color: 'white',
+  } as React.CSSProperties,
+  tabsContainer: {
+    width: '100%',
+    height: '100%',
+  } as React.CSSProperties,
+  tabsInnerContainer: {
+    height: '100%',
+    display: 'flex',
+    position: 'relative',
+  } as React.CSSProperties,
+  tab: {
+    height: '100%',
+    padding: '0 24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 500,
+    fontSize: '16px',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    boxSizing: 'border-box',
+    fontFamily: 'Merriweather, serif',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'white',
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  tabHover: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  } as React.CSSProperties,
+  tabActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    color: 'white',
+  } as React.CSSProperties,
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    transition: 'all 0.3s ease',
+    backgroundColor: 'transparent',
+  } as React.CSSProperties,
+  tabIndicatorActive: {
+    backgroundColor: 'white',
+    height: '2px',
+  } as React.CSSProperties,
+  border: {
+    borderLeft: '1px solid white',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  container: {
+    ...premiumStyles.container,
+    backgroundColor: 'rgb(0,0,0)',
+    color: '#FFD700',
+    borderBottom: '2px solid rgba(255, 215, 0, 0.4)',
+    animation: 'sacred-glow-pulse 2s infinite alternate',
+    boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
+  } as React.CSSProperties,
+  tabsContainer: premiumStyles.tabsContainer,
+  tabsInnerContainer: premiumStyles.tabsInnerContainer,
+  tab: {
+    ...premiumStyles.tab,
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.05em',
+    color: 'rgba(255, 215, 0, 0.8)',
+  } as React.CSSProperties,
+  tabHover: {
+    color: '#FFD700',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+    animation: 'sacred-shimmer 1s forwards',
+  } as React.CSSProperties,
+  tabActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    color: '#FFD700',
+    fontWeight: 600,
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+  tabIndicator: {
+    ...premiumStyles.tabIndicator,
+  } as React.CSSProperties,
+  tabIndicatorActive: {
+    backgroundColor: '#FFD700',
+    height: '4px',
+    boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
+  } as React.CSSProperties,
+  border: {
+    borderLeft: '1px solid rgba(255, 215, 0, 0.3)',
+  } as React.CSSProperties,
+  glyph: {
+    fontSize: '12px',
+    opacity: 0.6,
+    animation: 'glyph-rotate 10s linear infinite',
+  } as React.CSSProperties,
+  tabContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  } as React.CSSProperties,
+}
+
 function Tabs({
   items,
   height = '48px',
   alignment = 'left',
   navname = '',
   sacredtheme = false,
+  className,
+  style,
 }: TabsProps) {
   const [activeTabValues, setActiveTabValues] = useState<
     Record<string, ActiveTabValue>
   >({})
+  const [hoveredTab, setHoveredTab] = useState<string | null>(null)
   const pathname = usePathname()
+  const styles = sacredtheme ? sacredStyles : premiumStyles
 
   useEffect(() => {
-    // Find the item whose route matches the current path
     const currentTab = items.find(item => item.route === pathname)
     setActiveTabValues(prev => ({
       ...prev,
@@ -62,22 +163,18 @@ function Tabs({
     }))
   }, [items, navname, pathname])
 
-  /**
-   * When user changes tab via click, update the activeTabValues record.
-   */
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (newValue: string) => {
     setActiveTabValues(prev => ({
       ...prev,
       [navname]: { tabId: newValue },
     }))
   }
 
-  /**
-   * Called when a tab is clicked:
-   * - if trigger='route', navigate to the route
-   * - if trigger='onClick', call onClick
-   */
   const handleTabClick = (tab: TabsItem) => {
+    if (tab.title) {
+      handleTabChange(tab.title)
+    }
+
     if (tab.trigger === 'route' && tab.route) {
       window.location.href = tab.route
     } else if (tab.trigger === 'onClick' && tab.onClick) {
@@ -85,147 +182,79 @@ function Tabs({
     }
   }
 
+  const alignmentStyles = {
+    left: { justifyContent: 'flex-start' },
+    center: { justifyContent: 'center' },
+    right: { justifyContent: 'flex-end' },
+    justify: { justifyContent: 'space-between' },
+    inherit: { justifyContent: 'flex-start' },
+  }
+
+  const containerStyle: React.CSSProperties = {
+    ...styles.container,
+    height,
+    minHeight: height,
+    ...style,
+  }
+
   return (
-    <AppBar
-      position="sticky"
-      elevation={0} // Remove MUI's default shadow
-      sx={{
-        backgroundColor: sacredtheme ? '#0a0a0a' : black.main,
-        color: sacredtheme ? '#FFD700' : '#fff',
-        overflow: 'hidden',
-        height,
-        minHeight: height,
-        display: 'flex',
-        justifyContent: 'center',
-        boxShadow: sacredtheme ? `0 0 20px ${alpha('#FFD700', 0.3)}` : 'none',
-        ...(sacredtheme && {
-          borderBottom: `2px solid ${alpha('#FFD700', 0.4)}`,
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.03), rgba(255, 215, 0, 0.03)),
-            radial-gradient(circle at top center, rgba(255, 215, 0, 0.1) 0%, transparent 70%)
-          `,
-          animation: `${glowPulse} 3s ease-in-out infinite`,
-        }),
-      }}
-    >
-      <MuiTabs
-        value={activeTabValues[navname]?.tabId || false}
-        onChange={handleTabChange}
-        variant="fullWidth"
-        aria-label="nav tabs"
-        sx={{
-          backgroundColor: sacredtheme ? 'transparent' : black.main,
-          height: '100%',
-          '& .MuiTabs-flexContainer': {
-            height: '100%',
-            display: 'flex',
-            justifyContent: alignment === 'left' ? 'flex-start' : alignment,
-            backgroundColor: sacredtheme ? 'transparent' : black.main,
-          },
-          '& .MuiTabs-indicator': {
-            backgroundColor: sacredtheme ? '#FFD700' : '#fff',
-            height: sacredtheme ? '3px' : '2px',
-            ...(sacredtheme && {
-              boxShadow: '0 0 10px rgba(255, 215, 0, 0.8)',
-            }),
-          },
-          '& .MuiTab-root': {
-            height: '100%',
-            minHeight: 'unset',
-            display: 'flex',
-            alignItems: 'center',
-            textTransform: 'none',
-            boxSizing: 'border-box',
-            backgroundColor: sacredtheme ? 'transparent' : black.main,
-            color: sacredtheme ? alpha('#FFD700', 0.8) : '#fff',
-            fontWeight: 500,
-            fontFamily: sacredtheme ? '"Cinzel", serif' : 'Merriweather',
-            fontSize: 16,
-            transition: 'all 0.3s ease',
-            position: 'relative',
-            ...(sacredtheme && {
-              letterSpacing: '1px',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background:
-                  'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-                backgroundSize: '200% 100%',
-                opacity: 0,
-                transition: 'opacity 0.3s ease',
-              },
-            }),
-            '&:hover': {
-              backgroundColor: sacredtheme
-                ? 'transparent'
-                : 'rgba(255, 255, 255, 0.1)',
-              ...(sacredtheme && {
-                color: '#FFD700',
-                textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
-                '&::before': {
-                  opacity: 1,
-                  animation: `${sacredShimmer} 1.5s ease-in-out`,
-                },
+    <div style={containerStyle} className={className}>
+      <div style={styles.tabsContainer}>
+        <div
+          style={{
+            ...styles.tabsInnerContainer,
+            ...alignmentStyles[alignment],
+          }}
+        >
+          {items.map((item, index) => {
+            const isActive = activeTabValues[navname]?.tabId === item.title
+            const isHovered = hoveredTab === item.title
+
+            const tabStyle: React.CSSProperties = {
+              ...styles.tab,
+              ...(isHovered && !isActive && styles.tabHover),
+              ...(isActive && styles.tabActive),
+              ...(item.hasleftborder && styles.border),
+              ...(item.hasrightborder && {
+                ...styles.border,
+                borderRight: styles.border.borderLeft,
+                borderLeft: 'none',
               }),
-            },
-            '&.Mui-selected': {
-              backgroundColor: sacredtheme
-                ? alpha('#FFD700', 0.1)
-                : 'rgba(255, 255, 255, 0.2)',
-              ...(sacredtheme && {
-                color: '#FFD700',
-                textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
-                fontWeight: 600,
-              }),
-            },
-          },
-        }}
-      >
-        {items.map((item, index) => (
-          <Tab
-            key={item.title}
-            value={item.title || ''}
-            label={
-              sacredtheme ? (
-                <span
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                >
-                  <span
-                    style={{
-                      fontSize: '12px',
-                      opacity: 0.6,
-                      animation: `rotate ${10 + index * 2}s linear infinite`,
-                    }}
-                  >
-                    {index % 2 === 0 ? '𓊹' : '𓋹'}
-                  </span>
-                  {item.title || ''}
-                </span>
-              ) : (
-                item.title || ''
-              )
             }
-            onClick={() => handleTabClick(item)}
-            sx={{
-              ...(item.hasleftborder === 'true' && {
-                borderLeft: sacredtheme
-                  ? `1px solid ${alpha('#FFD700', 0.3)}`
-                  : '1px solid white',
-              }),
-              ...(item.hasrightborder === 'true' && {
-                borderRight: sacredtheme
-                  ? `1px solid ${alpha('#FFD700', 0.3)}`
-                  : '1px solid white',
-              }),
-            }}
-          />
-        ))}
-      </MuiTabs>
-    </AppBar>
+
+            const tabIndicatorStyle: React.CSSProperties = {
+              ...styles.tabIndicator,
+              ...(isActive && styles.tabIndicatorActive),
+            }
+
+            return (
+              <button
+                key={item.title}
+                onClick={() => handleTabClick(item)}
+                style={tabStyle}
+                onMouseEnter={() => setHoveredTab(item.title || '')}
+                onMouseLeave={() => setHoveredTab(null)}
+              >
+                <div style={tabIndicatorStyle} />
+                <div style={sacredStyles.tabContent}>
+                  {sacredtheme && (
+                    <span
+                      style={{
+                        ...sacredStyles.glyph,
+                        animation: `glyph-rotate ${10 + index * 2}s linear infinite`,
+                      }}
+                    >
+                      {index % 2 === 0 ? '𓊹' : '𓋹'}
+                    </span>
+                  )}
+                  <span>{item.title || ''}</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
   )
 }
 

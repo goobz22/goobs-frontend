@@ -1,6 +1,7 @@
 // src/components/ComplexTextEditor/RichEditor/index.tsx
 
-import React, { useCallback, useState } from 'react'
+'use client'
+import React, { useCallback, useState, useEffect } from 'react'
 import {
   Slate,
   Editable,
@@ -9,31 +10,13 @@ import {
 } from 'slate-react'
 import { Descendant } from 'slate'
 import Toolbar from '../Toolbars/Editor'
-import { Box, Divider, keyframes, alpha } from '@mui/material'
 import {
   useRichTextEditor,
   RichTextEditorTypes,
 } from '../utils/useRichtextEditor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = ['𓅓', '𓆄', '𓇳', '𓈖']
-
-const sacredTextGlow = keyframes`
-  0% { text-shadow: 0 0 3px rgba(255, 215, 0, 0.3); }
-  50% { text-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
-  100% { text-shadow: 0 0 3px rgba(255, 215, 0, 0.3); }
-`
-
-const sacredBorderPulse = keyframes`
-  0% { border-color: ${alpha('#FFD700', 0.3)}; }
-  50% { border-color: ${alpha('#FFD700', 0.6)}; }
-  100% { border-color: ${alpha('#FFD700', 0.3)}; }
-`
+import { SACRED_GLYPHS } from '../../../styles/sacredGlyphs'
 
 export interface RichTextEditorProps {
   value: Descendant[]
@@ -47,10 +30,130 @@ export interface RichTextEditorProps {
   markdownMode: boolean
   setMarkdownMode: (value: boolean) => void
   setMarkdown: (value: string) => void
-  // Accordion related props
   accordionSummary?: React.ReactNode
   defaultExpanded?: boolean
   sacredtheme?: boolean
+}
+
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    justifyContent: 'center',
+  } as React.CSSProperties,
+
+  editorContainer: {
+    border: '1px solid rgba(0, 0, 0, 1)',
+    borderRadius: '8px',
+    width: 'auto',
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+  } as React.CSSProperties,
+
+  separator: {
+    borderColor: 'rgba(0, 0, 0, 1)',
+  } as React.CSSProperties,
+
+  editable: {
+    padding: '16px',
+    color: 'rgba(0, 0, 0, 1)',
+  } as React.CSSProperties,
+
+  label: {
+    marginBottom: '8px',
+  } as React.CSSProperties,
+
+  text: {
+    color: 'rgba(0, 0, 0, 1)',
+  } as React.CSSProperties,
+
+  link: {
+    color: 'rgba(37, 99, 235, 1)',
+    textDecoration: 'underline',
+  } as React.CSSProperties,
+
+  code: {
+    backgroundColor: 'rgba(243, 244, 246, 1)',
+    color: 'rgba(55, 65, 81, 1)',
+    padding: '2px 4px',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    justifyContent: 'center',
+  } as React.CSSProperties,
+
+  editorContainer: {
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    borderRadius: '8px',
+    width: 'auto',
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: 'rgba(0, 0, 0, 1)',
+    backgroundImage:
+      'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.05), transparent)',
+    boxShadow:
+      '0 4px 6px -1px rgba(255, 215, 0, 0.2), 0 2px 4px -1px rgba(255, 215, 0, 0.1)',
+    animation: 'richTextEditorBorderPulse 4s ease-in-out infinite',
+  } as React.CSSProperties,
+
+  separator: {
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+    boxShadow:
+      '0 4px 6px -1px rgba(255, 215, 0, 0.3), 0 2px 4px -1px rgba(255, 215, 0, 0.2)',
+  } as React.CSSProperties,
+
+  editable: {
+    padding: '16px',
+    color: 'rgba(255, 215, 0, 0.9)',
+    animation: 'richTextEditorTextGlow 3s ease-in-out infinite',
+  } as React.CSSProperties,
+
+  label: {
+    marginBottom: '8px',
+    color: 'rgba(255, 215, 0, 1)',
+    fontFamily: '"Cinzel", serif',
+    fontWeight: 600,
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+
+  text: {
+    color: 'rgba(255, 215, 0, 0.9)',
+  } as React.CSSProperties,
+
+  link: {
+    color: 'rgba(255, 215, 0, 1)',
+    textDecoration: 'underline',
+    textDecorationColor: 'rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+
+  code: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    color: 'rgba(255, 215, 0, 1)',
+    padding: '2px 4px',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    bottom: '8px',
+    right: '8px',
+    fontSize: '48px',
+    color: 'rgba(255, 215, 0, 0.1)',
+    pointerEvents: 'none',
+    opacity: 0.5,
+  } as React.CSSProperties,
 }
 
 const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
@@ -60,6 +163,7 @@ const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
   sacredtheme = false,
 }) => {
   const customLeaf = leaf as RichTextEditorTypes['CustomText']
+  const styles = sacredtheme ? sacredStyles : premiumStyles
 
   let formattedChildren: React.ReactNode = children as React.ReactNode
 
@@ -77,53 +181,17 @@ const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
   }
   if (customLeaf.link) {
     formattedChildren = (
-      <a
-        href={customLeaf.link}
-        style={
-          sacredtheme
-            ? {
-                color: '#FFD700',
-                textDecoration: 'underline',
-                textDecorationColor: alpha('#FFD700', 0.5),
-              }
-            : undefined
-        }
-      >
+      <a href={customLeaf.link} style={styles.link}>
         {formattedChildren}
       </a>
     )
   }
   if (customLeaf.code) {
-    formattedChildren = (
-      <code
-        style={
-          sacredtheme
-            ? {
-                backgroundColor: alpha('#FFD700', 0.1),
-                color: '#FFD700',
-                padding: '2px 4px',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-              }
-            : undefined
-        }
-      >
-        {formattedChildren}
-      </code>
-    )
+    formattedChildren = <code style={styles.code}>{formattedChildren}</code>
   }
 
   return (
-    <span
-      {...attributes}
-      style={
-        sacredtheme
-          ? {
-              color: alpha('#FFD700', 0.9),
-            }
-          : undefined
-      }
-    >
+    <span {...attributes} style={styles.text}>
       {formattedChildren}
     </span>
   )
@@ -153,6 +221,30 @@ export function RichTextEditor({
 
   const [expanded, setExpanded] = useState(defaultExpanded)
 
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes richTextEditorBorderPulse {
+          0%, 100% { border-color: rgba(255, 215, 0, 0.3); }
+          50% { border-color: rgba(255, 215, 0, 0.6); }
+        }
+        @keyframes richTextEditorTextGlow {
+          0%, 100% { text-shadow: 0 0 3px rgba(255, 215, 0, 0.3); }
+          50% { text-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
+
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
   const renderElement = useCallback(
     (props: RenderElementProps) => (
       <Element {...props} sacredtheme={sacredtheme} />
@@ -170,26 +262,7 @@ export function RichTextEditor({
   }
 
   const editorContent = (
-    <Box
-      sx={{
-        border: sacredtheme
-          ? `1px solid ${alpha('#FFD700', 0.3)}`
-          : '1px solid black',
-        borderRadius: '8px',
-        width: 'auto',
-        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-        position: 'relative',
-        overflow: 'hidden',
-        ...(sacredtheme && {
-          animation: `${sacredBorderPulse} 4s ease-in-out infinite`,
-          boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)',
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-          `,
-        }),
-      }}
-    >
+    <div style={styles.editorContainer}>
       <Slate
         editor={editor}
         initialValue={internalValue}
@@ -205,23 +278,12 @@ export function RichTextEditor({
           editor={editor}
           sacredtheme={sacredtheme}
         />
-        <Divider
-          sx={{
-            backgroundColor: sacredtheme ? alpha('#FFD700', 0.3) : 'black',
-            ...(sacredtheme && {
-              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
-            }),
-          }}
-        />
-        <Box sx={{ position: 'relative' }}>
+        <hr style={styles.separator} />
+        <div style={{ position: 'relative' }}>
           <Editable
             style={{
+              ...styles.editable,
               minHeight: `${minRows * 20}px`,
-              padding: '16px',
-              color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
-              ...(sacredtheme && {
-                animation: `${sacredTextGlow} 3s ease-in-out infinite`,
-              }),
             }}
             placeholder={
               sacredtheme ? 'Channel divine wisdom...' : 'Enter text...'
@@ -230,36 +292,16 @@ export function RichTextEditor({
             renderElement={renderElement}
             renderLeaf={renderLeaf}
           />
-          {/* Sacred decorative element */}
           {sacredtheme && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: '8px',
-                right: '8px',
-                color: alpha('#FFD700', 0.1),
-                fontSize: '48px',
-                pointerEvents: 'none',
-                opacity: 0.5,
-              }}
-            >
-              {SACRED_GLYPHS[2]}
-            </Box>
+            <div style={sacredStyles.glyph}>{SACRED_GLYPHS[2]}</div>
           )}
-        </Box>
+        </div>
       </Slate>
-    </Box>
+    </div>
   )
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        justifyContent: 'center',
-      }}
-    >
+    <div style={styles.container}>
       {accordion ? (
         <Accordion
           expanded={expanded}
@@ -268,16 +310,7 @@ export function RichTextEditor({
           summary={
             <Typography
               fontvariant="merrih4"
-              sx={
-                sacredtheme
-                  ? {
-                      color: '#FFD700',
-                      fontFamily: '"Cinzel", serif',
-                      fontWeight: 600,
-                      textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-                    }
-                  : undefined
-              }
+              style={sacredtheme ? styles.label : undefined}
             >
               {accordionSummary || label || 'Rich Text Editor'}
             </Typography>
@@ -287,27 +320,14 @@ export function RichTextEditor({
       ) : (
         <>
           {label && (
-            <Typography
-              fontvariant="merrih4"
-              sx={
-                sacredtheme
-                  ? {
-                      color: '#FFD700',
-                      fontFamily: '"Cinzel", serif',
-                      fontWeight: 600,
-                      textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-                      marginBottom: '8px',
-                    }
-                  : undefined
-              }
-            >
+            <Typography fontvariant="merrih4" style={styles.label}>
               {label}
             </Typography>
           )}
           {editorContent}
         </>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -318,12 +338,13 @@ const Element = ({
   sacredtheme = false,
 }: RenderElementProps & { sacredtheme?: boolean }) => {
   const customElement = element as RichTextEditorTypes['CustomElement']
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
   if (!customElement.type) return null
+
   const style = {
     textAlign: customElement.align,
-    ...(sacredtheme && {
-      color: alpha('#FFD700', 0.9),
-    }),
+    ...styles.text,
   }
 
   switch (customElement.type) {
@@ -338,15 +359,7 @@ const Element = ({
         <a
           href={customElement.url}
           {...attributes}
-          style={
-            sacredtheme
-              ? {
-                  color: '#FFD700',
-                  textDecoration: 'underline',
-                  textDecorationColor: alpha('#FFD700', 0.5),
-                }
-              : undefined
-          }
+          style={{ ...style, ...styles.link }}
         >
           {children}
         </a>

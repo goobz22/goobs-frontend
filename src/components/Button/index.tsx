@@ -1,13 +1,9 @@
 // src/components/Button/index.tsx
-
 'use client'
-import React from 'react'
-import { Button, Box, ButtonProps, keyframes, alpha } from '@mui/material'
-import Typography from '../Typography'
-import { SvgIconProps } from '@mui/material/SvgIcon'
+import * as Agnostic from '../../framework-agnostic'
 
 // --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
+// SACRED THEMING CONSTANTS
 // --------------------------------------------------------------------------
 
 const SACRED_GLYPHS = [
@@ -37,355 +33,636 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-const sacredGlowPulse = keyframes`
-  0% { 
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-  }
-  50% { 
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.3);
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-  }
-  100% { 
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 5px rgba(255, 215, 0, 0.2);
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-  }
-`
+interface IconProps {
+  style?: Agnostic.CSSProperties
+  className?: string
+}
 
-const sacredShimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`
-
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
-
-const sacredFloat = keyframes`
-  0% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-2px) scale(1.05); }
-  100% { transform: translateY(0px) scale(1); }
-`
-
-const sacredIconGlow = keyframes`
-  0% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-  50% { filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.9)); }
-  100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-`
-
-export interface CustomButtonProps extends ButtonProps {
+export interface CustomButtonProps
+  extends Omit<Agnostic.ComponentProps, 'style'> {
   text?: string
-  /**
-   * The background color for the button when not disabled.
-   * If `backgroundcolor` is "none", it behaves like a text button.
-   */
   backgroundcolor?: string
-  /** The text color. Defaults to white unless disabled. */
   fontcolor?: string
-  fontvariant?: 'merriparagraph' | 'merrihelperfooter'
   width?: string
   height?: string
-  /**
-   * If you want to disable the button in a custom way (string),
-   * we unify this with MUI's `disabled` boolean.
-   */
   disableButton?: 'true' | 'false'
-
-  /** Optional icon to display. */
-  icon?: React.ReactElement<SvgIconProps>
+  icon?:
+    | Agnostic.VirtualElement
+    | ((props: IconProps) => Agnostic.VirtualElement)
+    | string
   iconcolor?: string
   iconsize?: string
   iconlocation?: 'left' | 'right' | 'above'
   fontlocation?: 'left' | 'center' | 'right'
-
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
+  outline?: boolean
+  onClick?: (event: Agnostic.MouseEvent<HTMLButtonElement>) => void
+  disabled?: boolean
+  className?: string
+  style?: Agnostic.CSSProperties
 }
 
-function CustomButton({
-  text,
-  variant = 'contained',
-  fontvariant = 'merriparagraph',
-  onClick,
-  fontcolor,
-  backgroundcolor,
-  width,
-  height,
-  disableButton,
-  icon,
-  iconcolor,
-  iconsize,
-  iconlocation = 'left',
-  fontlocation = 'center',
-  disabled,
-  style = {},
-  sacredtheme = false,
-  ...restProps
-}: CustomButtonProps) {
-  // Merge MUI's "disabled" with our "disableButton"
-  const isReallyDisabled = disabled || disableButton === 'true'
-
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    onClick?.(event)
-  }
-
-  // If user provides an icon, clone it to override color/size if desired
-  const IconComponent = icon
-    ? React.cloneElement(icon, {
-        sx: {
-          color: sacredtheme
-            ? isReallyDisabled
-              ? alpha('#FFD700', 0.3)
-              : iconcolor || '#FFD700'
-            : iconcolor || 'inherit',
-          fontSize: iconsize || '20px',
-          minWidth: iconsize || '20px',
-          minHeight: iconsize || '20px',
-          margin: 0,
-          ...(sacredtheme &&
-            !isReallyDisabled && {
-              animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-            }),
-        },
-      } as Partial<SvgIconProps>)
-    : null
-
-  // Determine if this is an icon-only button
-  const isIconOnly = !!icon && !text
-
-  // Adjust height for icon above text layout or icon-only buttons
-  const isIconAbove = iconlocation === 'above'
-  const defaultHeight = isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'
-  const minHeight = isIconOnly ? '36px' : isIconAbove ? '70px' : '40px'
-
-  // Random glyph selection for sacred theme
-  const leftGlyph =
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  const rightGlyph =
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-
-  // Base inline styles for the button
-  const buttonStyle: React.CSSProperties = {
-    minWidth: isIconOnly ? '36px' : 'fit-content',
-    width: width || (isIconOnly ? '36px' : 'auto'),
-    height: height || defaultHeight,
-    minHeight: minHeight,
-    padding: isIconOnly ? '6px' : isIconAbove ? '16px 16px' : '8px 16px',
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
     display: 'inline-flex',
-    flexShrink: 0,
-    flexWrap: 'nowrap',
-    whiteSpace: 'nowrap',
-    flexDirection: isIconAbove ? 'column' : 'row',
     alignItems: 'center',
-    justifyContent: isIconOnly
-      ? 'center'
-      : fontlocation === 'left'
-        ? 'flex-start'
-        : fontlocation === 'right'
-          ? 'flex-end'
-          : 'center',
-    gap: isIconAbove ? '12px' : '8px',
     position: 'relative',
     overflow: 'hidden',
-    transition: 'all 0.3s ease',
-  }
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    borderRadius: '10px',
+    border: '1px solid rgba(226, 232, 240, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(8px)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+    cursor: 'pointer',
+    fontFamily: '"Inter", sans-serif',
+    fontWeight: 600,
+    fontSize: '14px',
+    letterSpacing: '-0.025em',
+    color: 'rgb(55, 65, 81)',
+    textAlign: 'center',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+    padding: '12px 24px',
+    minHeight: '44px',
+    gap: '8px',
+  } as Agnostic.CSSProperties,
 
-  // Sacred theme styles
-  if (sacredtheme && !isReallyDisabled) {
-    buttonStyle.backgroundColor =
-      backgroundcolor === 'none'
-        ? 'transparent'
-        : backgroundcolor || alpha('#000000', 0.9)
-    buttonStyle.border = `2px solid ${alpha('#FFD700', 0.8)}`
-    buttonStyle.borderRadius = '8px'
-    buttonStyle.color = '#FFD700'
-    buttonStyle.fontFamily = '"Cinzel", serif'
-    buttonStyle.fontWeight = 600
-    buttonStyle.letterSpacing = '1px'
-    buttonStyle.textTransform = 'uppercase'
-    buttonStyle.animation = `${sacredGlowPulse} 3s ease-in-out infinite`
-    buttonStyle.backgroundImage =
-      backgroundcolor !== 'none'
-        ? `
-      linear-gradient(135deg, 
-        ${alpha('#FFD700', 0.1)} 0%, 
-        ${alpha('#000000', 0.9)} 50%,
-        ${alpha('#FFD700', 0.1)} 100%)
-    `
-        : undefined
-  }
+  containerNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  } as Agnostic.CSSProperties,
 
-  // If disabled, force styling
-  if (isReallyDisabled) {
-    if (sacredtheme) {
-      buttonStyle.backgroundColor = alpha('#000000', 0.6)
-      buttonStyle.border = `2px solid ${alpha('#FFD700', 0.2)}`
-      buttonStyle.color = alpha('#FFD700', 0.3)
-      buttonStyle.animation = 'none'
-      buttonStyle.backgroundImage = 'none'
-    } else {
-      buttonStyle.backgroundColor = '#cccccc'
-    }
-    buttonStyle.opacity = 1
-    buttonStyle.cursor = 'not-allowed'
-    buttonStyle.pointerEvents = 'auto'
-  } else if (!sacredtheme && backgroundcolor && backgroundcolor !== 'none') {
-    buttonStyle.backgroundColor = backgroundcolor
-  } else if (!sacredtheme && backgroundcolor === 'none') {
-    buttonStyle.backgroundColor = 'transparent'
-  }
+  containerHover: {
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08)',
+    backgroundColor: 'rgba(239, 246, 255, 0.95)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    color: 'rgb(29, 78, 216)',
+  } as Agnostic.CSSProperties,
 
-  // Inline styles for the top-level container (Box)
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
+  containerActive: {
+    transform: 'translateY(0px)',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08)',
+  } as Agnostic.CSSProperties,
+
+  containerDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    backgroundColor: 'rgba(249, 250, 251, 0.8)',
+    color: 'rgb(156, 163, 175)',
+    transform: 'none',
+    boxShadow: 'none',
+  } as Agnostic.CSSProperties,
+
+  containerIconOnly: {
+    width: '44px',
+    height: '44px',
+    padding: '10px',
+    borderRadius: '10px',
+    justifyContent: 'center',
+  } as Agnostic.CSSProperties,
+
+  containerIconAbove: {
     flexDirection: 'column',
-    alignItems: 'center',
-    width: width || (isIconOnly ? '36px' : 'auto'),
-    height: height || (isIconOnly ? '36px' : isIconAbove ? 'auto' : '40px'),
-    minHeight: isIconOnly ? '36px' : isIconAbove ? minHeight : 'auto',
-    minWidth: isIconOnly ? '36px' : 'fit-content',
+    padding: '16px',
+    minHeight: '80px',
+    gap: '8px',
+  } as Agnostic.CSSProperties,
+
+  accent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '3px',
+    background:
+      'linear-gradient(180deg, rgb(59, 130, 246) 0%, rgb(147, 197, 253) 100%)',
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+    borderRadius: '2px 0 0 2px',
+  } as Agnostic.CSSProperties,
+
+  accentVisible: {
+    opacity: 1,
+  } as Agnostic.CSSProperties,
+
+  shimmer: {
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background:
+      'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
+    transition: 'left 0.5s ease',
+  } as Agnostic.CSSProperties,
+
+  shimmerActive: {
+    left: '100%',
+  } as Agnostic.CSSProperties,
+
+  text: {
     position: 'relative',
-    ...style,
+    zIndex: 1,
+    lineHeight: 1,
+  } as Agnostic.CSSProperties,
+
+  icon: {
+    position: 'relative',
+    zIndex: 1,
+    transition: 'all 0.3s ease',
+    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+  } as Agnostic.CSSProperties,
+
+  iconHover: {
+    transform: 'scale(1.05)',
+    filter: 'drop-shadow(0 2px 4px rgba(29, 78, 216, 0.2))',
+  } as Agnostic.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.4s ease',
+    borderRadius: '12px',
+    border: '2px solid rgba(255, 215, 0, 0.4)',
+    backgroundColor: 'rgba(10, 10, 10, 0.9)',
+    backdropFilter: 'blur(8px)',
+    boxShadow:
+      '0 0 20px rgba(255, 215, 0, 0.2), 0 0 40px rgba(255, 215, 0, 0.1)',
+    cursor: 'pointer',
+    fontFamily: '"Cinzel", serif',
+    fontWeight: 700,
+    fontSize: '15px',
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    color: 'rgba(255, 215, 0, 0.9)',
+    textAlign: 'center',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+    padding: '16px 32px',
+    minHeight: '52px',
+    gap: '12px',
+    backgroundImage: `
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.02) 0%, transparent 50%)
+    `,
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as Agnostic.CSSProperties,
+
+  containerNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+  } as Agnostic.CSSProperties,
+
+  containerHover: {
+    transform: 'translateY(-2px)',
+    borderColor: 'rgba(255, 215, 0, 0.8)',
+    boxShadow:
+      '0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)',
+    color: '#FFD700',
+    textShadow: '0 0 15px rgba(255, 215, 0, 0.8)',
+    backgroundImage: `
+      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+    `,
+  } as Agnostic.CSSProperties,
+
+  containerActive: {
+    transform: 'translateY(-1px)',
+    boxShadow:
+      '0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.15)',
+  } as Agnostic.CSSProperties,
+
+  containerDisabled: {
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    backgroundColor: 'rgba(10, 10, 10, 0.6)',
+    color: 'rgba(255, 215, 0, 0.3)',
+    borderColor: 'rgba(255, 215, 0, 0.2)',
+    transform: 'none',
+    boxShadow: 'none',
+    textShadow: 'none',
+  } as Agnostic.CSSProperties,
+
+  containerIconOnly: {
+    width: '52px',
+    height: '52px',
+    padding: '12px',
+    borderRadius: '12px',
+    justifyContent: 'center',
+  } as Agnostic.CSSProperties,
+
+  containerIconAbove: {
+    flexDirection: 'column',
+    padding: '20px',
+    minHeight: '90px',
+    gap: '12px',
+  } as Agnostic.CSSProperties,
+
+  text: {
+    position: 'relative',
+    zIndex: 1,
+    lineHeight: 1,
+  } as Agnostic.CSSProperties,
+
+  icon: {
+    position: 'relative',
+    zIndex: 1,
+    transition: 'all 0.3s ease',
+    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+  } as Agnostic.CSSProperties,
+
+  iconHover: {
+    transform: 'scale(1.1) rotate(5deg)',
+    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+  } as Agnostic.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    fontSize: '14px',
+    color: 'rgba(255, 215, 0, 0.3)',
+    transition: 'all 0.3s ease',
+    opacity: 0,
+    pointerEvents: 'none',
+  } as Agnostic.CSSProperties,
+
+  glyphLeft: {
+    left: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+  } as Agnostic.CSSProperties,
+
+  glyphRight: {
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+  } as Agnostic.CSSProperties,
+
+  glyphVisible: {
+    opacity: 1,
+  } as Agnostic.CSSProperties,
+
+  glyphRotate: {
+    animation: 'sacredGlyphRotate 20s linear infinite',
+  } as Agnostic.CSSProperties,
+
+  glyphRotateReverse: {
+    animation: 'sacredGlyphRotateReverse 20s linear infinite',
+  } as Agnostic.CSSProperties,
+}
+
+function CustomButtonCore(
+  props: CustomButtonProps
+): Agnostic.VirtualElement | null {
+  const {
+    text,
+    onClick,
+    fontcolor,
+    backgroundcolor,
+    width,
+    height,
+    disableButton,
+    icon,
+    iconcolor,
+    iconsize,
+    iconlocation = 'left',
+    fontlocation = 'center',
+    disabled,
+    className,
+    sacredtheme = false,
+    outline = true,
+    style,
+    ...restProps
+  } = props
+
+  const isHovered = Agnostic.useSignal(false)
+  const isActive = Agnostic.useSignal(false)
+  const leftGlyph = Agnostic.useSignal(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+  const rightGlyph = Agnostic.useSignal(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  const isReallyDisabled = disabled || disableButton === 'true'
+  const isIconOnly = !!icon && !text
+  const isIconAbove = iconlocation === 'above'
+
+  // CSS keyframes for sacred animations
+  Agnostic.useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      if (styleSheet) {
+        const keyframes = `
+          @keyframes sacredGlyphRotate {
+            from { transform: translateY(-50%) rotate(0deg); }
+            to { transform: translateY(-50%) rotate(360deg); }
+          }
+          @keyframes sacredGlyphRotateReverse {
+            from { transform: translateY(-50%) rotate(360deg); }
+            to { transform: translateY(-50%) rotate(0deg); }
+          }
+        `
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
+      }
+    }
+  }, [])
+
+  const handleButtonClick = (event: Agnostic.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    if (!isReallyDisabled && onClick) {
+      onClick(event)
+    }
   }
 
-  // Style for the inner content box
-  const contentBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: isIconOnly
-      ? 'center'
-      : fontlocation === 'left'
+  const handleMouseDown = () => (isActive.value = true)
+  const handleMouseUp = () => (isActive.value = false)
+  const handleMouseLeave = () => {
+    isHovered.value = false
+    isActive.value = false
+  }
+
+  // Process icon with custom styling
+  let IconComponent: Agnostic.VirtualElement | null = null
+  if (icon) {
+    const iconStyle = {
+      color: isReallyDisabled
+        ? sacredtheme
+          ? 'rgba(255, 215, 0, 0.3)'
+          : 'rgb(156, 163, 175)'
+        : iconcolor || (sacredtheme ? '#FFD700' : 'currentColor'),
+      fontSize: iconsize || '20px',
+      minWidth: iconsize || '20px',
+      minHeight: iconsize || '20px',
+      margin: 0,
+      ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
+      ...(isHovered.value &&
+        !isReallyDisabled &&
+        (sacredtheme ? sacredStyles.iconHover : premiumStyles.iconHover)),
+    }
+
+    if (typeof icon === 'object' && '__vnode' in icon) {
+      // Framework-agnostic VirtualElement - pass type without casting
+      IconComponent = Agnostic.createElement(icon.type, {
+        ...icon.props,
+        style: {
+          ...(icon.props?.style || {}),
+          ...(iconStyle as Agnostic.CSSProperties),
+        },
+      })
+    } else if (typeof icon === 'function') {
+      // Framework-agnostic component function
+      IconComponent = icon({
+        style: iconStyle as Agnostic.CSSProperties,
+      })
+    } else {
+      // Fallback - treat as string
+      IconComponent = Agnostic.createElement(
+        'span',
+        {
+          style: iconStyle as Agnostic.CSSProperties,
+        },
+        String(icon)
+      )
+    }
+  }
+
+  if (sacredtheme) {
+    const containerStyle = {
+      ...sacredStyles.container,
+      ...(!outline && sacredStyles.containerNoOutline),
+      ...(isIconOnly && sacredStyles.containerIconOnly),
+      ...(isIconAbove && sacredStyles.containerIconAbove),
+      ...(isHovered.value && !isReallyDisabled && sacredStyles.containerHover),
+      ...(isActive.value && !isReallyDisabled && sacredStyles.containerActive),
+      ...(isReallyDisabled && sacredStyles.containerDisabled),
+      ...(width && { width }),
+      ...(height && { height }),
+      ...(backgroundcolor &&
+        !isReallyDisabled && { backgroundColor: backgroundcolor }),
+      ...((style as Agnostic.CSSProperties) || {}),
+    }
+
+    const textStyle = {
+      ...sacredStyles.text,
+      color: isReallyDisabled
+        ? 'rgba(255, 215, 0, 0.3)'
+        : fontcolor || 'rgba(255, 215, 0, 0.9)',
+      textAlign: fontlocation,
+    }
+
+    const justifyContent =
+      fontlocation === 'left'
         ? 'flex-start'
         : fontlocation === 'right'
           ? 'flex-end'
-          : 'center',
-    width: '100%',
-    height: '100%',
-    gap: '8px',
-    position: 'relative',
-    zIndex: 2,
+          : 'center'
+
+    // Create properly typed children array
+    const children: (Agnostic.VirtualElement | string | null)[] = []
+
+    // Add left glyph
+    if (!isIconOnly) {
+      children.push(
+        Agnostic.createElement(
+          'div',
+          {
+            style: {
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphLeft,
+              ...(isHovered.value &&
+                !isReallyDisabled &&
+                sacredStyles.glyphVisible),
+              ...(isHovered.value &&
+                !isReallyDisabled &&
+                sacredStyles.glyphRotate),
+            },
+          },
+          leftGlyph.value
+        )
+      )
+    }
+
+    // Add right glyph
+    if (!isIconOnly) {
+      children.push(
+        Agnostic.createElement(
+          'div',
+          {
+            style: {
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphRight,
+              ...(isHovered.value &&
+                !isReallyDisabled &&
+                sacredStyles.glyphVisible),
+              ...(isHovered.value &&
+                !isReallyDisabled &&
+                sacredStyles.glyphRotateReverse),
+            },
+          },
+          rightGlyph.value
+        )
+      )
+    }
+
+    // Add icon above
+    if (isIconAbove && IconComponent) {
+      children.push(IconComponent)
+    }
+
+    // Add left icon
+    if (iconlocation === 'left' && !isIconAbove && IconComponent) {
+      children.push(IconComponent)
+    }
+
+    // Add text
+    if (text) {
+      children.push(Agnostic.createElement('span', { style: textStyle }, text))
+    }
+
+    // Add right icon
+    if (iconlocation === 'right' && !isIconAbove && IconComponent) {
+      children.push(IconComponent)
+    }
+
+    return Agnostic.createElement(
+      'button',
+      {
+        ...restProps,
+        onClick: handleButtonClick,
+        onMouseDown: handleMouseDown,
+        onMouseUp: handleMouseUp,
+        onMouseEnter: () => (isHovered.value = true),
+        onMouseLeave: handleMouseLeave,
+        disabled: isReallyDisabled,
+        className: className,
+        style: {
+          ...containerStyle,
+          justifyContent: isIconAbove ? 'center' : justifyContent,
+          flexDirection: isIconAbove ? 'column' : 'row',
+        },
+        'data-testid': isReallyDisabled ? 'disabled-button' : 'button',
+      },
+      ...children
+    )
   }
 
-  return (
-    <Box style={containerStyle}>
-      <Button
-        {...restProps}
-        variant={variant}
-        onClick={handleButtonClick}
-        disabled={isReallyDisabled}
-        disableElevation
-        disableRipple
-        style={buttonStyle}
-        data-testid={isReallyDisabled ? 'disabled-button' : 'button'}
-        sx={{
-          ...(sacredtheme &&
-            !isReallyDisabled && {
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: `linear-gradient(90deg, transparent, ${alpha('#FFD700', 0.2)}, transparent)`,
-                backgroundSize: '200% 100%',
-                animation: `${sacredShimmer} 2s ease-in-out infinite`,
-                opacity: 0,
-                transition: 'opacity 0.3s ease',
-              },
-              '&::after': {
-                content: `"${leftGlyph}"`,
-                position: 'absolute',
-                left: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: alpha('#FFD700', 0.3),
-                fontSize: '14px',
-                animation: `${rotateGlyph} 20s linear infinite`,
-                opacity: 0,
-                transition: 'opacity 0.3s ease',
-              },
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                borderColor: '#FFD700',
-                boxShadow:
-                  '0 0 20px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4)',
-                '&::before': {
-                  opacity: 1,
-                },
-                '&::after': {
-                  opacity: 1,
-                },
-                '& .sacred-glyph-right': {
-                  opacity: 1,
-                },
-              },
-            }),
-        }}
-      >
-        {/* Sacred floating glyph on the right */}
-        {sacredtheme && !isReallyDisabled && (
-          <Box
-            className="sacred-glyph-right"
-            sx={{
-              position: 'absolute',
-              right: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: alpha('#FFD700', 0.3),
-              fontSize: '14px',
-              animation: `${rotateGlyph} 15s linear infinite reverse`,
-              opacity: 0,
-              transition: 'opacity 0.3s ease',
-            }}
-          >
-            {rightGlyph}
-          </Box>
-        )}
+  // Premium theme
+  const containerStyle = {
+    ...premiumStyles.container,
+    ...(!outline && premiumStyles.containerNoOutline),
+    ...(isIconOnly && premiumStyles.containerIconOnly),
+    ...(isIconAbove && premiumStyles.containerIconAbove),
+    ...(isHovered.value && !isReallyDisabled && premiumStyles.containerHover),
+    ...(isActive.value && !isReallyDisabled && premiumStyles.containerActive),
+    ...(isReallyDisabled && premiumStyles.containerDisabled),
+    ...(width && { width }),
+    ...(height && { height }),
+    ...(backgroundcolor &&
+      !isReallyDisabled && { backgroundColor: backgroundcolor }),
+    ...((style as Agnostic.CSSProperties) || {}),
+  }
 
-        {/* If iconlocation="above", show the icon first */}
-        {isIconAbove && IconComponent}
+  const textStyle = {
+    ...premiumStyles.text,
+    color: isReallyDisabled
+      ? 'rgb(156, 163, 175)'
+      : fontcolor || 'currentColor',
+    textAlign: fontlocation,
+  }
 
-        {/* The text+icon container */}
-        <Box style={contentBoxStyle}>
-          {iconlocation === 'left' && IconComponent}
+  const justifyContent =
+    fontlocation === 'left'
+      ? 'flex-start'
+      : fontlocation === 'right'
+        ? 'flex-end'
+        : 'center'
 
-          {text && (
-            <Typography
-              fontvariant={sacredtheme ? undefined : fontvariant}
-              fontcolor={
-                isReallyDisabled
-                  ? sacredtheme
-                    ? alpha('#FFD700', 0.3)
-                    : 'grey'
-                  : sacredtheme
-                    ? '#FFD700'
-                    : fontcolor || 'white'
-              }
-              text={text}
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Cinzel", serif',
-                      fontWeight: 600,
-                      letterSpacing: '1px',
-                      textTransform: 'uppercase',
-                      animation: isReallyDisabled
-                        ? 'none'
-                        : `${sacredFloat} 2s ease-in-out infinite`,
-                    }
-                  : undefined
-              }
-            />
-          )}
+  // Create properly typed children array
+  const children: (Agnostic.VirtualElement | string | null)[] = []
 
-          {iconlocation === 'right' && IconComponent}
-        </Box>
-      </Button>
-    </Box>
+  // Add accent
+  if (outline) {
+    children.push(
+      Agnostic.createElement('div', {
+        style: {
+          ...premiumStyles.accent,
+          ...(isHovered.value &&
+            !isReallyDisabled &&
+            premiumStyles.accentVisible),
+        },
+      })
+    )
+  }
+
+  // Add shimmer
+  if (isHovered.value && !isReallyDisabled) {
+    children.push(
+      Agnostic.createElement('div', {
+        style: {
+          ...premiumStyles.shimmer,
+          ...premiumStyles.shimmerActive,
+        },
+      })
+    )
+  }
+
+  // Add icon above
+  if (isIconAbove && IconComponent) {
+    children.push(IconComponent)
+  }
+
+  // Add left icon
+  if (iconlocation === 'left' && !isIconAbove && IconComponent) {
+    children.push(IconComponent)
+  }
+
+  // Add text
+  if (text) {
+    children.push(Agnostic.createElement('span', { style: textStyle }, text))
+  }
+
+  // Add right icon
+  if (iconlocation === 'right' && !isIconAbove && IconComponent) {
+    children.push(IconComponent)
+  }
+
+  return Agnostic.createElement(
+    'button',
+    {
+      ...restProps,
+      onClick: handleButtonClick,
+      onMouseDown: handleMouseDown,
+      onMouseUp: handleMouseUp,
+      onMouseEnter: () => (isHovered.value = true),
+      onMouseLeave: handleMouseLeave,
+      disabled: isReallyDisabled,
+      className: className,
+      style: {
+        ...containerStyle,
+        justifyContent: isIconAbove ? 'center' : justifyContent,
+        flexDirection: isIconAbove ? 'column' : 'row',
+      },
+      'data-testid': isReallyDisabled ? 'disabled-button' : 'button',
+    },
+    ...children
   )
 }
+
+// Export the framework-agnostic component directly
+const CustomButton = CustomButtonCore
 
 export default CustomButton

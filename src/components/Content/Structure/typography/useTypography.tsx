@@ -10,8 +10,7 @@ const useTypography = (props: {
     typographyItem: TypographyProps,
     index: number
   ): React.ReactElement => {
-    const { text, fontcolor, fontvariant, component, ...restProps } =
-      typographyItem
+    const { text, fontcolor, fontvariant, ...restProps } = typographyItem
 
     return (
       <Typography
@@ -19,7 +18,6 @@ const useTypography = (props: {
         text={text}
         fontvariant={fontvariant}
         fontcolor={fontcolor}
-        component={component || 'span'}
         {...restProps}
       />
     )

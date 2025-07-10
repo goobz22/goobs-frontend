@@ -1,59 +1,132 @@
 // src/components/Nav/VerticalVariant/mainNav/list.tsx
 'use client'
-import React, { FC } from 'react'
-import { MenuItem, alpha, keyframes } from '@mui/material'
+import React, { FC, useState } from 'react'
 import Link from 'next/link'
 import { white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
 
 interface ListNavProps {
   title?: string
-  /**
-   * Click handler for route or onClick triggers.
-   */
   onClick?: () => void
-  /**
-   * Indentation level for the item.
-   */
   level: number
-  /**
-   * Route for navigation
-   */
   route?: string
-  /**
-   * Trigger type: 'route' or 'onClick'
-   */
   trigger?: 'route' | 'onClick'
-  /**
-   * For closing mobile drawer
-   */
   onClose?: () => void
-  /**
-   * Drawer variant
-   */
   variant?: 'temporary' | 'permanent'
-  /**
-   * Whether the nav item is currently active/selected.
-   */
   isActive?: boolean
-  /**
-   * Color for the active and hover states.
-   */
   activeAndHoverColor: string
 }
 
-const shimmer = keyframes`
-  from {
-    background-position: -200% 0;
-  }
-  to {
-    background-position: 200% 0;
-  }
-`
+// Premium theme styles (when not sacred theme)
+const premiumStyles = {
+  menuItem: {
+    marginLeft: '24px',
+    marginTop: '8px',
+    height: '32px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '16px',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+  } as React.CSSProperties,
 
-/**
- * For a main nav item that has NO children and doesn't need expansion.
- */
+  menuItemActive: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  } as React.CSSProperties,
+
+  menuItemHover: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    transition: 'all 0.3s ease',
+  } as React.CSSProperties,
+
+  link: {
+    textDecoration: 'none',
+    color: 'inherit',
+  } as React.CSSProperties,
+
+  glyph: {
+    display: 'none', // Hidden for premium theme
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    display: 'none', // Hidden for premium theme
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles
+const sacredStyles = {
+  menuItem: {
+    marginLeft: '24px',
+    marginTop: '8px',
+    height: '32px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '16px',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    color: 'rgba(255, 215, 0, 1)',
+    '&::before': {
+      content: '"𓁟"',
+      position: 'absolute',
+      left: '8px',
+      opacity: 0,
+      transition: 'all 0.3s ease',
+      color: 'rgba(255, 215, 0, 1)',
+      fontSize: '16px',
+    },
+  } as React.CSSProperties,
+
+  menuItemActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+  } as React.CSSProperties,
+
+  menuItemHover: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    transform: 'translateX(8px)',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+    '&::before': {
+      opacity: 1,
+      transform: 'translateX(-4px) scale(1.25)',
+    },
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    transition: 'all 0.3s ease',
+    fontWeight: 600,
+    letterSpacing: '0.025em',
+    textShadow: '0 0 3px rgba(255, 215, 0, 0.3)',
+  } as React.CSSProperties,
+
+  link: {
+    textDecoration: 'none',
+    color: 'inherit',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    left: '8px',
+    opacity: 0,
+    transition: 'all 0.3s ease',
+    color: 'rgba(255, 215, 0, 1)',
+    fontSize: '16px',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    opacity: 1,
+    transform: 'translateX(-4px) scale(1.25)',
+  } as React.CSSProperties,
+}
+
 const ListNav: FC<ListNavProps> = ({
   title,
   onClick,
@@ -64,96 +137,64 @@ const ListNav: FC<ListNavProps> = ({
   isActive,
   activeAndHoverColor,
 }) => {
-  const issacredtheme =
-    activeAndHoverColor.includes('255, 215, 0') ||
-    activeAndHoverColor === alpha('#FFD700', 0.15)
+  const [isHovered, setIsHovered] = useState(false)
+  const issacredtheme = activeAndHoverColor.includes('rgba(255, 215, 0, 0.15)')
+
+  const styles = issacredtheme ? sacredStyles : premiumStyles
+
+  const menuItemStyle = {
+    ...styles.menuItem,
+    ...(isActive ? styles.menuItemActive : {}),
+    ...(isHovered ? styles.menuItemHover : {}),
+    ...(isActive && issacredtheme
+      ? { backgroundColor: activeAndHoverColor }
+      : {}),
+    ...(isHovered && issacredtheme
+      ? { backgroundColor: activeAndHoverColor }
+      : {}),
+  }
+
+  const glyphStyle = issacredtheme
+    ? {
+        ...styles.glyph,
+        ...(isHovered ? styles.glyphVisible : {}),
+      }
+    : {}
 
   const menuItemContent = (
     <Typography
       fontvariant="merrih5"
       fontcolor={issacredtheme ? '#FFD700' : white.main}
       text={title ?? ''}
-      sx={{
-        whiteSpace: 'nowrap', // No wrapping
-        ...(issacredtheme && {
-          fontWeight: 600,
-          letterSpacing: 1.2,
-          transition: 'all 0.3s ease',
-          textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-        }),
-      }}
+      style={styles.typography}
     />
   )
 
   const menuItem = (
-    <MenuItem
-      sx={{
-        // Match indentation of ExpandingNav text
-        // (AccordionSummary ml=1 + icon)
-        marginLeft: '24px',
-        marginTop: 2,
-        height: '32px',
-        borderRadius: '4px',
-        backgroundColor: isActive ? activeAndHoverColor : 'transparent',
-        ...(issacredtheme && {
-          position: 'relative',
-          transition: 'all 0.3s ease',
-          color: '#FFD700',
-          '&::before': {
-            content: '"𓁟"',
-            position: 'absolute',
-            left: '8px',
-            opacity: 0,
-            transition: 'all 0.3s ease',
-            color: '#FFD700',
-            fontSize: '16px',
-          },
-        }),
-        '&:hover': {
-          backgroundColor: activeAndHoverColor,
-          ...(issacredtheme && {
-            color: '#FFD700',
-            transform: 'translateX(8px)',
-            textShadow: '0 0 12px rgba(255, 215, 0, 0.8)',
-            '&::before': {
-              opacity: 1,
-              transform: 'translateX(-4px) scale(1.2)',
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              background:
-                'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent)',
-              animation: `${shimmer} 1s ease-in-out`,
-            },
-          }),
-        },
-      }}
+    <div
       onClick={() => {
         if (onClick) onClick()
         if (trigger === 'route' && variant === 'temporary' && onClose) {
           onClose()
         }
       }}
+      style={menuItemStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {issacredtheme && <div style={glyphStyle}>𓁟</div>}
       {menuItemContent}
-    </MenuItem>
+    </div>
   )
 
-  // If we have a route and it's a route trigger, wrap in Link
   if (route && trigger === 'route') {
     return (
-      <Link href={route} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Link href={route} style={styles.link}>
         {menuItem}
       </Link>
     )
   }
 
-  // Otherwise just return the MenuItem
   return menuItem
 }
 

@@ -1,6 +1,5 @@
 'use client'
-import React, { FC } from 'react'
-import { MenuItem, alpha } from '@mui/material'
+import React, { FC, useState } from 'react'
 import Link from 'next/link'
 import { semiTransparentWhite, white } from '../../../../styles/palette'
 import { Typography } from '../../../Typography'
@@ -13,16 +12,122 @@ interface SubViewNavProps {
   activeAndHoverColor?: string
   onClose?: () => void
   variant?: 'temporary' | 'permanent'
-  /**
-   * Whether the nav item is currently active/selected.
-   */
   isActive?: boolean
 }
 
-/**
- * SubViewNav component for displaying a fourth-level navigation item
- * This is meant to be used for items that are children of viewNav items
- */
+// Premium theme styles (when not sacred theme)
+const premiumStyles = {
+  menuItem: {
+    marginLeft: '64px',
+    height: '32px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '16px',
+    transition: 'all 0.3s ease',
+    whiteSpace: 'nowrap',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+  } as React.CSSProperties,
+
+  menuItemActive: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  } as React.CSSProperties,
+
+  menuItemHover: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
+  } as React.CSSProperties,
+
+  link: {
+    textDecoration: 'none',
+    color: 'white',
+    whiteSpace: 'nowrap',
+  } as React.CSSProperties,
+
+  glyph: {
+    display: 'none',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    display: 'none',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles
+const sacredStyles = {
+  menuItem: {
+    marginLeft: '64px',
+    height: '32px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '16px',
+    transition: 'all 0.3s ease',
+    whiteSpace: 'nowrap',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    position: 'relative',
+    color: 'rgba(255, 215, 0, 0.9)',
+    '&::before': {
+      content: '"𓊖"',
+      position: 'absolute',
+      left: '8px',
+      opacity: 0,
+      transition: 'all 0.3s ease',
+      color: 'rgba(255, 215, 0, 1)',
+      fontSize: '14px',
+    },
+  } as React.CSSProperties,
+
+  menuItemActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+  } as React.CSSProperties,
+
+  menuItemHover: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    transform: 'translateX(4px)',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+    '&::before': {
+      opacity: 1,
+      transform: 'translateX(-2px) scale(1.1)',
+    },
+  } as React.CSSProperties,
+
+  typography: {
+    whiteSpace: 'nowrap',
+    fontSize: '14px',
+    fontWeight: 500,
+    letterSpacing: '0.015em',
+    transition: 'all 0.3s ease',
+  } as React.CSSProperties,
+
+  link: {
+    textDecoration: 'none',
+    color: 'white',
+    whiteSpace: 'nowrap',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    left: '8px',
+    opacity: 0,
+    transition: 'all 0.3s ease',
+    color: 'rgba(255, 215, 0, 1)',
+    fontSize: '14px',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    opacity: 1,
+    transform: 'translateX(-2px) scale(1.1)',
+  } as React.CSSProperties,
+}
+
 const SubViewNav: FC<SubViewNavProps> = ({
   title,
   route,
@@ -33,7 +138,8 @@ const SubViewNav: FC<SubViewNavProps> = ({
   variant,
   isActive,
 }) => {
-  // Handle click to support both route and onClick
+  const [isHovered, setIsHovered] = useState(false)
+
   const handleClick = () => {
     if (trigger === 'route' && variant === 'temporary' && onClose) {
       onClose()
@@ -45,89 +151,55 @@ const SubViewNav: FC<SubViewNavProps> = ({
     }
   }
 
-  // Check if we're using sacred theming based on hover color
-  const issacredtheme =
-    activeAndHoverColor.includes('255, 215, 0') ||
-    activeAndHoverColor === alpha('#FFD700', 0.15)
+  const issacredtheme = activeAndHoverColor.includes('rgba(255, 215, 0, 0.15)')
 
-  return (
-    <Link
-      key={title}
-      href={route ?? ''}
-      style={{
-        textDecoration: 'none',
-        color: 'white',
-        whiteSpace: 'nowrap', // keep text in one line
-      }}
+  const styles = issacredtheme ? sacredStyles : premiumStyles
+
+  const menuItemStyle = {
+    ...styles.menuItem,
+    ...(isActive ? styles.menuItemActive : {}),
+    ...(isHovered ? styles.menuItemHover : {}),
+    ...(isActive && issacredtheme
+      ? { backgroundColor: activeAndHoverColor }
+      : {}),
+    ...(isHovered && issacredtheme
+      ? { backgroundColor: activeAndHoverColor }
+      : {}),
+  }
+
+  const glyphStyle = issacredtheme
+    ? {
+        ...styles.glyph,
+        ...(isHovered ? styles.glyphVisible : {}),
+      }
+    : {}
+
+  const content = (
+    <div
       onClick={handleClick}
+      style={menuItemStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <MenuItem
-        sx={{
-          color: issacredtheme ? alpha('#FFD700', 0.9) : white.main,
-          // Increased indentation by 15px compared to previous value
-          marginLeft: '68px',
-          whiteSpace: 'nowrap',
-          padding: '6px 16px',
-          minHeight: '32px',
-          position: 'relative',
-          transition: 'all 0.3s ease',
-          backgroundColor: isActive ? activeAndHoverColor : 'transparent',
-          ...(issacredtheme && {
-            '&::before': {
-              content: '"𓊖"',
-              position: 'absolute',
-              left: '8px',
-              opacity: 0,
-              transition: 'all 0.3s ease',
-              color: '#FFD700',
-              fontSize: '13px',
-            },
-          }),
-          '&:hover': {
-            backgroundColor: activeAndHoverColor,
-            ...(issacredtheme && {
-              color: '#FFD700',
-              transform: 'translateX(5px)',
-              textShadow: '0 0 9px rgba(255, 215, 0, 0.65)',
-              '&::before': {
-                opacity: 1,
-                transform: 'translateX(-2px) scale(1.15)',
-              },
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                right: 0,
-                bottom: 0,
-                background:
-                  'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.12), transparent)',
-                animation: 'shimmer 1.3s ease-in-out',
-              },
-            }),
-          },
-          '&:active': {
-            backgroundColor: activeAndHoverColor,
-          },
-        }}
-      >
-        <Typography
-          fontvariant="merriparagraph"
-          text={title ?? ''}
-          fontcolor={issacredtheme ? alpha('#FFD700', 0.9) : white.main}
-          sx={{
-            whiteSpace: 'nowrap',
-            fontSize: '0.85rem',
-            ...(issacredtheme && {
-              fontWeight: 500,
-              letterSpacing: 0.6,
-              transition: 'all 0.3s ease',
-            }),
-          }}
-        />
-      </MenuItem>
-    </Link>
+      {issacredtheme && <div style={glyphStyle}>𓊖</div>}
+      <Typography
+        fontvariant="merriparagraph"
+        text={title ?? ''}
+        fontcolor={issacredtheme ? 'rgba(255, 215, 0, 0.9)' : white.main}
+        style={styles.typography}
+      />
+    </div>
   )
+
+  if (route && trigger === 'route') {
+    return (
+      <Link href={route ?? ''} style={styles.link}>
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }
 
 export default SubViewNav

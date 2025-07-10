@@ -1,7 +1,7 @@
 // src/components/NumberField/numberfield.stories.tsx
 
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
+import { within, userEvent, expect } from 'storybook/test'
 import InternalIncrementNumberField from './index'
 
 /**

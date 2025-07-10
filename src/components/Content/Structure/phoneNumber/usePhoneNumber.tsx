@@ -1,15 +1,16 @@
 'use client'
 import React from 'react'
-import PhoneNumberField from '../../../Field/PhoneNumber'
-import type { TextFieldProps } from '../../../Field/Text'
+import PhoneNumberField, {
+  PhoneNumberFieldProps,
+} from '../../../Field/PhoneNumber'
 
 const usePhoneNumber = (props: {
-  phoneNumberField?: TextFieldProps | TextFieldProps[]
+  phoneNumberField?: PhoneNumberFieldProps | PhoneNumberFieldProps[]
 }): React.ReactElement[] | null => {
   if (!props.phoneNumberField) return null
 
   const renderPhoneNumberField = (
-    phoneNumberFieldItem: TextFieldProps,
+    phoneNumberFieldItem: PhoneNumberFieldProps,
     index: number
   ): React.ReactElement => {
     return (

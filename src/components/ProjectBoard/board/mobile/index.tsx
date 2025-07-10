@@ -1,41 +1,92 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Box, Stack, Checkbox, alpha, keyframes } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from '../../jotai/atom'
 
 import Typography from '../../../Typography'
 import Card from '../../../Card'
 import Dropdown from '../../../Field/Dropdown/Regular'
-import { black, white } from '../../../../styles/palette'
-
+import Checkbox from '../../../Checkbox'
 import type { BoardProps } from '../index'
 import type { ColumnData } from '../../types'
 import { useTaskDragAndDrop } from '../../../ProjectBoard/utils/useDragandDrop/tasks'
 
-// Sacred animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-2px) rotate(180deg); }
-  100% { transform: translateY(0px) rotate(360deg); }
-`
-
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  cardBackground: alpha('#000000', 0.9),
-}
-
 const SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
 
-/** Mobile: if overflow exists, show ONLY the overflow column. Otherwise,
- *  show a single selected "main" column from the 'columns' array. */
+const getStyles = (sacredtheme?: boolean) => ({
+  boardContainer: {
+    boxSizing: 'border-box',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  } as React.CSSProperties,
+  column: {
+    boxSizing: 'border-box',
+    width: '300px',
+    height: '70vh',
+    borderRadius: '0.375rem',
+    display: 'flex',
+    flexDirection: 'column',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    position: 'relative',
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          border: '2px solid rgba(255, 215, 0, 0.5)',
+          animation: 'board-glow-pulse 2s infinite alternate',
+          backdropFilter: 'blur(16px)',
+        }
+      : { backgroundColor: 'black' }),
+  } as React.CSSProperties,
+  columnHeader: {
+    padding: '0.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+    position: 'relative',
+    ...(sacredtheme
+      ? {
+          borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+          backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        }
+      : { borderBottom: '1px solid white' }),
+  } as React.CSSProperties,
+  columnDescription: {
+    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
+  } as React.CSSProperties,
+  tasksContainer: {
+    padding: '0.5rem',
+    flex: 1,
+  } as React.CSSProperties,
+  noTasks: {
+    ...(sacredtheme && {
+      fontStyle: 'italic',
+      fontFamily: 'Crimson Text, serif',
+    }),
+  } as React.CSSProperties,
+  tasksList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  checkbox: {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.5rem',
+    left: '0.5rem',
+    fontSize: '0.875rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'board-float-glyph 3s infinite alternate',
+    zIndex: 10,
+  } as React.CSSProperties,
+})
+
 export default function MobileBoard({
   columns,
   overflowColumns,
@@ -47,18 +98,13 @@ export default function MobileBoard({
   sacredtheme = false,
 }: BoardProps) {
   const [allColumns, setAllColumns] = useAtom(columnsAtom)
-
-  // Task DnD
   const { handleTaskDragStart, handleTaskDragOver, handleTaskDrop } =
     useTaskDragAndDrop()
-
-  // Local state for "main" column selection
   const [mobileColumnIndex, setMobileColumnIndex] = useState<number>(0)
-
-  // Column-level checkbox approach
   const [selectedColumnIndex, setSelectedColumnIndex] = useState<number | null>(
     null
   )
+  const styles = getStyles(sacredtheme)
 
   function isColumnCheckboxDisabled() {
     return selectedTask !== null
@@ -66,7 +112,6 @@ export default function MobileBoard({
   function isTaskCheckboxDisabled() {
     return selectedColumnIndex !== null
   }
-
   function handleColumnCheck(colIndex: number) {
     if (selectedColumnIndex === colIndex) {
       setSelectedColumnIndex(null)
@@ -78,8 +123,6 @@ export default function MobileBoard({
   function isColumnDraggable(colIndex: number) {
     return selectedColumnIndex === colIndex
   }
-
-  // Local column drag start (rarely used on mobile)
   function handleLocalColumnDragStart(e: React.DragEvent, colIndex: number) {
     if (!isColumnDraggable(colIndex)) {
       e.preventDefault()
@@ -87,9 +130,6 @@ export default function MobileBoard({
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Task-level DnD
-  // ─────────────────────────────────────────────────────────────────────────────
   function isTaskDraggable(colIndex: number, taskIndex: number) {
     if (selectedColumnIndex !== null) return false
     return (
@@ -122,9 +162,6 @@ export default function MobileBoard({
     })
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Overflow logic: On mobile, if there's overflow, we show ONLY that overflow column
-  // ─────────────────────────────────────────────────────────────────────────────
   const hasOverflow = Boolean(overflowColumns?.length)
   let activeOverflowColumn: ColumnData | undefined
   if (hasOverflow && selectedOverflowColumnId && overflowColumns) {
@@ -134,7 +171,7 @@ export default function MobileBoard({
   }
 
   const handleOverflowDropdownChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (!overflowColumns || !onChangeSelectedOverflowColumn) return
       const colTitle = e.target.value
       const found = overflowColumns.find(c => c.title === colTitle)
@@ -145,12 +182,10 @@ export default function MobileBoard({
     [overflowColumns, onChangeSelectedOverflowColumn]
   )
 
-  // If there's overflow => only show the overflow column
   if (hasOverflow && activeOverflowColumn) {
-    const overflowColIndex = columns.length // or some distinct index
-
+    const overflowColIndex = columns.length
     return (
-      <Box
+      <div
         key="overflow-mobile-column"
         draggable={false}
         onDragOver={e => e.preventDefault()}
@@ -158,121 +193,45 @@ export default function MobileBoard({
           e.preventDefault()
           onColumnDrop(e, overflowColIndex)
         }}
-        sx={{
-          boxSizing: 'border-box',
-          width: { xs: '300px', sm: '300px' },
-          height: '70vh',
-          backgroundColor: sacredtheme
-            ? egyptianStyles.cardBackground
-            : black.main,
-          borderRadius: '5px',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          position: 'relative',
-          ...(sacredtheme && {
-            border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-            backdropFilter: 'blur(10px)',
-          }),
-        }}
+        style={styles.column}
       >
-        {/* Sacred corner glyph */}
-        {sacredtheme && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '14px',
-              animation: `${floatGlyph} 4s ease-in-out infinite`,
-              zIndex: 1,
-            }}
-          >
-            {SACRED_GLYPHS[0]}
-          </Box>
-        )}
-
-        {/* Overflow Column Header */}
-        <Box
-          sx={{
-            borderBottom: sacredtheme
-              ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-              : `1px solid ${white.main}`,
-            p: 2,
-            position: 'relative',
-            ...(sacredtheme && {
-              backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-            }),
-          }}
-        >
+        {sacredtheme && <div style={styles.glyph}>{SACRED_GLYPHS[0]}</div>}
+        <div style={styles.columnHeader}>
           <Dropdown
             label="More Columns"
             options={overflowColumns?.map(col => ({ value: col.title })) ?? []}
             value={activeOverflowColumn?.title}
             onChange={handleOverflowDropdownChange}
-            fontcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
-            shrunkfontcolor={
-              sacredtheme ? egyptianStyles.goldColor : white.main
-            }
-            backgroundcolor={
-              sacredtheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
-            }
+            fontcolor={sacredtheme ? '#FFD700' : '#000'}
+            shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
             shrunklabelposition="aboveNotch"
-            outlinecolor={sacredtheme ? egyptianStyles.goldColor : white.main}
+            outlinecolor={sacredtheme ? '#FFD700' : 'white'}
             sacredtheme={sacredtheme}
           />
-
-          {/* 
-            REMOVE the overflow column's title here, keep only the description
-          */}
-          <Stack direction="column" spacing={0.5} mt={1}>
-            {/* We omit activeOverflowColumn.title */}
+          <div style={{ ...styles.columnDescription, marginTop: '0.25rem' }}>
             <Typography
               fontvariant="merrih6"
-              fontcolor={
-                sacredtheme ? alpha(egyptianStyles.goldColor, 0.8) : white.main
-              }
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Crimson Text", serif',
-                    }
-                  : {}
-              }
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
             >
               {activeOverflowColumn.description}
             </Typography>
-          </Stack>
-        </Box>
-
-        {/* Overflow Column Tasks */}
-        <Box sx={{ p: 2, flex: 1 }}>
+          </div>
+        </div>
+        <div style={styles.tasksContainer}>
           {!activeOverflowColumn.tasks?.length ? (
             <Typography
-              fontcolor={
-                sacredtheme ? alpha(egyptianStyles.goldColor, 0.6) : white.main
-              }
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Crimson Text", serif',
-                      fontStyle: 'italic',
-                    }
-                  : {}
-              }
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
+              style={styles.noTasks}
             >
               No tasks yet
             </Typography>
           ) : (
-            <Stack spacing={1}>
+            <div style={styles.tasksList}>
               {activeOverflowColumn.tasks.map((task, taskIndex) => {
                 const isSelected =
                   selectedTask?.colIndex === overflowColIndex &&
                   selectedTask?.taskIndex === taskIndex
-
                 return (
                   <Card
                     key={task._id}
@@ -294,25 +253,18 @@ export default function MobileBoard({
                   />
                 )
               })}
-            </Stack>
+            </div>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
     )
   }
 
-  // Otherwise, no overflow => show the usual single-column approach
   if (!columns.length) {
     return (
       <Typography
-        fontcolor={sacredtheme ? egyptianStyles.goldColor : black.main}
-        sx={
-          sacredtheme
-            ? {
-                fontFamily: '"Crimson Text", serif',
-              }
-            : {}
-        }
+        fontcolor={sacredtheme ? '#FFD700' : 'black'}
+        style={styles.noTasks}
       >
         No columns available.
       </Typography>
@@ -321,7 +273,7 @@ export default function MobileBoard({
 
   const currentColumn = columns[mobileColumnIndex]
 
-  function handleColumnDropdownChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleColumnDropdownChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const title = e.target.value
     const foundIndex = columns.findIndex(c => c.title === title)
     if (foundIndex >= 0) {
@@ -332,15 +284,8 @@ export default function MobileBoard({
   }
 
   return (
-    <Box
-      sx={{
-        boxSizing: 'border-box',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <Box
+    <div style={styles.boardContainer}>
+      <div
         key={currentColumn._id}
         draggable={isColumnDraggable(mobileColumnIndex)}
         onDragStart={e => handleLocalColumnDragStart(e, mobileColumnIndex)}
@@ -349,139 +294,55 @@ export default function MobileBoard({
           e.preventDefault()
           onColumnDrop(e, mobileColumnIndex)
         }}
-        sx={{
-          boxSizing: 'border-box',
-          width: { xs: '300px', sm: '300px' },
-          height: '70vh',
-          backgroundColor: sacredtheme
-            ? egyptianStyles.cardBackground
-            : black.main,
-          borderRadius: '5px',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          position: 'relative',
-          ...(sacredtheme && {
-            border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-            backdropFilter: 'blur(10px)',
-          }),
-        }}
+        style={styles.column}
       >
-        {/* Sacred corner glyph */}
         {sacredtheme && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '14px',
-              animation: `${floatGlyph} 4s ease-in-out infinite`,
-              zIndex: 1,
-            }}
-          >
+          <div style={styles.glyph}>
             {SACRED_GLYPHS[mobileColumnIndex % SACRED_GLYPHS.length]}
-          </Box>
+          </div>
         )}
-
-        {/* Column Head + Mobile Column Dropdown */}
-        <Box
-          sx={{
-            borderBottom: sacredtheme
-              ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-              : `1px solid ${white.main}`,
-            p: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            position: 'relative',
-            ...(sacredtheme && {
-              backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-            }),
-          }}
-        >
-          {/* Column checkbox */}
+        <div style={styles.columnHeader}>
           <Checkbox
             checked={selectedColumnIndex === mobileColumnIndex}
             disabled={isColumnCheckboxDisabled()}
             onChange={() => handleColumnCheck(mobileColumnIndex)}
-            sx={{
-              position: 'absolute',
-              top: 2,
-              right: 2,
-              color: sacredtheme ? egyptianStyles.goldColor : white.main,
-              '&.Mui-checked': {
-                color: sacredtheme ? egyptianStyles.goldColor : white.main,
-              },
-              ...(sacredtheme && {
-                '&.Mui-disabled': {
-                  color: alpha(egyptianStyles.goldColor, 0.3),
-                },
-              }),
-            }}
+            sacredtheme={sacredtheme}
+            style={styles.checkbox}
           />
-
           <Dropdown
             label="Select Column"
             options={columns.map(col => ({ value: col.title }))}
             value={currentColumn.title}
             onChange={handleColumnDropdownChange}
-            fontcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
-            shrunkfontcolor={
-              sacredtheme ? egyptianStyles.goldColor : white.main
-            }
-            backgroundcolor={
-              sacredtheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
-            }
+            fontcolor={sacredtheme ? '#FFD700' : '#000'}
+            shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
+            backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
             shrunklabelposition="aboveNotch"
-            outlinecolor={sacredtheme ? egyptianStyles.goldColor : white.main}
+            outlinecolor={sacredtheme ? '#FFD700' : 'white'}
             sacredtheme={sacredtheme}
           />
-
           <Typography
             fontvariant="merrih6"
-            fontcolor={
-              sacredtheme ? alpha(egyptianStyles.goldColor, 0.8) : white.main
-            }
-            sx={
-              sacredtheme
-                ? {
-                    fontFamily: '"Crimson Text", serif',
-                  }
-                : {}
-            }
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
+            style={styles.columnDescription}
           >
             {currentColumn.description}
           </Typography>
-        </Box>
-
-        {/* Column Body (tasks) */}
-        <Box sx={{ p: 2, flex: 1 }}>
+        </div>
+        <div style={styles.tasksContainer}>
           {!currentColumn.tasks?.length ? (
             <Typography
-              fontcolor={
-                sacredtheme ? alpha(egyptianStyles.goldColor, 0.6) : white.main
-              }
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Crimson Text", serif',
-                      fontStyle: 'italic',
-                    }
-                  : {}
-              }
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
+              style={styles.noTasks}
             >
               No tasks yet
             </Typography>
           ) : (
-            <Stack spacing={1}>
+            <div style={styles.tasksList}>
               {currentColumn.tasks.map((task, taskIndex) => {
                 const isSelected =
                   selectedTask?.colIndex === mobileColumnIndex &&
                   selectedTask?.taskIndex === taskIndex
-
                 return (
                   <Card
                     key={task._id}
@@ -506,10 +367,10 @@ export default function MobileBoard({
                   />
                 )
               })}
-            </Stack>
+            </div>
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

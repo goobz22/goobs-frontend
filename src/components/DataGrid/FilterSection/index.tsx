@@ -1,29 +1,10 @@
 'use client'
 
-import React from 'react'
-import { Box, Grid, useMediaQuery, keyframes, alpha } from '@mui/material'
+import React, { useState, useEffect } from 'react'
 import SearchableDropdown from '../../Field/Dropdown/Searchable'
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import { DataGridFilter } from '../types'
-
-// Sacred theming animations
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-`
-
-const sacredFloat = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0px); }
-`
-
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
 
 // Sacred hieroglyphs for decoration
 const SACRED_GLYPHS = [
@@ -58,36 +39,163 @@ export interface FilterSectionProps {
   sacredtheme?: boolean
 }
 
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    width: '100%',
+    position: 'relative',
+    padding: '2px',
+  } as React.CSSProperties,
+
+  grid: {
+    display: 'grid',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  filterItem: {
+    marginBottom: '8px',
+    width: '100%',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    width: '100%',
+    position: 'relative',
+    padding: '4px',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    backgroundImage:
+      'linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%, transparent 100%)',
+    animation: 'sacredGlow 3s ease-in-out infinite',
+    '&::before': {
+      content: '"𓊹"',
+      position: 'absolute',
+      top: '8px',
+      right: '12px',
+      fontSize: '14px',
+      color: 'rgba(255, 215, 0, 0.4)',
+      animation: 'glyphRotate 20s linear infinite',
+      zIndex: 10,
+    },
+  } as React.CSSProperties,
+
+  grid: {
+    display: 'grid',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  filterItem: {
+    marginBottom: '8px',
+    width: '100%',
+  } as React.CSSProperties,
+
+  decorativeGlyph: {
+    position: 'absolute',
+    fontSize: '12px',
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'sacredFloat 2s ease-in-out infinite',
+    zIndex: 10,
+  } as React.CSSProperties,
+
+  topLeftGlyph: {
+    top: '8px',
+    left: '8px',
+  } as React.CSSProperties,
+
+  bottomRightGlyph: {
+    bottom: '8px',
+    right: '8px',
+    animationDirection: 'reverse',
+  } as React.CSSProperties,
+
+  bottomDecoration: {
+    position: 'absolute',
+    bottom: '4px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: '2px',
+    opacity: 0.5,
+  } as React.CSSProperties,
+
+  bottomGlyph: {
+    color: 'rgba(255, 215, 0, 0.4)',
+    fontSize: '8px',
+  } as React.CSSProperties,
+}
+
+function useWindowSize() {
+  const [size, setSize] = useState([0, 0])
+  useEffect(() => {
+    function updateSize() {
+      setSize([window.innerWidth, window.innerHeight])
+    }
+    window.addEventListener('resize', updateSize)
+    updateSize()
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+  return size
+}
+
 const FilterSection: React.FC<FilterSectionProps> = ({
   filters,
   sacredtheme = false,
 }) => {
-  const isMobile = useMediaQuery('(max-width:600px)')
-  const isTablet = useMediaQuery('(max-width:900px)')
+  const [width] = useWindowSize()
+  const isMobile = width < 600
+  const isTablet = width < 900
+
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes sacredGlow {
+          0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+        }
+        @keyframes glyphRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes sacredFloat {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
+          50% { transform: translateY(-3px) scale(1.05); opacity: 0.8; }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
 
   if (!filters || filters.length === 0) {
     return null
   }
 
-  // Determine grid size based on screen size and number of filters
-  const getGridSize = () => {
-    if (isMobile) {
-      return 12 // Full width on mobile
-    }
-    if (isTablet) {
-      return filters.length === 1 ? 6 : 12 / Math.min(filters.length, 2) // Max 2 per row on tablet
-    }
-    // Desktop - up to 4 filters per row, but scale based on count
-    if (filters.length === 1) return 3
-    if (filters.length === 2) return 6
-    if (filters.length === 3) return 4
-    return 3 // 4 filters per row max
+  // Determine grid columns based on screen size and number of filters
+  const getGridColumns = () => {
+    if (isMobile) return { gridTemplateColumns: '1fr' }
+    if (isTablet)
+      return filters.length === 1
+        ? { gridTemplateColumns: 'repeat(2, 1fr)' }
+        : { gridTemplateColumns: '1fr' }
+    // Desktop
+    if (filters.length === 1) return { gridTemplateColumns: 'repeat(4, 1fr)' }
+    if (filters.length === 2) return { gridTemplateColumns: 'repeat(2, 1fr)' }
+    if (filters.length === 3) return { gridTemplateColumns: 'repeat(3, 1fr)' }
+    return { gridTemplateColumns: 'repeat(4, 1fr)' }
   }
-
-  const gridSize = getGridSize()
 
   // Helper function to render the appropriate filter component
   const renderFilterComponent = (filter: DataGridFilter) => {
+    const styles = sacredtheme ? sacredStyles : premiumStyles
+
     // Check if this is a date range filter
     if (filter.type === 'daterange') {
       return (
@@ -103,7 +211,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           }
           sacredtheme={sacredtheme}
           style={{
-            marginBottom: '8px',
+            ...styles.filterItem,
             width: filter.width || '100%',
           }}
         />
@@ -123,7 +231,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           sacredtheme={sacredtheme}
           disableFutureDateValidation={true}
           style={{
-            marginBottom: '8px',
+            ...styles.filterItem,
             width: filter.width || '100%',
           }}
         />
@@ -139,118 +247,75 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         onChange={filter.onChange as (value: { value: string } | null) => void}
         placeholder={filter.placeholder}
         width={filter.width || '100%'}
-        variant="simple"
         sacredtheme={sacredtheme}
-        sacredTitle={sacredtheme ? 'Divine Filtering' : ''}
-        sacredSubtitle={sacredtheme ? 'Channel cosmic data streams' : ''}
-        style={{
-          marginBottom: '8px',
-        }}
+        style={styles.filterItem}
       />
     )
   }
 
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const gridStyle = {
+    ...styles.grid,
+    ...getGridColumns(),
+  }
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        position: 'relative',
-        p: sacredtheme ? 1 : 0.5,
-        ...(sacredtheme && {
-          backgroundColor: alpha('#000000', 0.6),
-          borderRadius: '8px',
-          border: `1px solid ${alpha('#FFD700', 0.3)}`,
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at top left, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-          `,
-          animation: `${sacredGlow} 3s ease-in-out infinite`,
-          '&::before': {
-            content: '"𓊹"',
-            position: 'absolute',
-            top: '8px',
-            right: '12px',
-            fontSize: '14px',
-            color: alpha('#FFD700', 0.4),
-            animation: `${rotateGlyph} 15s linear infinite`,
-            zIndex: 1,
-          },
-        }),
-      }}
-    >
+    <div style={styles.container}>
       {/* Sacred decorative glyphs */}
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              color: alpha('#FFD700', 0.3),
-              fontSize: '12px',
-              animation: `${sacredFloat} 4s ease-in-out infinite`,
-              zIndex: 1,
+          <div
+            style={{
+              ...sacredStyles.decorativeGlyph,
+              ...sacredStyles.topLeftGlyph,
             }}
           >
             {SACRED_GLYPHS[15]} {/* Filter/sieve symbol */}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '8px',
-              right: '8px',
-              color: alpha('#FFD700', 0.3),
-              fontSize: '12px',
-              animation: `${sacredFloat} 3s ease-in-out infinite reverse`,
-              zIndex: 1,
+          </div>
+          <div
+            style={{
+              ...sacredStyles.decorativeGlyph,
+              ...sacredStyles.bottomRightGlyph,
             }}
           >
             {SACRED_GLYPHS[16]} {/* Filter/refine symbol */}
-          </Box>
+          </div>
         </>
       )}
 
-      <Grid container spacing={1}>
+      <div style={gridStyle}>
         {filters.map((filter, index) => (
-          <Grid
+          <div
             key={`${filter.label}-${index}`}
-            size={{
-              xs: isMobile ? 12 : filter.type === 'daterange' ? 6 : gridSize,
+            style={{
+              ...(filter.type === 'daterange' && !isMobile
+                ? { gridColumn: 'span 2' }
+                : {}),
             }}
           >
             {renderFilterComponent(filter)}
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {/* Bottom sacred decoration */}
       {sacredtheme && (
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '4px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: 0.5,
-            opacity: 0.5,
-          }}
-        >
+        <div style={sacredStyles.bottomDecoration}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, i) => (
-            <Box
+            <div
               key={i}
-              sx={{
-                color: alpha('#FFD700', 0.4),
-                fontSize: 8,
-                animation: `${sacredFloat} ${2 + i * 0.3}s ease-in-out infinite`,
+              style={{
+                ...sacredStyles.bottomGlyph,
+                animation: `sacredFloat ${2 + i * 0.3}s ease-in-out infinite`,
               }}
             >
               {glyph}
-            </Box>
+            </div>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

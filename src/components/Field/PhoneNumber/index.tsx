@@ -1,26 +1,10 @@
 'use client'
-import React, { useCallback, useState, useMemo } from 'react'
-import { Box, alpha, keyframes, Typography } from '@mui/material'
-import TextField, { TextFieldProps } from '../Text'
-
-// Sacred animations
-const glowPulse = keyframes`
-  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-`
+import React, { useCallback, useState, useMemo, useEffect } from 'react'
 
 const formatPhoneNumber = (inputValue: string): string => {
-  let digits = inputValue.replace(/\D/g, '')
-
-  // If it starts with '1', remove it as we'll add '+1' prefix
-  if (digits.startsWith('1')) {
-    digits = digits.slice(1)
-  }
-
+  let digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
   const limitedDigits = digits.slice(0, 10)
   let formattedNumber = '+1 '
-
   if (limitedDigits.length > 0) {
     formattedNumber += limitedDigits.slice(0, 3)
     if (limitedDigits.length > 3) {
@@ -30,25 +14,112 @@ const formatPhoneNumber = (inputValue: string): string => {
       }
     }
   }
-
-  return formattedNumber // Don't trim, keep the space after +1
+  return formattedNumber
 }
 
-// Helper function to clean and parse existing phone number values
 const parseExistingPhoneNumber = (value: string): string => {
-  if (!value) return '+1 ' // Return +1 with space for empty values
-
-  // If it already has +1, extract just the digits and reformat
+  if (!value) return '+1 '
   if (value.includes('+1')) {
-    const digits = value.replace(/\D/g, '').replace(/^1/, '') // Remove all non-digits and leading 1
+    const digits = value.replace(/\D/g, '').replace(/^1/, '')
     return formatPhoneNumber(digits)
   }
-
-  // If it's just digits, format normally
   return formatPhoneNumber(value)
 }
 
-const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
+import { TextFieldProps } from '../Text'
+
+export interface PhoneNumberFieldProps extends Omit<TextFieldProps, 'value'> {
+  value?: string | number
+  sacredtheme?: boolean
+  helperText?: string
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+}
+
+const getStyles = (
+  sacredtheme: boolean,
+  isLabelFloating: boolean,
+  isFocused: boolean,
+  error: boolean,
+  disabled: boolean
+) => ({
+  container: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    justifyContent: 'center',
+    width: '100%',
+  } as React.CSSProperties,
+  inputContainer: {
+    position: 'relative' as const,
+    width: '100%',
+    marginTop: '1rem',
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    height: '3.5rem',
+    padding: '0 1rem',
+    paddingRight: '3rem',
+    border: `2px solid`,
+    borderRadius: '0.25rem',
+    outline: 'none',
+    transition: 'all 0.3s ease-in-out',
+    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.8)' : 'white',
+    color: sacredtheme ? '#FFD700' : 'black',
+    borderColor: error
+      ? '#EF4444'
+      : isFocused
+        ? sacredtheme
+          ? '#FFD700'
+          : '#3B82F6'
+        : sacredtheme
+          ? 'rgba(255,215,0,0.5)'
+          : '#D1D5DB',
+    boxShadow:
+      isFocused && !error
+        ? sacredtheme
+          ? '0 0 20px rgba(255,215,0,0.6)'
+          : '0 0 10px rgba(59,130,246,0.5)'
+        : 'none',
+    opacity: disabled ? 0.5 : 1,
+    cursor: disabled ? 'not-allowed' : 'text',
+  } as React.CSSProperties,
+  label: {
+    position: 'absolute' as const,
+    left: '1rem',
+    transition: 'all 0.2s',
+    pointerEvents: 'none' as const,
+    color: error
+      ? '#EF4444'
+      : isFocused
+        ? sacredtheme
+          ? '#FFD700'
+          : '#3B82F6'
+        : sacredtheme
+          ? 'rgba(255,215,0,0.8)'
+          : '#6B7281',
+    backgroundColor: isLabelFloating
+      ? sacredtheme
+        ? 'black'
+        : 'white'
+      : 'transparent',
+    padding: isLabelFloating ? '0 0.25rem' : '0',
+    top: isLabelFloating ? '0' : '50%',
+    transform: isLabelFloating ? 'translateY(-50%)' : 'translateY(-50%)',
+    fontSize: isLabelFloating ? '0.75rem' : '1rem',
+  } as React.CSSProperties,
+  endAdornment: {
+    position: 'absolute' as const,
+    right: '0.75rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: 'rgba(255,215,0,0.4)',
+    fontSize: '0.875rem',
+    animation: 'sacred-glow 2s infinite alternate',
+  } as React.CSSProperties,
+})
+
+const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
   const {
     name,
     label = 'Phone Number',
@@ -57,20 +128,28 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
     onFocus,
     onBlur,
     value = '',
-    error,
+    error = false,
+    disabled = false,
+    id,
+    backgroundcolor,
+    outlinecolor,
+    fontcolor,
     sacredtheme = false,
     ...restProps
   } = props
 
   const [phoneNumber, setPhoneNumber] = useState(() =>
-    parseExistingPhoneNumber(value as string)
+    parseExistingPhoneNumber(String(value || ''))
   )
+  const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    setPhoneNumber(parseExistingPhoneNumber(String(value || '')))
+  }, [value])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
-
-      // If user is deleting and we get to just '+1 ', allow it
       if (input === '+1 ' || input === '+1' || input === '+') {
         setPhoneNumber('+1 ')
         if (onChange) {
@@ -79,21 +158,13 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
         }
         return
       }
-
-      // Extract digits from input, removing +1 prefix if present
-      let strippedInput = input.replace(/^\+1\s?/, '').replace(/\D/g, '')
-
-      // Remove leading '1' if present (in case user types it)
-      if (strippedInput.startsWith('1')) {
-        strippedInput = strippedInput.slice(1)
-      }
-
-      strippedInput = strippedInput.slice(0, 10)
+      let strippedInput = input
+        .replace(/^\+1\s?/, '')
+        .replace(/\D/g, '')
+        .slice(0, 10)
       const formattedValue = formatPhoneNumber(strippedInput)
       setPhoneNumber(formattedValue)
-
       if (onChange) {
-        // Pass the formatted value including +1 and dashes to parent
         const mockEvent = {
           ...e,
           target: { ...e.target, value: formattedValue },
@@ -106,104 +177,81 @@ const PhoneNumberField: React.FC<TextFieldProps> = React.memo(props => {
 
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
-      if (onFocus) {
-        onFocus(e)
-      }
+      setIsFocused(true)
+      onFocus?.(e)
     },
     [onFocus]
   )
-
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
-      if (onBlur) {
-        onBlur(e)
-      }
+      setIsFocused(false)
+      onBlur?.(e)
     },
     [onBlur]
   )
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault()
-  }, [])
-
-  // No longer need startAdornment since +1 is part of the value
-  const endAdornment = useMemo(
-    () =>
-      sacredtheme ? (
-        <Typography
-          sx={{
-            color: alpha('#FFD700', 0.4),
-            fontSize: '14px',
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-          }}
-        >
-          𓋴
-        </Typography>
-      ) : undefined,
-    [sacredtheme]
+  const isLabelFloating = isFocused || phoneNumber !== '+1 '
+  const styles = getStyles(
+    sacredtheme,
+    isLabelFloating,
+    isFocused,
+    error,
+    disabled
   )
 
-  const mergedSlotProps = useMemo(() => {
-    return {
-      input: {
-        sx: {
-          height: '40px',
-          padding: '0px 0px 0px 0px',
-          '& .MuiOutlinedInput-input': {
-            paddingLeft: '14px !important', // Add left padding for the +1 that's now part of input value
-          },
-          '& .MuiInputAdornment-positionStart': {
-            marginRight: '4px !important', // Reduce margin between adornment and input
-          },
-        },
-      },
-      inputLabel: {
-        sx: {
-          '&.MuiInputLabel-shrink': {
-            top: '0px',
-            left: '0px',
-          },
-          '&:not(.MuiInputLabel-shrink)': {
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
-            top: '9px',
-            left: '12px',
-          },
-        },
-      },
-    }
-  }, [])
+  const endAdornment = useMemo(
+    () => (sacredtheme ? <span style={styles.endAdornment}>𓋴</span> : null),
+    [sacredtheme, styles.endAdornment]
+  )
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        width: '100%',
-      }}
-      onClick={handleClick}
-    >
-      <TextField
-        name={name}
-        label={sacredtheme ? 'Sacred Connection' : label}
-        placeholder={sacredtheme ? 'Divine number...' : placeholder}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        value={phoneNumber}
-        error={error}
-        fullWidth
-        variant="outlined"
-        slotProps={mergedSlotProps}
-        endAdornment={endAdornment}
-        sacredtheme={sacredtheme}
-        {...restProps}
-      />
-    </Box>
+    <div style={styles.container}>
+      <div style={styles.inputContainer}>
+        <input
+          type="tel"
+          id={id}
+          name={name}
+          value={phoneNumber}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder={
+            isLabelFloating
+              ? sacredtheme
+                ? 'Divine number...'
+                : placeholder
+              : ''
+          }
+          style={{
+            ...styles.input,
+            backgroundColor: backgroundcolor,
+            borderColor: outlinecolor,
+            color: fontcolor,
+          }}
+          {...restProps}
+        />
+        {label && (
+          <label htmlFor={id} style={styles.label}>
+            {sacredtheme ? 'Sacred Connection' : label}
+          </label>
+        )}
+        {endAdornment && (
+          <div
+            style={{
+              position: 'absolute' as const,
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            {endAdornment}
+          </div>
+        )}
+      </div>
+    </div>
   )
 })
 
 PhoneNumberField.displayName = 'PhoneNumberField'
-
 export default PhoneNumberField

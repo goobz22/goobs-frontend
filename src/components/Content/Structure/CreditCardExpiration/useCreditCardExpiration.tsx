@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import CreditCardExpiration, {
   CreditCardExpirationProps,
 } from '../../../Field/Date/CreditCardExpiration'
@@ -13,35 +12,29 @@ export type { CreditCardExpirationProps }
 const CreditCardExpirationComponent: React.FC<CreditCardExpirationProps> = ({
   onChange,
   value = '',
-  errorMessage = 'Invalid expiration date',
   sacredtheme = false,
   isDefaultValue = false,
   label,
   placeholder,
   disabled = false,
   error = false,
-  helperText,
-  sx,
   style,
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <CreditCardExpiration
         onChange={onChange}
         value={value}
-        errorMessage={errorMessage}
         sacredtheme={sacredtheme}
         isDefaultValue={isDefaultValue}
         label={label}
         placeholder={placeholder}
         disabled={disabled}
         error={error}
-        helperText={helperText}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

@@ -3,22 +3,58 @@
 'use client'
 
 import React, { FC } from 'react'
-import { Box, styled, alpha } from '@mui/material'
 import CustomButton, { CustomButtonProps } from '../../Button'
-import { white, grey, black } from '../../../styles/palette'
+
+const premiumStyles = {
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  dividerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 16px',
+  } as React.CSSProperties,
+  divider: {
+    height: '20px',
+    borderLeft: '2px solid black',
+  } as React.CSSProperties,
+  buttonsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '0 16px',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  dividerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 16px',
+  } as React.CSSProperties,
+  divider: {
+    height: '20px',
+    borderLeft: '2px solid rgba(255, 215, 0, 0.6)',
+    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
+  } as React.CSSProperties,
+  buttonsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '0 16px',
+  } as React.CSSProperties,
+}
 
 /** A simple vertical divider */
-const VerticalDivider = styled(Box, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
-  borderLeft: sacredtheme
-    ? `2px solid ${alpha('#FFD700', 0.6)}`
-    : '2px solid black',
-  height: '20px',
-  ...(sacredtheme && {
-    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
-  }),
-}))
+const VerticalDivider: FC<{ sacredtheme?: boolean }> = ({ sacredtheme }) => {
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+  return <div style={styles.divider} />
+}
 
 export interface LeftProps {
   /** Array of button configs to render on the left side */
@@ -28,23 +64,17 @@ export interface LeftProps {
 
 const Left: FC<LeftProps> = ({ buttons, sacredtheme }) => {
   const buttonHeight = '45px'
+  const styles = sacredtheme ? sacredStyles : premiumStyles
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <div style={styles.container}>
       {/* Vertical Divider */}
-      <Box sx={{ display: 'flex', alignItems: 'center', padding: '0 15px' }}>
+      <div style={styles.dividerContainer}>
         <VerticalDivider sacredtheme={sacredtheme} />
-      </Box>
+      </div>
 
       {/* Buttons */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '0 15px',
-        }}
-      >
+      <div style={styles.buttonsContainer}>
         {buttons?.map((btn, i) => {
           const isDisabled = !!btn.disabled
           return (
@@ -54,25 +84,23 @@ const Left: FC<LeftProps> = ({ buttons, sacredtheme }) => {
               onClick={btn.onClick}
               disabled={isDisabled}
               disableButton={isDisabled ? 'true' : 'false'}
-              fontcolor={sacredtheme ? '#000000' : white.main}
+              fontcolor={sacredtheme ? '#000000' : 'white'}
               backgroundcolor={
                 isDisabled
                   ? sacredtheme
-                    ? alpha('#FFD700', 0.3)
-                    : grey.main
+                    ? 'rgba(255, 215, 0, 0.3)'
+                    : '#9E9E9E'
                   : sacredtheme
                     ? '#FFD700'
-                    : black.main
+                    : 'black'
               }
-              fontvariant="merriparagraph"
-              variant="contained"
               height={buttonHeight}
               sacredtheme={sacredtheme}
             />
           )
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

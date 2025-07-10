@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import CreditCardNumber, {
   CreditCardNumberProps,
   CardType,
@@ -24,12 +23,11 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
   disabled = false,
   error = false,
   helperText,
-  sx,
   style,
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <CreditCardNumber
         onChange={onChange}
         value={value}
@@ -43,10 +41,9 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
         disabled={disabled}
         error={error}
         helperText={helperText}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

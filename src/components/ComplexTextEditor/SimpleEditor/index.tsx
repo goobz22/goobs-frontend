@@ -1,25 +1,8 @@
 // src/components/ComplexTextEditor/SimpleEditor/index.tsx
 
-import React from 'react'
-import { Box, TextField, keyframes, alpha } from '@mui/material'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = ['𓋴', '𓏏', '𓊨', '𓁦']
-
-const sacredInputGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1); }
-  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1); }
-`
-
-const glyphPulse = keyframes`
-  0% { opacity: 0.2; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.2; }
-`
+'use client'
+import React, { useEffect, useState } from 'react'
+import { SACRED_GLYPHS } from '../../../styles/sacredGlyphs'
 
 type SimpleEditorProps = {
   value: string
@@ -33,6 +16,122 @@ type SimpleEditorProps = {
   sacredtheme?: boolean
 }
 
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+  } as React.CSSProperties,
+
+  textarea: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid rgba(209, 213, 219, 1)',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    color: 'rgba(0, 0, 0, 1)',
+    fontFamily: '"Inter", sans-serif',
+    fontSize: '14px',
+    lineHeight: '1.5',
+    resize: 'vertical',
+    outline: 'none',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    '&:focus': {
+      borderColor: 'rgba(59, 130, 246, 0.5)',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+    },
+  } as React.CSSProperties,
+
+  textareaError: {
+    borderColor: 'rgba(239, 68, 68, 1)',
+    '&:focus': {
+      borderColor: 'rgba(239, 68, 68, 1)',
+      boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.1)',
+    },
+  } as React.CSSProperties,
+
+  helperText: {
+    fontSize: '12px',
+    marginTop: '4px',
+    color: 'rgba(107, 114, 128, 1)',
+  } as React.CSSProperties,
+
+  helperTextError: {
+    color: 'rgba(239, 68, 68, 1)',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+  } as React.CSSProperties,
+
+  textarea: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    color: 'rgba(255, 215, 0, 0.9)',
+    fontFamily: '"Cinzel", serif',
+    fontSize: '14px',
+    lineHeight: '1.5',
+    letterSpacing: '0.025em',
+    resize: 'vertical',
+    outline: 'none',
+    transition: 'all 0.4s ease',
+    boxShadow:
+      'inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 5px rgba(255, 215, 0, 0.2)',
+    animation: 'simpleEditorInputGlow 4s ease-in-out infinite',
+    '&::placeholder': {
+      color: 'rgba(255, 215, 0, 0.5)',
+    },
+  } as React.CSSProperties,
+
+  textareaError: {
+    borderColor: 'rgba(239, 68, 68, 1)',
+    color: 'rgba(239, 68, 68, 0.9)',
+  } as React.CSSProperties,
+
+  helperText: {
+    fontSize: '12px',
+    marginTop: '4px',
+    color: 'rgba(255, 215, 0, 0.7)',
+    fontStyle: 'italic',
+    fontFamily: '"Cinzel", serif',
+  } as React.CSSProperties,
+
+  helperTextError: {
+    color: 'rgba(239, 68, 68, 1)',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    fontSize: '20px',
+    color: 'rgba(255, 215, 0, 0.2)',
+    pointerEvents: 'none',
+    transition: 'all 0.3s ease',
+    animation: 'simpleEditorGlyphPulse 3s ease-in-out infinite',
+  } as React.CSSProperties,
+
+  glyphTopRight: {
+    top: '10px',
+    right: '10px',
+  } as React.CSSProperties,
+
+  glyphBottomLeft: {
+    bottom: '10px',
+    left: '10px',
+    animationDelay: '1.5s',
+  } as React.CSSProperties,
+}
+
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
   value,
   setValue,
@@ -44,125 +143,94 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   style,
   sacredtheme = false,
 }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [leftGlyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+  const [rightGlyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes simpleEditorInputGlow {
+          0%, 100% { 
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+          }
+          50% { 
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.5);
+          }
+        }
+        @keyframes simpleEditorGlyphPulse {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.5; }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
+
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(event.target.value)
   }
 
-  const defaultStyles: React.CSSProperties = {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-  }
+  const styles = sacredtheme ? sacredStyles : premiumStyles
 
-  const combinedStyles = {
-    ...defaultStyles,
+  const containerStyle = {
+    ...styles.container,
     ...style,
   }
 
-  const textFieldStyles = {
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '8px',
-      backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-      color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
-      ...(sacredtheme && {
-        animation: `${sacredInputGlow} 4s ease-in-out infinite`,
-      }),
-      '& fieldset': {
-        borderColor: sacredtheme ? alpha('#FFD700', 0.3) : 'black',
-      },
-      '&:hover fieldset': {
-        borderColor: sacredtheme ? alpha('#FFD700', 0.5) : 'black',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: sacredtheme ? '#FFD700' : 'black',
-        ...(sacredtheme && {
-          borderWidth: '2px',
-        }),
-      },
-      '& .MuiInputBase-input': {
-        transform: 'translateY(-8px)',
-        ...(sacredtheme && {
-          fontFamily: 'monospace',
-          letterSpacing: '0.5px',
-          textShadow: '0 0 2px rgba(255, 215, 0, 0.3)',
-          '&::placeholder': {
-            color: alpha('#FFD700', 0.5),
-            fontStyle: 'italic',
-          },
-        }),
-      },
-    },
-    '& .MuiInputLabel-root': {
-      color: sacredtheme ? alpha('#FFD700', 0.8) : 'black',
-      ...(sacredtheme && {
-        fontFamily: '"Cinzel", serif',
-        fontWeight: 600,
-        letterSpacing: '1px',
-      }),
-      '&.Mui-focused': {
-        color: sacredtheme ? '#FFD700' : 'black',
-        ...(sacredtheme && {
-          textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-        }),
-      },
-    },
-    '& .MuiFormHelperText-root': {
-      color: sacredtheme ? alpha('#FFD700', 0.7) : undefined,
-      ...(sacredtheme && {
-        fontStyle: 'italic',
-      }),
-    },
+  const textareaStyle = {
+    ...styles.textarea,
+    ...(error && styles.textareaError),
+  }
+
+  const helperTextStyle = {
+    ...styles.helperText,
+    ...(error && styles.helperTextError),
   }
 
   return (
-    <Box sx={combinedStyles}>
-      <TextField
-        fullWidth
-        multiline
-        variant="outlined"
-        minRows={minRows}
-        label={label}
+    <div style={containerStyle}>
+      <textarea
         value={value}
-        error={error}
-        helperText={helperText}
-        required={required}
         onChange={handleChange}
-        sx={textFieldStyles}
-        placeholder={sacredtheme ? 'Inscribe your sacred text...' : undefined}
+        rows={minRows}
+        placeholder={sacredtheme ? 'Inscribe your sacred text...' : label}
+        required={required}
+        style={textareaStyle}
       />
-      {/* Sacred decorative elements */}
+      {helperText && <p style={helperTextStyle}>{helperText}</p>}
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              color: alpha('#FFD700', 0.2),
-              fontSize: '20px',
-              animation: `${glyphPulse} 3s ease-in-out infinite`,
-              pointerEvents: 'none',
+          <div
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphTopRight,
             }}
           >
-            {SACRED_GLYPHS[0]}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '10px',
-              left: '10px',
-              color: alpha('#FFD700', 0.2),
-              fontSize: '20px',
-              animation: `${glyphPulse} 3s ease-in-out infinite 1.5s`,
-              pointerEvents: 'none',
+            {rightGlyph}
+          </div>
+          <div
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphBottomLeft,
             }}
           >
-            {SACRED_GLYPHS[2]}
-          </Box>
+            {leftGlyph}
+          </div>
         </>
       )}
-    </Box>
+    </div>
   )
 }
 

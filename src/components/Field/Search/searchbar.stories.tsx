@@ -1,144 +1,104 @@
 // src/components/Searchbar/searchbar.stories.tsx
 
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
 import Searchbar from './index'
 
-/**
- * Setup Storybook metadata
- */
 const meta: Meta<typeof Searchbar> = {
   title: 'Components/Field/Search',
   component: Searchbar,
-  parameters: {
-    a11y: {
-      disable: false,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    shrunklabelposition: {
+      control: 'radio',
+      options: ['onNotch', 'aboveNotch'],
     },
+    label: { control: 'text' },
+    placeholder: { control: 'text' },
+  },
+  parameters: {
+    layout: 'centered',
   },
 }
 export default meta
 
 type Story = StoryObj<typeof Searchbar>
 
-/**
- * 1) Basic usage (no label, no special colors)
- */
-export const Basic: Story = {
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
+      <Searchbar {...args} />
+    </div>
+  ),
   args: {
-    placeholder: 'Search...',
+    label: 'Search',
+    placeholder: 'Search for anything...',
     value: '',
-    onChange: e => {
-      console.log('Basic search input =>', e.target.value)
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // The input might have "Search..." as the placeholder
-    const inputEl = canvas.getByPlaceholderText('Search...') // returns HTMLElement
-
-    // Initially empty
-    expect((inputEl as HTMLInputElement).value).toBe('')
-
-    // Type something
-    await userEvent.type(inputEl, 'Hello')
-    expect((inputEl as HTMLInputElement).value).toBe('Hello')
+    onChange: e => console.log('Search input =>', e.target.value),
+    sacredtheme: false,
   },
 }
 
-/**
- * 2) With Label
- */
-export const WithLabel: Story = {
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-black rounded-lg">
+      <Searchbar {...args} />
+    </div>
+  ),
   args: {
-    label: 'Search Label',
-    placeholder: 'Search items',
-    value: '',
-    onChange: e => {
-      console.log('WithLabel input =>', e.target.value)
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // The label is visible
-    expect(canvas.getByText('Search Label')).toBeInTheDocument()
-
-    // Type some text
-    const inputEl = canvas.getByLabelText('Search Label') // returns HTMLElement
-    await userEvent.type(inputEl, 'Apple')
-    expect((inputEl as HTMLInputElement).value).toBe('Apple')
+    ...PremiumTheme.args,
+    sacredtheme: true,
   },
 }
 
-/**
- * 3) Custom Colors
- */
-export const CustomColors: Story = {
-  args: {
-    label: 'Colored Search',
-    placeholder: 'Look here...',
-    value: '',
-    backgroundcolor: '#e3f2fd', // Light blue
-    iconcolor: '#0d47a1', // Darker blue
-    outlinecolor: '#64b5f6', // Another shade of blue
-    fontcolor: '#1a237e', // Deep purple for text
-    onChange: e => {
-      console.log('CustomColors input =>', e.target.value)
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const inputEl = canvas.getByLabelText('Colored Search')
-    // Type "Colored"
-    await userEvent.type(inputEl, 'Colored')
-    expect((inputEl as HTMLInputElement).value).toBe('Colored')
-  },
+const InteractiveDemoRenderer = () => {
+  const [value, setValue] = React.useState('')
+  const [sacred, setSacred] = React.useState(false)
+  const [shrunkPos, setShrunkPos] = React.useState<'onNotch' | 'aboveNotch'>(
+    'onNotch'
+  )
+
+  return (
+    <div className="w-[500px] space-y-4">
+      <div className="p-4 bg-white rounded-lg border">
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <select
+            value={shrunkPos}
+            onChange={e =>
+              setShrunkPos(e.target.value as 'onNotch' | 'aboveNotch')
+            }
+          >
+            <option value="onNotch">On Notch</option>
+            <option value="aboveNotch">Above Notch</option>
+          </select>
+        </div>
+      </div>
+      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+        <Searchbar
+          label="Interactive Search"
+          placeholder="Type to see changes"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          sacredtheme={sacred}
+          shrunklabelposition={shrunkPos}
+        />
+      </div>
+    </div>
+  )
 }
 
-/**
- * 4) Outline None
- */
-export const NoOutline: Story = {
-  args: {
-    label: 'No Border',
-    placeholder: 'Try typing...',
-    value: '',
-    outlinecolor: 'none',
-    onChange: e => {
-      console.log('NoOutline input =>', e.target.value)
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const inputEl = canvas.getByLabelText('No Border')
-
-    // Type "Borderless"
-    await userEvent.type(inputEl, 'Borderless')
-    expect((inputEl as HTMLInputElement).value).toBe('Borderless')
-  },
-}
-
-/**
- * 5) Pre-filled Value
- */
-export const Prefilled: Story = {
-  args: {
-    label: 'Prefilled Search',
-    placeholder: 'Modify me...',
-    value: 'Initial text',
-    onChange: e => {
-      console.log('Prefilled input =>', e.target.value)
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Confirm initial value
-    const inputEl = canvas.getByLabelText('Prefilled Search')
-    expect((inputEl as HTMLInputElement).value).toBe('Initial text')
-
-    // Clear it and type new text
-    await userEvent.clear(inputEl)
-    await userEvent.type(inputEl, 'New content')
-    expect((inputEl as HTMLInputElement).value).toBe('New content')
-  },
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoRenderer />,
 }

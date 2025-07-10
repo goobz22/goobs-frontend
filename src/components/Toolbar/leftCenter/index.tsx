@@ -3,89 +3,82 @@
 'use client'
 
 import React, { FC } from 'react'
-import { Box, keyframes, alpha } from '@mui/material'
 import Searchbar, { SearchbarProps } from '../../Field/Search'
 
-// Sacred theming animation
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-`
-
 interface LeftCenterProps extends Partial<SearchbarProps> {
+  shrunkfontcolor?: string
+  unshrunkfontcolor?: string
+  backgroundcolor?: string
+  iconcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
   sacredtheme?: boolean
+}
+
+const premiumStyles = {
+  container: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    width: '24rem', // w-96
+    height: '3.5rem', // h-14
+    position: 'relative',
+  } as React.CSSProperties,
+  searchbarContainer: {
+    marginBottom: '0.5rem', // mb-2
+    width: '100%',
+  } as React.CSSProperties,
+  glyph: {
+    display: 'none',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  container: {
+    ...premiumStyles.container,
+  } as React.CSSProperties,
+  searchbarContainer: {
+    ...premiumStyles.searchbarContainer,
+    animation: 'sacred-glow 1.5s infinite alternate',
+    borderRadius: '0.375rem', // rounded
+  } as React.CSSProperties,
+  glyph: {
+    content: '"𓂀"',
+    position: 'absolute',
+    top: '0.25rem', // top-1
+    right: '-20px',
+    fontSize: '1rem', // text-base
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'glyph-rotate 10s linear infinite',
+    zIndex: 10,
+  } as React.CSSProperties,
 }
 
 const LeftCenter: FC<LeftCenterProps> = props => {
   const {
     shrunklabelposition,
-    shrunkfontcolor,
-    unshrunkfontcolor,
     label,
-    backgroundcolor,
-    iconcolor,
-    outlinecolor,
-    fontcolor,
     placeholder,
     sacredtheme,
-    // Provide sensible defaults:
     value = '',
     onChange = () => {},
   } = props
 
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'flex-end',
-        width: '400px',
-        height: '55px',
-        position: 'relative',
-        ...(sacredtheme && {
-          '&::before': {
-            content: '"𓂀"',
-            position: 'absolute',
-            top: '5px',
-            right: '-20px',
-            fontSize: '16px',
-            color: alpha('#FFD700', 0.3),
-            animation: 'rotate 15s linear infinite',
-            zIndex: 1,
-          },
-        }),
-      }}
-    >
-      <Box
-        sx={{
-          marginBottom: '7px',
-          width: '100%',
-          ...(sacredtheme && {
-            animation: `${sacredGlow} 3s ease-in-out infinite`,
-            borderRadius: '4px',
-          }),
-        }}
-      >
+    <div style={styles.container}>
+      {sacredtheme && <div style={styles.glyph} />}
+      <div style={styles.searchbarContainer}>
         <Searchbar
           shrunklabelposition={shrunklabelposition}
-          shrunkfontcolor={sacredtheme ? '#FFD700' : shrunkfontcolor}
-          unshrunkfontcolor={
-            sacredtheme ? alpha('#FFD700', 0.8) : unshrunkfontcolor
-          }
           label={sacredtheme ? 'Divine Search' : label}
-          backgroundcolor={
-            sacredtheme ? alpha('#000000', 0.6) : backgroundcolor
-          }
-          iconcolor={sacredtheme ? '#FFD700' : iconcolor}
-          outlinecolor={sacredtheme ? '#FFD700' : outlinecolor}
-          fontcolor={sacredtheme ? '#FFD700' : fontcolor}
           placeholder={sacredtheme ? 'Seek ancient wisdom...' : placeholder}
           value={value}
           onChange={onChange}
           sacredtheme={sacredtheme}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

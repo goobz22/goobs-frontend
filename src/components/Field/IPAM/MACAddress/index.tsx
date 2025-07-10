@@ -61,10 +61,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   const formatMACAddress = useCallback(
     (input: string, wasDelete: boolean): string => {
       // Replace any character that's not a hex digit or colon
-      let formatted = input.replace(/[^0-9a-fA-F:]/g, '')
-
-      // Convert to uppercase
-      formatted = formatted.toUpperCase()
+      let formatted = input.replace(/[^0-9a-fA-F:]/g, '').toUpperCase()
 
       // Remove consecutive colons
       formatted = formatted.replace(/:{2,}/g, ':')
@@ -189,10 +186,6 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
       error={!isValid}
       helperText={getErrorMessage()}
       placeholder="00:1A:2B:3C:4D:5E"
-      inputProps={{
-        inputMode: 'text',
-        pattern: '[0-9a-fA-F:]*',
-      }}
       {...rest}
     />
   )

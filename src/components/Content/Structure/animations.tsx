@@ -1,5 +1,4 @@
 'use client'
-import { Box, styled, keyframes } from '@mui/material'
 import React, { useEffect } from 'react'
 
 export type Animation =
@@ -13,69 +12,91 @@ export type Animation =
   | 'fadeOut'
   | 'fadeIn'
 
-export const slideIn = keyframes`
-  0% { opacity: 0; transform: translateX(-20px); }
-  100% { opacity: 1; transform: translateX(0); }
-`
-
-export const slideInUp = keyframes`
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-`
-
-export const slideInDown = keyframes`
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-`
-
-export const slideInLeft = keyframes`
-  0% { opacity: 0; transform: translateX(-20px); }
-  100% { opacity: 1; transform: translateX(0); }
-`
-
-export const slideInRight = keyframes`
-  0% { opacity: 0; transform: translateX(20px); }
-  100% { opacity: 1; transform: translateX(0); }
-`
-
-export const fadeOut = keyframes`
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-`
-
-export const fadeIn = keyframes`
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-`
-
 interface AnimationProps {
   animationtype?: Animation
+  children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
 }
 
-const animationStyles: Record<Animation, string> = {
-  none: 'none',
-  slideIn: `${slideIn} 1s ease-in-out forwards`,
-  slideInUp: `${slideInUp} 1s ease-in-out forwards`,
-  slideInDown: `${slideInDown} 1s ease-in-out forwards`,
-  slideInLeft: `${slideInLeft} 1s ease-in-out forwards`,
-  slideInRight: `${slideInRight} 1s ease-in-out forwards`,
-  fadeOut: `${fadeOut} 0.5s ease-out forwards`,
-  fadeIn: `${fadeIn} 0.5s ease-in forwards`,
-  stuckOnScroll: 'none', // Assuming no animation for 'stuckOnScroll' as it's likely a CSS position behavior.
+// Animation styles mapping
+const animationStyles: Record<Animation, React.CSSProperties> = {
+  none: { opacity: 1 },
+  slideIn: {
+    opacity: 0,
+    animation: 'slideInLeft 0.6s ease-out forwards',
+  },
+  slideInUp: {
+    opacity: 0,
+    animation: 'slideInUp 0.6s ease-out forwards',
+  },
+  slideInDown: {
+    opacity: 0,
+    animation: 'slideInDown 0.6s ease-out forwards',
+  },
+  slideInLeft: {
+    opacity: 0,
+    animation: 'slideInLeft 0.6s ease-out forwards',
+  },
+  slideInRight: {
+    opacity: 0,
+    animation: 'slideInRight 0.6s ease-out forwards',
+  },
+  fadeOut: {
+    opacity: 1,
+    animation: 'fadeOut 0.6s ease-out forwards',
+  },
+  fadeIn: {
+    opacity: 0,
+    animation: 'fadeIn 0.6s ease-out forwards',
+  },
+  stuckOnScroll: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    opacity: 1,
+  },
 }
 
-export const AnimatedElement = styled(Box)<AnimationProps>(
-  ({ animationtype }) => ({
-    opacity: animationtype === 'none' ? 1 : 0,
-    animation: animationtype ? animationStyles[animationtype] : 'none',
-  })
-)
+export const AnimatedElement: React.FC<AnimationProps> = ({
+  animationtype = 'none',
+  children,
+  className,
+  style,
+  ...props
+}) => {
+  const animationStyle = animationStyles[animationtype]
 
-export const StuckElement = styled(Box)`
-  position: sticky;
-  top: 0;
-  z-index: 1;
-`
+  const finalStyle = {
+    ...animationStyle,
+    ...style,
+  }
+
+  return (
+    <div className={className} style={finalStyle} {...props}>
+      {children}
+    </div>
+  )
+}
+
+export const StuckElement: React.FC<{
+  children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+}> = ({ children, className, style, ...props }) => {
+  const stuckStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    ...style,
+  } as React.CSSProperties
+
+  return (
+    <div className={className} style={stuckStyle} {...props}>
+      {children}
+    </div>
+  )
+}
 
 export function useAnimation(ref: React.RefObject<HTMLDivElement>) {
   useEffect(() => {

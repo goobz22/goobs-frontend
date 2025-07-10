@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import USDField, { USDFieldProps } from '../../../Field/USD'
 
 export interface UseUSDProps {
@@ -20,7 +19,6 @@ const USDComponent: React.FC<USDFieldProps> = ({
   error = false,
   helperText,
   placeholder,
-  sx,
   enableIncrement = false,
   incrementStep = 1,
   initialDelay = 500,
@@ -30,7 +28,7 @@ const USDComponent: React.FC<USDFieldProps> = ({
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <USDField
         initialValue={initialValue}
         onChange={onChange}
@@ -48,10 +46,9 @@ const USDComponent: React.FC<USDFieldProps> = ({
         initialDelay={initialDelay}
         repeatInterval={repeatInterval}
         sacredtheme={sacredtheme}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

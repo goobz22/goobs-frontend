@@ -1,10 +1,11 @@
 'use client'
 
 import React from 'react'
-import { TableBody, TableRow, TableCell, Checkbox } from '@mui/material'
+import { ColumnDef } from '../../types'
 import StyledTooltip from '../../../Tooltip'
-import type { RowData, ColumnDef } from '../../types'
+import type { RowData } from '../../types'
 import { getRowId } from '../index'
+import Checkbox from '../../../Checkbox'
 
 /**
  * Safely convert a value to a string without triggering the default
@@ -502,285 +503,139 @@ function formatExpirationDate(
   formatted: string
   element: React.ReactNode
 } {
-  // Convert to string and parse expiration date
-  let dateStr = ''
-
-  if (typeof value === 'string') {
-    dateStr = value.trim()
-  } else if (typeof value === 'number') {
-    dateStr = String(value)
-  } else {
-    dateStr = ''
-  }
-
-  // Handle empty or invalid input
-  if (!dateStr) {
-    const formatted = '--/----'
-    const element = (
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-          fontWeight: 400,
-          fontSize: '0.875rem',
-          lineHeight: 1.3,
-          letterSpacing: '0.05em',
-          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredtheme
-            ? 'rgba(255, 215, 0, 0.05)'
-            : 'rgba(156, 163, 175, 0.1)',
-          border: sacredtheme
-            ? '1px solid rgba(255, 215, 0, 0.3)'
-            : '1px solid rgba(156, 163, 175, 0.3)',
-          borderRadius: '6px',
-          padding: '5px 10px',
-          minWidth: '80px',
-          textAlign: 'center' as const,
-          userSelect: 'none',
-        }}
-      >
-        {formatted}
-      </span>
-    )
-    return { formatted, element }
-  }
-
-  // Parse different date formats (MM/YYYY, MM/YY, etc.)
   const parseExpirationDate = (input: string) => {
-    // Remove any non-digit/slash characters
-    const cleaned = input.replace(/[^\d/]/g, '')
+    if (!input || typeof input !== 'string') {
+      return null
+    }
 
-    // Handle MM/YYYY or MM/YY format
-    const parts = cleaned.split('/')
-    if (parts.length === 2) {
-      const month = parseInt(parts[0], 10)
-      let year = parseInt(parts[1], 10)
+    const cleaned = input.replace(/[^0-9]/g, '')
+    let month, year
 
-      // Convert 2-digit year to 4-digit year
+    if (cleaned.length >= 3) {
+      month = parseInt(cleaned.slice(0, 2), 10)
+      year = parseInt(cleaned.slice(2), 10)
+
       if (year < 100) {
-        year += year < 50 ? 2000 : 1900
+        year += 2000
       }
 
-      if (month >= 1 && month <= 12 && year >= 2000 && year <= 2099) {
-        return { month, year, isValid: true }
+      if (!isNaN(month) && !isNaN(year) && month >= 1 && month <= 12) {
+        return new Date(year, month - 1)
       }
     }
-
-    return { month: 0, year: 0, isValid: false }
+    return null
   }
 
-  const parsedDate = parseExpirationDate(dateStr)
+  const date = parseExpirationDate(safeString(value))
+  const formatted = date
+    ? `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
+        date.getFullYear()
+      ).slice(2)}`
+    : 'Invalid Date'
 
-  if (!parsedDate.isValid) {
-    const formatted = 'Invalid'
-    const element = (
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-          fontWeight: 400,
-          fontSize: '0.875rem',
-          color: '#DC2626',
-          backgroundColor: 'rgba(220, 38, 38, 0.1)',
-          border: '1px solid rgba(220, 38, 38, 0.3)',
-          borderRadius: '6px',
-          padding: '5px 10px',
-          minWidth: '80px',
-          textAlign: 'center' as const,
-          userSelect: 'none',
-        }}
-      >
-        {formatted}
-      </span>
-    )
-    return { formatted, element }
+  const getStatus = () => {
+    if (!date) return 'invalid'
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    const expiry = new Date(date)
+    expiry.setMonth(expiry.getMonth() + 1, 0) // End of the expiration month
+    expiry.setHours(23, 59, 59, 999)
+
+    if (expiry < now) return 'expired'
+    const sixMonthsFromNow = new Date(now)
+    sixMonthsFromNow.setMonth(now.getMonth() + 6)
+    if (expiry < sixMonthsFromNow) return 'expiring_soon'
+    return 'valid'
   }
 
-  // Format the date consistently
-  const formatted = `${parsedDate.month.toString().padStart(2, '0')}/${parsedDate.year}`
+  const status = getStatus()
 
-  // Check expiration status
-  const now = new Date()
-  const currentMonth = now.getMonth() + 1 // JavaScript months are 0-indexed
-  const currentYear = now.getFullYear()
-
-  const isExpired =
-    parsedDate.year < currentYear ||
-    (parsedDate.year === currentYear && parsedDate.month < currentMonth)
-
-  const isExpiringSoon =
-    (!isExpired &&
-      parsedDate.year === currentYear &&
-      parsedDate.month <= currentMonth + 3) ||
-    (parsedDate.year === currentYear + 1 &&
-      currentMonth >= 10 &&
-      parsedDate.month <= currentMonth - 9)
-
-  // Get styling based on expiration status
   const getStatusStyling = () => {
-    if (sacredtheme) {
-      if (isExpired) {
-        return {
-          color: '#EF4444',
-          bgGradient:
-            'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.5) 50%, rgba(127, 29, 29, 0.8) 100%)',
-          borderColor: '#DC2626',
-          icon: '⚠️',
-          status: 'EXPIRED',
-        }
-      } else if (isExpiringSoon) {
-        return {
-          color: '#F59E0B',
-          bgGradient:
-            'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.1) 50%, rgba(245, 158, 11, 0.2) 100%)',
-          borderColor: '#D97706',
-          icon: '⏰',
-          status: 'EXPIRING',
-        }
-      } else {
-        return {
-          color: '#FFD700',
-          bgGradient:
-            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 50%, rgba(255, 215, 0, 0.15) 100%)',
-          borderColor: 'rgba(255, 215, 0, 0.6)',
-          icon: '✓',
-          status: 'VALID',
-        }
-      }
+    const base = {
+      fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif',
+      fontWeight: 500,
+      fontSize: '0.875rem',
+      borderRadius: '12px',
+      padding: '5px 10px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      transition: 'all 0.2s ease',
+      borderWidth: '1.5px',
+      borderStyle: 'solid',
     }
 
-    // Original theme styling
-    if (isExpired) {
-      return {
-        color: '#DC2626',
-        bgGradient:
-          'linear-gradient(135deg, #FEF2F2 0%, #FECACA 50%, #FCA5A5 100%)',
-        borderColor: '#EF4444',
-        icon: '⚠️',
-        status: 'EXPIRED',
-      }
-    } else if (isExpiringSoon) {
-      return {
-        color: '#D97706',
-        bgGradient:
-          'linear-gradient(135deg, #FFFBEB 0%, #FED7AA 50%, #FDBA74 100%)',
-        borderColor: '#F59E0B',
-        icon: '⏰',
-        status: 'EXPIRING',
-      }
-    } else {
-      return {
-        color: '#059669',
-        bgGradient:
-          'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%)',
-        borderColor: '#10B981',
-        icon: '✓',
-        status: 'VALID',
-      }
+    const themes = {
+      sacred: {
+        valid: {
+          color: '#A3E635',
+          bg: 'rgba(163, 230, 53, 0.1)',
+          borderColor: 'rgba(163, 230, 53, 0.4)',
+        },
+        expiring_soon: {
+          color: '#FBBF24',
+          bg: 'rgba(251, 191, 36, 0.1)',
+          borderColor: 'rgba(251, 191, 36, 0.5)',
+        },
+        expired: {
+          color: '#F87171',
+          bg: 'rgba(248, 113, 113, 0.1)',
+          borderColor: 'rgba(248, 113, 113, 0.5)',
+        },
+        invalid: {
+          color: '#9CA3AF',
+          bg: 'rgba(156, 163, 175, 0.1)',
+          borderColor: 'rgba(156, 163, 175, 0.3)',
+        },
+      },
+      standard: {
+        valid: {
+          color: '#166534',
+          bg: '#DCFCE7',
+          borderColor: '#4ADE80',
+        },
+        expiring_soon: {
+          color: '#92400E',
+          bg: '#FEF3C7',
+          borderColor: '#FBBF24',
+        },
+        expired: {
+          color: '#991B1B',
+          bg: '#FEE2E2',
+          borderColor: '#F87171',
+        },
+        invalid: {
+          color: '#4B5563',
+          bg: '#F3F4F6',
+          borderColor: '#D1D5DB',
+        },
+      },
+    }
+
+    const currentTheme = sacredtheme ? themes.sacred : themes.standard
+    const style = currentTheme[status]
+
+    return {
+      ...base,
+      color: style.color,
+      backgroundColor: style.bg,
+      borderColor: style.borderColor,
     }
   }
 
-  const statusInfo = getStatusStyling()
-  const formatId = `expiry-${Math.random().toString(36).substr(2, 9)}`
+  const statusIcons = {
+    valid: '✓',
+    expiring_soon: '⏳',
+    expired: '✕',
+    invalid: '?',
+  }
 
-  // Premium styled element with expiration status
   const element = (
-    <span
-      id={formatId}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-        fontWeight: 500,
-        fontSize: '0.875rem',
-        lineHeight: 1.3,
-        letterSpacing: '0.05em',
-        color: statusInfo.color,
-        background: statusInfo.bgGradient,
-        border: `1.5px solid ${statusInfo.borderColor}`,
-        borderRadius: '8px',
-        padding: '6px 12px',
-        minWidth: '100px',
-        textAlign: 'center' as const,
-        boxShadow: sacredtheme
-          ? `0 2px 8px rgba(255, 215, 0, 0.2)`
-          : `0 2px 8px rgba(0, 0, 0, 0.1)`,
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        cursor: 'default',
-        userSelect: 'none',
-        overflow: 'hidden',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
-          : '0 4px 12px rgba(0, 0, 0, 0.15)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(0, 0, 0, 0.1)'
-      }}
-    >
-      {/* Status icon */}
-      <span
-        style={{
-          fontSize: '0.75rem',
-          opacity: 0.8,
-          marginRight: '6px',
-        }}
-      >
-        {statusInfo.icon}
+    <span style={getStatusStyling()}>
+      <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+        {statusIcons[status]}
       </span>
-
-      {/* Formatted date */}
-      <span
-        style={{
-          fontVariantNumeric: 'tabular-nums',
-          fontFeatureSettings: '"tnum" 1',
-          fontWeight: 600,
-          flex: 1,
-        }}
-      >
-        {formatted}
-      </span>
-
-      {/* Status text for expired/expiring cards */}
-      {(isExpired || isExpiringSoon) && (
-        <span
-          style={{
-            fontSize: '0.65rem',
-            fontWeight: 600,
-            opacity: 0.7,
-            marginLeft: '4px',
-            textTransform: 'uppercase' as const,
-            letterSpacing: '0.05em',
-          }}
-        >
-          {statusInfo.status}
-        </span>
-      )}
-
-      {/* Subtle pattern overlay */}
-      <span
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '15px',
-          height: '100%',
-          background:
-            'linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 60%, transparent 80%)',
-          pointerEvents: 'none',
-        }}
-      />
+      <span>{formatted}</span>
     </span>
   )
 
@@ -798,42 +653,19 @@ function formatAccountNumber(
   formatted: string
   element: React.ReactNode
 } {
-  // Convert to string and extract digits only
   let digits = ''
-
-  if (typeof value === 'string') {
-    digits = value.replace(/\D/g, '')
-  } else if (typeof value === 'number') {
+  if (typeof value === 'string' || typeof value === 'number') {
     digits = String(value).replace(/\D/g, '')
-  } else {
-    digits = ''
   }
 
-  // Handle empty or invalid input
   if (!digits || digits.length < 4) {
-    const formatted = '•••••••••••••'
+    const formatted = '••••'
     const element = (
       <span
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-          fontWeight: 400,
-          fontSize: '0.875rem',
-          lineHeight: 1.3,
+          fontFamily: '"JetBrains Mono", monospace',
+          color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : '#6B7280',
           letterSpacing: '0.1em',
-          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredtheme
-            ? 'rgba(255, 215, 0, 0.05)'
-            : 'rgba(156, 163, 175, 0.1)',
-          border: sacredtheme
-            ? '1px solid rgba(255, 215, 0, 0.3)'
-            : '1px solid rgba(156, 163, 175, 0.3)',
-          borderRadius: '6px',
-          padding: '5px 10px',
-          minWidth: '120px',
-          textAlign: 'center' as const,
-          userSelect: 'none',
         }}
       >
         {formatted}
@@ -842,113 +674,43 @@ function formatAccountNumber(
     return { formatted, element }
   }
 
-  // Get last 4 digits and create masked version
   const lastFour = digits.slice(-4)
-  const maskedDigits = '•'.repeat(Math.max(0, digits.length - 4)) + lastFour
+  const masked = '•'.repeat(digits.length - 4) + lastFour
+  const formatted = masked
 
-  // Format with spacing for readability
-  const formatted = maskedDigits.replace(/(.{4})/g, '$1 ').trim()
+  const themeStyle = sacredtheme
+    ? {
+        color: '#FFD700',
+        fontFamily: '"Caudex", serif',
+        textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
+      }
+    : {
+        color: '#1F2937',
+        fontFamily: '"Inter", sans-serif',
+      }
 
-  const formatId = `account-${Math.random().toString(36).substr(2, 9)}`
-
-  // Banking-themed styled element with security focus
   const element = (
-    <span
-      id={formatId}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-        fontWeight: 500,
-        fontSize: '0.875rem',
-        lineHeight: 1.3,
-        letterSpacing: '0.08em',
-        color: sacredtheme ? '#FFD700' : '#1E40AF',
-        background: sacredtheme
-          ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)'
-          : 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 30%, #BFDBFE 100%)',
-        border: sacredtheme
-          ? '1.5px solid rgba(255, 215, 0, 0.6)'
-          : '1.5px solid #3B82F6',
-        borderRadius: '8px',
-        padding: '6px 12px',
-        minWidth: '130px',
-        textAlign: 'center' as const,
-        boxShadow: sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(59, 130, 246, 0.1)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        cursor: 'default',
-        userSelect: 'none',
-        overflow: 'hidden',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
-          : '0 4px 12px rgba(59, 130, 246, 0.2)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(59, 130, 246, 0.1)'
-      }}
-    >
-      {/* Bank icon */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <span
         style={{
           fontSize: '0.75rem',
-          opacity: 0.7,
-          marginRight: '6px',
-          color: sacredtheme ? '#FFD700' : '#1D4ED8',
+          opacity: 0.6,
+          color: sacredtheme ? '#FFD700' : '#4B5563',
         }}
       >
-        🏦
+        #
       </span>
-
-      {/* Account number with special styling for masked vs visible digits */}
       <span
         style={{
-          fontVariantNumeric: 'tabular-nums',
-          fontFeatureSettings: '"tnum" 1',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1px',
+          ...themeStyle,
+          fontWeight: 600,
+          fontSize: '0.9rem',
+          letterSpacing: '0.05em',
         }}
       >
-        {formatted.split('').map((char, index) => (
-          <span
-            key={index}
-            style={{
-              opacity: char === '•' ? 0.6 : 1,
-              fontSize: char === '•' ? '1.2em' : '1em',
-              fontWeight: char === '•' ? 300 : 600,
-            }}
-          >
-            {char}
-          </span>
-        ))}
+        {formatted}
       </span>
-
-      {/* Subtle security pattern overlay */}
-      <span
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '20px',
-          height: '100%',
-          background:
-            'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-    </span>
+    </div>
   )
 
   return { formatted, element }
@@ -965,42 +727,20 @@ function formatRoutingNumber(
   formatted: string
   element: React.ReactNode
 } {
-  // Convert to string and extract digits only
   let digits = ''
-
-  if (typeof value === 'string') {
-    digits = value.replace(/\D/g, '')
-  } else if (typeof value === 'number') {
+  if (typeof value === 'string' || typeof value === 'number') {
     digits = String(value).replace(/\D/g, '')
-  } else {
-    digits = ''
   }
 
-  // Handle empty or invalid input
-  if (!digits) {
-    const formatted = '--- --- ---'
+  if (digits.length !== 9) {
+    const formatted = 'Invalid ABA'
     const element = (
       <span
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-          fontWeight: 400,
-          fontSize: '0.875rem',
-          lineHeight: 1.3,
-          letterSpacing: '0.05em',
-          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
-          backgroundColor: sacredtheme
-            ? 'rgba(255, 215, 0, 0.05)'
-            : 'rgba(156, 163, 175, 0.1)',
-          border: sacredtheme
-            ? '1px solid rgba(255, 215, 0, 0.3)'
-            : '1px solid rgba(156, 163, 175, 0.3)',
-          borderRadius: '6px',
-          padding: '5px 10px',
-          minWidth: '100px',
-          textAlign: 'center' as const,
-          userSelect: 'none',
+          fontFamily: '"Inter", sans-serif',
+          color: '#EF4444',
+          fontSize: '0.8rem',
+          fontStyle: 'italic',
         }}
       >
         {formatted}
@@ -1009,132 +749,44 @@ function formatRoutingNumber(
     return { formatted, element }
   }
 
-  // Validate routing number (should be 9 digits)
-  const isValidLength = digits.length === 9
+  const formatted = digits
 
-  // Format routing number with dashes (XXX-XXX-XXX)
-  let formatted = digits
-  if (digits.length >= 6) {
-    formatted = `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
-  } else if (digits.length >= 3) {
-    formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`
-  }
+  const themeStyle = sacredtheme
+    ? {
+        color: '#38BDF8',
+        fontFamily: '"Orbitron", sans-serif',
+        textShadow: '0 0 10px rgba(56, 189, 248, 0.4)',
+      }
+    : {
+        color: '#0284C7',
+        fontFamily: '"Inter", sans-serif',
+      }
 
-  const formatId = `routing-${Math.random().toString(36).substr(2, 9)}`
-
-  // Styling based on validation
-  const colorScheme = sacredtheme
-    ? isValidLength
-      ? {
-          color: '#FFD700',
-          bgGradient:
-            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)',
-          borderColor: 'rgba(255, 215, 0, 0.6)',
-          icon: '✓',
-        }
-      : {
-          color: '#EF4444',
-          bgGradient:
-            'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.5) 30%, rgba(127, 29, 29, 0.8) 100%)',
-          borderColor: '#DC2626',
-          icon: '⚠️',
-        }
-    : isValidLength
-      ? {
-          color: '#059669',
-          bgGradient:
-            'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 30%, #A7F3D0 100%)',
-          borderColor: '#10B981',
-          icon: '✓',
-        }
-      : {
-          color: '#DC2626',
-          bgGradient:
-            'linear-gradient(135deg, #FEF2F2 0%, #FECACA 30%, #FCA5A5 100%)',
-          borderColor: '#EF4444',
-          icon: '⚠️',
-        }
-
-  // Professional routing number styled element
   const element = (
-    <span
-      id={formatId}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: '"JetBrains Mono", "SF Mono", Consolas, monospace',
-        fontWeight: 500,
-        fontSize: '0.875rem',
-        lineHeight: 1.3,
-        letterSpacing: '0.05em',
-        color: colorScheme.color,
-        background: colorScheme.bgGradient,
-        border: `1.5px solid ${colorScheme.borderColor}`,
-        borderRadius: '8px',
-        padding: '6px 12px',
-        minWidth: '110px',
-        textAlign: 'center' as const,
-        boxShadow: sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        cursor: 'default',
-        userSelect: 'none',
-        overflow: 'hidden',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
-          : '0 4px 12px rgba(0, 0, 0, 0.15)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(0, 0, 0, 0.1)'
-      }}
-    >
-      {/* Validation icon */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <span
         style={{
-          fontSize: '0.75rem',
-          opacity: 0.8,
-          marginRight: '6px',
+          fontSize: '0.8rem',
+          opacity: 0.7,
+          color: sacredtheme ? '#38BDF8' : '#3B82F6',
         }}
       >
-        {colorScheme.icon}
+        ⑆
       </span>
-
-      {/* Formatted routing number */}
       <span
         style={{
-          fontVariantNumeric: 'tabular-nums',
-          fontFeatureSettings: '"tnum" 1',
-          fontWeight: 600,
+          ...themeStyle,
+          fontWeight: 500,
+          fontSize: '0.9rem',
+          letterSpacing: '0.075em',
+          transition: 'letter-spacing 0.3s ease',
         }}
+        onMouseEnter={e => (e.currentTarget.style.letterSpacing = '0.1em')}
+        onMouseLeave={e => (e.currentTarget.style.letterSpacing = '0.075em')}
       >
         {formatted}
       </span>
-
-      {/* Subtle pattern overlay */}
-      <span
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '15px',
-          height: '100%',
-          background:
-            'linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 60%, transparent 80%)',
-          pointerEvents: 'none',
-        }}
-      />
-    </span>
+    </div>
   )
 
   return { formatted, element }
@@ -1179,420 +831,162 @@ const Rows: React.FC<RowsProps> = ({
   onRowCheckboxChange,
   sacredtheme = false,
 }) => {
-  if (rows.length === 0) {
+  if (!rows || rows.length === 0) {
     return (
-      <TableBody>
-        <TableRow>
-          {/* Extra cell for checkbox column */}
-          <TableCell />
-          <TableCell colSpan={finalDesktopColumns.length || 1}>
-            No data available
-          </TableCell>
-        </TableRow>
-      </TableBody>
+      <tbody>
+        <tr>
+          <td colSpan={100} className="text-center p-12 text-gray-500 italic">
+            No data to display.
+          </td>
+        </tr>
+      </tbody>
     )
   }
-
-  // -------------------------------------
-  // Mobile: single-column approach
-  // -------------------------------------
-  if (isMobile) {
-    return (
-      <TableBody>
-        {rows.map(row => {
-          const rowId = getRowId(row)
-          const isSelected = selectedRowIds.includes(rowId)
-
-          // Find the selected column definition for mobile
-          const mobileCol = allColumns.find(
-            col => col.field === mobileSelectedColumn
-          )
-
-          // Safety check: if no column is selected or column doesn't exist, use the first available column
-          const effectiveColumnField =
-            mobileCol?.field ||
-            (allColumns.length > 0 ? allColumns[0].field : '')
-          const effectiveColumn =
-            mobileCol || (allColumns.length > 0 ? allColumns[0] : null)
-
-          // Handle currency formatting for mobile
-          let cellDisplayValue: React.ReactNode
-          let cellValueStr: string
-
-          if (effectiveColumn?.formatCurrency) {
-            const { formatted, element } = formatCurrency(
-              row[effectiveColumnField],
-              sacredtheme
-            )
-            cellDisplayValue = element
-            cellValueStr = formatted
-          } else if (effectiveColumn?.formatCreditCard) {
-            const { formatted, element } = formatCreditCard(
-              row[effectiveColumnField],
-              sacredtheme
-            )
-            cellDisplayValue = element
-            cellValueStr = formatted
-          } else if (effectiveColumn?.formatExpirationDate) {
-            const { formatted, element } = formatExpirationDate(
-              row[effectiveColumnField],
-              sacredtheme
-            )
-            cellDisplayValue = element
-            cellValueStr = formatted
-          } else if (effectiveColumn?.formatAccountNumber) {
-            const { formatted, element } = formatAccountNumber(
-              row[effectiveColumnField],
-              sacredtheme
-            )
-            cellDisplayValue = element
-            cellValueStr = formatted
-          } else if (effectiveColumn?.formatRoutingNumber) {
-            const { formatted, element } = formatRoutingNumber(
-              row[effectiveColumnField],
-              sacredtheme
-            )
-            cellDisplayValue = element
-            cellValueStr = formatted
-          } else if (typeof effectiveColumn?.renderCell === 'function') {
-            const cellParams = {
-              row,
-              value: row[effectiveColumnField],
-              field: effectiveColumnField,
-              rowIndex: rows.indexOf(row),
-              columnIndex: 0,
-            }
-            cellDisplayValue = effectiveColumn.renderCell(cellParams)
-            cellValueStr = safeString(cellDisplayValue)
-          } else {
-            const rawValue = safeString(row[effectiveColumnField])
-            cellDisplayValue = rawValue || 'No data'
-            cellValueStr = rawValue || 'No data'
-          }
-
-          return (
-            <TableRow
-              key={rowId}
-              hover
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-              sx={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                backgroundColor: isSelected
-                  ? sacredtheme
-                    ? 'rgba(255, 215, 0, 0.15)'
-                    : 'rgba(0, 0, 255, 0.08)'
-                  : 'unset',
-                ...(sacredtheme && {
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 215, 0, 0.05)',
-                  },
-                }),
-              }}
-            >
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={isSelected}
-                  onChange={e => {
-                    e.stopPropagation()
-                    onRowCheckboxChange(rowId)
-                  }}
-                />
-              </TableCell>
-
-              <TableCell
-                sx={{
-                  // Match header cell styling for consistency
-                  width: '100%',
-                  minWidth: 200,
-                  maxWidth: '100%',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  paddingLeft: 0,
-                  paddingRight: 8,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <StyledTooltip
-                  title={cellValueStr}
-                  tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
-                  tooltipplacement="top"
-                  offsetX={0}
-                  offsetY={5}
-                  arrow
-                  sacredtheme={sacredtheme}
-                >
-                  <span>{cellDisplayValue}</span>
-                </StyledTooltip>
-              </TableCell>
-            </TableRow>
-          )
-        })}
-      </TableBody>
-    )
-  }
-
-  // -------------------------------------
-  // Desktop/tablet: multi-column approach
-  // -------------------------------------
   return (
-    <TableBody>
-      {rows.map((row, rowIndex) => {
+    <tbody>
+      {rows.map(row => {
         const rowId = getRowId(row)
         const isSelected = selectedRowIds.includes(rowId)
 
-        return (
-          <TableRow
-            key={rowId}
-            hover
-            onClick={onRowClick ? () => onRowClick(row) : undefined}
-            sx={{
-              cursor: onRowClick ? 'pointer' : 'default',
-              backgroundColor: isSelected
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.15)'
-                  : 'rgba(0, 0, 255, 0.08)'
-                : 'unset',
-              ...(sacredtheme && {
+        const rowStyle = {
+          transition: 'background-color 0.2s ease',
+          cursor: 'pointer',
+          ...(isSelected && sacredtheme
+            ? {
+                backgroundColor: 'rgba(255, 215, 0, 0.15)',
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 215, 0, 0.05)',
+                  backgroundColor: 'rgba(255, 215, 0, 0.2)',
                 },
-              }),
-            }}
-          >
-            {/* Checkbox cell */}
-            <TableCell padding="checkbox">
+              }
+            : {}),
+          ...(isSelected && !sacredtheme
+            ? {
+                backgroundColor: 'rgba(219, 234, 254, 1)',
+                '&:hover': {
+                  backgroundColor: 'rgba(191, 219, 254, 1)',
+                },
+              }
+            : {}),
+        }
+
+        return (
+          <tr key={rowId} onClick={() => onRowClick?.(row)} style={rowStyle}>
+            <td className="w-12 p-0 align-middle">
               <Checkbox
                 checked={isSelected}
                 onChange={e => {
                   e.stopPropagation()
                   onRowCheckboxChange(rowId)
                 }}
+                onClick={e => e.stopPropagation()}
+                sacredtheme={sacredtheme}
               />
-            </TableCell>
+            </td>
 
-            {finalDesktopColumns.map((col, columnIndex) => {
-              // Overflow logic
-              if (col.field === '__overflow__') {
-                const actualCol = overflowDesktopColumns.find(
-                  c => c.field === selectedOverflowField
-                )
-                const fieldToRender = actualCol?.field
-                const cellValue =
-                  fieldToRender != null ? row[fieldToRender] : undefined
+            {/* Normal desktop columns */}
+            {!isMobile &&
+              finalDesktopColumns.map(col => {
+                let cellContent: React.ReactNode
 
-                // Handle currency formatting for overflow columns
-                let cellDisplayValue: React.ReactNode
-                let cellValueStr: string
-
-                if (actualCol?.formatCurrency) {
-                  const { formatted, element } = formatCurrency(
-                    cellValue,
-                    sacredtheme
+                if (col.field === '__overflow__') {
+                  const overflowCol = overflowDesktopColumns.find(
+                    c => c.field === selectedOverflowField
                   )
-                  cellDisplayValue = element
-                  cellValueStr = formatted
-                } else if (actualCol?.formatCreditCard) {
-                  const { formatted, element } = formatCreditCard(
-                    cellValue,
-                    sacredtheme
-                  )
-                  cellDisplayValue = element
-                  cellValueStr = formatted
-                } else if (actualCol?.formatExpirationDate) {
-                  const { formatted, element } = formatExpirationDate(
-                    cellValue,
-                    sacredtheme
-                  )
-                  cellDisplayValue = element
-                  cellValueStr = formatted
-                } else if (actualCol?.formatAccountNumber) {
-                  const { formatted, element } = formatAccountNumber(
-                    cellValue,
-                    sacredtheme
-                  )
-                  cellDisplayValue = element
-                  cellValueStr = formatted
-                } else if (actualCol?.formatRoutingNumber) {
-                  const { formatted, element } = formatRoutingNumber(
-                    cellValue,
-                    sacredtheme
-                  )
-                  cellDisplayValue = element
-                  cellValueStr = formatted
+                  if (overflowCol) {
+                    const value = row[overflowCol.field]
+                    if (overflowCol.type === 'currency') {
+                      cellContent = formatCurrency(value, sacredtheme).element
+                    } else if (overflowCol.type === 'credit_card') {
+                      cellContent = formatCreditCard(value, sacredtheme).element
+                    } else if (overflowCol.type === 'expiration_date') {
+                      cellContent = formatExpirationDate(
+                        value,
+                        sacredtheme
+                      ).element
+                    } else if (overflowCol.type === 'account_number') {
+                      cellContent = formatAccountNumber(
+                        value,
+                        sacredtheme
+                      ).element
+                    } else if (overflowCol.type === 'routing_number') {
+                      cellContent = formatRoutingNumber(
+                        value,
+                        sacredtheme
+                      ).element
+                    } else {
+                      cellContent = safeString(value)
+                    }
+                  } else {
+                    cellContent = '---'
+                  }
                 } else {
-                  cellDisplayValue = safeString(cellValue)
-                  cellValueStr = safeString(cellValue)
+                  const value = row[col.field]
+                  if (col.type === 'currency') {
+                    cellContent = formatCurrency(value, sacredtheme).element
+                  } else if (col.type === 'credit_card') {
+                    cellContent = formatCreditCard(value, sacredtheme).element
+                  } else if (col.type === 'expiration_date') {
+                    cellContent = formatExpirationDate(
+                      value,
+                      sacredtheme
+                    ).element
+                  } else if (col.type === 'account_number') {
+                    cellContent = formatAccountNumber(
+                      value,
+                      sacredtheme
+                    ).element
+                  } else if (col.type === 'routing_number') {
+                    cellContent = formatRoutingNumber(
+                      value,
+                      sacredtheme
+                    ).element
+                  } else {
+                    cellContent = safeString(value)
+                  }
                 }
 
                 return (
-                  <TableCell
-                    key={`overflow-${rowId}-${columnIndex}`}
-                    sx={{
-                      maxWidth: 200,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      paddingLeft: 5,
-                    }}
-                  >
+                  <td key={col.field} className="p-2 align-middle">
                     <StyledTooltip
-                      title={cellValueStr}
-                      tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
-                      tooltipplacement="top"
-                      offsetX={0}
-                      offsetY={5}
-                      arrow
+                      title={safeString(row[col.field])}
                       sacredtheme={sacredtheme}
                     >
-                      <span>{cellDisplayValue}</span>
+                      <div className="truncate">{cellContent}</div>
                     </StyledTooltip>
-                  </TableCell>
+                  </td>
                 )
-              }
+              })}
 
-              // Normal column
-              let cellContent: React.ReactNode
-              if (typeof col.renderCell === 'function') {
-                const cellParams = {
-                  row,
-                  value: row[col.field],
-                  field: col.field,
-                  rowIndex,
-                  columnIndex,
-                }
-                cellContent = col.renderCell(cellParams)
-              } else if (col.formatCurrency) {
-                // Handle currency formatting
-                const { element } = formatCurrency(row[col.field], sacredtheme)
-                cellContent = element
-              } else if (col.formatCreditCard) {
-                // Handle credit card formatting
-                const { element } = formatCreditCard(
-                  row[col.field],
-                  sacredtheme
-                )
-                cellContent = element
-              } else if (col.formatExpirationDate) {
-                // Handle expiration date formatting
-                const { element } = formatExpirationDate(
-                  row[col.field],
-                  sacredtheme
-                )
-                cellContent = element
-              } else if (col.formatAccountNumber) {
-                // Handle account number formatting
-                const { element } = formatAccountNumber(
-                  row[col.field],
-                  sacredtheme
-                )
-                cellContent = element
-              } else if (col.formatRoutingNumber) {
-                // Handle routing number formatting
-                const { element } = formatRoutingNumber(
-                  row[col.field],
-                  sacredtheme
-                )
-                cellContent = element
-              } else {
-                // Because row[col.field] is unknown, cast to ReactNode or fallback to a string
-                const val = row[col.field] as React.ReactNode | undefined
-                // If it's not a valid ReactNode (e.g. object?), fallback to string:
-                cellContent =
-                  val && (typeof val === 'string' || React.isValidElement(val))
-                    ? val
-                    : safeString(val)
-              }
-
-              // Tooltip text needs a string, so convert cellContent safely
-              // For special formatting columns, use the formatted string; otherwise use safeString
-              const cellContentStr = col.formatCurrency
-                ? formatCurrency(row[col.field], sacredtheme).formatted
-                : col.formatCreditCard
-                  ? formatCreditCard(row[col.field], sacredtheme).formatted
-                  : col.formatExpirationDate
-                    ? formatExpirationDate(row[col.field], sacredtheme)
-                        .formatted
-                    : col.formatAccountNumber
-                      ? formatAccountNumber(row[col.field], sacredtheme)
-                          .formatted
-                      : col.formatRoutingNumber
-                        ? formatRoutingNumber(row[col.field], sacredtheme)
-                            .formatted
-                        : safeString(cellContent)
-
-              // Respect manual widths if present
-              const widthStyles: Record<string, string | number> = {}
-              if (col.width) {
-                widthStyles.width = col.width
-                widthStyles.minWidth = col.width
-                widthStyles.maxWidth = col.width
-              } else if (col.field === 'id' || col.field === '_id') {
-                widthStyles.width = '60px'
-                widthStyles.minWidth = '60px'
-                widthStyles.maxWidth = '60px'
-              } else {
-                widthStyles.maxWidth = 200
-              }
-
-              // Adjust cell styles for custom rendered cells and special formatting
-              const isCustomRendered = typeof col.renderCell === 'function'
-              const isCurrencyColumn = col.formatCurrency
-              const isCreditCardColumn = col.formatCreditCard
-              const isExpirationDateColumn = col.formatExpirationDate
-              const isAccountNumberColumn = col.formatAccountNumber
-              const isRoutingNumberColumn = col.formatRoutingNumber
-              const isSpecialColumn =
-                isCurrencyColumn ||
-                isCreditCardColumn ||
-                isExpirationDateColumn ||
-                isAccountNumberColumn ||
-                isRoutingNumberColumn
-
-              const cellStyles = {
-                whiteSpace:
-                  isCustomRendered || isSpecialColumn ? 'normal' : 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                paddingLeft: 1,
-                paddingRight: 1,
-                ...(isCustomRendered ? { padding: '8px 4px' } : {}),
-                ...(isSpecialColumn
-                  ? {
-                      padding: '8px 4px',
-                      verticalAlign: 'middle',
+            {/* Mobile: single column */}
+            {isMobile && (
+              <td className="p-2 align-middle">
+                {(() => {
+                  const mobileCol = allColumns.find(
+                    c => c.field === mobileSelectedColumn
+                  )
+                  if (mobileCol) {
+                    const value = row[mobileCol.field]
+                    if (mobileCol.type === 'currency') {
+                      return formatCurrency(value, sacredtheme).element
+                    } else if (mobileCol.type === 'credit_card') {
+                      return formatCreditCard(value, sacredtheme).element
+                    } else if (mobileCol.type === 'expiration_date') {
+                      return formatExpirationDate(value, sacredtheme).element
+                    } else if (mobileCol.type === 'account_number') {
+                      return formatAccountNumber(value, sacredtheme).element
+                    } else if (mobileCol.type === 'routing_number') {
+                      return formatRoutingNumber(value, sacredtheme).element
                     }
-                  : {}),
-                ...widthStyles,
-              }
-
-              return (
-                <TableCell
-                  key={`${col.field}-${rowId}-${columnIndex}`}
-                  sx={cellStyles}
-                >
-                  {React.isValidElement(cellContent) ? (
-                    cellContent // Directly render React elements without wrapping in tooltip
-                  ) : (
-                    <StyledTooltip
-                      title={cellContentStr}
-                      tooltipcolor={sacredtheme ? '#FFD700' : '#444'}
-                      tooltipplacement="top"
-                      offsetX={0}
-                      offsetY={5}
-                      arrow
-                      sacredtheme={sacredtheme}
-                    >
-                      <span>{cellContent}</span>
-                    </StyledTooltip>
-                  )}
-                </TableCell>
-              )
-            })}
-          </TableRow>
+                    return safeString(value)
+                  }
+                  return '---'
+                })()}
+              </td>
+            )}
+          </tr>
         )
       })}
-    </TableBody>
+    </tbody>
   )
 }
 

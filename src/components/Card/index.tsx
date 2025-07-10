@@ -41,6 +41,8 @@ export interface CardProps {
   width?: string | number
   /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
+  /** Show/hide the outline border (default: true) */
+  outline?: boolean
 
   // Default card specific props
   /** Whether to show an underline for the title */
@@ -67,8 +69,6 @@ export interface CardProps {
   linkEnabled?: boolean
   /** Whether to show a stepper */
   stepperEnabled?: boolean
-  /** Active step in the stepper */
-  stepperActiveStep?: number
   /** Steps configuration for the stepper */
   stepperSteps?: CustomStepperProps['steps']
 
@@ -189,6 +189,7 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
               : props.height
           }
           sacredtheme={props.sacredtheme}
+          outline={props.outline}
           draggable={props.draggable}
           onDragStart={props.onDragStart}
           onDragOver={props.onDragOver}
@@ -322,8 +323,9 @@ const Card: React.FC<CardProps> = ({ variant = 'default', ...props }) => {
           width={props.width}
           height={props.height}
           stepperEnabled={props.stepperEnabled}
-          stepperActiveStep={props.stepperActiveStep}
           stepperSteps={props.stepperSteps}
+          sacredtheme={props.sacredtheme}
+          outline={props.outline}
         />
       )
   }

@@ -1,26 +1,152 @@
-import React from 'react'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
-import { keyframes } from '@mui/material'
+'use client'
 
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0px); }
-`
+import React, { useState, useEffect } from 'react'
 
-interface DragIconProps {
+// --------------------------------------------------------------------------
+// SACRED THEMING CONSTANTS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+interface DragIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
-const DragIcon: React.FC<DragIconProps> = ({ sacredtheme }) => {
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  icon: {
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+    color: 'rgb(75, 85, 99)',
+  } as React.CSSProperties,
+
+  iconHover: {
+    transform: 'scale(1.05)',
+    filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
+    color: 'rgb(55, 65, 81)',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  icon: {
+    transition: 'all 0.4s ease',
+    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+    color: 'rgba(255, 215, 0, 0.9)',
+  } as React.CSSProperties,
+
+  iconHover: {
+    transform: 'scale(1.1) rotate(5deg)',
+    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+    color: '#FFD700',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    fontSize: '12px',
+    color: 'rgba(255, 215, 0, 0.6)',
+    transition: 'all 0.3s ease',
+    opacity: 0,
+    pointerEvents: 'none',
+    animation: 'sacredGlyphRotate 20s linear infinite',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    opacity: 1,
+  } as React.CSSProperties,
+}
+
+const DragIcon: React.FC<DragIconProps> = ({
+  sacredtheme = false,
+  style = {},
+  ...props
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes sacredGlyphRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
+
   const iconStyle = {
-    color: sacredtheme ? '#FFD700' : 'black',
-    ...(sacredtheme && {
-      animation: `${floatAnimation} 3s ease-in-out infinite`,
-      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-    }),
+    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
+    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
+    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+    ...style,
   }
-  return <DragIndicatorIcon style={iconStyle} />
+
+  return (
+    <div
+      style={{ position: 'relative', display: 'inline-block' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 -960 960 960"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-520q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-520q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z" />
+      </svg>
+      {sacredtheme && (
+        <div
+          style={{
+            ...sacredStyles.glyph,
+            ...(isHovered && sacredStyles.glyphVisible),
+            top: '-8px',
+            right: '-8px',
+          }}
+        >
+          {glyph}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default DragIcon

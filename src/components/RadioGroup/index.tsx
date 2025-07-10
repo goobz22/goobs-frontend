@@ -1,23 +1,4 @@
-import React from 'react'
-import {
-  Radio,
-  RadioGroup as MuiRadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  alpha,
-  keyframes,
-} from '@mui/material'
-import {
-  Typography,
-  CustomTypographyVariant,
-} from './../../components/Typography'
-
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-`
+import React, { useState } from 'react'
 
 /**
  * Interface representing a single radio option
@@ -25,7 +6,6 @@ const glowPulse = keyframes`
 export interface RadioOption {
   label: string
   fontColor?: string
-  fontVariant?: CustomTypographyVariant
 }
 
 /**
@@ -36,11 +16,119 @@ export interface RadioGroupProps {
   options: RadioOption[]
   defaultValue?: string
   name: string
-  labelFontVariant?: CustomTypographyVariant
   labelFontColor?: string
   labelText?: string
   sacredtheme?: boolean
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
+
+const getPremiumStyles = () => ({
+  formControl: { position: 'relative' } as React.CSSProperties,
+  formLabel: {
+    marginBottom: '0.5rem',
+    display: 'block',
+  } as React.CSSProperties,
+  label: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    padding: '0.25rem 0',
+  } as React.CSSProperties,
+  input: {
+    display: 'none',
+  } as React.CSSProperties,
+  radioSpan: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  radioOuter: {
+    width: '20px',
+    height: '20px',
+    border: '2px solid #9CA3AF',
+    borderRadius: '9999px',
+    marginRight: '0.5rem',
+    transition: 'all 0.2s',
+  } as React.CSSProperties,
+  radioInner: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '9999px',
+    position: 'absolute',
+    left: '4px',
+    top: '4px',
+    transition: 'all 0.2s',
+    transform: 'scale(0)',
+    backgroundColor: '#3B82F6',
+  } as React.CSSProperties,
+})
+
+const getSacredStyles = () => ({
+  formControl: {
+    position: 'relative',
+  } as React.CSSProperties,
+  formLabel: {
+    marginBottom: '0.5rem',
+    color: '#FFD700',
+    fontWeight: 600,
+    letterSpacing: '0.025em',
+    textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+    display: 'block',
+  } as React.CSSProperties,
+  label: {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease-in-out',
+    padding: '0.25rem 0',
+  } as React.CSSProperties,
+  labelHover: {
+    transform: 'translateX(4px)',
+  } as React.CSSProperties,
+  input: {
+    display: 'none',
+  } as React.CSSProperties,
+  radioSpan: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  radioOuter: {
+    width: '20px',
+    height: '20px',
+    border: '2px solid rgba(255, 215, 0, 0.6)',
+    borderRadius: '9999px',
+    marginRight: '0.5rem',
+    transition: 'all 0.2s',
+  } as React.CSSProperties,
+  radioInner: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '9999px',
+    position: 'absolute',
+    left: '4px',
+    top: '4px',
+    transition: 'all 0.2s',
+    transform: 'scale(0)',
+    backgroundColor: '#FFD700',
+  } as React.CSSProperties,
+  text: {
+    color: 'rgba(255, 215, 0, 0.9)',
+    transition: 'all 0.3s ease-in-out',
+  } as React.CSSProperties,
+  textHover: {
+    color: '#FFD700',
+    textShadow: '0 0 3px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '-5px',
+    right: 0,
+    fontSize: '16px',
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'glyph-rotate 10s linear infinite',
+  } as React.CSSProperties,
+})
 
 /**
  * RadioGroup component renders a group of radio buttons with customizable options.
@@ -53,111 +141,105 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
   defaultValue,
   name,
-  labelFontVariant,
   labelFontColor,
   labelText,
   sacredtheme,
+  onChange,
 }) => {
+  const [selectedValue, setSelectedValue] = useState(defaultValue)
+  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null)
+  const styles = sacredtheme ? getSacredStyles() : getPremiumStyles()
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedValue(e.target.value)
+    if (onChange) {
+      onChange(e)
+    }
+  }
+
   return (
-    <FormControl
-      sx={
-        sacredtheme
-          ? {
-              position: 'relative',
-              '&::before': {
-                content: '"𓋴"',
-                position: 'absolute',
-                top: '-5px',
-                right: '0px',
-                fontSize: '16px',
-                color: alpha('#FFD700', 0.3),
-                animation: `rotate 20s linear infinite`,
-              },
-            }
-          : undefined
-      }
-    >
-      {/* Render the form label */}
-      <FormLabel
+    <div style={styles.formControl}>
+      {sacredtheme && (
+        <div style={(styles as ReturnType<typeof getSacredStyles>).glyph}>
+          𓋴
+        </div>
+      )}
+      <label
         id={`${name}-label`}
-        sx={{
-          marginBottom: '8px',
-          ...(sacredtheme && {
-            color: '#FFD700',
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-          }),
+        style={{
+          ...styles.formLabel,
+          color: sacredtheme ? '#FFD700' : labelFontColor,
         }}
       >
-        <Typography
-          text={labelText || label}
-          fontcolor={sacredtheme ? '#FFD700' : labelFontColor}
-          fontvariant={labelFontVariant}
-        />
-      </FormLabel>
-      {/* Render the radio group */}
-      <MuiRadioGroup
-        aria-labelledby={`${name}-label`}
-        defaultValue={defaultValue}
-        name={name}
-      >
-        {/* Render individual radio options */}
-        {options.map((option, index) => (
-          <FormControlLabel
-            key={index}
-            control={
-              <Radio
-                sx={
-                  sacredtheme
-                    ? {
-                        color: alpha('#FFD700', 0.6),
-                        '&.Mui-checked': {
-                          color: '#FFD700',
-                          animation: `${glowPulse} 2s ease-in-out infinite`,
-                        },
-                        '&:hover': {
-                          backgroundColor: alpha('#FFD700', 0.1),
-                        },
-                      }
-                    : undefined
-                }
+        {labelText || label}
+      </label>
+      <div role="radiogroup" aria-labelledby={`${name}-label`}>
+        {options.map((option, index) => {
+          const isChecked = selectedValue === option.label
+          const isHovered = hoveredLabel === option.label
+
+          const labelStyle = {
+            ...styles.label,
+            ...(isHovered &&
+              sacredtheme &&
+              (styles as ReturnType<typeof getSacredStyles>).labelHover),
+          }
+
+          const textStyle = {
+            ...(sacredtheme &&
+              (styles as ReturnType<typeof getSacredStyles>).text),
+            ...(isHovered &&
+              sacredtheme &&
+              (styles as ReturnType<typeof getSacredStyles>).textHover),
+            color: !sacredtheme ? option.fontColor : undefined,
+          }
+
+          const radioOuterStyle = {
+            ...styles.radioOuter,
+            ...(isHovered && sacredtheme && { borderColor: '#FFD700' }),
+            ...(isHovered && !sacredtheme && { borderColor: '#3B82F6' }),
+            ...(isHovered && {
+              backgroundColor: sacredtheme
+                ? 'rgba(255, 215, 0, 0.1)'
+                : 'rgba(0, 0, 0, 0.04)',
+            }),
+          }
+
+          return (
+            <label
+              key={index}
+              style={labelStyle}
+              onMouseEnter={() => setHoveredLabel(option.label)}
+              onMouseLeave={() => setHoveredLabel(null)}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={option.label}
+                checked={isChecked}
+                style={styles.input}
+                onChange={handleChange}
               />
-            }
-            label={
-              <Typography
-                text={option.label}
-                fontcolor={
-                  sacredtheme ? alpha('#FFD700', 0.9) : option.fontColor
-                }
-                fontvariant={option.fontVariant}
-                sx={
-                  sacredtheme
-                    ? {
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          color: '#FFD700',
-                          textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-                        },
-                      }
-                    : undefined
-                }
-              />
-            }
-            sx={
-              sacredtheme
-                ? {
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(5px)',
-                    },
-                  }
-                : undefined
-            }
-          />
-        ))}
-      </MuiRadioGroup>
-    </FormControl>
+              <span style={styles.radioSpan}>
+                <span style={radioOuterStyle} />
+                <span
+                  style={{
+                    ...styles.radioInner,
+                    ...(isChecked && {
+                      transform: 'scale(1)',
+                      animation: sacredtheme
+                        ? 'radio-glow-pulse 2s ease-in-out infinite'
+                        : 'none',
+                    }),
+                  }}
+                />
+              </span>
+              <span style={textStyle}>{option.label}</span>
+            </label>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

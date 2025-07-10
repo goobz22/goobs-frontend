@@ -1,64 +1,7 @@
 'use client'
-import React from 'react'
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  SxProps,
-  Theme,
-  alpha,
-  keyframes,
-} from '@mui/material'
+import React, { useState } from 'react'
+import { Typography } from '../../Typography'
 
-// Enhanced sacred theming animations
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
-
-const sacredGlow = keyframes`
-  0% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-  50% { 
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-    border-color: ${alpha('#FFD700', 0.8)};
-  }
-  100% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  33% { transform: translateY(-3px) rotate(120deg); opacity: 0.6; }
-  66% { transform: translateY(1px) rotate(240deg); opacity: 0.4; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const sacredShimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
-const dataStreamAnimation = keyframes`
-  0% { 
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  50% { 
-    opacity: 0.3;
-  }
-  100% { 
-    transform: translateY(100%);
-    opacity: 0;
-  }
-`
-
-// Enhanced sacred hieroglyphs
 const SACRED_GLYPHS = [
   '𓁟',
   '𓂀',
@@ -86,20 +29,6 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-// Enhanced Egyptian styling constants
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  goldGradient:
-    'linear-gradient(135deg, #FFD700 0%, #F4A460 50%, #DAA520 100%)',
-  darkGold: '#B8860B',
-  temple: '#1a1a2e',
-  obsidian: '#16213e',
-  turquoise: '#0f3460',
-  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
-  cardBackground: alpha('#000000', 0.85),
-  glowEffect: `0 0 30px ${alpha('#FFD700', 0.3)}, 0 0 60px ${alpha('#FFD700', 0.1)}`,
-}
-
 export interface MetricCardProps {
   title: string
   value: string | number
@@ -112,8 +41,143 @@ export interface MetricCardProps {
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'
   glyph?: string
   sacredtheme?: boolean
-  sx?: SxProps<Theme>
+  className?: string
 }
+
+const getStyles = (sacredtheme?: boolean, color?: string) => ({
+  container: {
+    height: '100%',
+    borderRadius: '0.75rem',
+    borderWidth: '2px',
+    transition: 'all 0.3s ease-in-out',
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          backgroundImage: 'linear-gradient(to bottom right, #000, #1a1a1a)',
+          borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.5)`,
+          animation: 'metric-card-glow 2s infinite alternate',
+          position: 'relative',
+          overflow: 'hidden',
+          backdropFilter: 'blur(32px)',
+        }
+      : {
+          backgroundImage: 'linear-gradient(to bottom right, white, #F9FAFB)',
+          borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.2)`,
+        }),
+  } as React.CSSProperties,
+  containerHover: {
+    transform: sacredtheme
+      ? 'translateY(-0.5rem) scale(1.05)'
+      : 'translateY(-0.25rem)',
+    boxShadow:
+      '0 1rem 1.5rem -0.5rem rgba(0,0,0,0.1), 0 0.5rem 1rem -0.25rem rgba(0,0,0,0.05)',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    fontSize: '2.25rem',
+    zIndex: 20,
+    transition: 'all 0.3s ease-in-out',
+    animation: 'metric-card-float 4s infinite ease-in-out',
+    color: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.4)`,
+  } as React.CSSProperties,
+  dataStream: {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '0.125rem',
+    height: '100%',
+    overflow: 'hidden',
+    zIndex: 10,
+    '::after': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundImage:
+        'linear-gradient(to top, transparent, currentColor, transparent)',
+      animation: 'metric-card-data-stream 3s linear infinite',
+    },
+  } as React.CSSProperties,
+  content: {
+    position: 'relative',
+    zIndex: 30,
+    padding: '0.75rem',
+  } as React.CSSProperties,
+  header: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  iconContainer: {
+    marginRight: '0.5rem',
+    padding: '0.25rem',
+    borderRadius: '0.5rem',
+    border: '1px solid',
+    boxShadow:
+      '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+    color: color,
+    backgroundColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.15)`,
+    borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.3)`,
+  } as React.CSSProperties,
+  titleContainer: {
+    flex: 1,
+  } as React.CSSProperties,
+  title: {
+    fontWeight: 600,
+    letterSpacing: '0.025em',
+    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+    color: sacredtheme ? 'rgba(255,255,255,0.9)' : '#6B7280',
+    textShadow: sacredtheme
+      ? `0 0 10px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.3)`
+      : 'none',
+  } as React.CSSProperties,
+  value: {
+    fontSize: '2.25rem',
+    fontWeight: 700,
+    marginBottom: '0.25rem',
+    fontFamily: sacredtheme ? 'Cinzel, serif' : 'sans-serif',
+    letterSpacing: sacredtheme ? '-0.025em' : 'normal',
+    color: color,
+    textShadow: `0 0 15px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.5)`,
+  } as React.CSSProperties,
+  subtitle: {
+    marginBottom: '0.25rem',
+    fontFamily: sacredtheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
+    fontSize: sacredtheme ? '1rem' : '0.875rem',
+    letterSpacing: sacredtheme ? '0.05em' : 'normal',
+    color: sacredtheme ? 'rgba(255,255,255,0.8)' : '#6B7280',
+  } as React.CSSProperties,
+  trendContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: '0.25rem',
+  } as React.CSSProperties,
+  trend: {
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.125rem',
+    fontFamily: sacredtheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
+    fontSize: '1rem',
+  } as React.CSSProperties,
+  shimmer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    backgroundImage:
+      'linear-gradient(to right, transparent, currentColor, transparent)',
+    animation: 'metric-card-shimmer 3s infinite',
+    animationDelay: '1.5s',
+    opacity: 0.6,
+  } as React.CSSProperties,
+})
 
 export default function MetricCard({
   title,
@@ -124,344 +188,88 @@ export default function MetricCard({
   color = 'primary',
   glyph,
   sacredtheme = false,
-  sx,
+  className,
 }: MetricCardProps) {
   const selectedGlyph =
     glyph || SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
 
   const getColorValue = (colorName: string) => {
-    if (sacredtheme) {
-      // Enhanced sacred theme colors
-      switch (colorName) {
-        case 'success':
-          return '#10B981' // Emerald green
-        case 'warning':
-          return '#F59E0B' // Amber
-        case 'error':
-          return '#EF4444' // Red
-        case 'info':
-          return '#3B82F6' // Blue
-        case 'secondary':
-          return '#8B5CF6' // Purple
-        default:
-          return egyptianStyles.goldColor
-      }
-    } else {
-      // Standard theme colors
-      switch (colorName) {
-        case 'success':
-          return '#4caf50'
-        case 'warning':
-          return '#ff9800'
-        case 'error':
-          return '#f44336'
-        case 'info':
-          return '#2196f3'
-        case 'secondary':
-          return '#9c27b0'
-        default:
-          return '#1976d2'
-      }
+    const sacredColors: { [key: string]: string } = {
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+      info: '#3B82F6',
+      secondary: '#8B5CF6',
+      primary: '#FFD700',
     }
+    const standardColors: { [key: string]: string } = {
+      success: '#4caf50',
+      warning: '#ff9800',
+      error: '#f44336',
+      info: '#2196f3',
+      secondary: '#9c27b0',
+      primary: '#1976d2',
+    }
+    return sacredtheme ? sacredColors[colorName] : standardColors[colorName]
   }
 
   const cardColor = getColorValue(color)
+  const styles = getStyles(sacredtheme, cardColor)
+  const [isHovered, setIsHovered] = useState(false)
 
-  if (!sacredtheme) {
-    // Enhanced standard theme
-    return (
-      <Card
-        sx={{
-          height: '100%',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          border: `2px solid ${alpha(cardColor, 0.2)}`,
-          borderRadius: 3,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: `0 10px 25px ${alpha(cardColor, 0.2)}`,
-            borderColor: alpha(cardColor, 0.4),
-          },
-          ...sx,
-        }}
-      >
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-            {icon && (
-              <Box
-                sx={{
-                  mr: 2,
-                  color: cardColor,
-                  p: 1,
-                  borderRadius: 2,
-                  backgroundColor: alpha(cardColor, 0.1),
-                }}
-              >
-                {icon}
-              </Box>
-            )}
-            <Typography
-              variant="subtitle1"
-              sx={{
-                color: 'text.secondary',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-              }}
-            >
-              {title}
-            </Typography>
-          </Box>
-
-          <Typography
-            variant="h3"
-            sx={{
-              color: cardColor,
-              fontWeight: 700,
-              mb: 1,
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            {value}
-          </Typography>
-
-          {subtitle && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              {subtitle}
-            </Typography>
-          )}
-
-          {trend && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: trend.isPositive ? '#10B981' : '#EF4444',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-            >
-              {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Enhanced sacred theme with full Egyptian styling
   return (
-    <Card
-      sx={{
-        height: '100%',
-        background: `linear-gradient(135deg, 
-          ${egyptianStyles.cardBackground} 0%, 
-          ${alpha(egyptianStyles.obsidian, 0.95)} 100%
-        )`,
-        border: `2px solid ${alpha(cardColor, 0.5)}`,
-        borderRadius: 3,
-        position: 'relative',
-        overflow: 'hidden',
-        backdropFilter: 'blur(20px)',
-        transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        animation: `${sacredGlow} 4s ease-in-out infinite`,
-        '&:hover': {
-          transform: 'translateY(-8px) scale(1.02)',
-          borderColor: alpha(cardColor, 0.8),
-          boxShadow: `
-            0 20px 40px ${alpha('#000000', 0.6)}, 
-            0 0 40px ${alpha(cardColor, 0.4)},
-            inset 0 0 20px ${alpha(cardColor, 0.1)}
-          `,
-          '&::after': {
-            opacity: 0.8,
-          },
-          '& .metric-glyph': {
-            transform: 'scale(1.1) rotate(15deg)',
-          },
-        },
-        // Cosmic energy pattern
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `
-            conic-gradient(from 0deg at 50% 50%, 
-              ${alpha(cardColor, 0.1)} 0deg,
-              transparent 60deg,
-              ${alpha(cardColor, 0.05)} 120deg,
-              transparent 180deg,
-              ${alpha(cardColor, 0.1)} 240deg,
-              transparent 300deg,
-              ${alpha(cardColor, 0.05)} 360deg
-            )
-          `,
-          opacity: 0.4,
-          zIndex: 0,
-          animation: `${rotateGlyph} 60s linear infinite`,
-        },
-        // Animated border shimmer
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
-          backgroundSize: '200% 100%',
-          animation: `${sacredShimmer} 3s linear infinite`,
-          zIndex: 1,
-        },
-        ...sx,
-      }}
+    <div
+      style={{ ...styles.container, ...(isHovered && styles.containerHover) }}
+      className={className}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Sacred glyph decoration */}
-      <Box
-        className="metric-glyph"
-        sx={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-          color: alpha(cardColor, 0.4),
-          fontSize: '28px',
-          animation: `${floatAnimation} 8s ease-in-out infinite`,
-          zIndex: 2,
-          transition: 'all 0.3s ease',
-          textShadow: `0 0 10px ${alpha(cardColor, 0.3)}`,
-        }}
-      >
-        {selectedGlyph}
-      </Box>
-
-      {/* Data stream animation */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '2px',
-          height: '100%',
-          overflow: 'hidden',
-          zIndex: 1,
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: `linear-gradient(180deg, transparent, ${cardColor}, transparent)`,
-            animation: `${dataStreamAnimation} 6s linear infinite`,
-          },
-        }}
-      />
-
-      <CardContent sx={{ position: 'relative', zIndex: 3, p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+      {sacredtheme && (
+        <>
+          <div style={styles.glyph}>{selectedGlyph}</div>
+          <div style={styles.dataStream} />
+          <div style={styles.shimmer} />
+        </>
+      )}
+      <div style={styles.content}>
+        <div style={styles.header}>
           {icon && (
-            <Box
-              sx={{
-                mr: 2,
+            <div
+              style={{
+                ...styles.iconContainer,
                 color: cardColor,
-                p: 1,
-                borderRadius: 2,
-                backgroundColor: alpha(cardColor, 0.15),
-                border: `1px solid ${alpha(cardColor, 0.3)}`,
-                boxShadow: `0 0 10px ${alpha(cardColor, 0.2)}`,
+                backgroundColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.1)`,
+                borderColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.3)`,
               }}
             >
               {icon}
-            </Box>
+            </div>
           )}
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                color: alpha('#ffffff', 0.9),
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                fontFamily: '"Cinzel", serif',
-                textShadow: `0 0 10px ${alpha(cardColor, 0.3)}`,
-              }}
-            >
-              {title}
-            </Typography>
-          </Box>
-        </Box>
-
-        <Typography
-          variant="h3"
-          sx={{
-            color: cardColor,
-            fontWeight: 700,
-            mb: 1,
-            textShadow: `0 0 15px ${alpha(cardColor, 0.5)}`,
-            fontFamily: '"Cinzel", serif',
-            letterSpacing: '0.02em',
-          }}
-        >
-          {value}
-        </Typography>
-
+          <div style={styles.titleContainer}>
+            <Typography style={styles.title}>{title}</Typography>
+          </div>
+        </div>
+        <Typography style={styles.value}>{value}</Typography>
         {subtitle && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: alpha('#ffffff', 0.8),
-              mb: 1,
-              fontFamily: '"Crimson Text", serif',
-              fontSize: '1rem',
-              letterSpacing: '0.025em',
-            }}
-          >
-            {subtitle}
-          </Typography>
+          <Typography style={styles.subtitle}>{subtitle}</Typography>
         )}
-
         {trend && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+          <div style={styles.trendContainer}>
             <Typography
-              variant="body2"
-              sx={{
+              style={{
+                ...styles.trend,
                 color: trend.isPositive ? '#10B981' : '#EF4444',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                fontFamily: '"Crimson Text", serif',
-                textShadow: `0 0 8px ${alpha(trend.isPositive ? '#10B981' : '#EF4444', 0.3)}`,
-                fontSize: '0.95rem',
+                textShadow: `0 0 8px rgba(${trend.isPositive ? '16, 185, 129' : '239, 68, 68'}, 0.3)`,
               }}
             >
-              <span style={{ fontSize: '1.1em' }}>
+              <span style={{ fontSize: '1.125rem' }}>
                 {trend.isPositive ? '↗' : '↘'}
               </span>
               {Math.abs(trend.value)}%
             </Typography>
-          </Box>
+          </div>
         )}
-      </CardContent>
-
-      {/* Bottom border shimmer */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
-          backgroundSize: '200% 100%',
-          animation: `${sacredShimmer} 3s linear infinite`,
-          animationDelay: '1.5s',
-          opacity: 0.6,
-        }}
-      />
-    </Card>
+      </div>
+    </div>
   )
 }

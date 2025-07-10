@@ -1,60 +1,125 @@
-// src/components/Card/variants/detailedpricingsummary/index.tsx
+'use client'
 
 import React from 'react'
-import { Box, Paper, keyframes, alpha } from '@mui/material'
 import Typography from '../../../../components/Typography'
 import CustomButton from '../../../../components/Button'
+import { SACRED_GLYPHS } from '../../../../styles/sacredGlyphs'
 
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = ['𓊹', '𓊺', '𓊻', '𓋹', '𓌻', '𓍿']
-
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1); }
-  50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.1); }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-  100% { transform: translateY(0px); }
-`
-
-/**
- * Props for the DetailedPricingSummary component.
- */
 interface DetailedPricingSummaryProps {
-  /** Width of the pricing summary card */
   width?: string
-  /** Height of the pricing summary card */
   height?: string | number
-  /** Description of the product */
   product?: string
-  /** Name of the vendor */
   vendor?: string
-  /** Price from the vendor */
   vendorPrice?: string
-  /** Subtotal of the order */
   subtotal?: string
-  /** VAT amount */
   vat?: string
-  /** Total price of the order */
   total?: string
-  /** Text for the proceed button */
   proceedText?: string
-  /** Function to call when the proceed button is clicked */
   onProceed?: () => void
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
 }
 
-/**
- * DetailedPricingSummary component renders a card with detailed pricing information.
- * It displays product details, vendor information, subtotal, VAT, total, and a proceed button.
- */
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    padding: '1rem',
+    overflow: 'hidden',
+    ...(sacredtheme
+      ? {
+          border: '1px solid rgba(255, 215, 0, 0.3)',
+          backgroundColor: 'black',
+          animation: 'detailed-pricing-summary-glow 2s infinite alternate',
+          backgroundImage:
+            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.05), transparent)',
+        }
+      : {
+          border: '1px solid #E5E7EB',
+          backgroundColor: 'white',
+        }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    color: 'rgba(255, 215, 0, 0.2)',
+    fontSize: '1.5rem',
+    animation: 'detailed-pricing-summary-float 5s infinite alternate',
+  } as React.CSSProperties,
+  summaryContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  } as React.CSSProperties,
+  productTitle: {
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      fontWeight: 600,
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255,215,0,0.5)',
+    }),
+  } as React.CSSProperties,
+  productDescription: {
+    marginTop: '0.5rem',
+  } as React.CSSProperties,
+  vendorSection: {
+    marginTop: '1rem',
+  } as React.CSSProperties,
+  vendorRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  vendorPrice: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  vendorPriceText: {
+    ...(sacredtheme && {
+      fontWeight: 600,
+      textShadow: '0 0 3px rgba(255,215,0,0.5)',
+    }),
+  } as React.CSSProperties,
+  subtotalSection: {
+    marginTop: '1rem',
+  } as React.CSSProperties,
+  vatSection: {
+    marginTop: '0.5rem',
+  } as React.CSSProperties,
+  totalSection: {
+    marginTop: '0.5rem',
+    paddingTop: '0.5rem',
+    ...(sacredtheme
+      ? {
+          borderTop: '1px solid rgba(255, 215, 0, 0.3)',
+          backgroundImage:
+            'linear-gradient(to right, rgba(255, 215, 0, 0.05), transparent, rgba(255, 215, 0, 0.05))',
+        }
+      : {
+          borderTop: '1px solid #E5E7EB',
+        }),
+  } as React.CSSProperties,
+  totalRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  totalLabel: {
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      fontWeight: 'bold',
+      letterSpacing: '0.1em',
+      textShadow: '0 0 5px rgba(255,215,0,0.5)',
+    }),
+  } as React.CSSProperties,
+  buttonContainer: {
+    marginTop: '1rem',
+  } as React.CSSProperties,
+})
+
 const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
   height,
   product = 'Goobs Repo Unlimited × 1',
@@ -67,203 +132,99 @@ const DetailedPricingSummary: React.FC<DetailedPricingSummaryProps> = ({
   onProceed,
   sacredtheme = false,
 }) => {
+  const styles = getStyles(sacredtheme)
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'stretch',
-        border: sacredtheme
-          ? `1px solid ${alpha('#FFD700', 0.3)}`
-          : '1px solid #e8e8e8',
-        minHeight: height,
-        padding: '16px',
-        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-        overflow: 'hidden',
-        ...(sacredtheme && {
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-          `,
-          animation: `${sacredGlow} 3s ease-in-out infinite`,
-          '&::before': {
-            content: `"${SACRED_GLYPHS[0]}"`,
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            color: alpha('#FFD700', 0.2),
-            fontSize: '24px',
-            animation: `${floatAnimation} 4s ease-in-out infinite`,
-          },
-        }),
-      }}
-    >
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        {/* Product section */}
+    <div style={{ ...styles.container, minHeight: height }}>
+      {sacredtheme && <div style={styles.glyph}>{SACRED_GLYPHS[0]}</div>}
+      <div style={styles.summaryContainer}>
         <Typography
           text="Product"
           fontcolor={sacredtheme ? '#FFD700' : 'black'}
           fontvariant="merriparagraph"
-          sx={
-            sacredtheme
-              ? {
-                  fontFamily: '"Cinzel", serif',
-                  fontWeight: 600,
-                  letterSpacing: '1px',
-                  textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-                }
-              : undefined
-          }
+          style={styles.productTitle}
         />
         <Typography
           text={product}
-          fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
           fontvariant="merriparagraph"
-          sx={{ marginTop: '8px' }}
+          style={styles.productDescription}
         />
-
-        {/* Vendor section */}
-        <Box sx={{ marginTop: '16px' }}>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+        <div style={styles.vendorSection}>
+          <div style={styles.vendorRow}>
             <Typography
               text="Vendor:"
-              fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
               fontvariant="merriparagraph"
             />
             <Typography
               text={vendor}
-              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
               fontvariant="merriparagraph"
             />
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
-          >
+          </div>
+          <div style={styles.vendorPrice}>
             <Typography
               text={vendorPrice}
               fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merriparagraph"
-              sx={
-                sacredtheme
-                  ? {
-                      fontWeight: 600,
-                      textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
-                    }
-                  : undefined
-              }
+              style={styles.vendorPriceText}
             />
-          </Box>
-        </Box>
-
-        {/* Subtotal section */}
-        <Box sx={{ marginTop: '16px' }}>
+          </div>
+        </div>
+        <div style={styles.subtotalSection}>
           <Typography
             text="Subtotal"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
             fontvariant="merriparagraph"
           />
           <Typography
             text={subtotal}
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
             fontvariant="merriparagraph"
             align="right"
           />
-        </Box>
-
-        {/* VAT section */}
-        <Box sx={{ marginTop: '8px' }}>
+        </div>
+        <div style={styles.vatSection}>
           <Typography
             text="VAT"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
             fontvariant="merriparagraph"
           />
           <Typography
             text={vat}
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
             fontvariant="merriparagraph"
             align="right"
           />
-        </Box>
-
-        {/* Total section */}
-        <Box
-          sx={{
-            borderTop: sacredtheme
-              ? `1px solid ${alpha('#FFD700', 0.3)}`
-              : '1px solid #e8e8e8',
-            marginTop: '8px',
-            paddingTop: '8px',
-            ...(sacredtheme && {
-              background: `linear-gradient(to right, ${alpha('#FFD700', 0.05)}, transparent)`,
-            }),
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+        </div>
+        <div style={styles.totalSection}>
+          <div style={styles.totalRow}>
             <Typography
               text="Total"
               fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merrih5"
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Cinzel", serif',
-                      fontWeight: 700,
-                      textShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
-                    }
-                  : undefined
-              }
+              style={styles.totalLabel}
             />
             <Typography
               text={total}
               fontcolor={sacredtheme ? '#FFD700' : 'black'}
               fontvariant="merrih5"
-              sx={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Cinzel", serif',
-                      fontWeight: 700,
-                      textShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
-                    }
-                  : undefined
-              }
+              style={styles.totalLabel}
             />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Proceed button */}
-      <Box sx={{ marginTop: '16px' }}>
+          </div>
+        </div>
+      </div>
+      <div style={styles.buttonContainer}>
         <CustomButton
           text={proceedText}
-          variant="contained"
-          backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
+          backgroundcolor={sacredtheme ? 'rgba(0,0,0,0.9)' : 'black'}
           fontcolor={sacredtheme ? '#FFD700' : 'white'}
-          fontvariant="merriparagraph"
           onClick={onProceed}
           width="100%"
           sacredtheme={sacredtheme}
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

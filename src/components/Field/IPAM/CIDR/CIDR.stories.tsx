@@ -5,213 +5,98 @@ import CIDRField from '.'
 const meta: Meta<typeof CIDRField> = {
   title: 'Components/Field/IPAM/CIDR',
   component: CIDRField,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    showSubnetInfo: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    label: { control: 'text' },
+    minCidr: { control: 'number' },
+    maxCidr: { control: 'number' },
+  },
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
-  argTypes: {
-    onChange: { action: 'changed' },
-  },
 }
-
 export default meta
+
 type Story = StoryObj<typeof CIDRField>
 
-export const Default: Story = {
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
+      <CIDRField {...args} />
+    </div>
+  ),
   args: {
     label: 'CIDR',
     minCidr: 8,
     maxCidr: 32,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'A CIDR field that allows selecting any CIDR value from /8 to /32. Shows subnet mask and network information.',
-      },
-    },
+    sacredtheme: false,
   },
 }
 
-export const SubnetOnly: Story = {
-  args: {
-    label: 'Subnet CIDR',
-    minCidr: 16,
-    maxCidr: 32,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Configured for subnet selection only, allowing CIDR values from /16 to /32.',
-      },
-    },
-  },
-}
-
-export const SupernetOnly: Story = {
-  args: {
-    label: 'Supernet CIDR',
-    minCidr: 8,
-    maxCidr: 24,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Configured for supernet selection only, allowing CIDR values from /8 to /24.',
-      },
-    },
-  },
-}
-
-export const CustomRange: Story = {
-  args: {
-    label: 'Custom CIDR Range',
-    minCidr: 12,
-    maxCidr: 28,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'With a custom CIDR range from /12 to /28.',
-      },
-    },
-  },
-}
-
-export const WithoutInfo: Story = {
-  args: {
-    label: 'CIDR Only',
-    showSubnetInfo: false,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Shows only the CIDR input without additional network information.',
-      },
-    },
-  },
-}
-
-export const CustomTimingSettings: Story = {
-  args: {
-    label: 'Custom Timing Settings',
-    initialDelay: 200,
-    repeatInterval: 50,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'With custom timing settings for faster response when holding down the buttons.',
-      },
-    },
-  },
-}
-
-export const ComparisonDemo: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        maxWidth: '400px',
-      }}
-    >
-      <div style={{ marginBottom: '10px' }}>
-        <p>
-          <strong>CIDR Field Examples</strong>
-        </p>
-        <p>Click the up/down arrows to change between CIDR values.</p>
-        <p>
-          Shows subnet mask, total hosts, and network information for each CIDR
-          value.
-        </p>
-      </div>
-      <CIDRField
-        label="Full Range (/8 to /32)"
-        minCidr={8}
-        maxCidr={32}
-        initialValue="24"
-      />
-      <CIDRField
-        label="Subnet Range (/16 to /32)"
-        minCidr={16}
-        maxCidr={32}
-        initialValue="24"
-      />
-      <CIDRField
-        label="Supernet Range (/8 to /24)"
-        minCidr={8}
-        maxCidr={24}
-        initialValue="16"
-      />
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-black rounded-lg">
+      <CIDRField {...args} />
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Comparison of different CIDR ranges and their network information. Shows how CIDR values affect subnet masks and available hosts.',
-      },
-    },
+  args: {
+    ...PremiumTheme.args,
+    sacredtheme: true,
   },
 }
 
-export const NetworkSizeDemo: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        maxWidth: '400px',
-      }}
-    >
-      <div style={{ marginBottom: '10px' }}>
-        <p>
-          <strong>Network Size Examples</strong>
-        </p>
-        <p>
-          Demonstrates how different CIDR values affect network size and
-          available hosts.
-        </p>
+const InteractiveCIDRDemo: React.FC = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [showInfo, setShowInfo] = React.useState(true)
+  const [disabled, setDisabled] = React.useState(false)
+
+  return (
+    <div className="w-[500px] space-y-4">
+      <div className="p-4 bg-white rounded-lg border">
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div className="grid grid-cols-3 gap-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showInfo}
+              onChange={e => setShowInfo(e.target.checked)}
+            />{' '}
+            Show Info
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+        </div>
       </div>
-      <CIDRField
-        label="Large Network (/8)"
-        minCidr={8}
-        maxCidr={8}
-        initialValue="8"
-      />
-      <CIDRField
-        label="Medium Network (/16)"
-        minCidr={16}
-        maxCidr={16}
-        initialValue="16"
-      />
-      <CIDRField
-        label="Small Network (/24)"
-        minCidr={24}
-        maxCidr={24}
-        initialValue="24"
-      />
-      <CIDRField
-        label="Very Small Network (/30)"
-        minCidr={30}
-        maxCidr={30}
-        initialValue="30"
-      />
+      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+        <CIDRField
+          sacredtheme={sacred}
+          showSubnetInfo={showInfo}
+          disabled={disabled}
+        />
+      </div>
     </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Shows how different CIDR values affect network size, from very large (/8) to very small (/30) networks.',
-      },
-    },
-  },
+  )
+}
+
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveCIDRDemo />,
 }

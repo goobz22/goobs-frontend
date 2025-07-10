@@ -1,19 +1,10 @@
 // src/components/Accordion/index.tsx
-
 'use client'
-
-import React, { useState, useEffect } from 'react'
-import { styled, keyframes, alpha } from '@mui/material/styles'
-import MuiAccordion, {
-  AccordionProps as MuiAccordionProps,
-} from '@mui/material/Accordion'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import { ExpandMore } from '@mui/icons-material'
-import { black } from '../../styles/palette'
+import React, { useState, useEffect, FC, ReactNode } from 'react'
+import ExpandMoreIcon from '../Icons/ExpandMore'
 
 // --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
+// SACRED THEMING CONSTANTS
 // --------------------------------------------------------------------------
 
 const SACRED_GLYPHS = [
@@ -43,134 +34,291 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-const sacredGlowPulse = keyframes`
-  0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-`
+// Sacred theme CSS styles
+const sacredStyles = {
+  container: {
+    marginBottom: '8px',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    position: 'relative',
+    transition: 'all 0.3s ease',
+    backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    border: '2px solid rgba(255, 215, 0, 0.4)',
+    boxShadow:
+      '0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1)',
+    backdropFilter: 'blur(4px)',
+    backgroundImage: `
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+    `,
+  } as React.CSSProperties,
 
-const sacredFloat = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-  100% { transform: translateY(0px); }
-`
+  containerHover: {
+    transform: 'translateY(-2px)',
+    borderColor: 'rgba(255, 215, 0, 0.6)',
+    boxShadow:
+      '0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2)',
+  } as React.CSSProperties,
 
-const sacredShimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`
+  containerExpanded: {
+    borderColor: '#FFD700',
+    boxShadow:
+      '0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3)',
+    backgroundImage: `
+      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
+    `,
+  } as React.CSSProperties,
 
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
+  summary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '24px',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    backgroundColor: 'transparent',
+    color: 'rgba(255, 215, 0, 0.9)',
+    fontFamily: '"Cinzel", serif',
+    fontWeight: 600,
+    fontSize: '20px',
+    letterSpacing: '0.05em',
+    cursor: 'pointer',
+    minHeight: '64px',
+    textShadow: '0 0 10px #FFD700, 0 0 20px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
 
-const expandGlyphGlow = keyframes`
-  0% { opacity: 0.3; filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.4)); }
-  50% { opacity: 0.8; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); }
-  100% { opacity: 0.3; filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.4)); }
-`
+  summaryHover: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    color: '#FFD700',
+    textShadow: '0 0 15px #FFD700, 0 0 30px rgba(255, 215, 0, 0.7)',
+  } as React.CSSProperties,
 
-/**
- * Accordion component that works across all platforms
- *
- * Features:
- * - Responsive design that works on web, mobile, and tablets
- * - Supports both controlled and uncontrolled modes
- * - Can be expanded by default (defaultExpanded)
- * - Can be disabled
- * - Customizable styles
- * - Can be nested inside other accordions
- * - Handles large content gracefully
- * - Optional Egyptian/Sacred theming
- *
- * Basic usage:
- * ```tsx
- * <Accordion
- *   summary="Click to expand"
- *   details="This is the expanded content"
- * />
- * ```
- *
- * With sacred theme:
- * ```tsx
- * <Accordion
- *   summary="Ancient Knowledge"
- *   details="Sacred wisdom revealed..."
- *   sacredtheme
- * />
- * ```
- *
- * With default expanded state:
- * ```tsx
- * <Accordion
- *   summary="Already expanded"
- *   details="This content is visible by default"
- *   defaultExpanded={true}
- * />
- * ```
- *
- * Controlled accordion:
- * ```tsx
- * const [isExpanded, setIsExpanded] = useState(false);
- *
- * <Accordion
- *   summary="Controlled accordion"
- *   details="This is controlled externally"
- *   expanded={isExpanded}
- *   onChange={(_, expanded) => setIsExpanded(expanded)}
- * />
- * ```
- *
- * Custom styling:
- * ```tsx
- * <Accordion
- *   summary="Custom styled"
- *   details="With custom border"
- *   style={{ border: '2px solid #4caf50', borderRadius: '8px' }}
- * />
- * ```
- *
- * Multiple accordions:
- * ```tsx
- * <Accordion summary="First item" details="First content" />
- * <Accordion summary="Second item" details="Second content" />
- * <Accordion summary="Third item" details="Third content" />
- * ```
- *
- * Nested accordions:
- * ```tsx
- * <Accordion
- *   summary="Parent"
- *   details={
- *     <div>
- *       <p>Parent content</p>
- *       <Accordion
- *         summary="Child"
- *         details="Child content"
- *         style={{ marginLeft: '1rem' }}
- *       />
- *     </div>
- *   }
- * />
- * ```
- *
- * Disabled accordion:
- * ```tsx
- * <Accordion
- *   summary="Cannot be expanded"
- *   details="This content remains hidden"
- *   disabled={true}
- * />
- * ```
- */
+  summaryExpanded: {
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+    borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+    color: '#FFD700',
+    textShadow: '0 0 20px #FFD700, 0 0 40px rgba(255, 215, 0, 0.8)',
+  } as React.CSSProperties,
 
-// Define the props interface
+  details: {
+    padding: '24px',
+    position: 'relative',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+    color: 'rgba(245, 245, 220, 0.9)',
+    fontFamily: '"Merriweather", serif',
+    lineHeight: 1.6,
+    backdropFilter: 'blur(2px)',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    color: 'rgba(255, 215, 0, 0.4)',
+    fontSize: '16px',
+    transition: 'all 0.3s ease',
+    opacity: 0,
+  } as React.CSSProperties,
+
+  glyphLeft: {
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+  } as React.CSSProperties,
+
+  glyphRight: {
+    right: '48px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+  } as React.CSSProperties,
+
+  glyphVisible: {
+    opacity: 1,
+  } as React.CSSProperties,
+
+  glyphExpanded: {
+    opacity: 1,
+    animation: 'sacredGlyphRotate 20s linear infinite',
+  } as React.CSSProperties,
+
+  icon: {
+    width: '24px',
+    height: '24px',
+    transition: 'all 0.3s ease',
+    color: '#FFD700',
+    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
+  } as React.CSSProperties,
+
+  iconExpanded: {
+    transform: 'rotate(180deg)',
+    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.9))',
+  } as React.CSSProperties,
+
+  backgroundGlyphs: {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    color: 'rgba(255, 215, 0, 0.2)',
+    fontSize: '12px',
+    animation: 'sacredFloat 3s ease-in-out infinite',
+    pointerEvents: 'none',
+  } as React.CSSProperties,
+
+  decorativeGlyphs: {
+    position: 'absolute',
+    bottom: '8px',
+    right: '16px',
+    display: 'flex',
+    gap: '4px',
+    opacity: 0.3,
+  } as React.CSSProperties,
+
+  decorativeGlyph: {
+    color: '#FFD700',
+    fontSize: '12px',
+    animation: 'sacredGlow 3s ease-in-out infinite',
+  } as React.CSSProperties,
+}
+
+// Premium theme CSS styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    marginBottom: '12px',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    position: 'relative',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    background:
+      'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
+    border: '1px solid rgba(226, 232, 240, 0.8)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+    backdropFilter: 'blur(8px)',
+  } as React.CSSProperties,
+
+  containerNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+    background: 'rgba(255, 255, 255, 0.6)',
+  } as React.CSSProperties,
+
+  containerHover: {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  } as React.CSSProperties,
+
+  containerExpanded: {
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1)',
+    background:
+      'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%)',
+  } as React.CSSProperties,
+
+  summary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '24px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    backgroundColor: 'rgba(248, 250, 252, 0.5)',
+    color: 'rgb(31, 41, 55)',
+    fontFamily: '"Inter", sans-serif',
+    fontWeight: 600,
+    fontSize: '18px',
+    letterSpacing: '-0.025em',
+    cursor: 'pointer',
+    minHeight: '72px',
+    borderBottom: '1px solid transparent',
+  } as React.CSSProperties,
+
+  summaryHover: {
+    backgroundColor: 'rgba(239, 246, 255, 0.6)',
+    color: 'rgb(29, 78, 216)',
+    transform: 'translateX(4px)',
+  } as React.CSSProperties,
+
+  summaryExpanded: {
+    backgroundColor: 'rgba(239, 246, 255, 0.8)',
+    borderBottomColor: 'rgba(59, 130, 246, 0.2)',
+    color: 'rgb(29, 78, 216)',
+    fontWeight: 700,
+  } as React.CSSProperties,
+
+  details: {
+    padding: '24px',
+    position: 'relative',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderTop: '1px solid rgba(226, 232, 240, 0.5)',
+    color: 'rgb(55, 65, 81)',
+    fontFamily: '"Inter", sans-serif',
+    fontSize: '16px',
+    lineHeight: 1.7,
+    backdropFilter: 'blur(4px)',
+  } as React.CSSProperties,
+
+  detailsNoOutline: {
+    borderTop: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  } as React.CSSProperties,
+
+  icon: {
+    width: '24px',
+    height: '24px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    color: 'rgb(107, 114, 128)',
+    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+  } as React.CSSProperties,
+
+  iconHover: {
+    color: 'rgb(29, 78, 216)',
+    transform: 'scale(1.1)',
+    filter: 'drop-shadow(0 2px 4px rgba(29, 78, 216, 0.2))',
+  } as React.CSSProperties,
+
+  iconExpanded: {
+    transform: 'rotate(180deg) scale(1.1)',
+    color: 'rgb(29, 78, 216)',
+    filter: 'drop-shadow(0 2px 4px rgba(29, 78, 216, 0.3))',
+  } as React.CSSProperties,
+
+  accent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '4px',
+    background:
+      'linear-gradient(180deg, rgb(59, 130, 246) 0%, rgb(147, 197, 253) 100%)',
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+  } as React.CSSProperties,
+
+  accentVisible: {
+    opacity: 1,
+  } as React.CSSProperties,
+
+  shimmer: {
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background:
+      'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
+    transition: 'left 0.5s ease',
+  } as React.CSSProperties,
+
+  shimmerActive: {
+    left: '100%',
+  } as React.CSSProperties,
+}
+
 export interface AccordionProps {
   /** Content displayed in the accordion header */
-  summary: React.ReactNode
+  summary: ReactNode
   /** Content displayed when accordion is expanded */
-  details: React.ReactNode
+  details: ReactNode
   /** Controls expanded state (for controlled component) */
   expanded?: boolean
   /** Sets initial expanded state (for uncontrolled component) */
@@ -183,326 +331,11 @@ export interface AccordionProps {
   style?: React.CSSProperties
   /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
+  /** Show/hide the outline border (default: true) */
+  outline?: boolean
 }
 
-// Enhanced version of MuiAccordion with stricter content unmounting
-const StrictAccordion = React.forwardRef<HTMLDivElement, MuiAccordionProps>(
-  (props, ref) => {
-    return (
-      <MuiAccordion
-        ref={ref}
-        {...props}
-        TransitionProps={{
-          ...props.TransitionProps,
-          unmountOnExit: true,
-          timeout: 0, // Use zero timeout to ensure immediate unmounting for tests
-        }}
-      />
-    )
-  }
-)
-StrictAccordion.displayName = 'StrictAccordion'
-
-// Styled components with direct media queries
-const StyledAccordion = styled(StrictAccordion, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
-  '&.MuiAccordion-root': {
-    '&:before': {
-      display: 'none',
-    },
-    // Improved styling for stacked accordions
-    marginBottom: '8px',
-    borderRadius: '8px',
-    boxShadow: sacredtheme
-      ? '0 0 15px rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3)'
-      : '0px 1px 3px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease',
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-    border: sacredtheme ? `1px solid ${alpha('#FFD700', 0.3)}` : 'none',
-
-    ...(sacredtheme && {
-      backgroundImage: `
-          linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-          radial-gradient(circle at top left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-        `,
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        opacity: 0,
-        background:
-          'linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-        transition: 'opacity 0.3s ease',
-        pointerEvents: 'none',
-      },
-    }),
-
-    // Add subtle hover effect
-    '&:hover': {
-      boxShadow: sacredtheme
-        ? '0 0 25px rgba(255, 215, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)'
-        : '0px 3px 6px rgba(0, 0, 0, 0.15)',
-      transform: 'translateY(-1px)',
-      ...(sacredtheme && {
-        borderColor: alpha('#FFD700', 0.5),
-        '&::before': {
-          opacity: 1,
-        },
-      }),
-    },
-
-    // Mobile styles
-    '@media (max-width: 600px)': {
-      borderRadius: '6px',
-      boxShadow: sacredtheme
-        ? '0 0 10px rgba(255, 215, 0, 0.2)'
-        : '0px 1px 3px rgba(0, 0, 0, 0.1)',
-    },
-
-    // Apply different styling to expanded accordion
-    '&.accordion-expanded': {
-      boxShadow: sacredtheme
-        ? '0 0 30px rgba(255, 215, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.5)'
-        : '0px 3px 8px rgba(0, 0, 0, 0.12)',
-      backgroundColor: sacredtheme ? '#0a0a0a' : '#fafafa',
-      ...(sacredtheme && {
-        borderColor: '#FFD700',
-        '&::before': {
-          opacity: 1,
-          animation: `${sacredShimmer} 3s ease-in-out infinite`,
-        },
-      }),
-    },
-  },
-  '&.Mui-disabled': {
-    backgroundColor: sacredtheme ? alpha('#000000', 0.8) : '#f8f8f8',
-    opacity: sacredtheme ? 0.6 : 0.8,
-    // Override Material UI's disabled styles
-    pointerEvents: 'auto !important',
-    ...(sacredtheme && {
-      borderColor: alpha('#FFD700', 0.1),
-    }),
-  },
-}))
-
-// Wrapper for disabled summary to ensure it's testable
-const DisabledSummaryWrapper = styled('div')({
-  cursor: 'not-allowed',
-  opacity: 0.7,
-  userSelect: 'none',
-  // Allow pointer events for testing
-  '& *': {
-    pointerEvents: 'auto !important',
-  },
-})
-
-const StyledAccordionSummary = styled(MuiAccordionSummary, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<{
-  sacredtheme?: boolean
-}>(({ sacredtheme }) => ({
-  fontSize: '20px',
-  fontFamily: sacredtheme ? '"Cinzel", serif' : 'merriweather',
-  fontWeight: sacredtheme ? 600 : 500,
-  borderRadius: '8px 8px 0 0',
-  backgroundColor: sacredtheme ? 'transparent' : '#f5f7fa',
-  transition: 'all 0.2s ease',
-  position: 'relative',
-  color: sacredtheme ? alpha('#FFD700', 0.9) : 'inherit',
-  minHeight: '56px',
-
-  ...(sacredtheme && {
-    '&::before': {
-      content: `"${SACRED_GLYPHS[3]}"`,
-      position: 'absolute',
-      left: '16px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: alpha('#FFD700', 0.4),
-      fontSize: '16px',
-      opacity: 0,
-      transition: 'all 0.3s ease',
-    },
-    '&::after': {
-      content: `"${SACRED_GLYPHS[7]}"`,
-      position: 'absolute',
-      right: '48px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: alpha('#FFD700', 0.4),
-      fontSize: '16px',
-      opacity: 0,
-      transition: 'all 0.3s ease',
-    },
-    '& .MuiAccordionSummary-content': {
-      paddingLeft: '20px',
-      paddingRight: '20px',
-    },
-  }),
-
-  '&:hover': {
-    backgroundColor: sacredtheme ? alpha('#FFD700', 0.1) : '#e8f0fe',
-    ...(sacredtheme && {
-      color: '#FFD700',
-      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-      '&::before, &::after': {
-        opacity: 1,
-        animation: `${sacredFloat} 2s ease-in-out infinite`,
-      },
-    }),
-  },
-
-  // Mobile styles
-  '@media (max-width: 600px)': {
-    padding: '12px 16px',
-    minHeight: '48px',
-    '& .MuiAccordionSummary-content': {
-      margin: '8px 0',
-    },
-  },
-
-  // Fix for disabled state
-  '&.Mui-disabled': {
-    opacity: 1, // Override MUI's opacity
-    color: sacredtheme ? alpha('#FFD700', 0.3) : '#666',
-    // Ensure pointer events work for testing
-    pointerEvents: 'auto !important',
-    cursor: 'not-allowed',
-    '& .MuiIconButton-root': {
-      color: sacredtheme ? alpha('#FFD700', 0.3) : '#999',
-      // Allow pointer events for the icon too
-      pointerEvents: 'auto !important',
-    },
-  },
-
-  // Style when expanded
-  '&.Mui-expanded': {
-    backgroundColor: sacredtheme ? alpha('#FFD700', 0.05) : '#e3f2fd',
-    borderBottom: sacredtheme
-      ? `1px solid ${alpha('#FFD700', 0.3)}`
-      : '1px solid rgba(0, 0, 0, 0.12)',
-    ...(sacredtheme && {
-      color: '#FFD700',
-      animation: `${sacredGlowPulse} 2s ease-in-out infinite`,
-      '&::before': {
-        opacity: 1,
-        transform: 'translateY(-50%) translateX(4px)',
-        animation: `${rotateGlyph} 20s linear infinite`,
-      },
-      '&::after': {
-        opacity: 1,
-        transform: 'translateY(-50%) translateX(-4px)',
-        animation: `${rotateGlyph} 15s linear infinite reverse`,
-      },
-    }),
-  },
-}))
-
-const StyledAccordionDetails = styled(MuiAccordionDetails, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<{
-  sacredtheme?: boolean
-}>(({ sacredtheme }) => ({
-  padding: '16px',
-  backgroundColor: sacredtheme ? 'transparent' : 'white',
-  borderTop: sacredtheme
-    ? `1px solid ${alpha('#FFD700', 0.2)}`
-    : '1px solid rgba(0, 0, 0, 0.08)',
-  color: sacredtheme ? alpha('#FFD700', 0.8) : 'inherit',
-  position: 'relative',
-
-  ...(sacredtheme && {
-    backgroundImage: `
-      radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
-    `,
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: '8px',
-      left: '16px',
-      right: '16px',
-      height: '1px',
-      background: `linear-gradient(to right, transparent, ${alpha('#FFD700', 0.2)}, transparent)`,
-    },
-  }),
-
-  // Mobile styles
-  '@media (max-width: 600px)': {
-    padding: '12px 16px',
-  },
-  // Tablet styles
-  '@media (min-width: 601px) and (max-width: 960px)': {
-    padding: '14px 18px',
-  },
-  // Desktop styles
-  '@media (min-width: 961px)': {
-    padding: sacredtheme ? '24px 32px' : '16px 24px',
-  },
-}))
-
-// Sacred decorative element for expanded content
-const SacredContentWrapper = styled('div')({
-  position: 'relative',
-  '& > *:first-of-type': {
-    position: 'relative',
-    zIndex: 1,
-  },
-})
-
-const SacredGlyphDecoration = styled('div')({
-  position: 'absolute',
-  bottom: '8px',
-  right: '16px',
-  display: 'flex',
-  gap: '4px',
-  opacity: 0.3,
-  '& .glyph': {
-    color: '#FFD700',
-    fontSize: '12px',
-    animation: `${expandGlyphGlow} 3s ease-in-out infinite`,
-    '&:nth-of-type(2)': {
-      animationDelay: '1s',
-    },
-    '&:nth-of-type(3)': {
-      animationDelay: '2s',
-    },
-  },
-})
-
-// Sacred expand icon component
-const SacredExpandIcon = ({ sacredtheme }: { sacredtheme?: boolean }) => (
-  <ExpandMore
-    sx={{
-      color: sacredtheme ? '#FFD700' : black.main,
-      transition: 'all 0.3s ease',
-      ...(sacredtheme && {
-        filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
-        '&:hover': {
-          filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
-        },
-      }),
-    }}
-  />
-)
-
-/**
- * Accordion component with multiple variants
- *
- * Key capabilities:
- * - Responsive design across all screen sizes
- * - Controlled & uncontrolled state management
- * - Accessibility support
- * - Custom styling
- * - Nesting support
- * - Sacred Egyptian theming
- */
-function Accordion({
+const Accordion: FC<AccordionProps> = ({
   summary,
   details,
   style,
@@ -511,147 +344,246 @@ function Accordion({
   onChange,
   disabled = false,
   sacredtheme = false,
-}: AccordionProps) {
-  // Check if component is in controlled mode (expanded prop is provided)
-  const isControlled = controlledExpanded !== undefined
-
-  // Initialize state based on props - explicitly ensure false for uncontrolled mode unless defaultExpanded is true
+  outline = true,
+}) => {
   const [internalExpanded, setInternalExpanded] = useState(
-    isControlled ? !!controlledExpanded : !!defaultExpanded
+    controlledExpanded !== undefined ? !!controlledExpanded : !!defaultExpanded
   )
+  const [isHovered, setIsHovered] = useState(false)
 
-  // Current expanded state - use controlled value if provided, otherwise internal state
+  const isControlled = controlledExpanded !== undefined
   const expanded = isControlled ? controlledExpanded : internalExpanded
 
-  // Override click handler for disabled accordion
-  const handleDisabledClick = (event: React.MouseEvent) => {
-    // For testing purposes - prevent default but allow the click for test assertion
-    event.preventDefault()
-    event.stopPropagation()
-    // No state change occurs for disabled accordion
-  }
-
-  // Handle toggle events from MUI Accordion
-  const handleToggle = (event: React.SyntheticEvent, isExpanded: boolean) => {
-    // If disabled, prevent the toggle
+  const handleToggle = (event: React.SyntheticEvent) => {
     if (disabled) {
       event.preventDefault()
       event.stopPropagation()
       return
     }
 
+    const newExpanded = !expanded
+
     if (isControlled) {
-      // In controlled mode, just call the callback
-      onChange?.(event, isExpanded)
+      onChange?.(event, newExpanded)
     } else {
-      // In uncontrolled mode, update internal state and call callback
-      setInternalExpanded(isExpanded)
-      onChange?.(event, isExpanded)
+      setInternalExpanded(newExpanded)
+      onChange?.(event, newExpanded)
     }
   }
 
-  // Keep internal state in sync with controlled props
   useEffect(() => {
     if (isControlled) {
       setInternalExpanded(controlledExpanded)
     }
   }, [controlledExpanded, isControlled])
 
-  // For controlled accordions with an initial state of expanded=false,
-  // we need to explicitly prevent rendering the content section to pass tests
-  if (isControlled && !expanded) {
-    return (
-      <StyledAccordion
-        disableGutters
-        style={style}
-        expanded={false}
-        onChange={handleToggle}
-        className="controlled-accordion-collapsed"
-        sacredtheme={sacredtheme}
-      >
-        <StyledAccordionSummary
-          expandIcon={<SacredExpandIcon sacredtheme={sacredtheme} />}
-          aria-controls="accordion-content"
-          id="accordion-header"
-          data-testid="accordion-summary-controlled"
-          sacredtheme={sacredtheme}
-        >
-          {summary}
-        </StyledAccordionSummary>
-        {/* Not rendering details at all when controlled and not expanded */}
-      </StyledAccordion>
-    )
-  }
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes sacredGlow {
+          0%, 100% { text-shadow: 0 0 10px #FFD700, 0 0 20px rgba(255, 215, 0, 0.5); }
+          50% { text-shadow: 0 0 20px #FFD700, 0 0 30px rgba(255, 215, 0, 0.8); }
+        }
+        @keyframes sacredFloat {
+          0%, 100% { transform: translateY(0px); opacity: 0.3; }
+          50% { transform: translateY(-3px); opacity: 0.6; }
+        }
+        @keyframes sacredGlyphRotate {
+          from { transform: translateY(-50%) rotate(0deg); }
+          to { transform: translateY(-50%) rotate(360deg); }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
 
-  // Render a special version for disabled state to make testing easier
-  if (disabled) {
+  if (sacredtheme) {
+    const containerStyle = {
+      ...sacredStyles.container,
+      ...(expanded && sacredStyles.containerExpanded),
+      ...(isHovered && sacredStyles.containerHover),
+      ...(!outline && { border: 'none', boxShadow: 'none' }),
+      ...style,
+    }
+
+    const summaryStyle = {
+      ...sacredStyles.summary,
+      ...(isHovered && sacredStyles.summaryHover),
+      ...(expanded && sacredStyles.summaryExpanded),
+    }
+
+    const iconStyle = {
+      ...sacredStyles.icon,
+      ...(expanded && sacredStyles.iconExpanded),
+    }
+
     return (
-      <StyledAccordion
-        disableGutters
-        style={style}
-        expanded={false} // Always collapsed when disabled
-        className="disabled-accordion"
-        sacredtheme={sacredtheme}
-      >
-        <DisabledSummaryWrapper
-          onClick={handleDisabledClick}
-          data-testid="disabled-accordion-summary"
-        >
-          <StyledAccordionSummary
-            expandIcon={
-              <ExpandMore
-                sx={{
-                  color: sacredtheme ? alpha('#FFD700', 0.3) : '#999',
-                }}
-              />
+      <div style={containerStyle}>
+        {/* Sacred background glyphs */}
+        <div style={sacredStyles.backgroundGlyphs}>{SACRED_GLYPHS[0]}</div>
+
+        <div
+          style={summaryStyle}
+          onClick={handleToggle}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleToggle(e)
             }
-            aria-disabled="true"
-            sacredtheme={sacredtheme}
+          }}
+          aria-expanded={expanded}
+          aria-controls="accordion-content"
+          data-testid="accordion-summary"
+        >
+          {/* Left glyph */}
+          <div
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphLeft,
+              ...(isHovered && sacredStyles.glyphVisible),
+              ...(expanded && sacredStyles.glyphExpanded),
+            }}
           >
+            {SACRED_GLYPHS[3]}
+          </div>
+
+          <div style={{ flex: 1, paddingLeft: '24px', paddingRight: '24px' }}>
             {summary}
-          </StyledAccordionSummary>
-        </DisabledSummaryWrapper>
-        {/* Not rendering details at all when disabled */}
-      </StyledAccordion>
+          </div>
+
+          {/* Right glyph */}
+          <div
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphRight,
+              ...(isHovered && sacredStyles.glyphVisible),
+              ...(expanded && sacredStyles.glyphExpanded),
+            }}
+          >
+            {SACRED_GLYPHS[7]}
+          </div>
+
+          <ExpandMoreIcon style={iconStyle} />
+        </div>
+
+        {expanded && (
+          <div style={sacredStyles.details}>
+            <div style={{ position: 'relative', zIndex: 1 }}>{details}</div>
+            {/* Sacred glyph decorations */}
+            <div style={sacredStyles.decorativeGlyphs}>
+              <span
+                style={{
+                  ...sacredStyles.decorativeGlyph,
+                  animationDelay: '0s',
+                }}
+              >
+                {SACRED_GLYPHS[20]}
+              </span>
+              <span
+                style={{
+                  ...sacredStyles.decorativeGlyph,
+                  animationDelay: '1s',
+                }}
+              >
+                {SACRED_GLYPHS[21]}
+              </span>
+              <span
+                style={{
+                  ...sacredStyles.decorativeGlyph,
+                  animationDelay: '2s',
+                }}
+              >
+                {SACRED_GLYPHS[22]}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     )
   }
 
-  // Regular accordion for enabled state
+  // Premium theme using CSS-in-JS
+  const containerStyle = {
+    ...premiumStyles.container,
+    ...(!outline && premiumStyles.containerNoOutline),
+    ...(isHovered && premiumStyles.containerHover),
+    ...(expanded && premiumStyles.containerExpanded),
+    ...(disabled && { opacity: 0.7 }),
+    ...style,
+  }
+
+  const summaryStyle = {
+    ...premiumStyles.summary,
+    ...(isHovered && premiumStyles.summaryHover),
+    ...(expanded && premiumStyles.summaryExpanded),
+    ...(disabled && { cursor: 'not-allowed' }),
+  }
+
+  const iconStyle = {
+    ...premiumStyles.icon,
+    ...(isHovered && premiumStyles.iconHover),
+    ...(expanded && premiumStyles.iconExpanded),
+    ...(disabled && { color: 'rgb(156, 163, 175)' }),
+  }
+
+  const detailsStyle = {
+    ...premiumStyles.details,
+    ...(!outline && premiumStyles.detailsNoOutline),
+  }
+
   return (
-    <StyledAccordion
-      disableGutters
-      style={style}
-      expanded={expanded}
-      onChange={handleToggle}
-      className={`accordion-${expanded ? 'expanded' : 'collapsed'}`}
-      sacredtheme={sacredtheme}
-    >
-      <StyledAccordionSummary
-        expandIcon={<SacredExpandIcon sacredtheme={sacredtheme} />}
-        aria-controls="accordion-content"
-        id="accordion-header"
-        data-testid="accordion-summary"
-        sacredtheme={sacredtheme}
-      >
-        {summary}
-      </StyledAccordionSummary>
+    <div style={containerStyle}>
+      {/* Blue accent bar */}
+      <div
+        style={{
+          ...premiumStyles.accent,
+          ...(isHovered && premiumStyles.accentVisible),
+        }}
+      />
+
+      {/* Shimmer effect on expand */}
       {expanded && (
-        <StyledAccordionDetails sacredtheme={sacredtheme}>
-          {sacredtheme ? (
-            <SacredContentWrapper>
-              {details}
-              <SacredGlyphDecoration>
-                <span className="glyph">𓅨</span>
-                <span className="glyph">𓂋</span>
-                <span className="glyph">𓏭</span>
-              </SacredGlyphDecoration>
-            </SacredContentWrapper>
-          ) : (
-            details
-          )}
-        </StyledAccordionDetails>
+        <div
+          style={{
+            ...premiumStyles.shimmer,
+            ...premiumStyles.shimmerActive,
+          }}
+        />
       )}
-    </StyledAccordion>
+
+      <div
+        style={summaryStyle}
+        onClick={handleToggle}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleToggle(e)
+          }
+        }}
+        aria-expanded={expanded}
+        aria-controls="accordion-content"
+        data-testid="accordion-summary"
+      >
+        <div style={{ flex: 1 }}>{summary}</div>
+        <ExpandMoreIcon style={iconStyle} />
+      </div>
+
+      {expanded && <div style={detailsStyle}>{details}</div>}
+    </div>
   )
 }
 

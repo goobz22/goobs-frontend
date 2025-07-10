@@ -1,30 +1,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Checkbox from '@mui/material/Checkbox'
-import Button from '@mui/material/Button'
-import Paper from '@mui/material/Paper'
-import { Box, Typography, keyframes, alpha } from '@mui/material'
 import Dropdown, { DropdownOption } from '../Field/Dropdown/Regular'
+import CustomCheckbox from '../Checkbox'
 
-// Sacred theming animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0px); }
-`
-
-/** Utility functions for array handling */
 function not(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) === -1)
 }
@@ -32,18 +11,8 @@ function intersection(a: readonly string[], b: readonly string[]) {
   return a.filter(value => b.indexOf(value) !== -1)
 }
 
-/** Available display modes for the TransferList. */
 export type TransferListVariant = 'singleSelection' | 'multipleSelection'
 
-/**
- * For multipleSelection mode, you can pass a map of:
- *   dropdownValue -> { leftItems, rightItems }
- * Example:
- * {
- *   topics:   { leftItems: ['Topic1','Topic2'], rightItems: [] },
- *   articles: { leftItems: ['Article1','Article2'], rightItems: [] },
- * }
- */
 export interface TransferListDropdownDataMap {
   [dropdownValue: string]: {
     leftItems: string[]
@@ -52,49 +21,203 @@ export interface TransferListDropdownDataMap {
 }
 
 export interface TransferListProps {
-  /**
-   * If `variant="singleSelection"`, we use `leftItems` & `rightItems` directly.
-   * If `variant="multipleSelection"`, you must provide dropdown props.
-   */
   variant?: TransferListVariant
-
-  /** Used ONLY if variant="singleSelection". */
   leftItems?: readonly string[]
   rightItems?: readonly string[]
-
-  /** Used ONLY if variant="multipleSelection". */
   dropdownLabel?: string
   dropdownOptions?: DropdownOption[]
   dropdownDataMap?: TransferListDropdownDataMap
-
-  /**
-   * A map from item-value to label.
-   * e.g. { "HIGH": "High Priority", "LOW": "Low Priority" }.
-   * If provided, we'll display `itemLabelMap[value]` in the list
-   * rather than the raw `value`.
-   */
   itemLabelMap?: Record<string, string>
-
-  /**
-   * Fired whenever left/right arrays change (user clicks the arrows).
-   * @param leftItems  Updated array for the "left" column
-   * @param rightItems Updated array for the "right" column
-   * @param dropdownValue For multipleSelection mode
-   */
   onChange: (
     leftItems: string[],
     rightItems: string[],
     dropdownValue?: string
   ) => void
-
-  /** The title shown above the left column. Defaults to "Unassigned". */
   leftTitle?: string
-
-  /** The title shown above the right column. Defaults to "Assigned". */
   rightTitle?: string
-
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
+  className?: string
+  style?: React.CSSProperties
+}
+
+const premiumStyles = {
+  container: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'flex-start',
+  } as React.CSSProperties,
+  column: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  } as React.CSSProperties,
+  title: {
+    marginBottom: '8px',
+    fontWeight: 600,
+    color: 'rgb(17, 24, 39)',
+    fontFamily: '"Inter", sans-serif',
+  } as React.CSSProperties,
+  list: {
+    width: '100%',
+    height: '232px',
+    overflow: 'auto',
+    marginTop: '8px',
+    border: '1px solid rgb(209, 213, 219)',
+    borderRadius: '4px',
+    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)',
+    backgroundColor: 'white',
+  } as React.CSSProperties,
+  listItem: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '12px',
+    textAlign: 'left',
+    transition: 'all 0.3s ease',
+    borderBottom: '1px solid rgb(229, 231, 235)',
+  } as React.CSSProperties,
+  listItemHover: {
+    backgroundColor: 'rgb(249, 250, 251)',
+  } as React.CSSProperties,
+  listItemChecked: {
+    backgroundColor: 'rgb(239, 246, 255)',
+    borderLeft: '4px solid rgb(59, 130, 246)',
+  } as React.CSSProperties,
+  checkboxContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: '12px',
+  } as React.CSSProperties,
+  label: {
+    flex: 1,
+    fontWeight: 500,
+    color: 'rgb(17, 24, 39)',
+  } as React.CSSProperties,
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: '64px',
+    gap: '4px',
+  } as React.CSSProperties,
+  button: {
+    padding: '4px 12px',
+    fontSize: '14px',
+    border: '1px solid rgb(209, 213, 219)',
+    borderRadius: '4px',
+    transition: 'all 0.3s ease',
+    backgroundColor: 'white',
+    color: 'rgb(55, 65, 81)',
+  } as React.CSSProperties,
+  buttonHover: {
+    backgroundColor: 'rgb(249, 250, 251)',
+  } as React.CSSProperties,
+  buttonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  } as React.CSSProperties,
+}
+
+const sacredStyles = {
+  container: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'flex-start',
+    padding: '16px',
+    backgroundColor: 'rgba(10, 10, 10, 0.6)',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    position: 'relative',
+  } as React.CSSProperties,
+  column: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  } as React.CSSProperties,
+  title: {
+    marginBottom: '8px',
+    fontWeight: 600,
+    color: '#FFD700',
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.05em',
+    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+  } as React.CSSProperties,
+  list: {
+    width: '100%',
+    height: '232px',
+    overflow: 'auto',
+    marginTop: '8px',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    borderRadius: '4px',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    animation: 'sacred-glow-pulse 2s infinite alternate',
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.3)',
+  } as React.CSSProperties,
+  listItem: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '12px',
+    textAlign: 'left',
+    transition: 'all 0.3s ease',
+    color: 'rgba(255, 215, 0, 0.9)',
+    borderBottom: '1px solid rgba(255, 215, 0, 0.2)',
+  } as React.CSSProperties,
+  listItemHover: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    transform: 'translateX(4px)',
+  } as React.CSSProperties,
+  listItemChecked: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderLeft: '4px solid #FFD700',
+  } as React.CSSProperties,
+  checkboxContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: '12px',
+  } as React.CSSProperties,
+  label: {
+    flex: 1,
+    fontWeight: 500,
+    color: 'rgba(255, 215, 0, 0.9)',
+  } as React.CSSProperties,
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: '64px',
+    gap: '4px',
+  } as React.CSSProperties,
+  button: {
+    padding: '4px 12px',
+    fontSize: '14px',
+    border: '1px solid #FFD700',
+    borderRadius: '4px',
+    transition: 'all 0.3s ease',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    color: '#FFD700',
+    animation: 'sacred-float 3s infinite ease-in-out',
+  } as React.CSSProperties,
+  buttonHover: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    transform: 'scale(1.1)',
+    boxShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
+  } as React.CSSProperties,
+  buttonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    color: 'rgba(255, 215, 0, 0.3)',
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    fontSize: '20px',
+    color: 'rgba(255, 215, 0, 0.2)',
+    animation: 'glyph-rotate 20s linear infinite',
+  } as React.CSSProperties,
 }
 
 const TransferList: React.FC<TransferListProps> = ({
@@ -109,21 +232,18 @@ const TransferList: React.FC<TransferListProps> = ({
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
   sacredtheme = false,
+  className,
+  style,
 }) => {
-  // The currently selected dropdown value (multipleSelection only)
   const [selectedDropdownValue, setSelectedDropdownValue] = useState<string>('')
-
-  // Local states for the items displayed on left vs. right
   const [left, setLeft] = useState<readonly string[]>([])
   const [right, setRight] = useState<readonly string[]>([])
-
-  // Which items are "checked" by the user
   const [checked, setChecked] = useState<readonly string[]>([])
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
-  /**
-   * SINGLE-SELECTION: rely on leftItems / rightItems props.
-   * Only update local state if they've changed, to avoid an infinite loop.
-   */
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
   useEffect(() => {
     if (variant === 'singleSelection') {
       let changed = false
@@ -147,10 +267,6 @@ const TransferList: React.FC<TransferListProps> = ({
     }
   }, [variant, leftItems, rightItems, left, right])
 
-  /**
-   * MULTIPLE-SELECTION: load from dropdownDataMap whenever
-   * the user picks a new dropdown value.
-   */
   useEffect(() => {
     if (variant === 'multipleSelection') {
       if (!selectedDropdownValue) return
@@ -166,11 +282,9 @@ const TransferList: React.FC<TransferListProps> = ({
     }
   }, [variant, selectedDropdownValue, dropdownDataMap])
 
-  // Intersection of checked+left, and checked+right
   const leftChecked = intersection(checked, left)
   const rightChecked = intersection(checked, right)
 
-  /** Toggle check/uncheck for a given item. */
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value)
     const newChecked = [...checked]
@@ -182,13 +296,11 @@ const TransferList: React.FC<TransferListProps> = ({
     setChecked(newChecked)
   }
 
-  /** Move ALL from left => right. */
   const handleAllRight = () => {
     const newRight = [...right, ...left]
     setRight(newRight)
     setLeft([])
     setChecked([])
-
     onChange(
       [],
       newRight,
@@ -196,14 +308,12 @@ const TransferList: React.FC<TransferListProps> = ({
     )
   }
 
-  /** Move SELECTED from left => right. */
   const handleCheckedRight = () => {
     const newRight = [...right, ...leftChecked]
     const newLeft = not(left, leftChecked)
     setRight(newRight)
     setLeft(newLeft)
     setChecked(not(checked, leftChecked))
-
     onChange(
       newLeft,
       newRight,
@@ -211,14 +321,12 @@ const TransferList: React.FC<TransferListProps> = ({
     )
   }
 
-  /** Move SELECTED from right => left. */
   const handleCheckedLeft = () => {
     const newLeft = [...left, ...rightChecked]
     const newRight = not(right, rightChecked)
     setLeft(newLeft)
     setRight(newRight)
     setChecked(not(checked, rightChecked))
-
     onChange(
       newLeft,
       newRight,
@@ -226,13 +334,11 @@ const TransferList: React.FC<TransferListProps> = ({
     )
   }
 
-  /** Move ALL from right => left. */
   const handleAllLeft = () => {
     const newLeft = [...left, ...right]
     setLeft(newLeft)
     setRight([])
     setChecked([])
-
     onChange(
       newLeft,
       [],
@@ -240,275 +346,153 @@ const TransferList: React.FC<TransferListProps> = ({
     )
   }
 
-  /** Renders a scrollable list of items */
   const renderList = (items: readonly string[]) => (
-    <Paper
-      sx={{
-        width: '100%',
-        height: 230,
-        overflow: 'auto',
-        mt: 1,
-        ...(sacredtheme && {
-          backgroundColor: alpha('#000000', 0.8),
-          border: `1px solid ${alpha('#FFD700', 0.3)}`,
-          animation: `${glowPulse} 3s ease-in-out infinite`,
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(255, 215, 0, 0.5)',
-            borderRadius: '4px',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 215, 0, 0.7)',
-            },
-          },
-        }),
-      }}
-    >
-      <List dense component="div" role="list">
+    <div style={styles.list}>
+      <div style={{ borderBottom: 'none' }}>
         {items.map(value => {
           const labelId = `transfer-list-item-${value}-label`
           const isChecked = checked.indexOf(value) !== -1
-          const displayedLabel =
-            itemLabelMap && itemLabelMap[value] ? itemLabelMap[value] : value
+          const displayedLabel = itemLabelMap?.[value] || value
+          const isHovered = hoveredItem === value
+
+          const listItemStyle: React.CSSProperties = {
+            ...styles.listItem,
+            ...(isHovered && styles.listItemHover),
+            ...(isChecked && styles.listItemChecked),
+          }
 
           return (
-            <ListItemButton
+            <button
               key={value}
-              role="listitem"
               onClick={handleToggle(value)}
-              sx={{
-                ...(sacredtheme && {
-                  color: alpha('#FFD700', 0.9),
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    backgroundColor: alpha('#FFD700', 0.1),
-                    transform: 'translateX(5px)',
-                  },
-                  ...(isChecked && {
-                    backgroundColor: alpha('#FFD700', 0.15),
-                    borderLeft: `3px solid #FFD700`,
-                  }),
-                }),
-              }}
+              style={listItemStyle}
+              onMouseEnter={() => setHoveredItem(value)}
+              onMouseLeave={() => setHoveredItem(null)}
             >
-              <ListItemIcon>
-                <Checkbox
+              <div style={styles.checkboxContainer}>
+                <CustomCheckbox
                   checked={isChecked}
-                  tabIndex={-1}
-                  disableRipple
-                  inputProps={{ 'aria-labelledby': labelId }}
-                  sx={
-                    sacredtheme
-                      ? {
-                          color: alpha('#FFD700', 0.6),
-                          '&.Mui-checked': {
-                            color: '#FFD700',
-                            filter:
-                              'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-                          },
-                        }
-                      : undefined
-                  }
+                  onChange={() => {}}
+                  aria-labelledby={labelId}
+                  sacredtheme={sacredtheme}
                 />
-              </ListItemIcon>
-              <ListItemText
-                id={labelId}
-                primary={displayedLabel}
-                sx={
-                  sacredtheme
-                    ? {
-                        '& .MuiListItemText-primary': {
-                          color: alpha('#FFD700', 0.9),
-                          fontWeight: 500,
-                        },
-                      }
-                    : undefined
-                }
-              />
-            </ListItemButton>
+              </div>
+              <span id={labelId} style={styles.label}>
+                {displayedLabel}
+              </span>
+            </button>
           )
         })}
-      </List>
-    </Paper>
+      </div>
+    </div>
   )
 
-  /**
-   * Renders the left column:
-   * - singleSelection => show "leftTitle" + the list
-   * - multipleSelection => show a dropdown above the list
-   */
   const renderLeftColumn = () => {
     if (variant === 'singleSelection') {
       return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              mb: 1,
-              ...(sacredtheme && {
-                color: '#FFD700',
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-              }),
-            }}
-          >
-            {leftTitle}
-          </Typography>
+        <div style={styles.column}>
+          <h3 style={styles.title}>{leftTitle}</h3>
           {renderList(left)}
-        </Box>
+        </div>
       )
     }
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <div style={styles.column}>
         <Dropdown
           label={dropdownLabel || ''}
           options={dropdownOptions}
           value={selectedDropdownValue}
-          onChange={e => {
-            const newValue = e.target.value
-            setSelectedDropdownValue(newValue)
-          }}
-          backgroundcolor={sacredtheme ? alpha('#000000', 0.6) : undefined}
+          onChange={e => setSelectedDropdownValue(e.target.value)}
+          backgroundcolor={sacredtheme ? 'rgba(0, 0, 0, 0.6)' : undefined}
           outlinecolor={sacredtheme ? '#FFD700' : undefined}
           fontcolor={sacredtheme ? '#FFD700' : undefined}
           shrunkfontcolor={sacredtheme ? '#FFD700' : undefined}
+          sacredtheme={sacredtheme}
         />
         {renderList(left)}
-      </Box>
+      </div>
     )
   }
 
-  const buttonStyles = sacredtheme
-    ? {
-        color: '#FFD700',
-        borderColor: '#FFD700',
-        backgroundColor: alpha('#000000', 0.8),
-        '&:hover': {
-          backgroundColor: alpha('#FFD700', 0.1),
-          borderColor: '#FFD700',
-          transform: 'scale(1.1)',
-          boxShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
-        },
-        '&:disabled': {
-          color: alpha('#FFD700', 0.3),
-          borderColor: alpha('#FFD700', 0.3),
-        },
-      }
-    : undefined
+  const TransferButton = ({
+    onClick,
+    disabled,
+    'aria-label': ariaLabel,
+    children,
+    name,
+  }: {
+    onClick: () => void
+    disabled: boolean
+    'aria-label': string
+    children: React.ReactNode
+    name: string
+  }) => {
+    const isHovered = hoveredButton === name
+    const buttonStyle: React.CSSProperties = {
+      ...styles.button,
+      ...(isHovered && !disabled && styles.buttonHover),
+      ...(disabled && styles.buttonDisabled),
+      ...(sacredtheme && {
+        animationDelay: name === 'all-left' ? '0.5s' : undefined,
+      }),
+    }
+    return (
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        style={buttonStyle}
+        onMouseEnter={() => setHoveredButton(name)}
+        onMouseLeave={() => setHoveredButton(null)}
+      >
+        {children}
+      </button>
+    )
+  }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 2,
-        alignItems: 'flex-start',
-        ...(sacredtheme && {
-          padding: 2,
-          backgroundColor: alpha('#000000', 0.6),
-          borderRadius: 2,
-          border: `1px solid ${alpha('#FFD700', 0.3)}`,
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at center, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-          `,
-          position: 'relative',
-          '&::before': {
-            content: '"𓊨"',
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            fontSize: '20px',
-            color: alpha('#FFD700', 0.2),
-            animation: 'rotate 25s linear infinite',
-          },
-        }),
-      }}
-    >
-      <Box sx={{ width: '100%' }}>{renderLeftColumn()}</Box>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mt: { xs: 2, sm: 4 },
-          gap: '4px',
-        }}
-      >
-        <Button
-          variant="outlined"
-          size="small"
+    <div style={{ ...styles.container, ...style }} className={className}>
+      {sacredtheme && <div style={sacredStyles.glyph}>𓊨</div>}
+      <div style={styles.column}>{renderLeftColumn()}</div>
+      <div style={styles.buttonGroup}>
+        <TransferButton
           onClick={handleAllRight}
           disabled={left.length === 0}
           aria-label="move all right"
-          sx={{
-            ...buttonStyles,
-            ...(sacredtheme && {
-              animation: `${floatAnimation} 2s ease-in-out infinite`,
-            }),
-          }}
+          name="all-right"
         >
           ≫
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
+        </TransferButton>
+        <TransferButton
           onClick={handleCheckedRight}
           disabled={leftChecked.length === 0}
           aria-label="move selected right"
-          sx={buttonStyles}
+          name="checked-right"
         >
           &gt;
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
+        </TransferButton>
+        <TransferButton
           onClick={handleCheckedLeft}
           disabled={rightChecked.length === 0}
           aria-label="move selected left"
-          sx={buttonStyles}
+          name="checked-left"
         >
           &lt;
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
+        </TransferButton>
+        <TransferButton
           onClick={handleAllLeft}
           disabled={right.length === 0}
           aria-label="move all left"
-          sx={{
-            ...buttonStyles,
-            ...(sacredtheme && {
-              animation: `${floatAnimation} 2.5s ease-in-out infinite`,
-            }),
-          }}
+          name="all-left"
         >
           ≪
-        </Button>
-      </Box>
-      <Box sx={{ width: '100%' }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            mb: 1,
-            ...(sacredtheme && {
-              color: '#FFD700',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
-              textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
-            }),
-          }}
-        >
-          {rightTitle}
-        </Typography>
+        </TransferButton>
+      </div>
+      <div style={styles.column}>
+        <h3 style={styles.title}>{rightTitle}</h3>
         {renderList(right)}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

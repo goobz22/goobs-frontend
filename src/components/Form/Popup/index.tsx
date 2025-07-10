@@ -1,80 +1,13 @@
 'use client'
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import { Close, DragIndicator } from '@mui/icons-material'
-import {
-  Dialog,
-  IconButton,
-  Box,
-  alpha,
-  keyframes,
-  Typography,
-} from '@mui/material'
+import React, { useState, useEffect, useCallback } from 'react'
+import Dialog from '../../Dialog'
+import CloseIcon from '../../Icons/Close'
+import DragIcon from '../../Icons/Drag'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import CustomButton, { CustomButtonProps } from '../../Button'
-import { white } from '../../../styles/palette'
+import Typography from '../../Typography'
 
-// Sacred geometry animations
-const glowPulse = keyframes`
-  0% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-  50% { 
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-    border-color: ${alpha('#FFD700', 0.8)};
-  }
-  100% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  33% { transform: translateY(-5px) rotate(120deg); opacity: 0.5; }
-  66% { transform: translateY(2px) rotate(240deg); opacity: 0.4; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const sacredShimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
-const scrollbarGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-`
-
-const closeButtonGlow = keyframes`
-  0% { 
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-    transform: rotate(0deg);
-  }
-  50% { 
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-    transform: rotate(180deg);
-  }
-  100% { 
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-    transform: rotate(360deg);
-  }
-`
-
-// Egyptian styling constants
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  goldGradient:
-    'linear-gradient(135deg, #FFD700 0%, #F4A460 50%, #DAA520 100%)',
-  darkGold: '#B8860B',
-  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
-  cardBackground: alpha('#000000', 0.85),
-  glowEffect: `0 0 30px ${alpha('#FFD700', 0.3)}, 0 0 60px ${alpha('#FFD700', 0.1)}`,
-}
-
-// Sacred hieroglyphs for decoration
 const SACRED_GLYPHS = [
   '𓁟',
   '𓂀',
@@ -104,24 +37,120 @@ const SACRED_GLYPHS = [
 
 export interface PopupProps {
   open: boolean
-  /**
-   * Optional flag indicating the popup should be closed from the parent.
-   */
   close: boolean
-  /**
-   * Optional callback so the parent can be informed when user closes the dialog.
-   */
   onClose: () => void
   title?: string
   description?: string
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
-  /** Optional array of button props for footer buttons */
   buttons?: CustomButtonProps[]
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
 }
+
+const getStyles = (
+  sacredtheme?: boolean,
+  width: number = 450,
+  dragPosition?: { x: number; y: number },
+  isDragging?: boolean
+) => ({
+  dialog: {
+    width: `${width}px`,
+    maxHeight: '90vh',
+    top: dragPosition?.y === 0 ? '50%' : `${dragPosition?.y}px`,
+    left: dragPosition?.x === 0 ? '50%' : `${dragPosition?.x}px`,
+    transform:
+      dragPosition?.x === 0 && dragPosition?.y === 0
+        ? 'translate(-50%, -50%)'
+        : 'none',
+    cursor: isDragging ? 'grabbing' : 'default',
+    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.85)' : 'white',
+    backdropFilter: sacredtheme ? 'blur(16px)' : 'none',
+    border: sacredtheme ? '2px solid rgba(255, 215, 0, 0.5)' : 'none',
+    borderRadius: '0.75rem',
+    padding: '1.5rem',
+    animation: sacredtheme ? 'popup-glow-pulse 2s infinite alternate' : 'none',
+    boxShadow: sacredtheme
+      ? 'none'
+      : '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    color: 'rgba(255, 215, 0, 0.3)',
+    fontSize: '1.125rem',
+    zIndex: 10,
+    animation: 'popup-float 8s infinite alternate',
+  } as React.CSSProperties,
+  headerActions: {
+    position: 'absolute',
+    right: '0.5rem',
+    top: '0.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.125rem',
+    zIndex: 20,
+  } as React.CSSProperties,
+  actionButton: {
+    padding: '0.25rem',
+    borderRadius: '9999px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    color: sacredtheme ? '#FFD700' : '#6B7280',
+    animation: sacredtheme
+      ? 'popup-close-button-glow 1.5s infinite alternate'
+      : 'none',
+  } as React.CSSProperties,
+  actionButtonHover: {
+    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : '#F3F4F6',
+    transform: 'scale(1.1)',
+  } as React.CSSProperties,
+  title: {
+    textAlign: 'center',
+    marginBottom: '0.25rem',
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      textShadow: '0 0 10px rgba(255,215,0,0.5)',
+      letterSpacing: '0.1em',
+    }),
+  } as React.CSSProperties,
+  description: {
+    textAlign: 'center',
+    marginBottom: '1rem',
+    ...(sacredtheme && {
+      fontFamily: 'Crimson Text, serif',
+      letterSpacing: '0.05em',
+    }),
+  } as React.CSSProperties,
+  contentContainer: {
+    flex: 1,
+    overflow: 'auto',
+    minHeight: 0,
+    paddingRight: '0.625rem',
+  } as React.CSSProperties,
+  buttonContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: '0.5rem',
+    marginTop: '1rem',
+    ...(sacredtheme && {
+      borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+      paddingTop: '1rem',
+    }),
+  } as React.CSSProperties,
+  footerGlyphs: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.125rem',
+    marginTop: '0.5rem',
+    opacity: 0.5,
+  } as React.CSSProperties,
+  footerGlyph: {
+    color: '#FFD700',
+    fontSize: '0.75rem',
+    animation: 'popup-float 3s infinite alternate',
+  } as React.CSSProperties,
+})
 
 function Popup({
   open,
@@ -135,58 +164,48 @@ function Popup({
   buttons,
   sacredtheme = true,
 }: PopupProps) {
-  // Local state syncing with props
   const [isOpen, setIsOpen] = useState(open)
-  const [, setIsClosed] = useState(!open)
-
-  // Drag functionality state
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+  const styles = getStyles(sacredtheme, width, dragPosition, isDragging)
 
   useEffect(() => {
     setIsOpen(open)
-    setIsClosed(!open)
   }, [open])
 
   useEffect(() => {
     if (typeof close === 'boolean') {
       setIsOpen(!close)
-      setIsClosed(close)
     }
   }, [close])
 
-  // Reset drag position when opening
   useEffect(() => {
     if (open) {
       setDragPosition({ x: 0, y: 0 })
     }
   }, [open])
 
-  // Drag handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       setIsDragging(true)
-
-      // If starting from center (0,0), convert to absolute coordinates
       let currentX = dragPosition.x
       let currentY = dragPosition.y
-
       if (dragPosition.x === 0 && dragPosition.y === 0) {
-        // Get the actual popup element position when centered
-        const popup = document.querySelector('.MuiDialog-paper') as HTMLElement
+        const popup = document.querySelector(
+          '[data-dialog-paper="true"]'
+        ) as HTMLElement
         if (popup) {
           const rect = popup.getBoundingClientRect()
           currentX = rect.left
           currentY = rect.top
         } else {
-          // Fallback to calculated center
           currentX = window.innerWidth / 2 - width / 2
-          currentY = window.innerHeight / 2 - 300 // estimated height
+          currentY = window.innerHeight / 2 - 300
         }
       }
-
       setDragOffset({
         x: e.clientX - currentX,
         y: e.clientY - currentY,
@@ -200,13 +219,10 @@ function Popup({
       if (isDragging) {
         const newX = e.clientX - dragOffset.x
         const newY = e.clientY - dragOffset.y
-
-        // Keep within reasonable bounds (allow some off-screen movement)
         const maxX = window.innerWidth - 100
         const minX = -width + 100
         const maxY = window.innerHeight - 100
         const minY = -200
-
         setDragPosition({
           x: Math.max(minX, Math.min(maxX, newX)),
           y: Math.max(minY, Math.min(maxY, newY)),
@@ -220,18 +236,16 @@ function Popup({
     setIsDragging(false)
   }, [])
 
-  // Add and remove mouse event listeners
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = 'none' // Prevent text selection while dragging
+      document.body.style.userSelect = 'none'
     } else {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
       document.body.style.userSelect = ''
     }
-
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
@@ -239,408 +253,120 @@ function Popup({
     }
   }, [isDragging, handleMouseMove, handleMouseUp])
 
-  // Create a header grid using the new ContentSection interface.
-  // We only supply the typography array without any layout properties.
-  const headerGrid = useMemo(
-    (): ContentSectionProps['grids'][0] => ({
-      typography: [
-        {
-          text: title,
-          // Cast to literal type as expected by goobs-frontend.
-          fontvariant: 'merrih4' as const,
-          fontcolor: sacredtheme ? egyptianStyles.goldColor : 'black',
-          style: sacredtheme
-            ? {
-                fontFamily: '"Cinzel", serif',
-                textShadow: egyptianStyles.textShadow,
-                letterSpacing: '0.1em',
-                textAlign: 'center',
-              }
-            : undefined,
-          sacredtheme: sacredtheme,
-        },
-        {
-          text: description,
-          fontvariant: 'merrih5' as const,
-          fontcolor: sacredtheme ? alpha('#ffffff', 0.9) : 'black',
-          style: sacredtheme
-            ? {
-                fontFamily: '"Crimson Text", serif',
-                textAlign: 'center',
-                marginTop: '8px',
-              }
-            : undefined,
-          sacredtheme: sacredtheme,
-        },
-      ],
-      style: sacredtheme
-        ? {
-            marginBottom: '16px',
-          }
-        : undefined,
-    }),
-    [title, description, sacredtheme]
-  )
-
-  const renderHeader = useMemo(() => {
-    if (!title && !description) return null
-
-    return (
-      <>
-        {sacredtheme && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 1.5,
-              mb: 1,
-            }}
-          >
-            {SACRED_GLYPHS.slice(0, 5).map((glyph, index) => (
-              <Typography
-                key={index}
-                sx={{
-                  color: alpha(egyptianStyles.goldColor, 0.6),
-                  fontSize: '1rem',
-                  animation: `${floatAnimation} ${3 + index * 0.5}s ease-in-out infinite`,
-                  animationDelay: `${index * 0.2}s`,
-                }}
-              >
-                {glyph}
-              </Typography>
-            ))}
-          </Box>
-        )}
-        <ContentSection grids={[headerGrid]} />
-      </>
-    )
-  }, [headerGrid, sacredtheme, title, description])
-
-  const renderButtons = useMemo(() => {
-    if (!buttons || buttons.length === 0) return null
-
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: 2,
-          marginTop: sacredtheme ? '16px' : '15px',
-          ...(sacredtheme && {
-            borderTop: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-            paddingTop: '16px',
-          }),
-        }}
-      >
-        {buttons.map((buttonProps, index) => (
-          <CustomButton
-            key={index}
-            {...buttonProps}
-            sacredtheme={sacredtheme}
-            style={
-              sacredtheme
-                ? {
-                    fontFamily: '"Cinzel", serif',
-                    letterSpacing: '0.05em',
-                    boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.3)}`,
-                    ...buttonProps.style,
-                  }
-                : buttonProps.style
-            }
-          />
-        ))}
-      </Box>
-    )
-  }, [buttons, sacredtheme])
-
   const handleClose = () => {
     setIsOpen(false)
-    setIsClosed(true)
     onClose?.()
   }
-
-  const dialogPaperStyles = useMemo(() => {
-    const baseStyles = {
-      width: `${width}px`,
-      maxHeight: '90vh',
-      borderRadius: sacredtheme ? '12px' : '16px',
-      backgroundColor: sacredtheme ? egyptianStyles.cardBackground : white.main,
-      boxShadow: sacredtheme
-        ? egyptianStyles.glowEffect
-        : '0px 4px 10px rgba(0, 0, 0, 0.2)',
-      padding: sacredtheme ? '24px 32px 20px 32px' : '24px',
-      pointerEvents: 'auto' as const,
-      position: 'fixed' as const,
-      overflow: 'auto' as const,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      // Drag positioning
-      top: dragPosition.y === 0 ? '50%' : `${dragPosition.y}px`,
-      left: dragPosition.x === 0 ? '50%' : `${dragPosition.x}px`,
-      transform:
-        dragPosition.x === 0 && dragPosition.y === 0
-          ? 'translate(-50%, -50%)'
-          : 'none',
-      cursor: isDragging ? 'grabbing' : 'default',
-    }
-
-    if (!sacredtheme) return baseStyles
-
-    return {
-      ...baseStyles,
-      backdropFilter: 'blur(20px)',
-      border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-      animation: `${glowPulse} 4s ease-in-out infinite`,
-      // Sacred scrollbar styling for the main container
-      '&::-webkit-scrollbar': {
-        width: '12px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: alpha('#000000', 0.3),
-        borderRadius: '6px',
-        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
-        borderRadius: '6px',
-        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
-        boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
-        animation: `${scrollbarGlow} 3s ease-in-out infinite`,
-        '&:hover': {
-          backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
-          boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
-        },
-      },
-      '&::-webkit-scrollbar-thumb:active': {
-        backgroundColor: egyptianStyles.goldColor,
-        boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
-      },
-      // Firefox scrollbar styling
-      scrollbarWidth: 'thin',
-      scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '1px',
-        background: `linear-gradient(90deg, transparent, ${egyptianStyles.goldColor}, transparent)`,
-        backgroundSize: '200% 100%',
-        animation: `${sacredShimmer} 3s linear infinite`,
-      },
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '1px',
-        background: `linear-gradient(90deg, transparent, ${egyptianStyles.goldColor}, transparent)`,
-        backgroundSize: '200% 100%',
-        animation: `${sacredShimmer} 3s linear infinite`,
-        animationDelay: '1.5s',
-      },
-    }
-  }, [sacredtheme, width, dragPosition, isDragging])
 
   return (
     <Dialog
       open={isOpen}
-      onClose={handleClose} // Clicking outside/backdrop or pressing ESC triggers this
+      onClose={handleClose}
       fullWidth
       maxWidth={false}
-      slotProps={{
-        paper: {
-          sx: dialogPaperStyles,
-        },
-        backdrop: sacredtheme
-          ? {
-              sx: {
-                backgroundColor: alpha('#000000', 0.85),
-                backdropFilter: 'blur(5px)',
-              },
-            }
-          : undefined,
-      }}
+      style={styles.dialog}
+      data-dialog-paper="true"
     >
-      {/* Top corner decorations */}
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 5s ease-in-out infinite`,
-            }}
-          >
+          <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
             {SACRED_GLYPHS[10]}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              right: '48px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 5s ease-in-out infinite reverse`,
+          </div>
+          <div
+            style={{
+              ...styles.glyph,
+              top: '0.75rem',
+              right: '3rem',
+              animationDirection: 'reverse',
             }}
           >
             {SACRED_GLYPHS[11]}
-          </Box>
+          </div>
         </>
       )}
 
-      {/* Top-right controls: Drag icon and Close button */}
-      <Box
-        sx={{
-          position: 'absolute',
-          right: 8,
-          top: 8,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          zIndex: theme => theme.zIndex.modal + 1,
-        }}
-      >
-        {/* Drag indicator */}
-        <IconButton
-          size="small"
+      <div style={styles.headerActions}>
+        <button
           onMouseDown={handleMouseDown}
-          sx={{
-            color: sacredtheme
-              ? egyptianStyles.goldColor
-              : theme => theme.palette.grey[500],
-            cursor: isDragging ? 'grabbing' : 'grab',
-            ...(sacredtheme && {
-              animation: `${closeButtonGlow} 6s ease-in-out infinite`,
-              animationDelay: '1s',
-              '&:hover': {
-                color: egyptianStyles.goldColor,
-                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-                transform: 'scale(1.1)',
-                transition: 'all 0.3s ease',
-              },
-            }),
-            ...(!sacredtheme && {
-              '&:hover': {
-                color: theme => theme.palette.grey[700],
-                backgroundColor: alpha('#000', 0.04),
-              },
-            }),
+          style={{
+            ...styles.actionButton,
+            ...(hoveredButton === 'drag' && styles.actionButtonHover),
           }}
+          onMouseEnter={() => setHoveredButton('drag')}
+          onMouseLeave={() => setHoveredButton(null)}
         >
-          <DragIndicator />
-        </IconButton>
-
-        {/* Close button */}
-        <IconButton
-          size="small"
+          <DragIcon />
+        </button>
+        <button
           onClick={handleClose}
-          onMouseDown={e => e.stopPropagation()} // Prevent drag when clicking close
-          sx={{
-            color: sacredtheme
-              ? egyptianStyles.goldColor
-              : theme => theme.palette.grey[500],
-            cursor: 'pointer',
-            ...(sacredtheme && {
-              animation: `${closeButtonGlow} 6s ease-in-out infinite`,
-              '&:hover': {
-                color: egyptianStyles.goldColor,
-                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-                transform: 'scale(1.1)',
-                transition: 'all 0.3s ease',
-              },
-            }),
-            ...(!sacredtheme && {
-              '&:hover': {
-                color: theme => theme.palette.grey[700],
-                backgroundColor: alpha('#000', 0.04),
-              },
-            }),
+          onMouseDown={e => e.stopPropagation()}
+          style={{
+            ...styles.actionButton,
+            ...(hoveredButton === 'close' && styles.actionButtonHover),
           }}
+          onMouseEnter={() => setHoveredButton('close')}
+          onMouseLeave={() => setHoveredButton(null)}
         >
-          <Close />
-        </IconButton>
-      </Box>
+          <CloseIcon />
+        </button>
+      </div>
 
-      {renderHeader}
+      {title && (
+        <Typography
+          text={title}
+          fontcolor={sacredtheme ? 'gold' : 'black'}
+          style={styles.title}
+        />
+      )}
+      {description && (
+        <Typography
+          text={description}
+          fontcolor={sacredtheme ? 'white' : 'black'}
+          style={styles.description}
+        />
+      )}
 
-      <Box
-        sx={{
-          flex: 1,
-          overflow: 'auto',
-          minHeight: 0,
-          paddingRight: '10px',
-          ...(sacredtheme
-            ? {
-                position: 'relative',
-                zIndex: 1,
-                // Custom scrollbar styling for sacred theme
-                '&::-webkit-scrollbar': {
-                  width: '12px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: alpha('#000000', 0.3),
-                  borderRadius: '6px',
-                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
-                  borderRadius: '6px',
-                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
-                  boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
-                  animation: `${scrollbarGlow} 3s ease-in-out infinite`,
-                  '&:hover': {
-                    backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
-                    boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
-                  },
-                },
-                '&::-webkit-scrollbar-thumb:active': {
-                  backgroundColor: egyptianStyles.goldColor,
-                  boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
-                },
-                // Firefox scrollbar styling
-                scrollbarWidth: 'thin',
-                scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
-              }
-            : {}),
-        }}
-      >
+      <div style={styles.contentContainer}>
         {content ||
           (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
-      </Box>
+      </div>
 
-      {renderButtons}
+      {buttons && buttons.length > 0 && (
+        <div style={styles.buttonContainer}>
+          {buttons.map((buttonProps, index) => (
+            <CustomButton
+              key={index}
+              {...buttonProps}
+              sacredtheme={sacredtheme}
+              style={
+                sacredtheme
+                  ? {
+                      fontFamily: '"Cinzel", serif',
+                      letterSpacing: '0.05em',
+                      boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
+                      ...buttonProps.style,
+                    }
+                  : buttonProps.style
+              }
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Bottom decoration */}
       {sacredtheme && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 0.5,
-            mt: 2,
-            opacity: 0.5,
-          }}
-        >
+        <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <Typography
               key={index}
-              sx={{
-                color: egyptianStyles.goldColor,
-                fontSize: '12px',
-                animation: `${floatAnimation} ${2 + index * 0.3}s ease-in-out infinite`,
+              style={{
+                ...styles.footerGlyph,
+                animationDelay: `${2 + index * 0.3}s`,
               }}
             >
               {glyph}
             </Typography>
           ))}
-        </Box>
+        </div>
       )}
     </Dialog>
   )

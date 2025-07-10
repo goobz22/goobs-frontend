@@ -1,14 +1,11 @@
 'use client'
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react'
-import { Box, Stack, alpha, keyframes } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from './jotai/atom'
 import { JotaiProvider } from './jotai/provider'
 
 import Toolbar from '../Toolbar'
-// Removed old generic AddTask import
-// import AddTask from './forms/AddTask/client'
 import AdministratorAddTaskCompanyDropdown from './forms/AddTask/administrator/companyDropdown'
 import AdministratorAddTaskCompanyProvided from './forms/AddTask/administrator/companyProvided'
 import CompanyAddTaskCustomerDropdown from './forms/AddTask/company/customerDropdown'
@@ -22,61 +19,23 @@ import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
 import { useComputeBoardResize } from './utils/useComputeBoard'
 import Board from './board'
 
-import * as palette from '../../styles/palette'
-
-// Sacred geometry animations
-const glowPulse = keyframes`
-  0% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-  50% { 
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-    border-color: ${alpha('#FFD700', 0.8)};
-  }
-  100% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  33% { transform: translateY(-5px) rotate(120deg); opacity: 0.5; }
-  66% { transform: translateY(2px) rotate(240deg); opacity: 0.4; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-// Egyptian styling constants
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  darkGold: '#B8860B',
-  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
-  cardBackground: alpha('#000000', 0.85),
-  glowEffect: `0 0 30px ${alpha('#FFD700', 0.3)}, 0 0 60px ${alpha('#FFD700', 0.1)}`,
-}
-
-// Sacred hieroglyphs for decoration
 const SACRED_GLYPHS = [
-  '𓁟', // Eye of Horus
-  '𓂀', // Eye
-  '𓄿', // Vulture
-  '𓊖', // House
-  '𓊗', // Road
-  '𓋴', // Life/Ankh symbol
-  '𓏏', // Bread
-  '𓊨', // Gate
-  '𓅓', // Owl
-  '𓇳', // Sun
-  '𓊹', // Shrine
-  '𓂋', // Mouth
-  '𓏭', // Scribe's kit
-  '𓊵', // Cartouche
+  '𓁟',
+  '𓂀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓅓',
+  '𓇳',
+  '𓊹',
+  '𓂋',
+  '𓏭',
+  '𓊵',
 ]
 
-/**
- * Merge the incoming tasks into columns based on the boardType.
- */
 function mergeColumnsAndTasks(
   columns: Array<{ _id: string; title: string; description: string }>,
   tasks: Task[],
@@ -98,7 +57,6 @@ function mergeColumnsAndTasks(
           return false
       }
     })
-
     return {
       _id: col._id,
       title: col.title,
@@ -107,6 +65,32 @@ function mergeColumnsAndTasks(
     }
   })
 }
+
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    boxSizing: 'border-box',
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    ...(sacredtheme && {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      border: '2px solid rgba(255, 215, 0, 0.5)',
+      borderRadius: '0.5rem',
+      animation: 'project-board-glow-pulse 3s infinite alternate',
+      overflow: 'hidden',
+    }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    color: 'rgba(255, 215, 0, 0.3)',
+    zIndex: 10,
+    animation: 'project-board-float 10s infinite alternate',
+  } as React.CSSProperties,
+  toolbarContainer: {
+    marginTop: '0.25rem',
+    paddingLeft: '1rem',
+  } as React.CSSProperties,
+})
 
 function ProjectBoardContent({
   variant,
@@ -135,21 +119,16 @@ function ProjectBoardContent({
   preferDropdown,
   sacredtheme = false,
 }: ProjectBoardProps) {
-  // 1) Atom state for columns + tasks
   const [columnState, setColumnState] = useAtom(columnsAtom)
-
-  // Merge the tasks into columns
   const mergedColumns = useMemo(
     () => mergeColumnsAndTasks(columns, tasks, boardType),
     [columns, tasks, boardType]
   )
 
-  // Initialize the columns in our Jotai store
   useEffect(() => {
     setColumnState(mergedColumns)
   }, [mergedColumns, setColumnState])
 
-  // 2) Single-task selection state
   const [selectedTask, setSelectedTask] = useState<{
     colIndex: number
     taskIndex: number
@@ -167,35 +146,26 @@ function ProjectBoardContent({
     }
   }
 
-  // Flatten tasks to find the one to display in ShowTask
   const allTasks: Task[] = useMemo(
     () => columnState.flatMap(col => col.tasks),
     [columnState]
   )
 
-  // 3) COLUMN DRAG & DROP
   const { handleColumnDragStart, handleColumnDragOver, handleColumnDrop } =
     useColumnDragAndDrop(columnState, setColumnState)
-
-  // 4) Local modals: handle "Add Task" and "Show Task" states internally
   const [addTaskOpen, setAddTaskOpen] = useState(false)
-  /** We store the "currently showing Task" as an ID in local state. '-1' means none open. */
   const [showTaskOpen, setShowTaskOpen] = useState('-1')
+  const styles = getStyles(sacredtheme)
 
-  // 5) AddTask "onAdd" handler
   const handleAddTask = useCallback(
     (newTask: Omit<Task, '_id'>) => {
-      // 5.a) Update local columns in Jotai
       if (columnState.length === 0) {
         onAdd(newTask)
         setAddTaskOpen(false)
         return
       }
-
       const newCols = [...columnState]
       const colId = newCols[0]._id
-
-      // Build a full Task object by spreading newTask and overriding board-specific fields.
       const typedTask: Task = {
         _id: String(Date.now()),
         ...newTask,
@@ -206,24 +176,19 @@ function ProjectBoardContent({
         substatusId: boardType === 'subStatus' ? colId : newTask.substatusId,
         topicIds: boardType === 'topic' ? [colId] : newTask.topicIds,
       }
-
       newCols[0].tasks.push(typedTask)
       setColumnState(newCols)
       setAddTaskOpen(false)
-
-      // 5.b) Also call the parent's onAdd, passing the same newTask data
       onAdd(newTask)
     },
     [columnState, boardType, setColumnState, onAdd]
   )
 
-  // 6) If ShowTask is open, gather fields
   const currentShowTask = allTasks.find(t => t._id === showTaskOpen)
   if (showTaskOpen !== '-1' && !currentShowTask) {
     throw new Error('ShowTask is open but no task found')
   }
 
-  // Build fields for ShowTask
   const showTaskTitle = currentShowTask?.title || ''
   const showTaskDescription = currentShowTask?.description || ''
   const showTaskCreatedBy = currentShowTask?.createdBy || ''
@@ -232,13 +197,10 @@ function ProjectBoardContent({
     return currentShowTask.comments.map(c => ({
       _id: c._id,
       text: c.text,
-      // Ensure createdAt is a valid Date (fallback to current time if missing)
       createdAt: new Date(c.createdAt ?? Date.now()),
-      // Use createdBy from the shared type
       createdBy: c.createdBy,
       editHistory: c.editHistory.map(eh => ({
         ...eh,
-        // Only convert if a valid value exists, otherwise omit editedAt
         ...(eh.editedAt ? { editedAt: new Date(eh.editedAt) } : {}),
       })),
     }))
@@ -254,7 +216,6 @@ function ProjectBoardContent({
   const showTaskTeamMemberAssigned = currentShowTask?.teamMember || ''
   const showTaskNextActionDate = currentShowTask?.nextActionDate || ''
 
-  // 8) SEARCH + FILTER
   const [searchTerm, setSearchTerm] = useState('')
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchTerm(e.target.value)
@@ -271,7 +232,6 @@ function ProjectBoardContent({
     })
   }, [columnState, searchTerm])
 
-  // 9) "Fit / Overflow" columns
   const {
     containerRef,
     fittedColumns,
@@ -284,7 +244,6 @@ function ProjectBoardContent({
     showOverflowDropdown: true,
   })
 
-  // 10) Handling comment edits locally + calling parent's onEditComment
   function handleEditComment(
     commentId: string,
     newText: string,
@@ -308,7 +267,6 @@ function ProjectBoardContent({
     onEditComment(commentId, newText, taskId)
   }
 
-  // 11) Determine selected task ID
   const exactlyOneSelected = selectedTask !== null
   let selectedTaskId = ''
   if (selectedTask) {
@@ -323,7 +281,6 @@ function ProjectBoardContent({
     }
   }
 
-  // 12) Internal "Close Task" logic
   function handleCloseTask(taskId: string) {
     setColumnState(oldCols =>
       oldCols.map(col => {
@@ -340,10 +297,7 @@ function ProjectBoardContent({
   }
 
   const buttons = [
-    {
-      text: 'Create Task',
-      onClick: () => setAddTaskOpen(true),
-    },
+    { text: 'Create Task', onClick: () => setAddTaskOpen(true) },
     {
       text: 'Show Task',
       onClick: () => {
@@ -356,79 +310,53 @@ function ProjectBoardContent({
   ]
 
   return (
-    <Box
-      ref={containerRef}
-      sx={{
-        boxSizing: 'border-box',
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        ...(sacredtheme && {
-          backgroundColor: egyptianStyles.cardBackground,
-          border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-          borderRadius: '12px',
-          animation: `${glowPulse} 4s ease-in-out infinite`,
-          overflow: 'hidden',
-        }),
-      }}
-    >
-      {/* Sacred corner decorations */}
+    <div ref={containerRef} style={styles.container}>
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '24px',
-              animation: `${floatAnimation} 5s ease-in-out infinite`,
-              zIndex: 1,
+          <div
+            style={{
+              ...styles.glyph,
+              top: '0.75rem',
+              left: '0.75rem',
+              fontSize: '1.5rem',
             }}
           >
-            {SACRED_GLYPHS[0]} {/* Eye of Horus */}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '24px',
-              animation: `${floatAnimation} 5s ease-in-out infinite reverse`,
-              zIndex: 1,
+            {SACRED_GLYPHS[0]}
+          </div>
+          <div
+            style={{
+              ...styles.glyph,
+              top: '0.75rem',
+              right: '0.75rem',
+              fontSize: '1.5rem',
+              animationDirection: 'reverse',
             }}
           >
-            {SACRED_GLYPHS[13]} {/* Cartouche */}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 6s ease-in-out infinite`,
+            {SACRED_GLYPHS[13]}
+          </div>
+          <div
+            style={{
+              ...styles.glyph,
+              bottom: '0.75rem',
+              left: '0.75rem',
+              fontSize: '1.125rem',
               animationDelay: '1s',
-              zIndex: 1,
             }}
           >
-            {SACRED_GLYPHS[5]} {/* Ankh */}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '12px',
-              right: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 6s ease-in-out infinite reverse`,
+            {SACRED_GLYPHS[5]}
+          </div>
+          <div
+            style={{
+              ...styles.glyph,
+              bottom: '0.75rem',
+              right: '0.75rem',
+              fontSize: '1.125rem',
+              animationDirection: 'reverse',
               animationDelay: '1s',
-              zIndex: 1,
             }}
           >
-            {SACRED_GLYPHS[9]} {/* Sun */}
-          </Box>
+            {SACRED_GLYPHS[9]}
+          </div>
         </>
       )}
 
@@ -438,22 +366,12 @@ function ProjectBoardContent({
           label: 'Search...',
           value: searchTerm,
           onChange: handleSearchChange,
-          backgroundcolor: sacredtheme
-            ? alpha(egyptianStyles.goldColor, 0.1)
-            : palette.semiTransparentWhite.main,
-          shrunkfontcolor: sacredtheme
-            ? egyptianStyles.goldColor
-            : palette.white.main,
-          unshrunkfontcolor: sacredtheme
-            ? egyptianStyles.goldColor
-            : palette.white.main,
-          shrunklabelposition: 'onNotch',
           sacredtheme: sacredtheme,
         }}
         sacredtheme={sacredtheme}
       />
 
-      <Stack direction="row" spacing={3} mt={1} pl={4}>
+      <div style={styles.toolbarContainer}>
         <Board
           columns={fittedColumns}
           overflowColumns={overflowColumns}
@@ -466,9 +384,8 @@ function ProjectBoardContent({
           onColumnDrop={handleColumnDrop}
           sacredtheme={sacredtheme}
         />
-      </Stack>
+      </div>
 
-      {/* Conditionally render AddTask based on the variant and preferDropdown prop */}
       {variant === 'administrator' && (
         <>
           {preferDropdown === true ||
@@ -559,7 +476,6 @@ function ProjectBoardContent({
         />
       )}
 
-      {/* ShowTask modal */}
       {currentShowTask && (
         <ShowTask
           open={true}
@@ -580,7 +496,6 @@ function ProjectBoardContent({
           nextActionDate={showTaskNextActionDate}
           currentUserName={`${currentUser.firstName} ${currentUser.lastName}`}
           onEdit={updatedData => {
-            // Merge updated data with the current task ID and pass to the parent's onEdit callback
             onEdit({ _id: showTaskOpen, ...updatedData })
           }}
           onDelete={() => onDelete({ _id: showTaskOpen })}
@@ -602,11 +517,10 @@ function ProjectBoardContent({
           sacredtheme={sacredtheme}
         />
       )}
-    </Box>
+    </div>
   )
 }
 
-// Wrap the component with our custom JotaiProvider to avoid the "multiple instances" error
 function ProjectBoard(props: ProjectBoardProps) {
   return (
     <JotaiProvider>

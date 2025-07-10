@@ -1,22 +1,7 @@
 // src/components/ComplexTextEditor/Toolbars/Editor/index.tsx
 
-import React, { useState } from 'react'
-import { Box, Stack, keyframes, alpha } from '@mui/material'
-import {
-  Link,
-  Undo,
-  Redo,
-  FormatAlignLeft,
-  FormatAlignCenter,
-  FormatAlignRight,
-  FormatBold,
-  FormatItalic,
-  FormatUnderlined,
-  StrikethroughS,
-  Code,
-  FormatListNumbered,
-  FormatListBulleted,
-} from '@mui/icons-material'
+'use client'
+import React, { useState, useEffect } from 'react'
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
@@ -35,15 +20,23 @@ import {
   BlockFormat,
 } from '../../utils/useRichtextEditor'
 
+import LinkIcon from '../../../Icons/Link'
+import UndoIcon from '../../../Icons/Undo'
+import RedoIcon from '../../../Icons/Redo'
+import FormatAlignLeftIcon from '../../../Icons/FormatAlignLeft'
+import FormatAlignCenterIcon from '../../../Icons/FormatAlignCenter'
+import FormatAlignRightIcon from '../../../Icons/FormatAlignRight'
+import FormatBoldIcon from '../../../Icons/FormatBold'
+import FormatItalicIcon from '../../../Icons/FormatItalic'
+import FormatUnderlinedIcon from '../../../Icons/FormatUnderlined'
+import StrikethroughSIcon from '../../../Icons/StrikethroughS'
+import CodeIcon from '../../../Icons/Code'
+import FormatListNumberedIcon from '../../../Icons/FormatListNumbered'
+import FormatListBulletedIcon from '../../../Icons/FormatListBulleted'
+
 // --------------------------------------------------------------------------
 // SACRED THEMING CONSTANTS AND ANIMATIONS
 // --------------------------------------------------------------------------
-
-const sacredIconGlow = keyframes`
-  0% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-  50% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8)); }
-  100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-`
 
 // Define types directly in this file that aren't already imported
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
@@ -60,6 +53,83 @@ interface ToolbarMarkdownProps {
   sacredtheme?: boolean
 }
 
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    padding: '8px',
+  } as React.CSSProperties,
+
+  toolbarRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  buttonGroup: {
+    display: 'flex',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  buttonsContainer: {
+    display: 'flex',
+    gap: '2px',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  iconButton: {
+    borderRadius: '2px',
+    minWidth: '36px',
+    width: '36px',
+    height: '36px',
+    padding: '6px',
+    margin: '2px',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    padding: '8px',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  } as React.CSSProperties,
+
+  toolbarRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  buttonGroup: {
+    display: 'flex',
+    gap: '4px',
+  } as React.CSSProperties,
+
+  buttonsContainer: {
+    display: 'flex',
+    gap: '2px',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  iconButton: {
+    borderRadius: '2px',
+    minWidth: '36px',
+    width: '36px',
+    height: '36px',
+    padding: '6px',
+    margin: '2px',
+  } as React.CSSProperties,
+
+  iconButtonActive: {
+    borderRadius: '2px',
+    minWidth: '36px',
+    width: '36px',
+    height: '36px',
+    padding: '6px',
+    margin: '2px',
+    animation: 'toolbarIconGlow 2s ease-in-out infinite',
+  } as React.CSSProperties,
+}
+
 const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   editor,
   handleBoldClick,
@@ -74,14 +144,34 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   const { toggleMark, toggleBlock, isMarkActive, isBlockActive } =
     useRichTextEditor([], () => {})
 
+  // CSS keyframes for sacred animations
+  useEffect(() => {
+    if (sacredtheme) {
+      const styleSheet = document.styleSheets[0]
+      const keyframes = `
+        @keyframes toolbarIconGlow {
+          0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
+          50% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8)); }
+        }
+      `
+      try {
+        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+      } catch {
+        // Keyframes might already exist
+      }
+    }
+  }, [sacredtheme])
+
   // Display additional tool options based on toolbar type
   const showExtendedOptions = toolbarType === 'richtext' && !markdownMode
 
-  const handleAlignChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAlignChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setAlignValue(event.target.value as AlignmentFormat)
   }
 
-  const handleTextTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextTypeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setTextType(event.target.value as TextType)
   }
 
@@ -95,15 +185,15 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   const alignmentOptions = [
     {
       value: 'left',
-      icon: <FormatAlignLeft fontSize="small" />,
+      icon: <FormatAlignLeftIcon style={{ width: '16px', height: '16px' }} />,
     },
     {
       value: 'center',
-      icon: <FormatAlignCenter fontSize="small" />,
+      icon: <FormatAlignCenterIcon style={{ width: '16px', height: '16px' }} />,
     },
     {
       value: 'right',
-      icon: <FormatAlignRight fontSize="small" />,
+      icon: <FormatAlignRightIcon style={{ width: '16px', height: '16px' }} />,
     },
   ]
 
@@ -276,65 +366,44 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     }
   }
 
-  // Common style for toolbar buttons
-  const iconButtonStyle = {
-    borderRadius: '9%',
-    minWidth: '36px',
-    width: '36px',
-    height: '36px',
-    padding: '6px',
-    margin: '2px',
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const getButtonStyle = (format: string) => {
+    const isActive = isFormatActive(format)
+    const baseStyle =
+      isActive && sacredtheme
+        ? sacredStyles.iconButtonActive
+        : styles.iconButton
+
+    return baseStyle
   }
 
-  const sacredButtonStyle = sacredtheme
-    ? {
-        '& .MuiSvgIcon-root': {
-          animation: isFormatActive('')
-            ? `${sacredIconGlow} 2s ease-in-out infinite`
-            : 'none',
-        },
-      }
-    : {}
-
   return (
-    <Box
-      sx={{
-        padding: '8px',
-        backgroundColor: sacredtheme ? alpha('#000000', 0.5) : 'transparent',
-      }}
-    >
-      <Stack direction="row" spacing={1}>
+    <div style={styles.container}>
+      <div style={styles.toolbarRow}>
         {/* undo / redo */}
-        <Box sx={{ display: 'flex', gap: '4px' }}>
+        <div style={styles.buttonGroup}>
           <CustomButton
-            icon={<Undo fontSize="small" />}
+            icon={<UndoIcon style={{ width: '16px', height: '16px' }} />}
             backgroundcolor="none"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : black.main}
-            iconcolor={sacredtheme ? alpha('#FFD700', 0.8) : black.main}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
+            iconcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
             onClick={handleEditorAction('undo')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...sacredButtonStyle,
-            }}
+            style={styles.iconButton}
             disabled={markdownMode}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<Redo fontSize="small" />}
+            icon={<RedoIcon style={{ width: '16px', height: '16px' }} />}
             backgroundcolor="none"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : black.main}
-            iconcolor={sacredtheme ? alpha('#FFD700', 0.8) : black.main}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
+            iconcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
             onClick={handleEditorAction('redo')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...sacredButtonStyle,
-            }}
+            style={styles.iconButton}
             disabled={markdownMode}
             sacredtheme={sacredtheme}
           />
-        </Box>
+        </div>
         {/* text dropdown - only show in rich text mode */}
         {showExtendedOptions && (
           <Dropdown
@@ -358,13 +427,13 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           />
         )}
         {/* buttons */}
-        <Box sx={{ display: 'flex', gap: '2px', flexWrap: 'wrap' }}>
+        <div style={styles.buttonsContainer}>
           <CustomButton
-            icon={<FormatBold fontSize="small" />}
+            icon={<FormatBoldIcon style={{ width: '16px', height: '16px' }} />}
             backgroundcolor={
               isFormatActive('bold')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -374,7 +443,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -383,28 +452,21 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('bold')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('bold') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('bold')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<FormatItalic fontSize="small" />}
+            icon={
+              <FormatItalicIcon style={{ width: '16px', height: '16px' }} />
+            }
             backgroundcolor={
               isFormatActive('italic')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -414,7 +476,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -423,28 +485,21 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('italic')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('italic') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('italic')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<FormatUnderlined fontSize="small" />}
+            icon={
+              <FormatUnderlinedIcon style={{ width: '16px', height: '16px' }} />
+            }
             backgroundcolor={
               isFormatActive('underline')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -454,7 +509,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -463,29 +518,22 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('underline')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('underline') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('underline')}
             disabled={markdownMode}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<StrikethroughS fontSize="small" />}
+            icon={
+              <StrikethroughSIcon style={{ width: '16px', height: '16px' }} />
+            }
             backgroundcolor={
               isFormatActive('strikethrough')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -495,7 +543,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -504,28 +552,19 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('strikethrough')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('strikethrough') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('strikethrough')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<Code fontSize="small" />}
+            icon={<CodeIcon style={{ width: '16px', height: '16px' }} />}
             backgroundcolor={
               isFormatActive('code')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -535,7 +574,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -544,28 +583,19 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('code')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('code') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('code')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<Link fontSize="small" />}
+            icon={<LinkIcon style={{ width: '16px', height: '16px' }} />}
             backgroundcolor={
               isFormatActive('link')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -575,7 +605,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -584,28 +614,23 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('link')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('link') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('link')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<FormatListNumbered fontSize="small" />}
+            icon={
+              <FormatListNumberedIcon
+                style={{ width: '16px', height: '16px' }}
+              />
+            }
             backgroundcolor={
               isFormatActive('numbered-list')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -615,7 +640,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -624,28 +649,23 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('numbered-list')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('numbered-list') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('numbered-list')}
             sacredtheme={sacredtheme}
           />
           <CustomButton
-            icon={<FormatListBulleted fontSize="small" />}
+            icon={
+              <FormatListBulletedIcon
+                style={{ width: '16px', height: '16px' }}
+              />
+            }
             backgroundcolor={
               isFormatActive('bulleted-list')
                 ? sacredtheme
-                  ? alpha('#FFD700', 0.2)
+                  ? 'rgba(255, 215, 0, 0.2)'
                   : 'rgba(0, 0, 0, 0.10)'
                 : 'none'
             }
@@ -655,7 +675,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             iconcolor={
@@ -664,25 +684,16 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                   ? '#FFD700'
                   : grey.dark
                 : sacredtheme
-                  ? alpha('#FFD700', 0.8)
+                  ? 'rgba(255, 215, 0, 0.8)'
                   : black.main
             }
             onClick={handleEditorAction('bulleted-list')}
-            variant="text"
-            sx={{
-              ...iconButtonStyle,
-              ...(isFormatActive('bulleted-list') &&
-                sacredtheme && {
-                  '& .MuiSvgIcon-root': {
-                    animation: `${sacredIconGlow} 2s ease-in-out infinite`,
-                  },
-                }),
-            }}
+            style={getButtonStyle('bulleted-list')}
             sacredtheme={sacredtheme}
           />
-        </Box>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }
 

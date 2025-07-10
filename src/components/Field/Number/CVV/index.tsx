@@ -1,54 +1,124 @@
 'use client'
 import React, { useCallback, useState, useEffect } from 'react'
-import { Box, alpha, keyframes } from '@mui/material'
-import TextField, { TextFieldProps } from '../../../Field/Text'
 
-// Sacred animations from USD component
-const goldShimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-2px) scale(1.1); }
-  100% { transform: translateY(0px) scale(1); }
-`
-
-/**
- * Props interface for the CVV component
- * Extends TextFieldProps and adds CVV specific behavior
- */
-export interface CVVProps extends Omit<TextFieldProps, 'onChange'> {
-  /**
-   * Callback when the CVV changes and passes validation
-   */
+export interface CVVProps {
   onChange?: (value: string, isValid: boolean) => void
-  /**
-   * Minimum length for CVV (default: 3)
-   */
   minLength?: number
-  /**
-   * Maximum length for CVV (default: 4)
-   */
   maxLength?: number
-  /**
-   * Custom error message for invalid CVV
-   */
   errorMessage?: string
-  /**
-   * Enable sacred Egyptian theme
-   */
   sacredtheme?: boolean
-  /**
-   * Whether this is a default/existing value that should be partially masked
-   */
   isDefaultValue?: boolean
+  value?: string
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+  name?: string
+  id?: string
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
+  helperText?: string
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  error?: boolean
+  style?: React.CSSProperties
 }
 
-/**
- * CVV component for credit card verification value input with validation
- */
+const getStyles = (
+  sacredtheme: boolean,
+  isFocused: boolean,
+  isLabelFloating: boolean,
+  showError: boolean
+) => {
+  const premiumStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      marginTop: '1rem',
+    } as React.CSSProperties,
+    inputContainer: { position: 'relative' } as React.CSSProperties,
+    adornment: {
+      position: 'absolute' as const,
+      left: '0.75rem',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+    } as React.CSSProperties,
+    adornmentText: { fontSize: '1rem', color: '#4B5563' },
+    input: {
+      width: '100%',
+      height: '3.5rem',
+      paddingLeft: '3rem',
+      paddingRight: '1rem',
+      border: `2px solid ${showError ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
+      borderRadius: '0.25rem',
+      outline: 'none',
+      transition: 'all 0.3s',
+      backgroundColor: 'white',
+      color: 'black',
+    } as React.CSSProperties,
+    label: {
+      position: 'absolute' as const,
+      left: '3rem',
+      transition: 'all 0.2s',
+      pointerEvents: 'none' as const,
+      color: showError ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
+      ...(isLabelFloating
+        ? {
+            top: '0',
+            fontSize: '0.75rem',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'white',
+            padding: '0 0.25rem',
+            marginLeft: '-0.5rem',
+          }
+        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
+    } as React.CSSProperties,
+    helperText: {
+      marginTop: '0.25rem',
+      fontSize: '0.75rem',
+      padding: '0 0.75rem',
+      color: showError ? '#EF4444' : '#6B7281',
+    } as React.CSSProperties,
+  }
+
+  const sacredStyles = {
+    ...premiumStyles,
+    adornmentText: {
+      ...premiumStyles.adornmentText,
+      color: '#FFD700',
+      fontWeight: 600,
+      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
+    },
+    input: {
+      ...premiumStyles.input,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#FFD700',
+      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
+      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
+      textShadow: '0 0 2px rgba(255, 215, 0, 0.5)',
+    },
+    label: {
+      ...premiumStyles.label,
+      color: showError
+        ? 'rgba(255,215,0,0.8)'
+        : isFocused
+          ? '#FFD700'
+          : 'rgba(255, 215, 0, 0.8)',
+      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
+    },
+    helperText: {
+      ...premiumStyles.helperText,
+      color: showError ? 'rgba(255,215,0,0.8)' : 'rgba(255, 215, 0, 0.6)',
+    },
+  }
+
+  return sacredtheme ? sacredStyles : premiumStyles
+}
+
 const CVV: React.FC<CVVProps> = ({
   onChange,
   value = '',
@@ -57,80 +127,65 @@ const CVV: React.FC<CVVProps> = ({
   errorMessage = 'Invalid CVV format',
   sacredtheme = false,
   isDefaultValue = false,
+  label = 'CVV',
+  placeholder = '123',
+  disabled = false,
+  name,
+  id,
+  onFocus,
+  onBlur,
+  helperText,
   ...props
 }) => {
-  const [internalValue, setInternalValue] = useState<string>(value as string)
+  const [internalValue, setInternalValue] = useState<string>(value || '')
   const [isValid, setIsValid] = useState<boolean>(true)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
 
-  /**
-   * Validates a CVV string
-   */
   const validateCVV = useCallback(
     (cvv: string): boolean => {
-      // Trim any spaces
       const trimmedValue = cvv.trim()
-
-      // Check if empty and consider valid if empty (for optional fields)
       if (trimmedValue === '') return true
-
-      // Check if contains only digits
       const hasOnlyDigits = /^\d+$/.test(trimmedValue)
-
-      // Check if meets length requirements
       const isValidLength =
         trimmedValue.length >= minLength && trimmedValue.length <= maxLength
-
       return hasOnlyDigits && isValidLength
     },
     [minLength, maxLength]
   )
 
-  // Format the input: only allow digits
-  const formatInput = useCallback((input: string): string => {
-    // Filter out anything that's not a digit
-    return input.replace(/\D/g, '')
-  }, [])
+  const formatInput = useCallback(
+    (input: string): string => input.replace(/\D/g, ''),
+    []
+  )
+  const maskCVV = useCallback(
+    (cvv: string): string => (!cvv ? cvv : '*'.repeat(cvv.length)),
+    []
+  )
 
-  // Mask CVV for security - show as asterisks
-  const maskCVV = useCallback((cvv: string): string => {
-    if (!cvv) return cvv
-    return '*'.repeat(cvv.length)
-  }, [])
-
-  // Get display value based on focus state and default value status
-  const getDisplayValue = useCallback(() => {
-    if (isDefaultValue && !isFocused && !hasBeenEdited && internalValue) {
-      return maskCVV(internalValue)
-    }
-    return internalValue
-  }, [isDefaultValue, isFocused, hasBeenEdited, internalValue, maskCVV])
+  const getDisplayValue = useCallback(
+    () =>
+      isDefaultValue && !isFocused && !hasBeenEdited && internalValue
+        ? maskCVV(internalValue)
+        : internalValue,
+    [isDefaultValue, isFocused, hasBeenEdited, internalValue, maskCVV]
+  )
 
   useEffect(() => {
-    // Update internal value when prop value changes
-    setInternalValue(value as string)
-    // Validate the new value
-    setIsValid(validateCVV(value as string))
+    setInternalValue(value || '')
+    setIsValid(validateCVV(value || ''))
   }, [value, validateCVV])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const rawValue = e.target.value
       const formattedValue = formatInput(rawValue)
-
-      // Limit to maxLength digits
       const truncatedValue = formattedValue.slice(0, maxLength)
-
       setInternalValue(truncatedValue)
       setHasBeenEdited(true)
-
       const valid = validateCVV(truncatedValue)
       setIsValid(valid)
-
-      if (onChange) {
-        onChange(truncatedValue, valid)
-      }
+      onChange?.(truncatedValue, valid)
     },
     [onChange, validateCVV, formatInput, maxLength]
   )
@@ -138,93 +193,61 @@ const CVV: React.FC<CVVProps> = ({
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(true)
-      props.onFocus?.(e)
+      onFocus?.(e)
     },
-    [props]
+    [onFocus]
   )
-
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
-      props.onBlur?.(e)
+      onBlur?.(e)
     },
-    [props]
+    [onBlur]
   )
 
+  const isLabelFloating = isFocused || Boolean(internalValue)
+  const showError = !isValid && internalValue !== ''
+  const styles = getStyles(sacredtheme, isFocused, isLabelFloating, showError)
+
   const CVVAdornment = () => (
-    <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredtheme && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-15px',
-            color: alpha('#FFD700', 0.4),
-            fontSize: '12px',
-            animation: `${floatGlyph} 3s ease-in-out infinite`,
-          }}
-        >
-          𓋹
-        </Box>
-      )}
-      <Box
-        sx={{
-          color: sacredtheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredtheme ? 600 : 400,
-          fontSize: sacredtheme ? '14px' : '12px',
-          ...(sacredtheme && {
-            background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
-            backgroundSize: '200% 100%',
-            animation: `${goldShimmer} 3s linear infinite`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-          }),
-        }}
-      >
-        🔒
-      </Box>
-    </Box>
+    <div style={styles.adornment}>
+      <span style={styles.adornmentText}>🔒</span>
+    </div>
   )
 
   return (
-    <TextField
-      {...props}
-      value={getDisplayValue()}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      error={!isValid && internalValue !== ''}
-      helperText={
-        !isValid && internalValue !== '' ? errorMessage : props.helperText
-      }
-      label={props.label || 'CVV'}
-      placeholder={props.placeholder || '123'}
-      sacredtheme={sacredtheme}
-      startAdornment={<CVVAdornment />}
-      inputProps={{
-        ...props.inputProps,
-        maxLength: maxLength,
-        type: 'password',
-        autoComplete: 'cc-csc',
-      }}
-      slotProps={{
-        input: {
-          sx: {
-            '& .MuiInputBase-input': {
-              marginLeft: sacredtheme ? '-10px' : '-15px',
-              marginTop: '2px',
-            },
-            '&::placeholder': {
-              marginLeft: sacredtheme ? '-10px' : '-15px',
-              marginTop: '2px',
-            },
-          },
-        },
-      }}
-    />
+    <div style={styles.container}>
+      <div style={styles.inputContainer}>
+        <CVVAdornment />
+        <input
+          type="password"
+          id={id}
+          name={name}
+          value={getDisplayValue()}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder={isLabelFloating ? placeholder : ''}
+          maxLength={maxLength}
+          autoComplete="cc-csc"
+          style={styles.input}
+          {...props}
+        />
+        {label && (
+          <label htmlFor={id} style={styles.label}>
+            {label}
+          </label>
+        )}
+      </div>
+      {(showError || helperText) && (
+        <div style={styles.helperText}>
+          {showError ? errorMessage : helperText}
+        </div>
+      )}
+    </div>
   )
 }
 
 CVV.displayName = 'CVV'
-
 export default CVV

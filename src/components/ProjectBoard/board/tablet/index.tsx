@@ -1,44 +1,101 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Box, Stack, Checkbox, alpha, keyframes } from '@mui/material'
 import { useAtom } from 'jotai'
 import { columnsAtom } from '../../jotai/atom'
 
 import Typography from '../../../Typography'
 import Card from '../../../Card'
 import Dropdown from '../../../Field/Dropdown/Regular'
-import { black, white } from '../../../../styles/palette'
-
+import Checkbox from '../../../Checkbox'
 import type { BoardProps } from '../index'
 import type { ColumnData } from '../../types'
 import { useTaskDragAndDrop } from '../../../ProjectBoard/utils/useDragandDrop/tasks'
 
-// Sacred animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-2px) rotate(180deg); }
-  100% { transform: translateY(0px) rotate(360deg); }
-`
-
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  cardBackground: alpha('#000000', 0.9),
-}
-
 const SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
 
-/**
- * The TabletBoard:
- *  - Shows all "fitted" columns on the left
- *  - If overflowColumns exist, show exactly one overflow column on the right with a dropdown
- */
+const getStyles = (sacredtheme?: boolean) => ({
+  boardContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '0.75rem',
+  } as React.CSSProperties,
+  column: {
+    boxSizing: 'border-box',
+    width: '300px',
+    height: '70vh',
+    borderRadius: '0.375rem',
+    display: 'flex',
+    flexDirection: 'column',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    position: 'relative',
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          border: '2px solid rgba(255, 215, 0, 0.5)',
+          animation: 'board-glow-pulse 2s infinite alternate',
+          backdropFilter: 'blur(16px)',
+        }
+      : { backgroundColor: 'black' }),
+  } as React.CSSProperties,
+  columnHeader: {
+    padding: '0.5rem',
+    position: 'relative',
+    ...(sacredtheme
+      ? {
+          borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+          backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        }
+      : { borderBottom: '1px solid white' }),
+  } as React.CSSProperties,
+  columnTitleContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.125rem',
+  } as React.CSSProperties,
+  columnTitle: {
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      fontWeight: 600,
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+    }),
+  } as React.CSSProperties,
+  columnDescription: {
+    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
+  } as React.CSSProperties,
+  tasksContainer: {
+    padding: '0.5rem',
+    flex: 1,
+  } as React.CSSProperties,
+  noTasks: {
+    ...(sacredtheme && {
+      fontStyle: 'italic',
+      fontFamily: 'Crimson Text, serif',
+    }),
+  } as React.CSSProperties,
+  tasksList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  checkbox: {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.5rem',
+    left: '0.5rem',
+    fontSize: '0.875rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    animation: 'board-float-glyph 3s infinite alternate',
+    zIndex: 10,
+  } as React.CSSProperties,
+})
+
 export default function TabletBoard({
   columns,
   overflowColumns,
@@ -51,21 +108,14 @@ export default function TabletBoard({
   onColumnDrop,
   sacredtheme = false,
 }: BoardProps) {
-  // Jotai columns store
   const [allColumns, setAllColumns] = useAtom(columnsAtom)
-
-  // For column-level checkbox
   const [selectedColumnIndex, setSelectedColumnIndex] = useState<number | null>(
     null
   )
-
-  // For task-level DnD
   const { handleTaskDragStart, handleTaskDragOver, handleTaskDrop } =
     useTaskDragAndDrop()
+  const styles = getStyles(sacredtheme)
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Helper callbacks
-  // ─────────────────────────────────────────────────────────────────────────────
   function isColumnCheckboxDisabled() {
     return selectedTask !== null
   }
@@ -86,9 +136,6 @@ export default function TabletBoard({
     return selectedColumnIndex === colIndex
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Column-level DnD
-  // ─────────────────────────────────────────────────────────────────────────────
   function handleLocalColumnDragStart(e: React.DragEvent, colIndex: number) {
     if (!isColumnDraggable(colIndex)) {
       e.preventDefault()
@@ -105,9 +152,6 @@ export default function TabletBoard({
     onColumnDrop(e, colIndex)
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Task-level DnD
-  // ─────────────────────────────────────────────────────────────────────────────
   function isTaskDraggable(colIndex: number, taskIndex: number) {
     if (selectedColumnIndex !== null) return false
     return (
@@ -140,9 +184,6 @@ export default function TabletBoard({
     })
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Overflow logic
-  // ─────────────────────────────────────────────────────────────────────────────
   const hasOverflow = Boolean(overflowColumns?.length)
   let activeOverflowColumn: ColumnData | undefined
   if (hasOverflow && selectedOverflowColumnId && overflowColumns) {
@@ -152,7 +193,7 @@ export default function TabletBoard({
   }
 
   const handleOverflowDropdownChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (!overflowColumns || !onChangeSelectedOverflowColumn) return
       const colTitle = e.target.value
       const found = overflowColumns.find(c => c.title === colTitle)
@@ -163,153 +204,63 @@ export default function TabletBoard({
     [overflowColumns, onChangeSelectedOverflowColumn]
   )
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <Stack direction="row" spacing={3}>
-      {/* 1) Fitted columns on the left */}
+    <div style={styles.boardContainer}>
       {columns.map((col, colIndex) => {
         const colChecked = selectedColumnIndex === colIndex
 
         return (
-          <Box
+          <div
             key={col._id}
             draggable={isColumnDraggable(colIndex)}
             onDragStart={e => handleLocalColumnDragStart(e, colIndex)}
             onDragOver={e => handleLocalColumnDragOver(e, colIndex)}
             onDrop={e => handleLocalColumnDrop(e, colIndex)}
-            sx={{
-              boxSizing: 'border-box',
-              width: '300px',
-              height: '70vh',
-              backgroundColor: sacredtheme
-                ? egyptianStyles.cardBackground
-                : black.main,
-              borderRadius: '5px',
-              display: 'flex',
-              flexDirection: 'column',
-              overflowX: 'hidden',
-              overflowY: 'auto',
-              position: 'relative',
-              ...(sacredtheme && {
-                border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-                animation: `${glowPulse} 3s ease-in-out infinite`,
-                backdropFilter: 'blur(10px)',
-              }),
-            }}
+            style={styles.column}
           >
-            {/* Sacred corner glyphs */}
             {sacredtheme && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '8px',
-                  left: '8px',
-                  color: alpha(egyptianStyles.goldColor, 0.3),
-                  fontSize: '14px',
-                  animation: `${floatGlyph} 4s ease-in-out infinite`,
-                  zIndex: 1,
-                }}
-              >
+              <div style={styles.glyph}>
                 {SACRED_GLYPHS[colIndex % SACRED_GLYPHS.length]}
-              </Box>
+              </div>
             )}
 
-            {/* Column Header */}
-            <Box
-              sx={{
-                borderBottom: sacredtheme
-                  ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                  : `1px solid ${white.main}`,
-                p: 2,
-                position: 'relative',
-                ...(sacredtheme && {
-                  backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-                }),
-              }}
-            >
+            <div style={styles.columnHeader}>
               <Checkbox
                 checked={colChecked}
                 disabled={isColumnCheckboxDisabled()}
                 onChange={() => handleColumnCheck(colIndex)}
-                sx={{
-                  position: 'absolute',
-                  top: 2,
-                  right: 2,
-                  color: sacredtheme ? egyptianStyles.goldColor : white.main,
-                  '&.Mui-checked': {
-                    color: sacredtheme ? egyptianStyles.goldColor : white.main,
-                  },
-                  ...(sacredtheme && {
-                    '&.Mui-disabled': {
-                      color: alpha(egyptianStyles.goldColor, 0.3),
-                    },
-                  }),
-                }}
+                sacredtheme={sacredtheme}
+                style={styles.checkbox}
               />
 
-              <Stack direction="column" spacing={0.5}>
+              <div style={styles.columnTitleContainer}>
                 <Typography
                   fontvariant="merrih4"
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : white.main
-                  }
-                  sx={
-                    sacredtheme
-                      ? {
-                          fontFamily: '"Cinzel", serif',
-                          fontWeight: 600,
-                          letterSpacing: '0.05em',
-                          textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                        }
-                      : {}
-                  }
+                  fontcolor={sacredtheme ? '#FFD700' : 'white'}
+                  style={styles.columnTitle}
                 >
                   {col.title}
                 </Typography>
                 <Typography
                   fontvariant="merrih6"
-                  fontcolor={
-                    sacredtheme
-                      ? alpha(egyptianStyles.goldColor, 0.8)
-                      : white.main
-                  }
-                  sx={
-                    sacredtheme
-                      ? {
-                          fontFamily: '"Crimson Text", serif',
-                        }
-                      : {}
-                  }
+                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
+                  style={styles.columnDescription}
                 >
                   {col.description}
                 </Typography>
-              </Stack>
-            </Box>
+              </div>
+            </div>
 
-            {/* Column Body: tasks */}
-            <Box sx={{ p: 2, flex: 1 }}>
+            <div style={styles.tasksContainer}>
               {!col.tasks?.length ? (
                 <Typography
-                  fontcolor={
-                    sacredtheme
-                      ? alpha(egyptianStyles.goldColor, 0.6)
-                      : white.main
-                  }
-                  sx={
-                    sacredtheme
-                      ? {
-                          fontFamily: '"Crimson Text", serif',
-                          fontStyle: 'italic',
-                        }
-                      : {}
-                  }
+                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
+                  style={styles.noTasks}
                 >
                   No tasks yet
                 </Typography>
               ) : (
-                <Stack spacing={1}>
+                <div style={styles.tasksList}>
                   {col.tasks.map((task, taskIndex) => {
                     const isSelected =
                       selectedTask?.colIndex === colIndex &&
@@ -339,16 +290,15 @@ export default function TabletBoard({
                       />
                     )
                   })}
-                </Stack>
+                </div>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
         )
       })}
 
-      {/* 2) If there's overflow, show exactly ONE overflow column on the right */}
       {hasOverflow && activeOverflowColumn && (
-        <Box
+        <div
           key="overflow-tablet-column"
           draggable={false}
           onDragOver={e => e.preventDefault()}
@@ -356,40 +306,12 @@ export default function TabletBoard({
             e.preventDefault()
             onColumnDrop(e, columns.length)
           }}
-          sx={{
-            boxSizing: 'border-box',
-            width: '300px',
-            height: '70vh',
-            backgroundColor: sacredtheme
-              ? egyptianStyles.cardBackground
-              : black.main,
-            borderRadius: '5px',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowX: 'hidden',
-            overflowY: 'auto',
-            position: 'relative',
-            ...(sacredtheme && {
-              border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-              animation: `${glowPulse} 3s ease-in-out infinite`,
-              animationDelay: '0.5s',
-              backdropFilter: 'blur(10px)',
-            }),
+          style={{
+            ...styles.column,
+            animationDelay: sacredtheme ? '0.5s' : undefined,
           }}
         >
-          {/* Overflow Column Header */}
-          <Box
-            sx={{
-              borderBottom: sacredtheme
-                ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                : `1px solid ${white.main}`,
-              p: 2,
-              position: 'relative',
-              ...(sacredtheme && {
-                backgroundColor: alpha(egyptianStyles.goldColor, 0.1),
-              }),
-            }}
-          >
+          <div style={styles.columnHeader}>
             <Dropdown
               label="More Columns"
               options={
@@ -397,65 +319,37 @@ export default function TabletBoard({
               }
               value={activeOverflowColumn?.title}
               onChange={handleOverflowDropdownChange}
-              fontcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
-              shrunkfontcolor={
-                sacredtheme ? egyptianStyles.goldColor : white.main
-              }
-              backgroundcolor={
-                sacredtheme ? alpha(egyptianStyles.goldColor, 0.1) : white.main
-              }
+              fontcolor={sacredtheme ? '#FFD700' : '#000'}
+              shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
+              backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
               shrunklabelposition="aboveNotch"
-              outlinecolor={sacredtheme ? egyptianStyles.goldColor : white.main}
+              outlinecolor={sacredtheme ? '#FFD700' : 'white'}
               sacredtheme={sacredtheme}
             />
 
-            {/* 
-              REMOVE the overflow column's title, keep only the description
-            */}
-            <Stack direction="column" spacing={0.5} mt={1}>
-              {/* We omit activeOverflowColumn.title */}
+            <div
+              style={{ ...styles.columnTitleContainer, marginTop: '0.25rem' }}
+            >
               <Typography
                 fontvariant="merrih6"
-                fontcolor={
-                  sacredtheme
-                    ? alpha(egyptianStyles.goldColor, 0.8)
-                    : white.main
-                }
-                sx={
-                  sacredtheme
-                    ? {
-                        fontFamily: '"Crimson Text", serif',
-                      }
-                    : {}
-                }
+                fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
+                style={styles.columnDescription}
               >
                 {activeOverflowColumn.description}
               </Typography>
-            </Stack>
-          </Box>
+            </div>
+          </div>
 
-          {/* Overflow Column Tasks */}
-          <Box sx={{ p: 2, flex: 1 }}>
+          <div style={styles.tasksContainer}>
             {!activeOverflowColumn.tasks?.length ? (
               <Typography
-                fontcolor={
-                  sacredtheme
-                    ? alpha(egyptianStyles.goldColor, 0.6)
-                    : white.main
-                }
-                sx={
-                  sacredtheme
-                    ? {
-                        fontFamily: '"Crimson Text", serif',
-                        fontStyle: 'italic',
-                      }
-                    : {}
-                }
+                fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
+                style={styles.noTasks}
               >
                 No tasks yet
               </Typography>
             ) : (
-              <Stack spacing={1}>
+              <div style={styles.tasksList}>
                 {activeOverflowColumn.tasks.map((task, taskIndex) => {
                   const overflowColIndex = columns.length
                   const isSelected =
@@ -486,11 +380,11 @@ export default function TabletBoard({
                     />
                   )
                 })}
-              </Stack>
+              </div>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
-    </Stack>
+    </div>
   )
 }

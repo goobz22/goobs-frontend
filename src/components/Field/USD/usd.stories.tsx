@@ -1,194 +1,157 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import { createTheme } from '@mui/material/styles'
 import USDField from './index'
-
-const theme = createTheme()
 
 const meta: Meta<typeof USDField> = {
   title: 'Components/Field/USD',
   component: USDField,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    error: { control: 'boolean' },
+    label: { control: 'text' },
+    min: { control: 'number' },
+    max: { control: 'number' },
+    enableIncrement: { control: 'boolean' },
+  },
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
-  decorators: [
-    Story => (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Story />
-      </ThemeProvider>
-    ),
-  ],
 }
-
 export default meta
+
 type Story = StoryObj<typeof USDField>
 
-export const Default: Story = {
+export const Premium: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: '#f3f4f6',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <USDField {...args} />
+    </div>
+  ),
   args: {
     label: 'Amount',
+    initialValue: '123.45',
+    sacredtheme: false,
+    enableIncrement: true,
   },
 }
 
-export const WithInitialValue: Story = {
+export const Sacred: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: 'black',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <USDField {...args} />
+    </div>
+  ),
   args: {
-    label: 'Amount',
-    initialValue: '1000',
+    ...Premium.args,
+    sacredtheme: true,
   },
 }
 
-export const WithMinMax: Story = {
-  args: {
-    label: 'Amount',
-    min: 0,
-    max: 10000,
-    helperText: 'Enter a value between $0 and $10,000',
-  },
+const InteractiveRenderer = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const [value, setValue] = React.useState('99.99')
+  const [increment, setIncrement] = React.useState(true)
+
+  return (
+    <div
+      style={{
+        width: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+      }}
+    >
+      <div
+        style={{
+          padding: '1rem',
+          border: '1px solid #ccc',
+          borderRadius: '0.5rem',
+        }}
+      >
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr 1fr',
+            gap: '0.5rem',
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={error}
+              onChange={e => setError(e.target.checked)}
+            />{' '}
+            Error
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={increment}
+              onChange={e => setIncrement(e.target.checked)}
+            />{' '}
+            Increment
+          </label>
+        </div>
+      </div>
+      <div
+        style={{
+          padding: '2rem',
+          borderRadius: '0.5rem',
+          backgroundColor: sacred ? 'black' : '#f3f4f6',
+        }}
+      >
+        <USDField
+          label="Enter Amount"
+          value={value}
+          onChange={val => setValue(val)}
+          sacredtheme={sacred}
+          disabled={disabled}
+          error={error}
+          enableIncrement={increment}
+          helperText={error ? 'Invalid amount' : 'Please enter a USD value'}
+        />
+      </div>
+    </div>
+  )
 }
 
-export const WithCustomPrecision: Story = {
-  args: {
-    label: 'Amount',
-    precision: 3,
-    helperText:
-      'Value will be rounded to 3 decimal places when min/max limits are reached',
-  },
-}
-
-export const WithCustomLabel: Story = {
-  args: {
-    label: 'Price',
-  },
-}
-
-export const WithPlaceholder: Story = {
-  args: {
-    label: 'Amount',
-    placeholder: 'Enter amount',
-  },
-}
-
-export const WithHelperText: Story = {
-  args: {
-    label: 'Amount',
-    helperText: 'Enter a value between $0 and $10,000',
-  },
-}
-
-export const WithError: Story = {
-  args: {
-    label: 'Amount',
-    error: true,
-    helperText: 'Invalid amount',
-  },
-}
-
-export const Disabled: Story = {
-  args: {
-    label: 'Amount',
-    disabled: true,
-    initialValue: '1000',
-  },
-}
-
-export const ReadOnly: Story = {
-  args: {
-    label: 'Amount',
-    readOnly: true,
-    initialValue: '1000',
-  },
-}
-
-export const WithCustomWidth: Story = {
-  args: {
-    label: 'Amount',
-    sx: { width: '300px' },
-  },
-}
-
-export const WithCustomIconStyles: Story = {
-  args: {
-    label: 'Amount',
-    sx: {
-      '& .MuiInputAdornment-root': {
-        color: 'primary.main',
-      },
-      '& .MuiSvgIcon-root': {
-        fontSize: '1.5rem',
-      },
-    },
-  },
-}
-
-export const WithCustomInputStyles: Story = {
-  args: {
-    label: 'Amount',
-    sx: {
-      '& .MuiOutlinedInput-root': {
-        backgroundColor: 'grey.50',
-        '&:hover': {
-          backgroundColor: 'grey.100',
-        },
-      },
-    },
-  },
-}
-
-export const WithLargeAmount: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '1000000',
-    helperText: 'Enter a large amount',
-  },
-}
-
-export const WithSmallAmount: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '0.01',
-    helperText: 'Enter a small amount',
-  },
-}
-
-export const WithZeroAmount: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '0',
-    helperText: 'Zero amount',
-  },
-}
-
-export const WithNegativeAmount: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '-100',
-    helperText: 'Negative amount',
-  },
-}
-
-export const WithCustomValidation: Story = {
-  args: {
-    label: 'Amount',
-    min: 100,
-    max: 1000,
-    helperText: 'Amount must be between $100 and $1,000',
-  },
-}
-
-export const WithDecimalInput: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '100.5',
-    helperText: 'You can manually enter decimal points',
-  },
-}
-
-export const WithMultipleDecimals: Story = {
-  args: {
-    label: 'Amount',
-    initialValue: '100.5',
-    helperText: 'Only the first decimal point will be kept',
-  },
+export const Interactive: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveRenderer />,
 }

@@ -1,38 +1,14 @@
 'use client'
 
-import * as React from 'react'
-import {
-  Theme,
-  useTheme,
-  styled,
-  SxProps,
-  alpha,
-  keyframes,
-} from '@mui/material/styles'
-import Box from '@mui/material/Box'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl, { FormControlProps } from '@mui/material/FormControl'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import Chip from '@mui/material/Chip'
+import React, { useState, useMemo } from 'react'
+import Popover from '../../../Popover'
+import Checkbox from '../../../Checkbox'
+import Chip from '../../../Chip'
+import ArrowDropDown from '../../../Icons/ArrowDropDown'
 
-// Sacred animations
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-`
+type SxProps = Record<string, unknown>
+type FormControlProps = Record<string, unknown>
 
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-  100% { transform: translateY(0px); }
-`
-
-/**
- * Interface for dropdown options with attributes, matching SearchableDropdown format
- */
 export interface DropdownOption {
   value: string
   attribute1?: string
@@ -44,29 +20,18 @@ export interface DropdownOption {
   uniqueKey?: string
 }
 
+export type MultiSelectOption = string | DropdownOption
+
 export interface MultiSelectChipProps
   extends Omit<FormControlProps, 'onChange'> {
   label?: React.ReactNode
-  /**
-   * Can be either:
-   * - string[] for simple options
-   * - DropdownOption[] for complex options with attributes
-   */
-  options?: string[] | DropdownOption[]
-  /**
-   * The values of the selected items
-   */
+  options?: MultiSelectOption[]
   defaultSelected?: string[]
-  /**
-   * Callback when selection changes - returns array of selected values
-   */
   onChange?: (values: string[]) => void
-  /**
-   * Whether options are complex DropdownOption objects or simple strings
-   * Defaults to auto-detect
-   */
   complexOptions?: boolean
-
+  showOptionDetails?: boolean
+  sacredtheme?: boolean
+  className?: string
   backgroundcolor?: string
   outlinecolor?: string
   fontcolor?: string
@@ -74,473 +39,196 @@ export interface MultiSelectChipProps
   shrunkfontcolor?: string
   unshrunkfontcolor?: string
   placeholdercolor?: string
-
   shrunklabelposition?: 'onNotch' | 'aboveNotch'
   sx?: SxProps
-  /**
-   * Whether to show option details in the dropdown - only applies to complex options
-   */
-  showOptionDetails?: boolean
-  /** Enable sacred Egyptian theme */
-  sacredtheme?: boolean
 }
 
-const ITEM_HEIGHT = 40
-const ITEM_PADDING_TOP = 8
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+interface UnifiedOption {
+  value: string
+  label: React.ReactNode
+}
+
+function isDropdownOption(option: unknown): option is DropdownOption {
+  return typeof option === 'object' && option !== null && 'value' in option
+}
+
+const getStyles = (
+  sacredtheme: boolean,
+  backgroundcolor?: string,
+  outlinecolor?: string,
+  fontcolor?: string
+) => ({
+  container: { position: 'relative', width: '100%' } as React.CSSProperties,
+  chipContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '0.25rem',
+    padding: '0.5rem',
+    minHeight: '40px',
+    border: `2px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.5)' : outlinecolor || '#CBD5E1'}`,
+    borderRadius: '0.375rem',
+    cursor: 'pointer',
+    backgroundColor: sacredtheme
+      ? 'rgba(0, 0, 0, 0.8)'
+      : backgroundcolor || 'white',
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : fontcolor || '#4A5568',
+    '&:hover': { borderColor: sacredtheme ? '#FFD700' : '#A0AEC0' },
+  } as React.CSSProperties,
+  placeholder: {
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#A0AEC0',
+  } as React.CSSProperties,
+  arrowIcon: {
+    position: 'absolute' as const,
+    right: '0.5rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: sacredtheme ? '#FFD700' : '#4A5568',
+  } as React.CSSProperties,
+  popoverContent: {
+    width: '16rem',
+    maxHeight: '15rem',
+    overflowY: 'auto',
+    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#E2E8F0'}`,
+    borderRadius: '0.375rem',
+    boxShadow:
+      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.95)' : 'white',
+  } as React.CSSProperties,
+  option: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0.5rem',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : '#F7FAFC',
     },
+  } as React.CSSProperties,
+  optionLabel: { marginLeft: '0.5rem' } as React.CSSProperties,
+  optionDetails: {
+    value: {
+      color: sacredtheme ? '#FFD700' : 'inherit',
+      fontWeight: '500',
+    } as React.CSSProperties,
+    attribute: {
+      fontSize: '0.875rem',
+      color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#718096',
+      fontStyle: 'italic',
+    } as React.CSSProperties,
   },
-}
+})
 
-function getStyles(
-  name: string,
-  selectedArray: readonly string[],
-  theme: Theme
-) {
-  return {
-    fontWeight: selectedArray.includes(name)
-      ? theme.typography.fontWeightMedium
-      : theme.typography.fontWeightRegular,
-  }
-}
-
-const StyledFormControl = styled(FormControl, {
-  shouldForwardProp: prop =>
-    ![
-      'backgroundcolor',
-      'outlinecolor',
-      'fontcolor',
-      'inputfontcolor',
-      'shrunkfontcolor',
-      'unshrunkfontcolor',
-      'placeholdercolor',
-      'shrunklabelposition',
-      'sacredtheme',
-    ].includes(prop as string),
-})<
-  Pick<
-    MultiSelectChipProps,
-    | 'backgroundcolor'
-    | 'outlinecolor'
-    | 'fontcolor'
-    | 'inputfontcolor'
-    | 'shrunkfontcolor'
-    | 'unshrunkfontcolor'
-    | 'placeholdercolor'
-    | 'shrunklabelposition'
-  > & { hasvalue: string; sacredtheme?: boolean }
->(
-  ({
-    backgroundcolor,
-    outlinecolor,
-    fontcolor,
-    inputfontcolor,
-    shrunkfontcolor,
-    unshrunkfontcolor,
-    placeholdercolor,
-    shrunklabelposition,
-    hasvalue,
-    sacredtheme,
-  }) => ({
-    position: 'relative',
-    '& .MuiOutlinedInput-root': {
-      height: hasvalue === 'true' ? 'auto' : '39px',
-      backgroundColor: sacredtheme
-        ? alpha('#000000', 0.8)
-        : backgroundcolor || 'inherit',
-      color: sacredtheme ? '#FFD700' : fontcolor || 'inherit',
-      ...(sacredtheme && {
-        backgroundImage: `
-          linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
-          radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-        `,
-        '&::before': {
-          content: '"𓊻"',
-          position: 'absolute',
-          top: '50%',
-          right: '45px',
-          transform: 'translateY(-50%)',
-          color: alpha('#FFD700', 0.3),
-          fontSize: '14px',
-          pointerEvents: 'none',
-          zIndex: 1,
-          animation: `${floatGlyph} 3s ease-in-out infinite`,
-        },
-      }),
-      '& fieldset': {
-        borderColor: sacredtheme
-          ? '#FFD700'
-          : outlinecolor ||
-            (hasvalue === 'true' ? 'black' : 'rgba(0,0,0,0.23)'),
-        ...(sacredtheme && {
-          borderWidth: '2px',
-        }),
-      },
-      '&:hover fieldset': {
-        borderColor: sacredtheme
-          ? '#FFD700'
-          : outlinecolor ||
-            (hasvalue === 'true' ? 'black' : 'rgba(0,0,0,0.23)'),
-        ...(sacredtheme && {
-          boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
-        }),
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: sacredtheme
-          ? '#FFD700'
-          : outlinecolor ||
-            (hasvalue === 'true' ? 'black' : 'rgba(0,0,0,0.23)'),
-        ...(sacredtheme && {
-          animation: `${sacredGlow} 2s ease-in-out infinite`,
-        }),
-      },
-      '& input': {
-        color: sacredtheme
-          ? '#FFD700'
-          : inputfontcolor || fontcolor || 'inherit',
-        ...(sacredtheme && {
-          textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
-          fontWeight: 500,
-        }),
-        '&::placeholder': {
-          color: sacredtheme
-            ? alpha('#FFD700', 0.7)
-            : placeholdercolor || alpha('#000', 0.54),
-          ...(sacredtheme && {
-            fontStyle: 'italic',
-            letterSpacing: '0.5px',
-          }),
-        },
-      },
-      '& .MuiSelect-icon': {
-        color: sacredtheme
-          ? '#FFD700'
-          : inputfontcolor || fontcolor || 'inherit',
-        ...(sacredtheme && {
-          filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-        }),
-      },
-    },
-    '& .MuiInputLabel-root': {
-      color: sacredtheme
-        ? alpha('#FFD700', 0.8)
-        : unshrunkfontcolor || fontcolor || 'inherit',
-      pointerEvents: 'none',
-      zIndex: 1,
-      overflow: 'visible',
-      ...(sacredtheme && {
-        textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
-        fontWeight: 500,
-        letterSpacing: '0.5px',
-      }),
-      '&.Mui-focused': {
-        color: sacredtheme
-          ? '#FFD700'
-          : shrunkfontcolor || fontcolor || 'inherit',
-        ...(sacredtheme && {
-          textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
-        }),
-      },
-      '&.MuiInputLabel-shrink': {
-        color: sacredtheme
-          ? '#FFD700'
-          : shrunkfontcolor || fontcolor || 'inherit',
-        ...(sacredtheme && {
-          textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-          fontWeight: 600,
-        }),
-        ...(shrunklabelposition === 'aboveNotch' && {
-          transform: 'translate(0px, -17px) scale(0.75)',
-        }),
-        ...(shrunklabelposition === 'onNotch' && {
-          transform: 'translate(13px, -4px) scale(0.75)',
-        }),
-      },
-      '&:not(.MuiInputLabel-shrink)': {
-        transform: 'none',
-        top: '9px',
-        left: '14px',
-      },
-    },
-  })
-)
-
-export default function MultipleSelectChip(props: MultiSelectChipProps) {
-  const {
-    label = 'Chip',
-    options = [],
-    defaultSelected = [],
-    onChange,
-    complexOptions: userSpecifiedComplexOptions,
-    showOptionDetails = false,
-
-    backgroundcolor,
-    outlinecolor,
-    fontcolor,
-    inputfontcolor,
-    shrunkfontcolor,
-    unshrunkfontcolor,
-    placeholdercolor,
-    shrunklabelposition,
-    sx,
-    sacredtheme = false,
-    ...rest
-  } = props
-
-  const theme = useTheme()
+const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
+  label = 'Chip',
+  options = [],
+  defaultSelected = [],
+  onChange,
+  complexOptions: userSpecifiedComplexOptions,
+  showOptionDetails = false,
+  sacredtheme = false,
+  className,
+  backgroundcolor,
+  outlinecolor,
+  fontcolor,
+  placeholdercolor,
+  ...rest
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [selectedValues, setSelectedValues] =
-    React.useState<string[]>(defaultSelected)
-
-  // Auto-detect if options are complex (DropdownOption[]) or simple (string[])
-  const isComplexOptions = React.useMemo(() => {
-    if (userSpecifiedComplexOptions !== undefined) {
-      return userSpecifiedComplexOptions
-    }
-    // Check if options is an array and the first item is an object with a value property
-    return (
-      options.length > 0 &&
-      typeof options[0] !== 'string' &&
-      'value' in options[0]
-    )
-  }, [options, userSpecifiedComplexOptions])
-
-  // Parse options to get display values and lookup
-  const optionsData = React.useMemo(() => {
-    if (!isComplexOptions) {
-      // Simple string options
-      return {
-        displayOptions: options as string[],
-        optionsMap: new Map<string, string>(),
-      }
-    }
-
-    // Complex options with attributes
-    const complexOptions = options as DropdownOption[]
-    // Use DropdownOption type explicitly for the map
-    const optionsMap = new Map<string, DropdownOption>()
-
-    // Create a map of value to original option object for quick lookups
-    complexOptions.forEach(option => {
-      optionsMap.set(option.value, option)
-    })
-
-    // Extract just the values for the dropdown
-    const displayOptions = complexOptions.map(option => option.value)
-
-    return {
-      displayOptions,
-      optionsMap,
-    }
-  }, [options, isComplexOptions])
-
-  const hasValue = React.useMemo(
-    () => (selectedValues.length > 0).toString(),
-    [selectedValues]
+    useState<string[]>(defaultSelected)
+  const styles = getStyles(
+    sacredtheme,
+    backgroundcolor,
+    outlinecolor,
+    fontcolor
   )
 
-  const handleSelectChange = (
-    event: SelectChangeEvent<typeof selectedValues>
-  ) => {
-    const { value } = event.target
-    const newValue = typeof value === 'string' ? value.split(',') : value
-    setSelectedValues(newValue)
-    if (onChange) {
-      onChange(newValue)
+  const unifiedOptions = useMemo<UnifiedOption[]>(() => {
+    const isComplex =
+      userSpecifiedComplexOptions === true ||
+      (userSpecifiedComplexOptions !== false &&
+        options.length > 0 &&
+        isDropdownOption(options[0]))
+    if (isComplex) {
+      return options.filter(isDropdownOption).map(o => ({
+        value: o.value,
+        label:
+          showOptionDetails && o.attribute1 ? (
+            <div>
+              <div style={styles.optionDetails.value}>{o.value}</div>
+              <div style={styles.optionDetails.attribute}>{o.attribute1}</div>
+            </div>
+          ) : (
+            o.value
+          ),
+      }))
     }
+    return options
+      .filter((o): o is string => typeof o === 'string')
+      .map(o => ({ value: o, label: o }))
+  }, [
+    options,
+    userSpecifiedComplexOptions,
+    showOptionDetails,
+    styles.optionDetails,
+  ])
+
+  const handleToggle = (value: string) => {
+    const newSelectedValues = selectedValues.includes(value)
+      ? selectedValues.filter(v => v !== value)
+      : [...selectedValues, value]
+    setSelectedValues(newSelectedValues)
+    onChange?.(newSelectedValues)
   }
 
-  // Render menu item text appropriately based on option type
-  const renderMenuItemText = (value: string) => {
-    if (!isComplexOptions) {
-      return value
-    }
-
-    // Cast optionsMap to the correct type with DropdownOption
-    const optionsMap = optionsData.optionsMap as Map<string, DropdownOption>
-    const option = optionsMap.get(value)
-
-    // If no option found in the map, just return the value
-    if (!option) return value
-
-    // Check if we should show details and if attribute1 exists
-    if (!showOptionDetails || typeof option.attribute1 === 'undefined') {
-      return value
-    }
-
-    // If showing details, include attribute1 (typically description/department)
-    return (
-      <Box>
-        <Box
-          sx={{
-            color: sacredtheme ? '#FFD700' : 'inherit',
-            ...(sacredtheme && {
-              fontWeight: 500,
-            }),
-          }}
-        >
-          {value}
-        </Box>
-        <Box
-          sx={{
-            fontSize: '0.8em',
-            color: sacredtheme ? alpha('#FFD700', 0.7) : 'text.secondary',
-            ...(sacredtheme && {
-              fontStyle: 'italic',
-            }),
-          }}
-        >
-          {option.attribute1}
-        </Box>
-      </Box>
-    )
+  const handleOpen = (event: React.MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(event.currentTarget)
+    setIsOpen(true)
+  }
+  const handleClose = () => {
+    setIsOpen(false)
+    setAnchorEl(null)
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        width: '100%',
-        marginTop: '20px',
-        height: 'auto',
-        overflow: 'visible',
-        ...sx,
-      }}
-    >
-      <StyledFormControl
-        sx={{ ...sx }}
-        variant="outlined"
-        hasvalue={hasValue}
-        backgroundcolor={backgroundcolor}
-        outlinecolor={outlinecolor}
-        fontcolor={fontcolor}
-        inputfontcolor={inputfontcolor}
-        shrunkfontcolor={shrunkfontcolor}
-        unshrunkfontcolor={unshrunkfontcolor}
-        placeholdercolor={placeholdercolor}
-        shrunklabelposition={shrunklabelposition}
-        sacredtheme={sacredtheme}
-        {...rest}
-      >
-        <InputLabel id="multi-select-chip-label">
-          {sacredtheme ? 'Sacred Selections' : label}
-        </InputLabel>
-        <Select
-          labelId="multi-select-chip-label"
-          id="multi-select-chip"
-          multiple
-          value={selectedValues}
-          onChange={handleSelectChange}
-          input={
-            <OutlinedInput
-              label={sacredtheme ? 'Sacred Selections' : label}
-              sx={{
-                height: selectedValues.length > 0 ? 'auto' : '35px',
-                minHeight: '35px',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 0.5,
-                alignItems: 'center',
-                ...(selectedValues.length > 0 && {
-                  pt: 0.5,
-                  pb: 0.5,
-                }),
-              }}
-              placeholder={
-                sacredtheme
-                  ? 'Divine choices...'
-                  : placeholdercolor
-                    ? (label as string)
-                    : undefined
-              }
-            />
-          }
-          renderValue={selected => (
-            <Box
-              sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 0.5,
-              }}
+    <div style={styles.container} className={className} {...rest}>
+      <div onClick={handleOpen} ref={setAnchorEl} style={styles.chipContainer}>
+        {selectedValues.length === 0 && (
+          <span style={{ ...styles.placeholder, color: placeholdercolor }}>
+            {label}
+          </span>
+        )}
+        {selectedValues.map(value => (
+          <Chip
+            key={value}
+            label={value}
+            onDelete={() => handleToggle(value)}
+            sacredtheme={sacredtheme}
+          />
+        ))}
+        <ArrowDropDown style={styles.arrowIcon} />
+      </div>
+      <Popover open={isOpen} onClose={handleClose} anchorEl={anchorEl}>
+        <div style={styles.popoverContent}>
+          {unifiedOptions.map(option => (
+            <div
+              key={option.value}
+              onClick={() => handleToggle(option.value)}
+              style={styles.option}
             >
-              {selected.map(val => (
-                <Chip
-                  key={val}
-                  label={val}
-                  size="small"
-                  sx={{
-                    height: '24px',
-                    ...(sacredtheme && {
-                      backgroundColor: alpha('#FFD700', 0.2),
-                      color: '#FFD700',
-                      border: `1px solid ${alpha('#FFD700', 0.4)}`,
-                      '& .MuiChip-deleteIcon': {
-                        color: alpha('#FFD700', 0.8),
-                        '&:hover': {
-                          color: '#FFD700',
-                        },
-                      },
-                    }),
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-          MenuProps={{
-            ...MenuProps,
-            PaperProps: {
-              ...MenuProps.PaperProps,
-              sx: sacredtheme
-                ? {
-                    backgroundColor: alpha('#000000', 0.95),
-                    border: `1px solid ${alpha('#FFD700', 0.3)}`,
-                    '&::-webkit-scrollbar': {
-                      width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                      borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: 'rgba(255, 215, 0, 0.5)',
-                      borderRadius: '4px',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 215, 0, 0.7)',
-                      },
-                    },
-                  }
-                : {},
-            },
-          }}
-        >
-          {optionsData.displayOptions.map(value => (
-            <MenuItem
-              key={value}
-              value={value}
-              style={getStyles(value, selectedValues, theme)}
-              sx={{
-                ...(sacredtheme && {
-                  color: alpha('#FFD700', 0.9),
-                  backgroundColor: selectedValues.includes(value)
-                    ? alpha('#FFD700', 0.2)
-                    : 'transparent',
-                  '&:hover': {
-                    backgroundColor: alpha('#FFD700', 0.15),
-                    color: '#FFD700',
-                  },
-                }),
-              }}
-            >
-              {renderMenuItemText(value)}
-            </MenuItem>
+              <Checkbox
+                checked={selectedValues.includes(option.value)}
+                onChange={() => {}}
+                sacredtheme={sacredtheme}
+              />
+              <div style={styles.optionLabel}>{option.label}</div>
+            </div>
           ))}
-        </Select>
-      </StyledFormControl>
-    </Box>
+        </div>
+      </Popover>
+    </div>
   )
 }
+
+export default MultiSelectChip

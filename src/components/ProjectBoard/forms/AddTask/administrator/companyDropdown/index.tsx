@@ -1,23 +1,16 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Close } from '@mui/icons-material'
-import {
-  Dialog,
-  IconButton,
-  Box,
-  useMediaQuery,
-  useTheme,
-  alpha,
-  keyframes,
-} from '@mui/material'
+import Dialog from '../../../../../Dialog'
+import CloseIcon from '../../../../../Icons/Close'
 import Typography from '../../../../../Typography'
-import SearchableDropdown from '../../../../../Field/Dropdown/Searchable'
+import SearchableDropdown, {
+  DropdownOption,
+} from '../../../../../Field/Dropdown/Searchable'
 import MultiSelect from '../../../../../Field/Dropdown/MultiSelect'
 import ComplexTextEditor from '../../../../../ComplexTextEditor'
 import CustomButton from '../../../../../Button'
 import TextField from '../../../../../Field/Text'
-
 import type {
   Task,
   RawStatus,
@@ -28,25 +21,6 @@ import type {
   RawSeverityLevel,
   RawCompany,
 } from '../../../../types'
-
-// Sacred animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  50% { transform: translateY(-2px) rotate(180deg); opacity: 0.5; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  darkGold: '#B8860B',
-  cardBackground: alpha('#000000', 0.95),
-}
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -65,6 +39,87 @@ interface AdministratorAddTaskCompanyDropdownProps {
   sacredtheme?: boolean
 }
 
+const getStyles = (sacredtheme?: boolean) => ({
+  dialog: {
+    width: '100%',
+    '@media (min-width: 640px)': { width: '700px' },
+    margin: '1rem auto',
+    pointerEvents: 'auto',
+    borderRadius: '0.5rem',
+    overflow: 'hidden',
+    ...(sacredtheme && {
+      border: '2px solid rgba(255, 215, 0, 0.5)',
+      boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      animation: 'add-task-glow-pulse 2s infinite alternate',
+    }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.75rem',
+    fontSize: '1.125rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    zIndex: 10,
+    animation: 'add-task-float-glyph 5s infinite alternate',
+  } as React.CSSProperties,
+  closeButton: {
+    position: 'absolute',
+    right: '0.5rem',
+    top: '0.5rem',
+    zIndex: 20,
+    padding: '0.25rem',
+    borderRadius: '9999px',
+    color: sacredtheme ? '#FFD700' : '#6B7280',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  closeButtonHover: {
+    color: sacredtheme ? '#FBBF24' : '#1F2937',
+  } as React.CSSProperties,
+  header: {
+    padding: '0.75rem',
+    ...(sacredtheme && {
+      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+      backgroundColor: 'rgba(255, 215, 0, 0.05)',
+    }),
+  } as React.CSSProperties,
+  title: {
+    marginBottom: '0.75rem',
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+      color: '#FFD700',
+    }),
+  } as React.CSSProperties,
+  formContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  row: {
+    display: 'flex',
+    flexDirection: 'column',
+    '@media (min-width: 640px)': { flexDirection: 'row' },
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  col: {
+    flex: '1 1 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '0.5rem',
+    marginTop: '0.5rem',
+    flexDirection: 'column',
+    '@media (min-width: 640px)': { flexDirection: 'row' },
+  } as React.CSSProperties,
+})
+
 const AdministratorAddTaskCompanyDropdown: React.FC<
   AdministratorAddTaskCompanyDropdownProps
 > = ({
@@ -81,84 +136,50 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
   createdUserId,
   sacredtheme = false,
 }) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
-  // ------------------ FORM STATE ------------------
-  const [selectedCompany, setSelectedCompany] = useState('')
   const [selectedCompanyId, setSelectedCompanyId] = useState('')
-  const [selectedSeverity, setSelectedSeverity] = useState('')
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
-  const [selectedQueue, setSelectedQueue] = useState('')
   const [selectedQueueId, setSelectedQueueId] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('')
   const [selectedStatusId, setSelectedStatusId] = useState('')
-  const [selectedSubStatus, setSelectedSubStatus] = useState('')
   const [selectedSubStatusId, setSelectedSubStatusId] = useState('')
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([])
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
+  const [isCloseHovered, setCloseHovered] = useState(false)
+  const styles = getStyles(sacredtheme)
 
-  // Debug logging for incoming props
-  console.log('AdministratorAddTaskCompanyDropdown - Props received:', {
-    statusesCount: statuses?.length || 0,
-    subStatusesCount: subStatuses?.length || 0,
-    statusesData: statuses,
-    topicsData: topics,
-  })
-
-  // ------------------ DROPDOWN OPTIONS ------------------
   const companyOptions = rawCompanies.map(c => ({
     value: c.companyName,
     attribute1: c._id,
   }))
-
-  const severityOptions = severityLevels.map(sl => ({
+  const severityOptions: DropdownOption[] = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
     attribute1: sl.description || '',
     attribute2: sl._id,
   }))
-
-  const statusOptions = statuses.map(s => ({
+  const statusOptions: DropdownOption[] = statuses.map(s => ({
     value: s.status,
     attribute1: s._id,
   }))
-
-  // Filter substatuses based on the selected status
   const filteredSubStatusOptions = subStatuses
     .filter(s => {
-      // If no status is selected, hide all substatuses
       if (!selectedStatus) return false
-
-      // Get the ID of the selected status
       const selectedStatusId = statuses.find(
         status => status.status === selectedStatus
       )?._id
-      console.log('Filtering substatuses by status:', {
-        selectedStatus,
-        selectedStatusId,
-        substatus: s.subStatus,
-        substatusStatusId: s.statusId,
-        isMatch: s.statusId === selectedStatusId,
-      })
-
-      // Only include substatuses with the matching statusId
       return s.statusId === selectedStatusId
     })
     .map(s => {
       const associatedStatus =
         statuses.find(status => status._id === s.statusId)?.status || ''
-
       return {
         value: s.subStatus,
         attribute1: associatedStatus,
         attribute2: s._id,
       }
     })
-
-  // Add a "no substatuses" option if none are available for the selected status
-  const finalSubStatusOptions =
+  const finalSubStatusOptions: DropdownOption[] =
     filteredSubStatusOptions.length > 0
       ? filteredSubStatusOptions
       : selectedStatus
@@ -170,55 +191,20 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
             },
           ]
         : []
-
-  console.log('Filtered substatus options:', finalSubStatusOptions)
-
-  const queueOptions = schedulingQueues.map(q => ({
+  const queueOptions: DropdownOption[] = schedulingQueues.map(q => ({
     value: q.queueName,
     attribute1: q._id,
   }))
 
-  // Effect to reset substatus when status changes
   React.useEffect(() => {
-    // Clear the selected substatus when the status changes
-    setSelectedSubStatus('')
     setSelectedSubStatusId('')
   }, [selectedStatus])
 
-  // ------------------ SUBMIT HANDLER ------------------
   const handleSubmit = useCallback(() => {
-    console.log('Submitting task with stored IDs:', {
-      statusValue: selectedStatus,
-      statusId: selectedStatusId,
-      subStatusValue: selectedSubStatus,
-      subStatusId: selectedSubStatusId,
-      queueValue: selectedQueue,
-      queueId: selectedQueueId,
-      companyValue: selectedCompany,
-      companyId: selectedCompanyId,
-      severityValue: selectedSeverity,
-      severityId: selectedSeverityId,
-    })
-
-    // Validate required fields before submission
-    if (!selectedSeverityId) {
-      console.error('Error: Severity Level is required')
-      alert('Please select a Severity Level')
+    if (!selectedSeverityId || !selectedStatusId || !selectedSubStatusId) {
+      alert('Please fill out all required fields.')
       return
     }
-
-    if (!selectedStatusId) {
-      console.error('Error: Status is required')
-      alert('Please select a Status')
-      return
-    }
-
-    if (!selectedSubStatusId) {
-      console.error('Error: Substatus is required')
-      alert('Please select a Substatus')
-      return
-    }
-
     const newTaskData: Omit<Task, '_id'> = {
       title: taskTitle,
       description: taskDescription,
@@ -246,8 +232,8 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
       nextActionDate: '',
       companyId: selectedCompanyId,
       customerId: '',
+      editHistory: [],
     }
-
     onAdd(newTaskData)
   }, [
     taskTitle,
@@ -259,365 +245,231 @@ const AdministratorAddTaskCompanyDropdown: React.FC<
     selectedStatusId,
     selectedSubStatusId,
     selectedCompanyId,
-    selectedStatus,
-    selectedSubStatus,
-    selectedQueue,
-    selectedCompany,
-    selectedSeverity,
     createdUserId,
     onAdd,
   ])
 
-  // ------------------ RENDER ------------------
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullWidth
       maxWidth={false}
-      PaperProps={{
-        sx: {
-          width: isMobile ? '100%' : '700px',
-          margin: isMobile ? '16px' : 'auto',
-          pointerEvents: 'auto',
-          ...(sacredtheme && {
-            border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`,
-            backgroundColor: egyptianStyles.cardBackground,
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-          }),
-        },
-      }}
+      className={sacredtheme ? 'sacred-dialog' : ''}
     >
-      {sacredtheme && (
-        <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatGlyph} 4s ease-in-out infinite`,
-              zIndex: 1,
-            }}
-          >
-            {SACRED_GLYPHS[0]}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              right: '48px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatGlyph} 4s ease-in-out infinite reverse`,
-              zIndex: 1,
-            }}
-          >
-            {SACRED_GLYPHS[1]}
-          </Box>
-        </>
-      )}
-      <IconButton
-        size="small"
-        onClick={onClose}
-        sx={{
-          position: 'absolute',
-          right: 8,
-          top: 8,
-          color: sacredtheme
-            ? egyptianStyles.goldColor
-            : theme.palette.grey[500],
-          zIndex: theme.zIndex.modal + 1,
-          cursor: 'pointer',
-          '&:hover': {
-            color: sacredtheme
-              ? egyptianStyles.goldColor
-              : theme.palette.grey[700],
-          },
-        }}
-      >
-        <Close />
-      </IconButton>
-
-      <Box
-        sx={{
-          p: 3,
-          ...(sacredtheme && {
-            borderBottom: `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`,
-            backgroundColor: alpha(egyptianStyles.goldColor, 0.05),
-          }),
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            mb: 3,
-            ...(sacredtheme && {
-              fontFamily: '"Cinzel", serif',
-              letterSpacing: '0.05em',
-              textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-              color: egyptianStyles.goldColor,
-            }),
+      <div style={styles.dialog}>
+        {sacredtheme && (
+          <>
+            <div style={{ ...styles.glyph, left: '0.75rem' }}>
+              {SACRED_GLYPHS[0]}
+            </div>
+            <div
+              style={{
+                ...styles.glyph,
+                right: '3rem',
+                animationDirection: 'reverse',
+              }}
+            >
+              {SACRED_GLYPHS[1]}
+            </div>
+          </>
+        )}
+        <button
+          onClick={onClose}
+          style={{
+            ...styles.closeButton,
+            ...(isCloseHovered && styles.closeButtonHover),
           }}
+          onMouseEnter={() => setCloseHovered(true)}
+          onMouseLeave={() => setCloseHovered(false)}
         >
-          Create Task
-        </Typography>
+          <CloseIcon style={{ height: '1.5rem', width: '1.5rem' }} />
+        </button>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {/* Title and Description Fields */}
-          <TextField
-            label="Task Title"
-            value={taskTitle}
-            onChange={e => setTaskTitle(e.target.value)}
-            placeholder="Enter Task Title"
-            sacredtheme={sacredtheme}
-          />
+        <div style={styles.header}>
+          <Typography fontvariant="merrih5" style={styles.title}>
+            Create Task
+          </Typography>
 
-          <ComplexTextEditor
-            label="Task Description"
-            value={taskDescription}
-            onChange={setTaskDescription}
-            editorType="simple"
-            minRows={5}
-            sacredtheme={sacredtheme}
-          />
+          <div style={styles.formContainer}>
+            <TextField
+              label="Task Title"
+              value={taskTitle}
+              onChange={e => setTaskTitle(e.target.value)}
+              placeholder="Enter Task Title"
+              sacredtheme={sacredtheme}
+            />
+            <ComplexTextEditor
+              label="Task Description"
+              value={taskDescription}
+              onChange={setTaskDescription}
+              editorType="simple"
+              minRows={5}
+              sacredtheme={sacredtheme}
+            />
+            <SearchableDropdown
+              label="Company"
+              options={companyOptions}
+              defaultValue={
+                companyOptions.find(opt => opt.attribute1 === selectedCompanyId)
+                  ?.value
+              }
+              onChange={option =>
+                setSelectedCompanyId(option?.attribute1 || '')
+              }
+              placeholder="Select a company"
+              sacredtheme={sacredtheme}
+            />
 
-          {/* Company Dropdown */}
-          <SearchableDropdown
-            label="Company"
-            options={companyOptions}
-            defaultValue={
-              companyOptions.find(opt => opt.value === selectedCompany)?.value
-            }
-            onChange={option => {
-              setSelectedCompany(option?.value || '')
-              setSelectedCompanyId(option?.attribute1 || '')
-            }}
-            placeholder="Select a company"
-            sacredtheme={sacredtheme}
-          />
+            <div style={styles.row}>
+              <div style={styles.col}>
+                <SearchableDropdown
+                  label="Severity Level"
+                  options={severityOptions}
+                  defaultValue={
+                    severityOptions.find(
+                      opt => opt.attribute2 === selectedSeverityId
+                    )?.value
+                  }
+                  onChange={option =>
+                    setSelectedSeverityId(option?.attribute2 || '')
+                  }
+                  placeholder="Select severity level"
+                  sacredtheme={sacredtheme}
+                />
+                <SearchableDropdown
+                  label="Status"
+                  options={statusOptions}
+                  defaultValue={
+                    statusOptions.find(
+                      opt => opt.attribute1 === selectedStatusId
+                    )?.value
+                  }
+                  onChange={option => {
+                    const newStatus = option?.value || ''
+                    setSelectedStatus(newStatus)
+                    setSelectedStatusId(option?.attribute1 || '')
+                  }}
+                  placeholder="Select status"
+                  sacredtheme={sacredtheme}
+                />
+              </div>
 
-          {/* Top row of fields */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: isMobile ? 'column' : 'row',
-              gap: 1,
-            }}
-          >
-            {/* Left Column */}
-            <Box
-              sx={{
-                flex: isMobile ? 'auto' : 1,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-              }}
-            >
-              <SearchableDropdown
-                label="Severity Level"
-                options={severityOptions}
-                defaultValue={
-                  severityOptions.find(
-                    opt => opt.attribute2 === selectedSeverityId
-                  )?.value
-                }
-                onChange={option => {
-                  // Store the severity level as display value and the ID properly
-                  setSelectedSeverity(option?.value || '')
-                  setSelectedSeverityId(option?.attribute2 || '')
-                  console.log('Selected severity ID:', option?.attribute2)
-                }}
-                placeholder="Select severity level"
-                sacredtheme={sacredtheme}
-              />
-              <SearchableDropdown
-                label="Status"
-                options={statusOptions}
-                defaultValue={
-                  statusOptions.find(opt => opt.attribute1 === selectedStatusId)
-                    ?.value
-                }
-                onChange={option => {
-                  const newStatus = option?.value || ''
-                  console.log('Status selected:', newStatus)
+              <div style={styles.col}>
+                <SearchableDropdown
+                  label="Associated Product (Queue)"
+                  options={queueOptions}
+                  defaultValue={
+                    queueOptions.find(opt => opt.attribute1 === selectedQueueId)
+                      ?.value
+                  }
+                  onChange={option =>
+                    setSelectedQueueId(option?.attribute1 || '')
+                  }
+                  placeholder="Select product queue"
+                  sacredtheme={sacredtheme}
+                />
+                <SearchableDropdown
+                  label="Substatus"
+                  options={finalSubStatusOptions}
+                  defaultValue={
+                    finalSubStatusOptions.find(
+                      opt => opt.attribute2 === selectedSubStatusId
+                    )?.value
+                  }
+                  onChange={option =>
+                    setSelectedSubStatusId(option?.attribute2 || '')
+                  }
+                  placeholder={
+                    selectedStatus
+                      ? 'Select substatus'
+                      : 'Please select a status first'
+                  }
+                  disabled={!selectedStatus}
+                  sacredtheme={sacredtheme}
+                />
+              </div>
+            </div>
 
-                  setSelectedStatus(newStatus)
-                  setSelectedStatusId(option?.attribute1 || '')
-                  console.log(
-                    'Selected status ID from attribute1:',
-                    option?.attribute1
-                  )
-                }}
-                placeholder="Select status"
-                sacredtheme={sacredtheme}
-              />
-            </Box>
-
-            {/* Right Column */}
-            <Box
-              sx={{
-                flex: isMobile ? 'auto' : 1,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-              }}
-            >
-              <SearchableDropdown
-                label="Associated Product (Queue)"
-                options={queueOptions}
-                defaultValue={
-                  queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                    ?.value
-                }
-                onChange={option => {
-                  setSelectedQueue(option?.value || '')
-                  setSelectedQueueId(option?.attribute1 || '')
-                  console.log('Selected queue ID:', option?.attribute1)
-                }}
-                placeholder="Select product queue"
-                sacredtheme={sacredtheme}
-              />
-              <SearchableDropdown
-                label="Substatus"
-                options={finalSubStatusOptions}
-                defaultValue={
-                  finalSubStatusOptions.find(
-                    opt => opt.attribute2 === selectedSubStatusId
-                  )?.value
-                }
-                onChange={option => {
-                  setSelectedSubStatus(option?.value || '')
-                  setSelectedSubStatusId(option?.attribute2 || '')
-                  console.log('Selected substatus ID:', option?.attribute2)
-                }}
-                placeholder={
-                  selectedStatus
-                    ? 'Select substatus'
-                    : 'Please select a status first'
-                }
-                disabled={!selectedStatus}
-                sacredtheme={sacredtheme}
-              />
-            </Box>
-          </Box>
-
-          {/* Create a mapping from topic name to ID for lookup when submitting */}
-          {/* Also create a reverse mapping from ID to name for displaying selected values */}
-          {React.useMemo(() => {
-            console.log('Topics being mapped for dropdown:', topics)
-
-            // Create complex options for topics with _id as attribute1
-            const topicOptions = topics.map(t => ({
-              value: t.topic || `Topic ${t._id}`,
-              attribute1: t._id, // Store ID in attribute1
-            }))
-
-            console.log('Topic options created:', topicOptions)
-
-            // Translate selected IDs to names for display
-            const selectedTopicValues = selectedTopicIds.map(id => {
-              const topic = topics.find(t => t._id === id)
-              return topic ? topic.topic || `Topic ${topic._id}` : id
-            })
-
-            return (
-              <>
-                {/* Topics multi-select – using complex options with IDs in attribute1 */}
+            {React.useMemo(() => {
+              const topicOptions = topics.map(t => ({
+                value: t.topic || `Topic ${t._id}`,
+                attribute1: t._id,
+              }))
+              const selectedTopicValues = selectedTopicIds.map(id => {
+                const topic = topics.find(t => t._id === id)
+                return topic ? topic.topic || `Topic ${topic._id}` : id
+              })
+              return (
                 <MultiSelect
                   label="Topics"
                   options={topicOptions}
                   defaultSelected={selectedTopicValues}
                   onChange={selectedValues => {
-                    console.log('Selected topic values:', selectedValues)
-
-                    // Find the selected topics and get their IDs
                     const newSelectedIds = selectedValues.map(value => {
                       const matchingTopic = topicOptions.find(
                         opt => opt.value === value
                       )
-                      return matchingTopic?.attribute1 || value // Fall back to value if no match
+                      return matchingTopic?.attribute1 || value
                     })
-
-                    console.log('Mapped to topic IDs:', newSelectedIds)
                     setSelectedTopicIds(newSelectedIds)
                   }}
-                  complexOptions={true} // Explicitly set to use complex options
+                  complexOptions={true}
                   sacredtheme={sacredtheme}
                 />
-              </>
-            )
-          }, [topics, selectedTopicIds, sacredtheme])}
+              )
+            }, [topics, selectedTopicIds, sacredtheme])}
 
-          {/* Knowledgebase Articles multi-select – using article titles with IDs in attribute1 */}
-          {React.useMemo(() => {
-            // Create complex options with article IDs
-            const articleOptions = knowledgebaseArticles.map(a => ({
-              value: a.articleTitle || `Article ${a._id}`,
-              attribute1: a._id, // Store ID in attribute1
-            }))
+            {React.useMemo(() => {
+              const articleOptions = knowledgebaseArticles.map(a => ({
+                value: a.articleTitle || `Article ${a._id}`,
+                attribute1: a._id,
+              }))
+              const selectedArticleValues = selectedArticleIds.map(id => {
+                const article = knowledgebaseArticles.find(a => a._id === id)
+                return article
+                  ? article.articleTitle || `Article ${article._id}`
+                  : id
+              })
+              return (
+                <MultiSelect
+                  label="Knowledgebase Articles"
+                  options={articleOptions}
+                  defaultSelected={selectedArticleValues}
+                  onChange={selectedValues => {
+                    const newSelectedIds = selectedValues.map(value => {
+                      const matchingArticle = articleOptions.find(
+                        opt => opt.value === value
+                      )
+                      return matchingArticle?.attribute1 || value
+                    })
+                    setSelectedArticleIds(newSelectedIds)
+                  }}
+                  complexOptions={true}
+                  sacredtheme={sacredtheme}
+                />
+              )
+            }, [knowledgebaseArticles, selectedArticleIds, sacredtheme])}
 
-            // Translate selected IDs to titles for display
-            const selectedArticleValues = selectedArticleIds.map(id => {
-              const article = knowledgebaseArticles.find(a => a._id === id)
-              return article
-                ? article.articleTitle || `Article ${article._id}`
-                : id
-            })
-
-            return (
-              <MultiSelect
-                label="Knowledgebase Articles"
-                options={articleOptions}
-                defaultSelected={selectedArticleValues}
-                onChange={selectedValues => {
-                  // Map the selected values to IDs using attribute1
-                  const newSelectedIds = selectedValues.map(value => {
-                    const matchingArticle = articleOptions.find(
-                      opt => opt.value === value
-                    )
-                    return matchingArticle?.attribute1 || value // Fall back to value if no match
-                  })
-
-                  setSelectedArticleIds(newSelectedIds)
-                }}
-                complexOptions={true} // Explicitly set to use complex options
+            <div style={styles.buttonContainer}>
+              <CustomButton
+                text="Cancel"
+                onClick={onClose}
+                backgroundcolor="none"
+                fontcolor={sacredtheme ? '#FFD700' : 'black'}
                 sacredtheme={sacredtheme}
               />
-            )
-          }, [knowledgebaseArticles, selectedArticleIds, sacredtheme])}
-
-          {/* Action Buttons */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: 2,
-              mt: 2,
-              flexDirection: isMobile ? 'column' : 'row',
-            }}
-          >
-            <CustomButton
-              text="Cancel"
-              onClick={onClose}
-              backgroundcolor="none"
-              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-              sacredtheme={sacredtheme}
-            />
-            <CustomButton
-              text="Create Task"
-              onClick={handleSubmit}
-              backgroundcolor={sacredtheme ? egyptianStyles.goldColor : '#000'}
-              fontcolor={sacredtheme ? '#000' : 'white'}
-              sacredtheme={sacredtheme}
-            />
-          </Box>
-        </Box>
-      </Box>
+              <CustomButton
+                text="Create Task"
+                onClick={handleSubmit}
+                backgroundcolor={sacredtheme ? '#FFD700' : '#000'}
+                fontcolor={sacredtheme ? '#000' : 'white'}
+                sacredtheme={sacredtheme}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </Dialog>
   )
 }

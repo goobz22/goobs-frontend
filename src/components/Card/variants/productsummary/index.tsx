@@ -3,60 +3,122 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Box, Paper, Switch, keyframes, alpha } from '@mui/material'
 import Typography from '../../../../components/Typography'
 import CustomButton, { CustomButtonProps } from '../../../../components/Button'
+import Switch from '../../../../components/Switch'
+import { SACRED_GLYPHS } from '../../../../styles/sacredGlyphs'
 
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = ['𓊻', '𓋹', '𓌻', '𓍿', '𓅨', '𓂋']
-
-const sacredPulse = keyframes`
-  0% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 0.5; transform: scale(1); }
-`
-
-const sacredSwitchGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-3px) rotate(180deg); }
-  100% { transform: translateY(0px) rotate(360deg); }
-`
-
-/**
- * Props for the ProductSummaryCard component.
- */
 interface ProductSummaryCardProps {
-  /** Title of the product */
   title?: string
-  /** Body text */
   body?: string
-  /** Annual price of the product */
   annualPrice?: string
-  /** Monthly price of the product */
   monthlyPrice?: string
-  /** Props for the first button */
   button1Props?: CustomButtonProps
-  /** Props for the second button */
   button2Props?: CustomButtonProps
-  /** Height of the card */
   height?: string | number
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
 }
 
-/**
- * ProductSummaryCard component renders a card displaying a summary of a product,
- * including its title, description, pricing options, and action buttons.
- */
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    overflow: 'hidden',
+    ...(sacredtheme
+      ? {
+          border: '1px solid rgba(255, 215, 0, 0.3)',
+          backgroundColor: 'black',
+          boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.2)',
+          backgroundImage:
+            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.05), transparent)',
+        }
+      : {
+          border: '1px solid #E5E7EB',
+          backgroundColor: 'white',
+        }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    bottom: '1rem',
+    left: '1rem',
+    color: 'rgba(255, 215, 0, 0.15)',
+    fontSize: '4.5rem',
+    animation: 'product-summary-float 5s infinite alternate',
+    zIndex: 0,
+  } as React.CSSProperties,
+  header: {
+    width: '100%',
+    padding: '1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 10,
+    ...(sacredtheme
+      ? {
+          borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+          backgroundImage:
+            'linear-gradient(to right, rgba(255, 215, 0, 0.05), transparent, rgba(255, 215, 0, 0.05))',
+        }
+      : {
+          borderBottom: '1px solid #E5E7EB',
+        }),
+  } as React.CSSProperties,
+  title: {
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      fontWeight: 600,
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+    }),
+  } as React.CSSProperties,
+  price: {
+    ...(sacredtheme && {
+      fontWeight: 'bold',
+      textShadow: '0 0 5px rgba(255,215,0,0.5)',
+      animation: 'product-summary-pulse 2s infinite alternate',
+    }),
+  } as React.CSSProperties,
+  body: {
+    padding: '1rem',
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+  bodyText: {
+    ...(sacredtheme && {
+      letterSpacing: '0.025em',
+    }),
+  } as React.CSSProperties,
+  footer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem',
+    marginTop: 'auto',
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+  pricingToggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  toggleLabel: {
+    ...(sacredtheme && {
+      color: 'rgba(255, 215, 0, 0.7)',
+    }),
+  } as React.CSSProperties,
+  activeToggleLabel: {
+    ...(sacredtheme && {
+      color: '#FFD700',
+      textShadow: '0 0 3px rgba(255,215,0,0.5)',
+    }),
+  } as React.CSSProperties,
+})
+
 const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
   title,
   body,
@@ -67,207 +129,76 @@ const ProductSummaryCard: React.FC<ProductSummaryCardProps> = ({
   button2Props,
   sacredtheme = false,
 }) => {
-  /** State to track whether annual or monthly pricing is selected */
   const [isAnnualPricing, setIsAnnualPricing] = useState(true)
+  const styles = getStyles(sacredtheme)
 
-  /**
-   * Toggles between annual and monthly pricing
-   */
   const handlePricingToggle = () => {
     setIsAnnualPricing(!isAnnualPricing)
   }
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'stretch',
-        border: sacredtheme
-          ? `1px solid ${alpha('#FFD700', 0.3)}`
-          : '1px solid #e8e8e8',
-        height: height,
-        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-        overflow: 'hidden',
-        ...(sacredtheme && {
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-          `,
-          boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)',
-          '&::before': {
-            content: `"${SACRED_GLYPHS[1]}"`,
-            position: 'absolute',
-            bottom: '16px',
-            left: '16px',
-            color: alpha('#FFD700', 0.15),
-            fontSize: '64px',
-            animation: `${floatAnimation} 10s ease-in-out infinite`,
-            zIndex: 0,
-          },
-        }),
-      }}
-    >
-      {/* Title and Price section */}
-      <Box
-        sx={{
-          borderBottom: sacredtheme
-            ? `1px solid ${alpha('#FFD700', 0.3)}`
-            : '1px solid #e8e8e8',
-          width: '100%',
-          paddingLeft: '15px',
-          paddingRight: '15px',
-          paddingBottom: '10px',
-          paddingTop: '10px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 1,
-          ...(sacredtheme && {
-            background: `linear-gradient(to right, ${alpha('#FFD700', 0.05)}, transparent)`,
-          }),
-        }}
-      >
+    <div style={{ ...styles.container, height }}>
+      {sacredtheme && <div style={styles.glyph}>{SACRED_GLYPHS[1]}</div>}
+      <div style={styles.header}>
         <Typography
           text={title}
           fontcolor={sacredtheme ? '#FFD700' : 'black'}
           fontvariant="merrih5"
-          sx={
-            sacredtheme
-              ? {
-                  fontFamily: '"Cinzel", serif',
-                  fontWeight: 600,
-                  letterSpacing: '1px',
-                  textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                }
-              : undefined
-          }
+          style={styles.title}
         />
         <Typography
           text={isAnnualPricing ? `$${annualPrice}` : `$${monthlyPrice}`}
-          fontcolor={sacredtheme ? '#FFD700' : 'primary'}
+          fontcolor={sacredtheme ? '#FFD700' : 'blue'}
           fontvariant="merrih6"
-          sx={
-            sacredtheme
-              ? {
-                  fontWeight: 700,
-                  textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
-                  animation: `${sacredPulse} 2s ease-in-out infinite`,
-                }
-              : undefined
-          }
+          style={styles.price}
         />
-      </Box>
+      </div>
 
-      {/* Body text section */}
       {body && (
-        <Box sx={{ padding: '16px 15px', position: 'relative', zIndex: 1 }}>
+        <div style={styles.body}>
           <Typography
             text={body}
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
             fontvariant="merriparagraph"
-            sx={
-              sacredtheme
-                ? {
-                    letterSpacing: '0.5px',
-                  }
-                : undefined
-            }
+            style={styles.bodyText}
           />
-        </Box>
+        </div>
       )}
 
-      {/* Buttons and Pricing Toggle section */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingLeft: '15px',
-          paddingRight: '15px',
-          paddingBottom: '15px',
-          marginTop: 'auto',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        {/* First button */}
+      <div style={styles.footer}>
         {button1Props && (
           <CustomButton {...button1Props} sacredtheme={sacredtheme} />
         )}
-
-        {/* Pricing toggle switch */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <div style={styles.pricingToggle}>
           <Typography
             text="Monthly"
             fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
-            sx={{
-              marginRight: '8px',
-              ...(sacredtheme &&
-                !isAnnualPricing && {
-                  color: '#FFD700',
-                  textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-                }),
+            style={{
+              ...styles.toggleLabel,
+              ...(!isAnnualPricing && styles.activeToggleLabel),
+              marginRight: '0.5rem',
             }}
           />
           <Switch
             checked={isAnnualPricing}
             onChange={handlePricingToggle}
-            color="primary"
-            sx={
-              sacredtheme
-                ? {
-                    '& .MuiSwitch-switchBase': {
-                      color: alpha('#FFD700', 0.7),
-                      '&.Mui-checked': {
-                        color: '#FFD700',
-                        '& + .MuiSwitch-track': {
-                          backgroundColor: alpha('#FFD700', 0.5),
-                          opacity: 1,
-                          animation: `${sacredSwitchGlow} 2s ease-in-out infinite`,
-                        },
-                      },
-                    },
-                    '& .MuiSwitch-track': {
-                      backgroundColor: alpha('#FFD700', 0.3),
-                      opacity: 1,
-                    },
-                  }
-                : undefined
-            }
+            sacredtheme={sacredtheme}
           />
           <Typography
             text="Annual"
             fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
-            sx={{
-              marginLeft: '8px',
-              ...(sacredtheme &&
-                isAnnualPricing && {
-                  color: '#FFD700',
-                  textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-                }),
+            style={{
+              ...styles.toggleLabel,
+              ...(isAnnualPricing && styles.activeToggleLabel),
+              marginLeft: '0.5rem',
             }}
           />
-        </Box>
-
-        {/* Second button */}
+        </div>
         {button2Props && (
           <CustomButton {...button2Props} sacredtheme={sacredtheme} />
         )}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

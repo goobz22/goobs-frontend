@@ -1,58 +1,11 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { Box, alpha, keyframes, Typography } from '@mui/material'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { TypographyProps } from '../../Typography'
 import CustomButton, { CustomButtonProps } from '../../Button'
-import { white } from '../../../styles/palette'
+import Typography from '../../Typography'
 
-// Sacred geometry animations
-const glowPulse = keyframes`
-  0% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-  50% { 
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-    border-color: ${alpha('#FFD700', 0.8)};
-  }
-  100% { 
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-    border-color: ${alpha('#FFD700', 0.5)};
-  }
-`
-
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  33% { transform: translateY(-5px) rotate(120deg); opacity: 0.5; }
-  66% { transform: translateY(2px) rotate(240deg); opacity: 0.4; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const sacredShimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
-const scrollbarGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-`
-
-// Egyptian styling constants
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  goldGradient:
-    'linear-gradient(135deg, #FFD700 0%, #F4A460 50%, #DAA520 100%)',
-  darkGold: '#B8860B',
-  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
-  cardBackground: alpha('#000000', 0.85),
-  glowEffect: `0 0 30px ${alpha('#FFD700', 0.3)}, 0 0 60px ${alpha('#FFD700', 0.1)}`,
-}
-
-// Sacred hieroglyphs for decoration
 const SACRED_GLYPHS = [
   '𓁟',
   '𓂀',
@@ -86,11 +39,99 @@ export interface CustomDialogProps {
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
-  /** Optional array of button props for footer buttons */
   buttons?: CustomButtonProps[]
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
 }
+
+const getStyles = (sacredtheme?: boolean, width?: number) => ({
+  container: {
+    width: `${width}px`,
+    maxWidth: '100%',
+    maxHeight: '90vh',
+    margin: 'auto',
+    overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    ...(sacredtheme
+      ? {
+          position: 'relative',
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(16px)',
+          border: '2px solid rgba(255, 215, 0, 0.5)',
+          borderRadius: '0.75rem',
+          padding: '1.5rem',
+          animation: 'dialog-glow-pulse 2s infinite alternate',
+        }
+      : {
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          boxShadow:
+            '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+          padding: '1.5rem',
+        }),
+  } as React.CSSProperties,
+  shimmer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    backgroundImage:
+      'linear-gradient(to right, transparent, #FFD700, transparent)',
+    animation: 'dialog-shimmer 3s infinite',
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    color: 'rgba(255, 215, 0, 0.3)',
+    fontSize: '1.125rem',
+    zIndex: 10,
+    animation: 'dialog-float 8s infinite alternate',
+  } as React.CSSProperties,
+  headerGlyphs: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.375rem',
+    marginBottom: '0.25rem',
+  } as React.CSSProperties,
+  headerGlyph: {
+    color: 'rgba(255, 215, 0, 0.6)',
+    fontSize: '1rem',
+    animation: 'dialog-float 4s infinite alternate',
+  } as React.CSSProperties,
+  buttonContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: '0.5rem',
+    marginTop: '1rem',
+    ...(sacredtheme && {
+      borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+      paddingTop: '1rem',
+    }),
+  } as React.CSSProperties,
+  contentContainer: {
+    flex: 1,
+    overflow: 'auto',
+    minHeight: 0,
+    paddingRight: '0.625rem',
+    ...(sacredtheme && {
+      position: 'relative',
+      zIndex: 10,
+    }),
+  } as React.CSSProperties,
+  footerGlyphs: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.125rem',
+    marginTop: '0.5rem',
+    opacity: 0.5,
+  } as React.CSSProperties,
+  footerGlyph: {
+    color: '#FFD700',
+    fontSize: '0.75rem',
+    animation: 'dialog-float 3s infinite alternate',
+  } as React.CSSProperties,
+})
 
 function CustomDialog({
   title,
@@ -101,17 +142,18 @@ function CustomDialog({
   buttons,
   sacredtheme = true,
 }: CustomDialogProps) {
+  const styles = getStyles(sacredtheme, width)
   const headerGrid = useMemo(
     (): ContentSectionProps['grids'][0] => ({
       typography: [
         {
           text: title,
           fontvariant: 'merrih4',
-          fontcolor: sacredtheme ? egyptianStyles.goldColor : 'black',
+          fontcolor: sacredtheme ? '#FFD700' : 'black',
           style: sacredtheme
             ? {
                 fontFamily: '"Cinzel", serif',
-                textShadow: egyptianStyles.textShadow,
+                textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
                 letterSpacing: '0.1em',
                 textAlign: 'center',
               }
@@ -121,7 +163,7 @@ function CustomDialog({
         {
           text: description,
           fontvariant: 'merrih5',
-          fontcolor: sacredtheme ? alpha('#ffffff', 0.9) : 'black',
+          fontcolor: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
           style: sacredtheme
             ? {
                 fontFamily: '"Crimson Text", serif',
@@ -132,67 +174,40 @@ function CustomDialog({
           sacredtheme: sacredtheme,
         },
       ] as TypographyProps[],
-      style: sacredtheme
-        ? {
-            marginBottom: '16px',
-          }
-        : undefined,
+      style: sacredtheme ? { marginBottom: '16px' } : undefined,
     }),
     [title, description, sacredtheme]
   )
 
   const renderHeader = useMemo(() => {
     if (!title && !description) return null
-
     return (
       <>
         {sacredtheme && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 1.5,
-              mb: 1,
-            }}
-          >
+          <div style={styles.headerGlyphs}>
             {SACRED_GLYPHS.slice(0, 5).map((glyph, index) => (
               <Typography
                 key={index}
-                sx={{
-                  color: alpha(egyptianStyles.goldColor, 0.6),
-                  fontSize: '1rem',
-                  animation: `${floatAnimation} ${3 + index * 0.5}s ease-in-out infinite`,
+                style={{
+                  ...styles.headerGlyph,
                   animationDelay: `${index * 0.2}s`,
                 }}
               >
                 {glyph}
               </Typography>
             ))}
-          </Box>
+          </div>
         )}
         <ContentSection grids={[headerGrid]} />
       </>
     )
-  }, [headerGrid, sacredtheme, title, description])
+  }, [headerGrid, sacredtheme, title, description, styles])
 
   const renderButtons = useMemo(() => {
     if (!buttons || buttons.length === 0) return null
-
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: 2,
-          marginTop: sacredtheme ? '16px' : '15px',
-          ...(sacredtheme && {
-            borderTop: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-            paddingTop: '16px',
-          }),
-        }}
-      >
-        {buttons.map((buttonProps, index) => (
+      <div style={styles.buttonContainer}>
+        {buttons.map((buttonProps: CustomButtonProps, index: number) => (
           <CustomButton
             key={index}
             {...buttonProps}
@@ -202,207 +217,71 @@ function CustomDialog({
                 ? {
                     fontFamily: '"Cinzel", serif',
                     letterSpacing: '0.05em',
-                    boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.3)}`,
+                    boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
                     ...buttonProps.style,
                   }
                 : buttonProps.style
             }
           />
         ))}
-      </Box>
+      </div>
     )
-  }, [buttons, sacredtheme])
-
-  const containerStyles = useMemo(() => {
-    const baseStyles = {
-      width: `${width}px`,
-      maxWidth: '100%',
-      maxHeight: '90vh',
-      margin: '0 auto',
-      overflow: 'auto' as const,
-      display: 'flex',
-      flexDirection: 'column' as const,
-    }
-
-    if (!sacredtheme) {
-      return {
-        ...baseStyles,
-        borderRadius: '16px',
-        boxShadow: 3,
-        padding: 3,
-        bgcolor: white.main,
-      }
-    }
-
-    return {
-      ...baseStyles,
-      borderRadius: '12px',
-      padding: '24px 32px 20px 32px',
-      position: 'relative' as const,
-      bgcolor: egyptianStyles.cardBackground,
-      backdropFilter: 'blur(20px)',
-      border: `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`,
-      animation: `${glowPulse} 4s ease-in-out infinite`,
-      // Sacred scrollbar styling for the main container
-      '&::-webkit-scrollbar': {
-        width: '12px',
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: alpha('#000000', 0.3),
-        borderRadius: '6px',
-        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
-        borderRadius: '6px',
-        border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
-        boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
-        animation: `${scrollbarGlow} 3s ease-in-out infinite`,
-        '&:hover': {
-          backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
-          boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
-        },
-      },
-      '&::-webkit-scrollbar-thumb:active': {
-        backgroundColor: egyptianStyles.goldColor,
-        boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
-      },
-      // Firefox scrollbar styling
-      scrollbarWidth: 'thin',
-      scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '1px',
-        background: `linear-gradient(90deg, transparent, ${egyptianStyles.goldColor}, transparent)`,
-        backgroundSize: '200% 100%',
-        animation: `${sacredShimmer} 3s linear infinite`,
-      },
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '1px',
-        background: `linear-gradient(90deg, transparent, ${egyptianStyles.goldColor}, transparent)`,
-        backgroundSize: '200% 100%',
-        animation: `${sacredShimmer} 3s linear infinite`,
-        animationDelay: '1.5s',
-      },
-    }
-  }, [sacredtheme, width])
+  }, [buttons, sacredtheme, styles])
 
   return (
-    <Box sx={containerStyles}>
-      {/* Top corner decorations */}
+    <div style={styles.container}>
       {sacredtheme && (
         <>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 5s ease-in-out infinite`,
+          <div style={{ ...styles.shimmer, animationDelay: '0s' }} />
+          <div
+            style={{
+              ...styles.shimmer,
+              bottom: 0,
+              top: 'auto',
+              animationDelay: '1.5s',
             }}
-          >
+          />
+          <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
             {SACRED_GLYPHS[10]}
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              color: alpha(egyptianStyles.goldColor, 0.3),
-              fontSize: '18px',
-              animation: `${floatAnimation} 5s ease-in-out infinite reverse`,
+          </div>
+          <div
+            style={{
+              ...styles.glyph,
+              top: '0.75rem',
+              right: '0.75rem',
+              animationDirection: 'reverse',
             }}
           >
             {SACRED_GLYPHS[11]}
-          </Box>
+          </div>
         </>
       )}
 
       {renderHeader}
 
-      <Box
-        sx={{
-          flex: 1,
-          overflow: 'auto',
-          minHeight: 0,
-          paddingRight: '10px',
-          ...(sacredtheme
-            ? {
-                position: 'relative',
-                zIndex: 1,
-                // Custom scrollbar styling for sacred theme
-                '&::-webkit-scrollbar': {
-                  width: '12px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: alpha('#000000', 0.3),
-                  borderRadius: '6px',
-                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.2)}`,
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: alpha(egyptianStyles.goldColor, 0.6),
-                  borderRadius: '6px',
-                  border: `1px solid ${alpha(egyptianStyles.goldColor, 0.4)}`,
-                  boxShadow: `0 0 8px ${alpha(egyptianStyles.goldColor, 0.4)}`,
-                  animation: `${scrollbarGlow} 3s ease-in-out infinite`,
-                  '&:hover': {
-                    backgroundColor: alpha(egyptianStyles.goldColor, 0.8),
-                    boxShadow: `0 0 12px ${alpha(egyptianStyles.goldColor, 0.6)}`,
-                  },
-                },
-                '&::-webkit-scrollbar-thumb:active': {
-                  backgroundColor: egyptianStyles.goldColor,
-                  boxShadow: `0 0 15px ${alpha(egyptianStyles.goldColor, 0.8)}`,
-                },
-                // Firefox scrollbar styling
-                scrollbarWidth: 'thin',
-                scrollbarColor: `${alpha(egyptianStyles.goldColor, 0.6)} ${alpha('#000000', 0.3)}`,
-              }
-            : {}),
-        }}
-      >
+      <div style={styles.contentContainer}>
         {content ||
           (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
-      </Box>
+      </div>
 
       {renderButtons}
 
-      {/* Bottom decoration */}
       {sacredtheme && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 0.5,
-            mt: 2,
-            opacity: 0.5,
-          }}
-        >
+        <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <Typography
               key={index}
-              sx={{
-                color: egyptianStyles.goldColor,
-                fontSize: '12px',
-                animation: `${floatAnimation} ${2 + index * 0.3}s ease-in-out infinite`,
+              style={{
+                ...styles.footerGlyph,
+                animationDelay: `${2 + index * 0.3}s`,
               }}
             >
               {glyph}
             </Typography>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

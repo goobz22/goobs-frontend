@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useState, useCallback, useRef } from 'react'
-import { Box, IconButton, Typography } from '@mui/material'
 import TextField, { TextFieldProps } from '../../../Field/Text'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import { styled } from '@mui/material/styles'
+import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
+import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 export interface CIDRFieldProps extends Omit<TextFieldProps, 'onChange'> {
   initialValue?: string
@@ -13,50 +11,12 @@ export interface CIDRFieldProps extends Omit<TextFieldProps, 'onChange'> {
   label?: string
   initialDelay?: number
   repeatInterval?: number
-  /** The minimum CIDR value (default: 8) */
   minCidr?: number
-  /** The maximum CIDR value (default: 32) */
   maxCidr?: number
-  /** Whether to show subnet information (default: true) */
   showSubnetInfo?: boolean
 }
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  padding: 0,
-  width: '16px',
-  height: '16px',
-  minWidth: '16px',
-  minHeight: '16px',
-  borderRadius: '2px',
-  '&:hover': {
-    backgroundColor: theme.palette.grey[200],
-  },
-}))
-
-const ArrowIcon = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: '16px',
-  width: '16px',
-  lineHeight: 1,
-})
-
-const CIDRInfo = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(1),
-  color: theme.palette.text.secondary,
-  fontSize: '0.875rem',
-}))
-
-interface CIDRData {
-  mask: string
-  totalHosts: string
-  usableHosts: string
-  networks: string
-}
-
-const calculateCIDRInfo = (cidr: number): CIDRData => {
-  // Calculate subnet mask
+const calculateCIDRInfo = (cidr: number) => {
   const fullMask = Math.pow(2, 32) - Math.pow(2, 32 - cidr)
   const maskParts = [
     (fullMask >> 24) & 255,
@@ -65,12 +25,8 @@ const calculateCIDRInfo = (cidr: number): CIDRData => {
     fullMask & 255,
   ]
   const mask = maskParts.join('.')
-
-  // Calculate total hosts and usable hosts
   const totalHosts = Math.pow(2, 32 - cidr)
   const usableHosts = Math.max(totalHosts - 2, 0)
-
-  // Calculate number of networks (for supernet calculation)
   const networks = Math.pow(2, 32 - cidr)
 
   return {
@@ -81,6 +37,39 @@ const calculateCIDRInfo = (cidr: number): CIDRData => {
   }
 }
 
+const getStyles = () => ({
+  buttonContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    justifyContent: 'center',
+    marginRight: '-0.25rem',
+  } as React.CSSProperties,
+  button: {
+    padding: 0,
+    width: '1rem',
+    height: '1rem',
+    minWidth: '1rem',
+    minHeight: '1rem',
+    borderRadius: '0.125rem',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    '&:hover': {
+      backgroundColor: '#E5E7EB',
+    },
+    '&:disabled': {
+      opacity: 0.5,
+    },
+  } as React.CSSProperties,
+  infoContainer: {
+    marginTop: '0.5rem',
+    fontSize: '0.875rem',
+    color: '#4B5563',
+  } as React.CSSProperties,
+})
+
 const CIDRField: React.FC<CIDRFieldProps> = ({
   initialValue = '24',
   onChange,
@@ -90,6 +79,8 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   minCidr = 8,
   maxCidr = 32,
   showSubnetInfo = true,
+  disabled,
+  sacredtheme,
   ...rest
 }) => {
   const [currentValue, setCurrentValue] = useState(() => {
@@ -102,51 +93,30 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cidrInfo = calculateCIDRInfo(parseInt(currentValue) || 24)
+  const styles = getStyles()
 
   const clearTimers = useCallback(() => {
-    if (initialTimerRef.current) {
-      clearTimeout(initialTimerRef.current)
-      initialTimerRef.current = null
-    }
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
+    if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
+    if (timerRef.current) clearInterval(timerRef.current)
+    initialTimerRef.current = null
+    timerRef.current = null
   }, [])
 
   const handleIncrement = useCallback(() => {
     setCurrentValue(prev => {
       const num = parseInt(prev)
-      if (isNaN(num)) {
-        return minCidr.toString()
-      }
-
-      const newValue = Math.min(maxCidr, num + 1)
-      const newValueStr = newValue.toString()
-
-      if (onChange) {
-        onChange(newValue)
-      }
-
-      return newValueStr
+      const newValue = Math.min(maxCidr, isNaN(num) ? minCidr : num + 1)
+      onChange?.(newValue)
+      return newValue.toString()
     })
   }, [onChange, maxCidr, minCidr])
 
   const handleDecrement = useCallback(() => {
     setCurrentValue(prev => {
       const num = parseInt(prev)
-      if (isNaN(num)) {
-        return minCidr.toString()
-      }
-
-      const newValue = Math.max(minCidr, num - 1)
-      const newValueStr = newValue.toString()
-
-      if (onChange) {
-        onChange(newValue)
-      }
-
-      return newValueStr
+      const newValue = Math.max(minCidr, isNaN(num) ? minCidr : num - 1)
+      onChange?.(newValue)
+      return newValue.toString()
     })
   }, [onChange, minCidr])
 
@@ -178,16 +148,15 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value.replace(/[^0-9]/g, '')
-
+      const newValue = event.target.value
+        .replace(/[^0-9/]/g, '')
+        .replace('/', '')
       if (newValue === '') {
         setCurrentValue(minCidr.toString())
         onChange?.(event)
         return
       }
-
       const numValue = parseInt(newValue, 10)
-
       if (isNaN(numValue) || numValue < minCidr) {
         setCurrentValue(minCidr.toString())
       } else if (numValue > maxCidr) {
@@ -195,70 +164,55 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
       } else {
         setCurrentValue(newValue)
       }
-
       onChange?.(event)
     },
     [onChange, minCidr, maxCidr]
   )
 
+  const EndAdornment = () => (
+    <div style={styles.buttonContainer}>
+      <button
+        type="button"
+        onMouseDown={handleIncrementMouseDown}
+        disabled={disabled}
+        style={styles.button}
+      >
+        <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
+      </button>
+      <button
+        type="button"
+        onMouseDown={handleDecrementMouseDown}
+        disabled={disabled}
+        style={styles.button}
+      >
+        <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
+      </button>
+    </div>
+  )
+
   return (
-    <Box>
+    <div>
       <TextField
         value={`/${currentValue}`}
         onChange={handleChange}
         label={label}
         type="text"
         inputMode="numeric"
-        variant="outlined"
-        endAdornment={
-          <Box
-            display="flex"
-            flexDirection="column"
-            sx={{
-              marginRight: '-4px',
-              height: '32px',
-              justifyContent: 'center',
-            }}
-          >
-            <StyledIconButton
-              size="small"
-              onMouseDown={handleIncrementMouseDown}
-              edge="end"
-              aria-label="increment"
-              sx={{ marginBottom: '-2px' }}
-            >
-              <ArrowIcon>
-                <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
-              </ArrowIcon>
-            </StyledIconButton>
-            <StyledIconButton
-              size="small"
-              onMouseDown={handleDecrementMouseDown}
-              edge="end"
-              aria-label="decrement"
-            >
-              <ArrowIcon>
-                <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
-              </ArrowIcon>
-            </StyledIconButton>
-          </Box>
-        }
+        disabled={disabled}
+        endAdornment={<EndAdornment />}
+        sacredtheme={sacredtheme}
         {...rest}
       />
       {showSubnetInfo && (
-        <CIDRInfo>
-          <Typography variant="body2" component="div">
-            Subnet Mask: {cidrInfo.mask}
-          </Typography>
-          <Typography variant="body2" component="div">
+        <div style={styles.infoContainer}>
+          <div>Subnet Mask: {cidrInfo.mask}</div>
+          <div>
             Total Hosts: {cidrInfo.totalHosts} ({cidrInfo.usableHosts} usable)
-          </Typography>
-          <Typography variant="body2" component="div">
-            Networks: {cidrInfo.networks}
-          </Typography>
-        </CIDRInfo>
+          </div>
+          <div>Networks: {cidrInfo.networks}</div>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

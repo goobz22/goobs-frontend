@@ -1,120 +1,136 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
-import { Box, IconButton } from '@mui/material'
-import TextField, { TextFieldProps } from '../../../Field/Text'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import { styled, keyframes, alpha } from '@mui/material/styles'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
+import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
+import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
-// Sacred theme animations matching TextField
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3); }
-`
-
-const hieroglyphPulse = keyframes`
-  0% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
-  100% { opacity: 0.3; transform: scale(1); }
-`
-
-export interface InternalIncrementNumberFieldProps
-  extends Omit<TextFieldProps, 'onChange'> {
+export interface InternalIncrementNumberFieldProps {
   initialValue?: string
-  /**
-   * A standard ChangeEvent<HTMLInputElement> so parent can do
-   * e.g. (event) => parseInt(event.target.value) ...
-   */
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
   label?: string
   min?: number
   max?: number
-  /** Initial delay before continuous increment/decrement starts (ms) */
   initialDelay?: number
-  /** Interval between continuous increment/decrement actions (ms) */
   repeatInterval?: number
-  /** Enable sacred Egyptian theme */
   sacredtheme?: boolean
+  value?: string
+  placeholder?: string
+  disabled?: boolean
+  name?: string
+  id?: string
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
+  error?: boolean
+  helperText?: string
+  style?: React.CSSProperties
 }
 
-interface StyledIconButtonProps {
-  sacredtheme?: boolean
-}
-
-const StyledIconButton = styled(IconButton, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<StyledIconButtonProps>(({ theme, sacredtheme }) => ({
-  padding: 0,
-  width: '16px',
-  height: '16px',
-  minWidth: '16px',
-  minHeight: '16px',
-  borderRadius: '2px',
-  transition: 'all 0.3s ease',
-  ...(sacredtheme
-    ? {
-        backgroundColor: alpha('#FFD700', 0.1),
-        color: '#FFD700',
-        border: `1px solid ${alpha('#FFD700', 0.3)}`,
-        position: 'relative',
-        '&::before': {
-          content: '"𓆙"',
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: '8px',
-          opacity: 0.3,
-          pointerEvents: 'none',
-          zIndex: 0,
-          animation: `${hieroglyphPulse} 3s ease-in-out infinite`,
-        },
-        '&:hover': {
-          backgroundColor: alpha('#FFD700', 0.2),
-          boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
-          transform: 'scale(1.05)',
-          '&::before': {
-            opacity: 0.6,
-          },
-        },
-        '&:active': {
-          animation: `${sacredGlow} 0.3s ease-in-out`,
-          transform: 'scale(0.95)',
-        },
-      }
-    : {
-        '&:hover': {
-          backgroundColor: theme.palette.grey[200],
-        },
-      }),
-}))
-
-const ArrowIcon = styled(Box, {
-  shouldForwardProp: prop => prop !== 'sacredtheme',
-})<{ sacredtheme?: boolean }>(({ sacredtheme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: '16px',
-  width: '16px',
-  lineHeight: 1,
-  zIndex: 1,
-  position: 'relative',
-  ...(sacredtheme && {
-    '& svg': {
-      filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.6))',
-      color: '#FFD700',
+const getStyles = (
+  sacredtheme: boolean,
+  isFocused: boolean,
+  isLabelFloating: boolean
+) => {
+  const premiumStyles = {
+    container: { position: 'relative', width: '100%' } as React.CSSProperties,
+    input: {
+      width: '100%',
+      height: '3.5rem',
+      paddingLeft: '1rem',
+      paddingRight: '3rem',
+      border: `2px solid ${isFocused ? '#3B82F6' : '#D1D5DB'}`,
+      borderRadius: '0.25rem',
+      outline: 'none',
+      transition: 'all 0.3s',
+      backgroundColor: 'white',
+      color: 'black',
     },
-  }),
-}))
+    label: {
+      position: 'absolute' as const,
+      left: '1rem',
+      transition: 'all 0.2s',
+      pointerEvents: 'none' as const,
+      color: isFocused ? '#3B82F6' : '#6B7281',
+      ...(isLabelFloating
+        ? {
+            top: '0',
+            fontSize: '0.75rem',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'white',
+            padding: '0 0.25rem',
+          }
+        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
+    } as React.CSSProperties,
+    adornmentContainer: {
+      position: 'absolute' as const,
+      right: '0.75rem',
+      top: '50%',
+      transform: 'translateY(-50%)',
+    } as React.CSSProperties,
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '2rem',
+      justifyContent: 'center',
+    } as React.CSSProperties,
+    button: {
+      padding: 0,
+      width: '1rem',
+      height: '1rem',
+      minWidth: '1rem',
+      minHeight: '1rem',
+      borderRadius: '0.125rem',
+      transition: 'all 0.3s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#4B5563',
+      '&:hover': { backgroundColor: '#E5E7EB' },
+    } as React.CSSProperties,
+    icon: { fontSize: '1.125rem' },
+  }
 
-/**
- * A controlled numeric field that allows digits with increment/decrement buttons
- * in the right slot and optionally enforces min/max constraints.
- * Holding down the buttons will continuously increment/decrement the value.
- */
+  const sacredStyles = {
+    ...premiumStyles,
+    input: {
+      ...premiumStyles.input,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#FFD700',
+      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
+      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
+    },
+    label: {
+      ...premiumStyles.label,
+      color: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.8)',
+      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
+    },
+    buttonContainer: {
+      ...premiumStyles.buttonContainer,
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      borderRadius: '0.25rem',
+      padding: '0.125rem',
+    },
+    button: {
+      ...premiumStyles.button,
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      color: '#FFD700',
+      border: '1px solid rgba(255, 215, 0, 0.3)',
+      '&:hover': {
+        backgroundColor: 'rgba(255, 215, 0, 0.2)',
+        boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
+      },
+    } as React.CSSProperties,
+    icon: {
+      ...premiumStyles.icon,
+      filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.6))',
+    },
+  }
+
+  return sacredtheme ? sacredStyles : premiumStyles
+}
+
 const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
 > = ({
@@ -123,177 +139,152 @@ const InternalIncrementNumberField: React.FC<
   label,
   min = 0,
   max,
-  initialDelay = 500, // wait 500ms before starting continuous increment/decrement
-  repeatInterval = 100, // then repeat every 100ms
+  initialDelay = 500,
+  repeatInterval = 100,
   sacredtheme = false,
+  value,
+  placeholder,
+  disabled = false,
+  name,
+  id,
+  onFocus,
+  onBlur,
+  outlinecolor,
+  fontcolor,
   ...rest
 }) => {
-  const [value, setValue] = useState(initialValue)
+  const [internalValue, setInternalValue] = useState(value || initialValue)
+  const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimers = useCallback(() => {
-    if (initialTimerRef.current) {
-      clearTimeout(initialTimerRef.current)
-      initialTimerRef.current = null
-    }
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
+    if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
+    if (timerRef.current) clearInterval(timerRef.current)
   }, [])
 
   const handleIncrement = useCallback(() => {
-    setValue(prev => {
+    setInternalValue(prev => {
       const num = parseInt(prev)
-      if (isNaN(num)) {
-        return '0'
-      }
-
-      const newValue = max !== undefined ? Math.min(max, num + 1) : num + 1
-      const newValueStr = newValue.toString()
-
-      if (onChange) {
-        onChange(newValue)
-      }
-
-      return newValueStr
+      const newValue =
+        max !== undefined
+          ? Math.min(max, (isNaN(num) ? 0 : num) + 1)
+          : (isNaN(num) ? 0 : num) + 1
+      onChange?.(newValue)
+      return newValue.toString()
     })
   }, [onChange, max])
 
   const handleDecrement = useCallback(() => {
-    setValue(prev => {
+    setInternalValue(prev => {
       const num = parseInt(prev)
-      if (isNaN(num)) {
-        return '0'
-      }
-
-      const newValue = Math.max(min, num - 1)
-      const newValueStr = newValue.toString()
-
-      if (onChange) {
-        onChange(newValue)
-      }
-
-      return newValueStr
+      const newValue = Math.max(min, (isNaN(num) ? 0 : num) - 1)
+      onChange?.(newValue)
+      return newValue.toString()
     })
   }, [onChange, min])
 
-  const handleIncrementMouseDown = useCallback(() => {
-    // First increment happens immediately
-    handleIncrement()
-
-    // Set initial delay before rapid increment starts
+  const handleMouseDown = (handler: () => void) => {
+    if (disabled) return
+    handler()
     initialTimerRef.current = setTimeout(() => {
-      // Start continuous increment
-      timerRef.current = setInterval(handleIncrement, repeatInterval)
+      timerRef.current = setInterval(handler, repeatInterval)
     }, initialDelay)
+    document.addEventListener('mouseup', clearTimers, { once: true })
+  }
 
-    // Capture mouse up and mouse leave events on the document
-    document.addEventListener('mouseup', clearTimers)
-    document.addEventListener('mouseleave', clearTimers)
-  }, [handleIncrement, initialDelay, repeatInterval, clearTimers])
-
-  const handleDecrementMouseDown = useCallback(() => {
-    // First decrement happens immediately
-    handleDecrement()
-
-    // Set initial delay before rapid decrement starts
-    initialTimerRef.current = setTimeout(() => {
-      // Start continuous decrement
-      timerRef.current = setInterval(handleDecrement, repeatInterval)
-    }, initialDelay)
-
-    // Capture mouse up and mouse leave events on the document
-    document.addEventListener('mouseup', clearTimers)
-    document.addEventListener('mouseleave', clearTimers)
-  }, [handleDecrement, initialDelay, repeatInterval, clearTimers])
-
-  // Clean up event listeners when component unmounts
-  React.useEffect(() => {
-    return () => {
-      clearTimers()
-      document.removeEventListener('mouseup', clearTimers)
-      document.removeEventListener('mouseleave', clearTimers)
-    }
-  }, [clearTimers])
+  useEffect(() => clearTimers, [clearTimers])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value.replace(/[^0-9]/g, '')
-
-      if (newValue === '') {
-        setValue('')
-        onChange?.(event)
-        return
-      }
-
       const numValue = parseInt(newValue, 10)
-
-      if (min !== undefined && numValue < min) {
-        setValue(String(min))
-      } else if (max !== undefined && numValue > max) {
-        setValue(String(max))
-      } else {
-        setValue(newValue)
+      let finalValue = newValue
+      if (min !== undefined && numValue < min) finalValue = String(min)
+      else if (max !== undefined && numValue > max) finalValue = String(max)
+      setInternalValue(finalValue)
+      const syntheticEvent = {
+        ...event,
+        target: { ...event.target, value: finalValue },
       }
-
-      onChange?.(event)
+      onChange?.(syntheticEvent)
     },
     [onChange, min, max]
   )
 
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true)
+      onFocus?.(e)
+    },
+    [onFocus]
+  )
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false)
+      onBlur?.(e)
+    },
+    [onBlur]
+  )
+
+  const isLabelFloating = isFocused || Boolean(internalValue)
+  const styles = getStyles(sacredtheme, isFocused, isLabelFloating)
+
+  const IncrementAdornment = () => (
+    <div style={styles.buttonContainer}>
+      <button
+        type="button"
+        onMouseDown={() => handleMouseDown(handleIncrement)}
+        aria-label="increment"
+        disabled={disabled}
+        style={styles.button}
+      >
+        <ArrowDropUpIcon style={styles.icon} />
+      </button>
+      <button
+        type="button"
+        onMouseDown={() => handleMouseDown(handleDecrement)}
+        aria-label="decrement"
+        disabled={disabled}
+        style={{ ...styles.button, marginTop: '0.125rem' }}
+      >
+        <ArrowDropDownIcon style={styles.icon} />
+      </button>
+    </div>
+  )
+
   return (
-    <TextField
-      value={value}
-      onChange={handleChange}
-      label={label}
-      type="text"
-      inputMode="numeric"
-      variant="outlined"
-      sacredtheme={sacredtheme}
-      endAdornment={
-        <Box
-          display="flex"
-          flexDirection="column"
-          sx={{
-            marginRight: '-4px',
-            height: '32px',
-            justifyContent: 'center',
-            ...(sacredtheme && {
-              background: `linear-gradient(135deg, ${alpha('#FFD700', 0.05)} 0%, ${alpha('#FFD700', 0.15)} 100%)`,
-              borderRadius: '4px',
-              padding: '2px',
-            }),
+    <div style={{ ...styles.container, ...rest.style }}>
+      <div style={{ position: 'relative' }}>
+        <input
+          type="text"
+          inputMode="numeric"
+          id={id}
+          name={name}
+          value={internalValue}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder={isLabelFloating ? placeholder : ''}
+          style={{
+            ...styles.input,
+            backgroundColor: undefined,
+            borderColor: outlinecolor,
+            color: fontcolor,
           }}
-        >
-          <StyledIconButton
-            size="small"
-            onMouseDown={handleIncrementMouseDown}
-            edge="end"
-            aria-label="increment"
-            sacredtheme={sacredtheme}
-            sx={{ marginBottom: '-2px' }}
-          >
-            <ArrowIcon sacredtheme={sacredtheme}>
-              <ArrowDropUpIcon fontSize="small" sx={{ fontSize: '18px' }} />
-            </ArrowIcon>
-          </StyledIconButton>
-          <StyledIconButton
-            size="small"
-            onMouseDown={handleDecrementMouseDown}
-            edge="end"
-            aria-label="decrement"
-            sacredtheme={sacredtheme}
-          >
-            <ArrowIcon sacredtheme={sacredtheme}>
-              <ArrowDropDownIcon fontSize="small" sx={{ fontSize: '18px' }} />
-            </ArrowIcon>
-          </StyledIconButton>
-        </Box>
-      }
-      {...rest}
-    />
+          {...rest}
+        />
+        {label && (
+          <label htmlFor={id} style={styles.label}>
+            {label}
+          </label>
+        )}
+        <div style={styles.adornmentContainer}>
+          <IncrementAdornment />
+        </div>
+      </div>
+    </div>
   )
 }
 

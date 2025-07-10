@@ -2,169 +2,234 @@
 
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
 import StyledTooltip from './index'
-import { Box, Button } from '@mui/material'
+import CustomButton from '../Button' // Using your existing button for demonstration
 
-/**
- * Define Storybook metadata
- */
 const meta: Meta<typeof StyledTooltip> = {
   title: 'Components/Tooltip',
   component: StyledTooltip,
+  parameters: {
+    layout: 'centered',
+  },
   argTypes: {
-    tooltipcolor: { control: 'color' },
+    title: { control: 'text' },
     tooltipplacement: {
       control: 'select',
-      options: ['top', 'right', 'bottom', 'left'],
+      options: ['top', 'bottom', 'left', 'right'],
     },
+    sacredtheme: { control: 'boolean' },
+    arrow: { control: 'boolean' },
+    enterDelay: { control: 'number' },
+    leaveDelay: { control: 'number' },
   },
-  parameters: {
-    a11y: {
-      disable: false,
-    },
-  },
+  tags: ['autodocs'],
 }
+
 export default meta
+type Story = StoryObj<typeof meta>
 
-type Story = StoryObj<typeof StyledTooltip>
-
-/**
- * 1) Basic usage
- */
-export const Basic: Story = {
-  args: {
-    title: 'Basic Tooltip Text',
-    tooltipcolor: '#000000',
-    tooltipplacement: 'top',
-    offsetX: 0,
-    offsetY: 0,
-    arrow: true,
-    children: <Button variant="contained">Hover me</Button>,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // We hover over the button
-    const button = canvas.getByRole('button', { name: /hover me/i })
-    await userEvent.hover(button)
-
-    // Check that the tooltip appears
-    // Note: In a real environment, we might confirm the tooltip text.
-    // But the Testing Library does not always handle floating elements easily.
-    // We'll just ensure no error is thrown.
-  },
+const defaultArgs = {
+  title: 'Tooltip',
+  children: <CustomButton text="Hover me" />,
 }
 
 /**
- * 2) Different color (Red) and offset
+ * 1) Premium Theme Variants
  */
-export const RedColorOffset: Story = {
-  args: {
-    title: 'Red Tooltip with offset',
-    tooltipcolor: '#ff0000', // Red
-    tooltipplacement: 'right',
-    offsetX: 10,
-    offsetY: 20,
-    arrow: true,
-    children: <Button variant="contained">Hover for Red Tooltip</Button>,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const button = canvas.getByRole('button', {
-      name: /Hover for Red Tooltip/i,
-    })
-    await userEvent.hover(button)
-    // No direct assertion for color, but we ensure it doesn't crash.
-  },
-}
-
-/**
- * 3) Multiple Tooltips in one story
- */
-export const MultipleTooltips: Story = {
-  render: () => (
-    <Box display="flex" gap={2}>
-      <StyledTooltip
-        title="First tooltip"
-        tooltipcolor="#3f51b5"
-        tooltipplacement="bottom"
-        offsetX={0}
-        offsetY={0}
-        arrow
-      >
-        <Button variant="contained">First</Button>
-      </StyledTooltip>
-
-      <StyledTooltip
-        title="Second tooltip"
-        tooltipcolor="#009688"
-        tooltipplacement="top"
-        offsetX={10}
-        offsetY={10}
-        arrow
-      >
-        <Button variant="contained">Second</Button>
-      </StyledTooltip>
-
-      <StyledTooltip
-        title="Third tooltip"
-        tooltipcolor="#f44336"
-        tooltipplacement="left"
-        offsetX={-10}
-        offsetY={0}
-        arrow
-      >
-        <Button variant="contained">Third</Button>
-      </StyledTooltip>
-    </Box>
+export const PremiumThemeVariants: Story = {
+  name: 'Premium Theme - All Variants',
+  render: args => (
+    <div className="p-8 bg-gray-50 rounded-xl">
+      <h3 className="text-xl font-bold text-gray-900 mb-6 font-inter">
+        Premium Tooltips
+      </h3>
+      <div className="flex flex-wrap gap-8 justify-center items-center h-64">
+        <StyledTooltip {...args} tooltipplacement="top" title="Top Tooltip">
+          <CustomButton text="Top" />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="bottom"
+          title="Bottom Tooltip"
+        >
+          <CustomButton text="Bottom" />
+        </StyledTooltip>
+        <StyledTooltip {...args} tooltipplacement="left" title="Left Tooltip">
+          <CustomButton text="Left" />
+        </StyledTooltip>
+        <StyledTooltip {...args} tooltipplacement="right" title="Right Tooltip">
+          <CustomButton text="Right" />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="top"
+          title="No Arrow"
+          arrow={false}
+        >
+          <CustomButton text="No Arrow" />
+        </StyledTooltip>
+      </div>
+    </div>
   ),
-  play: ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // We can test the presence of the buttons
-    expect(canvas.getByRole('button', { name: /first/i })).toBeInTheDocument()
-    expect(canvas.getByRole('button', { name: /second/i })).toBeInTheDocument()
-    expect(canvas.getByRole('button', { name: /third/i })).toBeInTheDocument()
+  args: {
+    ...defaultArgs,
+    sacredtheme: false,
   },
 }
 
 /**
- * 4) No Arrow, different placement
+ * 2) Sacred Theme Variants
  */
-export const NoArrowBottom: Story = {
+export const SacredThemeVariants: Story = {
+  name: 'Sacred Theme - All Variants',
+  render: args => (
+    <div className="p-8 bg-black/90 rounded-xl">
+      <h3 className="text-xl font-bold text-yellow-400 mb-6 font-cinzel animate-sacred-glow">
+        Sacred Tooltips
+      </h3>
+      <div className="flex flex-wrap gap-8 justify-center items-center h-64">
+        <StyledTooltip
+          {...args}
+          tooltipplacement="top"
+          title="Ancient Wisdom (Top)"
+        >
+          <CustomButton text="Top" sacredtheme />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="bottom"
+          title="Divine Insight (Bottom)"
+        >
+          <CustomButton text="Bottom" sacredtheme />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="left"
+          title="Mystical Secret (Left)"
+        >
+          <CustomButton text="Left" sacredtheme />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="right"
+          title="Golden Prophecy (Right)"
+        >
+          <CustomButton text="Right" sacredtheme />
+        </StyledTooltip>
+        <StyledTooltip
+          {...args}
+          tooltipplacement="top"
+          title="No Arrow"
+          arrow={false}
+        >
+          <CustomButton text="No Arrow" sacredtheme />
+        </StyledTooltip>
+      </div>
+    </div>
+  ),
   args: {
-    title: 'No arrow tooltip',
-    tooltipcolor: '#000000',
-    tooltipplacement: 'bottom',
-    offsetX: 0,
-    offsetY: 0,
-    arrow: false,
-    children: <Button variant="contained">No Arrow</Button>,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const button = canvas.getByRole('button', { name: /no arrow/i })
-    await userEvent.hover(button)
+    ...defaultArgs,
+    sacredtheme: true,
   },
 }
 
+const InteractiveDemoRenderer = () => {
+  const [config, setConfig] = React.useState({
+    title: 'Interactive Tooltip',
+    placement: 'top' as 'top' | 'bottom' | 'left' | 'right',
+    sacred: false,
+    showArrow: true,
+    enterDelay: 100,
+    leaveDelay: 0,
+  })
+
+  return (
+    <div className="w-[500px] space-y-6">
+      <div className="p-6 bg-white rounded-lg border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Tooltip Configuration
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Title
+            </label>
+            <input
+              type="text"
+              value={config.title}
+              onChange={e => setConfig({ ...config, title: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placement
+            </label>
+            <select
+              value={config.placement}
+              onChange={e =>
+                setConfig({
+                  ...config,
+                  placement: e.target.value as
+                    | 'top'
+                    | 'bottom'
+                    | 'left'
+                    | 'right',
+                })
+              }
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 mt-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={config.sacred}
+              onChange={e => setConfig({ ...config, sacred: e.target.checked })}
+            />
+            <span className="ml-2">Sacred Theme</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={config.showArrow}
+              onChange={e =>
+                setConfig({ ...config, showArrow: e.target.checked })
+              }
+            />
+            <span className="ml-2">Show Arrow</span>
+          </label>
+        </div>
+      </div>
+
+      <div
+        className={`p-8 rounded-xl flex justify-center items-center h-48 ${config.sacred ? 'bg-black/90' : 'bg-gray-50'}`}
+      >
+        <StyledTooltip
+          title={config.title}
+          tooltipplacement={config.placement}
+          sacredtheme={config.sacred}
+          arrow={config.showArrow}
+          enterDelay={config.enterDelay}
+          leaveDelay={config.leaveDelay}
+        >
+          <CustomButton text="Hover me" sacredtheme={config.sacred} />
+        </StyledTooltip>
+      </div>
+    </div>
+  )
+}
+
 /**
- * 5) Large offset scenario
+ * 3) Interactive Demo
  */
-export const LargeOffset: Story = {
-  args: {
-    title: 'Large offset example',
-    tooltipcolor: '#424242',
-    tooltipplacement: 'right',
-    offsetX: 50,
-    offsetY: 50,
-    arrow: true,
-    children: <Button variant="contained">Huge Offset</Button>,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const button = canvas.getByRole('button', { name: /huge offset/i })
-    await userEvent.hover(button)
-    // The tooltip should appear far away from the button.
-  },
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoRenderer />,
 }

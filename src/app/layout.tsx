@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import React from 'react'
+import './globals.css'
 
 export const metadata = {
   title: 'Goobs Frontend',

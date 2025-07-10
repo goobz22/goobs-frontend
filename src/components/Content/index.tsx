@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { Box, BoxProps } from '@mui/material'
 import { TypographyProps } from '../Typography'
 import { RadioGroupProps } from '../RadioGroup'
 import { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
 import { TextFieldProps } from '../Field/Text'
+import { PhoneNumberFieldProps } from '../Field/PhoneNumber'
 import { CustomButtonProps } from '../Button'
 import { ImageProps } from './Structure/image/useImage'
 import { PricingProps } from '../PricingTable'
@@ -84,7 +84,7 @@ import type { SupernetFieldProps } from '../Field/IPAM/Supernet'
 
 export interface ContentSectionProps {
   grids: Array<{
-    boxProps?: BoxProps
+    boxProps?: React.HTMLAttributes<HTMLDivElement>
     confirmationcodeinput?:
       | ConfirmationCodeInputsProps
       | ConfirmationCodeInputsProps[]
@@ -114,7 +114,7 @@ export interface ContentSectionProps {
       | InternalIncrementNumberFieldProps[]
     passwordField?: PasswordFieldProps | PasswordFieldProps[]
     qrcode?: QRCodeProps | QRCodeProps[]
-    phoneNumberField?: TextFieldProps | TextFieldProps[]
+    phoneNumberField?: PhoneNumberFieldProps | PhoneNumberFieldProps[]
     checkbox?: CheckboxProps | CheckboxProps[]
     multiSelect?: MultiSelectChipProps | MultiSelectChipProps[]
     subnet?: SubnetFieldProps | SubnetFieldProps[]
@@ -266,13 +266,13 @@ const RenderContent: React.FC<
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
 
   return (
-    <Box {...boxProps} style={mergedStyle}>
+    <div {...boxProps} style={mergedStyle}>
       {elements.map((element, index) => (
-        <Box key={index}>{element}</Box>
+        <div key={index}>{element}</div>
       ))}
       {/* Render custom component if provided */}
       {customComponent}
-    </Box>
+    </div>
   )
 }
 

@@ -1,202 +1,221 @@
 'use client'
 import React, { useState, useCallback } from 'react'
-import {
-  TextField,
-  TextFieldProps,
-  InputAdornment,
-  alpha,
-  keyframes,
-  Box,
-} from '@mui/material'
-import { styled } from '@mui/material/styles'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
-// Sacred animations
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-2px) rotate(180deg); }
-  100% { transform: translateY(0px) rotate(360deg); }
-`
-
-export interface PasswordFieldProps extends Omit<TextFieldProps, 'type'> {
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
+export interface PasswordFieldProps {
   label?: string
-  /** Enable sacred Egyptian theme */
+  placeholder?: string
+  value?: string
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  disabled?: boolean
+  error?: boolean
+  name?: string
+  id?: string
   sacredtheme?: boolean
 }
 
-const StyledTextField = styled(TextField)<{
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  sacredtheme?: boolean
-}>(({ theme, backgroundcolor, outlinecolor, fontcolor, sacredtheme }) => ({
-  position: 'relative',
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: sacredtheme
-      ? alpha('#000000', 0.8)
-      : backgroundcolor || theme.palette.background.paper,
-    ...(sacredtheme && {
-      backgroundImage: `
-        linear-gradient(rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.05)),
-        radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
-      `,
-      '&::after': {
-        content: '"𓊨"',
-        position: 'absolute',
-        top: '50%',
-        left: '10px',
-        transform: 'translateY(-50%)',
-        color: alpha('#FFD700', 0.3),
-        fontSize: '14px',
-        pointerEvents: 'none',
-        zIndex: 1,
-        animation: `${floatGlyph} 4s ease-in-out infinite`,
-      },
-    }),
-    '& fieldset': {
-      borderColor: sacredtheme
-        ? '#FFD700'
-        : outlinecolor || theme.palette.primary.main,
-      ...(sacredtheme && {
-        borderWidth: '2px',
-      }),
-    },
-    '&:hover fieldset': {
-      borderColor: sacredtheme
-        ? '#FFD700'
-        : outlinecolor || theme.palette.primary.main,
-      ...(sacredtheme && {
-        boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
-      }),
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: sacredtheme
-        ? '#FFD700'
-        : outlinecolor || theme.palette.primary.main,
-      ...(sacredtheme && {
-        boxShadow: '0 0 20px rgba(255, 215, 0, 0.6)',
-      }),
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: sacredtheme
-      ? alpha('#FFD700', 0.8)
-      : fontcolor || theme.palette.text.primary,
-    ...(sacredtheme && {
-      textShadow: '0 0 6px rgba(255, 215, 0, 0.3)',
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-    }),
-    '&.Mui-focused': {
-      color: sacredtheme ? '#FFD700' : fontcolor || theme.palette.primary.main,
-      ...(sacredtheme && {
-        textShadow: '0 0 10px rgba(255, 215, 0, 0.7)',
-      }),
-    },
-  },
-  '& .MuiInputBase-input': {
-    color: sacredtheme ? '#FFD700' : fontcolor || theme.palette.text.primary,
-    ...(sacredtheme && {
-      textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
-      fontWeight: 500,
-      paddingLeft: '30px',
-    }),
-    '&::placeholder': {
-      color: sacredtheme ? alpha('#FFD700', 0.7) : 'rgba(0, 0, 0, 0.54)',
-      ...(sacredtheme && {
-        fontStyle: 'italic',
-        letterSpacing: '0.5px',
-      }),
-    },
-  },
-}))
+const getStyles = (
+  sacredtheme?: boolean,
+  isFocused?: boolean,
+  error?: boolean,
+  isLabelFloating?: boolean
+) => ({
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    marginTop: '1rem',
+    position: 'relative',
+  } as React.CSSProperties,
+  inputContainer: {
+    position: 'relative',
+  } as React.CSSProperties,
+  sacredGlyph: {
+    position: 'absolute',
+    left: '0.75rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: 'rgba(255, 215, 0, 0.3)',
+    fontSize: '0.875rem',
+    animation: 'float-glyph-rotate 5s infinite alternate',
+    zIndex: 10,
+    pointerEvents: 'none',
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    height: '3.5rem',
+    padding: '0 1rem',
+    paddingLeft: sacredtheme ? '2rem' : '1rem',
+    paddingRight: '3rem',
+    borderWidth: '2px',
+    borderRadius: '0.375rem',
+    outline: 'none',
+    transition: 'all 0.3s ease',
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          color: '#FFD700',
+          borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
+          backgroundImage:
+            'linear-gradient(rgba(255,215,0,0.05), rgba(255,215,0,0.05)), radial-gradient(circle at top right, rgba(255,215,0,0.08) 0%, transparent 50%)',
+          boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
+        }
+      : {
+          backgroundColor: 'white',
+          color: 'black',
+          borderColor: isFocused ? '#3B82F6' : '#D1D5DB',
+          boxShadow: isFocused ? '0 0 10px rgba(59, 130, 246, 0.3)' : 'none',
+        }),
+    ...(error && { borderColor: '#EF4444' }),
+  } as React.CSSProperties,
+  label: {
+    position: 'absolute',
+    left: '1rem',
+    transition: 'all 0.2s ease',
+    pointerEvents: 'none',
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : '#6B7280',
+    ...(isLabelFloating
+      ? {
+          top: 0,
+          fontSize: '0.75rem',
+          transform: 'translateY(-50%)',
+          backgroundColor: sacredtheme ? 'black' : 'white',
+          padding: '0 0.25rem',
+        }
+      : {
+          top: '50%',
+          transform: 'translateY(-50%)',
+          fontSize: '1rem',
+        }),
+    ...(isFocused && { color: sacredtheme ? '#FFD700' : '#3B82F6' }),
+    ...(error && !sacredtheme && { color: '#EF4444' }),
+  } as React.CSSProperties,
+  endAdornment: {
+    position: 'absolute',
+    right: '0.75rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+  } as React.CSSProperties,
+  endAdornmentGlyph: {
+    position: 'absolute',
+    right: '1.75rem',
+    color: 'rgba(255, 215, 0, 0.4)',
+    fontSize: '0.75rem',
+    animation: 'float-glyph-rotate 4s infinite alternate',
+  } as React.CSSProperties,
+})
 
-interface AdornmentProps {
-  componentvariant: string
+const EndAdornment: React.FC<{
   passwordVisible?: boolean
   togglePasswordVisibility?: () => void
   sacredtheme?: boolean
-}
-
-const EndAdornment: React.FC<AdornmentProps> = ({
-  componentvariant,
-  passwordVisible,
-  togglePasswordVisibility,
-  sacredtheme,
-}) => {
-  if (componentvariant === 'password') {
-    return (
-      <InputAdornment
-        position="end"
-        onClick={togglePasswordVisibility}
-        style={{ cursor: 'pointer' }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          {sacredtheme && (
-            <Box
-              sx={{
-                position: 'absolute',
-                right: '30px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: alpha('#FFD700', 0.4),
-                fontSize: '12px',
-                animation: `${floatGlyph} 3s ease-in-out infinite`,
-              }}
-            >
-              {passwordVisible ? '𓁦' : '𓁟'}
-            </Box>
-          )}
-          <ShowHideEyeIcon
-            visible={passwordVisible}
-            sacredtheme={sacredtheme}
-          />
-        </Box>
-      </InputAdornment>
-    )
-  }
-  return null
+}> = ({ passwordVisible, togglePasswordVisibility, sacredtheme }) => {
+  const styles = getStyles(sacredtheme)
+  return (
+    <button
+      type="button"
+      onClick={togglePasswordVisibility}
+      style={styles.endAdornment}
+    >
+      {sacredtheme && (
+        <span style={styles.endAdornmentGlyph}>
+          {passwordVisible ? '𓁦' : '𓁟'}
+        </span>
+      )}
+      <ShowHideEyeIcon visible={passwordVisible} sacredtheme={sacredtheme} />
+    </button>
+  )
 }
 
 const PasswordField: React.FC<PasswordFieldProps> = ({
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
   label = 'Password',
+  placeholder,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  disabled = false,
+  error = false,
+  name,
+  id,
   sacredtheme = false,
   ...rest
 }) => {
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const [hasValue, setHasValue] = useState(Boolean(value))
+  const styles = getStyles(
+    sacredtheme,
+    isFocused,
+    error,
+    isFocused || hasValue || Boolean(value)
+  )
 
-  const togglePasswordVisibility = useCallback(() => {
-    setPasswordVisible(prev => !prev)
-  }, [])
+  const togglePasswordVisibility = useCallback(
+    () => setPasswordVisible(prev => !prev),
+    []
+  )
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true)
+      onFocus?.(e)
+    },
+    [onFocus]
+  )
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false)
+      onBlur?.(e)
+    },
+    [onBlur]
+  )
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setHasValue(Boolean(e.target.value))
+      onChange?.(e)
+    },
+    [onChange]
+  )
+
+  const labelText = sacredtheme ? 'Sacred Key' : label
+  const placeholderText = sacredtheme ? 'Enter divine secret...' : placeholder
+  const isLabelFloating = isFocused || hasValue || Boolean(value)
 
   return (
-    <StyledTextField
-      type={passwordVisible ? 'text' : 'password'}
-      label={sacredtheme ? 'Sacred Key' : label}
-      backgroundcolor={backgroundcolor}
-      outlinecolor={outlinecolor}
-      fontcolor={fontcolor}
-      sacredtheme={sacredtheme}
-      fullWidth
-      placeholder={sacredtheme ? 'Enter divine secret...' : undefined}
-      InputProps={{
-        endAdornment: (
-          <EndAdornment
-            componentvariant="password"
-            passwordVisible={passwordVisible}
-            togglePasswordVisibility={togglePasswordVisibility}
-            sacredtheme={sacredtheme}
-          />
-        ),
-      }}
-      {...rest}
-    />
+    <div style={styles.container}>
+      <div style={styles.inputContainer}>
+        {sacredtheme && <span style={styles.sacredGlyph}>𓊨</span>}
+        <input
+          type={passwordVisible ? 'text' : 'password'}
+          id={id}
+          name={name}
+          value={value}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder={isLabelFloating ? placeholderText : ''}
+          style={{
+            ...styles.input,
+            ...(disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+          }}
+          {...rest}
+        />
+        <label htmlFor={id} style={styles.label}>
+          {labelText}
+        </label>
+        <EndAdornment
+          passwordVisible={passwordVisible}
+          togglePasswordVisibility={togglePasswordVisibility}
+          sacredtheme={sacredtheme}
+        />
+      </div>
+    </div>
   )
 }
 

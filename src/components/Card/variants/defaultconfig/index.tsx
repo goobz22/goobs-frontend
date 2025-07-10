@@ -1,8 +1,6 @@
-import React from 'react'
-import { Box, Paper, BoxProps, useMediaQuery, useTheme } from '@mui/material'
+import React, { useState } from 'react'
 import Typography from '../../../../components/Typography'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import InfoIcon from '@mui/icons-material/Info'
+import InfoIcon from '../../../../components/Icons/Info'
 import StyledTooltip from '../../../../components/Tooltip'
 import CustomButton from '../../../../components/Button'
 import Link from 'next/link'
@@ -12,53 +10,284 @@ import {
   CustomStepperProps,
 } from '../../../../components/Stepper'
 
-/**
- * Props for the DefaultCard component.
- * Extends BoxProps from Material-UI and includes additional custom properties.
- */
-interface DefaultCardProps extends BoxProps {
-  /** Title of the card */
+interface DefaultCardProps {
   title?: string
-  /** Whether to show an underline for the title */
   titleUnderline?: boolean
-  /** Body text of the card */
   body?: string
-  /** URL or path of the image to display */
   image?: string
-  /** Position of the image in the card */
   imagePosition?: 'top' | 'left'
-  /** Text for the parent breadcrumb */
   parentText?: string
-  /** Link for the parent breadcrumb */
   parentLink?: string
-  /** Text for the child breadcrumb */
   childText?: string
-  /** Link for the child breadcrumb */
   childLink?: string
-  /** Link for the grandchild breadcrumb */
   grandchildLink?: string
-  /** Whether to enable the favorite feature */
   favoriteEnabled?: boolean
-  /** Whether to show breadcrumbs */
   breadcrumbEnabled?: boolean
-  /** Whether to enable links */
   linkEnabled?: boolean
-  /** Width of the card */
-  /** Height of the card */
+  width?: string | number
   height?: string | number
-  /** Whether to show a stepper */
   stepperEnabled?: boolean
-  /** Active step in the stepper */
-  stepperActiveStep?: number
-  /** Steps configuration for the stepper */
   stepperSteps?: CustomStepperProps['steps']
+  className?: string
+  sacredtheme?: boolean
+  outline?: boolean
 }
 
-/**
- * DefaultCard component renders a customizable card with various features such as
- * image, title, body text, breadcrumbs, favorite icon, and stepper.
- * It adapts its layout based on the screen size and provided props.
- */
+// Sacred glyphs for theming
+const SACRED_GLYPHS = ['𓁟', '𓂀', '𓃀', '𓄿', '𓊖', '𓊗', '𓋴', '𓏏']
+
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    border: '1px solid rgba(226, 232, 240, 0.8)',
+    borderRadius: '12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(8px)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+    overflow: 'hidden',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    fontFamily: '"Inter", sans-serif',
+  } as React.CSSProperties,
+
+  containerNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  } as React.CSSProperties,
+
+  containerHover: {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  } as React.CSSProperties,
+
+  containerWithImage: {
+    flexDirection: 'row',
+  } as React.CSSProperties,
+
+  image: {
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    flexShrink: 0,
+  } as React.CSSProperties,
+
+  imageTop: {
+    width: '100%',
+    height: '192px',
+  } as React.CSSProperties,
+
+  imageLeft: {
+    width: '192px',
+    height: '100%',
+  } as React.CSSProperties,
+
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  } as React.CSSProperties,
+
+  header: {
+    width: '100%',
+    padding: '16px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
+    backgroundColor: 'rgba(248, 250, 252, 0.5)',
+  } as React.CSSProperties,
+
+  headerNoUnderline: {
+    borderBottom: 'none',
+  } as React.CSSProperties,
+
+  bodySection: {
+    padding: '24px',
+  } as React.CSSProperties,
+
+  bodyMobile: {
+    padding: '24px',
+    display: 'block',
+  } as React.CSSProperties,
+
+  bodyDesktop: {
+    display: 'none',
+  } as React.CSSProperties,
+
+  footer: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 24px',
+    marginTop: 'auto',
+    borderTop: '1px solid rgba(226, 232, 240, 0.3)',
+    backgroundColor: 'rgba(248, 250, 252, 0.3)',
+  } as React.CSSProperties,
+
+  breadcrumb: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  } as React.CSSProperties,
+
+  accent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '4px',
+    background:
+      'linear-gradient(180deg, rgb(59, 130, 246) 0%, rgb(147, 197, 253) 100%)',
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+  } as React.CSSProperties,
+
+  accentVisible: {
+    opacity: 1,
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    border: '2px solid rgba(255, 215, 0, 0.4)',
+    borderRadius: '12px',
+    backgroundColor: 'rgba(10, 10, 10, 0.9)',
+    backdropFilter: 'blur(8px)',
+    boxShadow:
+      '0 0 20px rgba(255, 215, 0, 0.2), 0 0 40px rgba(255, 215, 0, 0.1)',
+    overflow: 'hidden',
+    transition: 'all 0.4s ease',
+    fontFamily: '"Cinzel", serif',
+    backgroundImage: `
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.02) 0%, transparent 50%)
+    `,
+  } as React.CSSProperties,
+
+  containerNoOutline: {
+    border: 'none',
+    boxShadow: 'none',
+  } as React.CSSProperties,
+
+  containerHover: {
+    transform: 'translateY(-2px)',
+    borderColor: 'rgba(255, 215, 0, 0.8)',
+    boxShadow:
+      '0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)',
+    backgroundImage: `
+      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
+      radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+    `,
+  } as React.CSSProperties,
+
+  containerWithImage: {
+    flexDirection: 'row',
+  } as React.CSSProperties,
+
+  image: {
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    flexShrink: 0,
+    position: 'relative',
+  } as React.CSSProperties,
+
+  imageOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background:
+      'linear-gradient(45deg, transparent 0%, rgba(255, 215, 0, 0.1) 50%, transparent 100%)',
+  } as React.CSSProperties,
+
+  imageTop: {
+    width: '100%',
+    height: '192px',
+  } as React.CSSProperties,
+
+  imageLeft: {
+    width: '192px',
+    height: '100%',
+  } as React.CSSProperties,
+
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  } as React.CSSProperties,
+
+  header: {
+    width: '100%',
+    padding: '20px 28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+  } as React.CSSProperties,
+
+  headerNoUnderline: {
+    borderBottom: 'none',
+  } as React.CSSProperties,
+
+  bodySection: {
+    padding: '28px',
+  } as React.CSSProperties,
+
+  bodyMobile: {
+    padding: '28px',
+    display: 'block',
+  } as React.CSSProperties,
+
+  bodyDesktop: {
+    display: 'none',
+  } as React.CSSProperties,
+
+  footer: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '20px 28px',
+    marginTop: 'auto',
+    borderTop: '1px solid rgba(255, 215, 0, 0.3)',
+    backgroundColor: 'rgba(255, 215, 0, 0.03)',
+  } as React.CSSProperties,
+
+  breadcrumb: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  } as React.CSSProperties,
+
+  glyph: {
+    position: 'absolute',
+    fontSize: '16px',
+    color: 'rgba(255, 215, 0, 0.2)',
+    pointerEvents: 'none',
+    opacity: 0.3,
+  } as React.CSSProperties,
+
+  glyphTopRight: {
+    top: '12px',
+    right: '12px',
+  } as React.CSSProperties,
+
+  glyphBottomLeft: {
+    bottom: '12px',
+    left: '12px',
+  } as React.CSSProperties,
+}
+
 const DefaultCard: React.FC<DefaultCardProps> = ({
   title,
   titleUnderline = true,
@@ -76,160 +305,233 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
   width = '100%',
   height,
   stepperEnabled = false,
-  stepperActiveStep = -1,
   stepperSteps = [],
+  className,
+  sacredtheme = false,
+  outline = true,
   ...rest
 }) => {
-  const theme = useTheme()
-  /** Determines if the current viewport is mobile size */
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const [isHovered, setIsHovered] = useState(false)
+
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const containerStyle = {
+    ...styles.container,
+    ...(!outline && styles.containerNoOutline),
+    ...(image && imagePosition === 'left' && styles.containerWithImage),
+    ...(isHovered && styles.containerHover),
+    width: typeof width === 'number' ? `${width}px` : width,
+    height: typeof height === 'number' ? `${height}px` : height,
+  }
+
+  const imageStyle = {
+    ...styles.image,
+    ...(imagePosition === 'top' ? styles.imageTop : styles.imageLeft),
+    backgroundImage: image ? `url(${image})` : undefined,
+  }
+
+  const headerStyle = {
+    ...styles.header,
+    ...(!titleUnderline && styles.headerNoUnderline),
+  }
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection:
-          imagePosition === 'left' ? 'row' : isMobile ? 'row' : 'column',
-        justifyContent: isMobile ? 'space-between' : 'flex-start',
-        alignItems: isMobile ? 'center' : 'stretch',
-        border: '1px solid #e8e8e8',
-        width: width,
-        height: height,
-        ...rest.sx,
-      }}
+    <div
+      className={className}
+      style={containerStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      {...rest}
     >
-      {/* Render image if provided */}
-      {image && (
-        <Box
-          // @ts-ignore
-          sx={{
-            width: imagePosition === 'left' ? '200px' : '100%',
-            height: imagePosition === 'left' ? '100%' : '200px',
-            backgroundImage: `url(${image})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            flexShrink: 0,
+      {/* Sacred glyphs */}
+      {sacredtheme && (
+        <>
+          <div style={{ ...sacredStyles.glyph, ...sacredStyles.glyphTopRight }}>
+            {SACRED_GLYPHS[0]}
+          </div>
+          <div
+            style={{ ...sacredStyles.glyph, ...sacredStyles.glyphBottomLeft }}
+          >
+            {SACRED_GLYPHS[1]}
+          </div>
+        </>
+      )}
+
+      {/* Blue accent bar for premium theme */}
+      {!sacredtheme && outline && (
+        <div
+          style={{
+            ...premiumStyles.accent,
+            ...(isHovered && premiumStyles.accentVisible),
           }}
         />
       )}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Render title and favorite icon if title is provided */}
+
+      {/* Image */}
+      {image && (
+        <div style={imageStyle}>
+          {sacredtheme && <div style={sacredStyles.imageOverlay} />}
+        </div>
+      )}
+
+      {/* Content */}
+      <div style={styles.content}>
+        {/* Header */}
         {title && (
-          <Box
-            sx={{
-              borderBottom: titleUnderline ? '1px solid #e8e8e8' : 'none',
-              width: '100%',
-              paddingLeft: '15px',
-              paddingRight: '15px',
-              paddingBottom: '10px',
-              paddingTop: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Typography text={title} fontcolor="black" fontvariant="merrih5" />
-            {favoriteEnabled && <FavoriteIcon />}
-          </Box>
-        )}
-        {/* Render body text or info icon for mobile */}
-        {body && (
-          <Box sx={{ padding: isMobile ? '0 15px' : '16px 15px' }}>
-            {!isMobile && (
-              <Typography
-                text={body}
-                fontcolor="black"
-                fontvariant="merriparagraph"
-              />
-            )}
-            {isMobile && (
-              <StyledTooltip
-                title={body}
-                placement="right"
-                arrow
-                tooltipcolor="black"
-                tooltipplacement="right"
-                offsetX={0}
-                offsetY={0}
-                disableHoverListener
-              >
-                <InfoIcon style={{ color: 'black', cursor: 'pointer' }} />
-              </StyledTooltip>
-            )}
-          </Box>
-        )}
-        {/* Render stepper if enabled */}
-        {stepperEnabled && (
-          <Box sx={{ padding: '0px 15px' }}>
-            <CustomStepper
-              activeStep={stepperActiveStep}
-              nonLinear
-              orientation="vertical"
-              steps={stepperSteps}
-              sx={{
-                '.MuiStepIcon-text': { display: 'none' },
-                '.MuiStepConnector-line': { display: 'none' },
+          <div style={headerStyle}>
+            <Typography
+              text={title}
+              fontcolor={sacredtheme ? '#FFD700' : 'rgb(31, 41, 55)'}
+              fontvariant="merrih5"
+              style={{
+                ...(sacredtheme && {
+                  fontFamily: '"Cinzel", serif',
+                  fontWeight: 700,
+                  textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                }),
               }}
             />
-          </Box>
+            {favoriteEnabled && <FavoriteIcon />}
+          </div>
         )}
-        {/* Render breadcrumbs and link button */}
-        <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingLeft: '15px',
-            paddingRight: '15px',
-            paddingBottom: '10px',
-            marginTop: 'auto',
-          }}
-        >
-          <Box>
+
+        {/* Body - Desktop */}
+        {body && (
+          <div className="hidden md:block" style={styles.bodySection}>
+            <Typography
+              text={body}
+              fontcolor={
+                sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(55, 65, 81)'
+              }
+              fontvariant="merriparagraph"
+              style={{
+                ...(sacredtheme && {
+                  fontFamily: '"Merriweather", serif',
+                  lineHeight: 1.6,
+                }),
+              }}
+            />
+          </div>
+        )}
+
+        {/* Body - Mobile (with tooltip) */}
+        {body && (
+          <div className="block md:hidden" style={styles.bodySection}>
+            <StyledTooltip
+              title={body}
+              arrow
+              tooltipplacement="right"
+              offsetX={0}
+              offsetY={0}
+              sacredtheme={sacredtheme}
+            >
+              <InfoIcon
+                style={{
+                  color: sacredtheme ? '#FFD700' : 'black',
+                  cursor: 'pointer',
+                  ...(sacredtheme && {
+                    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+                  }),
+                }}
+              />
+            </StyledTooltip>
+          </div>
+        )}
+
+        {/* Stepper */}
+        {stepperEnabled && (
+          <div style={{ padding: '0 24px' }}>
+            <CustomStepper orientation="vertical" steps={stepperSteps} />
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={styles.footer}>
+          <div>
             {breadcrumbEnabled && (
-              <>
+              <div style={styles.breadcrumb}>
                 <Link href={parentLink} passHref>
                   <Typography
                     text={parentText}
-                    fontcolor="black"
+                    fontcolor={
+                      sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(75, 85, 99)'
+                    }
                     fontvariant="merriparagraph"
+                    style={{
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      ...(sacredtheme && {
+                        '&:hover': {
+                          color: '#FFD700',
+                          textShadow: '0 0 8px rgba(255, 215, 0, 0.8)',
+                        },
+                      }),
+                    }}
                   />
                 </Link>
                 <Typography
                   text=">"
-                  fontcolor="black"
+                  fontcolor={
+                    sacredtheme
+                      ? 'rgba(255, 215, 0, 0.6)'
+                      : 'rgb(107, 114, 128)'
+                  }
                   fontvariant="merriparagraph"
                 />
                 <Link href={childLink} passHref>
                   <Typography
                     text={childText}
-                    fontcolor="black"
+                    fontcolor={
+                      sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(75, 85, 99)'
+                    }
                     fontvariant="merriparagraph"
+                    style={{
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      ...(sacredtheme && {
+                        '&:hover': {
+                          color: '#FFD700',
+                          textShadow: '0 0 8px rgba(255, 215, 0, 0.8)',
+                        },
+                      }),
+                    }}
                   />
                 </Link>
-              </>
+              </div>
             )}
-          </Box>
-          <Box sx={{ paddingLeft: '10px' }}>
+          </div>
+          <div style={{ paddingLeft: '16px' }}>
             {linkEnabled && (
               <Link href={grandchildLink} passHref>
                 <CustomButton
-                  icon={<ArrowForwardIosIcon />}
-                  iconcolor="black"
+                  icon={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="1em"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  }
+                  iconcolor={sacredtheme ? '#FFD700' : 'rgb(55, 65, 81)'}
                   iconsize="15px"
                   iconlocation="right"
                   backgroundcolor="none"
-                  variant="text"
+                  sacredtheme={sacredtheme}
+                  outline={outline}
                 />
               </Link>
             )}
-          </Box>
-        </Box>
-      </Box>
-    </Paper>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

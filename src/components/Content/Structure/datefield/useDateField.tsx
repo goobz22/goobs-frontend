@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import { Box } from '@mui/material'
 import DateField, { DateFieldProps } from '../../../Field/Date/DateField'
 
 export interface UseDateFieldProps {
@@ -17,12 +16,11 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
   disabled = false,
   error = false,
   helperText,
-  sx,
   style,
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <DateField
         onChange={onChange}
         label={label}
@@ -31,10 +29,9 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
         disabled={disabled}
         error={error}
         helperText={helperText}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

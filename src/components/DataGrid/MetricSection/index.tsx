@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Box, Grid, useMediaQuery } from '@mui/material'
 import MetricCard from '../MetricCard'
 import { MetricCardData } from '../types'
 
@@ -10,46 +9,81 @@ interface MetricSectionProps {
   sacredtheme?: boolean
 }
 
+// Premium theme styles (when sacredtheme=false)
+const premiumStyles = {
+  container: {
+    width: '100%',
+    marginBottom: '8px',
+    padding: '4px',
+  } as React.CSSProperties,
+
+  grid: {
+    display: 'grid',
+    gap: '8px',
+  } as React.CSSProperties,
+}
+
+// Sacred theme styles (when sacredtheme=true)
+const sacredStyles = {
+  container: {
+    width: '100%',
+    marginBottom: '8px',
+    padding: '4px',
+  } as React.CSSProperties,
+
+  grid: {
+    display: 'grid',
+    gap: '8px',
+  } as React.CSSProperties,
+}
+
 const MetricSection: React.FC<MetricSectionProps> = ({
   metrics,
   sacredtheme = false,
 }) => {
-  const isMobile = useMediaQuery('(max-width:600px)')
-  const isTablet = useMediaQuery('(max-width:960px)')
-
-  // Determine grid sizing based on screen size and number of metrics
-  const getGridSize = () => {
-    if (isMobile) {
-      return 12 // Full width on mobile
+  const getGridColumns = () => {
+    switch (metrics.length) {
+      case 1:
+        return { gridTemplateColumns: '1fr' }
+      case 2:
+        return {
+          gridTemplateColumns: '1fr',
+          '@media (min-width: 768px)': {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+          },
+        }
+      case 3:
+        return {
+          gridTemplateColumns: '1fr',
+          '@media (min-width: 768px)': {
+            gridTemplateColumns: 'repeat(3, 1fr)',
+          },
+        }
+      default:
+        return {
+          gridTemplateColumns: '1fr',
+          '@media (min-width: 768px)': {
+            gridTemplateColumns: 'repeat(2, 1fr)',
+          },
+          '@media (min-width: 1024px)': {
+            gridTemplateColumns: 'repeat(4, 1fr)',
+          },
+        }
     }
-
-    if (isTablet) {
-      return metrics.length === 1 ? 12 : 6 // 1 or 2 per row on tablet
-    }
-
-    // Desktop: distribute evenly up to 4 per row
-    if (metrics.length === 1) return 12
-    if (metrics.length === 2) return 6
-    if (metrics.length === 3) return 4
-    return 3 // 4 per row for 4+ metrics
   }
 
-  const gridSize = getGridSize()
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const gridStyle = {
+    ...styles.grid,
+    ...getGridColumns(),
+  }
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        mb: 2,
-        p: 1,
-      }}
-    >
-      <Grid container spacing={2}>
+    <div style={styles.container}>
+      <div style={gridStyle}>
         {metrics.map((metric, index) => (
-          <Grid
-            key={`${metric.title}-${index}`}
-            size={{ xs: isMobile ? 12 : gridSize }}
-          >
+          <div key={`${metric.title}-${index}`}>
             <MetricCard
               title={metric.title}
               value={metric.value}
@@ -60,10 +94,10 @@ const MetricSection: React.FC<MetricSectionProps> = ({
               glyph={metric.glyph}
               sacredtheme={sacredtheme}
             />
-          </Grid>
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+    </div>
   )
 }
 

@@ -1,14 +1,8 @@
 'use client'
 import React from 'react'
-import DataGridCheckbox from './../../../../components/Checkbox'
-
-interface CheckboxProps {
-  onClick?: (event: React.MouseEvent) => void
-  checked?: boolean
-  indeterminate?: boolean
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
-  disabled?: boolean
-}
+import DataGridCheckbox, {
+  CheckboxProps,
+} from './../../../../components/Checkbox'
 
 const useCheckbox = (props: {
   checkbox?: CheckboxProps | CheckboxProps[]

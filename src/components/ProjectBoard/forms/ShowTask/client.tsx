@@ -1,21 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Chip,
-  Menu,
-  MenuItem,
-  alpha,
-  keyframes,
-} from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-
-// Custom components
+import Dialog from '../../../Dialog'
+import CloseIcon from '../../../Icons/Close'
+import MoreVertIcon from '../../../Icons/MoreVert'
+import Popover from '../../../Popover'
 import Typography from '../../../Typography'
 import CustomButton from '../../../Button'
 import ComplexTextEditor from '../../../ComplexTextEditor'
@@ -23,11 +12,7 @@ import SearchableDropdown from '../../../Field/Dropdown/Searchable'
 import MultipleSelectChip from '../../../Field/Dropdown/MultiSelect'
 import DateField from '../../../Field/Date/DateField'
 import TextField from '../../../Field/Text'
-
-// Colors
-import { gunpowder, woad, red, white, black } from '../../../../styles/palette'
-
-// Import shared types from the central types file
+import Chip from '../../../Chip'
 import type {
   Comment,
   CommentEditHistory,
@@ -41,44 +26,16 @@ import type {
   RawEmployee,
 } from '../../types'
 
-// Sacred animations
-const glowPulse = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  50% { transform: translateY(-2px) rotate(180deg); opacity: 0.5; }
-  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
-`
-
-const egyptianStyles = {
-  goldColor: '#FFD700',
-  darkGold: '#B8860B',
-  cardBackground: alpha('#000000', 0.95),
-}
-
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
-// ----------------------- ShowTaskProps -----------------------
 export interface ShowTaskProps {
   open: boolean
   onClose: () => void
-
-  // The Task ID (now used by onCloseTask).
   taskId: string
-
-  // Main Task fields
   taskTitle: string
   createdBy: string
   description: string
-
-  // Comments array using shared Comment type
   comments: Comment[]
-
-  // Right-side fields
   customerAssigned: string
   severity: string
   schedulingQueue: string
@@ -88,8 +45,6 @@ export interface ShowTaskProps {
   knowledgebaseArticles: string[]
   teamMemberAssigned: string
   nextActionDate: string
-
-  // Options for dropdowns / multi-select using raw types
   customerOptions: RawCustomer[]
   severityOptions: RawSeverityLevel[]
   schedulingQueueOptions: RawQueue[]
@@ -98,14 +53,7 @@ export interface ShowTaskProps {
   topicOptions: RawTopic[]
   knowledgebaseArticleOptions: RawArticle[]
   teamMemberOptions: RawEmployee[]
-
-  // Which user is viewing / editing? Only that user can edit comments they authored.
   currentUserName: string
-
-  // Callback actions
-  /**
-   * Now takes the taskId as a parameter so we can know which Task is being closed.
-   */
   onCloseTask: (taskId: string) => void
   onComment: (commentText: string, _id: string) => void
   onEdit: (updatedData: {
@@ -124,23 +72,130 @@ export interface ShowTaskProps {
   onDelete: () => void
   onDuplicate: () => void
   onEditComment: (commentId: string, newText: string, taskId: string) => void
-
-  /**
-   * New callback: Pass the full revision history of a comment (by commentId)
-   * to the parent component.
-   */
   onRevisionHistory: (
     commentId: string,
     revisionHistory: CommentEditHistory[]
   ) => void
-
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
 }
 
-// ----------------------- Helper Functions -----------------------
+const getStyles = (sacredtheme?: boolean) => ({
+  dialog: {
+    borderWidth: '2px',
+    borderRadius: '0.5rem',
+    overflow: 'hidden',
+    ...(sacredtheme
+      ? {
+          borderColor: 'rgba(255, 215, 0, 0.5)',
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          animation: 'show-task-glow-pulse 2s infinite alternate',
+        }
+      : {
+          borderColor: 'black',
+        }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '0.75rem',
+    color: 'rgba(255, 215, 0, 0.3)',
+    fontSize: '1.125rem',
+    zIndex: 10,
+    animation: 'show-task-float-glyph 5s infinite alternate',
+  } as React.CSSProperties,
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '0.5rem',
+    borderBottom: `2px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
+    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.05)' }),
+  } as React.CSSProperties,
+  headerTitle: {
+    fontSize: '1.125rem',
+    fontWeight: 700,
+    ...(sacredtheme && {
+      fontFamily: 'Cinzel, serif',
+      letterSpacing: '0.05em',
+      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+    }),
+  } as React.CSSProperties,
+  headerSubtitle: {
+    fontSize: '0.875rem',
+    marginTop: '0.125rem',
+    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
+  } as React.CSSProperties,
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+  } as React.CSSProperties,
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: 0,
+  } as React.CSSProperties,
+  mainContent: {
+    gridColumn: 'span 2 / span 2',
+    padding: '0.5rem',
+    paddingTop: 0,
+  } as React.CSSProperties,
+  descriptionContainer: {
+    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
+    margin: '0 -8px',
+    padding: '0.5rem 8px',
+    paddingBottom: '0.5rem',
+    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+  } as React.CSSProperties,
+  sectionTitle: {
+    fontWeight: 700,
+    marginBottom: '0.25rem',
+    ...(sacredtheme && { fontFamily: 'Cinzel, serif' }),
+  } as React.CSSProperties,
+  descriptionText: {
+    fontSize: '0.875rem',
+    whiteSpace: 'pre-wrap',
+    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
+  } as React.CSSProperties,
+  comment: {
+    marginBottom: '0',
+  } as React.CSSProperties,
+  commentEditing: {
+    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
+    margin: '0 -8px',
+    padding: '0.25rem 0.5rem',
+    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+  } as React.CSSProperties,
+  commentContent: {
+    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
+    margin: '0 -8px',
+    padding: '0.5rem',
+    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+  } as React.CSSProperties,
+  sidebar: {
+    gridColumn: 'span 1 / span 1',
+    padding: '0.5rem',
+    borderLeft: `2px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
+    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+  } as React.CSSProperties,
+  sidebarSection: {
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  sidebarLabel: {
+    fontSize: '0.875rem',
+    fontWeight: 700,
+    ...(sacredtheme && { fontFamily: 'Cinzel, serif' }),
+  } as React.CSSProperties,
+  sidebarValue: {
+    fontSize: '0.875rem',
+    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
+  } as React.CSSProperties,
+  chipContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.25rem',
+    marginTop: '0.25rem',
+  } as React.CSSProperties,
+})
 
-/** A helper to format a relative time (e.g. "3 hours ago") given a Date */
 function formatRelativeTime(date?: Date): string {
   if (!date) return ''
   const now = new Date()
@@ -154,14 +209,11 @@ function formatRelativeTime(date?: Date): string {
   return `${days} day${days === 1 ? '' : 's'} ago`
 }
 
-/** Given a date string, safely returns a Date object or null */
 function safeParseDate(dateStr?: string): Date | null {
   if (!dateStr) return null
   const d = new Date(dateStr)
   return Number.isNaN(d.getTime()) ? null : d
 }
-
-// ----------------------- ShowTask Component -----------------------
 
 const ShowTask: React.FC<ShowTaskProps> = ({
   open,
@@ -198,13 +250,9 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   onRevisionHistory,
   sacredtheme = false,
 }) => {
-  // 1) Local comment state – these comments use our shared types.
   const [localComments, setLocalComments] = useState<Comment[]>(comments)
-  // 2) For adding a new comment
   const [newComment, setNewComment] = useState('')
-  // 3) Whether we are editing the left-side fields
   const [isEditing, setIsEditing] = useState(false)
-  // 4) formData for the left & right fields (including description)
   const [formData, setFormData] = useState({
     taskTitle,
     description,
@@ -218,20 +266,17 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     teamMemberAssigned,
     nextActionDate,
   })
-  // 5) For editing an individual comment's text
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
-  // 6) For selecting revisions for each comment
   const [selectedRevisions, setSelectedRevisions] = useState<
     Record<string, string | null>
   >({})
+  const styles = getStyles(sacredtheme)
 
-  // ------------------ SETUP ORIGINAL REVISIONS ------------------
   useEffect(() => {
     setLocalComments(prev =>
       prev.map(c => {
         if (!c.editHistory || c.editHistory.length === 0) {
-          // Use the comment's createdAt as the "original" time
           const originalTime = c.createdAt || new Date()
           const originalRev: CommentEditHistory = {
             _id: `rev-orig-${c._id}`,
@@ -247,8 +292,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     )
   }, [])
 
-  // ------------------ COMMENT ACTIONS ------------------
-  /** Create a new comment in local state with the current user as author */
   const handleComment = () => {
     const trimmed = newComment.trim()
     if (!trimmed) return
@@ -275,13 +318,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     setNewComment('')
   }
 
-  /** Begin editing a comment's text */
   const startEditingComment = (commentId: string, currentText: string) => {
     setEditingCommentId(commentId)
     setEditingCommentText(currentText)
   }
 
-  /** Save the edited comment text and update the local state */
   const saveEditingComment = (commentId: string) => {
     const now = new Date()
     onEditComment(commentId, editingCommentText, taskId)
@@ -307,13 +348,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     setSelectedRevisions(prev => ({ ...prev, [commentId]: null }))
   }
 
-  /** Cancel editing a comment */
   const cancelEditingComment = () => {
     setEditingCommentId(null)
     setEditingCommentText('')
   }
 
-  // ------------------ RIGHT-SIDE EDIT TOGGLE ------------------
   const handleEditToggle = () => {
     if (isEditing) {
       onEdit({
@@ -335,37 +374,21 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     }
   }
 
-  // ------------------ REVISION SELECT ------------------
   const handleSelectRevision = (
     commentId: string,
     revisionId: string | null
   ) => {
     setSelectedRevisions(prev => ({ ...prev, [commentId]: revisionId || null }))
-    // Find the comment and pass its revision history up via the new callback
     const comment = localComments.find(c => c._id === commentId)
     if (comment && comment.editHistory) {
       onRevisionHistory(commentId, comment.editHistory)
     }
   }
 
-  // A reusable style for each right-side row
-  const rightSideRowStyle = {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    pb: 2,
-    borderBottom: sacredtheme
-      ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-      : '1px solid black',
-    mx: -2,
-    px: 2,
-  }
-
-  // ------------------ Comment Menu State ------------------
-  interface CommentMenuState {
+  const [commentMenu, setCommentMenu] = useState<{
     anchor: HTMLElement | null
     commentId: string | null
-  }
-  const [commentMenu, setCommentMenu] = useState<CommentMenuState>({
+  }>({
     anchor: null,
     commentId: null,
   })
@@ -384,79 +407,35 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     startEditingComment(commentId, text)
   }
 
-  // ------------------ JSX ------------------
   return (
     <Dialog
       open={open}
       onClose={onClose}
       maxWidth="lg"
       fullWidth
-      PaperProps={{
-        sx: {
-          border: sacredtheme
-            ? `2px solid ${alpha(egyptianStyles.goldColor, 0.5)}`
-            : '2px solid black',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: sacredtheme
-            ? `0 0 30px ${alpha(egyptianStyles.goldColor, 0.3)}`
-            : 'none',
-          ...(sacredtheme && {
-            backgroundColor: egyptianStyles.cardBackground,
-            animation: `${glowPulse} 3s ease-in-out infinite`,
-          }),
-        },
-      }}
+      className={sacredtheme ? 'sacred-dialog' : ''}
     >
-      <DialogContent sx={{ p: 0 }}>
-        {/* Sacred corner glyphs */}
+      <div style={styles.dialog}>
         {sacredtheme && (
           <>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '12px',
-                left: '12px',
-                color: alpha(egyptianStyles.goldColor, 0.3),
-                fontSize: '18px',
-                animation: `${floatGlyph} 4s ease-in-out infinite`,
-                zIndex: 1,
-              }}
-            >
+            <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
               {SACRED_GLYPHS[0]}
-            </Box>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '12px',
-                right: '48px',
-                color: alpha(egyptianStyles.goldColor, 0.3),
-                fontSize: '18px',
-                animation: `${floatGlyph} 4s ease-in-out infinite reverse`,
-                zIndex: 1,
+            </div>
+            <div
+              style={{
+                ...styles.glyph,
+                top: '0.75rem',
+                right: '3rem',
+                animationDirection: 'reverse',
               }}
             >
               {SACRED_GLYPHS[1]}
-            </Box>
+            </div>
           </>
         )}
 
-        {/* Top Row: Title + createdBy + action buttons */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 2,
-            borderBottom: sacredtheme
-              ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-              : '2px solid black',
-            ...(sacredtheme && {
-              backgroundColor: alpha(egyptianStyles.goldColor, 0.05),
-            }),
-          }}
-        >
-          {/* Left: Title & createdBy */}
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={styles.header}>
+          <div>
             {isEditing ? (
               <TextField
                 label="Task Title"
@@ -464,114 +443,75 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 onChange={e =>
                   setFormData(prev => ({ ...prev, taskTitle: e.target.value }))
                 }
-                outlinecolor={
-                  sacredtheme ? egyptianStyles.goldColor : black.main
-                }
-                fontcolor={sacredtheme ? egyptianStyles.goldColor : black.main}
                 shrunklabelposition="aboveNotch"
-                sx={{ mb: 1 }}
+                className="mb-1"
                 sacredtheme={sacredtheme}
               />
             ) : (
               <Typography
                 fontvariant="merrih4"
-                fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                fontcolor={sacredtheme ? '#FFD700' : 'black'}
                 text={formData.taskTitle}
-                sx={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  ...(sacredtheme && {
-                    fontFamily: '"Cinzel", serif',
-                    letterSpacing: '0.05em',
-                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                  }),
-                }}
+                style={styles.headerTitle}
               />
             )}
             <Typography
               fontvariant="merrih5"
-              fontcolor={
-                sacredtheme ? alpha(egyptianStyles.goldColor, 0.7) : 'gray'
-              }
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'gray'}
               text={`created by ${createdBy}`}
-              sx={{
-                fontSize: '14px',
-                mt: 0.5,
-                ...(sacredtheme && {
-                  fontFamily: '"Crimson Text", serif',
-                }),
-              }}
+              style={styles.headerSubtitle}
             />
-          </Box>
+          </div>
 
-          {/* Right: Action Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <div style={styles.headerActions}>
             <CustomButton
               text={isEditing ? 'Save' : 'Edit'}
-              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               backgroundcolor="none"
               onClick={handleEditToggle}
               sacredtheme={sacredtheme}
             />
             <CustomButton
               text="Delete"
-              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               backgroundcolor="none"
               onClick={onDelete}
               sacredtheme={sacredtheme}
             />
             <CustomButton
               text="Duplicate"
-              fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+              fontcolor={sacredtheme ? '#FFD700' : 'black'}
               backgroundcolor="none"
               onClick={onDuplicate}
               sacredtheme={sacredtheme}
             />
-            <IconButton
+            <button
               onClick={onClose}
-              sx={{
-                color: sacredtheme ? egyptianStyles.goldColor : 'inherit',
+              style={{
+                ...styles.headerActions,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.25rem',
+                borderRadius: '9999px',
+                color: sacredtheme ? '#FFD700' : 'black',
               }}
             >
               <CloseIcon />
-            </IconButton>
-          </Box>
-        </Box>
+            </button>
+          </div>
+        </div>
 
-        {/* Main Content: Left (Description & Comments) + Right (Additional Fields) */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 0 }}>
-          {/* LEFT COLUMN */}
-          <Box sx={{ p: 2, pt: 0 }}>
-            {/* DESCRIPTION */}
-            <Box
-              sx={{
-                border: sacredtheme
-                  ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                  : '1px solid black',
-                mx: -2,
-                px: 2,
-                pt: '5px',
-                pb: '10px',
-                display: 'flex',
-                flexDirection: 'column',
-                ...(sacredtheme && {
-                  backgroundColor: alpha(egyptianStyles.goldColor, 0.02),
-                }),
-              }}
-            >
+        <div style={styles.grid}>
+          <div style={styles.mainContent}>
+            <div style={styles.descriptionContainer}>
               {isEditing ? (
                 <>
                   <Typography
                     fontvariant="merrih5"
-                    fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
                     text="Task Description"
-                    sx={{
-                      fontWeight: 'bold',
-                      mb: 1,
-                      ...(sacredtheme && {
-                        fontFamily: '"Cinzel", serif',
-                      }),
-                    }}
+                    style={styles.sectionTitle}
                   />
                   <ComplexTextEditor
                     value={formData.description}
@@ -588,37 +528,20 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <>
                   <Typography
                     fontvariant="merrih5"
-                    fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
                     text="Task Description"
-                    sx={{
-                      fontWeight: 'bold',
-                      mb: 1,
-                      ...(sacredtheme && {
-                        fontFamily: '"Cinzel", serif',
-                      }),
-                    }}
+                    style={styles.sectionTitle}
                   />
                   <Typography
                     fontvariant="merrih6"
-                    fontcolor={
-                      sacredtheme
-                        ? alpha(egyptianStyles.goldColor, 0.9)
-                        : 'black'
-                    }
+                    fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
                     text={formData.description}
-                    sx={{
-                      fontSize: '14px',
-                      whiteSpace: 'pre-wrap',
-                      ...(sacredtheme && {
-                        fontFamily: '"Crimson Text", serif',
-                      }),
-                    }}
+                    style={styles.descriptionText}
                   />
                 </>
               )}
-            </Box>
+            </div>
 
-            {/* EXISTING COMMENTS */}
             {localComments.map(comment => {
               const selectedRevId = selectedRevisions[comment._id] || null
 
@@ -647,24 +570,9 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 commentMenu.anchor && commentMenu.commentId === comment._id
 
               return (
-                <Box key={comment._id} sx={{ mb: 0 }}>
+                <div key={comment._id} style={styles.comment}>
                   {editingCommentId === comment._id ? (
-                    <Box
-                      sx={{
-                        border: sacredtheme
-                          ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                          : '1px solid black',
-                        mx: -2,
-                        px: 2,
-                        py: 1,
-                        ...(sacredtheme && {
-                          backgroundColor: alpha(
-                            egyptianStyles.goldColor,
-                            0.02
-                          ),
-                        }),
-                      }}
-                    >
+                    <div style={styles.commentEditing}>
                       <ComplexTextEditor
                         value={editingCommentText}
                         onChange={val => setEditingCommentText(val)}
@@ -673,209 +581,123 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         editorType="simple"
                         sacredtheme={sacredtheme}
                       />
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          mt: 1,
-                          gap: 1,
-                        }}
-                      >
+                      <div className="flex justify-end mt-1 gap-1">
                         <CustomButton
                           text="Save"
                           backgroundcolor={
-                            sacredtheme ? egyptianStyles.goldColor : woad.dark
+                            sacredtheme ? '#FFD700' : 'woad.dark'
                           }
-                          fontcolor={sacredtheme ? black.main : white.main}
+                          fontcolor={sacredtheme ? 'black' : 'white'}
                           onClick={() => saveEditingComment(comment._id)}
                           sacredtheme={sacredtheme}
                         />
                         <CustomButton
                           text="Cancel"
                           backgroundcolor="none"
-                          fontcolor={
-                            sacredtheme ? egyptianStyles.goldColor : 'black'
-                          }
+                          fontcolor={sacredtheme ? '#FFD700' : 'black'}
                           onClick={cancelEditingComment}
                           sacredtheme={sacredtheme}
                         />
-                      </Box>
-                    </Box>
+                      </div>
+                    </div>
                   ) : (
-                    <Box
-                      sx={{
-                        border: sacredtheme
-                          ? `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                          : '1px solid black',
-                        mx: -2,
-                        px: 2,
-                        py: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        minHeight: '80px',
-                        ...(sacredtheme && {
-                          backgroundColor: alpha(
-                            egyptianStyles.goldColor,
-                            0.02
-                          ),
-                        }),
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                        }}
-                      >
+                    <div style={styles.commentContent}>
+                      <div className="flex justify-between items-start">
                         <Typography
                           fontvariant="merrih5"
-                          fontcolor={
-                            sacredtheme ? egyptianStyles.goldColor : 'black'
-                          }
+                          fontcolor={sacredtheme ? '#FFD700' : 'black'}
                           text={comment.createdBy}
-                          sx={{
-                            fontWeight: 'bold',
-                            ...(sacredtheme && {
-                              fontFamily: '"Cinzel", serif',
-                            }),
-                          }}
                         />
-                        <IconButton
-                          size="small"
+                        <button
                           onClick={e => openCommentMenu(e, comment._id)}
-                          sx={{
-                            mb: 1,
-                            color: sacredtheme
-                              ? egyptianStyles.goldColor
-                              : 'inherit',
+                          style={{
+                            ...styles.headerActions,
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.25rem',
+                            borderRadius: '9999px',
+                            color: sacredtheme ? '#FFD700' : 'black',
                           }}
                         >
-                          <MoreVertIcon fontSize="small" />
-                        </IconButton>
+                          <MoreVertIcon />
+                        </button>
 
-                        <Menu
-                          anchorEl={commentMenu.anchor}
+                        <Popover
                           open={Boolean(isMenuOpen)}
                           onClose={closeCommentMenu}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
-                          }}
-                          transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                          }}
-                          sx={{
-                            ...(sacredtheme && {
-                              '& .MuiPaper-root': {
-                                backgroundColor: egyptianStyles.cardBackground,
-                                border: `1px solid ${alpha(egyptianStyles.goldColor, 0.3)}`,
-                                '& .MuiMenuItem-root': {
-                                  color: egyptianStyles.goldColor,
-                                  '&:hover': {
-                                    backgroundColor: alpha(
-                                      egyptianStyles.goldColor,
-                                      0.1
-                                    ),
-                                  },
-                                },
-                              },
-                            }),
-                          }}
+                          anchorEl={commentMenu.anchor}
+                          className={
+                            sacredtheme
+                              ? 'bg-black/95 border-yellow-400/30'
+                              : ''
+                          }
                         >
                           {canEdit && (
-                            <MenuItem
+                            <div
                               onClick={() =>
                                 handleEditClick(comment._id, comment.text)
                               }
-                            >
-                              Edit
-                            </MenuItem>
-                          )}
-                          {hasHistory && (
-                            <MenuItem
-                              disableRipple
-                              sx={{
-                                py: 0.5,
-                                cursor: 'default',
-                                '&:hover': { backgroundColor: 'transparent' },
+                              style={{
+                                ...styles.headerActions,
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '0.5rem 1rem',
+                                color: sacredtheme ? '#FFD700' : 'gray',
                               }}
                             >
-                              <Box sx={{ width: 220 }}>
-                                <SearchableDropdown
-                                  label="Revision History"
-                                  shrunklabelposition="aboveNotch"
-                                  placeholder="Select revision..."
-                                  options={
-                                    comment.editHistory.map(rev => {
-                                      const revTime = formatRelativeTime(
-                                        rev.editedAt ?? comment.createdAt
-                                      )
-                                      const prefix = rev.isOriginal
-                                        ? 'Original'
-                                        : 'Edited'
-                                      const editedBy =
-                                        rev.editedBy ?? comment.createdBy
-                                      return {
-                                        value: `${prefix} ${revTime} by ${editedBy}`,
-                                        attribute1: rev._id,
-                                      }
-                                    }) || []
-                                  }
-                                  onChange={opt =>
-                                    handleSelectRevision(
-                                      comment._id,
-                                      opt?.attribute1 || null
-                                    )
-                                  }
-                                  outlinecolor={
-                                    sacredtheme
-                                      ? egyptianStyles.goldColor
-                                      : black.main
-                                  }
-                                  fontcolor={
-                                    sacredtheme
-                                      ? egyptianStyles.goldColor
-                                      : black.main
-                                  }
-                                  defaultValue={selectedRevId || undefined}
-                                  sacredtheme={sacredtheme}
-                                />
-                              </Box>
-                            </MenuItem>
+                              Edit
+                            </div>
                           )}
-                        </Menu>
-                      </Box>
+                          {hasHistory && (
+                            <div style={{ width: '14rem' }}>
+                              <SearchableDropdown
+                                label="Revision History"
+                                shrunklabelposition="aboveNotch"
+                                placeholder="Select revision..."
+                                options={
+                                  comment.editHistory.map(rev => {
+                                    const revTime = formatRelativeTime(
+                                      rev.editedAt ?? comment.createdAt
+                                    )
+                                    const prefix = rev.isOriginal
+                                      ? 'Original'
+                                      : 'Edited'
+                                    const editedBy =
+                                      rev.editedBy ?? comment.createdBy
+                                    return {
+                                      value: `${prefix} ${revTime} by ${editedBy}`,
+                                      attribute1: rev._id,
+                                    }
+                                  }) || []
+                                }
+                                onChange={opt =>
+                                  handleSelectRevision(
+                                    comment._id,
+                                    opt?.attribute1 || null
+                                  )
+                                }
+                                defaultValue={selectedRevId || undefined}
+                                sacredtheme={sacredtheme}
+                              />
+                            </div>
+                          )}
+                        </Popover>
+                      </div>
 
-                      <Box sx={{ mt: 'auto' }}>
+                      <div className="mt-auto">
                         <Typography
                           fontvariant="merriparagraph"
                           fontcolor={
-                            sacredtheme
-                              ? alpha(egyptianStyles.goldColor, 0.9)
-                              : 'black'
+                            sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'
                           }
                           text={displayedText}
-                          sx={{
-                            fontSize: '14px',
-                            mt: 0.5,
-                            ...(sacredtheme && {
-                              fontFamily: '"Crimson Text", serif',
-                            }),
-                          }}
                         />
-                        <Box
-                          sx={{
-                            fontSize: '12px',
-                            color: sacredtheme
-                              ? alpha(egyptianStyles.goldColor, 0.6)
-                              : 'gray',
-                            mt: 0.5,
-                            ...(sacredtheme && {
-                              fontFamily: '"Crimson Text", serif',
-                            }),
-                          }}
+                        <div
+                          className={
+                            sacredtheme ? 'text-yellow-400/60' : 'text-gray-500'
+                          }
                         >
                           {comment.createdAt && (
                             <span>
@@ -888,16 +710,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                               | Edited {updatedTime} by {displayedAuthor}
                             </span>
                           )}
-                        </Box>
-                      </Box>
-                    </Box>
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </Box>
+                </div>
               )
             })}
 
-            {/* NEW COMMENT EDITOR */}
-            <Box sx={{ mx: -2, px: 2, py: 0 }}>
+            <div style={{ margin: '0 -8px 0 0', padding: '0.5rem 8px 0.5rem' }}>
               <ComplexTextEditor
                 value={newComment}
                 onChange={val => setNewComment(val)}
@@ -906,334 +727,126 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 editorType="simple"
                 sacredtheme={sacredtheme}
               />
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  mt: 2,
-                  gap: 2,
-                }}
-              >
-                {/* PASS THE TASK ID TO onCloseTask */}
+              <div className="flex justify-end mt-2 gap-2">
                 <CustomButton
                   text="Close Task"
                   backgroundcolor={
-                    sacredtheme
-                      ? alpha(egyptianStyles.goldColor, 0.8)
-                      : gunpowder.main
+                    sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'gunpowder.main'
                   }
-                  fontcolor={sacredtheme ? black.main : white.main}
+                  fontcolor={sacredtheme ? 'black' : 'white'}
                   onClick={() => onCloseTask(taskId)}
                   sacredtheme={sacredtheme}
                 />
                 <CustomButton
                   text="Comment"
-                  backgroundcolor={
-                    sacredtheme ? egyptianStyles.goldColor : woad.dark
-                  }
-                  fontcolor={sacredtheme ? black.main : white.main}
+                  backgroundcolor={sacredtheme ? '#FFD700' : 'woad.dark'}
+                  fontcolor={sacredtheme ? 'black' : 'white'}
                   onClick={handleComment}
                   sacredtheme={sacredtheme}
                 />
-              </Box>
-            </Box>
-          </Box>
+              </div>
+            </div>
+          </div>
 
-          {/* RIGHT COLUMN */}
-          <Box
-            sx={{
-              borderLeft: sacredtheme
-                ? `2px solid ${alpha(egyptianStyles.goldColor, 0.3)}`
-                : '2px solid black',
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              ...(sacredtheme && {
-                backgroundColor: alpha(egyptianStyles.goldColor, 0.02),
-              }),
-            }}
-          >
-            {/* Customer Assigned */}
-            <Box sx={rightSideRowStyle}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Customer Assigned"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Customer Assigned"
-                  options={customerOptions.map(cust => ({
-                    value:
-                      cust.firstName || cust.lastName
-                        ? `${cust.firstName || ''} ${cust.lastName || ''}`.trim()
-                        : cust._id,
-                    attribute1: cust._id,
-                  }))}
-                  shrunklabelposition="aboveNotch"
-                  defaultValue={formData.customerAssigned}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      customerAssigned: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sacredtheme={sacredtheme}
-                />
-              ) : (
-                formData.customerAssigned && (
-                  <Chip
-                    label={formData.customerAssigned}
-                    variant="filled"
-                    sx={{
-                      backgroundColor: sacredtheme
-                        ? egyptianStyles.goldColor
-                        : woad.main,
-                      color: sacredtheme ? black.main : white.main,
-                      mt: 1,
-                    }}
+          <div style={styles.sidebar}>
+            {[
+              {
+                label: 'Customer Assigned',
+                value: formData.customerAssigned,
+                options: customerOptions.map(cust => ({
+                  value:
+                    cust.firstName || cust.lastName
+                      ? `${cust.firstName || ''} ${cust.lastName || ''}`.trim()
+                      : cust._id,
+                  attribute1: cust._id,
+                })),
+                field: 'customerAssigned',
+              },
+              {
+                label: 'Severity',
+                value: formData.severity,
+                options: severityOptions.map(s => ({
+                  value: String(s.severityLevel),
+                  attribute1: s._id,
+                })),
+                field: 'severity',
+              },
+              {
+                label: 'Scheduling Queue',
+                value: formData.schedulingQueue,
+                options: schedulingQueueOptions.map(q => ({
+                  value: q.queueName,
+                  attribute1: q._id,
+                })),
+                field: 'schedulingQueue',
+              },
+              {
+                label: 'Status',
+                value: formData.status,
+                options: statusOptions.map(s => ({
+                  value: s.status,
+                  attribute1: s._id,
+                })),
+                field: 'status',
+              },
+              {
+                label: 'Sub Status',
+                value: formData.subStatus,
+                options: subStatusOptions.map(s => ({
+                  value: s.subStatus,
+                  attribute1: s._id,
+                })),
+                field: 'subStatus',
+              },
+              {
+                label: 'Team Member Assigned',
+                value: formData.teamMemberAssigned,
+                options: teamMemberOptions.map(tm => ({
+                  value:
+                    tm.firstName && tm.lastName
+                      ? `${tm.firstName} ${tm.lastName}`
+                      : tm._id,
+                  attribute1: tm._id,
+                })),
+                field: 'teamMemberAssigned',
+              },
+            ].map(({ label, value, options, field }) => (
+              <div key={label} style={styles.sidebarSection}>
+                {!isEditing && (
+                  <Typography
+                    fontvariant="merriparagraph"
+                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                    text={label}
+                    style={styles.sidebarLabel}
                   />
-                )
-              )}
-            </Box>
+                )}
+                {isEditing ? (
+                  <SearchableDropdown
+                    label={label}
+                    options={options}
+                    shrunklabelposition="aboveNotch"
+                    defaultValue={value}
+                    onChange={newVal =>
+                      setFormData(prev => ({
+                        ...prev,
+                        [field]: newVal?.attribute1 || '',
+                      }))
+                    }
+                    sacredtheme={sacredtheme}
+                  />
+                ) : value ? (
+                  <Chip label={value} sacredtheme={sacredtheme} />
+                ) : null}
+              </div>
+            ))}
 
-            {/* Severity */}
-            <Box sx={rightSideRowStyle}>
+            <div style={styles.sidebarSection}>
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Severity"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Severity"
-                  options={severityOptions.map(s => ({
-                    value: String(s.severityLevel),
-                    attribute1: s._id,
-                  }))}
-                  shrunklabelposition="aboveNotch"
-                  defaultValue={formData.severity}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      severity: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sacredtheme={sacredtheme}
-                />
-              ) : formData.severity ? (
-                <Chip
-                  label={formData.severity}
-                  variant="filled"
-                  sx={{
-                    backgroundColor: sacredtheme ? '#DC2626' : red.main,
-                    color: white.main,
-                    mt: 1,
-                  }}
-                />
-              ) : null}
-            </Box>
-
-            {/* Scheduling Queue */}
-            <Box sx={rightSideRowStyle}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Scheduling Queue"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Scheduling Queue"
-                  options={schedulingQueueOptions.map(q => ({
-                    value: q.queueName,
-                    attribute1: q._id,
-                  }))}
-                  shrunklabelposition="aboveNotch"
-                  defaultValue={formData.schedulingQueue}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      schedulingQueue: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sacredtheme={sacredtheme}
-                />
-              ) : formData.schedulingQueue ? (
-                <Chip
-                  label={formData.schedulingQueue}
-                  variant="filled"
-                  sx={{
-                    backgroundColor: sacredtheme ? '#8B4513' : '#C48EA6',
-                    color: white.main,
-                    mt: 1,
-                  }}
-                />
-              ) : null}
-            </Box>
-
-            {/* Status */}
-            <Box sx={rightSideRowStyle}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Status"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Status"
-                  options={statusOptions.map(s => ({
-                    value: s.status,
-                    attribute1: s._id,
-                  }))}
-                  shrunklabelposition="aboveNotch"
-                  defaultValue={formData.status}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      status: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sacredtheme={sacredtheme}
-                />
-              ) : formData.status ? (
-                <Chip
-                  label={formData.status}
-                  variant="filled"
-                  sx={{
-                    backgroundColor: sacredtheme
-                      ? egyptianStyles.darkGold
-                      : black.main,
-                    color: sacredtheme ? black.main : white.main,
-                    mt: 1,
-                  }}
-                />
-              ) : null}
-            </Box>
-
-            {/* Sub Status */}
-            <Box sx={rightSideRowStyle}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Sub Status"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Sub Status"
-                  options={subStatusOptions.map(s => ({
-                    value: s.subStatus,
-                    attribute1: s._id,
-                  }))}
-                  defaultValue={formData.subStatus}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      subStatus: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  shrunklabelposition="aboveNotch"
-                  sacredtheme={sacredtheme}
-                />
-              ) : formData.subStatus ? (
-                <Chip
-                  label={formData.subStatus}
-                  variant="filled"
-                  color={sacredtheme ? 'warning' : 'info'}
-                  sx={{ mt: 1 }}
-                />
-              ) : null}
-            </Box>
-
-            {/* Topics (Multi-select) */}
-            <Box sx={rightSideRowStyle}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
                   text="Topics"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
+                  style={styles.sidebarLabel}
                 />
               )}
               {isEditing ? (
@@ -1244,49 +857,27 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   onChange={values =>
                     setFormData(prev => ({ ...prev, topics: values }))
                   }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sx={{ mt: 1 }}
+                  outlinecolor={sacredtheme ? '#FFD700' : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                  className="mt-1"
                   sacredtheme={sacredtheme}
                 />
               ) : formData.topics.length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                <div style={styles.chipContainer}>
                   {formData.topics.map((topic, idx) => (
-                    <Chip
-                      key={idx}
-                      label={topic}
-                      variant="filled"
-                      color="success"
-                      sx={{
-                        ...(sacredtheme && {
-                          backgroundColor: '#059669',
-                          color: white.main,
-                        }),
-                      }}
-                    />
+                    <Chip key={idx} label={topic} sacredtheme={sacredtheme} />
                   ))}
-                </Box>
+                </div>
               ) : null}
-            </Box>
+            </div>
 
-            {/* Knowledgebase Articles (Multi-select) */}
-            <Box sx={rightSideRowStyle}>
+            <div style={styles.sidebarSection}>
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
                   text="Knowledgebase Articles"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
+                  style={styles.sidebarLabel}
                 />
               )}
               {isEditing ? (
@@ -1300,121 +891,38 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       knowledgebaseArticles: values,
                     }))
                   }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  sx={{ mt: 1 }}
+                  outlinecolor={sacredtheme ? '#FFD700' : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                  className="mt-1"
                   sacredtheme={sacredtheme}
                 />
               ) : formData.knowledgebaseArticles.length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                <div style={styles.chipContainer}>
                   {formData.knowledgebaseArticles.map((article, idx) => (
-                    <Chip
-                      key={idx}
-                      label={article}
-                      variant="filled"
-                      color="warning"
-                      sx={{
-                        ...(sacredtheme && {
-                          backgroundColor: '#D97706',
-                          color: white.main,
-                        }),
-                      }}
-                    />
+                    <Chip key={idx} label={article} sacredtheme={sacredtheme} />
                   ))}
-                </Box>
+                </div>
               ) : null}
-            </Box>
+            </div>
 
-            {/* Team Member Assigned */}
-            <Box sx={rightSideRowStyle}>
+            <div style={styles.sidebarSection}>
               {!isEditing && (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
-                  text="Team Member Assigned"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
-                />
-              )}
-              {isEditing ? (
-                <SearchableDropdown
-                  label="Team Member Assigned"
-                  options={teamMemberOptions.map(tm => ({
-                    value:
-                      tm.firstName && tm.lastName
-                        ? `${tm.firstName} ${tm.lastName}`
-                        : tm._id,
-                    attribute1: tm._id,
-                  }))}
-                  defaultValue={formData.teamMemberAssigned}
-                  onChange={newVal =>
-                    setFormData(prev => ({
-                      ...prev,
-                      teamMemberAssigned: newVal?.attribute1 || '',
-                    }))
-                  }
-                  outlinecolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  fontcolor={
-                    sacredtheme ? egyptianStyles.goldColor : black.main
-                  }
-                  shrunklabelposition="aboveNotch"
-                  sacredtheme={sacredtheme}
-                />
-              ) : formData.teamMemberAssigned ? (
-                <Chip
-                  label={formData.teamMemberAssigned}
-                  variant="filled"
-                  sx={{
-                    backgroundColor: sacredtheme
-                      ? egyptianStyles.goldColor
-                      : woad.main,
-                    color: sacredtheme ? black.main : white.main,
-                    mt: 1,
-                  }}
-                />
-              ) : null}
-            </Box>
-
-            {/* Next Action Date */}
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {!isEditing && (
-                <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? egyptianStyles.goldColor : 'black'}
+                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
                   text="Next Action Date"
-                  sx={{
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    ...(sacredtheme && {
-                      fontFamily: '"Cinzel", serif',
-                    }),
-                  }}
+                  style={styles.sidebarLabel}
                 />
               )}
               {isEditing ? (
-                <Box sx={{ mt: 1, width: '100%' }}>
+                <div className="mt-1 w-full">
                   <DateField
                     label="Next Action Date"
                     value={safeParseDate(formData.nextActionDate)}
                     onChange={date => {
-                      // Check if date is a DateRange or a Date
                       if (date && 'start' in date) {
-                        // It's a DateRange, but we're not using range mode
                         return
                       }
-
-                      // Handle Date type
                       if (date instanceof Date) {
                         const mm = String(date.getMonth() + 1).padStart(2, '0')
                         const dd = String(date.getDate()).padStart(2, '0')
@@ -1432,27 +940,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     }}
                     sacredtheme={sacredtheme}
                   />
-                </Box>
+                </div>
               ) : formData.nextActionDate ? (
                 <Typography
                   fontvariant="merriparagraph"
-                  fontcolor={
-                    sacredtheme ? alpha(egyptianStyles.goldColor, 0.9) : 'black'
-                  }
+                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
                   text={formData.nextActionDate}
-                  sx={{
-                    fontSize: '14px',
-                    mt: 1,
-                    ...(sacredtheme && {
-                      fontFamily: '"Crimson Text", serif',
-                    }),
-                  }}
                 />
               ) : null}
-            </Box>
-          </Box>
-        </Box>
-      </DialogContent>
+            </div>
+          </div>
+        </div>
+      </div>
     </Dialog>
   )
 }

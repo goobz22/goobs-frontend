@@ -3,76 +3,136 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Box, Paper, keyframes, alpha } from '@mui/material'
 import Typography from '../../../../components/Typography'
 import CustomButton from '../../../../components/Button'
-import RemoveIcon from '@mui/icons-material/Remove'
-import AddIcon from '@mui/icons-material/Add'
+import AddIcon from '../../../../components/Icons/Add'
+import RemoveIcon from '../../../../components/Icons/Remove'
+import { SACRED_GLYPHS } from '../../../../styles/sacredGlyphs'
 
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = ['𓅓', '𓆄', '𓇳', '𓈖', '𓊹', '𓊺']
-
-const sacredGlow = keyframes`
-  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-`
-
-const rotateGlyph = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`
-
-const sacredCounterGlow = keyframes`
-  0% { box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.5); }
-  100% { box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.3); }
-`
-
-/**
- * Props for the ProductCard component.
- */
 interface ProductCardProps {
-  /** Title of the product */
   title?: string
-  /** Initial number of developers */
   numDevelopers?: number
-  /** Callback function when adding a developer */
   onAddDeveloper?: () => void
-  /** Callback function when removing a developer */
   onRemoveDeveloper?: () => void
-  /** Number of licenses */
   licenses?: number
-  /** Unit price of the product */
   unitPrice?: number
-  /** Total price (calculated) */
   total?: number
-  /** Callback function for buy action */
   onBuy?: () => void
-  /** Callback function for live preview action */
   onLivePreview?: () => void
-  /** Array of feature descriptions */
   featuredescriptions?: string[]
-  /** Release date of the product */
   releaseDate?: string
-  /** Callback function for contact action */
   onContact?: () => void
-  /** Creator of the product */
   createdBy?: string
-  /** Enable Egyptian/Sacred theming */
   sacredtheme?: boolean
-  /** Height of the card */
   height?: string | number
 }
 
-/**
- * ProductCard component renders a card displaying detailed information about a product.
- * It includes options to adjust the number of developers/licenses, shows pricing information,
- * and provides actions like Buy Now and Live Preview.
- */
+const getStyles = (sacredtheme?: boolean) => ({
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '1rem',
+    overflow: 'hidden',
+    ...(sacredtheme
+      ? {
+          border: '1px solid rgba(255, 215, 0, 0.3)',
+          backgroundColor: 'black',
+          animation: 'product-card-glow 2s infinite alternate',
+          backgroundImage:
+            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.05), transparent)',
+        }
+      : {
+          border: '1px solid #E5E7EB',
+          backgroundColor: 'white',
+        }),
+  } as React.CSSProperties,
+  glyph: {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    color: 'rgba(255, 215, 0, 0.2)',
+    fontSize: '3rem',
+    animation: 'product-card-rotate-glyph 15s linear infinite',
+    zIndex: 0,
+  } as React.CSSProperties,
+  section: {
+    marginBottom: '0.5rem',
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+  developerCountContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: '0.25rem',
+  } as React.CSSProperties,
+  developerButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '1.5rem',
+    height: '1.5rem',
+    borderRadius: '0.375rem',
+    transition: 'all 0.3s ease',
+    ...(sacredtheme
+      ? {
+          color: '#FFD700',
+        }
+      : {
+          color: '#4B5563',
+        }),
+  } as React.CSSProperties,
+  developerButtonHover: {
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(255, 215, 0, 0.1)',
+          transform: 'scale(1.1)',
+        }
+      : {
+          backgroundColor: '#E5E7EB',
+        }),
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    border: '1px solid',
+    borderRadius: '0.375rem',
+    padding: '0.25rem',
+    textAlign: 'center',
+    ...(sacredtheme
+      ? {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderColor: 'rgba(255, 215, 0, 0.5)',
+          color: '#FFD700',
+          fontWeight: 600,
+          animation: 'product-card-counter-glow 1.5s infinite alternate',
+        }
+      : {
+          backgroundColor: 'white',
+          borderColor: '#D1D5DB',
+          color: 'black',
+        }),
+  } as React.CSSProperties,
+  buttonGroup: {
+    marginBottom: '0.5rem',
+    display: 'flex',
+    justifyContent: 'flex-start',
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+  contact: {
+    marginTop: '0.5rem',
+    cursor: 'pointer',
+    position: 'relative',
+    zIndex: 10,
+  } as React.CSSProperties,
+  contactHover: {
+    ...(sacredtheme && {
+      color: '#FBBF24',
+      textShadow: '0 0 5px rgba(255,215,0,0.5)',
+    }),
+  } as React.CSSProperties,
+})
+
 const ProductCard: React.FC<ProductCardProps> = ({
   numDevelopers = 1,
   onAddDeveloper,
@@ -88,16 +148,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
   sacredtheme = false,
   height,
 }) => {
-  // State for number of developers input
   const [numDevelopersInput, setNumDevelopersInput] = useState(
     numDevelopers.toString()
   )
-  // State for number of licenses
   const [numLicenses, setNumLicenses] = useState(licenses)
+  const [addHover, setAddHover] = useState(false)
+  const [removeHover, setRemoveHover] = useState(false)
+  const [contactHover, setContactHover] = useState(false)
+  const styles = getStyles(sacredtheme)
 
-  /**
-   * Handles the action of adding a developer.
-   */
   const handleAddDeveloper = () => {
     const newNumDevelopers = parseInt(numDevelopersInput, 10) + 1
     setNumDevelopersInput(newNumDevelopers.toString())
@@ -105,9 +164,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     onAddDeveloper?.()
   }
 
-  /**
-   * Handles the action of removing a developer.
-   */
   const handleRemoveDeveloper = () => {
     const newNumDevelopers = parseInt(numDevelopersInput, 10) - 1
     if (newNumDevelopers >= 1) {
@@ -117,9 +173,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   }
 
-  /**
-   * Handles changes in the number of developers input field.
-   */
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -129,249 +182,147 @@ const ProductCard: React.FC<ProductCardProps> = ({
   }
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '16px',
-        minHeight: height,
-        backgroundColor: sacredtheme ? '#0a0a0a' : 'white',
-        border: sacredtheme
-          ? `1px solid ${alpha('#FFD700', 0.3)}`
-          : '1px solid #e8e8e8',
-        overflow: 'hidden',
-        ...(sacredtheme && {
-          backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
-            radial-gradient(circle at top left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-          `,
-          animation: `${sacredGlow} 4s ease-in-out infinite`,
-          '&::before': {
-            content: `"${SACRED_GLYPHS[4]}"`,
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            color: alpha('#FFD700', 0.2),
-            fontSize: '48px',
-            animation: `${rotateGlyph} 20s linear infinite`,
-            zIndex: 0,
-          },
-        }),
-      }}
-    >
-      {/* Number of developers section */}
-      <Box sx={{ mb: 2, position: 'relative', zIndex: 1 }}>
+    <div style={{ ...styles.container, minHeight: height }}>
+      {sacredtheme && <div style={styles.glyph}>{SACRED_GLYPHS[4]}</div>}
+
+      <div style={styles.section}>
         <Typography
           text="Number of developers"
           fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? alpha('#FFD700', 0.9) : 'black'}
-          sx={
-            sacredtheme
-              ? {
-                  fontWeight: 600,
-                  letterSpacing: '0.5px',
-                }
-              : undefined
+          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
+          style={
+            sacredtheme ? { fontWeight: 600, letterSpacing: '0.025em' } : {}
           }
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          {/* Remove developer button */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '24px',
-              height: '24px',
-              cursor: 'pointer',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease',
-              ...(sacredtheme && {
-                color: '#FFD700',
-                '&:hover': {
-                  backgroundColor: alpha('#FFD700', 0.1),
-                  transform: 'scale(1.1)',
-                },
-              }),
-            }}
+        <div style={styles.developerCountContainer}>
+          <button
             onClick={handleRemoveDeveloper}
+            style={{
+              ...styles.developerButton,
+              ...(removeHover && styles.developerButtonHover),
+            }}
+            onMouseEnter={() => setRemoveHover(true)}
+            onMouseLeave={() => setRemoveHover(false)}
           >
-            <RemoveIcon sx={{ fontSize: '16px' }} />
-          </Box>
-          {/* Number of developers input */}
-          <Box
-            sx={{ mx: 1, display: 'flex', alignItems: 'center', width: '45px' }}
-          >
+            <RemoveIcon style={{ width: '1rem', height: '1rem' }} />
+          </button>
+          <div style={{ margin: '0 0.25rem', width: '3rem' }}>
             <input
               type="text"
               value={numDevelopersInput}
               onChange={handleInputChange}
-              style={{
-                width: '100%',
-                border: sacredtheme
-                  ? `1px solid ${alpha('#FFD700', 0.5)}`
-                  : '1px solid #ccc',
-                borderRadius: '4px',
-                padding: '4px',
-                backgroundColor: sacredtheme ? alpha('#000000', 0.8) : 'white',
-                color: sacredtheme ? '#FFD700' : 'black',
-                textAlign: 'center',
-                fontWeight: sacredtheme ? 600 : 400,
-                ...(sacredtheme && {
-                  boxShadow: `inset 0 0 5px ${alpha('#FFD700', 0.2)}`,
-                  animation: `${sacredCounterGlow} 3s ease-in-out infinite`,
-                }),
-              }}
+              style={styles.input}
             />
-          </Box>
-          {/* Add developer button */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '24px',
-              height: '24px',
-              cursor: 'pointer',
-              borderRadius: '4px',
-              transition: 'all 0.3s ease',
-              ...(sacredtheme && {
-                color: '#FFD700',
-                '&:hover': {
-                  backgroundColor: alpha('#FFD700', 0.1),
-                  transform: 'scale(1.1)',
-                },
-              }),
-            }}
+          </div>
+          <button
             onClick={handleAddDeveloper}
+            style={{
+              ...styles.developerButton,
+              ...(addHover && styles.developerButtonHover),
+            }}
+            onMouseEnter={() => setAddHover(true)}
+            onMouseLeave={() => setAddHover(false)}
           >
-            <AddIcon sx={{ fontSize: '16px' }} />
-          </Box>
-        </Box>
-      </Box>
+            <AddIcon style={{ width: '1rem', height: '1rem' }} />
+          </button>
+        </div>
+      </div>
 
-      {/* Pricing information section */}
-      <Box sx={{ mb: 2, position: 'relative', zIndex: 1 }}>
-        <Box>
+      <div style={styles.section}>
+        <div>
           <Typography
             text={`Licenses: ${numLicenses}`}
             fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
           />
-        </Box>
-        <Box>
+        </div>
+        <div>
           <Typography
             text={`Unit price: $ ${unitPrice}`}
             fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
           />
-        </Box>
-        <Box sx={{ fontWeight: 'bold' }}>
+        </div>
+        <div style={{ fontWeight: 'bold' }}>
           <Typography
             text={`Total: $ ${(unitPrice * numLicenses).toFixed(2)}`}
             fontvariant="merriparagraph"
             fontcolor={sacredtheme ? '#FFD700' : 'black'}
-            sx={
+            style={
               sacredtheme
                 ? {
-                    fontSize: '1.1rem',
-                    fontWeight: 700,
-                    textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+                    fontSize: '1.125rem',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px rgba(255,215,0,0.5)',
                   }
-                : undefined
+                : {}
             }
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Action buttons section */}
-      <Box
-        sx={{
-          mb: 2,
-          display: 'flex',
-          justifyContent: 'flex-start',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        <Box sx={{ mr: '2px' }}>
+      <div style={styles.buttonGroup}>
+        <div style={{ marginRight: '0.125rem' }}>
           <CustomButton
             text="Buy now"
             fontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
+            backgroundcolor={sacredtheme ? 'rgba(0,0,0,0.9)' : 'black'}
             onClick={onBuy}
             sacredtheme={sacredtheme}
           />
-        </Box>
-        <Box sx={{ ml: '2px' }}>
+        </div>
+        <div style={{ marginLeft: '0.125rem' }}>
           <CustomButton
             text="Live Preview"
             fontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? alpha('#000000', 0.9) : 'black'}
+            backgroundcolor={sacredtheme ? 'rgba(0,0,0,0.9)' : 'black'}
             onClick={onLivePreview}
             sacredtheme={sacredtheme}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Feature descriptions section */}
-      <Box sx={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ position: 'relative', zIndex: 10 }}>
         {featuredescriptions.map((feature, index) => (
-          <Box key={index}>
+          <div key={index}>
             <Typography
               text={`✓ ${feature}`}
               fontvariant="merriparagraph"
-              fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
             />
-          </Box>
+          </div>
         ))}
-      </Box>
+      </div>
 
-      {/* Release date section */}
-      <Box sx={{ mt: 2, position: 'relative', zIndex: 1 }}>
+      <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
         <Typography
           text={`First release: ${releaseDate}`}
           fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
+          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'black'}
         />
-      </Box>
+      </div>
 
-      {/* Contact section */}
-      <Box
-        sx={{
-          mt: 2,
-          cursor: 'pointer',
-          position: 'relative',
-          zIndex: 1,
-          ...(sacredtheme && {
-            '&:hover': {
-              '& .MuiTypography-root': {
-                color: '#FFD700',
-                textShadow: '0 0 6px rgba(255, 215, 0, 0.6)',
-              },
-            },
-          }),
-        }}
+      <div
         onClick={onContact}
+        style={{ ...styles.contact, ...(contactHover && styles.contactHover) }}
+        onMouseEnter={() => setContactHover(true)}
+        onMouseLeave={() => setContactHover(false)}
       >
         <Typography
           text="Questions? Contact us"
           fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? alpha('#FFD700', 0.8) : 'black'}
+          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
         />
-      </Box>
+      </div>
 
-      {/* Creator information section */}
-      <Box sx={{ mt: 2, position: 'relative', zIndex: 1 }}>
+      <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
         <Typography
           text={`Created by ${createdBy}`}
           fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? alpha('#FFD700', 0.7) : 'black'}
+          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'black'}
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

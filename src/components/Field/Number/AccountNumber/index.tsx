@@ -1,54 +1,138 @@
 'use client'
 import React, { useCallback, useState, useEffect } from 'react'
-import { Box, alpha, keyframes } from '@mui/material'
-import TextField, { TextFieldProps } from '../../../Field/Text'
 
-// Sacred animations from USD component
-const goldShimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`
-
-const floatGlyph = keyframes`
-  0% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-2px) scale(1.1); }
-  100% { transform: translateY(0px) scale(1); }
-`
-
-/**
- * Props interface for the AccountNumber component
- * Extends TextFieldProps and adds account number specific behavior
- */
-export interface AccountNumberProps extends Omit<TextFieldProps, 'onChange'> {
-  /**
-   * Callback when the account number changes and passes validation
-   */
+export interface AccountNumberProps {
   onChange?: (value: string, isValid: boolean) => void
-  /**
-   * Minimum length for account number
-   */
   minLength?: number
-  /**
-   * Maximum length for account number
-   */
   maxLength?: number
-  /**
-   * Custom error message for invalid account numbers
-   */
   errorMessage?: string
-  /**
-   * Enable sacred Egyptian theme
-   */
   sacredtheme?: boolean
-  /**
-   * Whether this is a default/existing value that should be partially masked
-   */
   isDefaultValue?: boolean
+  value?: string
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+  name?: string
+  id?: string
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
+  helperText?: string
+  backgroundcolor?: string
+  outlinecolor?: string
+  fontcolor?: string
 }
 
-/**
- * AccountNumber component for bank account number input with validation
- */
+const getStyles = (
+  sacredtheme: boolean,
+  isFocused: boolean,
+  isLabelFloating: boolean,
+  showError: boolean
+) => {
+  const premiumStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      marginTop: '1rem',
+    } as React.CSSProperties,
+    inputContainer: {
+      position: 'relative',
+    } as React.CSSProperties,
+    adornment: {
+      position: 'absolute' as const,
+      left: '0.75rem',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+    } as React.CSSProperties,
+    adornmentText: {
+      fontSize: '0.875rem',
+      fontWeight: 400,
+      color: '#4B5563',
+    } as React.CSSProperties,
+    input: {
+      width: '100%',
+      height: '3.5rem',
+      paddingLeft: '2.5rem',
+      paddingRight: '1rem',
+      border: `2px solid ${showError ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
+      borderRadius: '0.25rem',
+      outline: 'none',
+      transition: 'all 0.3s',
+      backgroundColor: 'white',
+      color: 'black',
+    } as React.CSSProperties,
+    label: {
+      position: 'absolute' as const,
+      left: '2.5rem',
+      transition: 'all 0.2s',
+      pointerEvents: 'none' as const,
+      color: showError ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
+      ...(isLabelFloating
+        ? {
+            top: '0',
+            fontSize: '0.75rem',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'white',
+            padding: '0 0.25rem',
+            marginLeft: '-0.5rem',
+          }
+        : {
+            top: '50%',
+            fontSize: '1rem',
+            transform: 'translateY(-50%)',
+          }),
+    } as React.CSSProperties,
+    helperText: {
+      marginTop: '0.25rem',
+      fontSize: '0.75rem',
+      padding: '0 0.75rem',
+      color: showError ? '#EF4444' : '#6B7281',
+    } as React.CSSProperties,
+  }
+
+  const sacredStyles = {
+    ...premiumStyles,
+    adornment: { ...premiumStyles.adornment, left: '1rem' },
+    adornmentText: {
+      ...premiumStyles.adornmentText,
+      color: '#FFD700',
+      fontWeight: 600,
+      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
+    },
+    input: {
+      ...premiumStyles.input,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#FFD700',
+      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
+      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
+      textShadow: '0 0 2px rgba(255, 215, 0, 0.5)',
+      '::placeholder': {
+        color: 'rgba(255, 215, 0, 0.7)',
+        fontStyle: 'italic',
+      },
+    },
+    label: {
+      ...premiumStyles.label,
+      left: '3rem',
+      color: showError
+        ? 'rgba(255,215,0,0.8)'
+        : isFocused
+          ? '#FFD700'
+          : 'rgba(255, 215, 0, 0.8)',
+      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
+    },
+    helperText: {
+      ...premiumStyles.helperText,
+      color: showError ? 'rgba(255,215,0,0.8)' : 'rgba(255, 215, 0, 0.6)',
+    },
+  }
+
+  return sacredtheme ? sacredStyles : premiumStyles
+}
+
 const AccountNumber: React.FC<AccountNumberProps> = ({
   onChange,
   value = '',
@@ -57,57 +141,52 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   errorMessage = 'Invalid account number format',
   sacredtheme = false,
   isDefaultValue = false,
+  label = 'Account Number',
+  placeholder,
+  disabled = false,
+  name,
+  id,
+  onFocus,
+  onBlur,
+  helperText,
+  backgroundcolor,
+  outlinecolor,
+  fontcolor,
   ...props
 }) => {
-  const [internalValue, setInternalValue] = useState<string>(value as string)
+  const [internalValue, setInternalValue] = useState<string>(value)
   const [isValid, setIsValid] = useState<boolean>(true)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
 
-  /**
-   * Validates an account number string
-   */
   const validateAccountNumber = useCallback(
     (accountNumber: string): boolean => {
-      // Trim any spaces
       const trimmedValue = accountNumber.trim()
-
-      // Check if empty and consider valid if empty (for optional fields)
       if (trimmedValue === '') return true
-
-      // Check if contains only digits (allow hyphens but normalize for validation)
       const normalizedValue = trimmedValue.replace(/-/g, '')
       const hasOnlyDigits = /^\d+$/.test(normalizedValue)
-
-      // Check if meets length requirements
       const isValidLength =
         normalizedValue.length >= minLength &&
         normalizedValue.length <= maxLength
-
       return hasOnlyDigits && isValidLength
     },
     [minLength, maxLength]
   )
 
-  // Format the input: only allow digits and hyphens
-  const formatInput = useCallback((input: string): string => {
-    // Filter out anything that's not a digit or hyphen
-    return input.replace(/[^\d-]/g, '')
-  }, [])
+  const formatInput = useCallback(
+    (input: string): string => input.replace(/[^\d-]/g, ''),
+    []
+  )
 
-  // Mask account number for security - show only last 4 digits
   const maskAccountNumber = useCallback((accountNumber: string): string => {
     if (!accountNumber || accountNumber.length < 4) return accountNumber
     const lastFour = accountNumber.slice(-4)
-    const maskedPortion = '*'.repeat(Math.max(0, accountNumber.length - 4))
-    return maskedPortion + lastFour
+    return '*'.repeat(Math.max(0, accountNumber.length - 4)) + lastFour
   }, [])
 
-  // Get display value based on focus state and default value status
   const getDisplayValue = useCallback(() => {
-    if (isDefaultValue && !isFocused && !hasBeenEdited && internalValue) {
+    if (isDefaultValue && !isFocused && !hasBeenEdited && internalValue)
       return maskAccountNumber(internalValue)
-    }
     return internalValue
   }, [
     isDefaultValue,
@@ -118,26 +197,19 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   ])
 
   useEffect(() => {
-    // Update internal value when prop value changes
-    setInternalValue(value as string)
-    // Validate the new value
-    setIsValid(validateAccountNumber(value as string))
+    setInternalValue(value)
+    setIsValid(validateAccountNumber(value))
   }, [value, validateAccountNumber])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const rawValue = e.target.value
       const formattedValue = formatInput(rawValue)
-
       setInternalValue(formattedValue)
       setHasBeenEdited(true)
-
       const valid = validateAccountNumber(formattedValue)
       setIsValid(valid)
-
-      if (onChange) {
-        onChange(formattedValue, valid)
-      }
+      onChange?.(formattedValue, valid)
     },
     [onChange, validateAccountNumber, formatInput]
   )
@@ -145,88 +217,80 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(true)
-      props.onFocus?.(e)
+      onFocus?.(e)
     },
-    [props]
+    [onFocus]
   )
-
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
-      props.onBlur?.(e)
+      onBlur?.(e)
     },
-    [props]
+    [onBlur]
   )
+
+  const isLabelFloating = isFocused || Boolean(internalValue)
+  const showError = !isValid && internalValue !== ''
+  const styles = getStyles(sacredtheme, isFocused, isLabelFloating, showError)
+
+  const finalPlaceholder = sacredtheme ? '1234567890' : placeholder
 
   const AccountAdornment = () => (
-    <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-      {sacredtheme && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-15px',
-            color: alpha('#FFD700', 0.4),
-            fontSize: '12px',
-            animation: `${floatGlyph} 3s ease-in-out infinite`,
-          }}
-        >
-          𓊖
-        </Box>
-      )}
-      <Box
-        sx={{
-          color: sacredtheme ? '#FFD700' : 'inherit',
-          fontWeight: sacredtheme ? 600 : 400,
-          fontSize: sacredtheme ? '14px' : '12px',
-          ...(sacredtheme && {
-            background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
-            backgroundSize: '200% 100%',
-            animation: `${goldShimmer} 3s linear infinite`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))',
-          }),
-        }}
-      >
-        #
-      </Box>
-    </Box>
+    <div style={styles.adornment}>
+      <span style={styles.adornmentText}>#</span>
+    </div>
   )
 
+  const customInputStyles = {
+    ...styles.input,
+    backgroundColor: !sacredtheme ? backgroundcolor : undefined,
+    borderColor: !sacredtheme
+      ? showError
+        ? '#ef4444'
+        : isFocused
+          ? outlinecolor || '#3B82F6'
+          : outlinecolor || '#D1D5DB'
+      : isFocused
+        ? '#FFD700'
+        : 'rgba(255, 215, 0, 0.5)',
+    color: !sacredtheme ? fontcolor : undefined,
+  }
+
+  const customLabelStyles = {
+    ...styles.label,
+    color: !sacredtheme && !showError ? fontcolor : undefined,
+  }
+
   return (
-    <TextField
-      {...props}
-      value={getDisplayValue()}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      error={!isValid && internalValue !== ''}
-      helperText={
-        !isValid && internalValue !== '' ? errorMessage : props.helperText
-      }
-      label={props.label || 'Account Number'}
-      placeholder={sacredtheme ? '1234567890' : props.placeholder}
-      sacredtheme={sacredtheme}
-      startAdornment={<AccountAdornment />}
-      inputProps={{
-        ...props.inputProps,
-        maxLength: maxLength + 5, // Allow extra chars for potential hyphens
-      }}
-      slotProps={{
-        input: {
-          sx: {
-            '& .MuiInputBase-input': {
-              marginLeft: sacredtheme ? '-10px' : '-15px',
-              marginTop: '2px',
-            },
-            '&::placeholder': {
-              marginLeft: sacredtheme ? '-10px' : '-15px',
-              marginTop: '2px',
-            },
-          },
-        },
-      }}
-    />
+    <div style={styles.container}>
+      <div style={styles.inputContainer}>
+        <AccountAdornment />
+        <input
+          type="text"
+          id={id}
+          name={name}
+          value={getDisplayValue()}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder={isLabelFloating ? finalPlaceholder : ''}
+          maxLength={maxLength + 5}
+          style={customInputStyles}
+          {...props}
+        />
+        {label && (
+          <label htmlFor={id} style={customLabelStyles}>
+            {label}
+          </label>
+        )}
+      </div>
+      {(showError || helperText) && (
+        <div style={styles.helperText}>
+          {showError ? errorMessage : helperText}
+        </div>
+      )}
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import DateRangeComponent, {
   DateRangeProps,
   DateRange,
@@ -20,12 +19,11 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
   disabled = false,
   error = false,
   helperText,
-  sx,
   style,
   ...rest
 }) => {
   return (
-    <Box style={style}>
+    <div style={style}>
       <DateRangeComponent
         onChange={onChange}
         value={value}
@@ -35,10 +33,9 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
         disabled={disabled}
         error={error}
         helperText={helperText}
-        sx={sx}
         {...rest}
       />
-    </Box>
+    </div>
   )
 }
 

@@ -5,144 +5,100 @@ import VLANField from '.'
 const meta: Meta<typeof VLANField> = {
   title: 'Components/Field/IPAM/VLAN',
   component: VLANField,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    label: { control: 'text' },
+    error: { control: 'boolean' },
+    helperText: { control: 'text' },
+  },
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
-  argTypes: {
-    onChange: { action: 'changed' },
-  },
 }
-
 export default meta
+
 type Story = StoryObj<typeof VLANField>
 
-export const Default: Story = {
+export const PremiumTheme: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
+      <VLANField {...args} />
+    </div>
+  ),
   args: {
     label: 'VLAN ID',
     onChange: event => console.log('Value changed:', event.target.value),
+    sacredtheme: false,
   },
 }
 
-export const WithInitialValue: Story = {
-  args: {
-    label: 'VLAN with Initial Value',
-    initialValue: '100',
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-}
-
-export const WithReservedVLANs: Story = {
-  args: {
-    label: 'VLAN with Reserved IDs',
-    reservedVLANs: [1, 4094, 1000, 1001, 1002],
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
   render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        The following VLANs are reserved: 1, 4094, 1000-1002
-      </p>
+    <div className="w-[400px] p-6 bg-black rounded-lg">
       <VLANField {...args} />
     </div>
   ),
-}
-
-export const WithCustomStep: Story = {
   args: {
-    label: 'VLAN with Custom Step',
-    initialValue: '100',
-    onChange: event => console.log('Value changed:', event.target.value),
+    ...PremiumTheme.args,
+    sacredtheme: true,
   },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Increments/Decrements by 10 when using the buttons
-      </p>
-      <VLANField {...args} />
-    </div>
-  ),
 }
 
-export const WithCustomTimings: Story = {
-  args: {
-    label: 'VLAN with Custom Timing',
-    initialDelay: 100,
-    repeatInterval: 50,
-    initialValue: '100',
-    onChange: event => console.log('Value changed:', event.target.value),
-  },
-  render: args => (
-    <div>
-      <p style={{ marginBottom: '10px' }}>
-        Faster response when holding buttons (100ms initial delay, 50ms repeat
-        interval)
-      </p>
-      <VLANField {...args} />
+const InteractiveDemoRenderer = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const [value, setValue] = React.useState('100')
+
+  return (
+    <div className="w-[500px] space-y-4">
+      <div className="p-4 bg-white rounded-lg border">
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div className="grid grid-cols-3 gap-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={error}
+              onChange={e => setError(e.target.checked)}
+            />{' '}
+            Error
+          </label>
+        </div>
+      </div>
+      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+        <VLANField
+          label="Interactive VLAN"
+          initialValue={value}
+          onChange={e => setValue(e.target.value)}
+          sacredtheme={sacred}
+          disabled={disabled}
+          error={error}
+        />
+      </div>
     </div>
-  ),
+  )
 }
 
-export const WithBoundaryValues: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        maxWidth: '300px',
-      }}
-    >
-      <VLANField
-        label="VLAN Near Minimum"
-        initialValue="2"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <VLANField
-        label="VLAN Near Maximum"
-        initialValue="4093"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <VLANField
-        label="Invalid VLAN (Below Min)"
-        initialValue="0"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <VLANField
-        label="Invalid VLAN (Above Max)"
-        initialValue="5000"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-    </div>
-  ),
-}
-
-export const TypicalRanges: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        maxWidth: '300px',
-      }}
-    >
-      <p style={{ marginBottom: '0' }}>Common VLAN Ranges</p>
-      <VLANField
-        label="Normal Range VLAN"
-        initialValue="100"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <VLANField
-        label="Extended Range VLAN"
-        initialValue="2000"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-      <VLANField
-        label="Default Native VLAN"
-        initialValue="1"
-        onChange={event => console.log('Value changed:', event.target.value)}
-      />
-    </div>
-  ),
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoRenderer />,
 }

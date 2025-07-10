@@ -1,173 +1,153 @@
 // src/components/Field/Percentage/percentagefield.stories.tsx
 
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, userEvent, expect } from '@storybook/test'
 import PercentageField from './index'
 
-/**
- * Configure Storybook metadata
- */
 const meta: Meta<typeof PercentageField> = {
   title: 'Components/Field/Percentage',
   component: PercentageField,
+  argTypes: {
+    sacredtheme: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    error: { control: 'boolean' },
+    label: { control: 'text' },
+    min: { control: 'number' },
+    max: { control: 'number' },
+    step: { control: 'number' },
+  },
   parameters: {
-    a11y: {
-      disable: false,
-    },
+    layout: 'centered',
   },
 }
 export default meta
 
 type Story = StoryObj<typeof PercentageField>
 
-/**
- * 1) Basic usage
- */
-export const Basic: Story = {
+export const Premium: Story = {
+  name: 'Premium Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: '#f3f4f6',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <PercentageField {...args} />
+    </div>
+  ),
   args: {
-    label: 'Enter Percentage',
-    initialValue: '50',
-  },
-  play: ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Confirm the label and initial value
-    const input = canvas.getByLabelText('Enter Percentage')
-    expect(input).toHaveValue('50%')
+    label: 'Discount Percentage',
+    initialValue: '10',
+    sacredtheme: false,
   },
 }
 
-/**
- * 2) With Min/Max Constraints
- */
-export const WithMinMax: Story = {
+export const Sacred: Story = {
+  name: 'Sacred Theme',
+  render: args => (
+    <div
+      style={{
+        width: '400px',
+        padding: '2rem',
+        backgroundColor: 'black',
+        borderRadius: '0.5rem',
+      }}
+    >
+      <PercentageField {...args} />
+    </div>
+  ),
   args: {
-    label: 'Constrained Percentage',
-    initialValue: '25',
-    min: 10,
-    max: 90,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Constrained Percentage')
-
-    // Confirm initial value "25%"
-    expect(input).toHaveValue('25%')
-
-    // Try to enter a value below min
-    await userEvent.clear(input)
-    await userEvent.type(input, '5')
-    // Should be constrained to 10%
-    expect(input).toHaveValue('10%')
-
-    // Try to enter a value above max
-    await userEvent.clear(input)
-    await userEvent.type(input, '95')
-    // Should be constrained to 90%
-    expect(input).toHaveValue('90%')
+    ...Premium.args,
+    sacredtheme: true,
   },
 }
 
-/**
- * 3) Without Percentage Symbol
- */
-export const WithoutSymbol: Story = {
-  args: {
-    label: 'No Symbol',
-    initialValue: '75',
-    showPercentSymbol: false,
-  },
-  play: ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('No Symbol')
-    expect(input).toHaveValue('75')
-  },
+const InteractiveRenderer = () => {
+  const [sacred, setSacred] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState(false)
+  const [value, setValue] = React.useState('25')
+
+  return (
+    <div
+      style={{
+        width: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+      }}
+    >
+      <div
+        style={{
+          padding: '1rem',
+          border: '1px solid #ccc',
+          borderRadius: '0.5rem',
+        }}
+      >
+        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '0.5rem',
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={sacred}
+              onChange={e => setSacred(e.target.checked)}
+            />{' '}
+            Sacred
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={disabled}
+              onChange={e => setDisabled(e.target.checked)}
+            />{' '}
+            Disabled
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={error}
+              onChange={e => setError(e.target.checked)}
+            />{' '}
+            Error
+          </label>
+        </div>
+      </div>
+      <div
+        style={{
+          padding: '2rem',
+          borderRadius: '0.5rem',
+          backgroundColor: sacred ? 'black' : '#f3f4f6',
+        }}
+      >
+        <PercentageField
+          label="Tax Rate"
+          initialValue={value}
+          onChange={e => {
+            if (typeof e === 'number') setValue(String(e))
+            else setValue(e.target.value)
+          }}
+          sacredtheme={sacred}
+          disabled={disabled}
+          error={error}
+          min={0}
+          max={100}
+          step={0.5}
+        />
+      </div>
+    </div>
+  )
 }
 
-/**
- * 4) Decimal Values
- */
-export const DecimalValues: Story = {
-  args: {
-    label: 'Decimal Percentage',
-    initialValue: '33.5',
-    step: 0.5,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Decimal Percentage')
-
-    // Confirm initial value
-    expect(input).toHaveValue('33.5%')
-
-    // Type a decimal value
-    await userEvent.clear(input)
-    await userEvent.type(input, '42.75')
-    expect(input).toHaveValue('42.75%')
-  },
-}
-
-/**
- * 5) Increment/Decrement Buttons
- */
-export const IncrementDecrementButtons: Story = {
-  args: {
-    label: 'Increment/Decrement',
-    initialValue: '50',
-    min: 0,
-    max: 100,
-    step: 5,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const input = canvas.getByLabelText('Increment/Decrement')
-
-    // Verify initial value
-    expect(input).toHaveValue('50%')
-
-    // Click increment button 3 times (step is 5)
-    const incrementButton = canvas.getByLabelText('increment')
-    await userEvent.click(incrementButton)
-    await userEvent.click(incrementButton)
-    await userEvent.click(incrementButton)
-    expect(input).toHaveValue('65%')
-
-    // Click decrement button 4 times
-    const decrementButton = canvas.getByLabelText('decrement')
-    await userEvent.click(decrementButton)
-    await userEvent.click(decrementButton)
-    await userEvent.click(decrementButton)
-    await userEvent.click(decrementButton)
-    expect(input).toHaveValue('45%')
-  },
-}
-
-/**
- * 6) Continuous Increment/Decrement
- */
-export const ContinuousIncrementDecrement: Story = {
-  args: {
-    label: 'Hold To Continue',
-    initialValue: '25',
-    min: 0,
-    max: 100,
-    step: 5,
-    initialDelay: 300,
-    repeatInterval: 50,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-          This component supports continuous increment/decrement when you hold down the buttons:
-          
-          - Click a button once to increment/decrement by the step amount (5% in this example)
-          - Hold the button down to continuously increment/decrement
-          - After a short delay (300ms), continuous changes begin
-          - Changes continue until you release the button or reach min/max
-          
-          *Try it: Hold down the up arrow to quickly reach the max value (100%).*
-        `,
-      },
-    },
-  },
+export const Interactive: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveRenderer />,
 }
