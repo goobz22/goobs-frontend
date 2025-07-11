@@ -1,8 +1,19 @@
-// src/components/Checkbox/index.tsx
-
+/**
+ * @fileoverview Defines the Checkbox component, a custom checkbox with theming.
+ */
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useId,
+  ChangeEvent,
+} from 'react'
+import { useCallback } from 'react'
+import type { InputHTMLAttributes } from 'react'
 
 const SACRED_GLYPHS = [
   '𓁟',
@@ -33,15 +44,19 @@ const SACRED_GLYPHS = [
 
 const CheckIcon = ({ sacredtheme = false }: { sacredtheme?: boolean }) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 20 20"
     fill="currentColor"
     style={{
-      width: sacredtheme ? '18px' : '16px',
-      height: sacredtheme ? '18px' : '16px',
+      width: sacredtheme ? '20px' : '18px',
+      height: sacredtheme ? '20px' : '18px',
       flexShrink: 0,
     }}
   >
-    <path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z" />
+    <path
+      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+      strokeWidth="0.5"
+      stroke="currentColor"
+    />
   </svg>
 )
 
@@ -51,22 +66,44 @@ const IndeterminateIcon = ({
   sacredtheme?: boolean
 }) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 20 20"
     fill="currentColor"
     style={{
-      width: sacredtheme ? '18px' : '16px',
-      height: sacredtheme ? '18px' : '16px',
+      width: sacredtheme ? '20px' : '18px',
+      height: sacredtheme ? '20px' : '18px',
       flexShrink: 0,
     }}
   >
-    <path d="M4 8a1 1 0 011-1h6a1 1 0 110 2H5a1 1 0 01-1-1z" />
+    <path
+      d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"
+      strokeWidth="0.5"
+      stroke="currentColor"
+    />
   </svg>
 )
 
 export interface CheckboxProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  extends Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'size' | 'value' | 'defaultValue' | 'onChange' | 'onFocus' | 'onBlur'
+  > {
+  /** Whether the checkbox is checked */
+  checked?: boolean
+  /** Default checked state for uncontrolled mode */
+  defaultChecked?: boolean
+  /** Callback when checkbox state changes */
+  onChange?: (checked: boolean) => void
+  /** Callback when checkbox is focused */
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  /** Callback when checkbox loses focus */
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  /** Whether the checkbox is disabled */
+  disabled?: boolean
+  /** Whether to use the sacred theme */
   sacredtheme?: boolean
+  /** Whether to show outline */
   outline?: boolean
+  /** Whether the checkbox is in indeterminate state */
   indeterminate?: boolean
 }
 
@@ -170,18 +207,16 @@ const premiumStyles = {
     color: 'white',
     opacity: 0,
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: 'scale(0.8)',
+    transform: 'scale(0.8) translate(2px, 1px)',
     zIndex: 2,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '3px',
-    paddingLeft: '3px',
   } as React.CSSProperties,
 
   iconVisible: {
     opacity: 1,
-    transform: 'scale(1)',
+    transform: 'scale(1) translate(2px, 1px)',
   } as React.CSSProperties,
 
   iconDisabled: {
@@ -189,8 +224,8 @@ const premiumStyles = {
   } as React.CSSProperties,
 
   iconNoOutline: {
-    paddingTop: '1px',
-    paddingLeft: '1px',
+    // Adjust positioning when no outline - move 2px to the left
+    transform: 'scale(0.8) translate(0px, 1px)',
   } as React.CSSProperties,
 
   accent: {
@@ -324,19 +359,17 @@ const sacredStyles = {
     color: '#FFD700',
     opacity: 0,
     transition: 'all 0.4s ease',
-    transform: 'scale(0.8) rotate(-10deg)',
+    transform: 'scale(0.8) rotate(-10deg) translate(2px, 1px)',
     filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
     zIndex: 2,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '3px',
-    paddingLeft: '3px',
   } as React.CSSProperties,
 
   iconVisible: {
     opacity: 1,
-    transform: 'scale(1) rotate(0deg)',
+    transform: 'scale(1) rotate(0deg) translate(2px, 1px)',
     filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
   } as React.CSSProperties,
 
@@ -346,8 +379,8 @@ const sacredStyles = {
   } as React.CSSProperties,
 
   iconNoOutline: {
-    paddingTop: '1px',
-    paddingLeft: '1px',
+    // Adjust positioning when no outline - move 2px to the left
+    transform: 'scale(0.8) rotate(-10deg) translate(0px, 1px)',
   } as React.CSSProperties,
 
   glyph: {
@@ -383,138 +416,180 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
-const DataGridCheckbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  (
-    { sacredtheme = false, outline = true, indeterminate, disabled, ...props },
-    ref
-  ) => {
-    const id = React.useId()
-    const internalRef = React.useRef<HTMLInputElement>(null)
-    const [isHovered, setIsHovered] = useState(false)
+const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
+  const {
+    sacredtheme = false,
+    outline = true,
+    indeterminate,
+    checked: controlledChecked,
+    defaultChecked,
+    onChange,
+    onFocus,
+    onBlur,
+    disabled,
+    ...rest
+  } = props
+  const id = useId()
+  const internalRef = useRef<HTMLInputElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
 
-    React.useImperativeHandle(ref, () => internalRef.current!)
+  // State management for controlled/uncontrolled component
+  const [uncontrolledChecked, setUncontrolledChecked] = useState(
+    defaultChecked || false
+  )
+  const isControlled = controlledChecked !== undefined
+  const checked = isControlled ? controlledChecked : uncontrolledChecked
+  const isDisabled = disabled || false
 
-    React.useEffect(() => {
-      if (internalRef.current) {
-        internalRef.current.indeterminate = indeterminate || false
-      }
-    }, [indeterminate])
+  const handleFocus = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onFocus?.(event)
+    },
+    [onFocus]
+  )
 
-    // CSS keyframes for sacred animations
-    useEffect(() => {
-      if (sacredtheme) {
-        const styleSheet = document.styleSheets[0]
-        const keyframes = `
-          @keyframes sacredFloat {
-            0%, 100% { transform: translateY(-50%) translateX(0px); opacity: 0.3; }
-            50% { transform: translateY(-50%) translateX(2px); opacity: 0.6; }
-          }
-        `
-        try {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        } catch {
-          // Keyframes might already exist
-        }
-      }
-    }, [sacredtheme])
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onBlur?.(event)
+    },
+    [onBlur]
+  )
 
-    const styles = sacredtheme ? sacredStyles : premiumStyles
-    const isChecked = props.checked
-    const isIndeterminate = indeterminate && !isChecked
+  useImperativeHandle(ref, () => internalRef.current!)
 
-    const wrapperStyle = {
-      ...styles.wrapper,
-      ...(disabled && styles.wrapperDisabled),
+  useEffect(() => {
+    if (internalRef.current) {
+      internalRef.current.indeterminate = indeterminate || false
     }
+  }, [indeterminate])
 
-    const inputStyle = {
-      ...styles.input,
-      ...(disabled && styles.inputDisabled),
-    }
+  console.log('Checkbox rendered:', {
+    sacredtheme,
+    checked,
+    indeterminate,
+    isDisabled,
+  })
 
-    const boxStyle = {
-      ...styles.box,
-      ...(!outline && styles.boxNoOutline),
-      ...(isHovered && !disabled && styles.boxHover),
-      ...(isChecked && styles.boxChecked),
-      ...(isIndeterminate && styles.boxIndeterminate),
-      ...(disabled && styles.boxDisabled),
-    }
+  const styles = sacredtheme ? sacredStyles : premiumStyles
+  const isChecked = checked
+  const isIndeterminate = indeterminate && !isChecked
 
-    const iconStyle = {
-      ...styles.icon,
-      ...(!outline && styles.iconNoOutline),
-      ...((isChecked || isIndeterminate) && styles.iconVisible),
-      ...(disabled && styles.iconDisabled),
-    }
-
-    return (
-      <label
-        htmlFor={id}
-        style={wrapperStyle}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Sacred glyphs */}
-        {sacredtheme && (
-          <>
-            <span
-              style={{
-                ...sacredStyles.glyph,
-                ...sacredStyles.glyphLeft,
-                ...(isHovered && sacredStyles.glyphVisible),
-                ...sacredStyles.glyphFloating,
-              }}
-            >
-              {SACRED_GLYPHS[11]}
-            </span>
-            <span
-              style={{
-                ...sacredStyles.glyph,
-                ...sacredStyles.glyphRight,
-                ...(isHovered && sacredStyles.glyphVisible),
-                ...sacredStyles.glyphDelayedFloating,
-              }}
-            >
-              {SACRED_GLYPHS[15]}
-            </span>
-          </>
-        )}
-
-        {/* Premium theme accent */}
-        {!sacredtheme && outline && (isChecked || isIndeterminate) && (
-          <div
-            style={{
-              ...premiumStyles.accent,
-              ...premiumStyles.accentVisible,
-            }}
-          />
-        )}
-
-        <div style={styles.container}>
-          <input
-            type="checkbox"
-            id={id}
-            ref={internalRef}
-            style={inputStyle}
-            aria-checked={indeterminate ? 'mixed' : undefined}
-            disabled={disabled}
-            {...props}
-          />
-          <div style={boxStyle}></div>
-          <div style={iconStyle}>
-            {indeterminate ? (
-              <IndeterminateIcon sacredtheme={sacredtheme} />
-            ) : (
-              <CheckIcon sacredtheme={sacredtheme} />
-            )}
-          </div>
-        </div>
-      </label>
-    )
+  const wrapperStyle = {
+    ...styles.wrapper,
+    ...(isDisabled && styles.wrapperDisabled),
   }
-)
 
-DataGridCheckbox.displayName = 'DataGridCheckbox'
+  const inputStyle = {
+    ...styles.input,
+    ...(isDisabled && styles.inputDisabled),
+  }
 
-export default DataGridCheckbox
+  const boxStyle = {
+    ...styles.box,
+    ...(!outline && styles.boxNoOutline),
+    ...(isHovered && !isDisabled && styles.boxHover),
+    ...(isChecked && styles.boxChecked),
+    ...(isIndeterminate && styles.boxIndeterminate),
+    ...(isDisabled && styles.boxDisabled),
+  }
+
+  const iconStyle = {
+    ...styles.icon,
+    ...(!outline && styles.iconNoOutline),
+    ...((isChecked || isIndeterminate) && styles.iconVisible),
+    ...(isDisabled && styles.iconDisabled),
+    // Override transform based on outline and visibility state
+    ...((isChecked || isIndeterminate) &&
+      !outline && {
+        transform: sacredtheme
+          ? 'scale(1) rotate(0deg) translate(0px, 1px)'
+          : 'scale(1) translate(0px, 1px)',
+      }),
+  }
+
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const newChecked = e.target.checked
+
+      if (!isControlled) {
+        setUncontrolledChecked(newChecked)
+      }
+
+      onChange?.(newChecked)
+    },
+    [isControlled, onChange]
+  )
+
+  return (
+    <label
+      htmlFor={id}
+      style={wrapperStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Sacred glyphs */}
+      {sacredtheme && (
+        <>
+          <span
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphLeft,
+              ...(isHovered && sacredStyles.glyphVisible),
+              ...sacredStyles.glyphFloating,
+            }}
+          >
+            {SACRED_GLYPHS[11]}
+          </span>
+          <span
+            style={{
+              ...sacredStyles.glyph,
+              ...sacredStyles.glyphRight,
+              ...(isHovered && sacredStyles.glyphVisible),
+              ...sacredStyles.glyphDelayedFloating,
+            }}
+          >
+            {SACRED_GLYPHS[15]}
+          </span>
+        </>
+      )}
+
+      {/* Premium theme accent */}
+      {!sacredtheme && outline && (isChecked || isIndeterminate) && (
+        <div
+          style={{
+            ...premiumStyles.accent,
+            ...premiumStyles.accentVisible,
+          }}
+        />
+      )}
+
+      <div style={styles.container}>
+        <input
+          type="checkbox"
+          id={id}
+          ref={internalRef}
+          style={inputStyle}
+          aria-checked={indeterminate ? 'mixed' : undefined}
+          disabled={isDisabled}
+          checked={isChecked || false}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...rest}
+        />
+        <div style={boxStyle}></div>
+        <div style={iconStyle}>
+          {indeterminate ? (
+            <IndeterminateIcon sacredtheme={sacredtheme} />
+          ) : (
+            <CheckIcon sacredtheme={sacredtheme} />
+          )}
+        </div>
+      </div>
+    </label>
+  )
+})
+
+Checkbox.displayName = 'Checkbox'
+
+export default Checkbox
