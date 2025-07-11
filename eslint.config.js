@@ -139,6 +139,9 @@ export default [
       // Turn off the 'no-floating-promises' rule:
       '@typescript-eslint/no-floating-promises': 'off',
 
+      // Turn off the 'no-explicit-any' rule:
+      '@typescript-eslint/no-explicit-any': 'off',
+
       // React-specific overrides
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
