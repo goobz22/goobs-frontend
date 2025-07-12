@@ -1,56 +1,21 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
+import { getDialogStyles, type DialogStyles } from '../../theme/dialog'
 
-interface DialogProps {
+export interface DialogProps {
+  /** Whether the dialog is open */
   open: boolean
+  /** Function to call when the dialog should close */
   onClose: () => void
+  /** The content to display in the dialog */
   children: React.ReactNode
-  className?: string
-  fullWidth?: boolean
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
-  style?: React.CSSProperties
+  /** Custom styles to apply to the dialog using the theme system */
+  styles?: DialogStyles
 }
 
-const getStyles = (maxWidth: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false) => ({
-  backdrop: {
-    position: 'fixed',
-    inset: 0,
-    zIndex: 50,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  } as React.CSSProperties,
-  dialog: {
-    position: 'relative',
-    backgroundColor: 'white',
-    borderRadius: '0.5rem',
-    boxShadow:
-      '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-    ...(maxWidth && {
-      maxWidth: {
-        xs: '20rem',
-        sm: '24rem',
-        md: '28rem',
-        lg: '32rem',
-        xl: '36rem',
-      }[maxWidth],
-    }),
-  } as React.CSSProperties,
-})
-
-const Dialog: React.FC<DialogProps> = ({
-  open,
-  onClose,
-  children,
-  className,
-  fullWidth = false,
-  maxWidth = 'sm',
-  style,
-}) => {
+const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
-  const styles = getStyles(maxWidth)
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -74,16 +39,13 @@ const Dialog: React.FC<DialogProps> = ({
     return null
   }
 
+  const computedStyles = getDialogStyles(styles)
+
   return (
-    <div style={styles.backdrop} onClick={onClose}>
+    <div style={computedStyles.backdrop} onClick={onClose}>
       <div
         ref={dialogRef}
-        style={{
-          ...styles.dialog,
-          ...(fullWidth && { width: '100%' }),
-          ...style,
-        }}
-        className={className}
+        style={computedStyles.dialog}
         onClick={e => e.stopPropagation()}
       >
         {children}
