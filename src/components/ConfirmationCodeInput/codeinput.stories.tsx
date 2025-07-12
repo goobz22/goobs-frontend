@@ -8,11 +8,14 @@ const meta: Meta<typeof ConfirmationCodeInputs> = {
   title: 'Components/ConfirmationCodeInputs',
   component: ConfirmationCodeInputs,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     codeLength: { control: 'number' },
     showActionButtons: { control: 'boolean' },
     showSendResendButton: { control: 'boolean' },
     showSuccessState: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
   parameters: {
     layout: 'centered',
@@ -37,12 +40,14 @@ export const Premium: Story = {
   ),
   args: {
     isValid: true,
-    sacredtheme: false,
+    styles: {
+      theme: 'light',
+    },
     onDisableVerification: () => alert('Verification disabled'),
   },
 }
 
-export const Sacred: Story = {
+export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
     <div
@@ -56,13 +61,16 @@ export const Sacred: Story = {
     </div>
   ),
   args: {
-    ...Premium.args,
-    sacredtheme: true,
+    isValid: true,
+    styles: {
+      theme: 'sacred',
+    },
+    onDisableVerification: () => alert('Verification disabled'),
   },
 }
 
 const InteractiveDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredTheme, setSacredTheme] = React.useState(false)
   const [value, setValue] = React.useState('')
   const [isValid, setIsValid] = React.useState(false)
   const [showSuccess, setShowSuccess] = React.useState(false)
@@ -101,8 +109,8 @@ const InteractiveDemo: React.FC = () => {
         <label>
           <input
             type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
+            checked={sacredTheme}
+            onChange={e => setSacredTheme(e.target.checked)}
           />{' '}
           Sacred Theme
         </label>
@@ -111,7 +119,7 @@ const InteractiveDemo: React.FC = () => {
         style={{
           padding: '2rem',
           borderRadius: '0.5rem',
-          backgroundColor: sacred ? 'black' : '#f3f4f6',
+          backgroundColor: sacredTheme ? 'black' : '#f3f4f6',
         }}
       >
         <ConfirmationCodeInputs
@@ -119,7 +127,9 @@ const InteractiveDemo: React.FC = () => {
           onChange={setValue}
           isValid={isValid}
           onVerify={handleVerify}
-          sacredtheme={sacred}
+          styles={{
+            theme: sacredTheme ? 'sacred' : 'light',
+          }}
           showActionButtons={true}
           showSuccessState={showSuccess}
           onDisableVerification={() => alert('Disabled')}
