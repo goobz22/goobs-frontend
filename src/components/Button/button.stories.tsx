@@ -59,53 +59,51 @@ const meta: Meta<typeof Button> = {
   title: 'Components/Button',
   component: Button,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    outline: { control: 'boolean' },
-    loading: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, layout, and more',
+    },
     disabled: { control: 'boolean' },
     text: { control: 'text' },
-    iconLocation: {
-      control: 'radio',
-      options: ['left', 'right', 'above'],
-    },
-    contentAlign: {
-      control: 'radio',
-      options: ['left', 'center', 'right'],
-    },
+    icon: { control: 'text' },
     onClick: { action: 'clicked' },
   },
   parameters: {
+    layout: 'centered',
     a11y: {
       disable: false,
     },
   },
+  tags: ['autodocs'],
 }
 export default meta
 
 type Story = StoryObj<typeof Button>
 
 // --------------------------------------------------------------------------
-// STORIES
+// BASIC THEME STORIES
 // --------------------------------------------------------------------------
 
 /**
- * A primary button with default styling.
+ * A primary button with light theme styling.
  */
-export const Primary: Story = {
+export const LightTheme: Story = {
+  name: 'Light Theme',
   args: {
-    text: 'Primary Button',
-    sacredtheme: false,
-    disabled: false,
+    text: 'Light Button',
+    styles: { theme: 'light' },
   },
 }
 
 /**
- * A button with the "sacred" theme for a stylized appearance.
+ * A primary button with dark theme styling.
  */
-export const sacredtheme: Story = {
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
   args: {
-    text: 'Sacred Button',
-    sacredtheme: true,
+    text: 'Dark Button',
+    styles: { theme: 'dark' },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -113,14 +111,32 @@ export const sacredtheme: Story = {
 }
 
 /**
+ * A button with the "sacred" theme for a stylized appearance.
+ */
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  args: {
+    text: 'Sacred Button',
+    styles: { theme: 'sacred' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// ICON STORIES
+// --------------------------------------------------------------------------
+
+/**
  * A button with an icon positioned to the left of the text.
  */
 export const WithIconLeft: Story = {
+  name: 'Icon/Left',
   args: {
-    ...Primary.args,
     text: 'Send',
     icon: <SendIcon />,
-    iconLocation: 'left',
+    styles: { theme: 'light', iconLocation: 'left' },
   },
 }
 
@@ -128,11 +144,11 @@ export const WithIconLeft: Story = {
  * A button with an icon positioned to the right of the text.
  */
 export const WithIconRight: Story = {
+  name: 'Icon/Right',
   args: {
-    ...Primary.args,
     text: 'Download',
     icon: <DownloadIcon />,
-    iconLocation: 'right',
+    styles: { theme: 'light', iconLocation: 'right' },
   },
 }
 
@@ -140,11 +156,11 @@ export const WithIconRight: Story = {
  * A button with an icon positioned above the text.
  */
 export const WithIconAbove: Story = {
+  name: 'Icon/Above',
   args: {
-    ...Primary.args,
     text: 'Add Item',
     icon: <AddIcon />,
-    iconLocation: 'above',
+    styles: { theme: 'light', iconLocation: 'above' },
   },
 }
 
@@ -152,34 +168,78 @@ export const WithIconAbove: Story = {
  * A button that only contains an icon.
  */
 export const IconOnly: Story = {
+  name: 'Icon/Only',
   args: {
-    ...Primary.args,
-    text: undefined,
     icon: <SendIcon />,
+    styles: { theme: 'light' },
   },
 }
+
+// --------------------------------------------------------------------------
+// STATE STORIES
+// --------------------------------------------------------------------------
 
 /**
  * A button in the disabled state.
  */
-export const Disabled: Story = {
-  args: {
-    ...Primary.args,
-    text: 'Disabled Button',
-    disabled: true,
-  },
+export const DisabledStates: Story = {
+  name: 'State/Disabled',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Button
+        text="Disabled Light"
+        styles={{ theme: 'light', disabled: true }}
+      />
+      <Button text="Disabled Dark" styles={{ theme: 'dark', disabled: true }} />
+      <Button
+        text="Disabled Sacred"
+        styles={{ theme: 'sacred', disabled: true }}
+      />
+    </div>
+  ),
 }
 
 /**
- * A button in the loading state.
+ * A button with custom outline styling.
  */
-export const Loading: Story = {
+export const OutlineStates: Story = {
+  name: 'State/Outline',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Button text="Outline Light" styles={{ theme: 'light', outline: true }} />
+      <Button text="Outline Dark" styles={{ theme: 'dark', outline: true }} />
+      <Button
+        text="Outline Sacred"
+        styles={{ theme: 'sacred', outline: true }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// CUSTOM STYLING STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Custom colors and styling.
+ */
+export const CustomColors: Story = {
+  name: 'Styling/Custom Colors',
   args: {
-    ...Primary.args,
-    text: 'Loading...',
-    loading: true,
+    text: 'Custom Button',
+    styles: {
+      theme: 'light',
+      backgroundColor: 'rgba(147, 51, 234, 1)',
+      color: 'white',
+      borderColor: 'rgba(147, 51, 234, 1)',
+      hoverBackgroundColor: 'rgba(126, 34, 206, 1)',
+    },
   },
 }
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST
+// --------------------------------------------------------------------------
 
 /**
  * A story to test interaction and accessibility.
@@ -188,9 +248,9 @@ export const InteractionTest: Story = {
   name: 'Interaction and A11y Test',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <Button text="Enabled" />
-      <Button text="Disabled" disabled />
-      <Button text="Click Me" />
+      <Button text="Enabled" styles={{ theme: 'light' }} />
+      <Button text="Disabled" styles={{ theme: 'light', disabled: true }} />
+      <Button text="Click Me" styles={{ theme: 'light' }} />
     </div>
   ),
   play: async ({ canvasElement }) => {
