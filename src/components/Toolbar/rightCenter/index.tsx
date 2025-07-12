@@ -2,6 +2,7 @@
 
 import React from 'react'
 import ManageRow from '../../DataGrid/ManageRow'
+import { ToolbarStyles } from '../../../theme'
 
 export interface RightCenterProps {
   selectedRows?: string[]
@@ -12,23 +13,19 @@ export interface RightCenterProps {
   onShow?: () => void
   onExport?: () => void
   handleClose?: () => void
-  sacredtheme?: boolean
+  styles?: ToolbarStyles
 }
 
-const premiumStyles = {
-  container: {
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    height: '100%',
-    padding: '0 16px',
-  } as React.CSSProperties,
-}
-
-const sacredStyles = {
-  container: {
-    ...premiumStyles.container,
-  } as React.CSSProperties,
+const getStyles = () => {
+  return {
+    container: {
+      display: 'flex',
+      alignItems: 'center',
+      flexShrink: 0,
+      height: '100%',
+      padding: '0 16px',
+    } as React.CSSProperties,
+  }
 }
 
 function RightCenter({
@@ -40,11 +37,11 @@ function RightCenter({
   onShow,
   onExport,
   handleClose,
-  sacredtheme,
+  styles,
 }: RightCenterProps) {
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  const computedStyles = getStyles()
   return (
-    <div style={styles.container}>
+    <div style={computedStyles.container}>
       <ManageRow
         selectedRows={selectedRows}
         rows={rows}
@@ -54,7 +51,7 @@ function RightCenter({
         onShow={onShow}
         onExport={onExport}
         handleClose={handleClose}
-        sacredtheme={sacredtheme}
+        styles={{ theme: styles?.theme }}
       />
     </div>
   )
