@@ -1,7 +1,7 @@
-// src/components/CodeCopy/codecopy.stories.tsx
-
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+/**
+ * @fileoverview Storybook stories for the CodeCopy component.
+ */
+import type { Meta, StoryObj } from '@storybook/react'
 import CodeCopy from './index'
 
 const meta: Meta<typeof CodeCopy> = {
@@ -12,7 +12,10 @@ const meta: Meta<typeof CodeCopy> = {
       control: { type: 'select' },
       options: ['javascript', 'typescript', 'css', 'html', 'json'],
     },
-    sacredtheme: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
 }
 export default meta
@@ -29,70 +32,26 @@ const tsCode = `interface Person {
 }
 const user: Person = { name: "Alice", age: 25 };`
 
+/** A premium-themed code block with JavaScript code. */
 export const PremiumTheme: Story = {
   name: 'Premium Theme',
   args: {
     code: jsCode,
     language: 'javascript',
-    sacredtheme: false,
+    styles: {
+      theme: 'light',
+    },
   },
 }
 
+/** A sacred-themed code block with TypeScript code. */
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   args: {
     code: tsCode,
     language: 'typescript',
-    sacredtheme: true,
+    styles: {
+      theme: 'sacred',
+    },
   },
-}
-
-const InteractiveDemoComponent: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
-  const [lang, setLang] = React.useState('javascript')
-  const codeMap: { [key: string]: string } = {
-    javascript: jsCode,
-    typescript: tsCode,
-  }
-
-  return (
-    <div>
-      <div
-        style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 100,
-          backgroundColor: 'white',
-          padding: '1rem',
-          borderRadius: '0.5rem',
-          border: '1px solid #e5e7eb',
-        }}
-      >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <select
-          value={lang}
-          onChange={e => setLang(e.target.value)}
-          style={{ marginBottom: '0.5rem' }}
-        >
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-        </select>
-        <label>
-          <input
-            type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
-          />
-          <span style={{ marginLeft: '0.5rem' }}>Sacred Theme</span>
-        </label>
-      </div>
-      <CodeCopy code={codeMap[lang]} language={lang} sacredtheme={sacred} />
-    </div>
-  )
-}
-
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemoComponent />,
 }
