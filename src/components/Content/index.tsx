@@ -6,10 +6,10 @@ import { RadioGroupProps } from '../RadioGroup'
 import { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
 import { TextFieldProps } from '../Field/Text'
 import { PhoneNumberFieldProps } from '../Field/PhoneNumber'
-import { CustomButtonProps } from '../Button'
+import { ButtonProps } from '../Button'
 import { ImageProps } from './Structure/image/useImage'
 import { PricingProps } from '../PricingTable'
-import { CustomStepperProps } from '../Stepper'
+import { StepperProps } from '../Stepper'
 import { TransferListProps } from '../TransferList'
 import { CardProps } from '../Card'
 import { CodeCopyProps } from '../CodeCopy'
@@ -95,10 +95,10 @@ export interface ContentSectionProps {
     accordion?: AccordionProps | AccordionProps[]
     radiogroup?: RadioGroupProps | RadioGroupProps[]
     link?: LinkProps | LinkProps[]
-    button?: CustomButtonProps | CustomButtonProps[]
+    button?: ButtonProps | ButtonProps[]
     image?: ImageProps | ImageProps[]
     pricing?: PricingProps
-    stepper?: CustomStepperProps | CustomStepperProps[]
+    stepper?: StepperProps | StepperProps[]
     transferlist?: TransferListProps | TransferListProps[]
     card?: CardProps | CardProps[]
     codecopy?: CodeCopyProps | CodeCopyProps[]

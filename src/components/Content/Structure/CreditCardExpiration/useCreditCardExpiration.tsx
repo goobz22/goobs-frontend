@@ -12,29 +12,24 @@ export type { CreditCardExpirationProps }
 const CreditCardExpirationComponent: React.FC<CreditCardExpirationProps> = ({
   onChange,
   value = '',
-  sacredtheme = false,
   isDefaultValue = false,
   label,
   placeholder,
-  disabled = false,
-  error = false,
-  style,
+  helperText,
+  styles,
   ...rest
 }) => {
   return (
-    <div style={style}>
-      <CreditCardExpiration
-        onChange={onChange}
-        value={value}
-        sacredtheme={sacredtheme}
-        isDefaultValue={isDefaultValue}
-        label={label}
-        placeholder={placeholder}
-        disabled={disabled}
-        error={error}
-        {...rest}
-      />
-    </div>
+    <CreditCardExpiration
+      onChange={onChange}
+      value={value}
+      isDefaultValue={isDefaultValue}
+      label={label}
+      placeholder={placeholder}
+      helperText={helperText}
+      styles={styles}
+      {...rest}
+    />
   )
 }
 

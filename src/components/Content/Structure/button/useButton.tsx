@@ -1,14 +1,14 @@
 'use client'
 import React from 'react'
-import CustomButton, { CustomButtonProps } from './../../../Button'
+import CustomButton, { ButtonProps } from './../../../Button'
 
 const useButton = (props: {
-  button?: CustomButtonProps | CustomButtonProps[]
+  button?: ButtonProps | ButtonProps[]
 }): React.ReactElement[] | null => {
   if (!props.button) return null
 
   const renderButton = (
-    buttonItem: CustomButtonProps,
+    buttonItem: ButtonProps,
     index: number
   ): React.ReactElement => {
     return <CustomButton key={`button-${index}`} {...buttonItem} />

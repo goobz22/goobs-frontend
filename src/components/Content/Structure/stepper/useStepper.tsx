@@ -1,17 +1,17 @@
 'use client'
 import React from 'react'
-import { CustomStepper, CustomStepperProps } from '../../../Stepper'
+import Stepper, { StepperProps } from '../../../Stepper'
 
 const useStepper = (props: {
-  stepper?: CustomStepperProps | CustomStepperProps[]
+  stepper?: StepperProps | StepperProps[]
 }): React.ReactElement[] | null => {
   if (!props.stepper) return null
 
   const renderStepper = (
-    stepperProps: CustomStepperProps,
+    stepperProps: StepperProps,
     index: number
   ): React.ReactElement => {
-    return <CustomStepper key={`stepper-${index}`} {...stepperProps} />
+    return <Stepper key={`stepper-${index}`} {...stepperProps} />
   }
 
   if (Array.isArray(props.stepper)) {

@@ -13,37 +13,28 @@ export type { CreditCardNumberProps, CardType }
 const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
   onChange,
   value = '',
-  errorMessage = 'Invalid credit card number',
   useLuhnValidation = true,
-  sacredtheme = false,
   isDefaultValue = false,
   enableFormatting = true,
   label,
   placeholder,
-  disabled = false,
-  error = false,
   helperText,
-  style,
+  styles,
   ...rest
 }) => {
   return (
-    <div style={style}>
-      <CreditCardNumber
-        onChange={onChange}
-        value={value}
-        errorMessage={errorMessage}
-        useLuhnValidation={useLuhnValidation}
-        sacredtheme={sacredtheme}
-        isDefaultValue={isDefaultValue}
-        enableFormatting={enableFormatting}
-        label={label}
-        placeholder={placeholder}
-        disabled={disabled}
-        error={error}
-        helperText={helperText}
-        {...rest}
-      />
-    </div>
+    <CreditCardNumber
+      onChange={onChange}
+      value={value}
+      useLuhnValidation={useLuhnValidation}
+      isDefaultValue={isDefaultValue}
+      enableFormatting={enableFormatting}
+      label={label}
+      placeholder={placeholder}
+      helperText={helperText}
+      styles={styles}
+      {...rest}
+    />
   )
 }
 

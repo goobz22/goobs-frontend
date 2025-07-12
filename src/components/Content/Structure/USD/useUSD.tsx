@@ -14,41 +14,32 @@ const USDComponent: React.FC<USDFieldProps> = ({
   min,
   max,
   precision = 2,
-  readOnly = false,
-  disabled = false,
-  error = false,
-  helperText,
   placeholder,
   enableIncrement = false,
   incrementStep = 1,
   initialDelay = 500,
   repeatInterval = 100,
-  sacredtheme = false,
-  style,
+  helperText,
+  styles,
   ...rest
 }) => {
   return (
-    <div style={style}>
-      <USDField
-        initialValue={initialValue}
-        onChange={onChange}
-        label={label}
-        min={min}
-        max={max}
-        precision={precision}
-        readOnly={readOnly}
-        disabled={disabled}
-        error={error}
-        helperText={helperText}
-        placeholder={placeholder}
-        enableIncrement={enableIncrement}
-        incrementStep={incrementStep}
-        initialDelay={initialDelay}
-        repeatInterval={repeatInterval}
-        sacredtheme={sacredtheme}
-        {...rest}
-      />
-    </div>
+    <USDField
+      initialValue={initialValue}
+      onChange={onChange}
+      label={label}
+      min={min}
+      max={max}
+      precision={precision}
+      placeholder={placeholder}
+      enableIncrement={enableIncrement}
+      incrementStep={incrementStep}
+      initialDelay={initialDelay}
+      repeatInterval={repeatInterval}
+      helperText={helperText}
+      styles={styles}
+      {...rest}
+    />
   )
 }
 

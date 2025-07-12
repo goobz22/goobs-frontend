@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography, TypographyProps } from '../../../Typography'
+import Typography, { TypographyProps } from '../../../Typography'
 
 const useTypography = (props: {
   typography?: TypographyProps | TypographyProps[]
@@ -10,14 +10,13 @@ const useTypography = (props: {
     typographyItem: TypographyProps,
     index: number
   ): React.ReactElement => {
-    const { text, fontcolor, fontvariant, ...restProps } = typographyItem
+    const { text, variant, ...restProps } = typographyItem
 
     return (
       <Typography
         key={`typography-${index}`}
         text={text}
-        fontvariant={fontvariant}
-        fontcolor={fontcolor}
+        variant={variant}
         {...restProps}
       />
     )

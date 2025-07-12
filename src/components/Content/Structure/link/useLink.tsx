@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { Typography, TypographyProps } from '../../../Typography'
+import Typography, { TypographyProps } from '../../../Typography'
 
 export interface LinkProps extends TypographyProps {
   link: string
@@ -16,7 +16,7 @@ const useLink = (props: {
     linkItem: LinkProps,
     index: number
   ): React.ReactElement => {
-    const { link, text, fontcolor, fontvariant, ...restProps } = linkItem
+    const { link, text, variant, ...restProps } = linkItem
 
     if (!link) {
       throw new Error('Link property is required')
@@ -24,12 +24,7 @@ const useLink = (props: {
 
     return (
       <Link key={`link-${index}`} href={link} passHref>
-        <Typography
-          text={text}
-          fontvariant={fontvariant}
-          fontcolor={fontcolor}
-          {...restProps}
-        />
+        <Typography text={text} variant={variant} {...restProps} />
       </Link>
     )
   }

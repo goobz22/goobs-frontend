@@ -15,11 +15,11 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
   value,
   startLabel = 'Start Date',
   endLabel = 'End Date',
-  sacredtheme = false,
   disabled = false,
-  error = false,
+  error,
   helperText,
   style,
+  styles,
   ...rest
 }) => {
   return (
@@ -29,10 +29,10 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
         value={value}
         startLabel={startLabel}
         endLabel={endLabel}
-        sacredtheme={sacredtheme}
         disabled={disabled}
         error={error}
         helperText={helperText}
+        styles={styles}
         {...rest}
       />
     </div>

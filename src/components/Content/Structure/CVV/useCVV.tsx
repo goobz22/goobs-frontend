@@ -12,35 +12,26 @@ const CVVComponent: React.FC<CVVProps> = ({
   value = '',
   minLength = 3,
   maxLength = 4,
-  errorMessage = 'Invalid CVV format',
-  sacredtheme = false,
   isDefaultValue = false,
   label,
   placeholder,
-  disabled = false,
-  error = false,
   helperText,
-  style,
+  styles,
   ...rest
 }) => {
   return (
-    <div style={style}>
-      <CVV
-        onChange={onChange}
-        value={value}
-        minLength={minLength}
-        maxLength={maxLength}
-        errorMessage={errorMessage}
-        sacredtheme={sacredtheme}
-        isDefaultValue={isDefaultValue}
-        label={label}
-        placeholder={placeholder}
-        disabled={disabled}
-        error={error}
-        helperText={helperText}
-        {...rest}
-      />
-    </div>
+    <CVV
+      onChange={onChange}
+      value={value}
+      minLength={minLength}
+      maxLength={maxLength}
+      isDefaultValue={isDefaultValue}
+      label={label}
+      placeholder={placeholder}
+      helperText={helperText}
+      styles={styles}
+      {...rest}
+    />
   )
 }
 
