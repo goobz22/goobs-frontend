@@ -18,13 +18,18 @@ const meta: Meta<typeof Alert> = {
       control: 'select',
       options: ['error', 'warning', 'info', 'success'],
     },
-    sacredtheme: { control: 'boolean' },
-    outline: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, layout, and more',
+    },
+    message: { control: 'text' },
     onClose: { action: 'closed' },
   },
   parameters: {
     layout: 'centered',
   },
+  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '500px', padding: '1rem' }}>
@@ -38,56 +43,113 @@ export default meta
 type Story = StoryObj<typeof Alert>
 
 // --------------------------------------------------------------------------
-// PREMIUM THEME STORIES
+// LIGHT THEME STORIES
 // --------------------------------------------------------------------------
 
-/** A premium-themed alert for successful operations. */
-export const PremiumSuccess: Story = {
-  name: 'Premium/Success',
+/** A light-themed alert for successful operations. */
+export const LightSuccess: Story = {
+  name: 'Light/Success',
   args: {
     severity: 'success',
     message: 'Your operation was completed successfully.',
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
-/** A premium-themed alert for informational messages. */
-export const PremiumInfo: Story = {
-  name: 'Premium/Info',
+/** A light-themed alert for informational messages. */
+export const LightInfo: Story = {
+  name: 'Light/Info',
   args: {
-    ...PremiumSuccess.args,
     severity: 'info',
     message: 'Here is some information that might be useful to you.',
+    styles: { theme: 'light' },
   },
 }
 
-/** A premium-themed alert for warnings. */
-export const PremiumWarning: Story = {
-  name: 'Premium/Warning',
+/** A light-themed alert for warnings. */
+export const LightWarning: Story = {
+  name: 'Light/Warning',
   args: {
-    ...PremiumSuccess.args,
     severity: 'warning',
     message: 'Warning: This action may have unintended consequences.',
+    styles: { theme: 'light' },
   },
 }
 
-/** A premium-themed alert for errors. */
-export const PremiumError: Story = {
-  name: 'Premium/Error',
+/** A light-themed alert for errors. */
+export const LightError: Story = {
+  name: 'Light/Error',
   args: {
-    ...PremiumSuccess.args,
     severity: 'error',
     message: 'An error occurred while processing your request.',
+    styles: { theme: 'light' },
   },
 }
 
-/** A dismissible premium-themed alert. */
-export const PremiumDismissible: Story = {
-  name: 'Premium/Dismissible',
+/** A dismissible light-themed alert. */
+export const LightDismissible: Story = {
+  name: 'Light/Dismissible',
   args: {
-    ...PremiumInfo.args,
+    severity: 'info',
     message: 'You can close this alert by clicking the close button.',
     onClose: () => alert('Alert closed!'),
+    styles: { theme: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// DARK THEME STORIES
+// --------------------------------------------------------------------------
+
+/** A dark-themed alert for successful operations. */
+export const DarkSuccess: Story = {
+  name: 'Dark/Success',
+  args: {
+    severity: 'success',
+    message: 'Your operation was completed successfully.',
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** A dark-themed alert for informational messages. */
+export const DarkInfo: Story = {
+  name: 'Dark/Info',
+  args: {
+    severity: 'info',
+    message: 'Here is some information that might be useful to you.',
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** A dark-themed alert for warnings. */
+export const DarkWarning: Story = {
+  name: 'Dark/Warning',
+  args: {
+    severity: 'warning',
+    message: 'Warning: This action may have unintended consequences.',
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** A dark-themed alert for errors. */
+export const DarkError: Story = {
+  name: 'Dark/Error',
+  args: {
+    severity: 'error',
+    message: 'An error occurred while processing your request.',
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
@@ -95,55 +157,56 @@ export const PremiumDismissible: Story = {
 // SACRED THEME STORIES
 // --------------------------------------------------------------------------
 
-const sacredArgs = {
-  sacredtheme: true,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
-}
-
 /** A sacred-themed alert for successful operations. */
 export const SacredSuccess: Story = {
   name: 'Sacred/Success',
   args: {
-    ...PremiumSuccess.args,
+    severity: 'success',
     message: 'The sacred ritual has been successfully completed.',
-    ...sacredArgs,
+    styles: { theme: 'sacred' },
   },
-  parameters: sacredArgs.parameters,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
 }
 
 /** A sacred-themed alert for informational messages. */
 export const SacredInfo: Story = {
   name: 'Sacred/Info',
   args: {
-    ...SacredSuccess.args,
     severity: 'info',
     message: 'Ancient scrolls of wisdom have been unearthed.',
+    styles: { theme: 'sacred' },
   },
-  parameters: sacredArgs.parameters,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
 }
 
 /** A sacred-themed alert for warnings. */
 export const SacredWarning: Story = {
   name: 'Sacred/Warning',
   args: {
-    ...SacredSuccess.args,
     severity: 'warning',
     message: 'The celestial alignment is imminent. Prepare yourself.',
+    styles: { theme: 'sacred' },
   },
-  parameters: sacredArgs.parameters,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
 }
 
 /** A sacred-themed alert for errors. */
 export const SacredError: Story = {
   name: 'Sacred/Error',
   args: {
-    ...SacredSuccess.args,
     severity: 'error',
     message: 'A dark energy has corrupted the sacred artifacts.',
+    styles: { theme: 'sacred' },
   },
-  parameters: sacredArgs.parameters,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
 }
 
 // --------------------------------------------------------------------------
@@ -156,6 +219,7 @@ export const InteractionTest: Story = {
     severity: 'info',
     message: 'This is a dismissible alert.',
     onClose: () => {}, // Provide a mock function for the test
+    styles: { theme: 'light' },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
