@@ -1,152 +1,69 @@
-// src/components/Card/variants/product/index.tsx
-
+/**
+ * @fileoverview Defines the ProductCard component, a card for displaying product information and purchase options.
+ */
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
+import { CardStyles, getCardStyles, SACRED_GLYPHS } from '../../../../theme'
 import Typography from '../../../../components/Typography'
-import CustomButton from '../../../../components/Button'
+import Button from '../../../../components/Button'
 import AddIcon from '../../../../components/Icons/Add'
 import RemoveIcon from '../../../../components/Icons/Remove'
-import { SACRED_GLYPHS } from '../../../../styles/sacredGlyphs'
 
-interface ProductCardProps {
+// --------------------------------------------------------------------------
+// PROPS INTERFACE
+// --------------------------------------------------------------------------
+
+export interface ProductCardProps {
+  /** Product title */
   title?: string
+  /** Number of developers */
   numDevelopers?: number
+  /** Callback to add developer */
   onAddDeveloper?: () => void
+  /** Callback to remove developer */
   onRemoveDeveloper?: () => void
+  /** Number of licenses */
   licenses?: number
+  /** Unit price */
   unitPrice?: number
+  /** Total price */
   total?: number
+  /** Buy button callback */
   onBuy?: () => void
+  /** Live preview callback */
   onLivePreview?: () => void
+  /** Feature descriptions */
   featuredescriptions?: string[]
+  /** Release date */
   releaseDate?: string
+  /** Contact callback */
   onContact?: () => void
+  /** Created by */
   createdBy?: string
-  sacredtheme?: boolean
-  height?: string | number
+  /** Comprehensive styling options including theme, custom colors, and layout properties */
+  styles?: CardStyles
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  container: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '1rem',
-    overflow: 'hidden',
-    ...(sacredtheme
-      ? {
-          border: '1px solid rgba(255, 215, 0, 0.3)',
-          backgroundColor: 'black',
-          animation: 'product-card-glow 2s infinite alternate',
-          backgroundImage:
-            'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.05), transparent)',
-        }
-      : {
-          border: '1px solid #E5E7EB',
-          backgroundColor: 'white',
-        }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    color: 'rgba(255, 215, 0, 0.2)',
-    fontSize: '3rem',
-    animation: 'product-card-rotate-glyph 15s linear infinite',
-    zIndex: 0,
-  } as React.CSSProperties,
-  section: {
-    marginBottom: '0.5rem',
-    position: 'relative',
-    zIndex: 10,
-  } as React.CSSProperties,
-  developerCountContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginTop: '0.25rem',
-  } as React.CSSProperties,
-  developerButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '1.5rem',
-    height: '1.5rem',
-    borderRadius: '0.375rem',
-    transition: 'all 0.3s ease',
-    ...(sacredtheme
-      ? {
-          color: '#FFD700',
-        }
-      : {
-          color: '#4B5563',
-        }),
-  } as React.CSSProperties,
-  developerButtonHover: {
-    ...(sacredtheme
-      ? {
-          backgroundColor: 'rgba(255, 215, 0, 0.1)',
-          transform: 'scale(1.1)',
-        }
-      : {
-          backgroundColor: '#E5E7EB',
-        }),
-  } as React.CSSProperties,
-  input: {
-    width: '100%',
-    border: '1px solid',
-    borderRadius: '0.375rem',
-    padding: '0.25rem',
-    textAlign: 'center',
-    ...(sacredtheme
-      ? {
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          borderColor: 'rgba(255, 215, 0, 0.5)',
-          color: '#FFD700',
-          fontWeight: 600,
-          animation: 'product-card-counter-glow 1.5s infinite alternate',
-        }
-      : {
-          backgroundColor: 'white',
-          borderColor: '#D1D5DB',
-          color: 'black',
-        }),
-  } as React.CSSProperties,
-  buttonGroup: {
-    marginBottom: '0.5rem',
-    display: 'flex',
-    justifyContent: 'flex-start',
-    position: 'relative',
-    zIndex: 10,
-  } as React.CSSProperties,
-  contact: {
-    marginTop: '0.5rem',
-    cursor: 'pointer',
-    position: 'relative',
-    zIndex: 10,
-  } as React.CSSProperties,
-  contactHover: {
-    ...(sacredtheme && {
-      color: '#FBBF24',
-      textShadow: '0 0 5px rgba(255,215,0,0.5)',
-    }),
-  } as React.CSSProperties,
-})
+// --------------------------------------------------------------------------
+// MAIN PRODUCT CARD COMPONENT
+// --------------------------------------------------------------------------
 
 const ProductCard: React.FC<ProductCardProps> = ({
+  title: _title,
   numDevelopers = 1,
   onAddDeveloper,
   onRemoveDeveloper,
   licenses = 1,
   unitPrice = 180,
+  total: _total,
   onBuy,
   onLivePreview,
   featuredescriptions = [],
   releaseDate,
   onContact,
   createdBy,
-  sacredtheme = false,
-  height,
+  styles,
 }) => {
   const [numDevelopersInput, setNumDevelopersInput] = useState(
     numDevelopers.toString()
@@ -155,7 +72,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const [addHover, setAddHover] = useState(false)
   const [removeHover, setRemoveHover] = useState(false)
   const [contactHover, setContactHover] = useState(false)
-  const styles = getStyles(sacredtheme)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const isSacredTheme = styles?.theme === 'sacred'
+
+  const computedStyles = useMemo(
+    () => getCardStyles({ ...styles, variant: 'product' }, isHovered),
+    [styles, isHovered]
+  )
 
   const handleAddDeveloper = () => {
     const newNumDevelopers = parseInt(numDevelopersInput, 10) + 1
@@ -181,25 +105,87 @@ const ProductCard: React.FC<ProductCardProps> = ({
     setNumLicenses(parseInt(value, 10))
   }
 
-  return (
-    <div style={{ ...styles.container, minHeight: height }}>
-      {sacredtheme && <div style={styles.glyph}>{SACRED_GLYPHS[4]}</div>}
+  const containerStyle = {
+    ...computedStyles.productContainer,
+  }
 
-      <div style={styles.section}>
+  const developerButtonStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '1.5rem',
+    height: '1.5rem',
+    borderRadius: '0.375rem',
+    transition: 'all 0.3s ease',
+    color: isSacredTheme ? '#FFD700' : '#4B5563',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+  }
+
+  const developerButtonHoverStyle = {
+    backgroundColor: isSacredTheme ? 'rgba(255, 215, 0, 0.1)' : '#E5E7EB',
+    transform: isSacredTheme ? 'scale(1.1)' : 'none',
+  }
+
+  const inputStyle = {
+    width: '100%',
+    border: '1px solid',
+    borderRadius: '0.375rem',
+    padding: '0.25rem',
+    textAlign: 'center' as const,
+    backgroundColor: isSacredTheme ? 'rgba(0,0,0,0.8)' : 'white',
+    borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#D1D5DB',
+    color: isSacredTheme ? '#FFD700' : 'black',
+    fontWeight: isSacredTheme ? 600 : 'normal',
+  }
+
+  return (
+    <div
+      style={containerStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Sacred theme glyph */}
+      {isSacredTheme && (
+        <div
+          style={{
+            ...computedStyles.glyph,
+            ...computedStyles.glyphTopRight,
+            fontSize: '3rem',
+            animation: 'product-card-rotate-glyph 15s linear infinite',
+            zIndex: 0,
+          }}
+        >
+          {SACRED_GLYPHS[4]}
+        </div>
+      )}
+
+      {/* Number of developers section */}
+      <div style={{ marginBottom: '0.5rem', position: 'relative', zIndex: 10 }}>
         <Typography
           text="Number of developers"
-          fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
-          style={
-            sacredtheme ? { fontWeight: 600, letterSpacing: '0.025em' } : {}
-          }
+          variant="merriparagraph"
+          styles={{
+            color: isSacredTheme
+              ? 'rgba(255, 215, 0, 0.9)'
+              : computedStyles.bodyText.color,
+            fontWeight: isSacredTheme ? 600 : undefined,
+            letterSpacing: isSacredTheme ? '0.025em' : undefined,
+          }}
         />
-        <div style={styles.developerCountContainer}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginTop: '0.25rem',
+          }}
+        >
           <button
             onClick={handleRemoveDeveloper}
             style={{
-              ...styles.developerButton,
-              ...(removeHover && styles.developerButtonHover),
+              ...developerButtonStyle,
+              ...(removeHover && developerButtonHoverStyle),
             }}
             onMouseEnter={() => setRemoveHover(true)}
             onMouseLeave={() => setRemoveHover(false)}
@@ -211,14 +197,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
               type="text"
               value={numDevelopersInput}
               onChange={handleInputChange}
-              style={styles.input}
+              style={inputStyle}
             />
           </div>
           <button
             onClick={handleAddDeveloper}
             style={{
-              ...styles.developerButton,
-              ...(addHover && styles.developerButtonHover),
+              ...developerButtonStyle,
+              ...(addHover && developerButtonHoverStyle),
             }}
             onMouseEnter={() => setAddHover(true)}
             onMouseLeave={() => setAddHover(false)}
@@ -228,102 +214,159 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
 
-      <div style={styles.section}>
+      {/* Pricing section */}
+      <div style={{ marginBottom: '0.5rem', position: 'relative', zIndex: 10 }}>
         <div>
           <Typography
             text={`Licenses: ${numLicenses}`}
-            fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.8)'
+                : computedStyles.bodyText.color,
+            }}
           />
         </div>
         <div>
           <Typography
             text={`Unit price: $ ${unitPrice}`}
-            fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.8)'
+                : computedStyles.bodyText.color,
+            }}
           />
         </div>
         <div style={{ fontWeight: 'bold' }}>
           <Typography
             text={`Total: $ ${(unitPrice * numLicenses).toFixed(2)}`}
-            fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? '#FFD700' : 'black'}
-            style={
-              sacredtheme
-                ? {
-                    fontSize: '1.125rem',
-                    fontWeight: 'bold',
-                    textShadow: '0 0 5px rgba(255,215,0,0.5)',
-                  }
-                : {}
-            }
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme ? '#FFD700' : computedStyles.price.color,
+              fontSize: isSacredTheme ? '1.125rem' : undefined,
+              fontWeight: isSacredTheme ? 'bold' : undefined,
+              textShadow: isSacredTheme
+                ? '0 0 5px rgba(255,215,0,0.5)'
+                : undefined,
+            }}
           />
         </div>
       </div>
 
-      <div style={styles.buttonGroup}>
-        <div style={{ marginRight: '0.125rem' }}>
-          <CustomButton
-            text="Buy now"
-            fontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? 'rgba(0,0,0,0.9)' : 'black'}
-            onClick={onBuy}
-            sacredtheme={sacredtheme}
-          />
-        </div>
-        <div style={{ marginLeft: '0.125rem' }}>
-          <CustomButton
-            text="Live Preview"
-            fontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? 'rgba(0,0,0,0.9)' : 'black'}
-            onClick={onLivePreview}
-            sacredtheme={sacredtheme}
-          />
-        </div>
+      {/* Buttons */}
+      <div
+        style={{
+          marginBottom: '0.5rem',
+          display: 'flex',
+          justifyContent: 'flex-start',
+          position: 'relative',
+          zIndex: 10,
+          gap: '0.25rem',
+        }}
+      >
+        <Button
+          text="Buy now"
+          styles={{
+            theme: isSacredTheme ? 'sacred' : styles?.theme || 'light',
+            backgroundColor: isSacredTheme ? 'rgba(0,0,0,0.9)' : undefined,
+            color: isSacredTheme ? '#FFD700' : undefined,
+          }}
+          onClick={onBuy}
+        />
+        <Button
+          text="Live Preview"
+          styles={{
+            theme: isSacredTheme ? 'sacred' : styles?.theme || 'light',
+            backgroundColor: isSacredTheme ? 'rgba(0,0,0,0.9)' : undefined,
+            color: isSacredTheme ? '#FFD700' : undefined,
+          }}
+          onClick={onLivePreview}
+        />
       </div>
 
+      {/* Features */}
       <div style={{ position: 'relative', zIndex: 10 }}>
         {featuredescriptions.map((feature, index) => (
           <div key={index}>
             <Typography
               text={`✓ ${feature}`}
-              fontvariant="merriparagraph"
-              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
+              variant="merriparagraph"
+              styles={{
+                color: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.8)'
+                  : computedStyles.bodyText.color,
+              }}
             />
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
-        <Typography
-          text={`First release: ${releaseDate}`}
-          fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'black'}
-        />
-      </div>
+      {/* Release date */}
+      {releaseDate && (
+        <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
+          <Typography
+            text={`First release: ${releaseDate}`}
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.7)'
+                : computedStyles.bodyText.color,
+            }}
+          />
+        </div>
+      )}
 
-      <div
-        onClick={onContact}
-        style={{ ...styles.contact, ...(contactHover && styles.contactHover) }}
-        onMouseEnter={() => setContactHover(true)}
-        onMouseLeave={() => setContactHover(false)}
-      >
-        <Typography
-          text="Questions? Contact us"
-          fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black'}
-        />
-      </div>
+      {/* Contact */}
+      {onContact && (
+        <div
+          onClick={onContact}
+          style={{
+            marginTop: '0.5rem',
+            cursor: 'pointer',
+            position: 'relative',
+            zIndex: 10,
+          }}
+          onMouseEnter={() => setContactHover(true)}
+          onMouseLeave={() => setContactHover(false)}
+        >
+          <Typography
+            text="Questions? Contact us"
+            variant="merriparagraph"
+            styles={{
+              color:
+                contactHover && isSacredTheme
+                  ? '#FBBF24'
+                  : isSacredTheme
+                    ? 'rgba(255, 215, 0, 0.8)'
+                    : computedStyles.bodyText.color,
+              textShadow:
+                contactHover && isSacredTheme
+                  ? '0 0 5px rgba(255,215,0,0.5)'
+                  : undefined,
+            }}
+          />
+        </div>
+      )}
 
-      <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
-        <Typography
-          text={`Created by ${createdBy}`}
-          fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'black'}
-        />
-      </div>
+      {/* Created by */}
+      {createdBy && (
+        <div style={{ marginTop: '0.5rem', position: 'relative', zIndex: 10 }}>
+          <Typography
+            text={`Created by ${createdBy}`}
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.7)'
+                : computedStyles.bodyText.color,
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
+
+ProductCard.displayName = 'ProductCard'
 
 export default ProductCard

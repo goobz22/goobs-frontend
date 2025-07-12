@@ -1,43 +1,66 @@
+/**
+ * @fileoverview Defines the DefaultCard component, a versatile card for displaying content.
+ * It supports multiple configurations including images, breadcrumbs, actions, and two themes.
+ */
 import React, { useState } from 'react'
 import Typography from '../../../../components/Typography'
 import InfoIcon from '../../../../components/Icons/Info'
 import StyledTooltip from '../../../../components/Tooltip'
-import CustomButton from '../../../../components/Button'
+import Button from '../../../../components/Button'
 import Link from 'next/link'
 import FavoriteIcon from '../../../../components/Icons/FavoriteIcon'
-import {
-  CustomStepper,
-  CustomStepperProps,
-} from '../../../../components/Stepper'
+import Stepper, { StepperProps } from '../../../../components/Stepper'
 
+// --------------------------------------------------------------------------
+// PROPS
+// --------------------------------------------------------------------------
 interface DefaultCardProps {
+  /** The main title of the card. */
   title?: string
+  /** If true, a border will be shown below the title. */
   titleUnderline?: boolean
+  /** The main body content of the card. */
   body?: string
+  /** URL for the card's image. */
   image?: string
+  /** Position of the image relative to the content. */
   imagePosition?: 'top' | 'left'
+  /** Text for the parent level in the breadcrumb. */
   parentText?: string
+  /** URL for the parent level in the breadcrumb. */
   parentLink?: string
+  /** Text for the child level in the breadcrumb. */
   childText?: string
+  /** URL for the child level in the breadcrumb. */
   childLink?: string
+  /** URL for the final action link/button in the footer. */
   grandchildLink?: string
+  /** If true, a favorite icon will be displayed in the header. */
   favoriteEnabled?: boolean
+  /** If true, breadcrumbs will be displayed in the footer. */
   breadcrumbEnabled?: boolean
+  /** If true, a link/button will be displayed in the footer. */
   linkEnabled?: boolean
+  /** The width of the card. */
   width?: string | number
+  /** The height of the card. */
   height?: string | number
+  /** If true, a stepper component will be displayed. */
   stepperEnabled?: boolean
-  stepperSteps?: CustomStepperProps['steps']
+  /** The steps to be passed to the stepper component. */
+  stepperSteps?: StepperProps['steps']
+  /** Additional CSS classes for custom styling. */
   className?: string
+  /** If true, enables the stylized "sacred" theme. */
   sacredtheme?: boolean
+  /** If true, displays an outline style. */
   outline?: boolean
 }
 
-// Sacred glyphs for theming
-const SACRED_GLYPHS = ['𓁟', '𓂀', '𓃀', '𓄿', '𓊖', '𓊗', '𓋴', '𓏏']
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
+// --------------------------------------------------------------------------
+// STYLING
+// --------------------------------------------------------------------------
+const premiumStyles: Record<string, React.CSSProperties> = {
   container: {
     position: 'relative',
     display: 'flex',
@@ -152,8 +175,7 @@ const premiumStyles = {
   } as React.CSSProperties,
 }
 
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
+const sacredStyles: Record<string, React.CSSProperties> = {
   container: {
     position: 'relative',
     display: 'flex',
@@ -288,6 +310,12 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
+const SACRED_GLYPHS = ['𓁟', '𓂀', '𓃀', '𓄿', '𓊖', '𓊗', '𓋴', '𓏏']
+
+// --------------------------------------------------------------------------
+// MAIN COMPONENT
+// --------------------------------------------------------------------------
+
 const DefaultCard: React.FC<DefaultCardProps> = ({
   title,
   titleUnderline = true,
@@ -312,6 +340,13 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
   ...rest
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+
+  console.log('DefaultCard rendered with props:', {
+    title,
+    sacredtheme,
+    width,
+    height,
+  })
 
   const styles = sacredtheme ? sacredStyles : premiumStyles
 
@@ -381,9 +416,9 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
           <div style={headerStyle}>
             <Typography
               text={title}
-              fontcolor={sacredtheme ? '#FFD700' : 'rgb(31, 41, 55)'}
-              fontvariant="merrih5"
-              style={{
+              variant="merrih5"
+              styles={{
+                color: sacredtheme ? '#FFD700' : 'rgb(31, 41, 55)',
                 ...(sacredtheme && {
                   fontFamily: '"Cinzel", serif',
                   fontWeight: 700,
@@ -400,11 +435,11 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
           <div className="hidden md:block" style={styles.bodySection}>
             <Typography
               text={body}
-              fontcolor={
-                sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(55, 65, 81)'
-              }
-              fontvariant="merriparagraph"
-              style={{
+              variant="merriparagraph"
+              styles={{
+                color: sacredtheme
+                  ? 'rgba(255, 215, 0, 0.8)'
+                  : 'rgb(55, 65, 81)',
                 ...(sacredtheme && {
                   fontFamily: '"Merriweather", serif',
                   lineHeight: 1.6,
@@ -441,7 +476,13 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
         {/* Stepper */}
         {stepperEnabled && (
           <div style={{ padding: '0 24px' }}>
-            <CustomStepper orientation="vertical" steps={stepperSteps} />
+            <Stepper
+              steps={stepperSteps}
+              styles={{
+                orientation: 'vertical',
+                theme: sacredtheme ? 'sacred' : 'light',
+              }}
+            />
           </div>
         )}
 
@@ -450,50 +491,34 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
           <div>
             {breadcrumbEnabled && (
               <div style={styles.breadcrumb}>
-                <Link href={parentLink} passHref>
+                <Link href={parentLink || '/'} passHref>
                   <Typography
                     text={parentText}
-                    fontcolor={
-                      sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(75, 85, 99)'
-                    }
-                    fontvariant="merriparagraph"
-                    style={{
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      ...(sacredtheme && {
-                        '&:hover': {
-                          color: '#FFD700',
-                          textShadow: '0 0 8px rgba(255, 215, 0, 0.8)',
-                        },
-                      }),
+                    variant="merriparagraph"
+                    styles={{
+                      color: sacredtheme
+                        ? 'rgba(255, 215, 0, 0.8)'
+                        : 'rgb(75, 85, 99)',
                     }}
                   />
                 </Link>
                 <Typography
                   text=">"
-                  fontcolor={
-                    sacredtheme
+                  variant="merriparagraph"
+                  styles={{
+                    color: sacredtheme
                       ? 'rgba(255, 215, 0, 0.6)'
-                      : 'rgb(107, 114, 128)'
-                  }
-                  fontvariant="merriparagraph"
+                      : 'rgb(107, 114, 128)',
+                  }}
                 />
-                <Link href={childLink} passHref>
+                <Link href={childLink || '/'} passHref>
                   <Typography
                     text={childText}
-                    fontcolor={
-                      sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'rgb(75, 85, 99)'
-                    }
-                    fontvariant="merriparagraph"
-                    style={{
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      ...(sacredtheme && {
-                        '&:hover': {
-                          color: '#FFD700',
-                          textShadow: '0 0 8px rgba(255, 215, 0, 0.8)',
-                        },
-                      }),
+                    variant="merriparagraph"
+                    styles={{
+                      color: sacredtheme
+                        ? 'rgba(255, 215, 0, 0.8)'
+                        : 'rgb(75, 85, 99)',
                     }}
                   />
                 </Link>
@@ -502,8 +527,8 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
           </div>
           <div style={{ paddingLeft: '16px' }}>
             {linkEnabled && (
-              <Link href={grandchildLink} passHref>
-                <CustomButton
+              <Link href={grandchildLink || '/'} passHref>
+                <Button
                   icon={
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -519,12 +544,13 @@ const DefaultCard: React.FC<DefaultCardProps> = ({
                       <polyline points="9 18 15 12 9 6" />
                     </svg>
                   }
-                  iconcolor={sacredtheme ? '#FFD700' : 'rgb(55, 65, 81)'}
-                  iconsize="15px"
-                  iconlocation="right"
-                  backgroundcolor="none"
-                  sacredtheme={sacredtheme}
-                  outline={outline}
+                  styles={{
+                    theme: sacredtheme ? 'sacred' : 'light',
+                    color: sacredtheme ? '#FFD700' : 'rgb(55, 65, 81)',
+                    fontSize: '15px',
+                    iconLocation: 'right',
+                    outline: outline,
+                  }}
                 />
               </Link>
             )}
