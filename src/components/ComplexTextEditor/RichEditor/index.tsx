@@ -16,144 +16,25 @@ import {
 } from '../utils/useRichtextEditor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
-import { SACRED_GLYPHS } from '../../../styles/sacredGlyphs'
+import {
+  ComplexTextEditorStyles,
+  getComplexTextEditorStyles,
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  SACRED_GLYPHS,
+} from '../../../theme/'
 
 export interface RichTextEditorProps {
   value: Descendant[]
-  name?: string
   label?: string
   minRows?: number
   onChange?: () => void
   onSelectionChange?: () => void
   onValueChange?: () => void
-  accordion?: boolean
   markdownMode: boolean
   setMarkdownMode: (value: boolean) => void
   setMarkdown: (value: string) => void
-  accordionSummary?: React.ReactNode
-  defaultExpanded?: boolean
-  sacredtheme?: boolean
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-
-  editorContainer: {
-    border: '1px solid rgba(0, 0, 0, 1)',
-    borderRadius: '8px',
-    width: 'auto',
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-  } as React.CSSProperties,
-
-  separator: {
-    borderColor: 'rgba(0, 0, 0, 1)',
-  } as React.CSSProperties,
-
-  editable: {
-    padding: '16px',
-    color: 'rgba(0, 0, 0, 1)',
-  } as React.CSSProperties,
-
-  label: {
-    marginBottom: '8px',
-  } as React.CSSProperties,
-
-  text: {
-    color: 'rgba(0, 0, 0, 1)',
-  } as React.CSSProperties,
-
-  link: {
-    color: 'rgba(37, 99, 235, 1)',
-    textDecoration: 'underline',
-  } as React.CSSProperties,
-
-  code: {
-    backgroundColor: 'rgba(243, 244, 246, 1)',
-    color: 'rgba(55, 65, 81, 1)',
-    padding: '2px 4px',
-    borderRadius: '4px',
-    fontFamily: 'monospace',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-
-  editorContainer: {
-    border: '1px solid rgba(255, 215, 0, 0.3)',
-    borderRadius: '8px',
-    width: 'auto',
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: 'rgba(0, 0, 0, 1)',
-    backgroundImage:
-      'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.05), transparent)',
-    boxShadow:
-      '0 4px 6px -1px rgba(255, 215, 0, 0.2), 0 2px 4px -1px rgba(255, 215, 0, 0.1)',
-    animation: 'richTextEditorBorderPulse 4s ease-in-out infinite',
-  } as React.CSSProperties,
-
-  separator: {
-    borderColor: 'rgba(255, 215, 0, 0.3)',
-    boxShadow:
-      '0 4px 6px -1px rgba(255, 215, 0, 0.3), 0 2px 4px -1px rgba(255, 215, 0, 0.2)',
-  } as React.CSSProperties,
-
-  editable: {
-    padding: '16px',
-    color: 'rgba(255, 215, 0, 0.9)',
-    animation: 'richTextEditorTextGlow 3s ease-in-out infinite',
-  } as React.CSSProperties,
-
-  label: {
-    marginBottom: '8px',
-    color: 'rgba(255, 215, 0, 1)',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-  } as React.CSSProperties,
-
-  text: {
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  link: {
-    color: 'rgba(255, 215, 0, 1)',
-    textDecoration: 'underline',
-    textDecorationColor: 'rgba(255, 215, 0, 0.5)',
-  } as React.CSSProperties,
-
-  code: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    color: 'rgba(255, 215, 0, 1)',
-    padding: '2px 4px',
-    borderRadius: '4px',
-    fontFamily: 'monospace',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    bottom: '8px',
-    right: '8px',
-    fontSize: '48px',
-    color: 'rgba(255, 215, 0, 0.1)',
-    pointerEvents: 'none',
-    opacity: 0.5,
-  } as React.CSSProperties,
+  styles?: ComplexTextEditorStyles
 }
 
 const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
@@ -163,7 +44,30 @@ const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
   sacredtheme = false,
 }) => {
   const customLeaf = leaf as RichTextEditorTypes['CustomText']
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const linkStyle = sacredtheme
+    ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
+    : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' }
+
+  const codeStyle = sacredtheme
+    ? {
+        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        color: 'rgba(255, 215, 0, 1)',
+        padding: '2px 4px',
+        borderRadius: '4px',
+        fontFamily: 'monospace',
+      }
+    : {
+        backgroundColor: 'rgba(243, 244, 246, 1)',
+        color: 'rgba(55, 65, 81, 1)',
+        padding: '2px 4px',
+        borderRadius: '4px',
+        fontFamily: 'monospace',
+      }
+
+  const textStyle = sacredtheme
+    ? { color: 'rgba(255, 215, 0, 0.9)' }
+    : { color: 'rgba(0, 0, 0, 1)' }
 
   let formattedChildren: React.ReactNode = children as React.ReactNode
 
@@ -181,17 +85,17 @@ const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
   }
   if (customLeaf.link) {
     formattedChildren = (
-      <a href={customLeaf.link} style={styles.link}>
+      <a href={customLeaf.link} style={linkStyle}>
         {formattedChildren}
       </a>
     )
   }
   if (customLeaf.code) {
-    formattedChildren = <code style={styles.code}>{formattedChildren}</code>
+    formattedChildren = <code style={codeStyle}>{formattedChildren}</code>
   }
 
   return (
-    <span {...attributes} style={styles.text}>
+    <span {...attributes} style={textStyle}>
       {formattedChildren}
     </span>
   )
@@ -202,14 +106,24 @@ export function RichTextEditor({
   onChange,
   label,
   minRows = 5,
-  accordion = false,
   markdownMode,
   setMarkdownMode,
   setMarkdown,
-  accordionSummary,
-  defaultExpanded = false,
-  sacredtheme = false,
+  styles: editorStyles,
 }: RichTextEditorProps) {
+  const accordion = editorStyles?.accordionMode || false
+  const accordionSummary =
+    editorStyles?.accordionSummary || label || 'Rich Text Editor'
+  const defaultExpanded = editorStyles?.accordionDefaultExpanded || false
+  const isSacredTheme = editorStyles?.theme === 'sacred'
+
+  const [isFocused, setIsFocused] = useState(false)
+  const [expanded, setExpanded] = useState(defaultExpanded)
+
+  // Get computed styles
+  const computedStyles = getComplexTextEditorStyles(editorStyles, isFocused)
+  const { themeConfig } = getSharedFormFieldStyles(editorStyles, isFocused)
+
   const {
     editor,
     internalValue,
@@ -219,11 +133,9 @@ export function RichTextEditor({
     onKeyDown,
   } = useRichTextEditor(value, onChange ? () => onChange() : undefined)
 
-  const [expanded, setExpanded] = useState(defaultExpanded)
-
   // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
+    if (isSacredTheme) {
       const styleSheet = document.styleSheets[0]
       const keyframes = `
         @keyframes richTextEditorBorderPulse {
@@ -241,28 +153,34 @@ export function RichTextEditor({
         // Keyframes might already exist
       }
     }
-  }, [sacredtheme])
-
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  }, [isSacredTheme])
 
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <Element {...props} sacredtheme={sacredtheme} />
+      <Element {...props} sacredtheme={isSacredTheme} />
     ),
-    [sacredtheme]
+    [isSacredTheme]
   )
 
   const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} sacredtheme={sacredtheme} />,
-    [sacredtheme]
+    (props: RenderLeafProps) => <Leaf {...props} sacredtheme={isSacredTheme} />,
+    [isSacredTheme]
   )
 
   const handleAccordionChange = () => {
     setExpanded(!expanded)
   }
 
+  const handleFocus = () => {
+    setIsFocused(true)
+  }
+
+  const handleBlur = () => {
+    setIsFocused(false)
+  }
+
   const editorContent = (
-    <div style={styles.editorContainer}>
+    <div style={computedStyles.editorArea}>
       <Slate
         editor={editor}
         initialValue={internalValue}
@@ -276,41 +194,51 @@ export function RichTextEditor({
           handleItalicClick={handleItalicClick}
           toolbarType="richtext"
           editor={editor}
-          sacredtheme={sacredtheme}
+          styles={editorStyles}
         />
-        <hr style={styles.separator} />
         <div style={{ position: 'relative' }}>
           <Editable
             style={{
-              ...styles.editable,
+              ...computedStyles.editorArea,
               minHeight: `${minRows * 20}px`,
+              border: 'none',
+              outline: 'none',
             }}
             placeholder={
-              sacredtheme ? 'Channel divine wisdom...' : 'Enter text...'
+              isSacredTheme ? 'Channel divine wisdom...' : 'Enter text...'
             }
             onKeyDown={onKeyDown}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
           />
-          {sacredtheme && (
-            <div style={sacredStyles.glyph}>{SACRED_GLYPHS[2]}</div>
+          {isSacredTheme && (
+            <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[2]}</div>
           )}
         </div>
       </Slate>
     </div>
   )
 
+  // Render label if provided and not in accordion mode
+  const labelElement = label && !accordion && (
+    <label style={getSharedLabelStyles(themeConfig.label.default, themeConfig)}>
+      {label}
+    </label>
+  )
+
   return (
-    <div style={styles.container}>
+    <div style={computedStyles.container}>
       {accordion ? (
         <Accordion
           expanded={expanded}
           onChange={handleAccordionChange}
-          sacredtheme={sacredtheme}
+          styles={{ theme: editorStyles?.theme }}
           summary={
             <Typography
-              fontvariant="merrih4"
-              style={sacredtheme ? styles.label : undefined}
+              variant="merrih4"
+              styles={isSacredTheme ? { color: themeConfig.text } : undefined}
             >
               {accordionSummary || label || 'Rich Text Editor'}
             </Typography>
@@ -319,11 +247,7 @@ export function RichTextEditor({
         />
       ) : (
         <>
-          {label && (
-            <Typography fontvariant="merrih4" style={styles.label}>
-              {label}
-            </Typography>
-          )}
+          {labelElement}
           {editorContent}
         </>
       )}
@@ -338,13 +262,20 @@ const Element = ({
   sacredtheme = false,
 }: RenderElementProps & { sacredtheme?: boolean }) => {
   const customElement = element as RichTextEditorTypes['CustomElement']
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+
+  const textStyle = sacredtheme
+    ? { color: 'rgba(255, 215, 0, 0.9)' }
+    : { color: 'rgba(0, 0, 0, 1)' }
+
+  const linkStyle = sacredtheme
+    ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
+    : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' }
 
   if (!customElement.type) return null
 
   const style = {
     textAlign: customElement.align,
-    ...styles.text,
+    ...textStyle,
   }
 
   switch (customElement.type) {
@@ -359,7 +290,7 @@ const Element = ({
         <a
           href={customElement.url}
           {...attributes}
-          style={{ ...style, ...styles.link }}
+          style={{ ...style, ...linkStyle }}
         >
           {children}
         </a>

@@ -1,63 +1,43 @@
-// src/components/ComplexTextEditor/index.tsx
-
+/**
+ * @fileoverview Defines the ComplexTextEditor, a versatile text editor with multiple modes.
+ */
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
 import { Descendant } from 'slate'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
-import { SACRED_GLYPHS } from '../../styles/sacredGlyphs'
+import {
+  ComplexTextEditorStyles,
+  getComplexTextEditorStyles,
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedFooterTextStyles,
+  SACRED_GLYPHS,
+} from '../../theme/'
 
 export interface ComplexTextEditorProps {
+  /** The current value of the editor (for controlled usage). */
   value?: string
+  /** The type of editor to render. */
   editorType?: 'simple' | 'markdown' | 'rich' | 'complex'
+  /** The initial value of the editor (for uncontrolled usage). */
   initialValue?: string
+  /** The initial mode for complex editors. */
   initialMode?: EditorMode
+  /** The label for the editor. */
   label?: string
+  /** The minimum number of rows for the editor. */
   minRows?: number
+  /** Callback fired when the editor value changes. */
   onChange?: (value: string) => void
-  error?: boolean
+  /** Helper text to display below the editor. */
   helperText?: React.ReactNode
-  required?: boolean
-  style?: React.CSSProperties
-  accordion?: boolean
-  accordionSummary?: React.ReactNode
-  defaultExpanded?: boolean
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: ComplexTextEditorStyles
 }
 
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  container: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  container: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    bottom: '-20px',
-    right: '20px',
-    fontSize: '48px',
-    color: 'rgba(255, 215, 0, 0.2)',
-    pointerEvents: 'none',
-    zIndex: 0,
-    transition: 'all 0.3s ease',
-    animation: 'complexTextEditorGlyphFloat 10s ease-in-out infinite',
-  } as React.CSSProperties,
-}
-
+// Initial Slate value for rich text editor
 const initialSlateValue: Descendant[] = [
   {
     children: [{ text: '' }],
@@ -72,46 +52,38 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   label,
   minRows = 5,
   onChange,
-  error,
   helperText,
-  required,
-  style,
-  accordion = false,
-  accordionSummary = 'Text Editor',
-  defaultExpanded = false,
-  sacredtheme = false,
+  styles,
 }) => {
+  // Extract settings from styles
+  const accordion = styles?.accordionMode || false
+  const accordionSummary = styles?.accordionSummary || label || 'Text Editor'
+  const defaultExpanded = styles?.accordionDefaultExpanded || false
+  const isSacredTheme = styles?.theme === 'sacred'
+
+  console.log('ComplexTextEditor rendered:', {
+    editorType,
+    theme: styles?.theme,
+  })
   const startValue = value !== undefined ? value : initialValue
-  const startMode = determineStartMode(editorType, initialMode)
+  const startMode = determineStartMode(
+    editorType,
+    initialMode,
+    styles?.defaultMode
+  )
   const [mode, setMode] = useState<EditorMode>(startMode)
   const [simpleValue, setSimpleValue] = useState(startValue)
   const [richValue] = useState<Descendant[]>(initialSlateValue)
   const [markdown, setMarkdown] = useState(startValue)
   const [markdownMode, setMarkdownMode] = useState(startMode === 'markdown')
+  const [isFocused, _setIsFocused] = useState(false)
 
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes complexTextEditorGlyphFloat {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg);
-            opacity: 0.2;
-          }
-          50% { 
-            transform: translateY(-5px) rotate(180deg);
-            opacity: 0.4;
-          }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
-    }
-  }, [sacredtheme])
+  // Get computed styles
+  const computedStyles = getComplexTextEditorStyles(styles, isFocused)
+  const { themeConfig, footerTextColor } = getSharedFormFieldStyles(
+    styles,
+    isFocused
+  )
 
   useEffect(() => {
     if (value !== undefined && value !== simpleValue) {
@@ -150,11 +122,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           setValue={handleSimpleValueChange}
           minRows={minRows}
           label={editorLabel}
-          error={error}
-          helperText={helperText}
-          required={required}
-          style={style}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
       )
     }
@@ -173,67 +141,73 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
         setMarkdown={handleMarkdownChange}
         markdownMode={markdownMode}
         setMarkdownMode={setMarkdownMode}
-        error={error}
-        helperText={helperText}
-        required={required}
-        style={style}
-        accordion={accordion}
-        accordionSummary={accordionSummary}
-        defaultExpanded={defaultExpanded}
-        sacredtheme={sacredtheme}
+        styles={styles}
       />
     )
   }
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  // Render label if provided and not in accordion mode
+  const labelElement = label && !accordion && (
+    <label style={getSharedLabelStyles(themeConfig.label.default, themeConfig)}>
+      {label}
+    </label>
+  )
 
-  const containerStyle = {
-    ...styles.container,
-    ...style,
-  }
-
-  const editorComponent = (
-    <div style={containerStyle}>
-      {createEditorContent()}
-      {sacredtheme && <div style={sacredStyles.glyph}>{SACRED_GLYPHS[14]}</div>}
+  // Render helper text if provided
+  const helperTextElement = helperText && (
+    <div
+      style={getSharedFooterTextStyles(footerTextColor, themeConfig, styles)}
+    >
+      {helperText}
     </div>
   )
 
   if (accordion) {
     const summaryText = accordionSummary || label || 'Text Editor'
     return (
-      <div style={containerStyle}>
+      <div style={computedStyles.container}>
         <Accordion
           summary={summaryText}
           details={createEditorContent()}
           expanded={defaultExpanded}
-          sacredtheme={sacredtheme}
+          styles={{ theme: styles?.theme }}
         />
-        {sacredtheme && (
-          <div style={sacredStyles.glyph}>{SACRED_GLYPHS[14]}</div>
+        {isSacredTheme && (
+          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
         )}
       </div>
     )
   }
 
-  return editorComponent
+  return (
+    <div style={computedStyles.container}>
+      {labelElement}
+      {createEditorContent()}
+      {helperTextElement}
+      {isSacredTheme && (
+        <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
+      )}
+    </div>
+  )
 }
 
 function determineStartMode(
   editorType?: 'simple' | 'markdown' | 'rich' | 'complex',
-  initialMode?: EditorMode
+  initialMode?: EditorMode,
+  defaultMode?: 'simple' | 'rich' | 'markdown'
 ): EditorMode {
-  if (initialMode) {
-    return initialMode
+  if (initialMode) return initialMode
+  if (defaultMode) return defaultMode
+  switch (editorType) {
+    case 'markdown':
+      return 'markdown'
+    case 'rich':
+      return 'rich'
+    case 'simple':
+    case 'complex':
+    default:
+      return 'simple'
   }
-  if (editorType === 'simple' || editorType === 'complex') {
-    return 'simple'
-  } else if (editorType === 'markdown') {
-    return 'markdown'
-  } else if (editorType === 'rich') {
-    return 'rich'
-  }
-  return 'simple'
 }
 
 export default ComplexTextEditor

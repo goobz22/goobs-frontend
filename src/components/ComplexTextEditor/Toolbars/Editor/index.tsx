@@ -13,12 +13,13 @@ import {
   handleItalicClick as markdownItalicClick,
   replaceSelectedText,
 } from '../../utils/useMarkdownEditor'
-import { black, grey } from '../../../../styles/palette'
+import { black, grey } from '../../../../theme/'
 import {
   AlignmentFormat,
   InlineFormat,
   BlockFormat,
 } from '../../utils/useRichtextEditor'
+import { ComplexTextEditorStyles } from '../../../../theme/'
 
 import LinkIcon from '../../../Icons/Link'
 import UndoIcon from '../../../Icons/Undo'
@@ -35,7 +36,7 @@ import FormatListNumberedIcon from '../../../Icons/FormatListNumbered'
 import FormatListBulletedIcon from '../../../Icons/FormatListBulleted'
 
 // --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS AND ANIMATIONS
+// TOOLBAR COMPONENT INTERFACE
 // --------------------------------------------------------------------------
 
 // Define types directly in this file that aren't already imported
@@ -50,10 +51,14 @@ interface ToolbarMarkdownProps {
   setMarkdownMode?: (value: boolean) => void
   setMarkdown: (value: string) => void
   toolbarType?: 'markdown' | 'richtext'
-  sacredtheme?: boolean
+  styles?: ComplexTextEditorStyles
 }
 
-// Premium theme styles (when sacredtheme=false)
+// --------------------------------------------------------------------------
+// STYLE CONFIGURATIONS
+// --------------------------------------------------------------------------
+
+// Premium theme styles (when theme is light/dark)
 const premiumStyles = {
   container: {
     padding: '8px',
@@ -75,18 +80,9 @@ const premiumStyles = {
     gap: '2px',
     flexWrap: 'wrap',
   } as React.CSSProperties,
-
-  iconButton: {
-    borderRadius: '2px',
-    minWidth: '36px',
-    width: '36px',
-    height: '36px',
-    padding: '6px',
-    margin: '2px',
-  } as React.CSSProperties,
 }
 
-// Sacred theme styles (when sacredtheme=true)
+// Sacred theme styles (when theme is sacred)
 const sacredStyles = {
   container: {
     padding: '8px',
@@ -109,25 +105,6 @@ const sacredStyles = {
     gap: '2px',
     flexWrap: 'wrap',
   } as React.CSSProperties,
-
-  iconButton: {
-    borderRadius: '2px',
-    minWidth: '36px',
-    width: '36px',
-    height: '36px',
-    padding: '6px',
-    margin: '2px',
-  } as React.CSSProperties,
-
-  iconButtonActive: {
-    borderRadius: '2px',
-    minWidth: '36px',
-    width: '36px',
-    height: '36px',
-    padding: '6px',
-    margin: '2px',
-    animation: 'toolbarIconGlow 2s ease-in-out infinite',
-  } as React.CSSProperties,
 }
 
 const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
@@ -137,16 +114,18 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   markdownMode,
   setMarkdown,
   toolbarType = 'richtext',
-  sacredtheme = false,
+  styles,
 }) => {
   const [alignValue, setAlignValue] = useState<AlignmentFormat>('left')
   const [textType, setTextType] = useState<TextType>('paragraph')
   const { toggleMark, toggleBlock, isMarkActive, isBlockActive } =
     useRichTextEditor([], () => {})
 
+  const isSacredTheme = styles?.theme === 'sacred'
+
   // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
+    if (isSacredTheme) {
       const styleSheet = document.styleSheets[0]
       const keyframes = `
         @keyframes toolbarIconGlow {
@@ -160,7 +139,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         // Keyframes might already exist
       }
     }
-  }, [sacredtheme])
+  }, [isSacredTheme])
 
   // Display additional tool options based on toolbar type
   const showExtendedOptions = toolbarType === 'richtext' && !markdownMode
@@ -366,260 +345,115 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     }
   }
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  const containerStyles = isSacredTheme ? sacredStyles : premiumStyles
 
-  const getButtonStyle = (format: string) => {
+  // Create button styles for the unified theme system
+  const getButtonStyles = (format: string) => {
     const isActive = isFormatActive(format)
-    const baseStyle =
-      isActive && sacredtheme
-        ? sacredStyles.iconButtonActive
-        : styles.iconButton
 
-    return baseStyle
+    return {
+      theme: styles?.theme,
+      backgroundColor: isActive
+        ? isSacredTheme
+          ? 'rgba(255, 215, 0, 0.2)'
+          : 'rgba(0, 0, 0, 0.10)'
+        : 'transparent',
+      color: isActive
+        ? isSacredTheme
+          ? '#FFD700'
+          : grey.dark
+        : isSacredTheme
+          ? 'rgba(255, 215, 0, 0.8)'
+          : black.main,
+      borderRadius: '2px',
+      minWidth: '36px',
+      width: '36px',
+      height: '36px',
+      padding: '6px',
+      margin: '2px',
+    }
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.toolbarRow}>
+    <div style={containerStyles.container}>
+      <div style={containerStyles.toolbarRow}>
         {/* undo / redo */}
-        <div style={styles.buttonGroup}>
+        <div style={containerStyles.buttonGroup}>
           <CustomButton
             icon={<UndoIcon style={{ width: '16px', height: '16px' }} />}
-            backgroundcolor="none"
-            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
-            iconcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
             onClick={handleEditorAction('undo')}
-            style={styles.iconButton}
+            styles={getButtonStyles('undo')}
             disabled={markdownMode}
-            sacredtheme={sacredtheme}
           />
           <CustomButton
             icon={<RedoIcon style={{ width: '16px', height: '16px' }} />}
-            backgroundcolor="none"
-            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
-            iconcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : black.main}
             onClick={handleEditorAction('redo')}
-            style={styles.iconButton}
+            styles={getButtonStyles('redo')}
             disabled={markdownMode}
-            sacredtheme={sacredtheme}
           />
         </div>
         {/* text dropdown - only show in rich text mode */}
         {showExtendedOptions && (
-          <Dropdown
-            label="Text Type"
-            options={textTypeOptions}
-            value={textType}
-            onChange={handleTextTypeChange}
-            width="200px"
-            sacredtheme={sacredtheme}
-          />
+          <div style={{ width: '200px' }}>
+            <Dropdown
+              label="Text Type"
+              options={textTypeOptions}
+              value={textType}
+              onChange={handleTextTypeChange}
+              styles={{ theme: styles?.theme || 'light' }}
+            />
+          </div>
         )}
         {/* alignment dropdown - only show in rich text mode */}
         {showExtendedOptions && (
-          <Dropdown
-            label="Alignment"
-            options={alignmentOptions}
-            value={alignValue}
-            onChange={handleAlignChange}
-            width="150px"
-            sacredtheme={sacredtheme}
-          />
+          <div style={{ width: '150px' }}>
+            <Dropdown
+              label="Alignment"
+              options={alignmentOptions}
+              value={alignValue}
+              onChange={handleAlignChange}
+              styles={{ theme: styles?.theme || 'light' }}
+            />
+          </div>
         )}
         {/* buttons */}
-        <div style={styles.buttonsContainer}>
+        <div style={containerStyles.buttonsContainer}>
           <CustomButton
             icon={<FormatBoldIcon style={{ width: '16px', height: '16px' }} />}
-            backgroundcolor={
-              isFormatActive('bold')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('bold')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('bold')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('bold')}
-            style={getButtonStyle('bold')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('bold')}
           />
           <CustomButton
             icon={
               <FormatItalicIcon style={{ width: '16px', height: '16px' }} />
             }
-            backgroundcolor={
-              isFormatActive('italic')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('italic')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('italic')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('italic')}
-            style={getButtonStyle('italic')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('italic')}
           />
           <CustomButton
             icon={
               <FormatUnderlinedIcon style={{ width: '16px', height: '16px' }} />
             }
-            backgroundcolor={
-              isFormatActive('underline')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('underline')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('underline')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('underline')}
-            style={getButtonStyle('underline')}
+            styles={getButtonStyles('underline')}
             disabled={markdownMode}
-            sacredtheme={sacredtheme}
           />
           <CustomButton
             icon={
               <StrikethroughSIcon style={{ width: '16px', height: '16px' }} />
             }
-            backgroundcolor={
-              isFormatActive('strikethrough')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('strikethrough')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('strikethrough')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('strikethrough')}
-            style={getButtonStyle('strikethrough')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('strikethrough')}
           />
           <CustomButton
             icon={<CodeIcon style={{ width: '16px', height: '16px' }} />}
-            backgroundcolor={
-              isFormatActive('code')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('code')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('code')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('code')}
-            style={getButtonStyle('code')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('code')}
           />
           <CustomButton
             icon={<LinkIcon style={{ width: '16px', height: '16px' }} />}
-            backgroundcolor={
-              isFormatActive('link')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('link')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('link')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('link')}
-            style={getButtonStyle('link')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('link')}
           />
           <CustomButton
             icon={
@@ -627,34 +461,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                 style={{ width: '16px', height: '16px' }}
               />
             }
-            backgroundcolor={
-              isFormatActive('numbered-list')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('numbered-list')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('numbered-list')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('numbered-list')}
-            style={getButtonStyle('numbered-list')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('numbered-list')}
           />
           <CustomButton
             icon={
@@ -662,34 +470,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
                 style={{ width: '16px', height: '16px' }}
               />
             }
-            backgroundcolor={
-              isFormatActive('bulleted-list')
-                ? sacredtheme
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : 'rgba(0, 0, 0, 0.10)'
-                : 'none'
-            }
-            fontcolor={
-              isFormatActive('bulleted-list')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
-            iconcolor={
-              isFormatActive('bulleted-list')
-                ? sacredtheme
-                  ? '#FFD700'
-                  : grey.dark
-                : sacredtheme
-                  ? 'rgba(255, 215, 0, 0.8)'
-                  : black.main
-            }
             onClick={handleEditorAction('bulleted-list')}
-            style={getButtonStyle('bulleted-list')}
-            sacredtheme={sacredtheme}
+            styles={getButtonStyles('bulleted-list')}
           />
         </div>
       </div>

@@ -8,6 +8,10 @@ import SimpleEditor from '../../SimpleEditor'
 import { ToggleButton, ToggleButtonGroup } from '../../../ToggleButton'
 import { RichTextEditorTypes } from '../../utils/useRichtextEditor'
 import { Descendant } from 'slate'
+import {
+  ComplexTextEditorStyles,
+  getComplexTextEditorStyles,
+} from '../../../../theme/'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
 
@@ -24,51 +28,7 @@ interface ComplexToolbarProps {
   setMarkdown: (value: string) => void
   markdownMode: boolean
   setMarkdownMode: React.Dispatch<React.SetStateAction<boolean>>
-  handleBoldClick?: () => void
-  handleItalicClick?: () => void
-  handleLinkClick?: () => void
-  error?: boolean
-  helperText?: React.ReactNode
-  required?: boolean
-  style?: React.CSSProperties
-  accordion?: boolean
-  accordionSummary?: React.ReactNode
-  defaultExpanded?: boolean
-  sacredtheme?: boolean
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    width: '100%',
-  } as React.CSSProperties,
-
-  toggleContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    padding: '8px',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    width: '100%',
-  } as React.CSSProperties,
-
-  toggleContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    padding: '8px',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: '8px 8px 0 0',
-  } as React.CSSProperties,
+  styles?: ComplexTextEditorStyles
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -84,15 +44,10 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   setMarkdown,
   markdownMode,
   setMarkdownMode,
-  error,
-  helperText,
-  required,
-  style,
-  accordion = false,
-  accordionSummary,
-  defaultExpanded,
-  sacredtheme = false,
+  styles,
 }) => {
+  // Get computed styles
+  const computedStyles = getComplexTextEditorStyles(styles, false)
   const handleModeChange = (
     _event: React.MouseEvent<HTMLElement>,
     newMode: string | null
@@ -106,22 +61,17 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
     console.log('Setting new slate value:', value)
   }
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
-
   return (
-    <div style={styles.container}>
-      <div style={styles.toggleContainer}>
-        <ToggleButtonGroup
-          value={mode}
-          exclusive
-          onChange={handleModeChange}
-          sacredtheme={sacredtheme}
-        >
-          <ToggleButton value="simple">Simple</ToggleButton>
-          <ToggleButton value="rich">Rich Text</ToggleButton>
-          <ToggleButton value="markdown">Markdown</ToggleButton>
-        </ToggleButtonGroup>
-      </div>
+    <div style={computedStyles.container}>
+      {styles?.showModeToggle !== false && (
+        <div style={computedStyles.toggleRow}>
+          <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
+            <ToggleButton value="simple">Simple</ToggleButton>
+            <ToggleButton value="rich">Rich Text</ToggleButton>
+            <ToggleButton value="markdown">Markdown</ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      )}
 
       {mode === 'simple' && (
         <SimpleEditor
@@ -129,11 +79,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           setValue={setSimpleValue}
           minRows={minRows}
           label={label}
-          error={error}
-          helperText={helperText}
-          required={required}
-          style={style}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
       )}
 
@@ -143,13 +89,10 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           onChange={onRichChange}
           label={label}
           minRows={minRows}
-          accordion={accordion}
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setMarkdown={setMarkdown}
-          accordionSummary={accordionSummary}
-          defaultExpanded={defaultExpanded}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
       )}
 
@@ -160,7 +103,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           markdownMode={markdownMode}
           setMarkdownMode={setMarkdownMode}
           setNewSlateValue={setNewSlateValue}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
       )}
     </div>

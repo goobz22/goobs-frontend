@@ -313,7 +313,6 @@ export const useRichTextEditor = (
    * Convert Slate value to Markdown string and switch to markdown mode
    */
   const handleSwitchToMarkdown = (
-    editor: ReactEditor,
     setMarkdown: (value: string) => void,
     setMarkdownMode: (value: boolean) => void
   ): void => {
