@@ -8,11 +8,13 @@ const meta: Meta<typeof Checkbox> = {
   title: 'Components/Checkbox',
   component: Checkbox,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    outline: { control: 'boolean' },
     indeterminate: { control: 'boolean' },
     disabled: { control: 'boolean' },
     checked: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
   parameters: {
     layout: 'centered',
@@ -73,7 +75,9 @@ export const SacredTheme: Story = {
   name: 'Theme/Sacred',
   args: {
     checked: true,
-    sacredtheme: true,
+    styles: {
+      theme: 'sacred',
+    },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -84,8 +88,11 @@ export const SacredTheme: Story = {
 export const SacredDisabled: Story = {
   name: 'Theme/Sacred Disabled',
   args: {
-    ...SacredTheme.args,
+    checked: true,
     disabled: true,
+    styles: {
+      theme: 'sacred',
+    },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -97,6 +104,8 @@ export const NoOutline: Story = {
   name: 'Theme/No Outline',
   args: {
     checked: true,
-    outline: false,
+    styles: {
+      outline: false,
+    },
   },
 }

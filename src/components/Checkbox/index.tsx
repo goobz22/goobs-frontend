@@ -1,5 +1,6 @@
 /**
  * @fileoverview Defines the Checkbox component, a custom checkbox with theming.
+ * It supports light, dark, and sacred themes with extensive customization options.
  */
 'use client'
 
@@ -11,44 +12,23 @@ import React, {
   useRef,
   useId,
   ChangeEvent,
+  useMemo,
+  useCallback,
 } from 'react'
-import { useCallback } from 'react'
 import type { InputHTMLAttributes } from 'react'
+import { CheckboxStyles, getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
 
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+// --------------------------------------------------------------------------
+// ICON COMPONENTS
+// --------------------------------------------------------------------------
 
-const CheckIcon = ({ sacredtheme = false }: { sacredtheme?: boolean }) => (
+const CheckIcon = ({ theme }: { theme?: 'light' | 'dark' | 'sacred' }) => (
   <svg
     viewBox="0 0 20 20"
     fill="currentColor"
     style={{
-      width: sacredtheme ? '20px' : '18px',
-      height: sacredtheme ? '20px' : '18px',
+      width: theme === 'sacred' ? '20px' : '18px',
+      height: theme === 'sacred' ? '20px' : '18px',
       flexShrink: 0,
     }}
   >
@@ -61,16 +41,16 @@ const CheckIcon = ({ sacredtheme = false }: { sacredtheme?: boolean }) => (
 )
 
 const IndeterminateIcon = ({
-  sacredtheme = false,
+  theme,
 }: {
-  sacredtheme?: boolean
+  theme?: 'light' | 'dark' | 'sacred'
 }) => (
   <svg
     viewBox="0 0 20 20"
     fill="currentColor"
     style={{
-      width: sacredtheme ? '20px' : '18px',
-      height: sacredtheme ? '20px' : '18px',
+      width: theme === 'sacred' ? '20px' : '18px',
+      height: theme === 'sacred' ? '20px' : '18px',
       flexShrink: 0,
     }}
   >
@@ -81,6 +61,10 @@ const IndeterminateIcon = ({
     />
   </svg>
 )
+
+// --------------------------------------------------------------------------
+// PROPS INTERFACE
+// --------------------------------------------------------------------------
 
 export interface CheckboxProps
   extends Omit<
@@ -97,338 +81,124 @@ export interface CheckboxProps
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   /** Callback when checkbox loses focus */
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
-  /** Whether the checkbox is disabled */
-  disabled?: boolean
-  /** Whether to use the sacred theme */
-  sacredtheme?: boolean
-  /** Whether to show outline */
-  outline?: boolean
   /** Whether the checkbox is in indeterminate state */
   indeterminate?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: CheckboxStyles
 }
 
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  wrapper: {
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  } as React.CSSProperties,
+// --------------------------------------------------------------------------
+// SACRED THEME COMPONENTS
+// --------------------------------------------------------------------------
 
-  wrapperDisabled: {
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
+const SacredGlyphs: React.FC<{
+  isHovered: boolean
+}> = ({ isHovered }) => {
+  const glyphStyles = useMemo(
+    () => ({
+      glyph: {
+        position: 'absolute' as const,
+        fontSize: '12px',
+        color: 'rgba(255, 215, 0, 0.3)',
+        transition: 'all 0.3s ease',
+        pointerEvents: 'none' as const,
+      },
+      glyphLeft: {
+        left: '-24px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+      },
+      glyphRight: {
+        right: '-24px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+      },
+      glyphVisible: {
+        opacity: 0.6,
+      },
+      glyphFloating: {
+        animation: 'sacredFloat 3s ease-in-out infinite',
+      },
+      glyphDelayedFloating: {
+        animation: 'sacredFloat 3s ease-in-out infinite 1.5s',
+      },
+    }),
+    []
+  )
 
-  container: {
-    position: 'relative',
-    width: '24px',
-    height: '24px',
-    flexShrink: 0,
-  } as React.CSSProperties,
-
-  input: {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    opacity: 0,
-    cursor: 'pointer',
-    margin: 0,
-    padding: 0,
-    zIndex: 3,
-  } as React.CSSProperties,
-
-  inputDisabled: {
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
-
-  box: {
-    pointerEvents: 'none',
-    width: '100%',
-    height: '100%',
-    border: '2px solid rgb(59, 130, 246)',
-    borderRadius: '4px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    backgroundColor: 'rgba(249, 250, 251, 0.9)',
-    backdropFilter: 'blur(4px)',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    zIndex: 1,
-  } as React.CSSProperties,
-
-  boxNoOutline: {
-    border: 'none',
-    boxShadow: 'none',
-    backgroundColor: 'rgba(249, 250, 251, 0.6)',
-  } as React.CSSProperties,
-
-  boxHover: {
-    backgroundColor: 'rgba(239, 246, 255, 0.8)',
-    borderColor: 'rgb(37, 99, 235)',
-    transform: 'scale(1.05)',
-    boxShadow:
-      '0 4px 12px rgba(59, 130, 246, 0.2), 0 2px 6px rgba(59, 130, 246, 0.1)',
-  } as React.CSSProperties,
-
-  boxChecked: {
-    backgroundColor: 'rgb(59, 130, 246)',
-    borderColor: 'transparent',
-    boxShadow:
-      '0 4px 12px rgba(59, 130, 246, 0.3), 0 2px 6px rgba(59, 130, 246, 0.2)',
-  } as React.CSSProperties,
-
-  boxIndeterminate: {
-    backgroundColor: 'rgb(59, 130, 246)',
-    borderColor: 'transparent',
-    boxShadow:
-      '0 4px 12px rgba(59, 130, 246, 0.3), 0 2px 6px rgba(59, 130, 246, 0.2)',
-  } as React.CSSProperties,
-
-  boxDisabled: {
-    backgroundColor: 'rgba(249, 250, 251, 0.5)',
-    borderColor: 'rgb(156, 163, 175)',
-    transform: 'none',
-    boxShadow: 'none',
-  } as React.CSSProperties,
-
-  icon: {
-    pointerEvents: 'none',
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    color: 'white',
-    opacity: 0,
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: 'scale(0.8) translate(2px, 1px)',
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-
-  iconVisible: {
-    opacity: 1,
-    transform: 'scale(1) translate(2px, 1px)',
-  } as React.CSSProperties,
-
-  iconDisabled: {
-    color: 'rgb(156, 163, 175)',
-  } as React.CSSProperties,
-
-  iconNoOutline: {
-    // Adjust positioning when no outline - move 2px to the left
-    transform: 'scale(0.8) translate(0px, 1px)',
-  } as React.CSSProperties,
-
-  accent: {
-    position: 'absolute',
-    left: '-2px',
-    top: '-2px',
-    right: '-2px',
-    bottom: '-2px',
-    borderRadius: '6px',
-    background: 'linear-gradient(45deg, rgb(59, 130, 246), rgb(147, 197, 253))',
-    opacity: 0,
-    transition: 'opacity 0.3s ease',
-    zIndex: -1,
-  } as React.CSSProperties,
-
-  accentVisible: {
-    opacity: 0.3,
-  } as React.CSSProperties,
+  return (
+    <>
+      <span
+        style={{
+          ...glyphStyles.glyph,
+          ...glyphStyles.glyphLeft,
+          ...(isHovered && glyphStyles.glyphVisible),
+          ...glyphStyles.glyphFloating,
+        }}
+      >
+        {SACRED_GLYPHS[11]}
+      </span>
+      <span
+        style={{
+          ...glyphStyles.glyph,
+          ...glyphStyles.glyphRight,
+          ...(isHovered && glyphStyles.glyphVisible),
+          ...glyphStyles.glyphDelayedFloating,
+        }}
+      >
+        {SACRED_GLYPHS[15]}
+      </span>
+    </>
+  )
 }
 
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  wrapper: {
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'all 0.4s ease',
-  } as React.CSSProperties,
+const PremiumAccent: React.FC<{
+  isChecked: boolean
+  isIndeterminate: boolean
+  outline: boolean
+}> = ({ isChecked, isIndeterminate, outline }) => {
+  const accentStyles = useMemo(
+    () => ({
+      accent: {
+        position: 'absolute' as const,
+        left: '-2px',
+        top: '-2px',
+        right: '-2px',
+        bottom: '-2px',
+        borderRadius: '6px',
+        background:
+          'linear-gradient(45deg, rgb(59, 130, 246), rgb(147, 197, 253))',
+        opacity: 0.3,
+        transition: 'opacity 0.3s ease',
+        zIndex: -1,
+      },
+    }),
+    []
+  )
 
-  wrapperDisabled: {
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
+  if (!outline || (!isChecked && !isIndeterminate)) {
+    return null
+  }
 
-  container: {
-    position: 'relative',
-    width: '28px',
-    height: '28px',
-    flexShrink: 0,
-  } as React.CSSProperties,
-
-  input: {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    opacity: 0,
-    cursor: 'pointer',
-    margin: 0,
-    padding: 0,
-    zIndex: 3,
-  } as React.CSSProperties,
-
-  inputDisabled: {
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
-
-  box: {
-    pointerEvents: 'none',
-    width: '100%',
-    height: '100%',
-    border: '2px solid rgba(255, 215, 0, 0.4)',
-    borderRadius: '6px',
-    transition: 'all 0.4s ease',
-    backgroundColor: 'rgba(10, 10, 10, 0.9)',
-    backdropFilter: 'blur(8px)',
-    boxShadow:
-      '0 0 20px rgba(255, 215, 0, 0.2), 0 0 40px rgba(255, 215, 0, 0.1)',
-    backgroundImage: `
-      radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-    `,
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    zIndex: 1,
-  } as React.CSSProperties,
-
-  boxNoOutline: {
-    border: 'none',
-    boxShadow: 'none',
-  } as React.CSSProperties,
-
-  boxHover: {
-    borderColor: 'rgba(255, 215, 0, 0.8)',
-    transform: 'scale(1.1)',
-    boxShadow:
-      '0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)',
-    backgroundImage: `
-      radial-gradient(circle at center, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
-    `,
-  } as React.CSSProperties,
-
-  boxChecked: {
-    backgroundColor: 'rgba(10, 10, 10, 0.9)',
-    borderColor: '#FFD700',
-    boxShadow:
-      '0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3)',
-    backgroundImage: `
-      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
-      radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, transparent 50%)
-    `,
-  } as React.CSSProperties,
-
-  boxIndeterminate: {
-    backgroundColor: 'rgba(10, 10, 10, 0.9)',
-    borderColor: '#FFD700',
-    boxShadow:
-      '0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3)',
-    backgroundImage: `
-      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
-      radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, transparent 50%)
-    `,
-  } as React.CSSProperties,
-
-  boxDisabled: {
-    backgroundColor: 'rgba(10, 10, 10, 0.6)',
-    borderColor: 'rgba(255, 215, 0, 0.2)',
-    transform: 'none',
-    boxShadow: 'none',
-  } as React.CSSProperties,
-
-  icon: {
-    pointerEvents: 'none',
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    color: '#FFD700',
-    opacity: 0,
-    transition: 'all 0.4s ease',
-    transform: 'scale(0.8) rotate(-10deg) translate(2px, 1px)',
-    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-
-  iconVisible: {
-    opacity: 1,
-    transform: 'scale(1) rotate(0deg) translate(2px, 1px)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
-  } as React.CSSProperties,
-
-  iconDisabled: {
-    color: 'rgba(255, 215, 0, 0.3)',
-    filter: 'none',
-  } as React.CSSProperties,
-
-  iconNoOutline: {
-    // Adjust positioning when no outline - move 2px to the left
-    transform: 'scale(0.8) rotate(-10deg) translate(0px, 1px)',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.3)',
-    transition: 'all 0.3s ease',
-    pointerEvents: 'none',
-  } as React.CSSProperties,
-
-  glyphLeft: {
-    left: '-24px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-  } as React.CSSProperties,
-
-  glyphRight: {
-    right: '-24px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-  } as React.CSSProperties,
-
-  glyphVisible: {
-    opacity: 0.6,
-  } as React.CSSProperties,
-
-  glyphFloating: {
-    animation: 'sacredFloat 3s ease-in-out infinite',
-  } as React.CSSProperties,
-
-  glyphDelayedFloating: {
-    animation: 'sacredFloat 3s ease-in-out infinite 1.5s',
-  } as React.CSSProperties,
+  return <div style={accentStyles.accent} />
 }
+
+// --------------------------------------------------------------------------
+// MAIN CHECKBOX COMPONENT
+// --------------------------------------------------------------------------
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   const {
-    sacredtheme = false,
-    outline = true,
     indeterminate,
     checked: controlledChecked,
     defaultChecked,
     onChange,
     onFocus,
     onBlur,
-    disabled,
+    styles,
     ...rest
   } = props
+
   const id = useId()
   const internalRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
@@ -439,7 +209,23 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   )
   const isControlled = controlledChecked !== undefined
   const checked = isControlled ? controlledChecked : uncontrolledChecked
-  const isDisabled = disabled || false
+  const isDisabled = !!(styles?.disabled || rest.disabled)
+  const isSacredTheme = styles?.theme === 'sacred'
+
+  const isChecked = checked
+  const isIndeterminate = indeterminate && !isChecked
+
+  const computedStyles = useMemo(
+    () =>
+      getCheckboxStyles(
+        styles,
+        isHovered,
+        isChecked,
+        isIndeterminate,
+        isDisabled
+      ),
+    [styles, isHovered, isChecked, isIndeterminate, isDisabled]
+  )
 
   const handleFocus = useCallback(
     (event: React.FocusEvent<HTMLInputElement>) => {
@@ -455,58 +241,6 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     [onBlur]
   )
 
-  useImperativeHandle(ref, () => internalRef.current!)
-
-  useEffect(() => {
-    if (internalRef.current) {
-      internalRef.current.indeterminate = indeterminate || false
-    }
-  }, [indeterminate])
-
-  console.log('Checkbox rendered:', {
-    sacredtheme,
-    checked,
-    indeterminate,
-    isDisabled,
-  })
-
-  const styles = sacredtheme ? sacredStyles : premiumStyles
-  const isChecked = checked
-  const isIndeterminate = indeterminate && !isChecked
-
-  const wrapperStyle = {
-    ...styles.wrapper,
-    ...(isDisabled && styles.wrapperDisabled),
-  }
-
-  const inputStyle = {
-    ...styles.input,
-    ...(isDisabled && styles.inputDisabled),
-  }
-
-  const boxStyle = {
-    ...styles.box,
-    ...(!outline && styles.boxNoOutline),
-    ...(isHovered && !isDisabled && styles.boxHover),
-    ...(isChecked && styles.boxChecked),
-    ...(isIndeterminate && styles.boxIndeterminate),
-    ...(isDisabled && styles.boxDisabled),
-  }
-
-  const iconStyle = {
-    ...styles.icon,
-    ...(!outline && styles.iconNoOutline),
-    ...((isChecked || isIndeterminate) && styles.iconVisible),
-    ...(isDisabled && styles.iconDisabled),
-    // Override transform based on outline and visibility state
-    ...((isChecked || isIndeterminate) &&
-      !outline && {
-        transform: sacredtheme
-          ? 'scale(1) rotate(0deg) translate(0px, 1px)'
-          : 'scale(1) translate(0px, 1px)',
-      }),
-  }
-
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const newChecked = e.target.checked
@@ -520,69 +254,59 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     [isControlled, onChange]
   )
 
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false)
+  }, [])
+
+  useImperativeHandle(ref, () => internalRef.current!)
+
+  useEffect(() => {
+    if (internalRef.current) {
+      internalRef.current.indeterminate = indeterminate || false
+    }
+  }, [indeterminate])
+
   return (
     <label
       htmlFor={id}
-      style={wrapperStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      style={computedStyles.wrapper}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      {/* Sacred glyphs */}
-      {sacredtheme && (
-        <>
-          <span
-            style={{
-              ...sacredStyles.glyph,
-              ...sacredStyles.glyphLeft,
-              ...(isHovered && sacredStyles.glyphVisible),
-              ...sacredStyles.glyphFloating,
-            }}
-          >
-            {SACRED_GLYPHS[11]}
-          </span>
-          <span
-            style={{
-              ...sacredStyles.glyph,
-              ...sacredStyles.glyphRight,
-              ...(isHovered && sacredStyles.glyphVisible),
-              ...sacredStyles.glyphDelayedFloating,
-            }}
-          >
-            {SACRED_GLYPHS[15]}
-          </span>
-        </>
-      )}
+      {isSacredTheme && <SacredGlyphs isHovered={isHovered} />}
 
-      {/* Premium theme accent */}
-      {!sacredtheme && outline && (isChecked || isIndeterminate) && (
-        <div
-          style={{
-            ...premiumStyles.accent,
-            ...premiumStyles.accentVisible,
-          }}
+      {!isSacredTheme && (
+        <PremiumAccent
+          isChecked={isChecked}
+          isIndeterminate={!!isIndeterminate}
+          outline={styles?.outline !== false}
         />
       )}
 
-      <div style={styles.container}>
+      <div style={computedStyles.container}>
         <input
           type="checkbox"
           id={id}
           ref={internalRef}
-          style={inputStyle}
+          style={computedStyles.input}
           aria-checked={indeterminate ? 'mixed' : undefined}
           disabled={isDisabled}
-          checked={isChecked || false}
+          checked={!!isChecked}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           {...rest}
         />
-        <div style={boxStyle}></div>
-        <div style={iconStyle}>
+        <div style={computedStyles.box}></div>
+        <div style={computedStyles.icon}>
           {indeterminate ? (
-            <IndeterminateIcon sacredtheme={sacredtheme} />
+            <IndeterminateIcon theme={styles?.theme} />
           ) : (
-            <CheckIcon sacredtheme={sacredtheme} />
+            <CheckIcon theme={styles?.theme} />
           )}
         </div>
       </div>
