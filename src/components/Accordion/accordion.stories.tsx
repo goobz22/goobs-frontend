@@ -416,3 +416,809 @@ export const InteractionTest: Story = {
     ).toBeNull()
   },
 }
+
+// --------------------------------------------------------------------------
+// LEVEL TESTING STORY
+// --------------------------------------------------------------------------
+
+/** Story demonstrating the difference between menu items and accordion items */
+export const MenuVsAccordion: Story = {
+  name: 'Level Testing/Menu vs Accordion',
+  render: () => (
+    <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      {/* Menu Items */}
+      <div style={{ minWidth: 'fit-content' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Menu Items (Non-expandable)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Home"
+            href="/"
+            isActive={true}
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Products"
+            href="/products"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Orders"
+            onClick={() => console.log('Orders clicked')}
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Settings"
+            href="/settings"
+            styles={{ theme: 'light', level: 0 }}
+          />
+        </div>
+      </div>
+
+      {/* Accordion Items */}
+      <div style={{ minWidth: 'fit-content' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Accordion Items (Expandable)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            summary="Dashboard"
+            details={
+              <div style={{ padding: '1rem' }}>
+                Dashboard content and charts
+              </div>
+            }
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            summary="Analytics"
+            details={
+              <div style={{ padding: '1rem' }}>
+                Analytics reports and metrics
+              </div>
+            }
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            summary="User Management"
+            details={
+              <div style={{ padding: '1rem' }}>User roles and permissions</div>
+            }
+            styles={{ theme: 'light', level: 0 }}
+            defaultExpanded={true}
+          />
+          <Accordion
+            summary="System Settings"
+            details={
+              <div style={{ padding: '1rem' }}>
+                System configuration options
+              </div>
+            }
+            styles={{ theme: 'light', level: 0 }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+/** Story demonstrating width behavior: fixed vs dynamic */
+export const WidthBehaviorComparison: Story = {
+  name: 'Level Testing/Width Behavior Comparison',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Fixed Width Container (Text gets cut off) */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#dc2626' }}>
+          Fixed Width Container (Text gets cut off)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'hidden',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="This is a very long navigation item that will be cut off in a fixed width container"
+            href="/cut-off"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Another extremely long menu item that demonstrates text truncation in fixed containers"
+            href="/truncated"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Short Item"
+            href="/short"
+            styles={{ theme: 'light', level: 0 }}
+          />
+        </div>
+      </div>
+
+      {/* Dynamic Width Container (Auto-expands) */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#16a34a' }}>
+          Dynamic Width Container (Auto-expands)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="This is a very long navigation item that will be fully visible in a dynamic width container"
+            href="/fully-visible"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Another extremely long menu item that demonstrates full text display in dynamic containers"
+            href="/full-display"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Short Item"
+            href="/short"
+            styles={{ theme: 'light', level: 0 }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+const createLevelContent = (
+  level: number,
+  theme: 'light' | 'sacred'
+): React.ReactNode => {
+  if (level >= 6) {
+    return (
+      <div style={{ padding: '0' }}>
+        <Accordion
+          type="menu"
+          summary="Final Menu Item"
+          onClick={() => console.log('Menu clicked')}
+          styles={{
+            theme,
+            level: level + 1,
+            levelIndentBase: 16,
+            levelIndentIncrement: 12,
+            outline: false,
+          }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ padding: '0' }}>
+      <Accordion
+        type="menu"
+        summary={`Overview ${level + 1}`}
+        onClick={() => console.log('Overview clicked')}
+        styles={{
+          theme,
+          level: level + 1,
+          levelIndentBase: 16,
+          levelIndentIncrement: 12,
+          outline: false,
+        }}
+      />
+      <Accordion
+        summary={`Dashboard ${level + 1}`}
+        details={createLevelContent(level + 1, theme)}
+        styles={{
+          theme,
+          level: level + 1,
+          levelIndentBase: 16,
+          levelIndentIncrement: 12,
+          outline: false,
+        }}
+      />
+      <Accordion
+        type="menu"
+        summary={`Reports ${level + 1}`}
+        href="/reports"
+        styles={{
+          theme,
+          level: level + 1,
+          levelIndentBase: 16,
+          levelIndentIncrement: 12,
+          outline: false,
+        }}
+      />
+      <Accordion
+        summary={`Settings ${level + 1}`}
+        details={createLevelContent(level + 1, theme)}
+        styles={{
+          theme,
+          level: level + 1,
+          levelIndentBase: 16,
+          levelIndentIncrement: 12,
+          outline: false,
+        }}
+      />
+      <Accordion
+        type="menu"
+        summary={`Profile ${level + 1}`}
+        onClick={() => console.log('Profile clicked')}
+        isActive={level === 0}
+        styles={{
+          theme,
+          level: level + 1,
+          levelIndentBase: 16,
+          levelIndentIncrement: 12,
+          outline: false,
+        }}
+      />
+    </div>
+  )
+}
+
+/** Test story demonstrating 6 levels of nested navigation accordions to validate level prop functionality. */
+export const SixLevelNavigationTest: Story = {
+  name: 'Level Testing/Six Level Navigation',
+  render: () => (
+    <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      {/* Light Theme Navigation */}
+      <div style={{ minWidth: 'fit-content' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Light Theme Navigation
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Home"
+            href="/"
+            isActive={true}
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            summary="Dashboard"
+            details={createLevelContent(0, 'light')}
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+            defaultExpanded={true}
+          />
+          <Accordion
+            summary="Analytics"
+            details={createLevelContent(0, 'light')}
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            type="menu"
+            summary="Help"
+            href="/help"
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            summary="Settings"
+            details={createLevelContent(0, 'light')}
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Sacred Theme Navigation */}
+      <div style={{ minWidth: 'fit-content' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
+          Sacred Theme Navigation
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            backgroundColor: '#0a0a0a',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            borderRadius: '8px',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Home"
+            href="/"
+            isActive={true}
+            styles={{
+              theme: 'sacred',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            summary="Dashboard"
+            details={createLevelContent(0, 'sacred')}
+            styles={{
+              theme: 'sacred',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+            defaultExpanded={true}
+          />
+          <Accordion
+            summary="Analytics"
+            details={createLevelContent(0, 'sacred')}
+            styles={{
+              theme: 'sacred',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            type="menu"
+            summary="Help"
+            href="/help"
+            styles={{
+              theme: 'sacred',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+          <Accordion
+            summary="Settings"
+            details={createLevelContent(0, 'sacred')}
+            styles={{
+              theme: 'sacred',
+              level: 0,
+              levelIndentBase: 16,
+              levelIndentIncrement: 12,
+              outline: false,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+/** Alternative test showing different indentation configurations. */
+export const IndentationVariations: Story = {
+  name: 'Level Testing/Indentation Variations',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Dynamic Width Expansion Test */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Dynamic Width Expansion (Auto-expands beyond 300px)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Short Item"
+            href="/"
+            isActive={true}
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="This is a very long navigation item that should expand the container width automatically"
+            href="/long-item"
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            summary="Expandable Section with Really Long Title That Should Not Be Cut Off"
+            details={
+              <div style={{ padding: '0' }}>
+                <Accordion
+                  type="menu"
+                  summary="This is an even longer nested menu item that should expand the container significantly beyond 300px"
+                  href="/very-long-nested"
+                  styles={{ theme: 'light', level: 1 }}
+                />
+                <Accordion
+                  type="menu"
+                  summary="Medium length nested item"
+                  href="/medium"
+                  styles={{ theme: 'light', level: 1 }}
+                />
+              </div>
+            }
+            styles={{ theme: 'light', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="Normal Item"
+            href="/normal"
+            styles={{ theme: 'light', level: 0 }}
+          />
+        </div>
+      </div>
+
+      {/* Sacred Theme Dynamic Width */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
+          Sacred Theme - Dynamic Width Expansion
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            backgroundColor: '#0a0a0a',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            borderRadius: '8px',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Sacred Home"
+            href="/"
+            isActive={true}
+            styles={{ theme: 'sacred', level: 0 }}
+          />
+          <Accordion
+            type="menu"
+            summary="This is a very long sacred navigation item that should expand the container width automatically"
+            href="/long-sacred"
+            styles={{ theme: 'sacred', level: 0 }}
+          />
+          <Accordion
+            summary="Sacred Expandable Section with Really Long Title"
+            details={
+              <div style={{ padding: '0' }}>
+                <Accordion
+                  type="menu"
+                  summary="This is an extremely long nested sacred menu item that should expand the container significantly"
+                  href="/very-long-sacred-nested"
+                  styles={{ theme: 'sacred', level: 1 }}
+                />
+              </div>
+            }
+            styles={{ theme: 'sacred', level: 0 }}
+          />
+        </div>
+      </div>
+
+      {/* Mixed Navigation Types */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Mixed Navigation (Accordion + Menu Items)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          <Accordion
+            type="menu"
+            summary="Home"
+            href="/"
+            isActive={true}
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 0,
+              levelIndentIncrement: 6,
+            }}
+          />
+          <Accordion
+            summary="Products"
+            details={
+              <div style={{ padding: '0' }}>
+                <Accordion
+                  type="menu"
+                  summary="All Products"
+                  href="/products"
+                  styles={{
+                    theme: 'light',
+                    level: 1,
+                    levelIndentBase: 0,
+                    levelIndentIncrement: 6,
+                  }}
+                />
+                <Accordion
+                  type="menu"
+                  summary="Categories"
+                  href="/categories"
+                  styles={{
+                    theme: 'light',
+                    level: 1,
+                    levelIndentBase: 0,
+                    levelIndentIncrement: 6,
+                  }}
+                />
+                <Accordion
+                  type="menu"
+                  summary="Inventory"
+                  href="/inventory"
+                  styles={{
+                    theme: 'light',
+                    level: 1,
+                    levelIndentBase: 0,
+                    levelIndentIncrement: 6,
+                  }}
+                />
+              </div>
+            }
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 0,
+              levelIndentIncrement: 6,
+            }}
+          />
+          <Accordion
+            type="menu"
+            summary="Orders"
+            href="/orders"
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 0,
+              levelIndentIncrement: 6,
+            }}
+          />
+          <Accordion
+            summary="Settings"
+            details={
+              <div style={{ padding: '0' }}>
+                <Accordion
+                  type="menu"
+                  summary="General"
+                  href="/settings/general"
+                  styles={{
+                    theme: 'light',
+                    level: 1,
+                    levelIndentBase: 0,
+                    levelIndentIncrement: 6,
+                  }}
+                />
+                <Accordion
+                  summary="Advanced"
+                  details={
+                    <div style={{ padding: '0' }}>
+                      <Accordion
+                        type="menu"
+                        summary="API Keys"
+                        href="/settings/api"
+                        styles={{
+                          theme: 'light',
+                          level: 2,
+                          levelIndentBase: 0,
+                          levelIndentIncrement: 6,
+                        }}
+                      />
+                      <Accordion
+                        type="menu"
+                        summary="Security"
+                        href="/settings/security"
+                        styles={{
+                          theme: 'light',
+                          level: 2,
+                          levelIndentBase: 0,
+                          levelIndentIncrement: 6,
+                        }}
+                      />
+                    </div>
+                  }
+                  styles={{
+                    theme: 'light',
+                    level: 1,
+                    levelIndentBase: 0,
+                    levelIndentIncrement: 6,
+                  }}
+                />
+              </div>
+            }
+            styles={{
+              theme: 'light',
+              level: 0,
+              levelIndentBase: 0,
+              levelIndentIncrement: 6,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Standard Indentation */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Standard Indentation (6px per level)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          {[0, 1, 2, 3, 4, 5].map(level => (
+            <Accordion
+              key={level}
+              type="menu"
+              summary={`Level ${level} Navigation`}
+              onClick={() => console.log(`Level ${level} clicked`)}
+              styles={{
+                theme: 'light',
+                level,
+                levelIndentBase: 0,
+                levelIndentIncrement: 6,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Wide Indentation */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
+          Wide Indentation (20px per level)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#fff',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          {[0, 1, 2, 3, 4, 5].map(level => (
+            <Accordion
+              key={level}
+              type="menu"
+              summary={`Level ${level} Navigation`}
+              onClick={() => console.log(`Level ${level} clicked`)}
+              styles={{
+                theme: 'light',
+                level,
+                levelIndentBase: 0,
+                levelIndentIncrement: 20,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* With Base Indentation */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
+          Sacred Theme with Base Indentation (30px base + 15px per level)
+        </h3>
+        <div
+          style={{
+            width: '300px',
+            backgroundColor: '#0a0a0a',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            borderRadius: '8px',
+            overflow: 'visible',
+            minWidth: 'fit-content',
+          }}
+        >
+          {[0, 1, 2, 3, 4, 5].map(level => (
+            <Accordion
+              key={level}
+              type="menu"
+              summary={`Level ${level} Navigation`}
+              onClick={() => console.log(`Level ${level} clicked`)}
+              isActive={level === 2}
+              styles={{
+                theme: 'sacred',
+                level,
+                levelIndentBase: 30,
+                levelIndentIncrement: 15,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}

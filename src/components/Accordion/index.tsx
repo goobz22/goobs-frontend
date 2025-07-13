@@ -1,6 +1,7 @@
 /**
  * @fileoverview Defines the Accordion component, a collapsible content panel.
  * It supports both controlled and uncontrolled states, and features light, dark, and sacred themes.
+ * Also supports menu items for navigation.
  */
 'use client'
 import React, {
@@ -11,6 +12,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react'
+import Link from 'next/link'
 import ExpandMoreIcon from '../Icons/ExpandMore'
 import { AccordionStyles, getAccordionStyles, SACRED_GLYPHS } from '../../theme'
 
@@ -22,7 +24,7 @@ export interface AccordionProps {
   /** Content displayed in the accordion header. */
   summary: ReactNode
   /** Content displayed when the accordion is expanded. */
-  details: ReactNode
+  details?: ReactNode
   /** Controls the expanded state (for a controlled component). */
   expanded?: boolean
   /** Sets the initial expanded state (for an uncontrolled component). */
@@ -31,6 +33,16 @@ export interface AccordionProps {
   onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: AccordionStyles
+  /** Nesting level for indentation (0 = no indent, 1+ = progressively indented) */
+  level?: number
+  /** Type of component: 'accordion' for expandable sections, 'menu' for clickable items */
+  type?: 'accordion' | 'menu'
+  /** Callback fired when menu item is clicked (only used when type is 'menu') */
+  onClick?: (event: React.SyntheticEvent) => void
+  /** URL for navigation (only used when type is 'menu') */
+  href?: string
+  /** Whether the menu item is currently active (only used when type is 'menu') */
+  isActive?: boolean
 }
 
 // --------------------------------------------------------------------------
@@ -223,12 +235,18 @@ const SacredDetailsDecorations: FC = () => {
 
 /**
  * A collapsible content panel that supports multiple themes and controlled/uncontrolled states.
+ * Also supports menu items for navigation.
  */
 const Accordion: FC<AccordionProps> = props => {
   const {
     summary,
     details,
     styles,
+    level = 0,
+    type = 'accordion',
+    onClick,
+    href,
+    isActive,
     expanded: controlledExpanded,
     defaultExpanded,
     onChange,
@@ -238,10 +256,19 @@ const Accordion: FC<AccordionProps> = props => {
   const { expanded, handleToggle } = useAccordionState(props)
   const [isHovered, setIsHovered] = useState(false)
 
-  const computedStyles = useMemo(
-    () => getAccordionStyles(styles, isHovered, expanded, styles?.disabled),
-    [styles, isHovered, expanded]
-  )
+  const computedStyles = useMemo(() => {
+    // Pass level through styles to the theme system
+    const stylesWithLevel = {
+      ...styles,
+      level,
+    }
+    return getAccordionStyles(
+      stylesWithLevel,
+      isHovered,
+      expanded,
+      styles?.disabled
+    )
+  }, [styles, level, isHovered, expanded])
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
@@ -251,11 +278,92 @@ const Accordion: FC<AccordionProps> = props => {
     setIsHovered(false)
   }, [])
 
+  const handleClick = useCallback(
+    (event: React.SyntheticEvent) => {
+      if (styles?.disabled) return
+
+      if (type === 'menu') {
+        onClick?.(event)
+      } else {
+        handleToggle(event)
+      }
+    },
+    [type, onClick, handleToggle, styles?.disabled]
+  )
+
   const isSacredTheme = styles?.theme === 'sacred'
+  const isMenuType = type === 'menu'
+
+  // Add active state styling for menu items
+  const summaryStyleWithActive = useMemo(() => {
+    if (isMenuType && isActive) {
+      return {
+        ...computedStyles.summary,
+        backgroundColor: isSacredTheme
+          ? 'rgba(255, 215, 0, 0.15)'
+          : 'rgba(59, 130, 246, 0.1)',
+        color: isSacredTheme ? '#FFD700' : '#3B82F6',
+        fontWeight: 600,
+      }
+    }
+    return computedStyles.summary
+  }, [computedStyles.summary, isMenuType, isActive, isSacredTheme])
+
+  const summaryContent = (
+    <div
+      style={summaryStyleWithActive}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      role="button"
+      tabIndex={styles?.disabled ? -1 : 0}
+      aria-expanded={isMenuType ? undefined : expanded}
+      data-testid={isMenuType ? 'menu-item' : 'accordion-summary'}
+      {...rest}
+    >
+      {!isMenuType && (
+        <ExpandMoreIcon
+          style={{
+            ...computedStyles.icon,
+            position: 'absolute',
+            left: '8px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+          }}
+        />
+      )}
+      {isSacredTheme && (
+        <div
+          style={{
+            flex: 1,
+            paddingLeft: isMenuType ? '16px' : '30px',
+            paddingRight: '24px',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
+          }}
+        >
+          {summary}
+        </div>
+      )}
+      {!isSacredTheme && (
+        <div
+          style={{
+            flex: 1,
+            paddingLeft: isMenuType ? '16px' : '30px',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
+          }}
+        >
+          {summary}
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <div style={computedStyles.container}>
-      {isSacredTheme && (
+      {isSacredTheme && !isMenuType && (
         <SacredGlyphs
           isExpanded={!!expanded}
           isHovered={isHovered}
@@ -263,27 +371,15 @@ const Accordion: FC<AccordionProps> = props => {
         />
       )}
 
-      <div
-        style={computedStyles.summary}
-        onClick={handleToggle}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        role="button"
-        tabIndex={styles?.disabled ? -1 : 0}
-        aria-expanded={expanded}
-        data-testid="accordion-summary"
-        {...rest}
-      >
-        {isSacredTheme && (
-          <div style={{ flex: 1, paddingLeft: '24px', paddingRight: '24px' }}>
-            {summary}
-          </div>
-        )}
-        {!isSacredTheme && <div style={{ flex: 1 }}>{summary}</div>}
-        <ExpandMoreIcon style={computedStyles.icon} />
-      </div>
+      {isMenuType && href ? (
+        <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+          {summaryContent}
+        </Link>
+      ) : (
+        summaryContent
+      )}
 
-      {expanded && (
+      {!isMenuType && expanded && details && (
         <div style={computedStyles.details}>
           <div style={{ position: 'relative', zIndex: 1 }}>{details}</div>
           {isSacredTheme && <SacredDetailsDecorations />}
