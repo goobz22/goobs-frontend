@@ -6,17 +6,13 @@ import { usePathname } from 'next/navigation'
 import SearchableDropdown, {
   DropdownOption,
 } from '../Field/Dropdown/Searchable'
-import ExpandingNav from './VerticalVariant/mainNav/expanding'
-import ListNav from './VerticalVariant/mainNav/list'
-import ExpandingSubNav from './VerticalVariant/subNav/expanding'
-import ListSubNav from './VerticalVariant/subNav/list'
-import ViewNav from './VerticalVariant/viewNav'
-import ExpandingViewNav from './VerticalVariant/viewNav/expanding'
-import SubViewNav from './VerticalVariant/subViewNav/list'
-import ExpandingSubViewNav from './VerticalVariant/subViewNav/expanding'
-import SubSubViewNav from './VerticalVariant/subSubViewNav/list'
+import Accordion from '../Accordion'
 import Drawer from '../Drawer'
 import Typography from '../Typography'
+
+// --------------------------------------------------------------------------
+// EGYPTIAN THEMING CONSTANTS AND ANIMATIONS
+// --------------------------------------------------------------------------
 
 const SACRED_GLYPHS = [
   '𓁟',
@@ -41,10 +37,18 @@ const SACRED_GLYPHS = [
   '𓍿',
   '𓅨',
   '𓂋',
-  '',
+  '𓏭',
   '𓊵',
 ]
 
+// --------------------------------------------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------------------------------------------
+
+/**
+ * Recursively searches for the active navigation item based on the current path
+ * and returns the trail of parent items leading to it.
+ */
 const findActiveItemPath = (
   items: NavItem[],
   currentPath: string
@@ -54,24 +58,8 @@ const findActiveItemPath = (
       return [item]
     }
 
-    let children: NavItem[] | undefined
-    switch (item.navType) {
-      case 'mainNav':
-        children = item.subnavs
-        break
-      case 'subNav':
-        children = item.views
-        break
-      case 'viewNav':
-        children = item.subViewNavs
-        break
-      case 'subViewNav':
-        children = item.subSubViewNavs
-        break
-    }
-
-    if (children && children.length > 0) {
-      const childPath = findActiveItemPath(children, currentPath)
+    if (item.children && item.children.length > 0) {
+      const childPath = findActiveItemPath(item.children, currentPath)
       if (childPath) {
         return [item, ...childPath]
       }
@@ -80,17 +68,20 @@ const findActiveItemPath = (
   return null
 }
 
+// --------------------------------------------------------------------------
+// INTERFACES
+// --------------------------------------------------------------------------
+
+/**
+ * Simplified navigation item interface using accordion structure
+ */
 export interface NavItem {
-  navType: 'mainNav' | 'subNav' | 'viewNav' | 'subViewNav' | 'subSubViewNav'
   title: string
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
+  children?: NavItem[]
   expanding?: boolean
-  subnavs?: NavItem[]
-  views?: NavItem[]
-  subViewNavs?: NavItem[]
-  subSubViewNavs?: NavItem[]
 }
 
 export interface NavProps {
@@ -102,8 +93,6 @@ export interface NavProps {
   searchableNavLabel?: string
   anchor?: 'left' | 'right'
   backgroundcolor?: string
-  shrunkfontcolor?: string
-  unshrunkfontcolor?: string
   titleUrl?: string
   mobileOpen?: boolean
   onClose?: () => void
@@ -117,6 +106,10 @@ export interface NavProps {
   sacredSubtitle?: string
   pathname?: string
 }
+
+// --------------------------------------------------------------------------
+// SACRED BACKGROUND COMPONENT
+// --------------------------------------------------------------------------
 
 interface SacredBackgroundProps {
   width: number
@@ -213,68 +206,182 @@ const SacredBackground: React.FC<SacredBackgroundProps> = ({
   )
 }
 
-const getStyles = (sacredtheme?: boolean, backgroundcolor?: string) => ({
-  navContainer: {
-    height: '100%',
-    backgroundColor: sacredtheme ? '#1C1917' : backgroundcolor || '#F3F4F6',
-    color: sacredtheme ? '#FFD700' : 'inherit',
-  } as React.CSSProperties,
-  sacredDivider: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0 0.5rem',
-    marginBottom: '-6px',
-  } as React.CSSProperties,
-  sacredDividerLine: {
-    width: '30%',
-    height: '1px',
-    backgroundImage:
-      'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.5), transparent)',
-  } as React.CSSProperties,
-  sacredDividerGlyph: {
-    color: '#FFD700',
-    fontSize: '0.875rem',
-    padding: '0 0.25rem',
-    animation: 'nav-rotate-glyph 10s linear infinite',
-  } as React.CSSProperties,
-  contentContainer: {
-    position: 'relative',
-    height: '100%',
-    overflow: 'hidden',
-  } as React.CSSProperties,
-  navList: {
-    height: '100%',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    paddingRight: '17px',
-    boxSizing: 'content-box',
-  } as React.CSSProperties,
-  titleLink: {
-    textDecoration: 'none',
-  } as React.CSSProperties,
-  sacredFooter: {
-    textAlign: 'center',
-    padding: '0.75rem 0.5rem',
-  } as React.CSSProperties,
-  sacredFooterText: {
-    color: 'rgba(255, 215, 0, 0.6)',
-    fontSize: '0.75rem',
-    fontStyle: 'italic',
-    letterSpacing: '0.05em',
-    marginBottom: '0.25rem',
-  } as React.CSSProperties,
-  sacredFooterGlyphs: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.25rem',
-  } as React.CSSProperties,
-  sacredFooterGlyph: {
-    color: 'rgba(255, 215, 0, 0.4)',
-    fontSize: '0.75rem',
-    animation: 'nav-glow-pulse 3s infinite alternate',
-  } as React.CSSProperties,
-})
+// --------------------------------------------------------------------------
+// STYLES
+// --------------------------------------------------------------------------
+
+const getStyles = (sacredtheme?: boolean, backgroundcolor?: string) => {
+  return {
+    navContainer: {
+      height: '100%',
+      backgroundColor: sacredtheme ? '#0a0a0a' : backgroundcolor || '#F3F4F6',
+      color: sacredtheme ? '#FFD700' : 'inherit',
+      ...(sacredtheme && {
+        backgroundImage: `
+          linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+          radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
+        `,
+        border: `1px solid rgba(255, 215, 0, 0.2)`,
+        boxShadow: `
+          0 0 30px rgba(255, 215, 0, 0.1),
+          inset 0 0 60px rgba(255, 215, 0, 0.03)
+        `,
+      }),
+    } as React.CSSProperties,
+    contentContainer: {
+      position: 'relative',
+      height: '100%',
+      overflow: 'visible',
+      minWidth: 'fit-content',
+    } as React.CSSProperties,
+    navList: {
+      position: 'relative',
+      zIndex: 1,
+      height: '100%',
+      overflowY: 'auto',
+      overflowX: 'visible',
+      padding: '0 15px',
+      boxSizing: 'border-box',
+      minWidth: 'fit-content',
+      ...(sacredtheme && {
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.3)',
+      }),
+    } as React.CSSProperties,
+    titleContainer: {
+      textAlign: 'center',
+      padding: '8px 8px',
+      position: 'relative',
+      whiteSpace: 'nowrap',
+      minWidth: 'fit-content',
+    } as React.CSSProperties,
+    titleLink: {
+      textDecoration: 'none',
+      color: 'inherit',
+    } as React.CSSProperties,
+    searchContainer: {
+      position: 'relative',
+      zIndex: 1000,
+      minHeight: '40px',
+      whiteSpace: 'nowrap',
+      marginTop: '0',
+      paddingLeft: '10px',
+      minWidth: 'fit-content',
+    } as React.CSSProperties,
+    divider: {
+      width: '100%',
+      height: '1px',
+      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'white',
+      marginTop: '20px',
+      marginBottom: '8px',
+      minWidth: '280px',
+    } as React.CSSProperties,
+    // Sacred theme specific styles
+    sacredTitleContainer: {
+      textAlign: 'center',
+      padding: '8px 8px',
+      position: 'relative',
+      whiteSpace: 'nowrap',
+      minWidth: 'fit-content',
+    } as React.CSSProperties,
+    sacredTitleHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: '8px',
+      gap: '8px',
+    } as React.CSSProperties,
+    sacredTitleHeaderLine: {
+      width: '40px',
+      height: '1px',
+      background:
+        'linear-gradient(to right, transparent, #FFD700, transparent)',
+    } as React.CSSProperties,
+    sacredTitleHeaderGlyph: {
+      color: '#FFD700',
+      fontSize: '16px',
+      animation: 'nav-rotate-glyph 20s linear infinite',
+    } as React.CSSProperties,
+    sacredTitleMain: {
+      color: '#FFD700',
+      fontSize: '18px',
+      fontWeight: 700,
+      letterSpacing: '2px',
+      textTransform: 'uppercase',
+      animation: 'nav-glow-pulse 3s ease-in-out infinite',
+      fontFamily: '"Cinzel", serif',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      whiteSpace: 'nowrap',
+    } as React.CSSProperties,
+    sacredTitleMainHover: {
+      transform: 'scale(1.05)',
+      textShadow: '0 0 20px rgba(255, 215, 0, 0.8)',
+    } as React.CSSProperties,
+    sacredSubtitle: {
+      color: 'rgba(255, 215, 0, 0.7)',
+      fontSize: '12px',
+      fontStyle: 'italic',
+      marginTop: '4px',
+      letterSpacing: '1px',
+      whiteSpace: 'nowrap',
+    } as React.CSSProperties,
+    sacredGlyphsContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '4px',
+      marginTop: '4px',
+    } as React.CSSProperties,
+    sacredGlyph: {
+      color: 'rgba(255, 215, 0, 0.6)',
+      fontSize: '10px',
+    } as React.CSSProperties,
+    sacredDivider: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0 16px',
+      marginBottom: '-12px',
+      minWidth: '280px',
+    } as React.CSSProperties,
+    sacredDividerLine: {
+      width: '30%',
+      height: '1px',
+      background:
+        'linear-gradient(to right, transparent, rgba(255, 215, 0, 0.5), transparent)',
+    } as React.CSSProperties,
+    sacredDividerGlyph: {
+      color: '#FFD700',
+      fontSize: '14px',
+      padding: '0 8px',
+      animation: 'nav-rotate-glyph 15s linear infinite reverse',
+    } as React.CSSProperties,
+    sacredFooter: {
+      textAlign: 'center',
+      padding: '24px 16px',
+    } as React.CSSProperties,
+    sacredFooterText: {
+      color: 'rgba(255, 215, 0, 0.6)',
+      fontSize: '10px',
+      fontStyle: 'italic',
+      letterSpacing: '1px',
+      marginBottom: '8px',
+    } as React.CSSProperties,
+    sacredFooterGlyphs: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '8px',
+    } as React.CSSProperties,
+    sacredFooterGlyph: {
+      color: 'rgba(255, 215, 0, 0.4)',
+      fontSize: '12px',
+    } as React.CSSProperties,
+  }
+}
+
+// --------------------------------------------------------------------------
+// MAIN NAV COMPONENT
+// --------------------------------------------------------------------------
 
 function Nav({
   items = [],
@@ -298,13 +405,10 @@ function Nav({
   sacredSubtitle,
   pathname: propPathname,
 }: NavProps) {
-  const [expandedNavs, setExpandedNavs] = useState<string[]>([])
-  const [expandedSubnavs, setExpandedSubnavs] = useState<string[]>([])
-  const [expandedViewNavs, setExpandedViewNavs] = useState<string[]>([])
-  const [expandedSubViewNavs, setExpandedSubViewNavs] = useState<string[]>([])
   const [dropdownSelection, setDropdownSelection] = useState<
     string | undefined
   >()
+  const [titleHover, setTitleHover] = useState(false)
 
   const nextPathname = usePathname()
   const pathname = propPathname || nextPathname
@@ -316,49 +420,38 @@ function Nav({
   })
   const styles = getStyles(sacredtheme, backgroundcolor)
 
+  // Add webkit scrollbar styles to the document for sacred theme
+  useEffect(() => {
+    if (sacredtheme) {
+      const style = document.createElement('style')
+      style.textContent = `
+        .nav-sacred-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .nav-sacred-scrollbar::-webkit-scrollbar-track {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+        }
+        .nav-sacred-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 215, 0, 0.5);
+          border-radius: 4px;
+        }
+        .nav-sacred-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(255, 215, 0, 0.7);
+        }
+      `
+      document.head.appendChild(style)
+      return () => {
+        document.head.removeChild(style)
+      }
+    }
+  }, [sacredtheme])
+
   useEffect(() => {
     const activePath = findActiveItemPath(items, pathname)
     if (activePath) {
       const mainNavItemTitle = activePath[0]?.title
       setDropdownSelection(mainNavItemTitle)
-      const newExpandedNavs: string[] = []
-      const newExpandedSubnavs: string[] = []
-      const newExpandedViewNavs: string[] = []
-      const newExpandedSubViewNavs: string[] = []
-
-      activePath.forEach(pathItem => {
-        const hasChildren =
-          pathItem.subnavs?.length ||
-          pathItem.views?.length ||
-          pathItem.subViewNavs?.length ||
-          pathItem.subSubViewNavs?.length
-        if (hasChildren) {
-          switch (pathItem.navType) {
-            case 'mainNav':
-              newExpandedNavs.push(pathItem.title)
-              break
-            case 'subNav':
-              newExpandedSubnavs.push(pathItem.title)
-              break
-            case 'viewNav':
-              newExpandedViewNavs.push(pathItem.title)
-              break
-            case 'subViewNav':
-              newExpandedSubViewNavs.push(pathItem.title)
-              break
-          }
-        }
-      })
-      setExpandedNavs(current => [...new Set([...current, ...newExpandedNavs])])
-      setExpandedSubnavs(current => [
-        ...new Set([...current, ...newExpandedSubnavs]),
-      ])
-      setExpandedViewNavs(current => [
-        ...new Set([...current, ...newExpandedViewNavs]),
-      ])
-      setExpandedSubViewNavs(current => [
-        ...new Set([...current, ...newExpandedSubViewNavs]),
-      ])
     }
   }, [pathname, items])
 
@@ -378,9 +471,7 @@ function Nav({
     return () => window.removeEventListener('resize', updateSize)
   }, [sacredtheme])
 
-  const navOptions = items
-    .filter(item => item.navType === 'mainNav')
-    .map(item => ({ value: item.title }))
+  const navOptions = items.map(item => ({ value: item.title }))
 
   function handleNavClick(item: NavItem) {
     if (item.trigger === 'route' && item.route && router) {
@@ -396,169 +487,49 @@ function Nav({
     }
   }
 
-  function renderItem(
-    item: NavItem,
-    level: number,
-    activeAndHoverColor = sacredtheme
-      ? 'rgba(255, 215, 0, 0.15)'
-      : 'rgba(255,255,255,0.5)'
-  ) {
+  function renderNavItem(item: NavItem, level: number = 0): React.ReactNode {
     const isActive = item.route === pathname
-    switch (item.navType) {
-      case 'mainNav': {
-        const hasChildren = !!item.subnavs?.length
-        if (hasChildren) {
-          return (
-            <ExpandingNav
-              key={item.title}
-              title={item.title}
-              expandedNavs={expandedNavs}
-              setExpandedNavs={setExpandedNavs}
-              level={level}
-              activeAndHoverColor={activeAndHoverColor}
-            >
-              {item.subnavs?.map(subItem =>
-                renderItem(subItem, level + 1, activeAndHoverColor)
-              )}
-            </ExpandingNav>
-          )
-        } else {
-          return (
-            <ListNav
-              key={item.title}
-              title={item.title}
-              onClick={() => handleNavClick(item)}
-              level={level}
-              route={item.route}
-              trigger={item.trigger}
-              onClose={onClose}
-              variant={variant}
-              isActive={isActive}
-              activeAndHoverColor={activeAndHoverColor}
-            />
-          )
-        }
-      }
-      case 'subNav': {
-        const hasChildren = !!item.views?.length
-        if (hasChildren) {
-          return (
-            <ExpandingSubNav
-              key={item.title}
-              title={item.title}
-              expandedSubnavs={expandedSubnavs}
-              setExpandedSubnavs={setExpandedSubnavs}
-              activeAndHoverColor={activeAndHoverColor}
-            >
-              {item.views?.map(view =>
-                renderItem(view, level + 2, activeAndHoverColor)
-              )}
-            </ExpandingSubNav>
-          )
-        } else {
-          return (
-            <ListSubNav
-              key={item.title}
-              title={item.title}
-              route={item.route}
-              trigger={item.trigger}
-              activeAndHoverColor={activeAndHoverColor}
-              onClose={onClose}
-              variant={variant}
-              isActive={isActive}
-            />
-          )
-        }
-      }
-      case 'viewNav': {
-        const shouldExpand = item.expanding === true
-        if (shouldExpand) {
-          return (
-            <ExpandingViewNav
-              key={item.title}
-              title={item.title}
-              expandedNavs={expandedViewNavs}
-              setExpandedNavs={setExpandedViewNavs}
-              onClick={
-                item.trigger !== 'route'
-                  ? () => handleNavClick(item)
-                  : undefined
-              }
-              level={level}
-              activeAndHoverColor={activeAndHoverColor}
-            >
-              {item.subViewNavs?.map(subViewItem =>
-                renderItem(subViewItem, level + 1, activeAndHoverColor)
-              )}
-            </ExpandingViewNav>
-          )
-        } else {
-          return (
-            <ViewNav
-              key={item.title}
-              title={item.title}
-              route={item.route}
-              trigger={item.trigger}
-              onClick={item.onClick}
-              level={level}
-              activeAndHoverColor={activeAndHoverColor}
-              onClose={onClose}
-              variant={variant}
-              isActive={isActive}
-            />
-          )
-        }
-      }
-      case 'subViewNav': {
-        const shouldExpand =
-          item.expanding === true && !!item.subSubViewNavs?.length
-        if (shouldExpand) {
-          return (
-            <ExpandingSubViewNav
-              key={item.title}
-              title={item.title}
-              expandedNavs={expandedSubViewNavs}
-              setExpandedNavs={setExpandedSubViewNavs}
-              activeAndHoverColor={activeAndHoverColor}
-            >
-              {item.subSubViewNavs?.map(subSubViewItem =>
-                renderItem(subSubViewItem, level + 1, activeAndHoverColor)
-              )}
-            </ExpandingSubViewNav>
-          )
-        } else {
-          return (
-            <SubViewNav
-              key={item.title}
-              title={item.title}
-              route={item.route}
-              trigger={item.trigger}
-              onClick={item.onClick}
-              activeAndHoverColor={activeAndHoverColor}
-              onClose={onClose || (() => {})}
-              variant={variant}
-              isActive={isActive}
-            />
-          )
-        }
-      }
-      case 'subSubViewNav': {
-        return (
-          <SubSubViewNav
-            key={item.title}
-            title={item.title}
-            route={item.route}
-            trigger={item.trigger}
-            onClick={item.onClick}
-            activeAndHoverColor={activeAndHoverColor}
-            onClose={onClose || (() => {})}
-            variant={variant}
-            isActive={isActive}
-          />
-        )
-      }
-      default:
-        return null
+    const hasChildren = item.children && item.children.length > 0
+
+    if (hasChildren) {
+      // Accordion with expandable children
+      return (
+        <Accordion
+          key={item.title}
+          summary={item.title}
+          details={
+            <div style={{ padding: '0' }}>
+              {item.children?.map(child => renderNavItem(child, level + 1))}
+            </div>
+          }
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            level,
+            levelIndentBase: 16,
+            levelIndentIncrement: 12,
+            outline: false,
+          }}
+        />
+      )
+    } else {
+      // Menu item (non-expandable)
+      return (
+        <Accordion
+          key={item.title}
+          type="menu"
+          summary={item.title}
+          href={item.route}
+          onClick={() => handleNavClick(item)}
+          isActive={isActive}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            level,
+            levelIndentBase: 16,
+            levelIndentIncrement: 12,
+            outline: false,
+          }}
+        />
+      )
     }
   }
 
@@ -569,47 +540,72 @@ function Nav({
   }
 
   const selectedMainNavItem = items.find(
-    item => item.navType === 'mainNav' && item.title === dropdownSelection
+    item => item.title === dropdownSelection
   )
 
-  const NavTitle = () => (
+  // Sacred Title Component
+  const SacredTitle = () => (
+    <div style={styles.sacredTitleContainer}>
+      {/* Decorative header */}
+      <div style={styles.sacredTitleHeader}>
+        <div style={styles.sacredTitleHeaderLine} />
+        <div style={styles.sacredTitleHeaderGlyph}>𓊹</div>
+        <div style={styles.sacredTitleHeaderLine} />
+      </div>
+
+      {/* Main title */}
+      <Link
+        href={titleUrl || '/'}
+        style={styles.titleLink}
+        onClick={variant === 'temporary' ? onClose : undefined}
+      >
+        <div
+          style={{
+            ...styles.sacredTitleMain,
+            ...(titleHover ? styles.sacredTitleMainHover : {}),
+          }}
+          onMouseEnter={() => setTitleHover(true)}
+          onMouseLeave={() => setTitleHover(false)}
+        >
+          {sacredTitle || verticalNavTitle}
+        </div>
+      </Link>
+
+      {/* Subtitle if provided */}
+      {sacredSubtitle && (
+        <div style={styles.sacredSubtitle}>{sacredSubtitle}</div>
+      )}
+
+      {/* Sacred hieroglyphs */}
+      <div style={styles.sacredGlyphsContainer}>
+        {['𓏏', '𓊖', '𓍯', '𓏏', '𓊖'].map((glyph, i) => (
+          <div
+            key={i}
+            style={{
+              ...styles.sacredGlyph,
+              animation: `nav-float ${2 + i * 0.3}s ease-in-out infinite`,
+            }}
+          >
+            {glyph}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const RegularTitle = () => (
     <div
       style={{
-        textAlign: 'center',
+        ...styles.titleContainer,
         marginTop: marginabovetitle,
         marginBottom: marginbelowtitle,
       }}
     >
-      {sacredtheme ? (
-        <>
-          <Typography
-            fontvariant="merrih2"
-            style={{
-              color: '#FFD700',
-              textShadow: '0 0 10px rgba(255,215,0,0.7)',
-              letterSpacing: '0.1em',
-            }}
-          >
-            {sacredTitle}
-          </Typography>
-          <Typography
-            fontvariant="merriparagraph"
-            style={{
-              color: 'rgba(255,215,0,0.8)',
-              fontStyle: 'italic',
-              marginTop: '0.25rem',
-            }}
-          >
-            {sacredSubtitle}
-          </Typography>
-        </>
-      ) : (
-        <Link href={titleUrl || '/'} style={styles.titleLink}>
-          <Typography fontvariant="merrih4" style={{ color: 'black' }}>
-            {verticalNavTitle}
-          </Typography>
-        </Link>
-      )}
+      <Link href={titleUrl || '/'} style={styles.titleLink}>
+        <Typography variant="merrih4" styles={{ color: 'black' }}>
+          {verticalNavTitle}
+        </Typography>
+      </Link>
     </div>
   )
 
@@ -623,48 +619,72 @@ function Nav({
 
   const navContent = (
     <div ref={containerRef} style={styles.contentContainer}>
+      {/* Sacred background */}
       {sacredtheme && (
         <SacredBackground
           width={containerSize.width}
           height={containerSize.height}
         />
       )}
-      <div style={styles.navList}>
-        {showTitle && <NavTitle />}
-        {sacredtheme && showLine && <SacredDivider />}
 
-        <div style={{ padding: '0.5rem', whiteSpace: 'nowrap' }}>
-          {showSearchableNav && (
+      {/* Main content */}
+      <div
+        style={styles.navList}
+        className={sacredtheme ? 'nav-sacred-scrollbar' : ''}
+      >
+        {/* Title */}
+        {showTitle && (sacredtheme ? <SacredTitle /> : <RegularTitle />)}
+
+        {/* Search dropdown */}
+        {showSearchableNav && (
+          <div style={styles.searchContainer}>
             <SearchableDropdown
               label={searchableNavLabel}
               options={navOptions}
               onChange={handleDropdownChange}
               defaultValue={dropdownSelection}
-              sacredtheme={sacredtheme}
+              styles={{
+                theme: sacredtheme ? 'sacred' : 'light',
+                backgroundColor: sacredtheme ? 'rgba(0, 0, 0, 0.6)' : undefined,
+                borderColor: sacredtheme ? 'rgba(255, 215, 0, 0.4)' : undefined,
+                borderFocusedColor: sacredtheme
+                  ? 'rgba(255, 215, 0, 1)'
+                  : undefined,
+                labelColor: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : undefined,
+                textColor: sacredtheme ? 'rgba(255, 215, 0, 1)' : undefined,
+              }}
             />
-          )}
+          </div>
+        )}
+
+        {/* Divider */}
+        {showLine &&
+          (sacredtheme ? <SacredDivider /> : <div style={styles.divider} />)}
+
+        {/* Navigation items */}
+        <div style={{ overflow: 'visible', minWidth: 'fit-content' }}>
+          {selectedMainNavItem
+            ? renderNavItem(selectedMainNavItem, 0)
+            : items.map(item => renderNavItem(item, 0))}
         </div>
 
-        {selectedMainNavItem
-          ? renderItem(selectedMainNavItem, 0)
-          : items.map(item => renderItem(item, 0))}
-
+        {/* Sacred footer */}
         {sacredtheme && (
           <div style={styles.sacredFooter}>
-            <Typography style={styles.sacredFooterText}>
-              "Wisdom is the compass of the soul."
-            </Typography>
+            <div style={styles.sacredFooterText}>
+              "Through wisdom, navigate the divine"
+            </div>
             <div style={styles.sacredFooterGlyphs}>
-              {['𓆙', '𓆗', '𓆘'].map((g, i) => (
-                <span
+              {['𓅨', '𓂋', '𓏭', '𓊵'].map((glyph, i) => (
+                <div
                   key={i}
                   style={{
                     ...styles.sacredFooterGlyph,
-                    animationDelay: `${i * 0.2}s`,
+                    animation: `nav-glow-pulse ${4 + i * 0.5}s ease-in-out infinite`,
                   }}
                 >
-                  {g}
-                </span>
+                  {glyph}
+                </div>
               ))}
             </div>
           </div>
@@ -674,23 +694,41 @@ function Nav({
   )
 
   return (
-    <div style={{ height: '100vh', ...styles.navContainer }}>
+    <div
+      style={{
+        ...styles.navContainer,
+        minWidth: 'fit-content',
+        overflow: 'visible',
+      }}
+    >
       {variant === 'temporary' ? (
         <Drawer
           anchor={anchor}
           open={mobileOpen}
           onClose={onClose || (() => {})}
         >
-          {navContent}
+          <div
+            style={{
+              minWidth: '320px',
+              width: 'fit-content',
+              overflow: 'visible',
+            }}
+          >
+            {navContent}
+          </div>
         </Drawer>
       ) : (
         <div
           style={{
-            width: '280px',
-            height: '100%',
+            minWidth: '320px',
+            width: 'fit-content',
+            height: '100vh',
             position: 'fixed',
             top: spacingfromtopofscreen,
             [anchor]: 0,
+            paddingTop: '17px',
+            boxSizing: 'border-box',
+            overflow: 'visible',
           }}
         >
           {navContent}
