@@ -6,12 +6,13 @@ const meta: Meta<typeof AccountNumber> = {
   title: 'Components/Field/Number/AccountNumber',
   component: AccountNumber,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    styles: { control: 'object' },
     label: { control: 'text' },
     helperText: { control: 'text' },
     isDefaultValue: { control: 'boolean' },
-    errorMessage: { control: 'text' },
+    minLength: { control: 'number' },
+    maxLength: { control: 'number' },
+    placeholder: { control: 'text' },
   },
   parameters: {
     layout: 'centered',
@@ -37,8 +38,8 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'Account Number',
-    sacredtheme: false,
     placeholder: 'Enter your account number',
+    styles: { theme: 'light' },
   },
 }
 
@@ -58,12 +59,12 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoComponent: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [isDefault, setIsDefault] = React.useState(true)
   const [value, setValue] = React.useState('1234567890')
@@ -96,8 +97,8 @@ const InteractiveDemoComponent: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred
           </label>
@@ -123,7 +124,7 @@ const InteractiveDemoComponent: React.FC = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
         }}
       >
         <AccountNumber
@@ -133,10 +134,12 @@ const InteractiveDemoComponent: React.FC = () => {
             setValue(val)
             setIsValid(valid)
           }}
-          sacredtheme={sacred}
-          disabled={disabled}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
           isDefaultValue={isDefault}
-          errorMessage={!isValid ? 'Invalid account number' : undefined}
+          helperText={!isValid ? 'Invalid account number' : undefined}
         />
       </div>
     </div>

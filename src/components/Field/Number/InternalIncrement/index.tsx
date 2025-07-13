@@ -1,6 +1,16 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
@@ -12,123 +22,88 @@ export interface InternalIncrementNumberFieldProps {
   max?: number
   initialDelay?: number
   repeatInterval?: number
-  sacredtheme?: boolean
   value?: string
   placeholder?: string
-  disabled?: boolean
-  name?: string
   id?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  error?: boolean
   helperText?: string
-  style?: React.CSSProperties
+  styles?: FormFieldStyles
 }
 
-const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean
-) => {
-  const premiumStyles = {
-    container: { position: 'relative', width: '100%' } as React.CSSProperties,
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
     input: {
       width: '100%',
-      height: '3.5rem',
-      paddingLeft: '1rem',
-      paddingRight: '3rem',
-      border: `2px solid ${isFocused ? '#3B82F6' : '#D1D5DB'}`,
-      borderRadius: '0.25rem',
+      height: '100%',
+      backgroundColor: 'transparent',
       outline: 'none',
-      transition: 'all 0.3s',
-      backgroundColor: 'white',
-      color: 'black',
+      border: 'none',
+      padding: styles?.padding || '8px 16px',
+      paddingLeft: styles?.paddingLeft || '16px',
+      paddingRight: styles?.paddingRight || '48px', // Space for increment buttons
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
     },
-    label: {
-      position: 'absolute' as const,
-      left: '1rem',
-      transition: 'all 0.2s',
-      pointerEvents: 'none' as const,
-      color: isFocused ? '#3B82F6' : '#6B7281',
-      ...(isLabelFloating
-        ? {
-            top: '0',
-            fontSize: '0.75rem',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'white',
-            padding: '0 0.25rem',
-          }
-        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-    } as React.CSSProperties,
-    adornmentContainer: {
-      position: 'absolute' as const,
-      right: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-    } as React.CSSProperties,
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    adornment: getSharedAdornmentStyles(adornmentColor),
+    endAdornment: { right: '12px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
     buttonContainer: {
       display: 'flex',
       flexDirection: 'column',
-      height: '2rem',
+      height: '32px',
       justifyContent: 'center',
     } as React.CSSProperties,
     button: {
       padding: 0,
-      width: '1rem',
-      height: '1rem',
-      minWidth: '1rem',
-      minHeight: '1rem',
-      borderRadius: '0.125rem',
-      transition: 'all 0.3s',
+      width: '16px',
+      height: '16px',
+      minWidth: '16px',
+      minHeight: '16px',
+      borderRadius: '2px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#4B5563',
-      '&:hover': { backgroundColor: '#E5E7EB' },
+      color: adornmentColor,
+      transition,
     } as React.CSSProperties,
-    icon: { fontSize: '1.125rem' },
+    icon: { fontSize: '18px' },
   }
 
-  const sacredStyles = {
-    ...premiumStyles,
-    input: {
-      ...premiumStyles.input,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#FFD700',
-      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
-      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-    },
-    label: {
-      ...premiumStyles.label,
-      color: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.8)',
-      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
-    },
-    buttonContainer: {
-      ...premiumStyles.buttonContainer,
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-      borderRadius: '0.25rem',
-      padding: '0.125rem',
-    },
-    button: {
-      ...premiumStyles.button,
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-      color: '#FFD700',
-      border: '1px solid rgba(255, 215, 0, 0.3)',
-      '&:hover': {
-        backgroundColor: 'rgba(255, 215, 0, 0.2)',
-        boxShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
-      },
-    } as React.CSSProperties,
-    icon: {
-      ...premiumStyles.icon,
-      filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.6))',
-    },
-  }
-
-  return sacredtheme ? sacredStyles : premiumStyles
+  return componentStyles
 }
 
 const InternalIncrementNumberField: React.FC<
@@ -141,16 +116,13 @@ const InternalIncrementNumberField: React.FC<
   max,
   initialDelay = 500,
   repeatInterval = 100,
-  sacredtheme = false,
   value,
   placeholder,
-  disabled = false,
-  name,
   id,
   onFocus,
   onBlur,
-  outlinecolor,
-  fontcolor,
+  helperText,
+  styles,
   ...rest
 }) => {
   const [internalValue, setInternalValue] = useState(value || initialValue)
@@ -164,6 +136,7 @@ const InternalIncrementNumberField: React.FC<
   }, [])
 
   const handleIncrement = useCallback(() => {
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseInt(prev)
       const newValue =
@@ -173,19 +146,20 @@ const InternalIncrementNumberField: React.FC<
       onChange?.(newValue)
       return newValue.toString()
     })
-  }, [onChange, max])
+  }, [onChange, max, styles?.disabled])
 
   const handleDecrement = useCallback(() => {
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseInt(prev)
       const newValue = Math.max(min, (isNaN(num) ? 0 : num) - 1)
       onChange?.(newValue)
       return newValue.toString()
     })
-  }, [onChange, min])
+  }, [onChange, min, styles?.disabled])
 
   const handleMouseDown = (handler: () => void) => {
-    if (disabled) return
+    if (styles?.disabled) return
     handler()
     initialTimerRef.current = setTimeout(() => {
       timerRef.current = setInterval(handler, repeatInterval)
@@ -227,63 +201,69 @@ const InternalIncrementNumberField: React.FC<
     [onBlur]
   )
 
-  const isLabelFloating = isFocused || Boolean(internalValue)
-  const styles = getStyles(sacredtheme, isFocused, isLabelFloating)
+  const computedStyles = getStyles(styles, isFocused)
 
   const IncrementAdornment = () => (
-    <div style={styles.buttonContainer}>
+    <div style={computedStyles.buttonContainer}>
       <button
         type="button"
         onMouseDown={() => handleMouseDown(handleIncrement)}
         aria-label="increment"
-        disabled={disabled}
-        style={styles.button}
+        disabled={styles?.disabled}
+        style={computedStyles.button}
       >
-        <ArrowDropUpIcon style={styles.icon} />
+        <ArrowDropUpIcon style={computedStyles.icon} />
       </button>
       <button
         type="button"
         onMouseDown={() => handleMouseDown(handleDecrement)}
         aria-label="decrement"
-        disabled={disabled}
-        style={{ ...styles.button, marginTop: '0.125rem' }}
+        disabled={styles?.disabled}
+        style={{ ...computedStyles.button, marginTop: '2px' }}
       >
-        <ArrowDropDownIcon style={styles.icon} />
+        <ArrowDropDownIcon style={computedStyles.icon} />
       </button>
     </div>
   )
 
   return (
-    <div style={{ ...styles.container, ...rest.style }}>
-      <div style={{ position: 'relative' }}>
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={computedStyles.inputWrapper}>
         <input
           type="text"
           inputMode="numeric"
           id={id}
-          name={name}
           value={internalValue}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          placeholder={isLabelFloating ? placeholder : ''}
-          style={{
-            ...styles.input,
-            backgroundColor: undefined,
-            borderColor: outlinecolor,
-            color: fontcolor,
-          }}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+          placeholder={placeholder}
+          style={computedStyles.input}
           {...rest}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {label}
-          </label>
-        )}
-        <div style={styles.adornmentContainer}>
+        <div
+          style={{
+            ...computedStyles.adornment,
+            ...computedStyles.endAdornment,
+          }}
+        >
           <IncrementAdornment />
         </div>
       </div>
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

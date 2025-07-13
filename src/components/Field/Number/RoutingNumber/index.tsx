@@ -1,142 +1,103 @@
 'use client'
 import React, { useCallback, useState, useEffect } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 
 export interface RoutingNumberProps {
   onChange?: (value: string, isValid: boolean) => void
-  errorMessage?: string
   useChecksum?: boolean
-  sacredtheme?: boolean
   isDefaultValue?: boolean
   value?: string
   label?: string
   placeholder?: string
-  disabled?: boolean
-  name?: string
   id?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
+  styles?: FormFieldStyles
 }
 
-const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean,
-  showError: boolean
-) => {
-  const premiumStyles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      width: '100%',
-      marginTop: '1rem',
-    } as React.CSSProperties,
-    inputContainer: { position: 'relative' } as React.CSSProperties,
-    adornment: {
-      position: 'absolute' as const,
-      left: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      zIndex: 10,
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
       display: 'flex',
       alignItems: 'center',
-    } as React.CSSProperties,
-    adornmentText: {
-      fontSize: '1rem',
-      color: '#4B5563',
-    } as React.CSSProperties,
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
     input: {
       width: '100%',
-      height: '3.5rem',
-      paddingLeft: '3rem',
-      paddingRight: '1rem',
-      border: `2px solid ${showError ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
-      borderRadius: '0.25rem',
+      height: '100%',
+      backgroundColor: 'transparent',
       outline: 'none',
-      transition: 'all 0.3s',
-      backgroundColor: 'white',
-      color: 'black',
-    } as React.CSSProperties,
-    label: {
+      border: 'none',
+      padding: styles?.padding || '8px 16px',
+      paddingLeft: styles?.paddingLeft || '48px', // Space for routing icon
+      paddingRight: styles?.paddingRight || '16px',
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    adornment: getSharedAdornmentStyles(adornmentColor),
+    startAdornment: { left: '16px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
+    sacredGlyph: {
       position: 'absolute' as const,
-      left: '3rem',
-      transition: 'all 0.2s',
-      pointerEvents: 'none' as const,
-      color: showError ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
-      ...(isLabelFloating
-        ? {
-            top: '0',
-            fontSize: '0.75rem',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'white',
-            padding: '0 0.25rem',
-            marginLeft: '-0.5rem',
-          }
-        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-    } as React.CSSProperties,
-    helperText: {
-      marginTop: '0.25rem',
-      fontSize: '0.75rem',
-      padding: '0 0.75rem',
-      color: showError ? '#EF4444' : '#6B7281',
-    } as React.CSSProperties,
-  }
-
-  const sacredStyles = {
-    ...premiumStyles,
-    adornmentText: {
-      ...premiumStyles.adornmentText,
-      color: '#FFD700',
-      fontWeight: 600,
-      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
-    },
-    input: {
-      ...premiumStyles.input,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#FFD700',
-      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
-      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-    },
-    label: {
-      ...premiumStyles.label,
-      color: showError
-        ? 'rgba(255,215,0,0.8)'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.8)',
-      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
-    },
-    helperText: {
-      ...premiumStyles.helperText,
-      color: showError ? 'rgba(255,215,0,0.8)' : 'rgba(255, 215, 0, 0.6)',
+      left: '-16px',
+      color: 'rgba(255,215,0,0.4)',
+      fontSize: '12px',
     },
   }
 
-  return sacredtheme ? sacredStyles : premiumStyles
+  return componentStyles
 }
 
 const RoutingNumber: React.FC<RoutingNumberProps> = ({
   onChange,
   value = '',
-  errorMessage = 'Invalid routing number format',
   useChecksum = true,
-  sacredtheme = false,
   isDefaultValue = false,
   label = 'Routing Number',
   placeholder,
-  disabled = false,
-  name,
   id,
   onFocus,
   onBlur,
   helperText,
+  styles,
   ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value)
-  const [isValid, setIsValid] = useState<boolean>(true)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
 
@@ -185,8 +146,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
 
   useEffect(() => {
     setInternalValue(value)
-    setIsValid(validateRoutingNumber(value))
-  }, [value, validateRoutingNumber])
+  }, [value])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,7 +155,6 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       setInternalValue(formattedValue)
       setHasBeenEdited(true)
       const valid = validateRoutingNumber(formattedValue)
-      setIsValid(valid)
       onChange?.(formattedValue, valid)
     },
     [onChange, validateRoutingNumber, formatInput]
@@ -216,59 +175,53 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
     [onBlur]
   )
 
-  const isLabelFloating = isFocused || Boolean(internalValue)
-  const showError = !isValid && internalValue !== ''
-  const styles = getStyles(sacredtheme, isFocused, isLabelFloating, showError)
-  const finalPlaceholder = sacredtheme ? '021000021' : placeholder
+  const computedStyles = getStyles(styles, isFocused)
+  const sacredTheme = styles?.theme === 'sacred'
+  const finalPlaceholder = sacredTheme ? '021000021' : placeholder
 
   const RoutingAdornment = () => (
-    <div style={styles.adornment}>
-      {sacredtheme && (
-        <span
-          style={{
-            position: 'absolute',
-            left: '-1rem',
-            color: 'rgba(255,215,0,0.4)',
-            fontSize: '0.75rem',
-            animation: 'sacred-float 4s ease-in-out infinite',
-          }}
-        >
-          𓂋
-        </span>
-      )}
-      <span style={styles.adornmentText}>⚡</span>
+    <div
+      style={{
+        ...computedStyles.adornment,
+        ...computedStyles.startAdornment,
+      }}
+    >
+      {sacredTheme && <span style={computedStyles.sacredGlyph}>𓂋</span>}
+      <span>⚡</span>
     </div>
   )
 
   return (
-    <div style={styles.container}>
-      <div style={styles.inputContainer}>
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={computedStyles.inputWrapper}>
         <RoutingAdornment />
         <input
           type="text"
           id={id}
-          name={name}
           value={getDisplayValue()}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          placeholder={isLabelFloating ? finalPlaceholder : ''}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+          placeholder={finalPlaceholder}
           maxLength={9}
-          style={styles.input}
+          style={computedStyles.input}
           {...props}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {label}
-          </label>
-        )}
       </div>
-      {(showError || helperText) && (
-        <div style={styles.helperText}>
-          {showError ? errorMessage : helperText}
-        </div>
-      )}
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

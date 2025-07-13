@@ -6,12 +6,12 @@ const meta: Meta<typeof CreditCardNumber> = {
   title: 'Components/Field/Number/CreditCardNumber',
   component: CreditCardNumber,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    styles: { control: 'object' },
     label: { control: 'text' },
-    error: { control: 'boolean' },
     helperText: { control: 'text' },
     isDefaultValue: { control: 'boolean' },
+    useLuhnValidation: { control: 'boolean' },
+    enableFormatting: { control: 'boolean' },
   },
   parameters: {
     layout: 'centered',
@@ -37,8 +37,8 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'Credit Card Number',
-    sacredtheme: false,
     placeholder: '1234 5678 9012 3456',
+    styles: { theme: 'light' },
   },
 }
 
@@ -58,13 +58,13 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 // Separate component to handle hooks
 const InteractiveDemoComponent = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [isDefault, setIsDefault] = React.useState(true)
   const [value, setValue] = React.useState('4242424242424242')
@@ -98,8 +98,8 @@ const InteractiveDemoComponent = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred
           </label>
@@ -125,7 +125,7 @@ const InteractiveDemoComponent = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
         }}
       >
         <CreditCardNumber
@@ -136,13 +136,15 @@ const InteractiveDemoComponent = () => {
             setIsValid(valid)
             setCardType(type)
           }}
-          sacredtheme={sacred}
-          disabled={disabled}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
           isDefaultValue={isDefault}
-          errorMessage={!isValid ? 'Invalid card number' : undefined}
+          helperText={!isValid ? 'Invalid card number' : undefined}
         />
       </div>
-      <div style={{ color: sacred ? 'white' : 'black' }}>
+      <div style={{ color: sacredtheme ? 'white' : 'black' }}>
         <p>Card Type: {cardType}</p>
         <p>Is Valid: {isValid ? 'Yes' : 'No'}</p>
       </div>

@@ -6,9 +6,10 @@ const meta: Meta<typeof IncrementNumberField> = {
   title: 'Components/Field/Number/ExternalIncrement',
   component: IncrementNumberField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    styles: { control: 'object' },
     label: { control: 'text' },
+    helperText: { control: 'text' },
+    initialValue: { control: 'text' },
   },
   parameters: {
     layout: 'centered',
@@ -33,7 +34,7 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'Quantity',
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -48,12 +49,12 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
 
   return (
@@ -83,8 +84,8 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred
           </label>
@@ -102,7 +103,7 @@ const InteractiveDemoRenderer = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
           display: 'flex',
           justifyContent: 'center',
         }}
@@ -113,8 +114,10 @@ const InteractiveDemoRenderer = () => {
           onChange={() => {
             // This is handled by the component's internal state in this story
           }}
-          sacredtheme={sacred}
-          disabled={disabled}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
         />
       </div>
     </div>

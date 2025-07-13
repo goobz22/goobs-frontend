@@ -1,5 +1,15 @@
 'use client'
 import React, { useCallback, useState, useEffect } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 
 export type CardType =
   | 'visa'
@@ -57,147 +67,87 @@ const cardPatterns: CardPattern[] = [
 
 export interface CreditCardNumberProps {
   onChange?: (value: string, isValid: boolean, cardType: CardType) => void
-  errorMessage?: string
   useLuhnValidation?: boolean
-  sacredtheme?: boolean
   isDefaultValue?: boolean
   enableFormatting?: boolean
   value?: string
   label?: string
   placeholder?: string
-  disabled?: boolean
-  name?: string
   id?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
-  error?: boolean
-  style?: React.CSSProperties
+  styles?: FormFieldStyles
 }
 
-const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean,
-  showError: boolean
-): {
-  container: React.CSSProperties
-  inputContainer: React.CSSProperties
-  adornment: React.CSSProperties
-  adornmentText: React.CSSProperties
-  input: React.CSSProperties
-  label: React.CSSProperties
-  helperText: React.CSSProperties
-} => {
-  const premiumStyles = {
-    container: {
-      display: 'flex' as const,
-      flexDirection: 'column' as const,
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: styles?.height || '40px',
       width: '100%',
-      marginTop: '1rem',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
     },
-    inputContainer: { position: 'relative' as const },
-    adornment: {
-      position: 'absolute' as const,
-      left: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      zIndex: 10,
-      display: 'flex' as const,
-      alignItems: 'center' as const,
-    },
-    adornmentText: { fontSize: '1rem', color: '#4B5563' },
     input: {
       width: '100%',
-      height: '3.5rem',
-      paddingLeft: '3rem',
-      paddingRight: '1rem',
-      border: `2px solid ${showError ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
-      borderRadius: '0.25rem',
+      height: '100%',
+      backgroundColor: 'transparent',
       outline: 'none',
-      transition: 'all 0.3s',
-      backgroundColor: 'white',
-      color: 'black',
+      border: 'none',
+      padding: styles?.padding || '8px 16px',
+      paddingLeft: styles?.paddingLeft || '48px', // Space for card icon
+      paddingRight: styles?.paddingRight || '16px',
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
     },
-    label: {
-      position: 'absolute' as const,
-      left: '3rem',
-      transition: 'all 0.2s',
-      pointerEvents: 'none' as const,
-      color: showError ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
-      ...(isLabelFloating
-        ? {
-            top: '0',
-            fontSize: '0.75rem',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'white',
-            padding: '0 0.25rem',
-            marginLeft: '-0.5rem',
-          }
-        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-    },
-    helperText: {
-      marginTop: '0.25rem',
-      fontSize: '0.75rem',
-      padding: '0 0.75rem',
-      color: showError ? '#EF4444' : '#6B7281',
-    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    adornment: getSharedAdornmentStyles(adornmentColor),
+    startAdornment: { left: '16px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
 
-  const sacredStyles = {
-    ...premiumStyles,
-    adornmentText: {
-      ...premiumStyles.adornmentText,
-      color: '#FFD700',
-      fontWeight: 600,
-      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
-    },
-    input: {
-      ...premiumStyles.input,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#FFD700',
-      borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
-      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-      textShadow: '0 0 2px rgba(255, 215, 0, 0.5)',
-    },
-    label: {
-      ...premiumStyles.label,
-      color: showError
-        ? 'rgba(255,215,0,0.8)'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.8)',
-      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
-    },
-    helperText: {
-      ...premiumStyles.helperText,
-      color: showError ? 'rgba(255,215,0,0.8)' : 'rgba(255, 215, 0, 0.6)',
-    },
-  }
-
-  return sacredtheme ? sacredStyles : premiumStyles
+  return componentStyles
 }
 
 const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   onChange,
   value = '',
-  errorMessage = 'Invalid credit card number',
   useLuhnValidation = true,
-  sacredtheme = false,
   isDefaultValue = false,
   enableFormatting = true,
   label = 'Card Number',
   placeholder = '1234 5678 9012 3456',
-  disabled = false,
-  name,
   id,
   onFocus,
   onBlur,
   helperText,
+  styles,
   ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value || '')
-  const [isValid, setIsValid] = useState<boolean>(true)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
 
@@ -281,8 +231,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     const safeValue = value || ''
     const formattedValue = formatInput(safeValue)
     setInternalValue(formattedValue)
-    setIsValid(validateCreditCard(safeValue))
-  }, [value, validateCreditCard, formatInput])
+  }, [value, formatInput])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,7 +241,6 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       setHasBeenEdited(true)
       const detectedType = detectCardType(formattedValue)
       const valid = validateCreditCard(formattedValue)
-      setIsValid(valid)
       onChange?.(formattedValue.replace(/\D/g, ''), valid, detectedType)
     },
     [onChange, validateCreditCard, formatInput, detectCardType]
@@ -314,51 +262,56 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   )
 
   const getCardIcon = useCallback(
-    () => (sacredtheme ? '𓊪' : '💳'),
-    [sacredtheme]
+    () => (styles?.theme === 'sacred' ? '𓊪' : '💳'),
+    [styles?.theme]
   )
 
-  const isLabelFloating = isFocused || Boolean(internalValue)
-  const showError = !isValid && internalValue !== ''
-  const styles = getStyles(sacredtheme, isFocused, isLabelFloating, showError)
+  const computedStyles = getStyles(styles, isFocused)
 
   const CardAdornment = () => (
-    <div style={styles.adornment}>
-      <span style={styles.adornmentText}>{getCardIcon()}</span>
+    <div
+      style={{
+        ...computedStyles.adornment,
+        ...computedStyles.startAdornment,
+      }}
+    >
+      <span>{getCardIcon()}</span>
     </div>
   )
 
   return (
-    <div style={styles.container}>
-      <div style={styles.inputContainer}>
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={computedStyles.inputWrapper}>
         <CardAdornment />
         <input
           type="text"
           inputMode="numeric"
           id={id}
-          name={name}
           value={getDisplayValue()}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          placeholder={isLabelFloating ? placeholder : ''}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+          placeholder={placeholder}
           maxLength={23}
           autoComplete="cc-number"
-          style={styles.input}
+          style={computedStyles.input}
           {...props}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {label}
-          </label>
-        )}
       </div>
-      {(showError || helperText) && (
-        <div style={styles.helperText}>
-          {showError ? errorMessage : helperText}
-        </div>
-      )}
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

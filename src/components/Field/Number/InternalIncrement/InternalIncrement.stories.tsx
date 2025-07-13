@@ -6,11 +6,14 @@ const meta: Meta<typeof InternalIncrementNumberField> = {
   title: 'Components/Field/Number/InternalIncrement',
   component: InternalIncrementNumberField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    styles: { control: 'object' },
     label: { control: 'text' },
+    helperText: { control: 'text' },
     min: { control: 'number' },
     max: { control: 'number' },
+    initialValue: { control: 'text' },
+    initialDelay: { control: 'number' },
+    repeatInterval: { control: 'number' },
   },
   parameters: {
     layout: 'centered',
@@ -36,8 +39,8 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'Quantity',
-    sacredtheme: false,
     initialValue: '1',
+    styles: { theme: 'light' },
   },
 }
 
@@ -57,12 +60,12 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [value, setValue] = React.useState('10')
 
@@ -93,8 +96,8 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred
           </label>
@@ -112,7 +115,7 @@ const InteractiveDemoRenderer = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
           display: 'flex',
           justifyContent: 'center',
         }}
@@ -127,8 +130,10 @@ const InteractiveDemoRenderer = () => {
               setValue(e.target.value)
             }
           }}
-          sacredtheme={sacred}
-          disabled={disabled}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
           min={0}
           max={100}
         />

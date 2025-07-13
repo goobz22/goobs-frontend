@@ -6,11 +6,12 @@ const meta: Meta<typeof RoutingNumber> = {
   title: 'Components/Field/Number/RoutingNumber',
   component: RoutingNumber,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    styles: { control: 'object' },
     label: { control: 'text' },
     helperText: { control: 'text' },
     isDefaultValue: { control: 'boolean' },
+    useChecksum: { control: 'boolean' },
+    placeholder: { control: 'text' },
   },
   parameters: {
     layout: 'centered',
@@ -36,8 +37,8 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'Routing Number',
-    sacredtheme: false,
     placeholder: '021000021',
+    styles: { theme: 'light' },
   },
 }
 
@@ -57,12 +58,12 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [isDefault, setIsDefault] = React.useState(true)
   const [value, setValue] = React.useState('021000021')
@@ -95,8 +96,8 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred
           </label>
@@ -122,7 +123,7 @@ const InteractiveDemoRenderer = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
         }}
       >
         <RoutingNumber
@@ -132,10 +133,12 @@ const InteractiveDemoRenderer = () => {
             setValue(val)
             setIsValid(valid)
           }}
-          sacredtheme={sacred}
-          disabled={disabled}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
           isDefaultValue={isDefault}
-          errorMessage={!isValid ? 'Invalid routing number' : undefined}
+          helperText={!isValid ? 'Invalid routing number' : undefined}
         />
       </div>
     </div>

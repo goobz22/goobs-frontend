@@ -1,114 +1,116 @@
 'use client'
 import React, { useState, useCallback } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 
 type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>
 
 export interface IncrementNumberFieldProps
-  extends Omit<TextFieldProps, 'onChange'> {
+  extends Omit<TextFieldProps, 'onChange' | 'disabled' | 'required'> {
   initialValue?: string
   onChange?: () => void
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
   label?: string
-  sacredtheme?: boolean
+  helperText?: string
+  styles?: FormFieldStyles
 }
 
-const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean,
-  disabled: boolean,
-  backgroundcolor?: string,
-  outlinecolor?: string,
-  fontcolor?: string
-) => ({
-  container: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
-  button: {
-    padding: '0.25rem 0.75rem',
-    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#D1D5DB'}`,
-    borderRadius: '0.375rem',
-    transition: 'all 0.2s',
-    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.5)' : '#F3F4F6',
-    color: sacredtheme ? '#FFD700' : '#1F2937',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.5 : 1,
-    '&:hover': {
-      backgroundColor: !disabled
-        ? sacredtheme
-          ? 'rgba(255, 215, 0, 0.2)'
-          : '#E5E7EB'
-        : undefined,
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
+    getSharedFormFieldStyles(styles, isFocused)
+
+  const disabled = styles?.disabled
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      ...getSharedContainerStyles(styles),
     },
-  } as React.CSSProperties,
-  inputContainer: { position: 'relative' } as React.CSSProperties,
-  input: {
-    width: '4rem',
-    height: '2.5rem',
-    textAlign: 'center',
-    border: `2px solid ${sacredtheme ? (isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)') : isFocused ? '#3B82F6' : '#D1D5DB'}`,
-    borderRadius: '0.375rem',
-    outline: 'none',
-    transition: 'all 0.3s',
-    backgroundColor: sacredtheme
-      ? 'rgba(0,0,0,0.8)'
-      : backgroundcolor || 'white',
-    color: sacredtheme ? '#FFD700' : fontcolor || 'black',
-    opacity: disabled ? 0.5 : 1,
-  } as React.CSSProperties,
-  label: {
-    position: 'absolute',
-    left: '0.75rem',
-    transition: 'all 0.2s',
-    pointerEvents: 'none',
-    color: sacredtheme
-      ? 'rgba(255, 215, 0, 0.8)'
-      : isFocused
-        ? '#3B82F6'
-        : '#6B7281',
-    backgroundColor: sacredtheme ? 'black' : backgroundcolor || 'white',
-    ...(isLabelFloating
-      ? {
-          top: '0',
-          fontSize: '0.75rem',
-          transform: 'translateY(-50%)',
-          padding: '0 0.25rem',
-        }
-      : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-  } as React.CSSProperties,
-})
+    button: {
+      padding: '4px 12px',
+      border: `1px solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '6px',
+      transition,
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.5 : 1,
+      fontFamily: themeConfig.fontFamily,
+      fontSize: styles?.fontSize || '14px',
+      fontWeight: 500,
+      minWidth: '32px',
+      height: '32px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties,
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    } as React.CSSProperties,
+    input: {
+      width: '64px',
+      height: '40px',
+      textAlign: 'center',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      outline: 'none',
+      transition,
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      opacity: disabled ? 0.5 : 1,
+      fontFamily: themeConfig.fontFamily,
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      padding: '8px',
+      boxSizing: 'border-box',
+    } as React.CSSProperties,
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
+  }
+
+  return componentStyles
+}
 
 const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
   initialValue = '0',
   onChange,
   label,
-  disabled = false,
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
-  sacredtheme = false,
+  helperText,
+  styles,
   ...rest
 }) => {
   const [internalValue, setInternalValue] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
 
   const handleIncrement = useCallback(() => {
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseInt(prev, 10)
       const newValue = (isNaN(num) ? 0 : num + 1).toString()
       onChange?.()
       return newValue
     })
-  }, [onChange])
+  }, [onChange, styles?.disabled])
 
   const handleDecrement = useCallback(() => {
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseInt(prev, 10)
       const newValue = Math.max(0, isNaN(num) ? 0 : num - 1).toString()
       onChange?.()
       return newValue
     })
-  }, [onChange])
+  }, [onChange, styles?.disabled])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,69 +125,49 @@ const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
   const handleFocus = useCallback(() => setIsFocused(true), [])
   const handleBlur = useCallback(() => setIsFocused(false), [])
 
-  const isLabelFloating = isFocused || Boolean(internalValue)
-  const styles = getStyles(
-    sacredtheme,
-    isFocused,
-    isLabelFloating,
-    disabled,
-    backgroundcolor,
-    outlinecolor,
-    fontcolor
-  )
+  const computedStyles = getStyles(styles, isFocused)
 
   return (
-    <div style={styles.container}>
+    <div style={computedStyles.container}>
       <button
         type="button"
         onClick={handleDecrement}
-        disabled={disabled}
-        style={styles.button}
+        disabled={styles?.disabled}
+        style={computedStyles.button}
       >
         -
       </button>
-      <div style={styles.inputContainer}>
+      <div style={computedStyles.inputWrapper}>
+        {label && (
+          <label style={computedStyles.label}>
+            {label}
+            {styles?.required && (
+              <span style={getRequiredIndicatorStyle(styles)}>
+                {styles?.requiredIndicatorText || ' *'}
+              </span>
+            )}
+          </label>
+        )}
         <input
           type="text"
           value={internalValue}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          style={{
-            ...styles.input,
-            borderColor: isFocused
-              ? sacredtheme
-                ? '#FFD700'
-                : '#3B82F6'
-              : outlinecolor,
-          }}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+          style={computedStyles.input}
           {...rest}
         />
-        {label && (
-          <label
-            htmlFor={rest.id}
-            style={{
-              ...styles.label,
-              backgroundColor: sacredtheme
-                ? 'black'
-                : backgroundcolor || 'white',
-              color: isLabelFloating
-                ? sacredtheme
-                  ? '#FFD700'
-                  : '#3B82F6'
-                : fontcolor,
-            }}
-          >
-            {label}
-          </label>
+        {helperText && (
+          <div style={computedStyles.footerText}>{helperText}</div>
         )}
       </div>
       <button
         type="button"
         onClick={handleIncrement}
-        disabled={disabled}
-        style={styles.button}
+        disabled={styles?.disabled}
+        style={computedStyles.button}
       >
         +
       </button>
