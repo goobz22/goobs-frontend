@@ -161,16 +161,23 @@ const sacredStyles = {
     padding: '12px',
     textAlign: 'left',
     transition: 'all 0.3s ease',
-    color: 'rgba(255, 215, 0, 0.9)',
+    color: '#FFD700',
     borderBottom: '1px solid rgba(255, 215, 0, 0.2)',
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    border: '1px solid rgba(255, 215, 0, 0.1)',
+    borderRadius: '4px',
+    margin: '4px 0',
+    boxShadow: '0 0 5px rgba(255, 215, 0, 0.1)',
   } as React.CSSProperties,
   listItemHover: {
     backgroundColor: 'rgba(255, 215, 0, 0.1)',
     transform: 'translateX(4px)',
+    boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
   } as React.CSSProperties,
   listItemChecked: {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
     borderLeft: '4px solid #FFD700',
+    boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)',
   } as React.CSSProperties,
   checkboxContainer: {
     display: 'flex',
@@ -180,7 +187,11 @@ const sacredStyles = {
   label: {
     flex: 1,
     fontWeight: 500,
-    color: 'rgba(255, 215, 0, 0.9)',
+    color: '#FFD700',
+    textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   } as React.CSSProperties,
   buttonGroup: {
     display: 'flex',
@@ -200,15 +211,15 @@ const sacredStyles = {
     animation: 'sacred-float 3s infinite ease-in-out',
   } as React.CSSProperties,
   buttonHover: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
     transform: 'scale(1.1)',
     boxShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
   } as React.CSSProperties,
   buttonDisabled: {
     opacity: 0.5,
     cursor: 'not-allowed',
-    color: 'rgba(255, 215, 0, 0.3)',
-    borderColor: 'rgba(255, 215, 0, 0.3)',
+    color: '#FFD700',
+    borderColor: '#FFD700',
   } as React.CSSProperties,
   glyph: {
     position: 'absolute',
@@ -236,54 +247,28 @@ const TransferList: React.FC<TransferListProps> = ({
   style,
 }) => {
   const [selectedDropdownValue, setSelectedDropdownValue] = useState<string>('')
-  const [left, setLeft] = useState<readonly string[]>([])
-  const [right, setRight] = useState<readonly string[]>([])
   const [checked, setChecked] = useState<readonly string[]>([])
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   const styles = sacredtheme ? sacredStyles : premiumStyles
 
-  useEffect(() => {
-    if (variant === 'singleSelection') {
-      let changed = false
-      if (
-        leftItems.length !== left.length ||
-        !leftItems.every((val, idx) => left[idx] === val)
-      ) {
-        setLeft(leftItems)
-        changed = true
-      }
-      if (
-        rightItems.length !== right.length ||
-        !rightItems.every((val, idx) => right[idx] === val)
-      ) {
-        setRight(rightItems)
-        changed = true
-      }
-      if (changed) {
-        setChecked([])
-      }
-    }
-  }, [variant, leftItems, rightItems, left, right])
+  let currentLeft: readonly string[] = leftItems
+  let currentRight: readonly string[] = rightItems
+
+  if (variant === 'multipleSelection') {
+    currentLeft = dropdownDataMap[selectedDropdownValue]?.leftItems ?? []
+    currentRight = dropdownDataMap[selectedDropdownValue]?.rightItems ?? []
+  }
 
   useEffect(() => {
     if (variant === 'multipleSelection') {
-      if (!selectedDropdownValue) return
-      const dataForValue = dropdownDataMap[selectedDropdownValue]
-      if (dataForValue) {
-        setLeft(dataForValue.leftItems)
-        setRight(dataForValue.rightItems)
-      } else {
-        setLeft([])
-        setRight([])
-      }
       setChecked([])
     }
-  }, [variant, selectedDropdownValue, dropdownDataMap])
+  }, [variant, selectedDropdownValue])
 
-  const leftChecked = intersection(checked, left)
-  const rightChecked = intersection(checked, right)
+  const leftChecked = intersection(checked, currentLeft)
+  const rightChecked = intersection(checked, currentRight)
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value)
@@ -297,22 +282,18 @@ const TransferList: React.FC<TransferListProps> = ({
   }
 
   const handleAllRight = () => {
-    const newRight = [...right, ...left]
-    setRight(newRight)
-    setLeft([])
-    setChecked([])
+    const newRight = [...currentRight, ...currentLeft]
     onChange(
       [],
       newRight,
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
+    setChecked([])
   }
 
   const handleCheckedRight = () => {
-    const newRight = [...right, ...leftChecked]
-    const newLeft = not(left, leftChecked)
-    setRight(newRight)
-    setLeft(newLeft)
+    const newRight = [...currentRight, ...leftChecked]
+    const newLeft = not(currentLeft, leftChecked)
     setChecked(not(checked, leftChecked))
     onChange(
       newLeft,
@@ -322,10 +303,8 @@ const TransferList: React.FC<TransferListProps> = ({
   }
 
   const handleCheckedLeft = () => {
-    const newLeft = [...left, ...rightChecked]
-    const newRight = not(right, rightChecked)
-    setLeft(newLeft)
-    setRight(newRight)
+    const newLeft = [...currentLeft, ...rightChecked]
+    const newRight = not(currentRight, rightChecked)
     setChecked(not(checked, rightChecked))
     onChange(
       newLeft,
@@ -335,15 +314,13 @@ const TransferList: React.FC<TransferListProps> = ({
   }
 
   const handleAllLeft = () => {
-    const newLeft = [...left, ...right]
-    setLeft(newLeft)
-    setRight([])
-    setChecked([])
+    const newLeft = [...currentLeft, ...currentRight]
     onChange(
       newLeft,
       [],
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
+    setChecked([])
   }
 
   const renderList = (items: readonly string[]) => (
@@ -374,7 +351,9 @@ const TransferList: React.FC<TransferListProps> = ({
                   checked={isChecked}
                   onChange={() => {}}
                   aria-labelledby={labelId}
-                  sacredtheme={sacredtheme}
+                  styles={{
+                    theme: sacredtheme ? 'sacred' : 'light',
+                  }}
                 />
               </div>
               <span id={labelId} style={styles.label}>
@@ -392,7 +371,7 @@ const TransferList: React.FC<TransferListProps> = ({
       return (
         <div style={styles.column}>
           <h3 style={styles.title}>{leftTitle}</h3>
-          {renderList(left)}
+          {renderList(currentLeft)}
         </div>
       )
     }
@@ -403,13 +382,9 @@ const TransferList: React.FC<TransferListProps> = ({
           options={dropdownOptions}
           value={selectedDropdownValue}
           onChange={e => setSelectedDropdownValue(e.target.value)}
-          backgroundcolor={sacredtheme ? 'rgba(0, 0, 0, 0.6)' : undefined}
-          outlinecolor={sacredtheme ? '#FFD700' : undefined}
-          fontcolor={sacredtheme ? '#FFD700' : undefined}
-          shrunkfontcolor={sacredtheme ? '#FFD700' : undefined}
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
-        {renderList(left)}
+        {renderList(currentLeft)}
       </div>
     )
   }
@@ -457,7 +432,7 @@ const TransferList: React.FC<TransferListProps> = ({
       <div style={styles.buttonGroup}>
         <TransferButton
           onClick={handleAllRight}
-          disabled={left.length === 0}
+          disabled={currentLeft.length === 0}
           aria-label="move all right"
           name="all-right"
         >
@@ -481,7 +456,7 @@ const TransferList: React.FC<TransferListProps> = ({
         </TransferButton>
         <TransferButton
           onClick={handleAllLeft}
-          disabled={right.length === 0}
+          disabled={currentRight.length === 0}
           aria-label="move all left"
           name="all-left"
         >
@@ -490,7 +465,7 @@ const TransferList: React.FC<TransferListProps> = ({
       </div>
       <div style={styles.column}>
         <h3 style={styles.title}>{rightTitle}</h3>
-        {renderList(right)}
+        {renderList(currentRight)}
       </div>
     </div>
   )

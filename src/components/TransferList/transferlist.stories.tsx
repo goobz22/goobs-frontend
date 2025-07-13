@@ -53,14 +53,59 @@ const itemLabelMap = {
  */
 export const PremiumTheme: Story = {
   name: 'Premium Theme',
-  render: args => (
-    <div className="w-[700px] p-6 bg-gray-50 rounded-lg">
-      <h3 className="text-xl font-bold text-gray-800 mb-4 font-inter">
-        Premium TransferList
-      </h3>
-      <TransferList {...args} />
-    </div>
-  ),
+  render: args => {
+    const Component = () => {
+      const [localLeft, setLocalLeft] = React.useState(
+        args.leftItems ?? singleLeftItems
+      )
+      const [localRight, setLocalRight] = React.useState(
+        args.rightItems ?? singleRightItems
+      )
+      const [localDataMap, setLocalDataMap] =
+        React.useState<TransferListDropdownDataMap>(
+          args.dropdownDataMap ?? dropdownDataMap
+        )
+      const handleChange = (
+        newLeft: string[],
+        newRight: string[],
+        dropdownValue?: string
+      ) => {
+        if (args.variant === 'multipleSelection' && dropdownValue) {
+          setLocalDataMap(prev => ({
+            ...prev,
+            [dropdownValue]: { leftItems: newLeft, rightItems: newRight },
+          }))
+        } else {
+          setLocalLeft(newLeft)
+          setLocalRight(newRight)
+        }
+        args.onChange?.(newLeft, newRight, dropdownValue)
+      }
+      return (
+        <div className="w-[700px] p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-xl font-bold text-gray-800 mb-4 font-inter">
+            Premium TransferList
+          </h3>
+          <TransferList
+            {...args}
+            leftItems={
+              args.variant === 'singleSelection' ? localLeft : args.leftItems
+            }
+            rightItems={
+              args.variant === 'singleSelection' ? localRight : args.rightItems
+            }
+            dropdownDataMap={
+              args.variant === 'multipleSelection'
+                ? localDataMap
+                : args.dropdownDataMap
+            }
+            onChange={handleChange}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
   args: {
     variant: 'singleSelection',
     leftItems: singleLeftItems,
@@ -85,14 +130,59 @@ export const PremiumTheme: Story = {
  */
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
-  render: args => (
-    <div className="w-[700px] p-6 bg-black/90 rounded-lg border border-yellow-400/30">
-      <h3 className="text-xl font-bold text-yellow-400 mb-4 font-cinzel animate-sacred-glow">
-        Sacred TransferList
-      </h3>
-      <TransferList {...args} />
-    </div>
-  ),
+  render: args => {
+    const Component = () => {
+      const [localLeft, setLocalLeft] = React.useState(
+        args.leftItems ?? singleLeftItems
+      )
+      const [localRight, setLocalRight] = React.useState(
+        args.rightItems ?? singleRightItems
+      )
+      const [localDataMap, setLocalDataMap] =
+        React.useState<TransferListDropdownDataMap>(
+          args.dropdownDataMap ?? dropdownDataMap
+        )
+      const handleChange = (
+        newLeft: string[],
+        newRight: string[],
+        dropdownValue?: string
+      ) => {
+        if (args.variant === 'multipleSelection' && dropdownValue) {
+          setLocalDataMap(prev => ({
+            ...prev,
+            [dropdownValue]: { leftItems: newLeft, rightItems: newRight },
+          }))
+        } else {
+          setLocalLeft(newLeft)
+          setLocalRight(newRight)
+        }
+        args.onChange?.(newLeft, newRight, dropdownValue)
+      }
+      return (
+        <div className="w-[700px] p-6 bg-black/90 rounded-lg border border-yellow-400/30">
+          <h3 className="text-xl font-bold text-yellow-400 mb-4 font-cinzel animate-sacred-glow">
+            Sacred TransferList
+          </h3>
+          <TransferList
+            {...args}
+            leftItems={
+              args.variant === 'singleSelection' ? localLeft : args.leftItems
+            }
+            rightItems={
+              args.variant === 'singleSelection' ? localRight : args.rightItems
+            }
+            dropdownDataMap={
+              args.variant === 'multipleSelection'
+                ? localDataMap
+                : args.dropdownDataMap
+            }
+            onChange={handleChange}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
   args: {
     ...PremiumTheme.args,
     sacredtheme: true,
@@ -102,7 +192,7 @@ export const SacredTheme: Story = {
 const InteractiveDemoRenderer = () => {
   const [left, setLeft] = React.useState(singleLeftItems)
   const [right, setRight] = React.useState(singleRightItems)
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
 
   const handleChange = (newLeft: string[], newRight: string[]) => {
     setLeft(newLeft)
@@ -115,20 +205,20 @@ const InteractiveDemoRenderer = () => {
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
+            checked={sacredtheme}
+            onChange={e => setsacredtheme(e.target.checked)}
           />
           Enable Sacred Theme
         </label>
       </div>
       <div
-        className={`p-6 rounded-lg ${sacred ? 'bg-black/90 border border-yellow-400/30' : 'bg-gray-50'}`}
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black/90 border border-yellow-400/30' : 'bg-gray-50'}`}
       >
         <TransferList
           leftItems={left}
           rightItems={right}
           onChange={handleChange}
-          sacredtheme={sacred}
+          sacredtheme={sacredtheme}
         />
       </div>
     </div>
