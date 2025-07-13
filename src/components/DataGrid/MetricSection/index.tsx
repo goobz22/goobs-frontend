@@ -3,10 +3,12 @@
 import React from 'react'
 import MetricCard from '../MetricCard'
 import { MetricCardData } from '../types'
+import type { DataGridStyles } from '../../../theme'
 
 interface MetricSectionProps {
   metrics: MetricCardData[]
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 }
 
 // Premium theme styles (when sacredtheme=false)
@@ -37,10 +39,9 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
-const MetricSection: React.FC<MetricSectionProps> = ({
-  metrics,
-  sacredtheme = false,
-}) => {
+const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
+  const isSacredTheme = styles?.theme === 'sacred'
+
   const getGridColumns = () => {
     switch (metrics.length) {
       case 1:
@@ -72,15 +73,15 @@ const MetricSection: React.FC<MetricSectionProps> = ({
     }
   }
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  const componentStyles = isSacredTheme ? sacredStyles : premiumStyles
 
   const gridStyle = {
-    ...styles.grid,
+    ...componentStyles.grid,
     ...getGridColumns(),
   }
 
   return (
-    <div style={styles.container}>
+    <div style={componentStyles.container}>
       <div style={gridStyle}>
         {metrics.map((metric, index) => (
           <div key={`${metric.title}-${index}`}>
@@ -90,9 +91,8 @@ const MetricSection: React.FC<MetricSectionProps> = ({
               subtitle={metric.subtitle}
               icon={metric.icon}
               trend={metric.trend}
-              color={metric.color}
               glyph={metric.glyph}
-              sacredtheme={sacredtheme}
+              styles={styles}
             />
           </div>
         ))}

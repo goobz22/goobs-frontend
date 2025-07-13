@@ -5,39 +5,14 @@ import CustomToolbar from '../Toolbar'
 import Table from './Table'
 import CustomFooter from './Footer'
 import FilterSection from './FilterSection'
+import MetricSection from './MetricSection'
 import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import { DatagridProps, RowData } from './types'
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
 
 function arePropsEqual(
   prevProps: Readonly<DatagridProps>,
@@ -53,7 +28,7 @@ function arePropsEqual(
     'showIdColumns',
     'filters',
     'metrics',
-    'sacredtheme',
+    'styles',
   ]
   for (const key of keysToCompare) {
     if (JSON.stringify(prevProps[key]) !== JSON.stringify(nextProps[key])) {
@@ -62,96 +37,6 @@ function arePropsEqual(
   }
   return true
 }
-
-const getStyles = (sacredtheme?: boolean) => ({
-  container: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    ...(sacredtheme
-      ? {
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(16px)',
-          border: '2px solid rgba(255, 215, 0, 0.5)',
-          borderRadius: '0.5rem',
-          animation: 'datagrid-glow-pulse 2s infinite alternate',
-        }
-      : {
-          backgroundColor: '#1E293B',
-        }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    fontSize: '1.125rem',
-    color: 'rgba(255, 215, 0, 0.3)',
-    zIndex: 10,
-    animation: 'datagrid-float 8s infinite alternate',
-  } as React.CSSProperties,
-  error: {
-    marginBottom: '0.5rem',
-    padding: '1rem',
-    borderWidth: '1px',
-    borderRadius: '0.25rem',
-    ...(sacredtheme
-      ? {
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          color: '#F87171',
-          borderColor: 'rgba(239, 68, 68, 0.3)',
-        }
-      : {
-          backgroundColor: '#FEF2F2',
-          color: '#B91C1C',
-          borderColor: '#FECACA',
-        }),
-  } as React.CSSProperties,
-  tableContainer: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    position: 'relative',
-    margin: 0,
-    padding: 0,
-    '::before': sacredtheme
-      ? {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '2px',
-          height: '100%',
-          overflow: 'hidden',
-        }
-      : {},
-    '::after': sacredtheme
-      ? {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundImage:
-            'linear-gradient(to bottom, transparent, #FFD700, transparent)',
-          animation: 'datagrid-datastream 4s linear infinite',
-        }
-      : {},
-  } as React.CSSProperties,
-  footerContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.125rem',
-    marginTop: '0.5rem',
-    opacity: 0.5,
-  } as React.CSSProperties,
-  footerGlyph: {
-    color: '#FFD700',
-    fontSize: '0.75rem',
-    animation: `datagrid-float 3s ease-in-out infinite`,
-  } as React.CSSProperties,
-})
 
 function DataGrid({
   columns,
@@ -168,10 +53,12 @@ function DataGrid({
   showIdColumns = false,
   filters,
   metrics,
-  sacredtheme = false,
+  styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const styles = getStyles(sacredtheme)
+
+  const isSacredTheme = styles?.theme === 'sacred'
+  const computedStyles = getDataGridStyles(styles)
 
   const filteredColumns = useMemo(() => {
     if (showIdColumns) return columns
@@ -244,15 +131,17 @@ function DataGrid({
     selectedRows.length < rows.length
 
   return (
-    <div ref={containerRef} style={styles.container}>
-      {sacredtheme && (
+    <div ref={containerRef} style={computedStyles.container}>
+      {isSacredTheme && (
         <>
-          <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
+          <div
+            style={{ ...computedStyles.glyph, top: '0.75rem', left: '0.75rem' }}
+          >
             {SACRED_GLYPHS[23]}
           </div>
           <div
             style={{
-              ...styles.glyph,
+              ...computedStyles.glyph,
               top: '0.75rem',
               right: '0.75rem',
               animationDirection: 'reverse',
@@ -262,7 +151,7 @@ function DataGrid({
           </div>
         </>
       )}
-      {error && <div style={styles.error}>{error.message}</div>}
+      {error && <div style={computedStyles.error}>{error.message}</div>}
       <CustomToolbar
         buttons={buttons}
         dropdowns={dropdowns?.[0] ? [dropdowns[0]] : undefined}
@@ -287,12 +176,17 @@ function DataGrid({
               }
             : undefined
         }
-        sacredtheme={sacredtheme}
+        styles={{
+          theme: styles?.theme || 'light',
+        }}
       />
       {filters && Array.isArray(filters) && filters.length > 0 && (
-        <FilterSection filters={filters} sacredtheme={sacredtheme} />
+        <FilterSection filters={filters} styles={styles} />
       )}
-      <div style={styles.tableContainer}>
+      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
+        <MetricSection metrics={metrics} styles={styles} />
+      )}
+      <div style={computedStyles.tableContainer}>
         <Table
           columns={filteredColumns}
           rows={visibleRows}
@@ -302,7 +196,7 @@ function DataGrid({
           someRowsSelected={someRowsSelected}
           onHeaderCheckboxChange={handleHeaderCheckboxChange}
           onRowCheckboxChange={handleRowCheckboxChange}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
         <CustomFooter
           page={page}
@@ -310,16 +204,16 @@ function DataGrid({
           rowCount={filteredRows.length}
           onPageChange={setPage}
           columns={filteredColumns}
-          sacredtheme={sacredtheme}
+          styles={styles}
         />
       </div>
-      {sacredtheme && (
-        <div style={styles.footerContainer}>
+      {isSacredTheme && (
+        <div style={computedStyles.footerContainer}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <p
               key={index}
               style={{
-                ...styles.footerGlyph,
+                ...computedStyles.footerGlyph,
                 animationDelay: `${2 + index * 0.3}s`,
               }}
             >

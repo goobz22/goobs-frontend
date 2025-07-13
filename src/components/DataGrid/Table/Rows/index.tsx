@@ -4,6 +4,7 @@ import React from 'react'
 import { ColumnDef } from '../../types'
 import StyledTooltip from '../../../Tooltip'
 import type { RowData } from '../../types'
+import type { DataGridStyles } from '../../../../theme'
 import { getRowId } from '../index'
 import Checkbox from '../../../Checkbox'
 
@@ -566,7 +567,7 @@ function formatExpirationDate(
     }
 
     const themes = {
-      sacred: {
+      sacredtheme: {
         valid: {
           color: '#A3E635',
           bg: 'rgba(163, 230, 53, 0.1)',
@@ -612,7 +613,7 @@ function formatExpirationDate(
       },
     }
 
-    const currentTheme = sacredtheme ? themes.sacred : themes.standard
+    const currentTheme = sacredtheme ? themes.sacredtheme : themes.standard
     const style = currentTheme[status]
 
     return {
@@ -814,8 +815,8 @@ interface RowsProps {
   // Toggling row checkbox
   onRowCheckboxChange: (rowId: string) => void
 
-  /** Enable Egyptian/Sacred theming */
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 }
 
 const Rows: React.FC<RowsProps> = ({
@@ -829,8 +830,9 @@ const Rows: React.FC<RowsProps> = ({
   selectedRowIds,
   onRowClick,
   onRowCheckboxChange,
-  sacredtheme = false,
+  styles,
 }) => {
+  const isSacredTheme = styles?.theme === 'sacred'
   if (!rows || rows.length === 0) {
     return (
       <tbody>
@@ -851,7 +853,7 @@ const Rows: React.FC<RowsProps> = ({
         const rowStyle = {
           transition: 'background-color 0.2s ease',
           cursor: 'pointer',
-          ...(isSelected && sacredtheme
+          ...(isSelected && isSacredTheme
             ? {
                 backgroundColor: 'rgba(255, 215, 0, 0.15)',
                 '&:hover': {
@@ -859,7 +861,7 @@ const Rows: React.FC<RowsProps> = ({
                 },
               }
             : {}),
-          ...(isSelected && !sacredtheme
+          ...(isSelected && !isSacredTheme
             ? {
                 backgroundColor: 'rgba(219, 234, 254, 1)',
                 '&:hover': {
@@ -874,12 +876,13 @@ const Rows: React.FC<RowsProps> = ({
             <td className="w-12 p-0 align-middle">
               <Checkbox
                 checked={isSelected}
-                onChange={e => {
-                  e.stopPropagation()
+                onChange={_checked => {
                   onRowCheckboxChange(rowId)
                 }}
                 onClick={e => e.stopPropagation()}
-                sacredtheme={sacredtheme}
+                styles={{
+                  theme: isSacredTheme ? 'sacred' : 'light',
+                }}
               />
             </td>
 
@@ -895,23 +898,26 @@ const Rows: React.FC<RowsProps> = ({
                   if (overflowCol) {
                     const value = row[overflowCol.field]
                     if (overflowCol.type === 'currency') {
-                      cellContent = formatCurrency(value, sacredtheme).element
+                      cellContent = formatCurrency(value, isSacredTheme).element
                     } else if (overflowCol.type === 'credit_card') {
-                      cellContent = formatCreditCard(value, sacredtheme).element
+                      cellContent = formatCreditCard(
+                        value,
+                        isSacredTheme
+                      ).element
                     } else if (overflowCol.type === 'expiration_date') {
                       cellContent = formatExpirationDate(
                         value,
-                        sacredtheme
+                        isSacredTheme
                       ).element
                     } else if (overflowCol.type === 'account_number') {
                       cellContent = formatAccountNumber(
                         value,
-                        sacredtheme
+                        isSacredTheme
                       ).element
                     } else if (overflowCol.type === 'routing_number') {
                       cellContent = formatRoutingNumber(
                         value,
-                        sacredtheme
+                        isSacredTheme
                       ).element
                     } else {
                       cellContent = safeString(value)
@@ -922,23 +928,23 @@ const Rows: React.FC<RowsProps> = ({
                 } else {
                   const value = row[col.field]
                   if (col.type === 'currency') {
-                    cellContent = formatCurrency(value, sacredtheme).element
+                    cellContent = formatCurrency(value, isSacredTheme).element
                   } else if (col.type === 'credit_card') {
-                    cellContent = formatCreditCard(value, sacredtheme).element
+                    cellContent = formatCreditCard(value, isSacredTheme).element
                   } else if (col.type === 'expiration_date') {
                     cellContent = formatExpirationDate(
                       value,
-                      sacredtheme
+                      isSacredTheme
                     ).element
                   } else if (col.type === 'account_number') {
                     cellContent = formatAccountNumber(
                       value,
-                      sacredtheme
+                      isSacredTheme
                     ).element
                   } else if (col.type === 'routing_number') {
                     cellContent = formatRoutingNumber(
                       value,
-                      sacredtheme
+                      isSacredTheme
                     ).element
                   } else {
                     cellContent = safeString(value)
@@ -949,7 +955,7 @@ const Rows: React.FC<RowsProps> = ({
                   <td key={col.field} className="p-2 align-middle">
                     <StyledTooltip
                       title={safeString(row[col.field])}
-                      sacredtheme={sacredtheme}
+                      sacredtheme={isSacredTheme}
                     >
                       <div className="truncate">{cellContent}</div>
                     </StyledTooltip>
@@ -967,15 +973,15 @@ const Rows: React.FC<RowsProps> = ({
                   if (mobileCol) {
                     const value = row[mobileCol.field]
                     if (mobileCol.type === 'currency') {
-                      return formatCurrency(value, sacredtheme).element
+                      return formatCurrency(value, isSacredTheme).element
                     } else if (mobileCol.type === 'credit_card') {
-                      return formatCreditCard(value, sacredtheme).element
+                      return formatCreditCard(value, isSacredTheme).element
                     } else if (mobileCol.type === 'expiration_date') {
-                      return formatExpirationDate(value, sacredtheme).element
+                      return formatExpirationDate(value, isSacredTheme).element
                     } else if (mobileCol.type === 'account_number') {
-                      return formatAccountNumber(value, sacredtheme).element
+                      return formatAccountNumber(value, isSacredTheme).element
                     } else if (mobileCol.type === 'routing_number') {
-                      return formatRoutingNumber(value, sacredtheme).element
+                      return formatRoutingNumber(value, isSacredTheme).element
                     }
                     return safeString(value)
                   }

@@ -6,6 +6,7 @@ import FileCopy from '../../Icons/FileCopy'
 import Delete from '../../Icons/Delete'
 import Download from '../../Icons/Download'
 import Edit from '../../Icons/Edit'
+import type { DataGridStyles } from '../../../theme'
 
 type ModalType = 'duplicate' | 'delete' | 'export' | 'manage' | 'show'
 
@@ -18,171 +19,8 @@ interface ManageRowProps {
   onManage?: () => void
   onShow?: () => void
   onExport?: () => void
-  sacredtheme?: boolean
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  container: {
-    zIndex: 1300,
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '60px',
-    minWidth: '100%',
-    padding: '0 4px',
-    userSelect: 'none',
-    boxShadow:
-      '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    borderRadius: '6px',
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-  } as React.CSSProperties,
-
-  innerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    width: '100%',
-  } as React.CSSProperties,
-
-  titleContainer: {
-    flexGrow: 1,
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 16px',
-  } as React.CSSProperties,
-
-  actionsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '2px',
-  } as React.CSSProperties,
-
-  divider: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRight: '1px solid rgba(229, 231, 235, 1)',
-    paddingRight: '8px',
-    marginRight: '8px',
-  } as React.CSSProperties,
-
-  actionButton: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '8px',
-    cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'colors 0.3s ease',
-    userSelect: 'none',
-    '&:hover': {
-      backgroundColor: 'rgba(243, 244, 246, 1)',
-    },
-  } as React.CSSProperties,
-
-  iconContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    color: 'rgba(0, 0, 0, 1)',
-  } as React.CSSProperties,
-
-  actionsRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  container: {
-    zIndex: 1300,
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '60px',
-    minWidth: '100%',
-    padding: '0 4px',
-    userSelect: 'none',
-    boxShadow:
-      '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    borderRadius: '6px',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    border: '2px solid rgba(255, 215, 0, 0.5)',
-    backdropFilter: 'blur(8px)',
-    animation: 'manageRowGlowPulse 3s ease-in-out infinite',
-  } as React.CSSProperties,
-
-  innerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    width: '100%',
-  } as React.CSSProperties,
-
-  titleContainer: {
-    flexGrow: 1,
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 16px',
-  } as React.CSSProperties,
-
-  actionsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '2px',
-  } as React.CSSProperties,
-
-  divider: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRight: '1px solid rgba(255, 215, 0, 0.3)',
-    paddingRight: '8px',
-    marginRight: '8px',
-  } as React.CSSProperties,
-
-  actionButton: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '8px',
-    cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'colors 0.3s ease',
-    userSelect: 'none',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    },
-  } as React.CSSProperties,
-
-  iconContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    color: 'rgba(255, 215, 0, 1)',
-  } as React.CSSProperties,
-
-  actionsRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  } as React.CSSProperties,
-
-  typography: {
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    letterSpacing: '0.025em',
-    textShadow: '0 0 3px rgba(255, 215, 0, 0.3)',
-  } as React.CSSProperties,
-
-  typographySmall: {
-    fontFamily: '"Crimson Text", serif',
-  } as React.CSSProperties,
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 }
 
 function ManageRow({
@@ -194,11 +32,13 @@ function ManageRow({
   onManage,
   onShow,
   onExport,
-  sacredtheme = false,
+  styles,
 }: ManageRowProps) {
+  const isSacredTheme = styles?.theme === 'sacred'
+
   // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
+    if (isSacredTheme) {
       const styleSheet = document.styleSheets[0]
       const keyframes = `
         @keyframes manageRowGlowPulse {
@@ -218,7 +58,7 @@ function ManageRow({
         // Keyframes might already exist
       }
     }
-  }, [sacredtheme])
+  }, [isSacredTheme])
 
   const handleActionSelection = (type: ModalType) => {
     switch (type) {
@@ -278,50 +118,120 @@ function ManageRow({
 
   if (selectedRows.length === 0) return null
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
-
-  const titleStyle = {
-    ...(sacredtheme ? sacredStyles.typography : {}),
-    ...(sacredtheme ? {} : {}),
+  const containerStyle = {
+    zIndex: 1300,
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: '60px',
+    minWidth: '100%',
+    padding: '0 4px',
+    userSelect: 'none' as const,
+    boxShadow:
+      '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    borderRadius: '6px',
+    backgroundColor: isSacredTheme
+      ? 'rgba(0, 0, 0, 0.9)'
+      : 'rgba(255, 255, 255, 1)',
+    ...(isSacredTheme && {
+      border: '2px solid rgba(255, 215, 0, 0.5)',
+      backdropFilter: 'blur(8px)',
+      animation: 'manageRowGlowPulse 3s ease-in-out infinite',
+    }),
   }
 
-  const smallTypographyStyle = {
-    ...(sacredtheme ? sacredStyles.typographySmall : {}),
-    ...(sacredtheme ? {} : {}),
+  const innerContainerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    width: '100%',
+  }
+
+  const titleContainerStyle = {
+    flexGrow: 1,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 16px',
+  }
+
+  const actionsContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '2px',
+  }
+
+  const dividerStyle = {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    borderRight: isSacredTheme
+      ? '1px solid rgba(255, 215, 0, 0.3)'
+      : '1px solid rgba(229, 231, 235, 1)',
+    paddingRight: '8px',
+    marginRight: '8px',
+  }
+
+  const actionButtonStyle = {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    padding: '8px',
+    cursor: 'pointer',
+    borderRadius: '6px',
+    transition: 'colors 0.3s ease',
+    userSelect: 'none' as const,
+  }
+
+  const iconContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    color: isSacredTheme ? 'rgba(255, 215, 0, 1)' : 'rgba(0, 0, 0, 1)',
+  }
+
+  const actionsRowStyle = {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.innerContainer}>
-        <div style={styles.titleContainer}>
+    <div style={containerStyle}>
+      <div style={innerContainerStyle}>
+        <div style={titleContainerStyle}>
           <Typography
-            fontvariant="merriparagraph"
+            variant="merriparagraph"
             text={`${selectedRows.length} ${
               selectedRows.length === 1 ? 'item' : 'items'
             } selected`}
-            fontcolor={sacredtheme ? '#FFD700' : undefined}
-            style={sacredtheme ? titleStyle : {}}
+            styles={{
+              color: isSacredTheme ? '#FFD700' : undefined,
+              theme: isSacredTheme ? 'sacred' : 'light',
+            }}
           />
         </div>
 
-        <div style={styles.actionsContainer}>
+        <div style={actionsContainerStyle}>
           {selectedRows.length === 1 && (onManage || onShow || onDuplicate) && (
-            <div style={styles.divider}>
+            <div style={dividerStyle}>
               {onManage && (
                 <div
                   onClick={e => {
                     e.stopPropagation()
                     handleActionSelection('manage')
                   }}
-                  style={styles.actionButton}
+                  style={actionButtonStyle}
                 >
-                  <div style={styles.iconContainer}>
+                  <div style={iconContainerStyle}>
                     <Edit />
                     <Typography
-                      fontvariant="merriparagraph"
+                      variant="merriparagraph"
                       text="Manage"
-                      fontcolor={sacredtheme ? '#FFD700' : undefined}
-                      style={sacredtheme ? smallTypographyStyle : {}}
+                      styles={{
+                        color: isSacredTheme ? '#FFD700' : undefined,
+                        theme: isSacredTheme ? 'sacred' : 'light',
+                      }}
                     />
                   </div>
                 </div>
@@ -332,9 +242,9 @@ function ManageRow({
                     e.stopPropagation()
                     handleActionSelection('show')
                   }}
-                  style={styles.actionButton}
+                  style={actionButtonStyle}
                 >
-                  <div style={styles.iconContainer}>
+                  <div style={iconContainerStyle}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="1em"
@@ -350,10 +260,12 @@ function ManageRow({
                       <circle cx="12" cy="12" r="3" />
                     </svg>
                     <Typography
-                      fontvariant="merriparagraph"
+                      variant="merriparagraph"
                       text="Show"
-                      fontcolor={sacredtheme ? '#FFD700' : undefined}
-                      style={sacredtheme ? smallTypographyStyle : {}}
+                      styles={{
+                        color: isSacredTheme ? '#FFD700' : undefined,
+                        theme: isSacredTheme ? 'sacred' : 'light',
+                      }}
                     />
                   </div>
                 </div>
@@ -365,15 +277,17 @@ function ManageRow({
                     e.stopPropagation()
                     handleActionSelection('duplicate')
                   }}
-                  style={styles.actionButton}
+                  style={actionButtonStyle}
                 >
-                  <div style={styles.iconContainer}>
+                  <div style={iconContainerStyle}>
                     <FileCopy />
                     <Typography
-                      fontvariant="merriparagraph"
+                      variant="merriparagraph"
                       text="Duplicate"
-                      fontcolor={sacredtheme ? '#FFD700' : undefined}
-                      style={sacredtheme ? smallTypographyStyle : {}}
+                      styles={{
+                        color: isSacredTheme ? '#FFD700' : undefined,
+                        theme: isSacredTheme ? 'sacred' : 'light',
+                      }}
                     />
                   </div>
                 </div>
@@ -381,22 +295,24 @@ function ManageRow({
             </div>
           )}
 
-          <div style={styles.actionsRow}>
+          <div style={actionsRowStyle}>
             {onDelete && (
               <div
                 onClick={e => {
                   e.stopPropagation()
                   handleActionSelection('delete')
                 }}
-                style={styles.actionButton}
+                style={actionButtonStyle}
               >
-                <div style={styles.iconContainer}>
+                <div style={iconContainerStyle}>
                   <Delete />
                   <Typography
-                    fontvariant="merriparagraph"
+                    variant="merriparagraph"
                     text="Delete"
-                    fontcolor={sacredtheme ? '#FFD700' : undefined}
-                    style={sacredtheme ? smallTypographyStyle : {}}
+                    styles={{
+                      color: isSacredTheme ? '#FFD700' : undefined,
+                      theme: isSacredTheme ? 'sacred' : 'light',
+                    }}
                   />
                 </div>
               </div>
@@ -408,15 +324,17 @@ function ManageRow({
                   e.stopPropagation()
                   handleActionSelection('export')
                 }}
-                style={styles.actionButton}
+                style={actionButtonStyle}
               >
-                <div style={styles.iconContainer}>
+                <div style={iconContainerStyle}>
                   <Download />
                   <Typography
-                    fontvariant="merriparagraph"
+                    variant="merriparagraph"
                     text="Export"
-                    fontcolor={sacredtheme ? '#FFD700' : undefined}
-                    style={sacredtheme ? smallTypographyStyle : {}}
+                    styles={{
+                      color: isSacredTheme ? '#FFD700' : undefined,
+                      theme: isSacredTheme ? 'sacred' : 'light',
+                    }}
                   />
                 </div>
               </div>

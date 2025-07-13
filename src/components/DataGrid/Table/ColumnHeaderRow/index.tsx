@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { ColumnDef } from '../../types'
+import type { DataGridStyles } from '../../../../theme'
 import SearchableDropdown from '../../../Field/Dropdown/Searchable'
 import Checkbox from '../../../Checkbox'
 
@@ -15,7 +16,7 @@ interface ColumnHeaderRowProps {
   allColumns: ColumnDef[]
   selectedOverflowField: string
   setSelectedOverflowField: React.Dispatch<React.SetStateAction<string>>
-  sacredtheme?: boolean
+  styles?: DataGridStyles
 }
 
 const getStyles = () => ({
@@ -74,9 +75,19 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   allColumns,
   selectedOverflowField,
   setSelectedOverflowField,
-  sacredtheme = false,
+  styles,
 }) => {
-  const styles = getStyles()
+  const isSacredTheme = styles?.theme === 'sacred'
+  const componentStyles = getStyles()
+
+  // Wrapper function to convert boolean to ChangeEvent
+  const handleCheckboxChange = (checked: boolean) => {
+    const fakeEvent = {
+      target: { checked },
+      currentTarget: { checked },
+    } as React.ChangeEvent<HTMLInputElement>
+    handleHeaderCheckboxChange(fakeEvent)
+  }
   if (isMobile) {
     const mobileOptions = allColumns.map(col => ({
       value: col.headerName ?? col.field,
@@ -106,24 +117,36 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
     }
 
     return (
-      <tr style={styles.headerRow}>
-        <th style={{ ...styles.headerCell, ...styles.checkboxCell }}>
+      <tr style={componentStyles.headerRow}>
+        <th
+          style={{
+            ...componentStyles.headerCell,
+            ...componentStyles.checkboxCell,
+          }}
+        >
           <Checkbox
             checked={allRowsSelected}
             indeterminate={someRowsSelected}
-            onChange={handleHeaderCheckboxChange}
-            sacredtheme={sacredtheme}
+            onChange={handleCheckboxChange}
+            styles={{
+              theme: isSacredTheme ? 'sacred' : 'light',
+            }}
           />
         </th>
-        <th style={{ ...styles.headerCell, ...styles.mobileDropdownCell }}>
+        <th
+          style={{
+            ...componentStyles.headerCell,
+            ...componentStyles.mobileDropdownCell,
+          }}
+        >
           <SearchableDropdown
             label="Columns"
             options={mobileOptions}
             defaultValue={currentMobileChoice?.value || ''}
             onChange={handleMobileChange}
-            shrunklabelposition="aboveNotch"
-            style={{ marginBottom: 0, marginTop: 0, width: '100%' }}
-            sacredtheme={sacredtheme}
+            styles={{
+              theme: isSacredTheme ? 'sacred' : 'light',
+            }}
           />
         </th>
       </tr>
@@ -144,13 +167,20 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   }
 
   return (
-    <tr style={styles.headerRow}>
-      <th style={{ ...styles.headerCell, ...styles.checkboxCell }}>
+    <tr style={componentStyles.headerRow}>
+      <th
+        style={{
+          ...componentStyles.headerCell,
+          ...componentStyles.checkboxCell,
+        }}
+      >
         <Checkbox
           checked={allRowsSelected}
           indeterminate={someRowsSelected}
-          onChange={handleHeaderCheckboxChange}
-          sacredtheme={sacredtheme}
+          onChange={handleCheckboxChange}
+          styles={{
+            theme: isSacredTheme ? 'sacred' : 'light',
+          }}
         />
       </th>
       {finalDesktopColumns.map(col => {
@@ -158,7 +188,10 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
           return (
             <th
               key="overflow-header"
-              style={{ ...styles.headerCell, ...styles.overflowCell }}
+              style={{
+                ...componentStyles.headerCell,
+                ...componentStyles.overflowCell,
+              }}
             >
               <SearchableDropdown
                 label="More Columns"
@@ -176,9 +209,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                       : ''
                 }
                 onChange={handleOverflowChange}
-                shrunklabelposition="onNotch"
-                style={{ marginBottom: 0, marginTop: 0 }}
-                sacredtheme={sacredtheme}
+                styles={{
+                  theme: isSacredTheme ? 'sacred' : 'light',
+                }}
               />
             </th>
           )
@@ -186,7 +219,10 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         return (
           <th
             key={col.field}
-            style={{ ...styles.headerCell, ...styles.columnHeader(col.width) }}
+            style={{
+              ...componentStyles.headerCell,
+              ...componentStyles.columnHeader(col.width),
+            }}
           >
             {col.headerName ?? col.field}
           </th>

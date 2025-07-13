@@ -155,7 +155,6 @@ export const useSearchbar = ({
     ...searchbarProps,
     value: searchValue,
     onChange: handleSearchChange,
-    shrunklabelposition: 'onNotch',
     label: 'Search DataGrid',
   }
 

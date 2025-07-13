@@ -1,33 +1,8 @@
 'use client'
 import React, { useState } from 'react'
-import { Typography } from '../../Typography'
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import Typography from '../../Typography'
+import type { DataGridStyles } from '../../../theme'
+import { SACRED_GLYPHS } from '../../../theme'
 
 export interface MetricCardProps {
   title: string
@@ -38,19 +13,18 @@ export interface MetricCardProps {
     value: number
     isPositive: boolean
   }
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'
   glyph?: string
-  sacredtheme?: boolean
-  className?: string
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 }
 
-const getStyles = (sacredtheme?: boolean, color?: string) => ({
+const getStyles = (isSacredTheme?: boolean, color?: string) => ({
   container: {
     height: '100%',
     borderRadius: '0.75rem',
     borderWidth: '2px',
     transition: 'all 0.3s ease-in-out',
-    ...(sacredtheme
+    ...(isSacredTheme
       ? {
           backgroundColor: 'rgba(0, 0, 0, 0.9)',
           backgroundImage: 'linear-gradient(to bottom right, #000, #1a1a1a)',
@@ -66,7 +40,7 @@ const getStyles = (sacredtheme?: boolean, color?: string) => ({
         }),
   } as React.CSSProperties,
   containerHover: {
-    transform: sacredtheme
+    transform: isSacredTheme
       ? 'translateY(-0.5rem) scale(1.05)'
       : 'translateY(-0.25rem)',
     boxShadow:
@@ -130,9 +104,9 @@ const getStyles = (sacredtheme?: boolean, color?: string) => ({
   title: {
     fontWeight: 600,
     letterSpacing: '0.025em',
-    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
-    color: sacredtheme ? 'rgba(255,255,255,0.9)' : '#6B7280',
-    textShadow: sacredtheme
+    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+    color: isSacredTheme ? 'rgba(255,255,255,0.9)' : '#6B7280',
+    textShadow: isSacredTheme
       ? `0 0 10px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.3)`
       : 'none',
   } as React.CSSProperties,
@@ -140,17 +114,17 @@ const getStyles = (sacredtheme?: boolean, color?: string) => ({
     fontSize: '2.25rem',
     fontWeight: 700,
     marginBottom: '0.25rem',
-    fontFamily: sacredtheme ? 'Cinzel, serif' : 'sans-serif',
-    letterSpacing: sacredtheme ? '-0.025em' : 'normal',
+    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'sans-serif',
+    letterSpacing: isSacredTheme ? '-0.025em' : 'normal',
     color: color,
     textShadow: `0 0 15px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.5)`,
   } as React.CSSProperties,
   subtitle: {
     marginBottom: '0.25rem',
-    fontFamily: sacredtheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
-    fontSize: sacredtheme ? '1rem' : '0.875rem',
-    letterSpacing: sacredtheme ? '0.05em' : 'normal',
-    color: sacredtheme ? 'rgba(255,255,255,0.8)' : '#6B7280',
+    fontFamily: isSacredTheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
+    fontSize: isSacredTheme ? '1rem' : '0.875rem',
+    letterSpacing: isSacredTheme ? '0.05em' : 'normal',
+    color: isSacredTheme ? 'rgba(255,255,255,0.8)' : '#6B7280',
   } as React.CSSProperties,
   trendContainer: {
     display: 'flex',
@@ -162,7 +136,7 @@ const getStyles = (sacredtheme?: boolean, color?: string) => ({
     display: 'flex',
     alignItems: 'center',
     gap: '0.125rem',
-    fontFamily: sacredtheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
+    fontFamily: isSacredTheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
     fontSize: '1rem',
   } as React.CSSProperties,
   shimmer: {
@@ -185,58 +159,66 @@ export default function MetricCard({
   subtitle,
   icon,
   trend,
-  color = 'primary',
   glyph,
-  sacredtheme = false,
-  className,
+  styles,
 }: MetricCardProps) {
+  const isSacredTheme = styles?.theme === 'sacred'
   const selectedGlyph =
     glyph || SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
 
-  const getColorValue = (colorName: string) => {
-    const sacredColors: { [key: string]: string } = {
+  const getColorValue = () => {
+    const sacredColors = {
+      primary: '#FFD700',
+      secondary: '#8B5CF6',
       success: '#10B981',
       warning: '#F59E0B',
       error: '#EF4444',
       info: '#3B82F6',
-      secondary: '#8B5CF6',
-      primary: '#FFD700',
     }
-    const standardColors: { [key: string]: string } = {
+    const standardColors = {
+      primary: '#1976d2',
+      secondary: '#9c27b0',
       success: '#4caf50',
       warning: '#ff9800',
       error: '#f44336',
       info: '#2196f3',
-      secondary: '#9c27b0',
-      primary: '#1976d2',
     }
-    return sacredtheme ? sacredColors[colorName] : standardColors[colorName]
+
+    // Default to primary color based on theme
+    return isSacredTheme ? sacredColors.primary : standardColors.primary
   }
 
-  const cardColor = getColorValue(color)
-  const styles = getStyles(sacredtheme, cardColor)
+  const cardColor = getColorValue()
+  const componentStyles = getStyles(isSacredTheme, cardColor)
   const [isHovered, setIsHovered] = useState(false)
 
   return (
     <div
-      style={{ ...styles.container, ...(isHovered && styles.containerHover) }}
-      className={className}
+      style={{
+        ...componentStyles.container,
+        ...(isHovered && componentStyles.containerHover),
+        ...(styles?.backgroundColor && {
+          backgroundColor: styles.backgroundColor,
+        }),
+        ...(styles?.borderColor && { borderColor: styles.borderColor }),
+        ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {sacredtheme && (
+      {isSacredTheme && (
         <>
-          <div style={styles.glyph}>{selectedGlyph}</div>
-          <div style={styles.dataStream} />
-          <div style={styles.shimmer} />
+          <div style={componentStyles.glyph}>{selectedGlyph}</div>
+          <div style={componentStyles.dataStream} />
+          <div style={componentStyles.shimmer} />
         </>
       )}
-      <div style={styles.content}>
-        <div style={styles.header}>
+      <div style={componentStyles.content}>
+        <div style={componentStyles.header}>
           {icon && (
             <div
               style={{
-                ...styles.iconContainer,
+                ...componentStyles.iconContainer,
                 color: cardColor,
                 backgroundColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.1)`,
                 borderColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.3)`,
@@ -245,23 +227,15 @@ export default function MetricCard({
               {icon}
             </div>
           )}
-          <div style={styles.titleContainer}>
-            <Typography style={styles.title}>{title}</Typography>
+          <div style={componentStyles.titleContainer}>
+            <Typography>{title}</Typography>
           </div>
         </div>
-        <Typography style={styles.value}>{value}</Typography>
-        {subtitle && (
-          <Typography style={styles.subtitle}>{subtitle}</Typography>
-        )}
+        <Typography>{value}</Typography>
+        {subtitle && <Typography>{subtitle}</Typography>}
         {trend && (
-          <div style={styles.trendContainer}>
-            <Typography
-              style={{
-                ...styles.trend,
-                color: trend.isPositive ? '#10B981' : '#EF4444',
-                textShadow: `0 0 8px rgba(${trend.isPositive ? '16, 185, 129' : '239, 68, 68'}, 0.3)`,
-              }}
-            >
+          <div style={componentStyles.trendContainer}>
+            <Typography>
               <span style={{ fontSize: '1.125rem' }}>
                 {trend.isPositive ? '↗' : '↘'}
               </span>

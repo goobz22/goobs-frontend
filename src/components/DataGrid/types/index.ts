@@ -1,10 +1,11 @@
 'use client'
 
 import React from 'react'
-import type { CustomButtonProps } from '../../Button'
+import type { ButtonProps } from '../../Button'
 import type { DropdownProps } from '../../Field/Dropdown/Regular'
 import type { SearchbarProps } from '../../Field/Search'
 import type { DropdownOption } from '../../Field/Dropdown/Searchable'
+import type { DataGridStyles } from '../../../theme'
 
 export interface ColumnDef {
   field: string
@@ -57,8 +58,8 @@ export interface TableProps {
   someRowsSelected?: boolean
   onHeaderCheckboxChange: React.ChangeEventHandler<HTMLInputElement>
   onRowCheckboxChange: (rowId: string) => void
-  /** Enable Egyptian/Sacred theming */
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 }
 
 // New filter interface for embedded DataGrid filtering
@@ -84,14 +85,13 @@ export interface MetricCardData {
     value: number
     isPositive: boolean
   }
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'
   glyph?: string
 }
 
 export interface DatagridProps {
   columns: ColumnDef[]
   rows: RowData[]
-  buttons?: CustomButtonProps[]
+  buttons?: ButtonProps[]
   dropdowns?: DropdownProps[]
   searchbarProps?: SearchbarProps
   error?: Error | null
@@ -113,8 +113,8 @@ export interface DatagridProps {
   // Optional embedded filters that appear between toolbar and table
   filters?: DataGridFilter[]
 
-  /** Enable Egyptian/Sacred theming */
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
 
   metrics?: MetricCardData[]
 }

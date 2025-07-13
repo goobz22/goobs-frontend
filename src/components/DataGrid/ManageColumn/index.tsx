@@ -9,241 +9,27 @@ import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 import { ColumnDef } from '../types'
 import Typography from '../../Typography'
 import Popover from '../../Popover'
-
-const SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
+import type { DataGridStyles } from '../../../theme'
+import { SACRED_GLYPHS } from '../../../theme'
 
 interface ManageColumnProps {
   open?: boolean
   handleClose?: () => void
   columns: ColumnDef[]
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: DataGridStyles
   anchorEl?: HTMLElement | null
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  popover: {
-    border: '1px solid rgba(0, 0, 0, 1)',
-    borderRadius: '8px',
-    minWidth: '250px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-  } as React.CSSProperties,
-
-  container: {
-    padding: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-  } as React.CSSProperties,
-
-  decorativeGlyph: {
-    display: 'none', // Hidden for premium theme
-  } as React.CSSProperties,
-
-  topLeftGlyph: {
-    display: 'none', // Hidden for premium theme
-  } as React.CSSProperties,
-
-  topRightGlyph: {
-    display: 'none', // Hidden for premium theme
-  } as React.CSSProperties,
-
-  title: {
-    marginBottom: 0,
-  } as React.CSSProperties,
-
-  searchContainer: {
-    marginTop: '4px',
-    marginBottom: 0,
-  } as React.CSSProperties,
-
-  allColumnsHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    marginTop: 0,
-    marginBottom: 0,
-    justifyContent: 'space-between',
-  } as React.CSSProperties,
-
-  allColumnsText: {
-    fontWeight: 'bold',
-  } as React.CSSProperties,
-
-  checkboxContainer: {
-    marginRight: '-4px',
-  } as React.CSSProperties,
-
-  scrollArea: {
-    maxHeight: '160px',
-    overflowY: 'auto',
-    marginBottom: '10px',
-  } as React.CSSProperties,
-
-  columnRow: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '4px',
-  } as React.CSSProperties,
-
-  columnRowHover: {
-    borderRadius: '6px',
-    padding: '0 4px',
-    margin: '0 -4px',
-  } as React.CSSProperties,
-
-  columnText: {
-    flexGrow: 1,
-    marginRight: '4px',
-  } as React.CSSProperties,
-
-  eyeButton: {
-    padding: '4px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-
-  saveButton: {
-    marginTop: 0,
-    width: '100%',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  popover: {
-    border: '1px solid rgba(255, 215, 0, 0.5)',
-    borderRadius: '8px',
-    minWidth: '250px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    animation: 'glowPulse 3s ease-in-out infinite',
-    backdropFilter: 'blur(8px)',
-  } as React.CSSProperties,
-
-  container: {
-    padding: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    backdropFilter: 'blur(20px)',
-  } as React.CSSProperties,
-
-  decorativeGlyph: {
-    position: 'absolute',
-    fontSize: '14px',
-    color: 'rgba(255, 215, 0, 0.3)',
-    animation: 'floatGlyphPopover 3s ease-in-out infinite',
-  } as React.CSSProperties,
-
-  topLeftGlyph: {
-    top: '8px',
-    left: '8px',
-  } as React.CSSProperties,
-
-  topRightGlyph: {
-    top: '8px',
-    right: '8px',
-    animationDirection: 'reverse',
-  } as React.CSSProperties,
-
-  title: {
-    marginBottom: 0,
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    letterSpacing: '0.025em',
-    textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-  } as React.CSSProperties,
-
-  searchContainer: {
-    marginTop: '4px',
-    marginBottom: 0,
-  } as React.CSSProperties,
-
-  allColumnsHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    marginTop: 0,
-    marginBottom: 0,
-    justifyContent: 'space-between',
-  } as React.CSSProperties,
-
-  allColumnsText: {
-    fontWeight: 'bold',
-    fontFamily: '"Crimson Text", serif',
-  } as React.CSSProperties,
-
-  checkboxContainer: {
-    marginRight: '-4px',
-  } as React.CSSProperties,
-
-  scrollArea: {
-    maxHeight: '160px',
-    overflowY: 'auto',
-    marginBottom: '10px',
-    '&::-webkit-scrollbar': {
-      width: '8px',
-      height: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: 'rgba(255, 215, 0, 0.5)',
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-      backgroundColor: 'rgba(255, 215, 0, 0.7)',
-    },
-  } as React.CSSProperties,
-
-  columnRow: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '4px',
-  } as React.CSSProperties,
-
-  columnRowHover: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    borderRadius: '6px',
-    padding: '0 4px',
-    margin: '0 -4px',
-  } as React.CSSProperties,
-
-  columnText: {
-    flexGrow: 1,
-    marginRight: '4px',
-    fontFamily: '"Crimson Text", serif',
-  } as React.CSSProperties,
-
-  eyeButton: {
-    padding: '4px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    color: 'rgba(255, 215, 0, 1)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    },
-  } as React.CSSProperties,
-
-  saveButton: {
-    marginTop: 0,
-    width: '100%',
-  } as React.CSSProperties,
 }
 
 function ManageColumns({
   open = false,
   handleClose = () => {},
   columns,
-  sacredtheme = false,
+  styles,
   anchorEl = null,
 }: ManageColumnProps) {
+  const isSacredTheme = styles?.theme === 'sacred'
+
   const {
     handleAllCols,
     toggleColumnState,
@@ -261,7 +47,7 @@ function ManageColumns({
 
   // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
+    if (isSacredTheme) {
       const styleSheet = document.styleSheets[0]
       const keyframes = `
         @keyframes glowPulse {
@@ -285,7 +71,7 @@ function ManageColumns({
         // Keyframes might already exist
       }
     }
-  }, [sacredtheme])
+  }, [isSacredTheme])
 
   const someColumnsVisible = React.useMemo(() => {
     return (
@@ -313,111 +99,188 @@ function ManageColumns({
       .includes(searchInput.toLowerCase())
   })
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.stopPropagation()
-    handleAllCols(event.target.checked)
+  const handleCheckboxChange = (checked: boolean) => {
+    handleAllCols(checked)
   }
 
-  const styles = sacredtheme ? sacredStyles : premiumStyles
+  const containerStyle = {
+    padding: '8px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    position: 'relative' as const,
+    ...(isSacredTheme && {
+      backdropFilter: 'blur(20px)',
+    }),
+  }
+
+  const searchContainerStyle = {
+    marginTop: '4px',
+    marginBottom: 0,
+  }
+
+  const allColumnsHeaderStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: 0,
+    marginBottom: 0,
+    justifyContent: 'space-between',
+  }
+
+  const checkboxContainerStyle = {
+    marginRight: '-4px',
+  }
+
+  const scrollAreaStyle = {
+    maxHeight: '160px',
+    overflowY: 'auto' as const,
+    marginBottom: '10px',
+    ...(isSacredTheme && {
+      '&::-webkit-scrollbar': {
+        width: '8px',
+        height: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: 'rgba(255, 215, 0, 0.5)',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        backgroundColor: 'rgba(255, 215, 0, 0.7)',
+      },
+    }),
+  }
+
+  const columnRowStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '4px',
+  }
+
+  const columnRowHoverStyle = {
+    borderRadius: '6px',
+    padding: '0 4px',
+    margin: '0 -4px',
+    ...(isSacredTheme && {
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    }),
+  }
+
+  const eyeButtonStyle = {
+    padding: '4px',
+    borderRadius: '50%',
+    border: 'none',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    ...(isSacredTheme && {
+      color: 'rgba(255, 215, 0, 1)',
+      '&:hover': {
+        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      },
+    }),
+  }
 
   return (
     <Popover
       open={Boolean(open)}
       onClose={handleCloseAndUpdate}
       anchorEl={anchorEl}
-      sacredtheme={sacredtheme}
+      styles={{
+        theme: isSacredTheme ? 'sacred' : 'light',
+      }}
     >
-      <div
-        style={{
-          ...styles.container,
-          ...(sacredtheme ? styles.popover : premiumStyles.popover),
-        }}
-      >
-        {sacredtheme && (
+      <div style={containerStyle}>
+        {isSacredTheme && (
           <>
             <div
               style={{
-                ...styles.decorativeGlyph,
-                ...styles.topLeftGlyph,
+                position: 'absolute',
+                fontSize: '14px',
+                color: 'rgba(255, 215, 0, 0.3)',
+                animation: 'floatGlyphPopover 3s ease-in-out infinite',
+                top: '8px',
+                left: '8px',
               }}
             >
-              {SACRED_GLYPHS[0]}
+              {SACRED_GLYPHS[22]}
             </div>
             <div
               style={{
-                ...styles.decorativeGlyph,
-                ...styles.topRightGlyph,
+                position: 'absolute',
+                fontSize: '14px',
+                color: 'rgba(255, 215, 0, 0.3)',
+                animation: 'floatGlyphPopover 3s ease-in-out infinite',
+                top: '8px',
+                right: '8px',
+                animationDirection: 'reverse',
               }}
             >
-              {SACRED_GLYPHS[1]}
+              {SACRED_GLYPHS[23]}
             </div>
           </>
         )}
 
         <Typography
-          text={sacredtheme ? 'Sacred Columns' : 'Manage Columns'}
-          fontvariant="merriparagraph"
-          fontcolor={sacredtheme ? 'gold' : 'black'}
-          align="center"
-          style={{
-            ...styles.title,
-            ...(sacredtheme ? styles.title : {}),
+          text={isSacredTheme ? 'Sacred Columns' : 'Manage Columns'}
+          variant="merriparagraph"
+          styles={{
+            color: isSacredTheme ? 'gold' : 'black',
           }}
         />
-        <div style={styles.searchContainer}>
+        <div style={searchContainerStyle}>
           <Searchbar
             value={searchInput}
             onChange={handleSearchChange}
-            placeholder={sacredtheme ? 'Seek columns...' : 'Search Columns'}
-            sacredtheme={sacredtheme}
+            placeholder={isSacredTheme ? 'Seek columns...' : 'Search Columns'}
+            styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
           />
         </div>
-        <div style={styles.allColumnsHeader}>
+        <div style={allColumnsHeaderStyle}>
           <Typography
             text="All Columns"
-            fontvariant="merriparagraph"
-            fontcolor={sacredtheme ? 'gold' : 'black'}
-            style={{
-              fontWeight: 'bold',
-              ...(sacredtheme ? styles.allColumnsText : {}),
+            variant="merriparagraph"
+            styles={{
+              color: isSacredTheme ? 'gold' : 'black',
             }}
           />
-          <div style={styles.checkboxContainer}>
+          <div style={checkboxContainerStyle}>
             <Checkbox
               checked={isAllChecked}
               indeterminate={someColumnsVisible && !isAllChecked}
               onChange={handleCheckboxChange}
-              sacredtheme={sacredtheme}
+              styles={{
+                theme: isSacredTheme ? 'sacred' : 'light',
+              }}
             />
           </div>
         </div>
-        <div style={styles.scrollArea}>
+        <div style={scrollAreaStyle}>
           {filteredColumns.map((column, index) => {
             const isVisible = visibleColumns[column.field] === true
             return (
               <div
                 key={index}
                 style={{
-                  ...styles.columnRow,
-                  ...(sacredtheme ? styles.columnRowHover : {}),
+                  ...columnRowStyle,
+                  ...(isSacredTheme ? columnRowHoverStyle : {}),
                 }}
               >
                 <Typography
                   text={formatColumnName(column.field)}
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? 'white' : 'black'}
-                  style={{
-                    ...styles.columnText,
-                    ...(sacredtheme ? styles.columnText : {}),
+                  variant="merriparagraph"
+                  styles={{
+                    color: isSacredTheme ? 'white' : 'black',
                   }}
                 />
                 <button
                   onClick={() => handleEyeClick(column.field)}
-                  style={styles.eyeButton}
+                  style={eyeButtonStyle}
                 >
                   <ShowHideEyeIcon
                     visible={isVisible}
-                    sacredtheme={sacredtheme}
+                    sacredtheme={isSacredTheme}
                   />
                 </button>
               </div>
@@ -426,11 +289,10 @@ function ManageColumns({
         </div>
         <CustomButton
           text="Save"
-          backgroundcolor={sacredtheme ? 'gold' : 'black'}
-          fontcolor={sacredtheme ? 'black' : 'white'}
-          style={styles.saveButton}
+          styles={{
+            theme: isSacredTheme ? 'sacred' : 'light',
+          }}
           onClick={onSaveColumnView}
-          sacredtheme={sacredtheme}
         />
       </div>
     </Popover>

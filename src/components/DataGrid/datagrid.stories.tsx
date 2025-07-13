@@ -4,7 +4,7 @@ import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import DataGrid from './index'
 import { DatagridProps, ColumnDef, RowData } from './types'
-import { CustomButtonProps } from '../Button'
+import { ButtonProps } from '../Button'
 
 const sampleColumns: ColumnDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -21,7 +21,7 @@ const sampleRows: RowData[] = [
 const commonArgs: Partial<DatagridProps> = {
   columns: sampleColumns,
   rows: sampleRows,
-  buttons: [{ text: 'Add New' }] as CustomButtonProps[],
+  buttons: [{ text: 'Add New' }] as ButtonProps[],
   dropdowns: [
     { label: 'Filter', options: [{ value: 'all' }, { value: 'active' }] },
   ],
@@ -35,7 +35,11 @@ const meta: Meta<typeof DataGrid> = {
     layout: 'fullscreen',
   },
   argTypes: {
-    sacredtheme: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, custom colors, and layout properties.',
+    },
     showIdColumns: { control: 'boolean' },
   },
 }
@@ -43,8 +47,8 @@ export default meta
 
 type Story = StoryObj<typeof DataGrid>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
+export const LightTheme: Story = {
+  name: 'Light Theme',
   render: args => (
     <div
       style={{ backgroundColor: '#f3f4f6', height: '100vh', padding: '1rem' }}
@@ -54,7 +58,26 @@ export const PremiumTheme: Story = {
   ),
   args: {
     ...commonArgs,
-    sacredtheme: false,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => (
+    <div
+      style={{ backgroundColor: '#1e293b', height: '100vh', padding: '1rem' }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'dark',
+    },
   },
 }
 
@@ -67,20 +90,33 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...commonArgs,
-    sacredtheme: true,
+    styles: {
+      theme: 'sacred',
+    },
   },
 }
 
 // Create a proper React component for the interactive demo
 const InteractiveDemoComponent: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
   const [showIds, setShowIds] = React.useState(true)
+
+  const getBackgroundColor = () => {
+    switch (theme) {
+      case 'dark':
+        return '#1e293b'
+      case 'sacred':
+        return 'black'
+      default:
+        return '#f3f4f6'
+    }
+  }
 
   return (
     <div
       style={{
         padding: '1rem',
-        backgroundColor: sacred ? 'black' : '#f3f4f6',
+        backgroundColor: getBackgroundColor(),
         height: '100vh',
       }}
     >
@@ -97,14 +133,21 @@ const InteractiveDemoComponent: React.FC = () => {
         }}
       >
         <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <label>
-          <input
-            type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
-          />
-          <span style={{ marginLeft: '0.5rem' }}>Sacred Theme</span>
-        </label>
+        <div style={{ marginBottom: '0.5rem' }}>
+          <label>
+            <span style={{ marginRight: '0.5rem' }}>Theme:</span>
+            <select
+              value={theme}
+              onChange={e =>
+                setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+              }
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="sacred">Sacred</option>
+            </select>
+          </label>
+        </div>
         <label>
           <input
             type="checkbox"
@@ -117,12 +160,14 @@ const InteractiveDemoComponent: React.FC = () => {
       <DataGrid
         columns={sampleColumns}
         rows={sampleRows}
-        buttons={[{ text: 'Add New' }] as CustomButtonProps[]}
+        buttons={[{ text: 'Add New' }] as ButtonProps[]}
         dropdowns={[
           { label: 'Filter', options: [{ value: 'all' }, { value: 'active' }] },
         ]}
         searchbarProps={{ value: '', onChange: () => {} }}
-        sacredtheme={sacred}
+        styles={{
+          theme: theme,
+        }}
         showIdColumns={showIds}
       />
     </div>
@@ -132,4 +177,25 @@ const InteractiveDemoComponent: React.FC = () => {
 export const InteractiveDemo: Story = {
   name: 'Interactive Demo',
   render: () => <InteractiveDemoComponent />,
+}
+
+// Custom styling example
+export const CustomStyling: Story = {
+  name: 'Custom Styling',
+  render: args => (
+    <div
+      style={{ backgroundColor: '#f3f4f6', height: '100vh', padding: '1rem' }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+      backgroundColor: 'rgba(59, 130, 246, 0.05)',
+      borderColor: 'rgba(59, 130, 246, 0.3)',
+      borderRadius: '12px',
+    },
+  },
 }
