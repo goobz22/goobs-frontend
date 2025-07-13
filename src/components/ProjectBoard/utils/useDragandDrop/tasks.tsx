@@ -27,7 +27,7 @@ interface DragInfo {
 export function useTaskDragAndDrop() {
   const [dragItem, setDragItem] = React.useState<DragInfo | null>(null)
 
-  function handleTaskDragStart(e: React.DragEvent, item: DragInfo) {
+  function handleTaskDragStart(item: DragInfo) {
     setDragItem(item)
   }
 

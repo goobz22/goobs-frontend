@@ -161,7 +161,7 @@ export default function DesktopBoard({
     taskIndex: number
   ) {
     if (isTaskDraggable(columnIndex, taskIndex)) {
-      handleTaskDragStart(e, { columnIndex, taskIndex })
+      handleTaskDragStart({ columnIndex, taskIndex })
     } else {
       e.preventDefault()
     }
@@ -208,9 +208,13 @@ export default function DesktopBoard({
           <div
             key={col._id}
             draggable={isColumnDraggable(colIndex)}
-            onDragStart={e => handleLocalColumnDragStart(e, colIndex)}
-            onDragOver={e => handleLocalColumnDragOver(e, colIndex)}
-            onDrop={e => handleLocalColumnDrop(e, colIndex)}
+            onDragStart={(e: React.DragEvent) =>
+              handleLocalColumnDragStart(e, colIndex)
+            }
+            onDragOver={(e: React.DragEvent) =>
+              handleLocalColumnDragOver(e, colIndex)
+            }
+            onDrop={(e: React.DragEvent) => handleLocalColumnDrop(e, colIndex)}
             style={styles.column}
           >
             {sacredtheme && (
@@ -223,21 +227,23 @@ export default function DesktopBoard({
                 checked={colChecked}
                 disabled={isColumnCheckboxDisabled()}
                 onChange={() => handleColumnCheck(colIndex)}
-                sacredtheme={sacredtheme}
+                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 style={styles.checkbox}
               />
               <div style={styles.columnTitleContainer}>
                 <Typography
-                  fontvariant="merrih4"
-                  fontcolor={sacredtheme ? '#FFD700' : 'white'}
-                  style={styles.columnTitle}
+                  variant="merrih4"
+                  styles={{
+                    color: sacredtheme ? '#FFD700' : 'white',
+                  }}
                 >
                   {col.title}
                 </Typography>
                 <Typography
-                  fontvariant="merrih6"
-                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
-                  style={styles.columnDescription}
+                  variant="merrih6"
+                  styles={{
+                    color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white',
+                  }}
                 >
                   {col.description}
                 </Typography>
@@ -246,8 +252,9 @@ export default function DesktopBoard({
             <div style={styles.tasksContainer}>
               {!col.tasks?.length ? (
                 <Typography
-                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
-                  style={styles.noTasks}
+                  styles={{
+                    color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white',
+                  }}
                 >
                   No tasks yet
                 </Typography>
@@ -270,11 +277,11 @@ export default function DesktopBoard({
                           onSelectTask(colIndex, taskIndex)
                         }}
                         draggable={isTaskDraggable(colIndex, taskIndex)}
-                        onDragStart={e =>
+                        onDragStart={(e: React.DragEvent) =>
                           handleLocalTaskDragStart(e, colIndex, taskIndex)
                         }
                         onDragOver={handleTaskDragOver}
-                        onDrop={e =>
+                        onDrop={(e: React.DragEvent) =>
                           handleLocalTaskDrop(e, colIndex, taskIndex)
                         }
                         sacredtheme={sacredtheme}
@@ -292,8 +299,8 @@ export default function DesktopBoard({
         <div
           key="overflow-desktop-column"
           draggable={false}
-          onDragOver={e => e.preventDefault()}
-          onDrop={e => {
+          onDragOver={(e: React.DragEvent) => e.preventDefault()}
+          onDrop={(e: React.DragEvent) => {
             e.preventDefault()
             onColumnDrop(e, columns.length)
           }}
@@ -310,18 +317,22 @@ export default function DesktopBoard({
               }
               value={activeOverflowColumn?.title}
               onChange={handleOverflowDropdownChange}
-              fontcolor={sacredtheme ? '#FFD700' : '#000'}
-              shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
-              backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
-              shrunklabelposition="aboveNotch"
-              outlinecolor={sacredtheme ? '#FFD700' : 'white'}
-              sacredtheme={sacredtheme}
+              styles={{
+                theme: sacredtheme ? 'sacred' : 'light',
+                backgroundColor: sacredtheme
+                  ? 'rgba(255, 215, 0, 0.1)'
+                  : 'white',
+                borderColor: sacredtheme ? '#FFD700' : 'white',
+                textColor: sacredtheme ? '#FFD700' : '#000',
+                labelColor: sacredtheme ? '#FFD700' : 'white',
+              }}
             />
             <div style={styles.columnTitleContainer}>
               <Typography
-                fontvariant="merrih6"
-                fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
-                style={styles.columnDescription}
+                variant="merrih6"
+                styles={{
+                  color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white',
+                }}
               >
                 {activeOverflowColumn.description}
               </Typography>
@@ -330,8 +341,9 @@ export default function DesktopBoard({
           <div style={styles.tasksContainer}>
             {!activeOverflowColumn.tasks?.length ? (
               <Typography
-                fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
-                style={styles.noTasks}
+                styles={{
+                  color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white',
+                }}
               >
                 No tasks yet
               </Typography>
@@ -355,11 +367,11 @@ export default function DesktopBoard({
                         onSelectTask(overflowColIndex, taskIndex)
                       }}
                       draggable={isTaskDraggable(overflowColIndex, taskIndex)}
-                      onDragStart={e =>
+                      onDragStart={(e: React.DragEvent) =>
                         handleLocalTaskDragStart(e, overflowColIndex, taskIndex)
                       }
                       onDragOver={handleTaskDragOver}
-                      onDrop={e =>
+                      onDrop={(e: React.DragEvent) =>
                         handleLocalTaskDrop(e, overflowColIndex, taskIndex)
                       }
                       sacredtheme={sacredtheme}

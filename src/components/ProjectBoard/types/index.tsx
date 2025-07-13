@@ -1,3 +1,5 @@
+import { ProjectBoardStyles } from '../../../theme'
+
 /** A minimal typed comment for any type of task. */
 export type Comment = {
   _id: string
@@ -208,6 +210,6 @@ export interface ProjectBoardProps {
     commentId: string,
     revisionHistory: CommentEditHistory[]
   ) => void
-  /** Enable Egyptian/Sacred theming */
-  sacredtheme?: boolean
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: ProjectBoardStyles
 }

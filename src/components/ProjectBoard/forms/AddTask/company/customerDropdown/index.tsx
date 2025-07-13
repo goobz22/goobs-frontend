@@ -262,9 +262,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth={false}
-      className={sacredtheme ? 'sacred-dialog' : ''}
+      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
     >
       <div style={styles.dialog}>
         {sacredtheme && (
@@ -296,7 +294,10 @@ const CompanyAddTaskCustomerDropdown: React.FC<
         </button>
 
         <div style={styles.header}>
-          <Typography fontvariant="merrih5" style={styles.title}>
+          <Typography
+            variant="merrih5"
+            styles={{ color: sacredtheme ? '#FFD700' : undefined }}
+          >
             Create Task
           </Typography>
 
@@ -304,9 +305,9 @@ const CompanyAddTaskCustomerDropdown: React.FC<
             <TextField
               label="Task Title"
               value={taskTitle}
-              onChange={e => setTaskTitle(e.target.value)}
+              onChange={setTaskTitle}
               placeholder="Enter Task Title"
-              sacredtheme={sacredtheme}
+              styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
             />
             <ComplexTextEditor
               label="Task Description"
@@ -314,7 +315,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
               onChange={setTaskDescription}
               editorType="simple"
               minRows={5}
-              sacredtheme={sacredtheme}
+              styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
             />
             <SearchableDropdown
               label="Customer"
@@ -328,7 +329,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 setSelectedCustomerId(option?.attribute2 || '')
               }
               placeholder="Select a customer"
-              sacredtheme={sacredtheme}
+              styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
             />
             <div style={styles.row}>
               <div style={styles.col}>
@@ -344,7 +345,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     setSelectedSeverityId(option?.attribute2 || '')
                   }
                   placeholder="Select severity level"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 />
                 <SearchableDropdown
                   label="Status"
@@ -360,7 +361,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     setSelectedStatusId(option?.attribute1 || '')
                   }}
                   placeholder="Select status"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 />
               </div>
               <div style={styles.col}>
@@ -375,7 +376,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     setSelectedQueueId(option?.attribute1 || '')
                   }
                   placeholder="Select product queue"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 />
                 <SearchableDropdown
                   label="Substatus"
@@ -393,8 +394,10 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                       ? 'Select substatus'
                       : 'Please select a status first'
                   }
-                  disabled={!selectedStatus}
-                  sacredtheme={sacredtheme}
+                  styles={{
+                    theme: sacredtheme ? 'sacred' : 'light',
+                    disabled: !selectedStatus,
+                  }}
                 />
               </div>
             </div>
@@ -422,7 +425,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     setSelectedTopicIds(newSelectedIds)
                   }}
                   complexOptions={true}
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 />
               )
             }, [topics, selectedTopicIds, sacredtheme])}
@@ -453,7 +456,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     setSelectedArticleIds(newSelectedIds)
                   }}
                   complexOptions={true}
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
                 />
               )
             }, [knowledgebaseArticles, selectedArticleIds, sacredtheme])}
@@ -462,16 +465,12 @@ const CompanyAddTaskCustomerDropdown: React.FC<
               <CustomButton
                 text="Cancel"
                 onClick={onClose}
-                backgroundcolor="none"
-                fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                sacredtheme={sacredtheme}
+                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
               />
               <CustomButton
                 text="Create Task"
                 onClick={handleSubmit}
-                backgroundcolor={sacredtheme ? '#FFD700' : '#000'}
-                fontcolor={sacredtheme ? '#000' : 'white'}
-                sacredtheme={sacredtheme}
+                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
               />
             </div>
           </div>

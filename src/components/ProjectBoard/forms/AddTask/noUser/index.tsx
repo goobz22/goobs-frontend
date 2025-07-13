@@ -107,15 +107,17 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           </div>
         </>
       )}
-      <Typography style={styles.title}>Create Task</Typography>
+      <Typography styles={{ color: sacredtheme ? '#FFD700' : undefined }}>
+        Create Task
+      </Typography>
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <TextField
           label="Task Title"
           value={taskTitle}
-          onChange={e => setTaskTitle(e.target.value)}
+          onChange={setTaskTitle}
           placeholder="Enter Task Title"
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
         <ComplexTextEditor
           label="Task Description"
@@ -123,14 +125,14 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           onChange={setTaskDescription}
           editorType="simple"
           minRows={5}
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
         <TextField
           label="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={setEmail}
           placeholder="Enter your email"
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
         <SearchableDropdown
           label="Severity Level"
@@ -145,14 +147,12 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
             )
           }
           placeholder="Select severity level"
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
         <CustomButton
           text="Create Task"
           onClick={() => handleSubmit()}
-          backgroundcolor={sacredtheme ? '#FFD700' : '#000'}
-          fontcolor={sacredtheme ? '#000' : 'white'}
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
       </form>
     </div>

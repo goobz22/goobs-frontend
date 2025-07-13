@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Defines the ProjectBoard component for managing project tasks with drag-and-drop functionality.
+ * It supports light, dark, and sacred themes with comprehensive customization options.
+ */
 'use client'
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react'
@@ -18,23 +22,11 @@ import { ProjectBoardProps, ColumnData, Task, BoardType } from './types'
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
 import { useComputeBoardResize } from './utils/useComputeBoard'
 import Board from './board'
+import { getProjectBoardStyles, SACRED_GLYPHS } from '../../theme'
 
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓅓',
-  '𓇳',
-  '𓊹',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+// --------------------------------------------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------------------------------------------
 
 function mergeColumnsAndTasks(
   columns: Array<{ _id: string; title: string; description: string }>,
@@ -66,31 +58,9 @@ function mergeColumnsAndTasks(
   })
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  container: {
-    boxSizing: 'border-box',
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-    ...(sacredtheme && {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      borderRadius: '0.5rem',
-      animation: 'project-board-glow-pulse 3s infinite alternate',
-      overflow: 'hidden',
-    }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    color: 'rgba(255, 215, 0, 0.3)',
-    zIndex: 10,
-    animation: 'project-board-float 10s infinite alternate',
-  } as React.CSSProperties,
-  toolbarContainer: {
-    marginTop: '0.25rem',
-    paddingLeft: '1rem',
-  } as React.CSSProperties,
-})
+// --------------------------------------------------------------------------
+// MAIN PROJECT BOARD CONTENT COMPONENT
+// --------------------------------------------------------------------------
 
 function ProjectBoardContent({
   variant,
@@ -117,12 +87,20 @@ function ProjectBoardContent({
   customerId,
   companyId,
   preferDropdown,
-  sacredtheme = false,
+  styles,
 }: ProjectBoardProps) {
   const [columnState, setColumnState] = useAtom(columnsAtom)
   const mergedColumns = useMemo(
     () => mergeColumnsAndTasks(columns, tasks, boardType),
     [columns, tasks, boardType]
+  )
+
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDisabled = styles?.disabled
+
+  const computedStyles = useMemo(
+    () => getProjectBoardStyles(styles, isDisabled),
+    [styles, isDisabled]
   )
 
   useEffect(() => {
@@ -155,7 +133,6 @@ function ProjectBoardContent({
     useColumnDragAndDrop(columnState, setColumnState)
   const [addTaskOpen, setAddTaskOpen] = useState(false)
   const [showTaskOpen, setShowTaskOpen] = useState('-1')
-  const styles = getStyles(sacredtheme)
 
   const handleAddTask = useCallback(
     (newTask: Omit<Task, '_id'>) => {
@@ -310,51 +287,19 @@ function ProjectBoardContent({
   ]
 
   return (
-    <div ref={containerRef} style={styles.container}>
-      {sacredtheme && (
+    <div ref={containerRef} style={computedStyles.container}>
+      {isSacredTheme && (
         <>
-          <div
-            style={{
-              ...styles.glyph,
-              top: '0.75rem',
-              left: '0.75rem',
-              fontSize: '1.5rem',
-            }}
-          >
+          <div style={computedStyles.glyphPositions.topLeft}>
             {SACRED_GLYPHS[0]}
           </div>
-          <div
-            style={{
-              ...styles.glyph,
-              top: '0.75rem',
-              right: '0.75rem',
-              fontSize: '1.5rem',
-              animationDirection: 'reverse',
-            }}
-          >
+          <div style={computedStyles.glyphPositions.topRight}>
             {SACRED_GLYPHS[13]}
           </div>
-          <div
-            style={{
-              ...styles.glyph,
-              bottom: '0.75rem',
-              left: '0.75rem',
-              fontSize: '1.125rem',
-              animationDelay: '1s',
-            }}
-          >
+          <div style={computedStyles.glyphPositions.bottomLeft}>
             {SACRED_GLYPHS[5]}
           </div>
-          <div
-            style={{
-              ...styles.glyph,
-              bottom: '0.75rem',
-              right: '0.75rem',
-              fontSize: '1.125rem',
-              animationDirection: 'reverse',
-              animationDelay: '1s',
-            }}
-          >
+          <div style={computedStyles.glyphPositions.bottomRight}>
             {SACRED_GLYPHS[9]}
           </div>
         </>
@@ -366,12 +311,12 @@ function ProjectBoardContent({
           label: 'Search...',
           value: searchTerm,
           onChange: handleSearchChange,
-          sacredtheme: sacredtheme,
+          styles: { theme: styles?.theme },
         }}
-        sacredtheme={sacredtheme}
+        styles={{ theme: styles?.theme }}
       />
 
-      <div style={styles.toolbarContainer}>
+      <div style={computedStyles.toolbarContainer}>
         <Board
           columns={fittedColumns}
           overflowColumns={overflowColumns}
@@ -382,7 +327,7 @@ function ProjectBoardContent({
           onColumnDragStart={handleColumnDragStart}
           onColumnDragOver={handleColumnDragOver}
           onColumnDrop={handleColumnDrop}
-          sacredtheme={sacredtheme}
+          styles={{ theme: styles?.theme }}
         />
       </div>
 
@@ -404,7 +349,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCompanies={rawCompanies || []}
-              sacredtheme={sacredtheme}
+              sacredtheme={styles?.theme === 'sacred'}
             />
           ) : (
             <AdministratorAddTaskCompanyProvided
@@ -419,7 +364,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               companyId={companyId || ''}
-              sacredtheme={sacredtheme}
+              sacredtheme={styles?.theme === 'sacred'}
             />
           )}
         </>
@@ -442,7 +387,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCustomers={rawCustomers || []}
-              sacredtheme={sacredtheme}
+              sacredtheme={styles?.theme === 'sacred'}
             />
           ) : (
             <CompanyAddTaskCustomerProvided
@@ -457,7 +402,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               customerId={customerId || ''}
-              sacredtheme={sacredtheme}
+              sacredtheme={styles?.theme === 'sacred'}
             />
           )}
         </>
@@ -472,7 +417,7 @@ function ProjectBoardContent({
           severityLevels={rawSeverityLevels}
           createdUserId={currentUser._id}
           companyId={companyId || ''}
-          sacredtheme={sacredtheme}
+          styles={{ theme: styles?.theme }}
         />
       )}
 
@@ -514,12 +459,16 @@ function ProjectBoardContent({
           topicOptions={rawTopics}
           knowledgebaseArticleOptions={rawArticles}
           teamMemberOptions={rawEmployees}
-          sacredtheme={sacredtheme}
+          styles={{ theme: styles?.theme }}
         />
       )}
     </div>
   )
 }
+
+// --------------------------------------------------------------------------
+// MAIN PROJECT BOARD WRAPPER COMPONENT
+// --------------------------------------------------------------------------
 
 function ProjectBoard(props: ProjectBoardProps) {
   return (

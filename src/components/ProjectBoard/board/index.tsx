@@ -4,6 +4,7 @@ import React from 'react'
 import DesktopBoard from './desktop'
 import MobileBoard from './mobile'
 import TabletBoard from './tablet'
+import { ProjectBoardStyles } from '../../../theme'
 
 import type { ColumnData } from '../types'
 
@@ -17,6 +18,9 @@ export interface BoardProps {
   onColumnDragStart: (e: React.DragEvent, columnIndex: number) => void
   onColumnDragOver: (e: React.DragEvent, columnIndex: number) => void
   onColumnDrop: (e: React.DragEvent, columnIndex: number) => void
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: ProjectBoardStyles
+  /** Sacred theme flag for styling */
   sacredtheme?: boolean
 }
 

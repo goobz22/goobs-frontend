@@ -129,7 +129,6 @@ const meta: Meta<typeof ProjectBoard> = {
     layout: 'fullscreen',
   },
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     variant: {
       control: 'radio',
       options: ['administrator', 'company', 'customer'],
@@ -146,7 +145,9 @@ export const PremiumTheme: Story = {
     ...commonArgs,
     variant: 'administrator',
     boardType: 'status',
-    sacredtheme: false,
+    styles: {
+      theme: 'light',
+    },
   } as ProjectBoardProps,
 }
 
@@ -156,12 +157,14 @@ export const SacredTheme: Story = {
     ...commonArgs,
     variant: 'administrator',
     boardType: 'status',
-    sacredtheme: true,
+    styles: {
+      theme: 'sacred',
+    },
   } as ProjectBoardProps,
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [isSacredTheme, setIsSacredTheme] = React.useState(false)
   const [variant, setVariant] = React.useState<BoardVariant>('administrator')
   const [boardType, setBoardType] = React.useState<BoardType>('status')
 
@@ -169,7 +172,7 @@ const InteractiveDemoRenderer = () => {
     <div
       style={{
         padding: '1rem',
-        backgroundColor: sacred ? 'black' : '#f3f4f6',
+        backgroundColor: isSacredTheme ? 'black' : '#f3f4f6',
         height: '100vh',
       }}
     >
@@ -188,8 +191,8 @@ const InteractiveDemoRenderer = () => {
         <label>
           <input
             type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
+            checked={isSacredTheme}
+            onChange={e => setIsSacredTheme(e.target.checked)}
           />
           <span style={{ marginLeft: '0.5rem' }}>Sacred Theme</span>
         </label>
@@ -216,7 +219,9 @@ const InteractiveDemoRenderer = () => {
         columns={sampleColumns}
         tasks={sampleTasks}
         currentUser={{ _id: 'u1', firstName: 'Test', lastName: 'User' }}
-        sacredtheme={sacred}
+        styles={{
+          theme: isSacredTheme ? 'sacred' : 'light',
+        }}
         variant={variant}
         boardType={boardType}
         rawArticles={[]}

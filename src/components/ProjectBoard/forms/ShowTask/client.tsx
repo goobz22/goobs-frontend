@@ -25,6 +25,7 @@ import type {
   RawArticle,
   RawEmployee,
 } from '../../types'
+import { ProjectBoardStyles } from '../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -76,125 +77,148 @@ export interface ShowTaskProps {
     commentId: string,
     revisionHistory: CommentEditHistory[]
   ) => void
-  sacredtheme?: boolean
+  styles?: ProjectBoardStyles
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  dialog: {
-    borderWidth: '2px',
-    borderRadius: '0.5rem',
-    overflow: 'hidden',
-    ...(sacredtheme
-      ? {
-          borderColor: 'rgba(255, 215, 0, 0.5)',
-          backgroundColor: 'rgba(0, 0, 0, 0.95)',
-          animation: 'show-task-glow-pulse 2s infinite alternate',
-        }
-      : {
-          borderColor: 'black',
-        }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '0.75rem',
-    color: 'rgba(255, 215, 0, 0.3)',
-    fontSize: '1.125rem',
-    zIndex: 10,
-    animation: 'show-task-float-glyph 5s infinite alternate',
-  } as React.CSSProperties,
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0.5rem',
-    borderBottom: `2px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
-    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.05)' }),
-  } as React.CSSProperties,
-  headerTitle: {
-    fontSize: '1.125rem',
-    fontWeight: 700,
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      letterSpacing: '0.05em',
-      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-    }),
-  } as React.CSSProperties,
-  headerSubtitle: {
-    fontSize: '0.875rem',
-    marginTop: '0.125rem',
-    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-  } as React.CSSProperties,
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.25rem',
-  } as React.CSSProperties,
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 0,
-  } as React.CSSProperties,
-  mainContent: {
-    gridColumn: 'span 2 / span 2',
-    padding: '0.5rem',
-    paddingTop: 0,
-  } as React.CSSProperties,
-  descriptionContainer: {
-    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
-    margin: '0 -8px',
-    padding: '0.5rem 8px',
-    paddingBottom: '0.5rem',
-    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-  } as React.CSSProperties,
-  sectionTitle: {
-    fontWeight: 700,
-    marginBottom: '0.25rem',
-    ...(sacredtheme && { fontFamily: 'Cinzel, serif' }),
-  } as React.CSSProperties,
-  descriptionText: {
-    fontSize: '0.875rem',
-    whiteSpace: 'pre-wrap',
-    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-  } as React.CSSProperties,
-  comment: {
-    marginBottom: '0',
-  } as React.CSSProperties,
-  commentEditing: {
-    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
-    margin: '0 -8px',
-    padding: '0.25rem 0.5rem',
-    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-  } as React.CSSProperties,
-  commentContent: {
-    border: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
-    margin: '0 -8px',
-    padding: '0.5rem',
-    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-  } as React.CSSProperties,
-  sidebar: {
-    gridColumn: 'span 1 / span 1',
-    padding: '0.5rem',
-    borderLeft: `2px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : 'black'}`,
-    ...(sacredtheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-  } as React.CSSProperties,
-  sidebarSection: {
-    marginBottom: '0.5rem',
-  } as React.CSSProperties,
-  sidebarLabel: {
-    fontSize: '0.875rem',
-    fontWeight: 700,
-    ...(sacredtheme && { fontFamily: 'Cinzel, serif' }),
-  } as React.CSSProperties,
-  sidebarValue: {
-    fontSize: '0.875rem',
-    ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-  } as React.CSSProperties,
-  chipContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.25rem',
-    marginTop: '0.25rem',
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: ProjectBoardStyles) => {
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
+
+  return {
+    dialog: {
+      borderWidth: '2px',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      ...(isSacredTheme
+        ? {
+            borderColor: 'rgba(255, 215, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            animation: 'show-task-glow-pulse 2s infinite alternate',
+          }
+        : isDarkTheme
+          ? {
+              borderColor: 'rgba(75, 85, 99, 0.5)',
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+            }
+          : {
+              borderColor: 'black',
+            }),
+    } as React.CSSProperties,
+    glyph: {
+      position: 'absolute',
+      top: '0.75rem',
+      color: 'rgba(255, 215, 0, 0.3)',
+      fontSize: '1.125rem',
+      zIndex: 10,
+      animation: 'show-task-float-glyph 5s infinite alternate',
+    } as React.CSSProperties,
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0.5rem',
+      borderBottom: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.05)' }),
+      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.05)' }),
+    } as React.CSSProperties,
+    headerTitle: {
+      fontSize: '1.125rem',
+      fontWeight: 700,
+      ...(isSacredTheme && {
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.05em',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+      }),
+      ...(isDarkTheme && {
+        color: '#E5E7EB',
+      }),
+    } as React.CSSProperties,
+    headerSubtitle: {
+      fontSize: '0.875rem',
+      marginTop: '0.125rem',
+      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
+      ...(isDarkTheme && { color: '#9CA3AF' }),
+    } as React.CSSProperties,
+    headerActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.25rem',
+    } as React.CSSProperties,
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: 0,
+    } as React.CSSProperties,
+    mainContent: {
+      gridColumn: 'span 2 / span 2',
+      padding: '0.5rem',
+      paddingTop: 0,
+    } as React.CSSProperties,
+    descriptionContainer: {
+      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      margin: '0 -8px',
+      padding: '0.5rem 8px',
+      paddingBottom: '0.5rem',
+      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+    } as React.CSSProperties,
+    sectionTitle: {
+      fontWeight: 700,
+      marginBottom: '0.25rem',
+      ...(isSacredTheme && { fontFamily: 'Cinzel, serif' }),
+      ...(isDarkTheme && { color: '#E5E7EB' }),
+    } as React.CSSProperties,
+    descriptionText: {
+      fontSize: '0.875rem',
+      whiteSpace: 'pre-wrap',
+      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
+      ...(isDarkTheme && { color: '#D1D5DB' }),
+    } as React.CSSProperties,
+    comment: {
+      marginBottom: '0',
+    } as React.CSSProperties,
+    commentEditing: {
+      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      margin: '0 -8px',
+      padding: '0.25rem 0.5rem',
+      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+    } as React.CSSProperties,
+    commentContent: {
+      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      margin: '0 -8px',
+      padding: '0.5rem',
+      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+    } as React.CSSProperties,
+    sidebar: {
+      gridColumn: 'span 1 / span 1',
+      padding: '0.5rem',
+      borderLeft: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
+      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+    } as React.CSSProperties,
+    sidebarSection: {
+      marginBottom: '0.5rem',
+    } as React.CSSProperties,
+    sidebarLabel: {
+      fontSize: '0.875rem',
+      fontWeight: 700,
+      ...(isSacredTheme && { fontFamily: 'Cinzel, serif' }),
+      ...(isDarkTheme && { color: '#E5E7EB' }),
+    } as React.CSSProperties,
+    sidebarValue: {
+      fontSize: '0.875rem',
+      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
+      ...(isDarkTheme && { color: '#D1D5DB' }),
+    } as React.CSSProperties,
+    chipContainer: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '0.25rem',
+      marginTop: '0.25rem',
+    } as React.CSSProperties,
+  }
+}
 
 function formatRelativeTime(date?: Date): string {
   if (!date) return ''
@@ -248,7 +272,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   onDuplicate,
   onEditComment,
   onRevisionHistory,
-  sacredtheme = false,
+  styles,
 }) => {
   const [localComments, setLocalComments] = useState<Comment[]>(comments)
   const [newComment, setNewComment] = useState('')
@@ -271,7 +295,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   const [selectedRevisions, setSelectedRevisions] = useState<
     Record<string, string | null>
   >({})
-  const styles = getStyles(sacredtheme)
+  const computedStyles = getStyles(styles)
+  const isSacredTheme = styles?.theme === 'sacred'
 
   useEffect(() => {
     setLocalComments(prev =>
@@ -411,19 +436,23 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
-      fullWidth
-      className={sacredtheme ? 'sacred-dialog' : ''}
+      styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
     >
-      <div style={styles.dialog}>
-        {sacredtheme && (
+      <div style={computedStyles.dialog}>
+        {isSacredTheme && (
           <>
-            <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
+            <div
+              style={{
+                ...computedStyles.glyph,
+                top: '0.75rem',
+                left: '0.75rem',
+              }}
+            >
               {SACRED_GLYPHS[0]}
             </div>
             <div
               style={{
-                ...styles.glyph,
+                ...computedStyles.glyph,
                 top: '0.75rem',
                 right: '3rem',
                 animationDirection: 'reverse',
@@ -434,84 +463,69 @@ const ShowTask: React.FC<ShowTaskProps> = ({
           </>
         )}
 
-        <div style={styles.header}>
+        <div style={computedStyles.header}>
           <div>
             {isEditing ? (
               <TextField
                 label="Task Title"
                 value={formData.taskTitle}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, taskTitle: e.target.value }))
+                onChange={value =>
+                  setFormData(prev => ({ ...prev, taskTitle: value }))
                 }
-                shrunklabelposition="aboveNotch"
                 className="mb-1"
-                sacredtheme={sacredtheme}
+                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
               />
             ) : (
               <Typography
-                fontvariant="merrih4"
-                fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                text={formData.taskTitle}
-                style={styles.headerTitle}
-              />
+                variant="merrih4"
+                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+              >
+                {formData.taskTitle}
+              </Typography>
             )}
             <Typography
-              fontvariant="merrih5"
-              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.7)' : 'gray'}
+              variant="merrih5"
               text={`created by ${createdBy}`}
-              style={styles.headerSubtitle}
+              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             />
           </div>
 
-          <div style={styles.headerActions}>
+          <div style={computedStyles.headerActions}>
             <CustomButton
               text={isEditing ? 'Save' : 'Edit'}
-              fontcolor={sacredtheme ? '#FFD700' : 'black'}
-              backgroundcolor="none"
               onClick={handleEditToggle}
-              sacredtheme={sacredtheme}
+              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             />
             <CustomButton
               text="Delete"
-              fontcolor={sacredtheme ? '#FFD700' : 'black'}
-              backgroundcolor="none"
               onClick={onDelete}
-              sacredtheme={sacredtheme}
+              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             />
             <CustomButton
               text="Duplicate"
-              fontcolor={sacredtheme ? '#FFD700' : 'black'}
-              backgroundcolor="none"
               onClick={onDuplicate}
-              sacredtheme={sacredtheme}
+              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             />
-            <button
+            <CustomButton
+              icon={<CloseIcon />}
               onClick={onClose}
-              style={{
-                ...styles.headerActions,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '0.25rem',
-                borderRadius: '9999px',
-                color: sacredtheme ? '#FFD700' : 'black',
+              styles={{
+                theme: isSacredTheme ? 'sacred' : 'light',
+                outline: true,
               }}
-            >
-              <CloseIcon />
-            </button>
+            />
           </div>
         </div>
 
-        <div style={styles.grid}>
-          <div style={styles.mainContent}>
-            <div style={styles.descriptionContainer}>
+        <div style={computedStyles.grid}>
+          <div style={computedStyles.mainContent}>
+            <div style={computedStyles.descriptionContainer}>
               {isEditing ? (
                 <>
                   <Typography
-                    fontvariant="merrih5"
-                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                    variant="merrih5"
                     text="Task Description"
-                    style={styles.sectionTitle}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                   <ComplexTextEditor
                     value={formData.description}
@@ -521,22 +535,20 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                     label="Task Description"
                     editorType="simple"
                     minRows={3}
-                    sacredtheme={sacredtheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                 </>
               ) : (
                 <>
                   <Typography
-                    fontvariant="merrih5"
-                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                    variant="merrih5"
                     text="Task Description"
-                    style={styles.sectionTitle}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                   <Typography
-                    fontvariant="merrih6"
-                    fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
+                    variant="merrih6"
                     text={formData.description}
-                    style={styles.descriptionText}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                 </>
               )}
@@ -570,68 +582,55 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 commentMenu.anchor && commentMenu.commentId === comment._id
 
               return (
-                <div key={comment._id} style={styles.comment}>
+                <div key={comment._id} style={computedStyles.comment}>
                   {editingCommentId === comment._id ? (
-                    <div style={styles.commentEditing}>
+                    <div style={computedStyles.commentEditing}>
                       <ComplexTextEditor
                         value={editingCommentText}
                         onChange={val => setEditingCommentText(val)}
                         label="Edit Comment"
                         minRows={3}
                         editorType="simple"
-                        sacredtheme={sacredtheme}
+                        styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                       />
                       <div className="flex justify-end mt-1 gap-1">
                         <CustomButton
                           text="Save"
-                          backgroundcolor={
-                            sacredtheme ? '#FFD700' : 'woad.dark'
-                          }
-                          fontcolor={sacredtheme ? 'black' : 'white'}
                           onClick={() => saveEditingComment(comment._id)}
-                          sacredtheme={sacredtheme}
+                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                         />
                         <CustomButton
                           text="Cancel"
-                          backgroundcolor="none"
-                          fontcolor={sacredtheme ? '#FFD700' : 'black'}
                           onClick={cancelEditingComment}
-                          sacredtheme={sacredtheme}
+                          styles={{
+                            theme: isSacredTheme ? 'sacred' : 'light',
+                            outline: true,
+                          }}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div style={styles.commentContent}>
+                    <div style={computedStyles.commentContent}>
                       <div className="flex justify-between items-start">
                         <Typography
-                          fontvariant="merrih5"
-                          fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                          variant="merrih5"
                           text={comment.createdBy}
+                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                         />
-                        <button
+                        <CustomButton
+                          icon={<MoreVertIcon />}
                           onClick={e => openCommentMenu(e, comment._id)}
-                          style={{
-                            ...styles.headerActions,
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.25rem',
-                            borderRadius: '9999px',
-                            color: sacredtheme ? '#FFD700' : 'black',
+                          styles={{
+                            theme: isSacredTheme ? 'sacred' : 'light',
+                            outline: true,
                           }}
-                        >
-                          <MoreVertIcon />
-                        </button>
+                        />
 
                         <Popover
                           open={Boolean(isMenuOpen)}
                           onClose={closeCommentMenu}
                           anchorEl={commentMenu.anchor}
-                          className={
-                            sacredtheme
-                              ? 'bg-black/95 border-yellow-400/30'
-                              : ''
-                          }
+                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                         >
                           {canEdit && (
                             <div
@@ -639,12 +638,14 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                 handleEditClick(comment._id, comment.text)
                               }
                               style={{
-                                ...styles.headerActions,
+                                ...computedStyles.headerActions,
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
                                 padding: '0.5rem 1rem',
-                                color: sacredtheme ? '#FFD700' : 'gray',
+                                color: isSacredTheme
+                                  ? 'rgba(255, 215, 0, 0.7)'
+                                  : '#666',
                               }}
                             >
                               Edit
@@ -654,7 +655,6 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                             <div style={{ width: '14rem' }}>
                               <SearchableDropdown
                                 label="Revision History"
-                                shrunklabelposition="aboveNotch"
                                 placeholder="Select revision..."
                                 options={
                                   comment.editHistory.map(rev => {
@@ -679,7 +679,9 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                   )
                                 }
                                 defaultValue={selectedRevId || undefined}
-                                sacredtheme={sacredtheme}
+                                styles={{
+                                  theme: isSacredTheme ? 'sacred' : 'light',
+                                }}
                               />
                             </div>
                           )}
@@ -688,17 +690,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
 
                       <div className="mt-auto">
                         <Typography
-                          fontvariant="merriparagraph"
-                          fontcolor={
-                            sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'
-                          }
+                          variant="merriparagraph"
                           text={displayedText}
+                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                         />
-                        <div
-                          className={
-                            sacredtheme ? 'text-yellow-400/60' : 'text-gray-500'
-                          }
-                        >
+                        <div style={computedStyles.descriptionText}>
                           {comment.createdAt && (
                             <span>
                               Created {createdTime} by {comment.createdBy}
@@ -725,30 +721,24 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 label="Add Comment"
                 minRows={3}
                 editorType="simple"
-                sacredtheme={sacredtheme}
+                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
               />
               <div className="flex justify-end mt-2 gap-2">
                 <CustomButton
                   text="Close Task"
-                  backgroundcolor={
-                    sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'gunpowder.main'
-                  }
-                  fontcolor={sacredtheme ? 'black' : 'white'}
                   onClick={() => onCloseTask(taskId)}
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
                 <CustomButton
                   text="Comment"
-                  backgroundcolor={sacredtheme ? '#FFD700' : 'woad.dark'}
-                  fontcolor={sacredtheme ? 'black' : 'white'}
                   onClick={handleComment}
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               </div>
             </div>
           </div>
 
-          <div style={styles.sidebar}>
+          <div style={computedStyles.sidebar}>
             {[
               {
                 label: 'Customer Assigned',
@@ -811,20 +801,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 field: 'teamMemberAssigned',
               },
             ].map(({ label, value, options, field }) => (
-              <div key={label} style={styles.sidebarSection}>
+              <div key={label} style={computedStyles.sidebarSection}>
                 {!isEditing && (
                   <Typography
-                    fontvariant="merriparagraph"
-                    fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                    variant="merriparagraph"
                     text={label}
-                    style={styles.sidebarLabel}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                 )}
                 {isEditing ? (
                   <SearchableDropdown
                     label={label}
                     options={options}
-                    shrunklabelposition="aboveNotch"
                     defaultValue={value}
                     onChange={newVal =>
                       setFormData(prev => ({
@@ -832,21 +820,25 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         [field]: newVal?.attribute1 || '',
                       }))
                     }
-                    sacredtheme={sacredtheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                 ) : value ? (
-                  <Chip label={value} sacredtheme={sacredtheme} />
+                  <Chip
+                    label={value}
+                    styles={{
+                      theme: isSacredTheme ? 'sacred' : 'light',
+                    }}
+                  />
                 ) : null}
               </div>
             ))}
 
-            <div style={styles.sidebarSection}>
+            <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                  variant="merriparagraph"
                   text="Topics"
-                  style={styles.sidebarLabel}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               )}
               {isEditing ? (
@@ -857,27 +849,29 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   onChange={values =>
                     setFormData(prev => ({ ...prev, topics: values }))
                   }
-                  outlinecolor={sacredtheme ? '#FFD700' : 'black'}
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                  className="mt-1"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               ) : formData.topics.length > 0 ? (
-                <div style={styles.chipContainer}>
+                <div style={computedStyles.chipContainer}>
                   {formData.topics.map((topic, idx) => (
-                    <Chip key={idx} label={topic} sacredtheme={sacredtheme} />
+                    <Chip
+                      key={idx}
+                      label={topic}
+                      styles={{
+                        theme: isSacredTheme ? 'sacred' : 'light',
+                      }}
+                    />
                   ))}
                 </div>
               ) : null}
             </div>
 
-            <div style={styles.sidebarSection}>
+            <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                  variant="merriparagraph"
                   text="Knowledgebase Articles"
-                  style={styles.sidebarLabel}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               )}
               {isEditing ? (
@@ -891,27 +885,29 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       knowledgebaseArticles: values,
                     }))
                   }
-                  outlinecolor={sacredtheme ? '#FFD700' : 'black'}
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                  className="mt-1"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               ) : formData.knowledgebaseArticles.length > 0 ? (
-                <div style={styles.chipContainer}>
+                <div style={computedStyles.chipContainer}>
                   {formData.knowledgebaseArticles.map((article, idx) => (
-                    <Chip key={idx} label={article} sacredtheme={sacredtheme} />
+                    <Chip
+                      key={idx}
+                      label={article}
+                      styles={{
+                        theme: isSacredTheme ? 'sacred' : 'light',
+                      }}
+                    />
                   ))}
                 </div>
               ) : null}
             </div>
 
-            <div style={styles.sidebarSection}>
+            <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? '#FFD700' : 'black'}
+                  variant="merriparagraph"
                   text="Next Action Date"
-                  style={styles.sidebarLabel}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               )}
               {isEditing ? (
@@ -938,14 +934,14 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         }))
                       }
                     }}
-                    sacredtheme={sacredtheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   />
                 </div>
               ) : formData.nextActionDate ? (
                 <Typography
-                  fontvariant="merriparagraph"
-                  fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.9)' : 'black'}
+                  variant="merriparagraph"
                   text={formData.nextActionDate}
+                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                 />
               ) : null}
             </div>

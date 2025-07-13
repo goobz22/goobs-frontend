@@ -143,7 +143,7 @@ export default function MobileBoard({
     taskIndex: number
   ) {
     if (isTaskDraggable(columnIndex, taskIndex)) {
-      handleTaskDragStart(e, { columnIndex, taskIndex })
+      handleTaskDragStart({ columnIndex, taskIndex })
     } else {
       e.preventDefault()
     }
@@ -188,8 +188,8 @@ export default function MobileBoard({
       <div
         key="overflow-mobile-column"
         draggable={false}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => {
+        onDragOver={(e: React.DragEvent) => e.preventDefault()}
+        onDrop={(e: React.DragEvent) => {
           e.preventDefault()
           onColumnDrop(e, overflowColIndex)
         }}
@@ -202,17 +202,20 @@ export default function MobileBoard({
             options={overflowColumns?.map(col => ({ value: col.title })) ?? []}
             value={activeOverflowColumn?.title}
             onChange={handleOverflowDropdownChange}
-            fontcolor={sacredtheme ? '#FFD700' : '#000'}
-            shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
-            shrunklabelposition="aboveNotch"
-            outlinecolor={sacredtheme ? '#FFD700' : 'white'}
-            sacredtheme={sacredtheme}
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+              backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white',
+              borderColor: sacredtheme ? '#FFD700' : 'white',
+              textColor: sacredtheme ? '#FFD700' : '#000',
+              labelColor: sacredtheme ? '#FFD700' : 'white',
+            }}
           />
           <div style={{ ...styles.columnDescription, marginTop: '0.25rem' }}>
             <Typography
-              fontvariant="merrih6"
-              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
+              variant="merrih6"
+              styles={{
+                color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white',
+              }}
             >
               {activeOverflowColumn.description}
             </Typography>
@@ -221,8 +224,9 @@ export default function MobileBoard({
         <div style={styles.tasksContainer}>
           {!activeOverflowColumn.tasks?.length ? (
             <Typography
-              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
-              style={styles.noTasks}
+              styles={{
+                color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white',
+              }}
             >
               No tasks yet
             </Typography>
@@ -242,11 +246,11 @@ export default function MobileBoard({
                     disabled={false}
                     onCheck={() => onSelectTask(overflowColIndex, taskIndex)}
                     draggable={isTaskDraggable(overflowColIndex, taskIndex)}
-                    onDragStart={e =>
+                    onDragStart={(e: React.DragEvent) =>
                       handleLocalTaskDragStart(e, overflowColIndex, taskIndex)
                     }
                     onDragOver={handleTaskDragOver}
-                    onDrop={e =>
+                    onDrop={(e: React.DragEvent) =>
                       handleLocalTaskDrop(e, overflowColIndex, taskIndex)
                     }
                     sacredtheme={sacredtheme}
@@ -263,8 +267,9 @@ export default function MobileBoard({
   if (!columns.length) {
     return (
       <Typography
-        fontcolor={sacredtheme ? '#FFD700' : 'black'}
-        style={styles.noTasks}
+        styles={{
+          color: sacredtheme ? '#FFD700' : 'black',
+        }}
       >
         No columns available.
       </Typography>
@@ -288,9 +293,11 @@ export default function MobileBoard({
       <div
         key={currentColumn._id}
         draggable={isColumnDraggable(mobileColumnIndex)}
-        onDragStart={e => handleLocalColumnDragStart(e, mobileColumnIndex)}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => {
+        onDragStart={(e: React.DragEvent) =>
+          handleLocalColumnDragStart(e, mobileColumnIndex)
+        }
+        onDragOver={(e: React.DragEvent) => e.preventDefault()}
+        onDrop={(e: React.DragEvent) => {
           e.preventDefault()
           onColumnDrop(e, mobileColumnIndex)
         }}
@@ -306,7 +313,7 @@ export default function MobileBoard({
             checked={selectedColumnIndex === mobileColumnIndex}
             disabled={isColumnCheckboxDisabled()}
             onChange={() => handleColumnCheck(mobileColumnIndex)}
-            sacredtheme={sacredtheme}
+            styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
             style={styles.checkbox}
           />
           <Dropdown
@@ -314,17 +321,19 @@ export default function MobileBoard({
             options={columns.map(col => ({ value: col.title }))}
             value={currentColumn.title}
             onChange={handleColumnDropdownChange}
-            fontcolor={sacredtheme ? '#FFD700' : '#000'}
-            shrunkfontcolor={sacredtheme ? '#FFD700' : 'white'}
-            backgroundcolor={sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white'}
-            shrunklabelposition="aboveNotch"
-            outlinecolor={sacredtheme ? '#FFD700' : 'white'}
-            sacredtheme={sacredtheme}
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+              backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'white',
+              borderColor: sacredtheme ? '#FFD700' : 'white',
+              textColor: sacredtheme ? '#FFD700' : '#000',
+              labelColor: sacredtheme ? '#FFD700' : 'white',
+            }}
           />
           <Typography
-            fontvariant="merrih6"
-            fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white'}
-            style={styles.columnDescription}
+            variant="merrih6"
+            styles={{
+              color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'white',
+            }}
           >
             {currentColumn.description}
           </Typography>
@@ -332,8 +341,9 @@ export default function MobileBoard({
         <div style={styles.tasksContainer}>
           {!currentColumn.tasks?.length ? (
             <Typography
-              fontcolor={sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white'}
-              style={styles.noTasks}
+              styles={{
+                color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : 'white',
+              }}
             >
               No tasks yet
             </Typography>
@@ -356,11 +366,11 @@ export default function MobileBoard({
                       onSelectTask(mobileColumnIndex, taskIndex)
                     }}
                     draggable={isTaskDraggable(mobileColumnIndex, taskIndex)}
-                    onDragStart={e =>
+                    onDragStart={(e: React.DragEvent) =>
                       handleLocalTaskDragStart(e, mobileColumnIndex, taskIndex)
                     }
                     onDragOver={handleTaskDragOver}
-                    onDrop={e =>
+                    onDrop={(e: React.DragEvent) =>
                       handleLocalTaskDrop(e, mobileColumnIndex, taskIndex)
                     }
                     sacredtheme={sacredtheme}

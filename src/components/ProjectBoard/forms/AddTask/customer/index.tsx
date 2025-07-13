@@ -10,6 +10,7 @@ import ComplexTextEditor from '../../../../ComplexTextEditor'
 import CustomButton from '../../../../Button'
 import TextField from '../../../../Field/Text'
 import type { Task, RawTopic, RawQueue, RawSeverityLevel } from '../../../types'
+import { ProjectBoardStyles } from '../../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -22,95 +23,111 @@ interface CustomerAddTaskProps {
   severityLevels: RawSeverityLevel[]
   companyId: string
   createdUserId: string
-  sacredtheme?: boolean
+  styles?: ProjectBoardStyles
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  dialog: {
-    width: '100%',
-    '@media (min-width: 640px)': {
-      width: '700px',
-    },
-    margin: '1rem auto',
-    pointerEvents: 'auto',
-    borderRadius: '0.5rem',
-    overflow: 'hidden',
-    ...(sacredtheme && {
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      animation: 'add-task-glow-pulse 2s infinite alternate',
-    }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '0.75rem',
-    fontSize: '1.125rem',
-    color: 'rgba(255, 215, 0, 0.3)',
-    zIndex: 10,
-    animation: 'add-task-float-glyph 5s infinite alternate',
-  } as React.CSSProperties,
-  closeButton: {
-    position: 'absolute',
-    right: '0.5rem',
-    top: '0.5rem',
-    zIndex: 20,
-    padding: '0.25rem',
-    borderRadius: '9999px',
-    color: sacredtheme ? '#FFD700' : '#6B7280',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-  closeButtonHover: {
-    color: sacredtheme ? '#FBBF24' : '#1F2937',
-  } as React.CSSProperties,
-  header: {
-    padding: '0.75rem',
-    ...(sacredtheme && {
-      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-      backgroundColor: 'rgba(255, 215, 0, 0.05)',
-    }),
-  } as React.CSSProperties,
-  title: {
-    marginBottom: '0.75rem',
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      letterSpacing: '0.05em',
-      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-      color: '#FFD700',
-    }),
-  } as React.CSSProperties,
-  formContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem',
-  } as React.CSSProperties,
-  row: {
-    display: 'flex',
-    flexDirection: 'column',
-    '@media (min-width: 640px)': {
-      flexDirection: 'row',
-    },
-    gap: '0.25rem',
-  } as React.CSSProperties,
-  col: {
-    flex: '1 1 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem',
-  } as React.CSSProperties,
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '0.5rem',
-    marginTop: '0.5rem',
-    flexDirection: 'column',
-    '@media (min-width: 640px)': {
-      flexDirection: 'row',
-    },
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: ProjectBoardStyles) => {
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
+
+  return {
+    dialog: {
+      width: '100%',
+      '@media (min-width: 640px)': {
+        width: '700px',
+      },
+      margin: '1rem auto',
+      pointerEvents: 'auto',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      ...(isSacredTheme && {
+        border: '2px solid rgba(255, 215, 0, 0.5)',
+        boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        animation: 'add-task-glow-pulse 2s infinite alternate',
+      }),
+      ...(isDarkTheme && {
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        border: '2px solid rgba(75, 85, 99, 0.5)',
+      }),
+    } as React.CSSProperties,
+    glyph: {
+      position: 'absolute',
+      top: '0.75rem',
+      fontSize: '1.125rem',
+      color: 'rgba(255, 215, 0, 0.3)',
+      zIndex: 10,
+      animation: 'add-task-float-glyph 5s infinite alternate',
+    } as React.CSSProperties,
+    closeButton: {
+      position: 'absolute',
+      right: '0.5rem',
+      top: '0.5rem',
+      zIndex: 20,
+      padding: '0.25rem',
+      borderRadius: '9999px',
+      color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E5E7EB' : '#6B7280',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+    } as React.CSSProperties,
+    closeButtonHover: {
+      color: isSacredTheme ? '#FBBF24' : isDarkTheme ? '#F9FAFB' : '#1F2937',
+    } as React.CSSProperties,
+    header: {
+      padding: '0.75rem',
+      ...(isSacredTheme && {
+        borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+      }),
+      ...(isDarkTheme && {
+        borderBottom: '2px solid rgba(75, 85, 99, 0.3)',
+        backgroundColor: 'rgba(75, 85, 99, 0.05)',
+      }),
+    } as React.CSSProperties,
+    title: {
+      marginBottom: '0.75rem',
+      ...(isSacredTheme && {
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.05em',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+        color: '#FFD700',
+      }),
+      ...(isDarkTheme && {
+        color: '#E5E7EB',
+      }),
+    } as React.CSSProperties,
+    formContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.25rem',
+    } as React.CSSProperties,
+    row: {
+      display: 'flex',
+      flexDirection: 'column',
+      '@media (min-width: 640px)': {
+        flexDirection: 'row',
+      },
+      gap: '0.25rem',
+    } as React.CSSProperties,
+    col: {
+      flex: '1 1 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.25rem',
+    } as React.CSSProperties,
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      gap: '0.5rem',
+      marginTop: '0.5rem',
+      flexDirection: 'column',
+      '@media (min-width: 640px)': {
+        flexDirection: 'row',
+      },
+    } as React.CSSProperties,
+  }
+}
 
 const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   open,
@@ -121,7 +138,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   severityLevels,
   companyId,
   createdUserId,
-  sacredtheme = false,
+  styles,
 }) => {
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
   const [selectedQueueId, setSelectedQueueId] = useState('')
@@ -129,7 +146,8 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
   const [isCloseHovered, setCloseHovered] = useState(false)
-  const styles = getStyles(sacredtheme)
+  const computedStyles = getStyles(styles)
+  const isSacredTheme = styles?.theme === 'sacred'
 
   const severityOptions = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
@@ -192,19 +210,17 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth={false}
-      className={sacredtheme ? 'sacred-dialog' : ''}
+      styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
     >
-      <div style={styles.dialog}>
-        {sacredtheme && (
+      <div style={computedStyles.dialog}>
+        {isSacredTheme && (
           <>
-            <div style={{ ...styles.glyph, left: '0.75rem' }}>
+            <div style={{ ...computedStyles.glyph, left: '0.75rem' }}>
               {SACRED_GLYPHS[0]}
             </div>
             <div
               style={{
-                ...styles.glyph,
+                ...computedStyles.glyph,
                 right: '3rem',
                 animationDirection: 'reverse',
               }}
@@ -216,8 +232,8 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
         <button
           onClick={onClose}
           style={{
-            ...styles.closeButton,
-            ...(isCloseHovered && styles.closeButtonHover),
+            ...computedStyles.closeButton,
+            ...(isCloseHovered && computedStyles.closeButtonHover),
           }}
           onMouseEnter={() => setCloseHovered(true)}
           onMouseLeave={() => setCloseHovered(false)}
@@ -225,18 +241,21 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
           <CloseIcon style={{ height: '1.5rem', width: '1.5rem' }} />
         </button>
 
-        <div style={styles.header}>
-          <Typography fontvariant="merrih5" style={styles.title}>
+        <div style={computedStyles.header}>
+          <Typography
+            variant="merrih5"
+            styles={{ color: isSacredTheme ? '#FFD700' : undefined }}
+          >
             Create Task
           </Typography>
 
-          <div style={styles.formContainer}>
+          <div style={computedStyles.formContainer}>
             <TextField
               label="Task Title"
               value={taskTitle}
-              onChange={e => setTaskTitle(e.target.value)}
+              onChange={setTaskTitle}
               placeholder="Enter Task Title"
-              sacredtheme={sacredtheme}
+              styles={{ theme: styles?.theme }}
             />
             <ComplexTextEditor
               label="Task Description"
@@ -244,10 +263,10 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
               onChange={setTaskDescription}
               editorType="simple"
               minRows={5}
-              sacredtheme={sacredtheme}
+              styles={{ theme: styles?.theme }}
             />
-            <div style={styles.row}>
-              <div style={styles.col}>
+            <div style={computedStyles.row}>
+              <div style={computedStyles.col}>
                 <SearchableDropdown
                   label="Severity Level"
                   options={severityOptions}
@@ -260,10 +279,10 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                     setSelectedSeverityId(option?.attribute2 || '')
                   }
                   placeholder="Select severity level"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: styles?.theme }}
                 />
               </div>
-              <div style={styles.col}>
+              <div style={computedStyles.col}>
                 <SearchableDropdown
                   label="Associated Product (Queue)"
                   options={queueOptions}
@@ -275,7 +294,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                     setSelectedQueueId(option?.attribute1 || '')
                   }
                   placeholder="Select product queue"
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: styles?.theme }}
                 />
               </div>
             </div>
@@ -303,25 +322,21 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                     setSelectedTopicIds(newSelectedIds)
                   }}
                   complexOptions={true}
-                  sacredtheme={sacredtheme}
+                  styles={{ theme: styles?.theme }}
                 />
               )
-            }, [topics, selectedTopicIds, sacredtheme])}
+            }, [topics, selectedTopicIds, styles?.theme])}
 
-            <div style={styles.buttonContainer}>
+            <div style={computedStyles.buttonContainer}>
               <CustomButton
                 text="Cancel"
                 onClick={onClose}
-                backgroundcolor="none"
-                fontcolor={sacredtheme ? '#FFD700' : 'black'}
-                sacredtheme={sacredtheme}
+                styles={{ theme: styles?.theme }}
               />
               <CustomButton
                 text="Create Task"
                 onClick={handleSubmit}
-                backgroundcolor={sacredtheme ? '#FFD700' : '#000'}
-                fontcolor={sacredtheme ? '#000' : 'white'}
-                sacredtheme={sacredtheme}
+                styles={{ theme: styles?.theme }}
               />
             </div>
           </div>
