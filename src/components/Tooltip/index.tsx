@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Defines the StyledTooltip component, a customizable tooltip for displaying extra information.
+ */
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 
@@ -7,6 +10,7 @@ export interface CustomTooltipProps {
   tooltipplacement?: 'left' | 'right' | 'top' | 'bottom'
   offsetX?: number
   offsetY?: number
+  /** If true, enables the stylized "sacred" theme. */
   sacredtheme?: boolean
   arrow?: boolean
   open?: boolean
@@ -134,6 +138,12 @@ const StyledTooltip: React.FC<CustomTooltipProps> = ({
   const showTooltip = isControlled ? controlledOpen : isVisible
   const styles = sacredtheme ? sacredStyles : premiumStyles
 
+  console.log('StyledTooltip rendered:', {
+    title,
+    sacredtheme: sacredtheme,
+    isVisible: showTooltip,
+  })
+
   const handleMouseEnter = () => {
     if (isControlled) {
       onOpen?.()
@@ -223,29 +233,6 @@ const StyledTooltip: React.FC<CustomTooltipProps> = ({
       window.removeEventListener('resize', updatePosition)
     }
   }, [showTooltip, tooltipplacement, offsetX, offsetY, sacredtheme])
-
-  useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredTooltipGlow {
-          from {
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-          }
-          to {
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4), 0 0 50px rgba(255, 215, 0, 0.2);
-          }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
-    }
-  }, [sacredtheme])
 
   useEffect(() => {
     return () => {

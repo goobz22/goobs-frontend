@@ -93,28 +93,48 @@ export const SacredThemeVariants: Story = {
           tooltipplacement="top"
           title="Ancient Wisdom (Top)"
         >
-          <CustomButton text="Top" sacredtheme />
+          <CustomButton
+            text="Top"
+            styles={{
+              theme: 'sacred',
+            }}
+          />
         </StyledTooltip>
         <StyledTooltip
           {...args}
           tooltipplacement="bottom"
           title="Divine Insight (Bottom)"
         >
-          <CustomButton text="Bottom" sacredtheme />
+          <CustomButton
+            text="Bottom"
+            styles={{
+              theme: 'sacred',
+            }}
+          />
         </StyledTooltip>
         <StyledTooltip
           {...args}
           tooltipplacement="left"
           title="Mystical Secret (Left)"
         >
-          <CustomButton text="Left" sacredtheme />
+          <CustomButton
+            text="Left"
+            styles={{
+              theme: 'sacred',
+            }}
+          />
         </StyledTooltip>
         <StyledTooltip
           {...args}
           tooltipplacement="right"
           title="Golden Prophecy (Right)"
         >
-          <CustomButton text="Right" sacredtheme />
+          <CustomButton
+            text="Right"
+            styles={{
+              theme: 'sacred',
+            }}
+          />
         </StyledTooltip>
         <StyledTooltip
           {...args}
@@ -122,7 +142,12 @@ export const SacredThemeVariants: Story = {
           title="No Arrow"
           arrow={false}
         >
-          <CustomButton text="No Arrow" sacredtheme />
+          <CustomButton
+            text="No Arrow"
+            styles={{
+              theme: 'sacred',
+            }}
+          />
         </StyledTooltip>
       </div>
     </div>
@@ -137,7 +162,7 @@ const InteractiveDemoRenderer = () => {
   const [config, setConfig] = React.useState({
     title: 'Interactive Tooltip',
     placement: 'top' as 'top' | 'bottom' | 'left' | 'right',
-    sacred: false,
+    sacredtheme: false,
     showArrow: true,
     enterDelay: 100,
     leaveDelay: 0,
@@ -190,8 +215,10 @@ const InteractiveDemoRenderer = () => {
           <label className="flex items-center">
             <input
               type="checkbox"
-              checked={config.sacred}
-              onChange={e => setConfig({ ...config, sacred: e.target.checked })}
+              checked={config.sacredtheme}
+              onChange={e =>
+                setConfig({ ...config, sacredtheme: e.target.checked })
+              }
             />
             <span className="ml-2">Sacred Theme</span>
           </label>
@@ -209,17 +236,22 @@ const InteractiveDemoRenderer = () => {
       </div>
 
       <div
-        className={`p-8 rounded-xl flex justify-center items-center h-48 ${config.sacred ? 'bg-black/90' : 'bg-gray-50'}`}
+        className={`p-8 rounded-xl flex justify-center items-center h-48 ${config.sacredtheme ? 'bg-black/90' : 'bg-gray-50'}`}
       >
         <StyledTooltip
           title={config.title}
           tooltipplacement={config.placement}
-          sacredtheme={config.sacred}
+          sacredtheme={config.sacredtheme}
           arrow={config.showArrow}
           enterDelay={config.enterDelay}
           leaveDelay={config.leaveDelay}
         >
-          <CustomButton text="Hover me" sacredtheme={config.sacred} />
+          <CustomButton
+            text="Hover me"
+            styles={{
+              theme: config.sacredtheme ? 'sacred' : 'light',
+            }}
+          />
         </StyledTooltip>
       </div>
     </div>
