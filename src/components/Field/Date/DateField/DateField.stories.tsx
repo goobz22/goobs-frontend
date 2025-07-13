@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import DateField from './index'
@@ -5,99 +7,165 @@ import DateField from './index'
 const meta: Meta<typeof DateField> = {
   title: 'Components/Field/Date/DateField',
   component: DateField,
-  argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    label: { control: 'text' },
-    error: { control: 'boolean' },
-    helperText: { control: 'text' },
-  },
   parameters: {
     layout: 'centered',
   },
+  argTypes: {
+    label: { control: 'text' },
+    helperText: { control: 'text' },
+    styles: { control: 'object' },
+  },
 }
+
 export default meta
 
 type Story = StoryObj<typeof DateField>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
-  render: args => (
-    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
-      <DateField {...args} />
-    </div>
-  ),
+export const LightTheme: Story = {
+  name: 'Light Theme',
+  render: args => <DateField {...args} />,
   args: {
-    label: 'Appointment Date',
-    sacredtheme: false,
+    label: 'Select Date',
+    styles: { theme: 'light' },
   },
+  decorators: [
+    Story => (
+      <div
+        style={{ width: '400px', padding: '2rem', backgroundColor: '#f9fafb' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Select Date',
+    styles: { theme: 'dark' },
+  },
+  decorators: [
+    Story => (
+      <div
+        style={{ width: '400px', padding: '2rem', backgroundColor: '#1f2937' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
-  render: args => (
-    <div className="w-[400px] p-6 bg-black rounded-lg">
-      <DateField {...args} />
-    </div>
-  ),
+  render: args => <DateField {...args} />,
   args: {
-    ...PremiumTheme.args,
-    sacredtheme: true,
+    label: 'Select Date',
+    styles: { theme: 'sacred' },
+  },
+  decorators: [
+    Story => (
+      <div
+        style={{ width: '400px', padding: '2rem', backgroundColor: '#000000' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+export const Disabled: Story = {
+  name: 'Disabled',
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Disabled Date',
+    styles: { theme: 'light', disabled: true },
   },
 }
 
-const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
-  const [value, setValue] = React.useState<Date | null>(new Date())
+export const WithError: Story = {
+  name: 'With Error',
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Date with Error',
+    helperText: 'Invalid date',
+    styles: { theme: 'light', helperTextType: 'error' },
+  },
+}
+
+export const Required: Story = {
+  name: 'Required',
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Required Date',
+    styles: { theme: 'light', required: true },
+  },
+}
+
+export const CustomStyled: Story = {
+  name: 'Custom Styled',
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Custom Date',
+    styles: {
+      theme: 'light',
+      height: '50px',
+      fontSize: '18px',
+      borderRadius: '12px',
+    },
+  },
+}
+
+const InteractiveComponent = () => {
+  const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
+  const [disabled, setDisabled] = React.useState<boolean>(false)
+  const [error, setError] = React.useState<string>('')
+  const [value, setValue] = React.useState<Date | null>(null)
 
   return (
-    <div className="w-[500px] space-y-4">
-      <div className="p-4 bg-white rounded-lg border">
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <div className="grid grid-cols-3 gap-2">
-          <label>
-            <input
-              type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
-            />{' '}
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />{' '}
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
-            />{' '}
-            Error
-          </label>
-        </div>
+    <div style={{ width: '500px', padding: '2rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Theme: </label>
+        <select
+          value={theme}
+          onChange={e =>
+            setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+          }
+        >
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="sacred">Sacred</option>
+        </select>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
-        <DateField
-          label="Interactive Date"
-          value={value}
-          onChange={setValue}
-          sacredtheme={sacred}
-          disabled={disabled}
-          error={error}
-        />
+      <label>
+        <input
+          type="checkbox"
+          checked={disabled}
+          onChange={e => setDisabled(e.target.checked)}
+        />{' '}
+        Disabled
+      </label>
+      <div>
+        <label>Error: </label>
+        <input value={error} onChange={e => setError(e.target.value)} />
       </div>
+      <DateField
+        label="Interactive DateField"
+        value={value}
+        onChange={setValue}
+        helperText={error}
+        styles={{
+          theme,
+          disabled,
+          helperTextType: error ? 'error' : undefined,
+        }}
+      />
     </div>
   )
 }
 
 export const InteractiveDemo: Story = {
   name: 'Interactive Demo',
-  render: () => <InteractiveDemoRenderer />,
+  render: () => <InteractiveComponent />,
 }
