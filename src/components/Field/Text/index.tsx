@@ -1,426 +1,238 @@
+/**
+ * @fileoverview Defines the TextField component, a modern and themeable input field.
+ * It supports "light", "dark", and "sacred" themes, adornments, floating labels, and error states.
+ * This component is built using standard React hooks for state management and a comprehensive theme system.
+ */
 'use client'
-import * as Agnostic from '../../../framework-agnostic'
+import React, { useRef, useMemo, useState, useCallback } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../theme'
 
-export type TextFieldProps = Agnostic.InputHTMLAttributes<HTMLInputElement> & {
-  startAdornment?: Agnostic.VirtualElement
-  endAdornment?: Agnostic.VirtualElement
-  label?: Agnostic.VirtualElement | string
-  inputPadding?: { top?: number; left?: number }
-  shrunklabelposition?: 'onNotch' | 'aboveNotch'
-  error?: boolean
-  sacredtheme?: boolean
+// --------------------------------------------------------------------------
+// TYPE DEFINITIONS
+// --------------------------------------------------------------------------
+
+export interface TextFieldProps
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onFocus'
+    | 'onBlur'
+    | 'disabled'
+    | 'required'
+  > {
+  /** The value of the input. */
+  value: string
+  /** Callback fired when the value changes. */
+  onChange: (value: string) => void
+  /** Callback fired when the input is focused. */
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  /** Callback fired when the input loses focus. */
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  /** Helper text to display (can be error or info based on styles.helperTextType). */
+  helperText?: string
+  /** A React node to display at the start of the input. */
+  startAdornment?: React.ReactNode
+  /** A React node to display at the end of the input. */
+  endAdornment?: React.ReactNode
+  /** The label for the input. Can be a string or a React node. */
+  label?: React.ReactNode
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: FormFieldStyles
 }
 
+// --------------------------------------------------------------------------
+// STYLING LOGIC
+// --------------------------------------------------------------------------
+
 const getStyles = (
-  sacredtheme?: boolean,
-  error?: boolean,
-  isLabelShrunken?: boolean,
-  isVisuallyActive?: boolean,
-  shrunklabelposition?: 'onNotch' | 'aboveNotch',
-  startAdornment?: Agnostic.VirtualElement,
-  endAdornment?: Agnostic.VirtualElement,
-  hasLabel?: boolean,
-  measuredWidth?: number
+  styles?: FormFieldStyles,
+  isFocused?: boolean,
+  hasStartAdornment?: boolean,
+  hasEndAdornment?: boolean
 ) => {
-  const borderColor = error
-    ? '#EF4444'
-    : isVisuallyActive
-      ? sacredtheme
-        ? '#FFD700'
-        : '#3B82F6'
-      : sacredtheme
-        ? 'rgba(255, 215, 0, 0.4)'
-        : '#D1D5DB'
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
 
-  // Centralized transition properties for smoother animations
-  const transitionCurve = 'cubic-bezier(0.4, 0, 0.2, 1)'
-  const transitionDuration = '200ms'
-  const sharedTransition = `all ${transitionDuration} ${transitionCurve}`
-
-  return {
-    container: {
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      width: '100%',
-      marginTop: hasLabel ? '8px' : '0px',
-      marginBottom: '16px',
-      height: 'auto',
-      overflow: 'visible',
-    } as Agnostic.CSSProperties,
-
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
     inputWrapper: {
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      minHeight: '40px',
-      height: 'auto',
-      borderRadius: '8px',
-      transition: sharedTransition,
-      ...(sacredtheme
-        ? {
-            backgroundColor: 'rgba(10, 10, 10, 0.98)', // Increased opacity, removed blur
-            color: '#FFD700',
-            backgroundImage: `
-              radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-              radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
-            `,
-            ...(isVisuallyActive && {
-              boxShadow:
-                '0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1)',
-              backgroundImage: `
-                linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
-                radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
-              `,
-            }),
-          }
-        : {
-            backgroundColor: 'rgba(255, 255, 255, 0.98)', // Increased opacity, removed blur
-            color: 'rgb(31, 41, 55)',
-            ...(isVisuallyActive && {
-              backgroundColor: 'rgba(239, 246, 255, 1)', // Make fully opaque on focus
-              boxShadow:
-                '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06)',
-            }),
-          }),
-    } as Agnostic.CSSProperties,
-
-    // Notched outline effect using multiple divs
-    outlineTop: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '1px',
-      backgroundColor: borderColor,
-      transition: sharedTransition,
-      ...(isLabelShrunken &&
-        hasLabel &&
-        shrunklabelposition === 'onNotch' && {
-          background: `linear-gradient(to right, ${borderColor} 0%, ${borderColor} 10px, transparent 10px, transparent calc(14px + ${measuredWidth}px), ${borderColor} calc(14px + ${measuredWidth}px), ${borderColor} 100%)`,
-        }),
-    } as Agnostic.CSSProperties,
-
-    outlineBottom: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: '1px',
-      backgroundColor: borderColor,
-      transition: sharedTransition,
-    } as Agnostic.CSSProperties,
-
-    outlineLeft: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      width: '1px',
-      backgroundColor: borderColor,
-      transition: sharedTransition,
-    } as Agnostic.CSSProperties,
-
-    outlineRight: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: '1px',
-      backgroundColor: borderColor,
-      transition: sharedTransition,
-    } as Agnostic.CSSProperties,
-
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
     input: {
       width: '100%',
+      height: '100%',
       backgroundColor: 'transparent',
       outline: 'none',
       border: 'none',
-      padding: '16px',
-      paddingTop: hasLabel ? '16px' : '2px',
-      paddingBottom: hasLabel ? '16px' : '22px',
-      textAlign: 'left',
-      fontSize: '16px',
-      fontFamily: sacredtheme ? '"Cinzel", serif' : '"Inter", sans-serif',
-      fontWeight: sacredtheme ? 500 : 400,
-      color: sacredtheme ? '#FFD700' : 'rgb(31, 41, 55)',
-      paddingLeft: startAdornment ? '48px' : '16px',
-      paddingRight: endAdornment ? '48px' : '16px',
-      transition: sharedTransition,
-      ...(sacredtheme && {
-        textShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
-        letterSpacing: '0.025em',
-      }),
-    } as Agnostic.CSSProperties,
-
-    label: {
-      position: 'absolute',
-      left:
-        isLabelShrunken && shrunklabelposition === 'onNotch' ? '12px' : '16px',
-      transition: `transform ${transitionDuration} ${transitionCurve}, color ${transitionDuration} ${transitionCurve}, font-size ${transitionDuration} ${transitionCurve}, top ${transitionDuration} ${transitionCurve}, left ${transitionDuration} ${transitionCurve}`,
-      pointerEvents: 'none',
-      transformOrigin: 'top left',
-      fontFamily: sacredtheme ? '"Cinzel", serif' : '"Inter", sans-serif',
-      fontWeight: isLabelShrunken
-        ? sacredtheme
-          ? 700
-          : 600
-        : sacredtheme
-          ? 600
-          : 500,
-      color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : '#6B7280',
-      ...(isLabelShrunken
-        ? {
-            fontSize: '13px',
-            ...(shrunklabelposition === 'aboveNotch'
-              ? {
-                  top: '-24px',
-                  transform: 'translateY(0) scale(1)',
-                  backgroundColor: 'transparent',
-                  padding: '0',
-                }
-              : {
-                  top: '0px',
-                  transform: 'translateY(-50%) scale(1)',
-                  backgroundColor: sacredtheme
-                    ? 'rgba(10, 10, 10, 0.98)' // Match wrapper
-                    : 'rgba(255, 255, 255, 0.98)', // Match wrapper
-                  padding: '0 2px',
-                }),
-          }
-        : {
-            top: '50%',
-            transform: 'translateY(-50%) scale(1)',
-            fontSize: '16px',
-            backgroundColor: 'transparent',
-            padding: '0',
-          }),
-      ...(isVisuallyActive && {
-        color: sacredtheme ? '#FFD700' : '#3B82F6',
-        ...(sacredtheme && {
-          textShadow: '0 0 15px rgba(255, 215, 0, 0.6)',
-        }),
-      }),
-      ...(error && {
-        color: '#EF4444',
-      }),
-    } as Agnostic.CSSProperties,
-
-    adornment: {
-      position: 'absolute',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: sharedTransition,
-      color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : '#6B7280',
-      ...(isVisuallyActive && {
-        color: sacredtheme ? '#FFD700' : '#3B82F6',
-      }),
-    } as Agnostic.CSSProperties,
-
-    startAdornment: {
-      left: '16px',
-    } as Agnostic.CSSProperties,
-
-    endAdornment: {
-      right: '16px',
-    } as Agnostic.CSSProperties,
-
-    // Sacred theme decorative elements
-    sacredGlyph: {
-      position: 'absolute',
-      top: '8px',
-      right: '8px',
-      color: 'rgba(255, 215, 0, 0.3)',
-      fontSize: '12px',
-      pointerEvents: 'none',
-      transition: 'all 0.3s ease',
-      ...(isVisuallyActive && {
-        color: 'rgba(255, 215, 0, 0.6)',
-        animation: 'sacredFloat 3s ease-in-out infinite',
-      }),
-    } as Agnostic.CSSProperties,
+      padding: styles?.padding || '8px 16px',
+      paddingLeft:
+        styles?.paddingLeft ||
+        (hasStartAdornment ? styles?.startAdornmentOffset || '48px' : '16px'),
+      paddingRight:
+        styles?.paddingRight ||
+        (hasEndAdornment ? styles?.endAdornmentOffset || '48px' : '16px'),
+      paddingTop: styles?.paddingTop || '8px',
+      paddingBottom: styles?.paddingBottom || '8px',
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    adornment: getSharedAdornmentStyles(adornmentColor),
+    startAdornment: { left: '16px' },
+    endAdornment: { right: '16px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
+
+  return componentStyles
 }
 
-function TextFieldCore(props: TextFieldProps): Agnostic.VirtualElement | null {
+// --------------------------------------------------------------------------
+// TEXTFIELD COMPONENT
+// --------------------------------------------------------------------------
+
+const TextField: React.FC<TextFieldProps> = props => {
   const {
-    name,
-    label,
-    placeholder,
+    value,
     onChange,
     onFocus,
     onBlur,
-    value,
-    error,
-    disabled,
-    className,
+    helperText,
     startAdornment,
     endAdornment,
-    shrunklabelposition = 'onNotch',
-    sacredtheme = false,
-    ...restProps
+    label,
+    styles,
+    ...rest
   } = props
 
-  const inputRef = Agnostic.useSignal<HTMLInputElement | null>(null)
-  const focusSignal = Agnostic.useFocusSignal({ name: 'textfield-focus' })
-  const hasValueSignal = Agnostic.useSignal(Boolean(value?.toString().length), {
-    name: 'textfield-has-value',
-  })
+  // Focus state management for styling
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  // Update hasValue signal when props change
-  Agnostic.useEffect(() => {
-    console.log('--- ⚡️ TextField useEffect ---', { value: props.value });
-    hasValueSignal.value = Boolean(value?.toString().length)
-  }, [value])
-
-  const hasLabel = Boolean(label)
-
-  const labelMeasure = Agnostic.useMeasureSignal({ name: 'label-measure' })
-  const measuredWidth = labelMeasure.width
-
-  const handleChange = (e: Agnostic.ChangeEvent<HTMLInputElement>) => {
-    hasValueSignal.value = Boolean(e.target.value.length)
-    onChange?.(e)
-  }
-
-  const handleClick = () => {
-    inputRef.value?.focus()
-  }
-
-  // The 'visually active' state is now determined by a combination of the focus signal
-  // (which handles live focus/blur) and whether there's a value on initial render.
-  // This ensures the label is shrunken correctly from the start if a value is provided.
-  const isVisuallyActive = focusSignal.value || hasValueSignal.value
-  const isLabelShrunken = isVisuallyActive
-
-  console.log('--- ⚛️ TextField Render State ---', {
-    name: props.name,
-    'props.value': props.value,
-    'focusSignal.value': focusSignal.value,
-    'hasValueSignal.value': hasValueSignal.value,
-    isVisuallyActive,
-    isLabelShrunken,
-  });
-
-  const styles = getStyles(
-    sacredtheme,
-    error,
-    isLabelShrunken,
-    isVisuallyActive,
-    shrunklabelposition,
-    startAdornment,
-    endAdornment,
-    hasLabel,
-    measuredWidth
+  const computedStyles = useMemo(
+    () => getStyles(styles, isFocused, !!startAdornment, !!endAdornment),
+    [styles, isFocused, startAdornment, endAdornment]
   )
 
-  // Add CSS animations for sacred theme
-  Agnostic.useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredFloat {
-          0%, 100% { transform: translateY(0px); opacity: 0.3; }
-          50% { transform: translateY(-3px); opacity: 0.6; }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
-    }
-  }, [sacredtheme])
+  const handleContainerClick = () => {
+    inputRef.current?.focus()
+  }
 
-  return Agnostic.createElement(
-    'div',
-    { style: styles.container, className: className },
-    Agnostic.createElement(
-      'div',
-      {
-        style: styles.inputWrapper,
-        onClick: handleClick,
-      },
-      // Notched outline
-      Agnostic.createElement('div', { style: styles.outlineTop }),
-      Agnostic.createElement('div', { style: styles.outlineBottom }),
-      Agnostic.createElement('div', { style: styles.outlineLeft }),
-      Agnostic.createElement('div', { style: styles.outlineRight }),
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value
+      onChange(newValue)
+    },
+    [onChange]
+  )
 
-      // Start adornment
-      startAdornment &&
-        Agnostic.createElement(
-          'div',
-          { style: { ...styles.adornment, ...styles.startAdornment } },
-          startAdornment
-        ),
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true)
+      onFocus?.(e)
+    },
+    [onFocus]
+  )
 
-      // Input field
-      Agnostic.createElement('input', {
-        id: name,
-        name: name,
-        placeholder: isLabelShrunken && placeholder ? placeholder : '',
-        onChange: handleChange,
-        onFocus: onFocus,
-        onBlur: onBlur,
-        value: value,
-        disabled: disabled,
-        style: styles.input,
-        ref: (el: HTMLInputElement | null) => {
-          console.log(`--- 🔗 TextField ref callback ---`, { el: !!el, name: props.name });
-          inputRef.value = el
-          focusSignal.attachTo(el, () => {
-            const hasContent = Boolean(el?.value);
-            console.log(`--- ❔ TextField contentCallback ---`, { hasContent, value: el?.value });
-            return hasContent;
-          })
-        },
-        ...restProps,
-      }),
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false)
+      onBlur?.(e)
+    },
+    [onBlur]
+  )
 
-      // End adornment
-      endAdornment &&
-        Agnostic.createElement(
-          'div',
-          { style: { ...styles.adornment, ...styles.endAdornment } },
-          endAdornment
-        ),
+  return (
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {typeof label === 'string' ? (
+            <>
+              {label}
+              {styles?.required && (
+                <span style={getRequiredIndicatorStyle(styles)}>
+                  {styles?.requiredIndicatorText || ' *'}
+                </span>
+              )}
+            </>
+          ) : (
+            label
+          )}
+        </label>
+      )}
 
-      // Sacred theme decorative glyph
-      sacredtheme &&
-        Agnostic.createElement('div', { style: styles.sacredGlyph }, '𓊖')
-    ),
+      <div style={computedStyles.inputWrapper} onClick={handleContainerClick}>
+        {startAdornment && (
+          <div
+            style={{
+              ...computedStyles.adornment,
+              ...computedStyles.startAdornment,
+            }}
+          >
+            {startAdornment}
+          </div>
+        )}
 
-          // Label
-      label &&
-        Agnostic.createElement(
-          'label',
-          {
-            htmlFor: name,
-            style: styles.label,
-            ref: (el: HTMLLabelElement | null) => {
-              console.log(`--- 🏷️ TextField label ref callback ---`, { 
-                el: !!el, 
-                name: props.name, 
-                tagName: el?.tagName,
-                id: el?.id,
-                isSameNode: el && labelMeasure._element && el.isSameNode(labelMeasure._element),
-                labelText: typeof label === 'string' ? label : 'complex'
-              });
-              labelMeasure.attachTo(el)
-            },
-          },
-          label
-        )
+        <input
+          ref={inputRef}
+          {...rest}
+          {...getRequiredProps(styles?.required)}
+          value={value || ''}
+          disabled={styles?.disabled}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          style={computedStyles.input}
+        />
+
+        {endAdornment && (
+          <div
+            style={{
+              ...computedStyles.adornment,
+              ...computedStyles.endAdornment,
+            }}
+          >
+            {endAdornment}
+          </div>
+        )}
+      </div>
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
+    </div>
   )
 }
 
-// Export the framework-agnostic component
-const TextField = TextFieldCore
+TextField.displayName = 'TextField'
 
 export default TextField

@@ -6,9 +6,7 @@ const meta: Meta<typeof USDField> = {
   title: 'Components/Field/USD',
   component: USDField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    error: { control: 'boolean' },
+    helperText: { control: 'text' },
     label: { control: 'text' },
     min: { control: 'number' },
     max: { control: 'number' },
@@ -39,12 +37,12 @@ export const Premium: Story = {
   args: {
     label: 'Amount',
     initialValue: '123.45',
-    sacredtheme: false,
     enableIncrement: true,
+    styles: { theme: 'light' },
   },
 }
 
-export const Sacred: Story = {
+export const sacredtheme: Story = {
   name: 'Sacred Theme',
   render: args => (
     <div
@@ -60,12 +58,12 @@ export const Sacred: Story = {
   ),
   args: {
     ...Premium.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [error, setError] = React.useState(false)
   const [value, setValue] = React.useState('99.99')
@@ -98,8 +96,8 @@ const InteractiveRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -133,18 +131,19 @@ const InteractiveRenderer = () => {
         style={{
           padding: '2rem',
           borderRadius: '0.5rem',
-          backgroundColor: sacred ? 'black' : '#f3f4f6',
+          backgroundColor: sacredtheme ? 'black' : '#f3f4f6',
         }}
       >
         <USDField
           label="Enter Amount"
           value={value}
           onChange={val => setValue(val)}
-          sacredtheme={sacred}
-          disabled={disabled}
-          error={error}
           enableIncrement={increment}
           helperText={error ? 'Invalid amount' : 'Please enter a USD value'}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+            disabled: disabled,
+          }}
         />
       </div>
     </div>

@@ -1,139 +1,123 @@
 'use client'
 import React, { useState } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../theme'
 import SearchIcon from '../../Icons/Search'
 
 export interface SearchbarProps {
   label?: string
   placeholder?: string
   value: string
-  shrunklabelposition?: 'onNotch' | 'aboveNotch'
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  sacredtheme?: boolean
+  helperText?: string
   className?: string
-  style?: React.CSSProperties
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: FormFieldStyles
 }
 
-const getStyles = (
-  sacredtheme?: boolean,
-  isLabelShrunken?: boolean,
-  isFocused?: boolean,
-  shrunklabelposition?: 'onNotch' | 'aboveNotch'
-) => ({
-  container: {
-    width: '100%',
-    position: 'relative',
-    height: '3rem',
-    display: 'flex',
-    justifyContent: 'flex-end',
-  } as React.CSSProperties,
-  inputContainer: {
-    position: 'relative',
-    width: '100%',
-  } as React.CSSProperties,
-  input: {
-    width: '100%',
-    height: '2.5rem',
-    paddingLeft: '3rem',
-    paddingRight: '1rem',
-    borderWidth: '1px',
-    borderRadius: '0.375rem',
-    outline: 'none',
-    transition: 'all 0.3s ease',
-    ...(sacredtheme
-      ? {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          color: '#FFD700',
-          borderColor: isFocused ? '#FFD700' : 'rgba(255, 215, 0, 0.5)',
-          backgroundImage:
-            'linear-gradient(rgba(255,215,0,0.05), rgba(255,215,0,0.05)), radial-gradient(circle at top right, rgba(255,215,0,0.08) 0%, transparent 50%)',
-          boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-        }
-      : {
-          backgroundColor: 'white',
-          color: 'black',
-          borderColor: isFocused ? '#3B82F6' : '#D1D5DB',
-          boxShadow: isFocused ? '0 0 10px rgba(59, 130, 246, 0.3)' : 'none',
-        }),
-  } as React.CSSProperties,
-  label: {
-    position: 'absolute',
-    transition: 'all 0.2s ease',
-    pointerEvents: 'none',
-    zIndex: 10,
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : '#6B7280',
-    ...(isLabelShrunken
-      ? {
-          fontSize: '0.75rem',
-          ...(shrunklabelposition === 'aboveNotch'
-            ? {
-                top: '-1.25rem',
-                left: '0',
-              }
-            : {
-                top: '0.5rem',
-                left: '1rem',
-                transform: 'translateY(-50%)',
-                backgroundColor: sacredtheme ? 'black' : 'white',
-                padding: '0 0.25rem',
-              }),
-        }
-      : {
-          top: '50%',
-          left: '2.75rem',
-          transform: 'translateY(-50%)',
-          fontSize: '1rem',
-        }),
-    ...(isFocused && { color: sacredtheme ? '#FFD700' : '#3B82F6' }),
-  } as React.CSSProperties,
-  iconContainer: {
-    position: 'absolute',
-    left: '0.75rem',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    display: 'flex',
-    alignItems: 'center',
-  } as React.CSSProperties,
-  sacredGlyph: {
-    position: 'absolute',
-    left: '-1.25rem',
-    color: 'rgba(255, 215, 0, 0.4)',
-    fontSize: '0.75rem',
-    animation: 'sacred-pulse 2s infinite',
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: styles?.padding || '8px 16px 8px 48px', // Left padding for search icon
+      paddingLeft: styles?.paddingLeft || '48px',
+      paddingRight: styles?.paddingRight || '16px',
+      paddingTop: styles?.paddingTop || '8px',
+      paddingBottom: styles?.paddingBottom || '8px',
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    startAdornment: {
+      ...getSharedAdornmentStyles(adornmentColor),
+      left: '16px',
+    },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
+  }
+
+  return componentStyles
+}
 
 const Searchbar: React.FC<SearchbarProps> = ({
   label,
   placeholder,
   value,
-  shrunklabelposition = 'onNotch',
   onChange,
-  sacredtheme = false,
-  className,
-  style,
+  helperText,
+  styles,
 }) => {
   const [focused, setFocused] = useState(false)
-  const isLabelShrunken = focused || Boolean(value)
+
+  const computedStyles = getStyles(styles, focused)
 
   const handleFocus = () => setFocused(true)
   const handleBlur = () => setFocused(false)
 
-  const labelText = sacredtheme ? 'Divine Search' : label
-  const placeholderText = isLabelShrunken
-    ? sacredtheme
-      ? 'Seek ancient wisdom...'
-      : placeholder
-    : ''
-  const styles = getStyles(
-    sacredtheme,
-    isLabelShrunken,
-    focused,
-    shrunklabelposition
-  )
-
   return (
-    <div style={{ ...styles.container, ...style }} className={className}>
-      <div style={styles.inputContainer}>
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={computedStyles.inputWrapper}>
+        <div style={computedStyles.startAdornment}>
+          <SearchIcon
+            style={{
+              width: '20px',
+              height: '20px',
+              color: 'inherit',
+            }}
+          />
+        </div>
+
         <input
           id="search-input"
           type="text"
@@ -141,26 +125,17 @@ const Searchbar: React.FC<SearchbarProps> = ({
           onChange={onChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder={placeholderText}
-          style={styles.input}
+          disabled={styles?.disabled}
+          placeholder={placeholder}
+          style={{
+            ...computedStyles.input,
+            ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+          }}
+          {...getRequiredProps(styles?.required)}
         />
-        {labelText && (
-          <label htmlFor="search-input" style={styles.label}>
-            {labelText}
-          </label>
-        )}
-        <div style={styles.iconContainer}>
-          {sacredtheme && <span style={styles.sacredGlyph}>𓂀</span>}
-          <SearchIcon
-            style={{
-              width: '1.25rem',
-              height: '1.25rem',
-              color: sacredtheme ? '#FFD700' : '#4B5563',
-              animation: sacredtheme ? 'gold-shimmer 2s infinite' : 'none',
-            }}
-          />
-        </div>
       </div>
+
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

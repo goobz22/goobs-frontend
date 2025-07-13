@@ -1,10 +1,21 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../theme'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
 export interface PercentageFieldProps {
   initialValue?: string | number
+  value?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
   label?: string
   min?: number
@@ -13,150 +24,94 @@ export interface PercentageFieldProps {
   initialDelay?: number
   repeatInterval?: number
   showPercentSymbol?: boolean
-  sacredtheme?: boolean
   placeholder?: string
-  disabled?: boolean
-  error?: boolean
-  name?: string
   id?: string
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
+  helperText?: string
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: FormFieldStyles
 }
 
-interface StylesType {
-  container: React.CSSProperties
-  input: React.CSSProperties
-  label: React.CSSProperties
-  adornmentContainer: React.CSSProperties
-  buttonContainer: React.CSSProperties
-  button: React.CSSProperties
-  icon: React.CSSProperties
-  glyph?: React.CSSProperties
-}
+const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
 
-const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean,
-  disabled: boolean,
-  error?: boolean
-): StylesType => {
-  const premiumStyles = {
-    container: {
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
       position: 'relative',
-      width: '100%',
-      marginTop: '1rem',
-    } as React.CSSProperties,
+      display: 'flex',
+      alignItems: 'center',
+      height: styles?.height || '40px',
+      width: 'auto',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
     input: {
-      width: '100%',
-      height: '3.5rem',
-      paddingLeft: '1rem',
-      paddingRight: '3.5rem',
-      border: `2px solid ${error ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
-      borderRadius: '0.25rem',
+      height: '100%',
+      backgroundColor: 'transparent',
       outline: 'none',
-      transition: 'all 0.3s',
-      backgroundColor: 'white',
-      color: 'black',
-      opacity: disabled ? 0.5 : 1,
-    } as React.CSSProperties,
-    label: {
-      position: 'absolute' as const,
-      left: '1rem',
-      transition: 'all 0.2s',
-      pointerEvents: 'none' as const,
-      color: error ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
-      ...(isLabelFloating
-        ? {
-            top: '0',
-            fontSize: '0.75rem',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'white',
-            padding: '0 0.25rem',
-          }
-        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-    } as React.CSSProperties,
+      border: 'none',
+      padding: styles?.padding || '8px 60px 8px 16px', // Right padding for increment/decrement buttons
+      paddingLeft: styles?.paddingLeft || '16px',
+      paddingRight: styles?.paddingRight || '60px',
+      paddingTop: styles?.paddingTop || '8px',
+      paddingBottom: styles?.paddingBottom || '8px',
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
     adornmentContainer: {
-      position: 'absolute' as const,
-      right: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-    } as React.CSSProperties,
+      ...getSharedAdornmentStyles(adornmentColor),
+      right: '8px',
+    },
     buttonContainer: {
       display: 'flex',
-      flexDirection: 'column' as const,
-      height: '2rem',
+      flexDirection: 'column',
+      height: '32px',
       justifyContent: 'center',
-    } as React.CSSProperties,
+    },
     button: {
       padding: 0,
-      width: '1rem',
-      height: '1rem',
-      minWidth: '1rem',
-      minHeight: '1rem',
-      borderRadius: '0.125rem',
-      transition: 'all 0.3s',
+      width: '16px',
+      height: '16px',
+      minWidth: '16px',
+      minHeight: '16px',
+      borderRadius: '2px',
+      transition,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#4B5563',
-      '&:hover': { backgroundColor: '#E5E7EB' },
-    } as React.CSSProperties,
-    icon: { fontSize: '1.125rem' } as React.CSSProperties,
-  }
-
-  const sacredStyles = {
-    ...premiumStyles,
-    input: {
-      ...premiumStyles.input,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#FFD700',
-      borderColor: error
-        ? '#FFD700'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.5)',
-      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-    } as React.CSSProperties,
-    label: {
-      ...premiumStyles.label,
-      color: error
-        ? '#FFD700'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.8)',
-      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
-    } as React.CSSProperties,
-    adornmentContainer: {
-      ...premiumStyles.adornmentContainer,
-      right: '1rem',
-    } as React.CSSProperties,
-    glyph: {
-      position: 'absolute' as const,
-      right: '2.5rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: 'rgba(255, 215, 0, 0.3)',
-      fontSize: '0.75rem',
-      animation: 'glyph-rotate 10s linear infinite',
-    } as React.CSSProperties,
-    buttonContainer: {
-      ...premiumStyles.buttonContainer,
+      color: adornmentColor,
       backgroundColor: 'transparent',
-    } as React.CSSProperties,
-    button: {
-      ...premiumStyles.button,
-      color: '#FFD700',
-      '&:hover': { backgroundColor: 'rgba(255, 215, 0, 0.1)' },
-    } as React.CSSProperties,
+      border: 'none',
+      cursor: 'pointer',
+    },
+    icon: { fontSize: '18px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
 
-  return sacredtheme ? sacredStyles : premiumStyles
+  return componentStyles
 }
 
 const PercentageField: React.FC<PercentageFieldProps> = ({
   initialValue = '0',
+  value,
   onChange,
   label,
   min = 0,
@@ -165,23 +120,57 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   initialDelay = 500,
   repeatInterval = 100,
   showPercentSymbol = true,
-  sacredtheme = false,
   placeholder,
-  disabled = false,
-  error = false,
-  name,
   id,
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
+  helperText,
+  styles,
   ...rest
 }) => {
   const initialValueString =
     typeof initialValue === 'number' ? initialValue.toString() : initialValue
-  const [value, setValue] = useState(initialValueString)
+  const [internalValue, setInternalValue] = useState(
+    value || initialValueString
+  )
   const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const valueSpanRef = useRef<HTMLSpanElement>(null)
+  const placeholderSpanRef = useRef<HTMLSpanElement>(null)
+  const [inputContentWidth, setInputContentWidth] = useState(0)
+
+  const computedStyles = getStyles(styles, isFocused)
+
+  const currentValue = value || internalValue
+  const displayValue =
+    showPercentSymbol && currentValue ? `${currentValue}%` : currentValue
+
+  const measureStyle: React.CSSProperties = {
+    position: 'absolute',
+    visibility: 'hidden',
+    whiteSpace: 'pre',
+    fontSize: computedStyles.input.fontSize,
+    fontWeight: computedStyles.input.fontWeight,
+    lineHeight: computedStyles.input.lineHeight,
+    fontFamily: computedStyles.input.fontFamily,
+  }
+
+  useEffect(() => {
+    let valueWidth = 0
+    let placeholderWidth = 0
+    if (valueSpanRef.current) {
+      valueWidth = valueSpanRef.current.offsetWidth
+    }
+    if (placeholderSpanRef.current && placeholder) {
+      placeholderWidth = placeholderSpanRef.current.offsetWidth
+    }
+    setInputContentWidth(Math.max(valueWidth, placeholderWidth))
+  }, [displayValue, placeholder])
+
+  const padLeft =
+    parseFloat(String(computedStyles.input.paddingLeft || '0')) || 0
+  const padRight =
+    parseFloat(String(computedStyles.input.paddingRight || '0')) || 0
+  const calculatedWidth = `${inputContentWidth + padLeft + padRight + 1}px`
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -204,30 +193,28 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   )
 
   const handleIncrement = useCallback(() => {
-    setValue(prev => {
-      const num = parseFloat(prev || '0')
-      const newValue =
-        max !== undefined
-          ? Math.min(max, (isNaN(num) ? 0 : num) + step)
-          : (isNaN(num) ? 0 : num) + step
-      const newValueStr = formatValue(newValue.toString())
-      onChange?.(newValue)
-      return newValueStr
-    })
-  }, [onChange, max, step, formatValue])
+    const currentValue = value || internalValue
+    const num = parseFloat(currentValue || '0')
+    const newValue =
+      max !== undefined
+        ? Math.min(max, (isNaN(num) ? 0 : num) + step)
+        : (isNaN(num) ? 0 : num) + step
+    const newValueStr = formatValue(newValue.toString())
+    setInternalValue(newValueStr)
+    onChange?.(newValue)
+  }, [value, internalValue, onChange, max, step, formatValue])
 
   const handleDecrement = useCallback(() => {
-    setValue(prev => {
-      const num = parseFloat(prev || '0')
-      const newValue = Math.max(min, (isNaN(num) ? 0 : num) - step)
-      const newValueStr = formatValue(newValue.toString())
-      onChange?.(newValue)
-      return newValueStr
-    })
-  }, [onChange, min, step, formatValue])
+    const currentValue = value || internalValue
+    const num = parseFloat(currentValue || '0')
+    const newValue = Math.max(min, (isNaN(num) ? 0 : num) - step)
+    const newValueStr = formatValue(newValue.toString())
+    setInternalValue(newValueStr)
+    onChange?.(newValue)
+  }, [value, internalValue, onChange, min, step, formatValue])
 
   const handleMouseDown = (handler: () => void) => {
-    if (disabled) return
+    if (styles?.disabled) return
     handler()
     initialTimerRef.current = setTimeout(() => {
       timerRef.current = setInterval(handler, repeatInterval)
@@ -242,7 +229,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       const rawValue = event.target.value
       const numericInput = rawValue.replace(/%/g, '')
       const formattedValue = formatValue(numericInput)
-      setValue(formattedValue)
+      setInternalValue(formattedValue)
       const clonedEvent = {
         ...event,
         target: { ...event.target, value: formattedValue },
@@ -255,77 +242,82 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const handleFocus = useCallback(() => setIsFocused(true), [])
   const handleBlur = useCallback(() => setIsFocused(false), [])
 
-  const displayValue = showPercentSymbol && value ? `${value}%` : value
-  const isLabelFloating = isFocused || Boolean(value)
-  const styles = getStyles(
-    sacredtheme,
-    isFocused,
-    isLabelFloating,
-    disabled,
-    error
-  )
-
   const EndAdornment = () => (
-    <div style={styles.adornmentContainer}>
-      {sacredtheme && <span style={styles.glyph}>𓏏</span>}
-      <div style={styles.buttonContainer}>
+    <div style={computedStyles.adornmentContainer}>
+      <div style={computedStyles.buttonContainer}>
         <button
           type="button"
           onMouseDown={() => handleMouseDown(handleIncrement)}
           aria-label="increment"
-          disabled={disabled}
-          style={styles.button}
+          disabled={styles?.disabled}
+          style={computedStyles.button}
         >
-          <ArrowDropUpIcon style={styles.icon} />
+          <ArrowDropUpIcon style={computedStyles.icon} />
         </button>
         <button
           type="button"
           onMouseDown={() => handleMouseDown(handleDecrement)}
           aria-label="decrement"
-          disabled={disabled}
-          style={{ ...styles.button, marginTop: '0.125rem' }}
+          disabled={styles?.disabled}
+          style={{ ...computedStyles.button, marginTop: '2px' }}
         >
-          <ArrowDropDownIcon style={styles.icon} />
+          <ArrowDropDownIcon style={computedStyles.icon} />
         </button>
       </div>
     </div>
   )
 
   return (
-    <div style={styles.container}>
-      <div style={{ position: 'relative' }}>
+    <div
+      style={{
+        ...computedStyles.container,
+        display: 'inline-block',
+        width: styles?.width || 'auto',
+      }}
+    >
+      {label && (
+        <label style={computedStyles.label}>
+          {label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={{ ...computedStyles.inputWrapper, width: 'auto' }}>
         <input
           type="text"
           inputMode="numeric"
           id={id}
-          name={name}
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          placeholder={
-            isLabelFloating
-              ? sacredtheme
-                ? 'Divine percentage...'
-                : placeholder
-              : ''
-          }
+          disabled={styles?.disabled}
+          placeholder={placeholder}
           style={{
-            ...styles.input,
-            backgroundColor: backgroundcolor,
-            borderColor: outlinecolor,
-            color: fontcolor,
+            ...computedStyles.input,
+            width: calculatedWidth,
+            minWidth: '60px',
+            ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),
           }}
+          {...getRequiredProps(styles?.required)}
           {...rest}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {sacredtheme ? 'Sacred Portion' : label}
-          </label>
-        )}
+
+        <span ref={valueSpanRef} style={measureStyle}>
+          {displayValue}
+        </span>
+        <span ref={placeholderSpanRef} style={measureStyle}>
+          {placeholder}
+        </span>
+
         <EndAdornment />
       </div>
+
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

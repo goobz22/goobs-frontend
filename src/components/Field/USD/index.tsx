@@ -1,7 +1,16 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { black } from '../../../styles/palette'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../theme'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
@@ -12,22 +21,17 @@ export interface USDFieldProps {
   min?: number
   max?: number
   precision?: number
-  readOnly?: boolean
   enableIncrement?: boolean
   incrementStep?: number
   initialDelay?: number
   repeatInterval?: number
-  sacredtheme?: boolean
   value?: string
   placeholder?: string
-  disabled?: boolean
-  name?: string
   id?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
-  error?: boolean
   helperText?: string
-  style?: React.CSSProperties
+  styles?: FormFieldStyles
 }
 
 const formatCurrency = (value: string): string => {
@@ -47,141 +51,89 @@ const formatCurrency = (value: string): string => {
 }
 
 const getStyles = (
-  sacredtheme: boolean,
-  isFocused: boolean,
-  isLabelFloating: boolean,
-  disabled: boolean,
-  error?: boolean,
+  styles?: FormFieldStyles,
+  isFocused?: boolean,
   enableIncrement?: boolean
 ) => {
-  const premiumStyles = {
-    container: {
-      position: 'relative' as const,
-      width: '100%',
-      marginTop: '1rem',
-    },
-    inputContainer: { position: 'relative' as const },
-    input: {
-      width: '100%',
-      height: '3.5rem',
-      paddingLeft: '2.5rem',
-      paddingRight: enableIncrement ? '2.5rem' : '1rem',
-      border: `2px solid ${error ? '#EF4444' : isFocused ? '#3B82F6' : '#D1D5DB'}`,
-      borderRadius: '0.25rem',
-      outline: 'none',
-      transition: 'all 0.3s',
-      backgroundColor: 'white',
-      color: 'black',
-      opacity: disabled ? 0.5 : 1,
-    },
-    label: {
-      position: 'absolute' as const,
-      left: '2.5rem',
-      transition: 'all 0.2s',
-      pointerEvents: 'none' as const,
-      color: error ? '#EF4444' : isFocused ? '#3B82F6' : '#6B7281',
-      ...(isLabelFloating
-        ? {
-            top: '0',
-            fontSize: '0.75rem',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'white',
-            padding: '0 0.25rem',
-          }
-        : { top: '50%', fontSize: '1rem', transform: 'translateY(-50%)' }),
-    },
-    startAdornment: {
-      position: 'absolute' as const,
-      left: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      zIndex: 10,
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
       display: 'flex',
       alignItems: 'center',
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
     },
-    dollarSign: { fontSize: '1rem', fontWeight: 400, color: black.main },
-    endAdornment: {
-      position: 'absolute' as const,
-      right: '0.75rem',
-      top: '50%',
-      transform: 'translateY(-50%)',
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: styles?.padding || '8px 16px',
+      paddingLeft: styles?.paddingLeft || '40px', // Space for dollar sign
+      paddingRight: styles?.paddingRight || (enableIncrement ? '48px' : '16px'),
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
     },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    adornment: getSharedAdornmentStyles(adornmentColor),
+    startAdornment: { left: '16px' },
+    endAdornment: { right: '16px' },
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
     buttonContainer: {
       display: 'flex',
       flexDirection: 'column' as const,
       justifyContent: 'center',
-      height: '2rem',
+      height: '32px',
     },
     button: {
       padding: 0,
-      width: '1rem',
-      height: '1rem',
-      minWidth: '1rem',
-      minHeight: '1rem',
-      borderRadius: '0.125rem',
-      transition: 'all 0.3s',
+      width: '16px',
+      height: '16px',
+      minWidth: '16px',
+      minHeight: '16px',
+      borderRadius: '2px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#4B5563',
-      '&:hover': { backgroundColor: '#E5E7EB' },
+      color: adornmentColor,
+      transition,
     } as React.CSSProperties,
-    icon: { fontSize: '1.125rem' },
-    glyph: {
+    icon: { fontSize: '18px' },
+    sacredGlyph: {
       position: 'absolute' as const,
-      left: '-1rem',
+      left: '-16px',
       color: 'rgba(255,215,0,0.4)',
-      fontSize: '0.75rem',
-      animation: 'sacred-float 4s ease-in-out infinite',
-      display: 'none' as const,
+      fontSize: '12px',
     },
   }
 
-  const sacredStyles = {
-    ...premiumStyles,
-    input: {
-      ...premiumStyles.input,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      color: '#FFD700',
-      borderColor: error
-        ? '#FFD700'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.5)',
-      boxShadow: isFocused ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
-      textShadow: '0 0 2px rgba(255, 215, 0, 0.5)',
-    },
-    label: {
-      ...premiumStyles.label,
-      left: '3rem',
-      color: error
-        ? '#FFD700'
-        : isFocused
-          ? '#FFD700'
-          : 'rgba(255, 215, 0, 0.8)',
-      ...(isLabelFloating && { backgroundColor: 'rgba(0,0,0,0.8)' }),
-    },
-    glyph: {
-      position: 'absolute' as const,
-      left: '-1rem',
-      color: 'rgba(255,215,0,0.4)',
-      fontSize: '0.75rem',
-      animation: 'sacred-float 4s ease-in-out infinite',
-    },
-    dollarSign: {
-      ...premiumStyles.dollarSign,
-      color: '#FFD700',
-      fontWeight: 600,
-      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
-    },
-    button: {
-      ...premiumStyles.button,
-      color: '#FFD700',
-      '&:hover': { backgroundColor: 'rgba(255, 215, 0, 0.1)' },
-    } as React.CSSProperties,
-  }
-
-  return sacredtheme ? sacredStyles : premiumStyles
+  return componentStyles
 }
 
 const USDField: React.FC<USDFieldProps> = ({
@@ -191,19 +143,17 @@ const USDField: React.FC<USDFieldProps> = ({
   min,
   max,
   precision = 2,
-  readOnly = false,
   enableIncrement = false,
   incrementStep = 1,
   initialDelay = 500,
   repeatInterval = 100,
-  sacredtheme = false,
   value,
   placeholder,
-  disabled = false,
-  name,
   id,
   onFocus,
   onBlur,
+  helperText,
+  styles,
   ...rest
 }) => {
   const [internalValue, setInternalValue] = useState(value || initialValue)
@@ -217,7 +167,7 @@ const USDField: React.FC<USDFieldProps> = ({
   }, [])
 
   const handleIncrement = useCallback(() => {
-    if (readOnly || disabled) return
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseFloat(prev) || 0
       const newValue =
@@ -228,10 +178,10 @@ const USDField: React.FC<USDFieldProps> = ({
       onChange?.(formattedValue)
       return formattedValue
     })
-  }, [onChange, max, incrementStep, precision, readOnly, disabled])
+  }, [onChange, max, incrementStep, precision, styles?.disabled])
 
   const handleDecrement = useCallback(() => {
-    if (readOnly || disabled) return
+    if (styles?.disabled) return
     setInternalValue(prev => {
       const num = parseFloat(prev) || 0
       const newValue = Math.max(min || 0, num - incrementStep)
@@ -239,10 +189,10 @@ const USDField: React.FC<USDFieldProps> = ({
       onChange?.(formattedValue)
       return formattedValue
     })
-  }, [onChange, min, incrementStep, precision, readOnly, disabled])
+  }, [onChange, min, incrementStep, precision, styles?.disabled])
 
   const handleMouseDown = (handler: () => void) => {
-    if (readOnly || disabled) return
+    if (styles?.disabled) return
     handler()
     initialTimerRef.current = setTimeout(() => {
       timerRef.current = setInterval(handler, repeatInterval)
@@ -254,7 +204,7 @@ const USDField: React.FC<USDFieldProps> = ({
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (readOnly || disabled) return
+      if (styles?.disabled) return
       const newValue = event.target.value
       const formattedValue = formatCurrency(newValue)
       const numericValue = parseFloat(formattedValue)
@@ -273,7 +223,7 @@ const USDField: React.FC<USDFieldProps> = ({
       setInternalValue(formattedValue)
       onChange?.(formattedValue)
     },
-    [onChange, precision, min, max, readOnly, disabled]
+    [onChange, precision, min, max, styles?.disabled]
   )
 
   const handleFocus = useCallback(
@@ -291,81 +241,84 @@ const USDField: React.FC<USDFieldProps> = ({
     [onBlur]
   )
 
-  const isLabelFloating = isFocused || Boolean(internalValue)
-  const styles = getStyles(
-    sacredtheme,
-    isFocused,
-    isLabelFloating,
-    disabled,
-    rest.error,
-    enableIncrement
-  )
+  const computedStyles = getStyles(styles, isFocused, enableIncrement)
+  const sacredTheme = styles?.theme === 'sacred'
 
   const DollarAdornment = () => (
-    <div style={styles.startAdornment}>
-      {sacredtheme && <span style={styles.glyph}>𓊹</span>}
-      <span style={styles.dollarSign}>$</span>
+    <div
+      style={{
+        ...computedStyles.adornment,
+        ...computedStyles.startAdornment,
+      }}
+    >
+      {sacredTheme && <span style={computedStyles.sacredGlyph}>𓊹</span>}
+      <span>$</span>
     </div>
   )
 
   const IncrementAdornment = () =>
     enableIncrement ? (
-      <div style={styles.endAdornment}>
-        <div style={styles.buttonContainer}>
+      <div
+        style={{
+          ...computedStyles.adornment,
+          ...computedStyles.endAdornment,
+        }}
+      >
+        <div style={computedStyles.buttonContainer}>
           <button
             type="button"
             onMouseDown={() => handleMouseDown(handleIncrement)}
             aria-label="increment"
-            disabled={readOnly || disabled}
-            style={styles.button}
+            disabled={styles?.disabled}
+            style={computedStyles.button}
           >
-            <ArrowDropUpIcon style={styles.icon} />
+            <ArrowDropUpIcon style={computedStyles.icon} />
           </button>
           <button
             type="button"
             onMouseDown={() => handleMouseDown(handleDecrement)}
             aria-label="decrement"
-            disabled={readOnly || disabled}
-            style={{ ...styles.button, marginTop: '0.125rem' }}
+            disabled={styles?.disabled}
+            style={{ ...computedStyles.button, marginTop: '2px' }}
           >
-            <ArrowDropDownIcon style={styles.icon} />
+            <ArrowDropDownIcon style={computedStyles.icon} />
           </button>
         </div>
       </div>
     ) : null
 
   return (
-    <div style={{ ...styles.container, ...rest.style }}>
-      <div style={styles.inputContainer}>
+    <div style={computedStyles.container}>
+      {label && (
+        <label style={computedStyles.label}>
+          {sacredTheme ? 'Sacred Treasury' : label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={computedStyles.inputWrapper}>
         <DollarAdornment />
         <input
           type="text"
           inputMode="decimal"
           id={id}
-          name={name}
           value={internalValue}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          readOnly={readOnly}
-          placeholder={
-            isLabelFloating
-              ? sacredtheme
-                ? 'Divine wealth...'
-                : placeholder
-              : ''
-          }
-          style={styles.input}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+          placeholder={sacredTheme ? 'Divine wealth...' : placeholder}
+          style={computedStyles.input}
           {...rest}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {sacredtheme ? 'Sacred Treasury' : label}
-          </label>
-        )}
         <IncrementAdornment />
       </div>
+      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

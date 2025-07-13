@@ -1,5 +1,15 @@
 'use client'
 import React, { useCallback, useState, useMemo, useEffect } from 'react'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../theme'
 
 const formatPhoneNumber = (inputValue: string): string => {
   let digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
@@ -26,115 +36,33 @@ const parseExistingPhoneNumber = (value: string): string => {
   return formatPhoneNumber(value)
 }
 
-import { TextFieldProps } from '../Text'
-
-export interface PhoneNumberFieldProps extends Omit<TextFieldProps, 'value'> {
+export interface PhoneNumberFieldProps {
   value?: string | number
-  sacredtheme?: boolean
+  onChange?: (value: string) => void
+  label?: React.ReactNode
   helperText?: string
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
+  styles?: FormFieldStyles
+  // Additional HTML input props
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
+  placeholder?: string
+  id?: string
+  autoComplete?: string
 }
-
-const getStyles = (
-  sacredtheme: boolean,
-  isLabelFloating: boolean,
-  isFocused: boolean,
-  error: boolean,
-  disabled: boolean
-) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'center',
-    width: '100%',
-  } as React.CSSProperties,
-  inputContainer: {
-    position: 'relative' as const,
-    width: '100%',
-    marginTop: '1rem',
-  } as React.CSSProperties,
-  input: {
-    width: '100%',
-    height: '3.5rem',
-    padding: '0 1rem',
-    paddingRight: '3rem',
-    border: `2px solid`,
-    borderRadius: '0.25rem',
-    outline: 'none',
-    transition: 'all 0.3s ease-in-out',
-    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.8)' : 'white',
-    color: sacredtheme ? '#FFD700' : 'black',
-    borderColor: error
-      ? '#EF4444'
-      : isFocused
-        ? sacredtheme
-          ? '#FFD700'
-          : '#3B82F6'
-        : sacredtheme
-          ? 'rgba(255,215,0,0.5)'
-          : '#D1D5DB',
-    boxShadow:
-      isFocused && !error
-        ? sacredtheme
-          ? '0 0 20px rgba(255,215,0,0.6)'
-          : '0 0 10px rgba(59,130,246,0.5)'
-        : 'none',
-    opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? 'not-allowed' : 'text',
-  } as React.CSSProperties,
-  label: {
-    position: 'absolute' as const,
-    left: '1rem',
-    transition: 'all 0.2s',
-    pointerEvents: 'none' as const,
-    color: error
-      ? '#EF4444'
-      : isFocused
-        ? sacredtheme
-          ? '#FFD700'
-          : '#3B82F6'
-        : sacredtheme
-          ? 'rgba(255,215,0,0.8)'
-          : '#6B7281',
-    backgroundColor: isLabelFloating
-      ? sacredtheme
-        ? 'black'
-        : 'white'
-      : 'transparent',
-    padding: isLabelFloating ? '0 0.25rem' : '0',
-    top: isLabelFloating ? '0' : '50%',
-    transform: isLabelFloating ? 'translateY(-50%)' : 'translateY(-50%)',
-    fontSize: isLabelFloating ? '0.75rem' : '1rem',
-  } as React.CSSProperties,
-  endAdornment: {
-    position: 'absolute' as const,
-    right: '0.75rem',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    color: 'rgba(255,215,0,0.4)',
-    fontSize: '0.875rem',
-    animation: 'sacred-glow 2s infinite alternate',
-  } as React.CSSProperties,
-})
 
 const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
   const {
-    name,
     label = 'Phone Number',
     placeholder,
     onChange,
     onFocus,
     onBlur,
     value = '',
-    error = false,
-    disabled = false,
+    helperText,
     id,
-    backgroundcolor,
-    outlinecolor,
-    fontcolor,
-    sacredtheme = false,
+    styles,
     ...restProps
   } = props
 
@@ -147,14 +75,61 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     setPhoneNumber(parseExistingPhoneNumber(String(value || '')))
   }, [value])
 
+  const sacredtheme = styles?.theme === 'sacred'
+
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(styles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: styles?.height || '40px',
+      width: '100%',
+      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: styles?.padding || '8px 16px',
+      paddingRight: sacredtheme ? '48px' : '16px', // Space for sacred icon
+      fontSize: styles?.fontSize || '16px',
+      fontWeight: styles?.fontWeight,
+      lineHeight: styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    endAdornment: getSharedAdornmentStyles(adornmentColor),
+    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
+  }
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
       if (input === '+1 ' || input === '+1' || input === '+') {
         setPhoneNumber('+1 ')
         if (onChange) {
-          const mockEvent = { ...e, target: { ...e.target, value: '+1 ' } }
-          onChange(mockEvent)
+          onChange('+1 ')
         }
         return
       }
@@ -165,11 +140,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
       const formattedValue = formatPhoneNumber(strippedInput)
       setPhoneNumber(formattedValue)
       if (onChange) {
-        const mockEvent = {
-          ...e,
-          target: { ...e.target, value: formattedValue },
-        }
-        onChange(mockEvent)
+        onChange(formattedValue)
       }
     },
     [onChange]
@@ -182,6 +153,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     },
     [onFocus]
   )
+
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
@@ -190,65 +162,53 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     [onBlur]
   )
 
-  const isLabelFloating = isFocused || phoneNumber !== '+1 '
-  const styles = getStyles(
-    sacredtheme,
-    isLabelFloating,
-    isFocused,
-    error,
-    disabled
-  )
-
   const endAdornment = useMemo(
-    () => (sacredtheme ? <span style={styles.endAdornment}>𓋴</span> : null),
-    [sacredtheme, styles.endAdornment]
+    () =>
+      sacredtheme ? <span style={componentStyles.endAdornment}>𓋴</span> : null,
+    [sacredtheme, componentStyles.endAdornment]
   )
 
   return (
-    <div style={styles.container}>
-      <div style={styles.inputContainer}>
+    <div style={componentStyles.container}>
+      {label && (
+        <label style={componentStyles.label}>
+          {sacredtheme ? 'Sacred Connection' : label}
+          {styles?.required && (
+            <span style={getRequiredIndicatorStyle(styles)}>
+              {styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={componentStyles.inputWrapper}>
         <input
+          {...restProps}
+          {...getRequiredProps(styles?.required)}
           type="tel"
           id={id}
-          name={name}
           value={phoneNumber}
+          disabled={styles?.disabled}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={disabled}
-          placeholder={
-            isLabelFloating
-              ? sacredtheme
-                ? 'Divine number...'
-                : placeholder
-              : ''
-          }
-          style={{
-            ...styles.input,
-            backgroundColor: backgroundcolor,
-            borderColor: outlinecolor,
-            color: fontcolor,
-          }}
-          {...restProps}
+          placeholder={sacredtheme ? 'Divine number...' : placeholder}
+          style={componentStyles.input}
         />
-        {label && (
-          <label htmlFor={id} style={styles.label}>
-            {sacredtheme ? 'Sacred Connection' : label}
-          </label>
-        )}
+
         {endAdornment && (
           <div
             style={{
-              position: 'absolute' as const,
-              right: '0.75rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
+              ...componentStyles.endAdornment,
+              right: '16px',
             }}
           >
             {endAdornment}
           </div>
         )}
       </div>
+
+      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )
 })

@@ -6,7 +6,6 @@ const meta: Meta<typeof TimeRangeComponent> = {
   title: 'Components/Field/Time/TimeRange',
   component: TimeRangeComponent,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     showTimezone: { control: 'boolean' },
     timezone: { control: 'text' },
   },
@@ -35,7 +34,7 @@ export const PremiumTheme: Story = {
   args: {
     startLabel: 'Start Time',
     endLabel: 'End Time',
-    sacredtheme: false,
+
     value: {
       start: new Date(),
       end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
@@ -52,6 +51,7 @@ export const SacredTheme: Story = {
         padding: '2rem',
         backgroundColor: '#000',
         borderRadius: '8px',
+        boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
       }}
     >
       <TimeRangeComponent {...args} />
@@ -59,12 +59,11 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
   const [showTimezone, setShowTimezone] = React.useState(true)
   const [value, setValue] = React.useState<TimeRange>({
     start: new Date(),
@@ -98,14 +97,6 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
-            />
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
               checked={showTimezone}
               onChange={e => setShowTimezone(e.target.checked)}
             />
@@ -117,13 +108,12 @@ const InteractiveDemoRenderer = () => {
         style={{
           padding: '2rem',
           borderRadius: '8px',
-          backgroundColor: sacred ? 'black' : '#f9fafb',
+          backgroundColor: '#f9fafb',
         }}
       >
         <TimeRangeComponent
           value={value}
           onChange={setValue}
-          sacredtheme={sacred}
           showTimezone={showTimezone}
         />
       </div>

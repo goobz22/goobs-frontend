@@ -1,104 +1,646 @@
-// src/components/Searchbar/searchbar.stories.tsx
-
-import React from 'react'
+/**
+ * @fileoverview Storybook stories for the Search component.
+ * These stories showcase the various states, themes, and styling capabilities of the Search field.
+ * The Search component provides search input functionality with customizable styling.
+ */
+import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import Searchbar from './index'
+import { userEvent, within, expect } from '@storybook/test'
+import SearchBar from './index'
 
-const meta: Meta<typeof Searchbar> = {
+// Wrapper component for state management
+const SearchBarWithState = ({ initialValue = '', ...props }) => {
+  const [value, setValue] = useState(initialValue)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value)
+  }
+  return <SearchBar {...props} value={value} onChange={handleChange} />
+}
+
+// --------------------------------------------------------------------------
+// STORYBOOK METADATA
+// --------------------------------------------------------------------------
+const meta: Meta<typeof SearchBar> = {
   title: 'Components/Field/Search',
-  component: Searchbar,
-  argTypes: {
-    sacredtheme: { control: 'boolean' },
-    shrunklabelposition: {
-      control: 'radio',
-      options: ['onNotch', 'aboveNotch'],
-    },
-    label: { control: 'text' },
-    placeholder: { control: 'text' },
-  },
+  component: SearchBar,
   parameters: {
     layout: 'centered',
   },
+  tags: ['autodocs'],
+  argTypes: {
+    value: { control: 'text' },
+    onChange: { action: 'changed' },
+    label: { control: 'text' },
+    placeholder: { control: 'text' },
+    helperText: { control: 'text' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, layout, and more',
+    },
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '400px', padding: '2rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
+
 export default meta
+type Story = StoryObj<typeof SearchBar>
 
-type Story = StoryObj<typeof Searchbar>
+// --------------------------------------------------------------------------
+// BASIC THEME STORIES
+// --------------------------------------------------------------------------
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
-  render: args => (
-    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
-      <Searchbar {...args} />
-    </div>
+export const LightTheme: Story = {
+  name: 'Light Theme (Default)',
+  render: () => (
+    <SearchBarWithState
+      label="Search"
+      placeholder="Search for items..."
+      styles={{ theme: 'light' }}
+    />
   ),
-  args: {
-    label: 'Search',
-    placeholder: 'Search for anything...',
-    value: '',
-    onChange: e => console.log('Search input =>', e.target.value),
-    sacredtheme: false,
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: () => (
+    <SearchBarWithState
+      label="Search Query"
+      placeholder="Enter search terms"
+      styles={{ theme: 'dark' }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
-  render: args => (
-    <div className="w-[400px] p-6 bg-black rounded-lg">
-      <Searchbar {...args} />
-    </div>
+  render: () => (
+    <SearchBarWithState
+      label="Divine Search"
+      placeholder="Seek ancient wisdom..."
+      styles={{ theme: 'sacred' }}
+    />
   ),
-  args: {
-    ...PremiumTheme.args,
-    sacredtheme: true,
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-const InteractiveDemoRenderer = () => {
-  const [value, setValue] = React.useState('')
-  const [sacred, setSacred] = React.useState(false)
-  const [shrunkPos, setShrunkPos] = React.useState<'onNotch' | 'aboveNotch'>(
-    'onNotch'
-  )
+// --------------------------------------------------------------------------
+// CUSTOM COLOR STORIES
+// --------------------------------------------------------------------------
 
-  return (
-    <div className="w-[500px] space-y-4">
-      <div className="p-4 bg-white rounded-lg border">
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <label>
-            <input
-              type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
-            />{' '}
-            Sacred
-          </label>
-          <select
-            value={shrunkPos}
-            onChange={e =>
-              setShrunkPos(e.target.value as 'onNotch' | 'aboveNotch')
-            }
-          >
-            <option value="onNotch">On Notch</option>
-            <option value="aboveNotch">Above Notch</option>
-          </select>
+export const CustomColors: Story = {
+  name: 'Custom Colors',
+  render: () => (
+    <SearchBarWithState
+      label="Custom Search"
+      placeholder="Search with custom colors"
+      styles={{
+        theme: 'light',
+        backgroundColor: 'rgba(240, 253, 244, 0.95)',
+        borderColor: 'rgba(34, 197, 94, 0.4)',
+        borderFocusedColor: 'rgba(34, 197, 94, 1)',
+        textColor: 'rgba(21, 128, 61, 1)',
+        labelColor: 'rgba(21, 128, 61, 0.7)',
+      }}
+    />
+  ),
+}
+
+export const NeonStyle: Story = {
+  name: 'Neon Style',
+  render: () => (
+    <SearchBarWithState
+      label="Neon Search"
+      placeholder="Futuristic search"
+      styles={{
+        theme: 'dark',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderColor: 'rgba(236, 72, 153, 0.5)',
+        borderFocusedColor: 'rgba(236, 72, 153, 1)',
+        textColor: 'rgba(236, 72, 153, 1)',
+        labelColor: 'rgba(236, 72, 153, 0.7)',
+        borderRadius: '12px',
+        borderWidth: '2px',
+      }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// LAYOUT AND SPACING STORIES
+// --------------------------------------------------------------------------
+
+export const CustomLayout: Story = {
+  name: 'Custom Layout & Spacing',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchBarWithState
+        label="Large Padding"
+        placeholder="Extra space inside"
+        styles={{
+          theme: 'light',
+          padding: '24px',
+          borderRadius: '16px',
+          fontSize: '18px',
+        }}
+      />
+      <SearchBarWithState
+        label="Custom Dimensions"
+        placeholder="Fixed height"
+        styles={{
+          theme: 'light',
+          height: '60px',
+          width: '100%',
+          borderRadius: '8px',
+        }}
+      />
+      <SearchBarWithState
+        label="Asymmetric Padding"
+        placeholder="Different padding sides"
+        styles={{
+          theme: 'light',
+          paddingLeft: '32px',
+          paddingRight: '16px',
+          paddingTop: '20px',
+          paddingBottom: '20px',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// TYPOGRAPHY STORIES
+// --------------------------------------------------------------------------
+
+export const CustomTypography: Story = {
+  name: 'Custom Typography',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchBarWithState
+        label="Large Text"
+        placeholder="Search with bigger text"
+        styles={{
+          theme: 'light',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          lineHeight: '1.5',
+          padding: '20px',
+        }}
+      />
+      <SearchBarWithState
+        label="Custom Font"
+        placeholder="Different font family"
+        styles={{
+          theme: 'light',
+          fontFamily: '"Georgia", serif',
+          fontSize: '16px',
+          fontWeight: 400,
+        }}
+      />
+      <SearchBarWithState
+        label="Small & Light"
+        placeholder="Subtle search"
+        styles={{
+          theme: 'light',
+          fontSize: '14px',
+          fontWeight: 300,
+          padding: '12px',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// ERROR STATES
+// --------------------------------------------------------------------------
+
+export const ErrorStates: Story = {
+  name: 'Error States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchBarWithState
+        label="Search Query"
+        initialValue="invalid@#$%"
+        error="Search contains invalid characters."
+        styles={{ theme: 'light' }}
+      />
+      <SearchBarWithState
+        label="Product Search"
+        placeholder="Enter product name"
+        error="No results found for your search."
+        styles={{
+          theme: 'dark',
+          borderErrorColor: 'rgba(255, 99, 71, 1)',
+          labelErrorColor: 'rgba(255, 99, 71, 1)',
+          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+        }}
+      />
+      <SearchBarWithState
+        label="Sacred Search"
+        initialValue="forbidden-knowledge"
+        error="This knowledge is forbidden to mortals."
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// REQUIRED FIELDS
+// --------------------------------------------------------------------------
+
+export const RequiredFields: Story = {
+  name: 'Required Fields',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchBarWithState
+        label="Required Search"
+        placeholder="Enter search query"
+        required
+        styles={{ theme: 'light' }}
+      />
+      <SearchBarWithState
+        label="Product Search"
+        placeholder="Search for products"
+        required
+        error="Search query is required"
+        styles={{ theme: 'light' }}
+      />
+      <SearchBarWithState
+        label="User Search"
+        placeholder="Search for users"
+        required
+        styles={{ theme: 'dark' }}
+      />
+      <SearchBarWithState
+        label="Custom Required Search"
+        placeholder="Enter divine query"
+        required
+        styles={{
+          theme: 'sacred',
+          requiredIndicatorText: ' (required)',
+          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// COMPREHENSIVE SHOWCASE
+// --------------------------------------------------------------------------
+
+export const ComprehensiveShowcase: Story = {
+  name: 'Comprehensive Showcase',
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem',
+        padding: '1rem',
+      }}
+    >
+      {/* Light Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchBarWithState
+            label="Basic Search"
+            placeholder="Search items"
+            styles={{ theme: 'light' }}
+          />
+          <SearchBarWithState
+            label="Search Query"
+            initialValue="invalid"
+            error="Invalid search"
+            styles={{ theme: 'light' }}
+          />
+          <SearchBarWithState
+            label="Required Search"
+            placeholder="Required field"
+            required
+            styles={{ theme: 'light' }}
+          />
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
-        <Searchbar
-          label="Interactive Search"
-          placeholder="Type to see changes"
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          sacredtheme={sacred}
-          shrunklabelposition={shrunkPos}
-        />
+
+      {/* Dark Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchBarWithState
+            label="Basic Dark"
+            placeholder="Search items"
+            styles={{ theme: 'dark' }}
+          />
+          <SearchBarWithState
+            label="Custom Colors"
+            placeholder="Custom styling"
+            styles={{
+              theme: 'dark',
+              borderFocusedColor: 'rgba(34, 197, 94, 1)',
+              labelColor: 'rgba(34, 197, 94, 0.8)',
+            }}
+          />
+          <SearchBarWithState
+            label="Large Size"
+            placeholder="Search items"
+            styles={{
+              theme: 'dark',
+              fontSize: '18px',
+              padding: '20px',
+              borderRadius: '12px',
+            }}
+          />
+        </div>
       </div>
+
+      {/* Sacred Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchBarWithState
+            label="Divine Search"
+            placeholder="Seek wisdom"
+            styles={{ theme: 'sacred' }}
+          />
+          <SearchBarWithState
+            label="Sacred Query"
+            initialValue="forbidden"
+            error="Knowledge forbidden"
+            styles={{ theme: 'sacred' }}
+          />
+          <SearchBarWithState
+            label="Ancient Search"
+            placeholder="Enter divine query"
+            styles={{
+              theme: 'sacred',
+              borderRadius: '16px',
+              padding: '18px',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Custom Styling Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#7C3AED' }}>
+          Custom Styling
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchBarWithState
+            label="Neon Style"
+            placeholder="Futuristic search"
+            styles={{
+              theme: 'dark',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              borderColor: 'rgba(147, 51, 234, 0.5)',
+              borderFocusedColor: 'rgba(147, 51, 234, 1)',
+              textColor: 'rgba(147, 51, 234, 1)',
+              labelColor: 'rgba(147, 51, 234, 0.8)',
+              borderRadius: '20px',
+              borderWidth: '2px',
+            }}
+          />
+          <SearchBarWithState
+            label="Soft Rounded"
+            placeholder="Gentle search"
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(249, 250, 251, 1)',
+              borderColor: 'rgba(209, 213, 219, 1)',
+              borderFocusedColor: 'rgba(59, 130, 246, 1)',
+              borderRadius: '24px',
+              padding: '16px 24px',
+            }}
+          />
+          <SearchBarWithState
+            label="Minimal"
+            placeholder="Clean search"
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              borderFocusedColor: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '0px',
+              borderWidth: '0px 0px 2px 0px',
+              padding: '12px 0px',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// DISABLED STATE
+// --------------------------------------------------------------------------
+
+export const DisabledStates: Story = {
+  name: 'Disabled States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchBarWithState
+        label="Disabled Light"
+        initialValue="cannot-search"
+        disabled
+        styles={{ theme: 'light' }}
+      />
+      <SearchBarWithState
+        label="Disabled Dark"
+        initialValue="locked-search"
+        disabled
+        styles={{ theme: 'dark' }}
+      />
+      <SearchBarWithState
+        label="Disabled Sacred"
+        initialValue="sealed-knowledge"
+        disabled
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// SEARCH DEMO
+// --------------------------------------------------------------------------
+
+const SearchDemo = () => {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<string[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  const mockData = [
+    'Apple iPhone 15',
+    'Samsung Galaxy S24',
+    'MacBook Pro',
+    'Dell XPS 13',
+    'iPad Air',
+    'Microsoft Surface',
+    'Google Pixel 8',
+    'Sony WH-1000XM4',
+    'AirPods Pro',
+    'Nintendo Switch',
+  ]
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchQuery = e.target.value
+    setQuery(searchQuery)
+    setIsSearching(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      if (searchQuery.trim()) {
+        const filtered = mockData.filter(item =>
+          item.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        setResults(filtered)
+      } else {
+        setResults([])
+      }
+      setIsSearching(false)
+    }, 300)
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '400px',
+      }}
+    >
+      <h3 style={{ margin: '0 0 1rem 0' }}>Search Demo</h3>
+      <SearchBar
+        label="Product Search"
+        placeholder="Search for products..."
+        value={query}
+        onChange={handleSearch}
+        styles={{ theme: 'light' }}
+      />
+
+      {isSearching && (
+        <div
+          style={{
+            padding: '1rem',
+            textAlign: 'center',
+            fontSize: '14px',
+            color: '#6B7280',
+          }}
+        >
+          Searching...
+        </div>
+      )}
+
+      {!isSearching && results.length > 0 && (
+        <div
+          style={{
+            border: '1px solid #E5E7EB',
+            borderRadius: '8px',
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}
+        >
+          {results.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                padding: '0.75rem 1rem',
+                borderBottom:
+                  index < results.length - 1 ? '1px solid #E5E7EB' : 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}
+              onMouseEnter={e => {
+                const target = e.target as HTMLDivElement
+                target.style.backgroundColor = '#F3F4F6'
+              }}
+              onMouseLeave={e => {
+                const target = e.target as HTMLDivElement
+                target.style.backgroundColor = 'transparent'
+              }}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isSearching && query && results.length === 0 && (
+        <div
+          style={{
+            padding: '1rem',
+            textAlign: 'center',
+            fontSize: '14px',
+            color: '#6B7280',
+          }}
+        >
+          No results found for &quot;{query}&quot;
+        </div>
+      )}
+
+      <p style={{ fontSize: '14px', color: '#6B7280' }}>
+        Start typing to search through products. Results will appear below.
+      </p>
     </div>
   )
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemoRenderer />,
+export const SearchDemoStory: Story = {
+  name: 'Search Demo',
+  render: () => <SearchDemo />,
+}
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST
+// --------------------------------------------------------------------------
+
+export const InteractionTest: Story = {
+  name: 'Interaction Test',
+  render: () => (
+    <SearchBarWithState
+      label="Test Search Input"
+      placeholder="Search for testing..."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByPlaceholderText('Search for testing...')
+    const label = canvas.getByText('Test Search Input')
+
+    // Initial state
+    expect(label).toBeVisible()
+    expect(input).toBeVisible()
+
+    // Focus and type
+    await userEvent.click(input)
+    await userEvent.type(input, 'testing search functionality', { delay: 50 })
+
+    // Check value
+    await expect(input).toHaveValue('testing search functionality')
+  },
 }
