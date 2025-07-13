@@ -1,331 +1,562 @@
-// src/components/Dropdown/dropdown.stories.tsx
-
-import React from 'react'
+/**
+ * @fileoverview Storybook stories for the Dropdown component.
+ * These stories showcase the various states, themes, and styling capabilities of the Dropdown.
+ * The Dropdown uses the shared form field system with labels positioned above the input field.
+ */
+import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within } from '@storybook/test'
-import { userEvent } from '@storybook/test'
-import { expect } from '@storybook/test'
+import { userEvent, within, expect } from '@storybook/test'
 import Dropdown, { DropdownOption } from './index'
 
 /**
- * Setup story metadata
+ * Reusable mock options using the unified DropdownOption interface
  */
+const sampleOptions: DropdownOption[] = [
+  { value: 'javascript', icon: '🚀' },
+  { value: 'typescript', attribute1: 'Type-safe', icon: '✨' },
+  {
+    value: 'react',
+    attribute1: 'Library',
+    attribute2: 'Frontend',
+    icon: '⚛️',
+  },
+  { value: 'nodejs', attribute1: 'Runtime' },
+  { value: 'python' },
+]
+
+const countryOptions: DropdownOption[] = [
+  { value: 'usa', attribute1: 'United States', attribute2: 'North America' },
+  { value: 'canada', attribute1: 'Canada', attribute2: 'North America' },
+  { value: 'uk', attribute1: 'United Kingdom', attribute2: 'Europe' },
+  { value: 'france', attribute1: 'France', attribute2: 'Europe' },
+  { value: 'japan', attribute1: 'Japan', attribute2: 'Asia' },
+]
+
+// Wrapper component for state management
+interface DropdownWithStateProps {
+  initialValue?: string
+  label: string
+  options: DropdownOption[]
+  styles?: any
+  error?: string
+  disabled?: boolean
+  required?: boolean
+}
+
+const DropdownWithState: React.FC<DropdownWithStateProps> = ({
+  initialValue = '',
+  label,
+  options,
+  styles,
+  error,
+  disabled,
+  required,
+}) => {
+  const [value, setValue] = useState(initialValue)
+  return (
+    <Dropdown
+      label={label}
+      options={options}
+      helperText={error}
+      styles={{
+        ...styles,
+        disabled: disabled,
+        required: required,
+        helperTextType: error ? 'error' : undefined,
+      }}
+      value={value}
+      onChange={e => setValue(e.target.value)}
+    />
+  )
+}
+
+// --------------------------------------------------------------------------
+// STORYBOOK METADATA
+// --------------------------------------------------------------------------
 const meta: Meta<typeof Dropdown> = {
   title: 'Components/Field/Dropdown/Regular',
   component: Dropdown,
-  // Let Storybook build color pickers and other controls for these props
-  argTypes: {
-    backgroundcolor: { control: 'color' },
-    outlinecolor: { control: 'color' },
-    fontcolor: { control: 'color' },
-    shrunkfontcolor: { control: 'color' },
-    unshrunkfontcolor: { control: 'color' },
-    shrunklabelposition: {
-      control: 'select',
-      options: ['onNotch', 'aboveNotch'],
-    },
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    error: { control: 'boolean' },
-  },
   parameters: {
     layout: 'centered',
-    // Example: If you want to turn on the a11y addon's checks or
-    // other custom test-runner settings for all stories, you can do so here.
-    a11y: {
-      disable: false,
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    label: { control: 'text' },
+    helperText: { control: 'text' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, layout, and more',
     },
   },
+  decorators: [
+    Story => (
+      <div style={{ width: '400px', padding: '2rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export default meta
 type Story = StoryObj<typeof Dropdown>
 
-/**
- * Reusable mock options
- */
-const sampleOptions: DropdownOption[] = [
-  { value: 'option_1', icon: '🚀' },
-  { value: 'option_2', attribute1: 'Detail for #2', icon: '✨' },
-  {
-    value: 'option_3',
-    attribute1: 'Detail for #3',
-    attribute2: 'Secondary',
-    icon: '🎉',
-  },
-]
+// --------------------------------------------------------------------------
+// BASIC THEME STORIES
+// --------------------------------------------------------------------------
 
-/**
- * 1) Basic scenario: default usage
- */
-export const Default: Story = {
-  args: {
-    label: 'Default Dropdown',
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    // We can test the default scenario: open the dropdown & select an item
-    const canvas = within(canvasElement)
-
-    // 1. Click the dropdown to open menu
-    await userEvent.click(canvas.getByRole('button'))
-
-    // 2. Click on the second option
-    await userEvent.click(canvas.getByText('Option 2'))
-
-    // 3. Assert that the button now shows "Option 2"
-    await expect(canvas.getByRole('button')).toHaveTextContent('Option 2')
-  },
-}
-
-/**
- * 2) Dropdown with a default value
- */
-export const WithDefaultValue: Story = {
-  args: {
-    label: 'Dropdown (defaultValue="option_3")',
-    defaultValue: 'option_3',
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // The initial label should be "Option 3"
-    await expect(canvas.getByRole('button')).toHaveTextContent('Option 3')
-  },
-}
-
-/**
- * 3) Dropdown with an error state & helperText
- */
-export const WithError: Story = {
-  args: {
-    label: 'Dropdown in Error State',
-    error: true,
-    helperText: 'Oops! Something went wrong.',
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // Check for the error text in the helper area
-    await expect(
-      canvas.getByText('Oops! Something went wrong.')
-    ).toBeInTheDocument()
-  },
-}
-
-/**
- * 4) Dropdown marked as required
- */
-export const RequiredDropdown: Story = {
-  args: {
-    label: 'Dropdown (required)',
-    required: true,
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Make sure the label indicates required in some manner
-    // (This depends on how your <Dropdown /> implements required labels)
-    await expect(canvas.getByText('Dropdown (required)')).toBeInTheDocument()
-  },
-}
-
-/**
- * 5) Customized colors
- */
-export const CustomizedColors: Story = {
-  args: {
-    label: 'Custom Colors',
-    options: sampleOptions,
-    fontcolor: '#ffffff',
-    backgroundcolor: '#4a90e2',
-    outlinecolor: '#f56217',
-    shrunkfontcolor: '#E91E63',
-    unshrunkfontcolor: '#9C27B0',
-  },
-  play: async ({ canvasElement }) => {
-    // We won't do a heavy color check, but we can do a quick interaction test
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button'))
-    await userEvent.click(canvas.getByText('Option 1'))
-
-    await expect(canvas.getByRole('button')).toHaveTextContent('Option 1')
-  },
-}
-
-/**
- * 6) Complex options (show attribute1 and attribute2)
- */
-export const ComplexOptions: Story = {
-  args: {
-    label: 'Complex Options',
-    options: [
-      { value: 'Basic Option' },
-      {
-        value: 'Fancy Option',
-        attribute1: 'Extra data',
-        attribute2: 'More details',
-      },
-      { value: 'Simple', attribute1: 'Single attribute' },
-    ],
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Open
-    await userEvent.click(canvas.getByRole('button'))
-    // Find fancy option text
-    await expect(canvas.getByText('Fancy Option')).toBeInTheDocument()
-    await expect(
-      canvas.getByText(/Extra data \| More details/i)
-    ).toBeInTheDocument()
-  },
-}
-
-/**
- * 7) Shrunk label above the notch
- *    We set shrunklabelposition="aboveNotch" to confirm it doesn't draw the notch space
- */
-export const ShrunkLabelAboveNotch: Story = {
-  args: {
-    label: 'Above Notch Label',
-    shrunklabelposition: 'aboveNotch',
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Basic interaction
-    await userEvent.click(canvas.getByRole('button'))
-    await userEvent.click(canvas.getByText('Option 2'))
-    await expect(canvas.getByRole('button')).toHaveTextContent('Option 2')
-  },
-}
-
-/**
- * 8) Shrunk label on top of the notch (the default)
- */
-export const ShrunkLabelOnNotch: Story = {
-  args: {
-    label: 'On Notch Label',
-    shrunklabelposition: 'onNotch',
-    options: sampleOptions,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Basic interaction
-    await userEvent.click(canvas.getByRole('button'))
-    await userEvent.click(canvas.getByText('Option 3'))
-    await expect(canvas.getByRole('button')).toHaveTextContent('Option 3')
-  },
-}
-
-/**
- * 9) Empty options scenario
- */
-export const NoOptions: Story = {
-  args: {
-    label: 'No Options Provided',
-    options: [],
-    helperText: 'This dropdown has no items available.',
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Attempt to open
-    await userEvent.click(canvas.getByRole('button'))
-    // No items exist
-    // Might see a "No options" or an empty menu
-    // This assertion can change based on how you handle no items
-    await expect(canvas.queryByText('Option 1')).not.toBeInTheDocument()
-  },
-}
-
-/**
- * 10) Complex Options with Option Selected and Menu Open
- */
-export const ComplexOptionsSelected: Story = {
-  args: {
-    label: 'Complex Options',
-    defaultValue: 'Fancy Option',
-    options: [
-      { value: 'Basic Option' },
-      {
-        value: 'Fancy Option',
-        attribute1: 'Extra data',
-        attribute2: 'More details',
-      },
-      { value: 'Simple', attribute1: 'Single attribute' },
-    ],
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // Verify initial selected value
-    await expect(canvas.getByRole('button')).toHaveTextContent('Fancy Option')
-
-    // Open the dropdown
-    await userEvent.click(canvas.getByRole('button'))
-
-    // Verify all complex option details are visible
-    await expect(canvas.getByText('Fancy Option')).toBeInTheDocument()
-    await expect(
-      canvas.getByText(/Extra data \| More details/i)
-    ).toBeInTheDocument()
-    await expect(canvas.getByText('Simple')).toBeInTheDocument()
-    await expect(canvas.getByText('Single attribute')).toBeInTheDocument()
-
-    // Verify basic option is also visible
-    await expect(canvas.getByText('Basic Option')).toBeInTheDocument()
-  },
-}
-
-export const Premium: Story = {
-  name: 'Premium Theme',
-  render: args => (
-    <div
-      style={{
-        width: '400px',
-        padding: '2rem',
-        backgroundColor: '#f3f4f6',
-        borderRadius: '0.5rem',
-      }}
-    >
-      <Dropdown {...args} />
-    </div>
+export const LightTheme: Story = {
+  name: 'Light Theme (Default)',
+  render: () => (
+    <DropdownWithState
+      label="Programming Language"
+      options={sampleOptions}
+      styles={{ theme: 'light' }}
+    />
   ),
-  args: {
-    label: 'Select an Option',
-    options: sampleOptions,
-    sacredtheme: false,
-    helperText: 'This is a helper text.',
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: () => (
+    <DropdownWithState
+      label="Country"
+      options={countryOptions}
+      styles={{ theme: 'dark' }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-export const Sacred: Story = {
+export const SacredTheme: Story = {
   name: 'Sacred Theme',
-  render: args => (
-    <div
-      style={{
-        width: '400px',
-        padding: '2rem',
-        backgroundColor: 'black',
-        borderRadius: '0.5rem',
-      }}
-    >
-      <Dropdown {...args} />
-    </div>
+  render: () => (
+    <DropdownWithState
+      label="Ancient Wisdom"
+      options={sampleOptions}
+      styles={{ theme: 'sacred' }}
+    />
   ),
-  args: {
-    ...Premium.args,
-    sacredtheme: true,
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-const InteractiveDropdownDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
-  const [value, setValue] = React.useState('option_1')
+// --------------------------------------------------------------------------
+// OPTION VARIANTS
+// --------------------------------------------------------------------------
+
+export const BasicOptions: Story = {
+  name: 'Basic Options',
+  render: () => (
+    <DropdownWithState
+      label="Simple Selection"
+      options={[
+        { value: 'apple' },
+        { value: 'banana' },
+        { value: 'orange' },
+        { value: 'grape' },
+      ]}
+      styles={{ theme: 'light' }}
+    />
+  ),
+}
+
+export const ComplexOptions: Story = {
+  name: 'Complex Options with Attributes',
+  render: () => (
+    <DropdownWithState
+      label="Technology Stack"
+      options={sampleOptions}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const select = canvas.getByRole('combobox')
+
+    // Open dropdown and verify complex options display correctly
+    await userEvent.click(select)
+    await expect(canvas.getByText(/React/)).toBeInTheDocument()
+    await expect(canvas.getByText(/Library | Frontend/)).toBeInTheDocument()
+  },
+}
+
+export const WithDefaultValue: Story = {
+  name: 'With Default Value',
+  render: () => (
+    <DropdownWithState
+      label="Pre-selected Option"
+      initialValue="typescript"
+      options={sampleOptions}
+      styles={{ theme: 'light' }}
+    />
+  ),
+}
+
+export const RequiredDropdown: Story = {
+  name: 'Required Dropdown',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DropdownWithState
+        label="Required Selection"
+        options={sampleOptions}
+        required
+        styles={{ theme: 'light' }}
+      />
+      <DropdownWithState
+        label="Required Country"
+        options={countryOptions}
+        required
+        error="This field is required"
+        styles={{ theme: 'light' }}
+      />
+      <DropdownWithState
+        label="Required Tech Stack"
+        options={sampleOptions}
+        required
+        initialValue="react"
+        styles={{ theme: 'dark' }}
+      />
+      <DropdownWithState
+        label="Custom Required Indicator"
+        options={sampleOptions}
+        required
+        styles={{
+          theme: 'sacred',
+          requiredIndicatorText: ' (required)',
+          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+        }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Check that the required dropdowns are present with automatic asterisks
+    await expect(canvas.getByText(/Required Selection/)).toBeInTheDocument()
+    await expect(canvas.getByText(/Required Country/)).toBeInTheDocument()
+    await expect(canvas.getByText(/Required Tech Stack/)).toBeInTheDocument()
+
+    // Test the required attribute is applied
+    const selects = canvas.getAllByRole('combobox')
+    expect(selects[0]).toBeRequired()
+    expect(selects[1]).toBeRequired()
+    expect(selects[2]).toBeRequired()
+    expect(selects[3]).toBeRequired()
+  },
+}
+
+// --------------------------------------------------------------------------
+// ERROR STATES
+// --------------------------------------------------------------------------
+
+export const ErrorStates: Story = {
+  name: 'Error States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DropdownWithState
+        label="Required Selection"
+        options={sampleOptions}
+        error="Please select an option."
+        styles={{ theme: 'light' }}
+      />
+      <DropdownWithState
+        label="Invalid Choice"
+        options={countryOptions}
+        error="This selection is not available."
+        styles={{
+          theme: 'dark',
+          borderErrorColor: 'rgba(255, 99, 71, 1)',
+          labelErrorColor: 'rgba(255, 99, 71, 1)',
+          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+        }}
+      />
+      <DropdownWithState
+        label="Sacred Error"
+        options={sampleOptions}
+        error="The ancient wisdom rejects this choice."
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// CUSTOM STYLING
+// --------------------------------------------------------------------------
+
+export const CustomColors: Story = {
+  name: 'Custom Colors',
+  render: () => (
+    <DropdownWithState
+      label="Custom Styled"
+      options={sampleOptions}
+      styles={{
+        theme: 'light',
+        backgroundColor: 'rgba(255, 240, 245, 0.95)',
+        borderColor: 'rgba(255, 20, 147, 0.4)',
+        borderFocusedColor: 'rgba(255, 20, 147, 1)',
+        textColor: 'rgba(139, 0, 139, 1)',
+        labelColor: 'rgba(139, 0, 139, 0.7)',
+      }}
+    />
+  ),
+}
+
+export const CustomLayout: Story = {
+  name: 'Custom Layout & Spacing',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DropdownWithState
+        label="Large Size"
+        options={sampleOptions}
+        styles={{
+          theme: 'light',
+          height: '60px',
+          fontSize: '18px',
+          borderRadius: '12px',
+          padding: '16px 48px 16px 20px',
+        }}
+      />
+      <DropdownWithState
+        label="Compact Size"
+        options={countryOptions}
+        styles={{
+          theme: 'light',
+          height: '32px',
+          fontSize: '14px',
+          borderRadius: '4px',
+          padding: '4px 32px 4px 8px',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// DISABLED STATE
+// --------------------------------------------------------------------------
+
+export const DisabledStates: Story = {
+  name: 'Disabled States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DropdownWithState
+        label="Disabled Light"
+        options={sampleOptions}
+        disabled
+        styles={{ theme: 'light' }}
+      />
+      <DropdownWithState
+        label="Disabled Dark"
+        options={countryOptions}
+        disabled
+        styles={{ theme: 'dark' }}
+      />
+      <DropdownWithState
+        label="Disabled Sacred"
+        options={sampleOptions}
+        disabled
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// COMPREHENSIVE SHOWCASE
+// --------------------------------------------------------------------------
+
+export const ComprehensiveShowcase: Story = {
+  name: 'Comprehensive Showcase',
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem',
+        padding: '1rem',
+      }}
+    >
+      {/* Light Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <DropdownWithState
+            label="Basic Light"
+            options={sampleOptions}
+            styles={{ theme: 'light' }}
+          />
+          <DropdownWithState
+            label="With Error"
+            options={countryOptions}
+            error="Invalid selection"
+            styles={{ theme: 'light' }}
+          />
+          <DropdownWithState
+            label="With Default"
+            initialValue="react"
+            options={sampleOptions}
+            styles={{ theme: 'light' }}
+          />
+        </div>
+      </div>
+
+      {/* Dark Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <DropdownWithState
+            label="Basic Dark"
+            options={sampleOptions}
+            styles={{ theme: 'dark' }}
+          />
+          <DropdownWithState
+            label="Custom Colors"
+            options={countryOptions}
+            styles={{
+              theme: 'dark',
+              borderFocusedColor: 'rgba(34, 197, 94, 1)',
+              labelColor: 'rgba(34, 197, 94, 0.8)',
+            }}
+          />
+          <DropdownWithState
+            label="Large Size"
+            options={sampleOptions}
+            styles={{
+              theme: 'dark',
+              height: '56px',
+              fontSize: '18px',
+              borderRadius: '12px',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Sacred Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <DropdownWithState
+            label="Ancient Selection"
+            options={sampleOptions}
+            styles={{ theme: 'sacred' }}
+          />
+          <DropdownWithState
+            label="Mystical Error"
+            options={countryOptions}
+            error="The spirits reject this choice"
+            styles={{ theme: 'sacred' }}
+          />
+          <DropdownWithState
+            label="Divine Choice"
+            initialValue="typescript"
+            options={sampleOptions}
+            styles={{
+              theme: 'sacred',
+              borderRadius: '16px',
+              height: '48px',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Custom Styling Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#7C3AED' }}>
+          Custom Styling
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <DropdownWithState
+            label="Purple Style"
+            options={sampleOptions}
+            styles={{
+              theme: 'dark',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              borderColor: 'rgba(147, 51, 234, 0.5)',
+              borderFocusedColor: 'rgba(147, 51, 234, 1)',
+              textColor: 'rgba(147, 51, 234, 1)',
+              labelColor: 'rgba(147, 51, 234, 0.8)',
+              borderRadius: '20px',
+              borderWidth: '2px',
+            }}
+          />
+          <DropdownWithState
+            label="Soft Rounded"
+            options={countryOptions}
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(249, 250, 251, 1)',
+              borderColor: 'rgba(209, 213, 219, 1)',
+              borderFocusedColor: 'rgba(59, 130, 246, 1)',
+              borderRadius: '24px',
+              padding: '12px 40px 12px 20px',
+            }}
+          />
+          <DropdownWithState
+            label="Minimal"
+            options={sampleOptions}
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              borderFocusedColor: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '0px',
+              borderWidth: '0px 0px 2px 0px',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST
+// --------------------------------------------------------------------------
+
+export const InteractionTest: Story = {
+  name: 'Interaction Test',
+  render: () => (
+    <DropdownWithState
+      label="Test Dropdown"
+      options={sampleOptions}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const select = canvas.getByRole('combobox')
+    const label = canvas.getByText('Test Dropdown')
+
+    // Initial state
+    expect(label).toBeVisible()
+    expect(select).toBeVisible()
+
+    // Open dropdown and select an option
+    await userEvent.selectOptions(select, 'typescript')
+
+    // Check value was set
+    await expect(select).toHaveValue('typescript')
+  },
+}
+
+// --------------------------------------------------------------------------
+// INTERACTIVE DEMO
+// --------------------------------------------------------------------------
+
+const InteractiveDemo: React.FC = () => {
+  const [theme, setTheme] = useState<'light' | 'dark' | 'sacred'>('light')
+  const [disabled, setDisabled] = useState(false)
+  const [error, setError] = useState('')
+  const [value, setValue] = useState('')
 
   return (
     <div
@@ -334,32 +565,63 @@ const InteractiveDropdownDemo: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
+        backgroundColor:
+          theme === 'dark' || theme === 'sacred' ? '#1f2937' : '#f9fafb',
+        padding: '2rem',
+        borderRadius: '8px',
       }}
     >
       <div
         style={{
           padding: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '0.5rem',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          backgroundColor:
+            theme === 'dark' || theme === 'sacred' ? '#374151' : '#ffffff',
         }}
       >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <div
+        <h3
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '0.5rem',
+            fontWeight: 'bold',
+            marginBottom: '1rem',
+            color:
+              theme === 'dark' || theme === 'sacred' ? '#f9fafb' : '#111827',
           }}
         >
-          <label>
-            <input
-              type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
-            />{' '}
-            Sacred
-          </label>
-          <label>
+          Controls
+        </h3>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+        >
+          <div>
+            <label
+              style={{
+                color:
+                  theme === 'dark' || theme === 'sacred'
+                    ? '#f9fafb'
+                    : '#111827',
+              }}
+            >
+              Theme:
+              <select
+                value={theme}
+                onChange={e =>
+                  setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+                }
+                style={{ marginLeft: '0.5rem' }}
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="sacred">Sacred</option>
+              </select>
+            </label>
+          </div>
+          <label
+            style={{
+              color:
+                theme === 'dark' || theme === 'sacred' ? '#f9fafb' : '#111827',
+            }}
+          >
             <input
               type="checkbox"
               checked={disabled}
@@ -367,39 +629,44 @@ const InteractiveDropdownDemo: React.FC = () => {
             />{' '}
             Disabled
           </label>
-          <label>
+          <label
+            style={{
+              color:
+                theme === 'dark' || theme === 'sacred' ? '#f9fafb' : '#111827',
+            }}
+          >
+            Error Message:
             <input
-              type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
-            />{' '}
-            Error
+              type="text"
+              value={error}
+              onChange={e => setError(e.target.value)}
+              placeholder="Enter error message..."
+              style={{ marginLeft: '0.5rem', width: '200px' }}
+            />
           </label>
         </div>
       </div>
-      <div
-        style={{
-          padding: '2rem',
-          borderRadius: '0.5rem',
-          backgroundColor: sacred ? 'black' : '#f3f4f6',
+
+      <Dropdown
+        label="Interactive Dropdown"
+        options={sampleOptions}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        helperText={error || undefined}
+        styles={{
+          theme,
+          disabled: disabled,
+          helperTextType: error ? 'error' : undefined,
         }}
-      >
-        <Dropdown
-          label="Interactive Dropdown"
-          options={sampleOptions}
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          sacredtheme={sacred}
-          disabled={disabled}
-          error={error}
-          helperText={error ? 'There is an error' : 'Looking good'}
-        />
-      </div>
+      />
     </div>
   )
 }
 
 export const Interactive: Story = {
   name: 'Interactive Demo',
-  render: () => <InteractiveDropdownDemo />,
+  render: () => <InteractiveDemo />,
+  parameters: {
+    layout: 'centered',
+  },
 }

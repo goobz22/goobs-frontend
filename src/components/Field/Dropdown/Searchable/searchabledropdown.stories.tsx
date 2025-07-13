@@ -1,166 +1,682 @@
-// src/components/SearchableDropdown/searchabledropdown.stories.tsx
-
-import { Meta, StoryObj } from '@storybook/react'
-import SearchableDropdown from './index'
-import React from 'react'
-
 /**
- * Reusable list of options for demonstration.
+ * @fileoverview Storybook stories for the Searchable Dropdown component.
+ * These stories showcase the various states, themes, and styling capabilities of the Searchable Dropdown field.
+ * The Searchable Dropdown component provides dropdown selection with search functionality.
  */
+import React, { useState } from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { userEvent, within, expect } from '@storybook/test'
+import SearchableDropdown, { DropdownOption } from './index'
+
+// Sample data for dropdowns
 const sampleOptions = [
   { value: 'apple' },
   { value: 'banana' },
-  { value: 'carrot' },
-  { value: 'potato' },
-  { value: 'avocado' },
-  { value: 'broccoli' },
+  { value: 'cherry' },
+  { value: 'date' },
+  { value: 'elderberry' },
+  { value: 'fig' },
+  { value: 'grape' },
+  { value: 'honeydew' },
 ]
 
-/**
- * Storybook metadata
- */
+const countryOptions = [
+  { value: 'us' },
+  { value: 'ca' },
+  { value: 'uk' },
+  { value: 'au' },
+  { value: 'de' },
+  { value: 'fr' },
+  { value: 'jp' },
+  { value: 'in' },
+  { value: 'br' },
+  { value: 'mx' },
+]
+
+// Wrapper component for state management
+const SearchableDropdownWithState = ({
+  initialValue = '',
+  options = sampleOptions,
+  styles,
+  ...props
+}: {
+  initialValue?: string
+  options?: DropdownOption[]
+  styles?: any
+  label: string
+  [key: string]: any
+}) => {
+  const handleChange = (option: DropdownOption | null) => {
+    // Handle change if needed for demo purposes
+    console.log('Selected option:', option)
+  }
+
+  return (
+    <SearchableDropdown
+      {...props}
+      options={options}
+      defaultValue={initialValue}
+      onChange={handleChange}
+      styles={styles}
+    />
+  )
+}
+
+// --------------------------------------------------------------------------
+// STORYBOOK METADATA
+// --------------------------------------------------------------------------
 const meta: Meta<typeof SearchableDropdown> = {
   title: 'Components/Field/Dropdown/Searchable',
   component: SearchableDropdown,
-  argTypes: {
-    shrunklabelposition: {
-      control: 'select',
-      options: ['onNotch', 'aboveNotch'],
-    },
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    error: { control: 'boolean' },
+  parameters: {
+    layout: 'centered',
   },
+  tags: ['autodocs'],
+  argTypes: {
+    defaultValue: { control: 'text' },
+    onChange: { action: 'changed' },
+    label: { control: 'text' },
+    placeholder: { control: 'text' },
+    helperText: { control: 'text' },
+    options: { control: 'object' },
+    styles: { control: 'object' },
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '400px', padding: '2rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
-export default meta
 
+export default meta
 type Story = StoryObj<typeof SearchableDropdown>
 
-export const Premium: Story = {
-  name: 'Premium Theme',
-  render: args => (
-    <div
-      style={{
-        width: '400px',
-        padding: '2rem',
-        backgroundColor: '#f3f4f6',
-        borderRadius: '0.5rem',
-      }}
-    >
-      <SearchableDropdown {...args} />
-    </div>
+// --------------------------------------------------------------------------
+// BASIC THEME STORIES
+// --------------------------------------------------------------------------
+
+export const LightTheme: Story = {
+  name: 'Light Theme (Default)',
+  render: () => (
+    <SearchableDropdownWithState
+      label="Select Fruit"
+      placeholder="Choose a fruit"
+      styles={{ theme: 'light' }}
+    />
   ),
-  args: {
-    label: 'Select a Fruit/Veggie',
-    options: sampleOptions,
-    placeholder: 'Start typing...',
-    sacredtheme: false,
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: () => (
+    <SearchableDropdownWithState
+      label="Select Country"
+      placeholder="Choose a country"
+      options={countryOptions}
+      styles={{ theme: 'dark' }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-export const Sacred: Story = {
+export const SacredTheme: Story = {
   name: 'Sacred Theme',
-  render: args => (
-    <div
-      style={{
-        width: '400px',
-        padding: '2rem',
-        backgroundColor: 'black',
-        borderRadius: '0.5rem',
-      }}
-    >
-      <SearchableDropdown {...args} />
-    </div>
+  render: () => (
+    <SearchableDropdownWithState
+      label="Divine Selection"
+      placeholder="Choose sacred option..."
+      styles={{ theme: 'sacred' }}
+    />
   ),
-  args: {
-    ...Premium.args,
-    sacredtheme: true,
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-const InteractiveDemo = () => {
-  const [sacred, setSacred] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
-  const [value, setValue] = React.useState<{ value: string } | null>(null)
+// --------------------------------------------------------------------------
+// CUSTOM COLOR STORIES
+// --------------------------------------------------------------------------
+
+export const CustomColors: Story = {
+  name: 'Custom Colors',
+  render: () => (
+    <SearchableDropdownWithState
+      label="Custom Dropdown"
+      placeholder="Choose option"
+      styles={{
+        theme: 'light',
+        backgroundColor: 'rgba(249, 250, 251, 0.95)',
+        borderColor: 'rgba(79, 70, 229, 0.4)',
+        borderFocusedColor: 'rgba(79, 70, 229, 1)',
+        textColor: 'rgba(55, 48, 163, 1)',
+        labelColor: 'rgba(55, 48, 163, 0.7)',
+      }}
+    />
+  ),
+}
+
+export const NeonStyle: Story = {
+  name: 'Neon Style',
+  render: () => (
+    <SearchableDropdownWithState
+      label="Neon Dropdown"
+      placeholder="Choose option"
+      styles={{
+        theme: 'dark',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderColor: 'rgba(16, 185, 129, 0.5)',
+        borderFocusedColor: 'rgba(16, 185, 129, 1)',
+        textColor: 'rgba(16, 185, 129, 1)',
+        labelColor: 'rgba(16, 185, 129, 0.7)',
+        borderRadius: '12px',
+        borderWidth: '2px',
+      }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// LAYOUT AND SPACING STORIES
+// --------------------------------------------------------------------------
+
+export const CustomLayout: Story = {
+  name: 'Custom Layout & Spacing',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Large Padding"
+        placeholder="Choose option"
+        styles={{
+          theme: 'light',
+          padding: '24px',
+          borderRadius: '16px',
+          fontSize: '18px',
+        }}
+      />
+      <SearchableDropdownWithState
+        label="Custom Dimensions"
+        placeholder="Fixed height"
+        styles={{
+          theme: 'light',
+          height: '60px',
+          width: '100%',
+          borderRadius: '8px',
+        }}
+      />
+      <SearchableDropdownWithState
+        label="Asymmetric Padding"
+        placeholder="Different padding sides"
+        styles={{
+          theme: 'light',
+          paddingLeft: '32px',
+          paddingRight: '16px',
+          paddingTop: '20px',
+          paddingBottom: '20px',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// TYPOGRAPHY STORIES
+// --------------------------------------------------------------------------
+
+export const CustomTypography: Story = {
+  name: 'Custom Typography',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Large Text"
+        placeholder="Choose option"
+        styles={{
+          theme: 'light',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          lineHeight: '1.5',
+          padding: '20px',
+        }}
+      />
+      <SearchableDropdownWithState
+        label="Custom Font"
+        placeholder="Different font family"
+        styles={{
+          theme: 'light',
+          fontFamily: '"Georgia", serif',
+          fontSize: '16px',
+          fontWeight: 400,
+        }}
+      />
+      <SearchableDropdownWithState
+        label="Small & Light"
+        placeholder="Choose option"
+        styles={{
+          theme: 'light',
+          fontSize: '14px',
+          fontWeight: 300,
+          padding: '12px',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// OPTION VARIATIONS
+// --------------------------------------------------------------------------
+
+export const OptionVariations: Story = {
+  name: 'Option Variations',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Fruits"
+        placeholder="Choose a fruit"
+        options={sampleOptions}
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Countries"
+        placeholder="Choose a country"
+        options={countryOptions}
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Large Dataset"
+        placeholder="Choose option"
+        options={Array.from({ length: 100 }, (_, i) => ({
+          value: `option-${i}`,
+        }))}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// ERROR STATES
+// --------------------------------------------------------------------------
+
+export const ErrorStates: Story = {
+  name: 'Error States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Select Option"
+        placeholder="Choose an option"
+        error="Please select a valid option."
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Country Selection"
+        placeholder="Choose a country"
+        error="Country selection is required."
+        options={countryOptions}
+        styles={{
+          theme: 'dark',
+          borderErrorColor: 'rgba(255, 99, 71, 1)',
+          labelErrorColor: 'rgba(255, 99, 71, 1)',
+          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+        }}
+      />
+      <SearchableDropdownWithState
+        label="Sacred Choice"
+        placeholder="Choose sacred option"
+        error="The divine choice is required."
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// REQUIRED FIELDS
+// --------------------------------------------------------------------------
+
+export const RequiredFields: Story = {
+  name: 'Required Fields',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Required Selection"
+        placeholder="Choose an option"
+        required
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Country"
+        placeholder="Choose a country"
+        required
+        error="This field is required"
+        options={countryOptions}
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Category"
+        placeholder="Choose a category"
+        required
+        styles={{ theme: 'dark' }}
+      />
+      <SearchableDropdownWithState
+        label="Custom Required Dropdown"
+        placeholder="Choose divine option"
+        required
+        styles={{
+          theme: 'sacred',
+          requiredIndicatorText: ' (required)',
+          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+        }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// COMPREHENSIVE SHOWCASE
+// --------------------------------------------------------------------------
+
+export const ComprehensiveShowcase: Story = {
+  name: 'Comprehensive Showcase',
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem',
+        padding: '1rem',
+      }}
+    >
+      {/* Light Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchableDropdownWithState
+            label="Basic Dropdown"
+            placeholder="Choose option"
+            styles={{ theme: 'light' }}
+          />
+          <SearchableDropdownWithState
+            label="With Error"
+            placeholder="Choose option"
+            error="Invalid selection"
+            styles={{ theme: 'light' }}
+          />
+          <SearchableDropdownWithState
+            label="Required Field"
+            placeholder="Choose option"
+            required
+            styles={{ theme: 'light' }}
+          />
+        </div>
+      </div>
+
+      {/* Dark Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchableDropdownWithState
+            label="Basic Dark"
+            placeholder="Choose option"
+            styles={{ theme: 'dark' }}
+          />
+          <SearchableDropdownWithState
+            label="Custom Colors"
+            placeholder="Custom styling"
+            styles={{
+              theme: 'dark',
+              borderFocusedColor: 'rgba(34, 197, 94, 1)',
+              labelColor: 'rgba(34, 197, 94, 0.8)',
+            }}
+          />
+          <SearchableDropdownWithState
+            label="Large Size"
+            placeholder="Choose option"
+            styles={{
+              theme: 'dark',
+              fontSize: '18px',
+              padding: '20px',
+              borderRadius: '12px',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Sacred Theme Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchableDropdownWithState
+            label="Divine Selection"
+            placeholder="Sacred choice"
+            styles={{ theme: 'sacred' }}
+          />
+          <SearchableDropdownWithState
+            label="Sacred Dropdown"
+            placeholder="Choose divine option"
+            error="Choice forbidden"
+            styles={{ theme: 'sacred' }}
+          />
+          <SearchableDropdownWithState
+            label="Holy Selection"
+            placeholder="Enter divine choice"
+            styles={{
+              theme: 'sacred',
+              borderRadius: '16px',
+              padding: '18px',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Custom Styling Section */}
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#7C3AED' }}>
+          Custom Styling
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SearchableDropdownWithState
+            label="Neon Style"
+            placeholder="Choose option"
+            styles={{
+              theme: 'dark',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              borderColor: 'rgba(147, 51, 234, 0.5)',
+              borderFocusedColor: 'rgba(147, 51, 234, 1)',
+              textColor: 'rgba(147, 51, 234, 1)',
+              labelColor: 'rgba(147, 51, 234, 0.8)',
+              borderRadius: '20px',
+              borderWidth: '2px',
+            }}
+          />
+          <SearchableDropdownWithState
+            label="Soft Rounded"
+            placeholder="Choose option"
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(249, 250, 251, 1)',
+              borderColor: 'rgba(209, 213, 219, 1)',
+              borderFocusedColor: 'rgba(59, 130, 246, 1)',
+              borderRadius: '24px',
+              padding: '16px 24px',
+            }}
+          />
+          <SearchableDropdownWithState
+            label="Minimal"
+            placeholder="Choose option"
+            styles={{
+              theme: 'light',
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              borderFocusedColor: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '0px',
+              borderWidth: '0px 0px 2px 0px',
+              padding: '12px 0px',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// DISABLED STATE
+// --------------------------------------------------------------------------
+
+export const DisabledStates: Story = {
+  name: 'Disabled States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableDropdownWithState
+        label="Disabled Light"
+        initialValue="apple"
+        disabled
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdownWithState
+        label="Disabled Dark"
+        initialValue="us"
+        options={countryOptions}
+        disabled
+        styles={{ theme: 'dark' }}
+      />
+      <SearchableDropdownWithState
+        label="Disabled Sacred"
+        initialValue="banana"
+        disabled
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// SEARCH DEMO
+// --------------------------------------------------------------------------
+
+const SearchableDropdownDemo = () => {
+  const [selectedCountry, setSelectedCountry] = useState('')
+  const [selectedFruit, setSelectedFruit] = useState('')
+  const [error, setError] = useState('')
+
+  const handleCountryChange = (option: DropdownOption | null) => {
+    setSelectedCountry(option?.value || '')
+  }
+
+  const handleFruitChange = (option: DropdownOption | null) => {
+    setSelectedFruit(option?.value || '')
+  }
+
+  const handleSubmit = () => {
+    if (!selectedCountry || !selectedFruit) {
+      setError('Please select both country and fruit')
+    } else {
+      setError('')
+      alert(`Selected: ${selectedCountry} and ${selectedFruit}`)
+    }
+  }
 
   return (
     <div
       style={{
-        width: '500px',
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
+        width: '400px',
       }}
     >
-      <div
-        style={{
-          padding: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '0.5rem',
-        }}
-      >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '0.5rem',
-          }}
-        >
-          <label>
-            <input
-              type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
-            />{' '}
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />{' '}
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
-            />{' '}
-            Error
-          </label>
+      <h3 style={{ margin: '0 0 1rem 0' }}>Searchable Dropdown Demo</h3>
+      <SearchableDropdown
+        label="Country"
+        placeholder="Search and select country"
+        options={countryOptions}
+        defaultValue={selectedCountry}
+        onChange={handleCountryChange}
+        styles={{ theme: 'light' }}
+      />
+      <SearchableDropdown
+        label="Fruit"
+        placeholder="Search and select fruit"
+        options={sampleOptions}
+        defaultValue={selectedFruit}
+        onChange={handleFruitChange}
+        styles={{ theme: 'light' }}
+      />
+      {error && (
+        <div style={{ color: 'rgba(239, 68, 68, 1)', fontSize: '14px' }}>
+          {error}
         </div>
-        {value && (
-          <div style={{ marginTop: '0.5rem' }}>
-            <strong>Selected:</strong> {value.value}
-          </div>
-        )}
-      </div>
-      <div
+      )}
+      <button
+        onClick={handleSubmit}
         style={{
-          padding: '2rem',
-          borderRadius: '0.5rem',
-          backgroundColor: sacred ? 'black' : '#f3f4f6',
+          padding: '12px 24px',
+          backgroundColor: '#3B82F6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          fontWeight: '500',
         }}
       >
-        <SearchableDropdown
-          label="Interactive Dropdown"
-          options={sampleOptions}
-          onChange={val => setValue(val)}
-          sacredtheme={sacred}
-          disabled={disabled}
-          error={error}
-          helperText={error ? 'There is an error' : 'Looking good'}
-        />
+        Submit Selection
+      </button>
+      <div style={{ fontSize: '14px', color: '#6B7280' }}>
+        <p>Searchable dropdown features:</p>
+        <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+          <li>Type to search and filter options</li>
+          <li>Select from filtered results</li>
+          <li>Keyboard navigation support</li>
+          <li>Required field validation</li>
+        </ul>
       </div>
     </div>
   )
 }
 
-export const Interactive: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemo />,
+export const SearchDemo: Story = {
+  name: 'Search Demo',
+  render: () => <SearchableDropdownDemo />,
+}
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST
+// --------------------------------------------------------------------------
+
+export const InteractionTest: Story = {
+  name: 'Interaction Test',
+  render: () => (
+    <SearchableDropdownWithState
+      label="Test Searchable Dropdown"
+      placeholder="Search and select..."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const label = canvas.getByText('Test Searchable Dropdown')
+    const dropdown = canvas.getByRole('button')
+
+    // Initial state
+    expect(label).toBeVisible()
+    expect(dropdown).toBeVisible()
+
+    // Click to open dropdown
+    await userEvent.click(dropdown)
+
+    // The dropdown should be interactive
+    expect(dropdown).toBeVisible()
+  },
 }
