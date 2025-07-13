@@ -1,5 +1,4 @@
 import type { Preview } from '@storybook/react'
-import '../src/app/globals.css'
 
 // Note: isSecureContext override removed as it's not needed for Storybook and causes issues in modern browsers
 
