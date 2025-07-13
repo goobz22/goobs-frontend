@@ -7,6 +7,8 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from '@storybook/test'
 import Button from './index'
+import { useState } from 'react'
+import { ButtonGroup } from './index' // Import ButtonGroup
 
 // --------------------------------------------------------------------------
 // ICON COMPONENTS (as standard React components)
@@ -269,5 +271,123 @@ export const InteractionTest: Story = {
 
     // Test a specific click interaction
     await userEvent.click(clickMeButton)
+  },
+}
+
+// New stories for ButtonGroup
+
+export const LightThemeGroup: Story = {
+  name: 'Group/Light Theme',
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      return (
+        <ButtonGroup
+          value={value}
+          exclusive
+          onChange={(_, newValue) => newValue && setValue(newValue)}
+          styles={{ theme: 'light' }}
+        >
+          <Button value="send" text="Send" icon={<SendIcon />} />
+          <Button value="add" text="Add" icon={<AddIcon />} />
+          <Button value="download" text="Download" icon={<DownloadIcon />} />
+        </ButtonGroup>
+      )
+    }
+    return <Component />
+  },
+}
+
+export const DarkThemeGroup: Story = {
+  name: 'Group/Dark Theme',
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      return (
+        <ButtonGroup
+          value={value}
+          exclusive
+          onChange={(_, newValue) => newValue && setValue(newValue)}
+          styles={{ theme: 'dark' }}
+        >
+          <Button value="send" text="Send" icon={<SendIcon />} />
+          <Button value="add" text="Add" icon={<AddIcon />} />
+          <Button value="download" text="Download" icon={<DownloadIcon />} />
+        </ButtonGroup>
+      )
+    }
+    return <Component />
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+export const SacredThemeGroup: Story = {
+  name: 'Group/Sacred Theme',
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      return (
+        <ButtonGroup
+          value={value}
+          exclusive
+          onChange={(_, newValue) => newValue && setValue(newValue)}
+          styles={{ theme: 'sacred' }}
+        >
+          <Button value="send" text="Send" icon={<SendIcon />} />
+          <Button value="add" text="Add" icon={<AddIcon />} />
+          <Button value="download" text="Download" icon={<DownloadIcon />} />
+        </ButtonGroup>
+      )
+    }
+    return <Component />
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+export const InteractiveGroupDemo: Story = {
+  name: 'Group/Interactive Demo',
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      const [theme, setTheme] = useState<'light' | 'dark' | 'sacred'>('light')
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            padding: '1rem',
+            background: theme === 'light' ? '#fff' : '#333',
+            color: theme === 'light' ? '#000' : '#fff',
+          }}
+        >
+          <select
+            value={theme}
+            onChange={e =>
+              setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+            }
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="sacred">Sacred</option>
+          </select>
+          <ButtonGroup
+            value={value}
+            exclusive
+            onChange={(_, newValue) => newValue && setValue(newValue)}
+            styles={{ theme }}
+          >
+            <Button value="send" icon={<SendIcon />} />
+            <Button value="add" icon={<AddIcon />} />
+            <Button value="download" icon={<DownloadIcon />} />
+          </ButtonGroup>
+        </div>
+      )
+    }
+    return <Component />
   },
 }

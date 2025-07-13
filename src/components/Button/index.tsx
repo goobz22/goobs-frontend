@@ -18,6 +18,62 @@ import { ButtonStyles, getButtonStyles, SACRED_GLYPHS } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
+export interface ButtonGroupProps {
+  value: string
+  exclusive?: boolean
+  onChange: (
+    event: React.MouseEvent<HTMLElement>,
+    newValue: string | null
+  ) => void
+  children: React.ReactNode
+  styles?: ButtonStyles // Reuse Button's styles for consistency
+}
+
+export const ButtonGroup: React.FC<ButtonGroupProps> = ({
+  value,
+  exclusive,
+  onChange,
+  children,
+  styles,
+}) => {
+  const groupStyles = getButtonStyles(styles) // Get base styles from Button's theme function
+  const enhancedChildren = React.Children.map(children, child => {
+    if (React.isValidElement<ButtonProps>(child)) {
+      return React.cloneElement(child, {
+        ...child.props,
+        styles: {
+          ...child.props.styles,
+          ...styles, // Merge group styles with individual
+        },
+        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+          if (exclusive) {
+            onChange(e, (child.props as { value?: string }).value || '')
+          }
+          if (child.props.onClick) {
+            child.props.onClick(e)
+          }
+        },
+        // Inject selected based on value
+        selected: ((child.props as { value?: string }).value || '') === value,
+      })
+    }
+    return child
+  })
+
+  const computedGroupStyle = {
+    display: 'flex',
+    borderRadius: groupStyles.container.borderRadius || '4px',
+    overflow: 'hidden',
+    background: groupStyles.container.backgroundColor || 'transparent',
+    boxShadow: groupStyles.container.boxShadow,
+    border: groupStyles.container.border,
+    padding: groupStyles.container.padding,
+  }
+
+  return <div style={computedGroupStyle}>{enhancedChildren}</div>
+}
+
+// Update ButtonProps to include optional 'selected' and 'value' for toggle support
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
   /** The text content of the button. */
@@ -26,6 +82,8 @@ export interface ButtonProps
   icon?: ReactNode
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ButtonStyles
+  selected?: boolean // New optional prop for toggle state
+  value?: string // New optional prop for toggle value
 }
 
 // --------------------------------------------------------------------------
@@ -122,7 +180,7 @@ const SacredGlyphs: React.FC<{
  * A versatile and themeable button component.
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ text, icon, styles, onClick, ...restProps }, ref) => {
+  ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
     const [isHovered, setIsHovered] = useState(false)
     const [isActive, setIsActive] = useState(false)
 
@@ -132,8 +190,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const iconLocation = styles?.iconLocation || 'left'
 
     const computedStyles = useMemo(
-      () => getButtonStyles(styles, isHovered, isActive, isDisabled),
-      [styles, isHovered, isActive, isDisabled]
+      () =>
+        getButtonStyles(styles, isHovered, isActive || selected, isDisabled), // Treat selected as active for styling
+      [styles, isHovered, isActive, selected, isDisabled]
     )
 
     const handleMouseEnter = useCallback(() => {
