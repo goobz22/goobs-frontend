@@ -7,10 +7,9 @@ const meta: Meta<typeof MultipleSelectChip> = {
   title: 'Components/Field/Dropdown/MultiSelect',
   component: MultipleSelectChip,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
-    disabled: { control: 'boolean' },
     label: { control: 'text' },
-    error: { control: 'boolean' },
+    helperText: { control: 'text' },
+    styles: { control: 'object' },
   },
   parameters: {
     layout: 'centered',
@@ -50,11 +49,11 @@ export const Premium: Story = {
   args: {
     label: 'Select Names',
     options: NAMES,
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
-export const Sacred: Story = {
+export const sacredtheme: Story = {
   name: 'Sacred Theme',
   render: args => (
     <div
@@ -70,12 +69,12 @@ export const Sacred: Story = {
   ),
   args: {
     ...Premium.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemo = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [selected, setSelected] = React.useState<string[]>(['Van Henry'])
 
   return (
@@ -98,8 +97,8 @@ const InteractiveDemo = () => {
         <label>
           <input
             type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
+            checked={sacredtheme}
+            onChange={e => setsacredtheme(e.target.checked)}
           />{' '}
           Sacred Theme
         </label>
@@ -108,7 +107,7 @@ const InteractiveDemo = () => {
         style={{
           padding: '2rem',
           borderRadius: '0.5rem',
-          backgroundColor: sacred ? 'black' : '#f3f4f6',
+          backgroundColor: sacredtheme ? 'black' : '#f3f4f6',
         }}
       >
         <MultipleSelectChip
@@ -116,7 +115,7 @@ const InteractiveDemo = () => {
           options={NAMES}
           defaultSelected={selected}
           onChange={setSelected}
-          sacredtheme={sacred}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
       </div>
     </div>

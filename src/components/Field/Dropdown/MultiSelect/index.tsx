@@ -6,9 +6,6 @@ import Checkbox from '../../../Checkbox'
 import Chip from '../../../Chip'
 import ArrowDropDown from '../../../Icons/ArrowDropDown'
 
-type SxProps = Record<string, unknown>
-type FormControlProps = Record<string, unknown>
-
 export interface DropdownOption {
   value: string
   attribute1?: string
@@ -22,25 +19,30 @@ export interface DropdownOption {
 
 export type MultiSelectOption = string | DropdownOption
 
-export interface MultiSelectChipProps
-  extends Omit<FormControlProps, 'onChange'> {
+export interface MultiSelectChipProps {
   label?: React.ReactNode
   options?: MultiSelectOption[]
   defaultSelected?: string[]
   onChange?: (values: string[]) => void
   complexOptions?: boolean
   showOptionDetails?: boolean
-  sacredtheme?: boolean
-  className?: string
-  backgroundcolor?: string
-  outlinecolor?: string
-  fontcolor?: string
-  inputfontcolor?: string
-  shrunkfontcolor?: string
-  unshrunkfontcolor?: string
-  placeholdercolor?: string
-  shrunklabelposition?: 'onNotch' | 'aboveNotch'
-  sx?: SxProps
+  helperText?: string
+  styles?: {
+    theme?: 'light' | 'dark' | 'sacred'
+    disabled?: boolean
+    required?: boolean
+    height?: string
+    width?: string
+    borderRadius?: string
+    borderWidth?: string
+    padding?: string
+    fontSize?: string
+    fontWeight?: string
+    lineHeight?: string
+    helperTextType?: 'error' | 'info'
+    requiredIndicatorText?: string
+    container?: React.CSSProperties
+  }
 }
 
 interface UnifiedOption {
@@ -56,7 +58,7 @@ const getStyles = (
   sacredtheme: boolean,
   backgroundcolor?: string,
   outlinecolor?: string,
-  fontcolor?: string
+  color?: string
 ) => ({
   container: { position: 'relative', width: '100%' } as React.CSSProperties,
   chipContainer: {
@@ -72,7 +74,7 @@ const getStyles = (
     backgroundColor: sacredtheme
       ? 'rgba(0, 0, 0, 0.8)'
       : backgroundcolor || 'white',
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : fontcolor || '#4A5568',
+    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : color || '#4A5568',
     '&:hover': { borderColor: sacredtheme ? '#FFD700' : '#A0AEC0' },
   } as React.CSSProperties,
   placeholder: {
@@ -125,24 +127,17 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   onChange,
   complexOptions: userSpecifiedComplexOptions,
   showOptionDetails = false,
-  sacredtheme = false,
-  className,
-  backgroundcolor,
-  outlinecolor,
-  fontcolor,
-  placeholdercolor,
+  helperText,
+  styles: fieldStyles,
   ...rest
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [selectedValues, setSelectedValues] =
     useState<string[]>(defaultSelected)
-  const styles = getStyles(
-    sacredtheme,
-    backgroundcolor,
-    outlinecolor,
-    fontcolor
-  )
+
+  const sacredtheme = fieldStyles?.theme === 'sacred'
+  const styles = getStyles(sacredtheme, undefined, undefined, undefined)
 
   const unifiedOptions = useMemo<UnifiedOption[]>(() => {
     const isComplex =
@@ -192,19 +187,19 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   }
 
   return (
-    <div style={styles.container} className={className} {...rest}>
+    <div style={styles.container} {...rest}>
       <div onClick={handleOpen} ref={setAnchorEl} style={styles.chipContainer}>
         {selectedValues.length === 0 && (
-          <span style={{ ...styles.placeholder, color: placeholdercolor }}>
-            {label}
-          </span>
+          <span style={styles.placeholder}>{label}</span>
         )}
         {selectedValues.map(value => (
           <Chip
             key={value}
             label={value}
             onDelete={() => handleToggle(value)}
-            sacredtheme={sacredtheme}
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+            }}
           />
         ))}
         <ArrowDropDown style={styles.arrowIcon} />
@@ -220,13 +215,26 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               <Checkbox
                 checked={selectedValues.includes(option.value)}
                 onChange={() => {}}
-                sacredtheme={sacredtheme}
+                styles={{
+                  theme: sacredtheme ? 'sacred' : 'light',
+                }}
               />
               <div style={styles.optionLabel}>{option.label}</div>
             </div>
           ))}
         </div>
       </Popover>
+      {helperText && (
+        <div
+          style={{
+            marginTop: '4px',
+            fontSize: '14px',
+            color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#6B7280',
+          }}
+        >
+          {helperText}
+        </div>
+      )}
     </div>
   )
 }
