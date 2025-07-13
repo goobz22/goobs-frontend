@@ -6,12 +6,12 @@ const meta: Meta<typeof CIDRField> = {
   title: 'Components/Field/IPAM/CIDR',
   component: CIDRField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     showSubnetInfo: { control: 'boolean' },
     disabled: { control: 'boolean' },
     label: { control: 'text' },
     minCidr: { control: 'number' },
     maxCidr: { control: 'number' },
+    styles: { control: 'object' },
   },
   parameters: {
     layout: 'centered',
@@ -32,7 +32,7 @@ export const PremiumTheme: Story = {
     label: 'CIDR',
     minCidr: 8,
     maxCidr: 32,
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -45,12 +45,12 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveCIDRDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [showInfo, setShowInfo] = React.useState(true)
   const [disabled, setDisabled] = React.useState(false)
 
@@ -62,8 +62,8 @@ const InteractiveCIDRDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -85,9 +85,11 @@ const InteractiveCIDRDemo: React.FC = () => {
           </label>
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+      <div
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      >
         <CIDRField
-          sacredtheme={sacred}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
           showSubnetInfo={showInfo}
           disabled={disabled}
         />

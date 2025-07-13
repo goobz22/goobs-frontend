@@ -6,10 +6,10 @@ const meta: Meta<typeof MACAddressField> = {
   title: 'Components/Field/IPAM/MACAddress',
   component: MACAddressField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     disabled: { control: 'boolean' },
     label: { control: 'text' },
-    error: { control: 'boolean' },
+    helperText: { control: 'text' },
+    styles: { control: 'object' },
   },
   parameters: {
     layout: 'centered',
@@ -28,7 +28,7 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'MAC Address',
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -41,14 +41,14 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveMACAddressDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
+  const [showHelperText, setShowHelperText] = React.useState(false)
   const [value, setValue] = React.useState('00:1A:2B:3C:4D:5E')
 
   return (
@@ -59,8 +59,8 @@ const InteractiveMACAddressDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -75,21 +75,23 @@ const InteractiveMACAddressDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
+              checked={showHelperText}
+              onChange={e => setShowHelperText(e.target.checked)}
             />{' '}
-            Error
+            Helper Text
           </label>
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+      <div
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      >
         <MACAddressField
           label="Interactive MAC Address"
           initialValue={value}
           onChange={e => setValue(e.target.value)}
-          sacredtheme={sacred}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
           disabled={disabled}
-          error={error}
+          helperText={showHelperText ? 'Enter a valid MAC address' : undefined}
         />
       </div>
     </div>

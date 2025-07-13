@@ -1,9 +1,18 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import TextField, { TextFieldProps } from '../../../Field/Text'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type SharedFormFieldProps,
+} from '../../../../theme'
 import Typography from '../../../../components/Typography'
 
-export interface IPAddressFieldProps extends Omit<TextFieldProps, 'onChange'> {
+export interface IPAddressFieldProps
+  extends Omit<SharedFormFieldProps, 'onChange'> {
   initialValue?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   label?: string
@@ -23,11 +32,10 @@ export interface IPAddressFieldProps extends Omit<TextFieldProps, 'onChange'> {
   onEndIPChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   onEndIPBlur?: () => void
   errorEnd?: boolean
-  helperTextEnd?: string
   showAvailableRange?: boolean
   gatewayIP?: string
   availableRangeMessage?: string
-  helperText?: string
+  placeholder?: string
 }
 
 const getStyles = (sacredtheme?: boolean) => ({
@@ -225,6 +233,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   onEndIPBlur,
   errorEnd = false,
   availableRangeMessage,
+  placeholder = '192.168.0.1',
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
@@ -235,7 +244,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   const [isInSubnet, setIsInSubnet] = useState<boolean>(true)
   const [isValidRange, setIsValidRange] = useState<boolean>(true)
   const lastInputTypeWasDelete = useRef(false)
-  const styles = getStyles(rest.sacredtheme)
+  const styles = getStyles(rest.styles?.theme === 'sacred')
 
   const valueRef = useRef(value)
   const subnetAddressRef = useRef(subnetAddress)
@@ -409,14 +418,28 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       const dots = formatted.match(/\./g)
       if (dots && dots.length > 3)
         formatted = formatted.substring(0, formatted.lastIndexOf('.'))
-      const segments = formatted.split('.')
-      for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i]
-        if (segment !== '') {
-          if (segment.length > 3) segments[i] = segment.substring(0, 3)
-          const num = parseInt(segment, 10)
-          if (num > 255) segments[i] = '255'
+      let segments = formatted.split('.')
+      let i = 0
+      while (i < segments.length) {
+        let seg = segments[i]
+        if (seg !== '' && seg.length > 3) {
+          let first = seg.substring(0, 3)
+          let rest = seg.substring(3)
+          segments[i] = first
+          segments.splice(i + 1, 0, rest)
+        } else {
+          i++
         }
+      }
+      for (let j = 0; j < segments.length; j++) {
+        let seg = segments[j]
+        if (seg !== '') {
+          let num = parseInt(seg, 10)
+          if (num > 255) segments[j] = '255'
+        }
+      }
+      if (segments.length > 4) {
+        segments = segments.slice(0, 4)
       }
       formatted = segments.join('.')
       if (autoInsertDots && !wasDelete) {
@@ -450,22 +473,22 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     [allowIncomplete, subnetAddress, subnetCIDR, isGateway]
   )
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const formatted = formatIPAddress(
-        e.target.value,
-        lastInputTypeWasDelete.current
-      )
-      const valid = validateIPAddress(formatted)
-      setIsValid(valid)
-      setValue(formatted)
-      onChange?.(e)
-    },
-    [onChange, formatIPAddress, validateIPAddress]
-  )
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+        const allowed = /^[0-9.]$/
+        const controlKeys = [
+          'Backspace',
+          'Delete',
+          'ArrowLeft',
+          'ArrowRight',
+          'Tab',
+          'Enter',
+        ]
+        if (!controlKeys.includes(e.key) && !allowed.test(e.key)) {
+          e.preventDefault()
+        }
+      }
       lastInputTypeWasDelete.current =
         e.key === 'Backspace' || e.key === 'Delete'
     },
@@ -473,50 +496,230 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   )
 
   if (renderAsRange) {
+    const handleStartIPChange = (value: string) => {
+      if (onChange) {
+        // Create a synthetic event to match the expected signature
+        const syntheticEvent = {
+          target: { value },
+          currentTarget: { value },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange(syntheticEvent)
+      }
+    }
+
+    const handleEndIPChange = (value: string) => {
+      if (onEndIPChange) {
+        // Create a synthetic event to match the expected signature
+        const syntheticEvent = {
+          target: { value },
+          currentTarget: { value },
+        } as React.ChangeEvent<HTMLInputElement>
+        onEndIPChange(syntheticEvent)
+      }
+    }
+
+    const {
+      themeConfig: rangeThemeConfig,
+      borderColor: rangeBorderColor,
+      labelColor: rangeLabelColor,
+      footerTextColor: rangeFooterTextColor,
+      transition: rangeTransition,
+    } = getSharedFormFieldStyles(rest.styles, !!(!isValidRange || errorEnd))
+
+    const rangeComponentStyles: Record<string, React.CSSProperties> = {
+      container: getSharedContainerStyles(rest.styles),
+      inputWrapper: {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        height: rest.styles?.height || '40px',
+        width: '100%',
+        border: `${rest.styles?.borderWidth || '1px'} solid ${rangeBorderColor}`,
+        borderRadius: rest.styles?.borderRadius || '8px',
+        backgroundColor: rangeThemeConfig.background,
+        color: rangeThemeConfig.text,
+        margin: 0,
+        padding: 0,
+        boxSizing: 'border-box',
+        transition: rangeTransition,
+      },
+      input: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'transparent',
+        outline: 'none',
+        border: 'none',
+        padding: rest.styles?.padding || '8px 16px',
+        fontSize: rest.styles?.fontSize || '16px',
+        fontWeight: rest.styles?.fontWeight,
+        lineHeight: rest.styles?.lineHeight,
+        fontFamily: rangeThemeConfig.fontFamily,
+        color: 'inherit',
+        boxSizing: 'border-box',
+      },
+      label: getSharedLabelStyles(rangeLabelColor, rangeThemeConfig),
+      footerText: getSharedFooterTextStyles(
+        rangeFooterTextColor,
+        rangeThemeConfig,
+        rest.styles
+      ),
+    }
+
+    const createRangeInput = (
+      inputLabel: string,
+      inputValue: string | undefined,
+      inputOnChange: (value: string) => void,
+      inputError: string | undefined
+    ) => (
+      <div style={styles.rangeSide}>
+        {inputLabel && (
+          <label style={rangeComponentStyles.label}>
+            {inputLabel}
+            {rest.required && (
+              <span style={getRequiredIndicatorStyle(rest.styles)}>
+                {rest.styles?.requiredIndicatorText || ' *'}
+              </span>
+            )}
+          </label>
+        )}
+
+        <div style={rangeComponentStyles.inputWrapper}>
+          <input
+            {...rest}
+            {...getRequiredProps(rest.required)}
+            value={inputValue || ''}
+            disabled={rest.disabled}
+            onChange={e => inputOnChange(e.target.value)}
+            onBlur={onEndIPBlur}
+            placeholder={
+              placeholder ||
+              (inputLabel.includes('Start') ? '192.168.0.1' : '192.168.0.255')
+            }
+            style={rangeComponentStyles.input}
+          />
+        </div>
+
+        {inputError && (
+          <div style={rangeComponentStyles.footerText}>{inputError}</div>
+        )}
+      </div>
+    )
+
     return (
       <div style={styles.rangeContainer}>
         {availableRangeMessage && (
-          <Typography style={styles.infoText}>
-            {availableRangeMessage}
-          </Typography>
+          <Typography>{availableRangeMessage}</Typography>
         )}
         <div style={styles.rangeInner}>
-          <div style={styles.rangeSide}>
-            <TextField
-              {...rest}
-              label={startIPValue ? label : ''}
-              value={startIPValue}
-              onChange={onChange}
-              onBlur={onEndIPBlur}
-              error={!isValidRange}
-            />
-          </div>
-          <Typography style={styles.rangeDivider}>-</Typography>
-          <div style={styles.rangeSide}>
-            <TextField
-              {...rest}
-              label={endIPValue ? label : ''}
-              value={endIPValue}
-              onChange={onEndIPChange}
-              onBlur={onEndIPBlur}
-              error={errorEnd || !isValidRange}
-            />
-          </div>
+          {createRangeInput(
+            startIPValue ? label : '',
+            startIPValue,
+            handleStartIPChange,
+            !isValidRange ? 'Invalid IP range' : undefined
+          )}
+          <Typography>-</Typography>
+          {createRangeInput(
+            endIPValue ? label : '',
+            endIPValue,
+            handleEndIPChange,
+            errorEnd || !isValidRange ? 'Invalid IP range' : undefined
+          )}
         </div>
       </div>
     )
   }
 
+  const handleTextFieldChange = (newValue: string) => {
+    const formatted = formatIPAddress(newValue, lastInputTypeWasDelete.current)
+    const valid = validateIPAddress(formatted)
+    setIsValid(valid)
+    setValue(formatted)
+
+    if (onChange) {
+      // Create a synthetic event to match the expected signature
+      const syntheticEvent = {
+        target: { value: formatted },
+        currentTarget: { value: formatted },
+      } as React.ChangeEvent<HTMLInputElement>
+      onChange(syntheticEvent)
+    }
+  }
+
+  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
+    getSharedFormFieldStyles(
+      rest.styles,
+      !!(!isValid || !isInNetwork || !isInSubnet)
+    )
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(rest.styles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: rest.styles?.height || '40px',
+      width: '100%',
+      border: `${rest.styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: rest.styles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: rest.styles?.padding || '8px 16px',
+      fontSize: rest.styles?.fontSize || '16px',
+      fontWeight: rest.styles?.fontWeight,
+      lineHeight: rest.styles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    footerText: getSharedFooterTextStyles(
+      footerTextColor,
+      themeConfig,
+      rest.styles
+    ),
+  }
+
+  const error =
+    !isValid || !isInNetwork || !isInSubnet ? 'Invalid IP address' : undefined
+
   return (
-    <div style={{ ...rest.style, width: '100%' }}>
-      <TextField
-        label={label}
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        error={!isValid || !isInNetwork || !isInSubnet}
-        {...rest}
-      />
+    <div style={{ ...componentStyles.container, width: '100%' }}>
+      {label && (
+        <label style={componentStyles.label}>
+          {label}
+          {rest.required && (
+            <span style={getRequiredIndicatorStyle(rest.styles)}>
+              {rest.styles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={componentStyles.inputWrapper}>
+        <input
+          {...rest}
+          {...getRequiredProps(rest.required)}
+          value={value}
+          disabled={rest.disabled}
+          onChange={e => handleTextFieldChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          style={componentStyles.input}
+        />
+      </div>
+
+      {error && <div style={componentStyles.footerText}>{error}</div>}
     </div>
   )
 }

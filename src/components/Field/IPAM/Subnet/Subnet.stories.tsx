@@ -46,7 +46,7 @@ export const SacredTheme: Story = {
 }
 
 const InteractiveSubnetDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
   const [value, setValue] = React.useState({ address: '', mask: 24 })
 
@@ -58,8 +58,8 @@ const InteractiveSubnetDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -73,7 +73,9 @@ const InteractiveSubnetDemo: React.FC = () => {
           </label>
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+      <div
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      >
         <SubnetField
           label="Interactive Subnet"
           value={value}

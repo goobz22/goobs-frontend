@@ -1,19 +1,39 @@
 'use client'
 
 import React, { useState, useCallback, useRef } from 'react'
-import TextField, { TextFieldProps } from '../../../Field/Text'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
-export interface CIDRFieldProps extends Omit<TextFieldProps, 'onChange'> {
+export interface CIDRFieldProps {
   initialValue?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
-  label?: string
   initialDelay?: number
   repeatInterval?: number
   minCidr?: number
   maxCidr?: number
   showSubnetInfo?: boolean
+  label?: React.ReactNode
+  helperText?: string
+  disabled?: boolean
+  styles?: FormFieldStyles
+  // Additional HTML input props
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
+  placeholder?: string
+  id?: string
+  autoComplete?: string
 }
 
 const calculateCIDRInfo = (cidr: number) => {
@@ -79,8 +99,9 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   minCidr = 8,
   maxCidr = 32,
   showSubnetInfo = true,
+  helperText,
   disabled,
-  sacredtheme,
+  styles,
   ...rest
 }) => {
   const [currentValue, setCurrentValue] = useState(() => {
@@ -93,7 +114,63 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cidrInfo = calculateCIDRInfo(parseInt(currentValue) || 24)
-  const styles = getStyles()
+  const pickerStyles = getStyles()
+
+  // Merge disabled prop with styles
+  const mergedStyles = {
+    ...styles,
+    disabled: disabled !== undefined ? disabled : styles?.disabled,
+  }
+
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(mergedStyles, false)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(mergedStyles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: mergedStyles?.height || '40px',
+      width: '100%',
+      border: `${mergedStyles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: mergedStyles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: mergedStyles?.padding || '8px 16px',
+      paddingRight: '60px', // Space for increment/decrement buttons
+      fontSize: mergedStyles?.fontSize || '16px',
+      fontWeight: mergedStyles?.fontWeight,
+      lineHeight: mergedStyles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    endAdornment: getSharedAdornmentStyles(adornmentColor),
+    footerText: getSharedFooterTextStyles(
+      footerTextColor,
+      themeConfig,
+      mergedStyles
+    ),
+  }
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -146,44 +223,57 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     }
   }, [clearTimers])
 
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value
-        .replace(/[^0-9/]/g, '')
-        .replace('/', '')
+  const handleTextFieldChange = useCallback(
+    (value: string) => {
+      const newValue = value.replace(/[^0-9/]/g, '').replace('/', '')
       if (newValue === '') {
         setCurrentValue(minCidr.toString())
-        onChange?.(event)
+        if (onChange) {
+          const syntheticEvent = {
+            target: { value: `/${minCidr}` },
+            currentTarget: { value: `/${minCidr}` },
+          } as React.ChangeEvent<HTMLInputElement>
+          onChange(syntheticEvent)
+        }
         return
       }
       const numValue = parseInt(newValue, 10)
+      let finalValue = newValue
       if (isNaN(numValue) || numValue < minCidr) {
+        finalValue = minCidr.toString()
         setCurrentValue(minCidr.toString())
       } else if (numValue > maxCidr) {
+        finalValue = maxCidr.toString()
         setCurrentValue(maxCidr.toString())
       } else {
         setCurrentValue(newValue)
       }
-      onChange?.(event)
+      if (onChange) {
+        const syntheticEvent = {
+          target: { value: `/${finalValue}` },
+          currentTarget: { value: `/${finalValue}` },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange(syntheticEvent)
+      }
     },
     [onChange, minCidr, maxCidr]
   )
 
   const EndAdornment = () => (
-    <div style={styles.buttonContainer}>
+    <div style={pickerStyles.buttonContainer}>
       <button
         type="button"
         onMouseDown={handleIncrementMouseDown}
-        disabled={disabled}
-        style={styles.button}
+        disabled={mergedStyles?.disabled}
+        style={pickerStyles.button}
       >
         <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
       </button>
       <button
         type="button"
         onMouseDown={handleDecrementMouseDown}
-        disabled={disabled}
-        style={styles.button}
+        disabled={mergedStyles?.disabled}
+        style={pickerStyles.button}
       >
         <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
       </button>
@@ -192,19 +282,43 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
 
   return (
     <div>
-      <TextField
-        value={`/${currentValue}`}
-        onChange={handleChange}
-        label={label}
-        type="text"
-        inputMode="numeric"
-        disabled={disabled}
-        endAdornment={<EndAdornment />}
-        sacredtheme={sacredtheme}
-        {...rest}
-      />
+      <div style={componentStyles.container}>
+        {label && (
+          <label style={componentStyles.label}>
+            {label}
+            {mergedStyles?.required && (
+              <span style={getRequiredIndicatorStyle(mergedStyles)}>
+                {mergedStyles?.requiredIndicatorText || ' *'}
+              </span>
+            )}
+          </label>
+        )}
+
+        <div style={componentStyles.inputWrapper}>
+          <input
+            {...rest}
+            {...getRequiredProps(mergedStyles?.required)}
+            value={`/${currentValue}`}
+            disabled={mergedStyles?.disabled}
+            onChange={e => handleTextFieldChange(e.target.value)}
+            type="text"
+            inputMode="numeric"
+            style={componentStyles.input}
+          />
+
+          <div
+            style={{
+              ...componentStyles.endAdornment,
+              right: '16px',
+            }}
+          >
+            <EndAdornment />
+          </div>
+        </div>
+      </div>
+
       {showSubnetInfo && (
-        <div style={styles.infoContainer}>
+        <div style={pickerStyles.infoContainer}>
           <div>Subnet Mask: {cidrInfo.mask}</div>
           <div>
             Total Hosts: {cidrInfo.totalHosts} ({cidrInfo.usableHosts} usable)
@@ -212,6 +326,8 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
           <div>Networks: {cidrInfo.networks}</div>
         </div>
       )}
+
+      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

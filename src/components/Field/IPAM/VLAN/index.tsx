@@ -17,6 +17,7 @@ export interface VLANFieldProps
    */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   label?: string
+  disabled?: boolean
   /** Array of reserved VLAN IDs that can't be used */
   reservedVLANs?: number[]
 }
@@ -32,6 +33,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
   initialValue = '',
   onChange,
   label = 'VLAN ID',
+  disabled,
   reservedVLANs = [],
   ...rest
 }) => {
@@ -188,9 +190,13 @@ const VLANField: React.FC<VLANFieldProps> = ({
       label={label}
       min={MIN_VLAN_ID}
       max={MAX_VLAN_ID}
-      error={!isValid}
       helperText={errorMessage}
       placeholder={`${MIN_VLAN_ID}-${MAX_VLAN_ID}`}
+      styles={{
+        ...rest.styles,
+        helperTextType: !isValid ? 'error' : 'info',
+        disabled: disabled !== undefined ? disabled : rest.styles?.disabled,
+      }}
       {...rest}
     />
   )

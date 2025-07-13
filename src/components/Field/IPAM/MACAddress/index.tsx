@@ -1,15 +1,35 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import TextField, { TextFieldProps } from '../../../Field/Text'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type FormFieldStyles,
+} from '../../../../theme'
 
-export interface MACAddressFieldProps extends Omit<TextFieldProps, 'onChange'> {
+export interface MACAddressFieldProps {
   initialValue?: string
   /**
    * A standard ChangeEvent<HTMLInputElement> so parent can do
    * e.g. (event) => getMacValue(event.target.value) ...
    */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
-  label?: string
+  label?: React.ReactNode
+  helperText?: string
+  disabled?: boolean
+  styles?: FormFieldStyles
+  // Additional HTML input props
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
+  onPaste?: (event: React.ClipboardEvent<HTMLInputElement>) => void
+  placeholder?: string
+  id?: string
+  autoComplete?: string
 }
 
 /**
@@ -42,6 +62,9 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   initialValue = '',
   onChange,
   label = 'MAC Address',
+  helperText,
+  disabled,
+  styles,
   ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
@@ -116,14 +139,13 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     return isValidMACAddress(mac)
   }, [])
 
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = event.target.value
+  const handleTextFieldChange = useCallback(
+    (newValue: string) => {
       // Check if characters were deleted
-      lastInputTypeWasDelete.current = rawValue.length < value.length
+      lastInputTypeWasDelete.current = newValue.length < value.length
 
       const formattedValue = formatMACAddress(
-        rawValue,
+        newValue,
         lastInputTypeWasDelete.current
       )
       const valid = validateMACAddress(formattedValue)
@@ -131,16 +153,14 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
       setValue(formattedValue)
       setIsValid(valid)
 
-      // Create a properly typed clone of the event to prevent issues with synthetic events
-      const clonedEvent = {
-        ...event,
-        target: {
-          ...event.target,
-          value: formattedValue,
-        },
-      } as React.ChangeEvent<HTMLInputElement>
-
-      onChange?.(clonedEvent)
+      if (onChange) {
+        // Create a synthetic event to match the expected signature
+        const syntheticEvent = {
+          target: { value: formattedValue },
+          currentTarget: { value: formattedValue },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange(syntheticEvent)
+      }
     },
     [onChange, formatMACAddress, validateMACAddress, value]
   )
@@ -169,25 +189,86 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     [formatMACAddress, onChange, validateMACAddress]
   )
 
-  // Determine error message based on validation state
-  const getErrorMessage = useCallback(() => {
-    if (!isValid) {
-      return 'Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)'
-    }
-    return undefined
-  }, [isValid])
+  const error = !isValid
+    ? 'Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)'
+    : helperText
+
+  // Merge disabled prop with styles
+  const mergedStyles = {
+    ...styles,
+    disabled: disabled !== undefined ? disabled : styles?.disabled,
+  }
+
+  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
+    getSharedFormFieldStyles(mergedStyles, false)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(mergedStyles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: mergedStyles?.height || '40px',
+      width: '100%',
+      border: `${mergedStyles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: mergedStyles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: mergedStyles?.padding || '8px 16px',
+      fontSize: mergedStyles?.fontSize || '16px',
+      fontWeight: mergedStyles?.fontWeight,
+      lineHeight: mergedStyles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    footerText: getSharedFooterTextStyles(
+      footerTextColor,
+      themeConfig,
+      mergedStyles
+    ),
+  }
 
   return (
-    <TextField
-      value={value}
-      onChange={handleChange}
-      onPaste={handlePaste}
-      label={label}
-      error={!isValid}
-      helperText={getErrorMessage()}
-      placeholder="00:1A:2B:3C:4D:5E"
-      {...rest}
-    />
+    <div style={componentStyles.container}>
+      {label && (
+        <label style={componentStyles.label}>
+          {label}
+          {mergedStyles?.required && (
+            <span style={getRequiredIndicatorStyle(mergedStyles)}>
+              {mergedStyles?.requiredIndicatorText || ' *'}
+            </span>
+          )}
+        </label>
+      )}
+
+      <div style={componentStyles.inputWrapper}>
+        <input
+          {...rest}
+          {...getRequiredProps(mergedStyles?.required)}
+          value={value}
+          disabled={mergedStyles?.disabled}
+          onChange={e => handleTextFieldChange(e.target.value)}
+          onPaste={handlePaste}
+          placeholder="00:1A:2B:3C:4D:5E"
+          style={componentStyles.input}
+        />
+      </div>
+
+      {error && <div style={componentStyles.footerText}>{error}</div>}
+    </div>
   )
 }
 

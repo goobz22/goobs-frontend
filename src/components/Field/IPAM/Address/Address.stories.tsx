@@ -6,11 +6,10 @@ const meta: Meta<typeof IPAddressField> = {
   title: 'Components/Field/IPAM/Address',
   component: IPAddressField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     disabled: { control: 'boolean' },
     label: { control: 'text' },
-    error: { control: 'boolean' },
-    helperText: { control: 'text' },
+    error: { control: 'text' },
+    styles: { control: 'object' },
   },
   parameters: {
     layout: 'centered',
@@ -29,7 +28,7 @@ export const PremiumTheme: Story = {
   ),
   args: {
     label: 'IP Address',
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -42,14 +41,14 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveAddressDemo: React.FC = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
+  const [showError, setShowError] = React.useState(false)
   const [value, setValue] = React.useState('192.168.1.1')
 
   return (
@@ -60,8 +59,8 @@ const InteractiveAddressDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -76,21 +75,23 @@ const InteractiveAddressDemo: React.FC = () => {
           <label>
             <input
               type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
+              checked={showError}
+              onChange={e => setShowError(e.target.checked)}
             />{' '}
             Error
           </label>
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+      <div
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      >
         <IPAddressField
           label="Interactive IP Address"
           initialValue={value}
           onChange={e => setValue(e.target.value)}
-          sacredtheme={sacred}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
           disabled={disabled}
-          error={error}
+          error={showError ? 'Invalid IP address' : undefined}
         />
       </div>
     </div>

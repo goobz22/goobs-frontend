@@ -1,23 +1,38 @@
 'use client'
 
 import React, { useState, useCallback, useRef } from 'react'
-import TextField, { TextFieldProps } from '../../../Field/Text'
+import {
+  getSharedFormFieldStyles,
+  getSharedLabelStyles,
+  getSharedContainerStyles,
+  getSharedFooterTextStyles,
+  getSharedAdornmentStyles,
+  getRequiredIndicatorStyle,
+  getRequiredProps,
+  type SharedFormFieldProps,
+} from '../../../../theme'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
-import NetworkAddressField from '../NetworkAddress'
 
 export interface InternalIncrementNumberFieldProps
-  extends Omit<TextFieldProps, 'onChange'> {
+  extends Omit<SharedFormFieldProps, 'onChange'> {
   initialValue?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
-  label?: string
   min?: number
   max?: number
   initialDelay?: number
   repeatInterval?: number
   maskType?: 'subnet' | 'supernet'
   style?: React.CSSProperties
-  disabled?: boolean
+  // Additional HTML input props
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
+  placeholder?: string
+  id?: string
+  name?: string
+  autoComplete?: string
 }
 
 const calculateSubnetInfo = (cidr: number) => {
@@ -91,7 +106,7 @@ const InternalIncrementNumberField: React.FC<
   max,
   maskType = 'subnet',
   style,
-  disabled,
+  styles: fieldStyles,
   ...rest
 }) => {
   const effectiveMin =
@@ -108,7 +123,57 @@ const InternalIncrementNumberField: React.FC<
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const subnetInfo = calculateSubnetInfo(parseInt(currentValue) || effectiveMin)
-  const styles = getStyles()
+  const pickerStyles = getStyles()
+
+  const {
+    themeConfig,
+    borderColor,
+    labelColor,
+    adornmentColor,
+    footerTextColor,
+    transition,
+  } = getSharedFormFieldStyles(fieldStyles, false)
+
+  const componentStyles: Record<string, React.CSSProperties> = {
+    container: getSharedContainerStyles(fieldStyles),
+    inputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      height: fieldStyles?.height || '40px',
+      width: '100%',
+      border: `${fieldStyles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: fieldStyles?.borderRadius || '8px',
+      backgroundColor: themeConfig.background,
+      color: themeConfig.text,
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box',
+      transition,
+    },
+    input: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      outline: 'none',
+      border: 'none',
+      padding: fieldStyles?.padding || '8px 16px',
+      paddingRight: '60px', // Space for increment/decrement buttons
+      fontSize: fieldStyles?.fontSize || '16px',
+      fontWeight: fieldStyles?.fontWeight,
+      lineHeight: fieldStyles?.lineHeight,
+      fontFamily: themeConfig.fontFamily,
+      color: 'inherit',
+      boxSizing: 'border-box',
+    },
+    label: getSharedLabelStyles(labelColor, themeConfig),
+    endAdornment: getSharedAdornmentStyles(adornmentColor),
+    footerText: getSharedFooterTextStyles(
+      footerTextColor,
+      themeConfig,
+      fieldStyles
+    ),
+  }
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -167,42 +232,57 @@ const InternalIncrementNumberField: React.FC<
     }
   }, [clearTimers])
 
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value.replace(/[^0-9]/g, '')
+  const handleTextFieldChange = useCallback(
+    (value: string) => {
+      const newValue = value.replace(/[^0-9]/g, '')
       if (newValue === '') {
         setCurrentValue(effectiveMin.toString())
-        onChange?.(event)
+        if (onChange) {
+          const syntheticEvent = {
+            target: { value: effectiveMin.toString() },
+            currentTarget: { value: effectiveMin.toString() },
+          } as React.ChangeEvent<HTMLInputElement>
+          onChange(syntheticEvent)
+        }
         return
       }
       const numValue = parseInt(newValue, 10)
+      let finalValue = newValue
       if (isNaN(numValue) || numValue < effectiveMin) {
+        finalValue = effectiveMin.toString()
         setCurrentValue(effectiveMin.toString())
       } else if (numValue > effectiveMax) {
+        finalValue = effectiveMax.toString()
         setCurrentValue(effectiveMax.toString())
       } else {
         setCurrentValue(newValue)
       }
-      onChange?.(event)
+      if (onChange) {
+        const syntheticEvent = {
+          target: { value: finalValue },
+          currentTarget: { value: finalValue },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange(syntheticEvent)
+      }
     },
     [onChange, effectiveMin, effectiveMax]
   )
 
   const EndAdornment = () => (
-    <div style={styles.buttonContainer}>
+    <div style={pickerStyles.buttonContainer}>
       <button
         type="button"
         onMouseDown={handleIncrementMouseDown}
-        disabled={disabled}
-        style={styles.button}
+        disabled={rest.disabled}
+        style={pickerStyles.button}
       >
         <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
       </button>
       <button
         type="button"
         onMouseDown={handleDecrementMouseDown}
-        disabled={disabled}
-        style={styles.button}
+        disabled={rest.disabled}
+        style={pickerStyles.button}
       >
         <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
       </button>
@@ -211,17 +291,40 @@ const InternalIncrementNumberField: React.FC<
 
   return (
     <div style={style}>
-      <TextField
-        value={subnetInfo.mask}
-        onChange={handleChange}
-        label={label}
-        type="text"
-        inputMode="numeric"
-        style={style}
-        disabled={disabled}
-        endAdornment={<EndAdornment />}
-        {...rest}
-      />
+      <div style={componentStyles.container}>
+        {label && (
+          <label style={componentStyles.label}>
+            {label}
+            {rest.required && (
+              <span style={getRequiredIndicatorStyle(fieldStyles)}>
+                {fieldStyles?.requiredIndicatorText || ' *'}
+              </span>
+            )}
+          </label>
+        )}
+
+        <div style={componentStyles.inputWrapper}>
+          <input
+            {...rest}
+            {...getRequiredProps(rest.required)}
+            value={subnetInfo.mask}
+            disabled={rest.disabled}
+            onChange={e => handleTextFieldChange(e.target.value)}
+            type="text"
+            inputMode="numeric"
+            style={componentStyles.input}
+          />
+
+          <div
+            style={{
+              ...componentStyles.endAdornment,
+              right: '16px',
+            }}
+          >
+            <EndAdornment />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -307,10 +410,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     cidr: number
   } | null>(null)
   const [isValidSubnet, setIsValidSubnet] = useState<boolean>(true)
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
-  )
-  const styles = getStyles()
+  const subnetStyles = getStyles()
 
   const cidrToMaskFn = useCallback((cidr: number): string => {
     const binary = '1'.repeat(cidr) + '0'.repeat(32 - cidr)
@@ -372,13 +472,11 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   React.useEffect(() => {
     if (!address || !supernetAddress || !supernetMask || !networkRange) {
       setIsValidSubnet(true)
-      setErrorMessage(undefined)
       return
     }
     const segments = address.split('.')
     if (segments.length !== 4 || segments.some(s => s === '')) {
       setIsValidSubnet(true)
-      setErrorMessage(undefined)
       return
     }
     const subnetMaskStr =
@@ -387,11 +485,6 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         : supernetMask
     const isInRange = isIPInNetwork(address, supernetAddress, subnetMaskStr)
     setIsValidSubnet(isInRange)
-    setErrorMessage(
-      isInRange
-        ? undefined
-        : `Subnet must be within range ${networkRange.start} - ${networkRange.end}`
-    )
   }, [
     address,
     supernetAddress,
@@ -400,15 +493,6 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     cidrToMaskFn,
     isIPInNetwork,
   ])
-
-  const handleAddressChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newAddress = e.target.value
-      setAddress(newAddress)
-      onChange({ address: newAddress, mask })
-    },
-    [onChange, mask]
-  )
 
   const handleMaskChange = useCallback(
     (eventOrNumber: React.ChangeEvent<HTMLInputElement> | number) => {
@@ -439,20 +523,6 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
 
   return (
     <div style={style}>
-      <NetworkAddressField
-        label={label + ' Address'}
-        initialValue={address}
-        onChange={handleAddressChange}
-        error={!isValidSubnet}
-        helperText={errorMessage}
-        placeholder="e.g. 192.168.1.0"
-        required={required}
-        disabled={disabled}
-        validateAsNetworkAddress={true}
-        cidrPrefix={mask}
-        defaultNetwork={supernetAddress}
-        subnetMask={supernetMask}
-      />
       <InternalIncrementNumberField
         initialValue={mask.toString()}
         onChange={handleMaskChange}
@@ -464,7 +534,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         style={{ width: '100%' }}
         disabled={disabled}
       />
-      <div style={styles.infoContainer}>
+      <div style={subnetStyles.infoContainer}>
         <div>Subnet CIDR: /{mask}</div>
         <div>
           Total Hosts: {subnetInfo.hosts} ({subnetInfo.usableHosts} usable)
@@ -480,8 +550,8 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
             </div>
             <div
               style={{
-                ...styles.infoText,
-                ...(!isValidSubnet && styles.errorText),
+                ...subnetStyles.infoText,
+                ...(!isValidSubnet && subnetStyles.errorText),
               }}
             >
               Available Range: {networkRange.start} - {networkRange.end}

@@ -6,11 +6,10 @@ const meta: Meta<typeof VLANField> = {
   title: 'Components/Field/IPAM/VLAN',
   component: VLANField,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     disabled: { control: 'boolean' },
     label: { control: 'text' },
-    error: { control: 'boolean' },
-    helperText: { control: 'text' },
+    styles: { control: 'object' },
+    reservedVLANs: { control: 'object' },
   },
   parameters: {
     layout: 'centered',
@@ -30,7 +29,7 @@ export const PremiumTheme: Story = {
   args: {
     label: 'VLAN ID',
     onChange: event => console.log('Value changed:', event.target.value),
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -43,14 +42,14 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...PremiumTheme.args,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [disabled, setDisabled] = React.useState(false)
-  const [error, setError] = React.useState(false)
+  const [showReservedVLANs, setShowReservedVLANs] = React.useState(false)
   const [value, setValue] = React.useState('100')
 
   return (
@@ -61,8 +60,8 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />{' '}
             Sacred
           </label>
@@ -77,21 +76,22 @@ const InteractiveDemoRenderer = () => {
           <label>
             <input
               type="checkbox"
-              checked={error}
-              onChange={e => setError(e.target.checked)}
+              checked={showReservedVLANs}
+              onChange={e => setShowReservedVLANs(e.target.checked)}
             />{' '}
-            Error
+            Reserved VLANs
           </label>
         </div>
       </div>
-      <div className={`p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}>
+      <div
+        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      >
         <VLANField
           label="Interactive VLAN"
           initialValue={value}
           onChange={e => setValue(e.target.value)}
-          sacredtheme={sacred}
-          disabled={disabled}
-          error={error}
+          styles={{ theme: sacredtheme ? 'sacred' : 'light', disabled }}
+          reservedVLANs={showReservedVLANs ? [50, 100, 150, 200] : []}
         />
       </div>
     </div>
