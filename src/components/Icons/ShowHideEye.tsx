@@ -64,12 +64,14 @@ const sacredStyles = {
     color: 'rgba(255, 215, 0, 0.9)',
     transition: 'all 0.4s ease',
     filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+    fontFamily: 'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
   } as React.CSSProperties,
 
   iconHover: {
     transform: 'scale(1.1) rotate(5deg)',
     filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
     color: '#FFD700',
+    fontFamily: 'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
   } as React.CSSProperties,
 
   glyph: {
@@ -80,10 +82,12 @@ const sacredStyles = {
     opacity: 0,
     pointerEvents: 'none',
     animation: 'sacredGlyphRotate 20s linear infinite',
+    fontFamily: 'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
   } as React.CSSProperties,
 
   glyphVisible: {
     opacity: 1,
+    fontFamily: 'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
   } as React.CSSProperties,
 }
 
@@ -138,7 +142,8 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: 'serif',
+              fontFamily:
+                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
             }}
           >
             𓂀
@@ -166,7 +171,8 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'serif',
+            fontFamily:
+              'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
             position: 'relative',
           }}
         >
