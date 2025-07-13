@@ -8,8 +8,8 @@ import DataGrid from '../../DataGrid'
 import MetricSection from '../../DataGrid/MetricSection'
 import Typography from '../../Typography'
 import Alert, { AlertProps } from '../../Alert'
-import LinearProgress from '../../LinearProgress'
-import { SACRED_GLYPHS } from '../../../styles/sacredGlyphs'
+import ProgressBar from '../../ProgressBar'
+import { SACRED_GLYPHS } from '../../../theme/'
 
 export interface FormDataGridProps {
   title: string
@@ -181,15 +181,7 @@ function FormDataGrid({
               SACRED_GLYPHS[3],
               SACRED_GLYPHS[13],
             ].map((glyph, index) => (
-              <Typography
-                key={index}
-                style={{
-                  ...styles.headerGlyph,
-                  animationDelay: `${index * 0.2}s`,
-                }}
-              >
-                {glyph}
-              </Typography>
+              <Typography key={index}>{glyph}</Typography>
             ))}
           </div>
         )}
@@ -198,7 +190,12 @@ function FormDataGrid({
           <div style={styles.description}>{description}</div>
         </div>
         <div style={{ marginTop: '0.75rem' }}>
-          <LinearProgress sacredtheme={sacredtheme} />
+          <ProgressBar
+            variant="indeterminate"
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+            }}
+          />
         </div>
       </div>
     )
@@ -233,15 +230,7 @@ function FormDataGrid({
             SACRED_GLYPHS[3],
             SACRED_GLYPHS[13],
           ].map((glyph, index) => (
-            <Typography
-              key={index}
-              style={{
-                ...styles.headerGlyph,
-                animationDelay: `${index * 0.2}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
+            <Typography key={index}>{glyph}</Typography>
           ))}
         </div>
       )}
@@ -254,7 +243,12 @@ function FormDataGrid({
 
       {metrics && Array.isArray(metrics) && metrics.length > 0 && (
         <div style={styles.metricsContainer}>
-          <MetricSection metrics={metrics} sacredtheme={sacredtheme} />
+          <MetricSection
+            metrics={metrics}
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+            }}
+          />
         </div>
       )}
 
@@ -264,27 +258,26 @@ function FormDataGrid({
             severity={alert.severity}
             message={alert.message}
             onClose={alert.onClose}
-            sacredtheme={sacredtheme}
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+            }}
           />
         </div>
       )}
 
       <div style={styles.dataGridContainer}>
-        <DataGrid {...dataGridPropsWithoutMetrics} sacredtheme={sacredtheme} />
+        <DataGrid
+          {...dataGridPropsWithoutMetrics}
+          styles={{
+            theme: sacredtheme ? 'sacred' : 'light',
+          }}
+        />
       </div>
 
       {sacredtheme && (
         <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography
-              key={index}
-              style={{
-                ...styles.footerGlyph,
-                animationDelay: `${2 + index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
+            <Typography key={index}>{glyph}</Typography>
           ))}
         </div>
       )}

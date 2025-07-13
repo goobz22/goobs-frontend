@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import { TypographyProps } from '../../Typography'
-import CustomButton, { CustomButtonProps } from '../../Button'
+import CustomButton, { ButtonProps } from '../../Button'
 import Typography from '../../Typography'
 
 const SACRED_GLYPHS = [
@@ -39,7 +39,7 @@ export interface CustomDialogProps {
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
-  buttons?: CustomButtonProps[]
+  buttons?: ButtonProps[]
   sacredtheme?: boolean
 }
 
@@ -148,33 +148,21 @@ function CustomDialog({
       typography: [
         {
           text: title,
-          fontvariant: 'merrih4',
-          fontcolor: sacredtheme ? '#FFD700' : 'black',
-          style: sacredtheme
-            ? {
-                fontFamily: '"Cinzel", serif',
-                textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
-                letterSpacing: '0.1em',
-                textAlign: 'center',
-              }
-            : undefined,
-          sacredtheme: sacredtheme,
+          variant: 'merrih4',
+          styles: {
+            color: sacredtheme ? '#FFD700' : 'black',
+            theme: sacredtheme ? 'sacred' : 'light',
+          },
         },
         {
           text: description,
-          fontvariant: 'merrih5',
-          fontcolor: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
-          style: sacredtheme
-            ? {
-                fontFamily: '"Crimson Text", serif',
-                textAlign: 'center',
-                marginTop: '8px',
-              }
-            : undefined,
-          sacredtheme: sacredtheme,
+          variant: 'merrih5',
+          styles: {
+            color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
+            theme: sacredtheme ? 'sacred' : 'light',
+          },
         },
       ] as TypographyProps[],
-      style: sacredtheme ? { marginBottom: '16px' } : undefined,
     }),
     [title, description, sacredtheme]
   )
@@ -186,15 +174,7 @@ function CustomDialog({
         {sacredtheme && (
           <div style={styles.headerGlyphs}>
             {SACRED_GLYPHS.slice(0, 5).map((glyph, index) => (
-              <Typography
-                key={index}
-                style={{
-                  ...styles.headerGlyph,
-                  animationDelay: `${index * 0.2}s`,
-                }}
-              >
-                {glyph}
-              </Typography>
+              <Typography key={index}>{glyph}</Typography>
             ))}
           </div>
         )}
@@ -207,21 +187,14 @@ function CustomDialog({
     if (!buttons || buttons.length === 0) return null
     return (
       <div style={styles.buttonContainer}>
-        {buttons.map((buttonProps: CustomButtonProps, index: number) => (
+        {buttons.map((buttonProps: ButtonProps, index: number) => (
           <CustomButton
             key={index}
             {...buttonProps}
-            sacredtheme={sacredtheme}
-            style={
-              sacredtheme
-                ? {
-                    fontFamily: '"Cinzel", serif',
-                    letterSpacing: '0.05em',
-                    boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
-                    ...buttonProps.style,
-                  }
-                : buttonProps.style
-            }
+            styles={{
+              theme: sacredtheme ? 'sacred' : 'light',
+              ...buttonProps.styles,
+            }}
           />
         ))}
       </div>
@@ -269,15 +242,7 @@ function CustomDialog({
       {sacredtheme && (
         <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography
-              key={index}
-              style={{
-                ...styles.footerGlyph,
-                animationDelay: `${2 + index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
+            <Typography key={index}>{glyph}</Typography>
           ))}
         </div>
       )}

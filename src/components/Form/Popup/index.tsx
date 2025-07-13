@@ -5,7 +5,7 @@ import Dialog from '../../Dialog'
 import CloseIcon from '../../Icons/Close'
 import DragIcon from '../../Icons/Drag'
 import ContentSection, { ContentSectionProps } from '../../Content'
-import CustomButton, { CustomButtonProps } from '../../Button'
+import CustomButton, { ButtonProps } from '../../Button'
 import Typography from '../../Typography'
 
 const SACRED_GLYPHS = [
@@ -44,7 +44,7 @@ export interface PopupProps {
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
   width?: number
-  buttons?: CustomButtonProps[]
+  buttons?: ButtonProps[]
   sacredtheme?: boolean
 }
 
@@ -262,10 +262,9 @@ function Popup({
     <Dialog
       open={isOpen}
       onClose={handleClose}
-      fullWidth
-      maxWidth={false}
-      style={styles.dialog}
-      data-dialog-paper="true"
+      styles={{
+        theme: sacredtheme ? 'sacred' : 'light',
+      }}
     >
       {sacredtheme && (
         <>
@@ -314,15 +313,19 @@ function Popup({
       {title && (
         <Typography
           text={title}
-          fontcolor={sacredtheme ? 'gold' : 'black'}
-          style={styles.title}
+          styles={{
+            color: sacredtheme ? 'gold' : 'black',
+            theme: sacredtheme ? 'sacred' : 'light',
+          }}
         />
       )}
       {description && (
         <Typography
           text={description}
-          fontcolor={sacredtheme ? 'white' : 'black'}
-          style={styles.description}
+          styles={{
+            color: sacredtheme ? 'white' : 'black',
+            theme: sacredtheme ? 'sacred' : 'light',
+          }}
         />
       )}
 
@@ -337,17 +340,10 @@ function Popup({
             <CustomButton
               key={index}
               {...buttonProps}
-              sacredtheme={sacredtheme}
-              style={
-                sacredtheme
-                  ? {
-                      fontFamily: '"Cinzel", serif',
-                      letterSpacing: '0.05em',
-                      boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
-                      ...buttonProps.style,
-                    }
-                  : buttonProps.style
-              }
+              styles={{
+                theme: sacredtheme ? 'sacred' : 'light',
+                ...buttonProps.styles,
+              }}
             />
           ))}
         </div>
@@ -356,15 +352,7 @@ function Popup({
       {sacredtheme && (
         <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography
-              key={index}
-              style={{
-                ...styles.footerGlyph,
-                animationDelay: `${2 + index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
+            <Typography key={index}>{glyph}</Typography>
           ))}
         </div>
       )}

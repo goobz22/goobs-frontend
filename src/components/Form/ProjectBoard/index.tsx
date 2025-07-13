@@ -285,7 +285,7 @@ function FormProjectBoard({
           ].map((glyph, index) => (
             <Typography
               key={index}
-              style={{
+              styles={{
                 color: 'rgba(255, 215, 0, 0.6)',
                 fontSize: '16px',
                 animation: 'formProjectBoardFloat 5s ease-in-out infinite',
@@ -321,7 +321,7 @@ function FormProjectBoard({
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <Typography
               key={index}
-              style={{
+              styles={{
                 color: 'rgba(255, 215, 0, 1)',
                 fontSize: '12px',
                 animation: 'formProjectBoardFloat 5s ease-in-out infinite',
