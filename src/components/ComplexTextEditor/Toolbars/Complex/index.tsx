@@ -5,7 +5,7 @@ import React from 'react'
 import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
-import { ToggleButton, ToggleButtonGroup } from '../../../ToggleButton'
+import Button, { ButtonGroup } from '../../../Button'
 import { RichTextEditorTypes } from '../../utils/useRichtextEditor'
 import { Descendant } from 'slate'
 import {
@@ -65,11 +65,11 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
     <div style={computedStyles.container}>
       {styles?.showModeToggle !== false && (
         <div style={computedStyles.toggleRow}>
-          <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
-            <ToggleButton value="simple">Simple</ToggleButton>
-            <ToggleButton value="rich">Rich Text</ToggleButton>
-            <ToggleButton value="markdown">Markdown</ToggleButton>
-          </ToggleButtonGroup>
+          <ButtonGroup value={mode} exclusive onChange={handleModeChange}>
+            <Button value="simple" text="Simple" />
+            <Button value="rich" text="Rich Text" />
+            <Button value="markdown" text="Markdown" />
+          </ButtonGroup>
         </div>
       )}
 
