@@ -2,7 +2,6 @@
 // ACCORDION THEME SYSTEM
 // --------------------------------------------------------------------------
 import React from 'react'
-import { TRANSITIONS, SHADOWS } from './shared'
 
 export interface AccordionTheme {
   container: {
@@ -33,6 +32,13 @@ export interface AccordionTheme {
     letterSpacing: string
     textShadow?: string
     borderBottom: string
+    minHeight: string
+    height?: string
+    maxHeight?: string
+    whiteSpace?: string
+    overflow?: string
+    textOverflow?: string
+    minWidth?: string
   }
   summaryHover: {
     backgroundColor: string
@@ -71,6 +77,23 @@ export interface AccordionTheme {
     filter?: string
   }
   transition: string
+  // Mobile responsive overrides
+  mobile: {
+    borderRadius: string
+    boxShadow: string
+    summaryPadding: string
+    summaryMinHeight: string
+    detailsPadding: string
+    summaryFontSize: string
+  }
+  // Tablet responsive overrides
+  tablet: {
+    detailsPadding: string
+  }
+  // Desktop responsive overrides
+  desktop: {
+    detailsPadding: string
+  }
 }
 
 export interface AccordionStyles {
@@ -107,6 +130,9 @@ export interface AccordionStyles {
   summaryLetterSpacing?: string
   summaryTextShadow?: string
   summaryBorderBottom?: string
+  summaryWhiteSpace?: string
+  summaryOverflow?: string
+  summaryTextOverflow?: string
 
   // Summary hover
   summaryHoverBackgroundColor?: string
@@ -161,6 +187,13 @@ export interface AccordionStyles {
   width?: string
   maxWidth?: string
   minWidth?: string
+  height?: string
+  maxHeight?: string
+
+  // Navigation level (for indentation)
+  level?: number
+  levelIndentBase?: number
+  levelIndentIncrement?: number
 }
 
 export const accordionThemes: Record<
@@ -169,205 +202,255 @@ export const accordionThemes: Record<
 > = {
   light: {
     container: {
-      background:
-        'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
-      border: '1px solid rgba(226, 232, 240, 0.8)',
-      borderRadius: '16px',
-      boxShadow: SHADOWS.light.small,
-      backdropFilter: 'blur(8px)',
+      background: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+      backdropFilter: 'none',
     },
     containerHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: SHADOWS.light.medium,
-      borderColor: 'rgba(59, 130, 246, 0.3)',
+      transform: 'translateY(-1px)',
+      boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.15)',
     },
     containerExpanded: {
-      boxShadow: SHADOWS.light.large,
-      background:
-        'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%)',
+      boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.12)',
+      background: '#fafafa',
     },
     summary: {
-      background: 'rgba(248, 250, 252, 0.5)',
-      color: 'rgb(31, 41, 55)',
-      fontFamily: '"Inter", sans-serif',
-      fontSize: '18px',
-      fontWeight: 600,
-      letterSpacing: '-0.025em',
-      borderBottom: '1px solid transparent',
+      background: '#f5f7fa',
+      color: 'inherit',
+      fontFamily: 'merriweather',
+      fontSize: '14px',
+      fontWeight: 500,
+      letterSpacing: 'normal',
+      borderBottom: 'none',
+      minHeight: '32px',
+      height: '32px',
+      maxHeight: '32px',
+      whiteSpace: 'nowrap',
+      minWidth: 'fit-content',
     },
     summaryHover: {
-      backgroundColor: 'rgba(239, 246, 255, 0.6)',
-      color: 'rgb(29, 78, 216)',
-      transform: 'translateX(4px)',
+      backgroundColor: '#e8f0fe',
+      color: 'inherit',
     },
     summaryExpanded: {
-      backgroundColor: 'rgba(239, 246, 255, 0.8)',
-      borderBottomColor: 'rgba(59, 130, 246, 0.2)',
-      color: 'rgb(29, 78, 216)',
-      fontWeight: 700,
+      backgroundColor: '#e3f2fd',
+      borderBottomColor: 'rgba(0, 0, 0, 0.12)',
+      color: 'inherit',
+      fontWeight: 500,
     },
     details: {
-      background: 'rgba(255, 255, 255, 0.8)',
-      borderTop: '1px solid rgba(226, 232, 240, 0.5)',
-      color: 'rgb(55, 65, 81)',
-      fontFamily: '"Inter", sans-serif',
+      background: 'white',
+      borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+      color: 'inherit',
+      fontFamily: 'inherit',
       fontSize: '16px',
-      lineHeight: 1.7,
-      backdropFilter: 'blur(4px)',
+      lineHeight: 1.6,
+      backdropFilter: 'none',
     },
     icon: {
-      color: 'rgb(107, 114, 128)',
-      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+      color: '#000000',
+      filter: 'none',
     },
     iconHover: {
-      color: 'rgb(29, 78, 216)',
+      color: '#000000',
       transform: 'scale(1.1)',
-      filter: 'drop-shadow(0 2px 4px rgba(29, 78, 216, 0.2))',
+      filter: 'none',
     },
     iconExpanded: {
-      transform: 'rotate(180deg) scale(1.1)',
-      color: 'rgb(29, 78, 216)',
-      filter: 'drop-shadow(0 2px 4px rgba(29, 78, 216, 0.3))',
+      transform: 'rotate(180deg)',
+      color: '#000000',
+      filter: 'none',
     },
-    transition: TRANSITIONS.premium,
+    transition: 'all 0.2s ease',
+    mobile: {
+      borderRadius: '6px',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+      summaryPadding: '4px 16px',
+      summaryMinHeight: '32px',
+      detailsPadding: '12px 16px',
+      summaryFontSize: '14px',
+    },
+    tablet: {
+      detailsPadding: '14px 18px',
+    },
+    desktop: {
+      detailsPadding: '16px 24px',
+    },
   },
   dark: {
     container: {
-      background:
-        'linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%)',
-      border: '1px solid rgba(75, 85, 99, 0.8)',
-      borderRadius: '16px',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4)',
+      background: 'rgba(31, 41, 55, 0.95)',
+      border: 'none',
+      borderRadius: '8px',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.3)',
       backdropFilter: 'blur(8px)',
     },
     containerHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2)',
-      borderColor: 'rgba(96, 165, 250, 0.4)',
+      transform: 'translateY(-1px)',
+      boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.25)',
     },
     containerExpanded: {
-      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2)',
-      background:
-        'linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(31, 41, 55, 0.95) 100%)',
+      boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
+      background: 'rgba(30, 58, 138, 0.2)',
     },
     summary: {
       background: 'rgba(17, 24, 39, 0.5)',
       color: 'rgb(243, 244, 246)',
-      fontFamily: '"Inter", sans-serif',
-      fontSize: '18px',
-      fontWeight: 600,
-      letterSpacing: '-0.025em',
-      borderBottom: '1px solid transparent',
+      fontFamily: 'merriweather',
+      fontSize: '14px',
+      fontWeight: 500,
+      letterSpacing: 'normal',
+      borderBottom: 'none',
+      minHeight: '32px',
+      height: '32px',
+      maxHeight: '32px',
+      whiteSpace: 'nowrap',
+      minWidth: 'fit-content',
     },
     summaryHover: {
       backgroundColor: 'rgba(30, 58, 138, 0.3)',
       color: 'rgb(96, 165, 250)',
-      transform: 'translateX(4px)',
     },
     summaryExpanded: {
       backgroundColor: 'rgba(30, 58, 138, 0.4)',
       borderBottomColor: 'rgba(96, 165, 250, 0.3)',
       color: 'rgb(96, 165, 250)',
-      fontWeight: 700,
+      fontWeight: 500,
     },
     details: {
       background: 'rgba(17, 24, 39, 0.8)',
       borderTop: '1px solid rgba(75, 85, 99, 0.5)',
       color: 'rgb(209, 213, 219)',
-      fontFamily: '"Inter", sans-serif',
+      fontFamily: 'inherit',
       fontSize: '16px',
-      lineHeight: 1.7,
+      lineHeight: 1.6,
       backdropFilter: 'blur(4px)',
     },
     icon: {
       color: 'rgb(156, 163, 175)',
-      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2))',
+      filter: 'none',
     },
     iconHover: {
       color: 'rgb(96, 165, 250)',
       transform: 'scale(1.1)',
-      filter: 'drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3))',
+      filter: 'none',
     },
     iconExpanded: {
-      transform: 'rotate(180deg) scale(1.1)',
+      transform: 'rotate(180deg)',
       color: 'rgb(96, 165, 250)',
-      filter: 'drop-shadow(0 2px 4px rgba(96, 165, 250, 0.4))',
+      filter: 'none',
     },
-    transition: TRANSITIONS.premium,
+    transition: 'all 0.2s ease',
+    mobile: {
+      borderRadius: '6px',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.3)',
+      summaryPadding: '4px 16px',
+      summaryMinHeight: '32px',
+      detailsPadding: '12px 16px',
+      summaryFontSize: '14px',
+    },
+    tablet: {
+      detailsPadding: '14px 18px',
+    },
+    desktop: {
+      detailsPadding: '16px 24px',
+    },
   },
   sacred: {
     container: {
-      background: 'rgba(10, 10, 10, 0.95)',
-      border: '2px solid rgba(255, 215, 0, 0.4)',
-      borderRadius: '12px',
-      boxShadow: SHADOWS.sacred.small,
-      backdropFilter: 'blur(4px)',
+      background: '#0a0a0a',
+      border: '1px solid rgba(255, 215, 0, 0.3)',
+      borderRadius: '8px',
+      boxShadow:
+        '0 0 15px rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3)',
+      backdropFilter: 'blur(8px)',
       backgroundImage: `
-        radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+        linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+        radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
       `,
     },
     containerHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: SHADOWS.sacred.medium,
-      borderColor: 'rgba(255, 215, 0, 0.6)',
+      transform: 'translateY(-1px)',
+      boxShadow:
+        '0 0 25px rgba(255, 215, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)',
     },
     containerExpanded: {
-      boxShadow: SHADOWS.sacred.large,
-      background: 'rgba(10, 10, 10, 0.95)',
+      boxShadow:
+        '0 0 30px rgba(255, 215, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.5)',
+      background: '#0a0a0a',
       borderColor: '#FFD700',
       backgroundImage: `
-        linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),
-        radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
+        linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
+        radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%)
       `,
     },
     summary: {
       background: 'transparent',
       color: 'rgba(255, 215, 0, 0.9)',
       fontFamily: '"Cinzel", serif',
-      fontSize: '20px',
+      fontSize: '14px',
       fontWeight: 600,
       letterSpacing: '0.05em',
-      textShadow: '0 0 10px #FFD700, 0 0 20px rgba(255, 215, 0, 0.5)',
-      borderBottom: '1px solid transparent',
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+      borderBottom: 'none',
+      minHeight: '32px',
+      height: '32px',
+      maxHeight: '32px',
+      whiteSpace: 'nowrap',
+      minWidth: 'fit-content',
     },
     summaryHover: {
       backgroundColor: 'rgba(255, 215, 0, 0.1)',
       color: '#FFD700',
-      textShadow: '0 0 15px #FFD700, 0 0 30px rgba(255, 215, 0, 0.7)',
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
     },
     summaryExpanded: {
       backgroundColor: 'rgba(255, 215, 0, 0.05)',
       borderBottomColor: 'rgba(255, 215, 0, 0.3)',
       color: '#FFD700',
       fontWeight: 600,
-      textShadow: '0 0 20px #FFD700, 0 0 40px rgba(255, 215, 0, 0.8)',
+      textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
     },
     details: {
-      background: 'rgba(0, 0, 0, 0.4)',
+      background: 'transparent',
       borderTop: '1px solid rgba(255, 215, 0, 0.2)',
-      color: 'rgba(245, 245, 220, 0.9)',
-      fontFamily: '"Merriweather", serif',
+      color: 'rgba(255, 215, 0, 0.8)',
+      fontFamily: 'inherit',
       fontSize: '16px',
       lineHeight: 1.6,
       backdropFilter: 'blur(2px)',
     },
     icon: {
       color: '#FFD700',
-      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
+      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
     },
     iconHover: {
       color: '#FFD700',
       transform: 'scale(1.1)',
-      filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
     },
     iconExpanded: {
-      transform: 'rotate(180deg) scale(1.1)',
+      transform: 'rotate(180deg)',
       color: '#FFD700',
-      filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.9))',
+      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
     },
-    transition: TRANSITIONS.slow,
+    transition: 'all 0.3s ease',
+    mobile: {
+      borderRadius: '6px',
+      boxShadow: '0 0 10px rgba(255, 215, 0, 0.2)',
+      summaryPadding: '4px 16px',
+      summaryMinHeight: '32px',
+      detailsPadding: '12px 16px',
+      summaryFontSize: '14px',
+    },
+    tablet: {
+      detailsPadding: '14px 18px',
+    },
+    desktop: {
+      detailsPadding: '24px 32px',
+    },
   },
 }
 
@@ -381,6 +464,7 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
   }
 
   return {
+    ...baseTheme,
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
       border: styles.borderColor
@@ -422,6 +506,14 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
       textShadow: styles.summaryTextShadow || baseTheme.summary.textShadow,
       borderBottom:
         styles.summaryBorderBottom || baseTheme.summary.borderBottom,
+      minHeight: styles.summaryMinHeight || baseTheme.summary.minHeight,
+      height: styles.height || baseTheme.summary.height,
+      maxHeight: styles.maxHeight || baseTheme.summary.maxHeight,
+      whiteSpace: styles.summaryWhiteSpace || baseTheme.summary.whiteSpace,
+      overflow: styles.summaryOverflow || baseTheme.summary.overflow,
+      textOverflow:
+        styles.summaryTextOverflow || baseTheme.summary.textOverflow,
+      minWidth: styles.minWidth || baseTheme.summary.minWidth,
     },
     summaryHover: {
       backgroundColor:
@@ -479,6 +571,58 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
   }
 }
 
+// Helper function to get responsive styles
+const getResponsiveStyles = (
+  theme: AccordionTheme,
+  breakpoint: 'mobile' | 'tablet' | 'desktop'
+): Partial<React.CSSProperties> => {
+  const responsive = theme[breakpoint]
+
+  switch (breakpoint) {
+    case 'mobile':
+      return {
+        borderRadius: (responsive as any).borderRadius,
+        boxShadow: (responsive as any).boxShadow,
+      }
+    case 'tablet':
+    case 'desktop':
+      return {}
+    default:
+      return {}
+  }
+}
+
+// Helper function to get responsive summary styles
+const getResponsiveSummaryStyles = (
+  theme: AccordionTheme,
+  breakpoint: 'mobile' | 'tablet' | 'desktop'
+): Partial<React.CSSProperties> => {
+  const responsive = theme[breakpoint]
+
+  switch (breakpoint) {
+    case 'mobile':
+      return {
+        padding: (responsive as any).summaryPadding,
+        minHeight: (responsive as any).summaryMinHeight,
+        fontSize: (responsive as any).summaryFontSize,
+      }
+    default:
+      return {}
+  }
+}
+
+// Helper function to get responsive details styles
+const getResponsiveDetailsStyles = (
+  theme: AccordionTheme,
+  breakpoint: 'mobile' | 'tablet' | 'desktop'
+): Partial<React.CSSProperties> => {
+  const responsive = theme[breakpoint]
+
+  return {
+    padding: responsive.detailsPadding,
+  }
+}
+
 // Main style generator function
 export const getAccordionStyles = (
   styles?: AccordionStyles,
@@ -487,9 +631,17 @@ export const getAccordionStyles = (
   isDisabled?: boolean
 ) => {
   const themeConfig = getAccordionTheme(styles)
+  const isSacredTheme = styles?.theme === 'sacred'
 
+  // Calculate level-based indentation
+  const level = styles?.level || 0
+  const indentBase = styles?.levelIndentBase || 0
+  const indentIncrement = styles?.levelIndentIncrement || 6
+  const levelIndent = indentBase + level * indentIncrement
+
+  // Base container styles
   const containerStyle: React.CSSProperties = {
-    marginBottom: styles?.marginBottom || '12px',
+    marginBottom: styles?.marginBottom || '8px',
     margin: styles?.margin,
     width: styles?.width || '100%',
     maxWidth: styles?.maxWidth,
@@ -516,15 +668,23 @@ export const getAccordionStyles = (
         borderColor: themeConfig.containerExpanded.borderColor,
         backgroundImage: themeConfig.containerExpanded.backgroundImage,
       }),
-    ...(isDisabled && { opacity: 0.7 }),
+    ...(isDisabled && {
+      opacity: isSacredTheme ? 0.6 : 0.8,
+      backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.8)' : '#f8f8f8',
+      borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.1)' : undefined,
+    }),
     ...(styles?.outline === false && { border: 'none', boxShadow: 'none' }),
   }
 
+  // Base summary styles with level-based indentation
   const summaryStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: styles?.summaryPadding || '24px',
+    padding: styles?.summaryPadding || `4px 16px 4px ${levelIndent}px`,
+    height: '32px',
+    maxHeight: '32px',
+    minWidth: 'fit-content',
     transition: themeConfig.transition,
     position: 'relative',
     backgroundColor: themeConfig.summary.background,
@@ -534,9 +694,10 @@ export const getAccordionStyles = (
     fontSize: themeConfig.summary.fontSize,
     letterSpacing: themeConfig.summary.letterSpacing,
     cursor: isDisabled ? 'not-allowed' : 'pointer',
-    minHeight: styles?.summaryMinHeight || '72px',
+    minHeight: themeConfig.summary.minHeight,
     borderBottom: themeConfig.summary.borderBottom,
     textShadow: themeConfig.summary.textShadow,
+    whiteSpace: 'nowrap',
     ...(isHovered &&
       !isDisabled && {
         backgroundColor: themeConfig.summaryHover.backgroundColor,
@@ -547,15 +708,21 @@ export const getAccordionStyles = (
     ...(isExpanded &&
       !isDisabled && {
         backgroundColor: themeConfig.summaryExpanded.backgroundColor,
-        borderBottomColor: themeConfig.summaryExpanded.borderBottomColor,
+        borderBottom: `1px solid ${themeConfig.summaryExpanded.borderBottomColor}`,
         color: themeConfig.summaryExpanded.color,
         fontWeight: themeConfig.summaryExpanded.fontWeight,
         textShadow: themeConfig.summaryExpanded.textShadow,
       }),
+    ...(isDisabled && {
+      opacity: 1,
+      color: isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : '#666',
+      cursor: 'not-allowed',
+    }),
   }
 
+  // Base details styles
   const detailsStyle: React.CSSProperties = {
-    padding: styles?.detailsPadding || '24px',
+    padding: styles?.detailsPadding || '16px',
     position: 'relative',
     backgroundColor: themeConfig.details.background,
     borderTop: themeConfig.details.borderTop,
@@ -567,6 +734,7 @@ export const getAccordionStyles = (
     ...(styles?.outline === false && { borderTop: 'none' }),
   }
 
+  // Base icon styles
   const iconStyle: React.CSSProperties = {
     width: '24px',
     height: '24px',
@@ -585,7 +753,9 @@ export const getAccordionStyles = (
         color: themeConfig.iconExpanded.color,
         filter: themeConfig.iconExpanded.filter,
       }),
-    ...(isDisabled && { color: 'rgb(156, 163, 175)' }),
+    ...(isDisabled && {
+      color: isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : '#999',
+    }),
   }
 
   return {
@@ -593,5 +763,22 @@ export const getAccordionStyles = (
     summary: summaryStyle,
     details: detailsStyle,
     icon: iconStyle,
+    responsive: {
+      mobile: {
+        container: getResponsiveStyles(themeConfig, 'mobile'),
+        summary: getResponsiveSummaryStyles(themeConfig, 'mobile'),
+        details: getResponsiveDetailsStyles(themeConfig, 'mobile'),
+      },
+      tablet: {
+        container: getResponsiveStyles(themeConfig, 'tablet'),
+        summary: getResponsiveSummaryStyles(themeConfig, 'tablet'),
+        details: getResponsiveDetailsStyles(themeConfig, 'tablet'),
+      },
+      desktop: {
+        container: getResponsiveStyles(themeConfig, 'desktop'),
+        summary: getResponsiveSummaryStyles(themeConfig, 'desktop'),
+        details: getResponsiveDetailsStyles(themeConfig, 'desktop'),
+      },
+    },
   }
 }

@@ -29,10 +29,6 @@ export interface SwitchTheme {
   input: React.CSSProperties
   /** Input when disabled */
   inputDisabled: React.CSSProperties
-  /** Label styling */
-  label: React.CSSProperties
-  /** Label when disabled */
-  labelDisabled: React.CSSProperties
   /** Sacred glyph styling */
   glyph: React.CSSProperties
   /** Sacred glyph left position */
@@ -43,6 +39,10 @@ export interface SwitchTheme {
   glyphVisible: React.CSSProperties
   /** Sacred shimmer effect */
   shimmer: React.CSSProperties
+  /** Left label styling */
+  leftLabel: React.CSSProperties
+  /** Right label styling */
+  rightLabel: React.CSSProperties
 }
 
 export interface SwitchStyles {
@@ -170,17 +170,6 @@ const lightTheme: SwitchTheme = {
   inputDisabled: {
     cursor: 'not-allowed',
   },
-  label: {
-    fontSize: '14px',
-    fontWeight: 500,
-    color: 'rgb(55, 65, 81)',
-    fontFamily: 'Inter, system-ui, sans-serif',
-    userSelect: 'none',
-    transition: TRANSITIONS.medium,
-  },
-  labelDisabled: {
-    color: 'rgb(156, 163, 175)',
-  },
   glyph: {
     display: 'none',
   },
@@ -195,6 +184,22 @@ const lightTheme: SwitchTheme = {
   },
   shimmer: {
     display: 'none',
+  },
+  leftLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgb(55, 65, 81)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.medium,
+  },
+  rightLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgb(55, 65, 81)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.medium,
   },
 }
 
@@ -274,17 +279,6 @@ const darkTheme: SwitchTheme = {
   inputDisabled: {
     cursor: 'not-allowed',
   },
-  label: {
-    fontSize: '14px',
-    fontWeight: 500,
-    color: 'rgb(209, 213, 219)',
-    fontFamily: 'Inter, system-ui, sans-serif',
-    userSelect: 'none',
-    transition: TRANSITIONS.medium,
-  },
-  labelDisabled: {
-    color: 'rgb(107, 114, 128)',
-  },
   glyph: {
     display: 'none',
   },
@@ -299,6 +293,22 @@ const darkTheme: SwitchTheme = {
   },
   shimmer: {
     display: 'none',
+  },
+  leftLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgb(209, 213, 219)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.medium,
+  },
+  rightLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgb(209, 213, 219)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.medium,
   },
 }
 
@@ -397,19 +407,6 @@ const sacredTheme: SwitchTheme = {
   inputDisabled: {
     cursor: 'not-allowed',
   },
-  label: {
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#FFD700',
-    fontFamily: 'Cinzel, serif',
-    userSelect: 'none',
-    transition: TRANSITIONS.premium,
-    textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
-  },
-  labelDisabled: {
-    color: 'rgba(255, 215, 0, 0.4)',
-    textShadow: 'none',
-  },
   glyph: {
     position: 'absolute',
     fontSize: '8px',
@@ -441,6 +438,24 @@ const sacredTheme: SwitchTheme = {
       'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent)',
     animation: 'sacredSwitchShimmer 2s ease-in-out infinite',
     borderRadius: 'inherit',
+  },
+  leftLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#FFD700',
+    fontFamily: 'Cinzel, serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.premium,
+    textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
+  },
+  rightLabel: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#FFD700',
+    fontFamily: 'Cinzel, serif',
+    userSelect: 'none',
+    transition: TRANSITIONS.premium,
+    textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
   },
 }
 
@@ -516,15 +531,6 @@ export const getSwitchStyles = (
       ...(isDisabled && baseTheme.inputDisabled),
     },
     inputDisabled: baseTheme.inputDisabled,
-    label: {
-      ...baseTheme.label,
-      ...(styles?.labelColor && { color: styles.labelColor }),
-      ...(styles?.labelFontFamily && { fontFamily: styles.labelFontFamily }),
-      ...(styles?.labelFontSize && { fontSize: styles.labelFontSize }),
-      ...(styles?.labelFontWeight && { fontWeight: styles.labelFontWeight }),
-      ...(isDisabled && baseTheme.labelDisabled),
-    },
-    labelDisabled: baseTheme.labelDisabled,
     glyph: {
       ...baseTheme.glyph,
       ...(styles?.transitionDuration && {
@@ -541,6 +547,20 @@ export const getSwitchStyles = (
     },
     glyphVisible: baseTheme.glyphVisible,
     shimmer: baseTheme.shimmer,
+    leftLabel: {
+      ...baseTheme.leftLabel,
+      ...(styles?.labelColor && { color: styles.labelColor }),
+      ...(styles?.labelFontFamily && { fontFamily: styles.labelFontFamily }),
+      ...(styles?.labelFontSize && { fontSize: styles.labelFontSize }),
+      ...(styles?.labelFontWeight && { fontWeight: styles.labelFontWeight }),
+    },
+    rightLabel: {
+      ...baseTheme.rightLabel,
+      ...(styles?.labelColor && { color: styles.labelColor }),
+      ...(styles?.labelFontFamily && { fontFamily: styles.labelFontFamily }),
+      ...(styles?.labelFontSize && { fontSize: styles.labelFontSize }),
+      ...(styles?.labelFontWeight && { fontWeight: styles.labelFontWeight }),
+    },
   }
 
   return customStyles

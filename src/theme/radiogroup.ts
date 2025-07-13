@@ -13,6 +13,7 @@ export interface RadioGroupTheme {
   radioSpan: React.CSSProperties
   radioOuter: React.CSSProperties
   radioOuterHover: React.CSSProperties
+  radioOuterChecked: React.CSSProperties
   radioInner: React.CSSProperties
   radioInnerChecked: React.CSSProperties
   text: React.CSSProperties
@@ -102,6 +103,10 @@ export const radioGroupThemes: Record<
       borderColor: '#3B82F6',
       backgroundColor: 'rgba(59, 130, 246, 0.04)',
     },
+    radioOuterChecked: {
+      borderColor: '#3B82F6',
+      backgroundColor: '#3B82F6',
+    },
     radioInner: {
       width: '10px',
       height: '10px',
@@ -173,6 +178,10 @@ export const radioGroupThemes: Record<
       borderColor: '#60A5FA',
       backgroundColor: 'rgba(96, 165, 250, 0.1)',
     },
+    radioOuterChecked: {
+      borderColor: '#60A5FA',
+      backgroundColor: '#60A5FA',
+    },
     radioInner: {
       width: '10px',
       height: '10px',
@@ -239,7 +248,7 @@ export const radioGroupThemes: Record<
     radioOuter: {
       width: '20px',
       height: '20px',
-      border: '2px solid rgba(255, 215, 0, 0.6)',
+      border: '2px solid #FFD700',
       borderRadius: '50%',
       marginRight: '0.75rem',
       transition: TRANSITIONS.premium,
@@ -247,6 +256,10 @@ export const radioGroupThemes: Record<
     radioOuterHover: {
       borderColor: '#FFD700',
       backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    },
+    radioOuterChecked: {
+      borderColor: '#FFD700',
+      backgroundColor: '#FFD700',
     },
     radioInner: {
       width: '10px',
@@ -297,8 +310,12 @@ export const getRadioGroupTheme = (
   }
 
   const radioSize = styles.radioSize || '20px'
-  const innerSize = `${parseInt(radioSize) * 0.5}px`
-  const innerOffset = `${parseInt(radioSize) * 0.25}px`
+  const radioDimension = parseInt(radioSize)
+
+  // Calculate inner size to fill almost the entire inner area (minimal margin)
+  const innerSize = `${radioDimension - 6}px`
+  // Position the inner circle with 3px offset for centering
+  const innerOffset = `3px`
 
   return {
     ...baseTheme,
@@ -375,11 +392,12 @@ export const getRadioGroupStyles = (
     const radioOuterStyle: React.CSSProperties = {
       ...themeConfig.radioOuter,
       ...(isHovered && themeConfig.radioOuterHover),
+      ...(isChecked && themeConfig.radioOuterChecked),
     }
 
     const radioInnerStyle: React.CSSProperties = {
       ...themeConfig.radioInner,
-      ...(isChecked && themeConfig.radioInnerChecked),
+      display: 'none', // Hide the inner circle completely
     }
 
     const textStyle: React.CSSProperties = {
