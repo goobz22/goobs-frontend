@@ -38,7 +38,6 @@ import { AccountNumberProps } from '../Field/Number/AccountNumber'
 import { CVVProps } from '../Field/Number/CVV'
 import { CreditCardNumberProps } from '../Field/Number/CreditCardNumber'
 import { DateRangeProps } from '../Field/Date/DateRange'
-import { CreditCardExpirationProps } from '../Field/Date/CreditCardExpiration'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -79,7 +78,6 @@ import useAccountNumber from './Structure/accountnumber/useAccountNumber'
 import useCVV from './Structure/CVV/useCVV'
 import useCreditCardNumber from './Structure/CreditCardNumber/useCreditCardNumber'
 import useDateRange from './Structure/DateRange/useDateRange'
-import useCreditCardExpiration from './Structure/CreditCardExpiration/useCreditCardExpiration'
 import type { SupernetFieldProps } from '../Field/IPAM/Supernet'
 
 export interface ContentSectionProps {
@@ -129,10 +127,6 @@ export interface ContentSectionProps {
     cvv?: CVVProps | CVVProps[]
     creditCardNumber?: CreditCardNumberProps | CreditCardNumberProps[]
     dateRange?: DateRangeProps | DateRangeProps[]
-    creditCardExpiration?:
-      | CreditCardExpirationProps
-      | CreditCardExpirationProps[]
-    // Support for custom React components
     customComponent?: React.ReactNode
     // Added optional style property for grid customization
     style?: React.CSSProperties
@@ -256,11 +250,6 @@ const RenderContent: React.FC<
     })
   )
   addElements(useDateRange({ dateRange: injectsacredtheme(props.dateRange) }))
-  addElements(
-    useCreditCardExpiration({
-      creditCardExpiration: injectsacredtheme(props.creditCardExpiration),
-    })
-  )
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
