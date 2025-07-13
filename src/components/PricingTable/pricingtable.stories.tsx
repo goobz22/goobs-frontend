@@ -59,7 +59,10 @@ const meta: Meta<typeof PricingTable> = {
   title: 'Components/PricingTable',
   component: PricingTable,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
+    theme: {
+      control: 'select',
+      options: ['light', 'dark', 'sacred'],
+    },
   },
   parameters: {
     layout: 'centered',
@@ -78,7 +81,8 @@ export const PremiumTheme: Story = {
   ),
   args: {
     ...defaultConfig,
-    sacredtheme: false,
+    theme: 'light',
+    highlightedPackageIndex: 1,
   },
 }
 
@@ -91,27 +95,32 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...defaultConfig,
-    sacredtheme: true,
+    theme: 'sacred',
+    highlightedPackageIndex: 1,
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   return (
     <div
-      className={`w-[800px] p-6 rounded-lg ${sacred ? 'bg-black' : 'bg-gray-50'}`}
+      className={`w-[800px] p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
     >
       <div className="fixed top-4 right-4 z-50 p-4 bg-white rounded-lg border shadow-lg">
         <label>
           <input
             type="checkbox"
-            checked={sacred}
-            onChange={e => setSacred(e.target.checked)}
+            checked={sacredtheme}
+            onChange={e => setsacredtheme(e.target.checked)}
           />{' '}
           Sacred Theme
         </label>
       </div>
-      <PricingTable {...defaultConfig} sacredtheme={sacred} />
+      <PricingTable
+        {...defaultConfig}
+        theme={sacredtheme ? 'sacred' : 'light'}
+        highlightedPackageIndex={1}
+      />
     </div>
   )
 }
@@ -119,4 +128,18 @@ const InteractiveDemoRenderer = () => {
 export const InteractiveDemo: Story = {
   name: 'Interactive Demo',
   render: () => <InteractiveDemoRenderer />,
+}
+
+export const BothPrices: Story = {
+  name: 'Both Monthly and Annual',
+  render: args => (
+    <div className="w-[800px] p-6 bg-gray-50 rounded-lg">
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    ...defaultConfig,
+    theme: 'light',
+    highlightedPackageIndex: 2,
+  },
 }

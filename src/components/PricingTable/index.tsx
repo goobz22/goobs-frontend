@@ -1,10 +1,21 @@
+/**
+ * @fileoverview Defines the PricingTable component for displaying pricing plans and features.
+ * It supports light, dark, and sacred themes with comprehensive customization options.
+ */
 'use client'
-import React, { useState, useEffect, useCallback, FC } from 'react'
+import React, { FC } from 'react'
 import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
-import Dropdown from '../Field/Dropdown/Regular'
+// Remove Switch import
+// import Switch from '../Switch';
+import { SACRED_GLYPHS } from '../../theme'
+// Remove clsx import
+
+// --------------------------------------------------------------------------
+// PROPS INTERFACE (keep existing, perhaps adjust if needed)
+// --------------------------------------------------------------------------
 
 export interface PricingProps {
   tabletitle?: { text: string }
@@ -17,7 +28,12 @@ export interface PricingProps {
     buttonlinks: string[]
   }
   router?: { push(url: string): void }
-  sacredtheme?: boolean
+  /** Theme selection */
+  theme?: 'light' | 'dark' | 'sacred'
+  /** Disabled state */
+  disabled?: boolean
+  highlightedPackageIndex?: number
+  defaultBilling?: 'monthly' | 'annual'
 }
 
 export interface SubFeature {
@@ -33,286 +49,480 @@ export interface Feature {
   tiedtopackage?: { tiedtopackages: string[] }
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  container: {
-    display: 'flex',
-    width: '100%',
-    flexDirection: 'column',
-    height: '100%',
-    boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06)',
-    borderRadius: '0.375rem',
-    borderTopWidth: '12px',
-    ...(sacredtheme
-      ? {
-          borderTopColor: '#FFD700',
-          backgroundColor: '#1C1917',
-          border: '1px solid rgba(255, 215, 0, 0.3)',
-          backgroundImage:
-            'linear-gradient(rgba(255,215,0,0.02),rgba(255,215,0,0.02)),radial-gradient(circle at top right,rgba(255,215,0,0.08) 0%,transparent 50%)',
-          position: 'relative',
-          overflow: 'hidden',
-        }
-      : { borderTopColor: '#00B8D4', backgroundColor: 'white' }),
-  } as React.CSSProperties,
-  header: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '1rem',
-    borderBottom: `1px solid ${sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#E5E7EB'}`,
-    ...(sacredtheme && {
-      backgroundImage:
-        'linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent)',
-    }),
-  } as React.CSSProperties,
-  title: {
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    margin: 0,
-    ...(sacredtheme && {
-      letterSpacing: '0.05em',
-      color: '#FFD700',
-      animation: 'sacred-glow 1.5s infinite alternate',
-    }),
-  } as React.CSSProperties,
-  price: {
-    fontSize: '1rem',
-    ...(sacredtheme && {
-      fontWeight: 500,
-      letterSpacing: '0.025em',
-      color: '#FFD700',
-    }),
-  } as React.CSSProperties,
-  annualPrice: {
-    fontSize: '1rem',
-    ...(sacredtheme && {
+// --------------------------------------------------------------------------
+// THEME STYLES
+// --------------------------------------------------------------------------
+
+const getThemeStyles = (theme: string = 'light', disabled: boolean = false) => {
+  const opacity = disabled
+    ? { opacity: 0.5, pointerEvents: 'none' as const }
+    : {}
+
+  const common = {
+    container: {
+      padding: '1.5rem',
+      borderRadius: '0.375rem',
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      ...opacity,
+    },
+    glyph: {
+      position: 'absolute' as const,
+      top: '1rem',
+      right: '1rem',
+      fontSize: '1.5rem',
+    },
+    header: {
+      fontSize: '1.125rem',
+      fontWeight: 600,
+      marginBottom: '1rem',
+    },
+    priceLabel: {
+      fontSize: '1rem',
       fontStyle: 'italic',
-      color: 'rgba(255, 215, 0, 0.8)',
-    }),
-  } as React.CSSProperties,
-  featuresSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '1rem',
-  } as React.CSSProperties,
-  featureItem: {
-    marginBottom: '1rem',
-  } as React.CSSProperties,
-  featureTitleContainer: {
-    display: 'flex',
-    alignItems: 'center',
-  } as React.CSSProperties,
-  featureTitle: {
-    fontSize: '1rem',
-    ...(sacredtheme && {
+    },
+    packageName: {
+      fontWeight: 'bold',
+      textAlign: 'center' as const,
+      padding: '0.5rem 0',
+    },
+    price: {
+      textAlign: 'center' as const,
+      padding: '0.25rem 0',
+      fontWeight: 600,
+    },
+    annualPrice: {
+      textAlign: 'center' as const,
+      padding: '0.25rem 0',
+      fontStyle: 'italic',
+    },
+    featureTitle: {
       fontWeight: 500,
-      letterSpacing: '0.025em',
-      color: '#FFD700',
-    }),
-  } as React.CSSProperties,
-  iconContainer: {
-    marginLeft: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-  } as React.CSSProperties,
-  subFeatureContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginLeft: '1.5rem',
-    marginTop: '0.5rem',
-  } as React.CSSProperties,
-  subFeatureTitle: {
-    fontSize: '1rem',
-    ...(sacredtheme && { color: 'rgba(255, 215, 0, 0.9)' }),
-  } as React.CSSProperties,
-  buttonSection: {
-    padding: '1rem',
-    ...(sacredtheme && {
-      borderTop: '1px solid rgba(255, 215, 0, 0.3)',
-      backgroundImage:
-        'linear-gradient(to top, rgba(255, 215, 0, 0.05), transparent)',
-    }),
-  } as React.CSSProperties,
-  sacredFooter: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.25rem',
-    paddingBottom: '0.25rem',
-  } as React.CSSProperties,
-  sacredFooterGlyph: {
-    color: 'rgba(255, 215, 0, 0.3)',
-    fontSize: '0.75rem',
-    animation: 'sacred-float 3s infinite ease-in-out',
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '1.25rem',
-    right: '1.25rem',
-    fontSize: '1.5rem',
-    color: 'rgba(255, 215, 0, 0.2)',
-    animation: 'glyph-rotate 20s linear infinite',
-  } as React.CSSProperties,
-  checkIcon: {
-    animation: sacredtheme ? 'sacred-float 2s infinite' : 'none',
-  } as React.CSSProperties,
-})
+      padding: '0.5rem 0 0.5rem 0.5rem',
+    },
+    subFeatureTitle: {
+      fontWeight: 400,
+      padding: '0.25rem 0 0.25rem 1.5rem',
+    },
+    checkCell: {
+      textAlign: 'center' as const,
+      padding: '0.5rem 0',
+      borderRight: '1px solid rgba(255,255,255,0.1)', // for dark/sacred
+    },
+    checkIcon: {},
+    buttonSection: {
+      marginTop: '1rem',
+    },
+    button: {
+      width: '100%',
+    },
+    sacredFooter: {
+      display: 'flex' as const,
+      justifyContent: 'center' as const,
+      gap: '0.25rem',
+      marginTop: '1rem',
+    },
+    sacredFooterGlyph: {},
+    rowEven: { backgroundColor: 'rgba(0,0,0,0.02)' },
+    cellBorder: { borderRight: '1px solid rgba(0,0,0,0.1)' },
+    highlighted: {
+      backgroundColor: 'rgba(255,215,0,0.05)',
+      boxShadow: 'inset 0 0 10px rgba(255,215,0,0.3)',
+    },
+    badge: {
+      display: 'inline-block',
+      backgroundColor: '#4F46E5',
+      color: 'white',
+      padding: '0.25rem 0.75rem',
+      borderRadius: '0.5rem',
+      fontSize: '0.75rem',
+      fontWeight: 600,
+      marginLeft: '0.5rem',
+    },
+    toggleBackground: '#E5E7EB',
+  }
+
+  switch (theme) {
+    case 'sacred':
+      return {
+        ...common,
+        container: {
+          ...common.container,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          border: '1px solid rgba(154,132,0,0.3)',
+          boxShadow: '0 0 20px rgba(255,215,0,0.3)',
+          backdropFilter: 'blur(4px)',
+        },
+        glyph: {
+          ...common.glyph,
+          color: 'rgba(255,215,0,0.2)',
+          animation: 'spin 20s linear infinite',
+          position: 'absolute' as const,
+        },
+        header: {
+          ...common.header,
+          color: '#FFD700',
+          fontFamily: 'serif',
+          textShadow: '0 0 5px rgba(255,215,0,0.5)',
+        },
+        priceLabel: {
+          ...common.priceLabel,
+          color: 'rgba(255,215,0,0.8)',
+        },
+        packageName: {
+          ...common.packageName,
+          color: '#FFD700',
+          backgroundColor: 'rgba(154,132,0,0.1)',
+          borderTopLeftRadius: '0.375rem',
+          borderTopRightRadius: '0.375rem',
+        },
+        price: {
+          ...common.price,
+          color: '#FFD700',
+        },
+        annualPrice: {
+          ...common.annualPrice,
+          color: 'rgba(255,215,0,0.7)',
+        },
+        featureTitle: {
+          ...common.featureTitle,
+          color: '#FFD700',
+          backgroundColor: 'rgba(154,132,0,0.05)',
+        },
+        subFeatureTitle: {
+          ...common.subFeatureTitle,
+          color: 'rgba(255,215,0,0.9)',
+        },
+        checkIcon: {
+          color: '#FFD700',
+          fontSize: '1.25rem',
+        },
+        sacredFooterGlyph: {
+          color: 'rgba(255,215,0,0.3)',
+          fontSize: '0.75rem',
+          animation: 'float 3s ease-in-out infinite',
+        },
+        toggleBackground: 'rgba(0,0,0,0.8)',
+      }
+    case 'dark':
+      return {
+        ...common,
+        container: {
+          ...common.container,
+          backgroundColor: 'rgba(31,41,55,0.95)',
+          border: '1px solid rgba(75,85,99,0.8)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(4px)',
+        },
+        glyph: { display: 'none' },
+        header: {
+          ...common.header,
+          color: '#F3F4F6',
+        },
+        priceLabel: {
+          ...common.priceLabel,
+          color: '#9CA3AF',
+        },
+        packageName: {
+          ...common.packageName,
+          color: '#F9FAFB',
+          backgroundColor: 'rgba(55,65,81,0.5)',
+        },
+        price: {
+          ...common.price,
+          color: '#E5E7EB',
+        },
+        annualPrice: {
+          ...common.annualPrice,
+          color: '#9CA3AF',
+        },
+        featureTitle: {
+          ...common.featureTitle,
+          color: '#D1D5DB',
+          backgroundColor: 'rgba(55,65,81,0.2)',
+        },
+        subFeatureTitle: {
+          ...common.subFeatureTitle,
+          color: '#9CA3AF',
+        },
+        checkIcon: {
+          color: '#4ADE80',
+        },
+        sacredFooter: { display: 'none' },
+        toggleBackground: '#374151',
+      }
+    default:
+      return {
+        ...common,
+        container: {
+          ...common.container,
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          border: '1px solid rgba(226,232,240,0.8)',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          backdropFilter: 'blur(4px)',
+        },
+        glyph: { display: 'none' },
+        header: {
+          ...common.header,
+          color: '#1F2937',
+        },
+        priceLabel: {
+          ...common.priceLabel,
+          color: '#6B7280',
+        },
+        packageName: {
+          ...common.packageName,
+          color: '#1F2937',
+          backgroundColor: '#F3F4F6',
+        },
+        price: {
+          ...common.price,
+          color: '#1F2937',
+        },
+        annualPrice: {
+          ...common.annualPrice,
+          color: '#6B7280',
+        },
+        featureTitle: {
+          ...common.featureTitle,
+          color: '#374151',
+          backgroundColor: '#F9FAFB',
+        },
+        subFeatureTitle: {
+          ...common.subFeatureTitle,
+          color: '#4B5563',
+        },
+        checkIcon: {
+          color: '#22C55E',
+        },
+        sacredFooter: { display: 'none' },
+        toggleBackground: '#E5E7EB',
+      }
+  }
+}
+
+// --------------------------------------------------------------------------
+// MAIN PRICING TABLE COMPONENT
+// --------------------------------------------------------------------------
 
 const PricingTable: FC<PricingProps> = props => {
-  const { router, sacredtheme } = props
-  const [selectedPackageIndex, setSelectedPackageIndex] = useState(0)
-  const [selectedPackage, setSelectedPackage] = useState('')
-  const config = props
-  const styles = getStyles(sacredtheme)
+  const {
+    tabletitle,
+    packagecolumns,
+    monthlyprice,
+    annualprice,
+    features,
+    buttoncolumns,
+    router,
+    theme = 'light',
+    disabled = false,
+    highlightedPackageIndex,
+  } = props
 
-  useEffect(() => {
-    if (config.packagecolumns?.packagenames?.length) {
-      setSelectedPackage(config.packagecolumns.packagenames[0])
+  const styles = getThemeStyles(theme, disabled)
+  const isSacredTheme = theme === 'sacred'
+  const packagenames = packagecolumns?.packagenames ?? []
+  const numPackages = packagenames.length
+
+  if (numPackages === 0) return null
+
+  const handleButtonClick = (index: number) => {
+    if (router && buttoncolumns?.buttonlinks?.[index]) {
+      router.push(buttoncolumns.buttonlinks[index])
     }
-  }, [config.packagecolumns?.packagenames])
-
-  const handlePackageChange = useCallback(
-    (event: React.ChangeEvent<{ value: unknown }>) => {
-      const newValue = event.target.value as string
-      const newIndex =
-        config.packagecolumns?.packagenames?.indexOf(newValue) ?? 0
-      setSelectedPackageIndex(newIndex)
-      setSelectedPackage(newValue)
-    },
-    [config.packagecolumns?.packagenames]
-  )
+  }
 
   return (
     <div style={styles.container}>
-      {sacredtheme && <div style={styles.glyph}>𓁟</div>}
-      <div style={styles.header}>
-        {config.tabletitle && (
-          <h5 style={styles.title}>{config.tabletitle.text || ''}</h5>
-        )}
-        {config.packagecolumns && (
-          <div style={{ minWidth: sacredtheme ? '200px' : undefined }}>
-            <Dropdown
-              label="Packages"
-              options={(config.packagecolumns.packagenames || []).map(name => ({
-                value: name,
-              }))}
-              defaultValue={selectedPackage}
-              onChange={handlePackageChange}
-              sacredtheme={sacredtheme}
-            />
-          </div>
-        )}
-        {config.monthlyprice && (
-          <span style={styles.price}>
-            {config.monthlyprice.prices?.[selectedPackageIndex] || ''}
-          </span>
-        )}
-        {config.annualprice && (
-          <span style={styles.annualPrice}>
-            {config.annualprice.annualprices?.[selectedPackageIndex] || ''}
-          </span>
-        )}
-      </div>
+      {isSacredTheme && <div style={styles.glyph}>{SACRED_GLYPHS[0]}</div>}
 
-      <div style={styles.featuresSection}>
-        {config.features?.map((feature, featureIndex) => (
-          <div key={`feature-${featureIndex}`} style={styles.featureItem}>
-            <div style={styles.featureTitleContainer}>
-              <span style={styles.featureTitle}>{feature.title}</span>
-              {feature.infopopuptext && (
-                <div style={styles.iconContainer}>
+      {tabletitle && <h5 style={styles.header}>{tabletitle.text}</h5>}
+
+      <div style={{ overflowX: 'auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gap: 0,
+            gridTemplateColumns: `minmax(200px, 300px) repeat(${numPackages}, minmax(150px, 1fr))`,
+            minWidth: 'fit-content',
+          }}
+        >
+          {/* Package Names Row */}
+          <div /> {/* Empty top-left */}
+          {packagenames.map((name, i) => (
+            <div
+              key={i}
+              style={{
+                ...styles.packageName,
+                ...(i === highlightedPackageIndex ? styles.highlighted : {}),
+              }}
+            >
+              {name}
+              {i === highlightedPackageIndex && (
+                <span style={styles.badge}>Popular</span>
+              )}
+            </div>
+          ))}
+          {/* Monthly Price Row */}
+          {monthlyprice && (
+            <>
+              <div style={styles.priceLabel}>Monthly Price</div>
+              {monthlyprice.prices.slice(0, numPackages).map((price, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.price,
+                    ...(i === highlightedPackageIndex
+                      ? styles.highlighted
+                      : {}),
+                  }}
+                >
+                  {price.replace(/Monthly - |Annually - /, '')}
+                </div>
+              ))}
+            </>
+          )}
+          {/* Annual Price Row */}
+          {annualprice && (
+            <>
+              <div style={styles.priceLabel}>Annual Price</div>
+              {annualprice.annualprices
+                .slice(0, numPackages)
+                .map((price, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      ...styles.annualPrice,
+                      ...(i === highlightedPackageIndex
+                        ? styles.highlighted
+                        : {}),
+                    }}
+                  >
+                    {price.replace(/Monthly - |Annually - /, '')}
+                  </div>
+                ))}
+            </>
+          )}
+          {/* Features Rows */}
+          {features?.map((feature, fIndex) => (
+            <React.Fragment key={fIndex}>
+              <div
+                style={{
+                  ...styles.featureTitle,
+                  ...(fIndex % 2 === 0 ? styles.rowEven : {}),
+                }}
+              >
+                <span>{feature.title}</span>
+                {feature.infopopuptext && (
                   <StyledTooltip
                     tooltipplacement="right"
                     title={feature.infopopuptext}
-                    sacredtheme={sacredtheme}
+                    sacredtheme={isSacredTheme}
                   >
-                    <InfoIcon fontSize="small" />
-                  </StyledTooltip>
-                </div>
-              )}
-              {feature.tiedtopackage && (
-                <div style={styles.iconContainer}>
-                  {feature.tiedtopackage.tiedtopackages?.[
-                    selectedPackageIndex
-                  ] ? (
-                    <CheckCircleIcon
+                    <InfoIcon
                       fontSize="small"
-                      style={styles.checkIcon}
+                      style={{ marginLeft: '0.5rem', display: 'inline-block' }}
                     />
-                  ) : (
-                    <div style={{ width: '24px', height: '24px' }} />
-                  )}
-                </div>
-              )}
-            </div>
-            {feature.subfeatures?.map((subFeature, subFeatureIndex) => (
-              <div
-                key={`subfeature-${subFeatureIndex}`}
-                style={styles.subFeatureContainer}
-              >
-                <span style={styles.subFeatureTitle}>{subFeature.title}</span>
-                {subFeature.infopopuptext && (
-                  <div style={styles.iconContainer}>
-                    <StyledTooltip
-                      tooltipplacement="right"
-                      title={subFeature.infopopuptext}
-                      sacredtheme={sacredtheme}
-                    >
-                      <InfoIcon fontSize="small" />
-                    </StyledTooltip>
-                  </div>
-                )}
-                {subFeature.tiedtopackage && (
-                  <div style={styles.iconContainer}>
-                    {subFeature.tiedtopackage.tiedtopackages?.[
-                      selectedPackageIndex
-                    ] ? (
-                      <CheckCircleIcon fontSize="small" />
-                    ) : (
-                      <div style={{ width: '24px', height: '24px' }} />
-                    )}
-                  </div>
+                  </StyledTooltip>
                 )}
               </div>
-            ))}
-          </div>
-        ))}
+              {packagenames.map((_, pIndex) => (
+                <div
+                  key={pIndex}
+                  style={{
+                    ...styles.checkCell,
+                    borderRight: '1px solid rgba(0,0,0,0.1)',
+                    ...(fIndex % 2 === 0 ? styles.rowEven : {}),
+                    ...(pIndex === highlightedPackageIndex
+                      ? styles.highlighted
+                      : {}),
+                  }}
+                >
+                  {feature.tiedtopackage?.tiedtopackages?.[pIndex] ===
+                    'true' && (
+                    <CheckCircleIcon
+                      style={styles.checkIcon}
+                      fontSize="small"
+                    />
+                  )}
+                </div>
+              ))}
+
+              {feature.subfeatures?.map((sub, sIndex) => (
+                <React.Fragment key={sIndex}>
+                  <div style={styles.subFeatureTitle}>
+                    <span>{sub.title}</span>
+                    {sub.infopopuptext && (
+                      <StyledTooltip
+                        tooltipplacement="right"
+                        title={sub.infopopuptext}
+                        sacredtheme={isSacredTheme}
+                      >
+                        <InfoIcon
+                          fontSize="small"
+                          style={{
+                            marginLeft: '0.5rem',
+                            display: 'inline-block',
+                          }}
+                        />
+                      </StyledTooltip>
+                    )}
+                  </div>
+                  {packagenames.map((_, pIndex) => (
+                    <div
+                      key={pIndex}
+                      style={{
+                        ...styles.checkCell,
+                        borderRight: '1px solid rgba(0,0,0,0.1)',
+                        ...(fIndex % 2 === 0 ? styles.rowEven : {}),
+                        ...(pIndex === highlightedPackageIndex
+                          ? styles.highlighted
+                          : {}),
+                      }}
+                    >
+                      {sub.tiedtopackage?.tiedtopackages?.[pIndex] ===
+                        'true' && (
+                        <CheckCircleIcon
+                          style={styles.checkIcon}
+                          fontSize="small"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </React.Fragment>
+          ))}
+          {/* Buttons Row */}
+          <div /> {/* Empty */}
+          {buttoncolumns?.buttontexts.slice(0, numPackages).map((text, i) => (
+            <div key={i} style={styles.buttonSection}>
+              <CustomButton
+                text={text}
+                onClick={() => handleButtonClick(i)}
+                styles={{ theme, ...styles.button }}
+                disabled={disabled}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {config.buttoncolumns && (
-        <div style={styles.buttonSection}>
-          <CustomButton
-            backgroundcolor={sacredtheme ? '#FFD700' : 'black'}
-            fontcolor={sacredtheme ? '#000000' : 'white'}
-            width="100%"
-            onClick={() => {
-              if (router && config.buttoncolumns) {
-                router.push(
-                  config.buttoncolumns.buttonlinks[selectedPackageIndex] || '#'
-                )
-              } else {
-                console.warn('No router provided; skipping navigation.')
-              }
-            }}
-            text={config.buttoncolumns.buttontexts[selectedPackageIndex] || ''}
-            sacredtheme={sacredtheme}
-          />
-        </div>
-      )}
-
-      {sacredtheme && (
+      {isSacredTheme && (
         <div style={styles.sacredFooter}>
-          {['𓊹', '𓋹', '𓊹'].map((glyph, i) => (
-            <span
-              key={i}
-              style={{
-                ...styles.sacredFooterGlyph,
-                animationDuration: `${2 + i * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </span>
-          ))}
+          {[SACRED_GLYPHS[20], SACRED_GLYPHS[21], SACRED_GLYPHS[20]].map(
+            (glyph, i) => (
+              <span
+                key={i}
+                style={{
+                  ...styles.sacredFooterGlyph,
+                  animationDuration: `${2 + i * 0.3}s`,
+                }}
+              >
+                {glyph}
+              </span>
+            )
+          )}
         </div>
       )}
     </div>
