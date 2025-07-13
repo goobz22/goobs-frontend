@@ -98,21 +98,21 @@ export const SacredTheme: Story = {
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacred, setSacred] = React.useState(false)
+  const [sacredtheme, setsacredtheme] = React.useState(false)
   const [alignment, setAlignment] = React.useState<
     'left' | 'center' | 'right' | 'justify'
   >('left')
 
   return (
-    <div className={`h-[200vh] ${sacred ? 'bg-black' : 'bg-gray-800'}`}>
+    <div className={`h-[200vh] ${sacredtheme ? 'bg-black' : 'bg-gray-800'}`}>
       <div className="p-4 bg-white rounded-lg border fixed top-24 right-4 z-50">
         <h3 className="text-lg font-bold mb-2">Controls</h3>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={sacred}
-              onChange={e => setSacred(e.target.checked)}
+              checked={sacredtheme}
+              onChange={e => setsacredtheme(e.target.checked)}
             />
             Sacred Theme
           </label>
@@ -135,13 +135,13 @@ const InteractiveDemoRenderer = () => {
 
       <Tabs
         items={mixedTriggerTabs}
-        sacredtheme={sacred}
+        sacredtheme={sacredtheme}
         alignment={alignment}
         navname="interactiveNav"
       />
 
-      <div className={`p-8 ${sacred ? 'text-yellow-200' : 'text-white'}`}>
-        <h1 className={`text-2xl font-bold ${sacred && 'font-cinzel'}`}>
+      <div className={`p-8 ${sacredtheme ? 'text-yellow-200' : 'text-white'}`}>
+        <h1 className={`text-2xl font-bold ${sacredtheme && 'font-cinzel'}`}>
           Interactive Content
         </h1>
         <p>Use the controls to change the tabs.</p>
