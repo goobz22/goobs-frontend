@@ -2,23 +2,14 @@
 
 'use client'
 import React, { useState, useEffect } from 'react'
-import { BaseEditor } from 'slate'
-import { ReactEditor } from 'slate-react'
-import { HistoryEditor } from 'slate-history'
 import Dropdown from '../../../Field/Dropdown/Regular'
 import CustomButton from '../../../Button'
-import { useRichTextEditor } from '../../utils/useRichtextEditor'
 import {
   handleBoldClick as markdownBoldClick,
   handleItalicClick as markdownItalicClick,
   replaceSelectedText,
 } from '../../utils/useMarkdownEditor'
 import { black, grey } from '../../../../theme/'
-import {
-  AlignmentFormat,
-  InlineFormat,
-  BlockFormat,
-} from '../../utils/useRichtextEditor'
 import { ComplexTextEditorStyles } from '../../../../theme/'
 
 import LinkIcon from '../../../Icons/Link'
@@ -40,17 +31,27 @@ import FormatListBulletedIcon from '../../../Icons/FormatListBulleted'
 // --------------------------------------------------------------------------
 
 // Define types directly in this file that aren't already imported
-type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 export type TextType = 'paragraph' | 'h1' | 'h2' | 'h3'
+export type AlignmentFormat = 'left' | 'center' | 'right' | 'justify'
 
 interface ToolbarMarkdownProps {
-  editor?: CustomEditor
+  editor?: any // Slate editor
   handleBoldClick?: () => void
   handleItalicClick?: () => void
+  handleUnderlineClick?: () => void
+  handleStrikethroughClick?: () => void
+  handleCodeClick?: () => void
+  handleLinkClick?: () => void
+
+  handleUndo?: () => void
+  handleRedo?: () => void
+  handleAlign?: (align: string) => void
+  handleTextType?: (type: string) => void
+  handleBulletedList?: () => void
+  handleNumberedList?: () => void
   markdownMode: boolean
-  setMarkdownMode?: (value: boolean) => void
   setMarkdown: (value: string) => void
-  toolbarType?: 'markdown' | 'richtext'
+  toolbarType?: 'markdown' | 'richtext' | 'rich'
   styles?: ComplexTextEditorStyles
 }
 
@@ -62,23 +63,52 @@ interface ToolbarMarkdownProps {
 const premiumStyles = {
   container: {
     padding: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   } as React.CSSProperties,
 
   toolbarRow: {
     display: 'flex',
     flexDirection: 'row',
-    gap: '4px',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  primaryRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  dropdownRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   } as React.CSSProperties,
 
   buttonGroup: {
     display: 'flex',
     gap: '4px',
+    alignItems: 'center',
   } as React.CSSProperties,
 
   buttonsContainer: {
     display: 'flex',
     gap: '2px',
     flexWrap: 'wrap',
+    alignItems: 'center',
+  } as React.CSSProperties,
+
+  dropdown: {
+    minWidth: '120px',
+    maxWidth: '160px',
+    flex: '1 1 120px',
   } as React.CSSProperties,
 }
 
@@ -87,23 +117,52 @@ const sacredStyles = {
   container: {
     padding: '8px',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   } as React.CSSProperties,
 
   toolbarRow: {
     display: 'flex',
     flexDirection: 'row',
-    gap: '4px',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  primaryRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
+
+  dropdownRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   } as React.CSSProperties,
 
   buttonGroup: {
     display: 'flex',
     gap: '4px',
+    alignItems: 'center',
   } as React.CSSProperties,
 
   buttonsContainer: {
     display: 'flex',
     gap: '2px',
     flexWrap: 'wrap',
+    alignItems: 'center',
+  } as React.CSSProperties,
+
+  dropdown: {
+    minWidth: '120px',
+    maxWidth: '160px',
+    flex: '1 1 120px',
   } as React.CSSProperties,
 }
 
@@ -111,6 +170,17 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   editor,
   handleBoldClick,
   handleItalicClick,
+  handleUnderlineClick,
+  handleStrikethroughClick,
+  handleCodeClick,
+  handleLinkClick,
+
+  handleUndo,
+  handleRedo,
+  handleAlign,
+  handleTextType,
+  handleBulletedList,
+  handleNumberedList,
   markdownMode,
   setMarkdown,
   toolbarType = 'richtext',
@@ -118,8 +188,6 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
 }) => {
   const [alignValue, setAlignValue] = useState<AlignmentFormat>('left')
   const [textType, setTextType] = useState<TextType>('paragraph')
-  const { toggleMark, toggleBlock, isMarkActive, isBlockActive } =
-    useRichTextEditor([], () => {})
 
   const isSacredTheme = styles?.theme === 'sacred'
 
@@ -151,7 +219,11 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   const handleTextTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setTextType(event.target.value as TextType)
+    const newType = event.target.value as TextType
+    setTextType(newType)
+    if (handleTextType) {
+      handleTextType(newType)
+    }
   }
 
   const textTypeOptions = [
@@ -283,42 +355,86 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
       else if (editor) {
         switch (action) {
           case 'undo':
-            if ('undo' in editor && typeof editor.undo === 'function') {
-              editor.undo()
+            if (handleUndo) {
+              handleUndo()
             }
             break
 
           case 'redo':
-            if ('redo' in editor && typeof editor.redo === 'function') {
-              editor.redo()
+            if (handleRedo) {
+              handleRedo()
             }
             break
 
           case 'bulleted-list':
+            if (handleBulletedList) {
+              handleBulletedList()
+            }
+            break
+
           case 'numbered-list':
+            if (handleNumberedList) {
+              handleNumberedList()
+            }
+            break
+
           case 'left':
+            if (handleAlign) {
+              handleAlign('left')
+            }
+            break
+
           case 'center':
+            if (handleAlign) {
+              handleAlign('center')
+            }
+            break
+
           case 'right':
+            if (handleAlign) {
+              handleAlign('right')
+            }
+            break
+
           case 'justify':
-            toggleBlock(action as BlockFormat | AlignmentFormat)
+            if (handleAlign) {
+              handleAlign('justify')
+            }
             break
 
           case 'bold':
+            if (handleBoldClick) {
+              handleBoldClick()
+            }
+            break
+
           case 'italic':
+            if (handleItalicClick) {
+              handleItalicClick()
+            }
+            break
+
           case 'underline':
+            if (handleUnderlineClick) {
+              handleUnderlineClick()
+            }
+            break
+
           case 'strikethrough':
+            if (handleStrikethroughClick) {
+              handleStrikethroughClick()
+            }
+            break
+
           case 'code':
-            toggleMark(action as InlineFormat)
+            if (handleCodeClick) {
+              handleCodeClick()
+            }
             break
 
           case 'link':
-            // Safe check for insertLink function
-            if (
-              editor &&
-              typeof (editor as unknown as { insertLink: () => void })
-                .insertLink === 'function'
-            ) {
-              ;(editor as unknown as { insertLink: () => void }).insertLink()
+            if (handleLinkClick) {
+              handleLinkClick()
             }
             break
         }
@@ -339,9 +455,9 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         'justify',
       ].includes(format)
     ) {
-      return isBlockActive(format as BlockFormat | AlignmentFormat)
+      return document.queryCommandState(format)
     } else {
-      return isMarkActive(format as InlineFormat)
+      return document.queryCommandState(format)
     }
   }
 
@@ -376,7 +492,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
 
   return (
     <div style={containerStyles.container}>
-      <div style={containerStyles.toolbarRow}>
+      {/* Row 1: Primary Actions - Undo/Redo + Essential Formatting */}
+      <div style={containerStyles.primaryRow}>
         {/* undo / redo */}
         <div style={containerStyles.buttonGroup}>
           <CustomButton
@@ -392,32 +509,9 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             disabled={markdownMode}
           />
         </div>
-        {/* text dropdown - only show in rich text mode */}
-        {showExtendedOptions && (
-          <div style={{ width: '200px' }}>
-            <Dropdown
-              label="Text Type"
-              options={textTypeOptions}
-              value={textType}
-              onChange={handleTextTypeChange}
-              styles={{ theme: styles?.theme || 'light' }}
-            />
-          </div>
-        )}
-        {/* alignment dropdown - only show in rich text mode */}
-        {showExtendedOptions && (
-          <div style={{ width: '150px' }}>
-            <Dropdown
-              label="Alignment"
-              options={alignmentOptions}
-              value={alignValue}
-              onChange={handleAlignChange}
-              styles={{ theme: styles?.theme || 'light' }}
-            />
-          </div>
-        )}
-        {/* buttons */}
-        <div style={containerStyles.buttonsContainer}>
+
+        {/* Essential formatting buttons */}
+        <div style={containerStyles.buttonGroup}>
           <CustomButton
             icon={<FormatBoldIcon style={{ width: '16px', height: '16px' }} />}
             onClick={handleEditorAction('bold')}
@@ -438,6 +532,36 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             styles={getButtonStyles('underline')}
             disabled={markdownMode}
           />
+        </div>
+      </div>
+
+      {/* Row 2: Dropdowns - Text Type & Alignment (only in rich text mode) */}
+      {showExtendedOptions && (
+        <div style={containerStyles.dropdownRow}>
+          <div style={containerStyles.dropdown}>
+            <Dropdown
+              label="Text Type"
+              options={textTypeOptions}
+              value={textType}
+              onChange={handleTextTypeChange}
+              styles={{ theme: styles?.theme || 'light' }}
+            />
+          </div>
+          <div style={containerStyles.dropdown}>
+            <Dropdown
+              label="Alignment"
+              options={alignmentOptions}
+              value={alignValue}
+              onChange={handleAlignChange}
+              styles={{ theme: styles?.theme || 'light' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Row 3: Secondary Formatting & Structure */}
+      <div style={containerStyles.toolbarRow}>
+        <div style={containerStyles.buttonGroup}>
           <CustomButton
             icon={
               <StrikethroughSIcon style={{ width: '16px', height: '16px' }} />
@@ -455,6 +579,9 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
             onClick={handleEditorAction('link')}
             styles={getButtonStyles('link')}
           />
+        </div>
+
+        <div style={containerStyles.buttonGroup}>
           <CustomButton
             icon={
               <FormatListNumberedIcon

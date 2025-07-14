@@ -3,7 +3,6 @@
  */
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
-import { Descendant } from 'slate'
 import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
@@ -35,17 +34,12 @@ export interface ComplexTextEditorProps {
   helperText?: React.ReactNode
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ComplexTextEditorStyles
+  autoSave?: boolean
+  autoSaveKey?: string
 }
 
-// Initial Slate value for rich text editor
-const initialSlateValue: Descendant[] = [
-  {
-    children: [{ text: '' }],
-  },
-]
-
 const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
-  value,
+  value: valueProp,
   editorType,
   initialValue = '',
   initialMode,
@@ -54,6 +48,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   onChange,
   helperText,
   styles,
+  autoSave,
+  autoSaveKey,
 }) => {
   // Extract settings from styles
   const accordion = styles?.accordionMode || false
@@ -61,94 +57,125 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const defaultExpanded = styles?.accordionDefaultExpanded || false
   const isSacredTheme = styles?.theme === 'sacred'
 
-  console.log('ComplexTextEditor rendered:', {
-    editorType,
-    theme: styles?.theme,
-  })
-  const startValue = value !== undefined ? value : initialValue
+  const startValue = initialValue
   const startMode = determineStartMode(
     editorType,
     initialMode,
     styles?.defaultMode
   )
+  const [valueState, setValueState] = useState<string>(startValue)
+  const value = valueProp !== undefined ? valueProp : valueState
   const [mode, setMode] = useState<EditorMode>(startMode)
-  const [simpleValue, setSimpleValue] = useState(startValue)
-  const [richValue] = useState<Descendant[]>(initialSlateValue)
-  const [markdown, setMarkdown] = useState(startValue)
-  const [markdownMode, setMarkdownMode] = useState(startMode === 'markdown')
   const [isFocused, _setIsFocused] = useState(false)
+  const [accordionExpanded, setAccordionExpanded] =
+    useState<boolean>(defaultExpanded)
 
-  // Get computed styles
-  const computedStyles = getComplexTextEditorStyles(styles, isFocused)
+  // Get computed styles with transparent label background override
+  const stylesWithTransparentLabel = {
+    ...styles,
+    labelShrunkBackgroundColor: 'transparent',
+  }
+  const computedStyles = getComplexTextEditorStyles(
+    stylesWithTransparentLabel,
+    isFocused
+  )
   const { themeConfig, footerTextColor } = getSharedFormFieldStyles(
-    styles,
+    stylesWithTransparentLabel,
     isFocused
   )
 
   useEffect(() => {
-    if (value !== undefined && value !== simpleValue) {
-      setSimpleValue(value)
-      setMarkdown(value)
+    if (autoSave && autoSaveKey) {
+      const draft = localStorage.getItem(autoSaveKey)
+      if (draft && !value) setValueState(draft)
     }
-  }, [value, simpleValue])
+  }, [autoSave, autoSaveKey, value])
+  useEffect(() => {
+    if (autoSave && autoSaveKey) {
+      const timeout = setTimeout(
+        () => localStorage.setItem(autoSaveKey, value),
+        1000
+      )
+      return () => clearTimeout(timeout)
+    }
+  }, [autoSave, autoSaveKey, value])
 
-  const handleSimpleValueChange = useCallback(
-    (value: string) => {
-      setSimpleValue(value)
-      if (onChange) onChange(value)
+  const handleChange = useCallback(
+    (newValue: string) => {
+      if (valueProp === undefined) setValueState(newValue)
+      if (onChange) onChange(newValue)
     },
-    [onChange]
-  )
-
-  const handleRichChange = useCallback(() => {
-    console.log('Rich content changed')
-  }, [])
-
-  const handleMarkdownChange = useCallback(
-    (value: string) => {
-      setMarkdown(value)
-      if (onChange) onChange(value)
-    },
-    [onChange]
+    [onChange, valueProp]
   )
 
   const createEditorContent = () => {
-    const editorLabel = accordion ? undefined : label
-
     if (editorType === 'simple') {
       return (
         <SimpleEditor
-          value={simpleValue}
-          setValue={handleSimpleValueChange}
+          value={value}
+          onChange={handleChange}
           minRows={minRows}
-          label={editorLabel}
+          styles={styles}
+        />
+      )
+    } else if (editorType === 'rich') {
+      return (
+        <ComplexToolbar
+          mode={mode}
+          setMode={setMode}
+          value={value}
+          onChange={handleChange}
+          minRows={minRows}
+          styles={styles}
+        />
+      )
+    } else if (editorType === 'markdown') {
+      return (
+        <ComplexToolbar
+          mode={mode}
+          setMode={setMode}
+          value={value}
+          onChange={handleChange}
+          minRows={minRows}
+          styles={styles}
+        />
+      )
+    } else {
+      return (
+        <ComplexToolbar
+          mode={mode}
+          setMode={setMode}
+          value={value}
+          onChange={handleChange}
+          minRows={minRows}
           styles={styles}
         />
       )
     }
-
-    return (
-      <ComplexToolbar
-        mode={mode}
-        setMode={setMode}
-        label={editorLabel}
-        minRows={minRows}
-        simpleValue={simpleValue}
-        setSimpleValue={handleSimpleValueChange}
-        richValue={richValue}
-        onRichChange={handleRichChange}
-        markdown={markdown}
-        setMarkdown={handleMarkdownChange}
-        markdownMode={markdownMode}
-        setMarkdownMode={setMarkdownMode}
-        styles={styles}
-      />
-    )
   }
 
   // Render label if provided and not in accordion mode
   const labelElement = label && !accordion && (
-    <label style={getSharedLabelStyles(themeConfig.label.default, themeConfig)}>
+    <label
+      style={{
+        ...getSharedLabelStyles(themeConfig.label.default, themeConfig),
+        background: 'transparent',
+        backgroundColor: 'transparent',
+        backdropFilter: 'none',
+        padding: '0',
+        borderRadius: '0',
+        boxShadow: 'none',
+        // Sacred theme styling
+        ...(isSacredTheme && {
+          color: 'rgba(255, 215, 0, 0.9)', // Sacred gold color
+          fontFamily: '"Cinzel", serif', // Sacred font
+          textShadow: '0 0 3px rgba(255, 215, 0, 0.3)', // Sacred glow
+          letterSpacing: '0.05em',
+          fontWeight: 700,
+          textTransform: 'uppercase' as const,
+        }),
+      }}
+    >
       {label}
     </label>
   )
@@ -164,12 +191,21 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
 
   if (accordion) {
     const summaryText = accordionSummary || label || 'Text Editor'
+
+    const handleAccordionChange = (
+      _event: React.SyntheticEvent,
+      expanded: boolean
+    ) => {
+      setAccordionExpanded(expanded)
+    }
+
     return (
       <div style={computedStyles.container}>
         <Accordion
           summary={summaryText}
           details={createEditorContent()}
-          expanded={defaultExpanded}
+          expanded={accordionExpanded}
+          onChange={handleAccordionChange}
           styles={{ theme: styles?.theme }}
         />
         {isSacredTheme && (
@@ -180,13 +216,15 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   }
 
   return (
-    <div style={computedStyles.container}>
+    <div>
       {labelElement}
-      {createEditorContent()}
-      {helperTextElement}
-      {isSacredTheme && (
-        <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
-      )}
+      <div style={computedStyles.container}>
+        {createEditorContent()}
+        {helperTextElement}
+        {isSacredTheme && (
+          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
+        )}
+      </div>
     </div>
   )
 }

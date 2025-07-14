@@ -102,13 +102,42 @@ export const SacredTheme: Story = {
 export const SimpleEditor: Story = {
   name: 'Simple Text Editor',
   render: () => (
-    <ComplexTextEditorWithState
-      label="Simple Text"
-      editorType="simple"
-      initialValue="This is a simple text editor with basic functionality."
-      styles={{ theme: 'light' }}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
+        <ComplexTextEditorWithState
+          label="Simple Text Editor"
+          editorType="simple"
+          initialValue="This is a simple text editor with basic functionality in light theme."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <ComplexTextEditorWithState
+          label="Simple Text Editor"
+          editorType="simple"
+          initialValue="This is a simple text editor with basic functionality in dark theme."
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <ComplexTextEditorWithState
+          label="Sacred Text Editor"
+          editorType="simple"
+          initialValue="This is a simple text editor with sacred theme styling and mystical appearance."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
+    </div>
   ),
+  parameters: {
+    layout: 'centered',
+    backgrounds: { default: 'light' },
+  },
 }
 
 export const MarkdownEditor: Story = {
@@ -693,4 +722,26 @@ export const ComplexModeTest: Story = {
     // The editor should switch to markdown mode
     // (More specific assertions would depend on the implementation details)
   },
+}
+
+// Add argTypes for new props
+// Add story
+export const WithAutoSave: Story = {
+  render: () => (
+    <ComplexTextEditorWithState
+      autoSave
+      autoSaveKey="storybook-draft"
+      initialValue="Type to see auto-save"
+    />
+  ),
+}
+
+// Add stories for live preview, search replace, etc.
+export const MarkdownWithPreview: Story = {
+  render: () => (
+    <ComplexTextEditorWithState
+      editorType="markdown"
+      styles={{ theme: 'light' }}
+    />
+  ),
 }

@@ -5,24 +5,20 @@ import React, { useEffect, useState } from 'react'
 import {
   ComplexTextEditorStyles,
   getComplexTextEditorStyles,
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
   SACRED_GLYPHS,
 } from '../../../theme/'
 
 type SimpleEditorProps = {
   value: string
-  setValue: (value: string) => void
+  onChange: (value: string) => void
   minRows?: number
-  label?: string
   styles?: ComplexTextEditorStyles
 }
 
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
   value,
-  setValue,
+  onChange,
   minRows = 5,
-  label,
   styles,
 }) => {
   const [isFocused, setIsFocused] = useState(false)
@@ -37,7 +33,6 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
 
   // Get computed styles
   const computedStyles = getComplexTextEditorStyles(styles, isFocused)
-  const { themeConfig } = getSharedFormFieldStyles(styles, isFocused)
 
   // CSS keyframes for sacred animations
   useEffect(() => {
@@ -68,7 +63,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   }, [isSacredTheme])
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(event.target.value)
+    onChange(event.target.value)
   }
 
   const handleFocus = () => {
@@ -79,23 +74,24 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
     setIsFocused(false)
   }
 
-  // Render label if provided
-  const labelElement = label && (
-    <label style={getSharedLabelStyles(themeConfig.label.default, themeConfig)}>
-      {label}
-    </label>
-  )
+  // Label is now handled by parent component
 
   // Get textarea style with sacred glyph positioning
   const textareaStyle: React.CSSProperties = {
     ...computedStyles.editorArea,
     width: '100%',
+    maxWidth: '100%',
+    minWidth: '0',
     resize: 'vertical' as const,
     fontFamily: 'inherit',
+    boxSizing: 'border-box',
     ...(isSacredTheme && {
       paddingRight: '50px', // Make room for glyphs
     }),
   }
+
+  // Get scrollbar class name
+  const scrollbarClassName = (computedStyles as any).scrollbarClassName || ''
 
   const glyphStyles = {
     glyph: {
@@ -118,9 +114,21 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   }
 
   return (
-    <div style={computedStyles.container}>
-      {labelElement}
-      <div style={{ position: 'relative' }}>
+    <div
+      style={{
+        ...computedStyles.container,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
         <textarea
           value={value}
           onChange={handleChange}
@@ -128,11 +136,10 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
           onBlur={handleBlur}
           rows={minRows}
           placeholder={
-            isSacredTheme
-              ? 'Inscribe your sacred text...'
-              : label || 'Enter text...'
+            isSacredTheme ? 'Inscribe your sacred text...' : 'Enter text...'
           }
           style={textareaStyle}
+          className={scrollbarClassName}
         />
         {isSacredTheme && (
           <>

@@ -6,66 +6,63 @@ import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
 import Button, { ButtonGroup } from '../../../Button'
-import { RichTextEditorTypes } from '../../utils/useRichtextEditor'
-import { Descendant } from 'slate'
 import {
   ComplexTextEditorStyles,
   getComplexTextEditorStyles,
 } from '../../../../theme/'
+import { convertValue } from '../../utils/conversion'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
 
 interface ComplexToolbarProps {
   mode: EditorMode
   setMode: (mode: EditorMode) => void
-  label?: string
+  value: string
+  onChange: (value: string) => void
   minRows?: number
-  simpleValue: string
-  setSimpleValue: (value: string) => void
-  richValue: Descendant[]
-  onRichChange?: () => void
-  markdown: string
-  setMarkdown: (value: string) => void
-  markdownMode: boolean
-  setMarkdownMode: React.Dispatch<React.SetStateAction<boolean>>
   styles?: ComplexTextEditorStyles
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   mode,
   setMode,
-  label,
+  value,
+  onChange,
   minRows = 5,
-  simpleValue,
-  setSimpleValue,
-  richValue,
-  onRichChange,
-  markdown,
-  setMarkdown,
-  markdownMode,
-  setMarkdownMode,
   styles,
 }) => {
   // Get computed styles
   const computedStyles = getComplexTextEditorStyles(styles, false)
-  const handleModeChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newMode: string | null
-  ) => {
-    if (newMode !== null) {
-      setMode(newMode as EditorMode)
-    }
+  const handleModeChange = (newMode: EditorMode) => {
+    const converted = convertValue(value, mode, newMode)
+    onChange(converted)
+    setMode(newMode)
   }
 
-  const setNewSlateValue = (value: RichTextEditorTypes['CustomElement'][]) => {
-    console.log('Setting new slate value:', value)
+  const handleModeChangeWrapper = (
+    _event: React.MouseEvent<HTMLElement>,
+    newValue: string | null
+  ) => {
+    if (newValue) handleModeChange(newValue as EditorMode)
   }
 
   return (
     <div style={computedStyles.container}>
       {styles?.showModeToggle !== false && (
         <div style={computedStyles.toggleRow}>
-          <ButtonGroup value={mode} exclusive onChange={handleModeChange}>
+          <ButtonGroup
+            value={mode}
+            exclusive
+            onChange={handleModeChangeWrapper}
+            styles={{
+              theme: styles?.theme || 'light',
+              backgroundColor: 'transparent',
+              borderColor: 'transparent',
+              boxShadow: 'none',
+              padding: '0',
+              margin: '0',
+            }}
+          >
             <Button value="simple" text="Simple" />
             <Button value="rich" text="Rich Text" />
             <Button value="markdown" text="Markdown" />
@@ -75,34 +72,27 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
 
       {mode === 'simple' && (
         <SimpleEditor
-          value={simpleValue}
-          setValue={setSimpleValue}
+          value={value}
+          onChange={onChange}
           minRows={minRows}
-          label={label}
           styles={styles}
         />
       )}
 
       {mode === 'rich' && (
         <RichEditor
-          value={richValue}
-          onChange={onRichChange}
-          label={label}
+          value={value}
+          onChange={onChange}
           minRows={minRows}
-          markdownMode={markdownMode}
-          setMarkdownMode={setMarkdownMode}
-          setMarkdown={setMarkdown}
           styles={styles}
         />
       )}
 
       {mode === 'markdown' && (
         <MarkdownEditor
-          markdown={markdown}
-          setMarkdown={setMarkdown}
-          markdownMode={markdownMode}
-          setMarkdownMode={setMarkdownMode}
-          setNewSlateValue={setNewSlateValue}
+          value={value}
+          onChange={onChange}
+          minRows={minRows}
           styles={styles}
         />
       )}

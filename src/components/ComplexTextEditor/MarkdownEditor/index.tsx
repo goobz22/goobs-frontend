@@ -4,32 +4,30 @@
 import React, { useEffect, useState } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
-import { RichTextEditorTypes } from '../utils/useRichtextEditor'
 import {
   ComplexTextEditorStyles,
   getComplexTextEditorStyles,
-  SACRED_GLYPHS,
 } from '../../../theme/'
+import { mdToHtml } from '../utils/conversion'
 
 type MarkdownEditorProps = {
-  markdown: string
-  setMarkdown: (value: string) => void
-  markdownMode: boolean
-  setMarkdownMode: (value: boolean) => void
-  setNewSlateValue: (value: RichTextEditorTypes['CustomElement'][]) => void
+  value: string
+  onChange: (value: string) => void
+
+  minRows?: number
   styles?: ComplexTextEditorStyles
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
-  markdown,
-  setMarkdown,
-  markdownMode,
-  setMarkdownMode,
+  value,
+  onChange,
+  minRows,
   styles,
 }) => {
-  const [markdownValue, setMarkdownValue] = useState(markdown)
+  const [markdownValue, setMarkdownValue] = useState(value)
   const [selectedText, setSelectedText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const isSacredTheme = styles?.theme === 'sacred'
 
@@ -59,23 +57,17 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   }, [isSacredTheme])
 
   useEffect(() => {
-    if (!markdownMode) {
-      // Perform any action you want when markdownMode changes to false
+    if (value !== markdownValue) {
+      setMarkdownValue(value)
     }
-  }, [markdownMode])
-
-  useEffect(() => {
-    if (markdown !== markdownValue) {
-      setMarkdownValue(markdown)
-    }
-  }, [markdown, markdownValue])
+  }, [value, markdownValue])
 
   const handleLocalMarkdownChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const newValue = event.target.value
     setMarkdownValue(newValue)
-    setMarkdown(newValue)
+    onChange(newValue)
   }
 
   const handleSelect = (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -93,11 +85,16 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     setIsFocused(false)
   }
 
+  const handleBold = () => handleBoldClick(selectedText, value, onChange)
+  const handleItalic = () => handleItalicClick(selectedText, value, onChange)
+
   // Get textarea style
   const textareaStyle: React.CSSProperties = {
     ...computedStyles.editorArea,
     boxSizing: 'border-box',
-    width: '100%',
+    width: showPreview ? '50%' : '100%',
+    maxWidth: '100%',
+    minWidth: '0',
     fontFamily: 'monospace',
     border: 'none',
     outline: 'none',
@@ -107,22 +104,28 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     }),
   }
 
+  // Label is now handled by parent component
+
   return (
-    <div style={computedStyles.editorArea}>
+    <div
+      style={{
+        ...computedStyles.container,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
       <Toolbar
-        markdownMode={markdownMode}
-        setMarkdownMode={setMarkdownMode}
-        setMarkdown={setMarkdown}
-        handleBoldClick={() =>
-          handleBoldClick(selectedText, markdown, setMarkdown)
-        }
-        handleItalicClick={() =>
-          handleItalicClick(selectedText, markdown, setMarkdown)
-        }
+        handleBoldClick={handleBold}
+        handleItalicClick={handleItalic}
+        markdownMode={true}
+        setMarkdown={onChange}
         toolbarType="markdown"
         styles={styles}
       />
-      <div style={{ position: 'relative' }}>
+      <button onClick={() => setShowPreview(!showPreview)}>
+        Toggle Preview
+      </button>
+      <div style={{ display: 'flex' }}>
         <textarea
           value={markdownValue}
           onChange={handleLocalMarkdownChange}
@@ -135,10 +138,13 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               : 'Enter markdown...'
           }
           style={textareaStyle}
-          rows={10}
+          rows={minRows || 10}
         />
-        {isSacredTheme && (
-          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[1]}</div>
+        {showPreview && (
+          <div
+            style={{ width: '50%', borderLeft: '1px solid' }}
+            dangerouslySetInnerHTML={{ __html: mdToHtml(markdownValue) }}
+          />
         )}
       </div>
     </div>

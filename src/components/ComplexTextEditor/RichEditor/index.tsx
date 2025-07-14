@@ -1,137 +1,73 @@
 // src/components/ComplexTextEditor/RichEditor/index.tsx
 
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
-import {
-  Slate,
-  Editable,
-  RenderLeafProps,
-  RenderElementProps,
-} from 'slate-react'
-import { Descendant } from 'slate'
+import React, { useState, useEffect, useRef } from 'react'
 import Toolbar from '../Toolbars/Editor'
-import {
-  useRichTextEditor,
-  RichTextEditorTypes,
-} from '../utils/useRichtextEditor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
 import {
   ComplexTextEditorStyles,
   getComplexTextEditorStyles,
   getSharedFormFieldStyles,
-  getSharedLabelStyles,
   SACRED_GLYPHS,
 } from '../../../theme/'
 
 export interface RichTextEditorProps {
-  value: Descendant[]
-  label?: string
+  value: string
+  onChange: (html: string) => void
+
   minRows?: number
-  onChange?: () => void
-  onSelectionChange?: () => void
-  onValueChange?: () => void
-  markdownMode: boolean
-  setMarkdownMode: (value: boolean) => void
-  setMarkdown: (value: string) => void
   styles?: ComplexTextEditorStyles
-}
-
-const Leaf: React.FC<RenderLeafProps & { sacredtheme?: boolean }> = ({
-  attributes,
-  children,
-  leaf,
-  sacredtheme = false,
-}) => {
-  const customLeaf = leaf as RichTextEditorTypes['CustomText']
-
-  const linkStyle = sacredtheme
-    ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
-    : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' }
-
-  const codeStyle = sacredtheme
-    ? {
-        backgroundColor: 'rgba(255, 215, 0, 0.1)',
-        color: 'rgba(255, 215, 0, 1)',
-        padding: '2px 4px',
-        borderRadius: '4px',
-        fontFamily: 'monospace',
-      }
-    : {
-        backgroundColor: 'rgba(243, 244, 246, 1)',
-        color: 'rgba(55, 65, 81, 1)',
-        padding: '2px 4px',
-        borderRadius: '4px',
-        fontFamily: 'monospace',
-      }
-
-  const textStyle = sacredtheme
-    ? { color: 'rgba(255, 215, 0, 0.9)' }
-    : { color: 'rgba(0, 0, 0, 1)' }
-
-  let formattedChildren: React.ReactNode = children as React.ReactNode
-
-  if (customLeaf.bold) {
-    formattedChildren = <strong>{formattedChildren}</strong>
-  }
-  if (customLeaf.italic) {
-    formattedChildren = <em>{formattedChildren}</em>
-  }
-  if (customLeaf.underline) {
-    formattedChildren = <u>{formattedChildren}</u>
-  }
-  if (customLeaf.strikethrough) {
-    formattedChildren = <s>{formattedChildren}</s>
-  }
-  if (customLeaf.link) {
-    formattedChildren = (
-      <a href={customLeaf.link} style={linkStyle}>
-        {formattedChildren}
-      </a>
-    )
-  }
-  if (customLeaf.code) {
-    formattedChildren = <code style={codeStyle}>{formattedChildren}</code>
-  }
-
-  return (
-    <span {...attributes} style={textStyle}>
-      {formattedChildren}
-    </span>
-  )
 }
 
 export function RichTextEditor({
   value,
   onChange,
-  label,
   minRows = 5,
-  markdownMode,
-  setMarkdownMode,
-  setMarkdown,
   styles: editorStyles,
 }: RichTextEditorProps) {
   const accordion = editorStyles?.accordionMode || false
-  const accordionSummary =
-    editorStyles?.accordionSummary || label || 'Rich Text Editor'
+  const accordionSummary = editorStyles?.accordionSummary || 'Rich Text Editor'
   const defaultExpanded = editorStyles?.accordionDefaultExpanded || false
   const isSacredTheme = editorStyles?.theme === 'sacred'
 
   const [isFocused, setIsFocused] = useState(false)
   const [expanded, setExpanded] = useState(defaultExpanded)
 
+  const editorRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value
+    }
+  }, [value])
+  const handleInput = () => {
+    if (editorRef.current) onChange(editorRef.current.innerHTML)
+  }
+  const execCmd = (cmd: string, val: any = null) => {
+    editorRef.current?.focus()
+    document.execCommand(cmd, false, val)
+    handleInput()
+  }
+  const handleBoldClick = () => execCmd('bold')
+  const handleItalicClick = () => execCmd('italic')
+  const handleUnderlineClick = () => execCmd('underline')
+  const handleStrikethroughClick = () => execCmd('strikeThrough')
+  const handleCodeClick = () => execCmd('formatBlock', '<pre>') // rough
+  const handleLinkClick = () => {
+    const url = prompt('Enter URL')
+    if (url) execCmd('createLink', url)
+  }
+  const handleUndo = () => execCmd('undo')
+  const handleRedo = () => execCmd('redo')
+  const handleAlign = (align: string) =>
+    execCmd(`justify${align.charAt(0).toUpperCase() + align.slice(1)}`)
+  const handleTextType = (type: string) => execCmd('formatBlock', `<${type}>`)
+  const handleBulletedList = () => execCmd('insertUnorderedList')
+  const handleNumberedList = () => execCmd('insertOrderedList')
+
   // Get computed styles
   const computedStyles = getComplexTextEditorStyles(editorStyles, isFocused)
   const { themeConfig } = getSharedFormFieldStyles(editorStyles, isFocused)
-
-  const {
-    editor,
-    internalValue,
-    handleChange,
-    handleBoldClick,
-    handleItalicClick,
-    onKeyDown,
-  } = useRichTextEditor(value, onChange ? () => onChange() : undefined)
 
   // CSS keyframes for sacred animations
   useEffect(() => {
@@ -155,18 +91,6 @@ export function RichTextEditor({
     }
   }, [isSacredTheme])
 
-  const renderElement = useCallback(
-    (props: RenderElementProps) => (
-      <Element {...props} sacredtheme={isSacredTheme} />
-    ),
-    [isSacredTheme]
-  )
-
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} sacredtheme={isSacredTheme} />,
-    [isSacredTheme]
-  )
-
   const handleAccordionChange = () => {
     setExpanded(!expanded)
   }
@@ -180,53 +104,56 @@ export function RichTextEditor({
   }
 
   const editorContent = (
-    <div style={computedStyles.editorArea}>
-      <Slate
-        editor={editor}
-        initialValue={internalValue}
-        onChange={handleChange}
-      >
-        <Toolbar
-          markdownMode={markdownMode}
-          setMarkdownMode={setMarkdownMode}
-          setMarkdown={setMarkdown}
-          handleBoldClick={handleBoldClick}
-          handleItalicClick={handleItalicClick}
-          toolbarType="richtext"
-          editor={editor}
-          styles={editorStyles}
+    <div
+      style={{
+        ...computedStyles.editorArea,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      <Toolbar
+        handleBoldClick={handleBoldClick}
+        handleItalicClick={handleItalicClick}
+        handleUnderlineClick={handleUnderlineClick}
+        handleStrikethroughClick={handleStrikethroughClick}
+        handleCodeClick={handleCodeClick}
+        handleLinkClick={handleLinkClick}
+        handleUndo={handleUndo}
+        handleRedo={handleRedo}
+        handleAlign={handleAlign}
+        handleTextType={handleTextType}
+        handleBulletedList={handleBulletedList}
+        handleNumberedList={handleNumberedList}
+        markdownMode={false}
+        setMarkdown={() => {}}
+        toolbarType="richtext"
+        styles={editorStyles}
+      />
+      <div style={{ position: 'relative' }}>
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          style={{
+            minHeight: `${minRows * 20}px`,
+            outline: 'none',
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: '0',
+            boxSizing: 'border-box',
+          }}
+          dangerouslySetInnerHTML={{ __html: value }}
         />
-        <div style={{ position: 'relative' }}>
-          <Editable
-            style={{
-              ...computedStyles.editorArea,
-              minHeight: `${minRows * 20}px`,
-              border: 'none',
-              outline: 'none',
-            }}
-            placeholder={
-              isSacredTheme ? 'Channel divine wisdom...' : 'Enter text...'
-            }
-            onKeyDown={onKeyDown}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-          />
-          {isSacredTheme && (
-            <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[2]}</div>
-          )}
-        </div>
-      </Slate>
+        {isSacredTheme && (
+          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[2]}</div>
+        )}
+      </div>
     </div>
   )
 
-  // Render label if provided and not in accordion mode
-  const labelElement = label && !accordion && (
-    <label style={getSharedLabelStyles(themeConfig.label.default, themeConfig)}>
-      {label}
-    </label>
-  )
+  // Label is now handled by parent component
 
   return (
     <div style={computedStyles.container}>
@@ -240,80 +167,16 @@ export function RichTextEditor({
               variant="merrih4"
               styles={isSacredTheme ? { color: themeConfig.text } : undefined}
             >
-              {accordionSummary || label || 'Rich Text Editor'}
+              {accordionSummary}
             </Typography>
           }
           details={editorContent}
         />
       ) : (
-        <>
-          {labelElement}
-          {editorContent}
-        </>
+        <>{editorContent}</>
       )}
     </div>
   )
-}
-
-const Element = ({
-  attributes,
-  children,
-  element,
-  sacredtheme = false,
-}: RenderElementProps & { sacredtheme?: boolean }) => {
-  const customElement = element as RichTextEditorTypes['CustomElement']
-
-  const textStyle = sacredtheme
-    ? { color: 'rgba(255, 215, 0, 0.9)' }
-    : { color: 'rgba(0, 0, 0, 1)' }
-
-  const linkStyle = sacredtheme
-    ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
-    : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' }
-
-  if (!customElement.type) return null
-
-  const style = {
-    textAlign: customElement.align,
-    ...textStyle,
-  }
-
-  switch (customElement.type) {
-    case 'list-item':
-      return (
-        <li style={style} {...attributes}>
-          {children}
-        </li>
-      )
-    case 'link':
-      return (
-        <a
-          href={customElement.url}
-          {...attributes}
-          style={{ ...style, ...linkStyle }}
-        >
-          {children}
-        </a>
-      )
-    case 'bulleted-list':
-      return (
-        <ul style={style} {...attributes}>
-          {children}
-        </ul>
-      )
-    case 'numbered-list':
-      return (
-        <ol style={style} {...attributes}>
-          {children}
-        </ol>
-      )
-    default:
-      return (
-        <p style={style} {...attributes}>
-          {children}
-        </p>
-      )
-  }
 }
 
 export default RichTextEditor

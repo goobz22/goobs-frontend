@@ -1,4 +1,3 @@
-import { RichTextEditorTypes } from './useRichtextEditor'
 import React from 'react'
 
 // Simple regex patterns to identify bold and italic in markdown
@@ -9,18 +8,16 @@ const italicPattern = /(\*(.*?)\*)/g
 /**
  * 1) Converts markdown to Slate format (async because we use Promise.all)
  */
-export const markdownToSlate = async (
-  markdown: string
-): Promise<RichTextEditorTypes['CustomElement'][]> => {
+export const markdownToSlate = async (markdown: string): Promise<any[]> => {
   // Split markdown text by line breaks to create paragraphs
   const lines = markdown
     .split('\n')
     .map(line => line.trim())
     .filter(line => line)
 
-  const output: RichTextEditorTypes['CustomElement'][] = await Promise.all(
+  const output: any[] = await Promise.all(
     lines.map(line => {
-      const paragraph: RichTextEditorTypes['CustomElement'] = {
+      const paragraph: any = {
         type: 'paragraph',
         children: [{ text: line }],
       }
@@ -66,8 +63,8 @@ export const markdownToSlate = async (
  */
 export const handleSwitchToRichText = async (
   markdown: string,
-  setSlateValue: (value: RichTextEditorTypes['CustomElement'][]) => void,
-  setNewSlateValue: (value: RichTextEditorTypes['CustomElement'][]) => void,
+  setSlateValue: (value: any[]) => void,
+  setNewSlateValue: (value: any[]) => void,
   setMarkdownMode: (value: boolean) => void
 ): Promise<void> => {
   if (markdown !== '') {
