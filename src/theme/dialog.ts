@@ -14,6 +14,8 @@ export interface DialogTheme {
     justifyContent: string
     backgroundColor: string
     backdropFilter: string
+    padding: string
+    overflow: string
   }
   dialog: {
     position: string
@@ -23,6 +25,35 @@ export interface DialogTheme {
     border: string
     backdropFilter: string
     backgroundImage?: string
+    maxHeight: string
+    maxWidth: string
+    minWidth: string
+    display: string
+    flexDirection: string
+  }
+  content: {
+    overflowY: string
+    overflowX: string
+    maxHeight: string
+    scrollbarWidth: string
+    scrollbarColor?: string
+    msOverflowStyle?: string
+    WebkitScrollbarWidth?: string
+  }
+  scrollbar: {
+    width: string
+    backgroundColor: string
+    borderRadius: string
+  }
+  scrollbarThumb: {
+    backgroundColor: string
+    borderRadius: string
+    border?: string
+    backgroundImage?: string
+  }
+  scrollbarTrack: {
+    backgroundColor: string
+    borderRadius: string
   }
   transition: string
 }
@@ -54,6 +85,13 @@ export interface DialogStyles {
   padding?: string
   margin?: string
 
+  // Scrolling
+  enableScrolling?: boolean
+  scrollbarStyle?: 'auto' | 'thin' | 'none'
+  scrollbarColor?: string
+  scrollbarThumbColor?: string
+  scrollbarTrackColor?: string
+
   // States
   fullWidth?: boolean
 
@@ -76,6 +114,8 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
       justifyContent: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       backdropFilter: 'blur(2px)',
+      padding: '1rem',
+      overflow: 'hidden',
     },
     dialog: {
       position: 'relative',
@@ -84,6 +124,34 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
       boxShadow: SHADOWS.light.large,
       border: '1px solid rgba(226, 232, 240, 0.8)',
       backdropFilter: 'blur(8px)',
+      maxHeight: 'calc(100vh - 2rem)',
+      maxWidth: 'calc(100vw - 2rem)',
+      minWidth: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    content: {
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      maxHeight: 'calc(100vh - 4rem)',
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#CBD5E1 #F1F5F9',
+      msOverflowStyle: 'auto',
+      WebkitScrollbarWidth: '8px',
+    },
+    scrollbar: {
+      width: '8px',
+      backgroundColor: '#F1F5F9',
+      borderRadius: '4px',
+    },
+    scrollbarThumb: {
+      backgroundColor: '#CBD5E1',
+      borderRadius: '4px',
+      border: '1px solid #E2E8F0',
+    },
+    scrollbarTrack: {
+      backgroundColor: '#F8FAFC',
+      borderRadius: '4px',
     },
     transition: TRANSITIONS.medium,
   },
@@ -97,6 +165,8 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
       justifyContent: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
       backdropFilter: 'blur(2px)',
+      padding: '1rem',
+      overflow: 'hidden',
     },
     dialog: {
       position: 'relative',
@@ -105,6 +175,34 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
       boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2)',
       border: '1px solid rgba(75, 85, 99, 0.8)',
       backdropFilter: 'blur(8px)',
+      maxHeight: 'calc(100vh - 2rem)',
+      maxWidth: 'calc(100vw - 2rem)',
+      minWidth: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    content: {
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      maxHeight: 'calc(100vh - 4rem)',
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#4B5563 #1F2937',
+      msOverflowStyle: 'auto',
+      WebkitScrollbarWidth: '8px',
+    },
+    scrollbar: {
+      width: '8px',
+      backgroundColor: '#1F2937',
+      borderRadius: '4px',
+    },
+    scrollbarThumb: {
+      backgroundColor: '#4B5563',
+      borderRadius: '4px',
+      border: '1px solid #374151',
+    },
+    scrollbarTrack: {
+      backgroundColor: '#111827',
+      borderRadius: '4px',
     },
     transition: TRANSITIONS.medium,
   },
@@ -118,6 +216,8 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
       justifyContent: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       backdropFilter: 'blur(3px)',
+      padding: '1rem',
+      overflow: 'hidden',
     },
     dialog: {
       position: 'relative',
@@ -130,6 +230,36 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
         radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
         radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%)
       `,
+      maxHeight: 'calc(100vh - 2rem)',
+      maxWidth: 'calc(100vw - 2rem)',
+      minWidth: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    content: {
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      maxHeight: 'calc(100vh - 4rem)',
+      scrollbarWidth: 'thin',
+      scrollbarColor: 'rgba(255, 215, 0, 0.6) rgba(0, 0, 0, 0.8)',
+      msOverflowStyle: 'auto',
+      WebkitScrollbarWidth: '10px',
+    },
+    scrollbar: {
+      width: '10px',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      borderRadius: '5px',
+    },
+    scrollbarThumb: {
+      backgroundColor: 'rgba(255, 215, 0, 0.6)',
+      borderRadius: '5px',
+      border: '1px solid rgba(255, 215, 0, 0.3)',
+      backgroundImage:
+        'linear-gradient(45deg, rgba(255, 215, 0, 0.8), rgba(255, 215, 0, 0.4))',
+    },
+    scrollbarTrack: {
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      borderRadius: '5px',
     },
     transition: TRANSITIONS.premium,
   },
@@ -166,6 +296,32 @@ export const getDialogTheme = (styles?: DialogStyles): DialogTheme => {
       backdropFilter: styles.backdropFilter || baseTheme.dialog.backdropFilter,
       backgroundImage:
         styles.backgroundImage || baseTheme.dialog.backgroundImage,
+      maxHeight: styles.maxHeight || baseTheme.dialog.maxHeight,
+      maxWidth: styles.maxWidth || baseTheme.dialog.maxWidth,
+      minWidth: styles.minWidth || baseTheme.dialog.minWidth,
+    },
+    content: {
+      ...baseTheme.content,
+      overflowY:
+        styles.enableScrolling === false
+          ? 'hidden'
+          : baseTheme.content.overflowY,
+      scrollbarColor: styles.scrollbarColor || baseTheme.content.scrollbarColor,
+    },
+    scrollbar: {
+      ...baseTheme.scrollbar,
+      backgroundColor:
+        styles.scrollbarTrackColor || baseTheme.scrollbar.backgroundColor,
+    },
+    scrollbarThumb: {
+      ...baseTheme.scrollbarThumb,
+      backgroundColor:
+        styles.scrollbarThumbColor || baseTheme.scrollbarThumb.backgroundColor,
+    },
+    scrollbarTrack: {
+      ...baseTheme.scrollbarTrack,
+      backgroundColor:
+        styles.scrollbarTrackColor || baseTheme.scrollbarTrack.backgroundColor,
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
@@ -186,6 +342,8 @@ export const getDialogStyles = (styles?: DialogStyles) => {
     justifyContent: themeConfig.backdrop.justifyContent as any,
     backgroundColor: themeConfig.backdrop.backgroundColor,
     backdropFilter: themeConfig.backdrop.backdropFilter,
+    padding: themeConfig.backdrop.padding,
+    overflow: themeConfig.backdrop.overflow as any,
   }
 
   const dialogStyle: React.CSSProperties = {
@@ -197,19 +355,63 @@ export const getDialogStyles = (styles?: DialogStyles) => {
     backdropFilter: themeConfig.dialog.backdropFilter,
     backgroundImage: themeConfig.dialog.backgroundImage,
     transition: themeConfig.transition,
-    // Layout and sizing
-    maxWidth: styles?.maxWidth,
+    maxHeight: themeConfig.dialog.maxHeight,
+    maxWidth: themeConfig.dialog.maxWidth,
+    minWidth: themeConfig.dialog.minWidth,
+    display: themeConfig.dialog.display as any,
+    flexDirection: themeConfig.dialog.flexDirection as any,
+    // Layout and sizing overrides
     width: styles?.width || (styles?.fullWidth ? '100%' : undefined),
-    minWidth: styles?.minWidth,
     height: styles?.height,
-    maxHeight: styles?.maxHeight,
     minHeight: styles?.minHeight,
-    padding: styles?.padding,
+    padding: undefined, // Let content wrapper handle padding
     margin: styles?.margin,
   }
+
+  const contentStyle: React.CSSProperties = {
+    overflowY: themeConfig.content.overflowY as any,
+    overflowX: themeConfig.content.overflowX as any,
+    maxHeight: themeConfig.content.maxHeight,
+    scrollbarWidth: themeConfig.content.scrollbarWidth as any,
+    scrollbarColor: themeConfig.content.scrollbarColor,
+    msOverflowStyle: themeConfig.content.msOverflowStyle as any,
+    WebkitScrollbarWidth: themeConfig.content.WebkitScrollbarWidth,
+    padding: styles?.padding,
+    flexGrow: 1,
+    flexShrink: 1,
+    minHeight: 0, // Important for flex scrolling
+  }
+
+  // Generate CSS for webkit scrollbar styling
+  const scrollbarCSS = `
+    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar {
+      width: ${themeConfig.scrollbar.width};
+      background-color: ${themeConfig.scrollbar.backgroundColor};
+      border-radius: ${themeConfig.scrollbar.borderRadius};
+    }
+    
+    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-thumb {
+      background-color: ${themeConfig.scrollbarThumb.backgroundColor};
+      border-radius: ${themeConfig.scrollbarThumb.borderRadius};
+      ${themeConfig.scrollbarThumb.border ? `border: ${themeConfig.scrollbarThumb.border};` : ''}
+      ${themeConfig.scrollbarThumb.backgroundImage ? `background-image: ${themeConfig.scrollbarThumb.backgroundImage};` : ''}
+    }
+    
+    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-track {
+      background-color: ${themeConfig.scrollbarTrack.backgroundColor};
+      border-radius: ${themeConfig.scrollbarTrack.borderRadius};
+    }
+    
+    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-thumb:hover {
+      opacity: 0.8;
+    }
+  `
 
   return {
     backdrop: backdropStyle,
     dialog: dialogStyle,
+    content: contentStyle,
+    scrollbarCSS,
+    contentClassName: `dialog-content-${styles?.theme || 'light'}`,
   }
 }

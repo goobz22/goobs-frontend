@@ -92,6 +92,13 @@ export interface FormFieldStyles {
   startAdornmentOffset?: string
   endAdornmentOffset?: string
 
+  // Arrow positioning (for dropdowns)
+  arrowTop?: string
+  arrowRight?: string
+  arrowBottom?: string
+  arrowLeft?: string
+  arrowPadding?: string
+
   // Label positioning
   labelOffset?: string
   labelShrunkOffset?: string
