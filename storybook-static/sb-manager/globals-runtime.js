@@ -23564,6 +23564,7 @@ var Hy,
         ({ hidden: e }) => ({
           display: e ? 'none' : 'inline-block',
           zIndex: 2147483647,
+          colorScheme: 'light dark',
         }),
         ({ theme: e, color: t, hasChrome: r }) =>
           r
@@ -60803,6 +60804,7 @@ var hU = dr({
         /* @__PURE__ */ Ka.default.createElement(
           jp,
           {
+            'aria-label': 'Close',
             ...e,
           },
           /* @__PURE__ */ Ka.default.createElement(dT, null)
@@ -67457,7 +67459,7 @@ var BK = N(Va(), 1),
   An = N(DK(), 1)
 
 // src/manager-api/version.ts
-var FK = '9.0.15'
+var FK = '9.0.16'
 
 // src/manager-api/modules/versions.ts
 var { VERSIONCHECK: QIe } = Z,

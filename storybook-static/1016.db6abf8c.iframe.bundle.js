@@ -1,8 +1,589 @@
 'use strict'
 ;(self.webpackChunkgoobs_frontend = self.webpackChunkgoobs_frontend || []).push(
   [
-    [1669],
+    [1016],
     {
+      './src/theme/datagrid.ts': (
+        __unused_webpack_module,
+        __webpack_exports__,
+        __webpack_require__
+      ) => {
+        __webpack_require__.d(__webpack_exports__, {
+          fN: () => getDataGridStyles,
+          m8: () => getDataGridTheme,
+        })
+        __webpack_require__('./node_modules/next/dist/compiled/react/index.js')
+        var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+          './src/theme/shared.ts'
+        )
+        const dataGridThemes = {
+            light: {
+              container: {
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: 'transparent',
+                borderRadius: '0.75rem',
+                padding: '0',
+              },
+              contentWrapper: {
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '0.5rem',
+                border: '1px solid #E2E8F0',
+                overflow: 'hidden',
+                boxShadow:
+                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              },
+              error: {
+                marginBottom: '0.5rem',
+                padding: '1rem',
+                borderWidth: '1px',
+                borderRadius: '0.25rem',
+                backgroundColor: '#FEF2F2',
+                color: '#B91C1C',
+                borderColor: '#FECACA',
+              },
+              tableContainer: {
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                position: 'relative',
+                margin: '0',
+                padding: '0',
+              },
+              table: {
+                tableContainer: {
+                  width: '100%',
+                  overflowX: 'hidden',
+                  backgroundColor: 'transparent',
+                },
+                tableWrapper: { overflowX: 'visible', width: '100%' },
+                table: {
+                  width: '100%',
+                  minWidth: 'max-content',
+                  tableLayout: 'auto',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #E2E8F0',
+                  borderCollapse: 'separate',
+                },
+                tableHeader: {
+                  backgroundColor: '#F8FAFC',
+                  borderBottom: '2px solid #E2E8F0',
+                  color: '#374151',
+                  fontWeight: '600',
+                },
+                tableRow: {
+                  borderBottom: '1px solid #F3F4F6',
+                  backgroundColor: '#FFFFFF',
+                },
+                tableRowHover: { backgroundColor: '#F9FAFB' },
+                tableCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid #F3F4F6',
+                  verticalAlign: 'middle',
+                  color: '#374151',
+                },
+                tableHeaderCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid #E2E8F0',
+                  verticalAlign: 'middle',
+                  fontWeight: '600',
+                  textAlign: 'left',
+                  color: '#374151',
+                },
+              },
+              scrollbar: {
+                height: '8px',
+                width: '8px',
+                track: { backgroundColor: '#F1F5F9', borderRadius: '4px' },
+                thumb: {
+                  backgroundColor: '#CBD5E1',
+                  borderRadius: '4px',
+                  border: '1px solid #E2E8F0',
+                },
+                thumbHover: { backgroundColor: '#94A3B8' },
+              },
+              sectionDivider: {
+                height: '1px',
+                backgroundColor: '#E2E8F0',
+                opacity: 0.6,
+              },
+              footerContainer: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.125rem',
+                marginTop: '0.5rem',
+                opacity: 0.5,
+              },
+              footerGlyph: {
+                color: '#64748B',
+                fontSize: '0.75rem',
+                animation: 'none',
+              },
+              glyph: {
+                position: 'absolute',
+                fontSize: '1.125rem',
+                color: 'rgba(100, 116, 139, 0.3)',
+                zIndex: 10,
+                animation: 'none',
+              },
+              transition: _shared__WEBPACK_IMPORTED_MODULE_1__.Ds.medium,
+            },
+            dark: {
+              container: {
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: 'transparent',
+                borderRadius: '0.75rem',
+                padding: '0',
+              },
+              contentWrapper: {
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: '#1E293B',
+                borderRadius: '0.5rem',
+                border: '1px solid #334155',
+                overflow: 'hidden',
+                boxShadow:
+                  '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              },
+              error: {
+                marginBottom: '0.5rem',
+                padding: '1rem',
+                borderWidth: '1px',
+                borderRadius: '0.25rem',
+                backgroundColor: 'rgba(127, 29, 29, 0.3)',
+                color: '#F87171',
+                borderColor: 'rgba(239, 68, 68, 0.3)',
+              },
+              tableContainer: {
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                position: 'relative',
+                margin: '0',
+                padding: '0',
+              },
+              table: {
+                tableContainer: {
+                  width: '100%',
+                  overflowX: 'hidden',
+                  backgroundColor: 'transparent',
+                },
+                tableWrapper: { overflowX: 'visible', width: '100%' },
+                table: {
+                  width: '100%',
+                  minWidth: 'max-content',
+                  tableLayout: 'auto',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #334155',
+                  borderCollapse: 'separate',
+                },
+                tableHeader: {
+                  backgroundColor: '#1E293B',
+                  borderBottom: '2px solid #334155',
+                  color: '#E2E8F0',
+                  fontWeight: '600',
+                },
+                tableRow: {
+                  borderBottom: '1px solid #334155',
+                  backgroundColor: '#1E293B',
+                },
+                tableRowHover: { backgroundColor: '#273746' },
+                tableCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid #334155',
+                  verticalAlign: 'middle',
+                  color: '#E2E8F0',
+                },
+                tableHeaderCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid #334155',
+                  verticalAlign: 'middle',
+                  fontWeight: '600',
+                  textAlign: 'left',
+                  color: '#E2E8F0',
+                },
+              },
+              scrollbar: {
+                height: '8px',
+                width: '8px',
+                track: { backgroundColor: '#1E293B', borderRadius: '4px' },
+                thumb: {
+                  backgroundColor: '#475569',
+                  borderRadius: '4px',
+                  border: '1px solid #334155',
+                },
+                thumbHover: { backgroundColor: '#64748B' },
+              },
+              sectionDivider: {
+                height: '1px',
+                backgroundColor: '#334155',
+                opacity: 0.6,
+              },
+              footerContainer: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.125rem',
+                marginTop: '0.5rem',
+                opacity: 0.5,
+              },
+              footerGlyph: {
+                color: '#64748B',
+                fontSize: '0.75rem',
+                animation: 'none',
+              },
+              glyph: {
+                position: 'absolute',
+                fontSize: '1.125rem',
+                color: 'rgba(100, 116, 139, 0.3)',
+                zIndex: 10,
+                animation: 'none',
+              },
+              transition: _shared__WEBPACK_IMPORTED_MODULE_1__.Ds.medium,
+            },
+            sacred: {
+              container: {
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: 'transparent',
+                borderRadius: '0.75rem',
+                padding: '0',
+              },
+              contentWrapper: {
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                borderRadius: '0.5rem',
+                border: '2px solid rgba(255, 215, 0, 0.5)',
+                overflow: 'hidden',
+                boxShadow:
+                  '0 0 20px rgba(255, 215, 0, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              },
+              error: {
+                marginBottom: '0.5rem',
+                padding: '1rem',
+                borderWidth: '1px',
+                borderRadius: '0.25rem',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                color: '#F87171',
+                borderColor: 'rgba(239, 68, 68, 0.3)',
+              },
+              tableContainer: {
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                position: 'relative',
+                margin: '0',
+                padding: '0',
+              },
+              table: {
+                tableContainer: {
+                  width: '100%',
+                  overflowX: 'hidden',
+                  backgroundColor: 'transparent',
+                },
+                tableWrapper: { overflowX: 'visible', width: '100%' },
+                table: {
+                  width: '100%',
+                  minWidth: 'max-content',
+                  tableLayout: 'auto',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 215, 0, 0.5)',
+                  borderCollapse: 'separate',
+                },
+                tableHeader: {
+                  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                  borderBottom: '2px solid rgba(255, 215, 0, 0.5)',
+                  color: '#FFD700',
+                  fontWeight: '600',
+                },
+                tableRow: {
+                  borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                },
+                tableRowHover: { backgroundColor: 'rgba(255, 215, 0, 0.2)' },
+                tableCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+                  verticalAlign: 'middle',
+                  color: '#FBBF24',
+                },
+                tableHeaderCell: {
+                  padding: '0.75rem',
+                  borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+                  verticalAlign: 'middle',
+                  fontWeight: '600',
+                  textAlign: 'left',
+                  color: '#FFD700',
+                },
+              },
+              scrollbar: {
+                height: '8px',
+                width: '8px',
+                track: {
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                  borderRadius: '4px',
+                },
+                thumb: {
+                  backgroundColor: 'rgba(255, 215, 0, 0.6)',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255, 215, 0, 0.8)',
+                },
+                thumbHover: { backgroundColor: 'rgba(255, 215, 0, 0.8)' },
+              },
+              sectionDivider: {
+                height: '1px',
+                backgroundColor: 'rgba(255, 215, 0, 0.3)',
+                opacity: 0.8,
+              },
+              footerContainer: {
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.125rem',
+                marginTop: '0.5rem',
+                opacity: 0.5,
+              },
+              footerGlyph: {
+                color: '#FFD700',
+                fontSize: '0.75rem',
+                animation: 'datagrid-float 3s ease-in-out infinite',
+              },
+              glyph: {
+                position: 'absolute',
+                fontSize: '1.125rem',
+                color: 'rgba(255, 215, 0, 0.3)',
+                zIndex: 10,
+                animation: 'datagrid-float 8s infinite alternate',
+              },
+              transition: _shared__WEBPACK_IMPORTED_MODULE_1__.Ds.premium,
+            },
+          },
+          getDataGridTheme = styles => {
+            const theme = (null == styles ? void 0 : styles.theme) || 'light',
+              baseTheme = dataGridThemes[theme]
+            return styles
+              ? {
+                  container: {
+                    position: baseTheme.container.position,
+                    display: baseTheme.container.display,
+                    flexDirection: baseTheme.container.flexDirection,
+                    width: styles.width || baseTheme.container.width,
+                    backgroundColor:
+                      styles.backgroundColor ||
+                      baseTheme.container.backgroundColor,
+                    backdropFilter:
+                      styles.backdropFilter ||
+                      baseTheme.container.backdropFilter,
+                    border: styles.borderColor
+                      ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+                      : baseTheme.container.border,
+                    borderRadius:
+                      styles.borderRadius || baseTheme.container.borderRadius,
+                    animation:
+                      styles.animation || baseTheme.container.animation,
+                    padding: styles.padding || baseTheme.container.padding,
+                  },
+                  contentWrapper: {
+                    display: baseTheme.contentWrapper.display,
+                    flexDirection: baseTheme.contentWrapper.flexDirection,
+                    width: baseTheme.contentWrapper.width,
+                    backgroundColor:
+                      styles.contentBackgroundColor ||
+                      baseTheme.contentWrapper.backgroundColor,
+                    borderRadius:
+                      styles.contentBorderRadius ||
+                      baseTheme.contentWrapper.borderRadius,
+                    border: styles.contentBorderColor
+                      ? `1px solid ${styles.contentBorderColor}`
+                      : baseTheme.contentWrapper.border,
+                    overflow: baseTheme.contentWrapper.overflow,
+                    boxShadow:
+                      styles.contentBoxShadow ||
+                      baseTheme.contentWrapper.boxShadow,
+                  },
+                  error: {
+                    marginBottom: baseTheme.error.marginBottom,
+                    padding: baseTheme.error.padding,
+                    borderWidth: baseTheme.error.borderWidth,
+                    borderRadius: baseTheme.error.borderRadius,
+                    backgroundColor:
+                      styles.errorBackgroundColor ||
+                      baseTheme.error.backgroundColor,
+                    color: styles.errorColor || baseTheme.error.color,
+                    borderColor:
+                      styles.errorBorderColor || baseTheme.error.borderColor,
+                  },
+                  tableContainer: baseTheme.tableContainer,
+                  table: baseTheme.table,
+                  scrollbar: baseTheme.scrollbar,
+                  sectionDivider: baseTheme.sectionDivider,
+                  footerContainer: baseTheme.footerContainer,
+                  footerGlyph: baseTheme.footerGlyph,
+                  glyph: baseTheme.glyph,
+                  transition: styles.transitionDuration
+                    ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+                    : baseTheme.transition,
+                }
+              : baseTheme
+          },
+          getDataGridStyles = styles => {
+            const themeConfig = getDataGridTheme(styles),
+              containerStyle = {
+                position: themeConfig.container.position,
+                display: themeConfig.container.display,
+                flexDirection: themeConfig.container.flexDirection,
+                width: themeConfig.container.width,
+                backgroundColor: themeConfig.container.backgroundColor,
+                backdropFilter: themeConfig.container.backdropFilter,
+                border: themeConfig.container.border,
+                borderRadius: themeConfig.container.borderRadius,
+                animation: themeConfig.container.animation,
+                padding: themeConfig.container.padding,
+                transition: themeConfig.transition,
+                height: null == styles ? void 0 : styles.height,
+                maxWidth: null == styles ? void 0 : styles.maxWidth,
+                minWidth: null == styles ? void 0 : styles.minWidth,
+                maxHeight: null == styles ? void 0 : styles.maxHeight,
+                minHeight: null == styles ? void 0 : styles.minHeight,
+                margin: null == styles ? void 0 : styles.margin,
+              },
+              contentWrapperStyle = {
+                display: themeConfig.contentWrapper.display,
+                flexDirection: themeConfig.contentWrapper.flexDirection,
+                width: themeConfig.contentWrapper.width,
+                backgroundColor: themeConfig.contentWrapper.backgroundColor,
+                borderRadius: themeConfig.contentWrapper.borderRadius,
+                border: themeConfig.contentWrapper.border,
+                overflow: themeConfig.contentWrapper.overflow,
+                boxShadow: themeConfig.contentWrapper.boxShadow,
+                transition: themeConfig.transition,
+              },
+              errorStyle = {
+                marginBottom: themeConfig.error.marginBottom,
+                padding: themeConfig.error.padding,
+                borderWidth: themeConfig.error.borderWidth,
+                borderRadius: themeConfig.error.borderRadius,
+                backgroundColor: themeConfig.error.backgroundColor,
+                color: themeConfig.error.color,
+                borderColor: themeConfig.error.borderColor,
+                borderStyle: 'solid',
+              },
+              tableContainerStyle = {
+                width: themeConfig.tableContainer.width,
+                display: themeConfig.tableContainer.display,
+                flexDirection: themeConfig.tableContainer.flexDirection,
+                alignItems: themeConfig.tableContainer.alignItems,
+                position: themeConfig.tableContainer.position,
+                margin: themeConfig.tableContainer.margin,
+                padding: themeConfig.tableContainer.padding,
+              },
+              sectionDividerStyle = {
+                height: themeConfig.sectionDivider.height,
+                backgroundColor: themeConfig.sectionDivider.backgroundColor,
+                opacity: themeConfig.sectionDivider.opacity,
+                width: '100%',
+              },
+              footerContainerStyle = {
+                display: themeConfig.footerContainer.display,
+                justifyContent: themeConfig.footerContainer.justifyContent,
+                gap: themeConfig.footerContainer.gap,
+                marginTop: themeConfig.footerContainer.marginTop,
+                opacity: themeConfig.footerContainer.opacity,
+              },
+              footerGlyphStyle = {
+                color: themeConfig.footerGlyph.color,
+                fontSize: themeConfig.footerGlyph.fontSize,
+                animation: themeConfig.footerGlyph.animation,
+              },
+              glyphStyle = {
+                position: themeConfig.glyph.position,
+                fontSize: themeConfig.glyph.fontSize,
+                color: themeConfig.glyph.color,
+                zIndex: themeConfig.glyph.zIndex,
+                animation: themeConfig.glyph.animation,
+              }
+            return {
+              container: containerStyle,
+              contentWrapper: contentWrapperStyle,
+              error: errorStyle,
+              tableContainer: tableContainerStyle,
+              table: {
+                tableContainer: {
+                  width: themeConfig.table.tableContainer.width,
+                  overflowX: themeConfig.table.tableContainer.overflowX,
+                  minWidth: themeConfig.table.tableContainer.minWidth,
+                  borderRadius: themeConfig.table.tableContainer.borderRadius,
+                  overflow: themeConfig.table.tableContainer.overflow,
+                  border: themeConfig.table.tableContainer.border,
+                  backgroundColor:
+                    themeConfig.table.tableContainer.backgroundColor,
+                },
+                tableWrapper: {
+                  overflowX: themeConfig.table.tableWrapper.overflowX,
+                  width: themeConfig.table.tableWrapper.width,
+                  minWidth: themeConfig.table.tableWrapper.minWidth,
+                },
+                table: {
+                  width: themeConfig.table.table.width,
+                  minWidth: themeConfig.table.table.minWidth,
+                  tableLayout: themeConfig.table.table.tableLayout,
+                  backgroundColor: themeConfig.table.table.backgroundColor,
+                  border: themeConfig.table.table.border,
+                  borderCollapse: themeConfig.table.table.borderCollapse,
+                },
+                tableHeader: {
+                  backgroundColor:
+                    themeConfig.table.tableHeader.backgroundColor,
+                  borderBottom: themeConfig.table.tableHeader.borderBottom,
+                  color: themeConfig.table.tableHeader.color,
+                  fontWeight: themeConfig.table.tableHeader.fontWeight,
+                },
+                tableRow: {
+                  borderBottom: themeConfig.table.tableRow.borderBottom,
+                  backgroundColor: themeConfig.table.tableRow.backgroundColor,
+                },
+                tableRowHover: {
+                  backgroundColor:
+                    themeConfig.table.tableRowHover.backgroundColor,
+                },
+                tableCell: {
+                  padding: themeConfig.table.tableCell.padding,
+                  borderRight: themeConfig.table.tableCell.borderRight,
+                  verticalAlign: themeConfig.table.tableCell.verticalAlign,
+                  color: themeConfig.table.tableCell.color,
+                },
+                tableHeaderCell: {
+                  padding: themeConfig.table.tableHeaderCell.padding,
+                  borderRight: themeConfig.table.tableHeaderCell.borderRight,
+                  verticalAlign:
+                    themeConfig.table.tableHeaderCell.verticalAlign,
+                  fontWeight: themeConfig.table.tableHeaderCell.fontWeight,
+                  textAlign: themeConfig.table.tableHeaderCell.textAlign,
+                  color: themeConfig.table.tableHeaderCell.color,
+                },
+              },
+              scrollbar: themeConfig.scrollbar,
+              sectionDivider: sectionDividerStyle,
+              footerContainer: footerContainerStyle,
+              footerGlyph: footerGlyphStyle,
+              glyph: glyphStyle,
+            }
+          }
+      },
       './src/theme/index.ts': (
         __unused_webpack_module,
         __webpack_exports__,
@@ -14,13 +595,12 @@
           jB: () => getAccordionStyles,
           pu: () => getAlertStyles,
           hs: () => getButtonStyles,
-          Hu: () => getCardStyles,
           WS: () => getCheckboxStyles,
           z6: () => getChipStyles,
           lQ: () => getCodeCopyStyles,
           lm: () => getComplexTextEditorStyles,
           RJ: () => getConfirmationCodeInputStyles,
-          fN: () => getDataGridStyles,
+          fN: () => datagrid.fN,
           Ux: () => getDrawerStyles,
           tZ: () => getProgressBarStyles,
           Op: () => getProjectBoardStyles,
@@ -2700,348 +3280,9 @@
               shimmer: baseTheme.shimmer,
               glyph: baseTheme.glyph,
             }
-          },
-          dataGridThemes = {
-            light: {
-              container: {
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                backgroundColor: '#F8FAFC',
-                borderRadius: '0.5rem',
-                border: '1px solid #E2E8F0',
-              },
-              error: {
-                marginBottom: '0.5rem',
-                padding: '1rem',
-                borderWidth: '1px',
-                borderRadius: '0.25rem',
-                backgroundColor: '#FEF2F2',
-                color: '#B91C1C',
-                borderColor: '#FECACA',
-              },
-              tableContainer: {
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                position: 'relative',
-                margin: '0',
-                padding: '0',
-              },
-              table: {
-                tableContainer: {
-                  width: '100%',
-                  overflowX: 'hidden',
-                  borderRadius: '0.5rem',
-                  border: '1px solid #E2E8F0',
-                  backgroundColor: '#FFFFFF',
-                },
-                tableWrapper: { overflowX: 'visible', width: '100%' },
-                table: {
-                  width: '100%',
-                  minWidth: 'max-content',
-                  tableLayout: 'auto',
-                  backgroundColor: 'transparent',
-                },
-              },
-              footerContainer: {
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.125rem',
-                marginTop: '0.5rem',
-                opacity: 0.5,
-              },
-              footerGlyph: {
-                color: '#64748B',
-                fontSize: '0.75rem',
-                animation: 'none',
-              },
-              glyph: {
-                position: 'absolute',
-                fontSize: '1.125rem',
-                color: 'rgba(100, 116, 139, 0.3)',
-                zIndex: 10,
-                animation: 'none',
-              },
-              transition: shared.Ds.medium,
-            },
-            dark: {
-              container: {
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                backgroundColor: '#1E293B',
-                borderRadius: '0.5rem',
-                border: '1px solid #334155',
-              },
-              error: {
-                marginBottom: '0.5rem',
-                padding: '1rem',
-                borderWidth: '1px',
-                borderRadius: '0.25rem',
-                backgroundColor: 'rgba(127, 29, 29, 0.3)',
-                color: '#F87171',
-                borderColor: 'rgba(239, 68, 68, 0.3)',
-              },
-              tableContainer: {
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                position: 'relative',
-                margin: '0',
-                padding: '0',
-              },
-              table: {
-                tableContainer: {
-                  width: '100%',
-                  overflowX: 'hidden',
-                  borderRadius: '0.5rem',
-                  border: '1px solid #334155',
-                  backgroundColor: '#1E293B',
-                },
-                tableWrapper: { overflowX: 'visible', width: '100%' },
-                table: {
-                  width: '100%',
-                  minWidth: 'max-content',
-                  tableLayout: 'auto',
-                  backgroundColor: 'transparent',
-                },
-              },
-              footerContainer: {
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.125rem',
-                marginTop: '0.5rem',
-                opacity: 0.5,
-              },
-              footerGlyph: {
-                color: '#64748B',
-                fontSize: '0.75rem',
-                animation: 'none',
-              },
-              glyph: {
-                position: 'absolute',
-                fontSize: '1.125rem',
-                color: 'rgba(100, 116, 139, 0.3)',
-                zIndex: 10,
-                animation: 'none',
-              },
-              transition: shared.Ds.medium,
-            },
-            sacred: {
-              container: {
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                backdropFilter: 'blur(16px)',
-                border: '2px solid rgba(255, 215, 0, 0.5)',
-                borderRadius: '0.5rem',
-                animation: 'datagrid-glow-pulse 2s infinite alternate',
-              },
-              error: {
-                marginBottom: '0.5rem',
-                padding: '1rem',
-                borderWidth: '1px',
-                borderRadius: '0.25rem',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#F87171',
-                borderColor: 'rgba(239, 68, 68, 0.3)',
-              },
-              tableContainer: {
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                position: 'relative',
-                margin: '0',
-                padding: '0',
-              },
-              table: {
-                tableContainer: {
-                  width: '100%',
-                  overflowX: 'hidden',
-                  borderRadius: '0.5rem',
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255, 215, 0, 0.3)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                },
-                tableWrapper: { overflowX: 'visible', width: '100%' },
-                table: {
-                  width: '100%',
-                  minWidth: 'max-content',
-                  tableLayout: 'auto',
-                  backgroundColor: 'transparent',
-                },
-              },
-              footerContainer: {
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.125rem',
-                marginTop: '0.5rem',
-                opacity: 0.5,
-              },
-              footerGlyph: {
-                color: '#FFD700',
-                fontSize: '0.75rem',
-                animation: 'datagrid-float 3s ease-in-out infinite',
-              },
-              glyph: {
-                position: 'absolute',
-                fontSize: '1.125rem',
-                color: 'rgba(255, 215, 0, 0.3)',
-                zIndex: 10,
-                animation: 'datagrid-float 8s infinite alternate',
-              },
-              transition: shared.Ds.premium,
-            },
-          },
-          getDataGridStyles = styles => {
-            const themeConfig = (styles => {
-                const theme =
-                    (null == styles ? void 0 : styles.theme) || 'light',
-                  baseTheme = dataGridThemes[theme]
-                return styles
-                  ? {
-                      container: {
-                        position: baseTheme.container.position,
-                        display: baseTheme.container.display,
-                        flexDirection: baseTheme.container.flexDirection,
-                        width: styles.width || baseTheme.container.width,
-                        backgroundColor:
-                          styles.backgroundColor ||
-                          baseTheme.container.backgroundColor,
-                        backdropFilter:
-                          styles.backdropFilter ||
-                          baseTheme.container.backdropFilter,
-                        border: styles.borderColor
-                          ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-                          : baseTheme.container.border,
-                        borderRadius:
-                          styles.borderRadius ||
-                          baseTheme.container.borderRadius,
-                        animation:
-                          styles.animation || baseTheme.container.animation,
-                      },
-                      error: {
-                        marginBottom: baseTheme.error.marginBottom,
-                        padding: baseTheme.error.padding,
-                        borderWidth: baseTheme.error.borderWidth,
-                        borderRadius: baseTheme.error.borderRadius,
-                        backgroundColor:
-                          styles.errorBackgroundColor ||
-                          baseTheme.error.backgroundColor,
-                        color: styles.errorColor || baseTheme.error.color,
-                        borderColor:
-                          styles.errorBorderColor ||
-                          baseTheme.error.borderColor,
-                      },
-                      tableContainer: baseTheme.tableContainer,
-                      table: baseTheme.table,
-                      footerContainer: baseTheme.footerContainer,
-                      footerGlyph: baseTheme.footerGlyph,
-                      glyph: baseTheme.glyph,
-                      transition: styles.transitionDuration
-                        ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
-                        : baseTheme.transition,
-                    }
-                  : baseTheme
-              })(styles),
-              containerStyle = {
-                position: themeConfig.container.position,
-                display: themeConfig.container.display,
-                flexDirection: themeConfig.container.flexDirection,
-                width: themeConfig.container.width,
-                backgroundColor: themeConfig.container.backgroundColor,
-                backdropFilter: themeConfig.container.backdropFilter,
-                border: themeConfig.container.border,
-                borderRadius: themeConfig.container.borderRadius,
-                animation: themeConfig.container.animation,
-                transition: themeConfig.transition,
-                height: null == styles ? void 0 : styles.height,
-                maxWidth: null == styles ? void 0 : styles.maxWidth,
-                minWidth: null == styles ? void 0 : styles.minWidth,
-                maxHeight: null == styles ? void 0 : styles.maxHeight,
-                minHeight: null == styles ? void 0 : styles.minHeight,
-                padding: null == styles ? void 0 : styles.padding,
-                margin: null == styles ? void 0 : styles.margin,
-              },
-              errorStyle = {
-                marginBottom: themeConfig.error.marginBottom,
-                padding: themeConfig.error.padding,
-                borderWidth: themeConfig.error.borderWidth,
-                borderRadius: themeConfig.error.borderRadius,
-                backgroundColor: themeConfig.error.backgroundColor,
-                color: themeConfig.error.color,
-                borderColor: themeConfig.error.borderColor,
-                borderStyle: 'solid',
-              },
-              tableContainerStyle = {
-                width: themeConfig.tableContainer.width,
-                display: themeConfig.tableContainer.display,
-                flexDirection: themeConfig.tableContainer.flexDirection,
-                alignItems: themeConfig.tableContainer.alignItems,
-                position: themeConfig.tableContainer.position,
-                margin: themeConfig.tableContainer.margin,
-                padding: themeConfig.tableContainer.padding,
-              },
-              footerContainerStyle = {
-                display: themeConfig.footerContainer.display,
-                justifyContent: themeConfig.footerContainer.justifyContent,
-                gap: themeConfig.footerContainer.gap,
-                marginTop: themeConfig.footerContainer.marginTop,
-                opacity: themeConfig.footerContainer.opacity,
-              },
-              footerGlyphStyle = {
-                color: themeConfig.footerGlyph.color,
-                fontSize: themeConfig.footerGlyph.fontSize,
-                animation: themeConfig.footerGlyph.animation,
-              },
-              glyphStyle = {
-                position: themeConfig.glyph.position,
-                fontSize: themeConfig.glyph.fontSize,
-                color: themeConfig.glyph.color,
-                zIndex: themeConfig.glyph.zIndex,
-                animation: themeConfig.glyph.animation,
-              }
-            return {
-              container: containerStyle,
-              error: errorStyle,
-              tableContainer: tableContainerStyle,
-              table: {
-                tableContainer: {
-                  width: themeConfig.table.tableContainer.width,
-                  overflowX: themeConfig.table.tableContainer.overflowX,
-                  minWidth: themeConfig.table.tableContainer.minWidth,
-                  borderRadius: themeConfig.table.tableContainer.borderRadius,
-                  overflow: themeConfig.table.tableContainer.overflow,
-                  border: themeConfig.table.tableContainer.border,
-                  backgroundColor:
-                    themeConfig.table.tableContainer.backgroundColor,
-                },
-                tableWrapper: {
-                  overflowX: themeConfig.table.tableWrapper.overflowX,
-                  width: themeConfig.table.tableWrapper.width,
-                  minWidth: themeConfig.table.tableWrapper.minWidth,
-                },
-                table: {
-                  width: themeConfig.table.table.width,
-                  minWidth: themeConfig.table.table.minWidth,
-                  tableLayout: themeConfig.table.table.tableLayout,
-                  backgroundColor: themeConfig.table.table.backgroundColor,
-                },
-              },
-              footerContainer: footerContainerStyle,
-              footerGlyph: footerGlyphStyle,
-              glyph: glyphStyle,
-            }
-          },
-          complexTextEditorThemes = {
+          }
+        var datagrid = __webpack_require__('./src/theme/datagrid.ts')
+        const complexTextEditorThemes = {
             light: {
               container: {
                 background: 'rgba(255, 255, 255, 0.95)',
@@ -3071,6 +3312,16 @@
                 minHeight: '120px',
                 borderRadius: '0 0 8px 8px',
                 boxShadow: shared.I4.light.small,
+              },
+              scrollbar: {
+                width: '8px',
+                trackBackground: 'rgba(248, 250, 252, 1)',
+                thumbBackground: 'rgba(203, 213, 225, 1)',
+                thumbHoverBackground: 'rgba(148, 163, 184, 1)',
+                thumbActiveBackground: 'rgba(100, 116, 139, 1)',
+                thumbBorderRadius: '4px',
+                trackBorderRadius: '4px',
+                thumbBorder: 'none',
               },
               sacred: {
                 glyph: {
@@ -3115,6 +3366,16 @@
                 boxShadow:
                   '0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4)',
               },
+              scrollbar: {
+                width: '8px',
+                trackBackground: 'rgba(31, 41, 55, 1)',
+                thumbBackground: 'rgba(75, 85, 99, 1)',
+                thumbHoverBackground: 'rgba(107, 114, 128, 1)',
+                thumbActiveBackground: 'rgba(156, 163, 175, 1)',
+                thumbBorderRadius: '4px',
+                trackBorderRadius: '4px',
+                thumbBorder: 'none',
+              },
               sacred: {
                 glyph: {
                   color: 'rgba(255, 215, 0, 0.2)',
@@ -3156,6 +3417,16 @@
                 minHeight: '150px',
                 borderRadius: '0 0 12px 12px',
                 boxShadow: shared.I4.sacred.small,
+              },
+              scrollbar: {
+                width: '12px',
+                trackBackground: 'rgba(0, 0, 0, 0.5)',
+                thumbBackground: 'rgba(255, 215, 0, 0.3)',
+                thumbHoverBackground: 'rgba(255, 215, 0, 0.5)',
+                thumbActiveBackground: 'rgba(255, 215, 0, 0.7)',
+                thumbBorderRadius: '6px',
+                trackBorderRadius: '6px',
+                thumbBorder: '1px solid rgba(255, 215, 0, 0.2)',
               },
               sacred: {
                 glyph: {
@@ -3237,6 +3508,20 @@
                           styles.editorBoxShadow ||
                           baseTheme.editorArea.boxShadow,
                       },
+                      scrollbar: {
+                        width: baseTheme.scrollbar.width,
+                        trackBackground: baseTheme.scrollbar.trackBackground,
+                        thumbBackground: baseTheme.scrollbar.thumbBackground,
+                        thumbHoverBackground:
+                          baseTheme.scrollbar.thumbHoverBackground,
+                        thumbActiveBackground:
+                          baseTheme.scrollbar.thumbActiveBackground,
+                        thumbBorderRadius:
+                          baseTheme.scrollbar.thumbBorderRadius,
+                        trackBorderRadius:
+                          baseTheme.scrollbar.trackBorderRadius,
+                        thumbBorder: baseTheme.scrollbar.thumbBorder,
+                      },
                       sacred: {
                         glyph: {
                           color:
@@ -3266,7 +3551,21 @@
               })(styles),
               formFieldTheme = getFormFieldTheme(styles),
               isSacredTheme =
-                'sacred' === (null == styles ? void 0 : styles.theme)
+                'sacred' === (null == styles ? void 0 : styles.theme),
+              scrollbarClassName = ((themeConfig, theme) => {
+                const className = `complex-text-editor-scrollbar-${theme}`
+                if (document.getElementById(className)) return className
+                const style = document.createElement('style')
+                return (
+                  (style.id = className),
+                  (style.textContent = `\n    .${className}::-webkit-scrollbar {\n      width: ${themeConfig.scrollbar.width};\n      height: ${themeConfig.scrollbar.width};\n    }\n    \n    .${className}::-webkit-scrollbar-track {\n      background: ${themeConfig.scrollbar.trackBackground};\n      border-radius: ${themeConfig.scrollbar.trackBorderRadius};\n    }\n    \n    .${className}::-webkit-scrollbar-thumb {\n      background: ${themeConfig.scrollbar.thumbBackground};\n      border-radius: ${themeConfig.scrollbar.thumbBorderRadius};\n      border: ${themeConfig.scrollbar.thumbBorder};\n    }\n    \n    .${className}::-webkit-scrollbar-thumb:hover {\n      background: ${themeConfig.scrollbar.thumbHoverBackground};\n    }\n    \n    .${className}::-webkit-scrollbar-thumb:active {\n      background: ${themeConfig.scrollbar.thumbActiveBackground};\n    }\n    \n    .${className}::-webkit-scrollbar-corner {\n      background: ${themeConfig.scrollbar.trackBackground};\n    }\n  `),
+                  document.head.appendChild(style),
+                  className
+                )
+              })(
+                themeConfig,
+                (null == styles ? void 0 : styles.theme) || 'light'
+              )
             return {
               container: {
                 position: 'relative',
@@ -3330,6 +3629,8 @@
                 transition: themeConfig.transition,
                 outline: 'none',
                 resize: 'vertical',
+                scrollbarWidth: 'thin',
+                scrollbarColor: `${themeConfig.scrollbar.thumbBackground} ${themeConfig.scrollbar.trackBackground}`,
                 ...(isSacredTheme && {
                   textShadow: themeConfig.sacred.textGlow,
                 }),
@@ -3351,6 +3652,7 @@
                 zIndex: 0,
                 transition: themeConfig.transition,
               },
+              scrollbarClassName,
             }
           },
           confirmationCodeInputThemes = {
@@ -4516,12 +4818,12 @@
           toolbarThemes = {
             light: {
               container: {
-                background: 'rgba(248, 250, 252, 0.8)',
-                border: '1px solid rgba(226, 232, 240, 0.6)',
-                borderRadius: '8px',
-                boxShadow: shared.I4.light.small,
-                backdropFilter: 'blur(4px)',
-                padding: '0.75rem',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: '0',
+                boxShadow: 'none',
+                backdropFilter: 'none',
+                padding: '1rem',
               },
               glyph: {
                 color: 'rgba(107, 114, 128, 0.3)',
@@ -4531,13 +4833,12 @@
             },
             dark: {
               container: {
-                background: 'rgba(17, 24, 39, 0.8)',
-                border: '1px solid rgba(75, 85, 99, 0.6)',
-                borderRadius: '8px',
-                boxShadow:
-                  '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2)',
-                backdropFilter: 'blur(4px)',
-                padding: '0.75rem',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: '0',
+                boxShadow: 'none',
+                backdropFilter: 'none',
+                padding: '1rem',
               },
               glyph: {
                 color: 'rgba(156, 163, 175, 0.3)',
@@ -4547,15 +4848,14 @@
             },
             sacred: {
               container: {
-                background: 'rgba(0, 0, 0, 0.8)',
-                border: '1px solid rgba(255, 215, 0, 0.3)',
-                borderRadius: '0.5rem',
-                boxShadow: shared.I4.sacred.small,
-                backdropFilter: 'blur(4px)',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: '0',
+                boxShadow: 'none',
+                backdropFilter: 'none',
                 padding: '1rem',
                 backgroundImage:
-                  '\n        radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),\n        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)\n      ',
-                animation: 'sacredGlowPulse 2s infinite alternate',
+                  '\n        radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%),\n        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.02) 0%, transparent 50%)\n      ',
               },
               glyph: {
                 color: 'rgba(255, 215, 0, 0.2)',
@@ -5783,429 +6083,6 @@
                   fontWeight: styles.labelFontWeight,
                 }),
               },
-            }
-          },
-          card_lightTheme = {
-            container: {
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid rgba(226, 232, 240, 0.8)',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: shared.I4.light.small,
-              overflow: 'hidden',
-              transition: shared.Ds.medium,
-              fontFamily: '"Inter", sans-serif',
-            },
-            containerNoOutline: {
-              border: 'none',
-              boxShadow: 'none',
-              backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            },
-            containerHover: {
-              transform: 'translateY(-2px)',
-              boxShadow:
-                '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08)',
-              borderColor: 'rgba(59, 130, 246, 0.3)',
-            },
-            containerWithImage: { flexDirection: 'row' },
-            image: {
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              flexShrink: 0,
-            },
-            imageOverlay: { display: 'none' },
-            imageTop: { width: '100%', height: '192px' },
-            imageLeft: { width: '192px', height: '100%' },
-            content: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
-            header: {
-              width: '100%',
-              padding: '16px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
-              backgroundColor: 'rgba(248, 250, 252, 0.5)',
-            },
-            headerNoUnderline: { borderBottom: 'none' },
-            title: { color: 'rgb(31, 41, 55)', fontWeight: 600 },
-            bodySection: { padding: '24px' },
-            bodyText: { color: 'rgb(55, 65, 81)', lineHeight: 1.6 },
-            footer: {
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '16px 24px',
-              marginTop: 'auto',
-              borderTop: '1px solid rgba(226, 232, 240, 0.3)',
-              backgroundColor: 'rgba(248, 250, 252, 0.3)',
-            },
-            breadcrumb: { display: 'flex', alignItems: 'center', gap: '8px' },
-            accent: {
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: '4px',
-              background:
-                'linear-gradient(180deg, rgb(59, 130, 246) 0%, rgb(147, 197, 253) 100%)',
-              opacity: 0,
-              transition: 'opacity 0.3s ease',
-            },
-            accentVisible: { opacity: 1 },
-            glyph: { display: 'none' },
-            glyphTopRight: { display: 'none' },
-            glyphBottomLeft: { display: 'none' },
-            price: { color: 'rgb(59, 130, 246)', fontWeight: 600 },
-            toggle: {
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.5rem',
-            },
-            toggleLabel: { color: 'rgb(75, 85, 99)' },
-            activeToggleLabel: { color: 'rgb(31, 41, 55)', fontWeight: 600 },
-            taskContainer: { padding: '16px', cursor: 'pointer' },
-            taskCheckbox: { marginRight: '12px' },
-            inventoryContainer: { padding: '20px' },
-            productContainer: { padding: '20px' },
-            pricingSummary: {
-              padding: '20px',
-              backgroundColor: 'rgba(249, 250, 251, 0.5)',
-            },
-          },
-          card_darkTheme = {
-            container: {
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid rgba(75, 85, 99, 0.8)',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(31, 41, 55, 0.95)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: shared.I4.dark.small,
-              overflow: 'hidden',
-              transition: shared.Ds.medium,
-              fontFamily: '"Inter", sans-serif',
-            },
-            containerNoOutline: {
-              border: 'none',
-              boxShadow: 'none',
-              backgroundColor: 'rgba(31, 41, 55, 0.6)',
-            },
-            containerHover: {
-              transform: 'translateY(-2px)',
-              boxShadow:
-                '0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2)',
-              borderColor: 'rgba(96, 165, 250, 0.4)',
-            },
-            containerWithImage: { flexDirection: 'row' },
-            image: {
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              flexShrink: 0,
-            },
-            imageOverlay: { display: 'none' },
-            imageTop: { width: '100%', height: '192px' },
-            imageLeft: { width: '192px', height: '100%' },
-            content: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
-            header: {
-              width: '100%',
-              padding: '16px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(75, 85, 99, 0.5)',
-              backgroundColor: 'rgba(17, 24, 39, 0.5)',
-            },
-            headerNoUnderline: { borderBottom: 'none' },
-            title: { color: 'rgb(243, 244, 246)', fontWeight: 600 },
-            bodySection: { padding: '24px' },
-            bodyText: { color: 'rgb(209, 213, 219)', lineHeight: 1.6 },
-            footer: {
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '16px 24px',
-              marginTop: 'auto',
-              borderTop: '1px solid rgba(75, 85, 99, 0.3)',
-              backgroundColor: 'rgba(17, 24, 39, 0.3)',
-            },
-            breadcrumb: { display: 'flex', alignItems: 'center', gap: '8px' },
-            accent: {
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: '4px',
-              background:
-                'linear-gradient(180deg, rgb(96, 165, 250) 0%, rgb(59, 130, 246) 100%)',
-              opacity: 0,
-              transition: 'opacity 0.3s ease',
-            },
-            accentVisible: { opacity: 1 },
-            glyph: { display: 'none' },
-            glyphTopRight: { display: 'none' },
-            glyphBottomLeft: { display: 'none' },
-            price: { color: 'rgb(96, 165, 250)', fontWeight: 600 },
-            toggle: {
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.5rem',
-            },
-            toggleLabel: { color: 'rgb(156, 163, 175)' },
-            activeToggleLabel: { color: 'rgb(243, 244, 246)', fontWeight: 600 },
-            taskContainer: { padding: '16px', cursor: 'pointer' },
-            taskCheckbox: { marginRight: '12px' },
-            inventoryContainer: { padding: '20px' },
-            productContainer: { padding: '20px' },
-            pricingSummary: {
-              padding: '20px',
-              backgroundColor: 'rgba(17, 24, 39, 0.5)',
-            },
-          },
-          card_sacredTheme = {
-            container: {
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              border: '2px solid rgba(255, 215, 0, 0.4)',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(10, 10, 10, 0.9)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: shared.I4.sacred.medium,
-              overflow: 'hidden',
-              transition: shared.Ds.premium,
-              fontFamily: '"Cinzel", serif',
-              backgroundImage:
-                '\n      radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%),\n      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.02) 0%, transparent 50%)\n    ',
-            },
-            containerNoOutline: { border: 'none', boxShadow: 'none' },
-            containerHover: {
-              transform: 'translateY(-2px)',
-              borderColor: 'rgba(255, 215, 0, 0.8)',
-              boxShadow: shared.I4.sacred.large,
-              backgroundImage:
-                '\n      linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 50%, rgba(255, 215, 0, 0.1) 100%),\n      radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),\n      radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)\n    ',
-            },
-            containerWithImage: { flexDirection: 'row' },
-            image: {
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              flexShrink: 0,
-              position: 'relative',
-            },
-            imageOverlay: {
-              position: 'absolute',
-              inset: 0,
-              background:
-                'linear-gradient(45deg, transparent 0%, rgba(255, 215, 0, 0.1) 50%, transparent 100%)',
-            },
-            imageTop: { width: '100%', height: '192px' },
-            imageLeft: { width: '192px', height: '100%' },
-            content: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
-            header: {
-              width: '100%',
-              padding: '20px 28px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
-              backgroundColor: 'rgba(255, 215, 0, 0.05)',
-            },
-            headerNoUnderline: { borderBottom: 'none' },
-            title: {
-              color: '#FFD700',
-              fontFamily: '"Cinzel", serif',
-              fontWeight: 700,
-              textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-            },
-            bodySection: { padding: '28px' },
-            bodyText: {
-              color: 'rgba(255, 215, 0, 0.8)',
-              fontFamily: '"Merriweather", serif',
-              lineHeight: 1.6,
-              letterSpacing: '0.025em',
-            },
-            footer: {
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '20px 28px',
-              marginTop: 'auto',
-              borderTop: '1px solid rgba(255, 215, 0, 0.3)',
-              backgroundColor: 'rgba(255, 215, 0, 0.03)',
-            },
-            breadcrumb: { display: 'flex', alignItems: 'center', gap: '12px' },
-            accent: { display: 'none' },
-            accentVisible: { display: 'none' },
-            glyph: {
-              position: 'absolute',
-              fontSize: '16px',
-              color: 'rgba(255, 215, 0, 0.2)',
-              pointerEvents: 'none',
-              opacity: 0.3,
-              animation: 'glyph-rotate 10s linear infinite',
-            },
-            glyphTopRight: { top: '12px', right: '12px' },
-            glyphBottomLeft: { bottom: '12px', left: '12px' },
-            price: {
-              color: '#FFD700',
-              fontWeight: 'bold',
-              textShadow: '0 0 5px rgba(255,215,0,0.5)',
-              animation: 'sacred-price-pulse 2s infinite alternate',
-            },
-            toggle: {
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.5rem',
-            },
-            toggleLabel: { color: 'rgba(255, 215, 0, 0.7)' },
-            activeToggleLabel: {
-              color: '#FFD700',
-              textShadow: '0 0 3px rgba(255,215,0,0.5)',
-            },
-            taskContainer: {
-              padding: '20px',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 215, 0, 0.02)',
-            },
-            taskCheckbox: { marginRight: '16px' },
-            inventoryContainer: {
-              padding: '24px',
-              backgroundColor: 'rgba(255, 215, 0, 0.02)',
-            },
-            productContainer: {
-              padding: '24px',
-              backgroundColor: 'rgba(255, 215, 0, 0.02)',
-            },
-            pricingSummary: {
-              padding: '24px',
-              backgroundColor: 'rgba(255, 215, 0, 0.05)',
-              borderTop: '1px solid rgba(255, 215, 0, 0.2)',
-            },
-          },
-          getCardStyles = (styles, isHovered, isDisabled) => {
-            const baseTheme =
-              'light' === (null == styles ? void 0 : styles.theme)
-                ? card_lightTheme
-                : 'sacred' === (null == styles ? void 0 : styles.theme)
-                  ? card_sacredTheme
-                  : card_darkTheme
-            return {
-              container: {
-                ...baseTheme.container,
-                ...((null == styles ? void 0 : styles.containerBackground) && {
-                  backgroundColor: styles.containerBackground,
-                }),
-                ...((null == styles ? void 0 : styles.borderColor) && {
-                  borderColor: styles.borderColor,
-                }),
-                ...((null == styles ? void 0 : styles.borderRadius) && {
-                  borderRadius: styles.borderRadius,
-                }),
-                ...((null == styles ? void 0 : styles.width) && {
-                  width:
-                    'number' == typeof styles.width
-                      ? `${styles.width}px`
-                      : styles.width,
-                }),
-                ...((null == styles ? void 0 : styles.height) && {
-                  height:
-                    'number' == typeof styles.height
-                      ? `${styles.height}px`
-                      : styles.height,
-                }),
-                ...((null == styles ? void 0 : styles.padding) && {
-                  padding: styles.padding,
-                }),
-                ...((null == styles ? void 0 : styles.margin) && {
-                  margin: styles.margin,
-                }),
-                ...((null == styles ? void 0 : styles.fontFamily) && {
-                  fontFamily: styles.fontFamily,
-                }),
-                ...((null == styles ? void 0 : styles.boxShadow) && {
-                  boxShadow: styles.boxShadow,
-                }),
-                ...((null == styles ? void 0 : styles.backdropFilter) && {
-                  backdropFilter: styles.backdropFilter,
-                }),
-                ...(!1 === (null == styles ? void 0 : styles.outline) &&
-                  baseTheme.containerNoOutline),
-                ...(isHovered &&
-                  !1 !== (null == styles ? void 0 : styles.hoverEffects) &&
-                  baseTheme.containerHover),
-                ...(isDisabled && {
-                  opacity: 0.6,
-                  pointerEvents: 'none',
-                  filter: 'grayscale(0.3)',
-                }),
-              },
-              containerNoOutline: baseTheme.containerNoOutline,
-              containerHover: baseTheme.containerHover,
-              containerWithImage: baseTheme.containerWithImage,
-              image: baseTheme.image,
-              imageOverlay: baseTheme.imageOverlay,
-              imageTop: baseTheme.imageTop,
-              imageLeft: baseTheme.imageLeft,
-              content: baseTheme.content,
-              header: {
-                ...baseTheme.header,
-                ...(!1 === (null == styles ? void 0 : styles.titleUnderline) &&
-                  baseTheme.headerNoUnderline),
-              },
-              headerNoUnderline: baseTheme.headerNoUnderline,
-              title: {
-                ...baseTheme.title,
-                ...((null == styles ? void 0 : styles.textColor) && {
-                  color: styles.textColor,
-                }),
-                ...((null == styles ? void 0 : styles.fontSize) && {
-                  fontSize: styles.fontSize,
-                }),
-                ...((null == styles ? void 0 : styles.fontWeight) && {
-                  fontWeight: styles.fontWeight,
-                }),
-              },
-              bodySection: baseTheme.bodySection,
-              bodyText: {
-                ...baseTheme.bodyText,
-                ...((null == styles ? void 0 : styles.textColor) && {
-                  color: styles.textColor,
-                }),
-              },
-              footer: baseTheme.footer,
-              breadcrumb: baseTheme.breadcrumb,
-              accent: {
-                ...baseTheme.accent,
-                ...((null == styles ? void 0 : styles.accentColor) && {
-                  background: `linear-gradient(180deg, ${styles.accentColor} 0%, ${styles.accentColor}80 100%)`,
-                }),
-              },
-              accentVisible: baseTheme.accentVisible,
-              glyph: baseTheme.glyph,
-              glyphTopRight: baseTheme.glyphTopRight,
-              glyphBottomLeft: baseTheme.glyphBottomLeft,
-              price: baseTheme.price,
-              toggle: baseTheme.toggle,
-              toggleLabel: baseTheme.toggleLabel,
-              activeToggleLabel: baseTheme.activeToggleLabel,
-              taskContainer: baseTheme.taskContainer,
-              taskCheckbox: baseTheme.taskCheckbox,
-              inventoryContainer: baseTheme.inventoryContainer,
-              productContainer: baseTheme.productContainer,
-              pricingSummary: baseTheme.pricingSummary,
             }
           },
           h1Config = {

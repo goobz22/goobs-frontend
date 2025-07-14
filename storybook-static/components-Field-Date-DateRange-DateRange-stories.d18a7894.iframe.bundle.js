@@ -894,7 +894,7 @@
                   showIdColumns
                     ? options
                     : options.filter(opt => {
-                        const value = opt.value.toLowerCase()
+                        const value = String(opt.value).toLowerCase()
                         return !(
                           'id' === value ||
                           '_id' === value ||
@@ -1034,12 +1034,13 @@
                             ),
                             style: componentStyles.select,
                             children: filteredOptions.map(option => {
-                              const displayText = option.value
-                                  ? option.value
+                              const valueStr = String(option.value),
+                                displayText = option.value
+                                  ? valueStr
                                       .replace(/_/g, ' ')
                                       .charAt(0)
                                       .toUpperCase() +
-                                    option.value.replace(/_/g, ' ').slice(1)
+                                    valueStr.replace(/_/g, ' ').slice(1)
                                   : '',
                                 attributes = [
                                   option.attribute1,

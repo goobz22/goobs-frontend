@@ -1,7 +1,7 @@
 'use strict'
 ;(self.webpackChunkgoobs_frontend = self.webpackChunkgoobs_frontend || []).push(
   [
-    [9397],
+    [2828],
     {
       './src/components/Accordion/index.tsx': (
         __unused_webpack_module,
@@ -527,295 +527,11 @@
           react = __webpack_require__(
             './node_modules/next/dist/compiled/react/index.js'
           ),
-          index_es = __webpack_require__(
-            './node_modules/slate-react/dist/index.es.js'
-          ),
           Regular = __webpack_require__(
             './src/components/Field/Dropdown/Regular/index.tsx'
           ),
-          Button = __webpack_require__('./src/components/Button/index.tsx'),
-          dist_index_es = __webpack_require__(
-            './node_modules/slate/dist/index.es.js'
-          ),
-          slate_history_dist_index_es = __webpack_require__(
-            './node_modules/slate-history/dist/index.es.js'
-          )
-        const RichTextEditorConfig_Block = {
-            Paragraph: 'paragraph',
-            ListItem: 'list-item',
-            BulletedList: 'bulleted-list',
-            NumberedList: 'numbered-list',
-            Link: 'link',
-          },
-          RichTextEditorConfig_Alignment = 'left'
-        function isCustomElement(node) {
-          return dist_index_es.Hg.isElement(node) && 'type' in node
-        }
-        const useRichTextEditor = (initialValue, onChange) => {
-            const editor = (0, react.useMemo)(
-                () =>
-                  (0, slate_history_dist_index_es.$k)(
-                    (0, index_es.o$)((0, dist_index_es.ie)())
-                  ),
-                []
-              ),
-              [markdownMode, setMarkdownMode] = (0, react.useState)(!1),
-              [markdown, setMarkdown] = (0, react.useState)(''),
-              [slateValue, setSlateValue] = (0, react.useState)([]),
-              [internalValue, setInternalValue] = (0, react.useState)(
-                initialValue
-              )
-            ;(0, react.useEffect)(() => {}, [markdownMode])
-            const handleChange = (0, react.useCallback)(
-                newValue => {
-                  ;(setInternalValue(newValue),
-                    setSlateValue(newValue),
-                    onChange && onChange(newValue))
-                },
-                [onChange]
-              ),
-              toggleMark = format => {
-                isMarkActive(format)
-                  ? dist_index_es.KE.removeMark(editor, format)
-                  : dist_index_es.KE.addMark(editor, format, !0)
-              },
-              isBlockActive = (format, property = 'type') => {
-                const [match] = Array.from(
-                  dist_index_es.KE.nodes(editor, {
-                    match: n =>
-                      isCustomElement(n) &&
-                      property in n &&
-                      n[property] === format,
-                  })
-                )
-                return !!match
-              },
-              toggleBlock = format => {
-                const isActive = isBlockActive(
-                    format,
-                    Object.values(RichTextEditorConfig_Alignment).includes(
-                      format
-                    )
-                      ? 'align'
-                      : 'type'
-                  ),
-                  isList =
-                    'bulleted-list' === format || 'numbered-list' === format
-                let newProperties
-                if (
-                  (dist_index_es.gB.unwrapNodes(editor, {
-                    match: n =>
-                      isCustomElement(n) &&
-                      ('bulleted-list' === n.type ||
-                        'numbered-list' === n.type) &&
-                      !Object.values(RichTextEditorConfig_Alignment).includes(
-                        format
-                      ),
-                    split: !0,
-                  }),
-                  (newProperties = Object.values(
-                    RichTextEditorConfig_Alignment
-                  ).includes(format)
-                    ? { align: isActive ? void 0 : format }
-                    : {
-                        type: isActive
-                          ? RichTextEditorConfig_Block.Paragraph
-                          : isList
-                            ? RichTextEditorConfig_Block.ListItem
-                            : format,
-                      }),
-                  dist_index_es.gB.setNodes(editor, newProperties),
-                  !isActive && isList)
-                ) {
-                  const block = { type: format, children: [] }
-                  dist_index_es.gB.wrapNodes(editor, block)
-                }
-              },
-              isMarkActive = format => {
-                const marks = dist_index_es.KE.marks(editor)
-                return !!marks && !0 === marks[format]
-              },
-              toggleAlignment = alignment => {
-                const [match] = Array.from(
-                    dist_index_es.KE.nodes(editor, {
-                      match: n => isCustomElement(n) && n.align === alignment,
-                      mode: 'all',
-                    })
-                  ),
-                  isActive = !!match
-                dist_index_es.gB.setNodes(
-                  editor,
-                  { align: isActive ? void 0 : alignment },
-                  {
-                    match: n =>
-                      dist_index_es.Hg.isElement(n) &&
-                      dist_index_es.KE.isBlock(editor, n),
-                  }
-                )
-              },
-              slateToMarkdown = () =>
-                internalValue
-                  .map(node => {
-                    switch (node.type) {
-                      case 'bulleted-list':
-                        return node.children
-                          .map(item => `* ${serializeLeaf(item)}`)
-                          .join('\n')
-                      case 'numbered-list':
-                        return node.children
-                          .map(
-                            (item, index) =>
-                              `${index + 1}. ${serializeLeaf(item)}`
-                          )
-                          .join('\n')
-                      case 'list-item':
-                      case 'paragraph':
-                      default:
-                        return serializeLeaf(node)
-                      case 'link':
-                        return `[${serializeLeaf(node)}](${node.url})`
-                    }
-                  })
-                  .join('\n\n'),
-              serializeLeaf = node => {
-                if ('text' in node && 'string' == typeof node.text) {
-                  let text = node.text
-                  return (
-                    'bold' in node &&
-                    'italic' in node &&
-                    node.bold &&
-                    node.italic
-                      ? (text = `***${text}***`)
-                      : 'bold' in node && node.bold
-                        ? (text = `**${text}**`)
-                        : 'italic' in node &&
-                          node.italic &&
-                          (text = `*${text}*`),
-                    'code' in node && node.code && (text = `\`${text}\``),
-                    'strikethrough' in node &&
-                      node.strikethrough &&
-                      (text = `~~${text}~~`),
-                    text
-                  )
-                }
-                return 'children' in node && Array.isArray(node.children)
-                  ? node.children.map(child => serializeLeaf(child)).join('')
-                  : ''
-              }
-            return {
-              editor,
-              markdownMode,
-              setMarkdownMode,
-              markdown,
-              setMarkdown,
-              slateValue,
-              setSlateValue,
-              internalValue,
-              handleChange,
-              handleBoldClick: () => {
-                toggleMark('bold')
-              },
-              handleItalicClick: () => {
-                toggleMark('italic')
-              },
-              insertLink: () => {
-                let url = window.prompt('Enter the URL of the link:')
-                if (!url) return
-                const { selection } = editor
-                if (!selection) return
-                const nodes = Array.from(
-                  dist_index_es.KE.nodes(editor, {
-                    at: selection,
-                    match: n =>
-                      isCustomElement(n) &&
-                      n.type === RichTextEditorConfig_Block.Link,
-                  })
-                )
-                if (nodes.length > 0) {
-                  const [node] = nodes,
-                    link = node[0]
-                  if (
-                    ((url = window.prompt(
-                      'Edit the URL of the link:',
-                      link.url
-                    )),
-                    !url)
-                  )
-                    return
-                  dist_index_es.gB.setNodes(
-                    editor,
-                    { url },
-                    { at: index_es.rL.findPath(editor, link) }
-                  )
-                } else {
-                  const link = {
-                    type: RichTextEditorConfig_Block.Link,
-                    url,
-                    children: [
-                      { text: dist_index_es.KE.string(editor, selection) },
-                    ],
-                  }
-                  ;(dist_index_es.gB.wrapNodes(editor, link, { split: !0 }),
-                    dist_index_es.gB.collapse(editor, { edge: 'end' }))
-                }
-              },
-              onKeyDown: event => {
-                if (event.ctrlKey)
-                  switch ((event.preventDefault(), event.key)) {
-                    case 'b':
-                      toggleMark('bold')
-                      break
-                    case 'i':
-                      toggleMark('italic')
-                      break
-                    case 'u':
-                      toggleMark('underline')
-                      break
-                    case 'z':
-                      editor.undo()
-                      break
-                    case 'y':
-                      editor.redo()
-                      break
-                    case 's':
-                      toggleMark('strikethrough')
-                      break
-                    case 'c':
-                      toggleMark('code')
-                      break
-                    case '1':
-                      toggleBlock('bulleted-list')
-                      break
-                    case '2':
-                      toggleBlock('numbered-list')
-                      break
-                    case 'l':
-                      toggleAlignment('left')
-                      break
-                    case 'e':
-                      toggleAlignment('center')
-                      break
-                    case 'r':
-                      toggleAlignment('right')
-                      break
-                    case 'j':
-                      toggleAlignment('justify')
-                      break
-                    default:
-                      return
-                  }
-              },
-              toggleMark,
-              toggleBlock,
-              isMarkActive,
-              isBlockActive,
-              toggleAlignment,
-              handleSwitchToMarkdown: (setMarkdown, setMarkdownMode) => {
-                ;(setMarkdown(slateToMarkdown()), setMarkdownMode(!0))
-              },
-            }
-          },
-          useMarkdownEditor_handleBoldClick = (
+          Button = __webpack_require__('./src/components/Button/index.tsx')
+        const useMarkdownEditor_handleBoldClick = (
             selectedText,
             markdown,
             setMarkdown
@@ -886,24 +602,102 @@
             './src/components/Icons/FormatListBulleted.tsx'
           )
         const premiumStyles = {
-            container: { padding: '8px' },
-            toolbarRow: { display: 'flex', flexDirection: 'row', gap: '4px' },
-            buttonGroup: { display: 'flex', gap: '4px' },
-            buttonsContainer: { display: 'flex', gap: '2px', flexWrap: 'wrap' },
+            container: {
+              padding: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            },
+            toolbarRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            primaryRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            dropdownRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            buttonGroup: { display: 'flex', gap: '4px', alignItems: 'center' },
+            buttonsContainer: {
+              display: 'flex',
+              gap: '2px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            },
+            dropdown: {
+              minWidth: '120px',
+              maxWidth: '160px',
+              flex: '1 1 120px',
+            },
           },
           sacredStyles = {
             container: {
               padding: '8px',
               backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
             },
-            toolbarRow: { display: 'flex', flexDirection: 'row', gap: '4px' },
-            buttonGroup: { display: 'flex', gap: '4px' },
-            buttonsContainer: { display: 'flex', gap: '2px', flexWrap: 'wrap' },
+            toolbarRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            primaryRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            dropdownRow: {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            },
+            buttonGroup: { display: 'flex', gap: '4px', alignItems: 'center' },
+            buttonsContainer: {
+              display: 'flex',
+              gap: '2px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            },
+            dropdown: {
+              minWidth: '120px',
+              maxWidth: '160px',
+              flex: '1 1 120px',
+            },
           },
           ToolbarMarkdown = ({
             editor,
             handleBoldClick,
             handleItalicClick,
+            handleUnderlineClick,
+            handleStrikethroughClick,
+            handleCodeClick,
+            handleLinkClick,
+            handleUndo,
+            handleRedo,
+            handleAlign,
+            handleTextType,
+            handleBulletedList,
+            handleNumberedList,
             markdownMode,
             setMarkdown,
             toolbarType = 'richtext',
@@ -911,8 +705,6 @@
           }) => {
             const [alignValue, setAlignValue] = (0, react.useState)('left'),
               [textType, setTextType] = (0, react.useState)('paragraph'),
-              { toggleMark, toggleBlock, isMarkActive, isBlockActive } =
-                useRichTextEditor([], () => {}),
               isSacredTheme =
                 'sacred' === (null == styles ? void 0 : styles.theme)
             ;(0, react.useEffect)(() => {
@@ -1035,34 +827,46 @@
                 } else if (editor)
                   switch (action) {
                     case 'undo':
-                      'undo' in editor &&
-                        'function' == typeof editor.undo &&
-                        editor.undo()
+                      handleUndo && handleUndo()
                       break
                     case 'redo':
-                      'redo' in editor &&
-                        'function' == typeof editor.redo &&
-                        editor.redo()
+                      handleRedo && handleRedo()
                       break
                     case 'bulleted-list':
+                      handleBulletedList && handleBulletedList()
+                      break
                     case 'numbered-list':
+                      handleNumberedList && handleNumberedList()
+                      break
                     case 'left':
+                      handleAlign && handleAlign('left')
+                      break
                     case 'center':
+                      handleAlign && handleAlign('center')
+                      break
                     case 'right':
+                      handleAlign && handleAlign('right')
+                      break
                     case 'justify':
-                      toggleBlock(action)
+                      handleAlign && handleAlign('justify')
                       break
                     case 'bold':
+                      handleBoldClick && handleBoldClick()
+                      break
                     case 'italic':
+                      handleItalicClick && handleItalicClick()
+                      break
                     case 'underline':
+                      handleUnderlineClick && handleUnderlineClick()
+                      break
                     case 'strikethrough':
+                      handleStrikethroughClick && handleStrikethroughClick()
+                      break
                     case 'code':
-                      toggleMark(action)
+                      handleCodeClick && handleCodeClick()
                       break
                     case 'link':
-                      editor &&
-                        'function' == typeof editor.insertLink &&
-                        editor.insertLink()
+                      handleLinkClick && handleLinkClick()
                   }
               },
               containerStyles = isSacredTheme ? sacredStyles : premiumStyles,
@@ -1076,9 +880,8 @@
                     'center',
                     'right',
                     'justify',
-                  ].includes(format)
-                    ? isBlockActive(format)
-                    : isMarkActive(format)))(format)
+                  ].includes(format),
+                  document.queryCommandState(format)))(format)
                 return {
                   theme: null == styles ? void 0 : styles.theme,
                   backgroundColor: isActive
@@ -1101,133 +904,158 @@
                   margin: '2px',
                 }
               }
-            return (0, jsx_runtime.jsx)('div', {
+            return (0, jsx_runtime.jsxs)('div', {
               style: containerStyles.container,
-              children: (0, jsx_runtime.jsxs)('div', {
-                style: containerStyles.toolbarRow,
-                children: [
+              children: [
+                (0, jsx_runtime.jsxs)('div', {
+                  style: containerStyles.primaryRow,
+                  children: [
+                    (0, jsx_runtime.jsxs)('div', {
+                      style: containerStyles.buttonGroup,
+                      children: [
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(Undo.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('undo'),
+                          styles: getButtonStyles('undo'),
+                          disabled: markdownMode,
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(Redo.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('redo'),
+                          styles: getButtonStyles('redo'),
+                          disabled: markdownMode,
+                        }),
+                      ],
+                    }),
+                    (0, jsx_runtime.jsxs)('div', {
+                      style: containerStyles.buttonGroup,
+                      children: [
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(FormatBold.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('bold'),
+                          styles: getButtonStyles('bold'),
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(FormatItalic.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('italic'),
+                          styles: getButtonStyles('italic'),
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(FormatUnderlined.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('underline'),
+                          styles: getButtonStyles('underline'),
+                          disabled: markdownMode,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                showExtendedOptions &&
                   (0, jsx_runtime.jsxs)('div', {
-                    style: containerStyles.buttonGroup,
+                    style: containerStyles.dropdownRow,
                     children: [
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(Undo.A, {
-                          style: { width: '16px', height: '16px' },
+                      (0, jsx_runtime.jsx)('div', {
+                        style: containerStyles.dropdown,
+                        children: (0, jsx_runtime.jsx)(Regular.A, {
+                          label: 'Text Type',
+                          options: [
+                            { value: 'paragraph' },
+                            { value: 'h1' },
+                            { value: 'h2' },
+                            { value: 'h3' },
+                          ],
+                          value: textType,
+                          onChange: event => {
+                            const newType = event.target.value
+                            ;(setTextType(newType),
+                              handleTextType && handleTextType(newType))
+                          },
+                          styles: {
+                            theme:
+                              (null == styles ? void 0 : styles.theme) ||
+                              'light',
+                          },
                         }),
-                        onClick: handleEditorAction('undo'),
-                        styles: getButtonStyles('undo'),
-                        disabled: markdownMode,
                       }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(Redo.A, {
-                          style: { width: '16px', height: '16px' },
+                      (0, jsx_runtime.jsx)('div', {
+                        style: containerStyles.dropdown,
+                        children: (0, jsx_runtime.jsx)(Regular.A, {
+                          label: 'Alignment',
+                          options: alignmentOptions,
+                          value: alignValue,
+                          onChange: event => {
+                            setAlignValue(event.target.value)
+                          },
+                          styles: {
+                            theme:
+                              (null == styles ? void 0 : styles.theme) ||
+                              'light',
+                          },
                         }),
-                        onClick: handleEditorAction('redo'),
-                        styles: getButtonStyles('redo'),
-                        disabled: markdownMode,
                       }),
                     ],
                   }),
-                  showExtendedOptions &&
-                    (0, jsx_runtime.jsx)('div', {
-                      style: { width: '200px' },
-                      children: (0, jsx_runtime.jsx)(Regular.A, {
-                        label: 'Text Type',
-                        options: [
-                          { value: 'paragraph' },
-                          { value: 'h1' },
-                          { value: 'h2' },
-                          { value: 'h3' },
-                        ],
-                        value: textType,
-                        onChange: event => {
-                          setTextType(event.target.value)
-                        },
-                        styles: {
-                          theme:
-                            (null == styles ? void 0 : styles.theme) || 'light',
-                        },
-                      }),
+                (0, jsx_runtime.jsxs)('div', {
+                  style: containerStyles.toolbarRow,
+                  children: [
+                    (0, jsx_runtime.jsxs)('div', {
+                      style: containerStyles.buttonGroup,
+                      children: [
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(StrikethroughS.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('strikethrough'),
+                          styles: getButtonStyles('strikethrough'),
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(Code.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('code'),
+                          styles: getButtonStyles('code'),
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(Link.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('link'),
+                          styles: getButtonStyles('link'),
+                        }),
+                      ],
                     }),
-                  showExtendedOptions &&
-                    (0, jsx_runtime.jsx)('div', {
-                      style: { width: '150px' },
-                      children: (0, jsx_runtime.jsx)(Regular.A, {
-                        label: 'Alignment',
-                        options: alignmentOptions,
-                        value: alignValue,
-                        onChange: event => {
-                          setAlignValue(event.target.value)
-                        },
-                        styles: {
-                          theme:
-                            (null == styles ? void 0 : styles.theme) || 'light',
-                        },
-                      }),
+                    (0, jsx_runtime.jsxs)('div', {
+                      style: containerStyles.buttonGroup,
+                      children: [
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(FormatListNumbered.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('numbered-list'),
+                          styles: getButtonStyles('numbered-list'),
+                        }),
+                        (0, jsx_runtime.jsx)(Button.A, {
+                          icon: (0, jsx_runtime.jsx)(FormatListBulleted.A, {
+                            style: { width: '16px', height: '16px' },
+                          }),
+                          onClick: handleEditorAction('bulleted-list'),
+                          styles: getButtonStyles('bulleted-list'),
+                        }),
+                      ],
                     }),
-                  (0, jsx_runtime.jsxs)('div', {
-                    style: containerStyles.buttonsContainer,
-                    children: [
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(FormatBold.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('bold'),
-                        styles: getButtonStyles('bold'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(FormatItalic.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('italic'),
-                        styles: getButtonStyles('italic'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(FormatUnderlined.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('underline'),
-                        styles: getButtonStyles('underline'),
-                        disabled: markdownMode,
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(StrikethroughS.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('strikethrough'),
-                        styles: getButtonStyles('strikethrough'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(Code.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('code'),
-                        styles: getButtonStyles('code'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(Link.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('link'),
-                        styles: getButtonStyles('link'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(FormatListNumbered.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('numbered-list'),
-                        styles: getButtonStyles('numbered-list'),
-                      }),
-                      (0, jsx_runtime.jsx)(Button.A, {
-                        icon: (0, jsx_runtime.jsx)(FormatListBulleted.A, {
-                          style: { width: '16px', height: '16px' },
-                        }),
-                        onClick: handleEditorAction('bulleted-list'),
-                        styles: getButtonStyles('bulleted-list'),
-                      }),
-                    ],
-                  }),
-                ],
-              }),
+                  ],
+                }),
+              ],
             })
           },
           Editor = ToolbarMarkdown
@@ -1236,19 +1064,7 @@
           methods: [],
           displayName: 'ToolbarMarkdown',
           props: {
-            editor: {
-              required: !1,
-              tsType: {
-                name: 'intersection',
-                raw: 'BaseEditor & ReactEditor & HistoryEditor',
-                elements: [
-                  { name: 'BaseEditor' },
-                  { name: 'ReactEditor' },
-                  { name: 'HistoryEditor' },
-                ],
-              },
-              description: '',
-            },
+            editor: { required: !1, tsType: { name: 'any' }, description: '' },
             handleBoldClick: {
               required: !1,
               tsType: {
@@ -1269,22 +1085,115 @@
               },
               description: '',
             },
-            markdownMode: {
-              required: !0,
-              tsType: { name: 'boolean' },
-              description: '',
-            },
-            setMarkdownMode: {
+            handleUnderlineClick: {
               required: !1,
               tsType: {
                 name: 'signature',
                 type: 'function',
-                raw: '(value: boolean) => void',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleStrikethroughClick: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleCodeClick: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleLinkClick: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleUndo: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleRedo: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleAlign: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(align: string) => void',
                 signature: {
-                  arguments: [{ type: { name: 'boolean' }, name: 'value' }],
+                  arguments: [{ type: { name: 'string' }, name: 'align' }],
                   return: { name: 'void' },
                 },
               },
+              description: '',
+            },
+            handleTextType: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(type: string) => void',
+                signature: {
+                  arguments: [{ type: { name: 'string' }, name: 'type' }],
+                  return: { name: 'void' },
+                },
+              },
+              description: '',
+            },
+            handleBulletedList: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            handleNumberedList: {
+              required: !1,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '() => void',
+                signature: { arguments: [], return: { name: 'void' } },
+              },
+              description: '',
+            },
+            markdownMode: {
+              required: !0,
+              tsType: { name: 'boolean' },
               description: '',
             },
             setMarkdown: {
@@ -1304,10 +1213,11 @@
               required: !1,
               tsType: {
                 name: 'union',
-                raw: "'markdown' | 'richtext'",
+                raw: "'markdown' | 'richtext' | 'rich'",
                 elements: [
                   { name: 'literal', value: "'markdown'" },
                   { name: 'literal', value: "'richtext'" },
+                  { name: 'literal', value: "'rich'" },
                 ],
               },
               description: '',
@@ -1326,73 +1236,10 @@
           Accordion = __webpack_require__(
             './src/components/Accordion/index.tsx'
           )
-        const Leaf = ({ attributes, children, leaf, sacredtheme = !1 }) => {
-          const customLeaf = leaf,
-            linkStyle = sacredtheme
-              ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
-              : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' },
-            codeStyle = sacredtheme
-              ? {
-                  backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                  color: 'rgba(255, 215, 0, 1)',
-                  padding: '2px 4px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }
-              : {
-                  backgroundColor: 'rgba(243, 244, 246, 1)',
-                  color: 'rgba(55, 65, 81, 1)',
-                  padding: '2px 4px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                },
-            textStyle = sacredtheme
-              ? { color: 'rgba(255, 215, 0, 0.9)' }
-              : { color: 'rgba(0, 0, 0, 1)' }
-          let formattedChildren = children
-          return (
-            customLeaf.bold &&
-              (formattedChildren = (0, jsx_runtime.jsx)('strong', {
-                children: formattedChildren,
-              })),
-            customLeaf.italic &&
-              (formattedChildren = (0, jsx_runtime.jsx)('em', {
-                children: formattedChildren,
-              })),
-            customLeaf.underline &&
-              (formattedChildren = (0, jsx_runtime.jsx)('u', {
-                children: formattedChildren,
-              })),
-            customLeaf.strikethrough &&
-              (formattedChildren = (0, jsx_runtime.jsx)('s', {
-                children: formattedChildren,
-              })),
-            customLeaf.link &&
-              (formattedChildren = (0, jsx_runtime.jsx)('a', {
-                href: customLeaf.link,
-                style: linkStyle,
-                children: formattedChildren,
-              })),
-            customLeaf.code &&
-              (formattedChildren = (0, jsx_runtime.jsx)('code', {
-                style: codeStyle,
-                children: formattedChildren,
-              })),
-            (0, jsx_runtime.jsx)('span', {
-              ...attributes,
-              style: textStyle,
-              children: formattedChildren,
-            })
-          )
-        }
         function RichTextEditor({
           value,
           onChange,
-          label,
           minRows = 5,
-          markdownMode,
-          setMarkdownMode,
-          setMarkdown,
           styles: editorStyles,
         }) {
           const accordion =
@@ -1400,7 +1247,6 @@
               !1,
             accordionSummary =
               (null == editorStyles ? void 0 : editorStyles.accordionSummary) ||
-              label ||
               'Rich Text Editor',
             defaultExpanded =
               (null == editorStyles
@@ -1410,16 +1256,25 @@
               'sacred' === (null == editorStyles ? void 0 : editorStyles.theme),
             [isFocused, setIsFocused] = (0, react.useState)(!1),
             [expanded, setExpanded] = (0, react.useState)(defaultExpanded),
+            editorRef = (0, react.useRef)(null)
+          ;(0, react.useEffect)(() => {
+            editorRef.current &&
+              editorRef.current.innerHTML !== value &&
+              (editorRef.current.innerHTML = value)
+          }, [value])
+          const handleInput = () => {
+              editorRef.current && onChange(editorRef.current.innerHTML)
+            },
+            execCmd = (cmd, val = null) => {
+              var _editorRef_current
+              ;(null === (_editorRef_current = editorRef.current) ||
+                void 0 === _editorRef_current ||
+                _editorRef_current.focus(),
+                document.execCommand(cmd, !1, val),
+                handleInput())
+            },
             computedStyles = (0, theme.lm)(editorStyles, isFocused),
-            { themeConfig } = (0, theme.AW)(editorStyles, isFocused),
-            {
-              editor,
-              internalValue,
-              handleChange,
-              handleBoldClick,
-              handleItalicClick,
-              onKeyDown,
-            } = useRichTextEditor(value, onChange ? () => onChange() : void 0)
+            { themeConfig } = (0, theme.AW)(editorStyles, isFocused)
           ;(0, react.useEffect)(() => {
             if (isSacredTheme) {
               const styleSheet = document.styleSheets[0],
@@ -1430,79 +1285,69 @@
               } catch (e) {}
             }
           }, [isSacredTheme])
-          const renderElement = (0, react.useCallback)(
-              props =>
-                (0, jsx_runtime.jsx)(Element, {
-                  ...props,
-                  sacredtheme: isSacredTheme,
-                }),
-              [isSacredTheme]
-            ),
-            renderLeaf = (0, react.useCallback)(
-              props =>
-                (0, jsx_runtime.jsx)(Leaf, {
-                  ...props,
-                  sacredtheme: isSacredTheme,
-                }),
-              [isSacredTheme]
-            ),
-            editorContent = (0, jsx_runtime.jsx)('div', {
-              style: computedStyles.editorArea,
-              children: (0, jsx_runtime.jsxs)(index_es.A, {
-                editor,
-                initialValue: internalValue,
-                onChange: handleChange,
+          const editorContent = (0, jsx_runtime.jsxs)('div', {
+            style: {
+              ...computedStyles.editorArea,
+              maxWidth: '100%',
+              boxSizing: 'border-box',
+            },
+            children: [
+              (0, jsx_runtime.jsx)(Editor, {
+                handleBoldClick: () => execCmd('bold'),
+                handleItalicClick: () => execCmd('italic'),
+                handleUnderlineClick: () => execCmd('underline'),
+                handleStrikethroughClick: () => execCmd('strikeThrough'),
+                handleCodeClick: () => execCmd('formatBlock', '<pre>'),
+                handleLinkClick: () => {
+                  const url = prompt('Enter URL')
+                  url && execCmd('createLink', url)
+                },
+                handleUndo: () => execCmd('undo'),
+                handleRedo: () => execCmd('redo'),
+                handleAlign: align =>
+                  execCmd(
+                    `justify${align.charAt(0).toUpperCase() + align.slice(1)}`
+                  ),
+                handleTextType: type => execCmd('formatBlock', `<${type}>`),
+                handleBulletedList: () => execCmd('insertUnorderedList'),
+                handleNumberedList: () => execCmd('insertOrderedList'),
+                markdownMode: !1,
+                setMarkdown: () => {},
+                toolbarType: 'richtext',
+                styles: editorStyles,
+              }),
+              (0, jsx_runtime.jsxs)('div', {
+                style: { position: 'relative' },
                 children: [
-                  (0, jsx_runtime.jsx)(Editor, {
-                    markdownMode,
-                    setMarkdownMode,
-                    setMarkdown,
-                    handleBoldClick,
-                    handleItalicClick,
-                    toolbarType: 'richtext',
-                    editor,
-                    styles: editorStyles,
+                  (0, jsx_runtime.jsx)('div', {
+                    ref: editorRef,
+                    contentEditable: !0,
+                    onInput: handleInput,
+                    onBlur: () => {
+                      setIsFocused(!1)
+                    },
+                    onFocus: () => {
+                      setIsFocused(!0)
+                    },
+                    style: {
+                      minHeight: 20 * minRows + 'px',
+                      outline: 'none',
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: '0',
+                      boxSizing: 'border-box',
+                    },
+                    dangerouslySetInnerHTML: { __html: value },
                   }),
-                  (0, jsx_runtime.jsxs)('div', {
-                    style: { position: 'relative' },
-                    children: [
-                      (0, jsx_runtime.jsx)(index_es.Fo, {
-                        style: {
-                          ...computedStyles.editorArea,
-                          minHeight: 20 * minRows + 'px',
-                          border: 'none',
-                          outline: 'none',
-                        },
-                        placeholder: isSacredTheme
-                          ? 'Channel divine wisdom...'
-                          : 'Enter text...',
-                        onKeyDown,
-                        onFocus: () => {
-                          setIsFocused(!0)
-                        },
-                        onBlur: () => {
-                          setIsFocused(!1)
-                        },
-                        renderElement,
-                        renderLeaf,
-                      }),
-                      isSacredTheme &&
-                        (0, jsx_runtime.jsx)('div', {
-                          style: computedStyles.sacredGlyph,
-                          children: theme.vR[2],
-                        }),
-                    ],
-                  }),
+                  isSacredTheme &&
+                    (0, jsx_runtime.jsx)('div', {
+                      style: computedStyles.sacredGlyph,
+                      children: theme.vR[2],
+                    }),
                 ],
               }),
-            }),
-            labelElement =
-              label &&
-              !accordion &&
-              (0, jsx_runtime.jsx)('label', {
-                style: (0, theme.Wh)(themeConfig.label.default, themeConfig),
-                children: label,
-              })
+            ],
+          })
           return (0, jsx_runtime.jsx)('div', {
             style: computedStyles.container,
             children: accordion
@@ -1519,65 +1364,93 @@
                     styles: isSacredTheme
                       ? { color: themeConfig.text }
                       : void 0,
-                    children: accordionSummary || label || 'Rich Text Editor',
+                    children: accordionSummary,
                   }),
                   details: editorContent,
                 })
-              : (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
-                  children: [labelElement, editorContent],
+              : (0, jsx_runtime.jsx)(jsx_runtime.Fragment, {
+                  children: editorContent,
                 }),
           })
         }
-        const Element = ({
-            attributes,
-            children,
-            element,
-            sacredtheme = !1,
-          }) => {
-            const customElement = element,
-              textStyle = sacredtheme
-                ? { color: 'rgba(255, 215, 0, 0.9)' }
-                : { color: 'rgba(0, 0, 0, 1)' },
-              linkStyle = sacredtheme
-                ? { color: 'rgba(255, 215, 0, 1)', textDecoration: 'underline' }
-                : { color: 'rgba(37, 99, 235, 1)', textDecoration: 'underline' }
-            if (!customElement.type) return null
-            const style = { textAlign: customElement.align, ...textStyle }
-            switch (customElement.type) {
-              case 'list-item':
-                return (0, jsx_runtime.jsx)('li', {
-                  style,
-                  ...attributes,
-                  children,
-                })
-              case 'link':
-                return (0, jsx_runtime.jsx)('a', {
-                  href: customElement.url,
-                  ...attributes,
-                  style: { ...style, ...linkStyle },
-                  children,
-                })
-              case 'bulleted-list':
-                return (0, jsx_runtime.jsx)('ul', {
-                  style,
-                  ...attributes,
-                  children,
-                })
-              case 'numbered-list':
-                return (0, jsx_runtime.jsx)('ol', {
-                  style,
-                  ...attributes,
-                  children,
-                })
-              default:
-                return (0, jsx_runtime.jsx)('p', {
-                  style,
-                  ...attributes,
-                  children,
-                })
-            }
-          },
-          RichEditor = RichTextEditor
+        const RichEditor = RichTextEditor
+        function escapeHtml(unsafe) {
+          return unsafe
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+        }
+        function mdToHtml(md) {
+          let html = escapeHtml(md)
+          return (
+            (html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>')),
+            (html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>')),
+            (html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>')),
+            (html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')),
+            (html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')),
+            (html = html.replace(/~~(.*?)~~/g, '$1')),
+            (html = html.replace(/`(.*?)`/g, '<code>$1</code>')),
+            (html = html.replace(
+              /\[([^[]+)\]\(([^)]+)\)/g,
+              '<a href="$2">$1</a>'
+            )),
+            (html = html.replace(/^- (.*)$/gm, '<ul><li>$1</li></ul>')),
+            (html = html.replace(/^\d+\. (.*)$/gm, '<ol><li>$1</li></ol>')),
+            (html = html.replace(/\n/g, '<br>')),
+            '<p>' + html + '</p>'
+          )
+        }
+        function convertValue(value, fromMode, toMode) {
+          if (fromMode === toMode) return value
+          let intermediate
+          switch (fromMode) {
+            case 'simple':
+              intermediate = (function textToHtml(text) {
+                return '<p>' + escapeHtml(text).replace(/\n/g, '<br>') + '</p>'
+              })(value)
+              break
+            case 'markdown':
+              intermediate = mdToHtml(value)
+              break
+            case 'rich':
+              intermediate = value
+          }
+          switch (toMode) {
+            case 'simple':
+              return (function htmlToText(html) {
+                let text = html
+                return (
+                  (text = text.replace(/<br>/g, '\n')),
+                  (text = text.replace(/<[^>]+>/g, '')),
+                  text
+                )
+              })(intermediate)
+            case 'markdown':
+              return (function htmlToMd(html) {
+                let md = html
+                return (
+                  (md = md.replace(/<h1>(.*?)<\/h1>/g, '# $1\n')),
+                  (md = md.replace(/<h2>(.*?)<\/h2>/g, '## $1\n')),
+                  (md = md.replace(/<h3>(.*?)<\/h3>/g, '### $1\n')),
+                  (md = md.replace(/<strong>(.*?)<\/strong>/g, '**$1**')),
+                  (md = md.replace(/<em>(.*?)<\/em>/g, '*$1*')),
+                  (md = md.replace(/(.*?)<\/s>/g, '~~$1~~')),
+                  (md = md.replace(/<code>(.*?)<\/code>/g, '`$1`')),
+                  (md = md.replace(/<a href="(.*?)">(.*?)<\/a>/g, '[$2]($1)')),
+                  (md = md.replace(/<li>(.*?)<\/li>/g, '- $1\n')),
+                  (md = md.replace(/<br>/g, '\n')),
+                  (md = md.replace(/<p>(.*?)<\/p>/g, '$1\n\n')),
+                  (md = md.replace(/<[^>]+>/g, '')),
+                  md.trim()
+                )
+              })(intermediate)
+            case 'rich':
+              return intermediate
+          }
+          return value
+        }
         RichTextEditor.__docgenInfo = {
           description: '',
           methods: [],
@@ -1585,16 +1458,20 @@
           props: {
             value: {
               required: !0,
-              tsType: {
-                name: 'Array',
-                elements: [{ name: 'Descendant' }],
-                raw: 'Descendant[]',
-              },
+              tsType: { name: 'string' },
               description: '',
             },
-            label: {
-              required: !1,
-              tsType: { name: 'string' },
+            onChange: {
+              required: !0,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(html: string) => void',
+                signature: {
+                  arguments: [{ type: { name: 'string' }, name: 'html' }],
+                  return: { name: 'void' },
+                },
+              },
               description: '',
             },
             minRows: {
@@ -1603,67 +1480,6 @@
               description: '',
               defaultValue: { value: '5', computed: !1 },
             },
-            onChange: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '() => void',
-                signature: { arguments: [], return: { name: 'void' } },
-              },
-              description: '',
-            },
-            onSelectionChange: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '() => void',
-                signature: { arguments: [], return: { name: 'void' } },
-              },
-              description: '',
-            },
-            onValueChange: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '() => void',
-                signature: { arguments: [], return: { name: 'void' } },
-              },
-              description: '',
-            },
-            markdownMode: {
-              required: !0,
-              tsType: { name: 'boolean' },
-              description: '',
-            },
-            setMarkdownMode: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(value: boolean) => void',
-                signature: {
-                  arguments: [{ type: { name: 'boolean' }, name: 'value' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            setMarkdown: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(value: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'value' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
             styles: {
               required: !1,
               tsType: { name: 'ComplexTextEditorStyles' },
@@ -1671,18 +1487,13 @@
             },
           },
         }
-        const MarkdownEditor = ({
-            markdown,
-            setMarkdown,
-            markdownMode,
-            setMarkdownMode,
-            styles,
-          }) => {
+        const MarkdownEditor = ({ value, onChange, minRows, styles }) => {
             const [markdownValue, setMarkdownValue] = (0, react.useState)(
-                markdown
+                value
               ),
               [selectedText, setSelectedText] = (0, react.useState)(''),
               [isFocused, setIsFocused] = (0, react.useState)(!1),
+              [showPreview, setShowPreview] = (0, react.useState)(!1),
               isSacredTheme =
                 'sacred' === (null == styles ? void 0 : styles.theme),
               computedStyles = (0, theme.lm)(styles, isFocused)
@@ -1696,14 +1507,15 @@
                 } catch (e) {}
               }
             }, [isSacredTheme]),
-              (0, react.useEffect)(() => {}, [markdownMode]),
               (0, react.useEffect)(() => {
-                markdown !== markdownValue && setMarkdownValue(markdown)
-              }, [markdown, markdownValue]))
+                value !== markdownValue && setMarkdownValue(value)
+              }, [value, markdownValue]))
             const textareaStyle = {
               ...computedStyles.editorArea,
               boxSizing: 'border-box',
-              width: '100%',
+              width: showPreview ? '50%' : '100%',
+              maxWidth: '100%',
+              minWidth: '0',
               fontFamily: 'monospace',
               border: 'none',
               outline: 'none',
@@ -1713,35 +1525,42 @@
               }),
             }
             return (0, jsx_runtime.jsxs)('div', {
-              style: computedStyles.editorArea,
+              style: {
+                ...computedStyles.container,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+              },
               children: [
                 (0, jsx_runtime.jsx)(Editor, {
-                  markdownMode,
-                  setMarkdownMode,
-                  setMarkdown,
                   handleBoldClick: () =>
                     useMarkdownEditor_handleBoldClick(
                       selectedText,
-                      markdown,
-                      setMarkdown
+                      value,
+                      onChange
                     ),
                   handleItalicClick: () =>
                     useMarkdownEditor_handleItalicClick(
                       selectedText,
-                      markdown,
-                      setMarkdown
+                      value,
+                      onChange
                     ),
+                  markdownMode: !0,
+                  setMarkdown: onChange,
                   toolbarType: 'markdown',
                   styles,
                 }),
+                (0, jsx_runtime.jsx)('button', {
+                  onClick: () => setShowPreview(!showPreview),
+                  children: 'Toggle Preview',
+                }),
                 (0, jsx_runtime.jsxs)('div', {
-                  style: { position: 'relative' },
+                  style: { display: 'flex' },
                   children: [
                     (0, jsx_runtime.jsx)('textarea', {
                       value: markdownValue,
                       onChange: event => {
                         const newValue = event.target.value
-                        ;(setMarkdownValue(newValue), setMarkdown(newValue))
+                        ;(setMarkdownValue(newValue), onChange(newValue))
                       },
                       onSelect: event => {
                         const target = event.target
@@ -1762,12 +1581,14 @@
                         ? 'Compose your markdown scripture...'
                         : 'Enter markdown...',
                       style: textareaStyle,
-                      rows: 10,
+                      rows: minRows || 10,
                     }),
-                    isSacredTheme &&
+                    showPreview &&
                       (0, jsx_runtime.jsx)('div', {
-                        style: computedStyles.sacredGlyph,
-                        children: theme.vR[1],
+                        style: { width: '50%', borderLeft: '1px solid' },
+                        dangerouslySetInnerHTML: {
+                          __html: mdToHtml(markdownValue),
+                        },
                       }),
                   ],
                 }),
@@ -1780,12 +1601,12 @@
           methods: [],
           displayName: 'MarkdownEditor',
           props: {
-            markdown: {
+            value: {
               required: !0,
               tsType: { name: 'string' },
               description: '',
             },
-            setMarkdown: {
+            onChange: {
               required: !0,
               tsType: {
                 name: 'signature',
@@ -1798,49 +1619,9 @@
               },
               description: '',
             },
-            markdownMode: {
-              required: !0,
-              tsType: { name: 'boolean' },
-              description: '',
-            },
-            setMarkdownMode: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(value: boolean) => void',
-                signature: {
-                  arguments: [{ type: { name: 'boolean' }, name: 'value' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            setNewSlateValue: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: "(value: RichTextEditorTypes['CustomElement'][]) => void",
-                signature: {
-                  arguments: [
-                    {
-                      type: {
-                        name: 'Array',
-                        elements: [
-                          {
-                            name: "RichTextEditorTypes['CustomElement']",
-                            raw: "RichTextEditorTypes['CustomElement']",
-                          },
-                        ],
-                        raw: "RichTextEditorTypes['CustomElement'][]",
-                      },
-                      name: 'value',
-                    },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
+            minRows: {
+              required: !1,
+              tsType: { name: 'number' },
               description: '',
             },
             styles: {
@@ -1850,13 +1631,7 @@
             },
           },
         }
-        const SimpleEditor = ({
-            value,
-            setValue,
-            minRows = 5,
-            label,
-            styles,
-          }) => {
+        const SimpleEditor = ({ value, onChange, minRows = 5, styles }) => {
             const [isFocused, setIsFocused] = (0, react.useState)(!1),
               [leftGlyph] = (0, react.useState)(
                 theme.vR[Math.floor(Math.random() * theme.vR.length)]
@@ -1866,8 +1641,7 @@
               ),
               isSacredTheme =
                 'sacred' === (null == styles ? void 0 : styles.theme),
-              computedStyles = (0, theme.lm)(styles, isFocused),
-              { themeConfig } = (0, theme.AW)(styles, isFocused)
+              computedStyles = (0, theme.lm)(styles, isFocused)
             ;(0, react.useEffect)(() => {
               if (isSacredTheme) {
                 const styleSheet = document.styleSheets[0],
@@ -1878,19 +1652,17 @@
                 } catch (e) {}
               }
             }, [isSacredTheme])
-            const labelElement =
-                label &&
-                (0, jsx_runtime.jsx)('label', {
-                  style: (0, theme.Wh)(themeConfig.label.default, themeConfig),
-                  children: label,
-                }),
-              textareaStyle = {
+            const textareaStyle = {
                 ...computedStyles.editorArea,
                 width: '100%',
+                maxWidth: '100%',
+                minWidth: '0',
                 resize: 'vertical',
                 fontFamily: 'inherit',
+                boxSizing: 'border-box',
                 ...(isSacredTheme && { paddingRight: '50px' }),
               },
+              scrollbarClassName = computedStyles.scrollbarClassName || '',
               glyphStyles_glyph = {
                 position: 'absolute',
                 fontSize: '20px',
@@ -1905,52 +1677,59 @@
                 left: '10px',
                 animationDelay: '1.5s',
               }
-            return (0, jsx_runtime.jsxs)('div', {
-              style: computedStyles.container,
-              children: [
-                labelElement,
-                (0, jsx_runtime.jsxs)('div', {
-                  style: { position: 'relative' },
-                  children: [
-                    (0, jsx_runtime.jsx)('textarea', {
-                      value,
-                      onChange: event => {
-                        setValue(event.target.value)
-                      },
-                      onFocus: () => {
-                        setIsFocused(!0)
-                      },
-                      onBlur: () => {
-                        setIsFocused(!1)
-                      },
-                      rows: minRows,
-                      placeholder: isSacredTheme
-                        ? 'Inscribe your sacred text...'
-                        : label || 'Enter text...',
-                      style: textareaStyle,
+            return (0, jsx_runtime.jsx)('div', {
+              style: {
+                ...computedStyles.container,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+              },
+              children: (0, jsx_runtime.jsxs)('div', {
+                style: {
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
+                },
+                children: [
+                  (0, jsx_runtime.jsx)('textarea', {
+                    value,
+                    onChange: event => {
+                      onChange(event.target.value)
+                    },
+                    onFocus: () => {
+                      setIsFocused(!0)
+                    },
+                    onBlur: () => {
+                      setIsFocused(!1)
+                    },
+                    rows: minRows,
+                    placeholder: isSacredTheme
+                      ? 'Inscribe your sacred text...'
+                      : 'Enter text...',
+                    style: textareaStyle,
+                    className: scrollbarClassName,
+                  }),
+                  isSacredTheme &&
+                    (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+                      children: [
+                        (0, jsx_runtime.jsx)('div', {
+                          style: {
+                            ...glyphStyles_glyph,
+                            ...glyphStyles_glyphTopRight,
+                          },
+                          children: rightGlyph,
+                        }),
+                        (0, jsx_runtime.jsx)('div', {
+                          style: {
+                            ...glyphStyles_glyph,
+                            ...glyphStyles_glyphBottomLeft,
+                          },
+                          children: leftGlyph,
+                        }),
+                      ],
                     }),
-                    isSacredTheme &&
-                      (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
-                        children: [
-                          (0, jsx_runtime.jsx)('div', {
-                            style: {
-                              ...glyphStyles_glyph,
-                              ...glyphStyles_glyphTopRight,
-                            },
-                            children: rightGlyph,
-                          }),
-                          (0, jsx_runtime.jsx)('div', {
-                            style: {
-                              ...glyphStyles_glyph,
-                              ...glyphStyles_glyphBottomLeft,
-                            },
-                            children: leftGlyph,
-                          }),
-                        ],
-                      }),
-                  ],
-                }),
-              ],
+                ],
+              }),
             })
           },
           ComplexTextEditor_SimpleEditor = SimpleEditor
@@ -1964,7 +1743,7 @@
               tsType: { name: 'string' },
               description: '',
             },
-            setValue: {
+            onChange: {
               required: !0,
               tsType: {
                 name: 'signature',
@@ -1983,11 +1762,6 @@
               description: '',
               defaultValue: { value: '5', computed: !1 },
             },
-            label: {
-              required: !1,
-              tsType: { name: 'string' },
-              description: '',
-            },
             styles: {
               required: !1,
               tsType: { name: 'ComplexTextEditorStyles' },
@@ -1995,22 +1769,12 @@
             },
           },
         }
-        var console = __webpack_require__(
-          './node_modules/console-browserify/index.js'
-        )
         const ComplexToolbar = ({
             mode,
             setMode,
-            label,
+            value,
+            onChange,
             minRows = 5,
-            simpleValue,
-            setSimpleValue,
-            richValue,
-            onRichChange,
-            markdown,
-            setMarkdown,
-            markdownMode,
-            setMarkdownMode,
             styles,
           }) => {
             const computedStyles = (0, theme.lm)(styles, !1)
@@ -2023,8 +1787,21 @@
                     children: (0, jsx_runtime.jsxs)(Button.e, {
                       value: mode,
                       exclusive: !0,
-                      onChange: (_event, newMode) => {
-                        null !== newMode && setMode(newMode)
+                      onChange: (_event, newValue) => {
+                        newValue &&
+                          (newMode => {
+                            const converted = convertValue(value, mode, newMode)
+                            ;(onChange(converted), setMode(newMode))
+                          })(newValue)
+                      },
+                      styles: {
+                        theme:
+                          (null == styles ? void 0 : styles.theme) || 'light',
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent',
+                        boxShadow: 'none',
+                        padding: '0',
+                        margin: '0',
                       },
                       children: [
                         (0, jsx_runtime.jsx)(Button.A, {
@@ -2044,32 +1821,23 @@
                   }),
                 'simple' === mode &&
                   (0, jsx_runtime.jsx)(ComplexTextEditor_SimpleEditor, {
-                    value: simpleValue,
-                    setValue: setSimpleValue,
+                    value,
+                    onChange,
                     minRows,
-                    label,
                     styles,
                   }),
                 'rich' === mode &&
                   (0, jsx_runtime.jsx)(RichEditor, {
-                    value: richValue,
-                    onChange: onRichChange,
-                    label,
+                    value,
+                    onChange,
                     minRows,
-                    markdownMode,
-                    setMarkdownMode,
-                    setMarkdown,
                     styles,
                   }),
                 'markdown' === mode &&
                   (0, jsx_runtime.jsx)(ComplexTextEditor_MarkdownEditor, {
-                    markdown,
-                    setMarkdown,
-                    markdownMode,
-                    setMarkdownMode,
-                    setNewSlateValue: value => {
-                      console.log('Setting new slate value:', value)
-                    },
+                    value,
+                    onChange,
+                    minRows,
                     styles,
                   }),
               ],
@@ -2120,9 +1888,22 @@
               },
               description: '',
             },
-            label: {
-              required: !1,
+            value: {
+              required: !0,
               tsType: { name: 'string' },
+              description: '',
+            },
+            onChange: {
+              required: !0,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(value: string) => void',
+                signature: {
+                  arguments: [{ type: { name: 'string' }, name: 'value' }],
+                  return: { name: 'void' },
+                },
+              },
               description: '',
             },
             minRows: {
@@ -2131,81 +1912,6 @@
               description: '',
               defaultValue: { value: '5', computed: !1 },
             },
-            simpleValue: {
-              required: !0,
-              tsType: { name: 'string' },
-              description: '',
-            },
-            setSimpleValue: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(value: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'value' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            richValue: {
-              required: !0,
-              tsType: {
-                name: 'Array',
-                elements: [{ name: 'Descendant' }],
-                raw: 'Descendant[]',
-              },
-              description: '',
-            },
-            onRichChange: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '() => void',
-                signature: { arguments: [], return: { name: 'void' } },
-              },
-              description: '',
-            },
-            markdown: {
-              required: !0,
-              tsType: { name: 'string' },
-              description: '',
-            },
-            setMarkdown: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(value: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'value' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            markdownMode: {
-              required: !0,
-              tsType: { name: 'boolean' },
-              description: '',
-            },
-            setMarkdownMode: {
-              required: !0,
-              tsType: {
-                name: 'ReactDispatch',
-                raw: 'React.Dispatch<React.SetStateAction<boolean>>',
-                elements: [
-                  {
-                    name: 'ReactSetStateAction',
-                    raw: 'React.SetStateAction<boolean>',
-                    elements: [{ name: 'boolean' }],
-                  },
-                ],
-              },
-              description: '',
-            },
             styles: {
               required: !1,
               tsType: { name: 'ComplexTextEditorStyles' },
@@ -2213,154 +1919,151 @@
             },
           },
         }
-        var ComplexTextEditor_console = __webpack_require__(
-          './node_modules/console-browserify/index.js'
-        )
-        const initialSlateValue = [{ children: [{ text: '' }] }],
-          ComplexTextEditor = ({
-            value,
-            editorType,
-            initialValue = '',
-            initialMode,
-            label,
-            minRows = 5,
-            onChange,
-            helperText,
-            styles,
-          }) => {
-            const accordion =
-                (null == styles ? void 0 : styles.accordionMode) || !1,
-              accordionSummary =
-                (null == styles ? void 0 : styles.accordionSummary) ||
-                label ||
-                'Text Editor',
-              defaultExpanded =
-                (null == styles ? void 0 : styles.accordionDefaultExpanded) ||
-                !1,
-              isSacredTheme =
-                'sacred' === (null == styles ? void 0 : styles.theme)
-            ComplexTextEditor_console.log('ComplexTextEditor rendered:', {
+        const ComplexTextEditor = ({
+          value: valueProp,
+          editorType,
+          initialValue = '',
+          initialMode,
+          label,
+          minRows = 5,
+          onChange,
+          helperText,
+          styles,
+          autoSave,
+          autoSaveKey,
+        }) => {
+          const accordion =
+              (null == styles ? void 0 : styles.accordionMode) || !1,
+            accordionSummary =
+              (null == styles ? void 0 : styles.accordionSummary) ||
+              label ||
+              'Text Editor',
+            defaultExpanded =
+              (null == styles ? void 0 : styles.accordionDefaultExpanded) || !1,
+            isSacredTheme =
+              'sacred' === (null == styles ? void 0 : styles.theme),
+            startValue = initialValue,
+            startMode = (function determineStartMode(
               editorType,
-              theme: null == styles ? void 0 : styles.theme,
-            })
-            const startValue = void 0 !== value ? value : initialValue,
-              startMode = (function determineStartMode(
-                editorType,
-                initialMode,
-                defaultMode
-              ) {
-                if (initialMode) return initialMode
-                if (defaultMode) return defaultMode
-                switch (editorType) {
-                  case 'markdown':
-                    return 'markdown'
-                  case 'rich':
-                    return 'rich'
-                  default:
-                    return 'simple'
-                }
-              })(
-                editorType,
-                initialMode,
-                null == styles ? void 0 : styles.defaultMode
-              ),
-              [mode, setMode] = (0, react.useState)(startMode),
-              [simpleValue, setSimpleValue] = (0, react.useState)(startValue),
-              [richValue] = (0, react.useState)(initialSlateValue),
-              [markdown, setMarkdown] = (0, react.useState)(startValue),
-              [markdownMode, setMarkdownMode] = (0, react.useState)(
-                'markdown' === startMode
-              ),
-              [isFocused, _setIsFocused] = (0, react.useState)(!1),
-              computedStyles = (0, theme.lm)(styles, isFocused),
-              { themeConfig, footerTextColor } = (0, theme.AW)(
-                styles,
-                isFocused
-              )
-            ;(0, react.useEffect)(() => {
-              void 0 !== value &&
-                value !== simpleValue &&
-                (setSimpleValue(value), setMarkdown(value))
-            }, [value, simpleValue])
-            const handleSimpleValueChange = (0, react.useCallback)(
-                value => {
-                  ;(setSimpleValue(value), onChange && onChange(value))
-                },
-                [onChange]
-              ),
-              handleRichChange = (0, react.useCallback)(() => {
-                ComplexTextEditor_console.log('Rich content changed')
-              }, []),
-              handleMarkdownChange = (0, react.useCallback)(
-                value => {
-                  ;(setMarkdown(value), onChange && onChange(value))
-                },
-                [onChange]
-              ),
-              createEditorContent = () => {
-                const editorLabel = accordion ? void 0 : label
-                return 'simple' === editorType
-                  ? (0, jsx_runtime.jsx)(ComplexTextEditor_SimpleEditor, {
-                      value: simpleValue,
-                      setValue: handleSimpleValueChange,
-                      minRows,
-                      label: editorLabel,
-                      styles,
-                    })
-                  : (0, jsx_runtime.jsx)(Complex, {
-                      mode,
-                      setMode,
-                      label: editorLabel,
-                      minRows,
-                      simpleValue,
-                      setSimpleValue: handleSimpleValueChange,
-                      richValue,
-                      onRichChange: handleRichChange,
-                      markdown,
-                      setMarkdown: handleMarkdownChange,
-                      markdownMode,
-                      setMarkdownMode,
-                      styles,
-                    })
-              },
-              labelElement =
-                label &&
-                !accordion &&
-                (0, jsx_runtime.jsx)('label', {
-                  style: (0, theme.Wh)(themeConfig.label.default, themeConfig),
-                  children: label,
-                }),
-              helperTextElement =
-                helperText &&
-                (0, jsx_runtime.jsx)('div', {
-                  style: (0, theme.En)(footerTextColor, themeConfig, styles),
-                  children: helperText,
-                })
-            if (accordion) {
-              const summaryText = accordionSummary || label || 'Text Editor'
-              return (0, jsx_runtime.jsxs)('div', {
-                style: computedStyles.container,
-                children: [
-                  (0, jsx_runtime.jsx)(Accordion.A, {
-                    summary: summaryText,
-                    details: createEditorContent(),
-                    expanded: defaultExpanded,
-                    styles: { theme: null == styles ? void 0 : styles.theme },
-                  }),
-                  isSacredTheme &&
-                    (0, jsx_runtime.jsx)('div', {
-                      style: computedStyles.sacredGlyph,
-                      children: theme.vR[14],
-                    }),
-                ],
-              })
+              initialMode,
+              defaultMode
+            ) {
+              if (initialMode) return initialMode
+              if (defaultMode) return defaultMode
+              switch (editorType) {
+                case 'markdown':
+                  return 'markdown'
+                case 'rich':
+                  return 'rich'
+                default:
+                  return 'simple'
+              }
+            })(
+              editorType,
+              initialMode,
+              null == styles ? void 0 : styles.defaultMode
+            ),
+            [valueState, setValueState] = (0, react.useState)(startValue),
+            value = void 0 !== valueProp ? valueProp : valueState,
+            [mode, setMode] = (0, react.useState)(startMode),
+            [isFocused, _setIsFocused] = (0, react.useState)(!1),
+            [accordionExpanded, setAccordionExpanded] = (0, react.useState)(
+              defaultExpanded
+            ),
+            stylesWithTransparentLabel = {
+              ...styles,
+              labelShrunkBackgroundColor: 'transparent',
+            },
+            computedStyles = (0, theme.lm)(
+              stylesWithTransparentLabel,
+              isFocused
+            ),
+            { themeConfig, footerTextColor } = (0, theme.AW)(
+              stylesWithTransparentLabel,
+              isFocused
+            )
+          ;((0, react.useEffect)(() => {
+            if (autoSave && autoSaveKey) {
+              const draft = localStorage.getItem(autoSaveKey)
+              draft && !value && setValueState(draft)
             }
+          }, [autoSave, autoSaveKey, value]),
+            (0, react.useEffect)(() => {
+              if (autoSave && autoSaveKey) {
+                const timeout = setTimeout(
+                  () => localStorage.setItem(autoSaveKey, value),
+                  1e3
+                )
+                return () => clearTimeout(timeout)
+              }
+            }, [autoSave, autoSaveKey, value]))
+          const handleChange = (0, react.useCallback)(
+              newValue => {
+                ;(void 0 === valueProp && setValueState(newValue),
+                  onChange && onChange(newValue))
+              },
+              [onChange, valueProp]
+            ),
+            createEditorContent = () =>
+              'simple' === editorType
+                ? (0, jsx_runtime.jsx)(ComplexTextEditor_SimpleEditor, {
+                    value,
+                    onChange: handleChange,
+                    minRows,
+                    styles,
+                  })
+                : (0, jsx_runtime.jsx)(Complex, {
+                    mode,
+                    setMode,
+                    value,
+                    onChange: handleChange,
+                    minRows,
+                    styles,
+                  }),
+            labelElement =
+              label &&
+              !accordion &&
+              (0, jsx_runtime.jsx)('label', {
+                style: {
+                  ...(0, theme.Wh)(themeConfig.label.default, themeConfig),
+                  background: 'transparent',
+                  backgroundColor: 'transparent',
+                  backdropFilter: 'none',
+                  padding: '0',
+                  borderRadius: '0',
+                  boxShadow: 'none',
+                  ...(isSacredTheme && {
+                    color: 'rgba(255, 215, 0, 0.9)',
+                    fontFamily: '"Cinzel", serif',
+                    textShadow: '0 0 3px rgba(255, 215, 0, 0.3)',
+                    letterSpacing: '0.05em',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                  }),
+                },
+                children: label,
+              }),
+            helperTextElement =
+              helperText &&
+              (0, jsx_runtime.jsx)('div', {
+                style: (0, theme.En)(footerTextColor, themeConfig, styles),
+                children: helperText,
+              })
+          if (accordion) {
+            const summaryText = accordionSummary || label || 'Text Editor',
+              handleAccordionChange = (_event, expanded) => {
+                setAccordionExpanded(expanded)
+              }
             return (0, jsx_runtime.jsxs)('div', {
               style: computedStyles.container,
               children: [
-                labelElement,
-                createEditorContent(),
-                helperTextElement,
+                (0, jsx_runtime.jsx)(Accordion.A, {
+                  summary: summaryText,
+                  details: createEditorContent(),
+                  expanded: accordionExpanded,
+                  onChange: handleAccordionChange,
+                  styles: { theme: null == styles ? void 0 : styles.theme },
+                }),
                 isSacredTheme &&
                   (0, jsx_runtime.jsx)('div', {
                     style: computedStyles.sacredGlyph,
@@ -2369,6 +2072,24 @@
               ],
             })
           }
+          return (0, jsx_runtime.jsxs)('div', {
+            children: [
+              labelElement,
+              (0, jsx_runtime.jsxs)('div', {
+                style: computedStyles.container,
+                children: [
+                  createEditorContent(),
+                  helperTextElement,
+                  isSacredTheme &&
+                    (0, jsx_runtime.jsx)('div', {
+                      style: computedStyles.sacredGlyph,
+                      children: theme.vR[14],
+                    }),
+                ],
+              }),
+            ],
+          })
+        }
         const components_ComplexTextEditor = ComplexTextEditor
         ComplexTextEditor.__docgenInfo = {
           description: '',
@@ -2449,6 +2170,414 @@
               tsType: { name: 'ComplexTextEditorStyles' },
               description:
                 'Comprehensive styling options including theme, custom colors, and layout properties.',
+            },
+            autoSave: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+            },
+            autoSaveKey: {
+              required: !1,
+              tsType: { name: 'string' },
+              description: '',
+            },
+          },
+        }
+      },
+      './src/components/Typography/index.tsx': (
+        __unused_webpack_module,
+        __webpack_exports__,
+        __webpack_require__
+      ) => {
+        __webpack_require__.d(__webpack_exports__, {
+          A: () => components_Typography,
+        })
+        var jsx_runtime = __webpack_require__(
+            './node_modules/next/dist/compiled/react/jsx-runtime.js'
+          ),
+          shared =
+            (__webpack_require__(
+              './node_modules/next/dist/compiled/react/index.js'
+            ),
+            __webpack_require__('./src/theme/shared.ts'))
+        const typographyThemes = {
+            light: {
+              base: {
+                margin: '0',
+                padding: '0',
+                lineHeight: '1.6',
+                letterSpacing: '0.01em',
+                position: 'relative',
+                transition: shared.Ds.medium,
+              },
+              variants: {
+                merrih1: {
+                  fontSize: '2.25rem',
+                  fontWeight: '700',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merrih2: {
+                  fontSize: '1.875rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merrih3: {
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merrih4: {
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merrih5: {
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merrih6: {
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(17, 24, 39)',
+                },
+                merriparagraph: {
+                  fontSize: '1rem',
+                  fontWeight: '400',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(55, 65, 81)',
+                },
+                merrihelperfooter: {
+                  fontSize: '0.875rem',
+                  fontWeight: '400',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(107, 114, 128)',
+                },
+              },
+              alignment: {
+                left: { textAlign: 'left' },
+                center: { textAlign: 'center' },
+                right: { textAlign: 'right' },
+              },
+              gutterBottom: { marginBottom: '1rem' },
+              outline: {
+                textStroke: '1px rgb(17, 24, 39)',
+                WebkitTextStroke: '1px rgb(17, 24, 39)',
+              },
+            },
+            dark: {
+              base: {
+                margin: '0',
+                padding: '0',
+                lineHeight: '1.6',
+                letterSpacing: '0.01em',
+                position: 'relative',
+                transition: shared.Ds.medium,
+              },
+              variants: {
+                merrih1: {
+                  fontSize: '2.25rem',
+                  fontWeight: '700',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merrih2: {
+                  fontSize: '1.875rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merrih3: {
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merrih4: {
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merrih5: {
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merrih6: {
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(243, 244, 246)',
+                },
+                merriparagraph: {
+                  fontSize: '1rem',
+                  fontWeight: '400',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(209, 213, 219)',
+                },
+                merrihelperfooter: {
+                  fontSize: '0.875rem',
+                  fontWeight: '400',
+                  fontFamily: 'Merriweather, serif',
+                  color: 'rgb(156, 163, 175)',
+                },
+              },
+              alignment: {
+                left: { textAlign: 'left' },
+                center: { textAlign: 'center' },
+                right: { textAlign: 'right' },
+              },
+              gutterBottom: { marginBottom: '1rem' },
+              outline: {
+                textStroke: '1px rgb(243, 244, 246)',
+                WebkitTextStroke: '1px rgb(243, 244, 246)',
+              },
+            },
+            sacred: {
+              base: {
+                margin: '0',
+                padding: '0',
+                lineHeight: '1.6',
+                letterSpacing: '0.02em',
+                position: 'relative',
+                transition: shared.Ds.premium,
+              },
+              variants: {
+                merrih1: {
+                  fontSize: '2.5rem',
+                  fontWeight: '700',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merrih2: {
+                  fontSize: '2rem',
+                  fontWeight: '600',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merrih3: {
+                  fontSize: '1.75rem',
+                  fontWeight: '600',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 12px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.2)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merrih4: {
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merrih5: {
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 8px rgba(255, 215, 0, 0.4), 0 0 16px rgba(255, 215, 0, 0.2)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merrih6: {
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  fontFamily: 'Cinzel, serif',
+                  color: '#FFD700',
+                  textShadow:
+                    '0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.1)',
+                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+                },
+                merriparagraph: {
+                  fontSize: '1rem',
+                  fontWeight: '400',
+                  fontFamily: 'Cinzel, serif',
+                  color: 'rgba(245, 245, 220, 0.9)',
+                  textShadow: '0 0 5px rgba(255, 215, 0, 0.2)',
+                },
+                merrihelperfooter: {
+                  fontSize: '0.875rem',
+                  fontWeight: '400',
+                  fontFamily: 'Cinzel, serif',
+                  color: 'rgba(245, 245, 220, 0.7)',
+                  textShadow: '0 0 3px rgba(255, 215, 0, 0.1)',
+                },
+              },
+              alignment: {
+                left: { textAlign: 'left' },
+                center: { textAlign: 'center' },
+                right: { textAlign: 'right' },
+              },
+              gutterBottom: { marginBottom: '1rem' },
+              outline: {
+                textStroke: '1px #FFD700',
+                WebkitTextStroke: '1px #FFD700',
+              },
+            },
+          },
+          getTypographyStyles = styles => {
+            const themeConfig = (styles => {
+                const theme =
+                    (null == styles ? void 0 : styles.theme) || 'light',
+                  baseTheme = typographyThemes[theme]
+                if (!styles) return baseTheme
+                const variant = styles.variant || 'merriparagraph',
+                  baseVariant = baseTheme.variants[variant]
+                return {
+                  ...baseTheme,
+                  variants: {
+                    ...baseTheme.variants,
+                    [variant]: {
+                      ...baseVariant,
+                      fontSize: styles.fontSize || baseVariant.fontSize,
+                      fontWeight: styles.fontWeight || baseVariant.fontWeight,
+                      fontFamily: styles.fontFamily || baseVariant.fontFamily,
+                      color: styles.color || baseVariant.color,
+                      textShadow: styles.textShadow || baseVariant.textShadow,
+                      animation: baseVariant.animation,
+                    },
+                  },
+                }
+              })(styles),
+              variant =
+                (null == styles ? void 0 : styles.variant) || 'merriparagraph',
+              align = (null == styles ? void 0 : styles.textAlign) || 'left',
+              variantStyle = themeConfig.variants[variant],
+              alignmentStyle = themeConfig.alignment[align]
+            return {
+              container: {
+                ...themeConfig.base,
+                ...variantStyle,
+                ...alignmentStyle,
+                ...((null == styles ? void 0 : styles.gutterBottom) &&
+                  themeConfig.gutterBottom),
+                ...((null == styles ? void 0 : styles.outline) &&
+                  themeConfig.outline),
+                fontStyle: null == styles ? void 0 : styles.fontStyle,
+                margin: null == styles ? void 0 : styles.margin,
+                marginTop: null == styles ? void 0 : styles.marginTop,
+                marginBottom: null == styles ? void 0 : styles.marginBottom,
+                marginLeft: null == styles ? void 0 : styles.marginLeft,
+                marginRight: null == styles ? void 0 : styles.marginRight,
+                padding: null == styles ? void 0 : styles.padding,
+                paddingTop: null == styles ? void 0 : styles.paddingTop,
+                paddingBottom: null == styles ? void 0 : styles.paddingBottom,
+                paddingLeft: null == styles ? void 0 : styles.paddingLeft,
+                paddingRight: null == styles ? void 0 : styles.paddingRight,
+                width: null == styles ? void 0 : styles.width,
+                maxWidth: null == styles ? void 0 : styles.maxWidth,
+                minWidth: null == styles ? void 0 : styles.minWidth,
+                height: null == styles ? void 0 : styles.height,
+                maxHeight: null == styles ? void 0 : styles.maxHeight,
+                minHeight: null == styles ? void 0 : styles.minHeight,
+                position: null == styles ? void 0 : styles.position,
+                transition: (
+                  null == styles ? void 0 : styles.transitionDuration
+                )
+                  ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+                  : themeConfig.base.transition,
+                animation: null == styles ? void 0 : styles.animation,
+                animationDelay: null == styles ? void 0 : styles.animationDelay,
+              },
+            }
+          }
+        var console = __webpack_require__(
+          './node_modules/console-browserify/index.js'
+        )
+        const variantMapping = {
+            merrih1: 'h1',
+            merrih2: 'h2',
+            merrih3: 'h3',
+            merrih4: 'h4',
+            merrih5: 'h5',
+            merrih6: 'h6',
+            merriparagraph: 'p',
+            merrihelperfooter: 'p',
+          },
+          Typography = ({
+            text,
+            children,
+            variant = 'merriparagraph',
+            styles,
+            ...rest
+          }) => {
+            console.log('Typography component rendered with props:', {
+              variant,
+              text: text || children,
+              styles,
+            })
+            const mergedStyles = { variant, ...styles },
+              computedStyles = getTypographyStyles(mergedStyles),
+              Component = variantMapping[variant] || 'p',
+              content = children || text
+            return (0, jsx_runtime.jsx)(Component, {
+              style: computedStyles.container,
+              ...rest,
+              children: content,
+            })
+          }
+        Typography.displayName = 'Typography'
+        const components_Typography = Typography
+        Typography.__docgenInfo = {
+          description:
+            'A component for rendering text with consistent styling and theming.',
+          methods: [],
+          displayName: 'Typography',
+          props: {
+            text: {
+              required: !1,
+              tsType: { name: 'string' },
+              description:
+                'The text content to display. Can be used instead of children.',
+            },
+            children: {
+              required: !1,
+              tsType: { name: 'ReactReactNode', raw: 'React.ReactNode' },
+              description:
+                'The content to display. Takes precedence over the `text` prop.',
+            },
+            variant: {
+              required: !1,
+              tsType: {
+                name: 'union',
+                raw: "| 'merriparagraph'\n| 'merrihelperfooter'\n| 'merrih1'\n| 'merrih2'\n| 'merrih3'\n| 'merrih4'\n| 'merrih5'\n| 'merrih6'",
+                elements: [
+                  { name: 'literal', value: "'merriparagraph'" },
+                  { name: 'literal', value: "'merrihelperfooter'" },
+                  { name: 'literal', value: "'merrih1'" },
+                  { name: 'literal', value: "'merrih2'" },
+                  { name: 'literal', value: "'merrih3'" },
+                  { name: 'literal', value: "'merrih4'" },
+                  { name: 'literal', value: "'merrih5'" },
+                  { name: 'literal', value: "'merrih6'" },
+                ],
+              },
+              description:
+                'The typography variant to apply. Determines the style and semantic tag.',
+              defaultValue: { value: "'merriparagraph'", computed: !1 },
+            },
+            styles: {
+              required: !1,
+              tsType: { name: 'TypographyStyles' },
+              description:
+                'Custom styles to apply to the component using the theme system.',
             },
           },
         }

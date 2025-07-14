@@ -1181,9 +1181,30 @@
       ) => {
         ;(__webpack_require__.r(__webpack_exports__),
           __webpack_require__.d(__webpack_exports__, {
+            AdministratorFormCompanyDropdown: () =>
+              AdministratorFormCompanyDropdown,
+            AdministratorFormCompanyDropdownSacred: () =>
+              AdministratorFormCompanyDropdownSacred,
+            AdministratorFormCompanyProvided: () =>
+              AdministratorFormCompanyProvided,
+            AdministratorFormCompanyProvidedSacred: () =>
+              AdministratorFormCompanyProvidedSacred,
+            CompanyFormCustomerDropdown: () => CompanyFormCustomerDropdown,
+            CompanyFormCustomerDropdownSacred: () =>
+              CompanyFormCustomerDropdownSacred,
+            CompanyFormCustomerProvided: () => CompanyFormCustomerProvided,
+            CompanyFormCustomerProvidedSacred: () =>
+              CompanyFormCustomerProvidedSacred,
+            CustomerForm: () => CustomerForm,
+            CustomerFormSacred: () => CustomerFormSacred,
             InteractiveDemo: () => InteractiveDemo,
+            NoUserForm: () => NoUserForm,
+            NoUserFormSacred: () => NoUserFormSacred,
             PremiumTheme: () => PremiumTheme,
             SacredTheme: () => SacredTheme,
+            SeverityBoard: () => SeverityBoard,
+            StatusBoard: () => StatusBoard,
+            TopicBoard: () => TopicBoard,
             __namedExportsOrder: () => __namedExportsOrder,
             default: () => projectboard_stories,
           }))
@@ -8258,3144 +8279,813 @@
             },
           },
         }
-        var Card = __webpack_require__('./src/components/Card/index.tsx'),
-          Regular = __webpack_require__(
-            './src/components/Field/Dropdown/Regular/index.tsx'
-          ),
-          Checkbox = __webpack_require__('./src/components/Checkbox/index.tsx')
-        function useTaskDragAndDrop() {
-          const [dragItem, setDragItem] = react.useState(null)
-          return {
-            dragItem,
-            setDragItem,
-            handleTaskDragStart: function handleTaskDragStart(item) {
-              setDragItem(item)
-            },
-            handleTaskDragOver: function handleTaskDragOver(e) {
-              e.preventDefault()
-            },
-            handleTaskDrop: function handleTaskDrop(
-              e,
-              { dropColumnIndex, dropTaskIndex, allColumns, setAllColumns }
-            ) {
-              if ((e.preventDefault(), !dragItem)) return
-              const { columnIndex: sourceColIdx, taskIndex: sourceTaskIdx } =
-                dragItem
-              if (sourceColIdx < 0 || sourceColIdx >= allColumns.length) return
-              const sourceColumn = allColumns[sourceColIdx]
-              if (
-                sourceTaskIdx < 0 ||
-                sourceTaskIdx >= sourceColumn.tasks.length
-              )
-                return
-              const [movedTask] = sourceColumn.tasks.splice(sourceTaskIdx, 1)
-              if (dropColumnIndex < 0 || dropColumnIndex >= allColumns.length)
-                return (
-                  sourceColumn.tasks.splice(sourceTaskIdx, 0, movedTask),
-                  void setDragItem(null)
-                )
-              const destColumn = allColumns[dropColumnIndex]
-              ;(dropTaskIndex < 0 && (dropTaskIndex = 0),
-                dropTaskIndex > destColumn.tasks.length &&
-                  (dropTaskIndex = destColumn.tasks.length),
-                destColumn.tasks.splice(dropTaskIndex, 0, movedTask))
-              const newCols = [...allColumns]
-              ;((newCols[sourceColIdx] = { ...sourceColumn }),
-                (newCols[dropColumnIndex] = { ...destColumn }),
-                setAllColumns(newCols),
-                setDragItem(null))
-            },
-          }
-        }
-        const desktop_SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
-        function DesktopBoard({
-          columns,
-          overflowColumns,
-          selectedOverflowColumnId,
-          onChangeSelectedOverflowColumn,
-          selectedTask,
-          onSelectTask,
-          onColumnDragStart,
-          onColumnDragOver,
-          onColumnDrop,
-          sacredtheme = !1,
-        }) {
-          var _activeOverflowColumn_tasks
-          const [allColumns, setAllColumns] = (0, esm_react.fp)(columnsAtom),
-            [selectedColumnIndex, setSelectedColumnIndex] = (0, react.useState)(
-              null
-            ),
-            { handleTaskDragStart, handleTaskDragOver, handleTaskDrop } =
-              useTaskDragAndDrop(),
-            styles = (sacredtheme => ({
-              boardContainer: {
-                display: 'flex',
-                flexDirection: 'row',
-                gap: '0.75rem',
-              },
-              column: {
-                boxSizing: 'border-box',
-                width: '300px',
-                height: '70vh',
-                borderRadius: '0.375rem',
-                display: 'flex',
-                flexDirection: 'column',
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                      border: '2px solid rgba(255, 215, 0, 0.5)',
-                      animation: 'board-glow-pulse 2s infinite alternate',
-                      backdropFilter: 'blur(16px)',
-                    }
-                  : { backgroundColor: 'black' }),
-              },
-              columnHeader: {
-                padding: '0.5rem',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-                      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                    }
-                  : { borderBottom: '1px solid white' }),
-              },
-              columnTitleContainer: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.125rem',
-              },
-              columnTitle: {
-                ...(sacredtheme && {
-                  fontFamily: 'Cinzel, serif',
-                  fontWeight: 600,
-                  letterSpacing: '0.05em',
-                  textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-                }),
-              },
-              columnDescription: {
-                ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-              },
-              tasksContainer: { padding: '0.5rem', flex: 1 },
-              noTasks: {
-                ...(sacredtheme && {
-                  fontStyle: 'italic',
-                  fontFamily: 'Crimson Text, serif',
-                }),
-              },
-              tasksList: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-              },
-              checkbox: {
-                position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
-              },
-              glyph: {
-                position: 'absolute',
-                top: '0.5rem',
-                left: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 215, 0, 0.3)',
-                animation: 'board-float-glyph 3s infinite alternate',
-                zIndex: 10,
-              },
-            }))(sacredtheme)
-          function isTaskCheckboxDisabled() {
-            return null !== selectedColumnIndex
-          }
-          function isColumnDraggable(colIndex) {
-            return selectedColumnIndex === colIndex
-          }
-          function isTaskDraggable(colIndex, taskIndex) {
-            return (
-              null === selectedColumnIndex &&
-              (null == selectedTask ? void 0 : selectedTask.colIndex) ===
-                colIndex &&
-              (null == selectedTask ? void 0 : selectedTask.taskIndex) ===
-                taskIndex
-            )
-          }
-          function handleLocalTaskDragStart(e, columnIndex, taskIndex) {
-            isTaskDraggable(columnIndex, taskIndex)
-              ? handleTaskDragStart({ columnIndex, taskIndex })
-              : e.preventDefault()
-          }
-          function handleLocalTaskDrop(e, dropColumnIndex, dropTaskIndex) {
-            ;(e.preventDefault(),
-              handleTaskDrop(e, {
-                dropColumnIndex,
-                dropTaskIndex,
-                allColumns,
-                setAllColumns,
-              }))
-          }
-          const hasOverflow = Boolean(
-            null == overflowColumns ? void 0 : overflowColumns.length
-          )
-          let activeOverflowColumn
-          hasOverflow &&
-            selectedOverflowColumnId &&
-            overflowColumns &&
-            (activeOverflowColumn =
-              overflowColumns.find(c => c._id === selectedOverflowColumnId) ||
-              overflowColumns[0])
-          const handleOverflowDropdownChange = (0, react.useCallback)(
-            e => {
-              if (!overflowColumns || !onChangeSelectedOverflowColumn) return
-              const colTitle = e.target.value,
-                found = overflowColumns.find(c => c.title === colTitle)
-              found && onChangeSelectedOverflowColumn(found._id)
-            },
-            [overflowColumns, onChangeSelectedOverflowColumn]
-          )
-          var _overflowColumns_map
-          return (0, jsx_runtime.jsxs)('div', {
-            style: styles.boardContainer,
-            children: [
-              columns.map((col, colIndex) => {
-                var _col_tasks
-                const colChecked = selectedColumnIndex === colIndex
-                return (0, jsx_runtime.jsxs)(
-                  'div',
-                  {
-                    draggable: isColumnDraggable(colIndex),
-                    onDragStart: e =>
-                      (function handleLocalColumnDragStart(e, colIndex) {
-                        isColumnDraggable(colIndex)
-                          ? onColumnDragStart(e, colIndex)
-                          : e.preventDefault()
-                      })(e, colIndex),
-                    onDragOver: e =>
-                      (function handleLocalColumnDragOver(e, colIndex) {
-                        ;(e.preventDefault(), onColumnDragOver(e, colIndex))
-                      })(e, colIndex),
-                    onDrop: e =>
-                      (function handleLocalColumnDrop(e, colIndex) {
-                        ;(e.preventDefault(), onColumnDrop(e, colIndex))
-                      })(e, colIndex),
-                    style: styles.column,
-                    children: [
-                      sacredtheme &&
-                        (0, jsx_runtime.jsx)('div', {
-                          style: styles.glyph,
-                          children:
-                            desktop_SACRED_GLYPHS[
-                              colIndex % desktop_SACRED_GLYPHS.length
-                            ],
-                        }),
-                      (0, jsx_runtime.jsxs)('div', {
-                        style: styles.columnHeader,
-                        children: [
-                          (0, jsx_runtime.jsx)(Checkbox.A, {
-                            checked: colChecked,
-                            disabled: null !== selectedTask,
-                            onChange: () =>
-                              (function handleColumnCheck(colIndex) {
-                                selectedColumnIndex === colIndex
-                                  ? setSelectedColumnIndex(null)
-                                  : (onSelectTask(-1, -1),
-                                    setSelectedColumnIndex(colIndex))
-                              })(colIndex),
-                            styles: { theme: sacredtheme ? 'sacred' : 'light' },
-                            style: styles.checkbox,
-                          }),
-                          (0, jsx_runtime.jsxs)('div', {
-                            style: styles.columnTitleContainer,
-                            children: [
-                              (0, jsx_runtime.jsx)(Typography.A, {
-                                variant: 'merrih4',
-                                styles: {
-                                  color: sacredtheme ? '#FFD700' : 'white',
-                                },
-                                children: col.title,
-                              }),
-                              (0, jsx_runtime.jsx)(Typography.A, {
-                                variant: 'merrih6',
-                                styles: {
-                                  color: sacredtheme
-                                    ? 'rgba(255, 215, 0, 0.8)'
-                                    : 'white',
-                                },
-                                children: col.description,
-                              }),
-                            ],
-                          }),
-                        ],
-                      }),
-                      (0, jsx_runtime.jsx)('div', {
-                        style: styles.tasksContainer,
-                        children: (
-                          null === (_col_tasks = col.tasks) ||
-                          void 0 === _col_tasks
-                            ? void 0
-                            : _col_tasks.length
-                        )
-                          ? (0, jsx_runtime.jsx)('div', {
-                              style: styles.tasksList,
-                              children: col.tasks.map((task, taskIndex) => {
-                                const isSelected =
-                                  (null == selectedTask
-                                    ? void 0
-                                    : selectedTask.colIndex) === colIndex &&
-                                  (null == selectedTask
-                                    ? void 0
-                                    : selectedTask.taskIndex) === taskIndex
-                                return (0, jsx_runtime.jsx)(
-                                  Card.A,
-                                  {
-                                    variant: 'task',
-                                    title: task.title,
-                                    description: task.description,
-                                    checked: isSelected,
-                                    disabled: isTaskCheckboxDisabled(),
-                                    onCheck: () => {
-                                      null === selectedColumnIndex &&
-                                        onSelectTask(colIndex, taskIndex)
-                                    },
-                                    draggable: isTaskDraggable(
-                                      colIndex,
-                                      taskIndex
-                                    ),
-                                    onDragStart: e =>
-                                      handleLocalTaskDragStart(
-                                        e,
-                                        colIndex,
-                                        taskIndex
-                                      ),
-                                    onDragOver: handleTaskDragOver,
-                                    onDrop: e =>
-                                      handleLocalTaskDrop(
-                                        e,
-                                        colIndex,
-                                        taskIndex
-                                      ),
-                                    sacredtheme,
-                                  },
-                                  task._id
-                                )
-                              }),
-                            })
-                          : (0, jsx_runtime.jsx)(Typography.A, {
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.6)'
-                                  : 'white',
-                              },
-                              children: 'No tasks yet',
-                            }),
-                      }),
-                    ],
-                  },
-                  col._id
-                )
-              }),
-              hasOverflow &&
-                activeOverflowColumn &&
-                (0, jsx_runtime.jsxs)(
-                  'div',
-                  {
-                    draggable: !1,
-                    onDragOver: e => e.preventDefault(),
-                    onDrop: e => {
-                      ;(e.preventDefault(), onColumnDrop(e, columns.length))
-                    },
-                    style: {
-                      ...styles.column,
-                      animationDelay: sacredtheme ? '0.5s' : void 0,
-                    },
-                    children: [
-                      (0, jsx_runtime.jsxs)('div', {
-                        style: styles.columnHeader,
-                        children: [
-                          (0, jsx_runtime.jsx)(Regular.A, {
-                            label: 'More Columns',
-                            options:
-                              null !==
-                                (_overflowColumns_map =
-                                  null == overflowColumns
-                                    ? void 0
-                                    : overflowColumns.map(col => ({
-                                        value: col.title,
-                                      }))) && void 0 !== _overflowColumns_map
-                                ? _overflowColumns_map
-                                : [],
-                            value:
-                              null == activeOverflowColumn
-                                ? void 0
-                                : activeOverflowColumn.title,
-                            onChange: handleOverflowDropdownChange,
-                            styles: {
-                              theme: sacredtheme ? 'sacred' : 'light',
-                              backgroundColor: sacredtheme
-                                ? 'rgba(255, 215, 0, 0.1)'
-                                : 'white',
-                              borderColor: sacredtheme ? '#FFD700' : 'white',
-                              textColor: sacredtheme ? '#FFD700' : '#000',
-                              labelColor: sacredtheme ? '#FFD700' : 'white',
-                            },
-                          }),
-                          (0, jsx_runtime.jsx)('div', {
-                            style: styles.columnTitleContainer,
-                            children: (0, jsx_runtime.jsx)(Typography.A, {
-                              variant: 'merrih6',
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.8)'
-                                  : 'white',
-                              },
-                              children: activeOverflowColumn.description,
-                            }),
-                          }),
-                        ],
-                      }),
-                      (0, jsx_runtime.jsx)('div', {
-                        style: styles.tasksContainer,
-                        children: (
-                          null ===
-                            (_activeOverflowColumn_tasks =
-                              activeOverflowColumn.tasks) ||
-                          void 0 === _activeOverflowColumn_tasks
-                            ? void 0
-                            : _activeOverflowColumn_tasks.length
-                        )
-                          ? (0, jsx_runtime.jsx)('div', {
-                              style: styles.tasksList,
-                              children: activeOverflowColumn.tasks.map(
-                                (task, taskIndex) => {
-                                  const overflowColIndex = columns.length,
-                                    isSelected =
-                                      (null == selectedTask
-                                        ? void 0
-                                        : selectedTask.colIndex) ===
-                                        overflowColIndex &&
-                                      (null == selectedTask
-                                        ? void 0
-                                        : selectedTask.taskIndex) === taskIndex
-                                  return (0, jsx_runtime.jsx)(
-                                    Card.A,
-                                    {
-                                      variant: 'task',
-                                      title: task.title,
-                                      description: task.description,
-                                      checked: isSelected,
-                                      disabled: isTaskCheckboxDisabled(),
-                                      onCheck: () => {
-                                        null === selectedColumnIndex &&
-                                          onSelectTask(
-                                            overflowColIndex,
-                                            taskIndex
-                                          )
-                                      },
-                                      draggable: isTaskDraggable(
-                                        overflowColIndex,
-                                        taskIndex
-                                      ),
-                                      onDragStart: e =>
-                                        handleLocalTaskDragStart(
-                                          e,
-                                          overflowColIndex,
-                                          taskIndex
-                                        ),
-                                      onDragOver: handleTaskDragOver,
-                                      onDrop: e =>
-                                        handleLocalTaskDrop(
-                                          e,
-                                          overflowColIndex,
-                                          taskIndex
-                                        ),
-                                      sacredtheme,
-                                    },
-                                    task._id
-                                  )
-                                }
-                              ),
-                            })
-                          : (0, jsx_runtime.jsx)(Typography.A, {
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.6)'
-                                  : 'white',
-                              },
-                              children: 'No tasks yet',
-                            }),
-                      }),
-                    ],
-                  },
-                  'overflow-desktop-column'
-                ),
-            ],
-          })
-        }
-        DesktopBoard.__docgenInfo = {
-          description: '',
-          methods: [],
-          displayName: 'DesktopBoard',
-          props: {
-            columns: {
-              required: !0,
-              tsType: {
-                name: 'Array',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                    signature: {
-                      properties: [
-                        { key: '_id', value: { name: 'string', required: !0 } },
-                        {
-                          key: 'title',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'description',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'tasks',
-                          value: {
-                            name: 'Array',
-                            elements: [
-                              {
-                                name: 'signature',
-                                type: 'object',
-                                raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                signature: {
-                                  properties: [
-                                    {
-                                      key: '_id',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'companyId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The parent company ID or other domain-specific reference.',
-                                    },
-                                    {
-                                      key: 'title',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'description',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'severityId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If severity is linked to a separate record, store it here.',
-                                    },
-                                    {
-                                      key: 'statusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The main status.',
-                                    },
-                                    {
-                                      key: 'substatusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The sub-status.',
-                                    },
-                                    {
-                                      key: 'schedulingQueueId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The scheduling queue ID.',
-                                    },
-                                    {
-                                      key: 'topicIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Topics array, each referencing a topic ID.',
-                                    },
-                                    {
-                                      key: 'commentIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Comments array, referencing comment IDs.',
-                                    },
-                                    {
-                                      key: 'employeeIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Employee IDs assigned to the task.',
-                                    },
-                                    {
-                                      key: 'articleIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description: 'Knowledgebase article IDs.',
-                                    },
-                                    {
-                                      key: 'customerId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The "customer" ID if you have one.',
-                                    },
-                                    {
-                                      key: 'createdAt',
-                                      value: { name: 'Date', required: !0 },
-                                      description: 'Timestamps.',
-                                    },
-                                    {
-                                      key: 'closedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'updatedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'createdBy',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'editHistory',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'isOriginal',
-                                                  value: {
-                                                    name: 'boolean',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'CommentEditHistory[]',
-                                        required: !0,
-                                      },
-                                    },
-                                    {
-                                      key: 'comments',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editHistory',
-                                                  value: {
-                                                    name: 'Array',
-                                                    elements: [
-                                                      {
-                                                        name: 'signature',
-                                                        type: 'object',
-                                                        raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                        signature: {
-                                                          properties: [
-                                                            {
-                                                              key: '_id',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedBy',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedAt',
-                                                              value: {
-                                                                name: 'Date',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'text',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'isOriginal',
-                                                              value: {
-                                                                name: 'boolean',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                          ],
-                                                        },
-                                                      },
-                                                    ],
-                                                    raw: 'CommentEditHistory[]',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'Comment[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                    },
-                                    {
-                                      key: 'customerAssigned',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                    },
-                                    {
-                                      key: 'severity',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Severity label text (e.g. "Critical").',
-                                    },
-                                    {
-                                      key: 'schedulingQueue',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                    },
-                                    {
-                                      key: 'status',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'High-level status text (e.g. "Open").',
-                                    },
-                                    {
-                                      key: 'subStatus',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Sub-status text (e.g. "In Progress").',
-                                    },
-                                    {
-                                      key: 'topicLabels',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                    },
-                                    {
-                                      key: 'kbArticles',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                    },
-                                    {
-                                      key: 'teamMember',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                    },
-                                    {
-                                      key: 'nextActionDate',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                            raw: 'Task[]',
-                            required: !0,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-                raw: 'ColumnData[]',
-              },
-              description: '',
-            },
-            overflowColumns: {
-              required: !1,
-              tsType: {
-                name: 'Array',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                    signature: {
-                      properties: [
-                        { key: '_id', value: { name: 'string', required: !0 } },
-                        {
-                          key: 'title',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'description',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'tasks',
-                          value: {
-                            name: 'Array',
-                            elements: [
-                              {
-                                name: 'signature',
-                                type: 'object',
-                                raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                signature: {
-                                  properties: [
-                                    {
-                                      key: '_id',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'companyId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The parent company ID or other domain-specific reference.',
-                                    },
-                                    {
-                                      key: 'title',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'description',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'severityId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If severity is linked to a separate record, store it here.',
-                                    },
-                                    {
-                                      key: 'statusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The main status.',
-                                    },
-                                    {
-                                      key: 'substatusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The sub-status.',
-                                    },
-                                    {
-                                      key: 'schedulingQueueId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The scheduling queue ID.',
-                                    },
-                                    {
-                                      key: 'topicIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Topics array, each referencing a topic ID.',
-                                    },
-                                    {
-                                      key: 'commentIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Comments array, referencing comment IDs.',
-                                    },
-                                    {
-                                      key: 'employeeIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Employee IDs assigned to the task.',
-                                    },
-                                    {
-                                      key: 'articleIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description: 'Knowledgebase article IDs.',
-                                    },
-                                    {
-                                      key: 'customerId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The "customer" ID if you have one.',
-                                    },
-                                    {
-                                      key: 'createdAt',
-                                      value: { name: 'Date', required: !0 },
-                                      description: 'Timestamps.',
-                                    },
-                                    {
-                                      key: 'closedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'updatedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'createdBy',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'editHistory',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'isOriginal',
-                                                  value: {
-                                                    name: 'boolean',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'CommentEditHistory[]',
-                                        required: !0,
-                                      },
-                                    },
-                                    {
-                                      key: 'comments',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editHistory',
-                                                  value: {
-                                                    name: 'Array',
-                                                    elements: [
-                                                      {
-                                                        name: 'signature',
-                                                        type: 'object',
-                                                        raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                        signature: {
-                                                          properties: [
-                                                            {
-                                                              key: '_id',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedBy',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedAt',
-                                                              value: {
-                                                                name: 'Date',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'text',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'isOriginal',
-                                                              value: {
-                                                                name: 'boolean',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                          ],
-                                                        },
-                                                      },
-                                                    ],
-                                                    raw: 'CommentEditHistory[]',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'Comment[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                    },
-                                    {
-                                      key: 'customerAssigned',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                    },
-                                    {
-                                      key: 'severity',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Severity label text (e.g. "Critical").',
-                                    },
-                                    {
-                                      key: 'schedulingQueue',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                    },
-                                    {
-                                      key: 'status',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'High-level status text (e.g. "Open").',
-                                    },
-                                    {
-                                      key: 'subStatus',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Sub-status text (e.g. "In Progress").',
-                                    },
-                                    {
-                                      key: 'topicLabels',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                    },
-                                    {
-                                      key: 'kbArticles',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                    },
-                                    {
-                                      key: 'teamMember',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                    },
-                                    {
-                                      key: 'nextActionDate',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                            raw: 'Task[]',
-                            required: !0,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-                raw: 'ColumnData[]',
-              },
-              description: '',
-            },
-            selectedOverflowColumnId: {
-              required: !1,
-              tsType: { name: 'string' },
-              description: '',
-            },
-            onChangeSelectedOverflowColumn: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(colId: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'colId' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            selectedTask: {
-              required: !0,
-              tsType: {
-                name: 'union',
-                raw: '{ colIndex: number; taskIndex: number } | null',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{ colIndex: number; taskIndex: number }',
-                    signature: {
-                      properties: [
-                        {
-                          key: 'colIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                        {
-                          key: 'taskIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                      ],
-                    },
-                  },
-                  { name: 'null' },
-                ],
-              },
-              description: '',
-            },
-            onSelectTask: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(colIndex: number, taskIndex: number) => void',
-                signature: {
-                  arguments: [
-                    { type: { name: 'number' }, name: 'colIndex' },
-                    { type: { name: 'number' }, name: 'taskIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDragStart: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDragOver: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDrop: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            styles: {
-              required: !1,
-              tsType: { name: 'ProjectBoardStyles' },
-              description:
-                'Comprehensive styling options including theme, custom colors, and layout properties.',
-            },
-            sacredtheme: {
-              required: !1,
-              tsType: { name: 'boolean' },
-              description: 'Sacred theme flag for styling',
-              defaultValue: { value: 'false', computed: !1 },
-            },
-          },
-        }
-        const mobile_SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
-        function MobileBoard({
-          columns,
-          overflowColumns,
-          selectedOverflowColumnId,
-          onChangeSelectedOverflowColumn,
-          selectedTask,
-          onSelectTask,
-          onColumnDrop,
-          sacredtheme = !1,
-        }) {
-          var _currentColumn_tasks
-          const [allColumns, setAllColumns] = (0, esm_react.fp)(columnsAtom),
-            { handleTaskDragStart, handleTaskDragOver, handleTaskDrop } =
-              useTaskDragAndDrop(),
-            [mobileColumnIndex, setMobileColumnIndex] = (0, react.useState)(0),
-            [selectedColumnIndex, setSelectedColumnIndex] = (0, react.useState)(
-              null
-            ),
-            styles = (sacredtheme => ({
-              boardContainer: {
-                boxSizing: 'border-box',
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              },
-              column: {
-                boxSizing: 'border-box',
-                width: '300px',
-                height: '70vh',
-                borderRadius: '0.375rem',
-                display: 'flex',
-                flexDirection: 'column',
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                      border: '2px solid rgba(255, 215, 0, 0.5)',
-                      animation: 'board-glow-pulse 2s infinite alternate',
-                      backdropFilter: 'blur(16px)',
-                    }
-                  : { backgroundColor: 'black' }),
-              },
-              columnHeader: {
-                padding: '0.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-                      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                    }
-                  : { borderBottom: '1px solid white' }),
-              },
-              columnDescription: {
-                ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-              },
-              tasksContainer: { padding: '0.5rem', flex: 1 },
-              noTasks: {
-                ...(sacredtheme && {
-                  fontStyle: 'italic',
-                  fontFamily: 'Crimson Text, serif',
-                }),
-              },
-              tasksList: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-              },
-              checkbox: {
-                position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
-              },
-              glyph: {
-                position: 'absolute',
-                top: '0.5rem',
-                left: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 215, 0, 0.3)',
-                animation: 'board-float-glyph 3s infinite alternate',
-                zIndex: 10,
-              },
-            }))(sacredtheme)
-          function isColumnDraggable(colIndex) {
-            return selectedColumnIndex === colIndex
-          }
-          function isTaskDraggable(colIndex, taskIndex) {
-            return (
-              null === selectedColumnIndex &&
-              (null == selectedTask ? void 0 : selectedTask.colIndex) ===
-                colIndex &&
-              (null == selectedTask ? void 0 : selectedTask.taskIndex) ===
-                taskIndex
-            )
-          }
-          function handleLocalTaskDragStart(e, columnIndex, taskIndex) {
-            isTaskDraggable(columnIndex, taskIndex)
-              ? handleTaskDragStart({ columnIndex, taskIndex })
-              : e.preventDefault()
-          }
-          function handleLocalTaskDrop(e, dropColumnIndex, dropTaskIndex) {
-            ;(e.preventDefault(),
-              handleTaskDrop(e, {
-                dropColumnIndex,
-                dropTaskIndex,
-                allColumns,
-                setAllColumns,
-              }))
-          }
-          const hasOverflow = Boolean(
-            null == overflowColumns ? void 0 : overflowColumns.length
-          )
-          let activeOverflowColumn
-          hasOverflow &&
-            selectedOverflowColumnId &&
-            overflowColumns &&
-            (activeOverflowColumn =
-              overflowColumns.find(c => c._id === selectedOverflowColumnId) ||
-              overflowColumns[0])
-          const handleOverflowDropdownChange = (0, react.useCallback)(
-            e => {
-              if (!overflowColumns || !onChangeSelectedOverflowColumn) return
-              const colTitle = e.target.value,
-                found = overflowColumns.find(c => c.title === colTitle)
-              found && onChangeSelectedOverflowColumn(found._id)
-            },
-            [overflowColumns, onChangeSelectedOverflowColumn]
-          )
-          if (hasOverflow && activeOverflowColumn) {
-            var _activeOverflowColumn_tasks
-            const overflowColIndex = columns.length
-            var _overflowColumns_map
-            return (0, jsx_runtime.jsxs)(
-              'div',
-              {
-                draggable: !1,
-                onDragOver: e => e.preventDefault(),
-                onDrop: e => {
-                  ;(e.preventDefault(), onColumnDrop(e, overflowColIndex))
-                },
-                style: styles.column,
-                children: [
-                  sacredtheme &&
-                    (0, jsx_runtime.jsx)('div', {
-                      style: styles.glyph,
-                      children: mobile_SACRED_GLYPHS[0],
+        const board_SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹'],
+          TaskCard = ({
+            title,
+            description,
+            checked,
+            onCheck,
+            onEdit,
+            onDelete,
+            draggable = !1,
+            onDragStart,
+            onDragOver,
+            onDragEnter,
+            onDragLeave,
+            onDrop,
+            styles,
+          }) => {
+            const [isEditing, setIsEditing] = (0, react.useState)(!1),
+              [editTitle, setEditTitle] = (0, react.useState)(title),
+              [editDescription, setEditDescription] = (0, react.useState)(
+                description
+              ),
+              [isHovered, setIsHovered] = (0, react.useState)(!1),
+              isSacredTheme =
+                'sacred' === (null == styles ? void 0 : styles.theme),
+              isDarkTheme = 'dark' === (null == styles ? void 0 : styles.theme),
+              taskCardStyles = (0, react.useMemo)(
+                () => ({
+                  container: {
+                    position: 'relative',
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(0, 0, 0, 0.9)'
+                      : isDarkTheme
+                        ? '#374151'
+                        : '#ffffff',
+                    border: isSacredTheme
+                      ? '1px solid rgba(255, 215, 0, 0.3)'
+                      : isDarkTheme
+                        ? '1px solid #4b5563'
+                        : '1px solid #e5e7eb',
+                    borderRadius: '0.5rem',
+                    padding: '1rem',
+                    marginBottom: '0.5rem',
+                    cursor: draggable ? 'grab' : 'default',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSacredTheme
+                      ? isHovered
+                        ? '0 8px 25px rgba(255, 215, 0, 0.2)'
+                        : '0 2px 8px rgba(255, 215, 0, 0.1)'
+                      : isDarkTheme
+                        ? isHovered
+                          ? '0 8px 25px rgba(0, 0, 0, 0.4)'
+                          : '0 2px 8px rgba(0, 0, 0, 0.2)'
+                        : isHovered
+                          ? '0 8px 25px rgba(0, 0, 0, 0.15)'
+                          : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+                    ...(isSacredTheme && {
+                      backgroundImage:
+                        'linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.95) 100%)',
                     }),
-                  (0, jsx_runtime.jsxs)('div', {
-                    style: styles.columnHeader,
-                    children: [
-                      (0, jsx_runtime.jsx)(Regular.A, {
-                        label: 'More Columns',
-                        options:
-                          null !==
-                            (_overflowColumns_map =
-                              null == overflowColumns
-                                ? void 0
-                                : overflowColumns.map(col => ({
-                                    value: col.title,
-                                  }))) && void 0 !== _overflowColumns_map
-                            ? _overflowColumns_map
-                            : [],
-                        value:
-                          null == activeOverflowColumn
-                            ? void 0
-                            : activeOverflowColumn.title,
-                        onChange: handleOverflowDropdownChange,
-                        styles: {
-                          theme: sacredtheme ? 'sacred' : 'light',
-                          backgroundColor: sacredtheme
-                            ? 'rgba(255, 215, 0, 0.1)'
-                            : 'white',
-                          borderColor: sacredtheme ? '#FFD700' : 'white',
-                          textColor: sacredtheme ? '#FFD700' : '#000',
-                          labelColor: sacredtheme ? '#FFD700' : 'white',
-                        },
-                      }),
-                      (0, jsx_runtime.jsx)('div', {
-                        style: {
-                          ...styles.columnDescription,
-                          marginTop: '0.25rem',
-                        },
-                        children: (0, jsx_runtime.jsx)(Typography.A, {
-                          variant: 'merrih6',
-                          styles: {
-                            color: sacredtheme
-                              ? 'rgba(255, 215, 0, 0.8)'
-                              : 'white',
-                          },
-                          children: activeOverflowColumn.description,
-                        }),
-                      }),
-                    ],
-                  }),
-                  (0, jsx_runtime.jsx)('div', {
-                    style: styles.tasksContainer,
-                    children: (
-                      null ===
-                        (_activeOverflowColumn_tasks =
-                          activeOverflowColumn.tasks) ||
-                      void 0 === _activeOverflowColumn_tasks
-                        ? void 0
-                        : _activeOverflowColumn_tasks.length
-                    )
-                      ? (0, jsx_runtime.jsx)('div', {
-                          style: styles.tasksList,
-                          children: activeOverflowColumn.tasks.map(
-                            (task, taskIndex) => {
-                              const isSelected =
-                                (null == selectedTask
-                                  ? void 0
-                                  : selectedTask.colIndex) ===
-                                  overflowColIndex &&
-                                (null == selectedTask
-                                  ? void 0
-                                  : selectedTask.taskIndex) === taskIndex
-                              return (0, jsx_runtime.jsx)(
-                                Card.A,
-                                {
-                                  variant: 'task',
-                                  title: task.title,
-                                  description: task.description,
-                                  checked: isSelected,
-                                  disabled: !1,
-                                  onCheck: () =>
-                                    onSelectTask(overflowColIndex, taskIndex),
-                                  draggable: isTaskDraggable(
-                                    overflowColIndex,
-                                    taskIndex
-                                  ),
-                                  onDragStart: e =>
-                                    handleLocalTaskDragStart(
-                                      e,
-                                      overflowColIndex,
-                                      taskIndex
-                                    ),
-                                  onDragOver: handleTaskDragOver,
-                                  onDrop: e =>
-                                    handleLocalTaskDrop(
-                                      e,
-                                      overflowColIndex,
-                                      taskIndex
-                                    ),
-                                  sacredtheme,
-                                },
-                                task._id
-                              )
-                            }
-                          ),
-                        })
-                      : (0, jsx_runtime.jsx)(Typography.A, {
-                          styles: {
-                            color: sacredtheme
-                              ? 'rgba(255, 215, 0, 0.6)'
-                              : 'white',
-                          },
-                          children: 'No tasks yet',
-                        }),
-                  }),
-                ],
-              },
-              'overflow-mobile-column'
-            )
-          }
-          if (!columns.length)
-            return (0, jsx_runtime.jsx)(Typography.A, {
-              styles: { color: sacredtheme ? '#FFD700' : 'black' },
-              children: 'No columns available.',
-            })
-          const currentColumn = columns[mobileColumnIndex]
-          return (0, jsx_runtime.jsx)('div', {
-            style: styles.boardContainer,
-            children: (0, jsx_runtime.jsxs)(
-              'div',
-              {
-                draggable: isColumnDraggable(mobileColumnIndex),
-                onDragStart: e =>
-                  (function handleLocalColumnDragStart(e, colIndex) {
-                    isColumnDraggable(colIndex) || e.preventDefault()
-                  })(e, mobileColumnIndex),
-                onDragOver: e => e.preventDefault(),
-                onDrop: e => {
-                  ;(e.preventDefault(), onColumnDrop(e, mobileColumnIndex))
-                },
-                style: styles.column,
-                children: [
-                  sacredtheme &&
-                    (0, jsx_runtime.jsx)('div', {
-                      style: styles.glyph,
-                      children:
-                        mobile_SACRED_GLYPHS[
-                          mobileColumnIndex % mobile_SACRED_GLYPHS.length
-                        ],
+                  },
+                  checkbox: {
+                    position: 'absolute',
+                    top: '0.75rem',
+                    right: '0.75rem',
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    cursor: 'pointer',
+                    accentColor: isSacredTheme
+                      ? '#FFD700'
+                      : isDarkTheme
+                        ? '#60a5fa'
+                        : '#3b82f6',
+                  },
+                  title: {
+                    margin: '0 1.5rem 0.5rem 0',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    color: isSacredTheme
+                      ? '#FFD700'
+                      : isDarkTheme
+                        ? '#f9fafb'
+                        : '#1f2937',
+                    ...(isSacredTheme && {
+                      fontFamily: 'Cinzel, serif',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 0 8px rgba(255, 215, 0, 0.3)',
                     }),
-                  (0, jsx_runtime.jsxs)('div', {
-                    style: styles.columnHeader,
-                    children: [
-                      (0, jsx_runtime.jsx)(Checkbox.A, {
-                        checked: selectedColumnIndex === mobileColumnIndex,
-                        disabled: (function isColumnCheckboxDisabled() {
-                          return null !== selectedTask
-                        })(),
-                        onChange: () =>
-                          (function handleColumnCheck(colIndex) {
-                            selectedColumnIndex === colIndex
-                              ? setSelectedColumnIndex(null)
-                              : (onSelectTask(-1, -1),
-                                setSelectedColumnIndex(colIndex))
-                          })(mobileColumnIndex),
-                        styles: { theme: sacredtheme ? 'sacred' : 'light' },
-                        style: styles.checkbox,
-                      }),
-                      (0, jsx_runtime.jsx)(Regular.A, {
-                        label: 'Select Column',
-                        options: columns.map(col => ({ value: col.title })),
-                        value: currentColumn.title,
-                        onChange: function handleColumnDropdownChange(e) {
-                          const title = e.target.value,
-                            foundIndex = columns.findIndex(
-                              c => c.title === title
-                            )
-                          foundIndex >= 0 &&
-                            (onSelectTask(-1, -1),
-                            setSelectedColumnIndex(null),
-                            setMobileColumnIndex(foundIndex))
-                        },
-                        styles: {
-                          theme: sacredtheme ? 'sacred' : 'light',
-                          backgroundColor: sacredtheme
-                            ? 'rgba(255, 215, 0, 0.1)'
-                            : 'white',
-                          borderColor: sacredtheme ? '#FFD700' : 'white',
-                          textColor: sacredtheme ? '#FFD700' : '#000',
-                          labelColor: sacredtheme ? '#FFD700' : 'white',
-                        },
-                      }),
-                      (0, jsx_runtime.jsx)(Typography.A, {
-                        variant: 'merrih6',
-                        styles: {
-                          color: sacredtheme
-                            ? 'rgba(255, 215, 0, 0.8)'
-                            : 'white',
-                        },
-                        children: currentColumn.description,
-                      }),
-                    ],
-                  }),
-                  (0, jsx_runtime.jsx)('div', {
-                    style: styles.tasksContainer,
-                    children: (
-                      null === (_currentColumn_tasks = currentColumn.tasks) ||
-                      void 0 === _currentColumn_tasks
-                        ? void 0
-                        : _currentColumn_tasks.length
-                    )
-                      ? (0, jsx_runtime.jsx)('div', {
-                          style: styles.tasksList,
-                          children: currentColumn.tasks.map(
-                            (task, taskIndex) => {
-                              const isSelected =
-                                (null == selectedTask
-                                  ? void 0
-                                  : selectedTask.colIndex) ===
-                                  mobileColumnIndex &&
-                                (null == selectedTask
-                                  ? void 0
-                                  : selectedTask.taskIndex) === taskIndex
-                              return (0, jsx_runtime.jsx)(
-                                Card.A,
-                                {
-                                  variant: 'task',
-                                  title: task.title,
-                                  description: task.description,
-                                  checked: isSelected,
-                                  disabled: null !== selectedColumnIndex,
-                                  onCheck: () => {
-                                    null === selectedColumnIndex &&
-                                      onSelectTask(mobileColumnIndex, taskIndex)
-                                  },
-                                  draggable: isTaskDraggable(
-                                    mobileColumnIndex,
-                                    taskIndex
-                                  ),
-                                  onDragStart: e =>
-                                    handleLocalTaskDragStart(
-                                      e,
-                                      mobileColumnIndex,
-                                      taskIndex
-                                    ),
-                                  onDragOver: handleTaskDragOver,
-                                  onDrop: e =>
-                                    handleLocalTaskDrop(
-                                      e,
-                                      mobileColumnIndex,
-                                      taskIndex
-                                    ),
-                                  sacredtheme,
-                                },
-                                task._id
-                              )
-                            }
-                          ),
-                        })
-                      : (0, jsx_runtime.jsx)(Typography.A, {
-                          styles: {
-                            color: sacredtheme
-                              ? 'rgba(255, 215, 0, 0.6)'
-                              : 'white',
-                          },
-                          children: 'No tasks yet',
-                        }),
-                  }),
-                ],
-              },
-              currentColumn._id
-            ),
-          })
-        }
-        MobileBoard.__docgenInfo = {
-          description: '',
-          methods: [],
-          displayName: 'MobileBoard',
-          props: {
-            columns: {
-              required: !0,
-              tsType: {
-                name: 'Array',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                    signature: {
-                      properties: [
-                        { key: '_id', value: { name: 'string', required: !0 } },
-                        {
-                          key: 'title',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'description',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'tasks',
-                          value: {
-                            name: 'Array',
-                            elements: [
-                              {
-                                name: 'signature',
-                                type: 'object',
-                                raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                signature: {
-                                  properties: [
-                                    {
-                                      key: '_id',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'companyId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The parent company ID or other domain-specific reference.',
-                                    },
-                                    {
-                                      key: 'title',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'description',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'severityId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If severity is linked to a separate record, store it here.',
-                                    },
-                                    {
-                                      key: 'statusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The main status.',
-                                    },
-                                    {
-                                      key: 'substatusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The sub-status.',
-                                    },
-                                    {
-                                      key: 'schedulingQueueId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The scheduling queue ID.',
-                                    },
-                                    {
-                                      key: 'topicIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Topics array, each referencing a topic ID.',
-                                    },
-                                    {
-                                      key: 'commentIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Comments array, referencing comment IDs.',
-                                    },
-                                    {
-                                      key: 'employeeIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Employee IDs assigned to the task.',
-                                    },
-                                    {
-                                      key: 'articleIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description: 'Knowledgebase article IDs.',
-                                    },
-                                    {
-                                      key: 'customerId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The "customer" ID if you have one.',
-                                    },
-                                    {
-                                      key: 'createdAt',
-                                      value: { name: 'Date', required: !0 },
-                                      description: 'Timestamps.',
-                                    },
-                                    {
-                                      key: 'closedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'updatedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'createdBy',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'editHistory',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'isOriginal',
-                                                  value: {
-                                                    name: 'boolean',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'CommentEditHistory[]',
-                                        required: !0,
-                                      },
-                                    },
-                                    {
-                                      key: 'comments',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editHistory',
-                                                  value: {
-                                                    name: 'Array',
-                                                    elements: [
-                                                      {
-                                                        name: 'signature',
-                                                        type: 'object',
-                                                        raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                        signature: {
-                                                          properties: [
-                                                            {
-                                                              key: '_id',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedBy',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedAt',
-                                                              value: {
-                                                                name: 'Date',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'text',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'isOriginal',
-                                                              value: {
-                                                                name: 'boolean',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                          ],
-                                                        },
-                                                      },
-                                                    ],
-                                                    raw: 'CommentEditHistory[]',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'Comment[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                    },
-                                    {
-                                      key: 'customerAssigned',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                    },
-                                    {
-                                      key: 'severity',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Severity label text (e.g. "Critical").',
-                                    },
-                                    {
-                                      key: 'schedulingQueue',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                    },
-                                    {
-                                      key: 'status',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'High-level status text (e.g. "Open").',
-                                    },
-                                    {
-                                      key: 'subStatus',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Sub-status text (e.g. "In Progress").',
-                                    },
-                                    {
-                                      key: 'topicLabels',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                    },
-                                    {
-                                      key: 'kbArticles',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                    },
-                                    {
-                                      key: 'teamMember',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                    },
-                                    {
-                                      key: 'nextActionDate',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                            raw: 'Task[]',
-                            required: !0,
-                          },
-                        },
-                      ],
-                    },
                   },
-                ],
-                raw: 'ColumnData[]',
-              },
-              description: '',
-            },
-            overflowColumns: {
-              required: !1,
-              tsType: {
-                name: 'Array',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                    signature: {
-                      properties: [
-                        { key: '_id', value: { name: 'string', required: !0 } },
-                        {
-                          key: 'title',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'description',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'tasks',
-                          value: {
-                            name: 'Array',
-                            elements: [
-                              {
-                                name: 'signature',
-                                type: 'object',
-                                raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                signature: {
-                                  properties: [
-                                    {
-                                      key: '_id',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'companyId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The parent company ID or other domain-specific reference.',
-                                    },
-                                    {
-                                      key: 'title',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'description',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'severityId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If severity is linked to a separate record, store it here.',
-                                    },
-                                    {
-                                      key: 'statusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The main status.',
-                                    },
-                                    {
-                                      key: 'substatusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The sub-status.',
-                                    },
-                                    {
-                                      key: 'schedulingQueueId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The scheduling queue ID.',
-                                    },
-                                    {
-                                      key: 'topicIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Topics array, each referencing a topic ID.',
-                                    },
-                                    {
-                                      key: 'commentIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Comments array, referencing comment IDs.',
-                                    },
-                                    {
-                                      key: 'employeeIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Employee IDs assigned to the task.',
-                                    },
-                                    {
-                                      key: 'articleIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description: 'Knowledgebase article IDs.',
-                                    },
-                                    {
-                                      key: 'customerId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The "customer" ID if you have one.',
-                                    },
-                                    {
-                                      key: 'createdAt',
-                                      value: { name: 'Date', required: !0 },
-                                      description: 'Timestamps.',
-                                    },
-                                    {
-                                      key: 'closedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'updatedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'createdBy',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'editHistory',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'isOriginal',
-                                                  value: {
-                                                    name: 'boolean',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'CommentEditHistory[]',
-                                        required: !0,
-                                      },
-                                    },
-                                    {
-                                      key: 'comments',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editHistory',
-                                                  value: {
-                                                    name: 'Array',
-                                                    elements: [
-                                                      {
-                                                        name: 'signature',
-                                                        type: 'object',
-                                                        raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                        signature: {
-                                                          properties: [
-                                                            {
-                                                              key: '_id',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedBy',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedAt',
-                                                              value: {
-                                                                name: 'Date',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'text',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'isOriginal',
-                                                              value: {
-                                                                name: 'boolean',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                          ],
-                                                        },
-                                                      },
-                                                    ],
-                                                    raw: 'CommentEditHistory[]',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'Comment[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                    },
-                                    {
-                                      key: 'customerAssigned',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                    },
-                                    {
-                                      key: 'severity',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Severity label text (e.g. "Critical").',
-                                    },
-                                    {
-                                      key: 'schedulingQueue',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                    },
-                                    {
-                                      key: 'status',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'High-level status text (e.g. "Open").',
-                                    },
-                                    {
-                                      key: 'subStatus',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Sub-status text (e.g. "In Progress").',
-                                    },
-                                    {
-                                      key: 'topicLabels',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                    },
-                                    {
-                                      key: 'kbArticles',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                    },
-                                    {
-                                      key: 'teamMember',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                    },
-                                    {
-                                      key: 'nextActionDate',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                            raw: 'Task[]',
-                            required: !0,
-                          },
-                        },
-                      ],
-                    },
+                  description: {
+                    margin: '0 0 0.75rem 0',
+                    fontSize: '0.875rem',
+                    color: isSacredTheme
+                      ? 'rgba(255, 215, 0, 0.8)'
+                      : isDarkTheme
+                        ? '#d1d5db'
+                        : '#6b7280',
+                    lineHeight: '1.4',
+                    ...(isSacredTheme && {
+                      fontFamily: 'Crimson Text, serif',
+                      fontStyle: 'italic',
+                    }),
                   },
-                ],
-                raw: 'ColumnData[]',
-              },
-              description: '',
-            },
-            selectedOverflowColumnId: {
-              required: !1,
-              tsType: { name: 'string' },
-              description: '',
-            },
-            onChangeSelectedOverflowColumn: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(colId: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'colId' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            selectedTask: {
-              required: !0,
-              tsType: {
-                name: 'union',
-                raw: '{ colIndex: number; taskIndex: number } | null',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{ colIndex: number; taskIndex: number }',
-                    signature: {
-                      properties: [
-                        {
-                          key: 'colIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                        {
-                          key: 'taskIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                      ],
-                    },
+                  actions: {
+                    display: 'flex',
+                    gap: '0.5rem',
+                    marginTop: '0.75rem',
                   },
-                  { name: 'null' },
-                ],
-              },
-              description: '',
-            },
-            onSelectTask: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(colIndex: number, taskIndex: number) => void',
-                signature: {
-                  arguments: [
-                    { type: { name: 'number' }, name: 'colIndex' },
-                    { type: { name: 'number' }, name: 'taskIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDragStart: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDragOver: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDrop: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            styles: {
-              required: !1,
-              tsType: { name: 'ProjectBoardStyles' },
-              description:
-                'Comprehensive styling options including theme, custom colors, and layout properties.',
-            },
-            sacredtheme: {
-              required: !1,
-              tsType: { name: 'boolean' },
-              description: 'Sacred theme flag for styling',
-              defaultValue: { value: 'false', computed: !1 },
-            },
-          },
-        }
-        const tablet_SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
-        function TabletBoard({
-          columns,
-          overflowColumns,
-          selectedOverflowColumnId,
-          onChangeSelectedOverflowColumn,
-          selectedTask,
-          onSelectTask,
-          onColumnDragStart,
-          onColumnDragOver,
-          onColumnDrop,
-          sacredtheme = !1,
-        }) {
-          var _activeOverflowColumn_tasks
-          const [allColumns, setAllColumns] = (0, esm_react.fp)(columnsAtom),
-            [selectedColumnIndex, setSelectedColumnIndex] = (0, react.useState)(
-              null
-            ),
-            { handleTaskDragStart, handleTaskDragOver, handleTaskDrop } =
-              useTaskDragAndDrop(),
-            styles = (sacredtheme => ({
-              boardContainer: {
-                display: 'flex',
-                flexDirection: 'row',
-                gap: '0.75rem',
-              },
-              column: {
-                boxSizing: 'border-box',
-                width: '300px',
-                height: '70vh',
-                borderRadius: '0.375rem',
-                display: 'flex',
-                flexDirection: 'column',
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                      border: '2px solid rgba(255, 215, 0, 0.5)',
-                      animation: 'board-glow-pulse 2s infinite alternate',
-                      backdropFilter: 'blur(16px)',
-                    }
-                  : { backgroundColor: 'black' }),
-              },
-              columnHeader: {
-                padding: '0.5rem',
-                position: 'relative',
-                ...(sacredtheme
-                  ? {
-                      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-                      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                    }
-                  : { borderBottom: '1px solid white' }),
-              },
-              columnTitleContainer: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.125rem',
-              },
-              columnTitle: {
-                ...(sacredtheme && {
-                  fontFamily: 'Cinzel, serif',
-                  fontWeight: 600,
-                  letterSpacing: '0.05em',
-                  textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+                  button: {
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    borderRadius: '0.25rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  },
+                  editButton: {
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(255, 215, 0, 0.2)'
+                      : isDarkTheme
+                        ? '#4b5563'
+                        : '#f3f4f6',
+                    color: isSacredTheme
+                      ? '#FFD700'
+                      : isDarkTheme
+                        ? '#f9fafb'
+                        : '#374151',
+                  },
+                  deleteButton: {
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(220, 38, 38, 0.2)'
+                      : isDarkTheme
+                        ? '#7f1d1d'
+                        : '#fef2f2',
+                    color: isSacredTheme
+                      ? '#ff6b6b'
+                      : isDarkTheme
+                        ? '#fca5a5'
+                        : '#dc2626',
+                  },
+                  saveButton: {
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(34, 197, 94, 0.2)'
+                      : isDarkTheme
+                        ? '#065f46'
+                        : '#f0fdf4',
+                    color: isSacredTheme
+                      ? '#4ade80'
+                      : isDarkTheme
+                        ? '#6ee7b7'
+                        : '#16a34a',
+                  },
+                  cancelButton: {
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(107, 114, 128, 0.2)'
+                      : isDarkTheme
+                        ? '#374151'
+                        : '#f9fafb',
+                    color: isSacredTheme
+                      ? '#9ca3af'
+                      : isDarkTheme
+                        ? '#d1d5db'
+                        : '#6b7280',
+                  },
+                  input: {
+                    width: '100%',
+                    padding: '0.5rem',
+                    margin: '0.25rem 0',
+                    borderRadius: '0.25rem',
+                    border: isSacredTheme
+                      ? '1px solid rgba(255, 215, 0, 0.3)'
+                      : isDarkTheme
+                        ? '1px solid #4b5563'
+                        : '1px solid #d1d5db',
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(0, 0, 0, 0.5)'
+                      : isDarkTheme
+                        ? '#1f2937'
+                        : '#ffffff',
+                    color: isSacredTheme
+                      ? '#FFD700'
+                      : isDarkTheme
+                        ? '#f9fafb'
+                        : '#1f2937',
+                    fontSize: '0.875rem',
+                    ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
+                  },
+                  textarea: {
+                    width: '100%',
+                    padding: '0.5rem',
+                    margin: '0.25rem 0',
+                    borderRadius: '0.25rem',
+                    border: isSacredTheme
+                      ? '1px solid rgba(255, 215, 0, 0.3)'
+                      : isDarkTheme
+                        ? '1px solid #4b5563'
+                        : '1px solid #d1d5db',
+                    backgroundColor: isSacredTheme
+                      ? 'rgba(0, 0, 0, 0.5)'
+                      : isDarkTheme
+                        ? '#1f2937'
+                        : '#ffffff',
+                    color: isSacredTheme
+                      ? '#FFD700'
+                      : isDarkTheme
+                        ? '#f9fafb'
+                        : '#1f2937',
+                    fontSize: '0.875rem',
+                    resize: 'vertical',
+                    minHeight: '60px',
+                    ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
+                  },
+                  glyph: {
+                    position: 'absolute',
+                    top: '0.5rem',
+                    left: '0.5rem',
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 215, 0, 0.3)',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                  },
                 }),
-              },
-              columnDescription: {
-                ...(sacredtheme && { fontFamily: 'Crimson Text, serif' }),
-              },
-              tasksContainer: { padding: '0.5rem', flex: 1 },
-              noTasks: {
-                ...(sacredtheme && {
-                  fontStyle: 'italic',
-                  fontFamily: 'Crimson Text, serif',
-                }),
-              },
-              tasksList: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-              },
-              checkbox: {
-                position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
-              },
-              glyph: {
-                position: 'absolute',
-                top: '0.5rem',
-                left: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 215, 0, 0.3)',
-                animation: 'board-float-glyph 3s infinite alternate',
-                zIndex: 10,
-              },
-            }))(sacredtheme)
-          function isTaskCheckboxDisabled() {
-            return null !== selectedColumnIndex
-          }
-          function isColumnDraggable(colIndex) {
-            return selectedColumnIndex === colIndex
-          }
-          function isTaskDraggable(colIndex, taskIndex) {
-            return (
-              null === selectedColumnIndex &&
-              (null == selectedTask ? void 0 : selectedTask.colIndex) ===
-                colIndex &&
-              (null == selectedTask ? void 0 : selectedTask.taskIndex) ===
-                taskIndex
-            )
-          }
-          function handleLocalTaskDragStart(e, columnIndex, taskIndex) {
-            isTaskDraggable(columnIndex, taskIndex)
-              ? handleTaskDragStart({ columnIndex, taskIndex })
-              : e.preventDefault()
-          }
-          function handleLocalTaskDrop(e, dropColumnIndex, dropTaskIndex) {
-            ;(e.preventDefault(),
-              handleTaskDrop(e, {
-                dropColumnIndex,
-                dropTaskIndex,
-                allColumns,
-                setAllColumns,
-              }))
-          }
-          const hasOverflow = Boolean(
-            null == overflowColumns ? void 0 : overflowColumns.length
-          )
-          let activeOverflowColumn
-          hasOverflow &&
-            selectedOverflowColumnId &&
-            overflowColumns &&
-            (activeOverflowColumn =
-              overflowColumns.find(c => c._id === selectedOverflowColumnId) ||
-              overflowColumns[0])
-          const handleOverflowDropdownChange = (0, react.useCallback)(
-            e => {
-              if (!overflowColumns || !onChangeSelectedOverflowColumn) return
-              const colTitle = e.target.value,
-                found = overflowColumns.find(c => c.title === colTitle)
-              found && onChangeSelectedOverflowColumn(found._id)
-            },
-            [overflowColumns, onChangeSelectedOverflowColumn]
-          )
-          var _overflowColumns_map
-          return (0, jsx_runtime.jsxs)('div', {
-            style: styles.boardContainer,
-            children: [
-              columns.map((col, colIndex) => {
-                var _col_tasks
-                const colChecked = selectedColumnIndex === colIndex
-                return (0, jsx_runtime.jsxs)(
-                  'div',
-                  {
-                    draggable: isColumnDraggable(colIndex),
-                    onDragStart: e =>
-                      (function handleLocalColumnDragStart(e, colIndex) {
-                        isColumnDraggable(colIndex)
-                          ? onColumnDragStart(e, colIndex)
-                          : e.preventDefault()
-                      })(e, colIndex),
-                    onDragOver: e =>
-                      (function handleLocalColumnDragOver(e, colIndex) {
-                        ;(e.preventDefault(), onColumnDragOver(e, colIndex))
-                      })(e, colIndex),
-                    onDrop: e =>
-                      (function handleLocalColumnDrop(e, colIndex) {
-                        ;(e.preventDefault(), onColumnDrop(e, colIndex))
-                      })(e, colIndex),
-                    style: styles.column,
-                    children: [
-                      sacredtheme &&
-                        (0, jsx_runtime.jsx)('div', {
-                          style: styles.glyph,
-                          children:
-                            tablet_SACRED_GLYPHS[
-                              colIndex % tablet_SACRED_GLYPHS.length
-                            ],
-                        }),
-                      (0, jsx_runtime.jsxs)('div', {
-                        style: styles.columnHeader,
-                        children: [
-                          (0, jsx_runtime.jsx)(Checkbox.A, {
-                            checked: colChecked,
-                            disabled: null !== selectedTask,
-                            onChange: () =>
-                              (function handleColumnCheck(colIndex) {
-                                selectedColumnIndex === colIndex
-                                  ? setSelectedColumnIndex(null)
-                                  : (onSelectTask(-1, -1),
-                                    setSelectedColumnIndex(colIndex))
-                              })(colIndex),
-                            styles: { theme: sacredtheme ? 'sacred' : 'light' },
-                            style: styles.checkbox,
-                          }),
-                          (0, jsx_runtime.jsxs)('div', {
-                            style: styles.columnTitleContainer,
-                            children: [
-                              (0, jsx_runtime.jsx)(Typography.A, {
-                                variant: 'merrih4',
-                                styles: {
-                                  color: sacredtheme ? '#FFD700' : 'white',
-                                },
-                                children: col.title,
-                              }),
-                              (0, jsx_runtime.jsx)(Typography.A, {
-                                variant: 'merrih6',
-                                styles: {
-                                  color: sacredtheme
-                                    ? 'rgba(255, 215, 0, 0.8)'
-                                    : 'white',
-                                },
-                                children: col.description,
-                              }),
-                            ],
-                          }),
-                        ],
-                      }),
-                      (0, jsx_runtime.jsx)('div', {
-                        style: styles.tasksContainer,
-                        children: (
-                          null === (_col_tasks = col.tasks) ||
-                          void 0 === _col_tasks
-                            ? void 0
-                            : _col_tasks.length
-                        )
-                          ? (0, jsx_runtime.jsx)('div', {
-                              style: styles.tasksList,
-                              children: col.tasks.map((task, taskIndex) => {
-                                const isSelected =
-                                  (null == selectedTask
-                                    ? void 0
-                                    : selectedTask.colIndex) === colIndex &&
-                                  (null == selectedTask
-                                    ? void 0
-                                    : selectedTask.taskIndex) === taskIndex
-                                return (0, jsx_runtime.jsx)(
-                                  Card.A,
-                                  {
-                                    variant: 'task',
-                                    title: task.title,
-                                    description: task.description,
-                                    checked: isSelected,
-                                    disabled: isTaskCheckboxDisabled(),
-                                    onCheck: () => {
-                                      null === selectedColumnIndex &&
-                                        onSelectTask(colIndex, taskIndex)
-                                    },
-                                    draggable: isTaskDraggable(
-                                      colIndex,
-                                      taskIndex
-                                    ),
-                                    onDragStart: e =>
-                                      handleLocalTaskDragStart(
-                                        e,
-                                        colIndex,
-                                        taskIndex
-                                      ),
-                                    onDragOver: handleTaskDragOver,
-                                    onDrop: e =>
-                                      handleLocalTaskDrop(
-                                        e,
-                                        colIndex,
-                                        taskIndex
-                                      ),
-                                    sacredtheme,
-                                  },
-                                  task._id
-                                )
-                              }),
-                            })
-                          : (0, jsx_runtime.jsx)(Typography.A, {
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.6)'
-                                  : 'white',
-                              },
-                              children: 'No tasks yet',
-                            }),
-                      }),
-                    ],
-                  },
-                  col._id
-                )
-              }),
-              hasOverflow &&
-                activeOverflowColumn &&
-                (0, jsx_runtime.jsxs)(
-                  'div',
-                  {
-                    draggable: !1,
-                    onDragOver: e => e.preventDefault(),
-                    onDrop: e => {
-                      ;(e.preventDefault(), onColumnDrop(e, columns.length))
-                    },
-                    style: {
-                      ...styles.column,
-                      animationDelay: sacredtheme ? '0.5s' : void 0,
-                    },
-                    children: [
-                      (0, jsx_runtime.jsxs)('div', {
-                        style: styles.columnHeader,
-                        children: [
-                          (0, jsx_runtime.jsx)(Regular.A, {
-                            label: 'More Columns',
-                            options:
-                              null !==
-                                (_overflowColumns_map =
-                                  null == overflowColumns
-                                    ? void 0
-                                    : overflowColumns.map(col => ({
-                                        value: col.title,
-                                      }))) && void 0 !== _overflowColumns_map
-                                ? _overflowColumns_map
-                                : [],
-                            value:
-                              null == activeOverflowColumn
-                                ? void 0
-                                : activeOverflowColumn.title,
-                            onChange: handleOverflowDropdownChange,
-                            styles: {
-                              theme: sacredtheme ? 'sacred' : 'light',
-                              backgroundColor: sacredtheme
-                                ? 'rgba(255, 215, 0, 0.1)'
-                                : 'white',
-                              borderColor: sacredtheme ? '#FFD700' : 'white',
-                              textColor: sacredtheme ? '#FFD700' : '#000',
-                              labelColor: sacredtheme ? '#FFD700' : 'white',
-                            },
-                          }),
-                          (0, jsx_runtime.jsx)('div', {
-                            style: {
-                              ...styles.columnTitleContainer,
-                              marginTop: '0.25rem',
-                            },
-                            children: (0, jsx_runtime.jsx)(Typography.A, {
-                              variant: 'merrih6',
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.8)'
-                                  : 'white',
-                              },
-                              children: activeOverflowColumn.description,
-                            }),
-                          }),
-                        ],
-                      }),
-                      (0, jsx_runtime.jsx)('div', {
-                        style: styles.tasksContainer,
-                        children: (
-                          null ===
-                            (_activeOverflowColumn_tasks =
-                              activeOverflowColumn.tasks) ||
-                          void 0 === _activeOverflowColumn_tasks
-                            ? void 0
-                            : _activeOverflowColumn_tasks.length
-                        )
-                          ? (0, jsx_runtime.jsx)('div', {
-                              style: styles.tasksList,
-                              children: activeOverflowColumn.tasks.map(
-                                (task, taskIndex) => {
-                                  const overflowColIndex = columns.length,
-                                    isSelected =
-                                      (null == selectedTask
-                                        ? void 0
-                                        : selectedTask.colIndex) ===
-                                        overflowColIndex &&
-                                      (null == selectedTask
-                                        ? void 0
-                                        : selectedTask.taskIndex) === taskIndex
-                                  return (0, jsx_runtime.jsx)(
-                                    Card.A,
-                                    {
-                                      variant: 'task',
-                                      title: task.title,
-                                      description: task.description,
-                                      checked: isSelected,
-                                      disabled: isTaskCheckboxDisabled(),
-                                      onCheck: () => {
-                                        null === selectedColumnIndex &&
-                                          onSelectTask(
-                                            overflowColIndex,
-                                            taskIndex
-                                          )
-                                      },
-                                      draggable: isTaskDraggable(
-                                        overflowColIndex,
-                                        taskIndex
-                                      ),
-                                      onDragStart: e =>
-                                        handleLocalTaskDragStart(
-                                          e,
-                                          overflowColIndex,
-                                          taskIndex
-                                        ),
-                                      onDragOver: handleTaskDragOver,
-                                      onDrop: e =>
-                                        handleLocalTaskDrop(
-                                          e,
-                                          overflowColIndex,
-                                          taskIndex
-                                        ),
-                                      sacredtheme,
-                                    },
-                                    task._id
-                                  )
-                                }
-                              ),
-                            })
-                          : (0, jsx_runtime.jsx)(Typography.A, {
-                              styles: {
-                                color: sacredtheme
-                                  ? 'rgba(255, 215, 0, 0.6)'
-                                  : 'white',
-                              },
-                              children: 'No tasks yet',
-                            }),
-                      }),
-                    ],
-                  },
-                  'overflow-tablet-column'
-                ),
-            ],
-          })
-        }
-        function Board(props) {
-          const modifiedProps = {
-            ...props,
-            onSelectTask: (colIndex, taskIndex) => {
-              props.onSelectTask(colIndex, taskIndex)
-            },
-          }
-          return (
-            react.useEffect(() => {
-              const style = document.createElement('style')
-              return (
-                (style.textContent =
-                  '\n      .desktop-board { display: none; }\n      .mobile-board { display: block; }\n      .tablet-board { display: none; }\n\n      @media (min-width: 768px) {\n        .desktop-board { display: none; }\n        .mobile-board { display: none; }\n        .tablet-board { display: block; }\n      }\n\n      @media (min-width: 1280px) {\n        .desktop-board { display: block; }\n        .mobile-board { display: none; }\n        .tablet-board { display: none; }\n      }\n    '),
-                document.head.appendChild(style),
-                () => {
-                  document.head.removeChild(style)
-                }
+                [isSacredTheme, isDarkTheme, isHovered, draggable]
               )
-            }, []),
-            (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+            return (0, jsx_runtime.jsxs)('div', {
+              style: taskCardStyles.container,
+              draggable,
+              onDragStart,
+              onDragOver,
+              onDragEnter,
+              onDragLeave,
+              onDrop,
+              onMouseEnter: () => setIsHovered(!0),
+              onMouseLeave: () => setIsHovered(!1),
               children: [
-                (0, jsx_runtime.jsx)('div', {
-                  className: 'desktop-board',
-                  children: (0, jsx_runtime.jsx)(DesktopBoard, {
-                    ...modifiedProps,
+                isSacredTheme &&
+                  (0, jsx_runtime.jsx)('div', {
+                    style: taskCardStyles.glyph,
+                    children:
+                      board_SACRED_GLYPHS[
+                        Math.floor(Math.random() * board_SACRED_GLYPHS.length)
+                      ],
                   }),
+                (0, jsx_runtime.jsx)('input', {
+                  type: 'checkbox',
+                  checked,
+                  onChange: onCheck,
+                  style: taskCardStyles.checkbox,
                 }),
-                (0, jsx_runtime.jsx)('div', {
-                  className: 'mobile-board',
-                  children: (0, jsx_runtime.jsx)(MobileBoard, {
-                    ...modifiedProps,
-                  }),
-                }),
-                (0, jsx_runtime.jsx)('div', {
-                  className: 'tablet-board',
-                  children: (0, jsx_runtime.jsx)(TabletBoard, {
-                    ...modifiedProps,
-                  }),
-                }),
+                isEditing
+                  ? (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+                      children: [
+                        (0, jsx_runtime.jsx)('input', {
+                          type: 'text',
+                          value: editTitle,
+                          onChange: e => setEditTitle(e.target.value),
+                          style: taskCardStyles.input,
+                          placeholder: 'Task title',
+                        }),
+                        (0, jsx_runtime.jsx)('textarea', {
+                          value: editDescription,
+                          onChange: e => setEditDescription(e.target.value),
+                          style: taskCardStyles.textarea,
+                          placeholder: 'Task description',
+                        }),
+                        (0, jsx_runtime.jsxs)('div', {
+                          style: taskCardStyles.actions,
+                          children: [
+                            (0, jsx_runtime.jsx)('button', {
+                              style: {
+                                ...taskCardStyles.button,
+                                ...taskCardStyles.saveButton,
+                              },
+                              onClick: () => {
+                                ;(onEdit(editTitle, editDescription),
+                                  setIsEditing(!1))
+                              },
+                              children: 'Save',
+                            }),
+                            (0, jsx_runtime.jsx)('button', {
+                              style: {
+                                ...taskCardStyles.button,
+                                ...taskCardStyles.cancelButton,
+                              },
+                              onClick: () => {
+                                ;(setEditTitle(title),
+                                  setEditDescription(description),
+                                  setIsEditing(!1))
+                              },
+                              children: 'Cancel',
+                            }),
+                          ],
+                        }),
+                      ],
+                    })
+                  : (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+                      children: [
+                        (0, jsx_runtime.jsx)('h4', {
+                          style: taskCardStyles.title,
+                          children: title,
+                        }),
+                        (0, jsx_runtime.jsx)('p', {
+                          style: taskCardStyles.description,
+                          children: description,
+                        }),
+                        (0, jsx_runtime.jsxs)('div', {
+                          style: taskCardStyles.actions,
+                          children: [
+                            (0, jsx_runtime.jsx)('button', {
+                              style: {
+                                ...taskCardStyles.button,
+                                ...taskCardStyles.editButton,
+                              },
+                              onClick: () => setIsEditing(!0),
+                              children: 'Edit',
+                            }),
+                            (0, jsx_runtime.jsx)('button', {
+                              style: {
+                                ...taskCardStyles.button,
+                                ...taskCardStyles.deleteButton,
+                              },
+                              onClick: onDelete,
+                              children: 'Delete',
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
               ],
             })
-          )
+          }
+        function Board({
+          columns,
+          selectedTaskId,
+          onTaskSelect,
+          columnDragAndDrop,
+          taskDragAndDrop,
+          styles,
+        }) {
+          const [allColumns, setAllColumns] = (0, esm_react.fp)(columnsAtom),
+            { isMobile, isTablet } = (() => {
+              const [windowWidth, setWindowWidth] = (0, react.useState)(
+                window.innerWidth
+              )
+              return (
+                react.useEffect(() => {
+                  const handleResize = () => setWindowWidth(window.innerWidth)
+                  return (
+                    window.addEventListener('resize', handleResize),
+                    () => window.removeEventListener('resize', handleResize)
+                  )
+                }, []),
+                {
+                  isMobile: windowWidth < 768,
+                  isTablet: windowWidth >= 768 && windowWidth < 1280,
+                  _isDesktop: windowWidth >= 1280,
+                  windowWidth,
+                }
+              )
+            })(),
+            boardStyles = (0, react.useMemo)(
+              () =>
+                ((theme, isMobile = !1, isTablet = !1) => {
+                  const isSacredTheme = 'sacred' === theme,
+                    isDarkTheme = 'dark' === theme
+                  return {
+                    boardContainer: {
+                      display: 'flex',
+                      flexDirection: 'row',
+                      gap: '0.75rem',
+                      padding: '1rem',
+                      height: '100%',
+                      overflowX: 'auto',
+                      overflowY: 'hidden',
+                      scrollBehavior: 'smooth',
+                    },
+                    column: {
+                      boxSizing: 'border-box',
+                      width: isMobile ? '280px' : isTablet ? '300px' : '320px',
+                      height: isMobile ? 'auto' : '70vh',
+                      borderRadius: '0.5rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflowX: 'hidden',
+                      overflowY: 'auto',
+                      position: 'relative',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                      ...(isSacredTheme
+                        ? {
+                            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                            border: '2px solid rgba(255, 215, 0, 0.4)',
+                            boxShadow: '0 4px 20px rgba(255, 215, 0, 0.1)',
+                          }
+                        : isDarkTheme
+                          ? {
+                              backgroundColor: '#1f2937',
+                              border: '1px solid #374151',
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                            }
+                          : {
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                            }),
+                    },
+                    columnDragOver: {
+                      transform: 'scale(1.02)',
+                      ...(isSacredTheme
+                        ? {
+                            border: '2px solid rgba(255, 215, 0, 0.8)',
+                            boxShadow: '0 6px 25px rgba(255, 215, 0, 0.2)',
+                          }
+                        : isDarkTheme
+                          ? {
+                              border: '2px solid #60a5fa',
+                              boxShadow: '0 6px 20px rgba(96, 165, 250, 0.2)',
+                            }
+                          : {
+                              border: '2px solid #3b82f6',
+                              boxShadow: '0 4px 15px rgba(59, 130, 246, 0.2)',
+                            }),
+                    },
+                    columnHeader: {
+                      padding: '1rem',
+                      borderBottom:
+                        '1px solid ' +
+                        (isSacredTheme
+                          ? 'rgba(255, 215, 0, 0.3)'
+                          : isDarkTheme
+                            ? '#374151'
+                            : '#e5e7eb'),
+                      backgroundColor: isSacredTheme
+                        ? 'rgba(255, 215, 0, 0.05)'
+                        : 'transparent',
+                      cursor: 'grab',
+                      userSelect: 'none',
+                    },
+                    columnTitle: {
+                      margin: 0,
+                      color: isSacredTheme
+                        ? '#FFD700'
+                        : isDarkTheme
+                          ? '#f9fafb'
+                          : '#1f2937',
+                      fontSize: isMobile ? '1rem' : '1.125rem',
+                      fontWeight: '600',
+                      ...(isSacredTheme && {
+                        fontFamily: 'Cinzel, serif',
+                        letterSpacing: '0.05em',
+                        textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                      }),
+                    },
+                    columnDescription: {
+                      margin: '0.25rem 0 0 0',
+                      color: isSacredTheme
+                        ? 'rgba(255, 215, 0, 0.7)'
+                        : isDarkTheme
+                          ? '#9ca3af'
+                          : '#6b7280',
+                      fontSize: '0.875rem',
+                      ...(isSacredTheme && {
+                        fontFamily: 'Crimson Text, serif',
+                        fontStyle: 'italic',
+                      }),
+                    },
+                    tasksContainer: {
+                      padding: '0.75rem',
+                      flex: 1,
+                      minHeight: isMobile ? '200px' : 'auto',
+                    },
+                    tasksList: {
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                    },
+                    taskDragPlaceholder: {
+                      height: '80px',
+                      borderRadius: '0.375rem',
+                      border:
+                        '2px dashed ' +
+                        (isSacredTheme
+                          ? 'rgba(255, 215, 0, 0.5)'
+                          : isDarkTheme
+                            ? '#60a5fa'
+                            : '#3b82f6'),
+                      backgroundColor: isSacredTheme
+                        ? 'rgba(255, 215, 0, 0.1)'
+                        : isDarkTheme
+                          ? 'rgba(96, 165, 250, 0.1)'
+                          : 'rgba(59, 130, 246, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: isSacredTheme
+                        ? 'rgba(255, 215, 0, 0.7)'
+                        : isDarkTheme
+                          ? '#9ca3af'
+                          : '#6b7280',
+                      fontSize: '0.875rem',
+                      fontStyle: 'italic',
+                    },
+                    noTasks: {
+                      textAlign: 'center',
+                      color: isSacredTheme
+                        ? 'rgba(255, 215, 0, 0.5)'
+                        : isDarkTheme
+                          ? '#6b7280'
+                          : '#9ca3af',
+                      fontSize: '0.875rem',
+                      fontStyle: 'italic',
+                      padding: '2rem 1rem',
+                    },
+                    glyph: {
+                      position: 'absolute',
+                      top: '0.75rem',
+                      left: '0.75rem',
+                      fontSize: '1rem',
+                      color: 'rgba(255, 215, 0, 0.4)',
+                      zIndex: 10,
+                      pointerEvents: 'none',
+                    },
+                    scrollbarCSS: `\n      .board-container::-webkit-scrollbar {\n        height: 12px;\n        width: 12px;\n      }\n      .board-container::-webkit-scrollbar-track {\n        background: ${isSacredTheme ? 'rgba(0, 0, 0, 0.3)' : isDarkTheme ? '#374151' : '#f3f4f6'};\n        border-radius: 6px;\n      }\n      .board-container::-webkit-scrollbar-thumb {\n        background: ${isSacredTheme ? 'linear-gradient(45deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.7))' : isDarkTheme ? 'linear-gradient(45deg, #60a5fa, #3b82f6)' : 'linear-gradient(45deg, #d1d5db, #9ca3af)'};\n        border-radius: 6px;\n        border: ${isSacredTheme ? '1px solid rgba(255, 215, 0, 0.3)' : isDarkTheme ? '1px solid #1f2937' : '1px solid #e5e7eb'};\n      }\n      .board-container::-webkit-scrollbar-thumb:hover {\n        background: ${isSacredTheme ? 'linear-gradient(45deg, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.9))' : isDarkTheme ? 'linear-gradient(45deg, #93c5fd, #60a5fa)' : 'linear-gradient(45deg, #9ca3af, #6b7280)'};\n        ${isSacredTheme ? 'box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);' : ''}\n      }\n      .board-container::-webkit-scrollbar-corner {\n        background: ${isSacredTheme ? 'rgba(0, 0, 0, 0.3)' : isDarkTheme ? '#374151' : '#f3f4f6'};\n      }\n      \n      /* Column vertical scrollbars */\n      .board-column::-webkit-scrollbar {\n        height: 8px;\n        width: 8px;\n      }\n      .board-column::-webkit-scrollbar-track {\n        background: ${isSacredTheme ? 'rgba(0, 0, 0, 0.2)' : isDarkTheme ? '#1f2937' : '#f9fafb'};\n        border-radius: 4px;\n      }\n      .board-column::-webkit-scrollbar-thumb {\n        background: ${isSacredTheme ? 'linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.6))' : isDarkTheme ? 'linear-gradient(180deg, #4b5563, #6b7280)' : 'linear-gradient(180deg, #e5e7eb, #d1d5db)'};\n        border-radius: 4px;\n        border: ${isSacredTheme ? '1px solid rgba(255, 215, 0, 0.2)' : isDarkTheme ? '1px solid #374151' : '1px solid #d1d5db'};\n      }\n      .board-column::-webkit-scrollbar-thumb:hover {\n        background: ${isSacredTheme ? 'linear-gradient(180deg, rgba(255, 215, 0, 0.5), rgba(255, 215, 0, 0.8))' : isDarkTheme ? 'linear-gradient(180deg, #6b7280, #9ca3af)' : 'linear-gradient(180deg, #d1d5db, #9ca3af)'};\n        ${isSacredTheme ? 'box-shadow: 0 0 6px rgba(255, 215, 0, 0.3);' : ''}\n      }\n      .board-column::-webkit-scrollbar-corner {\n        background: ${isSacredTheme ? 'rgba(0, 0, 0, 0.2)' : isDarkTheme ? '#1f2937' : '#f9fafb'};\n      }\n    `,
+                  }
+                })(null == styles ? void 0 : styles.theme, isMobile, isTablet),
+              [null == styles ? void 0 : styles.theme, isMobile, isTablet]
+            ),
+            isSacredTheme =
+              'sacred' === (null == styles ? void 0 : styles.theme)
+          react.useEffect(() => {
+            const styleId = 'board-scrollbar-styles'
+            let styleElement = document.getElementById(styleId)
+            return (
+              styleElement ||
+                ((styleElement = document.createElement('style')),
+                (styleElement.id = styleId),
+                document.head.appendChild(styleElement)),
+              (styleElement.textContent = boardStyles.scrollbarCSS),
+              () => {
+                const element = document.getElementById(styleId)
+                element && element.remove()
+              }
+            )
+          }, [boardStyles.scrollbarCSS])
+          const handleTaskSelect = (0, react.useCallback)(
+              taskId => {
+                onTaskSelect(taskId)
+              },
+              [onTaskSelect]
+            ),
+            handleColumnDragStart = (0, react.useCallback)(
+              (e, columnIndex) => {
+                ;((e.currentTarget.style.cursor = 'grabbing'),
+                  columnDragAndDrop.handleColumnDragStart(e, columnIndex))
+              },
+              [columnDragAndDrop]
+            ),
+            handleColumnDragEnd = (0, react.useCallback)(
+              e => {
+                ;((e.currentTarget.style.cursor = 'grab'),
+                  columnDragAndDrop.resetColumnDragState())
+              },
+              [columnDragAndDrop]
+            ),
+            renderTask = (0, react.useCallback)(
+              (task, taskIndex, columnIndex) => {
+                var _taskDragAndDrop_dragItem
+                const isSelected = selectedTaskId === task._id,
+                  isDragging =
+                    (null ===
+                      (_taskDragAndDrop_dragItem = taskDragAndDrop.dragItem) ||
+                    void 0 === _taskDragAndDrop_dragItem
+                      ? void 0
+                      : _taskDragAndDrop_dragItem.taskId) === task._id
+                return (0, jsx_runtime.jsx)(
+                  'div',
+                  {
+                    style: { opacity: isDragging ? 0.5 : 1 },
+                    children: (0, jsx_runtime.jsx)(TaskCard, {
+                      title: task.title,
+                      description: task.description,
+                      checked: isSelected,
+                      onCheck: () => handleTaskSelect(task._id),
+                      onEdit: (title, description) => {
+                        const newColumns = [...allColumns],
+                          updatedTask = { ...task, title, description }
+                        ;((newColumns[columnIndex] = {
+                          ...newColumns[columnIndex],
+                          tasks: newColumns[columnIndex].tasks.map(t =>
+                            t._id === task._id ? updatedTask : t
+                          ),
+                        }),
+                          setAllColumns(newColumns))
+                      },
+                      onDelete: () => {
+                        const newColumns = [...allColumns]
+                        ;((newColumns[columnIndex] = {
+                          ...newColumns[columnIndex],
+                          tasks: newColumns[columnIndex].tasks.filter(
+                            t => t._id !== task._id
+                          ),
+                        }),
+                          setAllColumns(newColumns))
+                      },
+                      draggable: !0,
+                      onDragStart: e => {
+                        ;(e.stopPropagation(),
+                          taskDragAndDrop.handleTaskDragStart(
+                            e,
+                            task._id,
+                            columnIndex,
+                            taskIndex
+                          ))
+                      },
+                      onDragOver: e => {
+                        ;(e.stopPropagation(),
+                          taskDragAndDrop.handleTaskDragOver(
+                            e,
+                            columnIndex,
+                            taskIndex
+                          ))
+                      },
+                      onDragEnter: e => {
+                        ;(e.stopPropagation(),
+                          taskDragAndDrop.handleTaskDragEnter(
+                            e,
+                            columnIndex,
+                            taskIndex
+                          ))
+                      },
+                      onDragLeave: e => {
+                        ;(e.stopPropagation(),
+                          taskDragAndDrop.handleTaskDragLeave(e))
+                      },
+                      onDrop: e => {
+                        ;(e.stopPropagation(),
+                          taskDragAndDrop.handleTaskDrop(
+                            e,
+                            columnIndex,
+                            taskIndex,
+                            allColumns,
+                            setAllColumns
+                          ))
+                      },
+                      styles,
+                    }),
+                  },
+                  task._id
+                )
+              },
+              [
+                selectedTaskId,
+                taskDragAndDrop,
+                handleTaskSelect,
+                allColumns,
+                setAllColumns,
+                styles,
+              ]
+            ),
+            renderColumn = (0, react.useCallback)(
+              (column, columnIndex) => {
+                var _taskDragAndDrop_dragOverInfo,
+                  _taskDragAndDrop_dragOverInfo1
+                const isDragOver =
+                    columnDragAndDrop.dragOverColumnIndex === columnIndex,
+                  columnStyle = {
+                    ...boardStyles.column,
+                    ...(isDragOver ? boardStyles.columnDragOver : {}),
+                  }
+                return (0, jsx_runtime.jsxs)(
+                  'div',
+                  {
+                    className: 'board-column',
+                    style: columnStyle,
+                    children: [
+                      isSacredTheme &&
+                        (0, jsx_runtime.jsx)('div', {
+                          style: boardStyles.glyph,
+                          children:
+                            board_SACRED_GLYPHS[
+                              columnIndex % board_SACRED_GLYPHS.length
+                            ],
+                        }),
+                      (0, jsx_runtime.jsxs)('div', {
+                        style: boardStyles.columnHeader,
+                        draggable: !0,
+                        onDragStart: e => {
+                          ;(e.stopPropagation(),
+                            handleColumnDragStart(e, columnIndex))
+                        },
+                        onDragOver: e => {
+                          ;(e.stopPropagation(),
+                            columnDragAndDrop.handleColumnDragOver(
+                              e,
+                              columnIndex
+                            ))
+                        },
+                        onDragEnter: e => {
+                          ;(e.stopPropagation(),
+                            columnDragAndDrop.handleColumnDragEnter(
+                              e,
+                              columnIndex
+                            ))
+                        },
+                        onDragLeave: e => {
+                          ;(e.stopPropagation(),
+                            columnDragAndDrop.handleColumnDragLeave(e))
+                        },
+                        onDrop: e => {
+                          ;(e.stopPropagation(),
+                            columnDragAndDrop.handleColumnDrop(e, columnIndex))
+                        },
+                        onDragEnd: handleColumnDragEnd,
+                        children: [
+                          (0, jsx_runtime.jsx)('h3', {
+                            style: boardStyles.columnTitle,
+                            children: column.title,
+                          }),
+                          (0, jsx_runtime.jsx)('p', {
+                            style: boardStyles.columnDescription,
+                            children: column.description,
+                          }),
+                        ],
+                      }),
+                      (0, jsx_runtime.jsx)('div', {
+                        style: boardStyles.tasksContainer,
+                        onDragOver: e => {
+                          taskDragAndDrop.dragItem &&
+                            (e.stopPropagation(),
+                            taskDragAndDrop.handleColumnDragOver(
+                              e,
+                              columnIndex,
+                              allColumns
+                            ))
+                        },
+                        onDrop: e => {
+                          taskDragAndDrop.dragItem &&
+                            (e.stopPropagation(),
+                            taskDragAndDrop.handleColumnDrop(
+                              e,
+                              columnIndex,
+                              allColumns,
+                              setAllColumns
+                            ))
+                        },
+                        children:
+                          0 === column.tasks.length
+                            ? (0, jsx_runtime.jsx)('div', {
+                                style: boardStyles.noTasks,
+                                children: 'No tasks yet',
+                              })
+                            : (0, jsx_runtime.jsxs)('div', {
+                                style: boardStyles.tasksList,
+                                children: [
+                                  column.tasks.map((task, taskIndex) =>
+                                    renderTask(task, taskIndex, columnIndex)
+                                  ),
+                                  (null ===
+                                    (_taskDragAndDrop_dragOverInfo =
+                                      taskDragAndDrop.dragOverInfo) ||
+                                  void 0 === _taskDragAndDrop_dragOverInfo
+                                    ? void 0
+                                    : _taskDragAndDrop_dragOverInfo.columnIndex) ===
+                                    columnIndex &&
+                                    (null ===
+                                      (_taskDragAndDrop_dragOverInfo1 =
+                                        taskDragAndDrop.dragOverInfo) ||
+                                    void 0 === _taskDragAndDrop_dragOverInfo1
+                                      ? void 0
+                                      : _taskDragAndDrop_dragOverInfo1.taskIndex) ===
+                                      column.tasks.length &&
+                                    (0, jsx_runtime.jsx)('div', {
+                                      style: boardStyles.taskDragPlaceholder,
+                                      children: 'Drop task here',
+                                    }),
+                                ],
+                              }),
+                      }),
+                    ],
+                  },
+                  column._id
+                )
+              },
+              [
+                boardStyles,
+                columnDragAndDrop,
+                handleColumnDragStart,
+                handleColumnDragEnd,
+                isSacredTheme,
+                taskDragAndDrop,
+                allColumns,
+                setAllColumns,
+                renderTask,
+              ]
+            )
+          return (0, jsx_runtime.jsx)('div', {
+            className: 'board-container',
+            style: boardStyles.boardContainer,
+            children: columns.map((column, index) =>
+              renderColumn(column, index)
+            ),
+          })
         }
-        ;((TabletBoard.__docgenInfo = {
+        Board.__docgenInfo = {
           description: '',
           methods: [],
-          displayName: 'TabletBoard',
+          displayName: 'Board',
           props: {
             columns: {
               required: !0,
@@ -11770,1412 +9460,53 @@
               },
               description: '',
             },
-            overflowColumns: {
-              required: !1,
-              tsType: {
-                name: 'Array',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                    signature: {
-                      properties: [
-                        { key: '_id', value: { name: 'string', required: !0 } },
-                        {
-                          key: 'title',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'description',
-                          value: { name: 'string', required: !0 },
-                        },
-                        {
-                          key: 'tasks',
-                          value: {
-                            name: 'Array',
-                            elements: [
-                              {
-                                name: 'signature',
-                                type: 'object',
-                                raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                signature: {
-                                  properties: [
-                                    {
-                                      key: '_id',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'companyId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The parent company ID or other domain-specific reference.',
-                                    },
-                                    {
-                                      key: 'title',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'description',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'severityId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If severity is linked to a separate record, store it here.',
-                                    },
-                                    {
-                                      key: 'statusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The main status.',
-                                    },
-                                    {
-                                      key: 'substatusId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The sub-status.',
-                                    },
-                                    {
-                                      key: 'schedulingQueueId',
-                                      value: { name: 'string', required: !0 },
-                                      description: 'The scheduling queue ID.',
-                                    },
-                                    {
-                                      key: 'topicIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Topics array, each referencing a topic ID.',
-                                    },
-                                    {
-                                      key: 'commentIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Comments array, referencing comment IDs.',
-                                    },
-                                    {
-                                      key: 'employeeIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'Employee IDs assigned to the task.',
-                                    },
-                                    {
-                                      key: 'articleIds',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description: 'Knowledgebase article IDs.',
-                                    },
-                                    {
-                                      key: 'customerId',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'The "customer" ID if you have one.',
-                                    },
-                                    {
-                                      key: 'createdAt',
-                                      value: { name: 'Date', required: !0 },
-                                      description: 'Timestamps.',
-                                    },
-                                    {
-                                      key: 'closedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'updatedAt',
-                                      value: { name: 'Date', required: !0 },
-                                    },
-                                    {
-                                      key: 'createdBy',
-                                      value: { name: 'string', required: !0 },
-                                    },
-                                    {
-                                      key: 'editHistory',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editedAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !1,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'isOriginal',
-                                                  value: {
-                                                    name: 'boolean',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'CommentEditHistory[]',
-                                        required: !0,
-                                      },
-                                    },
-                                    {
-                                      key: 'comments',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [
-                                          {
-                                            name: 'signature',
-                                            type: 'object',
-                                            raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                            signature: {
-                                              properties: [
-                                                {
-                                                  key: '_id',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'text',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdAt',
-                                                  value: {
-                                                    name: 'Date',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'createdBy',
-                                                  value: {
-                                                    name: 'string',
-                                                    required: !0,
-                                                  },
-                                                },
-                                                {
-                                                  key: 'editHistory',
-                                                  value: {
-                                                    name: 'Array',
-                                                    elements: [
-                                                      {
-                                                        name: 'signature',
-                                                        type: 'object',
-                                                        raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                        signature: {
-                                                          properties: [
-                                                            {
-                                                              key: '_id',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedBy',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'editedAt',
-                                                              value: {
-                                                                name: 'Date',
-                                                                required: !1,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'text',
-                                                              value: {
-                                                                name: 'string',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                            {
-                                                              key: 'isOriginal',
-                                                              value: {
-                                                                name: 'boolean',
-                                                                required: !0,
-                                                              },
-                                                            },
-                                                          ],
-                                                        },
-                                                      },
-                                                    ],
-                                                    raw: 'CommentEditHistory[]',
-                                                    required: !0,
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
-                                        raw: 'Comment[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                    },
-                                    {
-                                      key: 'customerAssigned',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                    },
-                                    {
-                                      key: 'severity',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Severity label text (e.g. "Critical").',
-                                    },
-                                    {
-                                      key: 'schedulingQueue',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                    },
-                                    {
-                                      key: 'status',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'High-level status text (e.g. "Open").',
-                                    },
-                                    {
-                                      key: 'subStatus',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'Sub-status text (e.g. "In Progress").',
-                                    },
-                                    {
-                                      key: 'topicLabels',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                    },
-                                    {
-                                      key: 'kbArticles',
-                                      value: {
-                                        name: 'Array',
-                                        elements: [{ name: 'string' }],
-                                        raw: 'string[]',
-                                        required: !0,
-                                      },
-                                      description:
-                                        'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                    },
-                                    {
-                                      key: 'teamMember',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                    },
-                                    {
-                                      key: 'nextActionDate',
-                                      value: { name: 'string', required: !0 },
-                                      description:
-                                        'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                            raw: 'Task[]',
-                            required: !0,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-                raw: 'ColumnData[]',
-              },
-              description: '',
-            },
-            selectedOverflowColumnId: {
-              required: !1,
-              tsType: { name: 'string' },
-              description: '',
-            },
-            onChangeSelectedOverflowColumn: {
-              required: !1,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(colId: string) => void',
-                signature: {
-                  arguments: [{ type: { name: 'string' }, name: 'colId' }],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            selectedTask: {
+            selectedTaskId: {
               required: !0,
               tsType: {
                 name: 'union',
-                raw: '{ colIndex: number; taskIndex: number } | null',
-                elements: [
-                  {
-                    name: 'signature',
-                    type: 'object',
-                    raw: '{ colIndex: number; taskIndex: number }',
-                    signature: {
-                      properties: [
-                        {
-                          key: 'colIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                        {
-                          key: 'taskIndex',
-                          value: { name: 'number', required: !0 },
-                        },
-                      ],
-                    },
-                  },
-                  { name: 'null' },
-                ],
+                raw: 'string | null',
+                elements: [{ name: 'string' }, { name: 'null' }],
               },
               description: '',
             },
-            onSelectTask: {
+            onTaskSelect: {
               required: !0,
               tsType: {
                 name: 'signature',
                 type: 'function',
-                raw: '(colIndex: number, taskIndex: number) => void',
+                raw: '(taskId: string) => void',
                 signature: {
-                  arguments: [
-                    { type: { name: 'number' }, name: 'colIndex' },
-                    { type: { name: 'number' }, name: 'taskIndex' },
-                  ],
+                  arguments: [{ type: { name: 'string' }, name: 'taskId' }],
                   return: { name: 'void' },
                 },
               },
               description: '',
             },
-            onColumnDragStart: {
+            columnDragAndDrop: {
               required: !0,
               tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
+                name: 'ReturnType',
+                elements: [{ name: 'useColumnDragAndDrop' }],
+                raw: 'ReturnType<typeof useColumnDragAndDrop>',
               },
               description: '',
             },
-            onColumnDragOver: {
+            taskDragAndDrop: {
               required: !0,
               tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
-              },
-              description: '',
-            },
-            onColumnDrop: {
-              required: !0,
-              tsType: {
-                name: 'signature',
-                type: 'function',
-                raw: '(e: React.DragEvent, columnIndex: number) => void',
-                signature: {
-                  arguments: [
-                    {
-                      type: { name: 'ReactDragEvent', raw: 'React.DragEvent' },
-                      name: 'e',
-                    },
-                    { type: { name: 'number' }, name: 'columnIndex' },
-                  ],
-                  return: { name: 'void' },
-                },
+                name: 'ReturnType',
+                elements: [{ name: 'useTaskDragAndDrop' }],
+                raw: 'ReturnType<typeof useTaskDragAndDrop>',
               },
               description: '',
             },
             styles: {
               required: !1,
               tsType: { name: 'ProjectBoardStyles' },
-              description:
-                'Comprehensive styling options including theme, custom colors, and layout properties.',
-            },
-            sacredtheme: {
-              required: !1,
-              tsType: { name: 'boolean' },
-              description: 'Sacred theme flag for styling',
-              defaultValue: { value: 'false', computed: !1 },
+              description: '',
             },
           },
-        }),
-          (Board.__docgenInfo = {
-            description: '',
-            methods: [],
-            displayName: 'Board',
-            props: {
-              columns: {
-                required: !0,
-                tsType: {
-                  name: 'Array',
-                  elements: [
-                    {
-                      name: 'signature',
-                      type: 'object',
-                      raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                      signature: {
-                        properties: [
-                          {
-                            key: '_id',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'title',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'description',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'tasks',
-                            value: {
-                              name: 'Array',
-                              elements: [
-                                {
-                                  name: 'signature',
-                                  type: 'object',
-                                  raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                  signature: {
-                                    properties: [
-                                      {
-                                        key: '_id',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'companyId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'The parent company ID or other domain-specific reference.',
-                                      },
-                                      {
-                                        key: 'title',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'description',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'severityId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If severity is linked to a separate record, store it here.',
-                                      },
-                                      {
-                                        key: 'statusId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The main status.',
-                                      },
-                                      {
-                                        key: 'substatusId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The sub-status.',
-                                      },
-                                      {
-                                        key: 'schedulingQueueId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The scheduling queue ID.',
-                                      },
-                                      {
-                                        key: 'topicIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Topics array, each referencing a topic ID.',
-                                      },
-                                      {
-                                        key: 'commentIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Comments array, referencing comment IDs.',
-                                      },
-                                      {
-                                        key: 'employeeIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Employee IDs assigned to the task.',
-                                      },
-                                      {
-                                        key: 'articleIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Knowledgebase article IDs.',
-                                      },
-                                      {
-                                        key: 'customerId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'The "customer" ID if you have one.',
-                                      },
-                                      {
-                                        key: 'createdAt',
-                                        value: { name: 'Date', required: !0 },
-                                        description: 'Timestamps.',
-                                      },
-                                      {
-                                        key: 'closedAt',
-                                        value: { name: 'Date', required: !0 },
-                                      },
-                                      {
-                                        key: 'updatedAt',
-                                        value: { name: 'Date', required: !0 },
-                                      },
-                                      {
-                                        key: 'createdBy',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'editHistory',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [
-                                            {
-                                              name: 'signature',
-                                              type: 'object',
-                                              raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                              signature: {
-                                                properties: [
-                                                  {
-                                                    key: '_id',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editedBy',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !1,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editedAt',
-                                                    value: {
-                                                      name: 'Date',
-                                                      required: !1,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'text',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'isOriginal',
-                                                    value: {
-                                                      name: 'boolean',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                          ],
-                                          raw: 'CommentEditHistory[]',
-                                          required: !0,
-                                        },
-                                      },
-                                      {
-                                        key: 'comments',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [
-                                            {
-                                              name: 'signature',
-                                              type: 'object',
-                                              raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                              signature: {
-                                                properties: [
-                                                  {
-                                                    key: '_id',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'text',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'createdAt',
-                                                    value: {
-                                                      name: 'Date',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'createdBy',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editHistory',
-                                                    value: {
-                                                      name: 'Array',
-                                                      elements: [
-                                                        {
-                                                          name: 'signature',
-                                                          type: 'object',
-                                                          raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                          signature: {
-                                                            properties: [
-                                                              {
-                                                                key: '_id',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'editedBy',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !1,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'editedAt',
-                                                                value: {
-                                                                  name: 'Date',
-                                                                  required: !1,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'text',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'isOriginal',
-                                                                value: {
-                                                                  name: 'boolean',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                            ],
-                                                          },
-                                                        },
-                                                      ],
-                                                      raw: 'CommentEditHistory[]',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                          ],
-                                          raw: 'Comment[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                      },
-                                      {
-                                        key: 'customerAssigned',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                      },
-                                      {
-                                        key: 'severity',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Severity label text (e.g. "Critical").',
-                                      },
-                                      {
-                                        key: 'schedulingQueue',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                      },
-                                      {
-                                        key: 'status',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'High-level status text (e.g. "Open").',
-                                      },
-                                      {
-                                        key: 'subStatus',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Sub-status text (e.g. "In Progress").',
-                                      },
-                                      {
-                                        key: 'topicLabels',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                      },
-                                      {
-                                        key: 'kbArticles',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                      },
-                                      {
-                                        key: 'teamMember',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                      },
-                                      {
-                                        key: 'nextActionDate',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                      },
-                                    ],
-                                  },
-                                },
-                              ],
-                              raw: 'Task[]',
-                              required: !0,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  raw: 'ColumnData[]',
-                },
-                description: '',
-              },
-              overflowColumns: {
-                required: !1,
-                tsType: {
-                  name: 'Array',
-                  elements: [
-                    {
-                      name: 'signature',
-                      type: 'object',
-                      raw: '{\n  _id: string\n  title: string\n  description: string\n  tasks: Task[]\n}',
-                      signature: {
-                        properties: [
-                          {
-                            key: '_id',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'title',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'description',
-                            value: { name: 'string', required: !0 },
-                          },
-                          {
-                            key: 'tasks',
-                            value: {
-                              name: 'Array',
-                              elements: [
-                                {
-                                  name: 'signature',
-                                  type: 'object',
-                                  raw: '{\n  _id: string\n  /** The parent company ID or other domain-specific reference. */\n  companyId: string\n  title: string\n  description: string\n  /** If severity is linked to a separate record, store it here. */\n  severityId: string\n  /** The main status. */\n  statusId: string\n  /** The sub-status. */\n  substatusId: string\n  /** The scheduling queue ID. */\n  schedulingQueueId: string\n  /** Topics array, each referencing a topic ID. */\n  topicIds: string[]\n  /** Comments array, referencing comment IDs. */\n  commentIds: string[]\n  /** Employee IDs assigned to the task. */\n  employeeIds: string[]\n  /** Knowledgebase article IDs. */\n  articleIds: string[]\n  /** The "customer" ID if you have one. */\n  customerId: string\n  /** Timestamps. */\n  createdAt: Date\n  closedAt: Date\n  updatedAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n  /**\n   * If you want to store the actual comments (rather than just commentIds),\n   * so ShowTask can display them directly.\n   */\n  comments: Comment[]\n  /** If you store the "customer assigned" label as text (e.g. "Bobbie Sue"). */\n  customerAssigned: string\n  /** Severity label text (e.g. "Critical"). */\n  severity: string\n  /** Scheduling Queue text (e.g. "Technologies Unlimited"). */\n  schedulingQueue: string\n  /** High-level status text (e.g. "Open"). */\n  status: string\n  /** Sub-status text (e.g. "In Progress"). */\n  subStatus: string\n  /**\n   * If you want to store the actual topic strings (e.g. ["Technical Support"]).\n   * This can be used in addition to or instead of topicIds.\n   */\n  topicLabels: string[]\n  /**\n   * If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\n   * This can be used in addition to or instead of articleIds.\n   */\n  kbArticles: string[]\n  /** A string representing the assigned team member (e.g. "Matthew Goluba"). */\n  teamMember: string\n  /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */\n  nextActionDate: string\n}',
-                                  signature: {
-                                    properties: [
-                                      {
-                                        key: '_id',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'companyId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'The parent company ID or other domain-specific reference.',
-                                      },
-                                      {
-                                        key: 'title',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'description',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'severityId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If severity is linked to a separate record, store it here.',
-                                      },
-                                      {
-                                        key: 'statusId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The main status.',
-                                      },
-                                      {
-                                        key: 'substatusId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The sub-status.',
-                                      },
-                                      {
-                                        key: 'schedulingQueueId',
-                                        value: { name: 'string', required: !0 },
-                                        description: 'The scheduling queue ID.',
-                                      },
-                                      {
-                                        key: 'topicIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Topics array, each referencing a topic ID.',
-                                      },
-                                      {
-                                        key: 'commentIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Comments array, referencing comment IDs.',
-                                      },
-                                      {
-                                        key: 'employeeIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Employee IDs assigned to the task.',
-                                      },
-                                      {
-                                        key: 'articleIds',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'Knowledgebase article IDs.',
-                                      },
-                                      {
-                                        key: 'customerId',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'The "customer" ID if you have one.',
-                                      },
-                                      {
-                                        key: 'createdAt',
-                                        value: { name: 'Date', required: !0 },
-                                        description: 'Timestamps.',
-                                      },
-                                      {
-                                        key: 'closedAt',
-                                        value: { name: 'Date', required: !0 },
-                                      },
-                                      {
-                                        key: 'updatedAt',
-                                        value: { name: 'Date', required: !0 },
-                                      },
-                                      {
-                                        key: 'createdBy',
-                                        value: { name: 'string', required: !0 },
-                                      },
-                                      {
-                                        key: 'editHistory',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [
-                                            {
-                                              name: 'signature',
-                                              type: 'object',
-                                              raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                              signature: {
-                                                properties: [
-                                                  {
-                                                    key: '_id',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editedBy',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !1,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editedAt',
-                                                    value: {
-                                                      name: 'Date',
-                                                      required: !1,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'text',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'isOriginal',
-                                                    value: {
-                                                      name: 'boolean',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                          ],
-                                          raw: 'CommentEditHistory[]',
-                                          required: !0,
-                                        },
-                                      },
-                                      {
-                                        key: 'comments',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [
-                                            {
-                                              name: 'signature',
-                                              type: 'object',
-                                              raw: '{\n  _id: string\n  text: string\n  createdAt: Date\n  createdBy: string\n  editHistory: CommentEditHistory[]\n}',
-                                              signature: {
-                                                properties: [
-                                                  {
-                                                    key: '_id',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'text',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'createdAt',
-                                                    value: {
-                                                      name: 'Date',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'createdBy',
-                                                    value: {
-                                                      name: 'string',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                  {
-                                                    key: 'editHistory',
-                                                    value: {
-                                                      name: 'Array',
-                                                      elements: [
-                                                        {
-                                                          name: 'signature',
-                                                          type: 'object',
-                                                          raw: '{\n  _id: string\n  editedBy?: string\n  editedAt?: Date\n  text: string\n  isOriginal: boolean\n}',
-                                                          signature: {
-                                                            properties: [
-                                                              {
-                                                                key: '_id',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'editedBy',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !1,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'editedAt',
-                                                                value: {
-                                                                  name: 'Date',
-                                                                  required: !1,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'text',
-                                                                value: {
-                                                                  name: 'string',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                              {
-                                                                key: 'isOriginal',
-                                                                value: {
-                                                                  name: 'boolean',
-                                                                  required: !0,
-                                                                },
-                                                              },
-                                                            ],
-                                                          },
-                                                        },
-                                                      ],
-                                                      raw: 'CommentEditHistory[]',
-                                                      required: !0,
-                                                    },
-                                                  },
-                                                ],
-                                              },
-                                            },
-                                          ],
-                                          raw: 'Comment[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store the actual comments (rather than just commentIds),\nso ShowTask can display them directly.',
-                                      },
-                                      {
-                                        key: 'customerAssigned',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If you store the "customer assigned" label as text (e.g. "Bobbie Sue").',
-                                      },
-                                      {
-                                        key: 'severity',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Severity label text (e.g. "Critical").',
-                                      },
-                                      {
-                                        key: 'schedulingQueue',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Scheduling Queue text (e.g. "Technologies Unlimited").',
-                                      },
-                                      {
-                                        key: 'status',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'High-level status text (e.g. "Open").',
-                                      },
-                                      {
-                                        key: 'subStatus',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'Sub-status text (e.g. "In Progress").',
-                                      },
-                                      {
-                                        key: 'topicLabels',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store the actual topic strings (e.g. ["Technical Support"]).\nThis can be used in addition to or instead of topicIds.',
-                                      },
-                                      {
-                                        key: 'kbArticles',
-                                        value: {
-                                          name: 'Array',
-                                          elements: [{ name: 'string' }],
-                                          raw: 'string[]',
-                                          required: !0,
-                                        },
-                                        description:
-                                          'If you want to store knowledgebase articles as raw text (e.g. ["How to Troubleshoot Stuff"]).\nThis can be used in addition to or instead of articleIds.',
-                                      },
-                                      {
-                                        key: 'teamMember',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'A string representing the assigned team member (e.g. "Matthew Goluba").',
-                                      },
-                                      {
-                                        key: 'nextActionDate',
-                                        value: { name: 'string', required: !0 },
-                                        description:
-                                          'If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST").',
-                                      },
-                                    ],
-                                  },
-                                },
-                              ],
-                              raw: 'Task[]',
-                              required: !0,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  raw: 'ColumnData[]',
-                },
-                description: '',
-              },
-              selectedOverflowColumnId: {
-                required: !1,
-                tsType: { name: 'string' },
-                description: '',
-              },
-              onChangeSelectedOverflowColumn: {
-                required: !1,
-                tsType: {
-                  name: 'signature',
-                  type: 'function',
-                  raw: '(colId: string) => void',
-                  signature: {
-                    arguments: [{ type: { name: 'string' }, name: 'colId' }],
-                    return: { name: 'void' },
-                  },
-                },
-                description: '',
-              },
-              selectedTask: {
-                required: !0,
-                tsType: {
-                  name: 'union',
-                  raw: '{ colIndex: number; taskIndex: number } | null',
-                  elements: [
-                    {
-                      name: 'signature',
-                      type: 'object',
-                      raw: '{ colIndex: number; taskIndex: number }',
-                      signature: {
-                        properties: [
-                          {
-                            key: 'colIndex',
-                            value: { name: 'number', required: !0 },
-                          },
-                          {
-                            key: 'taskIndex',
-                            value: { name: 'number', required: !0 },
-                          },
-                        ],
-                      },
-                    },
-                    { name: 'null' },
-                  ],
-                },
-                description: '',
-              },
-              onSelectTask: {
-                required: !0,
-                tsType: {
-                  name: 'signature',
-                  type: 'function',
-                  raw: '(colIndex: number, taskIndex: number) => void',
-                  signature: {
-                    arguments: [
-                      { type: { name: 'number' }, name: 'colIndex' },
-                      { type: { name: 'number' }, name: 'taskIndex' },
-                    ],
-                    return: { name: 'void' },
-                  },
-                },
-                description: '',
-              },
-              onColumnDragStart: {
-                required: !0,
-                tsType: {
-                  name: 'signature',
-                  type: 'function',
-                  raw: '(e: React.DragEvent, columnIndex: number) => void',
-                  signature: {
-                    arguments: [
-                      {
-                        type: {
-                          name: 'ReactDragEvent',
-                          raw: 'React.DragEvent',
-                        },
-                        name: 'e',
-                      },
-                      { type: { name: 'number' }, name: 'columnIndex' },
-                    ],
-                    return: { name: 'void' },
-                  },
-                },
-                description: '',
-              },
-              onColumnDragOver: {
-                required: !0,
-                tsType: {
-                  name: 'signature',
-                  type: 'function',
-                  raw: '(e: React.DragEvent, columnIndex: number) => void',
-                  signature: {
-                    arguments: [
-                      {
-                        type: {
-                          name: 'ReactDragEvent',
-                          raw: 'React.DragEvent',
-                        },
-                        name: 'e',
-                      },
-                      { type: { name: 'number' }, name: 'columnIndex' },
-                    ],
-                    return: { name: 'void' },
-                  },
-                },
-                description: '',
-              },
-              onColumnDrop: {
-                required: !0,
-                tsType: {
-                  name: 'signature',
-                  type: 'function',
-                  raw: '(e: React.DragEvent, columnIndex: number) => void',
-                  signature: {
-                    arguments: [
-                      {
-                        type: {
-                          name: 'ReactDragEvent',
-                          raw: 'React.DragEvent',
-                        },
-                        name: 'e',
-                      },
-                      { type: { name: 'number' }, name: 'columnIndex' },
-                    ],
-                    return: { name: 'void' },
-                  },
-                },
-                description: '',
-              },
-              styles: {
-                required: !1,
-                tsType: { name: 'ProjectBoardStyles' },
-                description:
-                  'Comprehensive styling options including theme, custom colors, and layout properties.',
-              },
-              sacredtheme: {
-                required: !1,
-                tsType: { name: 'boolean' },
-                description: 'Sacred theme flag for styling',
-              },
-            },
-          }))
+        }
         var theme = __webpack_require__('./src/theme/index.ts')
         function ProjectBoardContent({
           variant,
@@ -13244,149 +9575,260 @@
           ;(0, react.useEffect)(() => {
             setColumnState(mergedColumns)
           }, [mergedColumns, setColumnState])
-          const [selectedTask, setSelectedTask] = (0, react.useState)(null)
-          const allTasks = (0, react.useMemo)(
-              () => columnState.flatMap(col => col.tasks),
-              [columnState]
-            ),
-            { handleColumnDragStart, handleColumnDragOver, handleColumnDrop } =
-              (function useColumnDragAndDrop(columnState, setColumnState) {
-                const [dragItem, setDragItem] = react.useState(null)
-                return {
-                  handleColumnDragStart: function handleColumnDragStart(
-                    e,
-                    columnIndex
-                  ) {
-                    ;((e.dataTransfer.effectAllowed = 'move'),
-                      setDragItem({ type: 'column', columnIndex }))
-                  },
-                  handleColumnDragOver: function handleColumnDragOver(e) {
-                    ;(e.preventDefault(), (e.dataTransfer.dropEffect = 'move'))
-                  },
-                  handleColumnDrop: function handleColumnDrop(
-                    e,
-                    dropColumnIndex
-                  ) {
-                    if (
-                      (e.preventDefault(),
-                      !dragItem || 'column' !== dragItem.type)
-                    )
-                      return void setDragItem(null)
-                    const newCols = (function reorder(
-                      list,
-                      startIndex,
-                      endIndex
-                    ) {
-                      const result = [...list],
-                        [removed] = result.splice(startIndex, 1)
-                      return (result.splice(endIndex, 0, removed), result)
-                    })(columnState, dragItem.columnIndex, dropColumnIndex)
-                    ;(setColumnState(newCols), setDragItem(null))
-                  },
-                }
-              })(columnState, setColumnState),
-            [addTaskOpen, setAddTaskOpen] = (0, react.useState)(!1),
+          const [selectedTaskId, setSelectedTaskId] = (0, react.useState)(null),
             [showTaskOpen, setShowTaskOpen] = (0, react.useState)('-1'),
-            handleAddTask = (0, react.useCallback)(
-              newTask => {
-                if (0 === columnState.length)
-                  return (onAdd(newTask), void setAddTaskOpen(!1))
-                const newCols = [...columnState],
-                  colId = newCols[0]._id,
-                  typedTask = {
-                    _id: String(Date.now()),
-                    ...newTask,
-                    severityId:
-                      'severityLevel' === boardType
-                        ? colId
-                        : newTask.severityId,
-                    schedulingQueueId:
-                      'status' === boardType
-                        ? colId
-                        : newTask.schedulingQueueId,
-                    statusId: 'status' === boardType ? colId : newTask.statusId,
-                    substatusId:
-                      'subStatus' === boardType ? colId : newTask.substatusId,
-                    topicIds:
-                      'topic' === boardType ? [colId] : newTask.topicIds,
-                  }
-                ;(newCols[0].tasks.push(typedTask),
-                  setColumnState(newCols),
-                  setAddTaskOpen(!1),
-                  onAdd(newTask))
-              },
-              [columnState, boardType, setColumnState, onAdd]
-            ),
-            currentShowTask = allTasks.find(t => t._id === showTaskOpen)
-          if ('-1' !== showTaskOpen && !currentShowTask)
-            throw new Error('ShowTask is open but no task found')
-          const showTaskTitle =
-              (null == currentShowTask ? void 0 : currentShowTask.title) || '',
-            showTaskDescription =
-              (null == currentShowTask
-                ? void 0
-                : currentShowTask.description) || '',
-            showTaskCreatedBy =
-              (null == currentShowTask ? void 0 : currentShowTask.createdBy) ||
-              '',
-            showTaskCommentsFixed = (0, react.useMemo)(
-              () =>
-                currentShowTask
-                  ? currentShowTask.comments.map(c => {
-                      var _c_createdAt
-                      return {
-                        _id: c._id,
-                        text: c.text,
-                        createdAt: new Date(
-                          null !== (_c_createdAt = c.createdAt) &&
-                          void 0 !== _c_createdAt
-                            ? _c_createdAt
-                            : Date.now()
-                        ),
-                        createdBy: c.createdBy,
-                        editHistory: c.editHistory.map(eh => ({
-                          ...eh,
-                          ...(eh.editedAt
-                            ? { editedAt: new Date(eh.editedAt) }
-                            : {}),
-                        })),
-                      }
-                    })
-                  : [],
-              [currentShowTask]
-            ),
-            showTaskCustomerAssigned =
-              (null == currentShowTask
-                ? void 0
-                : currentShowTask.customerAssigned) || '',
-            showTaskSeverity =
-              (null == currentShowTask ? void 0 : currentShowTask.severity) ||
-              '',
-            showTaskSchedulingQueue =
-              (null == currentShowTask
-                ? void 0
-                : currentShowTask.schedulingQueue) || '',
-            showTaskStatus =
-              (null == currentShowTask ? void 0 : currentShowTask.status) || '',
-            showTaskSubStatus =
-              (null == currentShowTask ? void 0 : currentShowTask.subStatus) ||
-              '',
-            showTaskTopics =
-              (null == currentShowTask
-                ? void 0
-                : currentShowTask.topicLabels) || [],
-            showTaskKBArticles =
-              (null == currentShowTask ? void 0 : currentShowTask.kbArticles) ||
-              [],
-            showTaskTeamMemberAssigned =
-              (null == currentShowTask ? void 0 : currentShowTask.teamMember) ||
-              '',
-            showTaskNextActionDate =
-              (null == currentShowTask
-                ? void 0
-                : currentShowTask.nextActionDate) || '',
-            [searchTerm, setSearchTerm] = (0, react.useState)('')
-          const filteredColumnState = (0, react.useMemo)(() => {
+            [addTaskOpen, setAddTaskOpen] = (0, react.useState)(!1),
+            [searchTerm, setSearchTerm] = (0, react.useState)(''),
+            columnDragAndDrop = (function useColumnDragAndDrop(
+              columnState,
+              setColumnState
+            ) {
+              const [draggedColumn, setDraggedColumn] = react.useState(null),
+                [isDragging, setIsDragging] = react.useState(!1),
+                [dragOverColumnIndex, setDragOverColumnIndex] =
+                  react.useState(null),
+                reorderColumns = (0, react.useCallback)(
+                  (list, startIndex, endIndex) => {
+                    const result = [...list],
+                      [removed] = result.splice(startIndex, 1)
+                    return (result.splice(endIndex, 0, removed), result)
+                  },
+                  []
+                ),
+                handleColumnDragStart = (0, react.useCallback)(
+                  (e, columnIndex) => {
+                    const column = columnState[columnIndex]
+                    if (!column) return
+                    ;((e.dataTransfer.effectAllowed = 'move'),
+                      e.dataTransfer.setData('text/plain', column._id),
+                      setDraggedColumn({ columnId: column._id, columnIndex }),
+                      setIsDragging(!0))
+                    const dragImage = e.currentTarget.cloneNode(!0)
+                    ;((dragImage.style.opacity = '0.7'),
+                      (dragImage.style.transform = 'rotate(2deg)'),
+                      e.dataTransfer.setDragImage(dragImage, 0, 0))
+                  },
+                  [columnState]
+                ),
+                handleColumnDragOver = (0, react.useCallback)(
+                  (e, columnIndex) => {
+                    ;(e.preventDefault(),
+                      (e.dataTransfer.dropEffect = 'move'),
+                      draggedColumn &&
+                        draggedColumn.columnIndex !== columnIndex &&
+                        setDragOverColumnIndex(columnIndex))
+                  },
+                  [draggedColumn]
+                ),
+                handleColumnDragEnter = (0, react.useCallback)(
+                  (e, columnIndex) => {
+                    ;(e.preventDefault(),
+                      draggedColumn &&
+                        draggedColumn.columnIndex !== columnIndex &&
+                        setDragOverColumnIndex(columnIndex))
+                  },
+                  [draggedColumn]
+                ),
+                handleColumnDragLeave = (0, react.useCallback)(e => {
+                  e.preventDefault()
+                  const relatedTarget = e.relatedTarget
+                  ;(relatedTarget && e.currentTarget.contains(relatedTarget)) ||
+                    setDragOverColumnIndex(null)
+                }, []),
+                handleColumnDrop = (0, react.useCallback)(
+                  (e, dropColumnIndex) => {
+                    if ((e.preventDefault(), !draggedColumn))
+                      return (
+                        setIsDragging(!1),
+                        void setDragOverColumnIndex(null)
+                      )
+                    const sourceIndex = draggedColumn.columnIndex
+                    if (sourceIndex === dropColumnIndex)
+                      return (
+                        setDraggedColumn(null),
+                        setIsDragging(!1),
+                        void setDragOverColumnIndex(null)
+                      )
+                    const newColumns = reorderColumns(
+                      columnState,
+                      sourceIndex,
+                      dropColumnIndex
+                    )
+                    ;(setColumnState(newColumns),
+                      setDraggedColumn(null),
+                      setIsDragging(!1),
+                      setDragOverColumnIndex(null))
+                  },
+                  [draggedColumn, columnState, reorderColumns, setColumnState]
+                ),
+                resetColumnDragState = (0, react.useCallback)(() => {
+                  ;(setDraggedColumn(null),
+                    setIsDragging(!1),
+                    setDragOverColumnIndex(null))
+                }, [])
+              return {
+                draggedColumn,
+                isDragging,
+                dragOverColumnIndex,
+                handleColumnDragStart,
+                handleColumnDragOver,
+                handleColumnDragEnter,
+                handleColumnDragLeave,
+                handleColumnDrop,
+                resetColumnDragState,
+              }
+            })(columnState, setColumnState),
+            taskDragAndDrop = (function useTaskDragAndDrop() {
+              const [dragItem, setDragItem] = react.useState(null),
+                [isDragging, setIsDragging] = react.useState(!1),
+                [dragOverInfo, setDragOverInfo] = react.useState(null),
+                handleTaskDragStart = (0, react.useCallback)(
+                  (e, taskId, columnIndex, taskIndex) => {
+                    ;((e.dataTransfer.effectAllowed = 'move'),
+                      e.dataTransfer.setData('text/plain', taskId),
+                      setDragItem({ taskId, columnIndex, taskIndex }),
+                      setIsDragging(!0))
+                    const dragImage = e.currentTarget.cloneNode(!0)
+                    ;((dragImage.style.opacity = '0.5'),
+                      (dragImage.style.transform = 'rotate(5deg)'),
+                      e.dataTransfer.setDragImage(dragImage, 0, 0))
+                  },
+                  []
+                ),
+                handleTaskDragOver = (0, react.useCallback)(
+                  (e, columnIndex, taskIndex) => {
+                    ;(e.preventDefault(),
+                      (e.dataTransfer.dropEffect = 'move'),
+                      setDragOverInfo({ columnIndex, taskIndex }))
+                  },
+                  []
+                ),
+                handleTaskDragEnter = (0, react.useCallback)(
+                  (e, columnIndex, taskIndex) => {
+                    ;(e.preventDefault(),
+                      setDragOverInfo({ columnIndex, taskIndex }))
+                  },
+                  []
+                ),
+                handleTaskDragLeave = (0, react.useCallback)(e => {
+                  e.preventDefault()
+                  const relatedTarget = e.relatedTarget
+                  ;(relatedTarget && e.currentTarget.contains(relatedTarget)) ||
+                    setDragOverInfo(null)
+                }, []),
+                handleTaskDrop = (0, react.useCallback)(
+                  (
+                    e,
+                    dropColumnIndex,
+                    dropTaskIndex,
+                    allColumns,
+                    setAllColumns
+                  ) => {
+                    if ((e.preventDefault(), !dragItem)) return
+                    const {
+                      columnIndex: sourceColIdx,
+                      taskIndex: sourceTaskIdx,
+                    } = dragItem
+                    if (
+                      sourceColIdx === dropColumnIndex &&
+                      sourceTaskIdx === dropTaskIndex
+                    )
+                      return (
+                        setDragItem(null),
+                        setIsDragging(!1),
+                        void setDragOverInfo(null)
+                      )
+                    if (sourceColIdx < 0 || sourceColIdx >= allColumns.length)
+                      return
+                    if (
+                      dropColumnIndex < 0 ||
+                      dropColumnIndex >= allColumns.length
+                    )
+                      return
+                    const newColumns = allColumns.map(col => ({
+                        ...col,
+                        tasks: [...col.tasks],
+                      })),
+                      sourceColumn = newColumns[sourceColIdx],
+                      destColumn = newColumns[dropColumnIndex],
+                      sourceTask = sourceColumn.tasks[sourceTaskIdx]
+                    if (!sourceTask) return
+                    sourceColumn.tasks.splice(sourceTaskIdx, 1)
+                    const insertIndex = Math.min(
+                      dropTaskIndex,
+                      destColumn.tasks.length
+                    )
+                    ;(destColumn.tasks.splice(insertIndex, 0, sourceTask),
+                      setAllColumns(newColumns),
+                      setDragItem(null),
+                      setIsDragging(!1),
+                      setDragOverInfo(null))
+                  },
+                  [dragItem]
+                ),
+                handleColumnDragOver = (0, react.useCallback)(
+                  (e, columnIndex, allColumns) => {
+                    var _allColumns_columnIndex
+                    ;(e.preventDefault(),
+                      (e.dataTransfer.dropEffect = 'move'),
+                      setDragOverInfo({
+                        columnIndex,
+                        taskIndex:
+                          (null ===
+                            (_allColumns_columnIndex =
+                              allColumns[columnIndex]) ||
+                          void 0 === _allColumns_columnIndex
+                            ? void 0
+                            : _allColumns_columnIndex.tasks.length) || 0,
+                      }))
+                  },
+                  []
+                ),
+                handleColumnDrop = (0, react.useCallback)(
+                  (e, columnIndex, allColumns, setAllColumns) => {
+                    var _allColumns_columnIndex
+                    if ((e.preventDefault(), !dragItem)) return
+                    const taskIndex =
+                      (null ===
+                        (_allColumns_columnIndex = allColumns[columnIndex]) ||
+                      void 0 === _allColumns_columnIndex
+                        ? void 0
+                        : _allColumns_columnIndex.tasks.length) || 0
+                    handleTaskDrop(
+                      e,
+                      columnIndex,
+                      taskIndex,
+                      allColumns,
+                      setAllColumns
+                    )
+                  },
+                  [dragItem, handleTaskDrop]
+                ),
+                resetDragState = (0, react.useCallback)(() => {
+                  ;(setDragItem(null), setIsDragging(!1), setDragOverInfo(null))
+                }, [])
+              return {
+                dragItem,
+                isDragging,
+                dragOverInfo,
+                handleTaskDragStart,
+                handleTaskDragOver,
+                handleTaskDragEnter,
+                handleTaskDragLeave,
+                handleTaskDrop,
+                handleColumnDragOver,
+                handleColumnDrop,
+                resetDragState,
+              }
+            })(),
+            handleTaskSelect = (0, react.useCallback)(taskId => {
+              setSelectedTaskId(prev => (prev === taskId ? null : taskId))
+            }, []),
+            handleSearchChange = (0, react.useCallback)(e => {
+              setSearchTerm(e.target.value)
+            }, []),
+            filteredColumnState = (0, react.useMemo)(() => {
+              if (!searchTerm) return columnState
               const lowerTerm = searchTerm.toLowerCase()
               return columnState.map(col => {
                 const filteredTasks = col.tasks.filter(
@@ -13397,122 +9839,100 @@
                 return { ...col, tasks: filteredTasks }
               })
             }, [columnState, searchTerm]),
-            {
-              containerRef,
-              fittedColumns,
-              overflowColumns,
-              selectedOverflowColumnId,
-              setSelectedOverflowColumnId,
-            } = (function useComputeBoardResize({
-              columns,
-              columnWidth,
-              showOverflowDropdown,
-            }) {
-              const containerRef = (0, react.useRef)(null),
-                [fittedColumns, setFittedColumns] = (0, react.useState)([]),
-                [overflowColumns, setOverflowColumns] = (0, react.useState)([]),
-                [selectedOverflowColumnId, setSelectedOverflowColumnId] = (0,
-                react.useState)(''),
-                recalcColumns = (0, react.useCallback)(() => {
-                  if (!containerRef.current) return
-                  const containerWidth = containerRef.current.offsetWidth,
-                    overflowReservedWidth = showOverflowDropdown
-                      ? columnWidth
-                      : 0
-                  let usedWidth = 0
-                  const canFit = []
-                  let theOverflow = []
-                  for (let i = 0; i < columns.length; i++) {
-                    if (
-                      !(
-                        usedWidth + columnWidth + overflowReservedWidth <=
-                        containerWidth
-                      )
-                    ) {
-                      if (
-                        ((theOverflow = columns.slice(i)),
-                        theOverflow.length > 0 && canFit.length > 0)
-                      ) {
-                        const lastFitted = canFit.pop()
-                        lastFitted &&
-                          (theOverflow = [lastFitted, ...theOverflow])
-                      }
-                      break
-                    }
-                    ;(canFit.push(columns[i]), (usedWidth += columnWidth))
-                  }
-                  ;(setFittedColumns(canFit),
-                    setOverflowColumns(theOverflow),
-                    theOverflow.length > 0
-                      ? theOverflow.some(
-                          c => c._id === selectedOverflowColumnId
-                        ) || setSelectedOverflowColumnId(theOverflow[0]._id)
-                      : '' !== selectedOverflowColumnId &&
-                        setSelectedOverflowColumnId(''))
-                }, [
-                  columns,
-                  columnWidth,
-                  showOverflowDropdown,
-                  selectedOverflowColumnId,
-                ])
-              return (
-                (0, react.useLayoutEffect)(() => {
-                  if (!containerRef.current) return
-                  const ro = new ResizeObserver(() => {
-                    recalcColumns()
-                  })
-                  return (
-                    ro.observe(containerRef.current),
-                    () => ro.disconnect()
-                  )
-                }, [recalcColumns]),
-                (0, react.useEffect)(() => {
-                  const handleResize = () => recalcColumns()
-                  return (
-                    window.addEventListener('resize', handleResize),
-                    () => window.removeEventListener('resize', handleResize)
-                  )
-                }, [recalcColumns]),
-                (0, react.useEffect)(() => {
-                  recalcColumns()
-                }, [recalcColumns]),
-                {
-                  containerRef,
-                  fittedColumns,
-                  overflowColumns,
-                  selectedOverflowColumnId,
-                  setSelectedOverflowColumnId,
+            handleAddTask = (0, react.useCallback)(
+              newTask => {
+                const taskWithId = {
+                  ...newTask,
+                  _id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 }
-              )
-            })({
-              columns: filteredColumnState,
-              columnWidth: 300,
-              showOverflowDropdown: !0,
-            })
-          const exactlyOneSelected = null !== selectedTask
-          let selectedTaskId = ''
-          if (selectedTask) {
-            const { colIndex, taskIndex } = selectedTask
-            colIndex >= 0 &&
-              colIndex < columnState.length &&
-              taskIndex >= 0 &&
-              taskIndex < columnState[colIndex].tasks.length &&
-              (selectedTaskId = columnState[colIndex].tasks[taskIndex]._id)
-          }
-          const buttons = [
-            { text: 'Create Task', onClick: () => setAddTaskOpen(!0) },
-            {
-              text: 'Show Task',
-              onClick: () => {
-                exactlyOneSelected &&
-                  selectedTaskId &&
-                  setShowTaskOpen(selectedTaskId)
+                ;(setColumnState(prevColumns => {
+                  const newColumns = [...prevColumns],
+                    targetColumnIndex = newColumns.findIndex(col => {
+                      switch (boardType) {
+                        case 'severityLevel':
+                          return col._id === newTask.severityId
+                        case 'status':
+                          return col._id === newTask.statusId
+                        case 'subStatus':
+                          return col._id === newTask.substatusId
+                        case 'topic':
+                          return newTask.topicIds.includes(col._id)
+                        default:
+                          return !1
+                      }
+                    })
+                  return (
+                    -1 !== targetColumnIndex &&
+                      (newColumns[targetColumnIndex] = {
+                        ...newColumns[targetColumnIndex],
+                        tasks: [
+                          ...newColumns[targetColumnIndex].tasks,
+                          taskWithId,
+                        ],
+                      }),
+                    newColumns
+                  )
+                }),
+                  setAddTaskOpen(!1),
+                  onAdd(newTask))
               },
-              disabled: !exactlyOneSelected || !selectedTaskId,
-            },
-          ]
+              [boardType, onAdd, setColumnState]
+            ),
+            handleEditComment = (0, react.useCallback)(
+              (commentId, newText, taskId) => {
+                ;(setColumnState(oldCols =>
+                  oldCols.map(col => {
+                    const updatedTasks = col.tasks.map(task => {
+                      if (task._id !== taskId) return task
+                      const updatedComments = task.comments.map(c =>
+                        c._id === commentId ? { ...c, text: newText } : c
+                      )
+                      return { ...task, comments: updatedComments }
+                    })
+                    return { ...col, tasks: updatedTasks }
+                  })
+                ),
+                  onEditComment(commentId, newText, taskId))
+              },
+              [onEditComment, setColumnState]
+            ),
+            handleCloseTask = (0, react.useCallback)(
+              taskId => {
+                ;(setColumnState(oldCols =>
+                  oldCols.map(col => {
+                    const updatedTasks = col.tasks.map(task =>
+                      task._id === taskId
+                        ? { ...task, closedAt: new Date() }
+                        : task
+                    )
+                    return { ...col, tasks: updatedTasks }
+                  })
+                ),
+                  setShowTaskOpen('-1'))
+              },
+              [setColumnState]
+            ),
+            currentShowTask = (0, react.useMemo)(
+              () =>
+                columnState
+                  .flatMap(col => col.tasks)
+                  .find(task => task._id === showTaskOpen),
+              [columnState, showTaskOpen]
+            ),
+            buttons = (0, react.useMemo)(
+              () => [
+                { text: 'Create Task', onClick: () => setAddTaskOpen(!0) },
+                {
+                  text: 'Show Task',
+                  onClick: () => {
+                    selectedTaskId && setShowTaskOpen(selectedTaskId)
+                  },
+                  disabled: !selectedTaskId,
+                },
+              ],
+              [selectedTaskId]
+            )
           return (0, jsx_runtime.jsxs)('div', {
-            ref: containerRef,
             style: computedStyles.container,
             children: [
               isSacredTheme &&
@@ -13541,9 +9961,7 @@
                 searchbarProps: {
                   label: 'Search...',
                   value: searchTerm,
-                  onChange: function handleSearchChange(e) {
-                    setSearchTerm(e.target.value)
-                  },
+                  onChange: handleSearchChange,
                   styles: { theme: null == styles ? void 0 : styles.theme },
                 },
                 styles: { theme: null == styles ? void 0 : styles.theme },
@@ -13551,21 +9969,11 @@
               (0, jsx_runtime.jsx)('div', {
                 style: computedStyles.toolbarContainer,
                 children: (0, jsx_runtime.jsx)(Board, {
-                  columns: fittedColumns,
-                  overflowColumns,
-                  selectedOverflowColumnId,
-                  onChangeSelectedOverflowColumn: setSelectedOverflowColumnId,
-                  selectedTask,
-                  onSelectTask: function handleSelectTask(colIndex, taskIndex) {
-                    selectedTask &&
-                    selectedTask.colIndex === colIndex &&
-                    selectedTask.taskIndex === taskIndex
-                      ? setSelectedTask(null)
-                      : setSelectedTask({ colIndex, taskIndex })
-                  },
-                  onColumnDragStart: handleColumnDragStart,
-                  onColumnDragOver: handleColumnDragOver,
-                  onColumnDrop: handleColumnDrop,
+                  columns: filteredColumnState,
+                  selectedTaskId,
+                  onTaskSelect: handleTaskSelect,
+                  columnDragAndDrop,
+                  taskDragAndDrop,
                   styles: { theme: null == styles ? void 0 : styles.theme },
                 }),
               }),
@@ -13666,19 +10074,19 @@
                   open: !0,
                   onClose: () => setShowTaskOpen('-1'),
                   taskId: showTaskOpen,
-                  taskTitle: showTaskTitle,
-                  createdBy: showTaskCreatedBy,
-                  description: showTaskDescription,
-                  comments: showTaskCommentsFixed,
-                  customerAssigned: showTaskCustomerAssigned,
-                  severity: showTaskSeverity,
-                  schedulingQueue: showTaskSchedulingQueue,
-                  status: showTaskStatus,
-                  subStatus: showTaskSubStatus,
-                  topics: showTaskTopics,
-                  knowledgebaseArticles: showTaskKBArticles,
-                  teamMemberAssigned: showTaskTeamMemberAssigned,
-                  nextActionDate: showTaskNextActionDate,
+                  taskTitle: currentShowTask.title,
+                  createdBy: currentShowTask.createdBy,
+                  description: currentShowTask.description,
+                  comments: currentShowTask.comments,
+                  customerAssigned: currentShowTask.customerAssigned,
+                  severity: currentShowTask.severity,
+                  schedulingQueue: currentShowTask.schedulingQueue,
+                  status: currentShowTask.status,
+                  subStatus: currentShowTask.subStatus,
+                  topics: currentShowTask.topicLabels,
+                  knowledgebaseArticles: currentShowTask.kbArticles,
+                  teamMemberAssigned: currentShowTask.teamMember,
+                  nextActionDate: currentShowTask.nextActionDate,
                   currentUserName: `${currentUser.firstName} ${currentUser.lastName}`,
                   onEdit: updatedData => {
                     onEdit({ _id: showTaskOpen, ...updatedData })
@@ -13687,34 +10095,8 @@
                   onDuplicate: () => onDuplicate({ _id: showTaskOpen }),
                   onComment: text => onComment(text, showTaskOpen),
                   onEditComment: (commentId, newText) =>
-                    (function handleEditComment(commentId, newText, taskId) {
-                      ;(setColumnState(oldCols =>
-                        oldCols.map(col => {
-                          const updatedTasks = col.tasks.map(task => {
-                            if (task._id !== taskId) return task
-                            const updatedComments = task.comments.map(c =>
-                              c._id === commentId ? { ...c, text: newText } : c
-                            )
-                            return { ...task, comments: updatedComments }
-                          })
-                          return { ...col, tasks: updatedTasks }
-                        })
-                      ),
-                        onEditComment(commentId, newText, taskId))
-                    })(commentId, newText, showTaskOpen),
-                  onCloseTask: function handleCloseTask(taskId) {
-                    ;(setColumnState(oldCols =>
-                      oldCols.map(col => {
-                        const updatedTasks = col.tasks.map(task =>
-                          task._id === taskId
-                            ? { ...task, closedAt: new Date() }
-                            : task
-                        )
-                        return { ...col, tasks: updatedTasks }
-                      })
-                    ),
-                      setShowTaskOpen('-1'))
-                  },
+                    handleEditComment(commentId, newText, showTaskOpen),
+                  onCloseTask: handleCloseTask,
                   onRevisionHistory,
                   customerOptions: rawCustomers,
                   severityOptions: rawSeverityLevels,
@@ -13734,7 +10116,7 @@
             children: (0, jsx_runtime.jsx)(ProjectBoardContent, { ...props }),
           })
         }
-        const components_ProjectBoard = react.memo(ProjectBoard)
+        const components_ProjectBoard = ProjectBoard
         ProjectBoard.__docgenInfo = {
           description: '',
           methods: [],
@@ -14936,44 +11318,392 @@
             },
           },
         }
+        const NoUserAddTask = ({ onAdd, severityLevels, sacredtheme = !1 }) => {
+            var _severityOptions_find
+            const [taskTitle, setTaskTitle] = (0, react.useState)(''),
+              [taskDescription, setTaskDescription] = (0, react.useState)(''),
+              [email, setEmail] = (0, react.useState)(''),
+              [selectedSeverityId, setSelectedSeverityId] = (0, react.useState)(
+                ''
+              ),
+              styles = (sacredtheme => ({
+                container: {
+                  padding: '0.75rem',
+                  position: 'relative',
+                  ...(sacredtheme && {
+                    border: '2px solid rgba(255, 215, 0, 0.5)',
+                    borderRadius: '0.5rem',
+                    overflow: 'hidden',
+                    boxShadow: '0 0 1rem rgba(255, 215, 0, 0.3)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                    animation:
+                      'no-user-add-task-glow-pulse 2s infinite alternate',
+                  }),
+                },
+                glyph: {
+                  position: 'absolute',
+                  top: '0.75rem',
+                  fontSize: '1.125rem',
+                  color: 'rgba(255, 215, 0, 0.3)',
+                  zIndex: 10,
+                  animation:
+                    'no-user-add-task-float-glyph 5s infinite alternate',
+                },
+                title: {
+                  marginBottom: '0.75rem',
+                  fontSize: '1.25rem',
+                  ...(sacredtheme && {
+                    fontFamily: 'Cinzel, serif',
+                    letterSpacing: '0.05em',
+                    textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+                    color: '#FFD700',
+                  }),
+                },
+                form: {
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                },
+              }))(sacredtheme),
+              severityOptions = severityLevels.map(sl => ({
+                value: String(sl.severityLevel),
+                attribute1: sl.description || '',
+                attribute2: sl._id,
+              })),
+              handleSubmit = (0, react.useCallback)(
+                e => {
+                  ;(e && e.preventDefault(),
+                    taskTitle && taskDescription && email && selectedSeverityId
+                      ? onAdd({
+                          title: taskTitle,
+                          description: taskDescription,
+                          email,
+                          severityId: selectedSeverityId,
+                        })
+                      : alert('Please fill out all fields.'))
+                },
+                [taskTitle, taskDescription, email, selectedSeverityId, onAdd]
+              )
+            return (0, jsx_runtime.jsxs)('div', {
+              style: styles.container,
+              children: [
+                sacredtheme &&
+                  (0, jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+                    children: [
+                      (0, jsx_runtime.jsx)('div', {
+                        style: { ...styles.glyph, left: '0.75rem' },
+                        children: '𓁹',
+                      }),
+                      (0, jsx_runtime.jsx)('div', {
+                        style: {
+                          ...styles.glyph,
+                          right: '0.75rem',
+                          animationDirection: 'reverse',
+                        },
+                        children: '𓂀',
+                      }),
+                    ],
+                  }),
+                (0, jsx_runtime.jsx)(Typography.A, {
+                  styles: { color: sacredtheme ? '#FFD700' : void 0 },
+                  children: 'Create Task',
+                }),
+                (0, jsx_runtime.jsxs)('form', {
+                  onSubmit: handleSubmit,
+                  style: styles.form,
+                  children: [
+                    (0, jsx_runtime.jsx)(Text.A, {
+                      label: 'Task Title',
+                      value: taskTitle,
+                      onChange: setTaskTitle,
+                      placeholder: 'Enter Task Title',
+                      styles: { theme: sacredtheme ? 'sacred' : 'light' },
+                    }),
+                    (0, jsx_runtime.jsx)(ComplexTextEditor.A, {
+                      label: 'Task Description',
+                      value: taskDescription,
+                      onChange: setTaskDescription,
+                      editorType: 'simple',
+                      minRows: 5,
+                      styles: { theme: sacredtheme ? 'sacred' : 'light' },
+                    }),
+                    (0, jsx_runtime.jsx)(Text.A, {
+                      label: 'Email',
+                      value: email,
+                      onChange: setEmail,
+                      placeholder: 'Enter your email',
+                      styles: { theme: sacredtheme ? 'sacred' : 'light' },
+                    }),
+                    (0, jsx_runtime.jsx)(Searchable.A, {
+                      label: 'Severity Level',
+                      options: severityOptions,
+                      defaultValue:
+                        null ===
+                          (_severityOptions_find = severityOptions.find(
+                            opt => opt.attribute2 === selectedSeverityId
+                          )) || void 0 === _severityOptions_find
+                          ? void 0
+                          : _severityOptions_find.value,
+                      onChange: option =>
+                        setSelectedSeverityId(
+                          (null == option ? void 0 : option.attribute2) || ''
+                        ),
+                      placeholder: 'Select severity level',
+                      styles: { theme: sacredtheme ? 'sacred' : 'light' },
+                    }),
+                    (0, jsx_runtime.jsx)(Button.A, {
+                      text: 'Create Task',
+                      onClick: () => handleSubmit(),
+                      styles: { theme: sacredtheme ? 'sacred' : 'light' },
+                    }),
+                  ],
+                }),
+              ],
+            })
+          },
+          noUser = NoUserAddTask
+        NoUserAddTask.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'NoUserAddTask',
+          props: {
+            onAdd: {
+              required: !0,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(newTask: {\n  title: string\n  description: string\n  email: string\n  severityId: string\n}) => void',
+                signature: {
+                  arguments: [
+                    {
+                      type: {
+                        name: 'signature',
+                        type: 'object',
+                        raw: '{\n  title: string\n  description: string\n  email: string\n  severityId: string\n}',
+                        signature: {
+                          properties: [
+                            {
+                              key: 'title',
+                              value: { name: 'string', required: !0 },
+                            },
+                            {
+                              key: 'description',
+                              value: { name: 'string', required: !0 },
+                            },
+                            {
+                              key: 'email',
+                              value: { name: 'string', required: !0 },
+                            },
+                            {
+                              key: 'severityId',
+                              value: { name: 'string', required: !0 },
+                            },
+                          ],
+                        },
+                      },
+                      name: 'newTask',
+                    },
+                  ],
+                  return: { name: 'void' },
+                },
+              },
+              description: '',
+            },
+            severityLevels: {
+              required: !0,
+              tsType: {
+                name: 'Array',
+                elements: [
+                  {
+                    name: 'signature',
+                    type: 'object',
+                    raw: '{\n  _id: string\n  severityLevel: number\n  description?: string\n}',
+                    signature: {
+                      properties: [
+                        { key: '_id', value: { name: 'string', required: !0 } },
+                        {
+                          key: 'severityLevel',
+                          value: { name: 'number', required: !0 },
+                        },
+                        {
+                          key: 'description',
+                          value: { name: 'string', required: !1 },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                raw: 'RawSeverityLevel[]',
+              },
+              description: '',
+            },
+            sacredtheme: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+          },
+        }
         var console = __webpack_require__(
           './node_modules/console-browserify/index.js'
         )
-        const sampleColumns = [
-            { _id: '1', title: 'To Do', description: 'Tasks to be done' },
+        const sampleRawStatuses = [
+            { _id: '1', status: 'Open', description: 'Open tasks' },
+            {
+              _id: '2',
+              status: 'In Progress',
+              description: 'Tasks being worked on',
+            },
+            { _id: '3', status: 'Closed', description: 'Completed tasks' },
+            { _id: '4', status: 'On Hold', description: 'Tasks on hold' },
+          ],
+          sampleRawSubStatuses = [
+            {
+              _id: 'ss1',
+              subStatus: 'New',
+              description: 'New task',
+              statusId: '1',
+            },
+            {
+              _id: 'ss2',
+              subStatus: 'Assigned',
+              description: 'Assigned task',
+              statusId: '1',
+            },
+            {
+              _id: 'ss3',
+              subStatus: 'Working',
+              description: 'Working on task',
+              statusId: '2',
+            },
+            {
+              _id: 'ss4',
+              subStatus: 'Testing',
+              description: 'Testing task',
+              statusId: '2',
+            },
+            {
+              _id: 'ss5',
+              subStatus: 'Completed',
+              description: 'Completed task',
+              statusId: '3',
+            },
+            {
+              _id: 'ss6',
+              subStatus: 'Waiting',
+              description: 'Waiting for response',
+              statusId: '4',
+            },
+          ],
+          sampleRawTopics = [
+            {
+              _id: 't1',
+              topic: 'Technical Support',
+              description: 'Technical support issues',
+            },
+            {
+              _id: 't2',
+              topic: 'Billing',
+              description: 'Billing related issues',
+            },
+            {
+              _id: 't3',
+              topic: 'General Inquiry',
+              description: 'General questions',
+            },
+            {
+              _id: 't4',
+              topic: 'Feature Request',
+              description: 'New feature requests',
+            },
+          ],
+          sampleRawQueues = [
+            { _id: 'q1', queueName: 'Support Queue' },
+            { _id: 'q2', queueName: 'Billing Queue' },
+            { _id: 'q3', queueName: 'Technical Queue' },
+            { _id: 'q4', queueName: 'Management Queue' },
+          ],
+          sampleRawArticles = [
+            {
+              _id: 'a1',
+              articleTitle: 'How to troubleshoot connection issues',
+            },
+            { _id: 'a2', articleTitle: 'Understanding billing cycles' },
+            { _id: 'a3', articleTitle: 'Setting up user accounts' },
+            { _id: 'a4', articleTitle: 'API documentation' },
+          ],
+          sampleRawCustomers = [
+            {
+              _id: 'c1',
+              firstName: 'John',
+              lastName: 'Doe',
+              email: 'john.doe@example.com',
+            },
+            {
+              _id: 'c2',
+              firstName: 'Jane',
+              lastName: 'Smith',
+              email: 'jane.smith@example.com',
+            },
+            {
+              _id: 'c3',
+              firstName: 'Bob',
+              lastName: 'Johnson',
+              email: 'bob.johnson@example.com',
+            },
+          ],
+          sampleRawEmployees = [
+            { _id: 'e1', firstName: 'Alice', lastName: 'Admin' },
+            { _id: 'e2', firstName: 'Bob', lastName: 'Manager' },
+            { _id: 'e3', firstName: 'Charlie', lastName: 'Developer' },
+          ],
+          sampleRawCompanies = [
+            { _id: 'comp1', companyName: 'Tech Solutions Inc.' },
+            { _id: 'comp2', companyName: 'Digital Services LLC' },
+            { _id: 'comp3', companyName: 'Innovation Corp' },
+          ],
+          sampleRawSeverityLevels = [
+            { _id: 's1', severityLevel: 1, description: 'Critical' },
+            { _id: 's2', severityLevel: 2, description: 'High' },
+            { _id: 's3', severityLevel: 3, description: 'Medium' },
+            { _id: 's4', severityLevel: 4, description: 'Low' },
+          ],
+          sampleColumns = [
+            { _id: '1', title: 'Open', description: 'Open tasks' },
             {
               _id: '2',
               title: 'In Progress',
               description: 'Tasks currently being worked on',
             },
-            { _id: '3', title: 'Done', description: 'Completed tasks' },
+            { _id: '3', title: 'Closed', description: 'Completed tasks' },
           ],
           sampleTasks = [
             {
               _id: 't1',
-              title: 'Task 1',
-              description: 'Description 1',
+              title: 'Fix login issue',
+              description: 'User cannot log in to their account',
               statusId: '1',
               comments: [],
-              topicIds: [],
+              topicIds: ['t1'],
               editHistory: [],
               createdBy: 'Admin',
               severityId: 's1',
               schedulingQueueId: 'q1',
               substatusId: 'ss1',
-              severity: 'low',
-              schedulingQueue: 'q1',
-              status: 'open',
-              subStatus: 'new',
-              topicLabels: [],
-              kbArticles: [],
-              teamMember: 'none',
-              nextActionDate: '',
-              companyId: '',
+              severity: 'Critical',
+              schedulingQueue: 'Support Queue',
+              status: 'Open',
+              subStatus: 'New',
+              topicLabels: ['Technical Support'],
+              kbArticles: ['How to troubleshoot connection issues'],
+              teamMember: 'Alice Admin',
+              nextActionDate: '12/15/2023 - 9:00AM CST',
+              companyId: 'comp1',
               customerId: 'c1',
-              employeeIds: [],
-              articleIds: [],
-              customerAssigned: 'c1',
+              employeeIds: ['e1'],
+              articleIds: ['a1'],
+              customerAssigned: 'John Doe',
               commentIds: [],
               createdAt: new Date(),
               closedAt: new Date(),
@@ -14981,59 +11711,29 @@
             },
             {
               _id: 't2',
-              title: 'Task 2',
-              description: 'Description 2',
+              title: 'Update billing information',
+              description: 'Customer needs to update their billing address',
               statusId: '2',
               comments: [],
-              topicIds: [],
+              topicIds: ['t2'],
               editHistory: [],
               createdBy: 'Admin',
-              severityId: 's1',
-              schedulingQueueId: 'q1',
-              substatusId: 'ss1',
-              severity: 'low',
-              schedulingQueue: 'q1',
-              status: 'open',
-              subStatus: 'new',
-              topicLabels: [],
-              kbArticles: [],
-              teamMember: 'none',
-              nextActionDate: '',
-              companyId: '',
-              customerId: 'c1',
-              employeeIds: [],
-              articleIds: [],
-              customerAssigned: 'c1',
-              commentIds: [],
-              createdAt: new Date(),
-              closedAt: new Date(),
-              updatedAt: new Date(),
-            },
-            {
-              _id: 't3',
-              title: 'Task 3',
-              description: 'Description 3',
-              statusId: '3',
-              comments: [],
-              topicIds: [],
-              editHistory: [],
-              createdBy: 'Admin',
-              severityId: 's1',
-              schedulingQueueId: 'q1',
-              substatusId: 'ss1',
-              severity: 'low',
-              schedulingQueue: 'q1',
-              status: 'open',
-              subStatus: 'new',
-              topicLabels: [],
-              kbArticles: [],
-              teamMember: 'none',
-              nextActionDate: '',
-              companyId: '',
-              customerId: 'c1',
-              employeeIds: [],
-              articleIds: [],
-              customerAssigned: 'c1',
+              severityId: 's3',
+              schedulingQueueId: 'q2',
+              substatusId: 'ss3',
+              severity: 'Medium',
+              schedulingQueue: 'Billing Queue',
+              status: 'In Progress',
+              subStatus: 'Working',
+              topicLabels: ['Billing'],
+              kbArticles: ['Understanding billing cycles'],
+              teamMember: 'Bob Manager',
+              nextActionDate: '12/16/2023 - 2:00PM CST',
+              companyId: 'comp2',
+              customerId: 'c2',
+              employeeIds: ['e2'],
+              articleIds: ['a2'],
+              customerAssigned: 'Jane Smith',
               commentIds: [],
               createdAt: new Date(),
               closedAt: new Date(),
@@ -15043,6 +11743,15 @@
           commonArgs = {
             columns: sampleColumns,
             tasks: sampleTasks,
+            rawStatuses: sampleRawStatuses,
+            rawSubStatuses: sampleRawSubStatuses,
+            rawTopics: sampleRawTopics,
+            rawQueues: sampleRawQueues,
+            rawArticles: sampleRawArticles,
+            rawCustomers: sampleRawCustomers,
+            rawEmployees: sampleRawEmployees,
+            rawCompanies: sampleRawCompanies,
+            rawSeverityLevels: sampleRawSeverityLevels,
             currentUser: { _id: 'u1', firstName: 'Test', lastName: 'User' },
             onAdd: task => console.log('Add task:', task),
             onEdit: task => console.log('Edit task:', task),
@@ -15052,6 +11761,8 @@
               console.log('Add comment:', text, 'to task:', taskId),
             onEditComment: (commentId, text, taskId) =>
               console.log('Edit comment:', commentId, text, 'to task:', taskId),
+            onRevisionHistory: (commentId, revisionHistory) =>
+              console.log('Revision history:', commentId, revisionHistory),
           },
           projectboard_stories = {
             title: 'Components/ProjectBoard',
@@ -15061,6 +11772,10 @@
               variant: {
                 control: 'radio',
                 options: ['administrator', 'company', 'customer'],
+              },
+              boardType: {
+                control: 'radio',
+                options: ['status', 'severityLevel', 'subStatus', 'topic'],
               },
             },
           },
@@ -15081,6 +11796,301 @@
               boardType: 'status',
               styles: { theme: 'sacred' },
             },
+          },
+          StatusBoard = {
+            name: 'Status Board',
+            args: {
+              ...commonArgs,
+              variant: 'administrator',
+              boardType: 'status',
+              styles: { theme: 'light' },
+            },
+          },
+          SeverityBoard = {
+            name: 'Severity Board',
+            args: {
+              ...commonArgs,
+              variant: 'administrator',
+              boardType: 'severityLevel',
+              columns: [
+                {
+                  _id: 's1',
+                  title: 'Critical',
+                  description: 'Critical issues',
+                },
+                {
+                  _id: 's2',
+                  title: 'High',
+                  description: 'High priority issues',
+                },
+                {
+                  _id: 's3',
+                  title: 'Medium',
+                  description: 'Medium priority issues',
+                },
+                { _id: 's4', title: 'Low', description: 'Low priority issues' },
+              ],
+              styles: { theme: 'light' },
+            },
+          },
+          TopicBoard = {
+            name: 'Topic Board',
+            args: {
+              ...commonArgs,
+              variant: 'administrator',
+              boardType: 'topic',
+              columns: [
+                {
+                  _id: 't1',
+                  title: 'Technical Support',
+                  description: 'Technical support issues',
+                },
+                {
+                  _id: 't2',
+                  title: 'Billing',
+                  description: 'Billing related issues',
+                },
+                {
+                  _id: 't3',
+                  title: 'General Inquiry',
+                  description: 'General questions',
+                },
+                {
+                  _id: 't4',
+                  title: 'Feature Request',
+                  description: 'New feature requests',
+                },
+              ],
+              styles: { theme: 'light' },
+            },
+          },
+          AdministratorFormCompanyProvided = {
+            name: 'Form: Administrator - Company Provided',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(companyProvided, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  companyId: 'comp1',
+                  createdUserId: 'u1',
+                  sacredtheme: !1,
+                }),
+              }),
+          },
+          AdministratorFormCompanyProvidedSacred = {
+            name: 'Form: Administrator - Company Provided (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(companyProvided, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  companyId: 'comp1',
+                  createdUserId: 'u1',
+                  sacredtheme: !0,
+                }),
+              }),
+          },
+          AdministratorFormCompanyDropdown = {
+            name: 'Form: Administrator - Company Dropdown',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(companyDropdown, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  rawCompanies: sampleRawCompanies,
+                  createdUserId: 'u1',
+                  sacredtheme: !1,
+                }),
+              }),
+          },
+          AdministratorFormCompanyDropdownSacred = {
+            name: 'Form: Administrator - Company Dropdown (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(companyDropdown, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  rawCompanies: sampleRawCompanies,
+                  createdUserId: 'u1',
+                  sacredtheme: !0,
+                }),
+              }),
+          },
+          CompanyFormCustomerProvided = {
+            name: 'Form: Company - Customer Provided',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(customerProvided, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  customerId: 'c1',
+                  createdUserId: 'u1',
+                  sacredtheme: !1,
+                }),
+              }),
+          },
+          CompanyFormCustomerProvidedSacred = {
+            name: 'Form: Company - Customer Provided (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(customerProvided, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  customerId: 'c1',
+                  createdUserId: 'u1',
+                  sacredtheme: !0,
+                }),
+              }),
+          },
+          CompanyFormCustomerDropdown = {
+            name: 'Form: Company - Customer Dropdown',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(customerDropdown, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  rawCustomers: sampleRawCustomers,
+                  createdUserId: 'u1',
+                  sacredtheme: !1,
+                }),
+              }),
+          },
+          CompanyFormCustomerDropdownSacred = {
+            name: 'Form: Company - Customer Dropdown (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(customerDropdown, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  statuses: sampleRawStatuses,
+                  subStatuses: sampleRawSubStatuses,
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  knowledgebaseArticles: sampleRawArticles,
+                  severityLevels: sampleRawSeverityLevels,
+                  rawCustomers: sampleRawCustomers,
+                  createdUserId: 'u1',
+                  sacredtheme: !0,
+                }),
+              }),
+          },
+          CustomerForm = {
+            name: 'Form: Customer',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(customer, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  severityLevels: sampleRawSeverityLevels,
+                  companyId: 'comp1',
+                  createdUserId: 'u1',
+                  styles: { theme: 'light' },
+                }),
+              }),
+          },
+          CustomerFormSacred = {
+            name: 'Form: Customer (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(customer, {
+                  open: !0,
+                  onClose: () => console.log('Close'),
+                  onAdd: task => console.log('Add task:', task),
+                  topics: sampleRawTopics,
+                  schedulingQueues: sampleRawQueues,
+                  severityLevels: sampleRawSeverityLevels,
+                  companyId: 'comp1',
+                  createdUserId: 'u1',
+                  styles: { theme: 'sacred' },
+                }),
+              }),
+          },
+          NoUserForm = {
+            name: 'Form: No User',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#f3f4f6' },
+                children: (0, jsx_runtime.jsx)(noUser, {
+                  onAdd: task => console.log('Add task:', task),
+                  severityLevels: sampleRawSeverityLevels,
+                  sacredtheme: !1,
+                }),
+              }),
+          },
+          NoUserFormSacred = {
+            name: 'Form: No User (Sacred)',
+            render: () =>
+              (0, jsx_runtime.jsx)('div', {
+                style: { padding: '2rem', backgroundColor: '#000' },
+                children: (0, jsx_runtime.jsx)(noUser, {
+                  onAdd: task => console.log('Add task:', task),
+                  severityLevels: sampleRawSeverityLevels,
+                  sacredtheme: !0,
+                }),
+              }),
           },
           InteractiveDemoRenderer = () => {
             const [isSacredTheme, setIsSacredTheme] = react.useState(!1),
@@ -15103,6 +12113,9 @@
                     padding: '1rem',
                     borderRadius: '0.5rem',
                     border: '1px solid #e5e7eb',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
                   },
                   children: [
                     (0, jsx_runtime.jsxs)('label', {
@@ -15161,33 +12174,121 @@
                   ],
                 }),
                 (0, jsx_runtime.jsx)(components_ProjectBoard, {
-                  ...commonArgs,
-                  columns: sampleColumns,
+                  columns: (type => {
+                    switch (type) {
+                      case 'severityLevel':
+                        return [
+                          {
+                            _id: 's1',
+                            title: 'Critical',
+                            description: 'Critical issues',
+                          },
+                          {
+                            _id: 's2',
+                            title: 'High',
+                            description: 'High priority issues',
+                          },
+                          {
+                            _id: 's3',
+                            title: 'Medium',
+                            description: 'Medium priority issues',
+                          },
+                          {
+                            _id: 's4',
+                            title: 'Low',
+                            description: 'Low priority issues',
+                          },
+                        ]
+                      case 'topic':
+                        return [
+                          {
+                            _id: 't1',
+                            title: 'Technical Support',
+                            description: 'Technical support issues',
+                          },
+                          {
+                            _id: 't2',
+                            title: 'Billing',
+                            description: 'Billing related issues',
+                          },
+                          {
+                            _id: 't3',
+                            title: 'General Inquiry',
+                            description: 'General questions',
+                          },
+                          {
+                            _id: 't4',
+                            title: 'Feature Request',
+                            description: 'New feature requests',
+                          },
+                        ]
+                      case 'subStatus':
+                        return [
+                          {
+                            _id: 'ss1',
+                            title: 'New',
+                            description: 'New tasks',
+                          },
+                          {
+                            _id: 'ss2',
+                            title: 'Assigned',
+                            description: 'Assigned tasks',
+                          },
+                          {
+                            _id: 'ss3',
+                            title: 'Working',
+                            description: 'Working on tasks',
+                          },
+                          {
+                            _id: 'ss4',
+                            title: 'Testing',
+                            description: 'Testing tasks',
+                          },
+                        ]
+                      default:
+                        return sampleColumns
+                    }
+                  })(boardType),
                   tasks: sampleTasks,
+                  rawStatuses: sampleRawStatuses,
+                  rawSubStatuses: sampleRawSubStatuses,
+                  rawTopics: sampleRawTopics,
+                  rawQueues: sampleRawQueues,
+                  rawArticles: sampleRawArticles,
+                  rawCustomers: sampleRawCustomers,
+                  rawEmployees: sampleRawEmployees,
+                  rawCompanies: sampleRawCompanies,
+                  rawSeverityLevels: sampleRawSeverityLevels,
                   currentUser: {
                     _id: 'u1',
                     firstName: 'Test',
                     lastName: 'User',
                   },
+                  onAdd: task => console.log('Add task:', task),
+                  onEdit: task => console.log('Edit task:', task),
+                  onDelete: task => console.log('Delete task:', task),
+                  onDuplicate: task => console.log('Duplicate task:', task),
+                  onComment: (text, taskId) =>
+                    console.log('Add comment:', text, 'to task:', taskId),
+                  onEditComment: (commentId, text, taskId) =>
+                    console.log(
+                      'Edit comment:',
+                      commentId,
+                      text,
+                      'to task:',
+                      taskId
+                    ),
+                  onRevisionHistory: (commentId, revisionHistory) =>
+                    console.log(
+                      'Revision history:',
+                      commentId,
+                      revisionHistory
+                    ),
                   styles: { theme: isSacredTheme ? 'sacred' : 'light' },
                   variant,
                   boardType,
-                  rawArticles: [],
-                  rawCompanies: [],
-                  rawCustomers: [],
-                  rawEmployees: [],
-                  rawQueues: [],
-                  rawSeverityLevels: [],
-                  rawStatuses: [],
-                  rawSubStatuses: [],
-                  rawTopics: [],
-                  onRevisionHistory: () => {},
-                  onEdit: () => {},
-                  onDelete: () => {},
-                  onDuplicate: () => {},
-                  onAdd: () => {},
-                  onComment: () => {},
-                  onEditComment: () => {},
+                  customerId: 'customer' === variant ? 'c1' : void 0,
+                  companyId: 'customer' !== variant ? 'comp1' : void 0,
                 }),
               ],
             })
@@ -15199,6 +12300,21 @@
           __namedExportsOrder = [
             'PremiumTheme',
             'SacredTheme',
+            'StatusBoard',
+            'SeverityBoard',
+            'TopicBoard',
+            'AdministratorFormCompanyProvided',
+            'AdministratorFormCompanyProvidedSacred',
+            'AdministratorFormCompanyDropdown',
+            'AdministratorFormCompanyDropdownSacred',
+            'CompanyFormCustomerProvided',
+            'CompanyFormCustomerProvidedSacred',
+            'CompanyFormCustomerDropdown',
+            'CompanyFormCustomerDropdownSacred',
+            'CustomerForm',
+            'CustomerFormSacred',
+            'NoUserForm',
+            'NoUserFormSacred',
             'InteractiveDemo',
           ]
       },

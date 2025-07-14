@@ -32,31 +32,79 @@
             const groupStyles = (0, _theme__WEBPACK_IMPORTED_MODULE_2__.hs)(
                 styles
               ),
+              totalChildren =
+                react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(
+                  children
+                ).length,
               enhancedChildren =
                 react__WEBPACK_IMPORTED_MODULE_1__.Children.map(
                   children,
-                  child =>
-                    react__WEBPACK_IMPORTED_MODULE_1__.isValidElement(child)
-                      ? react__WEBPACK_IMPORTED_MODULE_1__.cloneElement(child, {
+                  (child, index) => {
+                    if (
+                      react__WEBPACK_IMPORTED_MODULE_1__.isValidElement(child)
+                    ) {
+                      const isFirst = 0 === index,
+                        isLast = index === totalChildren - 1,
+                        isSelected = (child.props.value || '') === value,
+                        borderColor =
+                          'sacred' === (null == styles ? void 0 : styles.theme)
+                            ? 'rgba(255, 215, 0, 0.4)'
+                            : 'dark' ===
+                                (null == styles ? void 0 : styles.theme)
+                              ? 'rgba(75, 85, 99, 0.8)'
+                              : 'rgba(226, 232, 240, 0.8)'
+                      return react__WEBPACK_IMPORTED_MODULE_1__.cloneElement(
+                        child,
+                        {
                           ...child.props,
-                          styles: { ...child.props.styles, ...styles },
+                          styles: {
+                            ...child.props.styles,
+                            ...styles,
+                            borderColor: 'transparent',
+                            borderWidth: '0',
+                            boxShadow: 'none',
+                            margin: '0',
+                            padding: '8px 16px',
+                            borderRadius: isFirst
+                              ? `${groupStyles.container.borderRadius || '8px'} 0 0 ${groupStyles.container.borderRadius || '8px'}`
+                              : isLast
+                                ? `0 ${groupStyles.container.borderRadius || '8px'} ${groupStyles.container.borderRadius || '8px'} 0`
+                                : '0',
+                            ...(!isLast && {
+                              borderRightWidth: '1px',
+                              borderRightStyle: 'solid',
+                              borderRightColor: borderColor,
+                            }),
+                            ...(isSelected && {
+                              backgroundColor:
+                                'sacred' ===
+                                (null == styles ? void 0 : styles.theme)
+                                  ? 'rgba(255, 215, 0, 0.2)'
+                                  : 'dark' ===
+                                      (null == styles ? void 0 : styles.theme)
+                                    ? 'rgba(59, 130, 246, 0.3)'
+                                    : 'rgba(59, 130, 246, 0.1)',
+                            }),
+                          },
                           onClick: e => {
                             ;(exclusive && onChange(e, child.props.value || ''),
                               child.props.onClick && child.props.onClick(e))
                           },
-                          selected: (child.props.value || '') === value,
-                        })
-                      : child
+                          selected: isSelected,
+                        }
+                      )
+                    }
+                    return child
+                  }
                 ),
               computedGroupStyle = {
                 display: 'flex',
-                borderRadius: groupStyles.container.borderRadius || '4px',
+                borderRadius: groupStyles.container.borderRadius || '8px',
                 overflow: 'hidden',
-                background:
-                  groupStyles.container.backgroundColor || 'transparent',
+                background: 'transparent',
                 boxShadow: groupStyles.container.boxShadow,
                 border: groupStyles.container.border,
-                padding: groupStyles.container.padding,
+                padding: '0',
               }
             return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
               'div',

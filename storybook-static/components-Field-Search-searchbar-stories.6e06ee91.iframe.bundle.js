@@ -129,7 +129,39 @@
                     styles
                   ),
                 }
-              })(styles, focused)
+              })(styles, focused),
+              theme = (null == styles ? void 0 : styles.theme) || 'light',
+              placeholderColor = (() => {
+                switch (theme) {
+                  case 'dark':
+                  default:
+                    return '#9CA3AF'
+                  case 'sacred':
+                    return 'rgba(255, 215, 0, 0.7)'
+                }
+              })(),
+              placeholderStyles = ((theme, placeholderColor) => {
+                const className = `searchbar-placeholder-${theme}`
+                return {
+                  css: `\n    .${className}::placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-webkit-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-moz-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}:-ms-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-ms-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n  `,
+                  className,
+                }
+              })(theme, placeholderColor)
+            ;(0, react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+              const styleId = `searchbar-placeholder-${theme}`
+              let styleElement = document.getElementById(styleId)
+              return (
+                styleElement ||
+                  ((styleElement = document.createElement('style')),
+                  (styleElement.id = styleId),
+                  document.head.appendChild(styleElement)),
+                (styleElement.textContent = placeholderStyles.css),
+                () => {
+                  const element = document.getElementById(styleId)
+                  element && element.remove()
+                }
+              )
+            }, [theme, placeholderStyles.css])
             return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
               'div',
               {
@@ -170,36 +202,21 @@
                             children: (0,
                             react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
                               _Icons_Search__WEBPACK_IMPORTED_MODULE_3__.A,
-                              {
-                                style: {
-                                  width: '20px',
-                                  height: '20px',
-                                  color: 'inherit',
-                                },
-                              }
+                              {}
                             ),
                           }
                         ),
                         (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
                           'input',
                           {
-                            id: 'search-input',
                             type: 'text',
+                            placeholder,
                             value,
                             onChange,
                             onFocus: () => setFocused(!0),
                             onBlur: () => setFocused(!1),
-                            disabled: null == styles ? void 0 : styles.disabled,
-                            placeholder,
-                            style: {
-                              ...computedStyles.input,
-                              ...((null == styles
-                                ? void 0
-                                : styles.disabled) && {
-                                opacity: 0.5,
-                                cursor: 'not-allowed',
-                              }),
-                            },
+                            style: computedStyles.input,
+                            className: placeholderStyles.className,
                             ...(0, _theme__WEBPACK_IMPORTED_MODULE_2__.SI)(
                               null == styles ? void 0 : styles.required
                             ),

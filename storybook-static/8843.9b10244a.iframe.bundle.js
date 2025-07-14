@@ -3,6 +3,400 @@
   [
     [8843],
     {
+      './src/components/Button/index.tsx': (
+        __unused_webpack_module,
+        __webpack_exports__,
+        __webpack_require__
+      ) => {
+        __webpack_require__.d(__webpack_exports__, {
+          A: () => __WEBPACK_DEFAULT_EXPORT__,
+          e: () => ButtonGroup,
+        })
+        var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ =
+            __webpack_require__(
+              './node_modules/next/dist/compiled/react/jsx-runtime.js'
+            ),
+          react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+            './node_modules/next/dist/compiled/react/index.js'
+          ),
+          _theme__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(
+            './src/theme/index.ts'
+          )
+        const ButtonGroup = ({
+            value,
+            exclusive,
+            onChange,
+            children,
+            styles,
+          }) => {
+            const groupStyles = (0, _theme__WEBPACK_IMPORTED_MODULE_2__.hs)(
+                styles
+              ),
+              totalChildren =
+                react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(
+                  children
+                ).length,
+              enhancedChildren =
+                react__WEBPACK_IMPORTED_MODULE_1__.Children.map(
+                  children,
+                  (child, index) => {
+                    if (
+                      react__WEBPACK_IMPORTED_MODULE_1__.isValidElement(child)
+                    ) {
+                      const isFirst = 0 === index,
+                        isLast = index === totalChildren - 1,
+                        isSelected = (child.props.value || '') === value,
+                        borderColor =
+                          'sacred' === (null == styles ? void 0 : styles.theme)
+                            ? 'rgba(255, 215, 0, 0.4)'
+                            : 'dark' ===
+                                (null == styles ? void 0 : styles.theme)
+                              ? 'rgba(75, 85, 99, 0.8)'
+                              : 'rgba(226, 232, 240, 0.8)'
+                      return react__WEBPACK_IMPORTED_MODULE_1__.cloneElement(
+                        child,
+                        {
+                          ...child.props,
+                          styles: {
+                            ...child.props.styles,
+                            ...styles,
+                            borderColor: 'transparent',
+                            borderWidth: '0',
+                            boxShadow: 'none',
+                            margin: '0',
+                            padding: '8px 16px',
+                            borderRadius: isFirst
+                              ? `${groupStyles.container.borderRadius || '8px'} 0 0 ${groupStyles.container.borderRadius || '8px'}`
+                              : isLast
+                                ? `0 ${groupStyles.container.borderRadius || '8px'} ${groupStyles.container.borderRadius || '8px'} 0`
+                                : '0',
+                            ...(!isLast && {
+                              borderRightWidth: '1px',
+                              borderRightStyle: 'solid',
+                              borderRightColor: borderColor,
+                            }),
+                            ...(isSelected && {
+                              backgroundColor:
+                                'sacred' ===
+                                (null == styles ? void 0 : styles.theme)
+                                  ? 'rgba(255, 215, 0, 0.2)'
+                                  : 'dark' ===
+                                      (null == styles ? void 0 : styles.theme)
+                                    ? 'rgba(59, 130, 246, 0.3)'
+                                    : 'rgba(59, 130, 246, 0.1)',
+                            }),
+                          },
+                          onClick: e => {
+                            ;(exclusive && onChange(e, child.props.value || ''),
+                              child.props.onClick && child.props.onClick(e))
+                          },
+                          selected: isSelected,
+                        }
+                      )
+                    }
+                    return child
+                  }
+                ),
+              computedGroupStyle = {
+                display: 'flex',
+                borderRadius: groupStyles.container.borderRadius || '8px',
+                overflow: 'hidden',
+                background: 'transparent',
+                boxShadow: groupStyles.container.boxShadow,
+                border: groupStyles.container.border,
+                padding: '0',
+              }
+            return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+              'div',
+              { style: computedGroupStyle, children: enhancedChildren }
+            )
+          },
+          SacredGlyphs = ({ isHovered, isDisabled, isIconOnly }) => {
+            const [leftGlyph, setLeftGlyph] = (0,
+              react__WEBPACK_IMPORTED_MODULE_1__.useState)(
+                _theme__WEBPACK_IMPORTED_MODULE_2__.vR[
+                  Math.floor(
+                    Math.random() *
+                      _theme__WEBPACK_IMPORTED_MODULE_2__.vR.length
+                  )
+                ]
+              ),
+              [rightGlyph, setRightGlyph] = (0,
+              react__WEBPACK_IMPORTED_MODULE_1__.useState)(
+                _theme__WEBPACK_IMPORTED_MODULE_2__.vR[
+                  Math.floor(
+                    Math.random() *
+                      _theme__WEBPACK_IMPORTED_MODULE_2__.vR.length
+                  )
+                ]
+              )
+            ;(0, react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+              if (isHovered) {
+                const timer = setTimeout(() => {
+                  ;(setLeftGlyph(
+                    _theme__WEBPACK_IMPORTED_MODULE_2__.vR[
+                      Math.floor(
+                        Math.random() *
+                          _theme__WEBPACK_IMPORTED_MODULE_2__.vR.length
+                      )
+                    ]
+                  ),
+                    setRightGlyph(
+                      _theme__WEBPACK_IMPORTED_MODULE_2__.vR[
+                        Math.floor(
+                          Math.random() *
+                            _theme__WEBPACK_IMPORTED_MODULE_2__.vR.length
+                        )
+                      ]
+                    ))
+                }, 300)
+                return () => clearTimeout(timer)
+              }
+            }, [isHovered])
+            const glyphStyles = (0, react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(
+              () => ({
+                glyph: {
+                  position: 'absolute',
+                  fontSize: '14px',
+                  color: 'rgba(255, 215, 0, 0.3)',
+                  transition: 'all 0.3s ease',
+                  opacity: 0,
+                  pointerEvents: 'none',
+                },
+                glyphLeft: {
+                  left: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                },
+                glyphRight: {
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                },
+                glyphVisible: { opacity: 1 },
+              }),
+              []
+            )
+            return isIconOnly
+              ? null
+              : (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                  react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment,
+                  {
+                    children: [
+                      (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                        'div',
+                        {
+                          style: {
+                            ...glyphStyles.glyph,
+                            ...glyphStyles.glyphLeft,
+                            ...(isHovered &&
+                              !isDisabled &&
+                              glyphStyles.glyphVisible),
+                          },
+                          children: leftGlyph,
+                        }
+                      ),
+                      (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                        'div',
+                        {
+                          style: {
+                            ...glyphStyles.glyph,
+                            ...glyphStyles.glyphRight,
+                            ...(isHovered &&
+                              !isDisabled &&
+                              glyphStyles.glyphVisible),
+                          },
+                          children: rightGlyph,
+                        }
+                      ),
+                    ],
+                  }
+                )
+          },
+          Button = (0, react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)(
+            ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
+              const [isHovered, setIsHovered] = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useState)(!1),
+                [isActive, setIsActive] = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useState)(!1),
+                isDisabled =
+                  (null == styles ? void 0 : styles.disabled) ||
+                  restProps.disabled,
+                isIconOnly = !!icon && !text,
+                isSacredTheme =
+                  'sacred' === (null == styles ? void 0 : styles.theme),
+                iconLocation =
+                  (null == styles ? void 0 : styles.iconLocation) || 'left',
+                computedStyles = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(
+                  () =>
+                    (0, _theme__WEBPACK_IMPORTED_MODULE_2__.hs)(
+                      styles,
+                      isHovered,
+                      isActive || selected,
+                      isDisabled
+                    ),
+                  [styles, isHovered, isActive, selected, isDisabled]
+                ),
+                handleMouseEnter = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(() => {
+                  setIsHovered(!0)
+                }, []),
+                handleMouseLeave = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(() => {
+                  ;(setIsHovered(!1), setIsActive(!1))
+                }, []),
+                handleMouseDown = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(() => {
+                  setIsActive(!0)
+                }, []),
+                handleMouseUp = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(() => {
+                  setIsActive(!1)
+                }, []),
+                handleClick = (0,
+                react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(
+                  event => {
+                    !isDisabled && onClick && onClick(event)
+                  },
+                  [isDisabled, onClick]
+                ),
+                iconComponent = (0, react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(
+                  () =>
+                    icon
+                      ? (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                          'span',
+                          { children: icon }
+                        )
+                      : null,
+                  [icon]
+                )
+              return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                'button',
+                {
+                  ref,
+                  style: computedStyles.container,
+                  disabled: isDisabled,
+                  onMouseEnter: handleMouseEnter,
+                  onMouseLeave: handleMouseLeave,
+                  onMouseDown: handleMouseDown,
+                  onMouseUp: handleMouseUp,
+                  onClick: handleClick,
+                  ...restProps,
+                  children: [
+                    isSacredTheme &&
+                      (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                        SacredGlyphs,
+                        { isHovered, isDisabled: !!isDisabled, isIconOnly }
+                      ),
+                    'above' === iconLocation && iconComponent,
+                    'left' === iconLocation && iconComponent,
+                    text &&
+                      (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                        'span',
+                        { children: text }
+                      ),
+                    'right' === iconLocation && iconComponent,
+                  ],
+                }
+              )
+            }
+          )
+        Button.displayName = 'Button'
+        const __WEBPACK_DEFAULT_EXPORT__ = Button
+        ;((ButtonGroup.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'ButtonGroup',
+          props: {
+            value: {
+              required: !0,
+              tsType: { name: 'string' },
+              description: '',
+            },
+            exclusive: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+            },
+            onChange: {
+              required: !0,
+              tsType: {
+                name: 'signature',
+                type: 'function',
+                raw: '(\n  event: React.MouseEvent<HTMLElement>,\n  newValue: string | null\n) => void',
+                signature: {
+                  arguments: [
+                    {
+                      type: {
+                        name: 'ReactMouseEvent',
+                        raw: 'React.MouseEvent<HTMLElement>',
+                        elements: [{ name: 'HTMLElement' }],
+                      },
+                      name: 'event',
+                    },
+                    {
+                      type: {
+                        name: 'union',
+                        raw: 'string | null',
+                        elements: [{ name: 'string' }, { name: 'null' }],
+                      },
+                      name: 'newValue',
+                    },
+                  ],
+                  return: { name: 'void' },
+                },
+              },
+              description: '',
+            },
+            children: {
+              required: !0,
+              tsType: { name: 'ReactReactNode', raw: 'React.ReactNode' },
+              description: '',
+            },
+            styles: {
+              required: !1,
+              tsType: { name: 'ButtonStyles' },
+              description: '',
+            },
+          },
+        }),
+          (Button.__docgenInfo = {
+            description: 'A versatile and themeable button component.',
+            methods: [],
+            displayName: 'Button',
+            props: {
+              text: {
+                required: !1,
+                tsType: { name: 'string' },
+                description: 'The text content of the button.',
+              },
+              icon: {
+                required: !1,
+                tsType: { name: 'ReactNode' },
+                description:
+                  'An icon to display within the button. Can be a React node or a component.',
+              },
+              styles: {
+                required: !1,
+                tsType: { name: 'ButtonStyles' },
+                description:
+                  'Comprehensive styling options including theme, custom colors, and layout properties.',
+              },
+              selected: {
+                required: !1,
+                tsType: { name: 'boolean' },
+                description: '',
+              },
+              value: {
+                required: !1,
+                tsType: { name: 'string' },
+                description: '',
+              },
+            },
+            composes: ['Omit'],
+          }))
+      },
       './src/components/Field/Dropdown/Regular/index.tsx': (
         __unused_webpack_module,
         __webpack_exports__,
@@ -45,7 +439,7 @@
                   showIdColumns
                     ? options
                     : options.filter(opt => {
-                        const value = opt.value.toLowerCase()
+                        const value = String(opt.value).toLowerCase()
                         return !(
                           'id' === value ||
                           '_id' === value ||
@@ -185,12 +579,13 @@
                             ),
                             style: componentStyles.select,
                             children: filteredOptions.map(option => {
-                              const displayText = option.value
-                                  ? option.value
+                              const valueStr = String(option.value),
+                                displayText = option.value
+                                  ? valueStr
                                       .replace(/_/g, ' ')
                                       .charAt(0)
                                       .toUpperCase() +
-                                    option.value.replace(/_/g, ' ').slice(1)
+                                    valueStr.replace(/_/g, ' ').slice(1)
                                   : '',
                                 attributes = [
                                   option.attribute1,
@@ -431,7 +826,39 @@
                     styles
                   ),
                 }
-              })(styles, focused)
+              })(styles, focused),
+              theme = (null == styles ? void 0 : styles.theme) || 'light',
+              placeholderColor = (() => {
+                switch (theme) {
+                  case 'dark':
+                  default:
+                    return '#9CA3AF'
+                  case 'sacred':
+                    return 'rgba(255, 215, 0, 0.7)'
+                }
+              })(),
+              placeholderStyles = ((theme, placeholderColor) => {
+                const className = `searchbar-placeholder-${theme}`
+                return {
+                  css: `\n    .${className}::placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-webkit-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-moz-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}:-ms-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n    \n    .${className}::-ms-input-placeholder {\n      color: ${placeholderColor} !important;\n      opacity: 0.7;\n    }\n  `,
+                  className,
+                }
+              })(theme, placeholderColor)
+            ;(0, react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+              const styleId = `searchbar-placeholder-${theme}`
+              let styleElement = document.getElementById(styleId)
+              return (
+                styleElement ||
+                  ((styleElement = document.createElement('style')),
+                  (styleElement.id = styleId),
+                  document.head.appendChild(styleElement)),
+                (styleElement.textContent = placeholderStyles.css),
+                () => {
+                  const element = document.getElementById(styleId)
+                  element && element.remove()
+                }
+              )
+            }, [theme, placeholderStyles.css])
             return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
               'div',
               {
@@ -472,36 +899,21 @@
                             children: (0,
                             react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
                               _Icons_Search__WEBPACK_IMPORTED_MODULE_3__.A,
-                              {
-                                style: {
-                                  width: '20px',
-                                  height: '20px',
-                                  color: 'inherit',
-                                },
-                              }
+                              {}
                             ),
                           }
                         ),
                         (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
                           'input',
                           {
-                            id: 'search-input',
                             type: 'text',
+                            placeholder,
                             value,
                             onChange,
                             onFocus: () => setFocused(!0),
                             onBlur: () => setFocused(!1),
-                            disabled: null == styles ? void 0 : styles.disabled,
-                            placeholder,
-                            style: {
-                              ...computedStyles.input,
-                              ...((null == styles
-                                ? void 0
-                                : styles.disabled) && {
-                                opacity: 0.5,
-                                cursor: 'not-allowed',
-                              }),
-                            },
+                            style: computedStyles.input,
+                            className: placeholderStyles.className,
                             ...(0, _theme__WEBPACK_IMPORTED_MODULE_2__.SI)(
                               null == styles ? void 0 : styles.required
                             ),
@@ -703,9 +1115,12 @@
                   container: {
                     display: 'flex',
                     alignItems: 'flex-end',
-                    width: '24rem',
+                    width: '100%',
+                    maxWidth: '24rem',
+                    minWidth: '200px',
                     height: '3.5rem',
                     position: 'relative',
+                    flex: '1 1 auto',
                   },
                   searchbarContainer: {
                     marginBottom: '0.5rem',
@@ -729,7 +1144,59 @@
                 }
               })(styles),
               isSacredTheme =
-                'sacred' === (null == styles ? void 0 : styles.theme)
+                'sacred' === (null == styles ? void 0 : styles.theme),
+              searchbarStyles = (toolbarStyles => {
+                switch (
+                  (null == toolbarStyles ? void 0 : toolbarStyles.theme) ||
+                  'light'
+                ) {
+                  case 'dark':
+                    return {
+                      theme: 'dark',
+                      backgroundColor: '#1E293B',
+                      borderColor: '#334155',
+                      borderFocusedColor: '#475569',
+                      textColor: '#E2E8F0',
+                      labelColor: '#E2E8F0',
+                      labelFocusedColor: '#F1F5F9',
+                      adornmentColor: '#9CA3AF',
+                      adornmentFocusedColor: '#E2E8F0',
+                      borderRadius: '8px',
+                      height: '40px',
+                      fontFamily: 'Inter, sans-serif',
+                    }
+                  case 'sacred':
+                    return {
+                      theme: 'sacred',
+                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                      borderColor: 'rgba(255, 215, 0, 0.5)',
+                      borderFocusedColor: 'rgba(255, 215, 0, 0.8)',
+                      textColor: '#FBBF24',
+                      labelColor: '#FBBF24',
+                      labelFocusedColor: '#FFD700',
+                      adornmentColor: 'rgba(255, 215, 0, 0.6)',
+                      adornmentFocusedColor: '#FFD700',
+                      borderRadius: '8px',
+                      height: '40px',
+                      fontFamily: 'Cinzel, serif',
+                    }
+                  default:
+                    return {
+                      theme: 'light',
+                      backgroundColor: '#FFFFFF',
+                      borderColor: '#E2E8F0',
+                      borderFocusedColor: '#94A3B8',
+                      textColor: '#374151',
+                      labelColor: '#374151',
+                      labelFocusedColor: '#1F2937',
+                      adornmentColor: '#6B7280',
+                      adornmentFocusedColor: '#374151',
+                      borderRadius: '8px',
+                      height: '40px',
+                      fontFamily: 'Inter, sans-serif',
+                    }
+                }
+              })(styles)
             return (0, jsx_runtime.jsxs)('div', {
               style: computedStyles.container,
               children: [
@@ -743,7 +1210,7 @@
                       : placeholder,
                     value,
                     onChange,
-                    styles: { theme: null == styles ? void 0 : styles.theme },
+                    styles: searchbarStyles,
                   }),
                 }),
               ],
@@ -773,9 +1240,10 @@
                 alignItems: 'center',
                 flexShrink: 0,
                 height: '100%',
-                padding: '0 16px',
+                padding: '0 8px',
                 gap: '10px',
-                width: '12rem',
+                minWidth: '0',
+                maxWidth: '12rem',
               },
             },
             dropdownWithTheme = {
@@ -809,10 +1277,9 @@
             },
           },
         }
-        var Typography = __webpack_require__(
-            './src/components/Typography/index.tsx'
+        var FileCopy = __webpack_require__(
+            './src/components/Icons/FileCopy.tsx'
           ),
-          FileCopy = __webpack_require__('./src/components/Icons/FileCopy.tsx'),
           Delete = __webpack_require__('./src/components/Icons/Delete.tsx'),
           Download = __webpack_require__('./src/components/Icons/Download.tsx'),
           Edit = __webpack_require__('./src/components/Icons/Edit.tsx')
@@ -892,9 +1359,12 @@
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              height: '60px',
-              minWidth: '100%',
-              padding: '0 4px',
+              height: '48px',
+              width: '100%',
+              maxWidth: '100%',
+              minWidth: '0',
+              padding: '0 8px',
+              boxSizing: 'border-box',
               userSelect: 'none',
               boxShadow:
                 '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
@@ -909,32 +1379,41 @@
               }),
             },
             dividerStyle = {
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderRight: isSacredTheme
-                ? '1px solid rgba(255, 215, 0, 0.3)'
-                : '1px solid rgba(229, 231, 235, 1)',
-              paddingRight: '8px',
-              marginRight: '8px',
+              width: '1px',
+              height: '24px',
+              backgroundColor: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.3)'
+                : 'rgba(229, 231, 235, 1)',
+              margin: '0 8px',
+              flexShrink: 0,
             },
             actionButtonStyle = {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: '8px',
+              justifyContent: 'center',
+              padding: '4px 8px',
               cursor: 'pointer',
-              borderRadius: '6px',
+              borderRadius: '4px',
               transition: 'colors 0.3s ease',
               userSelect: 'none',
+              minWidth: '0',
+              height: '40px',
+              gap: '2px',
+              whiteSpace: 'nowrap',
             },
             iconContainerStyle = {
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               color: isSacredTheme
                 ? 'rgba(255, 215, 0, 1)'
-                : 'rgba(0, 0, 0, 1)',
+                : 'rgba(55, 65, 81, 1)',
+              fontSize: '16px',
+              width: '20px',
+              height: '16px',
+              margin: '0',
+              padding: '0',
             }
           return (0, jsx_runtime.jsx)('div', {
             style: containerStyle,
@@ -944,178 +1423,235 @@
                 alignItems: 'center',
                 gap: '4px',
                 width: '100%',
+                minWidth: '0',
+                maxWidth: '100%',
               },
               children: [
                 (0, jsx_runtime.jsx)('div', {
                   style: {
-                    flexGrow: 1,
+                    flex: '1 1 auto',
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '0 16px',
+                    padding: '0 8px',
+                    minWidth: '0',
+                    overflow: 'hidden',
                   },
-                  children: (0, jsx_runtime.jsx)(Typography.A, {
-                    variant: 'merriparagraph',
-                    text: `${selectedRows.length} ${1 === selectedRows.length ? 'item' : 'items'} selected`,
-                    styles: {
-                      color: isSacredTheme ? '#FFD700' : void 0,
-                      theme: isSacredTheme ? 'sacred' : 'light',
+                  children: (0, jsx_runtime.jsx)('span', {
+                    style: {
+                      color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      margin: '0',
+                      padding: '0',
+                      lineHeight: '1',
                     },
+                    children: `${selectedRows.length} ${1 === selectedRows.length ? 'item' : 'items'} selected`,
                   }),
                 }),
-                (0, jsx_runtime.jsxs)('div', {
+                (0, jsx_runtime.jsx)('div', {
                   style: {
                     display: 'flex',
-                    justifyContent: 'center',
+                    justifyContent: 'flex-end',
                     gap: '2px',
+                    flex: '0 0 auto',
+                    minWidth: '0',
                   },
-                  children: [
-                    1 === selectedRows.length &&
-                      (onManage || onShow || onDuplicate) &&
-                      (0, jsx_runtime.jsxs)('div', {
-                        style: dividerStyle,
-                        children: [
-                          onManage &&
+                  children: (0, jsx_runtime.jsxs)('div', {
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      height: '100%',
+                    },
+                    children: [
+                      1 === selectedRows.length &&
+                        onManage &&
+                        (0, jsx_runtime.jsxs)('div', {
+                          onClick: e => {
+                            ;(e.stopPropagation(),
+                              handleActionSelection('manage'))
+                          },
+                          style: actionButtonStyle,
+                          children: [
                             (0, jsx_runtime.jsx)('div', {
-                              onClick: e => {
-                                ;(e.stopPropagation(),
-                                  handleActionSelection('manage'))
-                              },
-                              style: actionButtonStyle,
-                              children: (0, jsx_runtime.jsxs)('div', {
-                                style: iconContainerStyle,
-                                children: [
-                                  (0, jsx_runtime.jsx)(Edit.A, {}),
-                                  (0, jsx_runtime.jsx)(Typography.A, {
-                                    variant: 'merriparagraph',
-                                    text: 'Manage',
-                                    styles: {
-                                      color: isSacredTheme ? '#FFD700' : void 0,
-                                      theme: isSacredTheme ? 'sacred' : 'light',
-                                    },
-                                  }),
-                                ],
-                              }),
-                            }),
-                          onShow &&
-                            (0, jsx_runtime.jsx)('div', {
-                              onClick: e => {
-                                ;(e.stopPropagation(),
-                                  handleActionSelection('show'))
-                              },
-                              style: actionButtonStyle,
-                              children: (0, jsx_runtime.jsxs)('div', {
-                                style: iconContainerStyle,
-                                children: [
-                                  (0, jsx_runtime.jsxs)('svg', {
-                                    xmlns: 'http://www.w3.org/2000/svg',
-                                    width: '1em',
-                                    height: '1em',
-                                    viewBox: '0 0 24 24',
-                                    fill: 'none',
-                                    stroke: 'currentColor',
-                                    strokeWidth: '2',
-                                    strokeLinecap: 'round',
-                                    strokeLinejoin: 'round',
-                                    children: [
-                                      (0, jsx_runtime.jsx)('path', {
-                                        d: 'M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z',
-                                      }),
-                                      (0, jsx_runtime.jsx)('circle', {
-                                        cx: '12',
-                                        cy: '12',
-                                        r: '3',
-                                      }),
-                                    ],
-                                  }),
-                                  (0, jsx_runtime.jsx)(Typography.A, {
-                                    variant: 'merriparagraph',
-                                    text: 'Show',
-                                    styles: {
-                                      color: isSacredTheme ? '#FFD700' : void 0,
-                                      theme: isSacredTheme ? 'sacred' : 'light',
-                                    },
-                                  }),
-                                ],
-                              }),
-                            }),
-                          onDuplicate &&
-                            (0, jsx_runtime.jsx)('div', {
-                              onClick: e => {
-                                ;(e.stopPropagation(),
-                                  handleActionSelection('duplicate'))
-                              },
-                              style: actionButtonStyle,
-                              children: (0, jsx_runtime.jsxs)('div', {
-                                style: iconContainerStyle,
-                                children: [
-                                  (0, jsx_runtime.jsx)(FileCopy.A, {}),
-                                  (0, jsx_runtime.jsx)(Typography.A, {
-                                    variant: 'merriparagraph',
-                                    text: 'Duplicate',
-                                    styles: {
-                                      color: isSacredTheme ? '#FFD700' : void 0,
-                                      theme: isSacredTheme ? 'sacred' : 'light',
-                                    },
-                                  }),
-                                ],
-                              }),
-                            }),
-                        ],
-                      }),
-                    (0, jsx_runtime.jsxs)('div', {
-                      style: {
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      },
-                      children: [
-                        onDelete &&
-                          (0, jsx_runtime.jsx)('div', {
-                            onClick: e => {
-                              ;(e.stopPropagation(),
-                                handleActionSelection('delete'))
-                            },
-                            style: actionButtonStyle,
-                            children: (0, jsx_runtime.jsxs)('div', {
                               style: iconContainerStyle,
-                              children: [
-                                (0, jsx_runtime.jsx)(Delete.A, {}),
-                                (0, jsx_runtime.jsx)(Typography.A, {
-                                  variant: 'merriparagraph',
-                                  text: 'Delete',
-                                  styles: {
-                                    color: isSacredTheme ? '#FFD700' : void 0,
-                                    theme: isSacredTheme ? 'sacred' : 'light',
-                                  },
-                                }),
-                              ],
+                              children: (0, jsx_runtime.jsx)(Edit.A, {
+                                sacredtheme: isSacredTheme,
+                                width: '16',
+                                height: '16',
+                                style: { width: '16px', height: '16px' },
+                              }),
                             }),
-                          }),
-                        onExport &&
-                          (0, jsx_runtime.jsx)('div', {
-                            onClick: e => {
-                              ;(e.stopPropagation(),
-                                handleActionSelection('export'))
-                            },
-                            style: actionButtonStyle,
-                            children: (0, jsx_runtime.jsxs)('div', {
+                            (0, jsx_runtime.jsx)('span', {
+                              style: {
+                                color: isSacredTheme
+                                  ? '#FFD700'
+                                  : 'rgba(55, 65, 81, 1)',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                margin: '0',
+                                padding: '0',
+                                lineHeight: '1',
+                                display: 'block',
+                              },
+                              children: 'Manage',
+                            }),
+                          ],
+                        }),
+                      1 === selectedRows.length &&
+                        onShow &&
+                        (0, jsx_runtime.jsxs)('div', {
+                          onClick: e => {
+                            ;(e.stopPropagation(),
+                              handleActionSelection('show'))
+                          },
+                          style: actionButtonStyle,
+                          children: [
+                            (0, jsx_runtime.jsx)('div', {
                               style: iconContainerStyle,
-                              children: [
-                                (0, jsx_runtime.jsx)(Download.A, {}),
-                                (0, jsx_runtime.jsx)(Typography.A, {
-                                  variant: 'merriparagraph',
-                                  text: 'Export',
-                                  styles: {
-                                    color: isSacredTheme ? '#FFD700' : void 0,
-                                    theme: isSacredTheme ? 'sacred' : 'light',
-                                  },
-                                }),
-                              ],
+                              children: (0, jsx_runtime.jsxs)('svg', {
+                                xmlns: 'http://www.w3.org/2000/svg',
+                                width: '16',
+                                height: '16',
+                                viewBox: '0 0 24 24',
+                                fill: 'none',
+                                stroke: 'currentColor',
+                                strokeWidth: '2',
+                                strokeLinecap: 'round',
+                                strokeLinejoin: 'round',
+                                children: [
+                                  (0, jsx_runtime.jsx)('path', {
+                                    d: 'M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z',
+                                  }),
+                                  (0, jsx_runtime.jsx)('circle', {
+                                    cx: '12',
+                                    cy: '12',
+                                    r: '3',
+                                  }),
+                                ],
+                              }),
                             }),
-                          }),
-                      ],
-                    }),
-                  ],
+                            (0, jsx_runtime.jsx)('span', {
+                              style: {
+                                color: isSacredTheme
+                                  ? '#FFD700'
+                                  : 'rgba(55, 65, 81, 1)',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                margin: '0',
+                                padding: '0',
+                                lineHeight: '1',
+                                display: 'block',
+                              },
+                              children: 'Show',
+                            }),
+                          ],
+                        }),
+                      1 === selectedRows.length &&
+                        onDuplicate &&
+                        (0, jsx_runtime.jsxs)('div', {
+                          onClick: e => {
+                            ;(e.stopPropagation(),
+                              handleActionSelection('duplicate'))
+                          },
+                          style: actionButtonStyle,
+                          children: [
+                            (0, jsx_runtime.jsx)('div', {
+                              style: iconContainerStyle,
+                              children: (0, jsx_runtime.jsx)(FileCopy.A, {
+                                sacredtheme: isSacredTheme,
+                                width: '16',
+                                height: '16',
+                                style: { width: '16px', height: '16px' },
+                              }),
+                            }),
+                            (0, jsx_runtime.jsx)('span', {
+                              style: {
+                                color: isSacredTheme
+                                  ? '#FFD700'
+                                  : 'rgba(55, 65, 81, 1)',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                margin: '0',
+                                padding: '0',
+                                lineHeight: '1',
+                                display: 'block',
+                              },
+                              children: 'Duplicate',
+                            }),
+                          ],
+                        }),
+                      1 === selectedRows.length &&
+                        (onManage || onShow || onDuplicate) &&
+                        (0, jsx_runtime.jsx)('div', { style: dividerStyle }),
+                      onDelete &&
+                        (0, jsx_runtime.jsxs)('div', {
+                          onClick: e => {
+                            ;(e.stopPropagation(),
+                              handleActionSelection('delete'))
+                          },
+                          style: actionButtonStyle,
+                          children: [
+                            (0, jsx_runtime.jsx)('div', {
+                              style: iconContainerStyle,
+                              children: (0, jsx_runtime.jsx)(Delete.A, {
+                                sacredtheme: isSacredTheme,
+                                width: '16',
+                                height: '16',
+                                style: { width: '16px', height: '16px' },
+                              }),
+                            }),
+                            (0, jsx_runtime.jsx)('span', {
+                              style: {
+                                color: isSacredTheme
+                                  ? '#FFD700'
+                                  : 'rgba(55, 65, 81, 1)',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                margin: '0',
+                                padding: '0',
+                                lineHeight: '1',
+                                display: 'block',
+                              },
+                              children: 'Delete',
+                            }),
+                          ],
+                        }),
+                      onExport &&
+                        (0, jsx_runtime.jsxs)('div', {
+                          onClick: e => {
+                            ;(e.stopPropagation(),
+                              handleActionSelection('export'))
+                          },
+                          style: actionButtonStyle,
+                          children: [
+                            (0, jsx_runtime.jsx)('div', {
+                              style: iconContainerStyle,
+                              children: (0, jsx_runtime.jsx)(Download.A, {
+                                sacredtheme: isSacredTheme,
+                                width: '16',
+                                height: '16',
+                                style: { width: '16px', height: '16px' },
+                              }),
+                            }),
+                            (0, jsx_runtime.jsx)('span', {
+                              style: {
+                                color: isSacredTheme
+                                  ? '#FFD700'
+                                  : 'rgba(55, 65, 81, 1)',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                margin: '0',
+                                padding: '0',
+                                lineHeight: '1',
+                                display: 'block',
+                              },
+                              children: 'Export',
+                            }),
+                          ],
+                        }),
+                    ],
+                  }),
                 }),
               ],
             }),
@@ -1245,9 +1781,12 @@
             container: {
               display: 'flex',
               alignItems: 'center',
-              flexShrink: 0,
               height: '100%',
-              padding: '0 16px',
+              padding: '0 8px',
+              minWidth: '0',
+              flex: '1 1 auto',
+              maxWidth: '100%',
+              overflow: 'hidden',
             },
           }
           return (0, jsx_runtime.jsx)('div', {
@@ -1391,7 +1930,7 @@
                 const style = document.createElement('style')
                 return (
                   (style.textContent =
-                    '\n      @media (min-width: 768px) {\n        .toolbar-mobile-container {\n          display: none !important;\n        }\n        .toolbar-tablet-container {\n          display: flex !important;\n          align-items: center;\n          justify-content: space-between;\n          width: 100%;\n          gap: 1rem;\n        }\n      }\n      @media (min-width: 1280px) {\n        .toolbar-container {\n            flex-direction: row;\n            align-items: center;\n            justify-content: space-between;\n        }\n        .toolbar-tablet-container {\n            display: none !important;\n        }\n        .toolbar-desktop-left, .toolbar-desktop-right {\n          display: flex !important;\n          align-items: center;\n          gap: 1rem;\n          flex-wrap: wrap;\n        }\n      }\n    '),
+                    '\n      .toolbar-container {\n        width: 100%;\n        max-width: 100%;\n        box-sizing: border-box;\n        overflow: hidden;\n      }\n      \n      @media (min-width: 768px) {\n        .toolbar-mobile-container {\n          display: none !important;\n        }\n        .toolbar-tablet-container {\n          display: flex !important;\n          align-items: center;\n          justify-content: space-between;\n          width: 100%;\n          max-width: 100%;\n          box-sizing: border-box;\n          gap: 1rem;\n          overflow: hidden;\n        }\n      }\n      @media (min-width: 1280px) {\n        .toolbar-container {\n            flex-direction: row;\n            align-items: center;\n            justify-content: space-between;\n            max-width: 100%;\n            box-sizing: border-box;\n            overflow: hidden;\n        }\n        .toolbar-tablet-container {\n            display: none !important;\n        }\n        .toolbar-desktop-left, .toolbar-desktop-right {\n          display: flex !important;\n          align-items: center;\n          gap: 1rem;\n          flex-wrap: nowrap;\n          min-width: 0;\n          box-sizing: border-box;\n          overflow: hidden;\n        }\n        .toolbar-desktop-left {\n          flex: 0 0 auto;\n          max-width: 50%;\n        }\n        .toolbar-desktop-right {\n          flex: 1 1 auto;\n          justify-content: flex-end;\n          max-width: 50%;\n          min-width: 0;\n        }\n      }\n    '),
                   document.head.appendChild(style),
                   () => {
                     document.head.removeChild(style)
@@ -1399,7 +1938,14 @@
                 )
               }, []),
               (0, jsx_runtime.jsxs)('div', {
-                style: computedStyles.container,
+                style: {
+                  ...computedStyles.container,
+                  width: '100%',
+                  maxWidth: '100%',
+                  minWidth: '0',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden',
+                },
                 className: 'toolbar-container',
                 children: [
                   isSacredTheme &&
@@ -1420,7 +1966,13 @@
                     ],
                   }),
                   (0, jsx_runtime.jsxs)('div', {
-                    style: computedStyles.desktopRight,
+                    style: {
+                      ...computedStyles.desktopRight,
+                      minWidth: '0',
+                      flex: '1 1 auto',
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                    },
                     className: 'toolbar-desktop-right',
                     children: [
                       rightCenterProps &&
@@ -1440,7 +1992,11 @@
                     ],
                   }),
                   (0, jsx_runtime.jsxs)('div', {
-                    style: computedStyles.tabletContainer,
+                    style: {
+                      ...computedStyles.tabletContainer,
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                    },
                     className: 'toolbar-tablet-container',
                     children: [
                       (0, jsx_runtime.jsx)('div', {
@@ -1449,6 +2005,9 @@
                           alignItems: 'center',
                           gap: '1rem',
                           flexWrap: 'wrap',
+                          flex: '1 1 auto',
+                          minWidth: '0',
+                          overflow: 'hidden',
                         },
                         children: (0, jsx_runtime.jsx)(left, {
                           buttons,
@@ -1461,6 +2020,10 @@
                           alignItems: 'center',
                           gap: '1rem',
                           flexWrap: 'wrap',
+                          flex: '0 0 auto',
+                          minWidth: '0',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
                         },
                         children: [
                           rightCenterProps &&
@@ -1482,7 +2045,11 @@
                     ],
                   }),
                   (0, jsx_runtime.jsxs)('div', {
-                    style: computedStyles.mobileContainer,
+                    style: {
+                      ...computedStyles.mobileContainer,
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                    },
                     className: 'toolbar-mobile-container',
                     children: [
                       (0, jsx_runtime.jsx)('div', {
@@ -1494,6 +2061,7 @@
                       }),
                       rightCenterProps &&
                         (0, jsx_runtime.jsx)('div', {
+                          style: { minWidth: '0', maxWidth: '100%' },
                           children: (0, jsx_runtime.jsx)(rightCenter, {
                             ...rightCenterProps,
                             styles,
@@ -1505,6 +2073,7 @@
                             (0, jsx_runtime.jsx)(
                               'div',
                               {
+                                style: { minWidth: '0', maxWidth: '100%' },
                                 children: (0, jsx_runtime.jsx)(right, {
                                   dropdown: dd,
                                   styles,
@@ -1557,404 +2126,6 @@
               required: !1,
               tsType: { name: 'ToolbarStyles' },
               description: '',
-            },
-          },
-        }
-      },
-      './src/components/Typography/index.tsx': (
-        __unused_webpack_module,
-        __webpack_exports__,
-        __webpack_require__
-      ) => {
-        __webpack_require__.d(__webpack_exports__, {
-          A: () => components_Typography,
-        })
-        var jsx_runtime = __webpack_require__(
-            './node_modules/next/dist/compiled/react/jsx-runtime.js'
-          ),
-          shared =
-            (__webpack_require__(
-              './node_modules/next/dist/compiled/react/index.js'
-            ),
-            __webpack_require__('./src/theme/shared.ts'))
-        const typographyThemes = {
-            light: {
-              base: {
-                margin: '0',
-                padding: '0',
-                lineHeight: '1.6',
-                letterSpacing: '0.01em',
-                position: 'relative',
-                transition: shared.Ds.medium,
-              },
-              variants: {
-                merrih1: {
-                  fontSize: '2.25rem',
-                  fontWeight: '700',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merrih2: {
-                  fontSize: '1.875rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merrih3: {
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merrih4: {
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merrih5: {
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merrih6: {
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(17, 24, 39)',
-                },
-                merriparagraph: {
-                  fontSize: '1rem',
-                  fontWeight: '400',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(55, 65, 81)',
-                },
-                merrihelperfooter: {
-                  fontSize: '0.875rem',
-                  fontWeight: '400',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(107, 114, 128)',
-                },
-              },
-              alignment: {
-                left: { textAlign: 'left' },
-                center: { textAlign: 'center' },
-                right: { textAlign: 'right' },
-              },
-              gutterBottom: { marginBottom: '1rem' },
-              outline: {
-                textStroke: '1px rgb(17, 24, 39)',
-                WebkitTextStroke: '1px rgb(17, 24, 39)',
-              },
-            },
-            dark: {
-              base: {
-                margin: '0',
-                padding: '0',
-                lineHeight: '1.6',
-                letterSpacing: '0.01em',
-                position: 'relative',
-                transition: shared.Ds.medium,
-              },
-              variants: {
-                merrih1: {
-                  fontSize: '2.25rem',
-                  fontWeight: '700',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merrih2: {
-                  fontSize: '1.875rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merrih3: {
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merrih4: {
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merrih5: {
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merrih6: {
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(243, 244, 246)',
-                },
-                merriparagraph: {
-                  fontSize: '1rem',
-                  fontWeight: '400',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(209, 213, 219)',
-                },
-                merrihelperfooter: {
-                  fontSize: '0.875rem',
-                  fontWeight: '400',
-                  fontFamily: 'Merriweather, serif',
-                  color: 'rgb(156, 163, 175)',
-                },
-              },
-              alignment: {
-                left: { textAlign: 'left' },
-                center: { textAlign: 'center' },
-                right: { textAlign: 'right' },
-              },
-              gutterBottom: { marginBottom: '1rem' },
-              outline: {
-                textStroke: '1px rgb(243, 244, 246)',
-                WebkitTextStroke: '1px rgb(243, 244, 246)',
-              },
-            },
-            sacred: {
-              base: {
-                margin: '0',
-                padding: '0',
-                lineHeight: '1.6',
-                letterSpacing: '0.02em',
-                position: 'relative',
-                transition: shared.Ds.premium,
-              },
-              variants: {
-                merrih1: {
-                  fontSize: '2.5rem',
-                  fontWeight: '700',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merrih2: {
-                  fontSize: '2rem',
-                  fontWeight: '600',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merrih3: {
-                  fontSize: '1.75rem',
-                  fontWeight: '600',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 12px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.2)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merrih4: {
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merrih5: {
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 8px rgba(255, 215, 0, 0.4), 0 0 16px rgba(255, 215, 0, 0.2)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merrih6: {
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  fontFamily: 'Cinzel, serif',
-                  color: '#FFD700',
-                  textShadow:
-                    '0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.1)',
-                  animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
-                },
-                merriparagraph: {
-                  fontSize: '1rem',
-                  fontWeight: '400',
-                  fontFamily: 'Cinzel, serif',
-                  color: 'rgba(245, 245, 220, 0.9)',
-                  textShadow: '0 0 5px rgba(255, 215, 0, 0.2)',
-                },
-                merrihelperfooter: {
-                  fontSize: '0.875rem',
-                  fontWeight: '400',
-                  fontFamily: 'Cinzel, serif',
-                  color: 'rgba(245, 245, 220, 0.7)',
-                  textShadow: '0 0 3px rgba(255, 215, 0, 0.1)',
-                },
-              },
-              alignment: {
-                left: { textAlign: 'left' },
-                center: { textAlign: 'center' },
-                right: { textAlign: 'right' },
-              },
-              gutterBottom: { marginBottom: '1rem' },
-              outline: {
-                textStroke: '1px #FFD700',
-                WebkitTextStroke: '1px #FFD700',
-              },
-            },
-          },
-          getTypographyStyles = styles => {
-            const themeConfig = (styles => {
-                const theme =
-                    (null == styles ? void 0 : styles.theme) || 'light',
-                  baseTheme = typographyThemes[theme]
-                if (!styles) return baseTheme
-                const variant = styles.variant || 'merriparagraph',
-                  baseVariant = baseTheme.variants[variant]
-                return {
-                  ...baseTheme,
-                  variants: {
-                    ...baseTheme.variants,
-                    [variant]: {
-                      ...baseVariant,
-                      fontSize: styles.fontSize || baseVariant.fontSize,
-                      fontWeight: styles.fontWeight || baseVariant.fontWeight,
-                      fontFamily: styles.fontFamily || baseVariant.fontFamily,
-                      color: styles.color || baseVariant.color,
-                      textShadow: styles.textShadow || baseVariant.textShadow,
-                      animation: baseVariant.animation,
-                    },
-                  },
-                }
-              })(styles),
-              variant =
-                (null == styles ? void 0 : styles.variant) || 'merriparagraph',
-              align = (null == styles ? void 0 : styles.textAlign) || 'left',
-              variantStyle = themeConfig.variants[variant],
-              alignmentStyle = themeConfig.alignment[align]
-            return {
-              container: {
-                ...themeConfig.base,
-                ...variantStyle,
-                ...alignmentStyle,
-                ...((null == styles ? void 0 : styles.gutterBottom) &&
-                  themeConfig.gutterBottom),
-                ...((null == styles ? void 0 : styles.outline) &&
-                  themeConfig.outline),
-                fontStyle: null == styles ? void 0 : styles.fontStyle,
-                margin: null == styles ? void 0 : styles.margin,
-                marginTop: null == styles ? void 0 : styles.marginTop,
-                marginBottom: null == styles ? void 0 : styles.marginBottom,
-                marginLeft: null == styles ? void 0 : styles.marginLeft,
-                marginRight: null == styles ? void 0 : styles.marginRight,
-                padding: null == styles ? void 0 : styles.padding,
-                paddingTop: null == styles ? void 0 : styles.paddingTop,
-                paddingBottom: null == styles ? void 0 : styles.paddingBottom,
-                paddingLeft: null == styles ? void 0 : styles.paddingLeft,
-                paddingRight: null == styles ? void 0 : styles.paddingRight,
-                width: null == styles ? void 0 : styles.width,
-                maxWidth: null == styles ? void 0 : styles.maxWidth,
-                minWidth: null == styles ? void 0 : styles.minWidth,
-                height: null == styles ? void 0 : styles.height,
-                maxHeight: null == styles ? void 0 : styles.maxHeight,
-                minHeight: null == styles ? void 0 : styles.minHeight,
-                position: null == styles ? void 0 : styles.position,
-                transition: (
-                  null == styles ? void 0 : styles.transitionDuration
-                )
-                  ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
-                  : themeConfig.base.transition,
-                animation: null == styles ? void 0 : styles.animation,
-                animationDelay: null == styles ? void 0 : styles.animationDelay,
-              },
-            }
-          }
-        var console = __webpack_require__(
-          './node_modules/console-browserify/index.js'
-        )
-        const variantMapping = {
-            merrih1: 'h1',
-            merrih2: 'h2',
-            merrih3: 'h3',
-            merrih4: 'h4',
-            merrih5: 'h5',
-            merrih6: 'h6',
-            merriparagraph: 'p',
-            merrihelperfooter: 'p',
-          },
-          Typography = ({
-            text,
-            children,
-            variant = 'merriparagraph',
-            styles,
-            ...rest
-          }) => {
-            console.log('Typography component rendered with props:', {
-              variant,
-              text: text || children,
-              styles,
-            })
-            const mergedStyles = { variant, ...styles },
-              computedStyles = getTypographyStyles(mergedStyles),
-              Component = variantMapping[variant] || 'p',
-              content = children || text
-            return (0, jsx_runtime.jsx)(Component, {
-              style: computedStyles.container,
-              ...rest,
-              children: content,
-            })
-          }
-        Typography.displayName = 'Typography'
-        const components_Typography = Typography
-        Typography.__docgenInfo = {
-          description:
-            'A component for rendering text with consistent styling and theming.',
-          methods: [],
-          displayName: 'Typography',
-          props: {
-            text: {
-              required: !1,
-              tsType: { name: 'string' },
-              description:
-                'The text content to display. Can be used instead of children.',
-            },
-            children: {
-              required: !1,
-              tsType: { name: 'ReactReactNode', raw: 'React.ReactNode' },
-              description:
-                'The content to display. Takes precedence over the `text` prop.',
-            },
-            variant: {
-              required: !1,
-              tsType: {
-                name: 'union',
-                raw: "| 'merriparagraph'\n| 'merrihelperfooter'\n| 'merrih1'\n| 'merrih2'\n| 'merrih3'\n| 'merrih4'\n| 'merrih5'\n| 'merrih6'",
-                elements: [
-                  { name: 'literal', value: "'merriparagraph'" },
-                  { name: 'literal', value: "'merrihelperfooter'" },
-                  { name: 'literal', value: "'merrih1'" },
-                  { name: 'literal', value: "'merrih2'" },
-                  { name: 'literal', value: "'merrih3'" },
-                  { name: 'literal', value: "'merrih4'" },
-                  { name: 'literal', value: "'merrih5'" },
-                  { name: 'literal', value: "'merrih6'" },
-                ],
-              },
-              description:
-                'The typography variant to apply. Determines the style and semantic tag.',
-              defaultValue: { value: "'merriparagraph'", computed: !1 },
-            },
-            styles: {
-              required: !1,
-              tsType: { name: 'TypographyStyles' },
-              description:
-                'Custom styles to apply to the component using the theme system.',
             },
           },
         }

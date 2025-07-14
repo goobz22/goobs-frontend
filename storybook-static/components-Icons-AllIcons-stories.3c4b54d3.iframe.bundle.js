@@ -176,52 +176,7 @@
             './node_modules/next/dist/compiled/react/index.js'
           ),
           Info = __webpack_require__('./src/components/Icons/Info.tsx'),
-          Warning = __webpack_require__('./src/components/Icons/Warning.tsx'),
-          Add = __webpack_require__('./src/components/Icons/Add.tsx'),
-          Remove = __webpack_require__('./src/components/Icons/Remove.tsx'),
-          Check = __webpack_require__('./src/components/Icons/Check.tsx'),
-          ArrowBack = __webpack_require__(
-            './src/components/Icons/ArrowBack.tsx'
-          ),
-          Delete = __webpack_require__('./src/components/Icons/Delete.tsx'),
-          Edit = __webpack_require__('./src/components/Icons/Edit.tsx'),
-          Search = __webpack_require__('./src/components/Icons/Search.tsx'),
-          Close = __webpack_require__('./src/components/Icons/Close.tsx'),
-          ExpandMore = __webpack_require__(
-            './src/components/Icons/ExpandMore.tsx'
-          ),
-          ShowHideEye = __webpack_require__(
-            './src/components/Icons/ShowHideEye.tsx'
-          ),
-          FavoriteIcon = __webpack_require__(
-            './src/components/Icons/FavoriteIcon.tsx'
-          ),
-          AccessTime = __webpack_require__(
-            './src/components/Icons/AccessTime.tsx'
-          ),
-          ArrowDropDown = __webpack_require__(
-            './src/components/Icons/ArrowDropDown.tsx'
-          ),
-          ArrowDropUp = __webpack_require__(
-            './src/components/Icons/ArrowDropUp.tsx'
-          ),
-          CheckCircle = __webpack_require__(
-            './src/components/Icons/CheckCircle.tsx'
-          ),
-          Error = __webpack_require__('./src/components/Icons/Error.tsx'),
-          Download = __webpack_require__('./src/components/Icons/Download.tsx'),
-          Lock = __webpack_require__('./src/components/Icons/Lock.tsx'),
-          Code = __webpack_require__('./src/components/Icons/Code.tsx'),
-          Calendar = __webpack_require__('./src/components/Icons/Calendar.tsx'),
-          CheckCircleOutline = __webpack_require__(
-            './src/components/Icons/CheckCircleOutline.tsx'
-          ),
-          CircleOutline = __webpack_require__(
-            './src/components/Icons/CircleOutline.tsx'
-          ),
-          ContentCopy = __webpack_require__(
-            './src/components/Icons/ContentCopy.tsx'
-          )
+          Warning = __webpack_require__('./src/components/Icons/Warning.tsx')
         const SACRED_GLYPHS = [
             '𓁟',
             '𓂀',
@@ -251,12 +206,12 @@
           premiumStyles_icon = {
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-            color: 'rgb(75, 85, 99)',
+            color: 'rgb(34, 197, 94)',
           },
           premiumStyles_iconHover = {
             transform: 'scale(1.05)',
-            filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
-            color: 'rgb(55, 65, 81)',
+            filter: 'drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3))',
+            color: 'rgb(22, 163, 74)',
           },
           sacredStyles_icon = {
             transition: 'all 0.4s ease',
@@ -278,7 +233,7 @@
             animation: 'sacredGlyphRotate 20s linear infinite',
           },
           sacredStyles_glyphVisible = { opacity: 1 },
-          DragIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
+          AddIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
             const [isHovered, setIsHovered] = (0, react.useState)(!1),
               [glyph] = (0, react.useState)(
                 SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
@@ -313,7 +268,7 @@
                   style: iconStyle,
                   ...props,
                   children: (0, jsx_runtime.jsx)('path', {
-                    d: 'M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-520q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-520q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z',
+                    d: 'M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z',
                   }),
                 }),
                 sacredtheme &&
@@ -321,6 +276,523 @@
                     style: {
                       ...sacredStyles_glyph,
                       ...(isHovered && sacredStyles_glyphVisible),
+                      top: '-8px',
+                      right: '-8px',
+                    },
+                    children: glyph,
+                  }),
+              ],
+            })
+          },
+          Add = AddIcon
+        AddIcon.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'AddIcon',
+          props: {
+            sacredtheme: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+            style: {
+              defaultValue: { value: '{}', computed: !1 },
+              required: !1,
+            },
+          },
+        }
+        const Remove_SACRED_GLYPHS = [
+            '𓁟',
+            '𓂀',
+            '𓃀',
+            '𓄿',
+            '𓊖',
+            '𓊗',
+            '𓋴',
+            '𓏏',
+            '𓊨',
+            '𓁦',
+            '𓅓',
+            '𓆄',
+            '𓇳',
+            '𓈖',
+            '𓊹',
+            '𓊺',
+            '𓊻',
+            '𓋹',
+            '𓌻',
+            '𓍿',
+            '𓅨',
+            '𓂋',
+            '𓏭',
+            '𓊵',
+          ],
+          Remove_premiumStyles_icon = {
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            color: 'rgb(239, 68, 68)',
+          },
+          Remove_premiumStyles_iconHover = {
+            transform: 'scale(1.05)',
+            filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))',
+            color: 'rgb(220, 38, 38)',
+          },
+          Remove_sacredStyles_icon = {
+            transition: 'all 0.4s ease',
+            filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+            color: 'rgba(255, 215, 0, 0.9)',
+          },
+          Remove_sacredStyles_iconHover = {
+            transform: 'scale(1.1) rotate(5deg)',
+            filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+            color: '#FFD700',
+          },
+          Remove_sacredStyles_glyph = {
+            position: 'absolute',
+            fontSize: '12px',
+            color: 'rgba(255, 215, 0, 0.6)',
+            transition: 'all 0.3s ease',
+            opacity: 0,
+            pointerEvents: 'none',
+            animation: 'sacredGlyphRotate 20s linear infinite',
+          },
+          Remove_sacredStyles_glyphVisible = { opacity: 1 },
+          RemoveIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
+            const [isHovered, setIsHovered] = (0, react.useState)(!1),
+              [glyph] = (0, react.useState)(
+                Remove_SACRED_GLYPHS[
+                  Math.floor(Math.random() * Remove_SACRED_GLYPHS.length)
+                ]
+              )
+            ;(0, react.useEffect)(() => {
+              if (sacredtheme) {
+                const styleSheet = document.styleSheets[0],
+                  keyframes =
+                    '\n        @keyframes sacredGlyphRotate {\n          from { transform: rotate(0deg); }\n          to { transform: rotate(360deg); }\n        }\n      '
+                try {
+                  styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+                } catch (e) {}
+              }
+            }, [sacredtheme])
+            const iconStyle = {
+              ...(sacredtheme
+                ? Remove_sacredStyles_icon
+                : Remove_premiumStyles_icon),
+              ...(isHovered && sacredtheme
+                ? Remove_sacredStyles_iconHover
+                : {}),
+              ...(isHovered && !sacredtheme
+                ? Remove_premiumStyles_iconHover
+                : {}),
+              ...style,
+            }
+            return (0, jsx_runtime.jsxs)('div', {
+              style: { position: 'relative', display: 'inline-block' },
+              onMouseEnter: () => setIsHovered(!0),
+              onMouseLeave: () => setIsHovered(!1),
+              children: [
+                (0, jsx_runtime.jsx)('svg', {
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  height: '24',
+                  viewBox: '0 -960 960 960',
+                  width: '24',
+                  fill: 'currentColor',
+                  style: iconStyle,
+                  ...props,
+                  children: (0, jsx_runtime.jsx)('path', {
+                    d: 'M200-440v-80h560v80H200Z',
+                  }),
+                }),
+                sacredtheme &&
+                  (0, jsx_runtime.jsx)('div', {
+                    style: {
+                      ...Remove_sacredStyles_glyph,
+                      ...(isHovered && Remove_sacredStyles_glyphVisible),
+                      top: '-8px',
+                      right: '-8px',
+                    },
+                    children: glyph,
+                  }),
+              ],
+            })
+          },
+          Remove = RemoveIcon
+        RemoveIcon.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'RemoveIcon',
+          props: {
+            sacredtheme: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+            style: {
+              defaultValue: { value: '{}', computed: !1 },
+              required: !1,
+            },
+          },
+        }
+        var Check = __webpack_require__('./src/components/Icons/Check.tsx'),
+          ArrowBack = __webpack_require__(
+            './src/components/Icons/ArrowBack.tsx'
+          ),
+          Delete = __webpack_require__('./src/components/Icons/Delete.tsx'),
+          Edit = __webpack_require__('./src/components/Icons/Edit.tsx'),
+          Search = __webpack_require__('./src/components/Icons/Search.tsx'),
+          Close = __webpack_require__('./src/components/Icons/Close.tsx'),
+          ExpandMore = __webpack_require__(
+            './src/components/Icons/ExpandMore.tsx'
+          ),
+          ShowHideEye = __webpack_require__(
+            './src/components/Icons/ShowHideEye.tsx'
+          )
+        const FavoriteIcon_SACRED_GLYPHS = [
+            '𓁟',
+            '𓂀',
+            '𓃀',
+            '𓄿',
+            '𓊖',
+            '𓊗',
+            '𓋴',
+            '𓏏',
+            '𓊨',
+            '𓁦',
+            '𓅓',
+            '𓆄',
+            '𓇳',
+            '𓈖',
+            '𓊹',
+            '𓊺',
+            '𓊻',
+            '𓋹',
+            '𓌻',
+            '𓍿',
+            '𓅨',
+            '𓂋',
+            '𓏭',
+            '𓊵',
+          ],
+          FavoriteIcon_premiumStyles = {
+            container: {
+              position: 'relative',
+              display: 'inline-block',
+              padding: '4px',
+              borderRadius: '50%',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+            },
+            containerHover: { backgroundColor: 'rgba(243, 244, 246, 0.5)' },
+            iconFilled: {
+              width: '24px',
+              height: '24px',
+              color: 'rgb(239, 68, 68)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            },
+            iconOutline: {
+              width: '24px',
+              height: '24px',
+              color: 'rgb(75, 85, 99)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            },
+            iconHover: {
+              transform: 'scale(1.05)',
+              filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))',
+            },
+            iconOutlineHover: {
+              transform: 'scale(1.05)',
+              filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
+              color: 'rgb(55, 65, 81)',
+            },
+          },
+          FavoriteIcon_sacredStyles = {
+            container: {
+              position: 'relative',
+              display: 'inline-block',
+              padding: '4px',
+              borderRadius: '50%',
+              transition: 'all 0.4s ease',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+            },
+            containerHover: { backgroundColor: 'rgba(255, 215, 0, 0.1)' },
+            iconFilled: {
+              width: '24px',
+              height: '24px',
+              color: '#FFD700',
+              transition: 'all 0.4s ease',
+              filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+              animation: 'heartbeat 1.5s ease-in-out infinite',
+            },
+            iconOutline: {
+              width: '24px',
+              height: '24px',
+              color: 'rgba(255, 215, 0, 0.7)',
+              transition: 'all 0.4s ease',
+              filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+            },
+            iconHover: {
+              transform: 'scale(1.1) rotate(5deg)',
+              filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+              color: '#FFD700',
+            },
+            iconOutlineHover: {
+              transform: 'scale(1.1) rotate(5deg)',
+              filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+              color: '#FFD700',
+            },
+            glyph: {
+              position: 'absolute',
+              fontSize: '12px',
+              color: 'rgba(255, 215, 0, 0.6)',
+              transition: 'all 0.3s ease',
+              opacity: 0,
+              pointerEvents: 'none',
+              animation: 'sacredGlyphRotate 20s linear infinite',
+            },
+            glyphVisible: { opacity: 1 },
+          },
+          FavoriteIconComponent = ({ sacredtheme = !1, style = {} }) => {
+            const [isFavorite, setIsFavorite] = (0, react.useState)(!1),
+              [isHovered, setIsHovered] = (0, react.useState)(!1),
+              [glyph] = (0, react.useState)(
+                FavoriteIcon_SACRED_GLYPHS[
+                  Math.floor(Math.random() * FavoriteIcon_SACRED_GLYPHS.length)
+                ]
+              )
+            ;(0, react.useEffect)(() => {
+              if (sacredtheme) {
+                const styleSheet = document.styleSheets[0],
+                  keyframes =
+                    '\n        @keyframes heartbeat {\n          0%, 100% { transform: scale(1); }\n          50% { transform: scale(1.05); }\n        }\n        @keyframes sacredGlyphRotate {\n          from { transform: rotate(0deg); }\n          to { transform: rotate(360deg); }\n        }\n      '
+                try {
+                  styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+                } catch (e) {}
+              }
+            }, [sacredtheme])
+            const styles = sacredtheme
+                ? FavoriteIcon_sacredStyles
+                : FavoriteIcon_premiumStyles,
+              containerStyle = {
+                ...styles.container,
+                ...(isHovered &&
+                  (sacredtheme
+                    ? styles.containerHover
+                    : FavoriteIcon_premiumStyles.containerHover)),
+                ...style,
+              },
+              iconStyle = isFavorite
+                ? { ...styles.iconFilled, ...(isHovered && styles.iconHover) }
+                : {
+                    ...styles.iconOutline,
+                    ...(isHovered &&
+                      (sacredtheme
+                        ? styles.iconOutlineHover
+                        : FavoriteIcon_premiumStyles.iconOutlineHover)),
+                  }
+            return (0, jsx_runtime.jsxs)('div', {
+              onClick: () => {
+                setIsFavorite(!isFavorite)
+              },
+              style: containerStyle,
+              onMouseEnter: () => setIsHovered(!0),
+              onMouseLeave: () => setIsHovered(!1),
+              children: [
+                isFavorite
+                  ? (0, jsx_runtime.jsx)('svg', {
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      height: '24',
+                      viewBox: '0 -960 960 960',
+                      width: '24',
+                      fill: 'currentColor',
+                      style: iconStyle,
+                      children: (0, jsx_runtime.jsx)('path', {
+                        d: 'm480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z',
+                      }),
+                    })
+                  : (0, jsx_runtime.jsx)('svg', {
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      height: '24',
+                      viewBox: '0 -960 960 960',
+                      width: '24',
+                      fill: 'currentColor',
+                      style: iconStyle,
+                      children: (0, jsx_runtime.jsx)('path', {
+                        d: 'm480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z',
+                      }),
+                    }),
+                sacredtheme &&
+                  (0, jsx_runtime.jsx)('div', {
+                    style: {
+                      ...FavoriteIcon_sacredStyles.glyph,
+                      ...(isHovered && FavoriteIcon_sacredStyles.glyphVisible),
+                      top: '-8px',
+                      right: '-8px',
+                    },
+                    children: glyph,
+                  }),
+              ],
+            })
+          },
+          FavoriteIcon = FavoriteIconComponent
+        FavoriteIconComponent.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'FavoriteIconComponent',
+          props: {
+            sacredtheme: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+            style: {
+              required: !1,
+              tsType: {
+                name: 'ReactCSSProperties',
+                raw: 'React.CSSProperties',
+              },
+              description: '',
+              defaultValue: { value: '{}', computed: !1 },
+            },
+          },
+        }
+        var AccessTime = __webpack_require__(
+            './src/components/Icons/AccessTime.tsx'
+          ),
+          ArrowDropDown = __webpack_require__(
+            './src/components/Icons/ArrowDropDown.tsx'
+          ),
+          ArrowDropUp = __webpack_require__(
+            './src/components/Icons/ArrowDropUp.tsx'
+          ),
+          CheckCircle = __webpack_require__(
+            './src/components/Icons/CheckCircle.tsx'
+          ),
+          Error = __webpack_require__('./src/components/Icons/Error.tsx'),
+          Download = __webpack_require__('./src/components/Icons/Download.tsx'),
+          Lock = __webpack_require__('./src/components/Icons/Lock.tsx'),
+          Code = __webpack_require__('./src/components/Icons/Code.tsx'),
+          Calendar = __webpack_require__('./src/components/Icons/Calendar.tsx'),
+          CheckCircleOutline = __webpack_require__(
+            './src/components/Icons/CheckCircleOutline.tsx'
+          ),
+          CircleOutline = __webpack_require__(
+            './src/components/Icons/CircleOutline.tsx'
+          ),
+          ContentCopy = __webpack_require__(
+            './src/components/Icons/ContentCopy.tsx'
+          )
+        const Drag_SACRED_GLYPHS = [
+            '𓁟',
+            '𓂀',
+            '𓃀',
+            '𓄿',
+            '𓊖',
+            '𓊗',
+            '𓋴',
+            '𓏏',
+            '𓊨',
+            '𓁦',
+            '𓅓',
+            '𓆄',
+            '𓇳',
+            '𓈖',
+            '𓊹',
+            '𓊺',
+            '𓊻',
+            '𓋹',
+            '𓌻',
+            '𓍿',
+            '𓅨',
+            '𓂋',
+            '𓏭',
+            '𓊵',
+          ],
+          Drag_premiumStyles_icon = {
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            color: 'rgb(75, 85, 99)',
+          },
+          Drag_premiumStyles_iconHover = {
+            transform: 'scale(1.05)',
+            filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
+            color: 'rgb(55, 65, 81)',
+          },
+          Drag_sacredStyles_icon = {
+            transition: 'all 0.4s ease',
+            filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+            color: 'rgba(255, 215, 0, 0.9)',
+          },
+          Drag_sacredStyles_iconHover = {
+            transform: 'scale(1.1) rotate(5deg)',
+            filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+            color: '#FFD700',
+          },
+          Drag_sacredStyles_glyph = {
+            position: 'absolute',
+            fontSize: '12px',
+            color: 'rgba(255, 215, 0, 0.6)',
+            transition: 'all 0.3s ease',
+            opacity: 0,
+            pointerEvents: 'none',
+            animation: 'sacredGlyphRotate 20s linear infinite',
+          },
+          Drag_sacredStyles_glyphVisible = { opacity: 1 },
+          DragIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
+            const [isHovered, setIsHovered] = (0, react.useState)(!1),
+              [glyph] = (0, react.useState)(
+                Drag_SACRED_GLYPHS[
+                  Math.floor(Math.random() * Drag_SACRED_GLYPHS.length)
+                ]
+              )
+            ;(0, react.useEffect)(() => {
+              if (sacredtheme) {
+                const styleSheet = document.styleSheets[0],
+                  keyframes =
+                    '\n        @keyframes sacredGlyphRotate {\n          from { transform: rotate(0deg); }\n          to { transform: rotate(360deg); }\n        }\n      '
+                try {
+                  styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+                } catch (e) {}
+              }
+            }, [sacredtheme])
+            const iconStyle = {
+              ...(sacredtheme
+                ? Drag_sacredStyles_icon
+                : Drag_premiumStyles_icon),
+              ...(isHovered && sacredtheme ? Drag_sacredStyles_iconHover : {}),
+              ...(isHovered && !sacredtheme
+                ? Drag_premiumStyles_iconHover
+                : {}),
+              ...style,
+            }
+            return (0, jsx_runtime.jsxs)('div', {
+              style: { position: 'relative', display: 'inline-block' },
+              onMouseEnter: () => setIsHovered(!0),
+              onMouseLeave: () => setIsHovered(!1),
+              children: [
+                (0, jsx_runtime.jsx)('svg', {
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  height: '24',
+                  viewBox: '0 -960 960 960',
+                  width: '24',
+                  fill: 'currentColor',
+                  style: iconStyle,
+                  ...props,
+                  children: (0, jsx_runtime.jsx)('path', {
+                    d: 'M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-520q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-520q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z',
+                  }),
+                }),
+                sacredtheme &&
+                  (0, jsx_runtime.jsx)('div', {
+                    style: {
+                      ...Drag_sacredStyles_glyph,
+                      ...(isHovered && Drag_sacredStyles_glyphVisible),
                       top: '-8px',
                       right: '-8px',
                     },
@@ -542,8 +1014,8 @@
           allIcons = [
             { name: 'Info', component: Info.A },
             { name: 'Warning', component: Warning.A },
-            { name: 'Add', component: Add.A },
-            { name: 'Remove', component: Remove.A },
+            { name: 'Add', component: Add },
+            { name: 'Remove', component: Remove },
             { name: 'Check', component: Check.A },
             { name: 'ArrowBack', component: ArrowBack.A },
             { name: 'Delete', component: Delete.A },
@@ -552,7 +1024,7 @@
             { name: 'Close', component: Close.A },
             { name: 'ExpandMore', component: ExpandMore.A },
             { name: 'ShowHideEye', component: ShowHideEye.A },
-            { name: 'Favorite', component: FavoriteIcon.A },
+            { name: 'Favorite', component: FavoriteIcon },
             { name: 'AccessTime', component: AccessTime.A },
             { name: 'ArrowDropDown', component: ArrowDropDown.A },
             { name: 'ArrowDropUp', component: ArrowDropUp.A },
@@ -1979,7 +2451,7 @@
           },
         }
       },
-      './src/components/Icons/MoreVert.tsx': (
+      './src/components/Icons/Info.tsx': (
         __unused_webpack_module,
         __webpack_exports__,
         __webpack_require__
@@ -2023,12 +2495,12 @@
           premiumStyles_icon = {
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-            color: 'rgb(75, 85, 99)',
+            color: 'rgb(59, 130, 246)',
           },
           premiumStyles_iconHover = {
             transform: 'scale(1.05)',
-            filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
-            color: 'rgb(55, 65, 81)',
+            filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
+            color: 'rgb(29, 78, 216)',
           },
           sacredStyles_icon = {
             transition: 'all 0.4s ease',
@@ -2050,7 +2522,7 @@
             animation: 'sacredGlyphRotate 20s linear infinite',
           },
           sacredStyles_glyphVisible = { opacity: 1 },
-          MoreVertIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
+          InfoIcon = ({ sacredtheme = !1, style = {}, ...props }) => {
             const [isHovered, setIsHovered] = (0,
               react__WEBPACK_IMPORTED_MODULE_1__.useState)(!1),
               [glyph] = (0, react__WEBPACK_IMPORTED_MODULE_1__.useState)(
@@ -2079,7 +2551,7 @@
                 onMouseEnter: () => setIsHovered(!0),
                 onMouseLeave: () => setIsHovered(!1),
                 children: [
-                  (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                  (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
                     'svg',
                     {
                       xmlns: 'http://www.w3.org/2000/svg',
@@ -2089,13 +2561,37 @@
                       fill: 'currentColor',
                       style: iconStyle,
                       ...props,
-                      children: (0,
-                      react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
-                        'path',
-                        {
-                          d: 'M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
-                        }
-                      ),
+                      children: [
+                        (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                          'circle',
+                          {
+                            cx: '12',
+                            cy: '12',
+                            r: '10',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            fill: 'none',
+                          }
+                        ),
+                        (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                          'path',
+                          {
+                            d: 'M12 16v-4',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            strokeLinecap: 'round',
+                          }
+                        ),
+                        (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                          'path',
+                          {
+                            d: 'M12 8h.01',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            strokeLinecap: 'round',
+                          }
+                        ),
+                      ],
                     }
                   ),
                   sacredtheme &&
@@ -2115,11 +2611,11 @@
               }
             )
           },
-          __WEBPACK_DEFAULT_EXPORT__ = MoreVertIcon
-        MoreVertIcon.__docgenInfo = {
+          __WEBPACK_DEFAULT_EXPORT__ = InfoIcon
+        InfoIcon.__docgenInfo = {
           description: '',
           methods: [],
-          displayName: 'MoreVertIcon',
+          displayName: 'InfoIcon',
           props: {
             sacredtheme: {
               required: !1,
@@ -2130,6 +2626,289 @@
             style: {
               defaultValue: { value: '{}', computed: !1 },
               required: !1,
+            },
+          },
+        }
+      },
+      './src/components/Icons/ShowHideEye.tsx': (
+        __unused_webpack_module,
+        __webpack_exports__,
+        __webpack_require__
+      ) => {
+        __webpack_require__.d(__webpack_exports__, {
+          A: () => __WEBPACK_DEFAULT_EXPORT__,
+        })
+        var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ =
+            __webpack_require__(
+              './node_modules/next/dist/compiled/react/jsx-runtime.js'
+            ),
+          react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+            './node_modules/next/dist/compiled/react/index.js'
+          )
+        const SACRED_GLYPHS = [
+            '𓁟',
+            '𓂀',
+            '𓃀',
+            '𓄿',
+            '𓊖',
+            '𓊗',
+            '𓋴',
+            '𓏏',
+            '𓊨',
+            '𓁦',
+            '𓅓',
+            '𓆄',
+            '𓇳',
+            '𓈖',
+            '𓊹',
+            '𓊺',
+            '𓊻',
+            '𓋹',
+            '𓌻',
+            '𓍿',
+            '𓅨',
+            '𓂋',
+            '𓏭',
+            '𓊵',
+          ],
+          premiumStyles = {
+            icon: {
+              width: '16px',
+              height: '16px',
+              color: 'rgb(75, 85, 99)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            },
+            iconHover: {
+              transform: 'scale(1.05)',
+              filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
+              color: 'rgb(55, 65, 81)',
+            },
+          },
+          sacredStyles = {
+            icon: {
+              width: '16px',
+              height: '16px',
+              color: 'rgba(255, 215, 0, 0.9)',
+              transition: 'all 0.4s ease',
+              filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
+              fontFamily:
+                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+            },
+            iconHover: {
+              transform: 'scale(1.1) rotate(5deg)',
+              filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+              color: '#FFD700',
+              fontFamily:
+                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+            },
+            glyph: {
+              position: 'absolute',
+              fontSize: '10px',
+              color: 'rgba(255, 215, 0, 0.6)',
+              transition: 'all 0.3s ease',
+              opacity: 0,
+              pointerEvents: 'none',
+              animation: 'sacredGlyphRotate 20s linear infinite',
+              fontFamily:
+                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+            },
+            glyphVisible: {
+              opacity: 1,
+              fontFamily:
+                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+            },
+          },
+          ShowHideEyeIcon = ({
+            visible = !1,
+            sacredtheme = !1,
+            style = {},
+          }) => {
+            const [isHovered, setIsHovered] = (0,
+              react__WEBPACK_IMPORTED_MODULE_1__.useState)(!1),
+              [glyph] = (0, react__WEBPACK_IMPORTED_MODULE_1__.useState)(
+                SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+              )
+            ;(0, react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+              if (sacredtheme) {
+                const styleSheet = document.styleSheets[0],
+                  keyframes =
+                    '\n        @keyframes sacredGlyphRotate {\n          from { transform: rotate(0deg); }\n          to { transform: rotate(360deg); }\n        }\n      '
+                try {
+                  styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+                } catch (e) {}
+              }
+            }, [sacredtheme])
+            const styles = sacredtheme ? sacredStyles : premiumStyles,
+              iconStyle = {
+                ...styles.icon,
+                ...(isHovered && sacredtheme ? styles.iconHover : {}),
+                ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+                ...style,
+              }
+            return (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+              'div',
+              {
+                style: { position: 'relative', display: 'inline-block' },
+                onMouseEnter: () => setIsHovered(!0),
+                onMouseLeave: () => setIsHovered(!1),
+                children: [
+                  visible
+                    ? sacredtheme
+                      ? (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                          'div',
+                          {
+                            style: {
+                              ...iconStyle,
+                              fontSize: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontFamily:
+                                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+                            },
+                            children: '𓂀',
+                          }
+                        )
+                      : (0,
+                        react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                          'svg',
+                          {
+                            style: iconStyle,
+                            xmlns: 'http://www.w3.org/2000/svg',
+                            viewBox: '0 0 24 24',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            children: [
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'path',
+                                {
+                                  d: 'M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z',
+                                }
+                              ),
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'circle',
+                                { cx: '12', cy: '12', r: '3' }
+                              ),
+                            ],
+                          }
+                        )
+                    : sacredtheme
+                      ? (0,
+                        react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                          'div',
+                          {
+                            style: {
+                              ...iconStyle,
+                              fontSize: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontFamily:
+                                'Segoe UI Historic, Noto Sans Egyptian Hieroglyphs, serif',
+                              position: 'relative',
+                            },
+                            children: [
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'span',
+                                { style: { opacity: 0.5 }, children: '𓂀' }
+                              ),
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'div',
+                                {
+                                  style: {
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform:
+                                      'translate(-50%, -50%) rotate(45deg)',
+                                    width: '20px',
+                                    height: '2px',
+                                    backgroundColor: 'currentColor',
+                                  },
+                                }
+                              ),
+                            ],
+                          }
+                        )
+                      : (0,
+                        react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                          'svg',
+                          {
+                            style: iconStyle,
+                            xmlns: 'http://www.w3.org/2000/svg',
+                            viewBox: '0 0 24 24',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            strokeWidth: '2',
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            children: [
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'path',
+                                {
+                                  d: 'M17.94 17.94A10.06 10.06 0 0 1 12 20C7 20 2.73 16.11 1 12c.74-1.81 2.01-3.41 3.56-4.69M9.53 9.53A3.001 3.001 0 0 1 12 15a3 3 0 0 1-2.47-5.47',
+                                }
+                              ),
+                              (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                'path',
+                                { d: 'M1 1l22 22' }
+                              ),
+                            ],
+                          }
+                        ),
+                  sacredtheme &&
+                    (0, react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                      'div',
+                      {
+                        style: {
+                          ...sacredStyles.glyph,
+                          ...(isHovered && sacredStyles.glyphVisible),
+                          top: '-6px',
+                          right: '-6px',
+                        },
+                        children: glyph,
+                      }
+                    ),
+                ],
+              }
+            )
+          },
+          __WEBPACK_DEFAULT_EXPORT__ = ShowHideEyeIcon
+        ShowHideEyeIcon.__docgenInfo = {
+          description: '',
+          methods: [],
+          displayName: 'ShowHideEyeIcon',
+          props: {
+            visible: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+            sacredtheme: {
+              required: !1,
+              tsType: { name: 'boolean' },
+              description: '',
+              defaultValue: { value: 'false', computed: !1 },
+            },
+            style: {
+              required: !1,
+              tsType: {
+                name: 'ReactCSSProperties',
+                raw: 'React.CSSProperties',
+              },
+              description: '',
+              defaultValue: { value: '{}', computed: !1 },
             },
           },
         }

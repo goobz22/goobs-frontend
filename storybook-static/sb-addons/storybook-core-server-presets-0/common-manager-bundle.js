@@ -10717,15 +10717,14 @@ To pass a single animation please supply them in simple values, e.g. animation('
         document.removeEventListener('keydown', this.onKeydown)
       }
       onKeydown(t) {
-        t.altKey ||
-          t.ctrlKey ||
-          t.metaKey ||
-          t.shiftKey ||
-          t.repeat ||
+        if (t.altKey || t.ctrlKey || t.metaKey || t.shiftKey || t.repeat) return
+        let { inputRefKey: r, inputRefValue: a } = this.state,
+          { addButtonElement: o, handleCancel: c } = this.props
+        ;[r, a, o].some(l => l === t.target) &&
           ((t.code === 'Enter' || t.key === 'Enter') &&
             (t.preventDefault(), this.onSubmit()),
           (t.code === 'Escape' || t.key === 'Escape') &&
-            (t.preventDefault(), this.props.handleCancel()))
+            (t.preventDefault(), c()))
       }
       onSubmit() {
         let {
@@ -11098,11 +11097,13 @@ To pass a single animation please supply them in simple values, e.g. animation('
         document.removeEventListener('keydown', this.onKeydown)
       }
       onKeydown(t) {
+        let { inputRef: r } = this.state
         t.altKey ||
           t.ctrlKey ||
           t.metaKey ||
           t.shiftKey ||
           t.repeat ||
+          r !== t.target ||
           ((t.code === 'Enter' || t.key === 'Enter') &&
             (t.preventDefault(), this.handleEdit()),
           (t.code === 'Escape' || t.key === 'Escape') &&
@@ -11807,11 +11808,13 @@ To pass a single animation please supply them in simple values, e.g. animation('
         document.removeEventListener('keydown', this.onKeydown)
       }
       onKeydown(t) {
+        let { inputRef: r } = this.state
         t.altKey ||
           t.ctrlKey ||
           t.metaKey ||
           t.shiftKey ||
           t.repeat ||
+          r !== t.target ||
           ((t.code === 'Enter' || t.key === 'Enter') &&
             (t.preventDefault(), this.handleEdit()),
           (t.code === 'Escape' || t.key === 'Escape') &&
