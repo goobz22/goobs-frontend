@@ -16,6 +16,7 @@ export interface DialogProps {
 
 const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
+  const styleRef = useRef<HTMLStyleElement | null>(null)
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -35,6 +36,32 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
     }
   }, [open, onClose])
 
+  useEffect(() => {
+    // Inject scrollbar CSS when dialog opens
+    if (open) {
+      const computedStyles = getDialogStyles(styles)
+
+      // Remove existing style if it exists
+      if (styleRef.current) {
+        document.head.removeChild(styleRef.current)
+      }
+
+      // Create and inject new style
+      const styleElement = document.createElement('style')
+      styleElement.textContent = computedStyles.scrollbarCSS
+      document.head.appendChild(styleElement)
+      styleRef.current = styleElement
+    }
+
+    // Cleanup on unmount or when dialog closes
+    return () => {
+      if (styleRef.current && document.head.contains(styleRef.current)) {
+        document.head.removeChild(styleRef.current)
+        styleRef.current = null
+      }
+    }
+  }, [open, styles])
+
   if (!open) {
     return null
   }
@@ -48,7 +75,12 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
         style={computedStyles.dialog}
         onClick={e => e.stopPropagation()}
       >
-        {children}
+        <div
+          className={computedStyles.contentClassName}
+          style={computedStyles.content}
+        >
+          {children}
+        </div>
       </div>
     </div>
   )
