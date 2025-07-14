@@ -1,20 +1,20 @@
 'use client'
 import React from 'react'
-import SearchableDropdown, {
-  SearchableDropdownProps,
-} from '../../../Field/Dropdown/Searchable'
+import SearchableSimple, {
+  SearchableSimpleProps,
+} from '../../../Field/Dropdown/SearchableSimple'
 
 const useSearchableDropdown = (props: {
-  searchableDropdown?: SearchableDropdownProps | SearchableDropdownProps[]
+  searchableDropdown?: SearchableSimpleProps | SearchableSimpleProps[]
 }): React.ReactElement[] | null => {
   if (!props.searchableDropdown) return null
 
   const renderSearchableDropdown = (
-    searchableDropdownItem: SearchableDropdownProps,
+    searchableDropdownItem: SearchableSimpleProps,
     index: number
   ): React.ReactElement => {
     return (
-      <SearchableDropdown
+      <SearchableSimple
         key={`searchable-dropdown-${index}`}
         {...searchableDropdownItem}
       />

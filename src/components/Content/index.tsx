@@ -22,7 +22,8 @@ import { SubnetFieldProps } from '../Field/IPAM/Subnet'
 import { PasswordFieldProps } from '../Field/Password'
 import { QRCodeProps } from '../QRCode'
 import { ComplexTextEditorProps } from '../ComplexTextEditor'
-import { SearchableDropdownProps } from '../Field/Dropdown/Searchable'
+import { SearchableSimpleProps } from '../Field/Dropdown/SearchableSimple'
+import { SearchableHistoryProps } from '../Field/Dropdown/SearchableHistory'
 import { AccordionProps } from '../Accordion'
 import { ProjectBoardProps } from '../ProjectBoard/types'
 import { MultiSelectChipProps } from '../Field/Dropdown/MultiSelect'
@@ -63,6 +64,7 @@ import usePhoneNumber from './Structure/phoneNumber/usePhoneNumber'
 import useCheckbox from './Structure/checkbox/useCheckbox'
 import useComplexEditor from './Structure/complexeditor/useComplexEditor'
 import useSearchableDropdown from './Structure/searchableDropdown/useSearchableDropdown'
+import useSearchableHistory from './Structure/searchableHistory/useSearchableHistory'
 import useAccordion from './Structure/accordion/useAccordion'
 import useProjectBoard from './Structure/projectboard/useProjectBoard'
 import useMultiSelect from './Structure/multiSelect/useMultiSelect'
@@ -86,7 +88,8 @@ export interface ContentSectionProps {
     confirmationcodeinput?:
       | ConfirmationCodeInputsProps
       | ConfirmationCodeInputsProps[]
-    searchableDropdown?: SearchableDropdownProps | SearchableDropdownProps[]
+    searchableDropdown?: SearchableSimpleProps | SearchableSimpleProps[]
+    searchableHistory?: SearchableHistoryProps | SearchableHistoryProps[]
     projectboard?: ProjectBoardProps | ProjectBoardProps[]
     complexeditor?: ComplexTextEditorProps | ComplexTextEditorProps[]
     typography?: TypographyProps | TypographyProps[]
@@ -197,6 +200,11 @@ const RenderContent: React.FC<
   addElements(
     useSearchableDropdown({
       searchableDropdown: injectsacredtheme(props.searchableDropdown),
+    })
+  )
+  addElements(
+    useSearchableHistory({
+      searchableHistory: injectsacredtheme(props.searchableHistory),
     })
   )
   addElements(useTextField({ textfield: injectsacredtheme(props.textfield) }))
