@@ -16709,16 +16709,14 @@ To pass a single animation please supply them in simple values, e.g. animation('
             { style: { color: a.base } },
             '[\u2026]'
           )
-        let o = e
-            .slice(0, 3)
-            .map((l, u) =>
-              n.createElement(Et, {
-                key: `${u}--${JSON.stringify(l)}`,
-                value: l,
-                nested: !0,
-                callsById: r,
-              })
-            ),
+        let o = e.slice(0, 3).map((l, u) =>
+            n.createElement(Et, {
+              key: `${u}--${JSON.stringify(l)}`,
+              value: l,
+              nested: !0,
+              callsById: r,
+            })
+          ),
           c = bc(o, n.createElement('span', null, ', '))
         return e.length <= 3
           ? n.createElement('span', { style: { color: a.base } }, '[', c, ']')

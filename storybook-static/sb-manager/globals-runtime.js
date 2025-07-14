@@ -20516,8 +20516,8 @@ var ue,
     P2e = /* @__PURE__ */ a((e, t = () => {}) => {
       let r = { left: e.scrollLeft, top: e.scrollTop },
         n = 0
-      return (
-        /* @__PURE__ */ a(function o() {
+      return /* @__PURE__ */ (
+        a(function o() {
           let i = { left: e.scrollLeft, top: e.scrollTop },
             s = r.left !== i.left,
             l = r.top !== i.top

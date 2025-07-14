@@ -688,38 +688,36 @@
                   (!1 !== userSpecifiedComplexOptions &&
                     options.length > 0 &&
                     isDropdownOption(options[0]))
-                    ? options
-                        .filter(isDropdownOption)
-                        .map(o => ({
-                          value: o.value,
-                          label:
-                            showOptionDetails && o.attribute1
-                              ? (0,
-                                react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
-                                  'div',
-                                  {
-                                    children: [
-                                      (0,
-                                      react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
-                                        'div',
-                                        {
-                                          style: styles.optionDetails.value,
-                                          children: o.value,
-                                        }
-                                      ),
-                                      (0,
-                                      react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
-                                        'div',
-                                        {
-                                          style: styles.optionDetails.attribute,
-                                          children: o.attribute1,
-                                        }
-                                      ),
-                                    ],
-                                  }
-                                )
-                              : o.value,
-                        }))
+                    ? options.filter(isDropdownOption).map(o => ({
+                        value: o.value,
+                        label:
+                          showOptionDetails && o.attribute1
+                            ? (0,
+                              react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(
+                                'div',
+                                {
+                                  children: [
+                                    (0,
+                                    react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                      'div',
+                                      {
+                                        style: styles.optionDetails.value,
+                                        children: o.value,
+                                      }
+                                    ),
+                                    (0,
+                                    react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(
+                                      'div',
+                                      {
+                                        style: styles.optionDetails.attribute,
+                                        children: o.attribute1,
+                                      }
+                                    ),
+                                  ],
+                                }
+                              )
+                            : o.value,
+                      }))
                     : options
                         .filter(o => 'string' == typeof o)
                         .map(o => ({ value: o, label: o })),
