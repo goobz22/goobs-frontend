@@ -5,7 +5,6 @@
 import React from 'react'
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
-import MetricSection from '../../DataGrid/MetricSection'
 import Typography from '../../Typography'
 import Alert, { AlertProps } from '../../Alert'
 import ProgressBar from '../../ProgressBar'
@@ -48,33 +47,33 @@ const getStyles = (sacredtheme?: boolean) => ({
     gap: '0.375rem',
     marginBottom: '0.25rem',
   } as React.CSSProperties,
-  headerGlyph: {
-    color: 'rgba(255, 215, 0, 0.6)',
-    fontSize: '1rem',
-    animation: 'form-datagrid-float 4s infinite alternate',
-  } as React.CSSProperties,
   titleContainer: {
-    marginTop: '0.25rem',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
     marginBottom: '0.75rem',
-    width: '100%',
+    ...(sacredtheme && {
+      textAlign: 'center',
+      borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+      paddingBottom: '0.75rem',
+    }),
   } as React.CSSProperties,
   title: {
-    marginBottom: '0.125rem',
     width: '100%',
     textAlign: 'left',
     fontFamily: 'Merriweather, serif',
-    fontSize: '1.5rem',
-    fontWeight: 400,
+    fontSize: '1.75rem',
+    fontWeight: 700,
     color: 'black',
     ...(sacredtheme && {
       fontFamily: 'Cinzel, serif',
       color: '#FFD700',
-      textShadow: '0 0 10px rgba(255,215,0,0.5)',
-      letterSpacing: '0.1em',
-      fontSize: '1.875rem',
-      fontWeight: 600,
       textAlign: 'center',
-      marginBottom: '0.25rem',
+      fontSize: '2rem',
+      letterSpacing: '0.05em',
+      textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+      marginBottom: '0.5rem',
     }),
   } as React.CSSProperties,
   description: {
@@ -112,9 +111,6 @@ const getStyles = (sacredtheme?: boolean) => ({
       animation: 'form-datagrid-data-flow 3s infinite',
     },
   } as React.CSSProperties,
-  metricsContainer: {
-    marginBottom: '0.75rem',
-  } as React.CSSProperties,
   alertContainer: {
     marginBottom: '0.75rem',
   } as React.CSSProperties,
@@ -149,7 +145,6 @@ function FormDataGrid({
   isLoading = false,
   alert,
 }: FormDataGridProps) {
-  const { metrics, ...dataGridPropsWithoutMetrics } = datagrid
   const styles = getStyles(sacredtheme)
 
   if (isLoading) {
@@ -241,17 +236,6 @@ function FormDataGrid({
         {sacredtheme && <div style={styles.shimmer} />}
       </div>
 
-      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-        <div style={styles.metricsContainer}>
-          <MetricSection
-            metrics={metrics}
-            styles={{
-              theme: sacredtheme ? 'sacred' : 'light',
-            }}
-          />
-        </div>
-      )}
-
       {alert && !isLoading && (
         <div style={styles.alertContainer}>
           <Alert
@@ -267,7 +251,7 @@ function FormDataGrid({
 
       <div style={styles.dataGridContainer}>
         <DataGrid
-          {...dataGridPropsWithoutMetrics}
+          {...datagrid}
           styles={{
             theme: sacredtheme ? 'sacred' : 'light',
           }}

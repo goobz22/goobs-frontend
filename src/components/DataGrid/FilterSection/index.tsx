@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import SearchableDropdown from '../../Field/Dropdown/Searchable'
+import SearchableSimple from '../../Field/Dropdown/SearchableSimple'
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import Searchbar from '../../Field/Search'
@@ -266,10 +266,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       )
     }
 
-    // Default to SearchableDropdown for regular filters
+    // Default to SearchableSimple for regular filters
     return (
       <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-        <SearchableDropdown
+        <SearchableSimple
           label={filter.label}
           options={filter.options || []}
           defaultValue={filter.value === 'all' ? '' : (filter.value as string)}
