@@ -37,13 +37,55 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   styles,
 }) => {
   const groupStyles = getButtonStyles(styles) // Get base styles from Button's theme function
-  const enhancedChildren = React.Children.map(children, child => {
+  const childrenArray = React.Children.toArray(children)
+  const totalChildren = childrenArray.length
+
+  const enhancedChildren = React.Children.map(children, (child, index) => {
     if (React.isValidElement<ButtonProps>(child)) {
+      const isFirst = index === 0
+      const isLast = index === totalChildren - 1
+      const isSelected =
+        ((child.props as { value?: string }).value || '') === value
+
+      // Get border color from theme
+      const borderColor =
+        styles?.theme === 'sacred'
+          ? 'rgba(255, 215, 0, 0.4)'
+          : styles?.theme === 'dark'
+            ? 'rgba(75, 85, 99, 0.8)'
+            : 'rgba(226, 232, 240, 0.8)'
+
       return React.cloneElement(child, {
         ...child.props,
         styles: {
           ...child.props.styles,
           ...styles, // Merge group styles with individual
+          // Remove individual button borders and adjust border radius
+          borderColor: 'transparent',
+          borderWidth: '0',
+          boxShadow: 'none',
+          margin: '0',
+          padding: '8px 16px', // Add proper padding for text readability
+          borderRadius: isFirst
+            ? `${groupStyles.container.borderRadius || '8px'} 0 0 ${groupStyles.container.borderRadius || '8px'}`
+            : isLast
+              ? `0 ${groupStyles.container.borderRadius || '8px'} ${groupStyles.container.borderRadius || '8px'} 0`
+              : '0',
+          // Add right border for all except last using border-right
+          ...(!isLast && {
+            borderRightWidth: '1px',
+            borderRightStyle: 'solid',
+            borderRightColor: borderColor,
+          }),
+          // Selected state background override
+          ...(isSelected && {
+            backgroundColor:
+              styles?.theme === 'sacred'
+                ? 'rgba(255, 215, 0, 0.2)'
+                : styles?.theme === 'dark'
+                  ? 'rgba(59, 130, 246, 0.3)'
+                  : 'rgba(59, 130, 246, 0.1)',
+          }),
         },
         onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
           if (exclusive) {
@@ -54,20 +96,20 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
           }
         },
         // Inject selected based on value
-        selected: ((child.props as { value?: string }).value || '') === value,
+        selected: isSelected,
       })
     }
     return child
   })
 
-  const computedGroupStyle = {
+  const computedGroupStyle: React.CSSProperties = {
     display: 'flex',
-    borderRadius: groupStyles.container.borderRadius || '4px',
+    borderRadius: groupStyles.container.borderRadius || '8px',
     overflow: 'hidden',
-    background: groupStyles.container.backgroundColor || 'transparent',
+    background: 'transparent',
     boxShadow: groupStyles.container.boxShadow,
     border: groupStyles.container.border,
-    padding: groupStyles.container.padding,
+    padding: '0',
   }
 
   return <div style={computedGroupStyle}>{enhancedChildren}</div>
