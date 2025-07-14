@@ -19,7 +19,7 @@ import {
 import ExpandMoreIcon from '../../../Icons/ExpandMore'
 
 export interface DropdownOption {
-  value: string
+  value: string | number
   icon?: React.ReactNode
   attribute1?: string
   attribute2?: string
@@ -56,7 +56,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   const filteredOptions = React.useMemo(() => {
     if (showIdColumns) return options
     return options.filter(opt => {
-      const value = opt.value.toLowerCase()
+      // Convert value to string and then lowercase to handle both string and number values
+      const value = String(opt.value).toLowerCase()
       return !(
         value === 'id' ||
         value === '_id' ||
@@ -143,9 +144,10 @@ const Dropdown: React.FC<DropdownProps> = ({
   }
 
   const renderOption = (option: DropdownOption) => {
+    const valueStr = String(option.value)
     const displayText = option.value
-      ? option.value.replace(/_/g, ' ').charAt(0).toUpperCase() +
-        option.value.replace(/_/g, ' ').slice(1)
+      ? valueStr.replace(/_/g, ' ').charAt(0).toUpperCase() +
+        valueStr.replace(/_/g, ' ').slice(1)
       : ''
 
     const attributes = [option.attribute1, option.attribute2].filter(Boolean)

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -21,6 +21,40 @@ export interface SearchbarProps {
   className?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: FormFieldStyles
+}
+
+// Create a unique ID for this component instance
+const createPlaceholderStyles = (theme: string, placeholderColor: string) => {
+  const className = `searchbar-placeholder-${theme}`
+
+  const css = `
+    .${className}::placeholder {
+      color: ${placeholderColor} !important;
+      opacity: 0.7;
+    }
+    
+    .${className}::-webkit-input-placeholder {
+      color: ${placeholderColor} !important;
+      opacity: 0.7;
+    }
+    
+    .${className}::-moz-placeholder {
+      color: ${placeholderColor} !important;
+      opacity: 0.7;
+    }
+    
+    .${className}:-ms-input-placeholder {
+      color: ${placeholderColor} !important;
+      opacity: 0.7;
+    }
+    
+    .${className}::-ms-input-placeholder {
+      color: ${placeholderColor} !important;
+      opacity: 0.7;
+    }
+  `
+
+  return { css, className }
 }
 
 const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
@@ -90,6 +124,44 @@ const Searchbar: React.FC<SearchbarProps> = ({
   const [focused, setFocused] = useState(false)
 
   const computedStyles = getStyles(styles, focused)
+  const theme = styles?.theme || 'light'
+
+  // Get the appropriate placeholder color based on theme
+  const getPlaceholderColor = () => {
+    switch (theme) {
+      case 'dark':
+        return '#9CA3AF' // Light gray for dark theme
+      case 'sacred':
+        return 'rgba(255, 215, 0, 0.7)' // Gold for sacred theme
+      default:
+        return '#9CA3AF' // Medium gray for light theme
+    }
+  }
+
+  const placeholderColor = getPlaceholderColor()
+  const placeholderStyles = createPlaceholderStyles(theme, placeholderColor)
+
+  // Inject placeholder styles
+  useEffect(() => {
+    const styleId = `searchbar-placeholder-${theme}`
+    let styleElement = document.getElementById(styleId)
+
+    if (!styleElement) {
+      styleElement = document.createElement('style')
+      styleElement.id = styleId
+      document.head.appendChild(styleElement)
+    }
+
+    styleElement.textContent = placeholderStyles.css
+
+    return () => {
+      // Clean up on unmount
+      const element = document.getElementById(styleId)
+      if (element) {
+        element.remove()
+      }
+    }
+  }, [theme, placeholderStyles.css])
 
   const handleFocus = () => setFocused(true)
   const handleBlur = () => setFocused(false)
@@ -106,35 +178,22 @@ const Searchbar: React.FC<SearchbarProps> = ({
           )}
         </label>
       )}
-
       <div style={computedStyles.inputWrapper}>
         <div style={computedStyles.startAdornment}>
-          <SearchIcon
-            style={{
-              width: '20px',
-              height: '20px',
-              color: 'inherit',
-            }}
-          />
+          <SearchIcon />
         </div>
-
         <input
-          id="search-input"
           type="text"
+          placeholder={placeholder}
           value={value}
           onChange={onChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          disabled={styles?.disabled}
-          placeholder={placeholder}
-          style={{
-            ...computedStyles.input,
-            ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),
-          }}
+          style={computedStyles.input}
+          className={placeholderStyles.className}
           {...getRequiredProps(styles?.required)}
         />
       </div>
-
       {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>
   )
