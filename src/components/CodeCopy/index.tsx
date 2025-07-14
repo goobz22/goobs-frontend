@@ -12,7 +12,6 @@ import React, {
   FC,
 } from 'react'
 import Button from '../../components/Button'
-import ContentCopyIcon from '../Icons/ContentCopy'
 import hljs from 'highlight.js'
 import { CodeCopyStyles, getCodeCopyStyles, SACRED_GLYPHS } from '../../theme'
 
@@ -201,34 +200,72 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   const shouldShowLineNumbers = styles?.showLineNumbers !== false
 
   return (
-    <div
-      style={{
-        ...computedStyles.container,
-        ...(isSacredTheme && computedStyles.shimmer),
-      }}
-      {...rest}
-    >
+    <div style={computedStyles.container} {...rest}>
+      {isSacredTheme && <div style={computedStyles.shimmer} />}
       {isSacredTheme && <SacredGlyphs />}
 
       <div style={computedStyles.header}>
-        <div style={computedStyles.langIndicator}>
+        <div
+          style={{
+            ...computedStyles.langIndicator,
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+          }}
+        >
           {isSacredTheme && (
             <span style={computedStyles.langGlyph}>{SACRED_GLYPHS[5]}</span>
           )}
-          <span style={computedStyles.langText}>{language}</span>
+          <span
+            style={{
+              ...computedStyles.langText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {language}
+          </span>
         </div>
-        <Button
-          text={copied ? 'Copied!' : 'Copy Code'}
-          icon={<ContentCopyIcon />}
-          onClick={handleCopy}
-          styles={{
-            theme: styles?.theme || 'dark',
-            disabled: styles?.disabled,
-            iconLocation: 'left',
-            backgroundColor: 'transparent',
-            color: isSacredTheme ? '#FFD700' : undefined,
+        <div
+          style={{
+            flexShrink: 1,
+            display: 'flex',
+            alignItems: 'center',
+            minWidth: 0,
+            maxWidth: '30%',
+            justifyContent: 'flex-end',
           }}
-        />
+        >
+          <Button
+            text={copied ? '✓' : '⧉'}
+            onClick={handleCopy}
+            styles={{
+              ...(!isSacredTheme && { theme: styles?.theme || 'dark' }),
+              disabled: styles?.disabled,
+              backgroundColor: 'transparent',
+              padding: '4px 6px',
+              minHeight: '28px',
+              fontSize: '14px',
+              borderRadius: '4px',
+              borderWidth: '1px',
+              borderColor: isSacredTheme
+                ? 'rgba(255, 215, 0, 0.4)'
+                : 'rgba(156, 163, 175, 0.4)',
+              minWidth: '32px',
+              maxWidth: '100%',
+              ...(isSacredTheme && {
+                color: '#FFD700',
+                textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
+                fontFamily: '"Cinzel", serif',
+                fontWeight: 600,
+                hoverColor: '#FFD700',
+                hoverBorderColor: 'rgba(255, 215, 0, 0.8)',
+                hoverTextShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
+              }),
+            }}
+          />
+        </div>
       </div>
 
       <div style={computedStyles.codeBlock}>
