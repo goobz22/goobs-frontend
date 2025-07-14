@@ -75,13 +75,19 @@ export function useComputeTableResize({
   /**
    * measureColumnNeededWidth: For a given column, how many pixels does it need?
    * - If the developer provided `col.width`, use that explicitly.
+   * - If the column has a computedWidth (from user resizing), use that.
    * - Otherwise, measure the header text plus some buffer.
    */
   const measureColumnNeededWidth = useCallback(
     (col: ColumnDef): number => {
       if (col.width != null) {
-        // Developer-supplied width
+        // Developer-supplied width or user-resized width
         return col.width
+      }
+
+      if (col.computedWidth != null) {
+        // User-resized width
+        return col.computedWidth
       }
 
       // Force 60px for id or _id if no manual width
@@ -124,8 +130,8 @@ export function useComputeTableResize({
       const col = visibleCols[i]
       const needed = measureColumnNeededWidth(col)
 
-      if (col.width != null) {
-        // If the developer explicitly set a width, forcibly add to canFit
+      if (col.width != null || col.computedWidth != null) {
+        // If the developer explicitly set a width or user resized it, forcibly add to canFit
         // only if we have enough space with our buffer
         if (
           usedWidth +
@@ -134,7 +140,7 @@ export function useComputeTableResize({
             COLUMN_TRANSITION_BUFFER <=
           containerWidth
         ) {
-          canFit.push(col)
+          canFit.push({ ...col, computedWidth: needed })
           usedWidth += needed
         } else {
           // Not enough space, all remaining columns go to overflow
@@ -147,7 +153,7 @@ export function useComputeTableResize({
           usedWidth + needed + overflowReservedWidth <=
           containerWidth - COLUMN_TRANSITION_BUFFER
         ) {
-          canFit.push(col)
+          canFit.push({ ...col, computedWidth: needed })
           usedWidth += needed
         } else {
           // everything else is overflow
