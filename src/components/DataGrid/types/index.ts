@@ -4,7 +4,7 @@ import React from 'react'
 import type { ButtonProps } from '../../Button'
 import type { DropdownProps } from '../../Field/Dropdown/Regular'
 import type { SearchbarProps } from '../../Field/Search'
-import type { DropdownOption } from '../../Field/Dropdown/Searchable'
+import type { DropdownOption } from '../../Field/Dropdown/SearchableSimple'
 import type { DataGridStyles } from '../../../theme'
 
 export interface ColumnDef {
