@@ -4,12 +4,20 @@ import React, { useState, useEffect } from 'react'
 import SearchableDropdown from '../../Field/Dropdown/Searchable'
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
-import { DataGridFilter } from '../types'
+import Searchbar from '../../Field/Search'
+import { DataGridFilter, ColumnDef, RowData } from '../types'
 import type { DataGridStyles } from '../../../theme'
 import { SACRED_GLYPHS } from '../../../theme'
 
 export interface FilterSectionProps {
   filters: DataGridFilter[]
+  columns?: ColumnDef[]
+  rows?: RowData[]
+  onSearchFilter?: (
+    searchTerm: string,
+    filteredRows: RowData[],
+    visibleColumns: string[]
+  ) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
 }
@@ -27,11 +35,127 @@ function useWindowSize() {
   return size
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({ filters, styles }) => {
+const FilterSection: React.FC<FilterSectionProps> = ({
+  filters,
+  columns = [],
+  rows = [],
+  onSearchFilter,
+  styles,
+}) => {
   const [width] = useWindowSize()
+  const [searchTerm, setSearchTerm] = useState('')
   const isMobile = width < 600
   const isTablet = width < 900
   const isSacredTheme = styles?.theme === 'sacred'
+
+  // Helper function to safely convert values to lowercase strings for searching
+  const toLowerCaseString = (value: unknown): string => {
+    if (value === null || value === undefined) return ''
+
+    // Handle objects by converting to JSON string or using toString if available
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value).toLowerCase()
+      } catch {
+        return ''
+      }
+    }
+
+    // Handle primitives safely
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      return String(value).toLowerCase()
+    }
+
+    return ''
+  }
+
+  // Filter rows based on search term
+  const getFilteredRows = (searchValue: string): RowData[] => {
+    if (!searchValue.trim() || !rows.length) return rows
+
+    const searchTerms = searchValue.toLowerCase().trim().split(' ')
+
+    // Separate terms into column header matches and content matches
+    const columnHeaderTerms: string[] = []
+    const contentTerms: string[] = []
+
+    searchTerms.forEach(term => {
+      const isColumnHeader = columns.some(column => {
+        const headerMatch = column.headerName?.toLowerCase().includes(term)
+        const fieldMatch = column.field.toLowerCase().includes(term)
+        return headerMatch || fieldMatch
+      })
+
+      if (isColumnHeader) {
+        columnHeaderTerms.push(term)
+      } else {
+        contentTerms.push(term)
+      }
+    })
+
+    // If only column headers are being searched (no content terms), show all rows
+    if (columnHeaderTerms.length > 0 && contentTerms.length === 0) {
+      return rows
+    }
+
+    // If there are content terms, filter rows by those terms
+    if (contentTerms.length > 0) {
+      return rows.filter(row =>
+        contentTerms.some(term =>
+          columns.some(column => {
+            const cellValue = toLowerCaseString(row[column.field])
+            return cellValue.includes(term)
+          })
+        )
+      )
+    }
+
+    // Fallback: show all rows
+    return rows
+  }
+
+  // Get visible columns based on search term
+  const getVisibleColumns = (searchValue: string): string[] => {
+    if (!searchValue.trim() || !columns.length) {
+      return columns.map(col => col.field)
+    }
+
+    const searchTerms = searchValue.toLowerCase().trim().split(' ')
+
+    return columns
+      .filter(col =>
+        searchTerms.some(term => {
+          // Check column header and field name
+          const headerMatch = col.headerName?.toLowerCase().includes(term)
+          const fieldMatch = col.field.toLowerCase().includes(term)
+
+          // Check if any rows have matching data in this column
+          const hasMatchingData = rows.some(row => {
+            const cellValue = toLowerCaseString(row[col.field])
+            return cellValue.includes(term)
+          })
+
+          return headerMatch || fieldMatch || hasMatchingData
+        })
+      )
+      .map(col => col.field)
+  }
+
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value
+    setSearchTerm(newSearchTerm)
+
+    if (onSearchFilter) {
+      const filteredRows = getFilteredRows(newSearchTerm)
+      const visibleColumns = getVisibleColumns(newSearchTerm)
+      onSearchFilter(newSearchTerm, filteredRows, visibleColumns)
+    }
+  }
 
   // CSS keyframes for sacred animations
   useEffect(() => {
@@ -59,22 +183,41 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, styles }) => {
     }
   }, [isSacredTheme])
 
-  if (!filters || filters.length === 0) {
+  if (!filters && !columns.length) {
     return null
   }
 
-  // Determine grid columns based on screen size and number of filters
+  // Determine grid columns based on screen size and number of filters + searchbar
   const getGridColumns = () => {
+    const totalItems = filters.length + 1 // +1 for searchbar
+    const hasDateRange = filters.some(f => f.type === 'daterange')
+
     if (isMobile) return { gridTemplateColumns: '1fr' }
-    if (isTablet)
-      return filters.length === 1
+    if (isTablet) {
+      // More conservative for tablet to prevent overflow
+      return totalItems <= 2
+        ? { gridTemplateColumns: '1fr' }
+        : { gridTemplateColumns: 'repeat(2, 1fr)' }
+    }
+
+    // Desktop - be conservative to prevent overflow
+    if (totalItems === 1) {
+      return { gridTemplateColumns: '1fr' }
+    } else if (totalItems === 2) {
+      return { gridTemplateColumns: 'repeat(2, 1fr)' }
+    } else if (totalItems === 3) {
+      return { gridTemplateColumns: 'repeat(2, 1fr)' }
+    } else if (totalItems === 4) {
+      // If there's a date range, use 2 columns, otherwise 3
+      return hasDateRange
         ? { gridTemplateColumns: 'repeat(2, 1fr)' }
-        : { gridTemplateColumns: '1fr' }
-    // Desktop
-    if (filters.length === 1) return { gridTemplateColumns: 'repeat(4, 1fr)' }
-    if (filters.length === 2) return { gridTemplateColumns: 'repeat(2, 1fr)' }
-    if (filters.length === 3) return { gridTemplateColumns: 'repeat(3, 1fr)' }
-    return { gridTemplateColumns: 'repeat(4, 1fr)' }
+        : { gridTemplateColumns: 'repeat(3, 1fr)' }
+    } else {
+      // For 5+ items, max 3 columns to prevent overflow
+      return hasDateRange
+        ? { gridTemplateColumns: 'repeat(2, 1fr)' }
+        : { gridTemplateColumns: 'repeat(3, 1fr)' }
+    }
   }
 
   // Helper function to render the appropriate filter component
@@ -82,42 +225,50 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, styles }) => {
     // Check if this is a date range filter
     if (filter.type === 'daterange') {
       return (
-        <DateRange
-          startLabel="From Date"
-          endLabel="To Date"
-          value={filter.value as { start: Date | null; end: Date | null }}
-          onChange={
-            filter.onChange as (value: {
-              start: Date | null
-              end: Date | null
-            }) => void
-          }
-          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-        />
+        <div
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+        >
+          <DateRange
+            startLabel="From Date"
+            endLabel="To Date"
+            value={filter.value as { start: Date | null; end: Date | null }}
+            onChange={
+              filter.onChange as (value: {
+                start: Date | null
+                end: Date | null
+              }) => void
+            }
+            styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+          />
+        </div>
       )
     }
 
     // Check if this is a date filter
     if (filter.type === 'date') {
       return (
-        <DateField
-          label={filter.label}
-          value={
-            (filter.value as string) ? new Date(filter.value as string) : null
-          }
-          onChange={filter.onChange as (date: Date | null) => void}
-          placeholder={filter.placeholder}
-          styles={{
-            theme: isSacredTheme ? 'sacred' : 'light',
-          }}
-          disableFutureDateValidation={true}
-        />
+        <div
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+        >
+          <DateField
+            label={filter.label}
+            value={
+              (filter.value as string) ? new Date(filter.value as string) : null
+            }
+            onChange={filter.onChange as (date: Date | null) => void}
+            placeholder={filter.placeholder}
+            styles={{
+              theme: isSacredTheme ? 'sacred' : 'light',
+            }}
+            disableFutureDateValidation={true}
+          />
+        </div>
       )
     }
 
     // Default to SearchableDropdown for regular filters
     return (
-      <div style={{ width: filter.width || '100%' }}>
+      <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
         <SearchableDropdown
           label={filter.label}
           options={filter.options || []}
@@ -134,21 +285,24 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, styles }) => {
 
   const filterSectionStyle = {
     width: '100%',
+    maxWidth: '100%',
     position: 'relative' as const,
-    padding: isSacredTheme ? '4px' : '2px',
+    padding: '1rem',
+    boxSizing: 'border-box' as const,
+    overflow: 'hidden',
     ...(isSacredTheme && {
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      borderRadius: '8px',
-      border: '1px solid rgba(255, 215, 0, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
       backgroundImage:
-        'linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%, transparent 100%)',
-      animation: 'sacredGlow 3s ease-in-out infinite',
+        'linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%, transparent 100%)',
     }),
   }
 
   const gridStyle = {
     display: 'grid',
-    gap: '4px',
+    gap: '8px',
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box' as const,
     ...getGridColumns(),
   }
 
@@ -188,10 +342,33 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, styles }) => {
       )}
 
       <div style={gridStyle}>
+        {/* Searchbar - always first */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box' as const,
+            overflow: 'hidden',
+          }}
+        >
+          <Searchbar
+            label="Search"
+            placeholder="Search data..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+          />
+        </div>
+
+        {/* Other filters */}
         {filters.map((filter, index) => (
           <div
             key={`${filter.label}-${index}`}
             style={{
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box' as const,
+              overflow: 'hidden',
               ...(filter.type === 'daterange' && !isMobile
                 ? { gridColumn: 'span 2' }
                 : {}),

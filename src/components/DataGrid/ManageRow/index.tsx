@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import Typography from '../../Typography'
 import FileCopy from '../../Icons/FileCopy'
 import Delete from '../../Icons/Delete'
 import Download from '../../Icons/Download'
@@ -124,9 +123,12 @@ function ManageRow({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '60px',
-    minWidth: '100%',
-    padding: '0 4px',
+    height: '48px',
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: '0',
+    padding: '0 8px',
+    boxSizing: 'border-box' as const,
     userSelect: 'none' as const,
     boxShadow:
       '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
@@ -146,156 +148,203 @@ function ManageRow({
     alignItems: 'center',
     gap: '4px',
     width: '100%',
+    minWidth: '0',
+    maxWidth: '100%',
   }
 
   const titleContainerStyle = {
-    flexGrow: 1,
+    flex: '1 1 auto',
     display: 'flex',
     alignItems: 'center',
-    padding: '0 16px',
+    padding: '0 8px',
+    minWidth: '0',
+    overflow: 'hidden',
   }
 
   const actionsContainerStyle = {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     gap: '2px',
+    flex: '0 0 auto',
+    minWidth: '0',
   }
 
   const dividerStyle = {
-    display: 'flex',
-    flexDirection: 'row' as const,
-    alignItems: 'center',
-    borderRight: isSacredTheme
-      ? '1px solid rgba(255, 215, 0, 0.3)'
-      : '1px solid rgba(229, 231, 235, 1)',
-    paddingRight: '8px',
-    marginRight: '8px',
+    width: '1px',
+    height: '24px',
+    backgroundColor: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.3)'
+      : 'rgba(229, 231, 235, 1)',
+    margin: '0 8px',
+    flexShrink: 0,
   }
 
   const actionButtonStyle = {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
-    padding: '8px',
+    justifyContent: 'center',
+    padding: '4px 8px',
     cursor: 'pointer',
-    borderRadius: '6px',
+    borderRadius: '4px',
     transition: 'colors 0.3s ease',
     userSelect: 'none' as const,
+    minWidth: '0',
+    height: '40px',
+    gap: '2px',
+    whiteSpace: 'nowrap' as const,
   }
 
   const iconContainerStyle = {
     display: 'flex',
-    flexDirection: 'column' as const,
     alignItems: 'center',
-    color: isSacredTheme ? 'rgba(255, 215, 0, 1)' : 'rgba(0, 0, 0, 1)',
+    justifyContent: 'center',
+    color: isSacredTheme ? 'rgba(255, 215, 0, 1)' : 'rgba(55, 65, 81, 1)',
+    fontSize: '16px',
+    width: '20px',
+    height: '16px',
+    margin: '0',
+    padding: '0',
   }
 
   const actionsRowStyle = {
     display: 'flex',
-    flexDirection: 'row' as const,
     alignItems: 'center',
+    gap: '4px',
+    height: '100%',
   }
 
   return (
     <div style={containerStyle}>
       <div style={innerContainerStyle}>
         <div style={titleContainerStyle}>
-          <Typography
-            variant="merriparagraph"
-            text={`${selectedRows.length} ${
+          <span
+            style={{
+              color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+              fontSize: '14px',
+              fontWeight: '500',
+              margin: '0',
+              padding: '0',
+              lineHeight: '1',
+            }}
+          >
+            {`${selectedRows.length} ${
               selectedRows.length === 1 ? 'item' : 'items'
             } selected`}
-            styles={{
-              color: isSacredTheme ? '#FFD700' : undefined,
-              theme: isSacredTheme ? 'sacred' : 'light',
-            }}
-          />
+          </span>
         </div>
 
         <div style={actionsContainerStyle}>
-          {selectedRows.length === 1 && (onManage || onShow || onDuplicate) && (
-            <div style={dividerStyle}>
-              {onManage && (
-                <div
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('manage')
-                  }}
-                  style={actionButtonStyle}
-                >
-                  <div style={iconContainerStyle}>
-                    <Edit />
-                    <Typography
-                      variant="merriparagraph"
-                      text="Manage"
-                      styles={{
-                        color: isSacredTheme ? '#FFD700' : undefined,
-                        theme: isSacredTheme ? 'sacred' : 'light',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              {onShow && (
-                <div
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('show')
-                  }}
-                  style={actionButtonStyle}
-                >
-                  <div style={iconContainerStyle}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="1em"
-                      height="1em"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                    <Typography
-                      variant="merriparagraph"
-                      text="Show"
-                      styles={{
-                        color: isSacredTheme ? '#FFD700' : undefined,
-                        theme: isSacredTheme ? 'sacred' : 'light',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {onDuplicate && (
-                <div
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleActionSelection('duplicate')
-                  }}
-                  style={actionButtonStyle}
-                >
-                  <div style={iconContainerStyle}>
-                    <FileCopy />
-                    <Typography
-                      variant="merriparagraph"
-                      text="Duplicate"
-                      styles={{
-                        color: isSacredTheme ? '#FFD700' : undefined,
-                        theme: isSacredTheme ? 'sacred' : 'light',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           <div style={actionsRowStyle}>
+            {selectedRows.length === 1 && onManage && (
+              <div
+                onClick={e => {
+                  e.stopPropagation()
+                  handleActionSelection('manage')
+                }}
+                style={actionButtonStyle}
+              >
+                <div style={iconContainerStyle}>
+                  <Edit
+                    sacredtheme={isSacredTheme}
+                    width="16"
+                    height="16"
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                </div>
+                <span
+                  style={{
+                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    margin: '0',
+                    padding: '0',
+                    lineHeight: '1',
+                    display: 'block',
+                  }}
+                >
+                  Manage
+                </span>
+              </div>
+            )}
+
+            {selectedRows.length === 1 && onShow && (
+              <div
+                onClick={e => {
+                  e.stopPropagation()
+                  handleActionSelection('show')
+                }}
+                style={actionButtonStyle}
+              >
+                <div style={iconContainerStyle}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </div>
+                <span
+                  style={{
+                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    margin: '0',
+                    padding: '0',
+                    lineHeight: '1',
+                    display: 'block',
+                  }}
+                >
+                  Show
+                </span>
+              </div>
+            )}
+
+            {selectedRows.length === 1 && onDuplicate && (
+              <div
+                onClick={e => {
+                  e.stopPropagation()
+                  handleActionSelection('duplicate')
+                }}
+                style={actionButtonStyle}
+              >
+                <div style={iconContainerStyle}>
+                  <FileCopy
+                    sacredtheme={isSacredTheme}
+                    width="16"
+                    height="16"
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                </div>
+                <span
+                  style={{
+                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    margin: '0',
+                    padding: '0',
+                    lineHeight: '1',
+                    display: 'block',
+                  }}
+                >
+                  Duplicate
+                </span>
+              </div>
+            )}
+
+            {selectedRows.length === 1 &&
+              (onManage || onShow || onDuplicate) && (
+                <div style={dividerStyle} />
+              )}
+
             {onDelete && (
               <div
                 onClick={e => {
@@ -305,16 +354,26 @@ function ManageRow({
                 style={actionButtonStyle}
               >
                 <div style={iconContainerStyle}>
-                  <Delete />
-                  <Typography
-                    variant="merriparagraph"
-                    text="Delete"
-                    styles={{
-                      color: isSacredTheme ? '#FFD700' : undefined,
-                      theme: isSacredTheme ? 'sacred' : 'light',
-                    }}
+                  <Delete
+                    sacredtheme={isSacredTheme}
+                    width="16"
+                    height="16"
+                    style={{ width: '16px', height: '16px' }}
                   />
                 </div>
+                <span
+                  style={{
+                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    margin: '0',
+                    padding: '0',
+                    lineHeight: '1',
+                    display: 'block',
+                  }}
+                >
+                  Delete
+                </span>
               </div>
             )}
 
@@ -327,16 +386,26 @@ function ManageRow({
                 style={actionButtonStyle}
               >
                 <div style={iconContainerStyle}>
-                  <Download />
-                  <Typography
-                    variant="merriparagraph"
-                    text="Export"
-                    styles={{
-                      color: isSacredTheme ? '#FFD700' : undefined,
-                      theme: isSacredTheme ? 'sacred' : 'light',
-                    }}
+                  <Download
+                    sacredtheme={isSacredTheme}
+                    width="16"
+                    height="16"
+                    style={{ width: '16px', height: '16px' }}
                   />
                 </div>
+                <span
+                  style={{
+                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    margin: '0',
+                    padding: '0',
+                    lineHeight: '1',
+                    display: 'block',
+                  }}
+                >
+                  Export
+                </span>
               </div>
             )}
           </div>

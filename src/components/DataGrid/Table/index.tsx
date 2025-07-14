@@ -1,25 +1,50 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import type { TableProps, RowData } from '../types'
-import { useComputeTableResize } from '../utils/useComputeTableResize'
+import React, { useEffect } from 'react'
 import ColumnHeaderRow from './ColumnHeaderRow'
 import Rows from './Rows'
+import { useColumnResize } from '../utils/useColumnResize'
 import { getDataGridStyles } from '../../../theme'
+import { getDataGridTheme } from '../../../theme/datagrid'
+import type { TableProps } from '../types'
 
-export function getRowId(row: RowData): string {
+export function getRowId(row: any): string {
   return String(row.id ?? row._id ?? '')
 }
 
-function useIsMobile(width = 500) {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const checkScreenSize = () => setIsMobile(window.innerWidth < width)
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [width])
-  return isMobile
+// Create themed scrollbar styles
+const createScrollbarStyles = (theme: string, scrollbarConfig: any) => {
+  const scrollbarClass = `datagrid-scrollbar-${theme}`
+
+  const css = `
+    .${scrollbarClass}::-webkit-scrollbar {
+      height: ${scrollbarConfig.height};
+      width: ${scrollbarConfig.width};
+    }
+    
+    .${scrollbarClass}::-webkit-scrollbar-track {
+      background-color: ${scrollbarConfig.track.backgroundColor};
+      border-radius: ${scrollbarConfig.track.borderRadius};
+    }
+    
+    .${scrollbarClass}::-webkit-scrollbar-thumb {
+      background-color: ${scrollbarConfig.thumb.backgroundColor};
+      border-radius: ${scrollbarConfig.thumb.borderRadius};
+      ${scrollbarConfig.thumb.border ? `border: ${scrollbarConfig.thumb.border};` : ''}
+    }
+    
+    .${scrollbarClass}::-webkit-scrollbar-thumb:hover {
+      background-color: ${scrollbarConfig.thumbHover.backgroundColor};
+    }
+    
+    /* Firefox scrollbar styles */
+    .${scrollbarClass} {
+      scrollbar-width: thin;
+      scrollbar-color: ${scrollbarConfig.thumb.backgroundColor} ${scrollbarConfig.track.backgroundColor};
+    }
+  `
+
+  return { css, className: scrollbarClass }
 }
 
 function Table({
@@ -30,125 +55,114 @@ function Table({
   allRowsSelected = false,
   someRowsSelected = false,
   onHeaderCheckboxChange,
-  onRowCheckboxChange,
+  onColumnResize,
   styles,
+  editingCell,
+  editingValue,
+  onCellClick,
+  onCellSave,
+  onCellCancel,
+  onEditingValueChange,
+  onColumnSort,
+  onManageColumns,
+  draggedColumn,
+  onColumnDragStart,
+  onColumnDragOver,
+  onColumnDrop,
+  onColumnDragEnd,
 }: TableProps) {
-  const isMobile = useIsMobile(500)
-  const isSacredTheme = styles?.theme === 'sacred'
   const computedStyles = getDataGridStyles(styles)
+  const theme = styles?.theme || 'light'
 
-  const {
-    containerRef,
-    fittedDesktopColumns,
-    overflowDesktopColumns,
-    selectedOverflowField,
-    setSelectedOverflowField,
-  } = useComputeTableResize({
-    columns: columns.map(col =>
-      col.width ? { ...col, computedWidth: col.width } : col
-    ),
-    checkboxSelection: true,
-    showOverflowDropdown: !isMobile,
-  })
+  // Get theme configuration directly
+  const themeConfig = getDataGridTheme(styles)
 
+  // Use column resize hook
+  const { updatedColumns, isResizing, resizingColumn, getResizeHandleProps } =
+    useColumnResize({
+      columns,
+      onColumnResize,
+    })
+
+  // Create scrollbar styles
+  const scrollbarStyles = createScrollbarStyles(theme, themeConfig.scrollbar)
+
+  // Inject scrollbar styles into document head
   useEffect(() => {
-    if (!selectedOverflowField && overflowDesktopColumns.length > 0) {
-      setSelectedOverflowField(overflowDesktopColumns[0].field)
+    const styleId = `datagrid-scrollbar-${theme}`
+    let styleElement = document.getElementById(styleId)
+
+    if (!styleElement) {
+      styleElement = document.createElement('style')
+      styleElement.id = styleId
+      document.head.appendChild(styleElement)
     }
-  }, [selectedOverflowField, overflowDesktopColumns, setSelectedOverflowField])
 
-  useEffect(() => {
-    if (isMobile && !selectedOverflowField && columns.length > 0) {
-      setSelectedOverflowField(columns[0].field)
+    styleElement.textContent = scrollbarStyles.css
+
+    return () => {
+      // Clean up on unmount
+      const element = document.getElementById(styleId)
+      if (element) {
+        element.remove()
+      }
     }
-  }, [isMobile, selectedOverflowField, columns, setSelectedOverflowField])
+  }, [theme, scrollbarStyles.css])
 
-  const finalDesktopColumns = !isMobile
-    ? overflowDesktopColumns.length > 0
-      ? [
-          ...fittedDesktopColumns,
-          { field: '__overflow__', headerName: 'More Columns' },
-        ]
-      : fittedDesktopColumns
-    : []
-
-  // Apply mobile-specific styles
+  // Apply styles for horizontal scrolling
   const tableContainerStyle = {
     ...computedStyles.table.tableContainer,
-    ...(isMobile && { minWidth: '100%' }),
+    overflowX: 'auto' as const,
+    width: '100%',
   }
 
   const tableWrapperStyle = {
     ...computedStyles.table.tableWrapper,
-    ...(isMobile && { minWidth: '100%' }),
-    ...(isSacredTheme && {
-      '&::-webkit-scrollbar': { height: '0.5rem' },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        borderRadius: '0.375rem',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: 'rgba(255, 215, 0, 0.5)',
-        borderRadius: '0.375rem',
-      },
-      '&::-webkit-scrollbar-thumb:hover': {
-        backgroundColor: 'rgba(255, 215, 0, 0.7)',
-      },
-    }),
+    overflowX: 'auto' as const,
+    width: '100%',
   }
 
   const tableStyle = {
     ...computedStyles.table.table,
-    ...(isMobile && { minWidth: '100%' }),
-    ...(isSacredTheme && {
-      '& td': {
-        borderBottom: '1px solid rgba(255, 215, 0, 0.2)',
-        color: 'rgba(255,255,255,0.9)',
-        fontFamily: 'serif',
-      },
-      '& th': {
-        backgroundColor: 'rgba(255, 215, 0, 0.1)',
-        color: '#FFD700',
-        fontFamily: 'Cinzel, serif',
-        fontWeight: 600,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-        borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-      },
-      '& tr:hover': { backgroundColor: 'rgba(255, 215, 0, 0.05)' },
-    }),
+    width: 'max-content', // Allow table to grow wider than container
+    minWidth: '100%',
   }
 
   return (
     <div style={tableContainerStyle}>
-      <div ref={containerRef} style={tableWrapperStyle}>
+      <div style={tableWrapperStyle} className={scrollbarStyles.className}>
         <table style={tableStyle}>
           <thead>
             <ColumnHeaderRow
-              isMobile={isMobile}
               allRowsSelected={allRowsSelected}
               someRowsSelected={someRowsSelected}
               handleHeaderCheckboxChange={onHeaderCheckboxChange}
-              finalDesktopColumns={finalDesktopColumns}
-              overflowDesktopColumns={overflowDesktopColumns}
-              selectedOverflowField={selectedOverflowField}
-              setSelectedOverflowField={setSelectedOverflowField}
-              allColumns={columns}
+              columns={updatedColumns}
+              getResizeHandleProps={getResizeHandleProps}
+              isResizing={isResizing}
+              resizingColumn={resizingColumn}
               styles={styles}
+              onColumnSort={onColumnSort}
+              onManageColumns={onManageColumns}
+              draggedColumn={draggedColumn}
+              onColumnDragStart={onColumnDragStart}
+              onColumnDragOver={onColumnDragOver}
+              onColumnDrop={onColumnDrop}
+              onColumnDragEnd={onColumnDragEnd}
             />
           </thead>
           <Rows
             rows={rows}
-            finalDesktopColumns={finalDesktopColumns}
-            overflowDesktopColumns={overflowDesktopColumns}
-            selectedOverflowField={selectedOverflowField}
-            isMobile={isMobile}
-            mobileSelectedColumn={selectedOverflowField}
+            columns={updatedColumns}
             selectedRowIds={selectedRowIds}
             onRowClick={onRowClick}
-            onRowCheckboxChange={onRowCheckboxChange}
-            allColumns={columns}
             styles={styles}
+            editingCell={editingCell}
+            editingValue={editingValue}
+            onCellClick={onCellClick}
+            onCellSave={onCellSave}
+            onCellCancel={onCellCancel}
+            onEditingValueChange={onEditingValueChange}
           />
         </table>
       </div>
@@ -156,5 +170,4 @@ function Table({
   )
 }
 
-Table.displayName = 'Table'
 export default Table

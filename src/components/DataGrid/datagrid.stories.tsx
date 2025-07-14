@@ -3,29 +3,398 @@
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import DataGrid from './index'
-import { DatagridProps, ColumnDef, RowData } from './types'
+import {
+  DatagridProps,
+  ColumnDef,
+  RowData,
+  DataGridFilter,
+  MetricCardData,
+} from './types'
 import { ButtonProps } from '../Button'
 
 const sampleColumns: ColumnDef[] = [
-  { field: 'id', headerName: 'ID', width: 90 },
-  { field: 'name', headerName: 'Name', width: 150 },
-  { field: 'age', headerName: 'Age', type: 'default', width: 110 },
+  { field: 'id', headerName: 'ID', width: 90, resizable: true },
+  { field: 'name', headerName: 'Name', width: 150, resizable: true },
+  {
+    field: 'age',
+    headerName: 'Age',
+    type: 'default',
+    width: 110,
+    resizable: true,
+  },
+  { field: 'email', headerName: 'Email Address', width: 200, resizable: true },
+  {
+    field: 'department',
+    headerName: 'Department',
+    width: 140,
+    resizable: true,
+    type: 'dropdown',
+    dropdownOptions: [
+      { value: 'Engineering' },
+      { value: 'Marketing' },
+      { value: 'HR' },
+      { value: 'Sales' },
+      { value: 'Finance' },
+      { value: 'Operations' },
+      { value: 'Customer Service' },
+      { value: 'Product' },
+      { value: 'Legal' },
+      { value: 'Design' },
+      { value: 'Data Science' },
+      { value: 'Security' },
+      { value: 'Administration' },
+      { value: 'Business Development' },
+      { value: 'Quality Assurance' },
+      { value: 'Adventure' },
+      { value: 'Construction' },
+    ],
+  },
+  {
+    field: 'salary',
+    headerName: 'Salary',
+    type: 'currency',
+    width: 120,
+    resizable: true,
+  },
+  { field: 'startDate', headerName: 'Start Date', width: 130, resizable: true },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 100,
+    resizable: true,
+    type: 'dropdown',
+    dropdownOptions: [
+      { value: 'Active' },
+      { value: 'On Leave' },
+      { value: 'Vacation' },
+      { value: 'Training' },
+      { value: 'Remote' },
+      { value: 'Probation' },
+      { value: 'Intern' },
+      { value: 'Flying' },
+      { value: 'Building' },
+    ],
+  },
 ]
 
 const sampleRows: RowData[] = [
-  { id: '1', name: 'John Doe', age: 35 },
-  { id: '2', name: 'Jane Doe', age: 32 },
-  { id: '3', name: 'Peter Pan', age: 100 },
+  {
+    id: '1',
+    name: 'John Doe',
+    age: 35,
+    email: 'john.doe@company.com',
+    department: 'Engineering',
+    salary: 75000,
+    startDate: '2020-01-15',
+    status: 'Active',
+  },
+  {
+    id: '2',
+    name: 'Jane Doe',
+    age: 32,
+    email: 'jane.doe@company.com',
+    department: 'Marketing',
+    salary: 68000,
+    startDate: '2021-03-22',
+    status: 'Active',
+  },
+  {
+    id: '3',
+    name: 'Peter Pan',
+    age: 100,
+    email: 'peter.pan@neverland.com',
+    department: 'Adventure',
+    salary: 50000,
+    startDate: '1904-12-27',
+    status: 'Flying',
+  },
+  {
+    id: '4',
+    name: 'Alice Wonder',
+    age: 28,
+    email: 'alice.wonder@rabbit.hole',
+    department: 'HR',
+    salary: 55000,
+    startDate: '2022-07-10',
+    status: 'Active',
+  },
+  {
+    id: '5',
+    name: 'Bob Builder',
+    age: 45,
+    email: 'bob.builder@construction.com',
+    department: 'Construction',
+    salary: 82000,
+    startDate: '2018-05-03',
+    status: 'Building',
+  },
+  ...Array.from({ length: 95 }, (_, i) => {
+    const id = (i + 6).toString()
+    const firstNames = [
+      'Michael',
+      'Sarah',
+      'David',
+      'Emma',
+      'Chris',
+      'Jessica',
+      'Ryan',
+      'Ashley',
+      'Kevin',
+      'Amanda',
+      'Daniel',
+      'Jennifer',
+      'Matthew',
+      'Lisa',
+      'James',
+      'Maria',
+      'Andrew',
+      'Michelle',
+      'Joshua',
+      'Elizabeth',
+      'Brandon',
+      'Nicole',
+      'Tyler',
+      'Rachel',
+      'Jacob',
+      'Stephanie',
+      'Nicholas',
+      'Rebecca',
+      'Anthony',
+      'Laura',
+      'William',
+      'Melissa',
+      'Samuel',
+      'Amy',
+      'Joseph',
+      'Angela',
+      'Alexander',
+      'Deborah',
+      'Adam',
+      'Sharon',
+    ]
+    const lastNames = [
+      'Smith',
+      'Johnson',
+      'Williams',
+      'Brown',
+      'Jones',
+      'Garcia',
+      'Miller',
+      'Davis',
+      'Rodriguez',
+      'Martinez',
+      'Hernandez',
+      'Lopez',
+      'Gonzalez',
+      'Wilson',
+      'Anderson',
+      'Thomas',
+      'Taylor',
+      'Moore',
+      'Jackson',
+      'Martin',
+      'Lee',
+      'Perez',
+      'Thompson',
+      'White',
+      'Harris',
+      'Sanchez',
+      'Clark',
+      'Ramirez',
+      'Lewis',
+      'Robinson',
+      'Walker',
+      'Young',
+      'Allen',
+      'King',
+      'Wright',
+      'Scott',
+      'Torres',
+      'Nguyen',
+      'Hill',
+      'Flores',
+    ]
+    const departments = [
+      'Engineering',
+      'Marketing',
+      'HR',
+      'Sales',
+      'Finance',
+      'Operations',
+      'Customer Service',
+      'Product',
+      'Legal',
+      'Design',
+      'Data Science',
+      'Security',
+      'Administration',
+      'Business Development',
+      'Quality Assurance',
+    ]
+    const statuses = [
+      'Active',
+      'On Leave',
+      'Vacation',
+      'Training',
+      'Remote',
+      'Probation',
+      'Intern',
+    ]
+
+    const firstName = firstNames[i % firstNames.length]
+    const lastName =
+      lastNames[Math.floor(i / firstNames.length) % lastNames.length]
+    const department = departments[i % departments.length]
+    const status = statuses[i % statuses.length]
+    const age = 22 + (i % 43) // Age between 22-65
+    const baseSalary = 40000 + (i % 20) * 5000 + Math.floor(i / 20) * 2000 // Varied salaries
+    const years = 2018 + (i % 6)
+    const months = String(1 + (i % 12)).padStart(2, '0')
+    const days = String(1 + (i % 28)).padStart(2, '0')
+
+    return {
+      id,
+      name: `${firstName} ${lastName}`,
+      age,
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`,
+      department,
+      salary: baseSalary,
+      startDate: `${years}-${months}-${days}`,
+      status,
+    }
+  }),
+]
+
+// Sample metrics for employee data
+const employeeMetrics: MetricCardData[] = [
+  {
+    title: 'Total Employees',
+    value: 100,
+    subtitle: 'Active workforce',
+    trend: {
+      value: 12.5,
+      isPositive: true,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Average Salary',
+    value: '$67,250',
+    subtitle: 'Per employee',
+    trend: {
+      value: 8.2,
+      isPositive: true,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Active Status',
+    value: '85%',
+    subtitle: '85 of 100 employees',
+    trend: {
+      value: 5.0,
+      isPositive: true,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Departments',
+    value: 15,
+    subtitle: 'Active divisions',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+  },
+]
+
+// Sample filters for the filter section
+const sampleFilters: DataGridFilter[] = [
+  {
+    label: 'Department',
+    value: 'all',
+    type: 'dropdown',
+    options: [
+      { value: 'all' },
+      { value: 'Engineering' },
+      { value: 'Marketing' },
+      { value: 'HR' },
+      { value: 'Sales' },
+      { value: 'Finance' },
+      { value: 'Operations' },
+      { value: 'Customer Service' },
+      { value: 'Product' },
+      { value: 'Legal' },
+      { value: 'Design' },
+      { value: 'Data Science' },
+      { value: 'Security' },
+      { value: 'Administration' },
+      { value: 'Business Development' },
+      { value: 'Quality Assurance' },
+      { value: 'Adventure' },
+      { value: 'Construction' },
+    ],
+    onChange: (value: { value: string } | null) => {
+      console.log('Department filter changed:', value)
+    },
+    placeholder: 'All Departments',
+  },
+  {
+    label: 'Status',
+    value: 'all',
+    type: 'dropdown',
+    options: [
+      { value: 'all' },
+      { value: 'Active' },
+      { value: 'On Leave' },
+      { value: 'Vacation' },
+      { value: 'Training' },
+      { value: 'Remote' },
+      { value: 'Probation' },
+      { value: 'Intern' },
+      { value: 'Flying' },
+      { value: 'Building' },
+    ],
+    onChange: (value: { value: string } | null) => {
+      console.log('Status filter changed:', value)
+    },
+    placeholder: 'All Statuses',
+  },
 ]
 
 const commonArgs: Partial<DatagridProps> = {
   columns: sampleColumns,
   rows: sampleRows,
   buttons: [{ text: 'Add New' }] as ButtonProps[],
-  dropdowns: [
-    { label: 'Filter', options: [{ value: 'all' }, { value: 'active' }] },
-  ],
   searchbarProps: { value: '', onChange: () => {} },
+  filters: sampleFilters,
+  metrics: employeeMetrics,
+  // Add manage row callback functions so the toolbar shows when rows are selected
+  onManage: (selectedRows: string[]) => {
+    console.log('Manage rows:', selectedRows)
+  },
+  onDelete: (selectedRows: string[]) => {
+    console.log('Delete rows:', selectedRows)
+  },
+  onDuplicate: (selectedRows: string[]) => {
+    console.log('Duplicate rows:', selectedRows)
+  },
+  onShow: (selectedRows: string[]) => {
+    console.log('Show rows:', selectedRows)
+  },
 }
 
 const meta: Meta<typeof DataGrid> = {
@@ -51,7 +420,13 @@ export const LightTheme: Story = {
   name: 'Light Theme',
   render: args => (
     <div
-      style={{ backgroundColor: '#f3f4f6', height: '100vh', padding: '1rem' }}
+      style={{
+        backgroundColor: '#f3f4f6',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
     >
       <DataGrid {...args} />
     </div>
@@ -68,7 +443,13 @@ export const DarkTheme: Story = {
   name: 'Dark Theme',
   render: args => (
     <div
-      style={{ backgroundColor: '#1e293b', height: '100vh', padding: '1rem' }}
+      style={{
+        backgroundColor: '#1e293b',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
     >
       <DataGrid {...args} />
     </div>
@@ -84,7 +465,15 @@ export const DarkTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <div style={{ backgroundColor: 'black', height: '100vh', padding: '1rem' }}>
+    <div
+      style={{
+        backgroundColor: '#000',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
       <DataGrid {...args} />
     </div>
   ),
@@ -161,10 +550,8 @@ const InteractiveDemoComponent: React.FC = () => {
         columns={sampleColumns}
         rows={sampleRows}
         buttons={[{ text: 'Add New' }] as ButtonProps[]}
-        dropdowns={[
-          { label: 'Filter', options: [{ value: 'all' }, { value: 'active' }] },
-        ]}
         searchbarProps={{ value: '', onChange: () => {} }}
+        filters={sampleFilters}
         styles={{
           theme: theme,
         }}
@@ -184,7 +571,13 @@ export const CustomStyling: Story = {
   name: 'Custom Styling',
   render: args => (
     <div
-      style={{ backgroundColor: '#f3f4f6', height: '100vh', padding: '1rem' }}
+      style={{
+        backgroundColor: '#f3f4f6',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
     >
       <DataGrid {...args} />
     </div>
@@ -196,6 +589,547 @@ export const CustomStyling: Story = {
       backgroundColor: 'rgba(59, 130, 246, 0.05)',
       borderColor: 'rgba(59, 130, 246, 0.3)',
       borderRadius: '12px',
+    },
+  },
+}
+
+// Column Resize Demo Component
+const ColumnResizeDemoComponent: React.FC<DatagridProps> = args => {
+  const [columnWidths, setColumnWidths] = React.useState<
+    Record<string, number>
+  >({})
+
+  const handleColumnResize = (columnField: string, newWidth: number) => {
+    console.log(`Column ${columnField} resized to ${newWidth}px`)
+    setColumnWidths(prev => ({ ...prev, [columnField]: newWidth }))
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <strong>Resize Demo:</strong> Hover over column borders to see resize
+        handles. Drag to resize columns.
+        <br />
+        <strong>Filter Demo:</strong> Use the filter section above the table to
+        filter data.
+        <br />
+        <strong>Metrics Demo:</strong> Key performance indicators are displayed
+        at the top.
+        {Object.keys(columnWidths).length > 0 && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <strong>Resized columns:</strong>{' '}
+            {JSON.stringify(columnWidths, null, 2)}
+          </div>
+        )}
+      </div>
+      <DataGrid
+        {...args}
+        showIdColumns={true}
+        onColumnResize={handleColumnResize}
+        filters={sampleFilters}
+        metrics={employeeMetrics}
+      />
+    </div>
+  )
+}
+
+// Column Resize Demo
+export const ColumnResizeDemo: Story = {
+  name: 'Column Resize Demo',
+  render: args => <ColumnResizeDemoComponent {...args} />,
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+// Financial Statements Data and Filters
+const financialColumns: ColumnDef[] = [
+  { field: 'id', headerName: 'Transaction ID', width: 120, resizable: true },
+  { field: 'date', headerName: 'Date', width: 120, resizable: true },
+  {
+    field: 'description',
+    headerName: 'Description',
+    width: 250,
+    resizable: true,
+  },
+  { field: 'category', headerName: 'Category', width: 140, resizable: true },
+  {
+    field: 'amount',
+    headerName: 'Amount',
+    type: 'currency',
+    width: 120,
+    resizable: true,
+  },
+  { field: 'type', headerName: 'Type', width: 100, resizable: true },
+  { field: 'account', headerName: 'Account', width: 150, resizable: true },
+  { field: 'status', headerName: 'Status', width: 100, resizable: true },
+]
+
+const financialRows: RowData[] = [
+  {
+    id: 'TXN-001',
+    date: '2024-01-15',
+    description: 'Office Supplies Purchase',
+    category: 'Office Expenses',
+    amount: -245.5,
+    type: 'Expense',
+    account: 'Business Checking',
+    status: 'Cleared',
+  },
+  {
+    id: 'TXN-002',
+    date: '2024-01-18',
+    description: 'Client Payment - ABC Corp',
+    category: 'Revenue',
+    amount: 5000.0,
+    type: 'Income',
+    account: 'Business Checking',
+    status: 'Cleared',
+  },
+  {
+    id: 'TXN-003',
+    date: '2024-02-01',
+    description: 'Monthly Software Subscription',
+    category: 'Technology',
+    amount: -99.99,
+    type: 'Expense',
+    account: 'Business Credit Card',
+    status: 'Pending',
+  },
+  {
+    id: 'TXN-004',
+    date: '2024-02-10',
+    description: 'Consulting Services Revenue',
+    category: 'Revenue',
+    amount: 2500.0,
+    type: 'Income',
+    account: 'Business Checking',
+    status: 'Cleared',
+  },
+  {
+    id: 'TXN-005',
+    date: '2024-02-15',
+    description: 'Equipment Purchase',
+    category: 'Capital Expenses',
+    amount: -1200.0,
+    type: 'Expense',
+    account: 'Business Checking',
+    status: 'Cleared',
+  },
+  {
+    id: 'TXN-006',
+    date: '2024-03-01',
+    description: 'Marketing Campaign',
+    category: 'Marketing',
+    amount: -750.0,
+    type: 'Expense',
+    account: 'Business Credit Card',
+    status: 'Cleared',
+  },
+  {
+    id: 'TXN-007',
+    date: '2024-03-12',
+    description: 'Project Payment - XYZ Ltd',
+    category: 'Revenue',
+    amount: 8500.0,
+    type: 'Income',
+    account: 'Business Checking',
+    status: 'Cleared',
+  },
+  ...Array.from({ length: 125 }, (_, i) => {
+    const txnNumber = String(i + 8).padStart(3, '0')
+    const id = `TXN-${txnNumber}`
+
+    const incomeDescriptions = [
+      'Client Payment - Professional Services',
+      'Monthly Retainer Fee',
+      'Project Milestone Payment',
+      'Consulting Revenue',
+      'Software License Sale',
+      'Training Workshop Revenue',
+      'Product Sales Revenue',
+      'Subscription Revenue',
+      'Partnership Commission',
+      'Investment Returns',
+      'Rental Income',
+      'Interest Income',
+      'Grant Funding',
+      'Contract Payment',
+      'Service Fee Revenue',
+    ]
+
+    const expenseDescriptions = [
+      'Office Rent Payment',
+      'Utility Bills',
+      'Internet & Phone Service',
+      'Software Subscription',
+      'Marketing Advertisement',
+      'Business Travel',
+      'Equipment Maintenance',
+      'Professional Services',
+      'Insurance Premium',
+      'Office Supplies',
+      'Parking & Transportation',
+      'Business Meals',
+      'Conference & Training',
+      'Legal Fees',
+      'Accounting Services',
+      'Bank Fees',
+      'Postage & Shipping',
+      'Website & Domain',
+      'Cloud Storage',
+      'Security Services',
+    ]
+
+    const categories = [
+      'Revenue',
+      'Office Expenses',
+      'Technology',
+      'Marketing',
+      'Travel',
+      'Professional Services',
+      'Insurance',
+      'Utilities',
+      'Equipment',
+      'Training & Development',
+      'Legal & Compliance',
+      'Banking & Finance',
+      'Communication',
+      'Supplies',
+      'Transportation',
+      'Capital Expenses',
+    ]
+
+    const accounts = [
+      'Business Checking',
+      'Business Credit Card',
+      'Savings Account',
+      'Petty Cash',
+    ]
+    const statuses = ['Cleared', 'Pending', 'Reconciled', 'Processing']
+
+    const isIncome = i % 3 === 0 // Roughly 1/3 income, 2/3 expenses
+    const type = isIncome ? 'Income' : 'Expense'
+    const descriptions = isIncome ? incomeDescriptions : expenseDescriptions
+    const description = descriptions[i % descriptions.length]
+
+    // Generate varied amounts
+    let amount: number
+    if (isIncome) {
+      amount = 500 + Math.random() * 15000 // Income: $500 - $15,500
+    } else {
+      amount = -(25 + Math.random() * 2000) // Expenses: $25 - $2,025
+    }
+    amount = Math.round(amount * 100) / 100 // Round to 2 decimal places
+
+    const category = categories[i % categories.length]
+    const account = accounts[i % accounts.length]
+    const status = statuses[i % statuses.length]
+
+    // Generate dates across 2023-2024
+    const year = i % 2 === 0 ? 2024 : 2023
+    const month = String(1 + (i % 12)).padStart(2, '0')
+    const day = String(1 + (i % 28)).padStart(2, '0')
+    const date = `${year}-${month}-${day}`
+
+    return {
+      id,
+      date,
+      description,
+      category,
+      amount,
+      type,
+      account,
+      status,
+    }
+  }),
+]
+
+const financialFilters: DataGridFilter[] = [
+  {
+    label: 'Transaction Date Range',
+    value: { start: null, end: null },
+    type: 'daterange',
+    onChange: (value: { start: Date | null; end: Date | null }) => {
+      console.log('Date range filter changed:', value)
+    },
+  },
+  {
+    label: 'Category',
+    value: 'all',
+    type: 'dropdown',
+    options: [
+      { value: 'all' },
+      { value: 'Revenue' },
+      { value: 'Office Expenses' },
+      { value: 'Technology' },
+      { value: 'Marketing' },
+      { value: 'Travel' },
+      { value: 'Professional Services' },
+      { value: 'Insurance' },
+      { value: 'Utilities' },
+      { value: 'Equipment' },
+      { value: 'Training & Development' },
+      { value: 'Legal & Compliance' },
+      { value: 'Banking & Finance' },
+      { value: 'Communication' },
+      { value: 'Supplies' },
+      { value: 'Transportation' },
+      { value: 'Capital Expenses' },
+    ],
+    onChange: (value: { value: string } | null) => {
+      console.log('Category filter changed:', value)
+    },
+    placeholder: 'All Categories',
+  },
+  {
+    label: 'Transaction Type',
+    value: 'all',
+    type: 'dropdown',
+    options: [{ value: 'all' }, { value: 'Income' }, { value: 'Expense' }],
+    onChange: (value: { value: string } | null) => {
+      console.log('Type filter changed:', value)
+    },
+    placeholder: 'All Types',
+  },
+  {
+    label: 'Status',
+    value: 'all',
+    type: 'dropdown',
+    options: [
+      { value: 'all' },
+      { value: 'Cleared' },
+      { value: 'Pending' },
+      { value: 'Reconciled' },
+      { value: 'Processing' },
+    ],
+    onChange: (value: { value: string } | null) => {
+      console.log('Status filter changed:', value)
+    },
+    placeholder: 'All Statuses',
+  },
+]
+
+// Financial metrics for transaction data
+const financialMetrics: MetricCardData[] = [
+  {
+    title: 'Total Revenue',
+    value: '$342,750',
+    subtitle: 'Incoming transactions',
+    trend: {
+      value: 15.3,
+      isPositive: true,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Total Expenses',
+    value: '$187,420',
+    subtitle: 'Outgoing transactions',
+    trend: {
+      value: 3.2,
+      isPositive: false,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Net Income',
+    value: '$155,330',
+    subtitle: 'Profit margin',
+    trend: {
+      value: 22.8,
+      isPositive: true,
+    },
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Transactions',
+    value: 132,
+    subtitle: 'Total processed',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+      </svg>
+    ),
+  },
+]
+
+export const FinancialStatements: Story = {
+  name: 'Financial Statements with Date Filters',
+  render: args => (
+    <div
+      style={{ backgroundColor: '#f3f4f6', height: '100vh', padding: '1rem' }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <strong>Financial Demo:</strong> This story showcases date range
+        filtering with financial transaction data.
+        <br />
+        <strong>Features:</strong> Date range filter, currency formatting,
+        category-based filtering, and financial metrics.
+      </div>
+      <DataGrid
+        {...args}
+        columns={financialColumns}
+        rows={financialRows}
+        buttons={[{ text: 'Add Transaction' }] as ButtonProps[]}
+        searchbarProps={{ value: '', onChange: () => {} }}
+        filters={financialFilters}
+        metrics={financialMetrics}
+        styles={{
+          theme: 'light',
+        }}
+        showIdColumns={true}
+      />
+    </div>
+  ),
+  args: {
+    columns: financialColumns,
+    rows: financialRows,
+    filters: financialFilters,
+    metrics: financialMetrics,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const SacredThemeWithMetrics: Story = {
+  name: 'Sacred Theme with Metrics',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#000',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        backgroundImage:
+          'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%)',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}>
+        <strong>Sacred Theme Demo:</strong> Experience the mystical design with
+        ancient glyphs and golden accents.
+        <br />
+        <strong>Features:</strong> Sacred metrics with animated glyphs, mystical
+        styling, and ethereal effects.
+      </div>
+      <DataGrid
+        {...args}
+        columns={sampleColumns}
+        rows={sampleRows}
+        buttons={[{ text: 'Add Sacred Entity' }] as ButtonProps[]}
+        searchbarProps={{ value: '', onChange: () => {} }}
+        filters={sampleFilters}
+        metrics={employeeMetrics}
+        styles={{
+          theme: 'sacred',
+        }}
+        showIdColumns={true}
+      />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    filters: sampleFilters,
+    metrics: employeeMetrics,
+    styles: {
+      theme: 'sacred',
+    },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+    layout: 'fullscreen',
+  },
+}
+
+export const ManageRowDemo: Story = {
+  name: 'Manage Row Demo',
+  render: args => (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <strong>Manage Row Demo:</strong> Click on the checkboxes to select
+        rows. The manage row toolbar will appear with options to manage, delete,
+        duplicate, and show selected rows.
+        <br />
+        <strong>Test Instructions:</strong>
+        <br />
+        1. Click on row checkboxes to select rows
+        <br />
+        2. Notice the toolbar appears with manage options
+        <br />
+        3. Check the console for callback logs when clicking manage actions
+      </div>
+      <DataGrid
+        {...args}
+        showIdColumns={true}
+        onManage={selectedRows => {
+          console.log('🔧 Manage action called with rows:', selectedRows)
+          alert(
+            `Managing ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
+          )
+        }}
+        onDelete={selectedRows => {
+          console.log('🗑️ Delete action called with rows:', selectedRows)
+          alert(
+            `Deleting ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
+          )
+        }}
+        onDuplicate={selectedRows => {
+          console.log('📋 Duplicate action called with rows:', selectedRows)
+          alert(
+            `Duplicating ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
+          )
+        }}
+        onShow={selectedRows => {
+          console.log('👁️ Show action called with rows:', selectedRows)
+          alert(
+            `Showing ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
+          )
+        }}
+        onSelectionChange={selectedRows => {
+          console.log('✅ Selection changed to:', selectedRows)
+        }}
+      />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    buttons: [{ text: 'Add New' }] as ButtonProps[],
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: {
+      theme: 'light',
     },
   },
 }

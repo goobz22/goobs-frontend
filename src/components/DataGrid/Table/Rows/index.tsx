@@ -3,10 +3,11 @@
 import React from 'react'
 import { ColumnDef } from '../../types'
 import StyledTooltip from '../../../Tooltip'
+import Dropdown from '../../../Field/Dropdown/Regular'
 import type { RowData } from '../../types'
 import type { DataGridStyles } from '../../../../theme'
 import { getRowId } from '../index'
-import Checkbox from '../../../Checkbox'
+import { getDataGridStyles } from '../../../../theme'
 
 /**
  * Safely convert a value to a string without triggering the default
@@ -795,49 +796,61 @@ function formatRoutingNumber(
 
 interface RowsProps {
   rows: RowData[]
-  finalDesktopColumns: ColumnDef[]
-  overflowDesktopColumns: ColumnDef[]
-  selectedOverflowField: string
-
-  // Mobile logic
-  isMobile: boolean
-  mobileSelectedColumn: string
-
-  // All columns for mobile currency formatting
-  allColumns: ColumnDef[]
-
-  // Current selected row IDs
+  columns: ColumnDef[]
   selectedRowIds: string[]
-
-  // Row click
   onRowClick?: (row: RowData) => void
-
-  // Toggling row checkbox
-  onRowCheckboxChange: (rowId: string) => void
-
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
+  // Inline editing props
+  editingCell?: { rowId: string; field: string } | null
+  editingValue?: string
+  onCellClick?: (rowId: string, field: string, currentValue: unknown) => void
+  onCellSave?: (rowId: string, field: string, value: string) => void
+  onCellCancel?: () => void
+  onEditingValueChange?: (value: string) => void
 }
 
 const Rows: React.FC<RowsProps> = ({
   rows,
-  finalDesktopColumns,
-  overflowDesktopColumns,
-  selectedOverflowField,
-  isMobile,
-  mobileSelectedColumn,
-  allColumns,
+  columns,
   selectedRowIds,
   onRowClick,
-  onRowCheckboxChange,
   styles,
+  editingCell,
+  editingValue,
+  onCellClick,
+  onCellSave,
+  onCellCancel,
+  onEditingValueChange,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
+  const computedStyles = getDataGridStyles(styles)
+
   if (!rows || rows.length === 0) {
     return (
       <tbody>
-        <tr>
-          <td colSpan={100} className="text-center p-12 text-gray-500 italic">
+        <tr style={computedStyles.table.tableRow}>
+          <td
+            style={{
+              ...computedStyles.table.tableCell,
+              width: '48px',
+              minWidth: '48px',
+              maxWidth: '48px',
+              padding: '0',
+              border: 'none',
+            }}
+          ></td>
+          <td
+            colSpan={100}
+            style={{
+              ...computedStyles.table.tableCell,
+              textAlign: 'center',
+              padding: '3rem',
+              color: computedStyles.table.tableCell.color,
+              fontStyle: 'italic',
+              opacity: 0.6,
+            }}
+          >
             No data to display.
           </td>
         </tr>
@@ -851,144 +864,176 @@ const Rows: React.FC<RowsProps> = ({
         const isSelected = selectedRowIds.includes(rowId)
 
         const rowStyle = {
-          transition: 'background-color 0.2s ease',
+          ...computedStyles.table.tableRow,
+          ...(isSelected && {
+            backgroundColor: isSacredTheme
+              ? 'rgba(255, 215, 0, 0.15)'
+              : 'rgba(219, 234, 254, 1)',
+          }),
           cursor: 'pointer',
-          ...(isSelected && isSacredTheme
-            ? {
-                backgroundColor: 'rgba(255, 215, 0, 0.15)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                },
-              }
-            : {}),
-          ...(isSelected && !isSacredTheme
-            ? {
-                backgroundColor: 'rgba(219, 234, 254, 1)',
-                '&:hover': {
-                  backgroundColor: 'rgba(191, 219, 254, 1)',
-                },
-              }
-            : {}),
+          transition: 'background-color 0.2s ease',
+        }
+
+        const rowHoverStyle = {
+          ...computedStyles.table.tableRowHover,
         }
 
         return (
-          <tr key={rowId} onClick={() => onRowClick?.(row)} style={rowStyle}>
-            <td className="w-12 p-0 align-middle">
-              <Checkbox
-                checked={isSelected}
-                onChange={_checked => {
-                  onRowCheckboxChange(rowId)
-                }}
-                onClick={e => e.stopPropagation()}
-                styles={{
-                  theme: isSacredTheme ? 'sacred' : 'light',
-                }}
-              />
-            </td>
+          <tr
+            key={rowId}
+            onClick={() => onRowClick?.(row)}
+            style={rowStyle}
+            onMouseEnter={e => {
+              if (!isSelected) {
+                Object.assign(e.currentTarget.style, rowHoverStyle)
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isSelected) {
+                Object.assign(e.currentTarget.style, rowStyle)
+              }
+            }}
+          >
+            {/* Empty column to align with header checkbox */}
+            <td
+              style={{
+                ...computedStyles.table.tableCell,
+                width: '48px',
+                minWidth: '48px',
+                maxWidth: '48px',
+                padding: '0',
+                border: 'none',
+              }}
+            ></td>
 
             {/* Normal desktop columns */}
-            {!isMobile &&
-              finalDesktopColumns.map(col => {
-                let cellContent: React.ReactNode
+            {columns.map(col => {
+              const value = row[col.field]
+              const isEditing =
+                editingCell?.rowId === rowId && editingCell?.field === col.field
+              let cellContent: React.ReactNode
 
-                if (col.field === '__overflow__') {
-                  const overflowCol = overflowDesktopColumns.find(
-                    c => c.field === selectedOverflowField
+              if (col.field === '__overflow__') {
+                // This case should ideally not happen if overflow logic is removed
+                // but keeping it for robustness if it somehow re-appears.
+                cellContent = '---'
+              } else if (isEditing) {
+                // Show input field or dropdown for editing
+                if (col.type === 'dropdown' && col.dropdownOptions) {
+                  // Render dropdown for dropdown columns
+                  cellContent = (
+                    <div style={{ width: '100%' }}>
+                      <Dropdown
+                        label=""
+                        value={editingValue}
+                        options={col.dropdownOptions.map(opt => ({
+                          value: opt.value,
+                          label: opt.label || opt.value,
+                        }))}
+                        onChange={e => {
+                          const newValue = e.target.value
+                          onEditingValueChange?.(newValue)
+                          // Auto-save on selection change
+                          onCellSave?.(rowId, col.field, newValue)
+                        }}
+                        styles={{
+                          theme: isSacredTheme ? 'sacred' : 'light',
+                          fontSize: '14px',
+                          height: '32px',
+                        }}
+                      />
+                    </div>
                   )
-                  if (overflowCol) {
-                    const value = row[overflowCol.field]
-                    if (overflowCol.type === 'currency') {
-                      cellContent = formatCurrency(value, isSacredTheme).element
-                    } else if (overflowCol.type === 'credit_card') {
-                      cellContent = formatCreditCard(
-                        value,
-                        isSacredTheme
-                      ).element
-                    } else if (overflowCol.type === 'expiration_date') {
-                      cellContent = formatExpirationDate(
-                        value,
-                        isSacredTheme
-                      ).element
-                    } else if (overflowCol.type === 'account_number') {
-                      cellContent = formatAccountNumber(
-                        value,
-                        isSacredTheme
-                      ).element
-                    } else if (overflowCol.type === 'routing_number') {
-                      cellContent = formatRoutingNumber(
-                        value,
-                        isSacredTheme
-                      ).element
-                    } else {
-                      cellContent = safeString(value)
-                    }
-                  } else {
-                    cellContent = '---'
-                  }
                 } else {
-                  const value = row[col.field]
-                  if (col.type === 'currency') {
-                    cellContent = formatCurrency(value, isSacredTheme).element
-                  } else if (col.type === 'credit_card') {
-                    cellContent = formatCreditCard(value, isSacredTheme).element
-                  } else if (col.type === 'expiration_date') {
-                    cellContent = formatExpirationDate(
-                      value,
-                      isSacredTheme
-                    ).element
-                  } else if (col.type === 'account_number') {
-                    cellContent = formatAccountNumber(
-                      value,
-                      isSacredTheme
-                    ).element
-                  } else if (col.type === 'routing_number') {
-                    cellContent = formatRoutingNumber(
-                      value,
-                      isSacredTheme
-                    ).element
-                  } else {
-                    cellContent = safeString(value)
-                  }
-                }
-
-                return (
-                  <td key={col.field} className="p-2 align-middle">
-                    <StyledTooltip
-                      title={safeString(row[col.field])}
-                      sacredtheme={isSacredTheme}
-                    >
-                      <div className="truncate">{cellContent}</div>
-                    </StyledTooltip>
-                  </td>
-                )
-              })}
-
-            {/* Mobile: single column */}
-            {isMobile && (
-              <td className="p-2 align-middle">
-                {(() => {
-                  const mobileCol = allColumns.find(
-                    c => c.field === mobileSelectedColumn
+                  // Render text input for other columns
+                  cellContent = (
+                    <div style={{ width: '100%' }}>
+                      <input
+                        type="text"
+                        value={editingValue}
+                        onChange={e => onEditingValueChange?.(e.target.value)}
+                        onBlur={() =>
+                          onCellSave?.(rowId, col.field, editingValue || '')
+                        }
+                        onKeyPress={e => {
+                          if (e.key === 'Enter') {
+                            onCellSave?.(rowId, col.field, editingValue || '')
+                          } else if (e.key === 'Escape') {
+                            onCellCancel?.()
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          border: '1px solid #ccc',
+                          padding: '4px',
+                          fontSize: '14px',
+                          borderRadius: '4px',
+                          backgroundColor: isSacredTheme
+                            ? 'rgba(0, 0, 0, 0.8)'
+                            : 'white',
+                          color: isSacredTheme ? '#FFD700' : '#333',
+                        }}
+                        autoFocus
+                      />
+                    </div>
                   )
-                  if (mobileCol) {
-                    const value = row[mobileCol.field]
-                    if (mobileCol.type === 'currency') {
-                      return formatCurrency(value, isSacredTheme).element
-                    } else if (mobileCol.type === 'credit_card') {
-                      return formatCreditCard(value, isSacredTheme).element
-                    } else if (mobileCol.type === 'expiration_date') {
-                      return formatExpirationDate(value, isSacredTheme).element
-                    } else if (mobileCol.type === 'account_number') {
-                      return formatAccountNumber(value, isSacredTheme).element
-                    } else if (mobileCol.type === 'routing_number') {
-                      return formatRoutingNumber(value, isSacredTheme).element
+                }
+              } else {
+                // Show formatted value
+                if (col.type === 'currency') {
+                  cellContent = formatCurrency(value, isSacredTheme).element
+                } else if (col.type === 'credit_card') {
+                  cellContent = formatCreditCard(value, isSacredTheme).element
+                } else if (col.type === 'expiration_date') {
+                  cellContent = formatExpirationDate(
+                    value,
+                    isSacredTheme
+                  ).element
+                } else if (col.type === 'account_number') {
+                  cellContent = formatAccountNumber(
+                    value,
+                    isSacredTheme
+                  ).element
+                } else if (col.type === 'routing_number') {
+                  cellContent = formatRoutingNumber(
+                    value,
+                    isSacredTheme
+                  ).element
+                } else {
+                  cellContent = safeString(value)
+                }
+              }
+
+              return (
+                <td
+                  key={col.field}
+                  style={computedStyles.table.tableCell}
+                  onClick={e => {
+                    // Only handle cell click if not editing and row is selected
+                    if (!isEditing && selectedRowIds.includes(rowId)) {
+                      e.stopPropagation()
+                      onCellClick?.(rowId, col.field, value)
                     }
-                    return safeString(value)
-                  }
-                  return '---'
-                })()}
-              </td>
-            )}
+                  }}
+                >
+                  <StyledTooltip
+                    title={safeString(row[col.field])}
+                    sacredtheme={isSacredTheme}
+                  >
+                    <div
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: computedStyles.table.tableCell.color,
+                      }}
+                    >
+                      {cellContent}
+                    </div>
+                  </StyledTooltip>
+                </td>
+              )
+            })}
           </tr>
         )
       })}

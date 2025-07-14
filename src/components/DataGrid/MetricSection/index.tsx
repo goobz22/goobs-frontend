@@ -15,13 +15,40 @@ interface MetricSectionProps {
 const premiumStyles = {
   container: {
     width: '100%',
-    marginBottom: '8px',
-    padding: '4px',
+    maxWidth: '100%',
+    marginBottom: '0',
+    padding: '1rem',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   } as React.CSSProperties,
 
-  grid: {
-    display: 'grid',
-    gap: '8px',
+  flexContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '1rem',
+    justifyContent: 'flex-start',
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+  } as React.CSSProperties,
+
+  cardWrapper: {
+    // Mobile: 1 column (100% width minus gap)
+    flex: '1 1 calc(100% - 0rem)',
+    minWidth: '280px',
+    maxWidth: '100%',
+
+    // Tablet: 2 columns (50% width minus gap)
+    '@media (min-width: 768px)': {
+      flex: '1 1 calc(50% - 0.5rem)',
+      maxWidth: 'calc(50% - 0.5rem)',
+    },
+
+    // Desktop: 4 columns (25% width minus gap)
+    '@media (min-width: 1024px)': {
+      flex: '1 1 calc(25% - 0.75rem)',
+      maxWidth: 'calc(25% - 0.75rem)',
+    },
   } as React.CSSProperties,
 }
 
@@ -29,62 +56,66 @@ const premiumStyles = {
 const sacredStyles = {
   container: {
     width: '100%',
-    marginBottom: '8px',
-    padding: '4px',
+    maxWidth: '100%',
+    marginBottom: '0',
+    padding: '1rem',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   } as React.CSSProperties,
 
-  grid: {
-    display: 'grid',
-    gap: '8px',
+  flexContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '1rem',
+    justifyContent: 'flex-start',
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+  } as React.CSSProperties,
+
+  cardWrapper: {
+    // Mobile: 1 column (100% width minus gap)
+    flex: '1 1 calc(100% - 0rem)',
+    minWidth: '280px',
+    maxWidth: '100%',
+
+    // Tablet: 2 columns (50% width minus gap)
+    '@media (min-width: 768px)': {
+      flex: '1 1 calc(50% - 0.5rem)',
+      maxWidth: 'calc(50% - 0.5rem)',
+    },
+
+    // Desktop: 4 columns (25% width minus gap)
+    '@media (min-width: 1024px)': {
+      flex: '1 1 calc(25% - 0.75rem)',
+      maxWidth: 'calc(25% - 0.75rem)',
+    },
   } as React.CSSProperties,
 }
 
 const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
   const isSacredTheme = styles?.theme === 'sacred'
-
-  const getGridColumns = () => {
-    switch (metrics.length) {
-      case 1:
-        return { gridTemplateColumns: '1fr' }
-      case 2:
-        return {
-          gridTemplateColumns: '1fr',
-          '@media (min-width: 768px)': {
-            gridTemplateColumns: 'repeat(2, 1fr)',
-          },
-        }
-      case 3:
-        return {
-          gridTemplateColumns: '1fr',
-          '@media (min-width: 768px)': {
-            gridTemplateColumns: 'repeat(3, 1fr)',
-          },
-        }
-      default:
-        return {
-          gridTemplateColumns: '1fr',
-          '@media (min-width: 768px)': {
-            gridTemplateColumns: 'repeat(2, 1fr)',
-          },
-          '@media (min-width: 1024px)': {
-            gridTemplateColumns: 'repeat(4, 1fr)',
-          },
-        }
-    }
-  }
-
   const componentStyles = isSacredTheme ? sacredStyles : premiumStyles
 
-  const gridStyle = {
-    ...componentStyles.grid,
-    ...getGridColumns(),
+  // Since we can't use media queries in inline styles, we'll use a responsive approach
+  // that works with flexbox and natural wrapping behavior
+  const getResponsiveCardStyle = (): React.CSSProperties => {
+    return {
+      flex: '1 1 0',
+      minWidth: '250px',
+      maxWidth: '350px',
+      boxSizing: 'border-box',
+    }
   }
 
   return (
     <div style={componentStyles.container}>
-      <div style={gridStyle}>
+      <div style={componentStyles.flexContainer}>
         {metrics.map((metric, index) => (
-          <div key={`${metric.title}-${index}`}>
+          <div
+            key={`${metric.title}-${index}`}
+            style={getResponsiveCardStyle()}
+          >
             <MetricCard
               title={metric.title}
               value={metric.value}

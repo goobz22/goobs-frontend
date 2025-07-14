@@ -1,8 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import Typography from '../../Typography'
 import type { DataGridStyles } from '../../../theme'
-import { SACRED_GLYPHS } from '../../../theme'
 
 export interface MetricCardProps {
   title: string
@@ -18,140 +16,117 @@ export interface MetricCardProps {
   styles?: DataGridStyles
 }
 
-const getStyles = (isSacredTheme?: boolean, color?: string) => ({
-  container: {
-    height: '100%',
-    borderRadius: '0.75rem',
-    borderWidth: '2px',
-    transition: 'all 0.3s ease-in-out',
-    ...(isSacredTheme
-      ? {
-          backgroundColor: 'rgba(0, 0, 0, 0.9)',
-          backgroundImage: 'linear-gradient(to bottom right, #000, #1a1a1a)',
-          borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.5)`,
-          animation: 'metric-card-glow 2s infinite alternate',
-          position: 'relative',
-          overflow: 'hidden',
-          backdropFilter: 'blur(32px)',
-        }
-      : {
-          backgroundImage: 'linear-gradient(to bottom right, white, #F9FAFB)',
-          borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.2)`,
-        }),
-  } as React.CSSProperties,
-  containerHover: {
-    transform: isSacredTheme
-      ? 'translateY(-0.5rem) scale(1.05)'
-      : 'translateY(-0.25rem)',
-    boxShadow:
-      '0 1rem 1.5rem -0.5rem rgba(0,0,0,0.1), 0 0.5rem 1rem -0.25rem rgba(0,0,0,0.05)',
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    fontSize: '2.25rem',
-    zIndex: 20,
-    transition: 'all 0.3s ease-in-out',
-    animation: 'metric-card-float 4s infinite ease-in-out',
-    color: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.4)`,
-  } as React.CSSProperties,
-  dataStream: {
-    position: 'absolute',
-    top: 0,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '0.125rem',
-    height: '100%',
-    overflow: 'hidden',
-    zIndex: 10,
-    '::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundImage:
-        'linear-gradient(to top, transparent, currentColor, transparent)',
-      animation: 'metric-card-data-stream 3s linear infinite',
-    },
-  } as React.CSSProperties,
-  content: {
-    position: 'relative',
-    zIndex: 30,
-    padding: '0.75rem',
-  } as React.CSSProperties,
-  header: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    marginBottom: '0.5rem',
-  } as React.CSSProperties,
-  iconContainer: {
-    marginRight: '0.5rem',
-    padding: '0.25rem',
-    borderRadius: '0.5rem',
-    border: '1px solid',
-    boxShadow:
-      '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
-    color: color,
-    backgroundColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.15)`,
-    borderColor: `rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.3)`,
-  } as React.CSSProperties,
-  titleContainer: {
-    flex: 1,
-  } as React.CSSProperties,
-  title: {
-    fontWeight: 600,
-    letterSpacing: '0.025em',
-    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'Inter, sans-serif',
-    color: isSacredTheme ? 'rgba(255,255,255,0.9)' : '#6B7280',
-    textShadow: isSacredTheme
-      ? `0 0 10px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.3)`
-      : 'none',
-  } as React.CSSProperties,
-  value: {
-    fontSize: '2.25rem',
-    fontWeight: 700,
-    marginBottom: '0.25rem',
-    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'sans-serif',
-    letterSpacing: isSacredTheme ? '-0.025em' : 'normal',
-    color: color,
-    textShadow: `0 0 15px rgba(${parseInt(color?.slice(1, 3) || '0', 16)}, ${parseInt(color?.slice(3, 5) || '0', 16)}, ${parseInt(color?.slice(5, 7) || '0', 16)}, 0.5)`,
-  } as React.CSSProperties,
-  subtitle: {
-    marginBottom: '0.25rem',
-    fontFamily: isSacredTheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
-    fontSize: isSacredTheme ? '1rem' : '0.875rem',
-    letterSpacing: isSacredTheme ? '0.05em' : 'normal',
-    color: isSacredTheme ? 'rgba(255,255,255,0.8)' : '#6B7280',
-  } as React.CSSProperties,
-  trendContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginTop: '0.25rem',
-  } as React.CSSProperties,
-  trend: {
-    fontWeight: 600,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.125rem',
-    fontFamily: isSacredTheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
-    fontSize: '1rem',
-  } as React.CSSProperties,
-  shimmer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    backgroundImage:
-      'linear-gradient(to right, transparent, currentColor, transparent)',
-    animation: 'metric-card-shimmer 3s infinite',
-    animationDelay: '1.5s',
-    opacity: 0.6,
-  } as React.CSSProperties,
-})
+// Enhanced sacred theming animations
+const keyframes = `
+@keyframes rotateGlyph {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sacredGlow {
+  0% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.8);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes floatAnimation {
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  33% { transform: translateY(-3px) rotate(120deg); opacity: 0.6; }
+  66% { transform: translateY(1px) rotate(240deg); opacity: 0.4; }
+  100% { transform: translateY(0px) rotate(360deg); opacity: 0.3; }
+}
+
+@keyframes sacredShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes dataStreamAnimation {
+  0% { 
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% { 
+    opacity: 0.3;
+  }
+  100% { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes standardHover {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes sacredHover {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-8px) scale(1.02); }
+}
+`
+
+// Enhanced sacred hieroglyphs
+const SACRED_GLYPHS = [
+  '𓁟',
+  '𓂀',
+  '𓃀',
+  '𓄿',
+  '𓊖',
+  '𓊗',
+  '𓋴',
+  '𓏏',
+  '𓊨',
+  '𓁦',
+  '𓅓',
+  '𓆄',
+  '𓇳',
+  '𓈖',
+  '𓊹',
+  '𓊺',
+  '𓊻',
+  '𓋹',
+  '𓌻',
+  '𓍿',
+  '𓅨',
+  '𓂋',
+  '𓏭',
+  '𓊵',
+]
+
+// Enhanced Egyptian styling constants
+const egyptianStyles = {
+  goldColor: '#FFD700',
+  goldGradient:
+    'linear-gradient(135deg, #FFD700 0%, #F4A460 50%, #DAA520 100%)',
+  darkGold: '#B8860B',
+  temple: '#1a1a2e',
+  obsidian: '#16213e',
+  turquoise: '#0f3460',
+  textShadow: '0 0 20px rgba(255, 215, 0, 0.7)',
+  cardBackground: 'rgba(0, 0, 0, 0.85)',
+  glowEffect:
+    '0 0 30px rgba(255, 215, 0, 0.3), 0 0 60px rgba(255, 215, 0, 0.1)',
+}
+
+// Inject keyframes into document head
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style')
+  style.textContent = keyframes
+  if (!document.head.querySelector('style[data-metric-card]')) {
+    style.setAttribute('data-metric-card', 'true')
+    document.head.appendChild(style)
+  }
+}
 
 export default function MetricCard({
   title,
@@ -162,88 +137,377 @@ export default function MetricCard({
   glyph,
   styles,
 }: MetricCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
   const isSacredTheme = styles?.theme === 'sacred'
   const selectedGlyph =
     glyph || SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
 
-  const getColorValue = () => {
-    const sacredColors = {
-      primary: '#FFD700',
-      secondary: '#8B5CF6',
-      success: '#10B981',
-      warning: '#F59E0B',
-      error: '#EF4444',
-      info: '#3B82F6',
+  const getColorValue = (colorName: string = 'primary') => {
+    if (isSacredTheme) {
+      switch (colorName) {
+        case 'success':
+          return '#10B981'
+        case 'warning':
+          return '#F59E0B'
+        case 'error':
+          return '#EF4444'
+        case 'info':
+          return '#3B82F6'
+        case 'secondary':
+          return '#8B5CF6'
+        default:
+          return egyptianStyles.goldColor
+      }
+    } else {
+      switch (colorName) {
+        case 'success':
+          return '#4caf50'
+        case 'warning':
+          return '#ff9800'
+        case 'error':
+          return '#f44336'
+        case 'info':
+          return '#2196f3'
+        case 'secondary':
+          return '#9c27b0'
+        default:
+          return '#1976d2'
+      }
     }
-    const standardColors = {
-      primary: '#1976d2',
-      secondary: '#9c27b0',
-      success: '#4caf50',
-      warning: '#ff9800',
-      error: '#f44336',
-      info: '#2196f3',
-    }
-
-    // Default to primary color based on theme
-    return isSacredTheme ? sacredColors.primary : standardColors.primary
   }
 
-  const cardColor = getColorValue()
-  const componentStyles = getStyles(isSacredTheme, cardColor)
-  const [isHovered, setIsHovered] = useState(false)
+  const cardColor = getColorValue('primary')
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 0, b: 0 }
+  }
 
-  return (
-    <div
-      style={{
-        ...componentStyles.container,
-        ...(isHovered && componentStyles.containerHover),
-        ...(styles?.backgroundColor && {
-          backgroundColor: styles.backgroundColor,
-        }),
-        ...(styles?.borderColor && { borderColor: styles.borderColor }),
-        ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {isSacredTheme && (
-        <>
-          <div style={componentStyles.glyph}>{selectedGlyph}</div>
-          <div style={componentStyles.dataStream} />
-          <div style={componentStyles.shimmer} />
-        </>
-      )}
-      <div style={componentStyles.content}>
-        <div style={componentStyles.header}>
-          {icon && (
-            <div
-              style={{
-                ...componentStyles.iconContainer,
-                color: cardColor,
-                backgroundColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.1)`,
-                borderColor: `rgba(${parseInt(cardColor.slice(1, 3), 16)}, ${parseInt(cardColor.slice(3, 5), 16)}, ${parseInt(cardColor.slice(5, 7), 16)}, 0.3)`,
-              }}
-            >
-              {icon}
-            </div>
-          )}
-          <div style={componentStyles.titleContainer}>
-            <Typography>{title}</Typography>
+  const rgb = hexToRgb(cardColor)
+  const rgbaColor = (alpha: number) =>
+    `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`
+
+  if (!isSacredTheme) {
+    // Enhanced standard theme
+    const standardCardStyle: React.CSSProperties = {
+      height: '100%',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+      border: `2px solid ${rgbaColor(0.2)}`,
+      borderRadius: '12px',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      cursor: 'pointer',
+      position: 'relative',
+      overflow: 'hidden',
+      ...(isHovered && {
+        transform: 'translateY(-4px)',
+        boxShadow: `0 10px 25px ${rgbaColor(0.2)}`,
+        borderColor: rgbaColor(0.4),
+      }),
+    }
+
+    const standardContentStyle: React.CSSProperties = {
+      padding: '24px',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    }
+
+    const standardHeaderStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'flex-start',
+      marginBottom: '16px',
+    }
+
+    const standardIconStyle: React.CSSProperties = {
+      marginRight: '16px',
+      color: cardColor,
+      padding: '8px',
+      borderRadius: '8px',
+      backgroundColor: rgbaColor(0.1),
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }
+
+    const standardTitleStyle: React.CSSProperties = {
+      color: '#6B7280',
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      fontSize: '16px',
+      lineHeight: '1.2',
+      margin: 0,
+    }
+
+    const standardValueStyle: React.CSSProperties = {
+      color: cardColor,
+      fontWeight: 700,
+      fontSize: '48px',
+      lineHeight: '1.1',
+      fontFamily: '"Inter", sans-serif',
+      margin: '0 0 8px 0',
+    }
+
+    const standardSubtitleStyle: React.CSSProperties = {
+      fontSize: '14px',
+      color: '#6B7280',
+      margin: '0 0 8px 0',
+      lineHeight: '1.3',
+    }
+
+    const standardTrendStyle: React.CSSProperties = {
+      fontSize: '14px',
+      color: trend?.isPositive ? '#10B981' : '#EF4444',
+      fontWeight: 600,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+      marginTop: 'auto',
+    }
+
+    return (
+      <div
+        style={standardCardStyle}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div style={standardContentStyle}>
+          <div style={standardHeaderStyle}>
+            {icon && <div style={standardIconStyle}>{icon}</div>}
+            <h3 style={standardTitleStyle}>{title}</h3>
           </div>
-        </div>
-        <Typography>{value}</Typography>
-        {subtitle && <Typography>{subtitle}</Typography>}
-        {trend && (
-          <div style={componentStyles.trendContainer}>
-            <Typography>
-              <span style={{ fontSize: '1.125rem' }}>
+
+          <div style={standardValueStyle}>{value}</div>
+
+          {subtitle && <div style={standardSubtitleStyle}>{subtitle}</div>}
+
+          {trend && (
+            <div style={standardTrendStyle}>
+              <span style={{ fontSize: '16px' }}>
                 {trend.isPositive ? '↗' : '↘'}
               </span>
               {Math.abs(trend.value)}%
-            </Typography>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Enhanced sacred theme with full Egyptian styling
+  const sacredCardStyle: React.CSSProperties = {
+    height: '100%',
+    background: `linear-gradient(135deg, ${egyptianStyles.cardBackground} 0%, rgba(22, 33, 62, 0.95) 100%)`,
+    border: `2px solid ${rgbaColor(0.5)}`,
+    borderRadius: '12px',
+    position: 'relative',
+    overflow: 'hidden',
+    backdropFilter: 'blur(20px)',
+    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    animation: 'sacredGlow 4s ease-in-out infinite',
+    cursor: 'pointer',
+    ...(isHovered && {
+      transform: 'translateY(-8px) scale(1.02)',
+      borderColor: rgbaColor(0.8),
+      boxShadow: `0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px ${rgbaColor(0.4)}, inset 0 0 20px ${rgbaColor(0.1)}`,
+    }),
+  }
+
+  const cosmicEnergyStyle: React.CSSProperties = {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: `conic-gradient(from 0deg at 50% 50%, ${rgbaColor(0.1)} 0deg, transparent 60deg, ${rgbaColor(0.05)} 120deg, transparent 180deg, ${rgbaColor(0.1)} 240deg, transparent 300deg, ${rgbaColor(0.05)} 360deg)`,
+    opacity: 0.4,
+    zIndex: 0,
+    animation: 'rotateGlyph 60s linear infinite',
+  }
+
+  const borderShimmerStyle: React.CSSProperties = {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
+    backgroundSize: '200% 100%',
+    animation: 'sacredShimmer 3s linear infinite',
+    zIndex: 1,
+  }
+
+  const sacredGlyphStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '16px',
+    right: '16px',
+    color: rgbaColor(0.4),
+    fontSize: '28px',
+    animation: 'floatAnimation 8s ease-in-out infinite',
+    zIndex: 2,
+    transition: 'all 0.3s ease',
+    textShadow: `0 0 10px ${rgbaColor(0.3)}`,
+    ...(isHovered && {
+      transform: 'scale(1.1) rotate(15deg)',
+    }),
+  }
+
+  const dataStreamStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '2px',
+    height: '100%',
+    overflow: 'hidden',
+    zIndex: 1,
+  }
+
+  const dataStreamAfterStyle: React.CSSProperties = {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: `linear-gradient(180deg, transparent, ${cardColor}, transparent)`,
+    animation: 'dataStreamAnimation 6s linear infinite',
+  }
+
+  const sacredContentStyle: React.CSSProperties = {
+    position: 'relative',
+    zIndex: 3,
+    padding: '24px',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  }
+
+  const sacredHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginBottom: '16px',
+  }
+
+  const sacredIconStyle: React.CSSProperties = {
+    marginRight: '16px',
+    color: cardColor,
+    padding: '8px',
+    borderRadius: '8px',
+    backgroundColor: rgbaColor(0.15),
+    border: `1px solid ${rgbaColor(0.3)}`,
+    boxShadow: `0 0 10px ${rgbaColor(0.2)}`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const sacredTitleStyle: React.CSSProperties = {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    fontFamily: '"Cinzel", serif',
+    textShadow: `0 0 10px ${rgbaColor(0.3)}`,
+    fontSize: '16px',
+    lineHeight: '1.2',
+    margin: 0,
+    flex: 1,
+  }
+
+  const sacredValueStyle: React.CSSProperties = {
+    color: cardColor,
+    fontWeight: 700,
+    fontSize: '48px',
+    lineHeight: '1.1',
+    margin: '0 0 8px 0',
+    textShadow: `0 0 15px ${rgbaColor(0.5)}`,
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.02em',
+  }
+
+  const sacredSubtitleStyle: React.CSSProperties = {
+    color: 'rgba(255, 255, 255, 0.8)',
+    margin: '0 0 8px 0',
+    fontFamily: '"Crimson Text", serif',
+    fontSize: '16px',
+    letterSpacing: '0.025em',
+    lineHeight: '1.3',
+  }
+
+  const sacredTrendStyle: React.CSSProperties = {
+    color: trend?.isPositive ? '#10B981' : '#EF4444',
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontFamily: '"Crimson Text", serif',
+    textShadow: `0 0 8px ${trend?.isPositive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+    fontSize: '15px',
+    marginTop: 'auto',
+  }
+
+  const bottomShimmerStyle: React.CSSProperties = {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
+    backgroundSize: '200% 100%',
+    animation: 'sacredShimmer 3s linear infinite',
+    animationDelay: '1.5s',
+    opacity: 0.6,
+  }
+
+  return (
+    <div
+      style={sacredCardStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Cosmic energy pattern */}
+      <div style={cosmicEnergyStyle} />
+
+      {/* Animated border shimmer */}
+      <div style={borderShimmerStyle} />
+
+      {/* Sacred glyph decoration */}
+      <div style={sacredGlyphStyle}>{selectedGlyph}</div>
+
+      {/* Data stream animation */}
+      <div style={dataStreamStyle}>
+        <div style={dataStreamAfterStyle} />
+      </div>
+
+      {/* Main content */}
+      <div style={sacredContentStyle}>
+        <div style={sacredHeaderStyle}>
+          {icon && <div style={sacredIconStyle}>{icon}</div>}
+          <h3 style={sacredTitleStyle}>{title}</h3>
+        </div>
+
+        <div style={sacredValueStyle}>{value}</div>
+
+        {subtitle && <div style={sacredSubtitleStyle}>{subtitle}</div>}
+
+        {trend && (
+          <div style={sacredTrendStyle}>
+            <span style={{ fontSize: '17px' }}>
+              {trend.isPositive ? '↗' : '↘'}
+            </span>
+            {Math.abs(trend.value)}%
           </div>
         )}
       </div>
+
+      {/* Bottom border shimmer */}
+      <div style={bottomShimmerStyle} />
     </div>
   )
 }

@@ -14,6 +14,7 @@ export interface ColumnDef {
   headerText?: string
   index?: number
   width?: number
+  resizable?: boolean
   // Column type for formatting
   type?:
     | 'currency'
@@ -21,6 +22,7 @@ export interface ColumnDef {
     | 'expiration_date'
     | 'account_number'
     | 'routing_number'
+    | 'dropdown'
     | 'default'
   // Format the column values as USD currency
   formatCurrency?: boolean
@@ -32,6 +34,8 @@ export interface ColumnDef {
   formatAccountNumber?: boolean
   // Format the column values as styled routing numbers
   formatRoutingNumber?: boolean
+  // Dropdown options for editing
+  dropdownOptions?: Array<{ value: string; label?: string }>
 
   renderCell?: (params: {
     row: RowData
@@ -57,9 +61,25 @@ export interface TableProps {
   allRowsSelected?: boolean
   someRowsSelected?: boolean
   onHeaderCheckboxChange: React.ChangeEventHandler<HTMLInputElement>
-  onRowCheckboxChange: (rowId: string) => void
+  onColumnResize?: (columnField: string, newWidth: number) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
+  // Inline editing props
+  editingCell?: { rowId: string; field: string } | null
+  editingValue?: string
+  onCellClick?: (rowId: string, field: string, currentValue: unknown) => void
+  onCellSave?: (rowId: string, field: string, value: string) => void
+  onCellCancel?: () => void
+  onEditingValueChange?: (value: string) => void
+  // Column action props
+  onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
+  onManageColumns?: () => void
+  // Column drag and drop props
+  draggedColumn?: string | null
+  onColumnDragStart?: (field: string) => void
+  onColumnDragOver?: (e: React.DragEvent) => void
+  onColumnDrop?: (targetField: string) => void
+  onColumnDragEnd?: () => void
 }
 
 // New filter interface for embedded DataGrid filtering
@@ -109,6 +129,9 @@ export interface DatagridProps {
 
   // For capturing selection changes
   onSelectionChange?: (selectedRows: string[]) => void
+
+  // For capturing column resize events
+  onColumnResize?: (columnField: string, newWidth: number) => void
 
   // Optional embedded filters that appear between toolbar and table
   filters?: DataGridFilter[]
