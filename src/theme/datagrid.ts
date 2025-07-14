@@ -15,6 +15,17 @@ export interface DataGridTheme {
     border?: string
     borderRadius?: string
     animation?: string
+    padding?: string
+  }
+  contentWrapper: {
+    display: string
+    flexDirection: string
+    width: string
+    backgroundColor: string
+    borderRadius: string
+    border: string
+    overflow: string
+    boxShadow: string
   }
   error: {
     marginBottom: string
@@ -54,7 +65,57 @@ export interface DataGridTheme {
       minWidth: string
       tableLayout: string
       backgroundColor?: string
+      border?: string
+      borderCollapse?: string
     }
+    tableHeader: {
+      backgroundColor: string
+      borderBottom: string
+      color: string
+      fontWeight: string
+    }
+    tableRow: {
+      borderBottom: string
+      backgroundColor?: string
+    }
+    tableRowHover: {
+      backgroundColor: string
+    }
+    tableCell: {
+      padding: string
+      borderRight?: string
+      verticalAlign: string
+      color: string
+    }
+    tableHeaderCell: {
+      padding: string
+      borderRight?: string
+      verticalAlign: string
+      fontWeight: string
+      textAlign: string
+      color: string
+    }
+  }
+  scrollbar: {
+    height: string
+    width: string
+    track: {
+      backgroundColor: string
+      borderRadius: string
+    }
+    thumb: {
+      backgroundColor: string
+      borderRadius: string
+      border?: string
+    }
+    thumbHover: {
+      backgroundColor: string
+    }
+  }
+  sectionDivider: {
+    height: string
+    backgroundColor: string
+    opacity: number
   }
   footerContainer: {
     display: string
@@ -90,6 +151,12 @@ export interface DataGridStyles {
   backdropFilter?: string
   animation?: string
 
+  // Content wrapper styling
+  contentBackgroundColor?: string
+  contentBorderColor?: string
+  contentBorderRadius?: string
+  contentBoxShadow?: string
+
   // Error states
   errorBackgroundColor?: string
   errorColor?: string
@@ -122,9 +189,20 @@ export const dataGridThemes: Record<
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
-      backgroundColor: '#F8FAFC',
+      backgroundColor: 'transparent',
+      borderRadius: '0.75rem',
+      padding: '0',
+    },
+    contentWrapper: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      backgroundColor: '#FFFFFF',
       borderRadius: '0.5rem',
       border: '1px solid #E2E8F0',
+      overflow: 'hidden',
+      boxShadow:
+        '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     },
     error: {
       marginBottom: '0.5rem',
@@ -148,9 +226,7 @@ export const dataGridThemes: Record<
       tableContainer: {
         width: '100%',
         overflowX: 'hidden',
-        borderRadius: '0.5rem',
-        border: '1px solid #E2E8F0',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'transparent',
       },
       tableWrapper: {
         overflowX: 'visible',
@@ -161,7 +237,57 @@ export const dataGridThemes: Record<
         minWidth: 'max-content',
         tableLayout: 'auto',
         backgroundColor: 'transparent',
+        border: '1px solid #E2E8F0',
+        borderCollapse: 'separate',
       },
+      tableHeader: {
+        backgroundColor: '#F8FAFC',
+        borderBottom: '2px solid #E2E8F0',
+        color: '#374151',
+        fontWeight: '600',
+      },
+      tableRow: {
+        borderBottom: '1px solid #F3F4F6',
+        backgroundColor: '#FFFFFF',
+      },
+      tableRowHover: {
+        backgroundColor: '#F9FAFB',
+      },
+      tableCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid #F3F4F6',
+        verticalAlign: 'middle',
+        color: '#374151',
+      },
+      tableHeaderCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid #E2E8F0',
+        verticalAlign: 'middle',
+        fontWeight: '600',
+        textAlign: 'left',
+        color: '#374151',
+      },
+    },
+    scrollbar: {
+      height: '8px',
+      width: '8px',
+      track: {
+        backgroundColor: '#F1F5F9',
+        borderRadius: '4px',
+      },
+      thumb: {
+        backgroundColor: '#CBD5E1',
+        borderRadius: '4px',
+        border: '1px solid #E2E8F0',
+      },
+      thumbHover: {
+        backgroundColor: '#94A3B8',
+      },
+    },
+    sectionDivider: {
+      height: '1px',
+      backgroundColor: '#E2E8F0',
+      opacity: 0.6,
     },
     footerContainer: {
       display: 'flex',
@@ -190,9 +316,20 @@ export const dataGridThemes: Record<
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      backgroundColor: 'transparent',
+      borderRadius: '0.75rem',
+      padding: '0',
+    },
+    contentWrapper: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
       backgroundColor: '#1E293B',
       borderRadius: '0.5rem',
       border: '1px solid #334155',
+      overflow: 'hidden',
+      boxShadow:
+        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     },
     error: {
       marginBottom: '0.5rem',
@@ -216,9 +353,7 @@ export const dataGridThemes: Record<
       tableContainer: {
         width: '100%',
         overflowX: 'hidden',
-        borderRadius: '0.5rem',
-        border: '1px solid #334155',
-        backgroundColor: '#1E293B',
+        backgroundColor: 'transparent',
       },
       tableWrapper: {
         overflowX: 'visible',
@@ -229,7 +364,57 @@ export const dataGridThemes: Record<
         minWidth: 'max-content',
         tableLayout: 'auto',
         backgroundColor: 'transparent',
+        border: '1px solid #334155',
+        borderCollapse: 'separate',
       },
+      tableHeader: {
+        backgroundColor: '#1E293B',
+        borderBottom: '2px solid #334155',
+        color: '#E2E8F0',
+        fontWeight: '600',
+      },
+      tableRow: {
+        borderBottom: '1px solid #334155',
+        backgroundColor: '#1E293B',
+      },
+      tableRowHover: {
+        backgroundColor: '#273746',
+      },
+      tableCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid #334155',
+        verticalAlign: 'middle',
+        color: '#E2E8F0',
+      },
+      tableHeaderCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid #334155',
+        verticalAlign: 'middle',
+        fontWeight: '600',
+        textAlign: 'left',
+        color: '#E2E8F0',
+      },
+    },
+    scrollbar: {
+      height: '8px',
+      width: '8px',
+      track: {
+        backgroundColor: '#1E293B',
+        borderRadius: '4px',
+      },
+      thumb: {
+        backgroundColor: '#475569',
+        borderRadius: '4px',
+        border: '1px solid #334155',
+      },
+      thumbHover: {
+        backgroundColor: '#64748B',
+      },
+    },
+    sectionDivider: {
+      height: '1px',
+      backgroundColor: '#334155',
+      opacity: 0.6,
     },
     footerContainer: {
       display: 'flex',
@@ -258,11 +443,20 @@ export const dataGridThemes: Record<
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      backdropFilter: 'blur(16px)',
-      border: '2px solid rgba(255, 215, 0, 0.5)',
+      backgroundColor: 'transparent',
+      borderRadius: '0.75rem',
+      padding: '0',
+    },
+    contentWrapper: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       borderRadius: '0.5rem',
-      animation: 'datagrid-glow-pulse 2s infinite alternate',
+      border: '2px solid rgba(255, 215, 0, 0.5)',
+      overflow: 'hidden',
+      boxShadow:
+        '0 0 20px rgba(255, 215, 0, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     },
     error: {
       marginBottom: '0.5rem',
@@ -286,10 +480,7 @@ export const dataGridThemes: Record<
       tableContainer: {
         width: '100%',
         overflowX: 'hidden',
-        borderRadius: '0.5rem',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 215, 0, 0.3)',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'transparent',
       },
       tableWrapper: {
         overflowX: 'visible',
@@ -300,7 +491,57 @@ export const dataGridThemes: Record<
         minWidth: 'max-content',
         tableLayout: 'auto',
         backgroundColor: 'transparent',
+        border: '1px solid rgba(255, 215, 0, 0.5)',
+        borderCollapse: 'separate',
       },
+      tableHeader: {
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderBottom: '2px solid rgba(255, 215, 0, 0.5)',
+        color: '#FFD700',
+        fontWeight: '600',
+      },
+      tableRow: {
+        borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      },
+      tableRowHover: {
+        backgroundColor: 'rgba(255, 215, 0, 0.2)',
+      },
+      tableCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+        verticalAlign: 'middle',
+        color: '#FBBF24',
+      },
+      tableHeaderCell: {
+        padding: '0.75rem',
+        borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+        verticalAlign: 'middle',
+        fontWeight: '600',
+        textAlign: 'left',
+        color: '#FFD700',
+      },
+    },
+    scrollbar: {
+      height: '8px',
+      width: '8px',
+      track: {
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        borderRadius: '4px',
+      },
+      thumb: {
+        backgroundColor: 'rgba(255, 215, 0, 0.6)',
+        borderRadius: '4px',
+        border: '1px solid rgba(255, 215, 0, 0.8)',
+      },
+      thumbHover: {
+        backgroundColor: 'rgba(255, 215, 0, 0.8)',
+      },
+    },
+    sectionDivider: {
+      height: '1px',
+      backgroundColor: 'rgba(255, 215, 0, 0.3)',
+      opacity: 0.8,
     },
     footerContainer: {
       display: 'flex',
@@ -349,6 +590,22 @@ export const getDataGridTheme = (styles?: DataGridStyles): DataGridTheme => {
         : baseTheme.container.border,
       borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
       animation: styles.animation || baseTheme.container.animation,
+      padding: styles.padding || baseTheme.container.padding,
+    },
+    contentWrapper: {
+      display: baseTheme.contentWrapper.display,
+      flexDirection: baseTheme.contentWrapper.flexDirection,
+      width: baseTheme.contentWrapper.width,
+      backgroundColor:
+        styles.contentBackgroundColor ||
+        baseTheme.contentWrapper.backgroundColor,
+      borderRadius:
+        styles.contentBorderRadius || baseTheme.contentWrapper.borderRadius,
+      border: styles.contentBorderColor
+        ? `1px solid ${styles.contentBorderColor}`
+        : baseTheme.contentWrapper.border,
+      overflow: baseTheme.contentWrapper.overflow,
+      boxShadow: styles.contentBoxShadow || baseTheme.contentWrapper.boxShadow,
     },
     error: {
       marginBottom: baseTheme.error.marginBottom,
@@ -362,6 +619,8 @@ export const getDataGridTheme = (styles?: DataGridStyles): DataGridTheme => {
     },
     tableContainer: baseTheme.tableContainer,
     table: baseTheme.table,
+    scrollbar: baseTheme.scrollbar,
+    sectionDivider: baseTheme.sectionDivider,
     footerContainer: baseTheme.footerContainer,
     footerGlyph: baseTheme.footerGlyph,
     glyph: baseTheme.glyph,
@@ -385,6 +644,7 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     border: themeConfig.container.border,
     borderRadius: themeConfig.container.borderRadius,
     animation: themeConfig.container.animation,
+    padding: themeConfig.container.padding,
     transition: themeConfig.transition,
     // Layout styling
     height: styles?.height,
@@ -392,8 +652,19 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     minWidth: styles?.minWidth,
     maxHeight: styles?.maxHeight,
     minHeight: styles?.minHeight,
-    padding: styles?.padding,
     margin: styles?.margin,
+  }
+
+  const contentWrapperStyle: React.CSSProperties = {
+    display: themeConfig.contentWrapper.display as any,
+    flexDirection: themeConfig.contentWrapper.flexDirection as any,
+    width: themeConfig.contentWrapper.width,
+    backgroundColor: themeConfig.contentWrapper.backgroundColor,
+    borderRadius: themeConfig.contentWrapper.borderRadius,
+    border: themeConfig.contentWrapper.border,
+    overflow: themeConfig.contentWrapper.overflow,
+    boxShadow: themeConfig.contentWrapper.boxShadow,
+    transition: themeConfig.transition,
   }
 
   const errorStyle: React.CSSProperties = {
@@ -415,6 +686,13 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     position: themeConfig.tableContainer.position as any,
     margin: themeConfig.tableContainer.margin,
     padding: themeConfig.tableContainer.padding,
+  }
+
+  const sectionDividerStyle: React.CSSProperties = {
+    height: themeConfig.sectionDivider.height,
+    backgroundColor: themeConfig.sectionDivider.backgroundColor,
+    opacity: themeConfig.sectionDivider.opacity,
+    width: '100%',
   }
 
   const footerContainerStyle: React.CSSProperties = {
@@ -459,14 +737,46 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
       minWidth: themeConfig.table.table.minWidth,
       tableLayout: themeConfig.table.table.tableLayout as any,
       backgroundColor: themeConfig.table.table.backgroundColor,
+      border: themeConfig.table.table.border,
+      borderCollapse: themeConfig.table.table.borderCollapse as any,
+    } as React.CSSProperties,
+    tableHeader: {
+      backgroundColor: themeConfig.table.tableHeader.backgroundColor,
+      borderBottom: themeConfig.table.tableHeader.borderBottom,
+      color: themeConfig.table.tableHeader.color,
+      fontWeight: themeConfig.table.tableHeader.fontWeight,
+    } as React.CSSProperties,
+    tableRow: {
+      borderBottom: themeConfig.table.tableRow.borderBottom,
+      backgroundColor: themeConfig.table.tableRow.backgroundColor,
+    } as React.CSSProperties,
+    tableRowHover: {
+      backgroundColor: themeConfig.table.tableRowHover.backgroundColor,
+    } as React.CSSProperties,
+    tableCell: {
+      padding: themeConfig.table.tableCell.padding,
+      borderRight: themeConfig.table.tableCell.borderRight,
+      verticalAlign: themeConfig.table.tableCell.verticalAlign as any,
+      color: themeConfig.table.tableCell.color,
+    } as React.CSSProperties,
+    tableHeaderCell: {
+      padding: themeConfig.table.tableHeaderCell.padding,
+      borderRight: themeConfig.table.tableHeaderCell.borderRight,
+      verticalAlign: themeConfig.table.tableHeaderCell.verticalAlign as any,
+      fontWeight: themeConfig.table.tableHeaderCell.fontWeight,
+      textAlign: themeConfig.table.tableHeaderCell.textAlign as any,
+      color: themeConfig.table.tableHeaderCell.color,
     } as React.CSSProperties,
   }
 
   return {
     container: containerStyle,
+    contentWrapper: contentWrapperStyle,
     error: errorStyle,
     tableContainer: tableContainerStyle,
     table: tableStyles,
+    scrollbar: themeConfig.scrollbar,
+    sectionDivider: sectionDividerStyle,
     footerContainer: footerContainerStyle,
     footerGlyph: footerGlyphStyle,
     glyph: glyphStyle,

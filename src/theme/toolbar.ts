@@ -2,7 +2,7 @@
 // TOOLBAR THEME SYSTEM
 // --------------------------------------------------------------------------
 import React from 'react'
-import { TRANSITIONS, SHADOWS } from './shared'
+import { TRANSITIONS } from './shared'
 
 export interface ToolbarTheme {
   container: {
@@ -72,12 +72,12 @@ export const toolbarThemes: Record<'light' | 'dark' | 'sacred', ToolbarTheme> =
   {
     light: {
       container: {
-        background: 'rgba(248, 250, 252, 0.8)',
-        border: '1px solid rgba(226, 232, 240, 0.6)',
-        borderRadius: '8px',
-        boxShadow: SHADOWS.light.small,
-        backdropFilter: 'blur(4px)',
-        padding: '0.75rem',
+        background: 'transparent',
+        border: 'none',
+        borderRadius: '0',
+        boxShadow: 'none',
+        backdropFilter: 'none',
+        padding: '1rem',
       },
       glyph: {
         color: 'rgba(107, 114, 128, 0.3)',
@@ -87,12 +87,12 @@ export const toolbarThemes: Record<'light' | 'dark' | 'sacred', ToolbarTheme> =
     },
     dark: {
       container: {
-        background: 'rgba(17, 24, 39, 0.8)',
-        border: '1px solid rgba(75, 85, 99, 0.6)',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2)',
-        backdropFilter: 'blur(4px)',
-        padding: '0.75rem',
+        background: 'transparent',
+        border: 'none',
+        borderRadius: '0',
+        boxShadow: 'none',
+        backdropFilter: 'none',
+        padding: '1rem',
       },
       glyph: {
         color: 'rgba(156, 163, 175, 0.3)',
@@ -102,17 +102,16 @@ export const toolbarThemes: Record<'light' | 'dark' | 'sacred', ToolbarTheme> =
     },
     sacred: {
       container: {
-        background: 'rgba(0, 0, 0, 0.8)',
-        border: '1px solid rgba(255, 215, 0, 0.3)',
-        borderRadius: '0.5rem',
-        boxShadow: SHADOWS.sacred.small,
-        backdropFilter: 'blur(4px)',
+        background: 'transparent',
+        border: 'none',
+        borderRadius: '0',
+        boxShadow: 'none',
+        backdropFilter: 'none',
         padding: '1rem',
         backgroundImage: `
-        radial-gradient(circle at top right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+        radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.02) 0%, transparent 50%)
       `,
-        animation: 'sacredGlowPulse 2s infinite alternate',
       },
       glyph: {
         color: 'rgba(255, 215, 0, 0.2)',

@@ -43,6 +43,18 @@ export interface ComplexTextEditorTheme {
     boxShadow: string
   }
 
+  // Scrollbar styling
+  scrollbar: {
+    width: string
+    trackBackground: string
+    thumbBackground: string
+    thumbHoverBackground: string
+    thumbActiveBackground: string
+    thumbBorderRadius: string
+    trackBorderRadius: string
+    thumbBorder: string
+  }
+
   // Sacred theme specific
   sacred: {
     glyph: {
@@ -134,6 +146,16 @@ export const complexTextEditorThemes: Record<
       borderRadius: '0 0 8px 8px',
       boxShadow: SHADOWS.light.small,
     },
+    scrollbar: {
+      width: '8px',
+      trackBackground: 'rgba(248, 250, 252, 1)',
+      thumbBackground: 'rgba(203, 213, 225, 1)',
+      thumbHoverBackground: 'rgba(148, 163, 184, 1)',
+      thumbActiveBackground: 'rgba(100, 116, 139, 1)',
+      thumbBorderRadius: '4px',
+      trackBorderRadius: '4px',
+      thumbBorder: 'none',
+    },
     sacred: {
       glyph: {
         color: 'rgba(255, 215, 0, 0.2)',
@@ -176,6 +198,16 @@ export const complexTextEditorThemes: Record<
       borderRadius: '0 0 8px 8px',
       boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4)',
     },
+    scrollbar: {
+      width: '8px',
+      trackBackground: 'rgba(31, 41, 55, 1)',
+      thumbBackground: 'rgba(75, 85, 99, 1)',
+      thumbHoverBackground: 'rgba(107, 114, 128, 1)',
+      thumbActiveBackground: 'rgba(156, 163, 175, 1)',
+      thumbBorderRadius: '4px',
+      trackBorderRadius: '4px',
+      thumbBorder: 'none',
+    },
     sacred: {
       glyph: {
         color: 'rgba(255, 215, 0, 0.2)',
@@ -217,6 +249,16 @@ export const complexTextEditorThemes: Record<
       minHeight: '150px',
       borderRadius: '0 0 12px 12px',
       boxShadow: SHADOWS.sacred.small,
+    },
+    scrollbar: {
+      width: '12px',
+      trackBackground: 'rgba(0, 0, 0, 0.5)',
+      thumbBackground: 'rgba(255, 215, 0, 0.3)',
+      thumbHoverBackground: 'rgba(255, 215, 0, 0.5)',
+      thumbActiveBackground: 'rgba(255, 215, 0, 0.7)',
+      thumbBorderRadius: '6px',
+      trackBorderRadius: '6px',
+      thumbBorder: '1px solid rgba(255, 215, 0, 0.2)',
     },
     sacred: {
       glyph: {
@@ -277,6 +319,16 @@ export const getComplexTextEditorTheme = (
       borderRadius: baseTheme.editorArea.borderRadius,
       boxShadow: styles.editorBoxShadow || baseTheme.editorArea.boxShadow,
     },
+    scrollbar: {
+      width: baseTheme.scrollbar.width,
+      trackBackground: baseTheme.scrollbar.trackBackground,
+      thumbBackground: baseTheme.scrollbar.thumbBackground,
+      thumbHoverBackground: baseTheme.scrollbar.thumbHoverBackground,
+      thumbActiveBackground: baseTheme.scrollbar.thumbActiveBackground,
+      thumbBorderRadius: baseTheme.scrollbar.thumbBorderRadius,
+      trackBorderRadius: baseTheme.scrollbar.trackBorderRadius,
+      thumbBorder: baseTheme.scrollbar.thumbBorder,
+    },
     sacred: {
       glyph: {
         color: styles.sacredGlyphColor || baseTheme.sacred.glyph.color,
@@ -295,6 +347,54 @@ export const getComplexTextEditorTheme = (
   }
 }
 
+// Scrollbar style injection function
+const injectScrollbarStyles = (
+  themeConfig: ComplexTextEditorTheme,
+  theme: string
+) => {
+  const className = `complex-text-editor-scrollbar-${theme}`
+
+  // Check if styles are already injected
+  if (document.getElementById(className)) {
+    return className
+  }
+
+  const style = document.createElement('style')
+  style.id = className
+  style.textContent = `
+    .${className}::-webkit-scrollbar {
+      width: ${themeConfig.scrollbar.width};
+      height: ${themeConfig.scrollbar.width};
+    }
+    
+    .${className}::-webkit-scrollbar-track {
+      background: ${themeConfig.scrollbar.trackBackground};
+      border-radius: ${themeConfig.scrollbar.trackBorderRadius};
+    }
+    
+    .${className}::-webkit-scrollbar-thumb {
+      background: ${themeConfig.scrollbar.thumbBackground};
+      border-radius: ${themeConfig.scrollbar.thumbBorderRadius};
+      border: ${themeConfig.scrollbar.thumbBorder};
+    }
+    
+    .${className}::-webkit-scrollbar-thumb:hover {
+      background: ${themeConfig.scrollbar.thumbHoverBackground};
+    }
+    
+    .${className}::-webkit-scrollbar-thumb:active {
+      background: ${themeConfig.scrollbar.thumbActiveBackground};
+    }
+    
+    .${className}::-webkit-scrollbar-corner {
+      background: ${themeConfig.scrollbar.trackBackground};
+    }
+  `
+
+  document.head.appendChild(style)
+  return className
+}
+
 // Main style generator function
 export const getComplexTextEditorStyles = (
   styles?: ComplexTextEditorStyles,
@@ -303,6 +403,10 @@ export const getComplexTextEditorStyles = (
   const themeConfig = getComplexTextEditorTheme(styles)
   const formFieldTheme = getFormFieldTheme(styles)
   const isSacredTheme = styles?.theme === 'sacred'
+  const theme = styles?.theme || 'light'
+
+  // Inject scrollbar styles and get the class name
+  const scrollbarClassName = injectScrollbarStyles(themeConfig, theme)
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -366,6 +470,9 @@ export const getComplexTextEditorStyles = (
     transition: themeConfig.transition,
     outline: 'none',
     resize: 'vertical' as const,
+    // Scrollbar styling
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${themeConfig.scrollbar.thumbBackground} ${themeConfig.scrollbar.trackBackground}`,
     // Sacred theme effects
     ...(isSacredTheme && {
       textShadow: themeConfig.sacred.textGlow,
@@ -396,5 +503,6 @@ export const getComplexTextEditorStyles = (
     toggleRow: toggleRowStyle,
     editorArea: editorAreaStyle,
     sacredGlyph: sacredGlyphStyle,
+    scrollbarClassName,
   }
 }

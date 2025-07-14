@@ -116,10 +116,6 @@ export { getStepperStyles } from './stepper'
 export type { SwitchTheme, SwitchStyles } from './switch'
 export { getSwitchStyles } from './switch'
 
-// Export card theme system
-export type { CardTheme, CardStyles } from './card'
-export { getCardStyles } from './card'
-
 // Export shared elements
 export {
   SACRED_GLYPHS,
