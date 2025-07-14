@@ -3,9 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import SearchableDropdown, {
+import SearchableSimple, {
   DropdownOption,
-} from '../Field/Dropdown/Searchable'
+} from '../Field/Dropdown/SearchableSimple'
 import Accordion from '../Accordion'
 import Drawer from '../Drawer'
 import Typography from '../Typography'
@@ -638,7 +638,7 @@ function Nav({
         {/* Search dropdown */}
         {showSearchableNav && (
           <div style={styles.searchContainer}>
-            <SearchableDropdown
+            <SearchableSimple
               label={searchableNavLabel}
               options={navOptions}
               onChange={handleDropdownChange}
