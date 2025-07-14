@@ -13,7 +13,6 @@ import RadioGroup, {
 import Popup, { PopupProps } from './components/Form/Popup'
 import CustomDialog, { CustomDialogProps } from './components/Form/Dialog'
 import ContentSection, { ContentSectionProps } from './components/Content'
-import Card, { CardProps } from './components/Card'
 import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
 import Nav, { NavProps, NavItem } from './components/Nav' // <-- Vertical-only Nav
 import PricingTable, { PricingProps } from './components/PricingTable'
@@ -179,7 +178,6 @@ export { ConfirmationCodeInput }
 export { RadioGroup }
 export { Popup }
 export { ContentSection }
-export { Card }
 export { CodeCopy }
 export { Nav }
 export { PricingTable }
@@ -271,7 +269,6 @@ export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
 export type { PopupProps }
 export type { ContentSectionProps }
-export type { CardProps }
 export type { CodeCopyProps }
 export type { NavProps } // vertical-only
 export type { PricingProps }

@@ -11,7 +11,7 @@ import { ImageProps } from './Structure/image/useImage'
 import { PricingProps } from '../PricingTable'
 import { StepperProps } from '../Stepper'
 import { TransferListProps } from '../TransferList'
-import { CardProps } from '../Card'
+
 import { CodeCopyProps } from '../CodeCopy'
 import { DateFieldProps } from '../Field/Date/DateField'
 import { DropdownProps } from '../Field/Dropdown/Regular'
@@ -49,7 +49,7 @@ import useButton from './Structure/button/useButton'
 import usePricing from './Structure/pricing/usePricing'
 import useStepper from './Structure/stepper/useStepper'
 import useTransferList from './Structure/transferlist/useTransferList'
-import useCard from './Structure/card/useCard'
+
 import useCodeCopy from './Structure/codecopy/useCodeCopy'
 import useTextField from './Structure/textfield/useTextField'
 import useDateField from './Structure/datefield/useDateField'
@@ -98,7 +98,7 @@ export interface ContentSectionProps {
     pricing?: PricingProps
     stepper?: StepperProps | StepperProps[]
     transferlist?: TransferListProps | TransferListProps[]
-    card?: CardProps | CardProps[]
+
     codecopy?: CodeCopyProps | CodeCopyProps[]
     textfield?: TextFieldProps | TextFieldProps[]
     datefield?: DateFieldProps | DateFieldProps[]
@@ -192,7 +192,7 @@ const RenderContent: React.FC<
   addElements(
     useTransferList({ transferlist: injectsacredtheme(props.transferlist) })
   )
-  addElements(useCard({ card: injectsacredtheme(props.card) }))
+
   addElements(useCodeCopy({ codecopy: injectsacredtheme(props.codecopy) }))
   addElements(
     useSearchableDropdown({
