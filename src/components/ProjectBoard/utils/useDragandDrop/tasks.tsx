@@ -2,91 +2,181 @@
 
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { ColumnData } from '../../types'
-
-/** Input shape for a full cross-column move. */
-interface HandleTaskDropArgs {
-  dropColumnIndex: number
-  dropTaskIndex: number
-  allColumns: ColumnData[]
-  setAllColumns: React.Dispatch<React.SetStateAction<ColumnData[]>>
-}
 
 /** Item describing which task is being dragged. */
 interface DragInfo {
+  taskId: string
   columnIndex: number
   taskIndex: number
 }
 
 /**
- * A custom hook to manage drag-and-drop for tasks (cards).
- * This version splices tasks out of one column and into another,
- * updating the global array (allColumns).
+ * GitHub-like drag and drop hook for tasks.
+ * Simplifies the drag model - tasks are directly draggable without pre-selection.
  */
 export function useTaskDragAndDrop() {
   const [dragItem, setDragItem] = React.useState<DragInfo | null>(null)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [dragOverInfo, setDragOverInfo] = React.useState<{
+    columnIndex: number
+    taskIndex: number
+  } | null>(null)
 
-  function handleTaskDragStart(item: DragInfo) {
-    setDragItem(item)
-  }
+  const handleTaskDragStart = useCallback(
+    (
+      e: React.DragEvent,
+      taskId: string,
+      columnIndex: number,
+      taskIndex: number
+    ) => {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', taskId)
 
-  function handleTaskDragOver(e: React.DragEvent) {
+      setDragItem({ taskId, columnIndex, taskIndex })
+      setIsDragging(true)
+
+      // Add ghost image styling
+      const dragImage = e.currentTarget.cloneNode(true) as HTMLElement
+      dragImage.style.opacity = '0.5'
+      dragImage.style.transform = 'rotate(5deg)'
+      e.dataTransfer.setDragImage(dragImage, 0, 0)
+    },
+    []
+  )
+
+  const handleTaskDragOver = useCallback(
+    (e: React.DragEvent, columnIndex: number, taskIndex: number) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+
+      setDragOverInfo({ columnIndex, taskIndex })
+    },
+    []
+  )
+
+  const handleTaskDragEnter = useCallback(
+    (e: React.DragEvent, columnIndex: number, taskIndex: number) => {
+      e.preventDefault()
+      setDragOverInfo({ columnIndex, taskIndex })
+    },
+    []
+  )
+
+  const handleTaskDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-  }
+    // Only clear drag over info if we're actually leaving the drop zone
+    const relatedTarget = e.relatedTarget as HTMLElement
+    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+      setDragOverInfo(null)
+    }
+  }, [])
 
-  function handleTaskDrop(
-    e: React.DragEvent,
-    {
-      dropColumnIndex,
-      dropTaskIndex,
-      allColumns,
-      setAllColumns,
-    }: HandleTaskDropArgs
-  ) {
-    e.preventDefault()
-    if (!dragItem) return
+  const handleTaskDrop = useCallback(
+    (
+      e: React.DragEvent,
+      dropColumnIndex: number,
+      dropTaskIndex: number,
+      allColumns: ColumnData[],
+      setAllColumns: React.Dispatch<React.SetStateAction<ColumnData[]>>
+    ) => {
+      e.preventDefault()
 
-    const { columnIndex: sourceColIdx, taskIndex: sourceTaskIdx } = dragItem
-    if (sourceColIdx < 0 || sourceColIdx >= allColumns.length) return
+      if (!dragItem) return
 
-    const sourceColumn = allColumns[sourceColIdx]
-    if (sourceTaskIdx < 0 || sourceTaskIdx >= sourceColumn.tasks.length) return
+      const { columnIndex: sourceColIdx, taskIndex: sourceTaskIdx } = dragItem
 
-    // The task being moved
-    const [movedTask] = sourceColumn.tasks.splice(sourceTaskIdx, 1)
+      // Don't do anything if dropping in the same position
+      if (sourceColIdx === dropColumnIndex && sourceTaskIdx === dropTaskIndex) {
+        setDragItem(null)
+        setIsDragging(false)
+        setDragOverInfo(null)
+        return
+      }
 
-    // Insert into the target column
-    if (dropColumnIndex < 0 || dropColumnIndex >= allColumns.length) {
-      // If invalid drop, just put it back
-      sourceColumn.tasks.splice(sourceTaskIdx, 0, movedTask)
+      if (sourceColIdx < 0 || sourceColIdx >= allColumns.length) return
+      if (dropColumnIndex < 0 || dropColumnIndex >= allColumns.length) return
+
+      // Create a deep copy of all columns to avoid mutation
+      const newColumns = allColumns.map(col => ({
+        ...col,
+        tasks: [...col.tasks],
+      }))
+
+      const sourceColumn = newColumns[sourceColIdx]
+      const destColumn = newColumns[dropColumnIndex]
+      const sourceTask = sourceColumn.tasks[sourceTaskIdx]
+
+      if (!sourceTask) return
+
+      // Remove task from source column
+      sourceColumn.tasks.splice(sourceTaskIdx, 1)
+
+      // Add task to destination column at the specified position
+      const insertIndex = Math.min(dropTaskIndex, destColumn.tasks.length)
+      destColumn.tasks.splice(insertIndex, 0, sourceTask)
+
+      // Update state with the new columns array
+      setAllColumns(newColumns)
+
+      // Clear drag state
       setDragItem(null)
-      return
-    }
-    const destColumn = allColumns[dropColumnIndex]
+      setIsDragging(false)
+      setDragOverInfo(null)
+    },
+    [dragItem]
+  )
 
-    // Clamp the dropTaskIndex
-    if (dropTaskIndex < 0) dropTaskIndex = 0
-    if (dropTaskIndex > destColumn.tasks.length) {
-      dropTaskIndex = destColumn.tasks.length
-    }
+  const handleColumnDragOver = useCallback(
+    (e: React.DragEvent, columnIndex: number, allColumns: ColumnData[]) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
 
-    destColumn.tasks.splice(dropTaskIndex, 0, movedTask)
+      // If dragging over empty space in column, set drop position to end
+      setDragOverInfo({
+        columnIndex,
+        taskIndex: allColumns[columnIndex]?.tasks.length || 0,
+      })
+    },
+    []
+  )
 
-    // Update the global store
-    const newCols = [...allColumns]
-    newCols[sourceColIdx] = { ...sourceColumn }
-    newCols[dropColumnIndex] = { ...destColumn }
-    setAllColumns(newCols)
+  const handleColumnDrop = useCallback(
+    (
+      e: React.DragEvent,
+      columnIndex: number,
+      allColumns: ColumnData[],
+      setAllColumns: React.Dispatch<React.SetStateAction<ColumnData[]>>
+    ) => {
+      e.preventDefault()
 
+      if (!dragItem) return
+
+      // Drop the task at the end of the target column
+      const taskIndex = allColumns[columnIndex]?.tasks.length || 0
+      handleTaskDrop(e, columnIndex, taskIndex, allColumns, setAllColumns)
+    },
+    [dragItem, handleTaskDrop]
+  )
+
+  const resetDragState = useCallback(() => {
     setDragItem(null)
-  }
+    setIsDragging(false)
+    setDragOverInfo(null)
+  }, [])
 
   return {
     dragItem,
-    setDragItem,
+    isDragging,
+    dragOverInfo,
     handleTaskDragStart,
     handleTaskDragOver,
+    handleTaskDragEnter,
+    handleTaskDragLeave,
     handleTaskDrop,
+    handleColumnDragOver,
+    handleColumnDrop,
+    resetDragState,
   }
 }

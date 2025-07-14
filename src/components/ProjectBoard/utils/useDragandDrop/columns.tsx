@@ -2,72 +2,145 @@
 
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { ColumnData } from '../../types'
 
-/** A small helper type describing the item we're dragging (column or task). */
-type DragItem = {
-  type: 'column' | 'task'
+/** Column drag information */
+interface ColumnDragInfo {
+  columnId: string
   columnIndex: number
-  taskIndex?: number
-} | null
+}
 
 /**
- * Hook that manages column-level drag and drop reordering.
- * - If a user checks a column’s checkbox, we allow them to drag it left/right.
- * - We reorder the array in state whenever they drop it on another column.
+ * GitHub-like column drag and drop hook.
+ * Simplifies column reordering - columns are directly draggable without pre-selection.
  */
 export function useColumnDragAndDrop(
   columnState: ColumnData[],
   setColumnState: React.Dispatch<React.SetStateAction<ColumnData[]>>
 ) {
-  // Which column/task is being dragged
-  const [dragItem, setDragItem] = React.useState<DragItem>(null)
+  const [draggedColumn, setDraggedColumn] =
+    React.useState<ColumnDragInfo | null>(null)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const [dragOverColumnIndex, setDragOverColumnIndex] = React.useState<
+    number | null
+  >(null)
 
   /** Utility to reorder columns in the array. */
-  function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
-    const result = [...list]
-    const [removed] = result.splice(startIndex, 1)
-    result.splice(endIndex, 0, removed)
-    return result
-  }
+  const reorderColumns = useCallback(
+    <T,>(list: T[], startIndex: number, endIndex: number): T[] => {
+      const result = [...list]
+      const [removed] = result.splice(startIndex, 1)
+      result.splice(endIndex, 0, removed)
+      return result
+    },
+    []
+  )
 
-  // --------------------------------------------------------------------------
-  // COLUMN DRAG EVENTS
-  // --------------------------------------------------------------------------
-  function handleColumnDragStart(e: React.DragEvent, columnIndex: number) {
-    // Let the browser know we intend a "move" operation
-    e.dataTransfer.effectAllowed = 'move'
-    setDragItem({ type: 'column', columnIndex })
-  }
+  const handleColumnDragStart = useCallback(
+    (e: React.DragEvent, columnIndex: number) => {
+      const column = columnState[columnIndex]
+      if (!column) return
 
-  function handleColumnDragOver(e: React.DragEvent) {
-    // Must prevent default so drop is allowed
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', column._id)
+
+      setDraggedColumn({ columnId: column._id, columnIndex })
+      setIsDragging(true)
+
+      // Add some visual feedback to the drag image
+      const dragImage = e.currentTarget.cloneNode(true) as HTMLElement
+      dragImage.style.opacity = '0.7'
+      dragImage.style.transform = 'rotate(2deg)'
+      e.dataTransfer.setDragImage(dragImage, 0, 0)
+    },
+    [columnState]
+  )
+
+  const handleColumnDragOver = useCallback(
+    (e: React.DragEvent, columnIndex: number) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+
+      if (draggedColumn && draggedColumn.columnIndex !== columnIndex) {
+        setDragOverColumnIndex(columnIndex)
+      }
+    },
+    [draggedColumn]
+  )
+
+  const handleColumnDragEnter = useCallback(
+    (e: React.DragEvent, columnIndex: number) => {
+      e.preventDefault()
+
+      if (draggedColumn && draggedColumn.columnIndex !== columnIndex) {
+        setDragOverColumnIndex(columnIndex)
+      }
+    },
+    [draggedColumn]
+  )
+
+  const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    // Indicate we're moving the item
-    e.dataTransfer.dropEffect = 'move'
-  }
 
-  function handleColumnDrop(e: React.DragEvent, dropColumnIndex: number) {
-    e.preventDefault()
-
-    // If no valid dragItem or not a column, clear & return
-    if (!dragItem || dragItem.type !== 'column') {
-      setDragItem(null)
-      return
+    // Only clear drag over if we're actually leaving the drop zone
+    const relatedTarget = e.relatedTarget as HTMLElement
+    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+      setDragOverColumnIndex(null)
     }
+  }, [])
 
-    // Actually reorder columns in state
-    const newCols = reorder(columnState, dragItem.columnIndex, dropColumnIndex)
-    setColumnState(newCols)
+  const handleColumnDrop = useCallback(
+    (e: React.DragEvent, dropColumnIndex: number) => {
+      e.preventDefault()
 
-    // Done dragging
-    setDragItem(null)
-  }
+      if (!draggedColumn) {
+        setIsDragging(false)
+        setDragOverColumnIndex(null)
+        return
+      }
+
+      const sourceIndex = draggedColumn.columnIndex
+
+      // Don't do anything if dropping in the same position
+      if (sourceIndex === dropColumnIndex) {
+        setDraggedColumn(null)
+        setIsDragging(false)
+        setDragOverColumnIndex(null)
+        return
+      }
+
+      // Reorder columns
+      const newColumns = reorderColumns(
+        columnState,
+        sourceIndex,
+        dropColumnIndex
+      )
+      setColumnState(newColumns)
+
+      // Reset drag state
+      setDraggedColumn(null)
+      setIsDragging(false)
+      setDragOverColumnIndex(null)
+    },
+    [draggedColumn, columnState, reorderColumns, setColumnState]
+  )
+
+  const resetColumnDragState = useCallback(() => {
+    setDraggedColumn(null)
+    setIsDragging(false)
+    setDragOverColumnIndex(null)
+  }, [])
 
   return {
+    draggedColumn,
+    isDragging,
+    dragOverColumnIndex,
     handleColumnDragStart,
     handleColumnDragOver,
+    handleColumnDragEnter,
+    handleColumnDragLeave,
     handleColumnDrop,
+    resetColumnDragState,
   }
 }
