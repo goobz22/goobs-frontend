@@ -17,9 +17,10 @@ const getStyles = () => {
       alignItems: 'center',
       flexShrink: 0,
       height: '100%',
-      padding: '0 16px',
+      padding: '0 8px',
       gap: '10px',
-      width: '12rem', // w-48
+      minWidth: '0',
+      maxWidth: '12rem', // max-w-48
     } as React.CSSProperties,
   }
 }

@@ -21,9 +21,12 @@ const getStyles = () => {
     container: {
       display: 'flex',
       alignItems: 'center',
-      flexShrink: 0,
       height: '100%',
-      padding: '0 16px',
+      padding: '0 8px',
+      minWidth: '0',
+      flex: '1 1 auto',
+      maxWidth: '100%',
+      overflow: 'hidden',
     } as React.CSSProperties,
   }
 }

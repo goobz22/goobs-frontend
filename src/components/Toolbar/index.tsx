@@ -32,6 +32,13 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   useEffect(() => {
     const style = document.createElement('style')
     style.textContent = `
+      .toolbar-container {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      
       @media (min-width: 768px) {
         .toolbar-mobile-container {
           display: none !important;
@@ -41,7 +48,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           align-items: center;
           justify-content: space-between;
           width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
           gap: 1rem;
+          overflow: hidden;
         }
       }
       @media (min-width: 1280px) {
@@ -49,6 +59,9 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
         .toolbar-tablet-container {
             display: none !important;
@@ -57,7 +70,20 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           display: flex !important;
           align-items: center;
           gap: 1rem;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
+          min-width: 0;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+        .toolbar-desktop-left {
+          flex: 0 0 auto;
+          max-width: 50%;
+        }
+        .toolbar-desktop-right {
+          flex: 1 1 auto;
+          justify-content: flex-end;
+          max-width: 50%;
+          min-width: 0;
         }
       }
     `
@@ -68,7 +94,17 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   }, [])
 
   return (
-    <div style={computedStyles.container} className="toolbar-container">
+    <div
+      style={{
+        ...computedStyles.container,
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: '0',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+      }}
+      className="toolbar-container"
+    >
       {isSacredTheme && <span style={computedStyles.glyph}>𓊗</span>}
 
       {/* Desktop */}
@@ -77,7 +113,13 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
         {searchbarProps && <LeftCenter {...searchbarProps} styles={styles} />}
       </div>
       <div
-        style={computedStyles.desktopRight}
+        style={{
+          ...computedStyles.desktopRight,
+          minWidth: '0',
+          flex: '1 1 auto',
+          maxWidth: '100%',
+          overflow: 'hidden',
+        }}
         className="toolbar-desktop-right"
       >
         {rightCenterProps && (
@@ -90,7 +132,11 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
 
       {/* Tablet */}
       <div
-        style={computedStyles.tabletContainer}
+        style={{
+          ...computedStyles.tabletContainer,
+          maxWidth: '100%',
+          overflow: 'hidden',
+        }}
         className="toolbar-tablet-container"
       >
         <div
@@ -99,6 +145,9 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             alignItems: 'center',
             gap: '1rem',
             flexWrap: 'wrap',
+            flex: '1 1 auto',
+            minWidth: '0',
+            overflow: 'hidden',
           }}
         >
           <Left buttons={buttons} styles={styles} />
@@ -109,6 +158,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             alignItems: 'center',
             gap: '1rem',
             flexWrap: 'wrap',
+            flex: '0 0 auto',
+            minWidth: '0',
+            maxWidth: '100%',
+            overflow: 'hidden',
           }}
         >
           {rightCenterProps && (
@@ -122,19 +175,23 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
 
       {/* Mobile */}
       <div
-        style={computedStyles.mobileContainer}
+        style={{
+          ...computedStyles.mobileContainer,
+          maxWidth: '100%',
+          overflow: 'hidden',
+        }}
         className="toolbar-mobile-container"
       >
         <div style={computedStyles.mobileRow}>
           <Left buttons={buttons} styles={styles} />
         </div>
         {rightCenterProps && (
-          <div>
+          <div style={{ minWidth: '0', maxWidth: '100%' }}>
             <RightCenter {...rightCenterProps} styles={styles} />
           </div>
         )}
         {dropdowns?.map((dd, index) => (
-          <div key={index}>
+          <div key={index} style={{ minWidth: '0', maxWidth: '100%' }}>
             <Right dropdown={dd} styles={styles} />
           </div>
         ))}
