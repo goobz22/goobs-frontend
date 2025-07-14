@@ -67,10 +67,13 @@ import PhoneNumberField from './components/Field/PhoneNumber'
 import Searchbar, { SearchbarProps } from './components/Field/Search'
 import TextField, { TextFieldProps } from './components/Field/Text'
 import USDField, { USDFieldProps } from './components/Field/USD'
-import SearchableDropdown, {
-  SearchableDropdownProps,
+import SearchableSimple, {
+  SearchableSimpleProps,
   DropdownOption,
-} from './components/Field/Dropdown/Searchable'
+} from './components/Field/Dropdown/SearchableSimple'
+import SearchableHistory, {
+  SearchableHistoryProps,
+} from './components/Field/Dropdown/SearchableHistory'
 import AccountNumber, {
   AccountNumberProps,
 } from './components/Field/Number/AccountNumber'
@@ -221,7 +224,8 @@ export type { PasswordFieldProps }
 export type { SearchbarProps }
 export type { TextFieldProps }
 export type { USDFieldProps }
-export type { SearchableDropdownProps }
+export type { SearchableSimpleProps }
+export type { SearchableHistoryProps }
 export type { MACAddressFieldProps }
 export type { VLANFieldProps }
 // NEW: Export AddTask / ShowTask / ManageTask
@@ -243,7 +247,8 @@ export type { PercentageFieldProps }
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
 
-export { SearchableDropdown }
+export { SearchableSimple }
+export { SearchableHistory }
 export { AccountNumber }
 export { RoutingNumber }
 export { CVV }
