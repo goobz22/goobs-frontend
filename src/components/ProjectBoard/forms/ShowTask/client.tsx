@@ -3,12 +3,16 @@
 import React, { useState, useEffect } from 'react'
 import Dialog from '../../../Dialog'
 import CloseIcon from '../../../Icons/Close'
+import EditIcon from '../../../Icons/Edit'
+import DeleteIcon from '../../../Icons/Delete'
+import ContentCopyIcon from '../../../Icons/ContentCopy'
 import MoreVertIcon from '../../../Icons/MoreVert'
-import Popover from '../../../Popover'
+
+import StyledTooltip from '../../../Tooltip'
 import Typography from '../../../Typography'
 import CustomButton from '../../../Button'
 import ComplexTextEditor from '../../../ComplexTextEditor'
-import SearchableDropdown from '../../../Field/Dropdown/Searchable'
+import SearchableSimple from '../../../Field/Dropdown/SearchableSimple'
 import MultipleSelectChip from '../../../Field/Dropdown/MultiSelect'
 import DateField from '../../../Field/Date/DateField'
 import TextField from '../../../Field/Text'
@@ -80,63 +84,99 @@ export interface ShowTaskProps {
   styles?: ProjectBoardStyles
 }
 
-const getStyles = (styles?: ProjectBoardStyles) => {
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
+const getShowTaskStyles = (styles?: ProjectBoardStyles) => {
+  const theme = styles?.theme || 'light'
+  const isSacredTheme = theme === 'sacred'
+  const isDarkTheme = theme === 'dark'
+
+  // Get base theme colors
+  const colors = {
+    primary: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E5E7EB' : '#1F2937',
+    secondary: isSacredTheme ? '#FBBF24' : isDarkTheme ? '#9CA3AF' : '#6B7280',
+    border: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.3)'
+      : isDarkTheme
+        ? 'rgba(75, 85, 99, 0.5)'
+        : 'rgba(226, 232, 240, 0.8)',
+    background: isSacredTheme
+      ? 'rgba(0, 0, 0, 0.95)'
+      : isDarkTheme
+        ? 'rgba(31, 41, 55, 0.95)'
+        : 'rgba(255, 255, 255, 0.95)',
+    cardBackground: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.02)'
+      : isDarkTheme
+        ? 'rgba(75, 85, 99, 0.05)'
+        : 'rgba(248, 250, 252, 0.5)',
+    textPrimary: isSacredTheme
+      ? '#FFD700'
+      : isDarkTheme
+        ? '#E5E7EB'
+        : '#1F2937',
+    textSecondary: isSacredTheme
+      ? '#FBBF24'
+      : isDarkTheme
+        ? '#9CA3AF'
+        : '#6B7280',
+  }
+
+  const fonts = {
+    primary: isSacredTheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+    secondary: isSacredTheme ? 'Crimson Text, serif' : 'Inter, sans-serif',
+  }
 
   return {
     dialog: {
       borderWidth: '2px',
       borderRadius: '0.5rem',
       overflow: 'hidden',
-      ...(isSacredTheme
-        ? {
-            borderColor: 'rgba(255, 215, 0, 0.5)',
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
-            animation: 'show-task-glow-pulse 2s infinite alternate',
-          }
-        : isDarkTheme
-          ? {
-              borderColor: 'rgba(75, 85, 99, 0.5)',
-              backgroundColor: 'rgba(17, 24, 39, 0.95)',
-            }
-          : {
-              borderColor: 'black',
-            }),
+      borderColor: colors.border,
+      backgroundColor: colors.background,
+      color: colors.textPrimary,
+      ...(isSacredTheme && {
+        animation: 'show-task-glow-pulse 2s infinite alternate',
+        boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
+      }),
+      ...(isDarkTheme && {
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+      }),
     } as React.CSSProperties,
     glyph: {
       position: 'absolute',
       top: '0.75rem',
-      color: 'rgba(255, 215, 0, 0.3)',
+      color: isSacredTheme
+        ? 'rgba(255, 215, 0, 0.3)'
+        : isDarkTheme
+          ? 'rgba(156, 163, 175, 0.3)'
+          : 'rgba(107, 114, 128, 0.3)',
       fontSize: '1.125rem',
       zIndex: 10,
-      animation: 'show-task-float-glyph 5s infinite alternate',
+      animation: isSacredTheme
+        ? 'show-task-float-glyph 5s infinite alternate'
+        : 'none',
     } as React.CSSProperties,
     header: {
       display: 'flex',
       justifyContent: 'space-between',
       padding: '0.5rem',
-      borderBottom: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
-      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.05)' }),
-      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.05)' }),
+      borderBottom: `2px solid ${colors.border}`,
+      backgroundColor: colors.cardBackground,
     } as React.CSSProperties,
     headerTitle: {
       fontSize: '1.125rem',
       fontWeight: 700,
+      fontFamily: fonts.primary,
+      color: colors.textPrimary,
       ...(isSacredTheme && {
-        fontFamily: 'Cinzel, serif',
         letterSpacing: '0.05em',
         textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-      }),
-      ...(isDarkTheme && {
-        color: '#E5E7EB',
       }),
     } as React.CSSProperties,
     headerSubtitle: {
       fontSize: '0.875rem',
       marginTop: '0.125rem',
-      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
-      ...(isDarkTheme && { color: '#9CA3AF' }),
+      fontFamily: fonts.secondary,
+      color: colors.textSecondary,
     } as React.CSSProperties,
     headerActions: {
       display: 'flex',
@@ -154,48 +194,43 @@ const getStyles = (styles?: ProjectBoardStyles) => {
       paddingTop: 0,
     } as React.CSSProperties,
     descriptionContainer: {
-      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      border: `1px solid ${colors.border}`,
       margin: '0 -8px',
-      padding: '0.5rem 8px',
-      paddingBottom: '0.5rem',
-      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+      padding: '0 8px',
+      backgroundColor: colors.cardBackground,
     } as React.CSSProperties,
     sectionTitle: {
       fontWeight: 700,
       marginBottom: '0.25rem',
-      ...(isSacredTheme && { fontFamily: 'Cinzel, serif' }),
-      ...(isDarkTheme && { color: '#E5E7EB' }),
+      fontFamily: fonts.primary,
+      color: colors.textPrimary,
     } as React.CSSProperties,
     descriptionText: {
       fontSize: '0.875rem',
       whiteSpace: 'pre-wrap',
-      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
-      ...(isDarkTheme && { color: '#D1D5DB' }),
+      fontFamily: fonts.secondary,
+      color: colors.textSecondary,
     } as React.CSSProperties,
     comment: {
       marginBottom: '0',
     } as React.CSSProperties,
     commentEditing: {
-      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      border: `1px solid ${colors.border}`,
       margin: '0 -8px',
       padding: '0.25rem 0.5rem',
-      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+      backgroundColor: colors.cardBackground,
     } as React.CSSProperties,
     commentContent: {
-      border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
+      border: `1px solid ${colors.border}`,
       margin: '0 -8px',
       padding: '0.5rem',
-      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+      backgroundColor: colors.cardBackground,
     } as React.CSSProperties,
     sidebar: {
       gridColumn: 'span 1 / span 1',
       padding: '0.5rem',
-      borderLeft: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : isDarkTheme ? 'rgba(75, 85, 99, 0.3)' : 'black'}`,
-      ...(isSacredTheme && { backgroundColor: 'rgba(255, 215, 0, 0.02)' }),
-      ...(isDarkTheme && { backgroundColor: 'rgba(75, 85, 99, 0.02)' }),
+      borderLeft: `2px solid ${colors.border}`,
+      backgroundColor: colors.cardBackground,
     } as React.CSSProperties,
     sidebarSection: {
       marginBottom: '0.5rem',
@@ -203,19 +238,88 @@ const getStyles = (styles?: ProjectBoardStyles) => {
     sidebarLabel: {
       fontSize: '0.875rem',
       fontWeight: 700,
-      ...(isSacredTheme && { fontFamily: 'Cinzel, serif' }),
-      ...(isDarkTheme && { color: '#E5E7EB' }),
+      fontFamily: fonts.primary,
+      color: colors.textPrimary,
     } as React.CSSProperties,
     sidebarValue: {
       fontSize: '0.875rem',
-      ...(isSacredTheme && { fontFamily: 'Crimson Text, serif' }),
-      ...(isDarkTheme && { color: '#D1D5DB' }),
+      fontFamily: fonts.secondary,
+      color: colors.textSecondary,
     } as React.CSSProperties,
     chipContainer: {
       display: 'flex',
       flexWrap: 'wrap',
       gap: '0.25rem',
       marginTop: '0.25rem',
+    } as React.CSSProperties,
+    moreVertIcon: {
+      position: 'absolute',
+      top: '19px',
+      right: '8px',
+      cursor: 'pointer',
+      color: isSacredTheme
+        ? 'rgba(255, 215, 0, 0.7)'
+        : isDarkTheme
+          ? '#9CA3AF'
+          : '#6B7280',
+      zIndex: 1,
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E5E7EB' : '#374151',
+        transform: 'scale(1.1)',
+      },
+    } as React.CSSProperties,
+    customMenu: {
+      position: 'absolute',
+      top: '100%',
+      right: '0',
+      backgroundColor: colors.background,
+      border: `1px solid ${colors.border}`,
+      borderRadius: '0.375rem',
+      boxShadow: isDarkTheme
+        ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
+        : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      zIndex: 1000,
+      minWidth: '200px',
+      ...(isSacredTheme && {
+        boxShadow:
+          '0 0 15px rgba(255, 215, 0, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+      }),
+    } as React.CSSProperties,
+    menuItem: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.75rem 1rem',
+      cursor: 'pointer',
+      backgroundColor: 'transparent',
+      border: 'none',
+      width: '100%',
+      textAlign: 'left',
+      fontSize: '0.875rem',
+      fontFamily: fonts.secondary,
+      color: colors.textPrimary,
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        backgroundColor: isSacredTheme
+          ? 'rgba(255, 215, 0, 0.1)'
+          : isDarkTheme
+            ? 'rgba(75, 85, 99, 0.5)'
+            : 'rgba(248, 250, 252, 0.8)',
+      },
+      '&:first-child': {
+        borderTopLeftRadius: '0.375rem',
+        borderTopRightRadius: '0.375rem',
+      },
+      '&:last-child': {
+        borderBottomLeftRadius: '0.375rem',
+        borderBottomRightRadius: '0.375rem',
+      },
+    } as React.CSSProperties,
+    menuDropdown: {
+      marginTop: '0.5rem',
+      padding: '0.5rem',
+      borderTop: `1px solid ${colors.border}`,
     } as React.CSSProperties,
   }
 }
@@ -295,7 +399,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   const [selectedRevisions, setSelectedRevisions] = useState<
     Record<string, string | null>
   >({})
-  const computedStyles = getStyles(styles)
+  const computedStyles = getShowTaskStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
 
   useEffect(() => {
@@ -411,10 +515,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
   }
 
   const [commentMenu, setCommentMenu] = useState<{
-    anchor: HTMLElement | null
     commentId: string | null
   }>({
-    anchor: null,
     commentId: null,
   })
 
@@ -422,10 +524,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     event: React.MouseEvent<HTMLElement>,
     commentId: string
   ) => {
-    setCommentMenu({ anchor: event.currentTarget, commentId })
+    event.stopPropagation()
+    setCommentMenu({ commentId })
   }
   const closeCommentMenu = () => {
-    setCommentMenu({ anchor: null, commentId: null })
+    setCommentMenu({ commentId: null })
   }
   const handleEditClick = (commentId: string, text: string) => {
     closeCommentMenu()
@@ -436,7 +539,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+      styles={{ theme: styles?.theme || 'light' }}
     >
       <div style={computedStyles.dialog}>
         {isSacredTheme && (
@@ -473,44 +576,65 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   setFormData(prev => ({ ...prev, taskTitle: value }))
                 }
                 className="mb-1"
-                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
             ) : (
-              <Typography
-                variant="merrih4"
-                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-              >
-                {formData.taskTitle}
-              </Typography>
+              <>
+                <Typography
+                  variant="merrih4"
+                  styles={{ theme: styles?.theme || 'light' }}
+                >
+                  {formData.taskTitle}
+                </Typography>
+                <Typography
+                  variant="merrih5"
+                  text={`created by ${createdBy}`}
+                  styles={{ theme: styles?.theme || 'light' }}
+                />
+              </>
             )}
-            <Typography
-              variant="merrih5"
-              text={`created by ${createdBy}`}
-              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-            />
           </div>
 
           <div style={computedStyles.headerActions}>
-            <CustomButton
-              text={isEditing ? 'Save' : 'Edit'}
-              onClick={handleEditToggle}
+            <StyledTooltip
+              title={isEditing ? 'Save' : 'Edit'}
+              tooltipplacement="bottom"
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-            />
-            <CustomButton
-              text="Delete"
-              onClick={onDelete}
+            >
+              <CustomButton
+                text={isEditing ? 'Save' : undefined}
+                icon={isEditing ? undefined : <EditIcon />}
+                onClick={handleEditToggle}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </StyledTooltip>
+            <StyledTooltip
+              title="Delete"
+              tooltipplacement="bottom"
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-            />
-            <CustomButton
-              text="Duplicate"
-              onClick={onDuplicate}
+            >
+              <CustomButton
+                icon={<DeleteIcon />}
+                onClick={onDelete}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </StyledTooltip>
+            <StyledTooltip
+              title="Duplicate"
+              tooltipplacement="bottom"
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-            />
+            >
+              <CustomButton
+                icon={<ContentCopyIcon />}
+                onClick={onDuplicate}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </StyledTooltip>
             <CustomButton
               icon={<CloseIcon />}
               onClick={onClose}
               styles={{
-                theme: isSacredTheme ? 'sacred' : 'light',
+                theme: styles?.theme || 'light',
                 outline: true,
               }}
             />
@@ -521,34 +645,33 @@ const ShowTask: React.FC<ShowTaskProps> = ({
           <div style={computedStyles.mainContent}>
             <div style={computedStyles.descriptionContainer}>
               {isEditing ? (
-                <>
-                  <Typography
-                    variant="merrih5"
-                    text="Task Description"
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                  />
-                  <ComplexTextEditor
-                    value={formData.description}
-                    onChange={val =>
-                      setFormData(prev => ({ ...prev, description: val }))
-                    }
-                    label="Task Description"
-                    editorType="simple"
-                    minRows={3}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                  />
-                </>
+                <ComplexTextEditor
+                  value={formData.description}
+                  onChange={val =>
+                    setFormData(prev => ({ ...prev, description: val }))
+                  }
+                  label="Task Description"
+                  editorType="simple"
+                  minRows={3}
+                  styles={{ theme: styles?.theme || 'light' }}
+                />
               ) : (
                 <>
                   <Typography
                     variant="merrih5"
                     text="Task Description"
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      margin: '5px 0',
+                    }}
                   />
                   <Typography
                     variant="merrih6"
                     text={formData.description}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      margin: '0 0 5px 0',
+                    }}
                   />
                 </>
               )}
@@ -578,8 +701,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 comment.editHistory && comment.editHistory.length > 0
               const canEdit =
                 currentUserName && comment.createdBy === currentUserName
-              const isMenuOpen =
-                commentMenu.anchor && commentMenu.commentId === comment._id
+              const isMenuOpen = commentMenu.commentId === comment._id
 
               return (
                 <div key={comment._id} style={computedStyles.comment}>
@@ -591,122 +713,150 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         label="Edit Comment"
                         minRows={3}
                         editorType="simple"
-                        styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                        styles={{ theme: styles?.theme || 'light' }}
                       />
                       <div className="flex justify-end mt-1 gap-1">
                         <CustomButton
                           text="Save"
                           onClick={() => saveEditingComment(comment._id)}
-                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                          styles={{ theme: styles?.theme || 'light' }}
                         />
                         <CustomButton
                           text="Cancel"
                           onClick={cancelEditingComment}
                           styles={{
-                            theme: isSacredTheme ? 'sacred' : 'light',
+                            theme: styles?.theme || 'light',
                             outline: true,
                           }}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div style={computedStyles.commentContent}>
-                      <div className="flex justify-between items-start">
-                        <Typography
-                          variant="merrih5"
-                          text={comment.createdBy}
-                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                        />
-                        <CustomButton
-                          icon={<MoreVertIcon />}
-                          onClick={e => openCommentMenu(e, comment._id)}
-                          styles={{
-                            theme: isSacredTheme ? 'sacred' : 'light',
-                            outline: true,
-                          }}
-                        />
+                    <div
+                      style={{
+                        ...computedStyles.commentContent,
+                        position: 'relative',
+                        padding: '0',
+                        paddingLeft: '10px',
+                      }}
+                    >
+                      <div style={{ paddingTop: '2px', position: 'relative' }}>
+                        <div style={{ position: 'relative' }}>
+                          <div
+                            onClick={e => openCommentMenu(e, comment._id)}
+                            style={computedStyles.moreVertIcon}
+                          >
+                            <MoreVertIcon sacredtheme={isSacredTheme} />
+                          </div>
 
-                        <Popover
-                          open={Boolean(isMenuOpen)}
-                          onClose={closeCommentMenu}
-                          anchorEl={commentMenu.anchor}
-                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                        >
-                          {canEdit && (
-                            <div
-                              onClick={() =>
-                                handleEditClick(comment._id, comment.text)
-                              }
-                              style={{
-                                ...computedStyles.headerActions,
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '0.5rem 1rem',
-                                color: isSacredTheme
-                                  ? 'rgba(255, 215, 0, 0.7)'
-                                  : '#666',
-                              }}
-                            >
-                              Edit
-                            </div>
-                          )}
-                          {hasHistory && (
-                            <div style={{ width: '14rem' }}>
-                              <SearchableDropdown
-                                label="Revision History"
-                                placeholder="Select revision..."
-                                options={
-                                  comment.editHistory.map(rev => {
-                                    const revTime = formatRelativeTime(
-                                      rev.editedAt ?? comment.createdAt
-                                    )
-                                    const prefix = rev.isOriginal
-                                      ? 'Original'
-                                      : 'Edited'
-                                    const editedBy =
-                                      rev.editedBy ?? comment.createdBy
-                                    return {
-                                      value: `${prefix} ${revTime} by ${editedBy}`,
-                                      attribute1: rev._id,
-                                    }
-                                  }) || []
-                                }
-                                onChange={opt =>
-                                  handleSelectRevision(
-                                    comment._id,
-                                    opt?.attribute1 || null
-                                  )
-                                }
-                                defaultValue={selectedRevId || undefined}
-                                styles={{
-                                  theme: isSacredTheme ? 'sacred' : 'light',
+                          {isMenuOpen && (
+                            <>
+                              <div
+                                style={{
+                                  position: 'fixed',
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  zIndex: 999,
                                 }}
+                                onClick={closeCommentMenu}
                               />
-                            </div>
+                              <div style={computedStyles.customMenu}>
+                                {canEdit && (
+                                  <button
+                                    onClick={() =>
+                                      handleEditClick(comment._id, comment.text)
+                                    }
+                                    style={{
+                                      ...computedStyles.menuItem,
+                                      backgroundColor: 'transparent',
+                                    }}
+                                    onMouseEnter={e => {
+                                      e.currentTarget.style.backgroundColor =
+                                        isSacredTheme
+                                          ? 'rgba(255, 215, 0, 0.1)'
+                                          : styles?.theme === 'dark'
+                                            ? 'rgba(75, 85, 99, 0.5)'
+                                            : 'rgba(248, 250, 252, 0.8)'
+                                    }}
+                                    onMouseLeave={e => {
+                                      e.currentTarget.style.backgroundColor =
+                                        'transparent'
+                                    }}
+                                  >
+                                    <EditIcon />
+                                    Edit
+                                  </button>
+                                )}
+                                {hasHistory && (
+                                  <div style={computedStyles.menuDropdown}>
+                                    <SearchableSimple
+                                      label="Revision History"
+                                      placeholder="Select revision..."
+                                      options={
+                                        comment.editHistory.map(rev => {
+                                          const revTime = formatRelativeTime(
+                                            rev.editedAt ?? comment.createdAt
+                                          )
+                                          const prefix = rev.isOriginal
+                                            ? 'Original'
+                                            : 'Edited'
+                                          const editedBy =
+                                            rev.editedBy ?? comment.createdBy
+                                          return {
+                                            value: `${prefix} ${revTime} by ${editedBy}`,
+                                            attribute1: rev._id,
+                                          }
+                                        }) || []
+                                      }
+                                      onChange={opt =>
+                                        handleSelectRevision(
+                                          comment._id,
+                                          opt?.attribute1 || null
+                                        )
+                                      }
+                                      defaultValue={selectedRevId || undefined}
+                                      styles={{
+                                        theme: styles?.theme || 'light',
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </>
                           )}
-                        </Popover>
-                      </div>
+                        </div>
 
-                      <div className="mt-auto">
                         <Typography
                           variant="merriparagraph"
                           text={displayedText}
-                          styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                          styles={{
+                            theme: styles?.theme || 'light',
+                            margin: '0',
+                            padding: '0',
+                            marginRight: '30px',
+                          }}
                         />
-                        <div style={computedStyles.descriptionText}>
-                          {comment.createdAt && (
-                            <span>
-                              Created {createdTime} by {comment.createdBy}
-                            </span>
-                          )}
-                          {displayedTime && displayedAuthor && (
-                            <span>
-                              {' '}
-                              | Edited {updatedTime} by {displayedAuthor}
-                            </span>
-                          )}
-                        </div>
+                      </div>
+                      <div
+                        style={{
+                          ...computedStyles.descriptionText,
+                          margin: '0',
+                          padding: '0',
+                          paddingBottom: '5px',
+                        }}
+                      >
+                        {comment.createdAt && (
+                          <div style={{ marginBottom: '2px' }}>
+                            Created {createdTime} by {comment.createdBy}
+                          </div>
+                        )}
+                        {displayedTime && displayedAuthor && (
+                          <div style={{ paddingBottom: '3px' }}>
+                            Edited {updatedTime}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -721,18 +871,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 label="Add Comment"
                 minRows={3}
                 editorType="simple"
-                styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
               <div className="flex justify-end mt-2 gap-2">
                 <CustomButton
                   text="Close Task"
                   onClick={() => onCloseTask(taskId)}
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
                 <CustomButton
                   text="Comment"
                   onClick={handleComment}
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               </div>
             </div>
@@ -806,11 +956,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   <Typography
                     variant="merriparagraph"
                     text={label}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                    styles={{ theme: styles?.theme || 'light' }}
                   />
                 )}
                 {isEditing ? (
-                  <SearchableDropdown
+                  <SearchableSimple
                     label={label}
                     options={options}
                     defaultValue={value}
@@ -820,13 +970,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         [field]: newVal?.attribute1 || '',
                       }))
                     }
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                    }}
                   />
                 ) : value ? (
                   <Chip
                     label={value}
                     styles={{
-                      theme: isSacredTheme ? 'sacred' : 'light',
+                      theme: styles?.theme || 'light',
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word',
+                      width: 'fit-content',
                     }}
                   />
                 ) : null}
@@ -838,18 +993,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Typography
                   variant="merriparagraph"
                   text="Topics"
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               )}
               {isEditing ? (
                 <MultipleSelectChip
                   label="Topics"
-                  options={topicOptions.map(t => t.topic)}
+                  options={topicOptions.map(t => ({ value: t.topic }))}
                   defaultSelected={formData.topics}
                   onChange={values =>
                     setFormData(prev => ({ ...prev, topics: values }))
                   }
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               ) : formData.topics.length > 0 ? (
                 <div style={computedStyles.chipContainer}>
@@ -858,7 +1013,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       key={idx}
                       label={topic}
                       styles={{
-                        theme: isSacredTheme ? 'sacred' : 'light',
+                        theme: styles?.theme || 'light',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        width: 'fit-content',
                       }}
                     />
                   ))}
@@ -871,13 +1029,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Typography
                   variant="merriparagraph"
                   text="Knowledgebase Articles"
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               )}
               {isEditing ? (
                 <MultipleSelectChip
                   label="Knowledgebase Articles"
-                  options={knowledgebaseArticleOptions.map(a => a.articleTitle)}
+                  options={knowledgebaseArticleOptions.map(a => ({
+                    value: a.articleTitle,
+                  }))}
                   defaultSelected={formData.knowledgebaseArticles}
                   onChange={values =>
                     setFormData(prev => ({
@@ -885,7 +1045,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       knowledgebaseArticles: values,
                     }))
                   }
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               ) : formData.knowledgebaseArticles.length > 0 ? (
                 <div style={computedStyles.chipContainer}>
@@ -894,7 +1054,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                       key={idx}
                       label={article}
                       styles={{
-                        theme: isSacredTheme ? 'sacred' : 'light',
+                        theme: styles?.theme || 'light',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        width: 'fit-content',
                       }}
                     />
                   ))}
@@ -907,7 +1070,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 <Typography
                   variant="merriparagraph"
                   text="Next Action Date"
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               )}
               {isEditing ? (
@@ -934,14 +1097,14 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         }))
                       }
                     }}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                    styles={{ theme: styles?.theme || 'light' }}
                   />
                 </div>
               ) : formData.nextActionDate ? (
                 <Typography
                   variant="merriparagraph"
                   text={formData.nextActionDate}
-                  styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               ) : null}
             </div>

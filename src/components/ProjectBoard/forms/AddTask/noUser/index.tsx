@@ -4,7 +4,7 @@ import React, { useState, useCallback, FormEvent } from 'react'
 import Typography from '../../../../Typography'
 import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
-import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
+import SearchableSimple from '../../../../Field/Dropdown/SearchableSimple'
 import CustomButton from '../../../../Button'
 import type { RawSeverityLevel } from '../../../types'
 
@@ -134,7 +134,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           placeholder="Enter your email"
           styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
-        <SearchableDropdown
+        <SearchableSimple
           label="Severity Level"
           options={severityOptions}
           defaultValue={

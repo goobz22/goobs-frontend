@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import Dialog from '../../../../Dialog'
 import CloseIcon from '../../../../Icons/Close'
 import Typography from '../../../../Typography'
-import SearchableDropdown from '../../../../Field/Dropdown/Searchable'
+import SearchableSimple from '../../../../Field/Dropdown/SearchableSimple'
 import MultiSelect from '../../../../Field/Dropdown/MultiSelect'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
 import CustomButton from '../../../../Button'
@@ -13,6 +13,36 @@ import type { Task, RawTopic, RawQueue, RawSeverityLevel } from '../../../types'
 import { ProjectBoardStyles } from '../../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
+
+// Hook to detect screen size for responsive form layout
+const useScreenSize = () => {
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  )
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth < 640) {
+        setScreenSize('mobile')
+      } else if (window.innerWidth < 1024) {
+        setScreenSize('tablet')
+      } else {
+        setScreenSize('desktop')
+      }
+    }
+
+    // Check on mount
+    checkScreenSize()
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  return screenSize
+}
 
 interface CustomerAddTaskProps {
   open: boolean
@@ -26,7 +56,10 @@ interface CustomerAddTaskProps {
   styles?: ProjectBoardStyles
 }
 
-const getStyles = (styles?: ProjectBoardStyles) => {
+const getStyles = (
+  styles?: ProjectBoardStyles,
+  screenSize?: 'mobile' | 'tablet' | 'desktop'
+) => {
   const isSacredTheme = styles?.theme === 'sacred'
   const isDarkTheme = styles?.theme === 'dark'
 
@@ -267,7 +300,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
             />
             <div style={computedStyles.row}>
               <div style={computedStyles.col}>
-                <SearchableDropdown
+                <SearchableSimple
                   label="Severity Level"
                   options={severityOptions}
                   defaultValue={
@@ -283,7 +316,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                 />
               </div>
               <div style={computedStyles.col}>
-                <SearchableDropdown
+                <SearchableSimple
                   label="Associated Product (Queue)"
                   options={queueOptions}
                   defaultValue={
@@ -321,7 +354,6 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                     })
                     setSelectedTopicIds(newSelectedIds)
                   }}
-                  complexOptions={true}
                   styles={{ theme: styles?.theme }}
                 />
               )
