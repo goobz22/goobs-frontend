@@ -1,46 +1,137 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+/**
+ * @fileoverview Storybook stories for the InternalIncrementNumberField component.
+ */
+import type { Meta, StoryObj } from '@storybook/react'
 import InternalIncrementNumberField from './index'
 
 const meta: Meta<typeof InternalIncrementNumberField> = {
   title: 'Components/Field/Number/InternalIncrement',
   component: InternalIncrementNumberField,
-  argTypes: {
-    styles: { control: 'object' },
-    label: { control: 'text' },
-    helperText: { control: 'text' },
-    min: { control: 'number' },
-    max: { control: 'number' },
-    initialValue: { control: 'text' },
-    initialDelay: { control: 'number' },
-    repeatInterval: { control: 'number' },
-  },
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+  },
+  argTypes: {
+    label: {
+      control: { type: 'text' },
+      description: 'Label for the field',
+    },
+    initialValue: {
+      control: { type: 'text' },
+      description: 'Initial value of the field',
+    },
+    helperText: {
+      control: { type: 'text' },
+      description: 'Helper text to display below the field',
+    },
+    min: {
+      control: { type: 'number' },
+      description: 'Minimum value allowed',
+    },
+    max: {
+      control: { type: 'number' },
+      description: 'Maximum value allowed',
+    },
+    initialDelay: {
+      control: { type: 'number' },
+      description: 'Initial delay before repeat increment starts',
+    },
+    repeatInterval: {
+      control: { type: 'number' },
+      description: 'Interval between repeat increments',
+    },
+    disabled: {
+      control: { type: 'boolean' },
+      description: 'Whether the field is disabled',
+    },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
 }
 export default meta
 
 type Story = StoryObj<typeof InternalIncrementNumberField>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
+const commonArgs = {
+  label: 'Quantity',
+  initialValue: '1',
+  min: 0,
+  max: 100,
+  disabled: false,
+}
+
+export const LightTheme: Story = {
+  name: 'Light Theme',
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#f9fafb',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <InternalIncrementNumberField {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Light Theme:</strong> Clean and professional numeric input
+          with light backgrounds and internal increment controls.
+          <br />
+          <strong>Features:</strong> Optimized for quantity selection in bright
+          environments, internal increment arrows, and accessible design.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
     </div>
   ),
   args: {
-    label: 'Quantity',
-    initialValue: '1',
-    styles: { theme: 'light' },
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Dark Theme:</strong> Developer-friendly dark mode with high
+          contrast and reduced eye strain.
+          <br />
+          <strong>Features:</strong> Perfect for low-light environments, modern
+          increment controls, and smooth interactions.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'dark',
+    },
   },
 }
 
@@ -49,100 +140,190 @@ export const SacredTheme: Story = {
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#000',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <InternalIncrementNumberField {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Theme:</strong> Mystical and spiritual numeric input
+          with sacred color palettes and ethereal aesthetics.
+          <br />
+          <strong>Features:</strong> Designed for contemplative number
+          selection, sacred color schemes, and transcendent user experience.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
     </div>
   ),
   args: {
-    ...PremiumTheme.args,
-    styles: { theme: 'sacred' },
+    ...commonArgs,
+    styles: {
+      theme: 'sacred',
+    },
   },
 }
 
-const InteractiveDemoRenderer = () => {
-  const [sacredtheme, setsacredtheme] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [value, setValue] = React.useState('10')
-
-  return (
+export const WithRange: Story = {
+  name: 'With Range',
+  render: args => (
     <div
       style={{
-        width: '500px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <div
-        style={{
-          padding: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-        }}
-      >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+      <div style={{ maxWidth: '400px', width: '100%' }}>
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '0.5rem',
-          }}
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
         >
-          <label>
-            <input
-              type="checkbox"
-              checked={sacredtheme}
-              onChange={e => setsacredtheme(e.target.checked)}
-            />
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disabled
-          </label>
+          <strong>With Range:</strong> Numeric input with custom min/max range
+          restrictions for specific use cases.
         </div>
-      </div>
-      <div
-        style={{
-          padding: '2rem',
-          borderRadius: '8px',
-          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <InternalIncrementNumberField
-          label="Amount"
-          initialValue={value}
-          onChange={e => {
-            if (typeof e === 'number') {
-              setValue(String(e))
-            } else {
-              setValue(e.target.value)
-            }
-          }}
-          styles={{
-            theme: sacredtheme ? 'sacred' : 'light',
-            disabled: disabled,
-          }}
-          min={0}
-          max={100}
-        />
+        <InternalIncrementNumberField {...args} />
       </div>
     </div>
-  )
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Age',
+    initialValue: '25',
+    min: 18,
+    max: 120,
+    helperText: 'Enter age between 18 and 120',
+    styles: {
+      theme: 'light',
+    },
+  },
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemoRenderer />,
+export const FastIncrement: Story = {
+  name: 'Fast Increment',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Fast Increment:</strong> Dark theme with customized increment
+          timing for rapid value changes.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Fast Counter',
+    initialValue: '0',
+    min: 0,
+    max: 1000,
+    initialDelay: 200,
+    repeatInterval: 50,
+    helperText: 'Fast increment/decrement timing',
+    styles: {
+      theme: 'dark',
+    },
+  },
+}
+
+export const DisabledState: Story = {
+  name: 'Disabled State',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Disabled State:</strong> Field in disabled state with internal
+          increment controls that cannot be modified.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    initialValue: '50',
+    helperText: 'This field is disabled',
+    styles: {
+      theme: 'light',
+      disabled: true,
+    },
+  },
+}
+
+export const SacredCounter: Story = {
+  name: 'Sacred Counter',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Counter:</strong> Sacred theme for mystical counting
+          with transcendent numeric input and divine increments.
+        </div>
+        <InternalIncrementNumberField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Sacred Counter',
+    initialValue: '7',
+    min: 1,
+    max: 77,
+    helperText: 'Count with sacred precision',
+    styles: {
+      theme: 'sacred',
+    },
+  },
 }

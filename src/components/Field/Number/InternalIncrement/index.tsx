@@ -41,6 +41,9 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
     transition,
   } = getSharedFormFieldStyles(styles, isFocused)
 
+  const isSacred = styles?.theme === 'sacred'
+  const isDark = styles?.theme === 'dark'
+
   const componentStyles: Record<string, React.CSSProperties> = {
     container: getSharedContainerStyles(styles),
     inputWrapper: {
@@ -93,12 +96,23 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
       borderRadius: '2px',
       border: 'none',
       backgroundColor: 'transparent',
-      cursor: 'pointer',
+      cursor: styles?.disabled ? 'not-allowed' : 'pointer',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       color: adornmentColor,
+      opacity: styles?.disabled ? 0.5 : 1,
       transition,
+      '&:hover': {
+        backgroundColor: isSacred
+          ? 'rgba(255, 215, 0, 0.1)'
+          : isDark
+            ? 'rgba(229, 231, 235, 0.1)'
+            : 'rgba(229, 231, 235, 0.5)',
+      },
+      '&:active': {
+        transform: 'scale(0.95)',
+      },
     } as React.CSSProperties,
     icon: { fontSize: '18px' },
   }

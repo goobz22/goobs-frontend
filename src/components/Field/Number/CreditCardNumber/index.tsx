@@ -261,10 +261,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     [onBlur]
   )
 
-  const getCardIcon = useCallback(
-    () => (styles?.theme === 'sacred' ? '𓊪' : '💳'),
-    [styles?.theme]
-  )
+  const getCardIcon = useCallback(() => '💳', [])
 
   const computedStyles = getStyles(styles, isFocused)
 
@@ -273,6 +270,10 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       style={{
         ...computedStyles.adornment,
         ...computedStyles.startAdornment,
+        display: 'flex',
+        alignItems: 'center',
+        height: '100%',
+        marginTop: '-3px',
       }}
     >
       <span>{getCardIcon()}</span>

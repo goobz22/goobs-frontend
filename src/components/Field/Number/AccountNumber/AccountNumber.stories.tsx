@@ -1,45 +1,127 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+/**
+ * @fileoverview Storybook stories for the AccountNumber component.
+ */
+import type { Meta, StoryObj } from '@storybook/react'
 import AccountNumber from './index'
 
 const meta: Meta<typeof AccountNumber> = {
   title: 'Components/Field/Number/AccountNumber',
   component: AccountNumber,
-  argTypes: {
-    styles: { control: 'object' },
-    label: { control: 'text' },
-    helperText: { control: 'text' },
-    isDefaultValue: { control: 'boolean' },
-    minLength: { control: 'number' },
-    maxLength: { control: 'number' },
-    placeholder: { control: 'text' },
-  },
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+  },
+  argTypes: {
+    label: {
+      control: { type: 'text' },
+      description: 'Label for the field',
+    },
+    placeholder: {
+      control: { type: 'text' },
+      description: 'Placeholder text',
+    },
+    helperText: {
+      control: { type: 'text' },
+      description: 'Helper text to display below the field',
+    },
+    isDefaultValue: {
+      control: { type: 'boolean' },
+      description: 'Whether the field has a default value',
+    },
+    minLength: {
+      control: { type: 'number' },
+      description: 'Minimum length of the account number',
+    },
+    maxLength: {
+      control: { type: 'number' },
+      description: 'Maximum length of the account number',
+    },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
 }
 export default meta
 
 type Story = StoryObj<typeof AccountNumber>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
+const commonArgs = {
+  label: 'Account Number',
+  placeholder: 'Enter your account number',
+  isDefaultValue: false,
+}
+
+export const LightTheme: Story = {
+  name: 'Light Theme',
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#f9fafb',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <AccountNumber {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Light Theme:</strong> Clean and professional account number
+          input with light backgrounds and validation.
+          <br />
+          <strong>Features:</strong> Optimized for financial forms in bright
+          environments, account validation, and accessible design.
+        </div>
+        <AccountNumber {...args} />
+      </div>
     </div>
   ),
   args: {
-    label: 'Account Number',
-    placeholder: 'Enter your account number',
-    styles: { theme: 'light' },
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Dark Theme:</strong> Banking-friendly dark mode with high
+          contrast and reduced eye strain.
+          <br />
+          <strong>Features:</strong> Perfect for low-light environments, modern
+          account validation, and smooth interactions.
+        </div>
+        <AccountNumber {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'dark',
+    },
   },
 }
 
@@ -48,105 +130,184 @@ export const SacredTheme: Story = {
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#000',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <AccountNumber {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Theme:</strong> Mystical and spiritual account number
+          input with sacred color palettes and ethereal aesthetics.
+          <br />
+          <strong>Features:</strong> Designed for contemplative banking
+          sessions, sacred color schemes, and transcendent user experience.
+        </div>
+        <AccountNumber {...args} />
+      </div>
     </div>
   ),
   args: {
-    ...PremiumTheme.args,
-    styles: { theme: 'sacred' },
+    ...commonArgs,
+    styles: {
+      theme: 'sacred',
+    },
   },
 }
 
-const InteractiveDemoComponent: React.FC = () => {
-  const [sacredtheme, setsacredtheme] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [isDefault, setIsDefault] = React.useState(true)
-  const [value, setValue] = React.useState('1234567890')
-  const [isValid, setIsValid] = React.useState(true)
-
-  return (
+export const BankingForm: Story = {
+  name: 'Banking Form',
+  render: args => (
     <div
       style={{
-        width: '500px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <div
-        style={{
-          padding: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-        }}
-      >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+      <div style={{ maxWidth: '400px', width: '100%' }}>
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.5rem',
-          }}
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
         >
-          <label>
-            <input
-              type="checkbox"
-              checked={sacredtheme}
-              onChange={e => setsacredtheme(e.target.checked)}
-            />
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={isDefault}
-              onChange={e => setIsDefault(e.target.checked)}
-            />
-            Is Default Value
-          </label>
+          <strong>Banking Form:</strong> Account number input optimized for
+          banking forms with validation and helper text.
         </div>
-      </div>
-      <div
-        style={{
-          padding: '2rem',
-          borderRadius: '8px',
-          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
-        }}
-      >
-        <AccountNumber
-          label="Interactive Account Number"
-          value={value}
-          onChange={(val, valid) => {
-            setValue(val)
-            setIsValid(valid)
-          }}
-          styles={{
-            theme: sacredtheme ? 'sacred' : 'light',
-            disabled: disabled,
-          }}
-          isDefaultValue={isDefault}
-          helperText={!isValid ? 'Invalid account number' : undefined}
-        />
+        <AccountNumber {...args} />
       </div>
     </div>
-  )
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Bank Account Number',
+    placeholder: '1234567890',
+    helperText: 'Enter your 10-digit bank account number',
+    minLength: 10,
+    maxLength: 12,
+    styles: {
+      theme: 'light',
+    },
+  },
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemoComponent />,
+export const WithDefaultValue: Story = {
+  name: 'With Default Value',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>With Default Value:</strong> Dark theme with pre-populated
+          account number for existing customers.
+        </div>
+        <AccountNumber {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    value: '1234567890',
+    isDefaultValue: true,
+    helperText: 'Account number from your profile',
+    styles: {
+      theme: 'dark',
+    },
+  },
+}
+
+export const DisabledState: Story = {
+  name: 'Disabled State',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Disabled State:</strong> Field in disabled state with
+          pre-configured account number that cannot be modified.
+        </div>
+        <AccountNumber {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    value: '9876543210',
+    helperText: 'This account number is read-only',
+    styles: {
+      theme: 'light',
+      disabled: true,
+    },
+  },
+}
+
+export const SacredBanking: Story = {
+  name: 'Sacred Banking',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Banking:</strong> Sacred theme for mystical banking
+          with transcendent account number input and divine validation.
+        </div>
+        <AccountNumber {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Sacred Account Number',
+    placeholder: 'Enter sacred account digits',
+    helperText: 'Your divine account number',
+    styles: {
+      theme: 'sacred',
+    },
+  },
 }

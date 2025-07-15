@@ -1,45 +1,132 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+/**
+ * @fileoverview Storybook stories for the CVV component.
+ */
+import type { Meta, StoryObj } from '@storybook/react'
 import CVV from './index'
 
 const meta: Meta<typeof CVV> = {
   title: 'Components/Field/Number/CVV',
   component: CVV,
-  argTypes: {
-    styles: { control: 'object' },
-    label: { control: 'text' },
-    helperText: { control: 'text' },
-    isDefaultValue: { control: 'boolean' },
-    minLength: { control: 'number' },
-    maxLength: { control: 'number' },
-    placeholder: { control: 'text' },
-  },
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+  },
+  argTypes: {
+    label: {
+      control: { type: 'text' },
+      description: 'Label for the field',
+    },
+    placeholder: {
+      control: { type: 'text' },
+      description: 'Placeholder text',
+    },
+    helperText: {
+      control: { type: 'text' },
+      description: 'Helper text to display below the field',
+    },
+    isDefaultValue: {
+      control: { type: 'boolean' },
+      description: 'Whether the field has a default value',
+    },
+    minLength: {
+      control: { type: 'number' },
+      description: 'Minimum length of the CVV',
+    },
+    maxLength: {
+      control: { type: 'number' },
+      description: 'Maximum length of the CVV',
+    },
+    disabled: {
+      control: { type: 'boolean' },
+      description: 'Whether the field is disabled',
+    },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
 }
 export default meta
 
 type Story = StoryObj<typeof CVV>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
+const commonArgs = {
+  label: 'CVV',
+  placeholder: '123',
+  isDefaultValue: false,
+  disabled: false,
+}
+
+export const LightTheme: Story = {
+  name: 'Light Theme',
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#f9fafb',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <CVV {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Light Theme:</strong> Clean and professional CVV input with
+          light backgrounds and security validation.
+          <br />
+          <strong>Features:</strong> Optimized for payment forms in bright
+          environments, CVV validation, and accessible design.
+        </div>
+        <CVV {...args} />
+      </div>
     </div>
   ),
   args: {
-    label: 'CVV',
-    placeholder: '123',
-    styles: { theme: 'light' },
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Dark Theme:</strong> Secure payment dark mode with high
+          contrast and reduced eye strain.
+          <br />
+          <strong>Features:</strong> Perfect for low-light environments, modern
+          CVV validation, and smooth interactions.
+        </div>
+        <CVV {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'dark',
+    },
   },
 }
 
@@ -48,105 +135,186 @@ export const SacredTheme: Story = {
   render: args => (
     <div
       style={{
-        width: '400px',
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#000',
-        borderRadius: '8px',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <CVV {...args} />
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Theme:</strong> Mystical and spiritual CVV input with
+          sacred color palettes and ethereal aesthetics.
+          <br />
+          <strong>Features:</strong> Designed for contemplative payment
+          sessions, sacred color schemes, and transcendent user experience.
+        </div>
+        <CVV {...args} />
+      </div>
     </div>
   ),
   args: {
-    ...PremiumTheme.args,
-    styles: { theme: 'sacred' },
+    ...commonArgs,
+    styles: {
+      theme: 'sacred',
+    },
   },
 }
 
-const InteractiveCVVDemo: React.FC = () => {
-  const [sacredtheme, setsacredtheme] = React.useState(false)
-  const [disabled, setDisabled] = React.useState(false)
-  const [isDefault, setIsDefault] = React.useState(true)
-  const [value, setValue] = React.useState('123')
-  const [isValid, setIsValid] = React.useState(true)
-
-  return (
+export const PaymentForm: Story = {
+  name: 'Payment Form',
+  render: args => (
     <div
       style={{
-        width: '500px',
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <div
-        style={{
-          padding: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-        }}
-      >
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
+      <div style={{ maxWidth: '400px', width: '100%' }}>
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.5rem',
-          }}
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
         >
-          <label>
-            <input
-              type="checkbox"
-              checked={sacredtheme}
-              onChange={e => setsacredtheme(e.target.checked)}
-            />
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={isDefault}
-              onChange={e => setIsDefault(e.target.checked)}
-            />
-            Is Default Value
-          </label>
+          <strong>Payment Form:</strong> CVV input optimized for payment forms
+          with security validation and helper text.
         </div>
-      </div>
-      <div
-        style={{
-          padding: '2rem',
-          borderRadius: '8px',
-          backgroundColor: sacredtheme ? 'black' : '#f9fafb',
-        }}
-      >
-        <CVV
-          label="Interactive CVV"
-          value={value}
-          onChange={(val, valid) => {
-            setValue(val)
-            setIsValid(valid)
-          }}
-          styles={{
-            theme: sacredtheme ? 'sacred' : 'light',
-            disabled: disabled,
-          }}
-          isDefaultValue={isDefault}
-          helperText={!isValid ? 'Invalid CVV' : undefined}
-        />
+        <CVV {...args} />
       </div>
     </div>
-  )
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Security Code',
+    placeholder: '123',
+    helperText: 'Enter the 3-digit code on the back of your card',
+    minLength: 3,
+    maxLength: 4,
+    styles: {
+      theme: 'light',
+    },
+  },
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveCVVDemo />,
+export const AmexCVV: Story = {
+  name: 'Amex CVV',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Amex CVV:</strong> Dark theme configured for American Express
+          4-digit CVV validation.
+        </div>
+        <CVV {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Amex Security Code',
+    placeholder: '1234',
+    helperText: 'Enter the 4-digit code on the front of your Amex card',
+    minLength: 4,
+    maxLength: 4,
+    styles: {
+      theme: 'dark',
+    },
+  },
+}
+
+export const DisabledState: Story = {
+  name: 'Disabled State',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Disabled State:</strong> Field in disabled state with
+          pre-configured CVV that cannot be modified.
+        </div>
+        <CVV {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    value: '123',
+    helperText: 'CVV is saved securely',
+    styles: {
+      theme: 'light',
+      disabled: true,
+    },
+  },
+}
+
+export const SacredPayment: Story = {
+  name: 'Sacred Payment',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Payment:</strong> Sacred theme for mystical payment
+          with transcendent CVV input and divine security validation.
+        </div>
+        <CVV {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Sacred Security Code',
+    placeholder: 'Enter sacred digits',
+    helperText: 'Your divine payment security code',
+    styles: {
+      theme: 'sacred',
+    },
+  },
 }

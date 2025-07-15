@@ -21,7 +21,11 @@ export interface IncrementNumberFieldProps
   styles?: FormFieldStyles
 }
 
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
+const getStyles = (
+  styles?: FormFieldStyles,
+  isFocused?: boolean,
+  helperText?: string
+) => {
   const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
     getSharedFormFieldStyles(styles, isFocused)
 
@@ -30,7 +34,7 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
   const componentStyles: Record<string, React.CSSProperties> = {
     container: {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-end',
       gap: '8px',
       ...getSharedContainerStyles(styles),
     },
@@ -47,10 +51,11 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
       fontSize: styles?.fontSize || '14px',
       fontWeight: 500,
       minWidth: '32px',
-      height: '32px',
+      height: '40px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      marginBottom: helperText ? '20px' : '0px',
     } as React.CSSProperties,
     inputWrapper: {
       position: 'relative',
@@ -125,7 +130,7 @@ const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
   const handleFocus = useCallback(() => setIsFocused(true), [])
   const handleBlur = useCallback(() => setIsFocused(false), [])
 
-  const computedStyles = getStyles(styles, isFocused)
+  const computedStyles = getStyles(styles, isFocused, helperText)
 
   return (
     <div style={computedStyles.container}>
