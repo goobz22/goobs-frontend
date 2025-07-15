@@ -122,116 +122,157 @@ export interface TimeRangeProps {
 
 type TimeSelection = 'start' | 'end'
 
-const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
-  datePicker: {
-    position: 'fixed' as const,
-    top: '100%',
-    left: 0,
-    zIndex: 50,
-    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.95)' : 'white',
-    borderRadius: '0.5rem',
-    padding: '1.25rem',
-    minWidth: '300px',
-    maxWidth: '400px',
-    boxShadow: sacredtheme
-      ? '0 0 1.5rem rgba(255, 215, 0, 0.2)'
-      : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    border: sacredtheme
-      ? '2px solid rgba(255, 215, 0, 0.5)'
-      : '1px solid #E5E7EB',
-    animation: sacredtheme
-      ? 'date-field-sacred-glow 2s infinite alternate'
-      : 'none',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '1rem',
-    padding: '0.5rem',
-    borderRadius: '0.5rem',
-    transition: 'background-color 0.2s',
-    '&:hover': {
-      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.05)' : '#F9FAFB',
+const getStyles = (theme: string = 'light', isDragging?: boolean) => {
+  const sacredtheme = theme === 'sacred'
+  const darktheme = theme === 'dark'
+
+  return {
+    datePicker: {
+      position: 'fixed' as const,
+      top: '100%',
+      left: 0,
+      zIndex: 50,
+      backgroundColor: sacredtheme
+        ? 'rgba(0,0,0,0.95)'
+        : darktheme
+          ? '#1e293b'
+          : 'white',
+      borderRadius: '0.5rem',
+      padding: '1.25rem',
+      minWidth: '300px',
+      maxWidth: '400px',
+      boxShadow: sacredtheme
+        ? '0 0 1.5rem rgba(255, 215, 0, 0.2)'
+        : darktheme
+          ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
+          : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      border: sacredtheme
+        ? '2px solid rgba(255, 215, 0, 0.5)'
+        : darktheme
+          ? '1px solid #475569'
+          : '1px solid #E5E7EB',
+      animation: sacredtheme
+        ? 'date-field-sacred-glow 2s infinite alternate'
+        : 'none',
     },
-  },
-  backButton: {
-    height: '2rem',
-    width: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '0 0.25rem',
-    padding: 0,
-    borderRadius: '9999px',
-    transition: 'all 0.3s ease',
-    color: sacredtheme ? '#FFD700' : '#4B5563',
-    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'transparent',
-    '&:hover': {
-      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.2)' : '#F3F4F6',
+    header: {
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: '1rem',
+      padding: '0.5rem',
+      borderRadius: '0.5rem',
+      transition: 'background-color 0.2s',
+      '&:hover': {
+        backgroundColor: sacredtheme
+          ? 'rgba(255, 215, 0, 0.05)'
+          : darktheme
+            ? '#334155'
+            : '#F9FAFB',
+      },
     },
-  },
-  headerTextContainer: {
-    flex: 1,
-    pointerEvents: 'none' as const,
-  },
-  headerTitle: {
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    color: sacredtheme ? '#FFD700' : '#1F2937',
-    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
-    cursor: 'pointer',
-  },
-  headerSubtitle: {
-    fontSize: '1rem',
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#6B7280',
-    fontFamily: sacredtheme ? 'Arapey, serif' : 'Inter, sans-serif',
-    cursor: isDragging ? 'grabbing' : 'grab',
-    textAlign: 'center' as const,
-  },
-  grid: {
-    display: 'grid',
-    gap: '0.5rem',
-  },
-  grid3Col: {
-    gridTemplateColumns: 'repeat(3, 1fr)',
-  },
-  pickerButton: {
-    padding: '0.5rem',
-    borderRadius: '9999px',
-    textAlign: 'center' as const,
-    transition: 'background-color 0.2s',
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black',
-    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : '#F3F4F6',
-    '&:hover': {
-      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.2)' : '#E5E7EB',
+    backButton: {
+      height: '2rem',
+      width: '2rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: '0 0.25rem',
+      padding: 0,
+      borderRadius: '9999px',
+      transition: 'all 0.3s ease',
+      color: sacredtheme ? '#FFD700' : darktheme ? '#94a3b8' : '#4B5563',
+      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : 'transparent',
+      '&:hover': {
+        backgroundColor: sacredtheme
+          ? 'rgba(255, 215, 0, 0.2)'
+          : darktheme
+            ? '#334155'
+            : '#F3F4F6',
+      },
     },
-    '&:disabled': {
-      backgroundColor: 'transparent',
-      color: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#D1D5DB',
-      '&:hover': { backgroundColor: 'transparent' },
+    headerTextContainer: {
+      flex: 1,
+      pointerEvents: 'none' as const,
     },
-  },
-  calendarIcon: {
-    height: '1.25rem',
-    width: '1.25rem',
-    color: sacredtheme ? '#FFD700' : '#6B7280',
-    animation: sacredtheme
-      ? 'sacred-icon-glow 1.5s infinite alternate'
-      : 'none',
-  },
-  select: {
-    background: 'transparent',
-    border: 'none',
-    color: sacredtheme ? '#FFD700' : '#1F2937',
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
-    cursor: 'pointer',
-    padding: 0,
-    margin: 0,
-    paddingRight: '1.5rem',
-  },
-})
+    headerTitle: {
+      fontSize: '1.125rem',
+      fontWeight: 600,
+      color: sacredtheme ? '#FFD700' : darktheme ? '#f1f5f9' : '#1F2937',
+      fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+      cursor: 'pointer',
+    },
+    headerSubtitle: {
+      fontSize: '1rem',
+      color: sacredtheme
+        ? 'rgba(255, 215, 0, 0.7)'
+        : darktheme
+          ? '#94a3b8'
+          : '#6B7280',
+      fontFamily: sacredtheme ? 'Arapey, serif' : 'Inter, sans-serif',
+      cursor: isDragging ? 'grabbing' : 'grab',
+      textAlign: 'center' as const,
+    },
+    grid: {
+      display: 'grid',
+      gap: '0.5rem',
+    },
+    grid3Col: {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+    },
+    pickerButton: {
+      padding: '0.5rem',
+      borderRadius: '9999px',
+      textAlign: 'center' as const,
+      transition: 'background-color 0.2s',
+      color: sacredtheme
+        ? 'rgba(255, 215, 0, 0.8)'
+        : darktheme
+          ? '#f1f5f9'
+          : 'black',
+      backgroundColor: sacredtheme
+        ? 'rgba(255, 215, 0, 0.1)'
+        : darktheme
+          ? '#334155'
+          : '#F3F4F6',
+      '&:hover': {
+        backgroundColor: sacredtheme
+          ? 'rgba(255, 215, 0, 0.2)'
+          : darktheme
+            ? '#475569'
+            : '#E5E7EB',
+      },
+      '&:disabled': {
+        backgroundColor: 'transparent',
+        color: sacredtheme
+          ? 'rgba(255, 215, 0, 0.3)'
+          : darktheme
+            ? '#64748b'
+            : '#D1D5DB',
+        '&:hover': { backgroundColor: 'transparent' },
+      },
+    },
+    calendarIcon: {
+      height: '1.25rem',
+      width: '1.25rem',
+      color: sacredtheme ? '#FFD700' : darktheme ? '#94a3b8' : '#6B7280',
+      animation: sacredtheme
+        ? 'sacred-icon-glow 1.5s infinite alternate'
+        : 'none',
+    },
+    select: {
+      background: 'transparent',
+      border: 'none',
+      color: sacredtheme ? '#FFD700' : darktheme ? '#f1f5f9' : '#1F2937',
+      fontSize: '1.25rem',
+      fontWeight: 600,
+      fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+      cursor: 'pointer',
+      padding: 0,
+      margin: 0,
+      paddingRight: '1.5rem',
+    },
+  }
+}
 
 const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   onChange,
@@ -276,7 +317,8 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
   const sacredtheme = styles?.theme === 'sacred'
-  const pickerStyles = getStyles(sacredtheme, isDragging)
+  const currentTheme = styles?.theme || 'light'
+  const pickerStyles = getStyles(currentTheme, isDragging)
 
   const {
     themeConfig,
@@ -656,7 +698,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
               onChange={e => setViewedHour(parseInt(e.target.value))}
               label=""
               styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
+                theme: currentTheme,
                 height: '2rem',
                 fontSize: '1rem',
                 padding: '0.25rem 1.5rem 0.25rem 0.5rem',
@@ -671,7 +713,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
               onChange={e => setViewedMinute(parseInt(e.target.value))}
               label=""
               styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
+                theme: currentTheme,
                 height: '2rem',
                 fontSize: '1rem',
                 padding: '0.25rem 1.5rem 0.25rem 0.5rem',
@@ -684,7 +726,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
               onChange={e => setViewedAmPm(e.target.value)}
               label=""
               styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
+                theme: currentTheme,
                 height: '2rem',
                 fontSize: '1rem',
                 padding: '0.25rem 1.5rem 0.25rem 0.5rem',
@@ -699,10 +741,22 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
           onClick={handleTimeSelect}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.2)' : '#F3F4F6',
-            color: sacredtheme ? '#FFD700' : '#1F2937',
+            backgroundColor:
+              currentTheme === 'sacred'
+                ? 'rgba(255, 215, 0, 0.2)'
+                : currentTheme === 'dark'
+                  ? '#334155'
+                  : '#F3F4F6',
+            color:
+              currentTheme === 'sacred'
+                ? '#FFD700'
+                : currentTheme === 'dark'
+                  ? '#f1f5f9'
+                  : '#1F2937',
             borderRadius: '0.5rem',
             cursor: 'pointer',
+            border: 'none',
+            transition: 'all 0.2s ease',
           }}
         >
           Confirm
@@ -738,7 +792,10 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
         </div>
       )}
       <div onClick={onClick} style={{ cursor: 'pointer' }}>
-        <AccessTimeIcon style={pickerStyles.calendarIcon} />
+        <AccessTimeIcon
+          style={pickerStyles.calendarIcon}
+          sacredtheme={sacredtheme}
+        />
       </div>
     </div>
   )

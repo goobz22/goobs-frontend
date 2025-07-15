@@ -244,17 +244,43 @@ const USDField: React.FC<USDFieldProps> = ({
   const computedStyles = getStyles(styles, isFocused, enableIncrement)
   const sacredTheme = styles?.theme === 'sacred'
 
-  const DollarAdornment = () => (
-    <div
-      style={{
-        ...computedStyles.adornment,
-        ...computedStyles.startAdornment,
-      }}
-    >
-      {sacredTheme && <span style={computedStyles.sacredGlyph}>𓊹</span>}
-      <span>$</span>
-    </div>
-  )
+  const DollarAdornment = () => {
+    const { themeConfig, adornmentColor } = getSharedFormFieldStyles(
+      styles,
+      isFocused
+    )
+
+    const dollarSignColor = sacredTheme
+      ? isFocused
+        ? '#FFD700'
+        : 'rgba(255, 215, 0, 0.9)'
+      : adornmentColor
+
+    return (
+      <div
+        style={{
+          ...computedStyles.adornment,
+          ...computedStyles.startAdornment,
+        }}
+      >
+        {sacredTheme && <span style={computedStyles.sacredGlyph}>𓊹</span>}
+        <span
+          style={{
+            color: dollarSignColor,
+            fontSize: styles?.fontSize || '16px',
+            fontWeight: styles?.fontWeight || 500,
+            fontFamily: themeConfig.fontFamily,
+            ...(sacredTheme && {
+              textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
+              filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
+            }),
+          }}
+        >
+          $
+        </span>
+      </div>
+    )
+  }
 
   const IncrementAdornment = () =>
     enableIncrement ? (
@@ -272,7 +298,10 @@ const USDField: React.FC<USDFieldProps> = ({
             disabled={styles?.disabled}
             style={computedStyles.button}
           >
-            <ArrowDropUpIcon style={computedStyles.icon} />
+            <ArrowDropUpIcon
+              style={computedStyles.icon}
+              sacredtheme={sacredTheme}
+            />
           </button>
           <button
             type="button"
@@ -281,7 +310,10 @@ const USDField: React.FC<USDFieldProps> = ({
             disabled={styles?.disabled}
             style={{ ...computedStyles.button, marginTop: '2px' }}
           >
-            <ArrowDropDownIcon style={computedStyles.icon} />
+            <ArrowDropDownIcon
+              style={computedStyles.icon}
+              sacredtheme={sacredTheme}
+            />
           </button>
         </div>
       </div>
