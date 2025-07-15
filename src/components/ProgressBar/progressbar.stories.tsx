@@ -334,222 +334,94 @@ export const EnhancedFeatures: Story = {
   },
 }
 
-export const LoadingSimulation: Story = {
-  render: () => {
-    const [progress, setProgress] = useState(0)
-    const [isLoading, setIsLoading] = useState(true)
-    const [stage, setStage] = useState('Initializing...')
+const LoadingSimulationComponent = () => {
+  const [progress, setProgress] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [stage, setStage] = useState('Initializing...')
 
-    useEffect(() => {
-      const stages = [
-        { label: 'Initializing...', duration: 800 },
-        { label: 'Loading configuration...', duration: 1200 },
-        { label: 'Connecting to server...', duration: 1500 },
-        { label: 'Fetching data...', duration: 2000 },
-        { label: 'Processing results...', duration: 1000 },
-        { label: 'Finalizing...', duration: 600 },
-      ]
+  useEffect(() => {
+    const stages = [
+      { label: 'Initializing...', duration: 800 },
+      { label: 'Loading configuration...', duration: 1200 },
+      { label: 'Connecting to server...', duration: 1500 },
+      { label: 'Fetching data...', duration: 2000 },
+      { label: 'Processing results...', duration: 1000 },
+      { label: 'Finalizing...', duration: 600 },
+    ]
 
-      let currentStage = 0
-      let currentProgress = 0
+    let currentStage = 0
+    let currentProgress = 0
 
-      const updateProgress = () => {
-        if (currentStage < stages.length) {
-          const stageProgress = 100 / stages.length
-          const targetProgress = (currentStage + 1) * stageProgress
+    const updateProgress = () => {
+      if (currentStage < stages.length) {
+        const stageProgress = 100 / stages.length
+        const targetProgress = (currentStage + 1) * stageProgress
 
-          setStage(stages[currentStage].label)
+        setStage(stages[currentStage].label)
 
-          const interval = setInterval(() => {
-            currentProgress += 2
-            setProgress(currentProgress)
-
-            if (currentProgress >= targetProgress) {
-              clearInterval(interval)
-              currentStage++
-
-              if (currentStage < stages.length) {
-                setTimeout(updateProgress, 200)
-              } else {
-                setIsLoading(false)
-                setStage('Complete!')
-              }
-            }
-          }, 50)
-        }
-      }
-
-      const timer = setTimeout(updateProgress, 500)
-      return () => clearTimeout(timer)
-    }, [])
-
-    const handleRestart = () => {
-      setProgress(0)
-      setIsLoading(true)
-      setStage('Initializing...')
-    }
-
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          width: '400px',
-          padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '12px',
-        }}
-      >
-        <h3 style={{ margin: 0, color: '#374151' }}>Loading Simulation</h3>
-
-        <div>
-          <div
-            style={{ marginBottom: '8px', fontSize: '14px', color: '#6b7280' }}
-          >
-            {stage}
-          </div>
-          <ProgressBar
-            value={progress}
-            variant={isLoading ? 'determinate' : 'determinate'}
-            showLabel
-            styles={{
-              theme: 'light',
-              striped: true,
-              animated: isLoading,
-              pulse: progress > 0 && progress < 100,
-            }}
-          />
-        </div>
-
-        {!isLoading && (
-          <button
-            onClick={handleRestart}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
-          >
-            Restart Simulation
-          </button>
-        )}
-      </div>
-    )
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Interactive loading simulation that demonstrates real-world usage with multiple stages and dynamic progress updates.',
-      },
-    },
-  },
-}
-
-export const FileUploadSimulation: Story = {
-  render: () => {
-    const [uploads, setUploads] = useState([
-      { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
-      { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
-      { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
-    ])
-
-    useEffect(() => {
-      const uploadFile = (fileIndex: number) => {
         const interval = setInterval(() => {
-          setUploads(prev => {
-            const newUploads = [...prev]
-            const file = newUploads[fileIndex]
+          currentProgress += 2
+          setProgress(currentProgress)
 
-            if (file.status === 'waiting') {
-              file.status = 'uploading'
+          if (currentProgress >= targetProgress) {
+            clearInterval(interval)
+            currentStage++
+
+            if (currentStage < stages.length) {
+              setTimeout(updateProgress, 200)
+            } else {
+              setIsLoading(false)
+              setStage('Complete!')
             }
-
-            if (file.status === 'uploading') {
-              file.progress += Math.random() * 8 + 2
-
-              if (file.progress >= 100) {
-                file.progress = 100
-                file.status = 'completed'
-                clearInterval(interval)
-
-                // Start next file
-                if (fileIndex + 1 < newUploads.length) {
-                  setTimeout(() => uploadFile(fileIndex + 1), 500)
-                }
-              }
-            }
-
-            return newUploads
-          })
-        }, 100)
+          }
+        }, 50)
       }
-
-      const timer = setTimeout(() => uploadFile(0), 1000)
-      return () => clearTimeout(timer)
-    }, [])
-
-    const handleRestart = () => {
-      setUploads([
-        { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
-        { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
-        { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
-      ])
     }
 
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-          width: '400px',
-          padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '12px',
-        }}
-      >
-        <h3 style={{ margin: 0, color: '#374151' }}>File Upload Progress</h3>
+    const timer = setTimeout(updateProgress, 500)
+    return () => clearTimeout(timer)
+  }, [])
 
-        {uploads.map((file, index) => (
-          <div
-            key={file.id}
-            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <span style={{ fontSize: '14px', color: '#374151' }}>
-                {file.name}
-              </span>
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                {file.status}
-              </span>
-            </div>
-            <ProgressBar
-              value={file.progress}
-              variant={
-                file.status === 'uploading' ? 'determinate' : 'determinate'
-              }
-              showLabel={file.status === 'uploading'}
-              styles={{
-                theme: 'light',
-                striped: file.status === 'uploading',
-                animated: file.status === 'uploading',
-              }}
-            />
-          </div>
-        ))}
+  const handleRestart = () => {
+    setProgress(0)
+    setIsLoading(true)
+    setStage('Initializing...')
+  }
 
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '12px',
+      }}
+    >
+      <h3 style={{ margin: 0, color: '#374151' }}>Loading Simulation</h3>
+
+      <div>
+        <div
+          style={{ marginBottom: '8px', fontSize: '14px', color: '#6b7280' }}
+        >
+          {stage}
+        </div>
+        <ProgressBar
+          value={progress}
+          variant={isLoading ? 'determinate' : 'determinate'}
+          showLabel
+          styles={{
+            theme: 'light',
+            striped: true,
+            animated: isLoading,
+            pulse: progress > 0 && progress < 100,
+          }}
+        />
+      </div>
+
+      {!isLoading && (
         <button
           onClick={handleRestart}
           style={{
@@ -560,14 +432,146 @@ export const FileUploadSimulation: Story = {
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '14px',
-            marginTop: '10px',
           }}
         >
-          Restart Upload
+          Restart Simulation
         </button>
-      </div>
-    )
+      )}
+    </div>
+  )
+}
+
+export const LoadingSimulation: Story = {
+  render: () => <LoadingSimulationComponent />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive loading simulation that demonstrates real-world usage with multiple stages and dynamic progress updates.',
+      },
+    },
   },
+}
+
+const FileUploadSimulationComponent = () => {
+  const [uploads, setUploads] = useState([
+    { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
+    { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
+    { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
+  ])
+
+  useEffect(() => {
+    const uploadFile = (fileIndex: number) => {
+      const interval = setInterval(() => {
+        setUploads(prev => {
+          const newUploads = [...prev]
+          const file = newUploads[fileIndex]
+
+          if (file.status === 'waiting') {
+            file.status = 'uploading'
+          }
+
+          if (file.status === 'uploading') {
+            file.progress += Math.random() * 8 + 2
+
+            if (file.progress >= 100) {
+              file.progress = 100
+              file.status = 'completed'
+              clearInterval(interval)
+
+              // Start next file
+              if (fileIndex + 1 < newUploads.length) {
+                setTimeout(() => uploadFile(fileIndex + 1), 500)
+              }
+            }
+          }
+
+          return newUploads
+        })
+      }, 100)
+    }
+
+    const timer = setTimeout(() => uploadFile(0), 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleRestart = () => {
+    setUploads([
+      { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
+      { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
+      { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
+    ])
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '12px',
+      }}
+    >
+      <h3 style={{ margin: 0, color: '#374151' }}>File Upload Progress</h3>
+
+      {uploads.map(file => (
+        <div
+          key={file.id}
+          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ fontSize: '14px', color: '#374151' }}>
+              {file.name}
+            </span>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              {file.status}
+            </span>
+          </div>
+          <ProgressBar
+            value={file.progress}
+            variant={
+              file.status === 'uploading' ? 'determinate' : 'determinate'
+            }
+            showLabel={file.status === 'uploading'}
+            styles={{
+              theme: 'light',
+              striped: file.status === 'uploading',
+              animated: file.status === 'uploading',
+            }}
+          />
+        </div>
+      ))}
+
+      <button
+        onClick={handleRestart}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          marginTop: '10px',
+        }}
+      >
+        Restart Upload
+      </button>
+    </div>
+  )
+}
+
+export const FileUploadSimulation: Story = {
+  render: () => <FileUploadSimulationComponent />,
   parameters: {
     docs: {
       description: {

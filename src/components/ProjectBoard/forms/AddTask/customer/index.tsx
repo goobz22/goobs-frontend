@@ -14,36 +14,6 @@ import { ProjectBoardStyles } from '../../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
-// Hook to detect screen size for responsive form layout
-const useScreenSize = () => {
-  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>(
-    'desktop'
-  )
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      if (window.innerWidth < 640) {
-        setScreenSize('mobile')
-      } else if (window.innerWidth < 1024) {
-        setScreenSize('tablet')
-      } else {
-        setScreenSize('desktop')
-      }
-    }
-
-    // Check on mount
-    checkScreenSize()
-
-    // Add event listener
-    window.addEventListener('resize', checkScreenSize)
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
-
-  return screenSize
-}
-
 interface CustomerAddTaskProps {
   open: boolean
   onClose: () => void
@@ -56,10 +26,7 @@ interface CustomerAddTaskProps {
   styles?: ProjectBoardStyles
 }
 
-const getStyles = (
-  styles?: ProjectBoardStyles,
-  screenSize?: 'mobile' | 'tablet' | 'desktop'
-) => {
+const getStyles = (styles?: ProjectBoardStyles) => {
   const isSacredTheme = styles?.theme === 'sacred'
   const isDarkTheme = styles?.theme === 'dark'
 

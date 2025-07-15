@@ -77,6 +77,7 @@ export interface CreditCardNumberProps {
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
+  disabled?: boolean
   styles?: FormFieldStyles
 }
 
@@ -144,6 +145,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   onFocus,
   onBlur,
   helperText,
+  disabled,
   styles,
   ...props
 }) => {
@@ -263,7 +265,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
 
   const getCardIcon = useCallback(() => '💳', [])
 
-  const computedStyles = getStyles(styles, isFocused)
+  const computedStyles = getStyles({ ...styles, disabled }, isFocused)
 
   const CardAdornment = () => (
     <div

@@ -1,23 +1,20 @@
-// src/components/Tooltip/tooltip.stories.tsx
-
+import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
 import StyledTooltip from './index'
-import CustomButton from '../Button' // Using your existing button for demonstration
+import Button from '../Button'
 
 const meta: Meta<typeof StyledTooltip> = {
   title: 'Components/Tooltip',
   component: StyledTooltip,
-  parameters: {
-    layout: 'centered',
-  },
   argTypes: {
-    title: { control: 'text' },
+    title: {
+      control: 'text',
+      description: 'The tooltip content text',
+    },
     tooltipplacement: {
       control: 'select',
       options: ['top', 'bottom', 'left', 'right'],
     },
-    sacredtheme: { control: 'boolean' },
     arrow: { control: 'boolean' },
     enterDelay: { control: 'number' },
     leaveDelay: { control: 'number' },
@@ -26,242 +23,108 @@ const meta: Meta<typeof StyledTooltip> = {
 }
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof StyledTooltip>
 
 const defaultArgs = {
-  title: 'Tooltip',
-  children: <CustomButton text="Hover me" />,
+  title: 'This is a helpful tooltip',
+  tooltipplacement: 'top' as const,
+  arrow: true,
+  enterDelay: 100,
+  leaveDelay: 0,
 }
 
-/**
- * 1) Premium Theme Variants
- */
-export const PremiumThemeVariants: Story = {
-  name: 'Premium Theme - All Variants',
+// Basic tooltip story
+export const Basic: Story = {
+  name: 'Basic/Light Theme',
   render: args => (
-    <div className="p-8 bg-gray-50 rounded-xl">
-      <h3 className="text-xl font-bold text-gray-900 mb-6 font-inter">
-        Premium Tooltips
-      </h3>
-      <div className="flex flex-wrap gap-8 justify-center items-center h-64">
-        <StyledTooltip {...args} tooltipplacement="top" title="Top Tooltip">
-          <CustomButton text="Top" />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="bottom"
-          title="Bottom Tooltip"
-        >
-          <CustomButton text="Bottom" />
-        </StyledTooltip>
-        <StyledTooltip {...args} tooltipplacement="left" title="Left Tooltip">
-          <CustomButton text="Left" />
-        </StyledTooltip>
-        <StyledTooltip {...args} tooltipplacement="right" title="Right Tooltip">
-          <CustomButton text="Right" />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="top"
-          title="No Arrow"
-          arrow={false}
-        >
-          <CustomButton text="No Arrow" />
-        </StyledTooltip>
-      </div>
+    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
+      <StyledTooltip {...args}>
+        <Button>Hover me</Button>
+      </StyledTooltip>
     </div>
   ),
   args: {
     ...defaultArgs,
-    sacredtheme: false,
   },
 }
 
-/**
- * 2) Sacred Theme Variants
- */
-export const SacredThemeVariants: Story = {
-  name: 'Sacred Theme - All Variants',
+// Sacred theme tooltip story
+export const SacredTheme: Story = {
+  name: 'Basic/Sacred Theme',
   render: args => (
-    <div className="p-8 bg-black/90 rounded-xl">
-      <h3 className="text-xl font-bold text-yellow-400 mb-6 font-cinzel animate-sacred-glow">
-        Sacred Tooltips
-      </h3>
-      <div className="flex flex-wrap gap-8 justify-center items-center h-64">
-        <StyledTooltip
-          {...args}
-          tooltipplacement="top"
-          title="Ancient Wisdom (Top)"
-        >
-          <CustomButton
-            text="Top"
-            styles={{
-              theme: 'sacred',
-            }}
-          />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="bottom"
-          title="Divine Insight (Bottom)"
-        >
-          <CustomButton
-            text="Bottom"
-            styles={{
-              theme: 'sacred',
-            }}
-          />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="left"
-          title="Mystical Secret (Left)"
-        >
-          <CustomButton
-            text="Left"
-            styles={{
-              theme: 'sacred',
-            }}
-          />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="right"
-          title="Golden Prophecy (Right)"
-        >
-          <CustomButton
-            text="Right"
-            styles={{
-              theme: 'sacred',
-            }}
-          />
-        </StyledTooltip>
-        <StyledTooltip
-          {...args}
-          tooltipplacement="top"
-          title="No Arrow"
-          arrow={false}
-        >
-          <CustomButton
-            text="No Arrow"
-            styles={{
-              theme: 'sacred',
-            }}
-          />
-        </StyledTooltip>
-      </div>
+    <div
+      style={{
+        padding: '2rem',
+        display: 'flex',
+        justifyContent: 'center',
+        backgroundColor: '#000',
+        minHeight: '200px',
+      }}
+    >
+      <StyledTooltip {...args}>
+        <Button styles={{ theme: 'sacred' }}>Hover me</Button>
+      </StyledTooltip>
     </div>
   ),
   args: {
     ...defaultArgs,
-    sacredtheme: true,
+    title: 'Sacred wisdom revealed',
+    styles: {
+      theme: 'sacred',
+    },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
   },
 }
 
-const InteractiveDemoRenderer = () => {
-  const [config, setConfig] = React.useState({
-    title: 'Interactive Tooltip',
-    placement: 'top' as 'top' | 'bottom' | 'left' | 'right',
-    sacredtheme: false,
-    showArrow: true,
-    enterDelay: 100,
-    leaveDelay: 0,
-  })
-
-  return (
-    <div className="w-[500px] space-y-6">
-      <div className="p-6 bg-white rounded-lg border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Tooltip Configuration
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title
-            </label>
-            <input
-              type="text"
-              value={config.title}
-              onChange={e => setConfig({ ...config, title: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Placement
-            </label>
-            <select
-              value={config.placement}
-              onChange={e =>
-                setConfig({
-                  ...config,
-                  placement: e.target.value as
-                    | 'top'
-                    | 'bottom'
-                    | 'left'
-                    | 'right',
-                })
-              }
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="top">Top</option>
-              <option value="bottom">Bottom</option>
-              <option value="left">Left</option>
-              <option value="right">Right</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 mt-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={config.sacredtheme}
-              onChange={e =>
-                setConfig({ ...config, sacredtheme: e.target.checked })
-              }
-            />
-            <span className="ml-2">Sacred Theme</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={config.showArrow}
-              onChange={e =>
-                setConfig({ ...config, showArrow: e.target.checked })
-              }
-            />
-            <span className="ml-2">Show Arrow</span>
-          </label>
-        </div>
-      </div>
-
-      <div
-        className={`p-8 rounded-xl flex justify-center items-center h-48 ${config.sacredtheme ? 'bg-black/90' : 'bg-gray-50'}`}
-      >
-        <StyledTooltip
-          title={config.title}
-          tooltipplacement={config.placement}
-          sacredtheme={config.sacredtheme}
-          arrow={config.showArrow}
-          enterDelay={config.enterDelay}
-          leaveDelay={config.leaveDelay}
-        >
-          <CustomButton
-            text="Hover me"
-            styles={{
-              theme: config.sacredtheme ? 'sacred' : 'light',
-            }}
-          />
-        </StyledTooltip>
-      </div>
+// Different placements
+export const Placements: Story = {
+  name: 'Placements',
+  render: () => (
+    <div
+      style={{
+        padding: '4rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '2rem',
+        placeItems: 'center',
+      }}
+    >
+      <StyledTooltip title="Top tooltip" tooltipplacement="top">
+        <Button>Top</Button>
+      </StyledTooltip>
+      <StyledTooltip title="Bottom tooltip" tooltipplacement="bottom">
+        <Button>Bottom</Button>
+      </StyledTooltip>
+      <StyledTooltip title="Left tooltip" tooltipplacement="left">
+        <Button>Left</Button>
+      </StyledTooltip>
+      <StyledTooltip title="Right tooltip" tooltipplacement="right">
+        <Button>Right</Button>
+      </StyledTooltip>
     </div>
-  )
+  ),
 }
 
-/**
- * 3) Interactive Demo
- */
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveDemoRenderer />,
+// With and without arrow
+export const ArrowVariants: Story = {
+  name: 'Arrow Variants',
+  render: () => (
+    <div
+      style={{
+        padding: '2rem',
+        display: 'flex',
+        gap: '2rem',
+        justifyContent: 'center',
+      }}
+    >
+      <StyledTooltip title="With arrow" arrow={true}>
+        <Button>With Arrow</Button>
+      </StyledTooltip>
+      <StyledTooltip title="Without arrow" arrow={false}>
+        <Button>Without Arrow</Button>
+      </StyledTooltip>
+    </div>
+  ),
 }

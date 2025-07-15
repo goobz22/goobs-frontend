@@ -12,7 +12,7 @@ import {
 
 type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>
 
-export interface IncrementNumberFieldProps
+export interface ExternalIncrementNumberFieldProps
   extends Omit<TextFieldProps, 'onChange' | 'disabled' | 'required'> {
   initialValue?: string
   onChange?: () => void
@@ -86,20 +86,15 @@ const getStyles = (
   return componentStyles
 }
 
-const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
-  initialValue = '0',
-  onChange,
-  label,
-  helperText,
-  styles,
-  ...rest
-}) => {
+const ExternalIncrementNumberField: React.FC<
+  ExternalIncrementNumberFieldProps
+> = ({ initialValue = '0', onChange, label, helperText, styles, ...rest }) => {
   const [internalValue, setInternalValue] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
 
   const handleIncrement = useCallback(() => {
     if (styles?.disabled) return
-    setInternalValue(prev => {
+    setInternalValue((prev: string) => {
       const num = parseInt(prev, 10)
       const newValue = (isNaN(num) ? 0 : num + 1).toString()
       onChange?.()
@@ -109,7 +104,7 @@ const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
 
   const handleDecrement = useCallback(() => {
     if (styles?.disabled) return
-    setInternalValue(prev => {
+    setInternalValue((prev: string) => {
       const num = parseInt(prev, 10)
       const newValue = Math.max(0, isNaN(num) ? 0 : num - 1).toString()
       onChange?.()
@@ -180,4 +175,4 @@ const IncrementNumberField: React.FC<IncrementNumberFieldProps> = ({
   )
 }
 
-export default IncrementNumberField
+export default ExternalIncrementNumberField

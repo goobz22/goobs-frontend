@@ -42,6 +42,10 @@ export { buttonThemes, getButtonTheme, getButtonStyles } from './button'
 export type { DropdownTheme, DropdownStyles } from './dropdown'
 export { dropdownThemes, getDropdownTheme, getDropdownStyles } from './dropdown'
 
+// Export nav theme system
+export type { NavTheme, NavStyles } from './nav'
+export { navThemes, getNavTheme, getNavStyles } from './nav'
+
 // Export chip theme system
 export type { ChipTheme, ChipStyles } from './chip'
 export { chipThemes, getChipTheme, getChipStyles } from './chip'

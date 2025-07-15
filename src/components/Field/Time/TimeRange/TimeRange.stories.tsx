@@ -231,139 +231,139 @@ export const CustomLabels: Story = {
   },
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => {
-    const [showTimezone, setShowTimezone] = React.useState(true)
-    const [value, setValue] = React.useState<TimeRange>({
-      start: new Date(),
-      end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
-    })
-    const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>(
-      'light'
-    )
+const InteractiveDemoComponent = () => {
+  const [showTimezone, setShowTimezone] = React.useState(true)
+  const [value, setValue] = React.useState<TimeRange>({
+    start: new Date(),
+    end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
+  })
+  const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
 
-    const getBackgroundColor = () => {
-      switch (theme) {
-        case 'dark':
-          return '#0f172a'
-        case 'sacred':
-          return '#1C1917'
-        default:
-          return '#f8fafc'
-      }
+  const getBackgroundColor = () => {
+    switch (theme) {
+      case 'dark':
+        return '#0f172a'
+      case 'sacred':
+        return '#1C1917'
+      default:
+        return '#f8fafc'
     }
+  }
 
-    const getTextColor = () => {
-      switch (theme) {
-        case 'dark':
-          return '#94a3b8'
-        case 'sacred':
-          return '#FFD700'
-        default:
-          return '#475569'
-      }
+  const getTextColor = () => {
+    switch (theme) {
+      case 'dark':
+        return '#94a3b8'
+      case 'sacred':
+        return '#FFD700'
+      default:
+        return '#475569'
     }
+  }
 
-    return (
-      <div
-        style={{
-          backgroundColor: getBackgroundColor(),
-          minHeight: '100vh',
-          padding: '2rem',
-          margin: 0,
-          boxSizing: 'border-box',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div style={{ maxWidth: '600px', width: '100%' }}>
-          <div
+  return (
+    <div
+      style={{
+        backgroundColor: getBackgroundColor(),
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '600px', width: '100%' }}>
+        <div
+          style={{
+            marginBottom: '1rem',
+            fontSize: '14px',
+            color: getTextColor(),
+          }}
+        >
+          <strong>Interactive Demo:</strong> Try different themes and settings
+          to see how the time range picker adapts.
+        </div>
+        <div
+          style={{
+            padding: '1rem',
+            border: `1px solid ${theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#334155' : '#e2e8f0'}`,
+            borderRadius: '8px',
+            marginBottom: '1rem',
+            backgroundColor:
+              theme === 'sacred'
+                ? 'rgba(255, 215, 0, 0.1)'
+                : theme === 'dark'
+                  ? 'rgba(51, 65, 85, 0.3)'
+                  : 'rgba(255, 255, 255, 0.8)',
+          }}
+        >
+          <h3
             style={{
-              marginBottom: '1rem',
-              fontSize: '14px',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
               color: getTextColor(),
             }}
           >
-            <strong>Interactive Demo:</strong> Try different themes and settings
-            to see how the time range picker adapts.
-          </div>
+            Controls
+          </h3>
           <div
             style={{
-              padding: '1rem',
-              border: `1px solid ${theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-              borderRadius: '8px',
-              marginBottom: '1rem',
-              backgroundColor:
-                theme === 'sacred'
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : theme === 'dark'
-                    ? 'rgba(51, 65, 85, 0.3)'
-                    : 'rgba(255, 255, 255, 0.8)',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '0.5rem',
             }}
           >
-            <h3
-              style={{
-                fontWeight: 'bold',
-                marginBottom: '0.5rem',
-                color: getTextColor(),
-              }}
-            >
-              Controls
-            </h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                gap: '0.5rem',
-              }}
-            >
-              <label style={{ color: getTextColor() }}>
-                <input
-                  type="checkbox"
-                  checked={showTimezone}
-                  onChange={e => setShowTimezone(e.target.checked)}
-                  style={{ marginRight: '0.5rem' }}
-                />
-                Show Timezone
-              </label>
-              <label style={{ color: getTextColor() }}>
-                <select
-                  value={theme}
-                  onChange={e =>
-                    setTheme(e.target.value as 'light' | 'dark' | 'sacred')
-                  }
-                  style={{
-                    marginLeft: '0.5rem',
-                    padding: '0.25rem',
-                    borderRadius: '4px',
-                    border: `1px solid ${theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-                    backgroundColor:
-                      theme === 'sacred'
-                        ? '#1C1917'
-                        : theme === 'dark'
-                          ? '#0f172a'
-                          : '#ffffff',
-                    color: getTextColor(),
-                  }}
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="sacred">Sacred</option>
-                </select>
-                Theme
-              </label>
-            </div>
+            <label style={{ color: getTextColor() }}>
+              <input
+                type="checkbox"
+                checked={showTimezone}
+                onChange={e => setShowTimezone(e.target.checked)}
+                style={{ marginRight: '0.5rem' }}
+              />
+              Show Timezone
+            </label>
+            <label style={{ color: getTextColor() }}>
+              <select
+                value={theme}
+                onChange={e =>
+                  setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+                }
+                style={{
+                  marginLeft: '0.5rem',
+                  padding: '0.25rem',
+                  borderRadius: '4px',
+                  border: `1px solid ${theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#334155' : '#e2e8f0'}`,
+                  backgroundColor:
+                    theme === 'sacred'
+                      ? '#1C1917'
+                      : theme === 'dark'
+                        ? '#0f172a'
+                        : '#ffffff',
+                  color: getTextColor(),
+                }}
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="sacred">Sacred</option>
+              </select>
+              Theme
+            </label>
           </div>
-          <TimeRangeComponent
-            value={value}
-            onChange={setValue}
-            showTimezone={showTimezone}
-            styles={{ theme }}
-          />
         </div>
+        <TimeRangeComponent
+          value={value}
+          onChange={setValue}
+          showTimezone={showTimezone}
+          styles={{ theme }}
+        />
       </div>
-    )
-  },
+    </div>
+  )
+}
+
+export const InteractiveDemo: Story = {
+  name: 'Interactive Demo',
+  render: () => <InteractiveDemoComponent />,
 }

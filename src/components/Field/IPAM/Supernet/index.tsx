@@ -2,6 +2,7 @@
 
 import React from 'react'
 import SubnetField from '../Subnet'
+import { FormFieldStyles } from '../../../../theme'
 
 export interface SupernetFieldValue {
   address: string
@@ -13,6 +14,7 @@ export interface SupernetFieldProps {
   onChange: (value: SupernetFieldValue) => void
   label?: string
   required?: boolean
+  styles?: FormFieldStyles
   // ...other props as needed
 }
 
@@ -22,6 +24,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
   onChange,
   label = 'Supernet',
   required = false,
+  styles,
 }) => {
   return (
     <SubnetField
@@ -32,6 +35,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
       min={8}
       max={23}
       maskType="supernet"
+      styles={styles}
     />
   )
 }

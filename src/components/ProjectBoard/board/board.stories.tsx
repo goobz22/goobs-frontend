@@ -6,7 +6,6 @@ import ProjectBoard from '../index'
 import { JotaiProvider } from '../jotai/provider'
 import {
   Task,
-  ProjectBoardProps,
   BoardVariant,
   BoardType,
   RawStatus,

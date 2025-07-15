@@ -2,7 +2,7 @@
  * @fileoverview Switch component theme system with light, dark, and sacred themes.
  */
 import React from 'react'
-import { SACRED_GLYPHS, TRANSITIONS, SHADOWS } from './shared'
+import { TRANSITIONS, SHADOWS } from './shared'
 
 export interface SwitchTheme {
   /** Main container styling */
@@ -565,5 +565,3 @@ export const getSwitchStyles = (
 
   return customStyles
 }
-
-export { SACRED_GLYPHS }

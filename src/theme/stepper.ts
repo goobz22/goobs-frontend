@@ -2,7 +2,7 @@
  * @fileoverview Stepper component theme system with light, dark, and sacred themes.
  */
 import React from 'react'
-import { SACRED_GLYPHS, TRANSITIONS, SHADOWS } from './shared'
+import { TRANSITIONS, SHADOWS } from './shared'
 
 export interface StepperTheme {
   /** Main container styling */
@@ -847,5 +847,3 @@ export const getStepperStyles = (styles?: StepperStyles): StepperTheme => {
 
   return customStyles
 }
-
-export { SACRED_GLYPHS }

@@ -2,11 +2,11 @@
  * @fileoverview Storybook stories for the ExternalIncrementNumberField component.
  */
 import type { Meta, StoryObj } from '@storybook/react'
-import IncrementNumberField from './index'
+import ExternalIncrementNumberField from './index'
 
-const meta: Meta<typeof IncrementNumberField> = {
+const meta: Meta<typeof ExternalIncrementNumberField> = {
   title: 'Components/Field/Number/ExternalIncrement',
-  component: IncrementNumberField,
+  component: ExternalIncrementNumberField,
   parameters: {
     layout: 'fullscreen',
   },
@@ -23,10 +23,6 @@ const meta: Meta<typeof IncrementNumberField> = {
       control: { type: 'text' },
       description: 'Helper text to display below the field',
     },
-    disabled: {
-      control: { type: 'boolean' },
-      description: 'Whether the field is disabled',
-    },
     styles: {
       control: 'object',
       description: 'Custom styles using the theme system',
@@ -35,232 +31,158 @@ const meta: Meta<typeof IncrementNumberField> = {
 }
 export default meta
 
-type Story = StoryObj<typeof IncrementNumberField>
+type Story = StoryObj<typeof ExternalIncrementNumberField>
 
 const commonArgs = {
   label: 'Quantity',
-  initialValue: '1',
-  disabled: false,
+  initialValue: '0',
 }
 
-export const LightTheme: Story = {
-  name: 'Light Theme',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#f8fafc',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
-        >
-          <strong>Light Theme:</strong> Clean and professional numeric input
-          with light backgrounds and external increment controls.
-          <br />
-          <strong>Features:</strong> Optimized for quantity selection in bright
-          environments, external increment buttons, and accessible design.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
-    </div>
-  ),
+export const Default: Story = {
   args: {
     ...commonArgs,
-    styles: {
-      theme: 'light',
-    },
   },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const WithHelperText: Story = {
+  args: {
+    ...commonArgs,
+    helperText: 'Use the buttons to increment or decrement the value.',
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const InitialValue5: Story = {
+  args: {
+    ...commonArgs,
+    initialValue: '5',
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const CustomLabel: Story = {
+  args: {
+    ...commonArgs,
+    label: 'Items',
+    initialValue: '10',
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#0f172a',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
-        >
-          <strong>Dark Theme:</strong> Developer-friendly dark mode with high
-          contrast and reduced eye strain.
-          <br />
-          <strong>Features:</strong> Perfect for low-light environments, modern
-          increment controls, and smooth interactions.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
-    </div>
-  ),
   args: {
     ...commonArgs,
     styles: {
       theme: 'dark',
     },
   },
+  render: (args: any) => (
+    <div style={{ padding: '20px', backgroundColor: '#1a1a1a' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#1C1917',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
-        >
-          <strong>Sacred Theme:</strong> Mystical and spiritual numeric input
-          with sacred color palettes and ethereal aesthetics.
-          <br />
-          <strong>Features:</strong> Designed for contemplative number
-          selection, sacred color schemes, and transcendent user experience.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
-    </div>
-  ),
   args: {
     ...commonArgs,
     styles: {
       theme: 'sacred',
     },
   },
-}
-
-export const ProductQuantity: Story = {
-  name: 'Product Quantity',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#f8fafc',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
-        >
-          <strong>Product Quantity:</strong> Optimized for e-commerce quantity
-          selection with external increment buttons.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
+  render: (args: any) => (
+    <div style={{ padding: '20px', backgroundColor: '#0a0a0a' }}>
+      <ExternalIncrementNumberField {...args} />
     </div>
   ),
-  args: {
-    ...commonArgs,
-    label: 'Product Quantity',
-    initialValue: '1',
-    helperText: 'Select quantity to add to cart',
-    styles: {
-      theme: 'light',
-    },
-  },
 }
 
-export const OrderAmountSacred: Story = {
-  name: 'Order Amount Sacred',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#1C1917',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
-        >
-          <strong>Order Amount Sacred:</strong> Sacred theme for mystical order
-          amount selection with transcendent numeric input.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
-    </div>
-  ),
+export const Required: Story = {
   args: {
     ...commonArgs,
-    label: 'Order Amount',
-    initialValue: '5',
-    helperText: 'Enter order amount',
     styles: {
-      theme: 'sacred',
+      required: true,
     },
   },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
 }
 
-export const DisabledState: Story = {
-  name: 'Disabled State',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#0f172a',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '400px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
-        >
-          <strong>Disabled State:</strong> Field in disabled state with external
-          increment controls that cannot be modified.
-        </div>
-        <IncrementNumberField {...args} />
-      </div>
-    </div>
-  ),
+export const Disabled: Story = {
   args: {
     ...commonArgs,
-    initialValue: '10',
-    disabled: true,
-    helperText: 'This field is disabled',
     styles: {
-      theme: 'dark',
+      disabled: true,
     },
   },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const CustomWidth: Story = {
+  args: {
+    ...commonArgs,
+    styles: {
+      width: '300px',
+    },
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const WithBorder: Story = {
+  args: {
+    ...commonArgs,
+    styles: {
+      borderWidth: '2px',
+      borderColor: '#007bff',
+      borderRadius: '12px',
+    },
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+}
+
+export const LargeSize: Story = {
+  args: {
+    ...commonArgs,
+    styles: {
+      height: '60px',
+      fontSize: '18px',
+    },
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
 }

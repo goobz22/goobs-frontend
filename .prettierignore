@@ -1,0 +1,19 @@
+# Storybook build output
+storybook-static/
+
+# Build outputs
+.next/
+node_modules/
+dist/
+build/
+
+# Lock files
+bun.lock
+package-lock.json
+yarn.lock
+
+# Git
+.git/
+
+# Generated files
+*.tsbuildinfo 

@@ -230,14 +230,3 @@ export const getTooltipStyles = (styles: TooltipStyles = {}): TooltipTheme => {
 // --------------------------------------------------------------------------
 // SACRED GLYPHS
 // --------------------------------------------------------------------------
-
-export const SACRED_GLYPHS = {
-  ankh: '☥',
-  eye: '👁',
-  scarab: '🪲',
-  pyramid: '△',
-  sun: '☉',
-  lotus: '🪷',
-  papyrus: '📜',
-  feather: '🪶',
-}

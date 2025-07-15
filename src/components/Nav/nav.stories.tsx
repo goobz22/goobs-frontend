@@ -574,13 +574,15 @@ const MobileNavDemo: React.FC<{
       </button>
       <Nav
         items={navItems}
-        variant="temporary"
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        sacredtheme={sacredtheme}
         verticalNavTitle="Mobile Navigation"
-        sacredTitle="Sacred Mobile"
-        sacredSubtitle="The Portable Wisdom"
+        title="Sacred Mobile"
+        subtitle="The Portable Wisdom"
+        styles={{
+          variant: 'temporary',
+          theme: sacredtheme ? 'sacred' : 'light',
+        }}
       />
     </div>
   )
@@ -598,47 +600,37 @@ const meta: Meta<typeof Nav> = {
       control: 'object',
       description: 'Array of navigation items with hierarchical structure',
     },
-    sacredtheme: {
-      control: 'boolean',
-      description: 'Enable Egyptian-inspired sacred theme with animations',
-    },
-    showSearchableNav: {
-      control: 'boolean',
-      description: 'Show/hide the searchable navigation dropdown',
-    },
-    showTitle: {
-      control: 'boolean',
-      description: 'Show/hide the navigation title',
-    },
-    showLine: {
-      control: 'boolean',
-      description: 'Show/hide the divider line',
-    },
-    variant: {
-      control: 'select',
-      options: ['permanent', 'temporary'],
-      description: 'Navigation variant (permanent or mobile temporary)',
-    },
-    anchor: {
-      control: 'select',
-      options: ['left', 'right'],
-      description: 'Anchor position for the navigation',
-    },
     verticalNavTitle: {
       control: 'text',
-      description: 'Title for regular theme navigation',
+      description: 'Title for navigation',
     },
-    sacredTitle: {
+    title: {
       control: 'text',
-      description: 'Title for sacred theme navigation',
+      description: 'Custom title (overrides verticalNavTitle when provided)',
     },
-    sacredSubtitle: {
+    subtitle: {
       control: 'text',
-      description: 'Subtitle for sacred theme navigation',
+      description: 'Subtitle text',
     },
-    backgroundcolor: {
-      control: 'color',
-      description: 'Custom background color for the navigation',
+    searchableNavLabel: {
+      control: 'text',
+      description: 'Label for the searchable navigation dropdown',
+    },
+    titleUrl: {
+      control: 'text',
+      description: 'URL for the title link',
+    },
+    mobileOpen: {
+      control: 'boolean',
+      description: 'Whether mobile navigation is open',
+    },
+    pathname: {
+      control: 'text',
+      description: 'Current path for active navigation highlighting',
+    },
+    styles: {
+      control: 'object',
+      description: 'Styling configuration object',
     },
   },
 }
@@ -683,10 +675,12 @@ export const SixLevelSacredTheme: Story = {
     <NavWrapper>
       <Nav
         items={sacredSixLevelNavItems}
-        sacredtheme={true}
-        sacredTitle="Sacred Hierarchy"
-        sacredSubtitle="Six Levels of Divine Organization"
+        title="Sacred Hierarchy"
+        subtitle="Six Levels of Divine Organization"
         pathname="/archives/scrolls/manuscripts/papyrus/math/astronomy"
+        styles={{
+          theme: 'sacred',
+        }}
       />
     </NavWrapper>
   ),
@@ -753,10 +747,12 @@ export const SixLevelComparison: Story = {
         >
           <Nav
             items={sacredSixLevelNavItems}
-            sacredtheme={true}
-            sacredTitle="Sacred Archives"
-            sacredSubtitle="Divine Wisdom Hierarchy"
+            title="Sacred Archives"
+            subtitle="Divine Wisdom Hierarchy"
             pathname="/governance/court/officials/scribes/scholars/guardians"
+            styles={{
+              theme: 'sacred',
+            }}
           />
         </div>
       </div>
@@ -893,8 +889,10 @@ export const DarkTheme: Story = {
       <Nav
         items={basicNavItems}
         verticalNavTitle="Dark Navigation"
-        backgroundcolor="#1F2937"
         pathname="/analytics"
+        styles={{
+          backgroundColor: '#1F2937',
+        }}
       />
     </NavWrapper>
   ),
@@ -912,10 +910,12 @@ export const SacredTheme: Story = {
     <NavWrapper>
       <Nav
         items={basicNavItems}
-        sacredtheme={true}
-        sacredTitle="Sacred Navigation"
-        sacredSubtitle="Divine Interface"
+        title="Sacred Navigation"
+        subtitle="Divine Interface"
         pathname="/settings"
+        styles={{
+          theme: 'sacred',
+        }}
       />
     </NavWrapper>
   ),
@@ -998,9 +998,11 @@ export const WithoutSearch: Story = {
     <NavWrapper>
       <Nav
         items={sixLevelNavItems}
-        showSearchableNav={false}
         verticalNavTitle="No Search Navigation"
         pathname="/management/users/permissions/roles"
+        styles={{
+          showSearchableNav: false,
+        }}
       />
     </NavWrapper>
   ),
@@ -1015,10 +1017,12 @@ export const MinimalConfiguration: Story = {
     <NavWrapper>
       <Nav
         items={basicNavItems}
-        showSearchableNav={false}
-        showTitle={false}
-        showLine={false}
         pathname="/analytics"
+        styles={{
+          showSearchableNav: false,
+          showTitle: false,
+          showLine: false,
+        }}
       />
     </NavWrapper>
   ),
@@ -1089,10 +1093,12 @@ export const ComprehensiveShowcase: Story = {
         </h3>
         <Nav
           items={sacredSixLevelNavItems}
-          sacredtheme={true}
-          sacredTitle="Sacred Archives"
-          sacredSubtitle="Divine Hierarchy"
+          title="Sacred Archives"
+          subtitle="Divine Hierarchy"
           pathname="/governance/court/officials/scribes/scholars/keepers"
+          styles={{
+            theme: 'sacred',
+          }}
         />
       </div>
 
@@ -1117,8 +1123,10 @@ export const ComprehensiveShowcase: Story = {
         <Nav
           items={interactiveNavItems}
           verticalNavTitle="Interactive Nav"
-          backgroundcolor="#7C3AED"
           pathname="/dashboard"
+          styles={{
+            backgroundColor: '#7C3AED',
+          }}
         />
       </div>
 
@@ -1143,10 +1151,12 @@ export const ComprehensiveShowcase: Story = {
         <Nav
           items={nestedNavItems}
           verticalNavTitle="Custom Navigation"
-          backgroundcolor="#DC2626"
-          marginabovetitle="1rem"
-          marginbelowtitle="1rem"
           pathname="/users/roles"
+          styles={{
+            backgroundColor: '#DC2626',
+            titleMarginTop: '1rem',
+            titleMarginBottom: '1rem',
+          }}
         />
       </div>
     </div>

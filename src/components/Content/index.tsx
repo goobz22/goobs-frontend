@@ -15,7 +15,7 @@ import { TransferListProps } from '../TransferList'
 import { CodeCopyProps } from '../CodeCopy'
 import { DateFieldProps } from '../Field/Date/DateField'
 import { DropdownProps } from '../Field/Dropdown/Regular'
-import { IncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
+import { ExternalIncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
 import { SearchbarProps } from '../Field/Search'
 import { InternalIncrementNumberFieldProps } from '../Field/Number/InternalIncrement'
 import { SubnetFieldProps } from '../Field/IPAM/Subnet'
@@ -55,7 +55,7 @@ import useCodeCopy from './Structure/codecopy/useCodeCopy'
 import useTextField from './Structure/textfield/useTextField'
 import useDateField from './Structure/datefield/useDateField'
 import useDropdown from './Structure/dropdown/useDropdown'
-import useIncrementNumberField from './Structure/incremementNumberField/useIncremementNumberField'
+import useIncrementNumberField from './Structure/externalIncremementNumberField/useIncremementNumberField'
 import useSearchbar from './Structure/searchbar/useSearchbar'
 import useNumberField from './Structure/numberField/useNumberField'
 import usePasswordField from './Structure/passwordField/usePasswordField'
@@ -107,8 +107,8 @@ export interface ContentSectionProps {
     datefield?: DateFieldProps | DateFieldProps[]
     dropdown?: DropdownProps | DropdownProps[]
     incrementNumberField?:
-      | IncrementNumberFieldProps
-      | IncrementNumberFieldProps[]
+      | ExternalIncrementNumberFieldProps
+      | ExternalIncrementNumberFieldProps[]
     searchbar?: SearchbarProps | SearchbarProps[]
     numberField?:
       | InternalIncrementNumberFieldProps

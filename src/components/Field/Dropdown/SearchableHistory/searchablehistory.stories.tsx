@@ -519,7 +519,7 @@ const HistoryTestDemo = () => {
         <br />
         2. Select another option
         <br />
-        3. Click on "History" tab to see both selections
+        3. Click on &quot;History&quot; tab to see both selections
         <br />
         4. The history should show all your previous selections
       </p>
@@ -626,10 +626,10 @@ const HistoryDebugDemo = () => {
           <strong>Instructions:</strong>
         </p>
         <ol style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-          <li>Select "Apple" from the dropdown</li>
-          <li>Select "Banana" from the dropdown</li>
-          <li>Select "Cherry" from the dropdown</li>
-          <li>Click on the "History" tab</li>
+          <li>Select &quot;Apple&quot; from the dropdown</li>
+          <li>Select &quot;Banana&quot; from the dropdown</li>
+          <li>Select &quot;Cherry&quot; from the dropdown</li>
+          <li>Click on the &quot;History&quot; tab</li>
           <li>You should see all three selections in the history</li>
         </ol>
       </div>

@@ -39,10 +39,7 @@ const meta: Meta<typeof InternalIncrementNumberField> = {
       control: { type: 'number' },
       description: 'Interval between repeat increments',
     },
-    disabled: {
-      control: { type: 'boolean' },
-      description: 'Whether the field is disabled',
-    },
+
     styles: {
       control: 'object',
       description: 'Custom styles using the theme system',

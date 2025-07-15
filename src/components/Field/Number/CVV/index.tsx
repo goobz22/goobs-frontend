@@ -23,6 +23,7 @@ export interface CVVProps {
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
+  disabled?: boolean
   styles?: FormFieldStyles
 }
 
@@ -90,6 +91,7 @@ const CVV: React.FC<CVVProps> = ({
   onFocus,
   onBlur,
   helperText,
+  disabled,
   styles,
   ...props
 }) => {
@@ -158,7 +160,7 @@ const CVV: React.FC<CVVProps> = ({
     [onBlur]
   )
 
-  const computedStyles = getStyles(styles, isFocused)
+  const computedStyles = getStyles({ ...styles, disabled }, isFocused)
 
   const CVVAdornment = () => (
     <div

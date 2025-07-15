@@ -2,12 +2,7 @@
  * @fileoverview CodeCopy component theme system with light, dark, and sacred themes.
  */
 import React from 'react'
-import {
-  SACRED_GLYPHS,
-  SACRED_ANIMATIONS,
-  TRANSITIONS,
-  SHADOWS,
-} from './shared'
+import { SACRED_ANIMATIONS, TRANSITIONS, SHADOWS } from './shared'
 
 export interface CodeCopyTheme {
   /** Base container styling */
@@ -430,5 +425,3 @@ export const getCodeCopyStyles = (
 
   return customStyles
 }
-
-export { SACRED_GLYPHS }

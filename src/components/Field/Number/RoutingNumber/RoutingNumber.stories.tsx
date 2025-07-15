@@ -31,10 +31,7 @@ const meta: Meta<typeof RoutingNumber> = {
       control: { type: 'boolean' },
       description: 'Enable checksum validation',
     },
-    disabled: {
-      control: { type: 'boolean' },
-      description: 'Whether the field is disabled',
-    },
+
     styles: {
       control: 'object',
       description: 'Custom styles using the theme system',
