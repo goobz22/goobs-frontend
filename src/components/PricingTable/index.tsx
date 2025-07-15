@@ -417,7 +417,7 @@ const PricingTable: FC<PricingProps> = props => {
                   <StyledTooltip
                     tooltipplacement="right"
                     title={feature.infopopuptext}
-                    sacredtheme={isSacredTheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   >
                     <InfoIcon
                       fontSize="small"
@@ -456,7 +456,7 @@ const PricingTable: FC<PricingProps> = props => {
                       <StyledTooltip
                         tooltipplacement="right"
                         title={sub.infopopuptext}
-                        sacredtheme={isSacredTheme}
+                        styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                       >
                         <InfoIcon
                           fontSize="small"
