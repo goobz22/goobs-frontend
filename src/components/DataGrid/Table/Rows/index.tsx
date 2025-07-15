@@ -1018,7 +1018,7 @@ const Rows: React.FC<RowsProps> = ({
                 >
                   <StyledTooltip
                     title={safeString(row[col.field])}
-                    sacredtheme={isSacredTheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   >
                     <div
                       style={{
