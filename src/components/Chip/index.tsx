@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import CloseIcon from '../Icons/Close'
 import { ChipStyles, getChipStyles, SACRED_GLYPHS } from '../../theme'
 
-interface ChipProps {
+export interface ChipProps {
   label: string
   onDelete?: () => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
