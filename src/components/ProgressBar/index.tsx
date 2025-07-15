@@ -5,8 +5,9 @@
  */
 'use client'
 
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useEffect } from 'react'
 import { ProgressBarStyles, getProgressBarStyles } from '../../theme'
+import { injectKeyframes } from '../../theme/shared'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -47,6 +48,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 }) => {
   const isIndeterminate = variant === 'indeterminate'
   const progressValue = Math.min(Math.max(value, 0), 100)
+
+  // Inject keyframes for animations
+  useEffect(() => {
+    injectKeyframes()
+  }, [])
 
   const computedStyles = useMemo(
     () => getProgressBarStyles(styles, progressValue, variant),

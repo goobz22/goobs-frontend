@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { useState, useEffect } from 'react'
 import ProgressBar from './index'
 
 const meta: Meta<typeof ProgressBar> = {
@@ -9,7 +10,7 @@ const meta: Meta<typeof ProgressBar> = {
     docs: {
       description: {
         component:
-          'A versatile progress bar component that supports both determinate (with specific progress value) and indeterminate (loading) modes across light, dark, and sacred themes.',
+          'A versatile progress bar component that supports both determinate (with specific progress value) and indeterminate (loading) modes across light, dark, and sacred themes. Features enhanced animations, stripes, pulse effects, and modern styling.',
       },
     },
   },
@@ -42,7 +43,8 @@ const meta: Meta<typeof ProgressBar> = {
     },
     styles: {
       control: { type: 'object' },
-      description: 'Comprehensive styling options',
+      description:
+        'Comprehensive styling options including striped, animated, and pulse effects',
     },
   },
 }
@@ -50,143 +52,274 @@ const meta: Meta<typeof ProgressBar> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Determinate: Story = {
-  args: {
-    value: 65,
-    variant: 'determinate',
-    showLabel: true,
-    styles: { theme: 'light' },
-  },
+export const Default: Story = {
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={65}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
 }
 
 export const Indeterminate: Story = {
-  args: {
-    variant: 'indeterminate',
-    showLabel: true,
-    styles: { theme: 'light' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        variant="indeterminate"
+        showLabel
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+}
+
+export const StripedAnimated: Story = {
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={75}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light', striped: true, animated: true }}
+      />
+    </div>
+  ),
+}
+
+export const PulseEffect: Story = {
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={60}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light', pulse: true }}
+      />
+    </div>
+  ),
 }
 
 export const LightTheme: Story = {
-  args: {
-    value: 45,
-    variant: 'determinate',
-    showLabel: true,
-    styles: { theme: 'light' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={45}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
 }
 
 export const DarkTheme: Story = {
-  args: {
-    value: 45,
-    variant: 'determinate',
-    showLabel: true,
-    styles: { theme: 'dark' },
-  },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#1f2937',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={45}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'dark' }}
+      />
+    </div>
+  ),
 }
 
 export const SacredTheme: Story = {
-  args: {
-    value: 45,
-    variant: 'determinate',
-    showLabel: true,
-    styles: { theme: 'sacred' },
-  },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#0a0a0a',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={45}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
 }
 
 export const SacredIndeterminate: Story = {
-  args: {
-    variant: 'indeterminate',
-    showLabel: true,
-    styles: { theme: 'sacred' },
-  },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#0a0a0a',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        variant="indeterminate"
+        showLabel
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
 }
 
 export const CustomLabel: Story = {
-  args: {
-    value: 80,
-    variant: 'determinate',
-    showLabel: true,
-    label: 'Processing files...',
-    styles: { theme: 'light' },
-  },
-}
-
-export const NoLabel: Story = {
-  args: {
-    value: 30,
-    variant: 'determinate',
-    showLabel: false,
-    styles: { theme: 'light' },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={80}
+        variant="determinate"
+        showLabel
+        label="Processing files..."
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
 }
 
 export const CustomSize: Story = {
-  args: {
-    value: 70,
-    variant: 'determinate',
-    showLabel: true,
-    styles: {
-      theme: 'light',
-      width: '400px',
-      height: '8px',
-    },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={70}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light', width: '400px', height: '24px' }}
+      />
+    </div>
+  ),
 }
 
 export const Disabled: Story = {
-  args: {
-    value: 50,
-    variant: 'determinate',
-    showLabel: true,
-    styles: {
-      theme: 'light',
-      disabled: true,
-    },
-  },
+  render: () => (
+    <div
+      style={{
+        width: '400px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+      }}
+    >
+      <ProgressBar
+        value={50}
+        variant="determinate"
+        showLabel
+        styles={{ theme: 'light', disabled: true }}
+      />
+    </div>
+  ),
 }
 
-export const ProgressStates: Story = {
+export const EnhancedFeatures: Story = {
   render: () => (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
-        width: '300px',
+        gap: '24px',
+        width: '400px',
       }}
     >
       <div>
-        <h4>Starting (0%)</h4>
-        <ProgressBar value={0} showLabel styles={{ theme: 'light' }} />
+        <h4>Standard Progress</h4>
+        <ProgressBar value={65} showLabel styles={{ theme: 'light' }} />
       </div>
       <div>
-        <h4>In Progress (35%)</h4>
-        <ProgressBar value={35} showLabel styles={{ theme: 'light' }} />
-      </div>
-      <div>
-        <h4>Nearly Complete (85%)</h4>
-        <ProgressBar value={85} showLabel styles={{ theme: 'light' }} />
-      </div>
-      <div>
-        <h4>Complete (100%)</h4>
-        <ProgressBar value={100} showLabel styles={{ theme: 'light' }} />
-      </div>
-      <div>
-        <h4>Loading (Indeterminate)</h4>
+        <h4>Striped Progress</h4>
         <ProgressBar
-          variant="indeterminate"
+          value={75}
           showLabel
-          styles={{ theme: 'light' }}
+          styles={{ theme: 'light', striped: true }}
+        />
+      </div>
+      <div>
+        <h4>Animated Stripes</h4>
+        <ProgressBar
+          value={85}
+          showLabel
+          styles={{ theme: 'light', striped: true, animated: true }}
+        />
+      </div>
+      <div>
+        <h4>Pulse Effect</h4>
+        <ProgressBar
+          value={60}
+          showLabel
+          styles={{ theme: 'light', pulse: true }}
+        />
+      </div>
+      <div>
+        <h4>All Effects Combined</h4>
+        <ProgressBar
+          value={70}
+          showLabel
+          styles={{
+            theme: 'light',
+            striped: true,
+            animated: true,
+            pulse: true,
+          }}
         />
       </div>
     </div>
@@ -195,7 +328,251 @@ export const ProgressStates: Story = {
     docs: {
       description: {
         story:
-          'Different progress states from start to completion, including indeterminate loading.',
+          'Showcase of enhanced visual features including stripes, animations, and pulse effects.',
+      },
+    },
+  },
+}
+
+export const LoadingSimulation: Story = {
+  render: () => {
+    const [progress, setProgress] = useState(0)
+    const [isLoading, setIsLoading] = useState(true)
+    const [stage, setStage] = useState('Initializing...')
+
+    useEffect(() => {
+      const stages = [
+        { label: 'Initializing...', duration: 800 },
+        { label: 'Loading configuration...', duration: 1200 },
+        { label: 'Connecting to server...', duration: 1500 },
+        { label: 'Fetching data...', duration: 2000 },
+        { label: 'Processing results...', duration: 1000 },
+        { label: 'Finalizing...', duration: 600 },
+      ]
+
+      let currentStage = 0
+      let currentProgress = 0
+
+      const updateProgress = () => {
+        if (currentStage < stages.length) {
+          const stageProgress = 100 / stages.length
+          const targetProgress = (currentStage + 1) * stageProgress
+
+          setStage(stages[currentStage].label)
+
+          const interval = setInterval(() => {
+            currentProgress += 2
+            setProgress(currentProgress)
+
+            if (currentProgress >= targetProgress) {
+              clearInterval(interval)
+              currentStage++
+
+              if (currentStage < stages.length) {
+                setTimeout(updateProgress, 200)
+              } else {
+                setIsLoading(false)
+                setStage('Complete!')
+              }
+            }
+          }, 50)
+        }
+      }
+
+      const timer = setTimeout(updateProgress, 500)
+      return () => clearTimeout(timer)
+    }, [])
+
+    const handleRestart = () => {
+      setProgress(0)
+      setIsLoading(true)
+      setStage('Initializing...')
+    }
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          width: '400px',
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '12px',
+        }}
+      >
+        <h3 style={{ margin: 0, color: '#374151' }}>Loading Simulation</h3>
+
+        <div>
+          <div
+            style={{ marginBottom: '8px', fontSize: '14px', color: '#6b7280' }}
+          >
+            {stage}
+          </div>
+          <ProgressBar
+            value={progress}
+            variant={isLoading ? 'determinate' : 'determinate'}
+            showLabel
+            styles={{
+              theme: 'light',
+              striped: true,
+              animated: isLoading,
+              pulse: progress > 0 && progress < 100,
+            }}
+          />
+        </div>
+
+        {!isLoading && (
+          <button
+            onClick={handleRestart}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Restart Simulation
+          </button>
+        )}
+      </div>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive loading simulation that demonstrates real-world usage with multiple stages and dynamic progress updates.',
+      },
+    },
+  },
+}
+
+export const FileUploadSimulation: Story = {
+  render: () => {
+    const [uploads, setUploads] = useState([
+      { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
+      { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
+      { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
+    ])
+
+    useEffect(() => {
+      const uploadFile = (fileIndex: number) => {
+        const interval = setInterval(() => {
+          setUploads(prev => {
+            const newUploads = [...prev]
+            const file = newUploads[fileIndex]
+
+            if (file.status === 'waiting') {
+              file.status = 'uploading'
+            }
+
+            if (file.status === 'uploading') {
+              file.progress += Math.random() * 8 + 2
+
+              if (file.progress >= 100) {
+                file.progress = 100
+                file.status = 'completed'
+                clearInterval(interval)
+
+                // Start next file
+                if (fileIndex + 1 < newUploads.length) {
+                  setTimeout(() => uploadFile(fileIndex + 1), 500)
+                }
+              }
+            }
+
+            return newUploads
+          })
+        }, 100)
+      }
+
+      const timer = setTimeout(() => uploadFile(0), 1000)
+      return () => clearTimeout(timer)
+    }, [])
+
+    const handleRestart = () => {
+      setUploads([
+        { id: 1, name: 'document.pdf', progress: 0, status: 'waiting' },
+        { id: 2, name: 'image.jpg', progress: 0, status: 'waiting' },
+        { id: 3, name: 'video.mp4', progress: 0, status: 'waiting' },
+      ])
+    }
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          width: '400px',
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '12px',
+        }}
+      >
+        <h3 style={{ margin: 0, color: '#374151' }}>File Upload Progress</h3>
+
+        {uploads.map((file, index) => (
+          <div
+            key={file.id}
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ fontSize: '14px', color: '#374151' }}>
+                {file.name}
+              </span>
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                {file.status}
+              </span>
+            </div>
+            <ProgressBar
+              value={file.progress}
+              variant={
+                file.status === 'uploading' ? 'determinate' : 'determinate'
+              }
+              showLabel={file.status === 'uploading'}
+              styles={{
+                theme: 'light',
+                striped: file.status === 'uploading',
+                animated: file.status === 'uploading',
+              }}
+            />
+          </div>
+        ))}
+
+        <button
+          onClick={handleRestart}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            marginTop: '10px',
+          }}
+        >
+          Restart Upload
+        </button>
+      </div>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'File upload simulation showing multiple progress bars with different states and sequential processing.',
       },
     },
   },
@@ -208,12 +585,16 @@ export const ThemeComparison: Story = {
         display: 'flex',
         flexDirection: 'column',
         gap: '30px',
-        width: '300px',
+        width: '400px',
       }}
     >
       <div>
         <h4>Light Theme</h4>
-        <ProgressBar value={60} showLabel styles={{ theme: 'light' }} />
+        <ProgressBar
+          value={60}
+          showLabel
+          styles={{ theme: 'light', striped: true, animated: true }}
+        />
       </div>
       <div
         style={{
@@ -223,7 +604,11 @@ export const ThemeComparison: Story = {
         }}
       >
         <h4 style={{ color: 'white', margin: '0 0 10px 0' }}>Dark Theme</h4>
-        <ProgressBar value={60} showLabel styles={{ theme: 'dark' }} />
+        <ProgressBar
+          value={60}
+          showLabel
+          styles={{ theme: 'dark', striped: true, animated: true }}
+        />
       </div>
       <div
         style={{
@@ -233,14 +618,19 @@ export const ThemeComparison: Story = {
         }}
       >
         <h4 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Sacred Theme</h4>
-        <ProgressBar value={60} showLabel styles={{ theme: 'sacred' }} />
+        <ProgressBar
+          value={60}
+          showLabel
+          styles={{ theme: 'sacred', striped: true, animated: true }}
+        />
       </div>
     </div>
   ),
   parameters: {
     docs: {
       description: {
-        story: 'Comparison of all three themes: light, dark, and sacred.',
+        story:
+          'Comparison of all three themes with enhanced striped and animated effects.',
       },
     },
   },
