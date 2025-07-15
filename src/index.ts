@@ -1,4 +1,4 @@
-import CustomButton, { ButtonProps } from './components/Button'
+import CustomButton, { ButtonProps, ButtonGroup } from './components/Button'
 import Typography, {
   CustomTypographyVariant,
   TypographyProps,
@@ -19,7 +19,7 @@ import PricingTable, { PricingProps } from './components/PricingTable'
 import Stepper, { StepperProps } from './components/Stepper'
 import CustomToolbar, { CustomToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
-import StyledTooltip, { CustomTooltipProps } from './components/Tooltip'
+import StyledTooltip, { TooltipProps } from './components/Tooltip'
 import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 import FormProjectBoard, {
   FormProjectBoardProps,
@@ -32,6 +32,8 @@ import ComplexEditor, {
 } from './components/ComplexTextEditor'
 // Import the Accordion component and its props
 import Accordion, { AccordionProps } from './components/Accordion'
+import Alert, { AlertProps } from './components/Alert'
+import Badge, { BadgeProps } from './components/Badge'
 import { RawCustomer } from './components/ProjectBoard/types'
 import AdministratorAddTaskCompanyDropdown from './components/ProjectBoard/forms/AddTask/administrator/companyDropdown'
 import AdministratorAddTaskCompanyProvided from './components/ProjectBoard/forms/AddTask/administrator/companyProvided'
@@ -44,6 +46,8 @@ import { RawSeverityLevel } from './components/ProjectBoard/types'
 import Tabs, { TabsProps } from './components/Tabs'
 import { Task } from './components/ProjectBoard/types'
 import Checkbox, { CheckboxProps } from './components/Checkbox'
+import Chip, { type ChipProps } from './components/Chip'
+import Switch, { type SwitchProps } from './components/Switch'
 import MACAddressField, {
   MACAddressFieldProps,
 } from './components/Field/IPAM/MACAddress'
@@ -88,6 +92,10 @@ import CreditCardNumber, {
 import PercentageField, {
   PercentageFieldProps,
 } from './components/Field/Percentage'
+import ProgressBar, { ProgressBarProps } from './components/ProgressBar'
+import Slider, { SliderProps } from './components/Field/Slider'
+import Snackbar, { type SnackbarProps } from './components/Snackbar'
+import * as Icons from './components/Icons'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
@@ -193,6 +201,8 @@ export { MultiSelectChip }
 export { Tabs }
 export { ComplexEditor }
 export { Accordion } // <-- Export Accordion here
+export { Alert }
+export { Badge }
 export { AdministratorAddTaskCompanyDropdown }
 export { AdministratorAddTaskCompanyProvided }
 export { CompanyAddTaskCustomerDropdown }
@@ -200,6 +210,10 @@ export { CompanyAddTaskCustomerProvided }
 export { CustomerAddTask }
 export { NoUserAddTask }
 export { Checkbox }
+export { Chip }
+export { Switch }
+export { Icons }
+export { ButtonGroup }
 // New named exports
 export { DateField }
 export { DateRangeComponent as DateRange }
@@ -231,6 +245,9 @@ export type { VLANFieldProps }
 // NEW: Export AddTask / ShowTask / ManageTask
 export { ShowTask }
 export { PercentageField }
+export { ProgressBar }
+export { Slider }
+export { Snackbar }
 
 export type { Task }
 export type { RawCustomer }
@@ -243,6 +260,13 @@ export type { CardType }
 export type { DateRangeProps }
 export type { TimeRangeProps }
 export type { PercentageFieldProps }
+export type { ChipProps }
+export type { SwitchProps }
+export type { ProgressBarProps }
+export type { AlertProps }
+export type { SnackbarProps }
+export type { SliderProps }
+export type { BadgeProps }
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
@@ -281,7 +305,7 @@ export type { StepperProps }
 export type { CustomToolbarProps }
 export type { FormProjectBoardProps }
 export type { TransferListProps }
-export type { CustomTooltipProps }
+export type { TooltipProps }
 export type { ProjectBoardProps }
 export type { QRCodeProps }
 export type { DropdownOption }
