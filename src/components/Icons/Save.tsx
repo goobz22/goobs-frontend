@@ -33,7 +33,7 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-interface CodeIconProps extends React.SVGProps<SVGSVGElement> {
+interface SaveIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
@@ -80,7 +80,7 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
-const CodeIcon: React.FC<CodeIconProps> = ({
+const SaveIcon: React.FC<SaveIconProps> = ({
   sacredtheme = false,
   style = {},
   ...props
@@ -130,7 +130,7 @@ const CodeIcon: React.FC<CodeIconProps> = ({
         style={iconStyle}
         {...props}
       >
-        <path d="M320-240 80-480l240-240 57 57-183 183 183 183-57 57Zm320 0-57-57 183-183-183-183 57-57 240 240-240 240Z" />
+        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160v400q0 33-23.5 56.5T760-120H200Zm360-320q-33 0-56.5-23.5T480-520q0-33 23.5-56.5T560-600q33 0 56.5 23.5T640-520q0 33-23.5 56.5T560-440ZM280-600h240v-160H280v160Z" />
       </svg>
       {sacredtheme && (
         <div
@@ -148,4 +148,4 @@ const CodeIcon: React.FC<CodeIconProps> = ({
   )
 }
 
-export default CodeIcon
+export default SaveIcon

@@ -33,7 +33,7 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
-interface CodeIconProps extends React.SVGProps<SVGSVGElement> {
+interface AddShoppingCartIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
@@ -80,7 +80,7 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
-const CodeIcon: React.FC<CodeIconProps> = ({
+const AddShoppingCartIcon: React.FC<AddShoppingCartIconProps> = ({
   sacredtheme = false,
   style = {},
   ...props
@@ -130,7 +130,7 @@ const CodeIcon: React.FC<CodeIconProps> = ({
         style={iconStyle}
         {...props}
       >
-        <path d="M320-240 80-480l240-240 57 57-183 183 183 183-57 57Zm320 0-57-57 183-183-183-183 57-57 240 240-240 240Z" />
+        <path d="M480-520v-120h-80v120H280v80h120v120h80v-120h120v-80H480Zm-40-280q-33 0-56.5-23.5T360-880q0-33 23.5-56.5T440-960q33 0 56.5 23.5T520-880q0 33-23.5 56.5T440-800Zm240 0q-33 0-56.5-23.5T600-880q0-33 23.5-56.5T680-960q33 0 56.5 23.5T760-880q0 33-23.5 56.5T680-800ZM120-120v-80h80l124-240H80v-80h130l176 340h368v80H356l-96 180H120Z" />
       </svg>
       {sacredtheme && (
         <div
@@ -148,4 +148,4 @@ const CodeIcon: React.FC<CodeIconProps> = ({
   )
 }
 
-export default CodeIcon
+export default AddShoppingCartIcon
