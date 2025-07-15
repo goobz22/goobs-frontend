@@ -27,6 +27,7 @@ export interface SearchableHistoryProps {
   placeholder?: string
   helperText?: string
   styles?: FormFieldStyles
+  externalHistoryUpdate?: DropdownOption | null
 }
 
 const capitalizeText = (text: string) => {
@@ -50,7 +51,7 @@ const getStyles = (styles?: FormFieldStyles, isOpen?: boolean) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       width: '100%',
-      height: styles?.height || '40px',
+      minHeight: styles?.minHeight || '40px',
       padding: styles?.padding || '8px 16px',
       borderRadius: styles?.borderRadius || '8px',
       border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
@@ -61,6 +62,12 @@ const getStyles = (styles?: FormFieldStyles, isOpen?: boolean) => {
       outline: 'none',
       fontFamily: themeConfig.fontFamily,
       fontSize: styles?.fontSize || '16px',
+      ...(styles?.disabled && {
+        backgroundColor: '#E0E0E0',
+        color: '#9E9E9E',
+        borderColor: '#BDBDBD',
+        cursor: 'not-allowed',
+      }),
     } as React.CSSProperties,
     input: {
       border: 'none',
@@ -72,6 +79,10 @@ const getStyles = (styles?: FormFieldStyles, isOpen?: boolean) => {
       width: '100%',
       padding: 0,
       height: '100%',
+      ...(styles?.disabled && {
+        color: '#9E9E9E',
+        cursor: 'not-allowed',
+      }),
     } as React.CSSProperties,
     arrowButton: {
       border: 'none',
@@ -84,12 +95,16 @@ const getStyles = (styles?: FormFieldStyles, isOpen?: boolean) => {
       color: themeConfig.text,
       minWidth: '20px',
       height: '100%',
+      ...(styles?.disabled && {
+        color: '#9E9E9E',
+        cursor: 'not-allowed',
+      }),
     } as React.CSSProperties,
     listbox: {
       position: 'absolute' as const,
       top: '100%',
       left: 0,
-      width: '100%',
+      right: 0,
       backgroundColor: themeConfig.background,
       border: `1px solid ${borderColor}`,
       marginTop: '4px',
@@ -119,7 +134,9 @@ const getStyles = (styles?: FormFieldStyles, isOpen?: boolean) => {
         backgroundColor: isActive
           ? sacredTheme
             ? 'rgba(255, 215, 0, 0.2)'
-            : '#F3F4F6'
+            : styles?.theme === 'dark'
+              ? 'rgba(75, 85, 99, 0.6)'
+              : '#F3F4F6'
           : 'transparent',
         color: themeConfig.text,
         border: 'none',
@@ -204,6 +221,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   placeholder,
   helperText,
   styles,
+  externalHistoryUpdate,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [selectedOption, setSelectedOption] = useState<DropdownOption | null>(
@@ -216,6 +234,12 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const componentStyles = getStyles(styles, isOpen)
+  const triggerStyle: React.CSSProperties = {
+    ...componentStyles.trigger,
+    boxSizing: 'border-box',
+    height: styles?.height || '40px',
+    minHeight: styles?.minHeight || '40px',
+  }
 
   useEffect(() => {
     const defaultOption = options.find(option => option.value === defaultValue)
@@ -224,6 +248,18 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       setSearchTerm(defaultOption.value)
     }
   }, [defaultValue, options])
+
+  // Handle external history updates
+  useEffect(() => {
+    if (externalHistoryUpdate) {
+      setHistory(prevHistory =>
+        [
+          externalHistoryUpdate,
+          ...prevHistory.filter(h => h.value !== externalHistoryUpdate.value),
+        ].slice(0, 5)
+      )
+    }
+  }, [externalHistoryUpdate])
 
   useEffect(() => {
     // Inject scrollbar styles
@@ -295,9 +331,8 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     option.value.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredHistory = history.filter(option =>
-    option.value.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Don't filter history by search term - show all history items
+  const filteredHistory = history
 
   return (
     <div style={componentStyles.container} ref={containerRef}>
@@ -312,8 +347,8 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
         </label>
       )}
 
-      <div style={{ position: 'relative' }}>
-        <div style={componentStyles.trigger}>
+      <div style={{ position: 'relative', width: '100%' }}>
+        <div style={triggerStyle}>
           <input
             ref={inputRef}
             type="text"
@@ -354,7 +389,10 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                 Options
               </button>
               <button
-                onClick={() => setActiveTab('history')}
+                onClick={() => {
+                  setActiveTab('history')
+                  setSearchTerm('') // Clear search term when switching to history
+                }}
                 style={componentStyles.tabButton(activeTab === 'history')}
               >
                 History

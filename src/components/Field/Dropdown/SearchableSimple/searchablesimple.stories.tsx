@@ -202,12 +202,10 @@ export const CustomLayout: Story = {
       />
       <SearchableSimpleWithState
         label="Custom Dimensions"
-        placeholder="Fixed height"
+        placeholder="Default height"
         styles={{
           theme: 'light',
-          height: '60px',
           width: '100%',
-          borderRadius: '8px',
         }}
       />
       <SearchableSimpleWithState

@@ -46,16 +46,19 @@ const SearchableHistoryWithState = ({
   label: string
   [key: string]: any
 }) => {
+  const [selectedValue, setSelectedValue] = useState<string>(initialValue)
+
   const handleChange = (option: DropdownOption | null) => {
     // Handle change if needed for demo purposes
     console.log('Selected option:', option)
+    setSelectedValue(option?.value || '')
   }
 
   return (
     <SearchableHistory
       {...props}
       options={options}
-      defaultValue={initialValue}
+      defaultValue={selectedValue}
       onChange={handleChange}
       styles={styles}
     />
@@ -202,12 +205,10 @@ export const CustomLayout: Story = {
       />
       <SearchableHistoryWithState
         label="Custom Dimensions"
-        placeholder="Fixed height"
+        placeholder="Default height"
         styles={{
           theme: 'light',
-          height: '60px',
           width: '100%',
-          borderRadius: '8px',
         }}
       />
       <SearchableHistoryWithState
@@ -497,6 +498,183 @@ const SearchableHistoryDemo = () => {
 export const HistoryDemo: Story = {
   name: 'History Demo',
   render: () => <SearchableHistoryDemo />,
+}
+
+// Single component demo to test history functionality
+const HistoryTestDemo = () => {
+  const [lastSelected, setLastSelected] = useState<string>('')
+
+  const handleChange = (option: DropdownOption | null) => {
+    setLastSelected(option?.value || '')
+    console.log('Selected:', option)
+  }
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <h3 style={{ margin: '0 0 1rem 0' }}>
+        History Test - Select multiple options
+      </h3>
+      <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '1rem' }}>
+        1. Select an option from the dropdown
+        <br />
+        2. Select another option
+        <br />
+        3. Click on "History" tab to see both selections
+        <br />
+        4. The history should show all your previous selections
+      </p>
+      {lastSelected && (
+        <p style={{ fontSize: '14px', color: '#059669', marginBottom: '1rem' }}>
+          Last selected: <strong>{lastSelected}</strong>
+        </p>
+      )}
+      <SearchableHistory
+        label="Test History"
+        placeholder="Search and select to test history"
+        options={[
+          { value: 'Apple' },
+          { value: 'Banana' },
+          { value: 'Cherry' },
+          { value: 'Date' },
+          { value: 'Elderberry' },
+          { value: 'Fig' },
+          { value: 'Grape' },
+          { value: 'Honeydew' },
+        ]}
+        onChange={handleChange}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
+export const HistoryFunctionalityTest: Story = {
+  name: 'History Functionality Test',
+  render: () => <HistoryTestDemo />,
+}
+
+// Dark theme history test
+const DarkHistoryTestDemo = () => {
+  const [lastSelected, setLastSelected] = useState<string>('')
+
+  const handleChange = (option: DropdownOption | null) => {
+    setLastSelected(option?.value || '')
+    console.log('Selected:', option)
+  }
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <h3 style={{ margin: '0 0 1rem 0', color: '#E5E7EB' }}>
+        Dark Theme History Test
+      </h3>
+      <p style={{ fontSize: '14px', color: '#9CA3AF', marginBottom: '1rem' }}>
+        Test the history functionality in dark mode.
+        <br />
+        The selected tab should be clearly visible.
+      </p>
+      {lastSelected && (
+        <p style={{ fontSize: '14px', color: '#10B981', marginBottom: '1rem' }}>
+          Last selected: <strong>{lastSelected}</strong>
+        </p>
+      )}
+      <SearchableHistory
+        label="Dark Theme Test"
+        placeholder="Search and select to test history"
+        options={[
+          { value: 'Apple' },
+          { value: 'Banana' },
+          { value: 'Cherry' },
+          { value: 'Date' },
+          { value: 'Elderberry' },
+          { value: 'Fig' },
+          { value: 'Grape' },
+          { value: 'Honeydew' },
+        ]}
+        onChange={handleChange}
+        styles={{ theme: 'dark' }}
+      />
+    </div>
+  )
+}
+
+export const DarkHistoryFunctionalityTest: Story = {
+  name: 'Dark Theme History Test',
+  render: () => <DarkHistoryTestDemo />,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// Comprehensive history debug test
+const HistoryDebugDemo = () => {
+  const [selectionHistory, setSelectionHistory] = useState<string[]>([])
+  const [renderCount, setRenderCount] = useState(0)
+
+  const handleChange = (option: DropdownOption | null) => {
+    if (option) {
+      setSelectionHistory(prev => [...prev, option.value])
+      setRenderCount(prev => prev + 1)
+      console.log('Parent component received selection:', option.value)
+    }
+  }
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '500px' }}>
+      <h3 style={{ margin: '0 0 1rem 0' }}>History Debug Test</h3>
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#6B7280' }}>
+        <p>
+          <strong>Instructions:</strong>
+        </p>
+        <ol style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
+          <li>Select "Apple" from the dropdown</li>
+          <li>Select "Banana" from the dropdown</li>
+          <li>Select "Cherry" from the dropdown</li>
+          <li>Click on the "History" tab</li>
+          <li>You should see all three selections in the history</li>
+        </ol>
+      </div>
+
+      <div
+        style={{
+          marginBottom: '1rem',
+          padding: '1rem',
+          backgroundColor: '#F3F4F6',
+          borderRadius: '8px',
+        }}
+      >
+        <p style={{ margin: '0 0 0.5rem 0', fontSize: '14px' }}>
+          <strong>Parent Component State:</strong>
+        </p>
+        <p style={{ margin: '0 0 0.5rem 0', fontSize: '12px' }}>
+          Render count: {renderCount}
+        </p>
+        <p style={{ margin: '0', fontSize: '12px' }}>
+          Selection history:{' '}
+          {selectionHistory.length > 0 ? selectionHistory.join(', ') : 'None'}
+        </p>
+      </div>
+
+      <SearchableHistory
+        key="history-debug" // Ensure component maintains state
+        label="Debug Test"
+        placeholder="Search and select to test history"
+        options={[
+          { value: 'Apple' },
+          { value: 'Banana' },
+          { value: 'Cherry' },
+          { value: 'Date' },
+          { value: 'Elderberry' },
+        ]}
+        onChange={handleChange}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
+export const HistoryDebugTest: Story = {
+  name: 'History Debug Test',
+  render: () => <HistoryDebugDemo />,
 }
 
 // --------------------------------------------------------------------------
