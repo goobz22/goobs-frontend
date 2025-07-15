@@ -28,12 +28,12 @@ const formatPhoneNumber = (inputValue: string): string => {
 }
 
 const parseExistingPhoneNumber = (value: string): string => {
-  if (!value) return '+1 '
+  if (!value) return ''
   if (value.includes('+1')) {
     const digits = value.replace(/\D/g, '').replace(/^1/, '')
-    return formatPhoneNumber(digits)
+    return digits ? formatPhoneNumber(digits).replace('+1 ', '') : ''
   }
-  return formatPhoneNumber(value)
+  return formatPhoneNumber(value).replace('+1 ', '')
 }
 
 export interface PhoneNumberFieldProps {
@@ -126,21 +126,27 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
-      if (input === '+1 ' || input === '+1' || input === '+') {
-        setPhoneNumber('+1 ')
-        if (onChange) {
-          onChange('+1 ')
+      let strippedInput = input.replace(/\D/g, '').slice(0, 10)
+
+      // Format just the digits part for display with stable formatting
+      let formattedDigits = ''
+      if (strippedInput.length > 0) {
+        formattedDigits = strippedInput.slice(0, 3)
+        if (strippedInput.length > 3) {
+          formattedDigits += '-' + strippedInput.slice(3, 6)
+          if (strippedInput.length > 6) {
+            formattedDigits += '-' + strippedInput.slice(6, 10)
+          }
         }
-        return
       }
-      let strippedInput = input
-        .replace(/^\+1\s?/, '')
-        .replace(/\D/g, '')
-        .slice(0, 10)
-      const formattedValue = formatPhoneNumber(strippedInput)
-      setPhoneNumber(formattedValue)
+      setPhoneNumber(formattedDigits)
+
+      // Return the full formatted number with +1 prefix
+      const fullFormattedValue = strippedInput
+        ? formatPhoneNumber(strippedInput)
+        : '+1 '
       if (onChange) {
-        onChange(formattedValue)
+        onChange(fullFormattedValue)
       }
     },
     [onChange]
@@ -182,6 +188,20 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
       )}
 
       <div style={componentStyles.inputWrapper}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: '16px',
+            color: 'inherit',
+            fontSize: styles?.fontSize || '16px',
+            fontFamily: componentStyles.input.fontFamily,
+            fontWeight: styles?.fontWeight,
+            userSelect: 'none',
+          }}
+        >
+          +1
+        </div>
         <input
           {...restProps}
           {...getRequiredProps(styles?.required)}
@@ -192,8 +212,12 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder={sacredtheme ? 'Divine number...' : placeholder}
-          style={componentStyles.input}
+          placeholder={placeholder || '555-555-5555'}
+          style={{
+            ...componentStyles.input,
+            paddingLeft: '8px',
+            flex: 1,
+          }}
         />
 
         {endAdornment && (

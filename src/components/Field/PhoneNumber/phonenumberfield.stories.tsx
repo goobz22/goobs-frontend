@@ -57,9 +57,28 @@ export const LightTheme: Story = {
   render: () => (
     <PhoneNumberFieldWithState
       label="Phone Number"
-      placeholder="(555) 123-4567"
       styles={{ theme: 'light' }}
     />
+  ),
+}
+
+export const DefaultPlaceholder: Story = {
+  name: 'Default Placeholder',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <PhoneNumberFieldWithState
+        label="Light Theme - Default Placeholder"
+        styles={{ theme: 'light' }}
+      />
+      <PhoneNumberFieldWithState
+        label="Dark Theme - Default Placeholder"
+        styles={{ theme: 'dark' }}
+      />
+      <PhoneNumberFieldWithState
+        label="Sacred Theme - Default Placeholder"
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
   ),
 }
 
