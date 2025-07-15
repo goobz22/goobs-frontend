@@ -1,7 +1,37 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { getDialogStyles, type DialogStyles } from '../../theme/dialog'
+
+// Hook to detect screen size for responsive behavior
+const useScreenSize = () => {
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  )
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth < 640) {
+        setScreenSize('mobile')
+      } else if (window.innerWidth < 1024) {
+        setScreenSize('tablet')
+      } else {
+        setScreenSize('desktop')
+      }
+    }
+
+    // Check on mount
+    checkScreenSize()
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  return screenSize
+}
 
 export interface DialogProps {
   /** Whether the dialog is open */
@@ -17,6 +47,7 @@ export interface DialogProps {
 const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
   const styleRef = useRef<HTMLStyleElement | null>(null)
+  const screenSize = useScreenSize()
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -39,7 +70,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
   useEffect(() => {
     // Inject scrollbar CSS when dialog opens
     if (open) {
-      const computedStyles = getDialogStyles(styles)
+      const computedStyles = getDialogStyles(styles, screenSize)
 
       // Remove existing style if it exists
       if (styleRef.current) {
@@ -60,13 +91,13 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
         styleRef.current = null
       }
     }
-  }, [open, styles])
+  }, [open, styles, screenSize])
 
   if (!open) {
     return null
   }
 
-  const computedStyles = getDialogStyles(styles)
+  const computedStyles = getDialogStyles(styles, screenSize)
 
   return (
     <div style={computedStyles.backdrop} onClick={onClose}>
