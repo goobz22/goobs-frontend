@@ -1,104 +1,317 @@
-import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
-import CIDRField from '.'
+/**
+ * @fileoverview Storybook stories for the CIDRField component.
+ */
+import type { Meta, StoryObj } from '@storybook/react'
+import CIDRField from './index'
 
 const meta: Meta<typeof CIDRField> = {
   title: 'Components/Field/IPAM/CIDR',
   component: CIDRField,
-  argTypes: {
-    showSubnetInfo: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    label: { control: 'text' },
-    minCidr: { control: 'number' },
-    maxCidr: { control: 'number' },
-    styles: { control: 'object' },
-  },
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+  },
+  argTypes: {
+    showSubnetInfo: {
+      control: { type: 'boolean' },
+      description: 'Display subnet information below the input',
+    },
+    disabled: {
+      control: { type: 'boolean' },
+      description: 'Whether the field is disabled',
+    },
+    label: {
+      control: { type: 'text' },
+      description: 'Label for the field',
+    },
+    minCidr: {
+      control: { type: 'number' },
+      description: 'Minimum CIDR value allowed',
+    },
+    maxCidr: {
+      control: { type: 'number' },
+      description: 'Maximum CIDR value allowed',
+    },
+    helperText: {
+      control: { type: 'text' },
+      description: 'Helper text to display',
+    },
+    placeholder: {
+      control: { type: 'text' },
+      description: 'Placeholder text',
+    },
+    styles: {
+      control: 'object',
+      description: 'Custom styles using the theme system',
+    },
   },
 }
 export default meta
 
 type Story = StoryObj<typeof CIDRField>
 
-export const PremiumTheme: Story = {
-  name: 'Premium Theme',
+const commonArgs = {
+  label: 'CIDR',
+  minCidr: 8,
+  maxCidr: 32,
+  showSubnetInfo: true,
+  disabled: false,
+  placeholder: 'Enter CIDR notation',
+}
+
+export const LightTheme: Story = {
+  name: 'Light Theme',
   render: args => (
-    <div className="w-[400px] p-6 bg-gray-50 rounded-lg">
-      <CIDRField {...args} />
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Light Theme:</strong> Clean and professional CIDR input with
+          light backgrounds and subnet information display.
+          <br />
+          <strong>Features:</strong> Optimized for network configuration in
+          bright environments, CIDR validation, and subnet calculations.
+        </div>
+        <CIDRField {...args} />
+      </div>
     </div>
   ),
   args: {
-    label: 'CIDR',
-    minCidr: 8,
-    maxCidr: 32,
-    styles: { theme: 'light' },
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Dark Theme:</strong> Network engineer-friendly dark mode with
+          high contrast and reduced eye strain.
+          <br />
+          <strong>Features:</strong> Perfect for low-light environments, modern
+          CIDR validation, and dynamic subnet calculations.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'dark',
+    },
   },
 }
 
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <div className="w-[400px] p-6 bg-black rounded-lg">
-      <CIDRField {...args} />
+    <div
+      style={{
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Sacred Theme:</strong> Mystical and spiritual CIDR
+          configuration with sacred color palettes and ethereal aesthetics.
+          <br />
+          <strong>Features:</strong> Designed for contemplative network
+          sessions, sacred color schemes, and transcendent subnet calculations.
+        </div>
+        <CIDRField {...args} />
+      </div>
     </div>
   ),
   args: {
-    ...PremiumTheme.args,
-    styles: { theme: 'sacred' },
+    ...commonArgs,
+    styles: {
+      theme: 'sacred',
+    },
   },
 }
 
-const InteractiveCIDRDemo: React.FC = () => {
-  const [sacredtheme, setsacredtheme] = React.useState(false)
-  const [showInfo, setShowInfo] = React.useState(true)
-  const [disabled, setDisabled] = React.useState(false)
-
-  return (
-    <div className="w-[500px] space-y-4">
-      <div className="p-4 bg-white rounded-lg border">
-        <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Controls</h3>
-        <div className="grid grid-cols-3 gap-2">
-          <label>
-            <input
-              type="checkbox"
-              checked={sacredtheme}
-              onChange={e => setsacredtheme(e.target.checked)}
-            />{' '}
-            Sacred
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={showInfo}
-              onChange={e => setShowInfo(e.target.checked)}
-            />{' '}
-            Show Info
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />{' '}
-            Disabled
-          </label>
+export const WithoutSubnetInfo: Story = {
+  name: 'Without Subnet Info',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Clean Input:</strong> CIDR input without subnet information
+          display for simpler configuration forms.
         </div>
-      </div>
-      <div
-        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
-      >
-        <CIDRField
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-          showSubnetInfo={showInfo}
-          disabled={disabled}
-        />
+        <CIDRField {...args} />
       </div>
     </div>
-  )
+  ),
+  args: {
+    ...commonArgs,
+    showSubnetInfo: false,
+    styles: {
+      theme: 'light',
+    },
+  },
 }
 
-export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
-  render: () => <InteractiveCIDRDemo />,
+export const CustomRange: Story = {
+  name: 'Custom Range',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Custom Range:</strong> CIDR input with custom min/max range
+          restrictions for specific network requirements.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Private Network CIDR',
+    minCidr: 16,
+    maxCidr: 24,
+    helperText: 'Private network range only (16-24)',
+    styles: {
+      theme: 'dark',
+    },
+  },
+}
+
+export const DisabledState: Story = {
+  name: 'Disabled State',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Disabled State:</strong> Field in disabled state with
+          pre-configured CIDR that cannot be modified.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    initialValue: '24',
+    disabled: true,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const SubnetCalculator: Story = {
+  name: 'Subnet Calculator',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#1C1917',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '500px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#FFD700' }}
+        >
+          <strong>Subnet Calculator:</strong> Sacred theme with detailed subnet
+          calculations and network information display.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Subnet Calculator',
+    initialValue: '24',
+    showSubnetInfo: true,
+    helperText: 'Enter CIDR to calculate subnet information',
+    styles: {
+      theme: 'sacred',
+    },
+  },
 }

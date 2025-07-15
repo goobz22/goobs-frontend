@@ -57,38 +57,54 @@ const calculateCIDRInfo = (cidr: number) => {
   }
 }
 
-const getStyles = () => ({
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    justifyContent: 'center',
-    marginRight: '-0.25rem',
-  } as React.CSSProperties,
-  button: {
-    padding: 0,
-    width: '1rem',
-    height: '1rem',
-    minWidth: '1rem',
-    minHeight: '1rem',
-    borderRadius: '0.125rem',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    '&:hover': {
-      backgroundColor: '#E5E7EB',
-    },
-    '&:disabled': {
-      opacity: 0.5,
-    },
-  } as React.CSSProperties,
-  infoContainer: {
-    marginTop: '0.5rem',
-    fontSize: '0.875rem',
-    color: '#4B5563',
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: FormFieldStyles, adornmentColor?: string) => {
+  const isSacred = styles?.theme === 'sacred'
+  const isDark = styles?.theme === 'dark'
+
+  return {
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      justifyContent: 'center',
+      marginRight: '-0.25rem',
+    } as React.CSSProperties,
+    button: {
+      padding: 0,
+      width: '1rem',
+      height: '1rem',
+      minWidth: '1rem',
+      minHeight: '1rem',
+      borderRadius: '0.125rem',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: styles?.disabled ? 'not-allowed' : 'pointer',
+      color:
+        adornmentColor ||
+        (isSacred ? '#FFD700' : isDark ? '#E5E7EB' : '#4B5563'),
+      transition: 'all 0.3s ease',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      opacity: styles?.disabled ? 0.5 : 1,
+      '&:hover': {
+        backgroundColor: isSacred
+          ? 'rgba(255, 215, 0, 0.1)'
+          : isDark
+            ? 'rgba(229, 231, 235, 0.1)'
+            : 'rgba(229, 231, 235, 0.5)',
+      },
+      '&:active': {
+        transform: 'scale(0.95)',
+      },
+    } as React.CSSProperties,
+    infoContainer: {
+      marginTop: '0.5rem',
+      fontSize: '0.875rem',
+      color: isSacred ? '#FFD700' : isDark ? '#D1D5DB' : '#4B5563',
+    } as React.CSSProperties,
+  }
+}
 
 const CIDRField: React.FC<CIDRFieldProps> = ({
   initialValue = '24',
@@ -114,7 +130,6 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cidrInfo = calculateCIDRInfo(parseInt(currentValue) || 24)
-  const pickerStyles = getStyles()
 
   // Merge disabled prop with styles
   const mergedStyles = {
@@ -130,6 +145,8 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     footerTextColor,
     transition,
   } = getSharedFormFieldStyles(mergedStyles, false)
+
+  const pickerStyles = getStyles(mergedStyles, adornmentColor)
 
   const componentStyles: Record<string, React.CSSProperties> = {
     container: getSharedContainerStyles(mergedStyles),

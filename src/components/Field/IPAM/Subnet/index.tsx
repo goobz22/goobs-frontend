@@ -10,6 +10,7 @@ import {
   getRequiredIndicatorStyle,
   getRequiredProps,
   type SharedFormFieldProps,
+  type FormFieldStyles,
 } from '../../../../theme'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
@@ -53,46 +54,62 @@ const calculateSubnetInfo = (cidr: number) => {
   }
 }
 
-const getStyles = () => ({
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    justifyContent: 'center',
-    marginRight: '-0.25rem',
-  } as React.CSSProperties,
-  button: {
-    padding: 0,
-    width: '1rem',
-    height: '1rem',
-    minWidth: '1rem',
-    minHeight: '1rem',
-    borderRadius: '0.125rem',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    '&:hover': {
-      backgroundColor: '#E5E7EB',
-    },
-    '&:disabled': {
-      opacity: 0.5,
-    },
-  } as React.CSSProperties,
-  infoContainer: {
-    marginTop: '0.5rem',
-    fontSize: '0.875rem',
-    color: '#4B5563',
-  } as React.CSSProperties,
-  infoText: {
-    marginTop: '0.25rem',
-    fontStyle: 'italic',
-    color: '#3B82F6',
-  } as React.CSSProperties,
-  errorText: {
-    color: '#EF4444',
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: SharedFormFieldProps, adornmentColor?: string) => {
+  const isSacred = styles?.styles?.theme === 'sacred'
+  const isDark = styles?.styles?.theme === 'dark'
+
+  return {
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      justifyContent: 'center',
+      marginRight: '-0.25rem',
+    } as React.CSSProperties,
+    button: {
+      padding: 0,
+      width: '1rem',
+      height: '1rem',
+      minWidth: '1rem',
+      minHeight: '1rem',
+      borderRadius: '0.125rem',
+      border: 'none',
+      backgroundColor: 'transparent',
+      cursor: styles?.disabled ? 'not-allowed' : 'pointer',
+      color:
+        adornmentColor ||
+        (isSacred ? '#FFD700' : isDark ? '#E5E7EB' : '#4B5563'),
+      transition: 'all 0.3s ease',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      opacity: styles?.disabled ? 0.5 : 1,
+      '&:hover': {
+        backgroundColor: isSacred
+          ? 'rgba(255, 215, 0, 0.1)'
+          : isDark
+            ? 'rgba(229, 231, 235, 0.1)'
+            : 'rgba(229, 231, 235, 0.5)',
+      },
+      '&:active': {
+        transform: 'scale(0.95)',
+      },
+    } as React.CSSProperties,
+    infoContainer: {
+      marginTop: '0.5rem',
+      fontSize: '0.875rem',
+      color: isSacred ? '#FFD700' : isDark ? '#D1D5DB' : '#4B5563',
+    } as React.CSSProperties,
+    infoText: {
+      marginTop: '0.25rem',
+      fontStyle: 'italic',
+      color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
+    } as React.CSSProperties,
+    errorText: {
+      color: isSacred ? '#FF6B6B' : isDark ? '#F87171' : '#EF4444',
+    } as React.CSSProperties,
+  }
+}
 
 const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
@@ -123,7 +140,6 @@ const InternalIncrementNumberField: React.FC<
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const subnetInfo = calculateSubnetInfo(parseInt(currentValue) || effectiveMin)
-  const pickerStyles = getStyles()
 
   const {
     themeConfig,
@@ -133,6 +149,8 @@ const InternalIncrementNumberField: React.FC<
     footerTextColor,
     transition,
   } = getSharedFormFieldStyles(fieldStyles, false)
+
+  const pickerStyles = getStyles(rest, adornmentColor)
 
   const componentStyles: Record<string, React.CSSProperties> = {
     container: getSharedContainerStyles(fieldStyles),
@@ -346,6 +364,7 @@ export interface SubnetFieldProps {
   supernetAddress?: string
   supernetMask?: string
   disabled?: boolean
+  styles?: FormFieldStyles
 }
 
 const cidrToMask = (cidr: number): string => {
@@ -526,7 +545,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
       <InternalIncrementNumberField
         initialValue={mask.toString()}
         onChange={handleMaskChange}
-        label={label + ' Mask'}
+        label={label}
         min={min}
         max={max}
         maskType={maskType}
