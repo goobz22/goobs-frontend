@@ -19,6 +19,8 @@ export interface ProgressBarTheme {
     boxShadow: string
     backgroundImage?: string
     filter?: string
+    position?: string
+    overflow?: string
   }
   indeterminateBar: {
     background: string
@@ -27,6 +29,7 @@ export interface ProgressBarTheme {
     backgroundImage?: string
     filter?: string
     animation: string
+    position?: string
   }
   label: {
     color: string
@@ -36,6 +39,15 @@ export interface ProgressBarTheme {
     textShadow?: string
   }
   transition: string
+  stripes?: {
+    backgroundImage: string
+    backgroundSize: string
+    animation: string
+  }
+  pulse?: {
+    animation: string
+    boxShadow: string
+  }
 }
 
 export interface ProgressBarStyles {
@@ -90,6 +102,9 @@ export interface ProgressBarStyles {
   // States
   disabled?: boolean
   outline?: boolean
+  striped?: boolean
+  animated?: boolean
+  pulse?: boolean
 
   // Dimensions
   maxWidth?: string
@@ -106,101 +121,148 @@ export const progressBarThemes: Record<
     container: {
       background: 'rgba(229, 231, 235, 0.8)',
       border: '1px solid rgba(209, 213, 219, 0.6)',
-      borderRadius: '9999px',
-      boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.1)',
-      backdropFilter: 'blur(4px)',
+      borderRadius: '12px',
+      boxShadow:
+        'inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.05)',
+      backdropFilter: 'blur(8px)',
     },
     bar: {
       background:
-        'linear-gradient(to right, rgb(37, 99, 235), rgb(59, 130, 246), rgb(37, 99, 235))',
-      borderRadius: '9999px',
-      boxShadow: '0 1px 3px rgba(37, 99, 235, 0.3)',
-      filter: 'drop-shadow(0 1px 2px rgba(37, 99, 235, 0.2))',
+        'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 50%, #2563EB 100%)',
+      borderRadius: '12px',
+      boxShadow:
+        '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+      filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
+      position: 'relative',
+      overflow: 'hidden',
     },
     indeterminateBar: {
       background:
-        'linear-gradient(90deg, transparent, rgb(59, 130, 246), transparent)',
-      borderRadius: '9999px',
-      boxShadow: '0 1px 3px rgba(59, 130, 246, 0.4)',
-      filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))',
-      animation: 'progressIndeterminate 1.5s ease-in-out infinite',
+        'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.3) 25%, #3B82F6 50%, rgba(59, 130, 246, 0.3) 75%, transparent 100%)',
+      borderRadius: '12px',
+      boxShadow:
+        '0 4px 12px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+      filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4))',
+      animation: 'progressIndeterminate 2s ease-in-out infinite',
+      position: 'absolute',
     },
     label: {
       color: 'rgb(55, 65, 81)',
       fontSize: '14px',
-      fontFamily: '"Inter", sans-serif',
-      fontWeight: '500',
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontWeight: '600',
     },
-    transition: TRANSITIONS.medium,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    stripes: {
+      backgroundImage:
+        'linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)',
+      backgroundSize: '20px 20px',
+      animation: 'progressStripes 1s linear infinite',
+    },
+    pulse: {
+      animation: 'progressPulse 2s ease-in-out infinite',
+      boxShadow: '0 0 0 rgba(59, 130, 246, 0.7)',
+    },
   },
   dark: {
     container: {
-      background: 'rgba(55, 65, 81, 0.8)',
+      background: 'rgba(31, 41, 55, 0.9)',
       border: '1px solid rgba(75, 85, 99, 0.6)',
-      borderRadius: '9999px',
-      boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.3)',
-      backdropFilter: 'blur(4px)',
+      borderRadius: '12px',
+      boxShadow:
+        'inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)',
+      backdropFilter: 'blur(8px)',
     },
     bar: {
       background:
-        'linear-gradient(to right, rgb(96, 165, 250), rgb(147, 197, 253), rgb(96, 165, 250))',
-      borderRadius: '9999px',
-      boxShadow: '0 1px 3px rgba(96, 165, 250, 0.4)',
-      filter: 'drop-shadow(0 1px 2px rgba(96, 165, 250, 0.3))',
+        'linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)',
+      borderRadius: '12px',
+      boxShadow:
+        '0 4px 12px rgba(96, 165, 250, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      filter: 'drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3))',
+      position: 'relative',
+      overflow: 'hidden',
     },
     indeterminateBar: {
       background:
-        'linear-gradient(90deg, transparent, rgb(147, 197, 253), transparent)',
-      borderRadius: '9999px',
-      boxShadow: '0 1px 3px rgba(147, 197, 253, 0.5)',
-      filter: 'drop-shadow(0 1px 2px rgba(147, 197, 253, 0.4))',
-      animation: 'progressIndeterminate 1.5s ease-in-out infinite',
+        'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.3) 25%, #60A5FA 50%, rgba(96, 165, 250, 0.3) 75%, transparent 100%)',
+      borderRadius: '12px',
+      boxShadow:
+        '0 4px 12px rgba(96, 165, 250, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      filter: 'drop-shadow(0 2px 4px rgba(96, 165, 250, 0.4))',
+      animation: 'progressIndeterminate 2s ease-in-out infinite',
+      position: 'absolute',
     },
     label: {
       color: 'rgb(209, 213, 219)',
       fontSize: '14px',
-      fontFamily: '"Inter", sans-serif',
-      fontWeight: '500',
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontWeight: '600',
     },
-    transition: TRANSITIONS.medium,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    stripes: {
+      backgroundImage:
+        'linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent)',
+      backgroundSize: '20px 20px',
+      animation: 'progressStripes 1s linear infinite',
+    },
+    pulse: {
+      animation: 'progressPulse 2s ease-in-out infinite',
+      boxShadow: '0 0 0 rgba(96, 165, 250, 0.7)',
+    },
   },
   sacred: {
     container: {
-      background: 'rgba(26, 26, 26, 0.9)',
+      background: 'rgba(12, 12, 12, 0.95)',
       border: '1px solid rgba(255, 215, 0, 0.3)',
-      borderRadius: '9999px',
-      boxShadow: SHADOWS.sacred.small,
-      backdropFilter: 'blur(4px)',
+      borderRadius: '12px',
+      boxShadow:
+        SHADOWS.sacred.small + ', inset 0 1px 0 rgba(255, 215, 0, 0.1)',
+      backdropFilter: 'blur(12px)',
       backgroundImage: `
-        radial-gradient(circle at left, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at right, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+        radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
       `,
     },
     bar: {
       background:
-        'linear-gradient(to right, #FBBF24, #F59E0B, #FFD700, #F59E0B, #FBBF24)',
-      borderRadius: '9999px',
+        'linear-gradient(135deg, #FBBF24 0%, #F59E0B 25%, #FFD700 50%, #F59E0B 75%, #FBBF24 100%)',
+      borderRadius: '12px',
       boxShadow:
-        '0 0 8px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.8))',
+        '0 0 16px rgba(255, 215, 0, 0.8), 0 4px 12px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.9))',
+      position: 'relative',
+      overflow: 'hidden',
     },
     indeterminateBar: {
       background:
-        'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), #FFD700, rgba(255, 215, 0, 0.3), transparent)',
-      borderRadius: '9999px',
+        'linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.2) 20%, rgba(255, 215, 0, 0.6) 40%, #FFD700 50%, rgba(255, 215, 0, 0.6) 60%, rgba(255, 215, 0, 0.2) 80%, transparent 100%)',
+      borderRadius: '12px',
       boxShadow:
-        '0 0 12px rgba(255, 215, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-      filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 1))',
-      animation: 'sacredProgressIndeterminate 2s ease-in-out infinite',
+        '0 0 20px rgba(255, 215, 0, 0.9), 0 4px 12px rgba(255, 215, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+      filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 1))',
+      animation: 'sacredProgressIndeterminate 2.5s ease-in-out infinite',
+      position: 'absolute',
     },
     label: {
       color: '#FFD700',
       fontSize: '14px',
-      fontFamily: '"Cinzel", serif',
-      fontWeight: '600',
-      textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
+      fontFamily: '"Cinzel", Georgia, serif',
+      fontWeight: '700',
+      textShadow:
+        '0 0 8px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5)',
     },
-    transition: TRANSITIONS.slow,
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    stripes: {
+      backgroundImage:
+        'linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent)',
+      backgroundSize: '16px 16px',
+      animation: 'progressStripes 0.8s linear infinite',
+    },
+    pulse: {
+      animation: 'sacredProgressPulse 2s ease-in-out infinite',
+      boxShadow: '0 0 0 rgba(255, 215, 0, 0.8)',
+    },
   },
 }
 
@@ -235,6 +297,8 @@ export const getProgressBarTheme = (
       backgroundImage:
         styles.barBackgroundImage || baseTheme.bar.backgroundImage,
       filter: styles.barFilter || baseTheme.bar.filter,
+      position: baseTheme.bar.position,
+      overflow: baseTheme.bar.overflow,
     },
     indeterminateBar: {
       background:
@@ -254,6 +318,7 @@ export const getProgressBarTheme = (
       animation:
         styles.indeterminateBarAnimation ||
         baseTheme.indeterminateBar.animation,
+      position: baseTheme.indeterminateBar.position,
     },
     label: {
       color: styles.labelColor || baseTheme.label.color,
@@ -265,6 +330,8 @@ export const getProgressBarTheme = (
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
       : baseTheme.transition,
+    stripes: baseTheme.stripes,
+    pulse: baseTheme.pulse,
   }
 }
 
@@ -280,7 +347,7 @@ export const getProgressBarStyles = (
 
   const containerStyle: React.CSSProperties = {
     width: styles?.width || '100%',
-    height: styles?.height || '10px',
+    height: styles?.height || '16px',
     maxWidth: styles?.maxWidth,
     minWidth: styles?.minWidth,
     maxHeight: styles?.maxHeight,
@@ -309,13 +376,19 @@ export const getProgressBarStyles = (
         top: 0,
         left: 0,
         height: '100%',
-        width: '50%',
+        width: '60%',
         background: themeConfig.indeterminateBar.background,
         borderRadius: themeConfig.indeterminateBar.borderRadius,
         boxShadow: themeConfig.indeterminateBar.boxShadow,
         backgroundImage: themeConfig.indeterminateBar.backgroundImage,
         filter: themeConfig.indeterminateBar.filter,
         animation: themeConfig.indeterminateBar.animation,
+        ...(styles?.striped &&
+          themeConfig.stripes && {
+            backgroundImage: `${themeConfig.stripes.backgroundImage}, ${themeConfig.indeterminateBar.background}`,
+            backgroundSize: themeConfig.stripes.backgroundSize,
+            animation: `${themeConfig.indeterminateBar.animation}, ${themeConfig.stripes.animation}`,
+          }),
       }
     : {
         height: '100%',
@@ -326,6 +399,20 @@ export const getProgressBarStyles = (
         backgroundImage: themeConfig.bar.backgroundImage,
         filter: themeConfig.bar.filter,
         transition: themeConfig.transition,
+        position: 'relative',
+        overflow: 'hidden',
+        ...(styles?.striped &&
+          themeConfig.stripes && {
+            backgroundImage: `${themeConfig.stripes.backgroundImage}, ${themeConfig.bar.background}`,
+            backgroundSize: themeConfig.stripes.backgroundSize,
+            ...(styles?.animated && {
+              animation: themeConfig.stripes.animation,
+            }),
+          }),
+        ...(styles?.pulse &&
+          themeConfig.pulse && {
+            animation: `${themeConfig.pulse.animation}${styles?.striped && styles?.animated && themeConfig.stripes ? `, ${themeConfig.stripes.animation}` : ''}`,
+          }),
       }
 
   const labelStyle: React.CSSProperties = {
@@ -334,7 +421,7 @@ export const getProgressBarStyles = (
     fontFamily: themeConfig.label.fontFamily,
     fontWeight: themeConfig.label.fontWeight,
     textShadow: themeConfig.label.textShadow,
-    marginTop: '4px',
+    marginTop: '8px',
     textAlign: 'center',
   }
 

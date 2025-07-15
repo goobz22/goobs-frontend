@@ -38,6 +38,10 @@ export { alertThemes, getAlertTheme, getAlertStyles } from './alert'
 export type { ButtonTheme, ButtonStyles } from './button'
 export { buttonThemes, getButtonTheme, getButtonStyles } from './button'
 
+// Export dropdown theme system
+export type { DropdownTheme, DropdownStyles } from './dropdown'
+export { dropdownThemes, getDropdownTheme, getDropdownStyles } from './dropdown'
+
 // Export chip theme system
 export type { ChipTheme, ChipStyles } from './chip'
 export { chipThemes, getChipTheme, getChipStyles } from './chip'
@@ -111,6 +115,10 @@ export { toolbarThemes, getToolbarTheme, getToolbarStyles } from './toolbar'
 // Export stepper theme system
 export type { StepperTheme, StepperStyles } from './stepper'
 export { getStepperStyles } from './stepper'
+
+// Export tooltip theme system
+export type { TooltipTheme, TooltipStyles } from './tooltip'
+export { tooltipThemes, getTooltipTheme, getTooltipStyles } from './tooltip'
 
 // Export switch theme system
 export type { SwitchTheme, SwitchStyles } from './switch'

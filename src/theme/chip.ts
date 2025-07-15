@@ -138,6 +138,11 @@ export interface ChipStyles {
   maxWidth?: string
   minWidth?: string
   maxHeight?: string
+
+  // Text wrapping
+  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line'
+  wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word'
+  wordWrap?: 'normal' | 'break-word'
 }
 
 export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
@@ -152,8 +157,8 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       fontSize: '14px',
       fontWeight: '500',
       color: 'rgb(59, 130, 246)',
-      padding: '0 12px',
-      height: '28px',
+      padding: '4px 12px',
+      height: 'auto',
     },
     containerHover: {
       transform: 'translateY(-1px)',
@@ -231,8 +236,8 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       fontSize: '14px',
       fontWeight: '500',
       color: 'rgb(96, 165, 250)',
-      padding: '0 12px',
-      height: '28px',
+      padding: '4px 12px',
+      height: 'auto',
     },
     containerHover: {
       transform: 'translateY(-1px)',
@@ -462,7 +467,7 @@ export const getChipStyles = (
     display: 'flex',
     alignItems: 'center',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: styles?.whiteSpace === 'normal' ? 'visible' : 'hidden',
     transition: themeConfig.transition,
     borderRadius: themeConfig.container.borderRadius,
     border: themeConfig.container.border,
@@ -483,6 +488,10 @@ export const getChipStyles = (
     maxWidth: styles?.maxWidth,
     minWidth: styles?.minWidth,
     maxHeight: styles?.maxHeight,
+    // Text wrapping styling
+    whiteSpace: styles?.whiteSpace,
+    wordBreak: styles?.wordBreak,
+    wordWrap: styles?.wordWrap,
     // State-based styling
     ...(isDisabled && {
       opacity: themeConfig.containerDisabled.opacity,

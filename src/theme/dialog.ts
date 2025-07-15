@@ -330,8 +330,57 @@ export const getDialogTheme = (styles?: DialogStyles): DialogTheme => {
 }
 
 // Main style generator function
-export const getDialogStyles = (styles?: DialogStyles) => {
+export const getDialogStyles = (
+  styles?: DialogStyles,
+  screenSize?: 'mobile' | 'tablet' | 'desktop'
+) => {
   const themeConfig = getDialogTheme(styles)
+
+  // Get responsive dimensions based on screen size
+  const getResponsiveMaxWidth = () => {
+    if (styles?.maxWidth) return styles.maxWidth
+
+    switch (screenSize) {
+      case 'mobile':
+        return '95vw'
+      case 'tablet':
+        return '85vw'
+      case 'desktop':
+        return '900px'
+      default:
+        return themeConfig.dialog.maxWidth
+    }
+  }
+
+  const getResponsiveMargin = () => {
+    if (styles?.margin) return styles.margin
+
+    switch (screenSize) {
+      case 'mobile':
+        return '0.5rem auto'
+      case 'tablet':
+        return '1rem auto'
+      case 'desktop':
+        return '1.5rem auto'
+      default:
+        return '1rem auto'
+    }
+  }
+
+  const getResponsivePadding = () => {
+    if (styles?.padding) return styles.padding
+
+    switch (screenSize) {
+      case 'mobile':
+        return '0.5rem'
+      case 'tablet':
+        return '1rem'
+      case 'desktop':
+        return '1.5rem'
+      default:
+        return '1rem'
+    }
+  }
 
   const backdropStyle: React.CSSProperties = {
     position: themeConfig.backdrop.position as any,
@@ -342,7 +391,7 @@ export const getDialogStyles = (styles?: DialogStyles) => {
     justifyContent: themeConfig.backdrop.justifyContent as any,
     backgroundColor: themeConfig.backdrop.backgroundColor,
     backdropFilter: themeConfig.backdrop.backdropFilter,
-    padding: themeConfig.backdrop.padding,
+    padding: getResponsivePadding(),
     overflow: themeConfig.backdrop.overflow as any,
   }
 
@@ -356,8 +405,8 @@ export const getDialogStyles = (styles?: DialogStyles) => {
     backgroundImage: themeConfig.dialog.backgroundImage,
     transition: themeConfig.transition,
     maxHeight: themeConfig.dialog.maxHeight,
-    maxWidth: themeConfig.dialog.maxWidth,
-    minWidth: themeConfig.dialog.minWidth,
+    maxWidth: getResponsiveMaxWidth(),
+    minWidth: screenSize === 'mobile' ? '280px' : themeConfig.dialog.minWidth,
     display: themeConfig.dialog.display as any,
     flexDirection: themeConfig.dialog.flexDirection as any,
     // Layout and sizing overrides
@@ -365,17 +414,16 @@ export const getDialogStyles = (styles?: DialogStyles) => {
     height: styles?.height,
     minHeight: styles?.minHeight,
     padding: undefined, // Let content wrapper handle padding
-    margin: styles?.margin,
+    margin: getResponsiveMargin(),
   }
 
   const contentStyle: React.CSSProperties = {
     overflowY: themeConfig.content.overflowY as any,
     overflowX: themeConfig.content.overflowX as any,
     maxHeight: themeConfig.content.maxHeight,
-    scrollbarWidth: themeConfig.content.scrollbarWidth as any,
     scrollbarColor: themeConfig.content.scrollbarColor,
     msOverflowStyle: themeConfig.content.msOverflowStyle as any,
-    WebkitScrollbarWidth: themeConfig.content.WebkitScrollbarWidth,
+    scrollbarWidth: themeConfig.content.WebkitScrollbarWidth as any,
     padding: styles?.padding,
     flexGrow: 1,
     flexShrink: 1,
