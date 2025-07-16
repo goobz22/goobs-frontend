@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import Dialog from '../../../../Dialog'
 import CloseIcon from '../../../../Icons/Close'
 import Typography from '../../../../Typography'

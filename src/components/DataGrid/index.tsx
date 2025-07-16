@@ -15,30 +15,6 @@ import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import { DatagridProps, RowData } from './types'
 import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
 
-function arePropsEqual(
-  prevProps: Readonly<DatagridProps>,
-  nextProps: Readonly<DatagridProps>
-) {
-  const keysToCompare: (keyof DatagridProps)[] = [
-    'columns',
-    'rows',
-    'buttons',
-    'dropdowns',
-    'searchbarProps',
-    'error',
-    'showIdColumns',
-    'filters',
-    'metrics',
-    'styles',
-  ]
-  for (const key of keysToCompare) {
-    if (JSON.stringify(prevProps[key]) !== JSON.stringify(nextProps[key])) {
-      return false
-    }
-  }
-  return true
-}
-
 function DataGrid({
   columns,
   rows: providedRows,
@@ -52,6 +28,7 @@ function DataGrid({
   onShow,
   onSelectionChange,
   onColumnResize,
+  onCellSave,
   showIdColumns = false,
   filters,
   metrics,
@@ -100,11 +77,6 @@ function DataGrid({
   // State for managing column widths
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
 
-  // State for search filtering
-  const [searchFilteredRows, setSearchFilteredRows] = useState<RowData[]>([])
-  const [visibleColumnFields, setVisibleColumnFields] = useState<string[]>([])
-  const [hasActiveSearch, setHasActiveSearch] = useState(false)
-
   // Merge column widths with the ordered columns
   const columnsWithWidths = useMemo(() => {
     return orderedColumns.map(col => ({
@@ -114,20 +86,10 @@ function DataGrid({
     }))
   }, [orderedColumns, columnWidths])
 
-  // Filter columns based on search visibility and hidden columns
+  // Filter columns based on hidden columns
   const visibleColumns = useMemo(() => {
-    let filteredCols = columnsWithWidths.filter(
-      col => !hiddenColumns.has(col.field)
-    )
-
-    if (hasActiveSearch) {
-      filteredCols = filteredCols.filter(col =>
-        visibleColumnFields.includes(col.field)
-      )
-    }
-
-    return filteredCols
-  }, [columnsWithWidths, visibleColumnFields, hasActiveSearch, hiddenColumns])
+    return columnsWithWidths.filter(col => !hiddenColumns.has(col.field))
+  }, [columnsWithWidths, hiddenColumns])
 
   // Handle column resize
   const handleColumnResize = useCallback(
@@ -143,16 +105,6 @@ function DataGrid({
       }
     },
     [onColumnResize]
-  )
-
-  // Handle search filter changes
-  const handleSearchFilter = useCallback(
-    (searchTerm: string, filteredRows: RowData[], visibleColumns: string[]) => {
-      setSearchFilteredRows(filteredRows)
-      setVisibleColumnFields(visibleColumns)
-      setHasActiveSearch(searchTerm.trim().length > 0)
-    },
-    []
   )
 
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
@@ -233,7 +185,10 @@ function DataGrid({
 
   const handleCellSave = useCallback(
     (rowId: string, field: string, value: string) => {
-      // Update the row data
+      // Call the external onCellSave callback
+      onCellSave(rowId, field, value)
+
+      // Update the local row data for immediate UI feedback
       setRows(prevRows =>
         prevRows.map(row => {
           const currentRowId = String(row._id ?? row.id)
@@ -246,7 +201,7 @@ function DataGrid({
       setEditingCell(null)
       setEditingValue('')
     },
-    []
+    [onCellSave]
   )
 
   const handleCellCancel = useCallback(() => {
@@ -260,7 +215,7 @@ function DataGrid({
 
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
     columns: visibleColumns,
-    rows: hasActiveSearch ? searchFilteredRows : rows,
+    rows: rows,
     searchbarProps,
   })
   const { handleManageRowClose, handleManage } = useManageRow({
@@ -357,15 +312,12 @@ function DataGrid({
         const targetIndex = newOrder.indexOf(targetField)
 
         if (draggedIndex !== -1 && targetIndex !== -1) {
-          // Remove dragged column from its current position
           newOrder.splice(draggedIndex, 1)
-          // Insert it at the target position
           newOrder.splice(targetIndex, 0, draggedColumn)
         }
 
         return newOrder
       })
-
       setDraggedColumn(null)
     },
     [draggedColumn]
@@ -375,169 +327,190 @@ function DataGrid({
     setDraggedColumn(null)
   }, [])
 
+  // Calculate pagination
   const startIndex = page * pageSize
-  const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize)
+  const endIndex = startIndex + pageSize
+  const visibleRows = filteredRows.slice(startIndex, endIndex)
 
-  useEffect(() => {
-    const totalPages = Math.ceil(filteredRows.length / pageSize)
-    if (page >= totalPages && totalPages > 0) {
-      setPage(totalPages - 1)
-    }
-  }, [filteredRows.length, pageSize, page])
-
+  // Calculate selection states
   const allRowsSelected =
-    rows.length > 0 &&
-    rows.every(r => selectedRows.includes(String(r._id ?? r.id)))
+    filteredRows.length > 0 && selectedRows.length === filteredRows.length
   const someRowsSelected =
-    rows.length > 0 &&
-    selectedRows.length > 0 &&
-    selectedRows.length < rows.length
+    selectedRows.length > 0 && selectedRows.length < filteredRows.length
+
+  if (error) {
+    return (
+      <div style={computedStyles.container}>
+        <div style={computedStyles.error}>
+          <div style={{ color: 'inherit' }}>Error: {error.message}</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div>
-      {/* Metrics Section - positioned above the DataGrid */}
-      {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-        <div style={{ marginBottom: '1rem' }}>
-          <MetricSection metrics={metrics} styles={styles} />
+    <div style={computedStyles.container} ref={containerRef}>
+      {isSacredTheme && (
+        <>
+          <div
+            style={{ ...computedStyles.glyph, top: '0.75rem', left: '0.75rem' }}
+          >
+            {SACRED_GLYPHS[10]}
+          </div>
+          <div
+            style={{
+              ...computedStyles.glyph,
+              top: '0.75rem',
+              right: '0.75rem',
+              animationDirection: 'reverse',
+            }}
+          >
+            {SACRED_GLYPHS[11]}
+          </div>
+        </>
+      )}
+
+      {isSacredTheme && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            marginBottom: '1rem',
+            opacity: 0.6,
+          }}
+        >
+          {[
+            SACRED_GLYPHS[13],
+            SACRED_GLYPHS[3],
+            SACRED_GLYPHS[23],
+            SACRED_GLYPHS[3],
+            SACRED_GLYPHS[13],
+          ].map((glyph, index) => (
+            <p
+              key={index}
+              style={{
+                color: '#FFD700',
+                fontSize: '0.875rem',
+                animation: 'datagrid-float 3s ease-in-out infinite',
+                animationDelay: `${index * 0.3}s`,
+              }}
+            >
+              {glyph}
+            </p>
+          ))}
         </div>
       )}
 
-      {/* Filter Section - positioned below metrics but outside DataGrid */}
-      <div style={{ marginBottom: '1rem' }}>
-        <FilterSection
-          filters={filters || []}
-          columns={columnsWithWidths}
-          rows={rows}
-          onSearchFilter={handleSearchFilter}
+      <div style={computedStyles.contentWrapper}>
+        {/* Toolbar - positioned inside DataGrid */}
+        <CustomToolbar
+          buttons={buttons}
+          dropdowns={dropdowns?.[0] ? [dropdowns[0]] : undefined}
+          searchbarProps={updatedSearchbarProps}
+          rightCenterProps={
+            selectedRows.length > 0
+              ? {
+                  selectedRows,
+                  rows,
+                  onDuplicate: onDuplicate
+                    ? () => onDuplicate(selectedRows)
+                    : undefined,
+                  onDelete: onDelete
+                    ? () => {
+                        onDelete(selectedRows)
+                        handleSelectionChange([])
+                      }
+                    : undefined,
+                  onManage: onManage ? handleManage : undefined,
+                  onShow: onShow ? () => onShow(selectedRows) : undefined,
+                  handleClose: handleManageRowClose,
+                }
+              : undefined
+          }
+          styles={{
+            theme: styles?.theme || 'light',
+          }}
+        />
+
+        <div style={computedStyles.sectionDivider} />
+
+        {/* Filters Section */}
+        {filters && filters.length > 0 && (
+          <FilterSection filters={filters} styles={styles} />
+        )}
+
+        {/* Metrics Section */}
+        {metrics && metrics.length > 0 && (
+          <MetricSection metrics={metrics} styles={styles} />
+        )}
+
+        <Table
+          columns={visibleColumns}
+          rows={visibleRows}
+          selectedRowIds={selectedRows}
+          onRowClick={handleRowClick}
+          allRowsSelected={allRowsSelected}
+          someRowsSelected={someRowsSelected}
+          onHeaderCheckboxChange={handleHeaderCheckboxChange}
+          onColumnResize={handleColumnResize}
+          styles={styles}
+          editingCell={editingCell}
+          editingValue={editingValue}
+          onCellClick={handleCellClick}
+          onCellSave={handleCellSave}
+          onCellCancel={handleCellCancel}
+          onEditingValueChange={handleEditingValueChange}
+          onColumnSort={handleColumnSort}
+          onManageColumns={handleToggleManageColumns}
+          draggedColumn={draggedColumn}
+          onColumnDragStart={handleColumnDragStart}
+          onColumnDragOver={handleColumnDragOver}
+          onColumnDrop={handleColumnDrop}
+          onColumnDragEnd={handleColumnDragEnd}
+        />
+
+        <CustomFooter
+          page={page}
+          pageSize={pageSize}
+          rowCount={filteredRows.length}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+          columns={visibleColumns}
           styles={styles}
         />
       </div>
 
-      {/* Main DataGrid Container */}
-      <div ref={containerRef} style={computedStyles.container}>
-        {isSacredTheme && (
-          <>
-            <div
+      {isSacredTheme && (
+        <div style={computedStyles.footerContainer}>
+          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
+            <p
+              key={index}
               style={{
-                ...computedStyles.glyph,
-                top: '0.75rem',
-                left: '0.75rem',
+                ...computedStyles.footerGlyph,
+                animationDelay: `${2 + index * 0.3}s`,
               }}
             >
-              {SACRED_GLYPHS[23]}
-            </div>
-            <div
-              style={{
-                ...computedStyles.glyph,
-                top: '0.75rem',
-                right: '0.75rem',
-                animationDirection: 'reverse',
-              }}
-            >
-              {SACRED_GLYPHS[22]}
-            </div>
-          </>
-        )}
-        {error && <div style={computedStyles.error}>{error.message}</div>}
-
-        <div style={computedStyles.contentWrapper}>
-          {/* Toolbar - positioned inside DataGrid */}
-          <CustomToolbar
-            buttons={buttons}
-            dropdowns={dropdowns?.[0] ? [dropdowns[0]] : undefined}
-            searchbarProps={updatedSearchbarProps}
-            rightCenterProps={
-              selectedRows.length > 0
-                ? {
-                    selectedRows,
-                    rows,
-                    onDuplicate: onDuplicate
-                      ? () => onDuplicate(selectedRows)
-                      : undefined,
-                    onDelete: onDelete
-                      ? () => {
-                          onDelete(selectedRows)
-                          handleSelectionChange([])
-                        }
-                      : undefined,
-                    onManage: onManage ? handleManage : undefined,
-                    onShow: onShow ? () => onShow(selectedRows) : undefined,
-                    handleClose: handleManageRowClose,
-                  }
-                : undefined
-            }
-            styles={{
-              theme: styles?.theme || 'light',
-            }}
-          />
-
-          <div style={computedStyles.sectionDivider} />
-
-          <Table
-            columns={visibleColumns}
-            rows={visibleRows}
-            selectedRowIds={selectedRows}
-            onRowClick={handleRowClick}
-            allRowsSelected={allRowsSelected}
-            someRowsSelected={someRowsSelected}
-            onHeaderCheckboxChange={handleHeaderCheckboxChange}
-            onColumnResize={handleColumnResize}
-            styles={styles}
-            editingCell={editingCell}
-            editingValue={editingValue}
-            onCellClick={handleCellClick}
-            onCellSave={handleCellSave}
-            onCellCancel={handleCellCancel}
-            onEditingValueChange={handleEditingValueChange}
-            onColumnSort={handleColumnSort}
-            onManageColumns={handleToggleManageColumns}
-            draggedColumn={draggedColumn}
-            onColumnDragStart={handleColumnDragStart}
-            onColumnDragOver={handleColumnDragOver}
-            onColumnDrop={handleColumnDrop}
-            onColumnDragEnd={handleColumnDragEnd}
-          />
-
-          <CustomFooter
-            page={page}
-            pageSize={pageSize}
-            rowCount={filteredRows.length}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
-            columns={visibleColumns}
-            styles={styles}
-          />
+              {glyph}
+            </p>
+          ))}
         </div>
+      )}
 
-        {isSacredTheme && (
-          <div style={computedStyles.footerContainer}>
-            {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-              <p
-                key={index}
-                style={{
-                  ...computedStyles.footerGlyph,
-                  animationDelay: `${2 + index * 0.3}s`,
-                }}
-              >
-                {glyph}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {/* Manage Columns Modal */}
+      {/* Manage Columns Modal */}
+      {showManageColumns && (
         <ManageColumnsSimple
           open={showManageColumns}
-          onClose={handleToggleManageColumns}
-          columns={filteredColumns}
+          columns={visibleColumns}
           hiddenColumns={hiddenColumns}
           onColumnShow={handleColumnShow}
           onColumnHide={handleColumnHide}
+          onClose={() => setShowManageColumns(false)}
           styles={styles}
         />
-      </div>
+      )}
     </div>
   )
 }
 
-export default React.memo(DataGrid, arePropsEqual)
+export default DataGrid

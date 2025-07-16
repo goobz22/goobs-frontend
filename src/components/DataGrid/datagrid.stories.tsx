@@ -395,6 +395,10 @@ const commonArgs: Partial<DatagridProps> = {
   onShow: (selectedRows: string[]) => {
     console.log('Show rows:', selectedRows)
   },
+  // Required callback for inline editing saves
+  onCellSave: (rowId: string, field: string, value: string) => {
+    console.log('Cell save:', { rowId, field, value })
+  },
 }
 
 const meta: Meta<typeof DataGrid> = {
@@ -556,6 +560,9 @@ const InteractiveDemoComponent: React.FC = () => {
           theme: theme,
         }}
         showIdColumns={showIds}
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+        }}
       />
     </div>
   )
@@ -635,6 +642,9 @@ const ColumnResizeDemoComponent: React.FC<DatagridProps> = args => {
         onColumnResize={handleColumnResize}
         filters={sampleFilters}
         metrics={employeeMetrics}
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+        }}
       />
     </div>
   )
@@ -1001,6 +1011,9 @@ export const FinancialStatements: Story = {
           theme: 'light',
         }}
         showIdColumns={true}
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+        }}
       />
     </div>
   ),
@@ -1048,6 +1061,9 @@ export const SacredThemeWithMetrics: Story = {
           theme: 'sacred',
         }}
         showIdColumns={true}
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+        }}
       />
     </div>
   ),
@@ -1119,6 +1135,9 @@ export const ManageRowDemo: Story = {
         }}
         onSelectionChange={selectedRows => {
           console.log('✅ Selection changed to:', selectedRows)
+        }}
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
         }}
       />
     </div>

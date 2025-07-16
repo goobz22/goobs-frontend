@@ -15,6 +15,7 @@ export interface ColumnDef {
   index?: number
   width?: number
   resizable?: boolean
+  editable?: boolean // Optional property to control if column is editable
   // Column type for formatting
   type?:
     | 'currency'
@@ -132,6 +133,9 @@ export interface DatagridProps {
 
   // For capturing column resize events
   onColumnResize?: (columnField: string, newWidth: number) => void
+
+  // Required callback for inline editing saves
+  onCellSave: (rowId: string, field: string, value: string) => void
 
   // Optional embedded filters that appear between toolbar and table
   filters?: DataGridFilter[]

@@ -1007,10 +1007,22 @@ const Rows: React.FC<RowsProps> = ({
               return (
                 <td
                   key={col.field}
-                  style={computedStyles.table.tableCell}
+                  style={{
+                    ...computedStyles.table.tableCell,
+                    cursor:
+                      !isEditing &&
+                      selectedRowIds.includes(rowId) &&
+                      col.editable !== false
+                        ? 'pointer'
+                        : 'default',
+                  }}
                   onClick={e => {
-                    // Only handle cell click if not editing and row is selected
-                    if (!isEditing && selectedRowIds.includes(rowId)) {
+                    // Only handle cell click if not editing, row is selected, and column is editable
+                    if (
+                      !isEditing &&
+                      selectedRowIds.includes(rowId) &&
+                      col.editable !== false
+                    ) {
                       e.stopPropagation()
                       onCellClick?.(rowId, col.field, value)
                     }

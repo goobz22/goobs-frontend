@@ -1,0 +1,1020 @@
+/**
+ * @fileoverview Storybook stories for the Badge component.
+ * Demonstrates different positions, colors, and use cases.
+ */
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { userEvent, within } from '@storybook/test'
+import Badge from './index'
+
+const meta: Meta<typeof Badge> = {
+  title: 'Components/Badge',
+  component: Badge,
+  argTypes: {
+    content: {
+      control: 'text',
+      description: 'The content to display inside the badge',
+    },
+    children: {
+      control: false,
+      description: 'The element to attach the badge to',
+    },
+    styles: {
+      control: 'object',
+      description:
+        'Styling options for the badge including position, colors, and offset',
+    },
+  },
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  decorators: [
+    Story => (
+      <div
+        style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+export default meta
+type Story = StoryObj<typeof Badge>
+
+// --------------------------------------------------------------------------
+// THEME STORIES
+// --------------------------------------------------------------------------
+
+/** A default badge with light theme. */
+export const LightTheme: Story = {
+  name: 'Themes/Light Theme',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/** A badge with dark theme. */
+export const DarkTheme: Story = {
+  name: 'Themes/Dark Theme',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#374151',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+          color: 'white',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** A badge with sacred theme. */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred Theme',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#1f2937',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+          color: '#FFD700',
+          border: '1px solid rgba(255, 215, 0, 0.3)',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { theme: 'sacred' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** All themes displayed together for comparison. */
+export const AllThemes: Story = {
+  name: 'Themes/All Themes',
+  render: () => (
+    <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+      <Badge content="5" styles={{ theme: 'light' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Light
+        </div>
+      </Badge>
+      <Badge content="5" styles={{ theme: 'dark' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: 'white',
+          }}
+        >
+          Dark
+        </div>
+      </Badge>
+      <Badge content="5" styles={{ theme: 'sacred' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#1f2937',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: '#FFD700',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+          }}
+        >
+          Sacred
+        </div>
+      </Badge>
+    </div>
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// BASIC STORIES
+// --------------------------------------------------------------------------
+
+/** A default badge positioned at top-right with red background. */
+export const Default: Story = {
+  name: 'Default',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+  },
+}
+
+/** A badge with custom content. */
+export const CustomContent: Story = {
+  name: 'Custom Content',
+  args: {
+    content: 'NEW',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+  },
+}
+
+// --------------------------------------------------------------------------
+// POSITION STORIES
+// --------------------------------------------------------------------------
+
+/** Badge positioned at top-left. */
+export const TopLeft: Story = {
+  name: 'Position/Top Left',
+  args: {
+    content: '3',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { position: 'top-left' },
+  },
+}
+
+/** Badge positioned at bottom-right. */
+export const BottomRight: Story = {
+  name: 'Position/Bottom Right',
+  args: {
+    content: '7',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { position: 'bottom-right' },
+  },
+}
+
+/** Badge positioned at bottom-left. */
+export const BottomLeft: Story = {
+  name: 'Position/Bottom Left',
+  args: {
+    content: '12',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { position: 'bottom-left' },
+  },
+}
+
+/** All positions displayed together for comparison. */
+export const AllPositions: Story = {
+  name: 'Position/All Positions',
+  render: () => (
+    <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+      <Badge content="1" styles={{ position: 'top-right' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          TR
+        </div>
+      </Badge>
+      <Badge content="2" styles={{ position: 'top-left' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          TL
+        </div>
+      </Badge>
+      <Badge content="3" styles={{ position: 'bottom-right' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          BR
+        </div>
+      </Badge>
+      <Badge content="4" styles={{ position: 'bottom-left' }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          BL
+        </div>
+      </Badge>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// COLOR STORIES
+// --------------------------------------------------------------------------
+
+/** Badge with custom colors. */
+export const CustomColors: Story = {
+  name: 'Colors/Custom Colors',
+  args: {
+    content: '99+',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: {
+      backgroundColor: '#2196f3',
+      color: 'white',
+    },
+  },
+}
+
+/** Different colored badges for different states in light theme. */
+export const ColorVariantsLight: Story = {
+  name: 'Colors/Color Variants - Light Theme',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <Badge
+        content="Error"
+        styles={{ backgroundColor: '#f44336', color: 'white', theme: 'light' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Error
+        </div>
+      </Badge>
+      <Badge
+        content="Success"
+        styles={{ backgroundColor: '#4caf50', color: 'white', theme: 'light' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Success
+        </div>
+      </Badge>
+      <Badge
+        content="Warning"
+        styles={{ backgroundColor: '#ff9800', color: 'white', theme: 'light' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Warning
+        </div>
+      </Badge>
+      <Badge
+        content="Info"
+        styles={{ backgroundColor: '#2196f3', color: 'white', theme: 'light' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Info
+        </div>
+      </Badge>
+    </div>
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/** Different colored badges for different states in dark theme. */
+export const ColorVariantsDark: Story = {
+  name: 'Colors/Color Variants - Dark Theme',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <Badge
+        content="Error"
+        styles={{ backgroundColor: '#ef4444', color: 'white', theme: 'dark' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: 'white',
+          }}
+        >
+          Error
+        </div>
+      </Badge>
+      <Badge
+        content="Success"
+        styles={{ backgroundColor: '#10b981', color: 'white', theme: 'dark' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: 'white',
+          }}
+        >
+          Success
+        </div>
+      </Badge>
+      <Badge
+        content="Warning"
+        styles={{ backgroundColor: '#f59e0b', color: 'white', theme: 'dark' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: 'white',
+          }}
+        >
+          Warning
+        </div>
+      </Badge>
+      <Badge
+        content="Info"
+        styles={{ backgroundColor: '#3b82f6', color: 'white', theme: 'dark' }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: 'white',
+          }}
+        >
+          Info
+        </div>
+      </Badge>
+    </div>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/** Different colored badges for different states in sacred theme. */
+export const ColorVariantsSacred: Story = {
+  name: 'Colors/Color Variants - Sacred Theme',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <Badge
+        content="Error"
+        styles={{
+          backgroundColor: 'rgba(220, 38, 38, 0.9)',
+          color: '#FFD700',
+          theme: 'sacred',
+        }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#1f2937',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: '#FFD700',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+          }}
+        >
+          Error
+        </div>
+      </Badge>
+      <Badge
+        content="Success"
+        styles={{
+          backgroundColor: 'rgba(34, 197, 94, 0.9)',
+          color: '#FFD700',
+          theme: 'sacred',
+        }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#1f2937',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: '#FFD700',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+          }}
+        >
+          Success
+        </div>
+      </Badge>
+      <Badge
+        content="Warning"
+        styles={{
+          backgroundColor: 'rgba(245, 158, 11, 0.9)',
+          color: '#FFD700',
+          theme: 'sacred',
+        }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#1f2937',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: '#FFD700',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+          }}
+        >
+          Warning
+        </div>
+      </Badge>
+      <Badge
+        content="Info"
+        styles={{
+          backgroundColor: 'rgba(59, 130, 246, 0.9)',
+          color: '#FFD700',
+          theme: 'sacred',
+        }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#1f2937',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            color: '#FFD700',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+          }}
+        >
+          Info
+        </div>
+      </Badge>
+    </div>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// OFFSET STORIES
+// --------------------------------------------------------------------------
+
+/** Badge with custom offset distance. */
+export const CustomOffset: Story = {
+  name: 'Offset/Custom Offset',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+        }}
+      >
+        Icon
+      </div>
+    ),
+    styles: { offset: 15 },
+  },
+}
+
+/** Different offset values for comparison. */
+export const OffsetVariants: Story = {
+  name: 'Offset/Offset Variants',
+  render: () => (
+    <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+      <Badge content="0" styles={{ offset: 0 }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Offset 0
+        </div>
+      </Badge>
+      <Badge content="8" styles={{ offset: 8 }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Offset 8
+        </div>
+      </Badge>
+      <Badge content="15" styles={{ offset: 15 }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Offset 15
+        </div>
+      </Badge>
+      <Badge content="25" styles={{ offset: 25 }}>
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          Offset 25
+        </div>
+      </Badge>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// REAL-WORLD USE CASES
+// --------------------------------------------------------------------------
+
+/** Badge on a notification icon. */
+export const NotificationIcon: Story = {
+  name: 'Use Cases/Notification Icon',
+  args: {
+    content: '3',
+    children: (
+      <div
+        style={{
+          width: '40px',
+          height: '40px',
+          backgroundColor: '#1976d2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '20px',
+        }}
+      >
+        🔔
+      </div>
+    ),
+    styles: { backgroundColor: '#f44336' },
+  },
+}
+
+/** Badge on a shopping cart icon. */
+export const ShoppingCart: Story = {
+  name: 'Use Cases/Shopping Cart',
+  args: {
+    content: '2',
+    children: (
+      <div
+        style={{
+          width: '40px',
+          height: '40px',
+          backgroundColor: '#1976d2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '20px',
+        }}
+      >
+        🛒
+      </div>
+    ),
+    styles: { backgroundColor: '#4caf50' },
+  },
+}
+
+/** Badge on a user avatar. */
+export const UserAvatar: Story = {
+  name: 'Use Cases/User Avatar',
+  args: {
+    content: 'Online',
+    children: (
+      <div
+        style={{
+          width: '50px',
+          height: '50px',
+          backgroundColor: '#9c27b0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '18px',
+          fontWeight: 'bold',
+        }}
+      >
+        JD
+      </div>
+    ),
+    styles: {
+      backgroundColor: '#4caf50',
+      color: 'white',
+      position: 'bottom-right',
+      offset: 2,
+    },
+  },
+}
+
+/** Badge on a menu item. */
+export const MenuItem: Story = {
+  name: 'Use Cases/Menu Item',
+  args: {
+    content: 'New',
+    children: (
+      <div
+        style={{
+          padding: '12px 16px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '4px',
+          border: '1px solid #e0e0e0',
+          fontSize: '14px',
+        }}
+      >
+        Messages
+      </div>
+    ),
+    styles: {
+      backgroundColor: '#ff9800',
+      color: 'white',
+      position: 'top-right',
+    },
+  },
+}
+
+// --------------------------------------------------------------------------
+// INTERACTIVE STORIES
+// --------------------------------------------------------------------------
+
+/** Interactive badge that can be clicked. */
+export const Interactive: Story = {
+  name: 'Interactive/Clickable Badge',
+  args: {
+    content: 'Click me',
+    children: (
+      <div
+        style={{
+          width: '60px',
+          height: '60px',
+          backgroundColor: '#e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '8px',
+          cursor: 'pointer',
+        }}
+        onClick={() => alert('Badge clicked!')}
+      >
+        Icon
+      </div>
+    ),
+    styles: {
+      backgroundColor: '#9c27b0',
+      color: 'white',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const icon = canvas.getByText('Icon')
+    await userEvent.click(icon)
+  },
+}
+
+// --------------------------------------------------------------------------
+// COMPOSITION STORIES
+// --------------------------------------------------------------------------
+
+/** Multiple badges on different elements. */
+export const MultipleBadges: Story = {
+  name: 'Composition/Multiple Badges',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <Badge content="5" styles={{ backgroundColor: '#f44336' }}>
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          📧
+        </div>
+      </Badge>
+      <Badge content="12" styles={{ backgroundColor: '#2196f3' }}>
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          🔔
+        </div>
+      </Badge>
+      <Badge content="3" styles={{ backgroundColor: '#4caf50' }}>
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          🛒
+        </div>
+      </Badge>
+      <Badge content="!" styles={{ backgroundColor: '#ff9800' }}>
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+        >
+          ⚠️
+        </div>
+      </Badge>
+    </div>
+  ),
+}
