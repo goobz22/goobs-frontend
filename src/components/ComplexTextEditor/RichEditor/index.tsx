@@ -8,7 +8,6 @@ import Accordion from '../../Accordion'
 import {
   ComplexTextEditorStyles,
   getComplexTextEditorStyles,
-  getSharedFormFieldStyles,
   SACRED_GLYPHS,
 } from '../../../theme/'
 
@@ -67,7 +66,6 @@ export function RichTextEditor({
 
   // Get computed styles
   const computedStyles = getComplexTextEditorStyles(editorStyles, isFocused)
-  const { themeConfig } = getSharedFormFieldStyles(editorStyles, isFocused)
 
   // CSS keyframes for sacred animations
   useEffect(() => {
@@ -164,8 +162,10 @@ export function RichTextEditor({
           styles={{ theme: editorStyles?.theme }}
           summary={
             <Typography
-              variant="merrih4"
-              styles={isSacredTheme ? { color: themeConfig.text } : undefined}
+              styles={{
+                theme: 'sacred',
+                variant: 'cinzelh4',
+              }}
             >
               {accordionSummary}
             </Typography>
