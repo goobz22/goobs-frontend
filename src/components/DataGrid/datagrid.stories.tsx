@@ -14,15 +14,56 @@ import { ButtonProps } from '../Button'
 
 const sampleColumns: ColumnDef[] = [
   { field: 'id', headerName: 'ID', width: 90, resizable: true },
-  { field: 'name', headerName: 'Name', width: 150, resizable: true },
+  {
+    field: 'name',
+    headerName: 'Name',
+    width: 150,
+    resizable: true,
+    creationField: {
+      type: 'text',
+      required: true,
+      placeholder: 'Enter full name',
+    },
+  },
   {
     field: 'age',
     headerName: 'Age',
     type: 'default',
     width: 110,
     resizable: true,
+    creationField: {
+      type: 'internalIncrement',
+      required: true,
+      placeholder: 'Enter age',
+      min: 18,
+      max: 100,
+      validation: value => {
+        const num = Number(value)
+        if (isNaN(num) || num < 18 || num > 100) {
+          return 'Age must be between 18 and 100'
+        }
+        return undefined
+      },
+    },
   },
-  { field: 'email', headerName: 'Email Address', width: 200, resizable: true },
+  {
+    field: 'email',
+    headerName: 'Email Address',
+    width: 200,
+    resizable: true,
+    creationField: {
+      type: 'text',
+      required: true,
+      placeholder: 'Enter email address',
+      validation: value => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address'
+        }
+        return undefined
+      },
+    },
+  },
   {
     field: 'department',
     headerName: 'Department',
@@ -48,6 +89,28 @@ const sampleColumns: ColumnDef[] = [
       { value: 'Adventure' },
       { value: 'Construction' },
     ],
+    creationField: {
+      type: 'searchableDropdown',
+      required: true,
+      placeholder: 'Select department',
+      options: [
+        { value: 'Engineering' },
+        { value: 'Marketing' },
+        { value: 'HR' },
+        { value: 'Sales' },
+        { value: 'Finance' },
+        { value: 'Operations' },
+        { value: 'Customer Service' },
+        { value: 'Product' },
+        { value: 'Legal' },
+        { value: 'Design' },
+        { value: 'Data Science' },
+        { value: 'Security' },
+        { value: 'Administration' },
+        { value: 'Business Development' },
+        { value: 'Quality Assurance' },
+      ],
+    },
   },
   {
     field: 'salary',
@@ -55,8 +118,30 @@ const sampleColumns: ColumnDef[] = [
     type: 'currency',
     width: 120,
     resizable: true,
+    creationField: {
+      type: 'text',
+      required: true,
+      placeholder: 'Enter salary',
+      validation: value => {
+        const num = Number(value)
+        if (isNaN(num) || num < 0) {
+          return 'Salary must be a positive number'
+        }
+        return undefined
+      },
+    },
   },
-  { field: 'startDate', headerName: 'Start Date', width: 130, resizable: true },
+  {
+    field: 'startDate',
+    headerName: 'Start Date',
+    width: 130,
+    resizable: true,
+    creationField: {
+      type: 'date',
+      required: true,
+      placeholder: 'Select start date',
+    },
+  },
   {
     field: 'status',
     headerName: 'Status',
@@ -74,6 +159,21 @@ const sampleColumns: ColumnDef[] = [
       { value: 'Flying' },
       { value: 'Building' },
     ],
+    creationField: {
+      type: 'searchableDropdown',
+      required: true,
+      placeholder: 'Select status',
+      options: [
+        { value: 'Active' },
+        { value: 'On Leave' },
+        { value: 'Vacation' },
+        { value: 'Training' },
+        { value: 'Remote' },
+        { value: 'Probation' },
+        { value: 'Intern' },
+      ],
+      defaultValue: 'Active',
+    },
   },
 ]
 
@@ -399,6 +499,14 @@ const commonArgs: Partial<DatagridProps> = {
   onCellSave: (rowId: string, field: string, value: string) => {
     console.log('Cell save:', { rowId, field, value })
   },
+  // Inline row creation
+  onRowCreation: (rowData: Record<string, any>) => {
+    console.log('Row creation:', rowData)
+    // In a real app, this would save to backend
+    return Promise.resolve()
+  },
+  allowRowCreation: true,
+  creationRowPosition: 'top',
 }
 
 const meta: Meta<typeof DataGrid> = {
@@ -1061,6 +1169,12 @@ export const SacredThemeWithMetrics: Story = {
           theme: 'sacred',
         }}
         showIdColumns={true}
+        allowRowCreation={true}
+        creationRowPosition="top"
+        onRowCreation={(rowData: Record<string, any>) => {
+          console.log('Row creation:', rowData)
+          return Promise.resolve()
+        }}
         onCellSave={(rowId: string, field: string, value: string) => {
           console.log('Cell save:', { rowId, field, value })
         }}
@@ -1072,6 +1186,8 @@ export const SacredThemeWithMetrics: Story = {
     rows: sampleRows,
     filters: sampleFilters,
     metrics: employeeMetrics,
+    allowRowCreation: true,
+    creationRowPosition: 'top',
     styles: {
       theme: 'sacred',
     },
@@ -1151,4 +1267,349 @@ export const ManageRowDemo: Story = {
       theme: 'light',
     },
   },
+}
+
+// Inline Row Creation Demo Component
+const InlineRowCreationDemo: React.FC<DatagridProps> = args => {
+  const [rows, setRows] = React.useState(sampleRows)
+  const [createdCount, setCreatedCount] = React.useState(0)
+
+  const handleRowCreation = async (rowData: Record<string, any>) => {
+    console.log('Creating new row:', rowData)
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Create new row with generated ID
+    const newRow = {
+      id: `new-${Date.now()}`,
+      name: rowData.name || '',
+      age: Number(rowData.age) || 0,
+      email: rowData.email || '',
+      department: rowData.department || '',
+      salary: Number(rowData.salary) || 0,
+      startDate: rowData.startDate
+        ? new Date(rowData.startDate).toISOString().split('T')[0]
+        : '',
+      status: rowData.status || 'Active',
+    }
+
+    setRows(prev => [newRow, ...prev])
+    setCreatedCount(prev => prev + 1)
+  }
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}>
+        <strong>Inline Row Creation:</strong> Click &quot;Add Row&quot; to
+        create new rows directly in the table.
+        <br />
+        <strong>Features:</strong> Field validation, different input types
+        (text, date, dropdowns), and required field indicators.
+        <br />
+        <strong>Rows Created:</strong> {createdCount}
+      </div>
+      <DataGrid
+        {...args}
+        rows={rows}
+        onRowCreation={handleRowCreation}
+        allowRowCreation={true}
+        creationRowPosition="top"
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+          // Update existing row
+          setRows(prev =>
+            prev.map(row =>
+              row.id === rowId ? { ...row, [field]: value } : row
+            )
+          )
+        }}
+      />
+    </div>
+  )
+}
+
+export const InlineRowCreation: Story = {
+  name: 'Inline Row Creation Demo',
+  render: args => <InlineRowCreationDemo {...args} />,
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+// Simple demo specifically for testing validation errors
+const ValidationTestDemo: React.FC<DatagridProps> = args => {
+  const [rows, setRows] = React.useState(sampleRows)
+
+  const handleRowCreation = async (rowData: Record<string, any>) => {
+    console.log('Creating new row:', rowData)
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Create new row with generated ID
+    const newRow = {
+      id: `new-${Date.now()}`,
+      name: rowData.name || '',
+      age: Number(rowData.age) || 0,
+      email: rowData.email || '',
+      department: rowData.department || '',
+      salary: Number(rowData.salary) || 0,
+      startDate: rowData.startDate
+        ? new Date(rowData.startDate).toISOString().split('T')[0]
+        : '',
+      status: rowData.status || 'Active',
+    }
+
+    setRows(prev => [newRow, ...prev])
+  }
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}>
+        <strong>Validation Error Testing:</strong> Click &quot;Add Row&quot;
+        then try to save without filling required fields.
+        <br />
+        <strong>Expected Behavior:</strong> A snackbar should appear with
+        validation errors.
+        <br />
+        <strong>Required Fields:</strong> Name, Age, Email, Department
+      </div>
+      <DataGrid
+        {...args}
+        rows={rows}
+        onRowCreation={handleRowCreation}
+        allowRowCreation={true}
+        creationRowPosition="top"
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+          setRows(prev =>
+            prev.map(row =>
+              row.id === rowId ? { ...row, [field]: value } : row
+            )
+          )
+        }}
+      />
+    </div>
+  )
+}
+
+export const ValidationErrorDemo: Story = {
+  name: 'Validation Error Snackbar Demo',
+  render: args => <ValidationTestDemo {...args} />,
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+// Billing Information Example Component
+const BillingInformationExampleDemo: React.FC = () => {
+  const [rows, setRows] = React.useState<RowData[]>([
+    {
+      id: '1',
+      name: 'John Doe',
+      streetAddress1: '123 Main St',
+      streetAddress2: 'Apt 4B',
+      city: 'New York',
+      state: 'NY',
+      zipcode: '10001',
+      phoneNumber: '(555) 123-4567',
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      streetAddress1: '456 Oak Ave',
+      streetAddress2: '',
+      city: 'Los Angeles',
+      state: 'CA',
+      zipcode: '90210',
+      phoneNumber: '(555) 987-6543',
+    },
+  ])
+
+  const billingColumns: ColumnDef[] = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 150,
+      creationField: {
+        type: 'text',
+        required: true,
+        placeholder: 'Enter full name',
+      },
+    },
+    {
+      field: 'streetAddress1',
+      headerName: 'Street Address 1',
+      width: 200,
+      creationField: {
+        type: 'text',
+        required: true,
+        placeholder: 'Enter street address',
+      },
+    },
+    {
+      field: 'streetAddress2',
+      headerName: 'Street Address 2',
+      width: 200,
+      creationField: {
+        type: 'text',
+        required: false,
+        placeholder: 'Apt, suite, etc. (optional)',
+      },
+    },
+    {
+      field: 'city',
+      headerName: 'City',
+      width: 150,
+      creationField: {
+        type: 'text',
+        required: true,
+        placeholder: 'Enter city',
+      },
+    },
+    {
+      field: 'state',
+      headerName: 'State',
+      width: 100,
+      creationField: {
+        type: 'searchableDropdown',
+        required: true,
+        placeholder: 'Select state',
+        options: [
+          { value: 'NY', label: 'New York' },
+          { value: 'CA', label: 'California' },
+          { value: 'TX', label: 'Texas' },
+          { value: 'FL', label: 'Florida' },
+          { value: 'IL', label: 'Illinois' },
+        ],
+      },
+    },
+    {
+      field: 'zipcode',
+      headerName: 'Zip Code',
+      width: 120,
+      creationField: {
+        type: 'text',
+        required: true,
+        placeholder: 'Enter zip code',
+        validation: value => {
+          const zipRegex = /^\d{5}(-\d{4})?$/
+          if (!zipRegex.test(value)) {
+            return 'Please enter a valid zip code'
+          }
+          return undefined
+        },
+      },
+    },
+    {
+      field: 'phoneNumber',
+      headerName: 'Phone Number',
+      width: 150,
+      creationField: {
+        type: 'text',
+        required: true,
+        placeholder: 'Enter phone number',
+        validation: value => {
+          const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/
+          if (!phoneRegex.test(value)) {
+            return 'Please enter phone as (555) 123-4567'
+          }
+          return undefined
+        },
+      },
+    },
+  ]
+
+  const handleRowCreation = async (rowData: Record<string, any>) => {
+    console.log('Creating billing information:', rowData)
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 300))
+
+    const newRow = {
+      id: `billing-${Date.now()}`,
+      name: rowData.name || '',
+      streetAddress1: rowData.streetAddress1 || '',
+      streetAddress2: rowData.streetAddress2 || '',
+      city: rowData.city || '',
+      state: rowData.state || '',
+      zipcode: rowData.zipcode || '',
+      phoneNumber: rowData.phoneNumber || '',
+    }
+
+    setRows(prev => [newRow, ...prev])
+  }
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}>
+        <strong>Billing Information:</strong> Example of replacing a popup form
+        with inline row creation.
+        <br />
+        <strong>Features:</strong> Address validation, state dropdown, phone
+        number formatting, and required field validation.
+      </div>
+      <DataGrid
+        columns={billingColumns}
+        rows={rows}
+        onRowCreation={handleRowCreation}
+        allowRowCreation={true}
+        creationRowPosition="top"
+        onCellSave={(rowId: string, field: string, value: string) => {
+          console.log('Cell save:', { rowId, field, value })
+          setRows(prev =>
+            prev.map(row =>
+              row.id === rowId ? { ...row, [field]: value } : row
+            )
+          )
+        }}
+        searchbarProps={{ value: '', onChange: () => {} }}
+        styles={{
+          theme: 'light',
+        }}
+      />
+    </div>
+  )
+}
+
+export const BillingInformationExample: Story = {
+  name: 'Billing Information Example',
+  render: () => <BillingInformationExampleDemo />,
+  args: {},
 }

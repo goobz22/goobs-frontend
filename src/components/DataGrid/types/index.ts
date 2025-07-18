@@ -24,6 +24,12 @@ export interface ColumnDef {
     | 'account_number'
     | 'routing_number'
     | 'dropdown'
+    | 'ipAddress'
+    | 'subnet'
+    | 'vlan'
+    | 'cidr'
+    | 'supernet'
+    | 'macAddress'
     | 'default'
   // Format the column values as USD currency
   formatCurrency?: boolean
@@ -45,6 +51,58 @@ export interface ColumnDef {
     rowIndex: number
     columnIndex: number
   }) => React.ReactNode
+
+  // Row creation field configuration
+  creationField?: {
+    type:
+      | 'text'
+      | 'date'
+      | 'dropdown'
+      | 'searchableDropdown'
+      | 'multiselect'
+      | 'internalIncrement'
+      | 'phoneNumber'
+      | 'cvv'
+      | 'creditCardNumber'
+      | 'accountNumber'
+      | 'routingNumber'
+      | 'ipAddress'
+      | 'subnet'
+      | 'vlan'
+      | 'cidr'
+      | 'supernet'
+      | 'macAddress'
+    required?: boolean
+    placeholder?: string
+    options?: Array<{
+      value: string
+      label?: string
+      attribute1?: string
+      attribute2?: string
+      _id?: string
+    }>
+    defaultValue?: string | string[] | Date | null
+    helperText?: string
+    validation?: (value: any) => string | undefined
+    // For numeric fields
+    min?: number
+    max?: number
+    step?: number
+    // For IPAM fields
+    subnetAddress?: string
+    subnetCIDR?: number
+    supernetAddress?: string
+    supernetMask?: string | number
+    reservedVLANs?: number[]
+    maskType?: 'subnet' | 'supernet'
+    showSubnetInfo?: boolean
+    allowIncomplete?: boolean
+    autoInsertDots?: boolean
+    isGateway?: boolean
+    isRange?: boolean
+    isStartIP?: boolean
+    isEndIP?: boolean
+  }
 }
 
 export interface RowData {
@@ -72,6 +130,13 @@ export interface TableProps {
   onCellSave?: (rowId: string, field: string, value: string) => void
   onCellCancel?: () => void
   onEditingValueChange?: (value: string) => void
+  // Row creation props
+  isCreatingRow?: boolean
+  creationRowData?: Record<string, any>
+  onCreationFieldChange?: (field: string, value: any) => void
+  onCreateRowSave?: () => void
+  onCreateRowCancel?: () => void
+  creationRowPosition?: 'top' | 'bottom'
   // Column action props
   onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
   onManageColumns?: () => void
@@ -134,8 +199,19 @@ export interface DatagridProps {
   // For capturing column resize events
   onColumnResize?: (columnField: string, newWidth: number) => void
 
-  // Required callback for inline editing saves
-  onCellSave: (rowId: string, field: string, value: string) => void
+  // Optional callback for inline editing saves
+  onCellSave?: (
+    rowId: string,
+    field: string,
+    value: any
+  ) => void | Promise<void>
+
+  // Optional callback for inline row creation
+  onRowCreation?: (rowData: Record<string, any>) => void | Promise<void>
+
+  // Row creation configuration
+  allowRowCreation?: boolean
+  creationRowPosition?: 'top' | 'bottom'
 
   // Optional embedded filters that appear between toolbar and table
   filters?: DataGridFilter[]

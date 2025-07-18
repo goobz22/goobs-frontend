@@ -7,6 +7,7 @@ import CustomFooter from './Footer'
 import FilterSection from './FilterSection'
 import MetricSection from './MetricSection'
 import ManageColumnsSimple from './ManageColumnsSimple'
+import Snackbar from '../Snackbar'
 import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
@@ -29,6 +30,9 @@ function DataGrid({
   onSelectionChange,
   onColumnResize,
   onCellSave,
+  onRowCreation,
+  allowRowCreation = false,
+  creationRowPosition = 'top',
   showIdColumns = false,
   filters,
   metrics,
@@ -116,6 +120,19 @@ function DataGrid({
   } | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
 
+  // Row creation state
+  const [isCreatingRow, setIsCreatingRow] = useState(false)
+  const [creationRowData, setCreationRowData] = useState<Record<string, any>>(
+    {}
+  )
+  const [_creationRowErrors, setCreationRowErrors] = useState<
+    Record<string, string>
+  >({})
+
+  // Snackbar state for validation errors
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState('')
+
   const autoPageSize = useAutoRowHeight(containerRef, {
     headerHeight:
       (filters?.length ? 50 : 0) + (metrics?.length ? 120 : 0) + 150,
@@ -185,8 +202,10 @@ function DataGrid({
 
   const handleCellSave = useCallback(
     (rowId: string, field: string, value: string) => {
-      // Call the external onCellSave callback
-      onCellSave(rowId, field, value)
+      // Call the external onCellSave callback if it exists
+      if (onCellSave) {
+        onCellSave(rowId, field, value)
+      }
 
       // Update the local row data for immediate UI feedback
       setRows(prevRows =>
@@ -211,6 +230,121 @@ function DataGrid({
 
   const handleEditingValueChange = useCallback((value: string) => {
     setEditingValue(value)
+  }, [])
+
+  // Row creation handlers
+  const handleStartRowCreation = useCallback(() => {
+    if (!allowRowCreation) return
+
+    // Initialize creation row data with default values
+    const initialData: Record<string, any> = {}
+    visibleColumns.forEach(col => {
+      if (col.creationField?.defaultValue !== undefined) {
+        initialData[col.field] = col.creationField.defaultValue
+      } else {
+        initialData[col.field] = ''
+      }
+    })
+
+    setCreationRowData(initialData)
+    setCreationRowErrors({})
+    setIsCreatingRow(true)
+  }, [allowRowCreation, visibleColumns])
+
+  const handleCreationFieldChange = useCallback((field: string, value: any) => {
+    setCreationRowData(prev => ({
+      ...prev,
+      [field]: value,
+    }))
+
+    // Clear error for this field when value changes
+    setCreationRowErrors(prev => ({
+      ...prev,
+      [field]: '',
+    }))
+  }, [])
+
+  // Generate user-friendly validation error message
+  const generateValidationMessage = useCallback(
+    (errors: Record<string, string>) => {
+      const fieldNames = Object.keys(errors)
+
+      // Convert field names to header names for better UX
+      const headerNames = fieldNames.map(fieldName => {
+        const column = visibleColumns.find(col => col.field === fieldName)
+        return column?.headerName || fieldName
+      })
+
+      if (headerNames.length === 1) {
+        return `Please fill out the ${headerNames[0]} field.`
+      } else if (headerNames.length === 2) {
+        return `Please fill out the ${headerNames[0]} and ${headerNames[1]} fields.`
+      } else {
+        const lastField = headerNames.pop()
+        return `Please fill out the ${headerNames.join(', ')}, and ${lastField} fields.`
+      }
+    },
+    [visibleColumns]
+  )
+
+  const handleCreateRowSave = useCallback(() => {
+    if (!onRowCreation) return
+
+    // Validate required fields
+    const errors: Record<string, string> = {}
+    let hasErrors = false
+
+    visibleColumns.forEach(col => {
+      if (col.creationField?.required) {
+        const value = creationRowData[col.field]
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          errors[col.field] = `${col.headerName} is required`
+          hasErrors = true
+        }
+      }
+
+      // Run custom validation if provided
+      if (col.creationField?.validation) {
+        const validationError = col.creationField.validation(
+          creationRowData[col.field]
+        )
+        if (validationError) {
+          errors[col.field] = validationError
+          hasErrors = true
+        }
+      }
+    })
+
+    if (hasErrors) {
+      setCreationRowErrors(errors)
+      // Show snackbar with validation error message
+      const message = generateValidationMessage(errors)
+      setSnackbarMessage(message)
+      setSnackbarOpen(true)
+      return
+    }
+
+    // Handle async operation without returning promise
+    Promise.resolve(onRowCreation(creationRowData))
+      .then(() => {
+        setIsCreatingRow(false)
+        setCreationRowData({})
+        setCreationRowErrors({})
+      })
+      .catch((error: unknown) => {
+        console.error('Error creating row:', error)
+      })
+  }, [
+    onRowCreation,
+    creationRowData,
+    visibleColumns,
+    generateValidationMessage,
+  ])
+
+  const handleCreateRowCancel = useCallback(() => {
+    setIsCreatingRow(false)
+    setCreationRowData({})
+    setCreationRowErrors({})
   }, [])
 
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
@@ -403,9 +537,32 @@ function DataGrid({
       )}
 
       <div style={computedStyles.contentWrapper}>
+        {/* Metrics Section */}
+        {metrics && metrics.length > 0 && (
+          <MetricSection metrics={metrics} styles={styles} />
+        )}
+
+        {/* Filters Section */}
+        {filters && filters.length > 0 && (
+          <FilterSection filters={filters} styles={styles} />
+        )}
+
         {/* Toolbar - positioned inside DataGrid */}
         <CustomToolbar
-          buttons={buttons}
+          buttons={
+            allowRowCreation && !isCreatingRow
+              ? [
+                  ...(buttons || []),
+                  {
+                    text: 'Add Row',
+                    onClick: handleStartRowCreation,
+                    styles: {
+                      theme: styles?.theme || 'light',
+                    },
+                  },
+                ]
+              : buttons
+          }
           dropdowns={dropdowns?.[0] ? [dropdowns[0]] : undefined}
           searchbarProps={updatedSearchbarProps}
           rightCenterProps={
@@ -435,16 +592,6 @@ function DataGrid({
 
         <div style={computedStyles.sectionDivider} />
 
-        {/* Filters Section */}
-        {filters && filters.length > 0 && (
-          <FilterSection filters={filters} styles={styles} />
-        )}
-
-        {/* Metrics Section */}
-        {metrics && metrics.length > 0 && (
-          <MetricSection metrics={metrics} styles={styles} />
-        )}
-
         <Table
           columns={visibleColumns}
           rows={visibleRows}
@@ -461,6 +608,12 @@ function DataGrid({
           onCellSave={handleCellSave}
           onCellCancel={handleCellCancel}
           onEditingValueChange={handleEditingValueChange}
+          isCreatingRow={isCreatingRow}
+          creationRowData={creationRowData}
+          onCreationFieldChange={handleCreationFieldChange}
+          onCreateRowSave={handleCreateRowSave}
+          onCreateRowCancel={handleCreateRowCancel}
+          creationRowPosition={creationRowPosition}
           onColumnSort={handleColumnSort}
           onManageColumns={handleToggleManageColumns}
           draggedColumn={draggedColumn}
@@ -509,6 +662,18 @@ function DataGrid({
           styles={styles}
         />
       )}
+
+      {/* Validation Error Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+        severity="error"
+        autoHideDuration={6000}
+        styles={{
+          theme: styles?.theme || 'light',
+        }}
+      />
     </div>
   )
 }

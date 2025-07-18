@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react'
 import ColumnHeaderRow from './ColumnHeaderRow'
 import Rows from './Rows'
+import CreationRow from './CreationRow'
 import { useColumnResize } from '../utils/useColumnResize'
 import { getDataGridStyles } from '../../../theme'
 import { getDataGridTheme } from '../../../theme/datagrid'
@@ -63,6 +64,12 @@ function Table({
   onCellSave,
   onCellCancel,
   onEditingValueChange,
+  isCreatingRow = false,
+  creationRowData = {},
+  onCreationFieldChange,
+  onCreateRowSave,
+  onCreateRowCancel,
+  creationRowPosition = 'top',
   onColumnSort,
   onManageColumns,
   draggedColumn,
@@ -151,19 +158,41 @@ function Table({
               onColumnDragEnd={onColumnDragEnd}
             />
           </thead>
-          <Rows
-            rows={rows}
-            columns={updatedColumns}
-            selectedRowIds={selectedRowIds}
-            onRowClick={onRowClick}
-            styles={styles}
-            editingCell={editingCell}
-            editingValue={editingValue}
-            onCellClick={onCellClick}
-            onCellSave={onCellSave}
-            onCellCancel={onCellCancel}
-            onEditingValueChange={onEditingValueChange}
-          />
+          <tbody>
+            {isCreatingRow && creationRowPosition === 'top' && (
+              <CreationRow
+                columns={updatedColumns}
+                creationRowData={creationRowData}
+                onCreationFieldChange={onCreationFieldChange}
+                onCreateRowSave={onCreateRowSave}
+                onCreateRowCancel={onCreateRowCancel}
+                styles={styles}
+              />
+            )}
+            <Rows
+              rows={rows}
+              columns={updatedColumns}
+              selectedRowIds={selectedRowIds}
+              onRowClick={onRowClick}
+              styles={styles}
+              editingCell={editingCell}
+              editingValue={editingValue}
+              onCellClick={onCellClick}
+              onCellSave={onCellSave}
+              onCellCancel={onCellCancel}
+              onEditingValueChange={onEditingValueChange}
+            />
+            {isCreatingRow && creationRowPosition === 'bottom' && (
+              <CreationRow
+                columns={updatedColumns}
+                creationRowData={creationRowData}
+                onCreationFieldChange={onCreationFieldChange}
+                onCreateRowSave={onCreateRowSave}
+                onCreateRowCancel={onCreateRowCancel}
+                styles={styles}
+              />
+            )}
+          </tbody>
         </table>
       </div>
     </div>

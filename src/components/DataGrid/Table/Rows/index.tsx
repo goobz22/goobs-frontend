@@ -828,37 +828,35 @@ const Rows: React.FC<RowsProps> = ({
 
   if (!rows || rows.length === 0) {
     return (
-      <tbody>
-        <tr style={computedStyles.table.tableRow}>
-          <td
-            style={{
-              ...computedStyles.table.tableCell,
-              width: '48px',
-              minWidth: '48px',
-              maxWidth: '48px',
-              padding: '0',
-              border: 'none',
-            }}
-          ></td>
-          <td
-            colSpan={100}
-            style={{
-              ...computedStyles.table.tableCell,
-              textAlign: 'center',
-              padding: '3rem',
-              color: computedStyles.table.tableCell.color,
-              fontStyle: 'italic',
-              opacity: 0.6,
-            }}
-          >
-            No data to display.
-          </td>
-        </tr>
-      </tbody>
+      <tr style={computedStyles.table.tableRow}>
+        <td
+          style={{
+            ...computedStyles.table.tableCell,
+            width: '48px',
+            minWidth: '48px',
+            maxWidth: '48px',
+            padding: '0',
+            border: 'none',
+          }}
+        ></td>
+        <td
+          colSpan={100}
+          style={{
+            ...computedStyles.table.tableCell,
+            textAlign: 'center',
+            padding: '3rem',
+            color: computedStyles.table.tableCell.color,
+            fontStyle: 'italic',
+            opacity: 0.6,
+          }}
+        >
+          No data to display.
+        </td>
+      </tr>
     )
   }
   return (
-    <tbody>
+    <>
       {rows.map(row => {
         const rowId = getRowId(row)
         const isSelected = selectedRowIds.includes(rowId)
@@ -944,6 +942,55 @@ const Rows: React.FC<RowsProps> = ({
                       />
                     </div>
                   )
+                } else if (
+                  col.type === 'ipAddress' ||
+                  col.type === 'macAddress' ||
+                  col.type === 'vlan' ||
+                  col.type === 'cidr'
+                ) {
+                  // For IPAM fields that use string values, use specialized input handling
+                  cellContent = (
+                    <div style={{ width: '100%' }}>
+                      <input
+                        type="text"
+                        value={editingValue}
+                        onChange={e => onEditingValueChange?.(e.target.value)}
+                        onBlur={() =>
+                          onCellSave?.(rowId, col.field, editingValue || '')
+                        }
+                        onKeyPress={e => {
+                          if (e.key === 'Enter') {
+                            onCellSave?.(rowId, col.field, editingValue || '')
+                          } else if (e.key === 'Escape') {
+                            onCellCancel?.()
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          border: '1px solid #ccc',
+                          padding: '4px',
+                          fontSize: '14px',
+                          borderRadius: '4px',
+                          backgroundColor: isSacredTheme
+                            ? 'rgba(0, 0, 0, 0.8)'
+                            : 'white',
+                          color: isSacredTheme ? '#FFD700' : '#333',
+                        }}
+                        autoFocus
+                        placeholder={
+                          col.type === 'ipAddress'
+                            ? '192.168.1.1'
+                            : col.type === 'macAddress'
+                              ? 'AA:BB:CC:DD:EE:FF'
+                              : col.type === 'vlan'
+                                ? '1-4094'
+                                : col.type === 'cidr'
+                                  ? '/24'
+                                  : undefined
+                        }
+                      />
+                    </div>
+                  )
                 } else {
                   // Render text input for other columns
                   cellContent = (
@@ -999,6 +1046,83 @@ const Rows: React.FC<RowsProps> = ({
                     value,
                     isSacredTheme
                   ).element
+                } else if (col.type === 'ipAddress') {
+                  cellContent = (
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        color: isSacredTheme ? '#FFD700' : '#1F2937',
+                      }}
+                    >
+                      {safeString(value)}
+                    </span>
+                  )
+                } else if (col.type === 'macAddress') {
+                  cellContent = (
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        color: isSacredTheme ? '#FFD700' : '#1F2937',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {safeString(value)}
+                    </span>
+                  )
+                } else if (col.type === 'vlan') {
+                  cellContent = (
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        color: isSacredTheme ? '#10B981' : '#059669',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {value ? `VLAN ${safeString(value)}` : ''}
+                    </span>
+                  )
+                } else if (col.type === 'cidr') {
+                  cellContent = (
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        color: isSacredTheme ? '#3B82F6' : '#2563EB',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {value ? `/${safeString(value)}` : ''}
+                    </span>
+                  )
+                } else if (col.type === 'subnet' || col.type === 'supernet') {
+                  // For complex subnet/supernet objects, show formatted string
+                  try {
+                    const subnetValue = value as any
+                    if (
+                      subnetValue &&
+                      subnetValue.address &&
+                      subnetValue.mask
+                    ) {
+                      cellContent = (
+                        <span
+                          style={{
+                            fontFamily: 'monospace',
+                            fontSize: '14px',
+                            color: isSacredTheme ? '#FFD700' : '#1F2937',
+                          }}
+                        >
+                          {`${subnetValue.address}/${subnetValue.mask}`}
+                        </span>
+                      )
+                    } else {
+                      cellContent = safeString(value)
+                    }
+                  } catch {
+                    cellContent = safeString(value)
+                  }
                 } else {
                   cellContent = safeString(value)
                 }
@@ -1049,7 +1173,7 @@ const Rows: React.FC<RowsProps> = ({
           </tr>
         )
       })}
-    </tbody>
+    </>
   )
 }
 
