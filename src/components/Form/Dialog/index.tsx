@@ -148,16 +148,16 @@ function CustomDialog({
       typography: [
         {
           text: title,
-          variant: 'merrih4',
           styles: {
+            variant: 'merrih4',
             color: sacredtheme ? '#FFD700' : 'black',
             theme: sacredtheme ? 'sacred' : 'light',
           },
         },
         {
           text: description,
-          variant: 'merrih5',
           styles: {
+            variant: 'merrih5',
             color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
             theme: sacredtheme ? 'sacred' : 'light',
           },

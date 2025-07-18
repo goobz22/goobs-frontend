@@ -1,8 +1,5 @@
 // Combined theme file - typography, colors, and sacred glyphs
-import {
-  CustomTypographyVariant,
-  TypographyProps,
-} from '../components/Typography'
+import { TypographyProps } from '../components/Typography'
 
 // Import shared form field theme system
 export {
@@ -137,7 +134,7 @@ export {
 } from './shared'
 
 // Export Typography types for use throughout the application
-export type { CustomTypographyVariant, TypographyProps }
+export type { TypographyProps }
 
 // --------------------------------------------------------------------------
 // TYPOGRAPHY CONFIGURATIONS

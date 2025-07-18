@@ -46,111 +46,157 @@ export interface PopupProps {
   width?: number
   buttons?: ButtonProps[]
   sacredtheme?: boolean
+  theme?: 'sacred' | 'light' | 'dark'
 }
 
 const getStyles = (
   sacredtheme?: boolean,
   width: number = 450,
   dragPosition?: { x: number; y: number },
-  isDragging?: boolean
-) => ({
-  dialog: {
-    width: `${width}px`,
-    maxHeight: '90vh',
-    top: dragPosition?.y === 0 ? '50%' : `${dragPosition?.y}px`,
-    left: dragPosition?.x === 0 ? '50%' : `${dragPosition?.x}px`,
-    transform:
-      dragPosition?.x === 0 && dragPosition?.y === 0
-        ? 'translate(-50%, -50%)'
-        : 'none',
-    cursor: isDragging ? 'grabbing' : 'default',
-    backgroundColor: sacredtheme ? 'rgba(0,0,0,0.85)' : 'white',
-    backdropFilter: sacredtheme ? 'blur(16px)' : 'none',
-    border: sacredtheme ? '2px solid rgba(255, 215, 0, 0.5)' : 'none',
-    borderRadius: '0.75rem',
-    padding: '1.5rem',
-    animation: sacredtheme ? 'popup-glow-pulse 2s infinite alternate' : 'none',
-    boxShadow: sacredtheme
-      ? 'none'
-      : '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    color: 'rgba(255, 215, 0, 0.3)',
-    fontSize: '1.125rem',
-    zIndex: 10,
-    animation: 'popup-float 8s infinite alternate',
-  } as React.CSSProperties,
-  headerActions: {
-    position: 'absolute',
-    right: '0.5rem',
-    top: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.125rem',
-    zIndex: 20,
-  } as React.CSSProperties,
-  actionButton: {
-    padding: '0.25rem',
-    borderRadius: '9999px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    color: sacredtheme ? '#FFD700' : '#6B7280',
-    animation: sacredtheme
-      ? 'popup-close-button-glow 1.5s infinite alternate'
-      : 'none',
-  } as React.CSSProperties,
-  actionButtonHover: {
-    backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : '#F3F4F6',
-    transform: 'scale(1.1)',
-  } as React.CSSProperties,
-  title: {
-    textAlign: 'center',
-    marginBottom: '0.25rem',
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      textShadow: '0 0 10px rgba(255,215,0,0.5)',
-      letterSpacing: '0.1em',
-    }),
-  } as React.CSSProperties,
-  description: {
-    textAlign: 'center',
-    marginBottom: '1rem',
-    ...(sacredtheme && {
-      fontFamily: 'Crimson Text, serif',
-      letterSpacing: '0.05em',
-    }),
-  } as React.CSSProperties,
-  contentContainer: {
-    flex: 1,
-    overflow: 'auto',
-    minHeight: 0,
-    paddingRight: '0.625rem',
-  } as React.CSSProperties,
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: '0.5rem',
-    marginTop: '1rem',
-    ...(sacredtheme && {
-      borderTop: '1px solid rgba(255, 215, 0, 0.2)',
-      paddingTop: '1rem',
-    }),
-  } as React.CSSProperties,
-  footerGlyphs: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.125rem',
-    marginTop: '0.5rem',
-    opacity: 0.5,
-  } as React.CSSProperties,
-  footerGlyph: {
-    color: '#FFD700',
-    fontSize: '0.75rem',
-    animation: 'popup-float 3s infinite alternate',
-  } as React.CSSProperties,
-})
+  isDragging?: boolean,
+  theme?: 'sacred' | 'light' | 'dark'
+) => {
+  // Determine the actual theme, with backward compatibility
+  const actualTheme = theme || (sacredtheme ? 'sacred' : 'light')
+
+  // Theme-specific colors for action buttons
+  const getActionButtonColors = () => {
+    switch (actualTheme) {
+      case 'sacred':
+        return {
+          color: '#FFD700',
+          hoverBg: 'rgba(255, 215, 0, 0.1)',
+          animation: 'popup-close-button-glow 1.5s infinite alternate',
+        }
+      case 'dark':
+        return {
+          color: '#D1D5DB',
+          hoverBg: 'rgba(75, 85, 99, 0.3)',
+          animation: 'none',
+        }
+      case 'light':
+      default:
+        return {
+          color: '#6B7280',
+          hoverBg: '#F3F4F6',
+          animation: 'none',
+        }
+    }
+  }
+
+  const actionButtonColors = getActionButtonColors()
+
+  return {
+    dialog: {
+      width: `${width}px`,
+      maxHeight: '90vh',
+      top: dragPosition?.y === 0 ? '50%' : `${dragPosition?.y}px`,
+      left: dragPosition?.x === 0 ? '50%' : `${dragPosition?.x}px`,
+      transform:
+        dragPosition?.x === 0 && dragPosition?.y === 0
+          ? 'translate(-50%, -50%)'
+          : 'none',
+      cursor: isDragging ? 'grabbing' : 'default',
+      backgroundColor:
+        actualTheme === 'sacred'
+          ? 'rgba(0,0,0,0.85)'
+          : actualTheme === 'dark'
+            ? '#1F2937'
+            : 'white',
+      backdropFilter: actualTheme === 'sacred' ? 'blur(16px)' : 'none',
+      border:
+        actualTheme === 'sacred'
+          ? '2px solid rgba(255, 215, 0, 0.5)'
+          : actualTheme === 'dark'
+            ? '1px solid #374151'
+            : 'none',
+      borderRadius: '0.75rem',
+      padding: '1.5rem',
+      animation:
+        actualTheme === 'sacred'
+          ? 'popup-glow-pulse 2s infinite alternate'
+          : 'none',
+      boxShadow:
+        actualTheme === 'sacred'
+          ? 'none'
+          : actualTheme === 'dark'
+            ? '0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.15)'
+            : '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+    } as React.CSSProperties,
+    glyph: {
+      position: 'absolute',
+      color: 'rgba(255, 215, 0, 0.3)',
+      fontSize: '1.125rem',
+      zIndex: 10,
+      animation: 'popup-float 8s infinite alternate',
+    } as React.CSSProperties,
+    headerActions: {
+      position: 'absolute',
+      right: '0.5rem',
+      top: '0.5rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.125rem',
+      zIndex: 20,
+    } as React.CSSProperties,
+    actionButton: {
+      padding: '0.25rem',
+      borderRadius: '9999px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      color: actionButtonColors.color,
+      animation: actionButtonColors.animation,
+      border: 'none',
+      backgroundColor: 'transparent',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    } as React.CSSProperties,
+    actionButtonHover: {
+      backgroundColor: actionButtonColors.hoverBg,
+      transform: 'scale(1.1)',
+    } as React.CSSProperties,
+    contentContainer: {
+      flex: 1,
+      overflow: 'auto',
+      minHeight: 0,
+      padding: '1rem', // Add padding to all sides for better spacing
+      paddingRight: '1.5rem', // Extra padding on right for scrollbar
+      borderRadius: '0.5rem', // Match the popup's rounded corners
+      ...(actualTheme === 'sacred' && {
+        // Add subtle border for sacred theme to define the scroll area
+        border: '1px solid rgba(255, 215, 0, 0.1)',
+      }),
+    } as React.CSSProperties,
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: '0.5rem',
+      marginTop: '1rem',
+      ...(actualTheme === 'sacred' && {
+        borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+        paddingTop: '1rem',
+      }),
+      ...(actualTheme === 'dark' && {
+        borderTop: '1px solid #374151',
+        paddingTop: '1rem',
+      }),
+    } as React.CSSProperties,
+    footerGlyphs: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '0.125rem',
+      marginTop: '0.5rem',
+      opacity: 0.5,
+    } as React.CSSProperties,
+    footerGlyph: {
+      color: '#FFD700',
+      fontSize: '0.75rem',
+      animation: 'popup-float 3s infinite alternate',
+    } as React.CSSProperties,
+  }
+}
 
 function Popup({
   open,
@@ -163,13 +209,21 @@ function Popup({
   width = 450,
   buttons,
   sacredtheme = true,
+  theme,
 }: PopupProps) {
   const [isOpen, setIsOpen] = useState(open)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
-  const styles = getStyles(sacredtheme, width, dragPosition, isDragging)
+  const actualTheme = theme || (sacredtheme ? 'sacred' : 'light')
+  const styles = getStyles(
+    sacredtheme,
+    width,
+    dragPosition,
+    isDragging,
+    actualTheme
+  )
 
   useEffect(() => {
     setIsOpen(open)
@@ -263,10 +317,10 @@ function Popup({
       open={isOpen}
       onClose={handleClose}
       styles={{
-        theme: sacredtheme ? 'sacred' : 'light',
+        theme: actualTheme,
       }}
     >
-      {sacredtheme && (
+      {actualTheme === 'sacred' && (
         <>
           <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
             {SACRED_GLYPHS[10]}
@@ -314,8 +368,11 @@ function Popup({
         <Typography
           text={title}
           styles={{
-            color: sacredtheme ? 'gold' : 'black',
-            theme: sacredtheme ? 'sacred' : 'light',
+            variant: actualTheme === 'sacred' ? 'cinzelh4' : 'merrih4',
+            theme: actualTheme,
+            textAlign: 'center',
+            padding: '0 1rem',
+            marginBottom: '0.25rem',
           }}
         />
       )}
@@ -323,15 +380,24 @@ function Popup({
         <Typography
           text={description}
           styles={{
-            color: sacredtheme ? 'white' : 'black',
-            theme: sacredtheme ? 'sacred' : 'light',
+            variant:
+              actualTheme === 'sacred' ? 'cinzelparagraph' : 'merriparagraph',
+            theme: actualTheme,
+            textAlign: 'center',
+            padding: '0 1.5rem',
+            marginBottom: '1rem',
           }}
         />
       )}
 
       <div style={styles.contentContainer}>
         {content ||
-          (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
+          (grids && (
+            <ContentSection
+              grids={grids}
+              sacredtheme={actualTheme === 'sacred'}
+            />
+          ))}
       </div>
 
       {buttons && buttons.length > 0 && (
@@ -341,7 +407,7 @@ function Popup({
               key={index}
               {...buttonProps}
               styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
+                theme: actualTheme,
                 ...buttonProps.styles,
               }}
             />
@@ -349,7 +415,7 @@ function Popup({
         </div>
       )}
 
-      {sacredtheme && (
+      {actualTheme === 'sacred' && (
         <div style={styles.footerGlyphs}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <Typography key={index}>{glyph}</Typography>

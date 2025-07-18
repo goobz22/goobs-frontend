@@ -78,6 +78,86 @@ export interface TypographyTheme {
       textShadow?: string
       animation?: string
     }
+    merrihelperheader: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh1: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh2: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh3: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh4: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh5: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelh6: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelparagraph: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelhelperfooter: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
+    cinzelhelperheader: {
+      fontSize: string
+      fontWeight: string | number
+      fontFamily: string
+      color: string
+      textShadow?: string
+      animation?: string
+    }
   }
   alignment: {
     left: {
@@ -113,6 +193,16 @@ export interface TypographyStyles {
     | 'merrih6'
     | 'merriparagraph'
     | 'merrihelperfooter'
+    | 'merrihelperheader'
+    | 'cinzelh1'
+    | 'cinzelh2'
+    | 'cinzelh3'
+    | 'cinzelh4'
+    | 'cinzelh5'
+    | 'cinzelh6'
+    | 'cinzelparagraph'
+    | 'cinzelhelperfooter'
+    | 'cinzelhelperheader'
 
   // Text styling
   color?: string
@@ -223,6 +313,66 @@ export const typographyThemes: Record<
         fontFamily: 'Merriweather, serif',
         color: 'rgb(107, 114, 128)',
       },
+      merrihelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Merriweather, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh1: {
+        fontSize: '2.25rem',
+        fontWeight: '700',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh2: {
+        fontSize: '1.875rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh3: {
+        fontSize: '1.5rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh4: {
+        fontSize: '1.25rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh5: {
+        fontSize: '1.125rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelh6: {
+        fontSize: '1rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
+      cinzelparagraph: {
+        fontSize: '1rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(55, 65, 81)',
+      },
+      cinzelhelperfooter: {
+        fontSize: '0.875rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(107, 114, 128)',
+      },
+      cinzelhelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(17, 24, 39)',
+      },
     },
     alignment: {
       left: {
@@ -300,6 +450,66 @@ export const typographyThemes: Record<
         fontWeight: '400',
         fontFamily: 'Merriweather, serif',
         color: 'rgb(156, 163, 175)',
+      },
+      merrihelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Merriweather, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh1: {
+        fontSize: '2.25rem',
+        fontWeight: '700',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh2: {
+        fontSize: '1.875rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh3: {
+        fontSize: '1.5rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh4: {
+        fontSize: '1.25rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh5: {
+        fontSize: '1.125rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelh6: {
+        fontSize: '1rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
+      },
+      cinzelparagraph: {
+        fontSize: '1rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(209, 213, 219)',
+      },
+      cinzelhelperfooter: {
+        fontSize: '0.875rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(156, 163, 175)',
+      },
+      cinzelhelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgb(243, 244, 246)',
       },
     },
     alignment: {
@@ -398,6 +608,88 @@ export const typographyThemes: Record<
         fontFamily: 'Cinzel, serif',
         color: 'rgba(245, 245, 220, 0.7)',
         textShadow: '0 0 3px rgba(255, 215, 0, 0.1)',
+      },
+      merrihelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
+      },
+      cinzelh1: {
+        fontSize: '2.5rem',
+        fontWeight: '700',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelh2: {
+        fontSize: '2rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelh3: {
+        fontSize: '1.75rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 12px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.2)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelh4: {
+        fontSize: '1.5rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelh5: {
+        fontSize: '1.25rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 8px rgba(255, 215, 0, 0.4), 0 0 16px rgba(255, 215, 0, 0.2)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelh6: {
+        fontSize: '1.125rem',
+        fontWeight: '600',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow:
+          '0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.1)',
+        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
+      },
+      cinzelparagraph: {
+        fontSize: '1rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgba(245, 245, 220, 0.9)',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.2)',
+      },
+      cinzelhelperfooter: {
+        fontSize: '0.875rem',
+        fontWeight: '400',
+        fontFamily: 'Cinzel, serif',
+        color: 'rgba(245, 245, 220, 0.7)',
+        textShadow: '0 0 3px rgba(255, 215, 0, 0.1)',
+      },
+      cinzelhelperheader: {
+        fontSize: '1rem',
+        fontWeight: '500',
+        fontFamily: 'Cinzel, serif',
+        color: '#FFD700',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.3)',
       },
     },
     alignment: {

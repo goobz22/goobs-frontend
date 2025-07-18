@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Alert, { AlertProps } from '../Alert'
+import { AlertStyles } from '../../theme'
 
 export interface SnackbarProps {
   open: boolean
@@ -9,6 +10,7 @@ export interface SnackbarProps {
   message: string
   severity: AlertProps['severity']
   autoHideDuration?: number
+  styles?: AlertStyles
 }
 
 const Snackbar: React.FC<SnackbarProps> = ({
@@ -17,6 +19,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
   message,
   severity,
   autoHideDuration = 6000,
+  styles,
 }) => {
   const [isOpen, setIsOpen] = useState(open)
 
@@ -49,7 +52,12 @@ const Snackbar: React.FC<SnackbarProps> = ({
         zIndex: 1400,
       }}
     >
-      <Alert message={message} severity={severity} onClose={onClose} />
+      <Alert
+        message={message}
+        severity={severity}
+        onClose={onClose}
+        styles={styles}
+      />
     </div>
   )
 }

@@ -409,7 +409,7 @@ function Nav({
   const RegularTitle = () => (
     <div style={themeStyles.titleContainer}>
       <Link href={titleUrl || '/'} style={themeStyles.titleLink}>
-        <Typography variant="merrih4" styles={{ color: 'black' }}>
+        <Typography styles={{ theme: 'sacred', variant: 'cinzelh4' }}>
           {verticalNavTitle}
         </Typography>
       </Link>
