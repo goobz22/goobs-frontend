@@ -242,10 +242,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
         </button>
 
         <div style={computedStyles.header}>
-          <Typography
-            variant="merrih5"
-            styles={{ color: isSacredTheme ? '#FFD700' : undefined }}
-          >
+          <Typography styles={{ theme: 'sacred', variant: 'cinzelh5' }}>
             Create Task
           </Typography>
 

@@ -320,10 +320,7 @@ const AdministratorAddTaskCompanyProvided: React.FC<
         </button>
 
         <div style={styles.header}>
-          <Typography
-            variant="merrih5"
-            styles={{ color: sacredtheme ? '#FFD700' : undefined }}
-          >
+          <Typography styles={{ theme: 'sacred', variant: 'cinzelh5' }}>
             Create Task
           </Typography>
 

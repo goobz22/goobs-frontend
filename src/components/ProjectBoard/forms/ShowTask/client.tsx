@@ -580,16 +580,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               />
             ) : (
               <>
-                <Typography
-                  variant="merrih4"
-                  styles={{ theme: styles?.theme || 'light' }}
-                >
+                <Typography styles={{ theme: 'sacred', variant: 'cinzelh4' }}>
                   {formData.taskTitle}
                 </Typography>
                 <Typography
-                  variant="merrih5"
                   text={`created by ${createdBy}`}
-                  styles={{ theme: styles?.theme || 'light' }}
+                  styles={{ theme: 'sacred', variant: 'cinzelh5' }}
                 />
               </>
             )}
@@ -658,18 +654,18 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               ) : (
                 <>
                   <Typography
-                    variant="merrih5"
                     text="Task Description"
                     styles={{
-                      theme: styles?.theme || 'light',
+                      theme: 'sacred',
+                      variant: 'cinzelh5',
                       margin: '5px 0',
                     }}
                   />
                   <Typography
-                    variant="merrih6"
                     text={formData.description}
                     styles={{
-                      theme: styles?.theme || 'light',
+                      theme: 'sacred',
+                      variant: 'cinzelh6',
                       margin: '0 0 5px 0',
                     }}
                   />
@@ -829,10 +825,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         </div>
 
                         <Typography
-                          variant="merriparagraph"
                           text={displayedText}
                           styles={{
-                            theme: styles?.theme || 'light',
+                            theme: 'sacred',
+                            variant: 'cinzelparagraph',
                             margin: '0',
                             padding: '0',
                             marginRight: '30px',
@@ -954,9 +950,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               <div key={label} style={computedStyles.sidebarSection}>
                 {!isEditing && (
                   <Typography
-                    variant="merriparagraph"
                     text={label}
-                    styles={{ theme: styles?.theme || 'light' }}
+                    styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
                   />
                 )}
                 {isEditing ? (
@@ -991,9 +986,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  variant="merriparagraph"
                   text="Topics"
-                  styles={{ theme: styles?.theme || 'light' }}
+                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
                 />
               )}
               {isEditing ? (
@@ -1027,9 +1021,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  variant="merriparagraph"
                   text="Knowledgebase Articles"
-                  styles={{ theme: styles?.theme || 'light' }}
+                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
                 />
               )}
               {isEditing ? (
@@ -1068,9 +1061,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <div style={computedStyles.sidebarSection}>
               {!isEditing && (
                 <Typography
-                  variant="merriparagraph"
                   text="Next Action Date"
-                  styles={{ theme: styles?.theme || 'light' }}
+                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
                 />
               )}
               {isEditing ? (
@@ -1102,9 +1094,8 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 </div>
               ) : formData.nextActionDate ? (
                 <Typography
-                  variant="merriparagraph"
                   text={formData.nextActionDate}
-                  styles={{ theme: styles?.theme || 'light' }}
+                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
                 />
               ) : null}
             </div>
