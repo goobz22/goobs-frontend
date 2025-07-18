@@ -10,16 +10,9 @@ const useTypography = (props: {
     typographyItem: TypographyProps,
     index: number
   ): React.ReactElement => {
-    const { text, variant, ...restProps } = typographyItem
+    const { text, ...restProps } = typographyItem
 
-    return (
-      <Typography
-        key={`typography-${index}`}
-        text={text}
-        variant={variant}
-        {...restProps}
-      />
-    )
+    return <Typography key={`typography-${index}`} text={text} {...restProps} />
   }
 
   if (Array.isArray(props.typography)) {

@@ -16,7 +16,7 @@ const useLink = (props: {
     linkItem: LinkProps,
     index: number
   ): React.ReactElement => {
-    const { link, text, variant, ...restProps } = linkItem
+    const { link, text, styles, ...restProps } = linkItem
 
     if (!link) {
       throw new Error('Link property is required')
@@ -24,7 +24,17 @@ const useLink = (props: {
 
     return (
       <Link key={`link-${index}`} href={link} passHref>
-        <Typography text={text} variant={variant} {...restProps} />
+        <Typography
+          text={text}
+          styles={{
+            theme: 'sacred',
+            variant: styles?.variant?.startsWith('cinzel')
+              ? styles.variant
+              : 'cinzelparagraph',
+            ...styles,
+          }}
+          {...restProps}
+        />
       </Link>
     )
   }
