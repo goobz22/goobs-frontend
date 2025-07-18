@@ -1,8 +1,5 @@
 import CustomButton, { ButtonProps, ButtonGroup } from './components/Button'
-import Typography, {
-  CustomTypographyVariant,
-  TypographyProps,
-} from './components/Typography'
+import Typography, { TypographyProps } from './components/Typography'
 import ConfirmationCodeInput, {
   ConfirmationCodeInputsProps,
 } from './components/ConfirmationCodeInput'
@@ -12,6 +9,7 @@ import RadioGroup, {
 } from './components/RadioGroup'
 import Popup, { PopupProps } from './components/Form/Popup'
 import CustomDialog, { CustomDialogProps } from './components/Form/Dialog'
+import Dialog, { DialogProps } from './components/Dialog'
 import ContentSection, { ContentSectionProps } from './components/Content'
 import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
 import Nav, { NavProps, NavItem } from './components/Nav' // <-- Vertical-only Nav
@@ -228,6 +226,7 @@ export { Searchbar }
 export { TextField }
 export { USDField }
 export { CustomDialog }
+export { Dialog }
 export { MACAddressField }
 export { VLANField }
 // Add FormDataGrid to named exports
@@ -280,6 +279,7 @@ export { CreditCardNumber }
 // 1) Form DataGrid
 export type { FormDataGridProps }
 export type { CustomDialogProps }
+export type { DialogProps }
 
 // 2) All DataGrid Types
 export type { DatagridProps }
@@ -293,7 +293,7 @@ export type { DropdownProps }
 // "Local" type exports for existing components
 export type { ButtonProps }
 export type { ComplexTextEditorProps }
-export type { CustomTypographyVariant, TypographyProps }
+export type { TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
 export type { PopupProps }
