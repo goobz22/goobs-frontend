@@ -234,7 +234,12 @@ export function getPaperHoverStyles(
   const theme = customStyles?.theme || 'light'
   const baseTheme = getPaperTheme(theme)
 
-  if (!baseTheme.containerHover && !customStyles?.hoverTransform && !customStyles?.hoverBoxShadow && !customStyles?.hoverBorderColor) {
+  if (
+    !baseTheme.containerHover &&
+    !customStyles?.hoverTransform &&
+    !customStyles?.hoverBoxShadow &&
+    !customStyles?.hoverBorderColor
+  ) {
     return undefined
   }
 
