@@ -37,47 +37,42 @@ interface PlayArrowIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  icon: {
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
+// Sacred theme styles
 const sacredStyles = {
   icon: {
-    transition: 'all 0.4s ease',
-    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
     color: '#FFD700',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.6)',
+    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
     transition: 'all 0.3s ease',
+  },
+  iconHover: {
+    color: '#FFED4A',
+    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
+    transform: 'scale(1.1)',
+  },
+  glyph: {
+    position: 'absolute' as const,
+    fontSize: '10px',
+    color: '#FFD700',
     opacity: 0,
-    pointerEvents: 'none',
+    transition: 'opacity 0.3s ease',
     animation: 'sacredGlyphRotate 20s linear infinite',
-  } as React.CSSProperties,
-
+    textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
+  },
   glyphVisible: {
     opacity: 1,
-  } as React.CSSProperties,
+  },
+}
+
+// Premium theme styles (fallback)
+const premiumStyles = {
+  icon: {
+    color: '#333',
+    transition: 'all 0.3s ease',
+  },
+  iconHover: {
+    color: '#555',
+    transform: 'scale(1.05)',
+  },
 }
 
 const PlayArrowIcon: React.FC<PlayArrowIconProps> = ({
@@ -130,7 +125,7 @@ const PlayArrowIcon: React.FC<PlayArrowIconProps> = ({
         style={iconStyle}
         {...props}
       >
-        <path d="M320-200v-560l440 280-440 280Z" />
+        <path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z" />
       </svg>
       {sacredtheme && (
         <div

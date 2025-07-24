@@ -1,0 +1,215 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import {
+  getBreadcrumbStyles,
+  BreadcrumbStyles,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+// --------------------------------------------------------------------------
+// PROPS INTERFACE
+// --------------------------------------------------------------------------
+
+export interface BreadcrumbItem {
+  /** The label text to display */
+  label: string
+  /** Optional href for the link */
+  href?: string
+  /** Whether this is the active/current item */
+  isActive?: boolean
+  /** Click handler for custom navigation */
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
+}
+
+export interface BreadcrumbProps {
+  /** Array of breadcrumb items */
+  items: BreadcrumbItem[]
+  /** Custom separator element */
+  separator?: React.ReactNode
+  /** Maximum number of items to show */
+  maxItems?: number
+  /** Comprehensive styling options */
+  styles?: BreadcrumbStyles
+  /** ARIA label for accessibility */
+  'aria-label'?: string
+}
+
+// --------------------------------------------------------------------------
+// SACRED THEME COMPONENTS
+// --------------------------------------------------------------------------
+
+const SacredGlyph: React.FC<{
+  isHovered: boolean
+}> = ({ isHovered }) => {
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    if (!isHydrated) {
+      setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
+      setIsHydrated(true)
+    }
+  }, [isHydrated])
+
+  useEffect(() => {
+    if (isHovered && isHydrated) {
+      const timer = setTimeout(() => {
+        setGlyph(
+          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+        )
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isHovered, isHydrated])
+
+  const glyphStyles = {
+    position: 'absolute' as const,
+    top: '-8px',
+    right: '-8px',
+    fontSize: '12px',
+    color: 'rgba(255, 215, 0, 0.3)',
+    transition: 'all 0.3s ease',
+    opacity: isHovered ? 0.6 : 0,
+    pointerEvents: 'none' as const,
+    animation: isHovered ? 'sacredGlyphRotate 20s linear infinite' : 'none',
+  }
+
+  return <div style={glyphStyles}>{glyph}</div>
+}
+
+// --------------------------------------------------------------------------
+// MAIN BREADCRUMB COMPONENT
+// --------------------------------------------------------------------------
+
+const Breadcrumb: React.FC<BreadcrumbProps> = ({
+  items,
+  separator,
+  maxItems,
+  styles,
+  'aria-label': ariaLabel = 'breadcrumb',
+}) => {
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null)
+
+  const computedStyles = getBreadcrumbStyles(styles)
+  const isSacredTheme = styles?.theme === 'sacred'
+
+  // Handle max items display
+  const displayItems =
+    maxItems && items.length > maxItems
+      ? [
+          ...items.slice(0, 1),
+          { label: '...', isEllipsis: true },
+          ...items.slice(-(maxItems - 2)),
+        ]
+      : items
+
+  const defaultSeparator = separator || '/'
+
+  const handleItemClick = (
+    item: BreadcrumbItem,
+    event: React.MouseEvent<HTMLElement>
+  ) => {
+    if (item.onClick) {
+      event.preventDefault()
+      item.onClick(event)
+    } else if (item.href && !item.isActive) {
+      // Allow normal navigation
+      return
+    } else if (!item.href) {
+      event.preventDefault()
+    }
+  }
+
+  const renderItem = (
+    item: BreadcrumbItem & { isEllipsis?: boolean },
+    index: number
+  ) => {
+    const isLast = index === displayItems.length - 1
+    const isHovered = hoveredItem === index
+
+    if ((item as any).isEllipsis) {
+      return (
+        <span key={index} style={computedStyles.ellipsis}>
+          {item.label}
+        </span>
+      )
+    }
+
+    const itemStyles = {
+      ...computedStyles.item,
+      ...(item.isActive && computedStyles.activeItem),
+      ...(isHovered && !item.isActive && computedStyles.itemHover),
+    }
+
+    const content = (
+      <span
+        style={{
+          position: 'relative',
+          display: 'inline-block',
+        }}
+        onMouseEnter={() => setHoveredItem(index)}
+        onMouseLeave={() => setHoveredItem(null)}
+      >
+        {item.label}
+        {isSacredTheme && !item.isActive && (
+          <SacredGlyph isHovered={isHovered} />
+        )}
+      </span>
+    )
+
+    if (item.href && !item.isActive) {
+      return (
+        <a
+          key={index}
+          href={item.href}
+          style={itemStyles}
+          onClick={event => handleItemClick(item, event)}
+        >
+          {content}
+        </a>
+      )
+    }
+
+    return (
+      <span
+        key={index}
+        style={itemStyles}
+        onClick={event => handleItemClick(item, event)}
+        role={item.onClick ? 'button' : undefined}
+        tabIndex={item.onClick ? 0 : undefined}
+        onKeyPress={event => {
+          if (item.onClick && (event.key === 'Enter' || event.key === ' ')) {
+            item.onClick(event as any)
+          }
+        }}
+      >
+        {content}
+      </span>
+    )
+  }
+
+  const renderSeparator = (index: number) => {
+    return (
+      <span key={`separator-${index}`} style={computedStyles.separator}>
+        {defaultSeparator}
+      </span>
+    )
+  }
+
+  return (
+    <nav aria-label={ariaLabel} style={computedStyles.container}>
+      <ol style={computedStyles.list}>
+        {displayItems.map((item, index) => (
+          <li key={index} style={computedStyles.listItem}>
+            {renderItem(item, index)}
+            {index < displayItems.length - 1 && renderSeparator(index)}
+          </li>
+        ))}
+      </ol>
+      {isSacredTheme && <div style={computedStyles.sacred?.shimmer} />}
+    </nav>
+  )
+}
+
+export default Breadcrumb

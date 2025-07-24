@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { DataGridStyles } from '../../../theme'
 
 export interface MetricCardProps {
@@ -138,9 +138,19 @@ export default function MetricCard({
   styles,
 }: MetricCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [selectedGlyph, setSelectedGlyph] = useState(glyph || SACRED_GLYPHS[0])
+  const [isHydrated, setIsHydrated] = useState(false)
   const isSacredTheme = styles?.theme === 'sacred'
-  const selectedGlyph =
-    glyph || SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+
+  // Set random glyph only on client side after hydration if no glyph prop provided
+  useEffect(() => {
+    if (!isHydrated && !glyph) {
+      setSelectedGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+      setIsHydrated(true)
+    }
+  }, [isHydrated, glyph])
 
   const getColorValue = (colorName: string = 'primary') => {
     if (isSacredTheme) {

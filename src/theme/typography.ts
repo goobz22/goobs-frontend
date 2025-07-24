@@ -785,9 +785,25 @@ export const getTypographyStyles = (styles?: TypographyStyles) => {
     transition: styles?.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
       : themeConfig.base.transition,
-    // Animations
-    animation: styles?.animation,
-    animationDelay: styles?.animationDelay,
+    // Animations - avoid mixing shorthand and longhand properties
+    ...(styles?.animationDelay
+      ? {
+          // If animationDelay is provided, use longhand properties only
+          animationName: variantStyle.animation ? 'sacredTextGlow' : undefined,
+          animationDuration: variantStyle.animation ? '3s' : undefined,
+          animationTimingFunction: variantStyle.animation
+            ? 'ease-in-out'
+            : undefined,
+          animationIterationCount: variantStyle.animation
+            ? 'infinite'
+            : undefined,
+          animationDirection: variantStyle.animation ? 'alternate' : undefined,
+          animationDelay: styles.animationDelay,
+        }
+      : {
+          // If no animationDelay, use shorthand or custom animation
+          animation: styles?.animation || variantStyle.animation,
+        }),
   }
 
   return {

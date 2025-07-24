@@ -311,6 +311,18 @@ export const getButtonStyles = (
   const flexDirection: React.CSSProperties['flexDirection'] =
     iconLocation === 'above' ? 'column' : 'row'
 
+  // Parse the border shorthand to avoid conflicts with individual borderColor
+  const parseBorder = (border: string) => {
+    // Expecting format like "1px solid #color" or "2px solid rgba(255,215,0,0.4)"
+    const parts = border.split(' ')
+    return {
+      borderWidth: parts[0] || '1px',
+      borderStyle: parts[1] || 'solid',
+      borderColor: parts.slice(2).join(' ') || 'transparent',
+    }
+  }
+  const borderParts = parseBorder(themeConfig.container.border)
+
   const containerStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -318,7 +330,9 @@ export const getButtonStyles = (
     overflow: 'hidden',
     transition: themeConfig.transition,
     borderRadius: themeConfig.container.borderRadius,
-    border: themeConfig.container.border,
+    borderWidth: borderParts.borderWidth,
+    borderStyle: borderParts.borderStyle,
+    borderColor: borderParts.borderColor,
     backgroundColor: themeConfig.container.background,
     backdropFilter: themeConfig.container.backdropFilter,
     boxShadow: themeConfig.container.boxShadow,
@@ -376,7 +390,9 @@ export const getButtonStyles = (
       }),
     // Apply outline override
     ...(styles?.outline === false && {
-      border: 'none',
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
       boxShadow: 'none',
     }),
   }

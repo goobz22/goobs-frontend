@@ -137,16 +137,27 @@ const SacredGlyphs: React.FC<{
   isDisabled: boolean
   isIconOnly: boolean
 }> = ({ isHovered, isDisabled, isIconOnly }) => {
-  const [leftGlyph, setLeftGlyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
-  const [rightGlyph, setRightGlyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  // Initialize with consistent values to prevent hydration mismatch
+  const [leftGlyph, setLeftGlyph] = useState(SACRED_GLYPHS[0])
+  const [rightGlyph, setRightGlyph] = useState(SACRED_GLYPHS[1])
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Set random glyphs only on client side after hydration
+  useEffect(() => {
+    if (!isHydrated) {
+      setLeftGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+      setRightGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+      setIsHydrated(true)
+    }
+  }, [isHydrated])
 
   // Change sacred glyphs on hover for a dynamic effect
   useEffect(() => {
-    if (isHovered) {
+    if (isHovered && isHydrated) {
       const timer = setTimeout(() => {
         setLeftGlyph(
           SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
@@ -157,7 +168,7 @@ const SacredGlyphs: React.FC<{
       }, 300) // Debounce to avoid excessive changes
       return () => clearTimeout(timer)
     }
-  }, [isHovered])
+  }, [isHovered, isHydrated])
 
   const glyphStyles = useMemo(
     () => ({

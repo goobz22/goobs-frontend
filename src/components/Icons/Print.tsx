@@ -37,47 +37,42 @@ interface PrintIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
-// Premium theme styles (when sacredtheme=false)
+// Premium theme styles
 const premiumStyles = {
   icon: {
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
-  } as React.CSSProperties,
-
+    color: '#4A5568',
+    transition: 'all 0.3s ease',
+  },
   iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-  } as React.CSSProperties,
+    color: '#2D3748',
+    transform: 'scale(1.1)',
+  },
 }
 
-// Sacred theme styles (when sacredtheme=true)
+// Sacred theme styles
 const sacredStyles = {
   icon: {
-    transition: 'all 0.4s ease',
-    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
     color: '#FFD700',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.6)',
+    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.4))',
     transition: 'all 0.3s ease',
+  },
+  iconHover: {
+    color: '#FFF8DC',
+    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
+    transform: 'scale(1.1)',
+  },
+  glyph: {
+    position: 'absolute' as const,
+    color: 'rgba(255, 215, 0, 0.6)',
+    fontSize: '8px',
+    fontFamily: '"Noto Sans Egyptian Hieroglyphs", serif',
+    animation: 'sacredGlyphRotate 3s linear infinite',
     opacity: 0,
-    pointerEvents: 'none',
-    animation: 'sacredGlyphRotate 20s linear infinite',
-  } as React.CSSProperties,
-
+    transition: 'opacity 0.3s ease',
+  },
   glyphVisible: {
     opacity: 1,
-  } as React.CSSProperties,
+  },
 }
 
 const PrintIcon: React.FC<PrintIconProps> = ({
@@ -130,7 +125,7 @@ const PrintIcon: React.FC<PrintIconProps> = ({
         style={iconStyle}
         {...props}
       >
-        <path d="M760-600v-160H200v160h-40v-200q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v200h-40ZM200-40v-240h560v240H200Zm520-400h40v-80h-40v80Zm-80-40q17 0 28.5-11.5T680-520q0-17-11.5-28.5T640-560q-17 0-28.5 11.5T600-520q0 17 11.5 28.5T640-480ZM200-40h560-560Z" />
+        <path d="M640-640v-120H320v120h-80v-200h480v200h-80Zm-480 80h640-640Zm560 100q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-480 20v120h480v-120H240Zm-80 200v-160H80v-240q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v240h-80v160H160Z" />
       </svg>
       {sacredtheme && (
         <div

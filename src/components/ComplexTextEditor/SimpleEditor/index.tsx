@@ -22,12 +22,23 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   styles,
 }) => {
   const [isFocused, setIsFocused] = useState(false)
-  const [leftGlyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
-  const [rightGlyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  // Initialize with consistent values to prevent hydration mismatch
+  const [leftGlyph, setLeftGlyph] = useState(SACRED_GLYPHS[0])
+  const [rightGlyph, setRightGlyph] = useState(SACRED_GLYPHS[1])
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Set random glyphs only on client side after hydration
+  useEffect(() => {
+    if (!isHydrated) {
+      setLeftGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+      setRightGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+      setIsHydrated(true)
+    }
+  }, [isHydrated])
 
   const isSacredTheme = styles?.theme === 'sacred'
 

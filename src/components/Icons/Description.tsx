@@ -37,114 +37,42 @@ interface DescriptionIconProps extends React.SVGProps<SVGSVGElement> {
   sacredtheme?: boolean
 }
 
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  icon: {
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  icon: {
-    transition: 'all 0.4s ease',
-    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
-    color: '#FFD700',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.6)',
-    transition: 'all 0.3s ease',
-    opacity: 0,
-    pointerEvents: 'none',
-    animation: 'sacredGlyphRotate 20s linear infinite',
-  } as React.CSSProperties,
-
-  glyphVisible: {
-    opacity: 1,
-  } as React.CSSProperties,
-}
-
 const DescriptionIcon: React.FC<DescriptionIconProps> = ({
   sacredtheme = false,
-  style = {},
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  const [currentGlyph, setCurrentGlyph] = useState(SACRED_GLYPHS[0])
 
-  // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
-    }
+    if (!sacredtheme) return
+
+    const interval = setInterval(() => {
+      setCurrentGlyph(
+        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+      )
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [sacredtheme])
 
-  const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
-    ...style,
+  if (sacredtheme) {
+    return <span style={{ fontSize: '1.2em' }}>{currentGlyph}</span>
   }
 
   return (
-    <div
-      style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        height="24"
-        viewBox="0 -960 960 960"
-        width="24"
+      <path
+        d="M14 2H6C5.45 2 4.95 2.22 4.59 2.59C4.22 2.95 4 3.45 4 4V20C4 20.55 4.22 21.05 4.59 21.41C4.95 21.78 5.45 22 6 22H18C18.55 22 19.05 21.78 19.41 21.41C19.78 21.05 20 20.55 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM8 12H16V14H8V12ZM8 16H13V18H8V16Z"
         fill="currentColor"
-        style={iconStyle}
-        {...props}
-      >
-        <path d="M480-480q-17 0-28.5-11.5T440-520q0-17 11.5-28.5T480-560q17 0 28.5 11.5T520-520q0 17-11.5 28.5T480-480ZM120-120v-200h80v120h120v80H120Zm560 0v-80h120v-120h80v200H680ZM120-680v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80ZM360-360v-240h240v240H360Z" />
-      </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
-      )}
-    </div>
+      />
+    </svg>
   )
 }
 

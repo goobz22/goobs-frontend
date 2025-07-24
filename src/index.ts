@@ -1,4 +1,5 @@
 import CustomButton, { ButtonProps, ButtonGroup } from './components/Button'
+import IconButton, { IconButtonProps } from './components/IconButton'
 import Typography, { TypographyProps } from './components/Typography'
 import ConfirmationCodeInput, {
   ConfirmationCodeInputsProps,
@@ -12,12 +13,13 @@ import CustomDialog, { CustomDialogProps } from './components/Form/Dialog'
 import Dialog, { DialogProps } from './components/Dialog'
 import ContentSection, { ContentSectionProps } from './components/Content'
 import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
-import Nav, { NavProps, NavItem } from './components/Nav' // <-- Vertical-only Nav
 import PricingTable, { PricingProps } from './components/PricingTable'
 import Stepper, { StepperProps } from './components/Stepper'
+import AppBar, { AppBarProps } from './components/AppBar'
 import CustomToolbar, { CustomToolbarProps } from './components/Toolbar'
 import TransferList, { TransferListProps } from './components/TransferList'
 import StyledTooltip, { TooltipProps } from './components/Tooltip'
+import Popover, { PopoverProps } from './components/Popover'
 import QRCodeComponent, { QRCodeProps } from './components/QRCode'
 import FormProjectBoard, {
   FormProjectBoardProps,
@@ -30,6 +32,23 @@ import ComplexEditor, {
 } from './components/ComplexTextEditor'
 // Import the Accordion component and its props
 import Accordion, { AccordionProps } from './components/Accordion'
+// Import the Breadcrumb component and its props
+import Breadcrumb, {
+  BreadcrumbProps,
+  BreadcrumbItem,
+} from './components/Breadcrumb'
+// Import the TreeView component and its props
+import TreeView, {
+  TreeViewProps,
+  TreeViewItem,
+  TreeViewItemId,
+  TreeViewApiRef,
+  TreeViewSelectionPropagation,
+  useTreeViewApiRef,
+  useTreeViewContext,
+} from './components/TreeView'
+// Import the Drawer component and its props
+import Drawer, { DrawerProps } from './components/Drawer'
 import Alert, { AlertProps } from './components/Alert'
 import Badge, { BadgeProps } from './components/Badge'
 import { RawCustomer } from './components/ProjectBoard/types'
@@ -42,6 +61,11 @@ import NoUserAddTask from './components/ProjectBoard/forms/AddTask/noUser'
 import { RawSeverityLevel } from './components/ProjectBoard/types'
 // Here is the new horizontal `Tabs` import
 import Tabs, { TabsProps } from './components/Tabs'
+import ToggleButton, {
+  ToggleButtonProps,
+  ToggleButtonGroup,
+  ToggleButtonGroupProps,
+} from './components/ToggleButton'
 import { Task } from './components/ProjectBoard/types'
 import Checkbox, { CheckboxProps } from './components/Checkbox'
 import Chip, { type ChipProps } from './components/Chip'
@@ -93,11 +117,46 @@ import PercentageField, {
 import ProgressBar, { ProgressBarProps } from './components/ProgressBar'
 import Slider, { SliderProps } from './components/Field/Slider'
 import Snackbar, { type SnackbarProps } from './components/Snackbar'
+import Paper, { PaperProps } from './components/Paper'
+import Card, {
+  CardProps,
+  CardContent,
+  CardContentProps,
+  CardActions,
+  CardActionsProps,
+} from './components/Card'
+import Stack, { StackProps, StackStyles } from './components/Stack'
+import Container, { ContainerProps } from './components/Container'
+import Avatar, { AvatarProps } from './components/Avatar'
+import Divider, { DividerProps } from './components/Divider'
+import Fade, { FadeProps } from './components/Fade'
+import Slide, { SlideProps } from './components/Slide'
+import Zoom, { ZoomProps } from './components/Zoom'
 import * as Icons from './components/Icons'
+import {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListProps,
+  ListItemProps,
+  ListItemIconProps,
+  ListItemTextProps,
+} from './components/List'
 
 // Add FormDataGrid import
 import FormDataGrid from './components/Form/DataGrid'
 import type { FormDataGridProps } from './components/Form/DataGrid'
+import Grid, { GridProps } from './components/Grid'
+import {
+  Table,
+  TableContainer,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from './components/Table'
+import type { SimpleTableProps, TableStyles } from './components/Table'
 
 // Animations
 import { Animation } from './components/Content/Structure/animations'
@@ -171,6 +230,10 @@ import {
   merrihelperfooter,
 } from './theme/'
 
+// Utilities
+import { alpha } from './utils/alpha'
+import { keyframes, css, commonKeyframes } from './utils/keyframes'
+
 // Styles
 // Note: formContainerStyle was removed as the file './styles/Form' doesn't exist
 
@@ -181,24 +244,31 @@ import ShowTask, {
   ShowTaskProps,
 } from './components/ProjectBoard/forms/ShowTask/client'
 
+export { AppBar }
 export { CustomButton }
+export { IconButton }
 export { Typography }
 export { ConfirmationCodeInput }
 export { RadioGroup }
 export { Popup }
 export { ContentSection }
 export { CodeCopy }
-export { Nav }
 export { PricingTable }
 export { Stepper }
 export { CustomToolbar }
 export { TransferList }
 export { StyledTooltip }
+export { Popover }
 export { QRCodeComponent }
 export { MultiSelectChip }
 export { Tabs }
+export { ToggleButton, ToggleButtonGroup }
 export { ComplexEditor }
 export { Accordion } // <-- Export Accordion here
+export { Breadcrumb } // <-- Export Breadcrumb here
+export { TreeView }
+export { useTreeViewApiRef, useTreeViewContext }
+export { Drawer }
 export { Alert }
 export { Badge }
 export { AdministratorAddTaskCompanyDropdown }
@@ -232,6 +302,9 @@ export { VLANField }
 // Add FormDataGrid to named exports
 export { FormDataGrid }
 export { FormProjectBoard }
+export { Grid }
+export { Table, TableContainer, TableHead, TableBody, TableRow, TableCell }
+export { List, ListItem, ListItemIcon, ListItemText }
 export type { InternalIncrementNumberFieldProps }
 export type { PasswordFieldProps }
 export type { SearchbarProps }
@@ -247,6 +320,18 @@ export { PercentageField }
 export { ProgressBar }
 export { Slider }
 export { Snackbar }
+export { Paper }
+export { Card, CardContent, CardActions }
+export { Stack }
+export { Container }
+export { Avatar }
+export { Divider }
+export { Fade }
+export { Slide }
+export { Zoom }
+
+// Export utilities
+export { alpha, keyframes, css, commonKeyframes }
 
 export type { Task }
 export type { RawCustomer }
@@ -266,6 +351,17 @@ export type { AlertProps }
 export type { SnackbarProps }
 export type { SliderProps }
 export type { BadgeProps }
+export type { PaperProps }
+export type { CardProps, CardContentProps, CardActionsProps }
+export type { StackProps, StackStyles }
+export type { ContainerProps }
+export type { AvatarProps }
+export type { DividerProps }
+export type { FadeProps }
+export type { SlideProps }
+export type { ZoomProps }
+export type { ListProps, ListItemProps, ListItemIconProps, ListItemTextProps }
+
 /* -------------------------------------------------------------------------- */
 /*                           Named Type Exports                               */
 /* -------------------------------------------------------------------------- */
@@ -280,6 +376,8 @@ export { CreditCardNumber }
 export type { FormDataGridProps }
 export type { CustomDialogProps }
 export type { DialogProps }
+export type { GridProps }
+export type { SimpleTableProps, TableStyles }
 
 // 2) All DataGrid Types
 export type { DatagridProps }
@@ -292,6 +390,7 @@ export type { DateFieldProps }
 export type { DropdownProps }
 // "Local" type exports for existing components
 export type { ButtonProps }
+export type { IconButtonProps }
 export type { ComplexTextEditorProps }
 export type { TypographyProps }
 export type { ConfirmationCodeInputsProps }
@@ -299,21 +398,31 @@ export type { RadioOption, RadioGroupProps }
 export type { PopupProps }
 export type { ContentSectionProps }
 export type { CodeCopyProps }
-export type { NavProps } // vertical-only
 export type { PricingProps }
 export type { StepperProps }
+export type { AppBarProps }
 export type { CustomToolbarProps }
 export type { FormProjectBoardProps }
 export type { TransferListProps }
 export type { TooltipProps }
+export type { PopoverProps }
 export type { ProjectBoardProps }
 export type { QRCodeProps }
 export type { DropdownOption }
 export type { TabsProps }
-export type { NavItem }
+export type { ToggleButtonProps, ToggleButtonGroupProps }
 export type { ShowTaskProps }
 export type { Animation }
 export type { AccordionProps } // <-- Export AccordionProps
+export type { BreadcrumbProps, BreadcrumbItem } // <-- Export Breadcrumb types
+export type {
+  TreeViewProps,
+  TreeViewItem,
+  TreeViewItemId,
+  TreeViewApiRef,
+  TreeViewSelectionPropagation,
+} // <-- Export TreeView types
+export type { DrawerProps } // <-- Export Drawer types
 export type { RawSeverityLevel }
 
 /* -------------------------------------------------------------------------- */

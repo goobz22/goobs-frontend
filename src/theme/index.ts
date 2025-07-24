@@ -27,6 +27,18 @@ export {
   getAccordionStyles,
 } from './accordion'
 
+// Export breadcrumb theme system
+export type { BreadcrumbTheme, BreadcrumbStyles } from './breadcrumb'
+export {
+  breadcrumbThemes,
+  getBreadcrumbTheme,
+  getBreadcrumbStyles,
+} from './breadcrumb'
+
+// Export appbar theme system
+export type { AppBarTheme, AppBarStyles } from './appbar'
+export { appBarThemes, getAppBarTheme, getAppBarStyles } from './appbar'
+
 // Export alert theme system
 export type { AlertTheme, AlertStyles } from './alert'
 export { alertThemes, getAlertTheme, getAlertStyles } from './alert'
@@ -34,6 +46,34 @@ export { alertThemes, getAlertTheme, getAlertStyles } from './alert'
 // Export button theme system
 export type { ButtonTheme, ButtonStyles } from './button'
 export { buttonThemes, getButtonTheme, getButtonStyles } from './button'
+
+// Export container theme system
+export type { ContainerTheme, ContainerStyles } from './container'
+export {
+  containerThemes,
+  getContainerTheme,
+  getContainerStyles,
+} from './container'
+
+// Export avatar theme system
+export type { AvatarTheme, AvatarStyles } from './avatar'
+export { avatarThemes, getAvatarTheme, getAvatarStyles } from './avatar'
+
+// Export divider theme system
+export type { DividerTheme, DividerStyles } from './divider'
+export { dividerThemes, getDividerTheme, getDividerStyles } from './divider'
+
+// Export fade theme system
+export type { FadeTheme, FadeStyles } from './fade'
+export { fadeThemes, getFadeTheme, getFadeStyles } from './fade'
+
+// Export slide theme system
+export type { SlideTheme, SlideStyles } from './slide'
+export { slideThemes, getSlideTheme, getSlideStyles } from './slide'
+
+// Export zoom theme system
+export type { ZoomTheme, ZoomStyles } from './zoom'
+export { zoomThemes, getZoomTheme, getZoomStyles } from './zoom'
 
 // Export dropdown theme system
 export type { DropdownTheme, DropdownStyles } from './dropdown'
@@ -93,6 +133,14 @@ export {
   getProgressBarStyles,
 } from './progressbar'
 
+// Export paper theme system
+export type { PaperTheme, PaperStyles } from './paper'
+export { paperThemes, getPaperTheme, getPaperStyles } from './paper'
+
+// Export card theme system
+export type { CardTheme, CardStyles } from './card'
+export { cardThemes, getCardTheme, getCardStyles } from './card'
+
 // Export pricing table theme system
 export type { PricingTableTheme, PricingTableStyles } from './pricingtable'
 export {
@@ -124,6 +172,18 @@ export { tooltipThemes, getTooltipTheme, getTooltipStyles } from './tooltip'
 // Export switch theme system
 export type { SwitchTheme, SwitchStyles } from './switch'
 export { getSwitchStyles } from './switch'
+
+// Export tabs theme system
+export type { TabsTheme, TabsStyles } from './tabs'
+export { tabsThemes, getTabsTheme, getTabsStyles } from './tabs'
+
+// Export treeview theme system
+export type { TreeViewTheme, TreeViewStyles } from './treeview'
+export {
+  treeViewThemes,
+  getTreeViewStyles,
+  getTreeItemStyles,
+} from './treeview'
 
 // Export shared elements
 export {
@@ -466,3 +526,16 @@ export const grey = {
   light: '#F5F5F5',
   dark: '#BDBDBD',
 }
+
+export * from './button'
+export * from './card'
+export * from './checkbox'
+export * from './chip'
+export * from './datagrid'
+export * from './dialog'
+export * from './divider'
+export * from './drawer'
+export * from './list'
+export * from './paper'
+export * from './popover'
+export * from './pricing-table'

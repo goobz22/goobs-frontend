@@ -1,150 +1,37 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
-
-interface CardGiftcardIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  icon: {
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  icon: {
-    transition: 'all 0.4s ease',
-    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
-    color: '#FFD700',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.6)',
-    transition: 'all 0.3s ease',
-    opacity: 0,
-    pointerEvents: 'none',
-    animation: 'sacredGlyphRotate 20s linear infinite',
-  } as React.CSSProperties,
-
-  glyphVisible: {
-    opacity: 1,
-  } as React.CSSProperties,
+interface CardGiftcardIconProps {
+  style?: React.CSSProperties
+  fontSize?: 'small' | 'medium' | 'large'
+  className?: string
 }
 
 const CardGiftcardIcon: React.FC<CardGiftcardIconProps> = ({
-  sacredtheme = false,
-  style = {},
-  ...props
+  style,
+  fontSize = 'medium',
+  className,
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
-
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
-    }
-  }, [sacredtheme])
-
-  const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
-    ...style,
+  const sizeMap = {
+    small: 20,
+    medium: 24,
+    large: 32,
   }
 
+  const size = sizeMap[fontSize]
+
   return (
-    <div
-      style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      style={style}
+      className={className}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        height="24"
-        viewBox="0 -960 960 960"
-        width="24"
-        fill="currentColor"
-        style={iconStyle}
-        {...props}
-      >
-        <path d="M840-200q-33 0-56.5-23.5T760-280v-80H200v80q0 33-23.5 56.5T120-200h-40v-80h40q33 0 56.5-23.5T200-360v-240q-33 0-56.5-23.5T120-680v-80h40q33 0 56.5 23.5T240-680v240h520v-240q0-33 23.5-56.5T840-760h40v80h-40q-33 0-56.5 23.5T760-600v240h80v80h-80Z" />
-      </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
-      )}
-    </div>
+      <path d="M20,6H16.35C16.64,5.43 16.86,4.82 17,4.18C17.16,3.54 17.13,2.88 16.91,2.26C16.68,1.64 16.28,1.09 15.74,0.68C15.2,0.27 14.55,0 13.88,0C13.21,0 12.56,0.27 12.02,0.68C11.48,1.09 11.08,1.64 10.85,2.26C10.63,2.88 10.6,3.54 10.76,4.18C10.9,4.82 11.12,5.43 11.41,6H4A2,2 0 0,0 2,8V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V8A2,2 0 0,0 20,6M12,4A1,1 0 1,1 13,5A1,1 0 0,1 12,4M20,20H4V10H20V20Z" />
+    </svg>
   )
 }
 

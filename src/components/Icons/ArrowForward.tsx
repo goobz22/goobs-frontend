@@ -42,12 +42,13 @@ const premiumStyles = {
   icon: {
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
+    color: 'rgb(75, 85, 99)',
   } as React.CSSProperties,
 
   iconHover: {
     transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+    filter: 'drop-shadow(0 2px 4px rgba(75, 85, 99, 0.3))',
+    color: 'rgb(55, 65, 81)',
   } as React.CSSProperties,
 }
 
@@ -60,7 +61,7 @@ const sacredStyles = {
   } as React.CSSProperties,
 
   iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
+    transform: 'scale(1.1) rotate(-5deg)',
     filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
     color: '#FFD700',
   } as React.CSSProperties,
@@ -130,7 +131,7 @@ const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({
         style={iconStyle}
         {...props}
       >
-        <path d="M480-480q-17 0-28.5-11.5T440-520q0-17 11.5-28.5T480-560q17 0 28.5 11.5T520-520q0 17-11.5 28.5T480-480ZM120-120v-200h80v120h120v80H120Zm560 0v-80h120v-120h80v200H680ZM120-680v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80ZM360-360v-240h240v240H360Z" />
+        <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" />
       </svg>
       {sacredtheme && (
         <div

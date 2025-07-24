@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useMemo, useEffect, FC } from 'react'
 import QRCode from 'react-qr-code'
 import { authenticator } from 'otplib'

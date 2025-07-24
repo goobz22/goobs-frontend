@@ -12,14 +12,8 @@ const basicTabs: TabsItem[] = [
 ]
 
 const withBordersTabs: TabsItem[] = [
-  { title: 'Tab One', route: '/one', trigger: 'route', hasrightborder: true },
-  {
-    title: 'Tab Two',
-    route: '/two',
-    trigger: 'route',
-    hasleftborder: true,
-    hasrightborder: true,
-  },
+  { title: 'Tab One', route: '/one', trigger: 'route' },
+  { title: 'Tab Two', route: '/two', trigger: 'route' },
   { title: 'Tab Three', route: '/three', trigger: 'route' },
 ]
 
@@ -42,7 +36,11 @@ const meta: Meta<typeof Tabs> = {
       control: 'radio',
       options: ['left', 'center', 'right', 'justify'],
     },
-    height: { control: 'text' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, borders, and layout',
+    },
   },
   parameters: {
     layout: 'fullscreen', // Use fullscreen to better showcase sticky behavior
@@ -69,9 +67,11 @@ export const PremiumTheme: Story = {
   args: {
     items: basicTabs,
     alignment: 'left',
-    height: '60px',
     navname: 'premiumNav',
-    sacredtheme: false,
+    styles: {
+      theme: 'light',
+      height: '60px',
+    },
   },
 }
 
@@ -93,28 +93,40 @@ export const SacredTheme: Story = {
     ...PremiumTheme.args,
     items: withBordersTabs,
     alignment: 'center',
-    sacredtheme: true,
+    styles: {
+      theme: 'sacred',
+      height: '60px',
+      tabLeftBorder: true,
+      tabRightBorder: true,
+    },
   },
 }
 
 const InteractiveDemoRenderer = () => {
-  const [sacredtheme, setsacredtheme] = React.useState(false)
+  const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
   const [alignment, setAlignment] = React.useState<
     'left' | 'center' | 'right' | 'justify'
   >('left')
 
   return (
-    <div className={`h-[200vh] ${sacredtheme ? 'bg-black' : 'bg-gray-800'}`}>
+    <div
+      className={`h-[200vh] ${theme === 'sacred' ? 'bg-black' : theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}
+    >
       <div className="p-4 bg-white rounded-lg border fixed top-24 right-4 z-50">
         <h3 className="text-lg font-bold mb-2">Controls</h3>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={sacredtheme}
-              onChange={e => setsacredtheme(e.target.checked)}
-            />
-            Sacred Theme
+            <select
+              value={theme}
+              onChange={e =>
+                setTheme(e.target.value as 'light' | 'dark' | 'sacred')
+              }
+              className="p-1 border rounded"
+            >
+              <option value="light">Light Theme</option>
+              <option value="dark">Dark Theme</option>
+              <option value="sacred">Sacred Theme</option>
+            </select>
           </label>
           <select
             value={alignment}
@@ -135,13 +147,20 @@ const InteractiveDemoRenderer = () => {
 
       <Tabs
         items={mixedTriggerTabs}
-        sacredtheme={sacredtheme}
         alignment={alignment}
         navname="interactiveNav"
+        styles={{
+          theme,
+          height: '60px',
+        }}
       />
 
-      <div className={`p-8 ${sacredtheme ? 'text-yellow-200' : 'text-white'}`}>
-        <h1 className={`text-2xl font-bold ${sacredtheme && 'font-cinzel'}`}>
+      <div
+        className={`p-8 ${theme === 'sacred' ? 'text-yellow-200' : theme === 'dark' ? 'text-white' : 'text-gray-800'}`}
+      >
+        <h1
+          className={`text-2xl font-bold ${theme === 'sacred' && 'font-cinzel'}`}
+        >
           Interactive Content
         </h1>
         <p>Use the controls to change the tabs.</p>

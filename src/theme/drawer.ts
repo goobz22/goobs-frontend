@@ -55,6 +55,7 @@ export interface DrawerStyles {
   // Layout and spacing
   width?: string
   height?: string
+  top?: string | number
   padding?: string
   margin?: string
   zIndex?: number
@@ -73,6 +74,10 @@ export interface DrawerStyles {
   minWidth?: string
   maxHeight?: string
   minHeight?: string
+
+  // Force positioning
+  forceLeft?: boolean
+  forceRight?: boolean
 }
 
 export const drawerThemes: Record<'light' | 'dark' | 'sacred', DrawerTheme> = {
@@ -198,18 +203,32 @@ export const getDrawerTheme = (styles?: DrawerStyles): DrawerTheme => {
 export const getDrawerStyles = (
   styles?: DrawerStyles,
   open?: boolean,
-  anchor?: 'left' | 'right',
+  anchor?: 'left' | 'right' | 'top' | 'bottom',
   _variant?: 'permanent' | 'temporary'
 ) => {
   const themeConfig = getDrawerTheme(styles)
   const anchorSide = anchor || 'left'
+  const isHorizontal = anchorSide === 'top' || anchorSide === 'bottom'
+
+  // Determine actual anchor side (allow force overrides)
+  const effectiveAnchor = styles?.forceLeft
+    ? 'left'
+    : styles?.forceRight
+      ? 'right'
+      : anchorSide
 
   const permanentStyle: React.CSSProperties = {
-    height: styles?.height || '100%',
+    height: isHorizontal ? styles?.height || '240px' : styles?.height || '100%',
+    width: isHorizontal ? styles?.width || '100%' : styles?.width || '240px',
     position: 'fixed',
-    top: 0,
-    [anchorSide]: 0,
-    width: styles?.width || '240px',
+    top: isHorizontal
+      ? effectiveAnchor === 'top'
+        ? 0
+        : 'auto'
+      : styles?.top || 0,
+    bottom: effectiveAnchor === 'bottom' ? 0 : 'auto',
+    left: effectiveAnchor === 'left' ? 0 : 'auto',
+    right: effectiveAnchor === 'right' ? 0 : 'auto',
     maxWidth: styles?.maxWidth,
     minWidth: styles?.minWidth,
     maxHeight: styles?.maxHeight,
@@ -217,10 +236,18 @@ export const getDrawerStyles = (
     padding: styles?.padding,
     margin: styles?.margin,
     background: themeConfig.permanent.background,
-    [anchorSide === 'left' ? 'borderRight' : 'borderLeft']:
-      anchorSide === 'left'
-        ? themeConfig.permanent.borderRight
-        : themeConfig.permanent.borderLeft,
+    ...(effectiveAnchor === 'left' && {
+      borderRight: themeConfig.permanent.borderRight,
+    }),
+    ...(effectiveAnchor === 'right' && {
+      borderLeft: themeConfig.permanent.borderLeft,
+    }),
+    ...(effectiveAnchor === 'top' && {
+      borderBottom: themeConfig.permanent.borderRight,
+    }),
+    ...(effectiveAnchor === 'bottom' && {
+      borderTop: themeConfig.permanent.borderLeft,
+    }),
     boxShadow: themeConfig.permanent.boxShadow,
     backdropFilter: themeConfig.permanent.backdropFilter,
     backgroundImage: themeConfig.permanent.backgroundImage,
@@ -249,8 +276,8 @@ export const getDrawerStyles = (
     padding: styles?.padding,
     margin: styles?.margin,
     background: themeConfig.temporary.background,
-    [anchorSide === 'left' ? 'borderRight' : 'borderLeft']:
-      anchorSide === 'left'
+    [effectiveAnchor === 'left' ? 'borderRight' : 'borderLeft']:
+      effectiveAnchor === 'left'
         ? themeConfig.temporary.borderRight
         : themeConfig.temporary.borderLeft,
     boxShadow: themeConfig.temporary.boxShadow,
@@ -258,19 +285,118 @@ export const getDrawerStyles = (
     backgroundImage: themeConfig.temporary.backgroundImage,
     zIndex: styles?.zIndex || 50,
     transition: themeConfig.transition,
-    [anchorSide]: 0,
+    [effectiveAnchor]: 0,
     transform: open
       ? 'translateX(0)'
-      : anchorSide === 'left'
+      : effectiveAnchor === 'left'
         ? 'translateX(-100%)'
         : 'translateX(100%)',
     opacity: styles?.disabled ? 0.5 : 1,
     pointerEvents: styles?.disabled ? 'none' : 'auto',
   }
 
+  // Get scrollbar styles based on theme
+  const getScrollbarStyles = (theme?: 'light' | 'dark' | 'sacred') => {
+    const scrollbarColors = {
+      light: {
+        track: '#f1f5f9',
+        thumb: '#cbd5e1',
+        thumbHover: '#94a3b8',
+      },
+      dark: {
+        track: '#1e293b',
+        thumb: '#475569',
+        thumbHover: '#64748b',
+      },
+      sacred: {
+        track: 'rgba(0, 0, 0, 0.3)',
+        thumb: 'rgba(255, 215, 0, 0.4)',
+        thumbHover: 'rgba(255, 215, 0, 0.6)',
+      },
+    }
+    const colors = scrollbarColors[theme || 'sacred']
+    return `
+      &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      &::-webkit-scrollbar-track {
+        background: ${colors.track};
+        border-radius: 4px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: ${colors.thumb};
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: ${colors.thumbHover};
+      }
+      scrollbar-width: thin;
+      scrollbar-color: ${colors.thumb} ${colors.track};
+    `
+  }
+
+  const scrollbarStyle = getScrollbarStyles(styles?.theme)
+
+  // Paper style (main content area)
+  const paperStyle: React.CSSProperties = {
+    position: 'fixed',
+    height: isHorizontal ? styles?.height || '240px' : styles?.height || '100%',
+    width: isHorizontal ? styles?.width || '100%' : styles?.width || '280px',
+    top: isHorizontal
+      ? effectiveAnchor === 'top'
+        ? 0
+        : 'auto'
+      : styles?.top || 0,
+    bottom: effectiveAnchor === 'bottom' ? 0 : 'auto',
+    left: effectiveAnchor === 'left' ? 0 : 'auto',
+    right: effectiveAnchor === 'right' ? 0 : 'auto',
+    maxWidth: styles?.maxWidth,
+    minWidth: styles?.minWidth,
+    maxHeight: styles?.maxHeight,
+    minHeight: styles?.minHeight,
+    padding: styles?.padding,
+    margin: styles?.margin,
+    background: themeConfig.temporary.background,
+    ...(effectiveAnchor === 'left' && {
+      borderRight: themeConfig.temporary.borderRight,
+    }),
+    ...(effectiveAnchor === 'right' && {
+      borderLeft: themeConfig.temporary.borderLeft,
+    }),
+    ...(effectiveAnchor === 'top' && {
+      borderBottom: themeConfig.temporary.borderRight,
+    }),
+    ...(effectiveAnchor === 'bottom' && {
+      borderTop: themeConfig.temporary.borderLeft,
+    }),
+    boxShadow: themeConfig.temporary.boxShadow,
+    backdropFilter: themeConfig.temporary.backdropFilter,
+    backgroundImage: themeConfig.temporary.backgroundImage,
+    zIndex: styles?.zIndex || 50,
+    transition: themeConfig.transition,
+    transform: open
+      ? isHorizontal
+        ? 'translateY(0)'
+        : 'translateX(0)'
+      : isHorizontal
+        ? effectiveAnchor === 'top'
+          ? 'translateY(-100%)'
+          : 'translateY(100%)'
+        : effectiveAnchor === 'left'
+          ? 'translateX(-100%)'
+          : 'translateX(100%)',
+    opacity: styles?.disabled ? 0.5 : 1,
+    pointerEvents: styles?.disabled ? 'none' : 'auto',
+    overflow: 'auto',
+  }
+
   return {
     permanent: permanentStyle,
     temporaryBackdrop: temporaryBackdropStyle,
     temporaryDrawer: temporaryDrawerStyle,
+    paper: paperStyle,
+    backdrop: temporaryBackdropStyle,
   }
 }
