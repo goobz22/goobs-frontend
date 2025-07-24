@@ -47,6 +47,16 @@ export { alertThemes, getAlertTheme, getAlertStyles } from './alert'
 export type { ButtonTheme, ButtonStyles } from './button'
 export { buttonThemes, getButtonTheme, getButtonStyles } from './button'
 
+// Export icon theme system
+export type { IconTheme, IconStyles } from './icon'
+export {
+  iconThemes,
+  getIconTheme,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from './icon'
+
 // Export container theme system
 export type { ContainerTheme, ContainerStyles } from './container'
 export {

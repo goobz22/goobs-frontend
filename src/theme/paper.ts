@@ -1,7 +1,8 @@
 // --------------------------------------------------------------------------
 // PAPER THEME SYSTEM
 // --------------------------------------------------------------------------
-import { TRANSITIONS, SHADOWS } from './shared'
+import React from 'react'
+import { TRANSITIONS } from './shared'
 
 export interface PaperTheme {
   container: {

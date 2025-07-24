@@ -2,7 +2,7 @@
 // DIVIDER THEME SYSTEM
 // --------------------------------------------------------------------------
 import React from 'react'
-import { TRANSITIONS, SHADOWS } from './shared'
+//
 
 export interface DividerTheme {
   container: {

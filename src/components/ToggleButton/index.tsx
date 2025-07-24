@@ -5,7 +5,7 @@
 'use client'
 
 import React, { useState, useMemo, ReactNode } from 'react'
-import { ButtonStyles, getButtonStyles, SACRED_GLYPHS } from '../../theme'
+import { ButtonStyles, getButtonStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // TOGGLE BUTTON PROPS INTERFACE
@@ -19,6 +19,8 @@ export interface ToggleButtonProps {
   disabled?: boolean
   size?: 'small' | 'medium' | 'large'
   styles?: ButtonStyles
+  isFirst?: boolean
+  isLast?: boolean
   'aria-label'?: string
 }
 
@@ -50,6 +52,8 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   disabled = false,
   size = 'medium',
   styles,
+  isFirst = false,
+  isLast = false,
   'aria-label': ariaLabel,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -135,6 +139,16 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
       }
     }
 
+    // Group styling overrides
+    let groupStyles = {}
+    if (isFirst || isLast) {
+      groupStyles = {
+        borderRadius: isFirst ? '7px 0 0 7px' : isLast ? '0 7px 7px 0' : '0',
+        borderRight: !isLast ? 'none' : undefined,
+        margin: 0,
+      }
+    }
+
     return {
       ...baseStyles.container,
       ...sizeConfig[size],
@@ -147,12 +161,13 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      position: 'relative',
-      userSelect: 'none',
+      position: 'relative' as const,
+      userSelect: 'none' as const,
       outline: 'none',
       textDecoration: 'none',
-    }
-  }, [styles, selected, isHovered, isPressed, disabled, size])
+      ...groupStyles,
+    } as React.CSSProperties
+  }, [styles, selected, isHovered, isPressed, disabled, size, isFirst, isLast])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!disabled && onClick) {
@@ -206,11 +221,11 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
 
     return {
       display: 'inline-flex',
-      position: 'relative',
+      position: 'relative' as const,
       border: `1px solid ${borderColor}`,
       borderRadius: baseStyles.container.borderRadius || '8px',
       overflow: 'hidden',
-    }
+    } as React.CSSProperties
   }, [styles])
 
   const enhancedChildren = React.Children.map(children, (child, index) => {
@@ -239,12 +254,8 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
             child.props.onClick(e)
           }
         },
-        style: {
-          ...child.props.style,
-          borderRadius: isFirst ? '7px 0 0 7px' : isLast ? '0 7px 7px 0' : '0',
-          borderRight: !isLast ? 'none' : undefined,
-          margin: 0,
-        },
+        isFirst,
+        isLast,
       })
     }
     return child

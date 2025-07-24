@@ -402,11 +402,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
               <div>
                 {filteredOptions.map((option, index) => (
                   <div
-                    key={
-                      option.uniqueKey ||
-                      option._id ||
-                      `${option.value}-${index}`
-                    }
+                    key={option._id || `${option.value}-${index}`}
                     style={componentStyles.option}
                     onClick={() => handleSelect(option)}
                   >
@@ -422,11 +418,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
               <div>
                 {filteredHistory.map((option, index) => (
                   <div
-                    key={
-                      option.uniqueKey ||
-                      option._id ||
-                      `${option.value}-${index}`
-                    }
+                    key={option._id || `${option.value}-${index}`}
                     style={componentStyles.option}
                     onClick={() => handleSelect(option)}
                   >

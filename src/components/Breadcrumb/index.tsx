@@ -125,7 +125,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     item: BreadcrumbItem & { isEllipsis?: boolean },
     index: number
   ) => {
-    const isLast = index === displayItems.length - 1
     const isHovered = hoveredItem === index
 
     if ((item as any).isEllipsis) {

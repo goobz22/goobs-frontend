@@ -253,7 +253,12 @@ const Accordion: FC<AccordionProps> = props => {
     ...rest
   } = props
 
-  const { expanded, handleToggle } = useAccordionState(props)
+  const { expanded, handleToggle } = useAccordionState({
+    expanded: controlledExpanded,
+    defaultExpanded,
+    onChange,
+    styles,
+  })
   const [isHovered, setIsHovered] = useState(false)
 
   const computedStyles = useMemo(() => {

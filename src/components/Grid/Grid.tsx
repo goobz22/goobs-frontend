@@ -30,7 +30,7 @@ const Grid: React.FC<GridProps> = ({
   direction = 'row',
   styles = {},
 }) => {
-  const { theme = 'default', ...customStyles } = styles
+  const { ...customStyles } = styles
 
   const containerStyles: React.CSSProperties = {
     display: 'flex',

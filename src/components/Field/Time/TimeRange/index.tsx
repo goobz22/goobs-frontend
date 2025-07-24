@@ -819,6 +819,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
         )}
       </div>
       {(isStartTimeOpen || isEndTimeOpen) && <CustomTimePicker />}
+      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

@@ -246,7 +246,7 @@ function ManageRow({
               >
                 <div style={iconContainerStyle}>
                   <Edit
-                    sacredtheme={isSacredTheme}
+                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                     width="16"
                     height="16"
                     style={{ width: '16px', height: '16px' }}
@@ -387,9 +387,12 @@ function ManageRow({
               >
                 <div style={iconContainerStyle}>
                   <Download
-                    sacredtheme={isSacredTheme}
-                    width="16"
-                    height="16"
+                    size={16}
+                    color={
+                      isSacredTheme
+                        ? 'rgba(255, 215, 0, 1)'
+                        : 'rgba(55, 65, 81, 1)'
+                    }
                     style={{ width: '16px', height: '16px' }}
                   />
                 </div>

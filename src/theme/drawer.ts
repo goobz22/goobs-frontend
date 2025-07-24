@@ -295,50 +295,6 @@ export const getDrawerStyles = (
     pointerEvents: styles?.disabled ? 'none' : 'auto',
   }
 
-  // Get scrollbar styles based on theme
-  const getScrollbarStyles = (theme?: 'light' | 'dark' | 'sacred') => {
-    const scrollbarColors = {
-      light: {
-        track: '#f1f5f9',
-        thumb: '#cbd5e1',
-        thumbHover: '#94a3b8',
-      },
-      dark: {
-        track: '#1e293b',
-        thumb: '#475569',
-        thumbHover: '#64748b',
-      },
-      sacred: {
-        track: 'rgba(0, 0, 0, 0.3)',
-        thumb: 'rgba(255, 215, 0, 0.4)',
-        thumbHover: 'rgba(255, 215, 0, 0.6)',
-      },
-    }
-    const colors = scrollbarColors[theme || 'sacred']
-    return `
-      &::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      &::-webkit-scrollbar-track {
-        background: ${colors.track};
-        border-radius: 4px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background: ${colors.thumb};
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-      }
-      &::-webkit-scrollbar-thumb:hover {
-        background: ${colors.thumbHover};
-      }
-      scrollbar-width: thin;
-      scrollbar-color: ${colors.thumb} ${colors.track};
-    `
-  }
-
-  const scrollbarStyle = getScrollbarStyles(styles?.theme)
-
   // Paper style (main content area)
   const paperStyle: React.CSSProperties = {
     position: 'fixed',

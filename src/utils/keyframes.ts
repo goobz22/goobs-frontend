@@ -41,7 +41,7 @@ export const css = (
  * Common keyframes that can be reused across components
  */
 export const commonKeyframes = {
-  sacredGlowPulse: (color: string = '#FFD700') =>
+  sacredGlowPulse: () =>
     keyframes(
       'sacredGlowPulse',
       `

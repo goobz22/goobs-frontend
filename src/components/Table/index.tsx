@@ -36,12 +36,10 @@ export interface TableContainerProps {
 
 export interface TableHeadProps {
   children: React.ReactNode
-  styles?: TableStyles
 }
 
 export interface TableBodyProps {
   children: React.ReactNode
-  styles?: TableStyles
 }
 
 export interface TableRowProps {
@@ -178,11 +176,11 @@ export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
   return <table style={tableStyle}>{children}</table>
 }
 
-export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
+export const TableHead: React.FC<TableHeadProps> = ({ children }) => {
   return <thead>{children}</thead>
 }
 
-export const TableBody: React.FC<TableBodyProps> = ({ children, styles }) => {
+export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
   return <tbody>{children}</tbody>
 }
 
@@ -191,8 +189,6 @@ export const TableRow: React.FC<TableRowProps> = ({
   hover = false,
   styles,
 }) => {
-  const themeConfig = getTableTheme(styles)
-
   const rowStyle: React.CSSProperties = {
     ...(hover && {
       transition: 'background-color 0.2s ease',

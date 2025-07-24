@@ -38,7 +38,7 @@ export const Default: Story = {
     },
     children: 'This content slides in and out!',
   },
-  render: args => {
+  render: function BasicSlideStory(args) {
     const [isVisible, setIsVisible] = useState(args.styles?.in ?? true)
 
     return (
@@ -52,7 +52,7 @@ export const Default: Story = {
       >
         <CustomButton
           onClick={() => setIsVisible(!isVisible)}
-          styles={{ variant: 'contained', theme: 'light' }}
+          styles={{ theme: 'light' }}
         >
           Toggle Slide
         </CustomButton>
@@ -67,10 +67,12 @@ export const Default: Story = {
             }}
           >
             <Paper styles={{ theme: 'light', padding: '20px' }}>
-              <Typography styles={{ variant: 'h6', theme: 'light' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
                 {args.children}
               </Typography>
-              <Typography styles={{ variant: 'body1', theme: 'light' }}>
+              <Typography
+                styles={{ variant: 'merriparagraph', theme: 'light' }}
+              >
                 This is a slide transition component that supports different
                 directions and themes.
               </Typography>
@@ -84,7 +86,7 @@ export const Default: Story = {
 
 // Story showing all directions
 export const AllDirections: Story = {
-  render: () => {
+  render: function AllDirectionsStory() {
     const [activeDirection, setActiveDirection] = useState<
       'up' | 'down' | 'left' | 'right'
     >('up')
@@ -118,9 +120,17 @@ export const AllDirections: Story = {
                 }, 100)
               }}
               styles={{
-                variant:
-                  activeDirection === direction ? 'contained' : 'outlined',
                 theme: 'light',
+                backgroundColor:
+                  activeDirection === direction
+                    ? 'rgba(59, 130, 246, 1)'
+                    : 'rgba(255, 255, 255, 0.95)',
+                color:
+                  activeDirection === direction ? 'white' : 'rgb(55, 65, 81)',
+                borderColor:
+                  activeDirection === direction
+                    ? 'rgba(59, 130, 246, 1)'
+                    : 'rgba(226, 232, 240, 0.8)',
               }}
             >
               Slide {direction}
@@ -128,7 +138,7 @@ export const AllDirections: Story = {
           ))}
           <CustomButton
             onClick={() => setIsVisible(!isVisible)}
-            styles={{ variant: 'contained', theme: 'dark' }}
+            styles={{ theme: 'dark' }}
           >
             Toggle
           </CustomButton>
@@ -156,19 +166,24 @@ export const AllDirections: Story = {
                 theme: 'light',
                 padding: '30px',
                 margin: '20px',
-                textAlign: 'center',
               }}
             >
-              <Typography styles={{ variant: 'h4', theme: 'light' }}>
-                Sliding {activeDirection}!
-              </Typography>
-              <Typography styles={{ variant: 'body1', theme: 'light' }}>
-                Current direction: <strong>{activeDirection}</strong>
-              </Typography>
-              <Typography styles={{ variant: 'body2', theme: 'light' }}>
-                Click the direction buttons above to see different slide
-                effects.
-              </Typography>
+              <div style={{ textAlign: 'center' }}>
+                <Typography styles={{ variant: 'merrih4', theme: 'light' }}>
+                  Sliding {activeDirection}!
+                </Typography>
+                <Typography
+                  styles={{ variant: 'merriparagraph', theme: 'light' }}
+                >
+                  Current direction: <strong>{activeDirection}</strong>
+                </Typography>
+                <Typography
+                  styles={{ variant: 'merrihelperfooter', theme: 'light' }}
+                >
+                  Click the direction buttons above to see different slide
+                  effects.
+                </Typography>
+              </div>
             </Paper>
           </Slide>
         </div>
@@ -179,7 +194,7 @@ export const AllDirections: Story = {
 
 // Story showing different themes
 export const Themes: Story = {
-  render: () => {
+  render: function ThemesStory() {
     const [currentTheme, setCurrentTheme] = useState<
       'light' | 'dark' | 'sacred'
     >('light')
@@ -199,8 +214,12 @@ export const Themes: Story = {
               key={theme}
               onClick={() => setCurrentTheme(theme)}
               styles={{
-                variant: currentTheme === theme ? 'contained' : 'outlined',
                 theme: theme,
+                backgroundColor:
+                  currentTheme === theme ? 'rgba(59, 130, 246, 1)' : undefined,
+                color: currentTheme === theme ? 'white' : undefined,
+                borderColor:
+                  currentTheme === theme ? 'rgba(59, 130, 246, 1)' : undefined,
               }}
             >
               {theme} theme
@@ -208,7 +227,7 @@ export const Themes: Story = {
           ))}
           <CustomButton
             onClick={() => setIsVisible(!isVisible)}
-            styles={{ variant: 'contained', theme: currentTheme }}
+            styles={{ theme: currentTheme }}
           >
             Toggle
           </CustomButton>
@@ -226,11 +245,13 @@ export const Themes: Story = {
             }}
           >
             <Paper styles={{ theme: currentTheme, padding: '25px' }}>
-              <Typography styles={{ variant: 'h5', theme: currentTheme }}>
+              <Typography styles={{ variant: 'merrih5', theme: currentTheme }}>
                 {currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}{' '}
                 Theme
               </Typography>
-              <Typography styles={{ variant: 'body1', theme: currentTheme }}>
+              <Typography
+                styles={{ variant: 'merriparagraph', theme: currentTheme }}
+              >
                 This slide component adapts to different theme configurations.
               </Typography>
             </Paper>
@@ -243,7 +264,7 @@ export const Themes: Story = {
 
 // Story with custom timing
 export const CustomTiming: Story = {
-  render: () => {
+  render: function CustomTimingStory() {
     const [isVisible, setIsVisible] = useState(true)
     const [duration, setDuration] = useState(300)
 
@@ -259,7 +280,7 @@ export const CustomTiming: Story = {
         >
           <CustomButton
             onClick={() => setIsVisible(!isVisible)}
-            styles={{ variant: 'contained', theme: 'light' }}
+            styles={{ theme: 'light' }}
           >
             Toggle Slide
           </CustomButton>
@@ -289,10 +310,12 @@ export const CustomTiming: Story = {
             }}
           >
             <Paper styles={{ theme: 'sacred', padding: '20px' }}>
-              <Typography styles={{ variant: 'h6', theme: 'sacred' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'sacred' }}>
                 Custom Timing: {duration}ms
               </Typography>
-              <Typography styles={{ variant: 'body1', theme: 'sacred' }}>
+              <Typography
+                styles={{ variant: 'merriparagraph', theme: 'sacred' }}
+              >
                 Adjust the slider to change the animation duration.
               </Typography>
             </Paper>

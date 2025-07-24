@@ -15,8 +15,6 @@ import React, {
   useContext,
   ReactNode,
   FC,
-  MouseEvent,
-  FocusEvent,
 } from 'react'
 import { TreeViewStyles, getTreeViewStyles, SACRED_GLYPHS } from '../../theme'
 import ExpandMoreIcon from '../Icons/ExpandMore'

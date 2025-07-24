@@ -35,8 +35,6 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
       [styles, isDisabled]
     )
 
-    const isVertical = styles?.orientation === 'vertical'
-
     return (
       <div ref={ref} style={computedStyles.container} {...restProps}>
         {children ? (

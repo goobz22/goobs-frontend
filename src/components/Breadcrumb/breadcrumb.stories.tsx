@@ -14,12 +14,6 @@ const meta: Meta<typeof Breadcrumb> = {
     },
   },
   tags: ['autodocs'],
-  argTypes: {
-    theme: {
-      control: { type: 'select' },
-      options: ['light', 'dark', 'sacred'],
-    },
-  },
 }
 
 export default meta

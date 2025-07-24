@@ -2,7 +2,7 @@
 // SLIDE THEME SYSTEM
 // --------------------------------------------------------------------------
 import React from 'react'
-import { TRANSITIONS } from './shared'
+//
 
 export interface SlideTheme {
   container: {

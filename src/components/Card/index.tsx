@@ -4,7 +4,34 @@
 'use client'
 
 import React, { forwardRef, useState, useMemo } from 'react'
-import { CardStyles, getCardStyles, SACRED_GLYPHS } from '../../theme/card'
+import { CardStyles, getCardStyles } from '../../theme/card'
+
+// --------------------------------------------------------------------------
+// SACRED GLYPHS CONSTANTS
+// --------------------------------------------------------------------------
+
+const SACRED_GLYPHS: string[] = [
+  '⧈',
+  '◊',
+  '✦',
+  '⟡',
+  '◈',
+  '⬟',
+  '◉',
+  '⬢',
+  '⟐',
+  '◆',
+  '⬝',
+  '⟢',
+  '◇',
+  '⬡',
+  '⬛',
+  '⟁',
+  '◊',
+  '⬜',
+  '⟐',
+  '◈',
+]
 
 // --------------------------------------------------------------------------
 // CARD PROPS
@@ -65,7 +92,7 @@ const SacredBackground: React.FC<{
       }}
     >
       {/* Sacred Glyphs Background */}
-      {SACRED_GLYPHS.slice(0, 4).map((glyph, index) => (
+      {SACRED_GLYPHS.slice(0, 4).map((glyph: string, index: number) => (
         <div
           key={index}
           style={{
