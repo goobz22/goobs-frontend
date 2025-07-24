@@ -54,7 +54,6 @@ export {
   getIconTheme,
   getIconStyles,
   injectSacredKeyframes,
-  SACRED_GLYPHS,
 } from './icon'
 
 // Export container theme system
@@ -548,4 +547,4 @@ export * from './drawer'
 export * from './list'
 export * from './paper'
 export * from './popover'
-export * from './pricing-table'
+export * from './pricingtable'
