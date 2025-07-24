@@ -13,8 +13,8 @@ export interface PaperTheme {
     backdropFilter: string
     padding?: string
     backgroundImage?: string
-    position: string
-    overflow: string
+    position: React.CSSProperties['position']
+    overflow: React.CSSProperties['overflow']
     transition?: string
   }
   containerHover?: {
@@ -70,7 +70,7 @@ const lightTheme: PaperTheme = {
     backdropFilter: 'blur(8px)',
     position: 'relative',
     overflow: 'hidden',
-    transition: TRANSITIONS.smooth,
+    transition: TRANSITIONS.medium,
   },
 }
 
@@ -83,7 +83,7 @@ const darkTheme: PaperTheme = {
     backdropFilter: 'blur(12px)',
     position: 'relative',
     overflow: 'hidden',
-    transition: TRANSITIONS.smooth,
+    transition: TRANSITIONS.medium,
   },
 }
 
@@ -173,10 +173,21 @@ export function getPaperStyles(
   const baseTheme = getPaperTheme(theme)
 
   const containerStyles: React.CSSProperties = {
-    ...baseTheme.container,
+    background: baseTheme.container.background,
+    border: baseTheme.container.border,
+    borderRadius: baseTheme.container.borderRadius,
+    backdropFilter: baseTheme.container.backdropFilter,
+    position: baseTheme.container.position,
+    overflow: baseTheme.container.overflow,
+    transition: baseTheme.container.transition,
 
     // Apply elevation shadow
     boxShadow: customStyles?.boxShadow || getElevationShadow(elevation, theme),
+
+    // Include background image if present
+    ...(baseTheme.container.backgroundImage && {
+      backgroundImage: baseTheme.container.backgroundImage,
+    }),
 
     // Custom overrides
     ...(customStyles?.backgroundColor && {
@@ -209,27 +220,43 @@ export function getPaperStyles(
     ...(customStyles?.minHeight && { minHeight: customStyles.minHeight }),
     ...(customStyles?.maxWidth && { maxWidth: customStyles.maxWidth }),
     ...(customStyles?.maxHeight && { maxHeight: customStyles.maxHeight }),
-
-    // Interactive hover states
-    ...((customStyles?.hoverTransform ||
-      customStyles?.hoverBoxShadow ||
-      customStyles?.hoverBorderColor) && {
-      '&:hover': {
-        ...(customStyles?.hoverTransform && {
-          transform: customStyles.hoverTransform,
-        }),
-        ...(customStyles?.hoverBoxShadow && {
-          boxShadow: customStyles.hoverBoxShadow,
-        }),
-        ...(customStyles?.hoverBorderColor && {
-          borderColor: customStyles.hoverBorderColor,
-        }),
-      },
-    }),
   }
 
   return {
     container: containerStyles,
+  }
+}
+
+// Helper function to get hover styles for interactive papers
+export function getPaperHoverStyles(
+  customStyles?: PaperStyles
+): React.CSSProperties | undefined {
+  const theme = customStyles?.theme || 'light'
+  const baseTheme = getPaperTheme(theme)
+
+  if (!baseTheme.containerHover && !customStyles?.hoverTransform && !customStyles?.hoverBoxShadow && !customStyles?.hoverBorderColor) {
+    return undefined
+  }
+
+  return {
+    ...(baseTheme.containerHover?.transform && {
+      transform: baseTheme.containerHover.transform,
+    }),
+    ...(baseTheme.containerHover?.boxShadow && {
+      boxShadow: baseTheme.containerHover.boxShadow,
+    }),
+    ...(baseTheme.containerHover?.borderColor && {
+      borderColor: baseTheme.containerHover.borderColor,
+    }),
+    ...(customStyles?.hoverTransform && {
+      transform: customStyles.hoverTransform,
+    }),
+    ...(customStyles?.hoverBoxShadow && {
+      boxShadow: customStyles.hoverBoxShadow,
+    }),
+    ...(customStyles?.hoverBorderColor && {
+      borderColor: customStyles.hoverBorderColor,
+    }),
   }
 }
 
