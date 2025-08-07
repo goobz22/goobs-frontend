@@ -1,75 +1,66 @@
-import React from 'react'
+'use client'
 
-/**
- * CardMembership Icon Component
- *
- * A customizable membership card/certification icon with sacred theming support.
- *
- * @param props - Standard SVG props including className, style, etc.
- * @param sacredtheme - Optional prop to enable sacred theming with golden glow effects
- * @returns JSX.Element
- */
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
-// Define props interface extending SVG props
 interface CardMembershipIconProps extends React.SVGProps<SVGSVGElement> {
-  /**
-   * Optional sacred theme styling
-   * When true, applies golden glow and sacred aesthetic
-   */
-  sacredtheme?: boolean
-
-  /**
-   * Size of the icon (width and height)
-   * @default 24
-   */
-  size?: number
+  styles?: IconStyles
 }
-
-// Sacred theme styles
-const sacredStyles = {
-  filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-  color: '#FFD700',
-  animation: 'sacredGlow 2s ease-in-out infinite alternate',
-}
-
-// Define keyframes for sacred glow animation
-const sacredKeyframes = `
-  @keyframes sacredGlow {
-    0% {
-      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-    }
-    100% {
-      filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
-    }
-  }
-`
 
 const CardMembershipIcon: React.FC<CardMembershipIconProps> = ({
-  sacredtheme,
-  size = 24,
-  style,
+  styles,
+  style = {},
   ...props
 }) => {
-  // Combine styles
-  const combinedStyle = {
-    ...(sacredtheme && sacredStyles),
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
-    <>
-      {sacredtheme && <style>{sacredKeyframes}</style>}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <svg
-        width={size}
-        height={size}
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
         viewBox="0 0 24 24"
+        width="24"
         fill="currentColor"
-        style={combinedStyle}
+        style={iconStyle}
         {...props}
       >
         <path d="M20 4H4c-1.11 0-2 .89-2 2v7c0 1.11.89 2 2 2v2c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2v-2c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 9H4V6h16v7zm-10 2l2 3 2-3H10z" />
       </svg>
-    </>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

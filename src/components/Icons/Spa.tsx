@@ -12,11 +12,7 @@ interface SpaIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
 }
 
-const SpaIcon: React.FC<SpaIconProps> = ({
-  styles,
-  style = {},
-  ...props
-}) => {
+const SpaIcon: React.FC<SpaIconProps> = ({ styles, style = {}, ...props }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [glyph] = useState(
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]

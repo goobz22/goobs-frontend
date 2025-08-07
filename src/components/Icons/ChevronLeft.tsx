@@ -1,78 +1,66 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface ChevronLeftIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
+  styles?: IconStyles
 }
 
 const ChevronLeftIcon: React.FC<ChevronLeftIconProps> = ({
-  sacredtheme = false,
+  styles,
+  style = {},
   ...props
 }) => {
-  const [currentGlyph, setCurrentGlyph] = useState(SACRED_GLYPHS[0])
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
 
+  // Inject CSS keyframes for sacred animations
   useEffect(() => {
-    if (!sacredtheme) return
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
 
-    const interval = setInterval(() => {
-      setCurrentGlyph(
-        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-      )
-    }, 3000)
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
-    return () => clearInterval(interval)
-  }, [sacredtheme])
-
-  if (sacredtheme) {
-    return <span style={{ fontSize: '1.2em' }}>{currentGlyph}</span>
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
   }
 
   return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path
-        d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
         fill="currentColor"
-      />
-    </svg>
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

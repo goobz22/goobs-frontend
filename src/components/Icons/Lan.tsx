@@ -1,70 +1,54 @@
-import React from 'react'
+'use client'
 
-/**
- * LAN Icon Component
- *
- * A customizable LAN/network connection icon with sacred theming support.
- *
- * @param props - Standard SVG props including className, style, etc.
- * @param sacredtheme - Optional prop to enable sacred theming with golden glow effects
- * @returns JSX.Element
- */
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
-// Define props interface extending SVG props
 interface LanIconProps extends React.SVGProps<SVGSVGElement> {
-  /**
-   * Optional sacred theme styling
-   * When true, applies golden glow and sacred aesthetic
-   */
-  sacredtheme?: boolean
-
-  /**
-   * Size of the icon (width and height)
-   * @default 24
-   */
-  size?: number
+  styles?: IconStyles
 }
 
-// Sacred theme styles
-const sacredStyles = {
-  filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-  color: '#FFD700',
-  animation: 'sacredGlow 2s ease-in-out infinite alternate',
-}
+const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
 
-// Define keyframes for sacred glow animation
-const sacredKeyframes = `
-  @keyframes sacredGlow {
-    0% {
-      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-    100% {
-      filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
-    }
-  }
-`
+  }, [styles?.theme])
 
-const LanIcon: React.FC<LanIconProps> = ({
-  sacredtheme,
-  size = 24,
-  style,
-  ...props
-}) => {
-  // Combine styles
-  const combinedStyle = {
-    ...(sacredtheme && sacredStyles),
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
-    <>
-      {sacredtheme && <style>{sacredKeyframes}</style>}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <svg
-        width={size}
-        height={size}
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
         viewBox="0 0 24 24"
+        width="24"
         fill="currentColor"
-        style={combinedStyle}
+        style={iconStyle}
         {...props}
       >
         <path d="M13 4h-2v16h2m0-8h8v-2h-8V4m0 6V8h8v2h-8z" />
@@ -72,7 +56,10 @@ const LanIcon: React.FC<LanIconProps> = ({
         <rect x="15" y="2" width="6" height="8" rx="1" />
         <rect x="15" y="14" width="6" height="8" rx="1" />
       </svg>
-    </>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

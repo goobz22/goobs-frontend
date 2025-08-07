@@ -1,75 +1,62 @@
-import React from 'react'
+'use client'
 
-/**
- * DNS Icon Component
- *
- * A customizable DNS/network services icon with sacred theming support.
- *
- * @param props - Standard SVG props including className, style, etc.
- * @param sacredtheme - Optional prop to enable sacred theming with golden glow effects
- * @returns JSX.Element
- */
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
-// Define props interface extending SVG props
 interface DnsIconProps extends React.SVGProps<SVGSVGElement> {
-  /**
-   * Optional sacred theme styling
-   * When true, applies golden glow and sacred aesthetic
-   */
-  sacredtheme?: boolean
-
-  /**
-   * Size of the icon (width and height)
-   * @default 24
-   */
-  size?: number
+  styles?: IconStyles
 }
 
-// Sacred theme styles
-const sacredStyles = {
-  filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-  color: '#FFD700',
-  animation: 'sacredGlow 2s ease-in-out infinite alternate',
-}
+const DnsIcon: React.FC<DnsIconProps> = ({ styles, style = {}, ...props }) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
 
-// Define keyframes for sacred glow animation
-const sacredKeyframes = `
-  @keyframes sacredGlow {
-    0% {
-      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-    100% {
-      filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
-    }
-  }
-`
+  }, [styles?.theme])
 
-const DnsIcon: React.FC<DnsIconProps> = ({
-  sacredtheme,
-  size = 24,
-  style,
-  ...props
-}) => {
-  // Combine styles
-  const combinedStyle = {
-    ...(sacredtheme && sacredStyles),
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
-    <>
-      {sacredtheme && <style>{sacredKeyframes}</style>}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <svg
-        width={size}
-        height={size}
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
         viewBox="0 0 24 24"
+        width="24"
         fill="currentColor"
-        style={combinedStyle}
+        style={iconStyle}
         {...props}
       >
         <path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 19c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm3 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm10 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm3 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm10 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
       </svg>
-    </>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

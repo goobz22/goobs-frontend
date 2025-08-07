@@ -1,44 +1,69 @@
-/**
- * @fileoverview WarningAmber icon component
- */
 'use client'
-import React from 'react'
 
-interface WarningAmberIconProps {
-  width?: number
-  height?: number
-  color?: string
-  className?: string
-  style?: React.CSSProperties
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface WarningAmberIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const WarningAmberIcon: React.FC<WarningAmberIconProps> = ({
-  width = 24,
-  height = 24,
-  color = 'currentColor',
-  className,
-  style,
+  styles,
+  style = {},
+  ...props
 }) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
+  }
+
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      style={style}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path
-        d="M12 5.99L19.53 19H4.47L12 5.99ZM12 2L1 21H23L12 2Z"
-        fill={color}
-        fillOpacity="0.3"
-      />
-      <path d="M13 16H11V18H13V16ZM13 10H11V14H13V10Z" fill={color} />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path
+          d="M12 5.99L19.53 19H4.47L12 5.99ZM12 2L1 21H23L12 2Z"
+          fillOpacity="0.3"
+        />
+        <path d="M13 16H11V18H13V16ZM13 10H11V14H13V10Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
-
-WarningAmberIcon.displayName = 'WarningAmberIcon'
 
 export default WarningAmberIcon

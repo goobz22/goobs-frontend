@@ -1,87 +1,19 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface WifiOffIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// Premium theme styles (when sacredtheme=false)
-const premiumStyles = {
-  icon: {
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-    color: 'currentColor', // Default color
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when sacredtheme=true)
-const sacredStyles = {
-  icon: {
-    transition: 'all 0.4s ease',
-    filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))',
-    color: 'rgba(255, 215, 0, 0.9)',
-  } as React.CSSProperties,
-
-  iconHover: {
-    transform: 'scale(1.1) rotate(5deg)',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
-    color: '#FFD700',
-  } as React.CSSProperties,
-
-  glyph: {
-    position: 'absolute',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.6)',
-    transition: 'all 0.3s ease',
-    opacity: 0,
-    pointerEvents: 'none',
-    animation: 'sacredGlyphRotate 20s linear infinite',
-  } as React.CSSProperties,
-
-  glyphVisible: {
-    opacity: 1,
-  } as React.CSSProperties,
+  styles?: IconStyles
 }
 
 const WifiOffIcon: React.FC<WifiOffIconProps> = ({
-  sacredtheme = false,
+  styles,
   style = {},
   ...props
 }) => {
@@ -90,34 +22,27 @@ const WifiOffIcon: React.FC<WifiOffIconProps> = ({
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
   )
 
-  // CSS keyframes for sacred animations
+  // Inject CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-  }, [sacredtheme])
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={computedStyles.container}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -132,17 +57,8 @@ const WifiOffIcon: React.FC<WifiOffIconProps> = ({
       >
         <path d="M480-348q-25 0-42.5-17.5T420-408q0-25 17.5-42.5T480-468q25 0 42.5 17.5T540-408q0 25-17.5 42.5T480-348Zm0 188L88-640l28-58 164 162v-204h80v128l120-90 120 90v-128h80v204l164-162 28 58-192 160v208L480-160Zm0-324Z" />
       </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
       )}
     </div>
   )

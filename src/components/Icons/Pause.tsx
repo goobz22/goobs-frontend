@@ -1,82 +1,19 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface PauseIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// Sacred theme styles
-const sacredStyles = {
-  icon: {
-    color: '#FFD700',
-    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))',
-    transition: 'all 0.3s ease',
-  },
-  iconHover: {
-    color: '#FFED4A',
-    filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8))',
-    transform: 'scale(1.1)',
-  },
-  glyph: {
-    position: 'absolute' as const,
-    fontSize: '10px',
-    color: '#FFD700',
-    opacity: 0,
-    transition: 'opacity 0.3s ease',
-    animation: 'sacredGlyphRotate 20s linear infinite',
-    textShadow: '0 0 4px rgba(255, 215, 0, 0.6)',
-  },
-  glyphVisible: {
-    opacity: 1,
-  },
-}
-
-// Premium theme styles (fallback)
-const premiumStyles = {
-  icon: {
-    color: '#333',
-    transition: 'all 0.3s ease',
-  },
-  iconHover: {
-    color: '#555',
-    transform: 'scale(1.05)',
-  },
+  styles?: IconStyles
 }
 
 const PauseIcon: React.FC<PauseIconProps> = ({
-  sacredtheme = false,
+  styles,
   style = {},
   ...props
 }) => {
@@ -85,34 +22,20 @@ const PauseIcon: React.FC<PauseIconProps> = ({
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
   )
 
-  // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-  }, [sacredtheme])
+  }, [styles?.theme])
 
-  const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
-    ...style,
-  }
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={computedStyles.container}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -122,22 +45,13 @@ const PauseIcon: React.FC<PauseIconProps> = ({
         viewBox="0 -960 960 960"
         width="24"
         fill="currentColor"
-        style={iconStyle}
+        style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
         <path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" />
       </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
       )}
     </div>
   )

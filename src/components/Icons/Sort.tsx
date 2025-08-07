@@ -1,86 +1,19 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface SortIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// --------------------------------------------------------------------------
-// STYLING CONSTANTS
-// --------------------------------------------------------------------------
-
-const premiumStyles = {
-  icon: {
-    color: '#4A5568', // Cool gray
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    cursor: 'pointer',
-  },
-  iconHover: {
-    color: '#2D3748', // Darker gray
-    transform: 'scale(1.1)',
-  },
-}
-
-const sacredStyles = {
-  icon: {
-    color: '#F7DC6F', // Egyptian gold
-    filter: 'drop-shadow(0 0 8px rgba(247, 220, 111, 0.4))',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    cursor: 'pointer',
-  },
-  iconHover: {
-    color: '#F4D03F', // Brighter gold
-    filter: 'drop-shadow(0 0 12px rgba(247, 220, 111, 0.6))',
-    transform: 'scale(1.1)',
-  },
-  glyph: {
-    position: 'absolute' as const,
-    fontSize: '8px',
-    color: '#F7DC6F',
-    opacity: 0,
-    transition: 'all 0.3s ease',
-    pointerEvents: 'none' as const,
-    animation: 'sacredGlyphRotate 3s linear infinite',
-  },
-  glyphVisible: {
-    opacity: 0.7,
-  },
+  styles?: IconStyles
 }
 
 const SortIcon: React.FC<SortIconProps> = ({
-  sacredtheme = false,
+  styles,
   style = {},
   ...props
 }) => {
@@ -89,34 +22,25 @@ const SortIcon: React.FC<SortIconProps> = ({
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
   )
 
-  // CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-  }, [sacredtheme])
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={computedStyles.container}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -131,17 +55,8 @@ const SortIcon: React.FC<SortIconProps> = ({
       >
         <path d="M120-240v-80h240v80H120Zm0-200v-80h480v80H120Zm0-200v-80h720v80H120Z" />
       </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
       )}
     </div>
   )

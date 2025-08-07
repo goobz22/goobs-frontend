@@ -1,28 +1,58 @@
-import React from 'react'
-import { coal } from '../../theme/index'
+'use client'
 
-// Restore icon component
-const RestoreIcon: React.FC<{
-  size?: number
-  color?: string
-  className?: string
-  style?: React.CSSProperties
-}> = ({ size = 24, color = coal.main, className = '', style = {} }) => {
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface RestoreIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
+}
+
+const RestoreIcon: React.FC<RestoreIconProps> = ({
+  styles,
+  style = {},
+  ...props
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={style}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path
-        d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"
-        fill={color}
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={{ ...computedStyles.icon, ...style }}
+        {...props}
+      >
+        <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

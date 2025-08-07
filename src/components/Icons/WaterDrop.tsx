@@ -1,82 +1,19 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface WaterDropIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// Premium theme styles
-const premiumStyles = {
-  icon: {
-    color: '#4A5568',
-    transition: 'all 0.3s ease',
-  },
-  iconHover: {
-    color: '#2D3748',
-    transform: 'scale(1.1)',
-  },
-}
-
-// Sacred theme styles
-const sacredStyles = {
-  icon: {
-    color: '#FFD700',
-    filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.4))',
-    transition: 'all 0.3s ease',
-  },
-  iconHover: {
-    color: '#FFF8DC',
-    filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
-    transform: 'scale(1.1)',
-  },
-  glyph: {
-    position: 'absolute' as const,
-    color: 'rgba(255, 215, 0, 0.6)',
-    fontSize: '8px',
-    fontFamily: '"Noto Sans Egyptian Hieroglyphs", serif',
-    animation: 'sacredGlyphRotate 3s linear infinite',
-    opacity: 0,
-    transition: 'opacity 0.3s ease',
-  },
-  glyphVisible: {
-    opacity: 1,
-  },
+  styles?: IconStyles
 }
 
 const WaterDropIcon: React.FC<WaterDropIconProps> = ({
-  sacredtheme = false,
+  styles,
   style = {},
   ...props
 }) => {
@@ -85,34 +22,27 @@ const WaterDropIcon: React.FC<WaterDropIconProps> = ({
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
   )
 
-  // CSS keyframes for sacred animations
+  // Inject CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-  }, [sacredtheme])
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={computedStyles.container}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -127,17 +57,8 @@ const WaterDropIcon: React.FC<WaterDropIconProps> = ({
       >
         <path d="M480-80q-100 0-170-70t-70-170q0-87 74.5-187.5T480-680q161 172 235.5 272.5T720-220q0 100-70 170T480-80Zm0-80q66 0 113-47t47-113q0-66-47-113t-113-47q-66 0-113 47t-47 113q0 66 47 113t113 47Zm0-160Z" />
       </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
       )}
     </div>
   )

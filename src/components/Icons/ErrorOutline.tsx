@@ -1,84 +1,19 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-// --------------------------------------------------------------------------
-// SACRED THEMING CONSTANTS
-// --------------------------------------------------------------------------
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
 interface ErrorOutlineIconProps extends React.SVGProps<SVGSVGElement> {
-  sacredtheme?: boolean
-}
-
-// --------------------------------------------------------------------------
-// SACRED THEMING STYLES
-// --------------------------------------------------------------------------
-
-const sacredStyles = {
-  icon: {
-    transition: 'all 0.3s ease',
-    filter: 'drop-shadow(0 0 8px rgba(218, 165, 32, 0.3))',
-    color: '#DAA520',
-  },
-  iconHover: {
-    filter: 'drop-shadow(0 0 15px rgba(218, 165, 32, 0.6))',
-    transform: 'scale(1.1)',
-    color: '#FFD700',
-  },
-  glyph: {
-    position: 'absolute' as const,
-    fontSize: '8px',
-    color: '#DAA520',
-    opacity: 0,
-    transition: 'all 0.3s ease',
-    animation: 'sacredGlyphRotate 3s linear infinite',
-    textShadow: '0 0 4px rgba(218, 165, 32, 0.8)',
-  },
-  glyphVisible: {
-    opacity: 0.7,
-  },
-}
-
-const premiumStyles = {
-  icon: {
-    transition: 'all 0.2s ease',
-    color: '#6366F1',
-  },
-  iconHover: {
-    color: '#4F46E5',
-    transform: 'scale(1.05)',
-  },
+  styles?: IconStyles
 }
 
 const ErrorOutlineIcon: React.FC<ErrorOutlineIconProps> = ({
-  sacredtheme = false,
+  styles,
   style = {},
   ...props
 }) => {
@@ -87,34 +22,27 @@ const ErrorOutlineIcon: React.FC<ErrorOutlineIconProps> = ({
     SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
   )
 
-  // CSS keyframes for sacred animations
+  // Inject CSS keyframes for sacred animations
   useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
-      const keyframes = `
-        @keyframes sacredGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
-      }
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
     }
-  }, [sacredtheme])
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   const iconStyle = {
-    ...(sacredtheme ? sacredStyles.icon : premiumStyles.icon),
-    ...(isHovered && sacredtheme ? sacredStyles.iconHover : {}),
-    ...(isHovered && !sacredtheme ? premiumStyles.iconHover : {}),
+    ...computedStyles.icon,
     ...style,
   }
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={computedStyles.container}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -129,17 +57,8 @@ const ErrorOutlineIcon: React.FC<ErrorOutlineIconProps> = ({
       >
         <path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z" />
       </svg>
-      {sacredtheme && (
-        <div
-          style={{
-            ...sacredStyles.glyph,
-            ...(isHovered && sacredStyles.glyphVisible),
-            top: '-8px',
-            right: '-8px',
-          }}
-        >
-          {glyph}
-        </div>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
       )}
     </div>
   )

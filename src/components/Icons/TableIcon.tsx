@@ -1,27 +1,64 @@
 'use client'
-import React from 'react'
 
-interface TableIconProps {
-  fontSize?: 'small' | 'medium' | 'large'
-  style?: React.CSSProperties
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface TableIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const TableIcon: React.FC<TableIconProps> = ({
-  fontSize = 'medium',
-  style,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const size = fontSize === 'small' ? 16 : fontSize === 'large' ? 24 : 20
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
+  }
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={style}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path d="M10 4H4c-1.1 0-2 .9-2 2v3h20V6c0-1.1-.9-2-2-2h-6c0-1.1-.9-2-2-2zM2 19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-7H2v7z" />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M10 4H4c-1.1 0-2 .9-2 2v3h20V6c0-1.1-.9-2-2-2h-6c0-1.1-.9-2-2-2zM2 19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-7H2v7z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

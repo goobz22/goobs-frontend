@@ -1,36 +1,59 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
-interface BankIconProps {
-  size?: number
-  color?: string
-  style?: React.CSSProperties
-  sacredtheme?: boolean
+interface BankIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const BankIcon: React.FC<BankIconProps> = ({
-  size = 24,
-  color = 'currentColor',
-  style,
-  sacredtheme,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const effectiveColor = sacredtheme ? 'rgba(255, 215, 0, 0.8)' : color
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={style}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path
-        d="M12 3L2 8h20l-10-5zm-8 6v8h16V9H4zm2 2h2v4H6v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zM2 19h20v2H2v-2z"
-        fill={effectiveColor}
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={{ ...computedStyles.icon, ...style }}
+        {...props}
+      >
+        <path d="M12 3L2 8h20l-10-5zm-8 6v8h16V9H4zm2 2h2v4H6v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zM2 19h20v2H2v-2z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

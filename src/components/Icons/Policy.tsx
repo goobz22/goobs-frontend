@@ -1,35 +1,59 @@
-import React from 'react'
+'use client'
 
-interface PolicyIconProps {
-  style?: React.CSSProperties
-  fontSize?: 'small' | 'medium' | 'large'
-  className?: string
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface PolicyIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const PolicyIcon: React.FC<PolicyIconProps> = ({
-  style,
-  fontSize = 'medium',
-  className,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const sizeMap = {
-    small: 20,
-    medium: 24,
-    large: 32,
-  }
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
 
-  const size = sizeMap[fontSize]
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={style}
-      className={className}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={{ ...computedStyles.icon, ...style }}
+        {...props}
+      >
+        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

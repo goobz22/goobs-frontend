@@ -1,35 +1,64 @@
-import React from 'react'
+'use client'
 
-interface VpnLockIconProps {
-  style?: React.CSSProperties
-  fontSize?: 'small' | 'medium' | 'large'
-  className?: string
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface VpnLockIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const VpnLockIcon: React.FC<VpnLockIconProps> = ({
-  style,
-  fontSize = 'medium',
-  className,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const sizeMap = {
-    small: 20,
-    medium: 24,
-    large: 32,
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
   }
 
-  const size = sizeMap[fontSize]
-
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={style}
-      className={className}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path d="M22,4V16A2,2 0 0,1 20,18H16L12,22L8,18H4A2,2 0 0,1 2,16V4A2,2 0 0,1 4,2H20A2,2 0 0,1 22,4M13.5,6A1.5,1.5 0 0,0 12,7.5V8.5A1.5,1.5 0 0,0 10.5,10V13.5A1.5,1.5 0 0,0 12,15H15A1.5,1.5 0 0,0 16.5,13.5V10A1.5,1.5 0 0,0 15,8.5V7.5A1.5,1.5 0 0,0 13.5,6Z" />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M22,4V16A2,2 0 0,1 20,18H16L12,22L8,18H4A2,2 0 0,1 2,16V4A2,2 0 0,1 4,2H20A2,2 0 0,1 22,4M13.5,6A1.5,1.5 0 0,0 12,7.5V8.5A1.5,1.5 0 0,0 10.5,10V13.5A1.5,1.5 0 0,0 12,15H15A1.5,1.5 0 0,0 16.5,13.5V10A1.5,1.5 0 0,0 15,8.5V7.5A1.5,1.5 0 0,0 13.5,6Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

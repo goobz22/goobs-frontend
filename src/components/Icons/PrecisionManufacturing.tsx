@@ -8,7 +8,8 @@ import {
   SACRED_GLYPHS,
 } from '../../theme'
 
-interface PrecisionManufacturingIconProps extends React.SVGProps<SVGSVGElement> {
+interface PrecisionManufacturingIconProps
+  extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
 }
 
