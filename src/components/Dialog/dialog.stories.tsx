@@ -48,11 +48,15 @@ const InteractiveDialog = ({
   return (
     <div style={{ padding: '20px' }}>
       <Button
-        styles={{ theme: styles?.theme || 'light' }}
+        styles={{
+          theme:
+            (styles as { theme?: 'light' | 'dark' | 'sacred' })?.theme ||
+            'light',
+        }}
         text={buttonText}
         onClick={() => setOpen(true)}
       />
-      <Dialog open={open} onClose={() => setOpen(false)} styles={styles}>
+      <Dialog open={open} onClose={() => setOpen(false)} styles={styles as any}>
         {children}
       </Dialog>
     </div>

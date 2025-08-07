@@ -180,7 +180,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
       )}
       <div style={computedStyles.inputWrapper}>
         <div style={computedStyles.startAdornment}>
-          <SearchIcon sacredtheme={theme === 'sacred'} />
+          <SearchIcon styles={{ theme: theme || 'sacred' }} />
         </div>
         <input
           type="text"

@@ -252,7 +252,10 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           disabled={styles?.disabled}
           style={computedStyles.button}
         >
-          <ArrowDropUpIcon style={computedStyles.icon} />
+          <ArrowDropUpIcon
+            styles={{ theme: styles?.theme || 'sacred' }}
+            style={computedStyles.icon}
+          />
         </button>
         <button
           type="button"
@@ -261,7 +264,10 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           disabled={styles?.disabled}
           style={{ ...computedStyles.button, marginTop: '2px' }}
         >
-          <ArrowDropDownIcon style={computedStyles.icon} />
+          <ArrowDropDownIcon
+            styles={{ theme: styles?.theme || 'sacred' }}
+            style={computedStyles.icon}
+          />
         </button>
       </div>
     </div>

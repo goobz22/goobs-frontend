@@ -368,6 +368,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             disabled={styles?.disabled}
           >
             <ArrowDropDownIcon
+              styles={{ theme: styles?.theme || 'sacred' }}
               style={{
                 transition: 'transform 0.2s',
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',

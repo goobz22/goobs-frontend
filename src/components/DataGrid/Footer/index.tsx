@@ -290,7 +290,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to first page"
       >
-        <LastPageIcon />
+        <LastPageIcon styles={{ theme: styles?.theme || 'sacred' }} />
       </PaginationButton>
 
       <PaginationButton
@@ -298,7 +298,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to previous page"
       >
-        <KeyboardArrowLeftIcon />
+        <KeyboardArrowLeftIcon styles={{ theme: styles?.theme || 'sacred' }} />
       </PaginationButton>
 
       <div style={paginationTextStyle}>
@@ -310,7 +310,7 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to next page"
       >
-        <KeyboardArrowRightIcon />
+        <KeyboardArrowRightIcon styles={{ theme: styles?.theme || 'sacred' }} />
       </PaginationButton>
 
       <PaginationButton
@@ -318,7 +318,7 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to last page"
       >
-        <FirstPageIcon />
+        <FirstPageIcon styles={{ theme: styles?.theme || 'sacred' }} />
       </PaginationButton>
     </div>
   )

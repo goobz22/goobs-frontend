@@ -1100,11 +1100,14 @@ const Rows: React.FC<RowsProps> = ({
                 } else if (col.type === 'subnet' || col.type === 'supernet') {
                   // For complex subnet/supernet objects, show formatted string
                   try {
-                    const subnetValue = value as any
+                    const subnetValue = value as {
+                      address?: string
+                      mask?: number
+                    } | null
                     if (
                       subnetValue &&
                       subnetValue.address &&
-                      subnetValue.mask
+                      subnetValue.mask !== undefined
                     ) {
                       cellContent = (
                         <span

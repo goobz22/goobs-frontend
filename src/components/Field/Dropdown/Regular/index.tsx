@@ -404,7 +404,10 @@ const Dropdown: React.FC<DropdownProps> = ({
           {filteredOptions.map(renderOption)}
         </select>
         <div style={componentStyles.iconWrapper}>
-          <ExpandMoreIcon style={componentStyles.icon} />
+          <ExpandMoreIcon
+            styles={{ theme: styles?.theme || 'sacred' }}
+            style={componentStyles.icon}
+          />
         </div>
       </div>
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}

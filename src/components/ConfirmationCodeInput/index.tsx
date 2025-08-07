@@ -128,7 +128,7 @@ const SacredBottomDecorations: React.FC = () => {
 
   return (
     <div style={decorativeStyles.bottomGlyphContainer}>
-      {[...Array(3)].map((_, i) => (
+      {Array.from({ length: 3 }).map((_, i) => (
         <span key={i} style={decorativeStyles.bottomGlyph}>
           .
         </span>
@@ -185,7 +185,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   }, [])
 
   useEffect(() => {
-    inputRefs.current = Array(codeLength).fill(null)
+    inputRefs.current = Array.from({ length: codeLength }, () => null)
   }, [codeLength])
 
   useEffect(() => {

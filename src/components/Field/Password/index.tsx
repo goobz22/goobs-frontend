@@ -163,7 +163,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
         >
           <ShowHideEyeIcon
             visible={passwordVisible}
-            sacredtheme={styles?.theme === 'sacred'}
+            styles={{ theme: styles?.theme || 'sacred' }}
           />
         </button>
       </div>

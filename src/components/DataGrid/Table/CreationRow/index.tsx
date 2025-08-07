@@ -47,7 +47,14 @@ const CreationRow: React.FC<CreationRowProps> = ({
     const fieldConfig = column.creationField
     if (!fieldConfig) return null
 
-    const value = creationRowData[column.field]
+    const value = creationRowData[column.field] as
+      | string
+      | number
+      | boolean
+      | Date
+      | string[]
+      | null
+      | undefined
     const fieldStyles = {
       theme: (isSacredTheme ? 'sacred' : 'light') as
         | 'light'
@@ -65,7 +72,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'text':
         return (
           <TextField
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -78,7 +85,13 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'date':
         return (
           <DateField
-            value={value || null}
+            value={
+              value instanceof Date
+                ? value
+                : value
+                  ? new Date(String(value))
+                  : null
+            }
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -92,7 +105,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <SearchableSimple
             label=""
             options={fieldConfig.options || []}
-            defaultValue={value || ''}
+            defaultValue={String(value ?? '')}
             onChange={option => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
@@ -112,7 +125,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <MultiSelectChip
             label=""
             options={fieldConfig.options || []}
-            defaultSelected={Array.isArray(value) ? value : []}
+            defaultSelected={Array.isArray(value) ? (value as string[]) : []}
             onChange={values => onCreationFieldChange?.(column.field, values)}
             helperText={fieldConfig.helperText}
             styles={fieldStyles}
@@ -122,7 +135,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'internalIncrement':
         return (
           <InternalIncrementNumberField
-            initialValue={value?.toString() || '0'}
+            initialValue={value?.toString() ?? '0'}
             onChange={eventOrValue => {
               // Handle both React event and number values from the component
               let numValue: number
@@ -150,7 +163,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <SearchableSimple
             label=""
             options={fieldConfig.options || []}
-            defaultValue={value || ''}
+            defaultValue={String(value ?? '')}
             onChange={option => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
@@ -168,7 +181,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'phoneNumber':
         return (
           <PhoneNumberField
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -181,7 +194,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'cvv':
         return (
           <CVV
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={(newValue, _isValid) =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -194,7 +207,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'creditCardNumber':
         return (
           <CreditCardNumber
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={(newValue, _isValid, _cardType) =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -207,7 +220,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'accountNumber':
         return (
           <AccountNumber
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={(newValue, _isValid) =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -220,7 +233,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'routingNumber':
         return (
           <RoutingNumber
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={(newValue, _isValid) =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -233,7 +246,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'ipAddress':
         return (
           <IPAddressField
-            initialValue={value || ''}
+            initialValue={String(value ?? '')}
             onChange={event =>
               onCreationFieldChange?.(column.field, event.target.value)
             }
@@ -253,7 +266,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'subnet':
         return (
           <SubnetField
-            value={value || { address: '', mask: 24 }}
+            value={
+              (value as unknown as {
+                address: string
+                mask: number
+              } | null) ?? {
+                address: '',
+                mask: 24,
+              }
+            }
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -271,7 +292,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'vlan':
         return (
           <VLANField
-            initialValue={value?.toString() || ''}
+            initialValue={value?.toString() ?? ''}
             onChange={event =>
               onCreationFieldChange?.(
                 column.field,
@@ -287,7 +308,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'cidr':
         return (
           <CIDRField
-            initialValue={value?.toString() || '24'}
+            initialValue={value?.toString() ?? '24'}
             onChange={eventOrNumber => {
               let cidrValue: number
               if (typeof eventOrNumber === 'number') {
@@ -314,7 +335,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'supernet':
         return (
           <SupernetField
-            value={value || { address: '', mask: 16 }}
+            value={
+              (value as unknown as {
+                address: string
+                mask: number
+              } | null) ?? {
+                address: '',
+                mask: 16,
+              }
+            }
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }
@@ -327,7 +356,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'macAddress':
         return (
           <MACAddressField
-            initialValue={value || ''}
+            initialValue={String(value ?? '')}
             onChange={event =>
               onCreationFieldChange?.(column.field, event.target.value)
             }
@@ -339,7 +368,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       default:
         return (
           <TextField
-            value={value || ''}
+            value={String(value ?? '')}
             onChange={newValue =>
               onCreationFieldChange?.(column.field, newValue)
             }

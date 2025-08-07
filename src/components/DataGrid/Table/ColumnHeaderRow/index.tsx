@@ -205,7 +205,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
               >
-                <MoreVertIcon />
+                <MoreVertIcon styles={{ theme: styles?.theme || 'sacred' }} />
               </button>
             </div>
 

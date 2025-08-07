@@ -9,12 +9,35 @@ import { getDataGridStyles } from '../../../theme'
 import { getDataGridTheme } from '../../../theme/datagrid'
 import type { TableProps } from '../types'
 
-export function getRowId(row: any): string {
+export function getRowId(row: {
+  id?: string | number
+  _id?: string | number
+}): string {
   return String(row.id ?? row._id ?? '')
 }
 
+interface ScrollbarConfig {
+  height: string
+  width: string
+  track: {
+    backgroundColor: string
+    borderRadius: string
+  }
+  thumb: {
+    backgroundColor: string
+    borderRadius: string
+    border?: string
+  }
+  thumbHover?: {
+    backgroundColor: string
+  }
+}
+
 // Create themed scrollbar styles
-const createScrollbarStyles = (theme: string, scrollbarConfig: any) => {
+const createScrollbarStyles = (
+  theme: string,
+  scrollbarConfig: ScrollbarConfig
+) => {
   const scrollbarClass = `datagrid-scrollbar-${theme}`
 
   const css = `

@@ -122,9 +122,9 @@ function DataGrid({
 
   // Row creation state
   const [isCreatingRow, setIsCreatingRow] = useState(false)
-  const [creationRowData, setCreationRowData] = useState<Record<string, any>>(
-    {}
-  )
+  const [creationRowData, setCreationRowData] = useState<
+    Record<string, unknown>
+  >({})
   const [_creationRowErrors, setCreationRowErrors] = useState<
     Record<string, string>
   >({})
@@ -237,7 +237,7 @@ function DataGrid({
     if (!allowRowCreation) return
 
     // Initialize creation row data with default values
-    const initialData: Record<string, any> = {}
+    const initialData: Record<string, unknown> = {}
     visibleColumns.forEach(col => {
       if (col.creationField?.defaultValue !== undefined) {
         initialData[col.field] = col.creationField.defaultValue
@@ -251,18 +251,21 @@ function DataGrid({
     setIsCreatingRow(true)
   }, [allowRowCreation, visibleColumns])
 
-  const handleCreationFieldChange = useCallback((field: string, value: any) => {
-    setCreationRowData(prev => ({
-      ...prev,
-      [field]: value,
-    }))
+  const handleCreationFieldChange = useCallback(
+    (field: string, value: unknown) => {
+      setCreationRowData(prev => ({
+        ...prev,
+        [field]: value,
+      }))
 
-    // Clear error for this field when value changes
-    setCreationRowErrors(prev => ({
-      ...prev,
-      [field]: '',
-    }))
-  }, [])
+      // Clear error for this field when value changes
+      setCreationRowErrors(prev => ({
+        ...prev,
+        [field]: '',
+      }))
+    },
+    []
+  )
 
   // Generate user-friendly validation error message
   const generateValidationMessage = useCallback(

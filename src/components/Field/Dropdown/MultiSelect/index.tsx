@@ -234,7 +234,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
           )}
         </div>
         <div style={componentStyles.iconWrapper}>
-          <ExpandMoreIcon style={componentStyles.icon} />
+          <ExpandMoreIcon
+            styles={{ theme: styles?.theme || 'sacred' }}
+            style={componentStyles.icon}
+          />
         </div>
         {isOpen && (
           <div ref={dropdownRef} style={componentStyles.dropdown}>

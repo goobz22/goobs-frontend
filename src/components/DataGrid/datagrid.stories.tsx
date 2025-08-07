@@ -57,7 +57,7 @@ const sampleColumns: ColumnDef[] = [
       placeholder: 'Enter email address',
       validation: value => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(value)) {
+        if (!emailRegex.test(String(value))) {
           return 'Please enter a valid email address'
         }
         return undefined
@@ -1274,7 +1274,7 @@ const InlineRowCreationDemo: React.FC<DatagridProps> = args => {
   const [rows, setRows] = React.useState(sampleRows)
   const [createdCount, setCreatedCount] = React.useState(0)
 
-  const handleRowCreation = async (rowData: Record<string, any>) => {
+  const handleRowCreation = async (rowData: Record<string, unknown>) => {
     console.log('Creating new row:', rowData)
 
     // Simulate API call
@@ -1283,15 +1283,15 @@ const InlineRowCreationDemo: React.FC<DatagridProps> = args => {
     // Create new row with generated ID
     const newRow = {
       id: `new-${Date.now()}`,
-      name: rowData.name || '',
+      name: String(rowData.name || ''),
       age: Number(rowData.age) || 0,
-      email: rowData.email || '',
-      department: rowData.department || '',
+      email: String(rowData.email || ''),
+      department: String(rowData.department || ''),
       salary: Number(rowData.salary) || 0,
       startDate: rowData.startDate
-        ? new Date(rowData.startDate).toISOString().split('T')[0]
+        ? new Date(String(rowData.startDate)).toISOString().split('T')[0]
         : '',
-      status: rowData.status || 'Active',
+      status: String(rowData.status || 'Active'),
     }
 
     setRows(prev => [newRow, ...prev])
@@ -1354,7 +1354,7 @@ export const InlineRowCreation: Story = {
 const ValidationTestDemo: React.FC<DatagridProps> = args => {
   const [rows, setRows] = React.useState(sampleRows)
 
-  const handleRowCreation = async (rowData: Record<string, any>) => {
+  const handleRowCreation = async (rowData: Record<string, unknown>) => {
     console.log('Creating new row:', rowData)
 
     // Simulate API call
@@ -1363,15 +1363,15 @@ const ValidationTestDemo: React.FC<DatagridProps> = args => {
     // Create new row with generated ID
     const newRow = {
       id: `new-${Date.now()}`,
-      name: rowData.name || '',
+      name: String(rowData.name || ''),
       age: Number(rowData.age) || 0,
-      email: rowData.email || '',
-      department: rowData.department || '',
+      email: String(rowData.email || ''),
+      department: String(rowData.department || ''),
       salary: Number(rowData.salary) || 0,
       startDate: rowData.startDate
-        ? new Date(rowData.startDate).toISOString().split('T')[0]
+        ? new Date(String(rowData.startDate)).toISOString().split('T')[0]
         : '',
-      status: rowData.status || 'Active',
+      status: String(rowData.status || 'Active'),
     }
 
     setRows(prev => [newRow, ...prev])
@@ -1522,7 +1522,7 @@ const BillingInformationExampleDemo: React.FC = () => {
         placeholder: 'Enter zip code',
         validation: value => {
           const zipRegex = /^\d{5}(-\d{4})?$/
-          if (!zipRegex.test(value)) {
+          if (!zipRegex.test(String(value))) {
             return 'Please enter a valid zip code'
           }
           return undefined
@@ -1539,7 +1539,7 @@ const BillingInformationExampleDemo: React.FC = () => {
         placeholder: 'Enter phone number',
         validation: value => {
           const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/
-          if (!phoneRegex.test(value)) {
+          if (!phoneRegex.test(String(value))) {
             return 'Please enter phone as (555) 123-4567'
           }
           return undefined
@@ -1548,7 +1548,7 @@ const BillingInformationExampleDemo: React.FC = () => {
     },
   ]
 
-  const handleRowCreation = async (rowData: Record<string, any>) => {
+  const handleRowCreation = async (rowData: Record<string, unknown>) => {
     console.log('Creating billing information:', rowData)
 
     // Simulate API call
@@ -1556,13 +1556,13 @@ const BillingInformationExampleDemo: React.FC = () => {
 
     const newRow = {
       id: `billing-${Date.now()}`,
-      name: rowData.name || '',
-      streetAddress1: rowData.streetAddress1 || '',
-      streetAddress2: rowData.streetAddress2 || '',
-      city: rowData.city || '',
-      state: rowData.state || '',
-      zipcode: rowData.zipcode || '',
-      phoneNumber: rowData.phoneNumber || '',
+      name: String(rowData.name || ''),
+      streetAddress1: String(rowData.streetAddress1 || ''),
+      streetAddress2: String(rowData.streetAddress2 || ''),
+      city: String(rowData.city || ''),
+      state: String(rowData.state || ''),
+      zipcode: String(rowData.zipcode || ''),
+      phoneNumber: String(rowData.phoneNumber || ''),
     }
 
     setRows(prev => [newRow, ...prev])
