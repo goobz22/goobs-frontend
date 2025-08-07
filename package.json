@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.101.0",
+  "version": "0.122.0",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "next": "15",
     "otplib": "^12",
     "react-qr-code": "^2",
-    "slate": "^0.117",
+    "slate": "^0.118",
     "slate-dom": "^0.117",
     "slate-history": "^0.113",
     "slate-react": "^0.117",
