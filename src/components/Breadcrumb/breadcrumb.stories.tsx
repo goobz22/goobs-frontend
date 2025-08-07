@@ -56,7 +56,7 @@ export const Sacred: Story = {
 export const WithCustomSeparator: Story = {
   args: {
     items: sampleItems,
-    separator: <ChevronRightIcon />,
+    separator: <ChevronRightIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'sacred' },
   },
   parameters: {

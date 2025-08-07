@@ -69,6 +69,26 @@ export interface CardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 // --------------------------------------------------------------------------
+// CARD HEADER PROPS
+// --------------------------------------------------------------------------
+
+export interface CardHeaderProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
+  /** The header content to display in the card header area. */
+  children?: React.ReactNode
+  /** The title text for the card header. */
+  title?: string
+  /** The subtitle text for the card header. */
+  subtitle?: string
+  /** Action element to display on the right side of the header. */
+  action?: React.ReactNode
+  /** Avatar element to display on the left side of the header. */
+  avatar?: React.ReactNode
+  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  styles?: CardStyles
+}
+
+// --------------------------------------------------------------------------
 // SACRED THEME BACKGROUND DECORATIONS
 // --------------------------------------------------------------------------
 
@@ -221,6 +241,70 @@ export const CardActions = forwardRef<HTMLDivElement, CardActionsProps>(
 )
 
 CardActions.displayName = 'CardActions'
+
+// --------------------------------------------------------------------------
+// CARD HEADER COMPONENT
+// --------------------------------------------------------------------------
+
+export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
+  (
+    {
+      children,
+      title,
+      subtitle,
+      action,
+      avatar,
+      styles,
+      className,
+      ...restProps
+    },
+    ref
+  ) => {
+    const computedStyles = useMemo(() => getCardStyles(styles), [styles])
+
+    return (
+      <div
+        ref={ref}
+        className={className}
+        style={computedStyles.header}
+        {...restProps}
+      >
+        {avatar && <div style={{ marginRight: '16px' }}>{avatar}</div>}
+        <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+          {title && (
+            <div
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 500,
+                lineHeight: 1.6,
+                marginBottom: subtitle ? '4px' : 0,
+              }}
+            >
+              {title}
+            </div>
+          )}
+          {subtitle && (
+            <div
+              style={{
+                fontSize: '0.875rem',
+                color: 'rgba(0, 0, 0, 0.6)',
+                lineHeight: 1.43,
+              }}
+            >
+              {subtitle}
+            </div>
+          )}
+          {children}
+        </div>
+        {action && (
+          <div style={{ marginLeft: '16px', flexShrink: 0 }}>{action}</div>
+        )}
+      </div>
+    )
+  }
+)
+
+CardHeader.displayName = 'CardHeader'
 
 export default Card
 

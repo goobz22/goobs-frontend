@@ -42,7 +42,7 @@ export function RichTextEditor({
   const handleInput = () => {
     if (editorRef.current) onChange(editorRef.current.innerHTML)
   }
-  const execCmd = (cmd: string, val: any = null) => {
+  const execCmd = (cmd: string, val: string | undefined = undefined) => {
     editorRef.current?.focus()
     document.execCommand(cmd, false, val)
     handleInput()

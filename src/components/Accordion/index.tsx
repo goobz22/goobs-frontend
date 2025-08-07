@@ -328,6 +328,7 @@ const Accordion: FC<AccordionProps> = props => {
     >
       {!isMenuType && (
         <ExpandMoreIcon
+          styles={{ theme: styles?.theme || 'sacred' }}
           style={{
             ...computedStyles.icon,
             position: 'absolute',

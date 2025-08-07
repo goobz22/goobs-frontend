@@ -124,7 +124,10 @@ const Alert: React.FC<AlertProps> = ({
     >
       {isSacredTheme && <SacredGlyphs severity={severity} />}
 
-      <Icon style={computedStyles.icon} />
+      <Icon
+        styles={{ theme: styles?.theme || 'sacred' }}
+        style={computedStyles.icon}
+      />
 
       <div style={computedStyles.message}>{message}</div>
 

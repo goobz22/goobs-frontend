@@ -16,7 +16,13 @@ export interface ChipProps {
   styles?: ChipStyles
 }
 
-const Chip: React.FC<ChipProps> = ({ label, icon, onDelete, onClick, styles }) => {
+const Chip: React.FC<ChipProps> = ({
+  label,
+  icon,
+  onDelete,
+  onClick,
+  styles,
+}) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isCloseHovered, setIsCloseHovered] = useState(false)
 
@@ -74,11 +80,7 @@ const Chip: React.FC<ChipProps> = ({ label, icon, onDelete, onClick, styles }) =
       )}
 
       {/* Icon */}
-      {icon && (
-        <span style={computedStyles.icon}>
-          {icon}
-        </span>
-      )}
+      {icon && <span style={computedStyles.icon}>{icon}</span>}
 
       {/* Label */}
       <span style={{ position: 'relative', zIndex: 1 }}>{label}</span>
@@ -93,7 +95,7 @@ const Chip: React.FC<ChipProps> = ({ label, icon, onDelete, onClick, styles }) =
           disabled={isDisabled}
           aria-label="Remove chip"
         >
-          <CloseIcon style={{ width: '16px', height: '16px' }} />
+          <CloseIcon styles={{ theme: styles?.theme || 'sacred', size: 16 }} />
         </button>
       )}
     </div>

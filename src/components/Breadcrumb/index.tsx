@@ -127,7 +127,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   ) => {
     const isHovered = hoveredItem === index
 
-    if ((item as any).isEllipsis) {
+    if ('isEllipsis' in item && item.isEllipsis) {
       return (
         <span key={index} style={computedStyles.ellipsis}>
           {item.label}
@@ -179,7 +179,13 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         tabIndex={item.onClick ? 0 : undefined}
         onKeyPress={event => {
           if (item.onClick && (event.key === 'Enter' || event.key === ' ')) {
-            item.onClick(event as any)
+            // Convert keyboard event to mouse event for consistency
+            const syntheticEvent = {
+              ...event,
+              preventDefault: event.preventDefault.bind(event),
+              stopPropagation: event.stopPropagation.bind(event),
+            } as unknown as React.MouseEvent<HTMLElement>
+            item.onClick(syntheticEvent)
           }
         }}
       >

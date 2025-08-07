@@ -17,7 +17,16 @@ export const markdownToSlate = async (markdown: string): Promise<any[]> => {
 
   const output: any[] = await Promise.all(
     lines.map(line => {
-      const paragraph: any = {
+      interface SlateNode {
+        type: string
+        children: Array<{
+          text: string
+          bold?: boolean
+          italic?: boolean
+        }>
+      }
+
+      const paragraph: SlateNode = {
         type: 'paragraph',
         children: [{ text: line }],
       }
@@ -61,10 +70,19 @@ export const markdownToSlate = async (markdown: string): Promise<any[]> => {
 /**
  * 2) Switch from Markdown to RichText mode (async because we call markdownToSlate)
  */
+interface SlateNode {
+  type: string
+  children: Array<{
+    text: string
+    bold?: boolean
+    italic?: boolean
+  }>
+}
+
 export const handleSwitchToRichText = async (
   markdown: string,
-  setSlateValue: (value: any[]) => void,
-  setNewSlateValue: (value: any[]) => void,
+  setSlateValue: (value: SlateNode[]) => void,
+  setNewSlateValue: (value: SlateNode[]) => void,
   setMarkdownMode: (value: boolean) => void
 ): Promise<void> => {
   if (markdown !== '') {

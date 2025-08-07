@@ -236,15 +236,27 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   const alignmentOptions = [
     {
       value: 'left',
-      icon: <FormatAlignLeftIcon style={{ width: '16px', height: '16px' }} />,
+      icon: (
+        <FormatAlignLeftIcon
+          styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+        />
+      ),
     },
     {
       value: 'center',
-      icon: <FormatAlignCenterIcon style={{ width: '16px', height: '16px' }} />,
+      icon: (
+        <FormatAlignCenterIcon
+          styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+        />
+      ),
     },
     {
       value: 'right',
-      icon: <FormatAlignRightIcon style={{ width: '16px', height: '16px' }} />,
+      icon: (
+        <FormatAlignRightIcon
+          styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+        />
+      ),
     },
   ]
 
@@ -497,13 +509,21 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         {/* undo / redo */}
         <div style={containerStyles.buttonGroup}>
           <CustomButton
-            icon={<UndoIcon style={{ width: '16px', height: '16px' }} />}
+            icon={
+              <UndoIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
+            }
             onClick={handleEditorAction('undo')}
             styles={getButtonStyles('undo')}
             disabled={markdownMode}
           />
           <CustomButton
-            icon={<RedoIcon style={{ width: '16px', height: '16px' }} />}
+            icon={
+              <RedoIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
+            }
             onClick={handleEditorAction('redo')}
             styles={getButtonStyles('redo')}
             disabled={markdownMode}
@@ -513,20 +533,28 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         {/* Essential formatting buttons */}
         <div style={containerStyles.buttonGroup}>
           <CustomButton
-            icon={<FormatBoldIcon style={{ width: '16px', height: '16px' }} />}
+            icon={
+              <FormatBoldIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
+            }
             onClick={handleEditorAction('bold')}
             styles={getButtonStyles('bold')}
           />
           <CustomButton
             icon={
-              <FormatItalicIcon style={{ width: '16px', height: '16px' }} />
+              <FormatItalicIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
             }
             onClick={handleEditorAction('italic')}
             styles={getButtonStyles('italic')}
           />
           <CustomButton
             icon={
-              <FormatUnderlinedIcon style={{ width: '16px', height: '16px' }} />
+              <FormatUnderlinedIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
             }
             onClick={handleEditorAction('underline')}
             styles={getButtonStyles('underline')}
@@ -564,18 +592,28 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         <div style={containerStyles.buttonGroup}>
           <CustomButton
             icon={
-              <StrikethroughSIcon style={{ width: '16px', height: '16px' }} />
+              <StrikethroughSIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
             }
             onClick={handleEditorAction('strikethrough')}
             styles={getButtonStyles('strikethrough')}
           />
           <CustomButton
-            icon={<CodeIcon style={{ width: '16px', height: '16px' }} />}
+            icon={
+              <CodeIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
+            }
             onClick={handleEditorAction('code')}
             styles={getButtonStyles('code')}
           />
           <CustomButton
-            icon={<LinkIcon style={{ width: '16px', height: '16px' }} />}
+            icon={
+              <LinkIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
+              />
+            }
             onClick={handleEditorAction('link')}
             styles={getButtonStyles('link')}
           />
@@ -585,6 +623,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <FormatListNumberedIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
                 style={{ width: '16px', height: '16px' }}
               />
             }
@@ -594,6 +633,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <FormatListBulletedIcon
+                styles={{ theme: styles?.theme || 'sacred', size: 16 }}
                 style={{ width: '16px', height: '16px' }}
               />
             }

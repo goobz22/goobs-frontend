@@ -102,7 +102,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   }
 
   // Get scrollbar class name
-  const scrollbarClassName = (computedStyles as any).scrollbarClassName || ''
+  const scrollbarClassName = computedStyles.scrollbarClassName || ''
 
   const glyphStyles = {
     glyph: {
@@ -150,7 +150,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
             isSacredTheme ? 'Inscribe your sacred text...' : 'Enter text...'
           }
           style={textareaStyle}
-          className={scrollbarClassName}
+          className={scrollbarClassName as string}
         />
         {isSacredTheme && (
           <>

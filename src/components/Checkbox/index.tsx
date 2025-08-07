@@ -17,50 +17,8 @@ import React, {
 } from 'react'
 import type { InputHTMLAttributes } from 'react'
 import { CheckboxStyles, getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
-
-// --------------------------------------------------------------------------
-// ICON COMPONENTS
-// --------------------------------------------------------------------------
-
-const CheckIcon = ({ theme }: { theme?: 'light' | 'dark' | 'sacred' }) => (
-  <svg
-    viewBox="0 0 20 20"
-    fill="currentColor"
-    style={{
-      width: theme === 'sacred' ? '20px' : '18px',
-      height: theme === 'sacred' ? '20px' : '18px',
-      flexShrink: 0,
-    }}
-  >
-    <path
-      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-      strokeWidth="0.5"
-      stroke="currentColor"
-    />
-  </svg>
-)
-
-const IndeterminateIcon = ({
-  theme,
-}: {
-  theme?: 'light' | 'dark' | 'sacred'
-}) => (
-  <svg
-    viewBox="0 0 20 20"
-    fill="currentColor"
-    style={{
-      width: theme === 'sacred' ? '20px' : '18px',
-      height: theme === 'sacred' ? '20px' : '18px',
-      flexShrink: 0,
-    }}
-  >
-    <path
-      d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"
-      strokeWidth="0.5"
-      stroke="currentColor"
-    />
-  </svg>
-)
+import CheckIcon from '../Icons/Check'
+import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -304,9 +262,19 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         <div style={computedStyles.box}></div>
         <div style={computedStyles.icon}>
           {indeterminate ? (
-            <IndeterminateIcon theme={styles?.theme} />
+            <IndeterminateCheckBoxIcon
+              styles={{
+                theme: styles?.theme || 'sacred',
+                size: styles?.theme === 'sacred' ? 20 : 18,
+              }}
+            />
           ) : (
-            <CheckIcon theme={styles?.theme} />
+            <CheckIcon
+              styles={{
+                theme: styles?.theme || 'sacred',
+                size: styles?.theme === 'sacred' ? 20 : 18,
+              }}
+            />
           )}
         </div>
       </div>

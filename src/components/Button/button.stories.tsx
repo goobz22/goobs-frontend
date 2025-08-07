@@ -9,49 +9,9 @@ import { userEvent, within, expect } from '@storybook/test'
 import Button from './index'
 import { useState } from 'react'
 import { ButtonGroup } from './index' // Import ButtonGroup
-
-// --------------------------------------------------------------------------
-// ICON COMPONENTS (as standard React components)
-// --------------------------------------------------------------------------
-
-const SendIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="24px"
-    viewBox="0 0 24 24"
-    width="24px"
-    fill="currentColor"
-  >
-    <path d="M0 0h24v24H0V0z" fill="none" />
-    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2 .01 7z" />
-  </svg>
-)
-
-const AddIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="24px"
-    viewBox="0 0 24 24"
-    width="24px"
-    fill="currentColor"
-  >
-    <path d="M0 0h24v24H0V0z" fill="none" />
-    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-  </svg>
-)
-
-const DownloadIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="24px"
-    viewBox="0 0 24 24"
-    width="24px"
-    fill="currentColor"
-  >
-    <path d="M0 0h24v24H0V0z" fill="none" />
-    <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
-  </svg>
-)
+import SendIcon from '../Icons/Send'
+import AddIcon from '../Icons/Add'
+import DownloadIcon from '../Icons/Download'
 
 // --------------------------------------------------------------------------
 // STORYBOOK METADATA
@@ -137,7 +97,7 @@ export const WithIconLeft: Story = {
   name: 'Icon/Left',
   args: {
     text: 'Send',
-    icon: <SendIcon />,
+    icon: <SendIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'light', iconLocation: 'left' },
   },
 }
@@ -149,7 +109,7 @@ export const WithIconRight: Story = {
   name: 'Icon/Right',
   args: {
     text: 'Download',
-    icon: <DownloadIcon />,
+    icon: <DownloadIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'light', iconLocation: 'right' },
   },
 }
@@ -161,7 +121,7 @@ export const WithIconAbove: Story = {
   name: 'Icon/Above',
   args: {
     text: 'Add Item',
-    icon: <AddIcon />,
+    icon: <AddIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'light', iconLocation: 'above' },
   },
 }
@@ -172,7 +132,7 @@ export const WithIconAbove: Story = {
 export const IconOnly: Story = {
   name: 'Icon/Only',
   args: {
-    icon: <SendIcon />,
+    icon: <SendIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'light' },
   },
 }
@@ -288,9 +248,21 @@ export const LightThemeGroup: Story = {
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'light' }}
         >
-          <Button value="send" text="Send" icon={<SendIcon />} />
-          <Button value="add" text="Add" icon={<AddIcon />} />
-          <Button value="download" text="Download" icon={<DownloadIcon />} />
+          <Button
+            value="send"
+            text="Send"
+            icon={<SendIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="add"
+            text="Add"
+            icon={<AddIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="download"
+            text="Download"
+            icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
+          />
         </ButtonGroup>
       )
     }
@@ -310,9 +282,21 @@ export const DarkThemeGroup: Story = {
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'dark' }}
         >
-          <Button value="send" text="Send" icon={<SendIcon />} />
-          <Button value="add" text="Add" icon={<AddIcon />} />
-          <Button value="download" text="Download" icon={<DownloadIcon />} />
+          <Button
+            value="send"
+            text="Send"
+            icon={<SendIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="add"
+            text="Add"
+            icon={<AddIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="download"
+            text="Download"
+            icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
+          />
         </ButtonGroup>
       )
     }
@@ -335,9 +319,21 @@ export const SacredThemeGroup: Story = {
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'sacred' }}
         >
-          <Button value="send" text="Send" icon={<SendIcon />} />
-          <Button value="add" text="Add" icon={<AddIcon />} />
-          <Button value="download" text="Download" icon={<DownloadIcon />} />
+          <Button
+            value="send"
+            text="Send"
+            icon={<SendIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="add"
+            text="Add"
+            icon={<AddIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="download"
+            text="Download"
+            icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
+          />
         </ButtonGroup>
       )
     }
@@ -381,9 +377,18 @@ export const InteractiveGroupDemo: Story = {
             onChange={(_, newValue) => newValue && setValue(newValue)}
             styles={{ theme }}
           >
-            <Button value="send" icon={<SendIcon />} />
-            <Button value="add" icon={<AddIcon />} />
-            <Button value="download" icon={<DownloadIcon />} />
+            <Button
+              value="send"
+              icon={<SendIcon styles={{ theme: 'sacred' }} />}
+            />
+            <Button
+              value="add"
+              icon={<AddIcon styles={{ theme: 'sacred' }} />}
+            />
+            <Button
+              value="download"
+              icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
+            />
           </ButtonGroup>
         </div>
       )
