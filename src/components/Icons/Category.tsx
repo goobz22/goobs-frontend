@@ -2,41 +2,69 @@
  * @fileoverview Category icon component
  */
 'use client'
-import React from 'react'
 
-interface CategoryIconProps {
-  width?: number
-  height?: number
-  color?: string
-  className?: string
-  style?: React.CSSProperties
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface CategoryIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const CategoryIcon: React.FC<CategoryIconProps> = ({
-  width = 24,
-  height = 24,
-  color = 'currentColor',
-  className,
-  style,
+  styles,
+  style = {},
+  ...props
 }) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
+  }
+
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      style={style}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path
-        d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2ZM4 14L5 17H7L6 14H4ZM9 14L10 17H12L11 14H9ZM14 14L15 17H17L16 14H14ZM19 14L20 17H22L21 14H19Z"
-        fill={color}
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 -960 960 960"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h65v-60q0-8.5 5.75-14.25T265-920q8.5 0 14.25 5.75T285-900v60h390v-60q0-8.5 5.75-14.25T695-920q8.5 0 14.25 5.75T715-900v60h65q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-80h600v-440H180v440Zm0-520h600v-80H180v80Zm0 0v-80 80Zm300 200q-17 0-28.5-11.5T440-560q0-17 11.5-28.5T480-600q17 0 28.5 11.5T520-560q0 17-11.5 28.5T480-520Zm-160 0q-17 0-28.5-11.5T280-560q0-17 11.5-28.5T320-600q17 0 28.5 11.5T360-560q0 17-11.5 28.5T320-520Zm320 0q-17 0-28.5-11.5T600-560q0-17 11.5-28.5T640-600q17 0 28.5 11.5T680-560q0 17-11.5 28.5T640-520ZM480-360q-17 0-28.5-11.5T440-400q0-17 11.5-28.5T480-440q17 0 28.5 11.5T520-400q0 17-11.5 28.5T480-360Zm-160 0q-17 0-28.5-11.5T280-400q0-17 11.5-28.5T320-440q17 0 28.5 11.5T360-400q0 17-11.5 28.5T320-360Zm320 0q-17 0-28.5-11.5T600-400q0-17 11.5-28.5T640-440q17 0 28.5 11.5T680-400q0 17-11.5 28.5T640-360Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
-
-CategoryIcon.displayName = 'CategoryIcon'
 
 export default CategoryIcon

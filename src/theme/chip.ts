@@ -35,6 +35,24 @@ export interface ChipTheme {
     borderColor?: string
     textShadow?: string
   }
+  icon: {
+    width: string
+    height: string
+    marginRight: string
+    display: string
+    alignItems: string
+    justifyContent: string
+    flexShrink: number
+    color: string
+  }
+  iconHover: {
+    transform?: string
+    color?: string
+  }
+  iconDisabled: {
+    opacity: number
+    color: string
+  }
   closeButton: {
     marginLeft: string
     marginRight: string
@@ -111,6 +129,16 @@ export interface ChipStyles {
   padding?: string
   height?: string
 
+  // Icon styling
+  iconWidth?: string
+  iconHeight?: string
+  iconMarginRight?: string
+  iconColor?: string
+  iconHoverColor?: string
+  iconHoverTransform?: string
+  iconDisabledOpacity?: number
+  iconDisabledColor?: string
+
   // Hover states
   hoverBackgroundColor?: string
   hoverBorderColor?: string
@@ -172,6 +200,24 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       backgroundColor: 'rgba(156, 163, 175, 0.1)',
       color: 'rgb(156, 163, 175)',
       borderColor: 'rgba(156, 163, 175, 0.2)',
+    },
+    icon: {
+      width: '16px',
+      height: '16px',
+      marginRight: '6px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      color: 'inherit',
+    },
+    iconHover: {
+      transform: 'scale(1.05)',
+      color: 'rgb(59, 130, 246)',
+    },
+    iconDisabled: {
+      opacity: 0.5,
+      color: 'rgb(156, 163, 175)',
     },
     closeButton: {
       marginLeft: '6px',
@@ -251,6 +297,24 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       backgroundColor: 'rgba(75, 85, 99, 0.1)',
       color: 'rgb(75, 85, 99)',
       borderColor: 'rgba(75, 85, 99, 0.2)',
+    },
+    icon: {
+      width: '16px',
+      height: '16px',
+      marginRight: '6px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      color: 'inherit',
+    },
+    iconHover: {
+      transform: 'scale(1.05)',
+      color: 'rgb(147, 197, 253)',
+    },
+    iconDisabled: {
+      opacity: 0.5,
+      color: 'rgb(75, 85, 99)',
     },
     closeButton: {
       marginLeft: '6px',
@@ -334,6 +398,24 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       backgroundColor: 'rgba(10, 10, 10, 0.6)',
       color: 'rgba(255, 215, 0, 0.3)',
       borderColor: 'rgba(255, 215, 0, 0.1)',
+    },
+    icon: {
+      width: '16px',
+      height: '16px',
+      marginRight: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      color: 'inherit',
+    },
+    iconHover: {
+      transform: 'scale(1.1) rotate(5deg)',
+      color: '#FFD700',
+    },
+    iconDisabled: {
+      opacity: 0.3,
+      color: 'rgba(255, 215, 0, 0.3)',
     },
     closeButton: {
       marginLeft: '8px',
@@ -441,6 +523,23 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
       textShadow:
         styles.disabledTextShadow || baseTheme.containerDisabled.textShadow,
     },
+    icon: {
+      ...baseTheme.icon,
+      width: styles?.iconWidth || baseTheme.icon.width,
+      height: styles?.iconHeight || baseTheme.icon.height,
+      marginRight: styles?.iconMarginRight || baseTheme.icon.marginRight,
+      color: styles?.iconColor || baseTheme.icon.color,
+    },
+    iconHover: {
+      ...baseTheme.iconHover,
+      transform: styles?.iconHoverTransform || baseTheme.iconHover.transform,
+      color: styles?.iconHoverColor || baseTheme.iconHover.color,
+    },
+    iconDisabled: {
+      ...baseTheme.iconDisabled,
+      opacity: styles?.iconDisabledOpacity ?? baseTheme.iconDisabled.opacity,
+      color: styles?.iconDisabledColor || baseTheme.iconDisabled.color,
+    },
     closeButton: baseTheme.closeButton,
     closeButtonHover: baseTheme.closeButtonHover,
     closeButtonDisabled: baseTheme.closeButtonDisabled,
@@ -536,8 +635,15 @@ export const getChipStyles = (
     ...themeConfig.closeButtonDisabled,
   }
 
+  const iconStyle: React.CSSProperties = {
+    ...themeConfig.icon,
+    ...(isHovered && !isDisabled && themeConfig.iconHover),
+    ...(isDisabled && themeConfig.iconDisabled),
+  }
+
   return {
     container: containerStyle,
+    icon: iconStyle,
     closeButton: closeButtonStyle,
     closeButtonHover: closeButtonHoverStyle,
     closeButtonDisabled: closeButtonDisabledStyle,

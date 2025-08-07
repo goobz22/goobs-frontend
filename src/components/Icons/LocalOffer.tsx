@@ -1,37 +1,66 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
 
-interface LocalOfferIconProps {
-  style?: React.CSSProperties
-  fontSize?: 'small' | 'medium' | 'large'
-  className?: string
+interface LocalOfferIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const LocalOfferIcon: React.FC<LocalOfferIconProps> = ({
-  style,
-  fontSize = 'medium',
-  className,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const sizeMap = {
-    small: 20,
-    medium: 24,
-    large: 32,
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
   }
 
-  const size = sizeMap[fontSize]
-
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={style}
-      className={className}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path d="M21.41,11.58L12.41,2.58C12.04,2.21 11.53,2 11,2H4C2.9,2 2,2.9 2,4V11C2,11.53 2.21,12.04 2.59,12.42L11.59,21.42C11.95,21.78 12.45,21.97 13,22C13.55,22 14.05,21.78 14.41,21.41L21.41,14.41C21.78,14.05 22,13.55 22,13C22,12.45 21.78,11.95 21.41,11.58M13,20L4,11V4H11L20,13L13,20M6.5,5A1.5,1.5 0 1,1 5,6.5A1.5,1.5 0 0,1 6.5,5Z" />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 -960 960 960"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="m840-234-60-11q-16-3-31-3t-31 3l-60 11q-52 10-99-16t-75-74l-51-84q-9-14-9-32t9-32l51-84q28-48 75-74t99-16l60 11q16 3 31 3t31-3l60-11q52-10 99 16t75 74l51 84q9 14 9 32t-9 32l-51 84q-28 48-75 74t-99 16ZM760-400q33 0 56.5-23.5T840-480q0-33-23.5-56.5T760-560q-33 0-56.5 23.5T680-480q0 33 23.5 56.5T760-400ZM126-80l-46-46 634-634 46 46L126-80Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 

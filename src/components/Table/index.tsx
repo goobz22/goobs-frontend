@@ -36,10 +36,12 @@ export interface TableContainerProps {
 
 export interface TableHeadProps {
   children: React.ReactNode
+  styles?: TableStyles
 }
 
 export interface TableBodyProps {
   children: React.ReactNode
+  styles?: TableStyles
 }
 
 export interface TableRowProps {
@@ -176,12 +178,24 @@ export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
   return <table style={tableStyle}>{children}</table>
 }
 
-export const TableHead: React.FC<TableHeadProps> = ({ children }) => {
-  return <thead>{children}</thead>
+export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
+  const themeConfig = getTableTheme(styles)
+
+  const headStyle: React.CSSProperties = {
+    ...themeConfig.header,
+  }
+
+  return <thead style={headStyle}>{children}</thead>
 }
 
-export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
-  return <tbody>{children}</tbody>
+export const TableBody: React.FC<TableBodyProps> = ({ children, styles }) => {
+  const themeConfig = getTableTheme(styles)
+
+  const bodyStyle: React.CSSProperties = {
+    ...themeConfig.table,
+  }
+
+  return <tbody style={bodyStyle}>{children}</tbody>
 }
 
 export const TableRow: React.FC<TableRowProps> = ({

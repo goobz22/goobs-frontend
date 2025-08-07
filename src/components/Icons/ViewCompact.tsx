@@ -1,38 +1,66 @@
-import React from 'react'
+'use client'
 
-interface ViewCompactIconProps {
-  fontSize?: 'small' | 'medium' | 'large' | number
-  color?: string
-  style?: React.CSSProperties
-  className?: string
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  IconStyles,
+  getIconStyles,
+  injectSacredKeyframes,
+  SACRED_GLYPHS,
+} from '../../theme'
+
+interface ViewCompactIconProps extends React.SVGProps<SVGSVGElement> {
+  styles?: IconStyles
 }
 
 const ViewCompactIcon: React.FC<ViewCompactIconProps> = ({
-  fontSize = 'medium',
-  color = 'currentColor',
-  style,
-  className,
+  styles,
+  style = {},
+  ...props
 }) => {
-  const size =
-    typeof fontSize === 'number'
-      ? fontSize
-      : fontSize === 'small'
-        ? 20
-        : fontSize === 'large'
-          ? 32
-          : 24
+  const [isHovered, setIsHovered] = useState(false)
+  const [glyph] = useState(
+    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
+  )
+
+  // Inject CSS keyframes for sacred animations
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Compute styles based on theme and state
+  const computedStyles = useMemo(
+    () => getIconStyles(styles, isHovered, styles?.disabled),
+    [styles, isHovered]
+  )
+
+  const iconStyle = {
+    ...computedStyles.icon,
+    ...style,
+  }
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill={color}
-      style={style}
-      className={className}
+    <div
+      style={computedStyles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <path d="M3 19h6v-7H3v7zm7 0h12v-7H10v7zM3 5v6h19V5H3z" />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 -960 960 960"
+        width="24"
+        fill="currentColor"
+        style={iconStyle}
+        {...props}
+      >
+        <path d="M160-520v-240h640v240H160Zm80-80h480v-80H240v80ZM160-200v-240h320v240H160Zm80-80h160v-80H240v80Zm400 80v-240h320v240H640Zm80-80h160v-80H720v80Z" />
+      </svg>
+      {computedStyles.isSacredTheme && (
+        <div style={computedStyles.glyph}>{glyph}</div>
+      )}
+    </div>
   )
 }
 
