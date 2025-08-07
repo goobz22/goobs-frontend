@@ -194,6 +194,14 @@ export {
   getTreeItemStyles,
 } from './treeview'
 
+// Export pagination theme system
+export type { PaginationTheme, PaginationStyles } from './pagination'
+export {
+  paginationThemes,
+  getPaginationTheme,
+  getPaginationStyles,
+} from './pagination'
+
 // Export shared elements
 export {
   SACRED_GLYPHS,

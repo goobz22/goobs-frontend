@@ -794,7 +794,10 @@ const TreeItem: FC<TreeItemProps> = ({
           role="button"
           aria-label={isExpanded ? 'Collapse' : 'Expand'}
         >
-          <ExpandMoreIcon style={itemStyles.expandIcon} />
+          <ExpandMoreIcon
+            styles={{ theme: styles.theme || 'sacred' }}
+            style={itemStyles.expandIcon}
+          />
         </div>
       )}
 

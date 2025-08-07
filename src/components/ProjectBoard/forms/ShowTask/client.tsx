@@ -599,7 +599,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             >
               <CustomButton
                 text={isEditing ? 'Save' : undefined}
-                icon={isEditing ? undefined : <EditIcon />}
+                icon={
+                  isEditing ? undefined : (
+                    <EditIcon styles={{ theme: styles?.theme || 'sacred' }} />
+                  )
+                }
                 onClick={handleEditToggle}
                 styles={{ theme: styles?.theme || 'light' }}
               />
@@ -610,7 +614,9 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             >
               <CustomButton
-                icon={<DeleteIcon />}
+                icon={
+                  <DeleteIcon styles={{ theme: styles?.theme || 'sacred' }} />
+                }
                 onClick={onDelete}
                 styles={{ theme: styles?.theme || 'light' }}
               />
@@ -621,13 +627,17 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             >
               <CustomButton
-                icon={<ContentCopyIcon />}
+                icon={
+                  <ContentCopyIcon
+                    styles={{ theme: styles?.theme || 'sacred' }}
+                  />
+                }
                 onClick={onDuplicate}
                 styles={{ theme: styles?.theme || 'light' }}
               />
             </StyledTooltip>
             <CustomButton
-              icon={<CloseIcon />}
+              icon={<CloseIcon styles={{ theme: styles?.theme || 'sacred' }} />}
               onClick={onClose}
               styles={{
                 theme: styles?.theme || 'light',
@@ -742,7 +752,9 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                             onClick={e => openCommentMenu(e, comment._id)}
                             style={computedStyles.moreVertIcon}
                           >
-                            <MoreVertIcon sacredtheme={isSacredTheme} />
+                            <MoreVertIcon
+                              styles={{ theme: styles?.theme || 'sacred' }}
+                            />
                           </div>
 
                           {isMenuOpen && (
@@ -781,7 +793,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                         'transparent'
                                     }}
                                   >
-                                    <EditIcon />
+                                    <EditIcon
+                                      styles={{
+                                        theme: styles?.theme || 'sacred',
+                                      }}
+                                    />
                                     Edit
                                   </button>
                                 )}

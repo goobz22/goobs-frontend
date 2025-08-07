@@ -49,6 +49,13 @@ export interface CardTheme {
     position?: React.CSSProperties['position']
     zIndex?: number
   }
+  header: {
+    padding: string
+    display: React.CSSProperties['display']
+    alignItems: React.CSSProperties['alignItems']
+    position?: React.CSSProperties['position']
+    zIndex?: number
+  }
   glyph?: {
     position: React.CSSProperties['position']
     fontSize: string
@@ -91,6 +98,9 @@ export interface CardStyles {
   // Actions styling
   actionsPadding?: string
   actionsJustify?: string
+
+  // Header styling
+  headerPadding?: string
 
   // Layout and positioning
   margin?: string
@@ -155,6 +165,11 @@ const lightTheme: CardTheme = {
     gap: '8px',
     borderTop: '1px solid rgba(226, 232, 240, 0.6)',
   },
+  header: {
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'center',
+  },
 }
 
 const darkTheme: CardTheme = {
@@ -189,6 +204,11 @@ const darkTheme: CardTheme = {
     justifyContent: 'flex-end',
     gap: '8px',
     borderTop: '1px solid rgba(71, 85, 105, 0.6)',
+  },
+  header: {
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'center',
   },
 }
 
@@ -232,6 +252,13 @@ const sacredTheme: CardTheme = {
     justifyContent: 'flex-end',
     gap: '12px',
     borderTop: '1px solid rgba(255, 215, 0, 0.3)',
+    position: 'relative',
+    zIndex: 2,
+  },
+  header: {
+    padding: '20px',
+    display: 'flex',
+    alignItems: 'center',
     position: 'relative',
     zIndex: 2,
   },
@@ -286,6 +313,7 @@ export const getCardStyles = (
   container: React.CSSProperties
   content: React.CSSProperties
   actions: React.CSSProperties
+  header: React.CSSProperties
   shimmer: React.CSSProperties
   glyph: React.CSSProperties
 } => {
@@ -338,10 +366,16 @@ export const getCardStyles = (
     ...(styles?.actionsJustify && { justifyContent: styles.actionsJustify }),
   }
 
+  const header: React.CSSProperties = {
+    ...baseTheme.header,
+    ...(styles?.headerPadding && { padding: styles.headerPadding }),
+  }
+
   return {
     container,
     content,
     actions,
+    header,
     shimmer: baseTheme.shimmer || {},
     glyph: baseTheme.glyph || {},
   }

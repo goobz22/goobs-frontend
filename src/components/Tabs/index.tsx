@@ -119,4 +119,54 @@ function Tabs({
   )
 }
 
+// Individual Tab component for standalone use
+export interface TabProps {
+  children?: React.ReactNode
+  value?: string | number
+  label?: string
+  disabled?: boolean
+  styles?: TabsStyles
+  onClick?: () => void
+}
+
+export const Tab: React.FC<TabProps> = ({
+  children,
+  value,
+  label,
+  disabled = false,
+  styles,
+  onClick,
+  ...props
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const computedStyles = getTabsStyles(
+    styles,
+    isHovered ? String(value) : null,
+    ''
+  )
+
+  const tabStyle: React.CSSProperties = {
+    ...computedStyles.tab,
+    ...(isHovered && computedStyles.tabHover),
+    ...(disabled && { opacity: 0.6, pointerEvents: 'none' }),
+  }
+
+  return (
+    <button
+      style={tabStyle}
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      {...props}
+    >
+      <div style={computedStyles.tabContent}>
+        <span>{label}</span>
+        {children}
+      </div>
+    </button>
+  )
+}
+
 export default Tabs

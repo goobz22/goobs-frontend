@@ -420,6 +420,7 @@ const PricingTable: FC<PricingProps> = props => {
                     styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                   >
                     <InfoIcon
+                      styles={{ theme: isSacredTheme ? 'sacred' : theme }}
                       fontSize="small"
                       style={{ marginLeft: '0.5rem', display: 'inline-block' }}
                     />
@@ -441,6 +442,7 @@ const PricingTable: FC<PricingProps> = props => {
                   {feature.tiedtopackage?.tiedtopackages?.[pIndex] ===
                     'true' && (
                     <CheckCircleIcon
+                      styles={{ theme: isSacredTheme ? 'sacred' : theme }}
                       style={styles.checkIcon}
                       fontSize="small"
                     />
@@ -459,6 +461,7 @@ const PricingTable: FC<PricingProps> = props => {
                         styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
                       >
                         <InfoIcon
+                          styles={{ theme: isSacredTheme ? 'sacred' : theme }}
                           fontSize="small"
                           style={{
                             marginLeft: '0.5rem',
@@ -483,6 +486,7 @@ const PricingTable: FC<PricingProps> = props => {
                       {sub.tiedtopackage?.tiedtopackages?.[pIndex] ===
                         'true' && (
                         <CheckCircleIcon
+                          styles={{ theme: isSacredTheme ? 'sacred' : theme }}
                           style={styles.checkIcon}
                           fontSize="small"
                         />
