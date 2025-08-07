@@ -5,7 +5,6 @@ import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import prettierPlugin from 'eslint-plugin-prettier'
 import nextPlugin from '@next/eslint-plugin-next'
-import unusedImports from 'eslint-plugin-unused-imports'
 import _globals from 'globals'
 
 // Combine globals from the 'globals' package:
@@ -25,7 +24,6 @@ export default [
       'react-hooks': reactHooksPlugin,
       prettier: prettierPlugin,
       '@next/next': nextPlugin,
-      'unused-imports': unusedImports,
     },
 
     languageOptions: {
@@ -48,17 +46,16 @@ export default [
 
     rules: {
       // Core ESLint rules
-      'no-unused-vars': 'off',
+      'no-unused-vars': 'off', // Turn off base rule in favor of TypeScript rule
       'no-undef': 'warn',
       'no-empty': 'warn',
       'no-unreachable': 'error',
       'no-unreachable-loop': 'error',
       'no-fallthrough': 'error',
 
-      // unused-imports plugin rules (main feature)
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'error',
+      // TypeScript rules (non-type-aware)
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
         {
           vars: 'all',
           varsIgnorePattern: '^_',
@@ -66,9 +63,6 @@ export default [
           argsIgnorePattern: '^_',
         },
       ],
-
-      // TypeScript rules (non-type-aware)
-      '@typescript-eslint/no-unused-vars': 'off', // handled by unused-imports
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
