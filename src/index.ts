@@ -30,6 +30,20 @@ import MultiSelectChip, {
 import ComplexEditor, {
   ComplexTextEditorProps,
 } from './components/ComplexTextEditor'
+import FormControl, {
+  FormControlProps,
+  FormControlStyles,
+} from './components/FormControl'
+import InputLabel, {
+  InputLabelProps,
+  InputLabelStyles,
+} from './components/InputLabel'
+import Select, { SelectProps, SelectStyles } from './components/Select'
+import MenuItem, { MenuItemProps, MenuItemStyles } from './components/MenuItem'
+import FormControlLabel, {
+  FormControlLabelProps,
+  FormControlLabelStyles,
+} from './components/FormControlLabel'
 // Import the Accordion component and its props
 import Accordion, { AccordionProps } from './components/Accordion'
 // Import the Breadcrumb component and its props
@@ -60,7 +74,7 @@ import CustomerAddTask from './components/ProjectBoard/forms/AddTask/customer'
 import NoUserAddTask from './components/ProjectBoard/forms/AddTask/noUser'
 import { RawSeverityLevel } from './components/ProjectBoard/types'
 // Here is the new horizontal `Tabs` import
-import Tabs, { TabsProps } from './components/Tabs'
+import Tabs, { TabsProps, Tab, TabProps } from './components/Tabs'
 import ToggleButton, {
   ToggleButtonProps,
   ToggleButtonGroup,
@@ -116,6 +130,7 @@ import PercentageField, {
 } from './components/Field/Percentage'
 import ProgressBar, { ProgressBarProps } from './components/ProgressBar'
 import Slider, { SliderProps } from './components/Field/Slider'
+import Pagination, { PaginationProps } from './components/Pagination'
 import Snackbar, { type SnackbarProps } from './components/Snackbar'
 import Paper, { PaperProps } from './components/Paper'
 import Card, {
@@ -124,6 +139,8 @@ import Card, {
   CardContentProps,
   CardActions,
   CardActionsProps,
+  CardHeader,
+  CardHeaderProps,
 } from './components/Card'
 import Stack, { StackProps, StackStyles } from './components/Stack'
 import Container, { ContainerProps } from './components/Container'
@@ -261,9 +278,14 @@ export { StyledTooltip }
 export { Popover }
 export { QRCodeComponent }
 export { MultiSelectChip }
-export { Tabs }
+export { Tabs, Tab }
 export { ToggleButton, ToggleButtonGroup }
 export { ComplexEditor }
+export { FormControl }
+export { InputLabel }
+export { Select }
+export { MenuItem }
+export { FormControlLabel }
 export { Accordion } // <-- Export Accordion here
 export { Breadcrumb } // <-- Export Breadcrumb here
 export { TreeView }
@@ -319,9 +341,10 @@ export { ShowTask }
 export { PercentageField }
 export { ProgressBar }
 export { Slider }
+export { Pagination }
 export { Snackbar }
 export { Paper }
-export { Card, CardContent, CardActions }
+export { Card, CardContent, CardActions, CardHeader }
 export { Stack }
 export { Container }
 export { Avatar }
@@ -347,12 +370,13 @@ export type { PercentageFieldProps }
 export type { ChipProps }
 export type { SwitchProps }
 export type { ProgressBarProps }
+export type { PaginationProps }
 export type { AlertProps }
 export type { SnackbarProps }
 export type { SliderProps }
 export type { BadgeProps }
 export type { PaperProps }
-export type { CardProps, CardContentProps, CardActionsProps }
+export type { CardProps, CardContentProps, CardActionsProps, CardHeaderProps }
 export type { StackProps, StackStyles }
 export type { ContainerProps }
 export type { AvatarProps }
@@ -392,6 +416,11 @@ export type { DropdownProps }
 export type { ButtonProps }
 export type { IconButtonProps }
 export type { ComplexTextEditorProps }
+export type { FormControlProps, FormControlStyles }
+export type { InputLabelProps, InputLabelStyles }
+export type { SelectProps, SelectStyles }
+export type { MenuItemProps, MenuItemStyles }
+export type { FormControlLabelProps, FormControlLabelStyles }
 export type { TypographyProps }
 export type { ConfirmationCodeInputsProps }
 export type { RadioOption, RadioGroupProps }
@@ -409,7 +438,7 @@ export type { PopoverProps }
 export type { ProjectBoardProps }
 export type { QRCodeProps }
 export type { DropdownOption }
-export type { TabsProps }
+export type { TabsProps, TabProps }
 export type { ToggleButtonProps, ToggleButtonGroupProps }
 export type { ShowTaskProps }
 export type { Animation }
