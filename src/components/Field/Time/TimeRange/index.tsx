@@ -794,7 +794,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
       <div onClick={onClick} style={{ cursor: 'pointer' }}>
         <AccessTimeIcon
           style={pickerStyles.calendarIcon}
-          sacredtheme={sacredtheme}
+          styles={{ theme: sacredtheme ? 'sacred' : currentTheme }}
         />
       </div>
     </div>

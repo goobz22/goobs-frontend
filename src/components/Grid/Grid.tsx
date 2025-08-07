@@ -79,7 +79,10 @@ const Grid: React.FC<GridProps> = ({
         12
       )
     }
-    return size || 12
+    if (typeof size === 'number' || size === 'auto') {
+      return size
+    }
+    return 12
   }
 
   const currentSize = getCurrentSize()

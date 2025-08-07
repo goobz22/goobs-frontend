@@ -300,7 +300,9 @@ const USDField: React.FC<USDFieldProps> = ({
           >
             <ArrowDropUpIcon
               style={computedStyles.icon}
-              sacredtheme={sacredTheme}
+              styles={{
+                theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
+              }}
             />
           </button>
           <button
@@ -312,7 +314,9 @@ const USDField: React.FC<USDFieldProps> = ({
           >
             <ArrowDropDownIcon
               style={computedStyles.icon}
-              sacredtheme={sacredTheme}
+              styles={{
+                theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
+              }}
             />
           </button>
         </div>

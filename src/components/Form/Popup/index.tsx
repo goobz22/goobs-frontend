@@ -348,7 +348,7 @@ function Popup({
           onMouseEnter={() => setHoveredButton('drag')}
           onMouseLeave={() => setHoveredButton(null)}
         >
-          <DragIcon />
+          <DragIcon styles={{ theme: actualTheme || 'sacred' }} />
         </button>
         <button
           onClick={handleClose}
@@ -360,7 +360,7 @@ function Popup({
           onMouseEnter={() => setHoveredButton('close')}
           onMouseLeave={() => setHoveredButton(null)}
         >
-          <CloseIcon />
+          <CloseIcon styles={{ theme: actualTheme || 'sacred' }} />
         </button>
       </div>
 
