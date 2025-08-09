@@ -211,7 +211,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   )
   const [activeSelection, setActiveSelection] = useState<DateSelection>('start')
   const [isFocused, setIsFocused] = useState(false)
-  const popoverRef = useRef<HTMLDivElement>(null)
+  const popoverRef = useRef<HTMLDivElement | null>(null)
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth()
@@ -404,9 +404,10 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   const parseDate = (dateString: string): Date | null => {
     const parts = dateString.split('/')
     if (parts.length === 3) {
-      const month = parseInt(parts[0], 10)
-      const day = parseInt(parts[1], 10)
-      const year = parseInt(parts[2], 10)
+      const [monthStr = '', dayStr = '', yearStr = ''] = parts
+      const month = parseInt(monthStr, 10)
+      const day = parseInt(dayStr, 10)
+      const year = parseInt(yearStr, 10)
       if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
         const date = new Date(year, month - 1, day)
         if (
@@ -516,7 +517,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
       e.preventDefault()
       const inc = e.key === 'ArrowUp' ? 1 : -1
       const parts = inputValue.split('/').map(p => parseInt(p, 10) || 0)
-      let [month, day, year] = parts
+      let [month = 1, day = 1, year = new Date().getFullYear()] = parts
       if (isNaN(month)) month = 1
       if (isNaN(day)) day = 1
       if (isNaN(year)) year = new Date().getFullYear()
@@ -622,7 +623,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
                 ? MONTHS
                 : MONTHS.slice(currentMonth)
               ).map(month => ({ value: month }))}
-              value={MONTHS[viewedMonth]}
+              value={String(MONTHS[viewedMonth] ?? MONTHS[0])}
               onChange={e => setViewedMonth(MONTHS.indexOf(e.target.value))}
               label=""
               styles={{

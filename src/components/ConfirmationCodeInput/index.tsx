@@ -1,21 +1,12 @@
 // src/components/ConfirmationCodeInput/index.tsx
 
 'use client'
-import React, {
-  useState,
-  useEffect,
-  FC,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import type { FC } from 'react'
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
-import CustomButton, { ButtonProps } from '../Button'
-import {
-  ConfirmationCodeInputStyles,
-  getConfirmationCodeInputStyles,
-  SACRED_GLYPHS,
-} from '../../theme'
+import CustomButton, { type ButtonProps } from '../Button'
+import { getConfirmationCodeInputStyles, SACRED_GLYPHS } from '../../theme'
+import type { ConfirmationCodeInputStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -290,17 +281,17 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
       e.preventDefault()
-      const pastedData = e.clipboardData.getData('text')
+      const pastedData = e.clipboardData.getData('text') || ''
       const digits = pastedData.replace(/\D/g, '').slice(0, codeLength - index)
       if (digits) {
         const newValueArr = internalValue.padEnd(codeLength, '').split('')
         for (let i = 0; i < digits.length; i++)
-          if (index + i < codeLength) newValueArr[index + i] = digits[i]
+          if (index + i < codeLength) newValueArr[index + i] = digits.charAt(i)
         const newValue = newValueArr.join('').trimEnd()
         setInternalValue(newValue)
         onChange?.(newValue)
         const focusIndex = Math.min(index + digits.length, codeLength - 1)
-        inputRefs.current[focusIndex]?.focus()
+        inputRefs.current[focusIndex || 0]?.focus()
       }
     },
     [internalValue, codeLength, onChange]
@@ -327,7 +318,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           <CustomButton
             text="Disable Verification"
             styles={{
-              theme: styles?.theme,
+              theme: styles?.theme || 'light',
               width: '100%',
               height: '40px',
             }}
@@ -392,7 +383,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
               <CustomButton
                 text={codeSent ? 'Resend Code' : 'Send Code'}
                 styles={{
-                  theme: styles?.theme,
+                  theme: styles?.theme || 'light',
                   width: '180px',
                   height: '44px',
                 }}
@@ -403,7 +394,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
             <CustomButton
               text="Verify"
               styles={{
-                theme: styles?.theme,
+                theme: styles?.theme || 'light',
                 width: '180px',
                 height: '44px',
               }}

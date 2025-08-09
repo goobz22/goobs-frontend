@@ -220,7 +220,7 @@ export const Nested: Story = {
 // --------------------------------------------------------------------------
 
 const ControlledAccordionExample = () => {
-  const [expanded, setExpanded] = React.useState<boolean | undefined>(undefined)
+  const [expanded, setExpanded] = React.useState<boolean>(false)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <button

@@ -105,7 +105,11 @@ export const avatarThemes: Record<'light' | 'dark' | 'sacred', AvatarTheme> = {
   },
 }
 
-const sizeMap = {
+type SizeOption = 'small' | 'medium' | 'large' | 'xl'
+const sizeMap: Record<
+  SizeOption,
+  { width: string; height: string; fontSize: string }
+> = {
   small: { width: '32px', height: '32px', fontSize: '0.875rem' },
   medium: { width: '40px', height: '40px', fontSize: '1rem' },
   large: { width: '56px', height: '56px', fontSize: '1.25rem' },
@@ -116,34 +120,35 @@ const sizeMap = {
 export const getAvatarTheme = (styles?: AvatarStyles): AvatarTheme => {
   const theme = styles?.theme || 'light'
   const baseTheme = avatarThemes[theme]
-  const size = styles?.size ? sizeMap[styles.size] : {}
+  const size = styles?.size ? sizeMap[styles.size] : undefined
 
   if (!styles) {
     return baseTheme
   }
 
+  const resolvedBorder = styles?.borderColor
+    ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+    : baseTheme.container.border
+
+  const resolvedBoxShadow = styles?.boxShadow ?? baseTheme.container.boxShadow
+
   return {
     container: {
-      width: styles.width || (size as any).width || baseTheme.container.width,
-      height:
-        styles.height || (size as any).height || baseTheme.container.height,
-      borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
+      width: styles?.width ?? size?.width ?? baseTheme.container.width,
+      height: styles?.height ?? size?.height ?? baseTheme.container.height,
+      borderRadius: styles?.borderRadius ?? baseTheme.container.borderRadius,
       display: baseTheme.container.display,
       alignItems: baseTheme.container.alignItems,
       justifyContent: baseTheme.container.justifyContent,
       backgroundColor:
-        styles.backgroundColor || baseTheme.container.backgroundColor,
-      color: styles.color || baseTheme.container.color,
+        styles?.backgroundColor ?? baseTheme.container.backgroundColor,
+      color: styles?.color ?? baseTheme.container.color,
       fontSize:
-        styles.fontSize ||
-        (size as any).fontSize ||
-        baseTheme.container.fontSize,
-      fontWeight: styles.fontWeight || baseTheme.container.fontWeight,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
-      boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
+        styles?.fontSize ?? size?.fontSize ?? baseTheme.container.fontSize,
+      fontWeight: styles?.fontWeight ?? baseTheme.container.fontWeight,
       overflow: baseTheme.container.overflow,
+      ...(resolvedBorder ? { border: resolvedBorder } : {}),
+      ...(resolvedBoxShadow ? { boxShadow: resolvedBoxShadow } : {}),
     },
   }
 }
@@ -159,15 +164,19 @@ export const getAvatarStyles = (
     width: themeConfig.container.width,
     height: themeConfig.container.height,
     borderRadius: themeConfig.container.borderRadius,
-    display: themeConfig.container.display as any,
-    alignItems: themeConfig.container.alignItems as any,
-    justifyContent: themeConfig.container.justifyContent as any,
+    display: themeConfig.container.display,
+    alignItems: themeConfig.container.alignItems,
+    justifyContent: themeConfig.container.justifyContent,
     backgroundColor: themeConfig.container.backgroundColor,
     color: themeConfig.container.color,
     fontSize: themeConfig.container.fontSize,
     fontWeight: themeConfig.container.fontWeight,
-    border: themeConfig.container.border,
-    boxShadow: themeConfig.container.boxShadow,
+    ...(themeConfig.container.border
+      ? { border: themeConfig.container.border }
+      : {}),
+    ...(themeConfig.container.boxShadow
+      ? { boxShadow: themeConfig.container.boxShadow }
+      : {}),
     overflow: themeConfig.container.overflow as any,
     // Layout styling
     margin: styles?.margin,

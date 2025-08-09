@@ -344,82 +344,103 @@ const CompanyAddTaskCustomerProvided: React.FC<
             {/* Single responsive grid for all dropdown fields */}
             <div style={styles.dropdownRow}>
               <div style={styles.fieldWrapper}>
-                <SearchableSimple
-                  label="Severity Level"
-                  options={severityOptions}
-                  defaultValue={
-                    severityOptions.find(
-                      opt => opt.attribute2 === selectedSeverityId
-                    )?.value
-                  }
-                  onChange={option =>
-                    setSelectedSeverityId(option?.attribute2 || '')
-                  }
-                  placeholder="Select severity level"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-                />
+                {(() => {
+                  const computed = severityOptions.find(
+                    opt => opt.attribute2 === selectedSeverityId
+                  )?.value
+                  return (
+                    <SearchableSimple
+                      label="Severity Level"
+                      options={severityOptions}
+                      {...(computed !== undefined
+                        ? { defaultValue: computed }
+                        : {})}
+                      onChange={option =>
+                        setSelectedSeverityId(option?.attribute2 || '')
+                      }
+                      placeholder="Select severity level"
+                      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                    />
+                  )
+                })()}
               </div>
               <div style={styles.fieldWrapper}>
-                <SearchableSimple
-                  label="Associated Product (Queue)"
-                  options={queueOptions}
-                  defaultValue={
-                    queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                      ?.value
-                  }
-                  onChange={option =>
-                    setSelectedQueueId(option?.attribute1 || '')
-                  }
-                  placeholder="Select product queue"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-                />
+                {(() => {
+                  const computed = queueOptions.find(
+                    opt => opt.attribute1 === selectedQueueId
+                  )?.value
+                  return (
+                    <SearchableSimple
+                      label="Associated Product (Queue)"
+                      options={queueOptions}
+                      {...(computed !== undefined
+                        ? { defaultValue: computed }
+                        : {})}
+                      onChange={option =>
+                        setSelectedQueueId(option?.attribute1 || '')
+                      }
+                      placeholder="Select product queue"
+                      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                    />
+                  )
+                })()}
               </div>
               <div style={styles.fieldWrapper}>
-                <SearchableSimple
-                  label="Status"
-                  options={statusOptions}
-                  defaultValue={
-                    statusOptions.find(
-                      opt => opt.attribute1 === selectedStatusId
-                    )?.value
-                  }
-                  onChange={option => {
-                    const newStatus = option?.value || ''
-                    setSelectedStatus(newStatus)
-                    setSelectedStatusId(option?.attribute1 || '')
-                  }}
-                  placeholder="Select status"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-                />
+                {(() => {
+                  const computed = statusOptions.find(
+                    opt => opt.attribute1 === selectedStatusId
+                  )?.value
+                  return (
+                    <SearchableSimple
+                      label="Status"
+                      options={statusOptions}
+                      {...(computed !== undefined
+                        ? { defaultValue: computed }
+                        : {})}
+                      onChange={option => {
+                        const newStatus = option?.value || ''
+                        setSelectedStatus(newStatus)
+                        setSelectedStatusId(option?.attribute1 || '')
+                      }}
+                      placeholder="Select status"
+                      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                    />
+                  )
+                })()}
               </div>
               <div style={styles.fieldWrapper}>
-                <SearchableSimple
-                  label="Substatus"
-                  options={finalSubStatusOptions}
-                  defaultValue={
-                    finalSubStatusOptions.find(
-                      opt => opt.attribute2 === selectedSubStatusId
-                    )?.value
-                  }
-                  onChange={option =>
-                    setSelectedSubStatusId(option?.attribute2 || '')
-                  }
-                  placeholder={
-                    selectedStatus
-                      ? 'Select substatus'
-                      : 'Please select a status first'
-                  }
-                  styles={{
-                    theme: sacredtheme ? 'sacred' : 'light',
-                    disabled: !selectedStatus,
-                  }}
-                />
+                {(() => {
+                  const computed = finalSubStatusOptions.find(
+                    opt => opt.attribute2 === selectedSubStatusId
+                  )?.value
+                  return (
+                    <SearchableSimple
+                      label="Substatus"
+                      options={finalSubStatusOptions}
+                      {...(computed !== undefined
+                        ? { defaultValue: computed }
+                        : {})}
+                      onChange={option =>
+                        setSelectedSubStatusId(option?.attribute2 || '')
+                      }
+                      placeholder={
+                        selectedStatus
+                          ? 'Select substatus'
+                          : 'Please select a status first'
+                      }
+                      styles={{
+                        theme: sacredtheme ? 'sacred' : 'light',
+                        disabled: !selectedStatus,
+                      }}
+                    />
+                  )
+                })()}
               </div>
               <div style={styles.fieldWrapper}>
                 {React.useMemo(() => {
                   const topicOptions = topics.map(t => ({
                     value: t.topic || `Topic ${t._id}`,
-                    attribute1: t._id,
+                    _id: t._id,
                   }))
                   const selectedTopicValues = selectedTopicIds.map(id => {
                     const topic = topics.find(t => t._id === id)
@@ -435,7 +456,7 @@ const CompanyAddTaskCustomerProvided: React.FC<
                           const matchingTopic = topicOptions.find(
                             opt => opt.value === value
                           )
-                          return matchingTopic?.attribute1 || value
+                          return matchingTopic?._id || value
                         })
                         setSelectedTopicIds(newSelectedIds)
                       }}
@@ -448,7 +469,7 @@ const CompanyAddTaskCustomerProvided: React.FC<
                 {React.useMemo(() => {
                   const articleOptions = knowledgebaseArticles.map(a => ({
                     value: a.articleTitle || `Article ${a._id}`,
-                    attribute1: a._id,
+                    _id: a._id,
                   }))
                   const selectedArticleValues = selectedArticleIds.map(id => {
                     const article = knowledgebaseArticles.find(
@@ -468,7 +489,7 @@ const CompanyAddTaskCustomerProvided: React.FC<
                           const matchingArticle = articleOptions.find(
                             opt => opt.value === value
                           )
-                          return matchingArticle?.attribute1 || value
+                          return matchingArticle?._id || value
                         })
                         setSelectedArticleIds(newSelectedIds)
                       }}

@@ -71,6 +71,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   const [isValid, setIsValid] = useState<boolean>(
     initialValue === '' || isValidMACAddress(initialValue)
   )
+  const [isFocused, setIsFocused] = useState(false)
   const lastInputTypeWasDelete = useRef(false)
 
   // Validate initial value on mount
@@ -103,8 +104,9 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
 
       // Truncate any segments that are more than 2 characters
       for (let i = 0; i < segments.length; i++) {
-        if (segments[i].length > 2) {
-          segments[i] = segments[i].substring(0, 2)
+        const seg = segments[i] ?? ''
+        if (seg.length > 2) {
+          segments[i] = seg.substring(0, 2)
         }
       }
 
@@ -118,7 +120,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
         // Only process the last segment if it doesn't have a trailing colon
         // and we have less than 6 segments total
         if (segments.length < 6) {
-          const lastSegment = segments[segments.length - 1]
+          const lastSegment = segments[segments.length - 1] ?? ''
 
           // If the last segment has 2 hex digits and doesn't end with a colon, add a colon
           if (lastSegment.length === 2 && segments.length < 6) {
@@ -194,16 +196,21 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     : helperText
 
   // Merge disabled prop with styles
-  const mergedStyles = {
+  const mergedStyles: FormFieldStyles = {
     ...styles,
-    disabled: disabled !== undefined ? disabled : styles?.disabled,
+    ...(disabled !== undefined ? { disabled } : {}),
   }
 
+  // Promote error state into the shared style system for proper colors
+  const computedStyles: FormFieldStyles = error
+    ? { ...mergedStyles, helperTextType: 'error' as const }
+    : mergedStyles
+
   const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
-    getSharedFormFieldStyles(mergedStyles, false)
+    getSharedFormFieldStyles(computedStyles, isFocused)
 
   const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(mergedStyles),
+    container: getSharedContainerStyles(computedStyles),
     inputWrapper: {
       position: 'relative',
       display: 'flex',
@@ -237,18 +244,18 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     footerText: getSharedFooterTextStyles(
       footerTextColor,
       themeConfig,
-      mergedStyles
+      computedStyles
     ),
   }
 
   return (
     <div style={componentStyles.container}>
       {label && (
-        <label style={componentStyles.label}>
+        <label htmlFor={rest.id} style={componentStyles.label}>
           {label}
-          {mergedStyles?.required && (
-            <span style={getRequiredIndicatorStyle(mergedStyles)}>
-              {mergedStyles?.requiredIndicatorText || ' *'}
+          {computedStyles?.required && (
+            <span style={getRequiredIndicatorStyle(computedStyles)}>
+              {computedStyles?.requiredIndicatorText || ' *'}
             </span>
           )}
         </label>
@@ -257,12 +264,21 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
       <div style={componentStyles.inputWrapper}>
         <input
           {...rest}
-          {...getRequiredProps(mergedStyles?.required)}
+          {...getRequiredProps(computedStyles?.required)}
           value={value}
-          disabled={mergedStyles?.disabled}
+          disabled={computedStyles?.disabled}
           onChange={e => handleTextFieldChange(e.target.value)}
+          onFocus={e => {
+            setIsFocused(true)
+            rest.onFocus?.(e)
+          }}
+          onBlur={e => {
+            setIsFocused(false)
+            rest.onBlur?.(e)
+          }}
           onPaste={handlePaste}
-          placeholder="00:1A:2B:3C:4D:5E"
+          placeholder={rest.placeholder ?? '00:1A:2B:3C:4D:5E'}
+          aria-invalid={!isValid}
           style={componentStyles.input}
         />
       </div>

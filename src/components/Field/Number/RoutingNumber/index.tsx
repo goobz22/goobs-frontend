@@ -104,11 +104,16 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   const validateRoutingChecksum = useCallback(
     (routingNumber: string): boolean => {
       if (routingNumber.length !== 9) return false
-      const digits = routingNumber.split('').map(Number)
-      const sum =
-        3 * (digits[0] + digits[3] + digits[6]) +
-        7 * (digits[1] + digits[4] + digits[7]) +
-        (digits[2] + digits[5] + digits[8])
+      const d0 = parseInt(routingNumber.charAt(0), 10)
+      const d1 = parseInt(routingNumber.charAt(1), 10)
+      const d2 = parseInt(routingNumber.charAt(2), 10)
+      const d3 = parseInt(routingNumber.charAt(3), 10)
+      const d4 = parseInt(routingNumber.charAt(4), 10)
+      const d5 = parseInt(routingNumber.charAt(5), 10)
+      const d6 = parseInt(routingNumber.charAt(6), 10)
+      const d7 = parseInt(routingNumber.charAt(7), 10)
+      const d8 = parseInt(routingNumber.charAt(8), 10)
+      const sum = 3 * (d0 + d3 + d6) + 7 * (d1 + d4 + d7) + (d2 + d5 + d8)
       return sum % 10 === 0
     },
     []

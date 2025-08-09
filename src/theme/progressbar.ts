@@ -277,6 +277,25 @@ export const getProgressBarTheme = (
     return baseTheme
   }
 
+  // Precompute optional values so we can conditionally include them
+  const containerBackgroundImage =
+    styles.backgroundImage ?? baseTheme.container.backgroundImage
+
+  const barBackgroundImage =
+    styles.barBackgroundImage ?? baseTheme.bar.backgroundImage
+  const barFilter = styles.barFilter ?? baseTheme.bar.filter
+
+  const indeterminateBackgroundImage =
+    styles.indeterminateBarBackgroundImage ??
+    baseTheme.indeterminateBar.backgroundImage
+  const indeterminateFilter =
+    styles.indeterminateBarFilter ?? baseTheme.indeterminateBar.filter
+
+  const labelTextShadow = styles.labelTextShadow ?? baseTheme.label.textShadow
+  const barPosition = baseTheme.bar.position
+  const barOverflow = baseTheme.bar.overflow
+  const indeterminatePosition = baseTheme.indeterminateBar.position
+
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
@@ -287,18 +306,20 @@ export const getProgressBarTheme = (
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
         styles.backdropFilter || baseTheme.container.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(containerBackgroundImage !== undefined
+        ? { backgroundImage: containerBackgroundImage }
+        : {}),
     },
     bar: {
       background: styles.barBackground || baseTheme.bar.background,
       borderRadius: styles.barBorderRadius || baseTheme.bar.borderRadius,
       boxShadow: styles.barBoxShadow || baseTheme.bar.boxShadow,
-      backgroundImage:
-        styles.barBackgroundImage || baseTheme.bar.backgroundImage,
-      filter: styles.barFilter || baseTheme.bar.filter,
-      position: baseTheme.bar.position,
-      overflow: baseTheme.bar.overflow,
+      ...(barBackgroundImage !== undefined
+        ? { backgroundImage: barBackgroundImage }
+        : {}),
+      ...(barFilter !== undefined ? { filter: barFilter } : {}),
+      ...(barPosition !== undefined ? { position: barPosition } : {}),
+      ...(barOverflow !== undefined ? { overflow: barOverflow } : {}),
     },
     indeterminateBar: {
       background:
@@ -310,28 +331,31 @@ export const getProgressBarTheme = (
       boxShadow:
         styles.indeterminateBarBoxShadow ||
         baseTheme.indeterminateBar.boxShadow,
-      backgroundImage:
-        styles.indeterminateBarBackgroundImage ||
-        baseTheme.indeterminateBar.backgroundImage,
-      filter:
-        styles.indeterminateBarFilter || baseTheme.indeterminateBar.filter,
+      ...(indeterminateBackgroundImage !== undefined
+        ? { backgroundImage: indeterminateBackgroundImage }
+        : {}),
+      ...(indeterminateFilter !== undefined
+        ? { filter: indeterminateFilter }
+        : {}),
       animation:
         styles.indeterminateBarAnimation ||
         baseTheme.indeterminateBar.animation,
-      position: baseTheme.indeterminateBar.position,
+      ...(indeterminatePosition !== undefined
+        ? { position: indeterminatePosition }
+        : {}),
     },
     label: {
       color: styles.labelColor || baseTheme.label.color,
       fontSize: styles.labelFontSize || baseTheme.label.fontSize,
       fontFamily: styles.labelFontFamily || baseTheme.label.fontFamily,
       fontWeight: styles.labelFontWeight || baseTheme.label.fontWeight,
-      textShadow: styles.labelTextShadow || baseTheme.label.textShadow,
+      ...(labelTextShadow !== undefined ? { textShadow: labelTextShadow } : {}),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
       : baseTheme.transition,
-    stripes: baseTheme.stripes,
-    pulse: baseTheme.pulse,
+    ...(baseTheme.stripes ? { stripes: baseTheme.stripes } : {}),
+    ...(baseTheme.pulse ? { pulse: baseTheme.pulse } : {}),
   }
 }
 

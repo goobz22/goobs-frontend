@@ -29,7 +29,7 @@ import type {
   RawArticle,
   RawEmployee,
 } from '../../types'
-import { ProjectBoardStyles } from '../../../../theme'
+import type { ProjectBoardStyles } from '../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -598,12 +598,15 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             >
               <CustomButton
-                text={isEditing ? 'Save' : undefined}
-                icon={
-                  isEditing ? undefined : (
-                    <EditIcon styles={{ theme: styles?.theme || 'sacred' }} />
-                  )
-                }
+                {...(isEditing
+                  ? { text: 'Save' }
+                  : {
+                      icon: (
+                        <EditIcon
+                          styles={{ theme: styles?.theme || 'sacred' }}
+                        />
+                      ),
+                    })}
                 onClick={handleEditToggle}
                 styles={{ theme: styles?.theme || 'light' }}
               />
@@ -828,7 +831,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                           opt?.attribute1 || null
                                         )
                                       }
-                                      defaultValue={selectedRevId || undefined}
+                                      defaultValue={selectedRevId || ''}
                                       styles={{
                                         theme: styles?.theme || 'light',
                                       }}

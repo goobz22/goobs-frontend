@@ -463,6 +463,33 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
     return baseTheme
   }
 
+  // Avoid assigning explicit undefined to optional props under exactOptionalPropertyTypes
+  const hoverBorderColor =
+    styles.hoverBorderColor ?? baseTheme.containerHover.borderColor
+  const expandedBorderColor =
+    styles.expandedBorderColor ?? baseTheme.containerExpanded.borderColor
+  const summaryTextShadow =
+    styles.summaryTextShadow ?? baseTheme.summary.textShadow
+  const summaryHoverTransform =
+    styles.summaryHoverTransform ?? baseTheme.summaryHover.transform
+  const summaryHoverTextShadow =
+    styles.summaryHoverTextShadow ?? baseTheme.summaryHover.textShadow
+  const summaryExpandedTextShadow =
+    styles.summaryExpandedTextShadow ?? baseTheme.summaryExpanded.textShadow
+  const iconFilter = styles.iconFilter ?? baseTheme.icon.filter
+  const iconHoverFilter = styles.iconHoverFilter ?? baseTheme.iconHover.filter
+  const iconExpandedFilter =
+    styles.iconExpandedFilter ?? baseTheme.iconExpanded.filter
+
+  const summaryHeight = styles.height ?? baseTheme.summary.height
+  const summaryMaxHeight = styles.maxHeight ?? baseTheme.summary.maxHeight
+  const summaryWhiteSpace =
+    styles.summaryWhiteSpace ?? baseTheme.summary.whiteSpace
+  const summaryOverflow = styles.summaryOverflow ?? baseTheme.summary.overflow
+  const summaryTextOverflow =
+    styles.summaryTextOverflow ?? baseTheme.summary.textOverflow
+  const summaryMinWidth = styles.minWidth ?? baseTheme.summary.minWidth
+
   return {
     ...baseTheme,
     container: {
@@ -474,14 +501,19 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
         styles.backdropFilter || baseTheme.container.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(styles.backgroundImage || baseTheme.container.backgroundImage
+        ? {
+            backgroundImage: (styles.backgroundImage ||
+              baseTheme.container.backgroundImage) as string,
+          }
+        : {}),
     },
     containerHover: {
       transform: styles.hoverTransform || baseTheme.containerHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.containerHover.boxShadow,
-      borderColor:
-        styles.hoverBorderColor || baseTheme.containerHover.borderColor,
+      ...(hoverBorderColor !== undefined
+        ? { borderColor: hoverBorderColor }
+        : {}),
     },
     containerExpanded: {
       boxShadow:
@@ -489,11 +521,16 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
       background:
         styles.expandedBackgroundColor ||
         baseTheme.containerExpanded.background,
-      borderColor:
-        styles.expandedBorderColor || baseTheme.containerExpanded.borderColor,
-      backgroundImage:
-        styles.expandedBackgroundImage ||
-        baseTheme.containerExpanded.backgroundImage,
+      ...(expandedBorderColor !== undefined
+        ? { borderColor: expandedBorderColor }
+        : {}),
+      ...(styles.expandedBackgroundImage ||
+      baseTheme.containerExpanded.backgroundImage
+        ? {
+            backgroundImage: (styles.expandedBackgroundImage ||
+              baseTheme.containerExpanded.backgroundImage) as string,
+          }
+        : {}),
     },
     summary: {
       background: styles.summaryBackgroundColor || baseTheme.summary.background,
@@ -503,27 +540,36 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
       fontWeight: styles.summaryFontWeight || baseTheme.summary.fontWeight,
       letterSpacing:
         styles.summaryLetterSpacing || baseTheme.summary.letterSpacing,
-      textShadow: styles.summaryTextShadow || baseTheme.summary.textShadow,
+      ...(summaryTextShadow !== undefined
+        ? { textShadow: summaryTextShadow }
+        : {}),
       borderBottom:
         styles.summaryBorderBottom || baseTheme.summary.borderBottom,
       minHeight: styles.summaryMinHeight || baseTheme.summary.minHeight,
-      height: styles.height || baseTheme.summary.height,
-      maxHeight: styles.maxHeight || baseTheme.summary.maxHeight,
-      whiteSpace: styles.summaryWhiteSpace || baseTheme.summary.whiteSpace,
-      overflow: styles.summaryOverflow || baseTheme.summary.overflow,
-      textOverflow:
-        styles.summaryTextOverflow || baseTheme.summary.textOverflow,
-      minWidth: styles.minWidth || baseTheme.summary.minWidth,
+      ...(summaryHeight !== undefined ? { height: summaryHeight } : {}),
+      ...(summaryMaxHeight !== undefined
+        ? { maxHeight: summaryMaxHeight }
+        : {}),
+      ...(summaryWhiteSpace !== undefined
+        ? { whiteSpace: summaryWhiteSpace }
+        : {}),
+      ...(summaryOverflow !== undefined ? { overflow: summaryOverflow } : {}),
+      ...(summaryTextOverflow !== undefined
+        ? { textOverflow: summaryTextOverflow }
+        : {}),
+      ...(summaryMinWidth !== undefined ? { minWidth: summaryMinWidth } : {}),
     },
     summaryHover: {
       backgroundColor:
         styles.summaryHoverBackgroundColor ||
         baseTheme.summaryHover.backgroundColor,
       color: styles.summaryHoverColor || baseTheme.summaryHover.color,
-      transform:
-        styles.summaryHoverTransform || baseTheme.summaryHover.transform,
-      textShadow:
-        styles.summaryHoverTextShadow || baseTheme.summaryHover.textShadow,
+      ...(summaryHoverTransform !== undefined
+        ? { transform: summaryHoverTransform }
+        : {}),
+      ...(summaryHoverTextShadow !== undefined
+        ? { textShadow: summaryHoverTextShadow }
+        : {}),
     },
     summaryExpanded: {
       backgroundColor:
@@ -536,9 +582,9 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
       fontWeight:
         styles.summaryExpandedFontWeight ||
         baseTheme.summaryExpanded.fontWeight,
-      textShadow:
-        styles.summaryExpandedTextShadow ||
-        baseTheme.summaryExpanded.textShadow,
+      ...(summaryExpandedTextShadow !== undefined
+        ? { textShadow: summaryExpandedTextShadow }
+        : {}),
     },
     details: {
       background: styles.detailsBackgroundColor || baseTheme.details.background,
@@ -552,18 +598,20 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
     },
     icon: {
       color: styles.iconColor || baseTheme.icon.color,
-      filter: styles.iconFilter || baseTheme.icon.filter,
+      ...(iconFilter !== undefined ? { filter: iconFilter } : {}),
     },
     iconHover: {
       color: styles.iconHoverColor || baseTheme.iconHover.color,
       transform: styles.iconHoverTransform || baseTheme.iconHover.transform,
-      filter: styles.iconHoverFilter || baseTheme.iconHover.filter,
+      ...(iconHoverFilter !== undefined ? { filter: iconHoverFilter } : {}),
     },
     iconExpanded: {
       transform:
         styles.iconExpandedTransform || baseTheme.iconExpanded.transform,
       color: styles.iconExpandedColor || baseTheme.iconExpanded.color,
-      filter: styles.iconExpandedFilter || baseTheme.iconExpanded.filter,
+      ...(iconExpandedFilter !== undefined
+        ? { filter: iconExpandedFilter }
+        : {}),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

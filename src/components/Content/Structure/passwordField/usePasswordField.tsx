@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import PasswordField, { PasswordFieldProps } from '../../../Field/Password'
+import PasswordField, { type PasswordFieldProps } from '../../../Field/Password'
 
 const usePasswordField = (props: {
   passwordField?: PasswordFieldProps | PasswordFieldProps[]

@@ -4,10 +4,8 @@
 import React, { useEffect, useState } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
-import {
-  ComplexTextEditorStyles,
-  getComplexTextEditorStyles,
-} from '../../../theme/'
+import { getComplexTextEditorStyles } from '../../../theme/'
+import type { ComplexTextEditorStyles } from '../../../theme/'
 import { mdToHtml } from '../utils/conversion'
 
 type MarkdownEditorProps = {
@@ -37,7 +35,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet = document.styleSheets?.[0]
       const keyframes = `
         @keyframes markdownEditorCodeGlow {
           0%, 100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
@@ -49,7 +47,9 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         }
       `
       try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        if (styleSheet) {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        }
       } catch {
         // Keyframes might already exist
       }
@@ -120,7 +120,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         markdownMode={true}
         setMarkdown={onChange}
         toolbarType="markdown"
-        styles={styles}
+        styles={styles as ComplexTextEditorStyles}
       />
       <button onClick={() => setShowPreview(!showPreview)}>
         Toggle Preview

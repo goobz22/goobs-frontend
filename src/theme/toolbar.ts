@@ -131,6 +131,12 @@ export const getToolbarTheme = (styles?: ToolbarStyles): ToolbarTheme => {
     return baseTheme
   }
 
+  const backgroundImageValue =
+    styles.backgroundImage ?? baseTheme.container.backgroundImage
+  const containerAnimationValue =
+    styles.containerAnimation ?? baseTheme.container.animation
+  const glyphAnimationValue = styles.glyphAnimation ?? baseTheme.glyph.animation
+
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
@@ -142,17 +148,24 @@ export const getToolbarTheme = (styles?: ToolbarStyles): ToolbarTheme => {
       backdropFilter:
         styles.backdropFilter || baseTheme.container.backdropFilter,
       padding: styles.padding || baseTheme.container.padding,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
-      animation: styles.containerAnimation || baseTheme.container.animation,
+      ...(backgroundImageValue !== undefined
+        ? { backgroundImage: backgroundImageValue }
+        : {}),
+      ...(containerAnimationValue !== undefined
+        ? { animation: containerAnimationValue }
+        : {}),
     },
     glyph: {
       color: styles.glyphColor || baseTheme.glyph.color,
       fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
-      animation: styles.glyphAnimation || baseTheme.glyph.animation,
+      ...(glyphAnimationValue !== undefined
+        ? { animation: glyphAnimationValue }
+        : {}),
     },
     transition: styles.transitionDuration
-      ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+      ? `all ${styles.transitionDuration} ${
+          styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }`
       : baseTheme.transition,
   }
 }
@@ -184,8 +197,12 @@ export const getToolbarStyles = (
     boxShadow: themeConfig.container.boxShadow,
     backdropFilter: themeConfig.container.backdropFilter,
     padding: themeConfig.container.padding,
-    backgroundImage: themeConfig.container.backgroundImage,
-    animation: themeConfig.container.animation,
+    ...(themeConfig.container.backgroundImage !== undefined
+      ? { backgroundImage: themeConfig.container.backgroundImage }
+      : {}),
+    ...(themeConfig.container.animation !== undefined
+      ? { animation: themeConfig.container.animation }
+      : {}),
     position: 'relative',
     transition: themeConfig.transition,
     opacity: isDisabled ? 0.5 : 1,
@@ -198,7 +215,9 @@ export const getToolbarStyles = (
     right: '0.5rem',
     color: themeConfig.glyph.color,
     fontSize: themeConfig.glyph.fontSize,
-    animation: themeConfig.glyph.animation,
+    ...(themeConfig.glyph.animation !== undefined
+      ? { animation: themeConfig.glyph.animation }
+      : {}),
   }
 
   const desktopLeftStyle: React.CSSProperties = {

@@ -6,7 +6,8 @@
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from '@storybook/test'
-import Dropdown, { DropdownOption } from './index'
+import Dropdown, { type DropdownOption } from './index'
+import type { FormFieldStyles } from '../../../../theme'
 
 /**
  * Reusable mock options using the unified DropdownOption interface
@@ -37,7 +38,7 @@ interface DropdownWithStateProps {
   initialValue?: string
   label: string
   options: DropdownOption[]
-  styles?: any
+  styles?: FormFieldStyles
   error?: string
   disabled?: boolean
   required?: boolean
@@ -57,12 +58,12 @@ const DropdownWithState: React.FC<DropdownWithStateProps> = ({
     <Dropdown
       label={label}
       options={options}
-      helperText={error}
+      {...(error ? { helperText: error } : {})}
       styles={{
         ...styles,
-        disabled: disabled,
-        required: required,
-        helperTextType: error ? 'error' : undefined,
+        disabled: disabled ?? false,
+        required: required ?? false,
+        helperTextType: error ? 'error' : 'info',
       }}
       value={value}
       onChange={e => setValue(e.target.value)}
@@ -180,7 +181,9 @@ export const ComplexOptions: Story = {
     // Open dropdown and verify complex options display correctly
     await userEvent.click(select)
     await expect(canvas.getByText(/React/)).toBeInTheDocument()
-    await expect(canvas.getByText(/Library | Frontend/)).toBeInTheDocument()
+    await expect(
+      canvas.getByText(/\(Library \| Frontend\)/)
+    ).toBeInTheDocument()
   },
 }
 
@@ -652,11 +655,11 @@ const InteractiveDemo: React.FC = () => {
         options={sampleOptions}
         value={value}
         onChange={e => setValue(e.target.value)}
-        helperText={error || undefined}
+        {...(error ? { helperText: error } : {})}
         styles={{
           theme,
-          disabled: disabled,
-          helperTextType: error ? 'error' : undefined,
+          disabled,
+          helperTextType: error ? 'error' : 'info',
         }}
       />
     </div>

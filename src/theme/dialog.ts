@@ -294,8 +294,12 @@ export const getDialogTheme = (styles?: DialogStyles): DialogTheme => {
       borderRadius: styles.borderRadius || baseTheme.dialog.borderRadius,
       boxShadow: styles.boxShadow || baseTheme.dialog.boxShadow,
       backdropFilter: styles.backdropFilter || baseTheme.dialog.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.dialog.backgroundImage,
+      ...(styles.backgroundImage || baseTheme.dialog.backgroundImage
+        ? {
+            backgroundImage:
+              styles.backgroundImage || baseTheme.dialog.backgroundImage,
+          }
+        : {}),
       maxHeight: styles.maxHeight || baseTheme.dialog.maxHeight,
       maxWidth: styles.maxWidth || baseTheme.dialog.maxWidth,
       minWidth: styles.minWidth || baseTheme.dialog.minWidth,
@@ -306,7 +310,12 @@ export const getDialogTheme = (styles?: DialogStyles): DialogTheme => {
         styles.enableScrolling === false
           ? 'hidden'
           : baseTheme.content.overflowY,
-      scrollbarColor: styles.scrollbarColor || baseTheme.content.scrollbarColor,
+      ...(styles.scrollbarColor || baseTheme.content.scrollbarColor
+        ? {
+            scrollbarColor:
+              styles.scrollbarColor || baseTheme.content.scrollbarColor,
+          }
+        : {}),
     },
     scrollbar: {
       ...baseTheme.scrollbar,

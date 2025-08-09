@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import MultipleSelectChip, {
-  MultiSelectChipProps,
+  type MultiSelectChipProps,
 } from '../../../Field/Dropdown/MultiSelect'
 
 const useMultiSelect = (props: {

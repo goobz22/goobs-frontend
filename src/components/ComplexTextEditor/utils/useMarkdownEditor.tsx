@@ -36,7 +36,7 @@ export const markdownToSlate = async (markdown: string): Promise<any[]> => {
         paragraph.children = Array.from(
           line.matchAll(boldAndItalicPattern)
         ).map(match => ({
-          text: match[2],
+          text: match[2] ?? '',
           italic: true,
           bold: true,
         }))
@@ -45,7 +45,7 @@ export const markdownToSlate = async (markdown: string): Promise<any[]> => {
       else if (boldPattern.test(line)) {
         paragraph.children = Array.from(line.matchAll(boldPattern)).map(
           match => ({
-            text: match[2],
+            text: match[2] ?? '',
             bold: true,
           })
         )
@@ -54,7 +54,7 @@ export const markdownToSlate = async (markdown: string): Promise<any[]> => {
       else if (italicPattern.test(line)) {
         paragraph.children = Array.from(line.matchAll(italicPattern)).map(
           match => ({
-            text: match[2],
+            text: match[2] ?? '',
             italic: true,
           })
         )

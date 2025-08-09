@@ -57,7 +57,9 @@ export function useComputeBoardResize({
     for (let i = 0; i < columns.length; i++) {
       // If adding another column + the "overflow" column fits in the container, keep going
       if (usedWidth + columnWidth + overflowReservedWidth <= containerWidth) {
-        canFit.push(columns[i])
+        const col = columns[i]
+        if (!col) continue
+        canFit.push(col)
         usedWidth += columnWidth
       } else {
         // Everything else is overflow
@@ -85,7 +87,10 @@ export function useComputeBoardResize({
         c => c._id === selectedOverflowColumnId
       )
       if (!stillExists) {
-        setSelectedOverflowColumnId(theOverflow[0]._id)
+        const firstOverflowColumn = theOverflow[0]
+        if (firstOverflowColumn) {
+          setSelectedOverflowColumnId(firstOverflowColumn._id)
+        }
       }
     } else {
       // If no overflow, reset

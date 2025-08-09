@@ -3,15 +3,10 @@
  * Supports light, dark, and sacred themes with TreeView integration.
  */
 'use client'
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  ReactNode,
-  FC,
-} from 'react'
-import { DrawerStyles, getDrawerStyles, SACRED_GLYPHS } from '../../theme'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import type { ReactNode, FC } from 'react'
+import { getDrawerStyles, SACRED_GLYPHS } from '../../theme'
+import type { DrawerStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // TYPES AND INTERFACES
@@ -74,12 +69,16 @@ const SacredBackground: FC<SacredBackgroundProps> = ({ width, height }) => {
     }> = []
 
     for (let i = 0; i < 12; i++) {
+      const randomIndex = Math.floor(Math.random() * SACRED_GLYPHS.length)
+      const defaultGlyph = '𓁟'
+      const glyph = SACRED_GLYPHS[randomIndex] ?? defaultGlyph
+
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        glyph: SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
+        glyph,
         size: 10 + Math.random() * 6,
         opacity: Math.random() * 0.15 + 0.05,
         maxOpacity: Math.random() * 0.2 + 0.1,
@@ -248,16 +247,16 @@ const Drawer: FC<DrawerProps> = ({
     document.head.appendChild(styleElement)
 
     return () => {
-      const styles = document.getElementById(scrollbarId)
-      if (styles) {
-        styles.remove()
+      const styleEl = document.getElementById(scrollbarId)
+      if (styleEl) {
+        styleEl.remove()
       }
     }
   }, [styles.theme])
 
   // Handle backdrop clicks
   const handleBackdropClick = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.MouseEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && onClose) {
         onClose()
       }
@@ -298,7 +297,7 @@ const Drawer: FC<DrawerProps> = ({
       ref={drawerRef}
       style={computedStyles.paper}
       role="dialog"
-      aria-modal={variant === 'temporary' && open}
+      aria-modal={variant === 'temporary' ? open : undefined}
       {...other}
     >
       {/* Sacred background */}

@@ -3,17 +3,12 @@
  */
 'use client'
 
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  FC,
-} from 'react'
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import type { FC } from 'react'
 import Button from '../../components/Button'
 import hljs from 'highlight.js'
-import { CodeCopyStyles, getCodeCopyStyles, SACRED_GLYPHS } from '../../theme'
+import { getCodeCopyStyles, SACRED_GLYPHS } from '../../theme'
+import type { CodeCopyStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -242,7 +237,6 @@ const CodeCopy: FC<CodeCopyProps> = props => {
             onClick={handleCopy}
             styles={{
               ...(!isSacredTheme && { theme: styles?.theme || 'dark' }),
-              disabled: styles?.disabled,
               backgroundColor: 'transparent',
               padding: '4px 6px',
               minHeight: '28px',
@@ -264,6 +258,7 @@ const CodeCopy: FC<CodeCopyProps> = props => {
                 hoverTextShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
               }),
             }}
+            disabled={styles?.disabled}
           />
         </div>
       </div>

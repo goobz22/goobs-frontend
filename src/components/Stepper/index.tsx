@@ -1,7 +1,8 @@
 'use client'
 
 import React, { JSX, useState, useMemo, useEffect } from 'react'
-import { StepperStyles, getStepperStyles, SACRED_GLYPHS } from '../../theme'
+import { getStepperStyles, SACRED_GLYPHS } from '../../theme'
+import type { StepperStyles } from '../../theme'
 import { injectKeyframes } from '../../theme/shared'
 import Check from '../Icons/Check'
 import CircleOutline from '../Icons/CircleOutline'

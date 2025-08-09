@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Searchbar, { SearchbarProps } from '../../../Field/Search'
+import Searchbar, { type SearchbarProps } from '../../../Field/Search'
 
 const useSearchbar = (props: {
   searchbar?: SearchbarProps | SearchbarProps[]

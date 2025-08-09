@@ -139,6 +139,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const [inputContentWidth, setInputContentWidth] = useState(0)
 
   const computedStyles = getStyles(styles, isFocused)
+  const inputStyles = (computedStyles.input ?? {}) as React.CSSProperties
 
   const currentValue = value || internalValue
   const displayValue =
@@ -148,10 +149,10 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     position: 'absolute',
     visibility: 'hidden',
     whiteSpace: 'pre',
-    fontSize: computedStyles.input.fontSize,
-    fontWeight: computedStyles.input.fontWeight,
-    lineHeight: computedStyles.input.lineHeight,
-    fontFamily: computedStyles.input.fontFamily,
+    fontSize: inputStyles.fontSize,
+    fontWeight: inputStyles.fontWeight,
+    lineHeight: inputStyles.lineHeight,
+    fontFamily: inputStyles.fontFamily,
   }
 
   useEffect(() => {
@@ -166,10 +167,8 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     setInputContentWidth(Math.max(valueWidth, placeholderWidth))
   }, [displayValue, placeholder])
 
-  const padLeft =
-    parseFloat(String(computedStyles.input.paddingLeft || '0')) || 0
-  const padRight =
-    parseFloat(String(computedStyles.input.paddingRight || '0')) || 0
+  const padLeft = parseFloat(String(inputStyles.paddingLeft || '0')) || 0
+  const padRight = parseFloat(String(inputStyles.paddingRight || '0')) || 0
   const calculatedWidth = `${inputContentWidth + padLeft + padRight + 1}px`
 
   const clearTimers = useCallback(() => {
@@ -304,7 +303,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           disabled={styles?.disabled}
           placeholder={placeholder}
           style={{
-            ...computedStyles.input,
+            ...inputStyles,
             width: calculatedWidth,
             minWidth: '60px',
             ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),

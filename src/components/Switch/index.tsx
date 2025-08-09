@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { SwitchStyles, getSwitchStyles, SACRED_GLYPHS } from '../../theme'
+import { getSwitchStyles, SACRED_GLYPHS } from '../../theme'
+import type { SwitchStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -43,7 +44,10 @@ const Switch: React.FC<SwitchProps> = ({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes sacredSwitchFloat {
           0%, 100% { transform: translateY(-50%) scale(1); opacity: 0.3; }
@@ -55,10 +59,12 @@ const Switch: React.FC<SwitchProps> = ({
           100% { left: '100%'; }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [isSacredTheme])

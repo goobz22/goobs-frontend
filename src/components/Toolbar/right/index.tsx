@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Dropdown, { DropdownProps } from '../../Field/Dropdown/Regular'
-import { ToolbarStyles } from '../../../theme'
+import type { ToolbarStyles } from '../../../theme'
 
 export interface RightProps {
   /** A single dropdown to render. (We'll render multiple <Right> if needed.) */

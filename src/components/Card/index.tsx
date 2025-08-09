@@ -4,7 +4,8 @@
 'use client'
 
 import React, { forwardRef, useState, useMemo } from 'react'
-import { CardStyles, getCardStyles } from '../../theme/card'
+import { getCardStyles } from '../../theme/card'
+import type { CardStyles } from '../../theme/card'
 
 // --------------------------------------------------------------------------
 // SACRED GLYPHS CONSTANTS

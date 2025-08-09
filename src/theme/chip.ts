@@ -481,6 +481,27 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
     return baseTheme
   }
 
+  // Resolve optional values up-front to avoid assigning `undefined` to optional props
+  const resolvedIconHoverTransform =
+    styles?.iconHoverTransform ?? baseTheme.iconHover.transform
+  const resolvedIconHoverColor =
+    styles?.iconHoverColor ?? baseTheme.iconHover.color
+
+  const resolvedContainerTextShadow =
+    styles.textShadow ?? baseTheme.container.textShadow
+  const resolvedContainerBackgroundImage =
+    styles.backgroundImage ?? baseTheme.container.backgroundImage
+
+  const resolvedHoverBorderColor =
+    styles.hoverBorderColor ?? baseTheme.containerHover.borderColor
+  const resolvedHoverBackgroundImage =
+    styles.hoverBackgroundImage ?? baseTheme.containerHover.backgroundImage
+
+  const resolvedDisabledBorderColor =
+    styles.disabledBorderColor ?? baseTheme.containerDisabled.borderColor
+  const resolvedDisabledTextShadow =
+    styles.disabledTextShadow ?? baseTheme.containerDisabled.textShadow
+
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
@@ -495,22 +516,27 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
       fontSize: styles.fontSize || baseTheme.container.fontSize,
       fontWeight: styles.fontWeight || baseTheme.container.fontWeight,
       color: styles.color || baseTheme.container.color,
-      textShadow: styles.textShadow || baseTheme.container.textShadow,
+      ...(resolvedContainerTextShadow
+        ? { textShadow: resolvedContainerTextShadow }
+        : {}),
       padding: styles.padding || baseTheme.container.padding,
       height: styles.height || baseTheme.container.height,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(resolvedContainerBackgroundImage
+        ? { backgroundImage: resolvedContainerBackgroundImage }
+        : {}),
     },
     containerHover: {
       transform: styles.hoverTransform || baseTheme.containerHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.containerHover.boxShadow,
       backgroundColor:
         styles.hoverBackgroundColor || baseTheme.containerHover.backgroundColor,
-      borderColor:
-        styles.hoverBorderColor || baseTheme.containerHover.borderColor,
       color: styles.hoverColor || baseTheme.containerHover.color,
-      backgroundImage:
-        styles.hoverBackgroundImage || baseTheme.containerHover.backgroundImage,
+      ...(resolvedHoverBorderColor
+        ? { borderColor: resolvedHoverBorderColor }
+        : {}),
+      ...(resolvedHoverBackgroundImage
+        ? { backgroundImage: resolvedHoverBackgroundImage }
+        : {}),
     },
     containerDisabled: {
       opacity: styles.disabledOpacity ?? baseTheme.containerDisabled.opacity,
@@ -518,10 +544,12 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
         styles.disabledBackgroundColor ||
         baseTheme.containerDisabled.backgroundColor,
       color: styles.disabledColor || baseTheme.containerDisabled.color,
-      borderColor:
-        styles.disabledBorderColor || baseTheme.containerDisabled.borderColor,
-      textShadow:
-        styles.disabledTextShadow || baseTheme.containerDisabled.textShadow,
+      ...(resolvedDisabledBorderColor
+        ? { borderColor: resolvedDisabledBorderColor }
+        : {}),
+      ...(resolvedDisabledTextShadow
+        ? { textShadow: resolvedDisabledTextShadow }
+        : {}),
     },
     icon: {
       ...baseTheme.icon,
@@ -532,8 +560,12 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
     },
     iconHover: {
       ...baseTheme.iconHover,
-      transform: styles?.iconHoverTransform || baseTheme.iconHover.transform,
-      color: styles?.iconHoverColor || baseTheme.iconHover.color,
+      ...(resolvedIconHoverTransform !== undefined
+        ? { transform: resolvedIconHoverTransform }
+        : {}),
+      ...(resolvedIconHoverColor !== undefined
+        ? { color: resolvedIconHoverColor }
+        : {}),
     },
     iconDisabled: {
       ...baseTheme.iconDisabled,

@@ -1,5 +1,7 @@
 import React from 'react'
-import QRCodeComponent, { QRCodeProps } from '../../../../components/QRCode'
+import QRCodeComponent, {
+  type QRCodeProps,
+} from '../../../../components/QRCode'
 
 const useQRCode = (props: {
   qrcode?: QRCodeProps | QRCodeProps[]

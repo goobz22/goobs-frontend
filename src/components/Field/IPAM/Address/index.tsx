@@ -83,8 +83,13 @@ const isValidIPAddress = (ip: string): boolean => {
 
 const ipToNumber = (ip: string): number => {
   if (!isValidIPAddress(ip)) return -1
-  const parts = ip.split('.').map(Number)
-  return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]
+  const [a, b, c, d] = ip.split('.').map(n => Number(n)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  return (a << 24) | (b << 16) | (c << 8) | d
 }
 
 const isValidIPRange = (startIP: string, endIP: string): boolean => {
@@ -103,8 +108,19 @@ const isIPInNetwork = (ip: string, network: string, mask: string): boolean => {
   const networkParts = network.split('.').map(part => parseInt(part, 10))
   const maskParts = mask.split('.').map(part => parseInt(part, 10))
   for (let i = 0; i < 4; i++) {
-    if ((ipParts[i] & maskParts[i]) !== (networkParts[i] & maskParts[i]))
-      return false
+    const ipPart = ipParts[i]
+    const networkPart = networkParts[i]
+    const maskPart = maskParts[i]
+    if (
+      ipPart === undefined ||
+      networkPart === undefined ||
+      maskPart === undefined
+    ) {
+      // If any part is unexpectedly undefined, treat as non-blocking
+      // since earlier guards ensure valid IPs; return true to avoid false negatives
+      return true
+    }
+    if ((ipPart & maskPart) !== (networkPart & maskPart)) return false
   }
   return true
 }
@@ -177,10 +193,30 @@ const calculateNetworkRange = (
   network: string,
   mask: string
 ): { start: string; end: string } => {
-  const networkParts = network.split('.').map(part => parseInt(part, 10))
-  const maskParts = mask.split('.').map(part => parseInt(part, 10))
-  const startParts = networkParts.map((part, i) => part & maskParts[i])
-  const endParts = startParts.map((part, i) => part | (~maskParts[i] & 255))
+  const networkParts = network.split('.').map(part => parseInt(part, 10)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  const maskParts = mask.split('.').map(part => parseInt(part, 10)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  const startParts: [number, number, number, number] = [
+    networkParts[0] & maskParts[0],
+    networkParts[1] & maskParts[1],
+    networkParts[2] & maskParts[2],
+    networkParts[3] & maskParts[3],
+  ]
+  const endParts: [number, number, number, number] = [
+    startParts[0] | (~maskParts[0] & 255),
+    startParts[1] | (~maskParts[1] & 255),
+    startParts[2] | (~maskParts[2] & 255),
+    startParts[3] | (~maskParts[3] & 255),
+  ]
   return { start: startParts.join('.'), end: endParts.join('.') }
 }
 
@@ -421,10 +457,10 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       let segments = formatted.split('.')
       let i = 0
       while (i < segments.length) {
-        let seg = segments[i]
-        if (seg !== '' && seg.length > 3) {
-          let first = seg.substring(0, 3)
-          let rest = seg.substring(3)
+        const segStr: string = segments[i] ?? ''
+        if (segStr !== '' && segStr.length > 3) {
+          const first = segStr.substring(0, 3)
+          const rest = segStr.substring(3)
           segments[i] = first
           segments.splice(i + 1, 0, rest)
         } else {
@@ -432,9 +468,9 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
         }
       }
       for (let j = 0; j < segments.length; j++) {
-        let seg = segments[j]
-        if (seg !== '') {
-          let num = parseInt(seg, 10)
+        const segStr: string = segments[j] ?? ''
+        if (segStr !== '') {
+          const num = parseInt(segStr, 10)
           if (num > 255) segments[j] = '255'
         }
       }
@@ -443,9 +479,10 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       }
       formatted = segments.join('.')
       if (autoInsertDots && !wasDelete) {
-        const segments = formatted.split('.')
-        if (segments.length < 4) {
-          if (segments[segments.length - 1].length === 3) formatted += '.'
+        const segmentsLocal = formatted.split('.')
+        if (segmentsLocal.length < 4) {
+          const last: string = segmentsLocal[segmentsLocal.length - 1] ?? ''
+          if (last.length === 3) formatted += '.'
         }
       }
       return formatted

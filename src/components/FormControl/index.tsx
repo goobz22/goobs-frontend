@@ -1,11 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import {
-  FormFieldStyles,
-  SACRED_GLYPHS,
-  injectSacredKeyframes,
-} from '../../theme'
+import { SACRED_GLYPHS, injectSacredKeyframes } from '../../theme'
+import type { FormFieldStyles } from '../../theme'
 
 export interface FormControlStyles extends FormFieldStyles {
   fullWidth?: boolean

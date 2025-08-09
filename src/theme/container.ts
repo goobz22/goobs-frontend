@@ -109,6 +109,17 @@ export const getContainerTheme = (styles?: ContainerStyles): ContainerTheme => {
     return baseTheme
   }
 
+  const computedBackground =
+    styles.backgroundColor ?? baseTheme.container.backgroundColor
+  const computedBorder = styles.borderColor
+    ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+    : baseTheme.container.border
+  const computedBorderRadius =
+    styles.borderRadius ?? baseTheme.container.borderRadius
+  const computedBoxShadow = styles.boxShadow ?? baseTheme.container.boxShadow
+  const computedBackdropFilter =
+    styles.backdropFilter ?? baseTheme.container.backdropFilter
+
   return {
     container: {
       maxWidth: styles.maxWidth || baseTheme.container.maxWidth,
@@ -116,15 +127,17 @@ export const getContainerTheme = (styles?: ContainerStyles): ContainerTheme => {
       margin: styles.margin || baseTheme.container.margin,
       padding: styles.padding || baseTheme.container.padding,
       boxSizing: styles.boxSizing || baseTheme.container.boxSizing,
-      backgroundColor:
-        styles.backgroundColor || baseTheme.container.backgroundColor,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
-      borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
-      boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
-      backdropFilter:
-        styles.backdropFilter || baseTheme.container.backdropFilter,
+      ...(computedBackground !== undefined && {
+        backgroundColor: computedBackground,
+      }),
+      ...(computedBorder !== undefined && { border: computedBorder }),
+      ...(computedBorderRadius !== undefined && {
+        borderRadius: computedBorderRadius,
+      }),
+      ...(computedBoxShadow !== undefined && { boxShadow: computedBoxShadow }),
+      ...(computedBackdropFilter !== undefined && {
+        backdropFilter: computedBackdropFilter,
+      }),
     },
   }
 }

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import SubnetField from '../Subnet'
-import { FormFieldStyles } from '../../../../theme'
+import type { FormFieldStyles } from '../../../../theme'
 
 export interface SupernetFieldValue {
   address: string
@@ -35,7 +35,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
       min={8}
       max={23}
       maskType="supernet"
-      styles={styles}
+      {...(styles !== undefined ? { styles } : {})}
     />
   )
 }

@@ -3,7 +3,8 @@
  */
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { TooltipStyles, getTooltipStyles } from '../../theme'
+import { getTooltipStyles } from '../../theme'
+import type { TooltipStyles } from '../../theme'
 
 export interface TooltipProps {
   children: React.ReactNode
@@ -88,8 +89,14 @@ const StyledTooltip: React.FC<TooltipProps> = ({
       let x = 0
       let y = 0
       // Parse arrow size from border string (e.g., "5px solid transparent" -> 5)
-      const borderString = themeStyles.arrow.border as string
-      const arrowSize = parseInt(borderString.split('px')[0]) || 5
+      const borderValue: string =
+        typeof (themeStyles.arrow.border as unknown) === 'string'
+          ? (themeStyles.arrow.border as string)
+          : '5px solid transparent'
+      const parts = borderValue.split('px')
+      const arrowSizeToken = parts[0] ?? '5'
+      const parsedArrowSize = parseInt(arrowSizeToken, 10)
+      const arrowSize = Number.isFinite(parsedArrowSize) ? parsedArrowSize : 5
       const arrowOffset = arrowSize + 3
 
       switch (tooltipplacement) {

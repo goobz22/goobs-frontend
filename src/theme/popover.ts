@@ -115,20 +115,31 @@ export const getPopoverTheme = (styles?: PopoverStyles): PopoverTheme => {
 
   return {
     popover: {
-      ...baseTheme.popover,
-      backgroundColor:
-        styles.backgroundColor || baseTheme.popover.backgroundColor,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.popover.border,
-      borderRadius: styles.borderRadius || baseTheme.popover.borderRadius,
-      boxShadow: styles.boxShadow || baseTheme.popover.boxShadow,
-      backdropFilter: styles.backdropFilter || baseTheme.popover.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.popover.backgroundImage,
-      marginTop: styles.marginTop || baseTheme.popover.marginTop,
-      zIndex: styles.zIndex || baseTheme.popover.zIndex,
-      position: styles.position || baseTheme.popover.position,
+      ...(() => {
+        const computedBackgroundImage =
+          styles.backgroundImage ?? baseTheme.popover.backgroundImage
+
+        const overrides: Partial<PopoverTheme['popover']> = {
+          backgroundColor:
+            styles.backgroundColor || baseTheme.popover.backgroundColor,
+          border: styles.borderColor
+            ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+            : baseTheme.popover.border,
+          borderRadius: styles.borderRadius || baseTheme.popover.borderRadius,
+          boxShadow: styles.boxShadow || baseTheme.popover.boxShadow,
+          backdropFilter:
+            styles.backdropFilter || baseTheme.popover.backdropFilter,
+          marginTop: styles.marginTop || baseTheme.popover.marginTop,
+          zIndex: styles.zIndex || baseTheme.popover.zIndex,
+          position: styles.position || baseTheme.popover.position,
+        }
+
+        if (computedBackgroundImage !== undefined) {
+          overrides.backgroundImage = computedBackgroundImage
+        }
+
+        return { ...baseTheme.popover, ...overrides }
+      })(),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

@@ -1,6 +1,6 @@
 import React from 'react'
 import SupernetField, {
-  SupernetFieldProps,
+  type SupernetFieldProps,
 } from '../../../../components/Field/IPAM/Supernet'
 
 interface UseSupernet {

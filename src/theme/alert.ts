@@ -405,14 +405,22 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
       fontSize: styles.fontSize || baseTheme.container.fontSize,
       lineHeight: styles.lineHeight || baseTheme.container.lineHeight,
       padding: styles.padding || baseTheme.container.padding,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...((styles.backgroundImage ?? baseTheme.container.backgroundImage)
+        ? {
+            backgroundImage: (styles.backgroundImage ??
+              baseTheme.container.backgroundImage) as string,
+          }
+        : {}),
     },
     containerHover: {
       transform: styles.hoverTransform || baseTheme.containerHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.containerHover.boxShadow,
-      borderColor:
-        styles.hoverBorderColor || baseTheme.containerHover.borderColor,
+      ...((styles.hoverBorderColor ?? baseTheme.containerHover.borderColor)
+        ? {
+            borderColor: (styles.hoverBorderColor ??
+              baseTheme.containerHover.borderColor) as string,
+          }
+        : {}),
     },
     severity: {
       error: {
@@ -422,8 +430,12 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
         borderColor:
           styles.errorBorderColor || baseTheme.severity.error.borderColor,
         color: styles.errorColor || baseTheme.severity.error.color,
-        textShadow:
-          styles.errorTextShadow || baseTheme.severity.error.textShadow,
+        ...((styles.errorTextShadow ?? baseTheme.severity.error.textShadow)
+          ? {
+              textShadow: (styles.errorTextShadow ??
+                baseTheme.severity.error.textShadow) as string,
+            }
+          : {}),
       },
       warning: {
         backgroundColor:
@@ -432,8 +444,12 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
         borderColor:
           styles.warningBorderColor || baseTheme.severity.warning.borderColor,
         color: styles.warningColor || baseTheme.severity.warning.color,
-        textShadow:
-          styles.warningTextShadow || baseTheme.severity.warning.textShadow,
+        ...((styles.warningTextShadow ?? baseTheme.severity.warning.textShadow)
+          ? {
+              textShadow: (styles.warningTextShadow ??
+                baseTheme.severity.warning.textShadow) as string,
+            }
+          : {}),
       },
       info: {
         backgroundColor:
@@ -441,7 +457,12 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
         borderColor:
           styles.infoBorderColor || baseTheme.severity.info.borderColor,
         color: styles.infoColor || baseTheme.severity.info.color,
-        textShadow: styles.infoTextShadow || baseTheme.severity.info.textShadow,
+        ...((styles.infoTextShadow ?? baseTheme.severity.info.textShadow)
+          ? {
+              textShadow: (styles.infoTextShadow ??
+                baseTheme.severity.info.textShadow) as string,
+            }
+          : {}),
       },
       success: {
         backgroundColor:
@@ -450,23 +471,38 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
         borderColor:
           styles.successBorderColor || baseTheme.severity.success.borderColor,
         color: styles.successColor || baseTheme.severity.success.color,
-        textShadow:
-          styles.successTextShadow || baseTheme.severity.success.textShadow,
+        ...((styles.successTextShadow ?? baseTheme.severity.success.textShadow)
+          ? {
+              textShadow: (styles.successTextShadow ??
+                baseTheme.severity.success.textShadow) as string,
+            }
+          : {}),
       },
     },
     icon: {
       width: styles.iconWidth || baseTheme.icon.width,
       height: styles.iconHeight || baseTheme.icon.height,
-      filter: styles.iconFilter || baseTheme.icon.filter,
+      ...((styles.iconFilter ?? baseTheme.icon.filter)
+        ? { filter: (styles.iconFilter ?? baseTheme.icon.filter) as string }
+        : {}),
     },
     iconHover: {
       transform: styles.iconHoverTransform || baseTheme.iconHover.transform,
-      filter: styles.iconHoverFilter || baseTheme.iconHover.filter,
+      ...((styles.iconHoverFilter ?? baseTheme.iconHover.filter)
+        ? {
+            filter: (styles.iconHoverFilter ??
+              baseTheme.iconHover.filter) as string,
+          }
+        : {}),
     },
     message: {
       fontWeight: styles.messageFontWeight || baseTheme.message.fontWeight,
-      letterSpacing:
-        styles.messageLetterSpacing || baseTheme.message.letterSpacing,
+      ...((styles.messageLetterSpacing ?? baseTheme.message.letterSpacing)
+        ? {
+            letterSpacing: (styles.messageLetterSpacing ??
+              baseTheme.message.letterSpacing) as string,
+          }
+        : {}),
     },
     closeButton: {
       width: styles.closeButtonWidth || baseTheme.closeButton.width,
@@ -478,24 +514,40 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
         styles.closeButtonBackground || baseTheme.closeButton.background,
       color: styles.closeButtonColor || baseTheme.closeButton.color,
       fontSize: styles.closeButtonFontSize || baseTheme.closeButton.fontSize,
-      fontFamily:
-        styles.closeButtonFontFamily || baseTheme.closeButton.fontFamily,
-      textShadow:
-        styles.closeButtonTextShadow || baseTheme.closeButton.textShadow,
+      ...((styles.closeButtonFontFamily ?? baseTheme.closeButton.fontFamily)
+        ? {
+            fontFamily: (styles.closeButtonFontFamily ??
+              baseTheme.closeButton.fontFamily) as string,
+          }
+        : {}),
+      ...((styles.closeButtonTextShadow ?? baseTheme.closeButton.textShadow)
+        ? {
+            textShadow: (styles.closeButtonTextShadow ??
+              baseTheme.closeButton.textShadow) as string,
+          }
+        : {}),
     },
     closeButtonHover: {
       background:
         styles.closeButtonHoverBackground ||
         baseTheme.closeButtonHover.background,
-      borderColor:
-        styles.closeButtonHoverBorderColor ||
-        baseTheme.closeButtonHover.borderColor,
+      ...((styles.closeButtonHoverBorderColor ??
+      baseTheme.closeButtonHover.borderColor)
+        ? {
+            borderColor: (styles.closeButtonHoverBorderColor ??
+              baseTheme.closeButtonHover.borderColor) as string,
+          }
+        : {}),
       transform:
         styles.closeButtonHoverTransform ||
         baseTheme.closeButtonHover.transform,
-      boxShadow:
-        styles.closeButtonHoverBoxShadow ||
-        baseTheme.closeButtonHover.boxShadow,
+      ...((styles.closeButtonHoverBoxShadow ??
+      baseTheme.closeButtonHover.boxShadow)
+        ? {
+            boxShadow: (styles.closeButtonHoverBoxShadow ??
+              baseTheme.closeButtonHover.boxShadow) as string,
+          }
+        : {}),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

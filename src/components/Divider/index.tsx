@@ -5,7 +5,8 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { DividerStyles, getDividerStyles } from '../../theme'
+import { getDividerStyles } from '../../theme'
+import type { DividerStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

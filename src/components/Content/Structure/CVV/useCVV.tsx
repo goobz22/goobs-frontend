@@ -1,5 +1,5 @@
 import React from 'react'
-import CVV, { CVVProps } from '../../../Field/Number/CVV'
+import CVV, { type CVVProps } from '../../../Field/Number/CVV'
 
 export interface UseCVVProps {
   cvv?: CVVProps | CVVProps[]
@@ -21,15 +21,15 @@ const CVVComponent: React.FC<CVVProps> = ({
 }) => {
   return (
     <CVV
-      onChange={onChange}
+      onChange={onChange ?? (() => {})}
       value={value}
       minLength={minLength}
       maxLength={maxLength}
       isDefaultValue={isDefaultValue}
-      label={label}
-      placeholder={placeholder}
-      helperText={helperText}
-      styles={styles}
+      {...(label !== undefined ? { label } : {})}
+      {...(placeholder !== undefined ? { placeholder } : {})}
+      {...(helperText !== undefined ? { helperText } : {})}
+      {...(styles !== undefined ? { styles } : {})}
       {...rest}
     />
   )

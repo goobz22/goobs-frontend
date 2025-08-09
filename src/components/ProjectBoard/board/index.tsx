@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { useAtom } from 'jotai'
 import { columnsAtom } from '../jotai/atom'
-import { ProjectBoardStyles } from '../../../theme'
+import type { ProjectBoardStyles } from '../../../theme'
 import { useColumnDragAndDrop } from '../utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from '../utils/useDragandDrop/tasks'
 import type { ColumnData } from '../types'
@@ -674,9 +674,12 @@ export default function Board({
               // Update the task in the columns
               const newColumns = [...allColumns]
               const updatedTask = { ...task, title, description }
+              const currentColumn = newColumns[columnIndex]!
               newColumns[columnIndex] = {
-                ...newColumns[columnIndex],
-                tasks: newColumns[columnIndex].tasks.map(t =>
+                _id: currentColumn._id,
+                title: currentColumn.title,
+                description: currentColumn.description,
+                tasks: currentColumn.tasks.map(t =>
                   t._id === task._id ? updatedTask : t
                 ),
               }
@@ -685,11 +688,12 @@ export default function Board({
             onDelete={() => {
               // Remove the task from the columns
               const newColumns = [...allColumns]
+              const currentColumn = newColumns[columnIndex]!
               newColumns[columnIndex] = {
-                ...newColumns[columnIndex],
-                tasks: newColumns[columnIndex].tasks.filter(
-                  t => t._id !== task._id
-                ),
+                _id: currentColumn._id,
+                title: currentColumn.title,
+                description: currentColumn.description,
+                tasks: currentColumn.tasks.filter(t => t._id !== task._id),
               }
               setAllColumns(newColumns)
             }}
@@ -725,7 +729,7 @@ export default function Board({
                 setAllColumns
               )
             }}
-            styles={styles}
+            {...(styles ? { styles } : {})}
           />
         </div>
       )

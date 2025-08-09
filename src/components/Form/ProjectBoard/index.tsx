@@ -214,7 +214,10 @@ function FormProjectBoard({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (sacredtheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes formProjectBoardGlowPulse {
           0%, 100% { 
@@ -239,10 +242,12 @@ function FormProjectBoard({
           100% { transform: translateX(100%); }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [sacredtheme])

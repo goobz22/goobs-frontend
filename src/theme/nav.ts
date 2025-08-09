@@ -785,6 +785,8 @@ export const navThemes: Record<'light' | 'dark' | 'sacred', NavTheme> = {
 // Theme selector function
 export const getNavTheme = (styles?: NavStyles): NavTheme => {
   const baseTheme = navThemes[styles?.theme || 'light']
+  const computedBackgroundImage =
+    styles?.backgroundImage ?? baseTheme.container.backgroundImage
 
   return {
     ...baseTheme,
@@ -798,8 +800,9 @@ export const getNavTheme = (styles?: NavStyles): NavTheme => {
       boxShadow: styles?.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
         styles?.backdropFilter || baseTheme.container.backdropFilter,
-      backgroundImage:
-        styles?.backgroundImage || baseTheme.container.backgroundImage,
+      ...(computedBackgroundImage !== undefined
+        ? { backgroundImage: computedBackgroundImage }
+        : {}),
       color: styles?.color || baseTheme.container.color,
       minWidth: styles?.minWidth || baseTheme.container.minWidth,
       width: styles?.width || baseTheme.container.width,

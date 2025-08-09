@@ -5,7 +5,8 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { ZoomStyles, getZoomStyles } from '../../theme'
+import { getZoomStyles } from '../../theme'
+import type { ZoomStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

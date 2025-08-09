@@ -6,10 +6,8 @@ import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
 import Button, { ButtonGroup } from '../../../Button'
-import {
-  ComplexTextEditorStyles,
-  getComplexTextEditorStyles,
-} from '../../../../theme/'
+import { getComplexTextEditorStyles } from '../../../../theme/'
+import type { ComplexTextEditorStyles } from '../../../../theme/'
 import { convertValue } from '../../utils/conversion'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
@@ -75,7 +73,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
-          styles={styles}
+          {...(styles ? { styles } : {})}
         />
       )}
 
@@ -84,7 +82,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
-          styles={styles}
+          {...(styles ? { styles } : {})}
         />
       )}
 
@@ -93,7 +91,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
-          styles={styles}
+          {...(styles ? { styles } : {})}
         />
       )}
     </div>

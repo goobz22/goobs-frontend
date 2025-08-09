@@ -167,36 +167,73 @@ export const getAppBarTheme = (styles?: AppBarStyles): AppBarTheme => {
   }
 
   return {
-    container: {
-      backgroundColor:
-        styles.backgroundColor || baseTheme.container.backgroundColor,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
-      borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
-      boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
-      backdropFilter:
-        styles.backdropFilter || baseTheme.container.backdropFilter,
-      animation: styles.containerAnimation || baseTheme.container.animation,
-    },
-    toolbar: {
-      padding: styles.toolbarPadding || baseTheme.toolbar.padding,
-      minHeight: styles.toolbarMinHeight || baseTheme.toolbar.minHeight,
-      gap: styles.toolbarGap || baseTheme.toolbar.gap,
-    },
-    glyph: {
-      color: styles.glyphColor || baseTheme.glyph.color,
-      fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
-      animation: styles.glyphAnimation || baseTheme.glyph.animation,
-    },
-    shimmer: baseTheme.shimmer
+    container: (() => {
+      const container: AppBarTheme['container'] = {
+        backgroundColor:
+          styles.backgroundColor || baseTheme.container.backgroundColor,
+        border: styles.borderColor
+          ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+          : baseTheme.container.border,
+        borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
+        boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
+      }
+
+      const resolvedBackgroundImage =
+        styles.backgroundImage ?? baseTheme.container.backgroundImage
+      if (resolvedBackgroundImage !== undefined) {
+        container.backgroundImage = resolvedBackgroundImage
+      }
+
+      const resolvedBackdropFilter =
+        styles.backdropFilter ?? baseTheme.container.backdropFilter
+      if (resolvedBackdropFilter !== undefined) {
+        container.backdropFilter = resolvedBackdropFilter
+      }
+
+      const resolvedAnimation =
+        styles.containerAnimation ?? baseTheme.container.animation
+      if (resolvedAnimation !== undefined) {
+        container.animation = resolvedAnimation
+      }
+
+      return container
+    })(),
+    toolbar: (() => {
+      const toolbar: AppBarTheme['toolbar'] = {
+        padding: styles.toolbarPadding || baseTheme.toolbar.padding,
+        minHeight: styles.toolbarMinHeight || baseTheme.toolbar.minHeight,
+      }
+
+      const resolvedGap = styles.toolbarGap ?? baseTheme.toolbar.gap
+      if (resolvedGap !== undefined) {
+        toolbar.gap = resolvedGap
+      }
+
+      return toolbar
+    })(),
+    glyph: (() => {
+      const glyph: AppBarTheme['glyph'] = {
+        color: styles.glyphColor || baseTheme.glyph.color,
+        fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
+      }
+
+      const resolvedGlyphAnimation =
+        styles.glyphAnimation ?? baseTheme.glyph.animation
+      if (resolvedGlyphAnimation !== undefined) {
+        glyph.animation = resolvedGlyphAnimation
+      }
+
+      return glyph
+    })(),
+    ...(baseTheme.shimmer
       ? {
-          background: styles.shimmerBackground || baseTheme.shimmer.background,
-          animation: styles.shimmerAnimation || baseTheme.shimmer.animation,
+          shimmer: {
+            background:
+              styles.shimmerBackground || baseTheme.shimmer.background,
+            animation: styles.shimmerAnimation || baseTheme.shimmer.animation,
+          },
         }
-      : undefined,
+      : {}),
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
       : baseTheme.transition,

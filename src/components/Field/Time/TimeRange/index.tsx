@@ -76,8 +76,8 @@ const parseTimeInput = (
 ): { hours: number; minutes: number } | null => {
   const parts = timeString.split(':')
   if (parts.length === 2) {
-    const hours = parseInt(parts[0], 10)
-    const minutes = parseInt(parts[1], 10)
+    const hours = parseInt(parts[0] ?? '', 10)
+    const minutes = parseInt(parts[1] ?? '', 10)
     if (
       !isNaN(hours) &&
       !isNaN(minutes) &&
@@ -553,8 +553,9 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault()
       const inc = e.key === 'ArrowUp' ? 1 : -1
-      const parts = inputValue.split(':').map(p => parseInt(p, 10) || 0)
-      let [hours, minutes] = parts
+      const parts = inputValue.split(':').map(p => parseInt(p ?? '', 10))
+      let hours = (parts[0] ?? 0) as number
+      let minutes = (parts[1] ?? 0) as number
       const selectedPart = pos <= 2 ? 'hours' : 'minutes'
       if (selectedPart === 'hours') {
         hours = (hours + inc + 24) % 24

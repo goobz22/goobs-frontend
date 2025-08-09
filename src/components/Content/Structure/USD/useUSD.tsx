@@ -1,5 +1,5 @@
 import React from 'react'
-import USDField, { USDFieldProps } from '../../../Field/USD'
+import USDField, { type USDFieldProps } from '../../../Field/USD'
 
 export interface UseUSDProps {
   usdField?: USDFieldProps | USDFieldProps[]
@@ -26,18 +26,18 @@ const USDComponent: React.FC<USDFieldProps> = ({
   return (
     <USDField
       initialValue={initialValue}
-      onChange={onChange}
+      {...(onChange ? { onChange } : {})}
       label={label}
-      min={min}
-      max={max}
-      precision={precision}
-      placeholder={placeholder}
+      {...(min !== undefined ? { min } : {})}
+      {...(max !== undefined ? { max } : {})}
+      {...(precision !== undefined ? { precision } : {})}
+      {...(placeholder !== undefined ? { placeholder } : {})}
       enableIncrement={enableIncrement}
       incrementStep={incrementStep}
       initialDelay={initialDelay}
       repeatInterval={repeatInterval}
-      helperText={helperText}
-      styles={styles}
+      {...(helperText !== undefined ? { helperText } : {})}
+      {...(styles !== undefined ? { styles } : {})}
       {...rest}
     />
   )

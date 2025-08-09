@@ -8,11 +8,12 @@ import React, {
   useState,
   useMemo,
   useCallback,
-  ReactNode,
   useEffect,
   forwardRef,
 } from 'react'
-import { ButtonStyles, getButtonStyles, SACRED_GLYPHS } from '../../theme'
+import type { ReactNode } from 'react'
+import { getButtonStyles, SACRED_GLYPHS } from '../../theme'
+import type { ButtonStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

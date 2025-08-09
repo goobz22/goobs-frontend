@@ -1,16 +1,16 @@
 // src/components/DataGrid/datagrid.stories.tsx
 
 import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import DataGrid from './index'
-import {
+import type {
   DatagridProps,
   ColumnDef,
   RowData,
   DataGridFilter,
   MetricCardData,
 } from './types'
-import { ButtonProps } from '../Button'
+import type { ButtonProps } from '../Button'
 
 const sampleColumns: ColumnDef[] = [
   { field: 'id', headerName: 'ID', width: 90, resizable: true },
@@ -341,9 +341,9 @@ const sampleRows: RowData[] = [
       'Intern',
     ]
 
-    const firstName = firstNames[i % firstNames.length]
+    const firstName = firstNames[i % firstNames.length] ?? 'User'
     const lastName =
-      lastNames[Math.floor(i / firstNames.length) % lastNames.length]
+      lastNames[Math.floor(i / firstNames.length) % lastNames.length] ?? 'User'
     const department = departments[i % departments.length]
     const status = statuses[i % statuses.length]
     const age = 22 + (i % 43) // Age between 22-65

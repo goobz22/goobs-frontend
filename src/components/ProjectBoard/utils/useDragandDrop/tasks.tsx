@@ -66,9 +66,11 @@ export function useTaskDragAndDrop() {
 
   const handleTaskDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    // Only clear drag over info if we're actually leaving the drop zone
-    const relatedTarget = e.relatedTarget as HTMLElement
-    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+    // Only clear drag over info if we're actually leaving the drop zone.
+    // React.DragEvent does not expose relatedTarget, so compute using elementFromPoint.
+    const currentTarget = e.currentTarget as HTMLElement
+    const nextElement = document.elementFromPoint(e.clientX, e.clientY)
+    if (!nextElement || !currentTarget.contains(nextElement)) {
       setDragOverInfo(null)
     }
   }, [])
@@ -106,6 +108,7 @@ export function useTaskDragAndDrop() {
 
       const sourceColumn = newColumns[sourceColIdx]
       const destColumn = newColumns[dropColumnIndex]
+      if (!sourceColumn || !destColumn) return
       const sourceTask = sourceColumn.tasks[sourceTaskIdx]
 
       if (!sourceTask) return

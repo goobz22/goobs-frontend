@@ -11,12 +11,13 @@ import React, {
   useImperativeHandle,
   useRef,
   useId,
-  ChangeEvent,
   useMemo,
   useCallback,
 } from 'react'
+import type { ChangeEvent } from 'react'
 import type { InputHTMLAttributes } from 'react'
-import { CheckboxStyles, getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
+import { getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
+import type { CheckboxStyles } from '../../theme'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 

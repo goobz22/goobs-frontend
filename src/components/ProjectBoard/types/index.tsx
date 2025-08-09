@@ -1,4 +1,4 @@
-import { ProjectBoardStyles } from '../../../theme'
+import type { ProjectBoardStyles } from '../../../theme'
 
 /** A minimal typed comment for any type of task. */
 export type Comment = {

@@ -168,25 +168,47 @@ export const getProjectBoardTheme = (
   }
 
   return {
-    container: {
-      background: styles.backgroundColor || baseTheme.container.background,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
-      borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
-      boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
-      backdropFilter:
-        styles.backdropFilter || baseTheme.container.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
-      animation: styles.containerAnimation || baseTheme.container.animation,
-    },
-    glyph: {
-      color: styles.glyphColor || baseTheme.glyph.color,
-      fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
-      zIndex: styles.glyphZIndex || baseTheme.glyph.zIndex,
-      animation: styles.glyphAnimation || baseTheme.glyph.animation,
-    },
+    container: (() => {
+      const container: ProjectBoardTheme['container'] = {
+        background: styles.backgroundColor || baseTheme.container.background,
+        border: styles.borderColor
+          ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+          : baseTheme.container.border,
+        borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
+        boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
+        backdropFilter:
+          styles.backdropFilter || baseTheme.container.backdropFilter,
+      }
+
+      const computedBackgroundImage =
+        styles.backgroundImage ?? baseTheme.container.backgroundImage
+      if (computedBackgroundImage !== undefined) {
+        container.backgroundImage = computedBackgroundImage
+      }
+
+      const computedAnimation =
+        styles.containerAnimation ?? baseTheme.container.animation
+      if (computedAnimation !== undefined) {
+        container.animation = computedAnimation
+      }
+
+      return container
+    })(),
+    glyph: (() => {
+      const glyph: ProjectBoardTheme['glyph'] = {
+        color: styles.glyphColor || baseTheme.glyph.color,
+        fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
+        zIndex: styles.glyphZIndex || baseTheme.glyph.zIndex,
+      }
+
+      const computedGlyphAnimation =
+        styles.glyphAnimation ?? baseTheme.glyph.animation
+      if (computedGlyphAnimation !== undefined) {
+        glyph.animation = computedGlyphAnimation
+      }
+
+      return glyph
+    })(),
     toolbarContainer: {
       background:
         styles.toolbarBackground || baseTheme.toolbarContainer.background,

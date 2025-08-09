@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ComplexTextEditor, {
-  ComplexTextEditorProps,
+  type ComplexTextEditorProps,
 } from '../../../ComplexTextEditor'
 
 const useComplexEditor = (props: {

@@ -313,9 +313,10 @@ const DateField: React.FC<DateFieldProps> = ({
   const parseDate = (dateString: string): Date | null => {
     const parts = dateString.split('/')
     if (parts.length === 3) {
-      const month = parseInt(parts[0], 10)
-      const day = parseInt(parts[1], 10)
-      const year = parseInt(parts[2], 10)
+      const [monthStr, dayStr, yearStr] = parts
+      const month = parseInt(monthStr ?? '', 10)
+      const day = parseInt(dayStr ?? '', 10)
+      const year = parseInt(yearStr ?? '', 10)
       if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
         const date = new Date(year, month - 1, day)
         if (
@@ -350,8 +351,10 @@ const DateField: React.FC<DateFieldProps> = ({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault()
       const inc = e.key === 'ArrowUp' ? 1 : -1
-      const parts = inputValue.split('/').map(p => parseInt(p, 10) || 0)
-      let [month, day, year] = parts
+      const parts = inputValue.split('/').map(p => parseInt(p ?? '', 10))
+      let month = (parts[0] ?? 1) as number
+      let day = (parts[1] ?? 1) as number
+      let year = (parts[2] ?? new Date().getFullYear()) as number
       if (isNaN(month)) month = 1
       if (isNaN(day)) day = 1
       if (isNaN(year)) year = new Date().getFullYear()
@@ -365,7 +368,9 @@ const DateField: React.FC<DateFieldProps> = ({
         year += inc
         year = Math.max(1900, Math.min(2100, year))
       }
-      const newValue = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`
+      const newValue = `${month.toString().padStart(2, '0')}/${day
+        .toString()
+        .padStart(2, '0')}/${year}`
       setInputValue(newValue)
       const parsed = parseDate(newValue)
       if (parsed) setSelectedDate(parsed)
@@ -547,7 +552,7 @@ const DateField: React.FC<DateFieldProps> = ({
                 ? MONTHS
                 : MONTHS.slice(currentMonth)
               ).map(month => ({ value: month }))}
-              value={MONTHS[viewedMonth]}
+              value={MONTHS[viewedMonth] || ''}
               onChange={e => setViewedMonth(MONTHS.indexOf(e.target.value))}
               label=""
               styles={{

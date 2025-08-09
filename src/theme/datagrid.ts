@@ -575,6 +575,16 @@ export const getDataGridTheme = (styles?: DataGridStyles): DataGridTheme => {
     return baseTheme
   }
 
+  const computedBackdropFilter =
+    styles?.backdropFilter ?? baseTheme.container.backdropFilter
+  const computedBorder = styles?.borderColor
+    ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+    : baseTheme.container.border
+  const computedAnimation = styles?.animation ?? baseTheme.container.animation
+  const computedBorderRadius =
+    styles?.borderRadius ?? baseTheme.container.borderRadius
+  const computedPadding = styles?.padding ?? baseTheme.container.padding
+
   return {
     container: {
       position: baseTheme.container.position,
@@ -583,14 +593,17 @@ export const getDataGridTheme = (styles?: DataGridStyles): DataGridTheme => {
       width: styles.width || baseTheme.container.width,
       backgroundColor:
         styles.backgroundColor || baseTheme.container.backgroundColor,
-      backdropFilter:
-        styles.backdropFilter || baseTheme.container.backdropFilter,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
-      borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
-      animation: styles.animation || baseTheme.container.animation,
-      padding: styles.padding || baseTheme.container.padding,
+      ...(computedBackdropFilter !== undefined
+        ? { backdropFilter: computedBackdropFilter }
+        : {}),
+      ...(computedBorder !== undefined ? { border: computedBorder } : {}),
+      ...(computedBorderRadius !== undefined
+        ? { borderRadius: computedBorderRadius }
+        : {}),
+      ...(computedAnimation !== undefined
+        ? { animation: computedAnimation }
+        : {}),
+      ...(computedPadding !== undefined ? { padding: computedPadding } : {}),
     },
     contentWrapper: {
       display: baseTheme.contentWrapper.display,

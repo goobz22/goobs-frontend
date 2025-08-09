@@ -28,7 +28,7 @@ interface ScrollbarConfig {
     borderRadius: string
     border?: string
   }
-  thumbHover?: {
+  thumbHover: {
     backgroundColor: string
   }
 }
@@ -111,7 +111,7 @@ function Table({
   const { updatedColumns, isResizing, resizingColumn, getResizeHandleProps } =
     useColumnResize({
       columns,
-      onColumnResize,
+      ...(onColumnResize ? { onColumnResize } : {}),
     })
 
   // Create scrollbar styles
@@ -171,14 +171,14 @@ function Table({
               getResizeHandleProps={getResizeHandleProps}
               isResizing={isResizing}
               resizingColumn={resizingColumn}
-              styles={styles}
-              onColumnSort={onColumnSort}
-              onManageColumns={onManageColumns}
-              draggedColumn={draggedColumn}
-              onColumnDragStart={onColumnDragStart}
-              onColumnDragOver={onColumnDragOver}
-              onColumnDrop={onColumnDrop}
-              onColumnDragEnd={onColumnDragEnd}
+              {...(styles ? { styles } : {})}
+              {...(onColumnSort ? { onColumnSort } : {})}
+              {...(onManageColumns ? { onManageColumns } : {})}
+              {...(draggedColumn != null ? { draggedColumn } : {})}
+              {...(onColumnDragStart ? { onColumnDragStart } : {})}
+              {...(onColumnDragOver ? { onColumnDragOver } : {})}
+              {...(onColumnDrop ? { onColumnDrop } : {})}
+              {...(onColumnDragEnd ? { onColumnDragEnd } : {})}
             />
           </thead>
           <tbody>
@@ -186,33 +186,33 @@ function Table({
               <CreationRow
                 columns={updatedColumns}
                 creationRowData={creationRowData}
-                onCreationFieldChange={onCreationFieldChange}
-                onCreateRowSave={onCreateRowSave}
-                onCreateRowCancel={onCreateRowCancel}
-                styles={styles}
+                {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
+                {...(onCreateRowSave ? { onCreateRowSave } : {})}
+                {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
+                {...(styles ? { styles } : {})}
               />
             )}
             <Rows
               rows={rows}
               columns={updatedColumns}
               selectedRowIds={selectedRowIds}
-              onRowClick={onRowClick}
-              styles={styles}
-              editingCell={editingCell}
-              editingValue={editingValue}
-              onCellClick={onCellClick}
-              onCellSave={onCellSave}
-              onCellCancel={onCellCancel}
-              onEditingValueChange={onEditingValueChange}
+              {...(onRowClick ? { onRowClick } : {})}
+              {...(styles ? { styles } : {})}
+              {...(editingCell ? { editingCell } : {})}
+              {...(editingValue != null ? { editingValue } : {})}
+              {...(onCellClick ? { onCellClick } : {})}
+              {...(onCellSave ? { onCellSave } : {})}
+              {...(onCellCancel ? { onCellCancel } : {})}
+              {...(onEditingValueChange ? { onEditingValueChange } : {})}
             />
             {isCreatingRow && creationRowPosition === 'bottom' && (
               <CreationRow
                 columns={updatedColumns}
                 creationRowData={creationRowData}
-                onCreationFieldChange={onCreationFieldChange}
-                onCreateRowSave={onCreateRowSave}
-                onCreateRowCancel={onCreateRowCancel}
-                styles={styles}
+                {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
+                {...(onCreateRowSave ? { onCreateRowSave } : {})}
+                {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
+                {...(styles ? { styles } : {})}
               />
             )}
           </tbody>

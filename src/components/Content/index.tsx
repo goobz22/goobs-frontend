@@ -1,44 +1,44 @@
 'use client'
 
 import React from 'react'
-import { TypographyProps } from '../Typography'
-import { RadioGroupProps } from '../RadioGroup'
-import { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
-import { TextFieldProps } from '../Field/Text'
-import { PhoneNumberFieldProps } from '../Field/PhoneNumber'
-import { ButtonProps } from '../Button'
-import { ImageProps } from './Structure/image/useImage'
-import { PricingProps } from '../PricingTable'
-import { StepperProps } from '../Stepper'
-import { TransferListProps } from '../TransferList'
+import type { TypographyProps } from '../Typography'
+import type { RadioGroupProps } from '../RadioGroup'
+import type { ConfirmationCodeInputsProps } from '../ConfirmationCodeInput'
+import type { TextFieldProps } from '../Field/Text'
+import type { PhoneNumberFieldProps } from '../Field/PhoneNumber'
+import type { ButtonProps } from '../Button'
+import type { ImageProps } from './Structure/image/useImage'
+import type { PricingProps } from '../PricingTable'
+import type { StepperProps } from '../Stepper'
+import type { TransferListProps } from '../TransferList'
 
-import { CodeCopyProps } from '../CodeCopy'
-import { DateFieldProps } from '../Field/Date/DateField'
-import { DropdownProps } from '../Field/Dropdown/Regular'
-import { ExternalIncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
-import { SearchbarProps } from '../Field/Search'
-import { InternalIncrementNumberFieldProps } from '../Field/Number/InternalIncrement'
-import { SubnetFieldProps } from '../Field/IPAM/Subnet'
-import { PasswordFieldProps } from '../Field/Password'
-import { QRCodeProps } from '../QRCode'
-import { ComplexTextEditorProps } from '../ComplexTextEditor'
-import { SearchableSimpleProps } from '../Field/Dropdown/SearchableSimple'
-import { SearchableHistoryProps } from '../Field/Dropdown/SearchableHistory'
-import { AccordionProps } from '../Accordion'
-import { ProjectBoardProps } from '../ProjectBoard/types'
-import { MultiSelectChipProps } from '../Field/Dropdown/MultiSelect'
-import { CheckboxProps } from '../Checkbox'
-import { LinkProps } from './Structure/link/useLink'
+import type { CodeCopyProps } from '../CodeCopy'
+import type { DateFieldProps } from '../Field/Date/DateField'
+import type { DropdownProps } from '../Field/Dropdown/Regular'
+import type { ExternalIncrementNumberFieldProps } from '../Field/Number/ExternalIncrement'
+import type { SearchbarProps } from '../Field/Search'
+import type { InternalIncrementNumberFieldProps } from '../Field/Number/InternalIncrement'
+import type { SubnetFieldProps } from '../Field/IPAM/Subnet'
+import type { PasswordFieldProps } from '../Field/Password'
+import type { QRCodeProps } from '../QRCode'
+import type { ComplexTextEditorProps } from '../ComplexTextEditor'
+import type { SearchableSimpleProps } from '../Field/Dropdown/SearchableSimple'
+import type { SearchableHistoryProps } from '../Field/Dropdown/SearchableHistory'
+import type { AccordionProps } from '../Accordion'
+import type { ProjectBoardProps } from '../ProjectBoard/types'
+import type { MultiSelectChipProps } from '../Field/Dropdown/MultiSelect'
+import type { CheckboxProps } from '../Checkbox'
+import type { LinkProps } from './Structure/link/useLink'
 import type { USDFieldProps } from './Structure/USD/useUSD'
-import { CIDRFieldProps } from '../Field/IPAM/CIDR'
-import { IPAddressFieldProps } from '../Field/IPAM/Address'
-import { VLANFieldProps } from '../Field/IPAM/VLAN'
-import { MACAddressFieldProps } from '../Field/IPAM/MACAddress'
-import { RoutingNumberProps } from '../Field/Number/RoutingNumber'
-import { AccountNumberProps } from '../Field/Number/AccountNumber'
-import { CVVProps } from '../Field/Number/CVV'
-import { CreditCardNumberProps } from '../Field/Number/CreditCardNumber'
-import { DateRangeProps } from '../Field/Date/DateRange'
+import type { CIDRFieldProps } from '../Field/IPAM/CIDR'
+import type { IPAddressFieldProps } from '../Field/IPAM/Address'
+import type { VLANFieldProps } from '../Field/IPAM/VLAN'
+import type { MACAddressFieldProps } from '../Field/IPAM/MACAddress'
+import type { RoutingNumberProps } from '../Field/Number/RoutingNumber'
+import type { AccountNumberProps } from '../Field/Number/AccountNumber'
+import type { CVVProps } from '../Field/Number/CVV'
+import type { CreditCardNumberProps } from '../Field/Number/CreditCardNumber'
+import type { DateRangeProps } from '../Field/Date/DateRange'
 
 // Import hooks
 import useTypography from './Structure/typography/useTypography'
@@ -172,92 +172,145 @@ const RenderContent: React.FC<
     }
   }
 
+  // Helper to include a prop only when it is defined (to satisfy exactOptionalPropertyTypes)
+  const withProp = <K extends string, V>(key: K, value: V | undefined) =>
+    value === undefined
+      ? ({} as Record<K, V>)
+      : ({ [key]: value } as Record<K, V>)
+
   // Add elements for each content type, injecting sacredtheme where applicable
   addElements(
-    useTypography({ typography: injectsacredtheme(props.typography) })
+    useTypography(withProp('typography', injectsacredtheme(props.typography)))
   )
   addElements(
-    useRadioGroup({ radiogroup: injectsacredtheme(props.radiogroup) })
+    useRadioGroup(withProp('radiogroup', injectsacredtheme(props.radiogroup)))
   )
   addElements(
-    useConfirmationInput({
-      confirmationcodeinput: injectsacredtheme(props.confirmationcodeinput),
-    })
+    useConfirmationInput(
+      withProp(
+        'confirmationcodeinput',
+        injectsacredtheme(props.confirmationcodeinput)
+      )
+    )
   )
-  addElements(useLink({ link: injectsacredtheme(props.link) }))
-  addElements(useButton({ button: injectsacredtheme(props.button) }))
-  addElements(useImage({ image: injectsacredtheme(props.image) }))
+  addElements(useLink(withProp('link', injectsacredtheme(props.link))))
+  addElements(useButton(withProp('button', injectsacredtheme(props.button))))
+  addElements(useImage(withProp('image', injectsacredtheme(props.image))))
   addElements(
-    useComplexEditor({ complexeditor: injectsacredtheme(props.complexeditor) })
+    useComplexEditor(
+      withProp('complexeditor', injectsacredtheme(props.complexeditor))
+    )
   )
-  addElements(usePricing({ pricing: injectsacredthemeSingle(props.pricing) }))
-  addElements(useStepper({ stepper: injectsacredtheme(props.stepper) }))
   addElements(
-    useTransferList({ transferlist: injectsacredtheme(props.transferlist) })
+    usePricing(withProp('pricing', injectsacredthemeSingle(props.pricing)))
+  )
+  addElements(useStepper(withProp('stepper', injectsacredtheme(props.stepper))))
+  addElements(
+    useTransferList(
+      withProp('transferlist', injectsacredtheme(props.transferlist))
+    )
   )
 
-  addElements(useCodeCopy({ codecopy: injectsacredtheme(props.codecopy) }))
   addElements(
-    useSearchableDropdown({
-      searchableDropdown: injectsacredtheme(props.searchableDropdown),
-    })
+    useCodeCopy(withProp('codecopy', injectsacredtheme(props.codecopy)))
   )
   addElements(
-    useSearchableHistory({
-      searchableHistory: injectsacredtheme(props.searchableHistory),
-    })
-  )
-  addElements(useTextField({ textfield: injectsacredtheme(props.textfield) }))
-  addElements(useDateField({ dateField: injectsacredtheme(props.datefield) }))
-  addElements(
-    useProjectBoard({ projectboard: injectsacredtheme(props.projectboard) })
-  )
-  addElements(useAccordion({ accordion: injectsacredtheme(props.accordion) }))
-  addElements(
-    useMultiSelect({ multiSelect: injectsacredtheme(props.multiSelect) })
-  )
-  addElements(useCheckbox({ checkbox: injectsacredtheme(props.checkbox) }))
-  addElements(
-    usePhoneNumber({
-      phoneNumberField: injectsacredtheme(props.phoneNumberField),
-    })
-  )
-  addElements(useDropdown({ dropdown: injectsacredtheme(props.dropdown) }))
-  addElements(
-    useIncrementNumberField({
-      incrementNumberField: injectsacredtheme(props.incrementNumberField),
-    })
-  )
-  addElements(useSearchbar({ searchbar: injectsacredtheme(props.searchbar) }))
-  addElements(
-    useNumberField({ numberField: injectsacredtheme(props.numberField) })
+    useSearchableDropdown(
+      withProp(
+        'searchableDropdown',
+        injectsacredtheme(props.searchableDropdown)
+      )
+    )
   )
   addElements(
-    usePasswordField({ passwordField: injectsacredtheme(props.passwordField) })
-  )
-  addElements(useQRCode({ qrcode: injectsacredtheme(props.qrcode) }))
-  addElements(useSubnet({ subnet: injectsacredtheme(props.subnet) }))
-  addElements(useSupernet({ supernet: injectsacredtheme(props.supernet) }))
-  addElements(useCIDR({ cidr: injectsacredtheme(props.cidr) }))
-  addElements(useAddress({ address: injectsacredtheme(props.address) }))
-  addElements(useVLAN({ vlan: injectsacredtheme(props.vlan) }))
-  addElements(useUSD({ usdField: injectsacredtheme(props.usdField) }))
-  addElements(
-    useMacAddress({ macAddressField: injectsacredtheme(props.macAddressField) })
+    useSearchableHistory(
+      withProp('searchableHistory', injectsacredtheme(props.searchableHistory))
+    )
   )
   addElements(
-    useRoutingNumber({ routingnumber: injectsacredtheme(props.routingnumber) })
+    useTextField(withProp('textfield', injectsacredtheme(props.textfield)))
   )
   addElements(
-    useAccountNumber({ accountnumber: injectsacredtheme(props.accountnumber) })
+    useDateField(withProp('dateField', injectsacredtheme(props.datefield)))
   )
-  addElements(useCVV({ cvv: injectsacredtheme(props.cvv) }))
   addElements(
-    useCreditCardNumber({
-      creditCardNumber: injectsacredtheme(props.creditCardNumber),
-    })
+    useProjectBoard(
+      withProp('projectboard', injectsacredtheme(props.projectboard))
+    )
   )
-  addElements(useDateRange({ dateRange: injectsacredtheme(props.dateRange) }))
+  addElements(
+    useAccordion(withProp('accordion', injectsacredtheme(props.accordion)))
+  )
+  addElements(
+    useMultiSelect(
+      withProp('multiSelect', injectsacredtheme(props.multiSelect))
+    )
+  )
+  addElements(
+    useCheckbox(withProp('checkbox', injectsacredtheme(props.checkbox)))
+  )
+  addElements(
+    usePhoneNumber(
+      withProp('phoneNumberField', injectsacredtheme(props.phoneNumberField))
+    )
+  )
+  addElements(
+    useDropdown(withProp('dropdown', injectsacredtheme(props.dropdown)))
+  )
+  addElements(
+    useIncrementNumberField(
+      withProp(
+        'incrementNumberField',
+        injectsacredtheme(props.incrementNumberField)
+      )
+    )
+  )
+  addElements(
+    useSearchbar(withProp('searchbar', injectsacredtheme(props.searchbar)))
+  )
+  addElements(
+    useNumberField(
+      withProp('numberField', injectsacredtheme(props.numberField))
+    )
+  )
+  addElements(
+    usePasswordField(
+      withProp('passwordField', injectsacredtheme(props.passwordField))
+    )
+  )
+  addElements(useQRCode(withProp('qrcode', injectsacredtheme(props.qrcode))))
+  addElements(useSubnet(withProp('subnet', injectsacredtheme(props.subnet))))
+  addElements(
+    useSupernet(withProp('supernet', injectsacredtheme(props.supernet)))
+  )
+  addElements(useCIDR(withProp('cidr', injectsacredtheme(props.cidr))))
+  addElements(useAddress(withProp('address', injectsacredtheme(props.address))))
+  addElements(useVLAN(withProp('vlan', injectsacredtheme(props.vlan))))
+  addElements(useUSD(withProp('usdField', injectsacredtheme(props.usdField))))
+  addElements(
+    useMacAddress(
+      withProp('macAddressField', injectsacredtheme(props.macAddressField))
+    )
+  )
+  addElements(
+    useRoutingNumber(
+      withProp('routingnumber', injectsacredtheme(props.routingnumber))
+    )
+  )
+  addElements(
+    useAccountNumber(
+      withProp('accountnumber', injectsacredtheme(props.accountnumber))
+    )
+  )
+  addElements(useCVV(withProp('cvv', injectsacredtheme(props.cvv))))
+  addElements(
+    useCreditCardNumber(
+      withProp('creditCardNumber', injectsacredtheme(props.creditCardNumber))
+    )
+  )
+  addElements(
+    useDateRange(withProp('dateRange', injectsacredtheme(props.dateRange)))
+  )
 
   // Merge any style provided in boxProps with the grid's style property
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
@@ -280,7 +333,11 @@ export default function ContentSection({
   return (
     <>
       {grids.map((gridProps, index) => (
-        <RenderContent key={index} {...gridProps} sacredtheme={sacredtheme} />
+        <RenderContent
+          key={index}
+          {...gridProps}
+          {...(sacredtheme === undefined ? {} : { sacredtheme })}
+        />
       ))}
     </>
   )

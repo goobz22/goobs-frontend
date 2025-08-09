@@ -4,17 +4,12 @@
  * Also supports menu items for navigation.
  */
 'use client'
-import React, {
-  useState,
-  useEffect,
-  FC,
-  ReactNode,
-  useMemo,
-  useCallback,
-} from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import type { FC, ReactNode } from 'react'
 import Link from 'next/link'
 import ExpandMoreIcon from '../Icons/ExpandMore'
-import { AccordionStyles, getAccordionStyles, SACRED_GLYPHS } from '../../theme'
+import { getAccordionStyles, SACRED_GLYPHS } from '../../theme'
+import type { AccordionStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -49,15 +44,21 @@ export interface AccordionProps {
 // HELPER HOOK for state management
 // --------------------------------------------------------------------------
 
+type UseAccordionStateArgs = {
+  expanded?: boolean | undefined
+  defaultExpanded?: boolean | undefined
+  onChange?:
+    | ((event: React.SyntheticEvent, expanded: boolean) => void)
+    | undefined
+  styles?: AccordionStyles | undefined
+}
+
 const useAccordionState = ({
   expanded: controlledExpanded,
   defaultExpanded = false,
   onChange,
   styles,
-}: Pick<
-  AccordionProps,
-  'expanded' | 'defaultExpanded' | 'onChange' | 'styles'
->) => {
+}: UseAccordionStateArgs) => {
   const { current: isControlled } = React.useRef(
     controlledExpanded !== undefined
   )

@@ -1,6 +1,6 @@
 import React from 'react'
 import RadioGroup from '../../../RadioGroup'
-import { RadioGroupProps as BaseRadioGroupProps } from '../../../../components/RadioGroup'
+import type { RadioGroupProps as BaseRadioGroupProps } from '../../../../components/RadioGroup'
 
 const useRadioGroup = (props: {
   radiogroup?: BaseRadioGroupProps | BaseRadioGroupProps[]

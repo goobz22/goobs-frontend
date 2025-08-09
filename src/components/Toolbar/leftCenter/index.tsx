@@ -2,9 +2,10 @@
 
 'use client'
 
-import React, { FC } from 'react'
-import Searchbar, { SearchbarProps } from '../../Field/Search'
-import { ToolbarStyles } from '../../../theme'
+import React from 'react'
+import type { FC } from 'react'
+import Searchbar, { type SearchbarProps } from '../../Field/Search'
+import type { ToolbarStyles } from '../../../theme'
 import type { FormFieldStyles } from '../../../theme'
 
 interface LeftCenterProps extends Partial<SearchbarProps> {
@@ -103,7 +104,7 @@ const getStyles = (styles?: ToolbarStyles) => {
 }
 
 const LeftCenter: FC<LeftCenterProps> = props => {
-  const { label, placeholder, styles, value = '', onChange = () => {} } = props
+  const { label, placeholder, styles, value = '', onChange } = props
 
   const computedStyles = getStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
@@ -111,17 +112,30 @@ const LeftCenter: FC<LeftCenterProps> = props => {
   // Create proper FormFieldStyles based on the DataGrid theme
   const searchbarStyles = createSearchbarStyles(styles)
 
+  // Ensure required onChange is always provided to Searchbar
+  const effectiveOnChange: SearchbarProps['onChange'] = onChange ?? (_e => {})
+
+  // Build props while respecting exactOptionalPropertyTypes: only include
+  // optional props when defined.
+  const searchbarProps: SearchbarProps = {
+    value,
+    onChange: effectiveOnChange,
+    styles: searchbarStyles,
+  }
+
+  if (isSacredTheme) {
+    searchbarProps.label = 'Divine Search'
+    searchbarProps.placeholder = 'Seek ancient wisdom...'
+  } else {
+    if (label !== undefined) searchbarProps.label = label
+    if (placeholder !== undefined) searchbarProps.placeholder = placeholder
+  }
+
   return (
     <div style={computedStyles.container}>
       <div style={computedStyles.glyph} />
       <div style={computedStyles.searchbarContainer}>
-        <Searchbar
-          label={isSacredTheme ? 'Divine Search' : label}
-          placeholder={isSacredTheme ? 'Seek ancient wisdom...' : placeholder}
-          value={value}
-          onChange={onChange}
-          styles={searchbarStyles}
-        />
+        <Searchbar {...searchbarProps} />
       </div>
     </div>
   )

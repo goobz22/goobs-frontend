@@ -13,7 +13,7 @@ import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
-import { DatagridProps, RowData } from './types'
+import type { DatagridProps, RowData } from './types'
 import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
 
 function DataGrid({
@@ -83,11 +83,19 @@ function DataGrid({
 
   // Merge column widths with the ordered columns
   const columnsWithWidths = useMemo(() => {
-    return orderedColumns.map(col => ({
-      ...col,
-      width: columnWidths[col.field] || col.width,
-      computedWidth: columnWidths[col.field] || col.computedWidth || col.width,
-    }))
+    return orderedColumns.map(col => {
+      const mappedWidth = columnWidths[col.field] ?? col.width
+      const mappedComputedWidth =
+        columnWidths[col.field] ?? col.computedWidth ?? col.width
+
+      return {
+        ...col,
+        ...(mappedWidth !== undefined ? { width: mappedWidth } : {}),
+        ...(mappedComputedWidth !== undefined
+          ? { computedWidth: mappedComputedWidth }
+          : {}),
+      }
+    })
   }, [orderedColumns, columnWidths])
 
   // Filter columns based on hidden columns
@@ -353,10 +361,10 @@ function DataGrid({
   const { filteredRows, updatedSearchbarProps } = useSearchbar({
     columns: visibleColumns,
     rows: rows,
-    searchbarProps,
+    ...(searchbarProps !== undefined ? { searchbarProps } : {}),
   })
   const { handleManageRowClose, handleManage } = useManageRow({
-    onManage,
+    ...(onManage !== undefined ? { onManage } : {}),
     selectedRows,
     handleSelectionChange,
   })
@@ -542,12 +550,18 @@ function DataGrid({
       <div style={computedStyles.contentWrapper}>
         {/* Metrics Section */}
         {metrics && metrics.length > 0 && (
-          <MetricSection metrics={metrics} styles={styles} />
+          <MetricSection
+            metrics={metrics}
+            {...(styles !== undefined ? { styles } : {})}
+          />
         )}
 
         {/* Filters Section */}
         {filters && filters.length > 0 && (
-          <FilterSection filters={filters} styles={styles} />
+          <FilterSection
+            filters={filters}
+            {...(styles !== undefined ? { styles } : {})}
+          />
         )}
 
         {/* Toolbar - positioned inside DataGrid */}
@@ -555,7 +569,7 @@ function DataGrid({
           buttons={
             allowRowCreation && !isCreatingRow
               ? [
-                  ...(buttons || []),
+                  ...(buttons ?? []),
                   {
                     text: 'Add Row',
                     onClick: handleStartRowCreation,
@@ -564,30 +578,32 @@ function DataGrid({
                     },
                   },
                 ]
-              : buttons
+              : (buttons ?? [])
           }
-          dropdowns={dropdowns?.[0] ? [dropdowns[0]] : undefined}
+          {...(dropdowns?.[0] ? { dropdowns: [dropdowns[0]] } : {})}
           searchbarProps={updatedSearchbarProps}
-          rightCenterProps={
-            selectedRows.length > 0
-              ? {
+          {...(selectedRows.length > 0
+            ? {
+                rightCenterProps: {
                   selectedRows,
                   rows,
-                  onDuplicate: onDuplicate
-                    ? () => onDuplicate(selectedRows)
-                    : undefined,
-                  onDelete: onDelete
-                    ? () => {
-                        onDelete(selectedRows)
-                        handleSelectionChange([])
+                  ...(onDuplicate
+                    ? { onDuplicate: () => onDuplicate(selectedRows) }
+                    : {}),
+                  ...(onDelete
+                    ? {
+                        onDelete: () => {
+                          onDelete(selectedRows)
+                          handleSelectionChange([])
+                        },
                       }
-                    : undefined,
-                  onManage: onManage ? handleManage : undefined,
-                  onShow: onShow ? () => onShow(selectedRows) : undefined,
+                    : {}),
+                  ...(onManage ? { onManage: handleManage } : {}),
+                  ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
                   handleClose: handleManageRowClose,
-                }
-              : undefined
-          }
+                },
+              }
+            : {})}
           styles={{
             theme: styles?.theme || 'light',
           }}
@@ -604,7 +620,7 @@ function DataGrid({
           someRowsSelected={someRowsSelected}
           onHeaderCheckboxChange={handleHeaderCheckboxChange}
           onColumnResize={handleColumnResize}
-          styles={styles}
+          {...(styles !== undefined ? { styles } : {})}
           editingCell={editingCell}
           editingValue={editingValue}
           onCellClick={handleCellClick}
@@ -633,7 +649,7 @@ function DataGrid({
           onPageChange={setPage}
           onPageSizeChange={handlePageSizeChange}
           columns={visibleColumns}
-          styles={styles}
+          {...(styles !== undefined ? { styles } : {})}
         />
       </div>
 
@@ -662,7 +678,7 @@ function DataGrid({
           onColumnShow={handleColumnShow}
           onColumnHide={handleColumnHide}
           onClose={() => setShowManageColumns(false)}
-          styles={styles}
+          {...(styles !== undefined ? { styles } : {})}
         />
       )}
 

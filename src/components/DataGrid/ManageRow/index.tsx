@@ -38,7 +38,10 @@ function ManageRow({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes manageRowGlowPulse {
           0%, 100% { 
@@ -51,10 +54,12 @@ function ManageRow({
           }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [isSacredTheme])

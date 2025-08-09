@@ -15,6 +15,9 @@ import CreditCardNumber from '../../../Field/Number/CreditCardNumber'
 import AccountNumber from '../../../Field/Number/AccountNumber'
 import RoutingNumber from '../../../Field/Number/RoutingNumber'
 import Button from '../../../Button'
+import type { DropdownOption } from '../../../Field/Dropdown/SearchableSimple'
+import type { CardType } from '../../../Field/Number/CreditCardNumber'
+import type { SubnetFieldValue } from '../../../Field/IPAM/Subnet'
 // IPAM field imports
 import IPAddressField from '../../../Field/IPAM/Address'
 import SubnetField from '../../../Field/IPAM/Subnet'
@@ -60,7 +63,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         | 'light'
         | 'dark'
         | 'sacred',
-      required: fieldConfig.required,
+      required: !!fieldConfig.required,
       fontSize: '14px',
       height: fieldConfig.type === 'internalIncrement' ? '40px' : '32px', // 8px bigger for internal increment
       padding: '4px 8px',
@@ -73,11 +76,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <TextField
             value={String(value ?? '')}
-            onChange={newValue =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -92,10 +99,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
                   ? new Date(String(value))
                   : null
             }
-            onChange={newValue =>
+            onChange={(newValue: Date | null) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -106,7 +115,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label=""
             options={fieldConfig.options || []}
             defaultValue={String(value ?? '')}
-            onChange={option => {
+            onChange={(option: DropdownOption | null) => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
                 column.field === 'state'
@@ -114,8 +123,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
                   : option?.value || ''
               onCreationFieldChange?.(column.field, valueToUse)
             }}
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -126,8 +139,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label=""
             options={fieldConfig.options || []}
             defaultSelected={Array.isArray(value) ? (value as string[]) : []}
-            onChange={values => onCreationFieldChange?.(column.field, values)}
-            helperText={fieldConfig.helperText}
+            onChange={(values: string[]) =>
+              onCreationFieldChange?.(column.field, values)
+            }
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -136,7 +153,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <InternalIncrementNumberField
             initialValue={value?.toString() ?? '0'}
-            onChange={eventOrValue => {
+            onChange={(
+              eventOrValue: React.ChangeEvent<HTMLInputElement> | number
+            ) => {
               // Handle both React event and number values from the component
               let numValue: number
               if (typeof eventOrValue === 'number') {
@@ -150,10 +169,18 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 isNaN(numValue) ? 0 : numValue
               )
             }}
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
-            min={fieldConfig.min}
-            max={fieldConfig.max}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
+            {...(typeof fieldConfig.min === 'number'
+              ? { min: fieldConfig.min }
+              : {})}
+            {...(typeof fieldConfig.max === 'number'
+              ? { max: fieldConfig.max }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -164,7 +191,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label=""
             options={fieldConfig.options || []}
             defaultValue={String(value ?? '')}
-            onChange={option => {
+            onChange={(option: DropdownOption | null) => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
                 column.field === 'state'
@@ -172,8 +199,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
                   : option?.value || ''
               onCreationFieldChange?.(column.field, valueToUse)
             }}
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -182,11 +213,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <PhoneNumberField
             value={String(value ?? '')}
-            onChange={newValue =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -195,11 +230,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <CVV
             value={String(value ?? '')}
-            onChange={(newValue, _isValid) =>
+            onChange={(newValue: string, _isValid: boolean) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -208,11 +247,17 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <CreditCardNumber
             value={String(value ?? '')}
-            onChange={(newValue, _isValid, _cardType) =>
-              onCreationFieldChange?.(column.field, newValue)
-            }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            onChange={(
+              newValue: string,
+              _isValid: boolean,
+              _cardType: CardType
+            ) => onCreationFieldChange?.(column.field, newValue)}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -221,11 +266,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <AccountNumber
             value={String(value ?? '')}
-            onChange={(newValue, _isValid) =>
+            onChange={(newValue: string, _isValid: boolean) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -234,11 +283,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <RoutingNumber
             value={String(value ?? '')}
-            onChange={(newValue, _isValid) =>
+            onChange={(newValue: string, _isValid: boolean) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -247,18 +300,36 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <IPAddressField
             initialValue={String(value ?? '')}
-            onChange={event =>
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(column.field, event.target.value)
             }
-            placeholder={fieldConfig.placeholder}
-            subnetAddress={fieldConfig.subnetAddress}
-            subnetCIDR={fieldConfig.subnetCIDR}
-            allowIncomplete={fieldConfig.allowIncomplete}
-            autoInsertDots={fieldConfig.autoInsertDots}
-            isGateway={fieldConfig.isGateway}
-            isRange={fieldConfig.isRange}
-            isStartIP={fieldConfig.isStartIP}
-            isEndIP={fieldConfig.isEndIP}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.subnetAddress
+              ? { subnetAddress: fieldConfig.subnetAddress }
+              : {})}
+            {...(typeof fieldConfig.subnetCIDR === 'number'
+              ? { subnetCIDR: fieldConfig.subnetCIDR }
+              : {})}
+            {...(typeof fieldConfig.allowIncomplete === 'boolean'
+              ? { allowIncomplete: fieldConfig.allowIncomplete }
+              : {})}
+            {...(typeof fieldConfig.autoInsertDots === 'boolean'
+              ? { autoInsertDots: fieldConfig.autoInsertDots }
+              : {})}
+            {...(typeof fieldConfig.isGateway === 'boolean'
+              ? { isGateway: fieldConfig.isGateway }
+              : {})}
+            {...(typeof fieldConfig.isRange === 'boolean'
+              ? { isRange: fieldConfig.isRange }
+              : {})}
+            {...(typeof fieldConfig.isStartIP === 'boolean'
+              ? { isStartIP: fieldConfig.isStartIP }
+              : {})}
+            {...(typeof fieldConfig.isEndIP === 'boolean'
+              ? { isEndIP: fieldConfig.isEndIP }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -275,16 +346,30 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 mask: 24,
               }
             }
-            onChange={newValue =>
+            onChange={(newValue: SubnetFieldValue) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            label={fieldConfig.placeholder}
-            required={fieldConfig.required}
-            min={fieldConfig.min}
-            max={fieldConfig.max}
-            maskType={fieldConfig.maskType}
-            supernetAddress={fieldConfig.supernetAddress}
-            supernetMask={fieldConfig.supernetMask?.toString()}
+            {...(fieldConfig.placeholder
+              ? { label: fieldConfig.placeholder }
+              : {})}
+            {...(typeof fieldConfig.required === 'boolean'
+              ? { required: fieldConfig.required }
+              : {})}
+            {...(typeof fieldConfig.min === 'number'
+              ? { min: fieldConfig.min }
+              : {})}
+            {...(typeof fieldConfig.max === 'number'
+              ? { max: fieldConfig.max }
+              : {})}
+            {...(fieldConfig.maskType
+              ? { maskType: fieldConfig.maskType }
+              : {})}
+            {...(fieldConfig.supernetAddress
+              ? { supernetAddress: fieldConfig.supernetAddress }
+              : {})}
+            {...(fieldConfig.supernetMask !== undefined
+              ? { supernetMask: fieldConfig.supernetMask?.toString() }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -293,14 +378,18 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <VLANField
             initialValue={value?.toString() ?? ''}
-            onChange={event =>
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(
                 column.field,
                 parseInt(event.target.value) || 0
               )
             }
-            placeholder={fieldConfig.placeholder}
-            reservedVLANs={fieldConfig.reservedVLANs}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(Array.isArray(fieldConfig.reservedVLANs)
+              ? { reservedVLANs: fieldConfig.reservedVLANs }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -309,7 +398,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <CIDRField
             initialValue={value?.toString() ?? '24'}
-            onChange={eventOrNumber => {
+            onChange={(
+              eventOrNumber: React.ChangeEvent<HTMLInputElement> | number
+            ) => {
               let cidrValue: number
               if (typeof eventOrNumber === 'number') {
                 cidrValue = eventOrNumber
@@ -324,10 +415,18 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 isNaN(cidrValue) ? 24 : cidrValue
               )
             }}
-            minCidr={fieldConfig.min}
-            maxCidr={fieldConfig.max}
-            showSubnetInfo={fieldConfig.showSubnetInfo}
-            helperText={fieldConfig.helperText}
+            {...(typeof fieldConfig.min === 'number'
+              ? { minCidr: fieldConfig.min }
+              : {})}
+            {...(typeof fieldConfig.max === 'number'
+              ? { maxCidr: fieldConfig.max }
+              : {})}
+            {...(typeof fieldConfig.showSubnetInfo === 'boolean'
+              ? { showSubnetInfo: fieldConfig.showSubnetInfo }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -344,11 +443,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 mask: 16,
               }
             }
-            onChange={newValue =>
+            onChange={(newValue: SubnetFieldValue) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            label={fieldConfig.placeholder}
-            required={fieldConfig.required}
+            {...(fieldConfig.placeholder
+              ? { label: fieldConfig.placeholder }
+              : {})}
+            {...(typeof fieldConfig.required === 'boolean'
+              ? { required: fieldConfig.required }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -357,10 +460,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <MACAddressField
             initialValue={String(value ?? '')}
-            onChange={event =>
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(column.field, event.target.value)
             }
-            placeholder={fieldConfig.placeholder}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
             styles={fieldStyles}
           />
         )
@@ -369,11 +474,15 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <TextField
             value={String(value ?? '')}
-            onChange={newValue =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
-            placeholder={fieldConfig.placeholder}
-            helperText={fieldConfig.helperText}
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
             styles={fieldStyles}
           />
         )

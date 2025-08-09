@@ -4,7 +4,8 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { ListStyles, getListStyles } from '../../theme'
+import { getListStyles } from '../../theme'
+import type { ListStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACES

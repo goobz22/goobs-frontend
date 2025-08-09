@@ -31,6 +31,9 @@ export function useColumnDragAndDrop(
     <T,>(list: T[], startIndex: number, endIndex: number): T[] => {
       const result = [...list]
       const [removed] = result.splice(startIndex, 1)
+      if (removed === undefined) {
+        return result
+      }
       result.splice(endIndex, 0, removed)
       return result
     },
@@ -83,9 +86,11 @@ export function useColumnDragAndDrop(
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
 
-    // Only clear drag over if we're actually leaving the drop zone
-    const relatedTarget = e.relatedTarget as HTMLElement
-    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+    // Only clear drag over if we're actually leaving the drop zone.
+    // React.DragEvent does not expose relatedTarget, so compute using elementFromPoint.
+    const currentTarget = e.currentTarget as HTMLElement
+    const nextElement = document.elementFromPoint(e.clientX, e.clientY)
+    if (!nextElement || !currentTarget.contains(nextElement)) {
       setDragOverColumnIndex(null)
     }
   }, [])

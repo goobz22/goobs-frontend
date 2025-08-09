@@ -250,23 +250,48 @@ export const getButtonTheme = (styles?: ButtonStyles): ButtonTheme => {
       fontWeight: styles.fontWeight || baseTheme.container.fontWeight,
       letterSpacing: styles.letterSpacing || baseTheme.container.letterSpacing,
       color: styles.color || baseTheme.container.color,
-      textShadow: styles.textShadow || baseTheme.container.textShadow,
-      textTransform: styles.textTransform || baseTheme.container.textTransform,
       padding: styles.padding || baseTheme.container.padding,
       minHeight: styles.minHeight || baseTheme.container.minHeight,
       gap: styles.gap || baseTheme.container.gap,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(styles.textShadow !== undefined ||
+      baseTheme.container.textShadow !== undefined
+        ? { textShadow: styles.textShadow ?? baseTheme.container.textShadow }
+        : {}),
+      ...(styles.textTransform !== undefined ||
+      baseTheme.container.textTransform !== undefined
+        ? {
+            textTransform:
+              styles.textTransform ?? baseTheme.container.textTransform,
+          }
+        : {}),
+      ...(styles.backgroundImage !== undefined ||
+      baseTheme.container.backgroundImage !== undefined
+        ? {
+            backgroundImage:
+              styles.backgroundImage ?? baseTheme.container.backgroundImage,
+          }
+        : {}),
     },
     containerHover: {
       transform: styles.hoverTransform || baseTheme.containerHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.containerHover.boxShadow,
       backgroundColor:
         styles.hoverBackgroundColor || baseTheme.containerHover.backgroundColor,
-      borderColor:
-        styles.hoverBorderColor || baseTheme.containerHover.borderColor,
       color: styles.hoverColor || baseTheme.containerHover.color,
-      textShadow: styles.hoverTextShadow || baseTheme.containerHover.textShadow,
+      ...(styles.hoverBorderColor !== undefined ||
+      baseTheme.containerHover.borderColor !== undefined
+        ? {
+            borderColor:
+              styles.hoverBorderColor ?? baseTheme.containerHover.borderColor,
+          }
+        : {}),
+      ...(styles.hoverTextShadow !== undefined ||
+      baseTheme.containerHover.textShadow !== undefined
+        ? {
+            textShadow:
+              styles.hoverTextShadow ?? baseTheme.containerHover.textShadow,
+          }
+        : {}),
     },
     containerActive: {
       transform: styles.activeTransform || baseTheme.containerActive.transform,
@@ -278,10 +303,22 @@ export const getButtonTheme = (styles?: ButtonStyles): ButtonTheme => {
         styles.disabledBackgroundColor ||
         baseTheme.containerDisabled.backgroundColor,
       color: styles.disabledColor || baseTheme.containerDisabled.color,
-      borderColor:
-        styles.disabledBorderColor || baseTheme.containerDisabled.borderColor,
-      textShadow:
-        styles.disabledTextShadow || baseTheme.containerDisabled.textShadow,
+      ...(styles.disabledBorderColor !== undefined ||
+      baseTheme.containerDisabled.borderColor !== undefined
+        ? {
+            borderColor:
+              styles.disabledBorderColor ??
+              baseTheme.containerDisabled.borderColor,
+          }
+        : {}),
+      ...(styles.disabledTextShadow !== undefined ||
+      baseTheme.containerDisabled.textShadow !== undefined
+        ? {
+            textShadow:
+              styles.disabledTextShadow ??
+              baseTheme.containerDisabled.textShadow,
+          }
+        : {}),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

@@ -7,7 +7,6 @@ import {
   getSharedContainerStyles,
   getSharedFooterTextStyles,
   getRequiredIndicatorStyle,
-  getRequiredProps,
   type FormFieldStyles,
 } from '../../../../theme'
 import Checkbox from '../../../Checkbox'
@@ -117,14 +116,6 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       padding: '8px 12px',
       cursor: 'pointer',
       transition,
-      '&:hover': {
-        backgroundColor:
-          (styles?.theme || 'light') === 'light'
-            ? '#F7FAFC'
-            : (styles?.theme || 'light') === 'dark'
-              ? '#2D3748'
-              : 'rgba(255, 215, 0, 0.1)',
-      },
     },
     optionLabel: {
       marginLeft: '8px',
@@ -214,7 +205,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
           onFocus={handleFocus}
           style={componentStyles.chipContainer}
           tabIndex={styles?.disabled ? -1 : 0}
-          {...getRequiredProps(styles?.required)}
+          aria-required={styles?.required || undefined}
         >
           {selectedValues.length === 0 ? (
             <span style={componentStyles.placeholder}>{label}</span>
@@ -223,9 +214,9 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               <Chip
                 key={value}
                 label={value}
-                onDelete={
-                  styles?.disabled ? undefined : () => handleToggle(value)
-                }
+                {...(styles?.disabled
+                  ? {}
+                  : { onDelete: () => handleToggle(value) })}
                 styles={{
                   theme: styles?.theme || 'light',
                 }}

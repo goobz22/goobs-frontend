@@ -357,7 +357,8 @@ const LoadingSimulationComponent = () => {
         const stageProgress = 100 / stages.length
         const targetProgress = (currentStage + 1) * stageProgress
 
-        setStage(stages[currentStage].label)
+        // Current stage is within bounds due to the guard; assert non-null for TS
+        setStage(stages[currentStage]!.label)
 
         const interval = setInterval(() => {
           currentProgress += 2
@@ -466,6 +467,9 @@ const FileUploadSimulationComponent = () => {
         setUploads(prev => {
           const newUploads = [...prev]
           const file = newUploads[fileIndex]
+
+          // Guard against out-of-bounds index per noUncheckedIndexedAccess
+          if (!file) return newUploads
 
           if (file.status === 'waiting') {
             file.status = 'uploading'

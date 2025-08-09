@@ -861,18 +861,20 @@ const Rows: React.FC<RowsProps> = ({
         const rowId = getRowId(row)
         const isSelected = selectedRowIds.includes(rowId)
 
-        const rowStyle = {
+        const rowStyle: React.CSSProperties = {
           ...computedStyles.table.tableRow,
-          ...(isSelected && {
-            backgroundColor: isSacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : 'rgba(219, 234, 254, 1)',
-          }),
+          ...(isSelected
+            ? {
+                backgroundColor: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.15)'
+                  : 'rgba(219, 234, 254, 1)',
+              }
+            : {}),
           cursor: 'pointer',
           transition: 'background-color 0.2s ease',
         }
 
-        const rowHoverStyle = {
+        const rowHoverStyle: React.CSSProperties = {
           ...computedStyles.table.tableRowHover,
         }
 
@@ -923,7 +925,7 @@ const Rows: React.FC<RowsProps> = ({
                     <div style={{ width: '100%' }}>
                       <Dropdown
                         label=""
-                        value={editingValue}
+                        value={editingValue ?? ''}
                         options={col.dropdownOptions.map(opt => ({
                           value: opt.value,
                           label: opt.label || opt.value,

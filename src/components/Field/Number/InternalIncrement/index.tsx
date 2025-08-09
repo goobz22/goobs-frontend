@@ -144,6 +144,13 @@ const InternalIncrementNumberField: React.FC<
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Sync internal value when controlled `value` prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(value)
+    }
+  }, [value])
+
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
     if (timerRef.current) clearInterval(timerRef.current)

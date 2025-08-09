@@ -1,4 +1,4 @@
-import { EditorMode } from '../Toolbars/Complex'
+import type { EditorMode } from '../Toolbars/Complex'
 
 function escapeHtml(unsafe: string): string {
   return unsafe

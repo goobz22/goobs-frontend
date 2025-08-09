@@ -2,9 +2,10 @@
 
 'use client'
 
-import React, { FC } from 'react'
+import React from 'react'
+import type { FC } from 'react'
 import CustomButton, { ButtonProps } from '../../Button'
-import { ToolbarStyles } from '../../../theme'
+import type { ToolbarStyles } from '../../../theme'
 
 const getStyles = (styles?: ToolbarStyles) => {
   const isSacredTheme = styles?.theme === 'sacred'
@@ -59,7 +60,7 @@ const Left: FC<LeftProps> = ({ buttons, styles }) => {
     <div style={computedStyles.container}>
       {/* Vertical Divider */}
       <div style={computedStyles.dividerContainer}>
-        <VerticalDivider styles={styles} />
+        <VerticalDivider {...(styles ? { styles } : {})} />
       </div>
 
       {/* Buttons */}
@@ -69,10 +70,10 @@ const Left: FC<LeftProps> = ({ buttons, styles }) => {
           return (
             <CustomButton
               key={i}
-              text={btn.text}
+              {...(btn.text ? { text: btn.text } : {})}
               onClick={btn.onClick}
               disabled={isDisabled}
-              styles={{ theme: styles?.theme }}
+              {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
             />
           )
         })}

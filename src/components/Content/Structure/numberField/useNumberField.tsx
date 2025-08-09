@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import NumberField, {
-  InternalIncrementNumberFieldProps,
+  type InternalIncrementNumberFieldProps,
 } from '../../../Field/Number/InternalIncrement'
 
 const useNumberField = (props: {

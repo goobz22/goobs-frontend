@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ExternalIncrementNumberField, {
-  ExternalIncrementNumberFieldProps,
+  type ExternalIncrementNumberFieldProps,
 } from '../../../Field/Number/ExternalIncrement'
 
 const useIncrementNumberField = (props: {

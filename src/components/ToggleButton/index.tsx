@@ -5,7 +5,8 @@
 'use client'
 
 import React, { useState, useMemo, ReactNode } from 'react'
-import { ButtonStyles, getButtonStyles } from '../../theme'
+import { getButtonStyles } from '../../theme'
+import type { ButtonStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // TOGGLE BUTTON PROPS INTERFACE

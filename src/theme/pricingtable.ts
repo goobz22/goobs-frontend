@@ -406,6 +406,37 @@ export const getPricingTableTheme = (
     return baseTheme
   }
 
+  // Build sections that need conditional optional keys to satisfy exactOptionalPropertyTypes
+  const computedCheckIcon: PricingTableTheme['checkIcon'] = {
+    color: styles.checkIconColor || baseTheme.checkIcon.color,
+  }
+  if (
+    styles.checkIconFilter !== undefined ||
+    baseTheme.checkIcon.filter !== undefined
+  ) {
+    computedCheckIcon.filter =
+      styles.checkIconFilter ?? baseTheme.checkIcon.filter!
+  }
+  if (
+    styles.checkIconAnimation !== undefined ||
+    baseTheme.checkIcon.animation !== undefined
+  ) {
+    computedCheckIcon.animation =
+      styles.checkIconAnimation ?? baseTheme.checkIcon.animation!
+  }
+
+  const computedGlyph: PricingTableTheme['glyph'] = {
+    color: styles.glyphColor || baseTheme.glyph.color,
+    fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
+  }
+  if (
+    styles.glyphAnimation !== undefined ||
+    baseTheme.glyph.animation !== undefined
+  ) {
+    computedGlyph.animation =
+      styles.glyphAnimation ?? baseTheme.glyph.animation!
+  }
+
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
@@ -419,14 +450,24 @@ export const getPricingTableTheme = (
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
         styles.backdropFilter || baseTheme.container.backdropFilter,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(styles.backgroundImage !== undefined ||
+      baseTheme.container.backgroundImage !== undefined
+        ? {
+            backgroundImage:
+              styles.backgroundImage ?? baseTheme.container.backgroundImage!,
+          }
+        : {}),
     },
     header: {
       background: styles.headerBackground || baseTheme.header.background,
       borderBottom: styles.headerBorderBottom || baseTheme.header.borderBottom,
-      backgroundImage:
-        styles.headerBackgroundImage || baseTheme.header.backgroundImage,
+      ...(styles.headerBackgroundImage !== undefined ||
+      baseTheme.header.backgroundImage !== undefined
+        ? {
+            backgroundImage:
+              styles.headerBackgroundImage ?? baseTheme.header.backgroundImage!,
+          }
+        : {}),
     },
     title: {
       color: styles.titleColor || baseTheme.title.color,
@@ -434,8 +475,14 @@ export const getPricingTableTheme = (
       fontFamily: styles.titleFontFamily || baseTheme.title.fontFamily,
       fontWeight: styles.titleFontWeight || baseTheme.title.fontWeight,
       letterSpacing: styles.titleLetterSpacing || baseTheme.title.letterSpacing,
-      animation: styles.titleAnimation || baseTheme.title.animation,
-      textShadow: styles.titleTextShadow || baseTheme.title.textShadow,
+      ...(styles.titleAnimation !== undefined ||
+      baseTheme.title.animation !== undefined
+        ? { animation: styles.titleAnimation ?? baseTheme.title.animation! }
+        : {}),
+      ...(styles.titleTextShadow !== undefined ||
+      baseTheme.title.textShadow !== undefined
+        ? { textShadow: styles.titleTextShadow ?? baseTheme.title.textShadow! }
+        : {}),
     },
     price: {
       color: styles.priceColor || baseTheme.price.color,
@@ -443,7 +490,10 @@ export const getPricingTableTheme = (
       fontFamily: styles.priceFontFamily || baseTheme.price.fontFamily,
       fontWeight: styles.priceFontWeight || baseTheme.price.fontWeight,
       letterSpacing: styles.priceLetterSpacing || baseTheme.price.letterSpacing,
-      textShadow: styles.priceTextShadow || baseTheme.price.textShadow,
+      ...(styles.priceTextShadow !== undefined ||
+      baseTheme.price.textShadow !== undefined
+        ? { textShadow: styles.priceTextShadow ?? baseTheme.price.textShadow! }
+        : {}),
     },
     annualPrice: {
       color: styles.annualPriceColor || baseTheme.annualPrice.color,
@@ -455,8 +505,13 @@ export const getPricingTableTheme = (
       fontStyle: styles.annualPriceFontStyle || baseTheme.annualPrice.fontStyle,
       letterSpacing:
         styles.annualPriceLetterSpacing || baseTheme.annualPrice.letterSpacing,
-      textShadow:
-        styles.annualPriceTextShadow || baseTheme.annualPrice.textShadow,
+      ...(styles.annualPriceTextShadow !== undefined ||
+      baseTheme.annualPrice.textShadow !== undefined
+        ? {
+            textShadow:
+              styles.annualPriceTextShadow ?? baseTheme.annualPrice.textShadow!,
+          }
+        : {}),
     },
     featureTitle: {
       color: styles.featureTitleColor || baseTheme.featureTitle.color,
@@ -468,8 +523,14 @@ export const getPricingTableTheme = (
       letterSpacing:
         styles.featureTitleLetterSpacing ||
         baseTheme.featureTitle.letterSpacing,
-      textShadow:
-        styles.featureTitleTextShadow || baseTheme.featureTitle.textShadow,
+      ...(styles.featureTitleTextShadow !== undefined ||
+      baseTheme.featureTitle.textShadow !== undefined
+        ? {
+            textShadow:
+              styles.featureTitleTextShadow ??
+              baseTheme.featureTitle.textShadow!,
+          }
+        : {}),
     },
     subFeatureTitle: {
       color: styles.subFeatureTitleColor || baseTheme.subFeatureTitle.color,
@@ -484,29 +545,31 @@ export const getPricingTableTheme = (
       letterSpacing:
         styles.subFeatureTitleLetterSpacing ||
         baseTheme.subFeatureTitle.letterSpacing,
-      textShadow:
-        styles.subFeatureTitleTextShadow ||
-        baseTheme.subFeatureTitle.textShadow,
+      ...(styles.subFeatureTitleTextShadow !== undefined ||
+      baseTheme.subFeatureTitle.textShadow !== undefined
+        ? {
+            textShadow:
+              styles.subFeatureTitleTextShadow ??
+              baseTheme.subFeatureTitle.textShadow!,
+          }
+        : {}),
     },
     buttonSection: {
       background:
         styles.buttonSectionBackground || baseTheme.buttonSection.background,
       borderTop:
         styles.buttonSectionBorderTop || baseTheme.buttonSection.borderTop,
-      backgroundImage:
-        styles.buttonSectionBackgroundImage ||
-        baseTheme.buttonSection.backgroundImage,
+      ...(styles.buttonSectionBackgroundImage !== undefined ||
+      baseTheme.buttonSection.backgroundImage !== undefined
+        ? {
+            backgroundImage:
+              styles.buttonSectionBackgroundImage ??
+              baseTheme.buttonSection.backgroundImage!,
+          }
+        : {}),
     },
-    checkIcon: {
-      color: styles.checkIconColor || baseTheme.checkIcon.color,
-      filter: styles.checkIconFilter || baseTheme.checkIcon.filter,
-      animation: styles.checkIconAnimation || baseTheme.checkIcon.animation,
-    },
-    glyph: {
-      color: styles.glyphColor || baseTheme.glyph.color,
-      fontSize: styles.glyphFontSize || baseTheme.glyph.fontSize,
-      animation: styles.glyphAnimation || baseTheme.glyph.animation,
-    },
+    checkIcon: computedCheckIcon,
+    glyph: computedGlyph,
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
       : baseTheme.transition,

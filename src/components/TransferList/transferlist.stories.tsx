@@ -86,21 +86,32 @@ export const PremiumTheme: Story = {
           <h3 className="text-xl font-bold text-gray-800 mb-4 font-inter">
             Premium TransferList
           </h3>
-          <TransferList
-            {...args}
-            leftItems={
-              args.variant === 'singleSelection' ? localLeft : args.leftItems
+          {(() => {
+            const tlProps: import('./index').TransferListProps = {
+              onChange: handleChange,
             }
-            rightItems={
-              args.variant === 'singleSelection' ? localRight : args.rightItems
+            if (args.variant !== undefined) tlProps.variant = args.variant
+            if (args.dropdownLabel !== undefined)
+              tlProps.dropdownLabel = args.dropdownLabel
+            if (args.dropdownOptions !== undefined)
+              tlProps.dropdownOptions = args.dropdownOptions
+            if (args.itemLabelMap !== undefined)
+              tlProps.itemLabelMap = args.itemLabelMap
+            if (typeof args.sacredtheme === 'boolean')
+              tlProps.sacredtheme = args.sacredtheme
+            if (args.className !== undefined) tlProps.className = args.className
+            if (args.style !== undefined) tlProps.style = args.style
+            if (args.leftTitle !== undefined) tlProps.leftTitle = args.leftTitle
+            if (args.rightTitle !== undefined)
+              tlProps.rightTitle = args.rightTitle
+            if (args.variant === 'singleSelection') {
+              tlProps.leftItems = localLeft
+              tlProps.rightItems = localRight
+            } else if (args.variant === 'multipleSelection') {
+              tlProps.dropdownDataMap = localDataMap
             }
-            dropdownDataMap={
-              args.variant === 'multipleSelection'
-                ? localDataMap
-                : args.dropdownDataMap
-            }
-            onChange={handleChange}
-          />
+            return <TransferList {...tlProps} />
+          })()}
         </div>
       )
     }
@@ -163,21 +174,32 @@ export const SacredTheme: Story = {
           <h3 className="text-xl font-bold text-yellow-400 mb-4 font-cinzel animate-sacred-glow">
             Sacred TransferList
           </h3>
-          <TransferList
-            {...args}
-            leftItems={
-              args.variant === 'singleSelection' ? localLeft : args.leftItems
+          {(() => {
+            const tlProps: import('./index').TransferListProps = {
+              onChange: handleChange,
             }
-            rightItems={
-              args.variant === 'singleSelection' ? localRight : args.rightItems
+            if (args.variant !== undefined) tlProps.variant = args.variant
+            if (args.dropdownLabel !== undefined)
+              tlProps.dropdownLabel = args.dropdownLabel
+            if (args.dropdownOptions !== undefined)
+              tlProps.dropdownOptions = args.dropdownOptions
+            if (args.itemLabelMap !== undefined)
+              tlProps.itemLabelMap = args.itemLabelMap
+            if (typeof args.sacredtheme === 'boolean')
+              tlProps.sacredtheme = args.sacredtheme
+            if (args.className !== undefined) tlProps.className = args.className
+            if (args.style !== undefined) tlProps.style = args.style
+            if (args.leftTitle !== undefined) tlProps.leftTitle = args.leftTitle
+            if (args.rightTitle !== undefined)
+              tlProps.rightTitle = args.rightTitle
+            if (args.variant === 'singleSelection') {
+              tlProps.leftItems = localLeft
+              tlProps.rightItems = localRight
+            } else if (args.variant === 'multipleSelection') {
+              tlProps.dropdownDataMap = localDataMap
             }
-            dropdownDataMap={
-              args.variant === 'multipleSelection'
-                ? localDataMap
-                : args.dropdownDataMap
-            }
-            onChange={handleChange}
-          />
+            return <TransferList {...tlProps} />
+          })()}
         </div>
       )
     }

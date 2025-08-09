@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-  FormFieldStyles,
   getSharedFormFieldStyles,
   getSharedLabelStyles,
   SACRED_GLYPHS,
   injectSacredKeyframes,
 } from '../../theme'
+import type { FormFieldStyles } from '../../theme'
 
 export interface InputLabelStyles extends FormFieldStyles {
   focused?: boolean

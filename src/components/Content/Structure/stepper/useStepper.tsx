@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Stepper, { StepperProps } from '../../../Stepper'
+import Stepper, { type StepperProps } from '../../../Stepper'
 
 const useStepper = (props: {
   stepper?: StepperProps | StepperProps[]

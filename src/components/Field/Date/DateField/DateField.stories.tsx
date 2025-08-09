@@ -12,7 +12,6 @@ const meta: Meta<typeof DateField> = {
   },
   argTypes: {
     label: { control: 'text' },
-    helperText: { control: 'text' },
     styles: { control: 'object' },
   },
 }
@@ -89,7 +88,6 @@ export const WithError: Story = {
   render: args => <DateField {...args} />,
   args: {
     label: 'Date with Error',
-    helperText: 'Invalid date',
     styles: { theme: 'light', helperTextType: 'error' },
   },
 }
@@ -153,12 +151,11 @@ const InteractiveComponent = () => {
       <DateField
         label="Interactive DateField"
         value={value}
-        onChange={setValue}
-        helperText={error}
+        onChange={(d: Date | null) => setValue(d)}
         styles={{
           theme,
           disabled,
-          helperTextType: error ? 'error' : undefined,
+          ...(error ? { helperTextType: 'error' } : {}),
         }}
       />
     </div>

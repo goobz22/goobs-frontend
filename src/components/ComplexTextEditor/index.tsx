@@ -3,17 +3,18 @@
  */
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
-import ComplexToolbar, { EditorMode } from './Toolbars/Complex'
+import ComplexToolbar from './Toolbars/Complex'
+import type { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
 import {
-  ComplexTextEditorStyles,
   getComplexTextEditorStyles,
   getSharedFormFieldStyles,
   getSharedLabelStyles,
   getSharedFooterTextStyles,
   SACRED_GLYPHS,
 } from '../../theme/'
+import type { ComplexTextEditorStyles } from '../../theme/'
 
 export interface ComplexTextEditorProps {
   /** The current value of the editor (for controlled usage). */
@@ -115,7 +116,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           value={value}
           onChange={handleChange}
           minRows={minRows}
-          styles={styles}
+          styles={styles as ComplexTextEditorStyles}
         />
       )
     } else if (editorType === 'rich') {
@@ -126,7 +127,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           value={value}
           onChange={handleChange}
           minRows={minRows}
-          styles={styles}
+          styles={styles as ComplexTextEditorStyles}
         />
       )
     } else if (editorType === 'markdown') {
@@ -137,7 +138,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           value={value}
           onChange={handleChange}
           minRows={minRows}
-          styles={styles}
+          styles={styles as ComplexTextEditorStyles}
         />
       )
     } else {
@@ -148,7 +149,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           value={value}
           onChange={handleChange}
           minRows={minRows}
-          styles={styles}
+          styles={styles as ComplexTextEditorStyles}
         />
       )
     }
@@ -206,7 +207,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           details={createEditorContent()}
           expanded={accordionExpanded}
           onChange={handleAccordionChange}
-          styles={{ theme: styles?.theme }}
+          styles={{ theme: styles?.theme || 'light' }}
         />
         {isSacredTheme && (
           <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>

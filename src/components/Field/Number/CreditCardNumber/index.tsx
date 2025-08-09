@@ -166,7 +166,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     let sum = 0
     let isEven = false
     for (let i = cleanNumber.length - 1; i >= 0; i--) {
-      let digit = parseInt(cleanNumber[i])
+      let digit = parseInt(cleanNumber.charAt(i), 10)
       if (isEven) {
         digit *= 2
         if (digit > 9) digit -= 9
@@ -265,7 +265,10 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
 
   const getCardIcon = useCallback(() => '💳', [])
 
-  const computedStyles = getStyles({ ...styles, disabled }, isFocused)
+  const computedStyles = getStyles(
+    { ...styles, ...(disabled !== undefined ? { disabled } : {}) },
+    isFocused
+  )
 
   const CardAdornment = () => (
     <div

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ConfirmationCodeInputs, {
-  ConfirmationCodeInputsProps,
+  type ConfirmationCodeInputsProps,
 } from '../../../ConfirmationCodeInput'
 
 const useConfirmationInput = (props: {

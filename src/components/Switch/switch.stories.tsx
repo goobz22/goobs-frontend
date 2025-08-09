@@ -180,8 +180,10 @@ export const LightThemeVariants: Story = {
     expect(switches.length).toBeGreaterThan(0)
 
     // Test switch interaction
-    const firstSwitch = switches[0]
-    await userEvent.click(firstSwitch)
+    const firstSwitch = switches.at(0)
+    if (firstSwitch) {
+      await userEvent.click(firstSwitch)
+    }
   },
 }
 
@@ -336,8 +338,10 @@ export const DarkThemeVariants: Story = {
     expect(switches.length).toBeGreaterThan(0)
 
     // Test switch interaction
-    const firstSwitch = switches[0]
-    await userEvent.click(firstSwitch)
+    const firstSwitch = switches.at(0)
+    if (firstSwitch) {
+      await userEvent.click(firstSwitch)
+    }
   },
 }
 
@@ -496,8 +500,10 @@ export const SacredThemeVariants: Story = {
     expect(sacredSwitches.length).toBeGreaterThan(0)
 
     // Test sacred switch interaction
-    const firstSacredSwitch = sacredSwitches[0]
-    await userEvent.click(firstSacredSwitch)
+    const firstSacredSwitch = sacredSwitches.at(0)
+    if (firstSacredSwitch) {
+      await userEvent.click(firstSacredSwitch)
+    }
   },
 }
 
@@ -643,13 +649,12 @@ export const ThemeComparison: Story = {
     expect(allSwitches.length).toBeGreaterThan(0)
 
     // Test interactions with different themes
-    await userEvent.click(allSwitches[0])
-    if (allSwitches.length > 3) {
-      await userEvent.click(allSwitches[3])
-    }
-    if (allSwitches.length > 6) {
-      await userEvent.click(allSwitches[6])
-    }
+    const s0 = allSwitches.at(0)
+    const s3 = allSwitches.at(3)
+    const s6 = allSwitches.at(6)
+    if (s0) await userEvent.click(s0)
+    if (s3) await userEvent.click(s3)
+    if (s6) await userEvent.click(s6)
   },
 }
 
@@ -781,7 +786,10 @@ export const CustomColors: Story = {
     expect(switches.length).toBeGreaterThan(0)
 
     // Test custom switch interaction
-    await userEvent.click(switches[0])
+    const firstSwitch = switches.at(0)
+    if (firstSwitch) {
+      await userEvent.click(firstSwitch)
+    }
   },
 }
 
@@ -858,7 +866,10 @@ export const DualLabelDemo: Story = {
     const canvas = within(canvasElement)
     const switches = canvas.getAllByRole('checkbox')
     expect(switches.length).toBe(3)
-    await userEvent.click(switches[0])
+    const firstSwitch = switches.at(0)
+    if (firstSwitch) {
+      await userEvent.click(firstSwitch)
+    }
     // Add assertions if needed
   },
 }
@@ -994,7 +1005,9 @@ export const InteractiveDemo: Story = {
     await userEvent.selectOptions(themeSelect, 'sacred')
 
     // Test switch interactions
-    await userEvent.click(switches[0])
-    await userEvent.click(switches[3])
+    const first = switches.at(0)
+    const fourth = switches.at(3)
+    if (first) await userEvent.click(first)
+    if (fourth) await userEvent.click(fourth)
   },
 }

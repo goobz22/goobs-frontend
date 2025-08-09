@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import DataGridCheckbox, {
-  CheckboxProps,
+  type CheckboxProps,
 } from './../../../../components/Checkbox'
 
 const useCheckbox = (props: {

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ColumnDef } from '../types'
+import type { ColumnDef } from '../types'
 import Dropdown from '../../Field/Dropdown/Regular'
 import FirstPageIcon from '../../Icons/FirstPage'
 import LastPageIcon from '../../Icons/LastPage'
@@ -282,7 +282,7 @@ const TablePagination: React.FC<{
       <PageSizeSelector
         pageSize={pageSize}
         onPageSizeChange={onPageSizeChange}
-        styles={styles}
+        {...(styles !== undefined ? { styles } : {})}
       />
 
       <PaginationButton
@@ -400,7 +400,7 @@ function CustomFooter({
             rowCount={rowCount}
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
-            styles={styles}
+            {...(styles !== undefined ? { styles } : {})}
           />
         </div>
       </div>

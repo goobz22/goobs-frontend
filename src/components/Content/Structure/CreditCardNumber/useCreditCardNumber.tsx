@@ -1,7 +1,7 @@
 import React from 'react'
 import CreditCardNumber, {
-  CreditCardNumberProps,
-  CardType,
+  type CreditCardNumberProps,
+  type CardType,
 } from '../../../Field/Number/CreditCardNumber'
 
 export interface UseCreditCardNumberProps {
@@ -24,15 +24,15 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
 }) => {
   return (
     <CreditCardNumber
-      onChange={onChange}
+      onChange={onChange ?? (() => {})}
       value={value}
       useLuhnValidation={useLuhnValidation}
       isDefaultValue={isDefaultValue}
       enableFormatting={enableFormatting}
-      label={label}
-      placeholder={placeholder}
-      helperText={helperText}
-      styles={styles}
+      {...(label !== undefined ? { label } : {})}
+      {...(placeholder !== undefined ? { placeholder } : {})}
+      {...(helperText !== undefined ? { helperText } : {})}
+      {...(styles !== undefined ? { styles } : {})}
       {...rest}
     />
   )

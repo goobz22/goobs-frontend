@@ -3,6 +3,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import CustomToolbar from './index'
+import type { CustomToolbarProps } from './index'
 
 import type { SearchbarProps } from '../Field/Search'
 import type { DropdownProps } from '../Field/Dropdown/Regular'
@@ -166,17 +167,18 @@ const InteractiveDemoRenderer = () => {
           </label>
         </div>
       </div>
-      <CustomToolbar
-        buttons={showButtons ? sampleButtons : undefined}
-        searchbarProps={showSearch ? sampleSearchProps : undefined}
-        rightCenterProps={
-          showRightCenter
-            ? { selectedRows: ['1'], rows: [{ id: '1' }] }
-            : undefined
-        }
-        dropdowns={showDropdowns ? [sampleDropdown] : undefined}
-        styles={{ theme }}
-      />
+      {(() => {
+        const toolbarProps: CustomToolbarProps = { styles: { theme } }
+        if (showButtons) toolbarProps.buttons = sampleButtons
+        if (showSearch) toolbarProps.searchbarProps = sampleSearchProps
+        if (showRightCenter)
+          toolbarProps.rightCenterProps = {
+            selectedRows: ['1'],
+            rows: [{ id: '1' }],
+          }
+        if (showDropdowns) toolbarProps.dropdowns = [sampleDropdown]
+        return <CustomToolbar {...toolbarProps} />
+      })()}
     </div>
   )
 }

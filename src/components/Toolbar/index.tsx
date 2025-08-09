@@ -1,6 +1,7 @@
 'use client'
 
-import React, { FC, useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import type { FC } from 'react'
 import Left from './left'
 import LeftCenter from './leftCenter'
 import Right from './right'
@@ -8,7 +9,8 @@ import RightCenter, { RightCenterProps } from './rightCenter'
 import { ButtonProps } from '../Button'
 import { DropdownProps } from '../Field/Dropdown/Regular'
 import { SearchbarProps } from '../Field/Search'
-import { getToolbarStyles, ToolbarStyles } from '../../theme'
+import { getToolbarStyles } from '../../theme'
+import type { ToolbarStyles } from '../../theme'
 
 export interface CustomToolbarProps {
   buttons?: ButtonProps[]
@@ -109,8 +111,13 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
 
       {/* Desktop */}
       <div style={computedStyles.desktopLeft} className="toolbar-desktop-left">
-        <Left buttons={buttons} styles={styles} />
-        {searchbarProps && <LeftCenter {...searchbarProps} styles={styles} />}
+        <Left
+          {...(buttons ? { buttons } : {})}
+          {...(styles ? { styles } : {})}
+        />
+        {searchbarProps && (
+          <LeftCenter {...searchbarProps} {...(styles ? { styles } : {})} />
+        )}
       </div>
       <div
         style={{
@@ -123,10 +130,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
         className="toolbar-desktop-right"
       >
         {rightCenterProps && (
-          <RightCenter {...rightCenterProps} styles={styles} />
+          <RightCenter {...rightCenterProps} {...(styles ? { styles } : {})} />
         )}
         {dropdowns?.map((dd, index) => (
-          <Right key={index} dropdown={dd} styles={styles} />
+          <Right key={index} dropdown={dd} {...(styles ? { styles } : {})} />
         ))}
       </div>
 
@@ -150,7 +157,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             overflow: 'hidden',
           }}
         >
-          <Left buttons={buttons} styles={styles} />
+          <Left
+            {...(buttons ? { buttons } : {})}
+            {...(styles ? { styles } : {})}
+          />
         </div>
         <div
           style={{
@@ -165,10 +175,13 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           }}
         >
           {rightCenterProps && (
-            <RightCenter {...rightCenterProps} styles={styles} />
+            <RightCenter
+              {...rightCenterProps}
+              {...(styles ? { styles } : {})}
+            />
           )}
           {dropdowns?.map((dd, index) => (
-            <Right key={index} dropdown={dd} styles={styles} />
+            <Right key={index} dropdown={dd} {...(styles ? { styles } : {})} />
           ))}
         </div>
       </div>
@@ -183,16 +196,22 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
         className="toolbar-mobile-container"
       >
         <div style={computedStyles.mobileRow}>
-          <Left buttons={buttons} styles={styles} />
+          <Left
+            {...(buttons ? { buttons } : {})}
+            {...(styles ? { styles } : {})}
+          />
         </div>
         {rightCenterProps && (
           <div style={{ minWidth: '0', maxWidth: '100%' }}>
-            <RightCenter {...rightCenterProps} styles={styles} />
+            <RightCenter
+              {...rightCenterProps}
+              {...(styles ? { styles } : {})}
+            />
           </div>
         )}
         {dropdowns?.map((dd, index) => (
           <div key={index} style={{ minWidth: '0', maxWidth: '100%' }}>
-            <Right dropdown={dd} styles={styles} />
+            <Right dropdown={dd} {...(styles ? { styles } : {})} />
           </div>
         ))}
       </div>

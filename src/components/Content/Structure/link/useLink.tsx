@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import Typography, { TypographyProps } from '../../../Typography'
+import Typography, { type TypographyProps } from '../../../Typography'
 
 export interface LinkProps extends TypographyProps {
   link: string
@@ -25,7 +25,7 @@ const useLink = (props: {
     return (
       <Link key={`link-${index}`} href={link} passHref>
         <Typography
-          text={text}
+          {...(text !== undefined ? { text } : {})}
           styles={{
             theme: 'sacred',
             variant: styles?.variant?.startsWith('cinzel')

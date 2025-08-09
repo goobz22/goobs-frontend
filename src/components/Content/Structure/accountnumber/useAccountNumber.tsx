@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import AccountNumber, {
-  AccountNumberProps,
+  type AccountNumberProps,
 } from '../../../Field/Number/AccountNumber'
 
 const useAccountNumber = (props: {

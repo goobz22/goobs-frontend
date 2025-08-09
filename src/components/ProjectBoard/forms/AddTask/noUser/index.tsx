@@ -107,7 +107,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           </div>
         </>
       )}
-      <Typography styles={{ color: sacredtheme ? '#FFD700' : undefined }}>
+      <Typography {...(sacredtheme ? { styles: { color: '#FFD700' } } : {})}>
         Create Task
       </Typography>
 
@@ -139,7 +139,7 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           options={severityOptions}
           defaultValue={
             severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
-              ?.value
+              ?.value || ''
           }
           onChange={option =>
             setSelectedSeverityId(

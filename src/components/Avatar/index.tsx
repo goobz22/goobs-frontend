@@ -5,7 +5,8 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { AvatarStyles, getAvatarStyles } from '../../theme'
+import { getAvatarStyles } from '../../theme'
+import type { AvatarStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

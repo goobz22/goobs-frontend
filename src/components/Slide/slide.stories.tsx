@@ -215,11 +215,13 @@ export const Themes: Story = {
               onClick={() => setCurrentTheme(theme)}
               styles={{
                 theme: theme,
-                backgroundColor:
-                  currentTheme === theme ? 'rgba(59, 130, 246, 1)' : undefined,
-                color: currentTheme === theme ? 'white' : undefined,
-                borderColor:
-                  currentTheme === theme ? 'rgba(59, 130, 246, 1)' : undefined,
+                ...(currentTheme === theme
+                  ? {
+                      backgroundColor: 'rgba(59, 130, 246, 1)',
+                      color: 'white',
+                      borderColor: 'rgba(59, 130, 246, 1)',
+                    }
+                  : {}),
               }}
             >
               {theme} theme

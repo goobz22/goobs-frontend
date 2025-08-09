@@ -3,7 +3,8 @@
 // --------------------------------------------------------------------------
 import React from 'react'
 import { TRANSITIONS, SHADOWS } from './shared'
-import { FormFieldStyles, getFormFieldTheme } from './formField'
+import type { FormFieldStyles } from './formField'
+import { getFormFieldTheme } from './formField'
 
 export interface ComplexTextEditorTheme {
   // Container styling

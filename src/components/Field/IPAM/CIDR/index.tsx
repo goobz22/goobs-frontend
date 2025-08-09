@@ -87,16 +87,6 @@ const getStyles = (styles?: FormFieldStyles, adornmentColor?: string) => {
       alignItems: 'center',
       justifyContent: 'center',
       opacity: styles?.disabled ? 0.5 : 1,
-      '&:hover': {
-        backgroundColor: isSacred
-          ? 'rgba(255, 215, 0, 0.1)'
-          : isDark
-            ? 'rgba(229, 231, 235, 0.1)'
-            : 'rgba(229, 231, 235, 0.5)',
-      },
-      '&:active': {
-        transform: 'scale(0.95)',
-      },
     } as React.CSSProperties,
     infoContainer: {
       marginTop: '0.5rem',
@@ -121,7 +111,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   ...rest
 }) => {
   const [currentValue, setCurrentValue] = useState(() => {
-    const initialNum = parseInt(initialValue)
+    const initialNum = parseInt(initialValue, 10)
     if (isNaN(initialNum)) return '24'
     return Math.min(Math.max(initialNum, minCidr), maxCidr).toString()
   })
@@ -129,12 +119,12 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const cidrInfo = calculateCIDRInfo(parseInt(currentValue) || 24)
+  const cidrInfo = calculateCIDRInfo(parseInt(currentValue, 10) || 24)
 
-  // Merge disabled prop with styles
-  const mergedStyles = {
-    ...styles,
-    disabled: disabled !== undefined ? disabled : styles?.disabled,
+  // Merge disabled prop with styles while preserving exact optional property types
+  const mergedStyles: FormFieldStyles = {
+    ...(styles || {}),
+    ...(disabled !== undefined ? { disabled } : {}),
   }
 
   const {
@@ -194,11 +184,14 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     if (timerRef.current) clearInterval(timerRef.current)
     initialTimerRef.current = null
     timerRef.current = null
+    // Remove listeners added during press-and-hold
+    document.removeEventListener('mouseup', clearTimers)
+    document.removeEventListener('mouseleave', clearTimers)
   }, [])
 
   const handleIncrement = useCallback(() => {
     setCurrentValue(prev => {
-      const num = parseInt(prev)
+      const num = parseInt(prev, 10)
       const newValue = Math.min(maxCidr, isNaN(num) ? minCidr : num + 1)
       onChange?.(newValue)
       return newValue.toString()
@@ -207,7 +200,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
 
   const handleDecrement = useCallback(() => {
     setCurrentValue(prev => {
-      const num = parseInt(prev)
+      const num = parseInt(prev, 10)
       const newValue = Math.max(minCidr, isNaN(num) ? minCidr : num - 1)
       onChange?.(newValue)
       return newValue.toString()

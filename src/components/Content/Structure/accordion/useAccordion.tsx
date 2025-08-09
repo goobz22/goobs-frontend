@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Accordion, { AccordionProps } from '../../../Accordion'
+import Accordion, { type AccordionProps } from '../../../Accordion'
 
 const useAccordion = (props: {
   accordion?: AccordionProps | AccordionProps[]

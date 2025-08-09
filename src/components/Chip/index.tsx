@@ -5,7 +5,8 @@
 
 import React, { useState } from 'react'
 import CloseIcon from '../Icons/Close'
-import { ChipStyles, getChipStyles, SACRED_GLYPHS } from '../../theme'
+import { getChipStyles, SACRED_GLYPHS } from '../../theme'
+import type { ChipStyles } from '../../theme'
 
 export interface ChipProps {
   label: string

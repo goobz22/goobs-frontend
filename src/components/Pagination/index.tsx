@@ -4,12 +4,10 @@
  */
 'use client'
 
-import React, { useState, useMemo, useCallback, FC, ReactNode } from 'react'
-import {
-  PaginationStyles,
-  getPaginationStyles,
-  SACRED_GLYPHS,
-} from '../../theme'
+import React, { useState, useMemo, useCallback } from 'react'
+import type { FC, ReactNode } from 'react'
+import { getPaginationStyles, SACRED_GLYPHS } from '../../theme'
+import type { PaginationStyles } from '../../theme'
 import FirstPageIcon from '../Icons/FirstPage'
 import LastPageIcon from '../Icons/LastPage'
 import KeyboardArrowLeftIcon from '../Icons/KeyboardArrowLeft'
@@ -163,9 +161,10 @@ const usePagination = ({
     Math.min(page - siblingCount, count - boundaryCount - siblingCount * 2 - 1),
     boundaryCount + 2
   )
+  const firstEndPage = endPages.length > 0 ? endPages[0] : undefined
   const siblingsEnd = Math.min(
     Math.max(page + siblingCount, boundaryCount + siblingCount * 2 + 2),
-    endPages.length > 0 ? endPages[0] - 2 : count - 1
+    firstEndPage !== undefined ? firstEndPage - 2 : count - 1
   )
 
   const itemList: (number | 'start-ellipsis' | 'end-ellipsis')[] = [
@@ -417,7 +416,7 @@ const Pagination: FC<PaginationProps> = ({
             count={count}
             onChange={onChange}
             styles={computedStyles}
-            renderItem={renderItem}
+            {...(renderItem ? { renderItem } : {})}
           />
         ))}
 

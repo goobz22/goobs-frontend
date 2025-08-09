@@ -362,7 +362,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
               defaultValue={
                 customerOptions.find(
                   opt => opt.attribute2 === selectedCustomerId
-                )?.value
+                )?.value ?? ''
               }
               onChange={option =>
                 setSelectedCustomerId(option?.attribute2 || '')
@@ -379,7 +379,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                   defaultValue={
                     severityOptions.find(
                       opt => opt.attribute2 === selectedSeverityId
-                    )?.value
+                    )?.value ?? ''
                   }
                   onChange={option =>
                     setSelectedSeverityId(option?.attribute2 || '')
@@ -394,7 +394,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                   options={queueOptions}
                   defaultValue={
                     queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                      ?.value
+                      ?.value ?? ''
                   }
                   onChange={option =>
                     setSelectedQueueId(option?.attribute1 || '')
@@ -410,7 +410,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                   defaultValue={
                     statusOptions.find(
                       opt => opt.attribute1 === selectedStatusId
-                    )?.value
+                    )?.value ?? ''
                   }
                   onChange={option => {
                     const newStatus = option?.value || ''
@@ -428,7 +428,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                   defaultValue={
                     finalSubStatusOptions.find(
                       opt => opt.attribute2 === selectedSubStatusId
-                    )?.value
+                    )?.value ?? ''
                   }
                   onChange={option =>
                     setSelectedSubStatusId(option?.attribute2 || '')
@@ -448,7 +448,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 {React.useMemo(() => {
                   const topicOptions = topics.map(t => ({
                     value: t.topic || `Topic ${t._id}`,
-                    attribute1: t._id,
+                    _id: t._id,
                   }))
                   const selectedTopicValues = selectedTopicIds.map(id => {
                     const topic = topics.find(t => t._id === id)
@@ -464,7 +464,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                           const matchingTopic = topicOptions.find(
                             opt => opt.value === value
                           )
-                          return matchingTopic?.attribute1 || value
+                          return matchingTopic?._id || value
                         })
                         setSelectedTopicIds(newSelectedIds)
                       }}
@@ -477,7 +477,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                 {React.useMemo(() => {
                   const articleOptions = knowledgebaseArticles.map(a => ({
                     value: a.articleTitle || `Article ${a._id}`,
-                    attribute1: a._id,
+                    _id: a._id,
                   }))
                   const selectedArticleValues = selectedArticleIds.map(id => {
                     const article = knowledgebaseArticles.find(
@@ -497,7 +497,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                           const matchingArticle = articleOptions.find(
                             opt => opt.value === value
                           )
-                          return matchingArticle?.attribute1 || value
+                          return matchingArticle?._id || value
                         })
                         setSelectedArticleIds(newSelectedIds)
                       }}

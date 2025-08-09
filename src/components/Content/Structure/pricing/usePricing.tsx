@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import PricingTable, {
-  PricingProps,
+  type PricingProps,
 } from './../../../../components/PricingTable'
 
 const usePricing = (props: {

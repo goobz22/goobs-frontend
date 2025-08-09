@@ -336,8 +336,13 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
       backgroundColor: styles.backgroundColor || baseTheme.box.backgroundColor,
       backdropFilter: styles.backdropFilter || baseTheme.box.backdropFilter,
       boxShadow: styles.boxShadow || baseTheme.box.boxShadow,
-      backgroundImage: styles.backgroundImage || baseTheme.box.backgroundImage,
       transition: baseTheme.box.transition,
+      ...((styles.backgroundImage ?? baseTheme.box.backgroundImage)
+        ? {
+            backgroundImage: (styles.backgroundImage ??
+              baseTheme.box.backgroundImage) as string,
+          }
+        : {}),
     },
     boxHover: {
       backgroundColor:
@@ -345,8 +350,12 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
       borderColor: styles.hoverBorderColor || baseTheme.boxHover.borderColor,
       transform: styles.hoverTransform || baseTheme.boxHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.boxHover.boxShadow,
-      backgroundImage:
-        styles.hoverBackgroundImage || baseTheme.boxHover.backgroundImage,
+      ...((styles.hoverBackgroundImage ?? baseTheme.boxHover.backgroundImage)
+        ? {
+            backgroundImage: (styles.hoverBackgroundImage ??
+              baseTheme.boxHover.backgroundImage) as string,
+          }
+        : {}),
     },
     boxChecked: {
       backgroundColor:
@@ -354,8 +363,13 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
       borderColor:
         styles.checkedBorderColor || baseTheme.boxChecked.borderColor,
       boxShadow: styles.checkedBoxShadow || baseTheme.boxChecked.boxShadow,
-      backgroundImage:
-        styles.checkedBackgroundImage || baseTheme.boxChecked.backgroundImage,
+      ...((styles.checkedBackgroundImage ??
+      baseTheme.boxChecked.backgroundImage)
+        ? {
+            backgroundImage: (styles.checkedBackgroundImage ??
+              baseTheme.boxChecked.backgroundImage) as string,
+          }
+        : {}),
     },
     boxIndeterminate: {
       backgroundColor:
@@ -366,9 +380,13 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
         baseTheme.boxIndeterminate.borderColor,
       boxShadow:
         styles.indeterminateBoxShadow || baseTheme.boxIndeterminate.boxShadow,
-      backgroundImage:
-        styles.indeterminateBackgroundImage ||
-        baseTheme.boxIndeterminate.backgroundImage,
+      ...((styles.indeterminateBackgroundImage ??
+      baseTheme.boxIndeterminate.backgroundImage)
+        ? {
+            backgroundImage: (styles.indeterminateBackgroundImage ??
+              baseTheme.boxIndeterminate.backgroundImage) as string,
+          }
+        : {}),
     },
     boxDisabled: {
       backgroundColor:
@@ -380,18 +398,30 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
     },
     icon: {
       color: styles.iconColor || baseTheme.icon.color,
-      filter: styles.iconFilter || baseTheme.icon.filter,
       transform: styles.iconTransform || baseTheme.icon.transform,
       transition: baseTheme.icon.transition,
+      ...((styles.iconFilter ?? baseTheme.icon.filter)
+        ? { filter: (styles.iconFilter ?? baseTheme.icon.filter) as string }
+        : {}),
     },
     iconVisible: {
       opacity: styles.iconVisibleOpacity ?? baseTheme.iconVisible.opacity,
       transform: styles.iconVisibleTransform || baseTheme.iconVisible.transform,
-      filter: styles.iconVisibleFilter || baseTheme.iconVisible.filter,
+      ...((styles.iconVisibleFilter ?? baseTheme.iconVisible.filter)
+        ? {
+            filter: (styles.iconVisibleFilter ??
+              baseTheme.iconVisible.filter) as string,
+          }
+        : {}),
     },
     iconDisabled: {
       color: styles.iconDisabledColor || baseTheme.iconDisabled.color,
-      filter: styles.iconDisabledFilter || baseTheme.iconDisabled.filter,
+      ...((styles.iconDisabledFilter ?? baseTheme.iconDisabled.filter)
+        ? {
+            filter: (styles.iconDisabledFilter ??
+              baseTheme.iconDisabled.filter) as string,
+          }
+        : {}),
     },
   }
 }

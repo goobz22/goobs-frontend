@@ -238,14 +238,20 @@ function FormDataGrid({
 
       {alert && !isLoading && (
         <div style={styles.alertContainer}>
-          <Alert
-            severity={alert.severity}
-            message={alert.message}
-            onClose={alert.onClose}
-            styles={{
-              theme: sacredtheme ? 'sacred' : 'light',
-            }}
-          />
+          {(() => {
+            const baseProps: AlertProps = {
+              severity: alert.severity,
+              message: alert.message,
+              styles: {
+                theme: sacredtheme ? 'sacred' : 'light',
+              },
+            }
+            return alert.onClose ? (
+              <Alert {...baseProps} onClose={alert.onClose} />
+            ) : (
+              <Alert {...baseProps} />
+            )
+          })()}
         </div>
       )}
 

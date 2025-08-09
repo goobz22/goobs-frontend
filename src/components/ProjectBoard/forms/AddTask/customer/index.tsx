@@ -10,7 +10,7 @@ import ComplexTextEditor from '../../../../ComplexTextEditor'
 import CustomButton from '../../../../Button'
 import TextField from '../../../../Field/Text'
 import type { Task, RawTopic, RawQueue, RawSeverityLevel } from '../../../types'
-import { ProjectBoardStyles } from '../../../../../theme'
+import type { ProjectBoardStyles } from '../../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -252,7 +252,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
               value={taskTitle}
               onChange={setTaskTitle}
               placeholder="Enter Task Title"
-              styles={{ theme: styles?.theme }}
+              {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
             />
             <ComplexTextEditor
               label="Task Description"
@@ -260,7 +260,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
               onChange={setTaskDescription}
               editorType="simple"
               minRows={5}
-              styles={{ theme: styles?.theme }}
+              {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
             />
             <div style={computedStyles.row}>
               <div style={computedStyles.col}>
@@ -270,13 +270,15 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                   defaultValue={
                     severityOptions.find(
                       opt => opt.attribute2 === selectedSeverityId
-                    )?.value
+                    )?.value || ''
                   }
                   onChange={option =>
                     setSelectedSeverityId(option?.attribute2 || '')
                   }
                   placeholder="Select severity level"
-                  styles={{ theme: styles?.theme }}
+                  {...(styles?.theme
+                    ? { styles: { theme: styles.theme } }
+                    : {})}
                 />
               </div>
               <div style={computedStyles.col}>
@@ -285,13 +287,15 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                   options={queueOptions}
                   defaultValue={
                     queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                      ?.value
+                      ?.value || ''
                   }
                   onChange={option =>
                     setSelectedQueueId(option?.attribute1 || '')
                   }
                   placeholder="Select product queue"
-                  styles={{ theme: styles?.theme }}
+                  {...(styles?.theme
+                    ? { styles: { theme: styles.theme } }
+                    : {})}
                 />
               </div>
             </div>
@@ -318,7 +322,9 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
                     })
                     setSelectedTopicIds(newSelectedIds)
                   }}
-                  styles={{ theme: styles?.theme }}
+                  {...(styles?.theme
+                    ? { styles: { theme: styles.theme } }
+                    : {})}
                 />
               )
             }, [topics, selectedTopicIds, styles?.theme])}
@@ -327,12 +333,12 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
               <CustomButton
                 text="Cancel"
                 onClick={onClose}
-                styles={{ theme: styles?.theme }}
+                {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
               />
               <CustomButton
                 text="Create Task"
                 onClick={handleSubmit}
-                styles={{ theme: styles?.theme }}
+                {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
               />
             </div>
           </div>

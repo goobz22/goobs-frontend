@@ -5,7 +5,8 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { ContainerStyles, getContainerStyles } from '../../theme'
+import { getContainerStyles } from '../../theme'
+import type { ContainerStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

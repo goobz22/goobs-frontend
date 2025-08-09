@@ -1,7 +1,7 @@
 import React from 'react'
 import DateRangeComponent, {
-  DateRangeProps,
-  DateRange,
+  type DateRangeProps,
+  type DateRange,
 } from '../../../Field/Date/DateRange'
 
 export interface UseDateRangeProps {
@@ -25,14 +25,14 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
   return (
     <div style={style}>
       <DateRangeComponent
-        onChange={onChange}
-        value={value}
+        {...(onChange ? { onChange } : {})}
+        {...(value !== undefined ? { value } : {})}
         startLabel={startLabel}
         endLabel={endLabel}
         disabled={disabled}
-        error={error}
-        helperText={helperText}
-        styles={styles}
+        {...(error !== undefined ? { error } : {})}
+        {...(helperText !== undefined ? { helperText } : {})}
+        {...(styles !== undefined ? { styles } : {})}
         {...rest}
       />
     </div>

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ProjectBoard from '../../../ProjectBoard/'
-import { ProjectBoardProps } from '../../../ProjectBoard/types'
+import type { ProjectBoardProps } from '../../../ProjectBoard/types'
 
 const useProjectBoard = (props: {
   projectboard?: ProjectBoardProps | ProjectBoardProps[]

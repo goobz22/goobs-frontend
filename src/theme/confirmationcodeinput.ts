@@ -414,6 +414,27 @@ export const getConfirmationCodeInputTheme = (
     return baseTheme
   }
 
+  // Compute optional values so we can include them conditionally
+  const containerBackgroundImage =
+    styles.backgroundImage ?? baseTheme.container.backgroundImage
+  const hoverBorderColor =
+    styles.hoverBorderColor ?? baseTheme.containerHover.borderColor
+  const successBackgroundImage =
+    styles.successBackgroundImage ?? baseTheme.successContainer.backgroundImage
+  const successIconFilter =
+    styles.successIconFilter ?? baseTheme.successIcon.filter
+  const successIconAnimation =
+    styles.successIconAnimation ?? baseTheme.successIcon.animation
+  const successMessageTextShadow =
+    styles.successMessageTextShadow ?? baseTheme.successMessage.textShadow
+  const inputTextShadow = styles.inputTextShadow ?? baseTheme.input.textShadow
+  const inputAnimation = styles.inputAnimation ?? baseTheme.input.animation
+  const statusIndicatorAnimation =
+    styles.statusIndicatorAnimation ?? baseTheme.statusIndicator.animation
+  const statusIndicatorValidAnimation =
+    styles.statusIndicatorValidAnimation ??
+    baseTheme.statusIndicatorValid.animation
+
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
@@ -425,14 +446,16 @@ export const getConfirmationCodeInputTheme = (
       backdropFilter:
         styles.backdropFilter || baseTheme.container.backdropFilter,
       padding: styles.padding || baseTheme.container.padding,
-      backgroundImage:
-        styles.backgroundImage || baseTheme.container.backgroundImage,
+      ...(containerBackgroundImage !== undefined
+        ? { backgroundImage: containerBackgroundImage }
+        : {}),
     },
     containerHover: {
       transform: styles.hoverTransform || baseTheme.containerHover.transform,
       boxShadow: styles.hoverBoxShadow || baseTheme.containerHover.boxShadow,
-      borderColor:
-        styles.hoverBorderColor || baseTheme.containerHover.borderColor,
+      ...(hoverBorderColor !== undefined
+        ? { borderColor: hoverBorderColor }
+        : {}),
     },
     successContainer: {
       background:
@@ -448,15 +471,17 @@ export const getConfirmationCodeInputTheme = (
         styles.successBackdropFilter ||
         baseTheme.successContainer.backdropFilter,
       padding: styles.successPadding || baseTheme.successContainer.padding,
-      backgroundImage:
-        styles.successBackgroundImage ||
-        baseTheme.successContainer.backgroundImage,
+      ...(successBackgroundImage !== undefined
+        ? { backgroundImage: successBackgroundImage }
+        : {}),
     },
     successIcon: {
       fontSize: styles.successIconFontSize || baseTheme.successIcon.fontSize,
       color: styles.successIconColor || baseTheme.successIcon.color,
-      filter: styles.successIconFilter || baseTheme.successIcon.filter,
-      animation: styles.successIconAnimation || baseTheme.successIcon.animation,
+      ...(successIconFilter !== undefined ? { filter: successIconFilter } : {}),
+      ...(successIconAnimation !== undefined
+        ? { animation: successIconAnimation }
+        : {}),
     },
     successMessage: {
       fontSize:
@@ -474,8 +499,9 @@ export const getConfirmationCodeInputTheme = (
       textTransform:
         styles.successMessageTextTransform ||
         baseTheme.successMessage.textTransform,
-      textShadow:
-        styles.successMessageTextShadow || baseTheme.successMessage.textShadow,
+      ...(successMessageTextShadow !== undefined
+        ? { textShadow: successMessageTextShadow }
+        : {}),
     },
     input: {
       width: styles.inputWidth || baseTheme.input.width,
@@ -491,8 +517,8 @@ export const getConfirmationCodeInputTheme = (
       borderColor: styles.inputBorderColor || baseTheme.input.borderColor,
       borderRadius: styles.inputBorderRadius || baseTheme.input.borderRadius,
       borderWidth: styles.inputBorderWidth || baseTheme.input.borderWidth,
-      textShadow: styles.inputTextShadow || baseTheme.input.textShadow,
-      animation: styles.inputAnimation || baseTheme.input.animation,
+      ...(inputTextShadow !== undefined ? { textShadow: inputTextShadow } : {}),
+      ...(inputAnimation !== undefined ? { animation: inputAnimation } : {}),
     },
     inputFocus: {
       borderColor:
@@ -511,16 +537,17 @@ export const getConfirmationCodeInputTheme = (
       backgroundColor:
         styles.statusIndicatorBackgroundColor ||
         baseTheme.statusIndicator.backgroundColor,
-      animation:
-        styles.statusIndicatorAnimation || baseTheme.statusIndicator.animation,
+      ...(statusIndicatorAnimation !== undefined
+        ? { animation: statusIndicatorAnimation }
+        : {}),
     },
     statusIndicatorValid: {
       backgroundColor:
         styles.statusIndicatorValidBackgroundColor ||
         baseTheme.statusIndicatorValid.backgroundColor,
-      animation:
-        styles.statusIndicatorValidAnimation ||
-        baseTheme.statusIndicatorValid.animation,
+      ...(statusIndicatorValidAnimation !== undefined
+        ? { animation: statusIndicatorValidAnimation }
+        : {}),
     },
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

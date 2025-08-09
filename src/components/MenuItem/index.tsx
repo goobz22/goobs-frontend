@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-  FormFieldStyles,
   getSharedFormFieldStyles,
   injectSacredKeyframes,
   SACRED_GLYPHS,
 } from '../../theme'
+import type { FormFieldStyles } from '../../theme'
 
 export interface MenuItemStyles extends FormFieldStyles {
   dense?: boolean

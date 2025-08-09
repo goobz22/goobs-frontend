@@ -2,7 +2,7 @@
 
 import React from 'react'
 import ManageRow from '../../DataGrid/ManageRow'
-import { ToolbarStyles } from '../../../theme'
+import type { ToolbarStyles } from '../../../theme'
 
 export interface RightCenterProps {
   selectedRows?: string[]
@@ -48,13 +48,13 @@ function RightCenter({
       <ManageRow
         selectedRows={selectedRows}
         rows={rows}
-        onDuplicate={onDuplicate}
-        onDelete={onDelete}
-        onManage={onManage}
-        onShow={onShow}
-        onExport={onExport}
-        handleClose={handleClose}
-        styles={{ theme: styles?.theme }}
+        {...(onDuplicate ? { onDuplicate: onDuplicate as () => void } : {})}
+        {...(onDelete ? { onDelete: onDelete as () => void } : {})}
+        {...(onManage ? { onManage: onManage as () => void } : {})}
+        {...(onShow ? { onShow: onShow as () => void } : {})}
+        {...(onExport ? { onExport: onExport as () => void } : {})}
+        {...(handleClose ? { handleClose: handleClose as () => void } : {})}
+        {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
       />
     </div>
   )

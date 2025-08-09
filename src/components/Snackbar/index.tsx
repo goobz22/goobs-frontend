@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Alert, { AlertProps } from '../Alert'
-import { AlertStyles } from '../../theme'
+import type { AlertStyles } from '../../theme'
 
 export interface SnackbarProps {
   open: boolean
@@ -56,7 +56,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
         message={message}
         severity={severity}
         onClose={onClose}
-        styles={styles}
+        styles={styles as AlertStyles}
       />
     </div>
   )

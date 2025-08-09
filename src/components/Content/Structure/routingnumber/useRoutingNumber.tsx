@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import RoutingNumber, {
-  RoutingNumberProps,
+  type RoutingNumberProps,
 } from '../../../Field/Number/RoutingNumber'
 
 const useRoutingNumber = (props: {

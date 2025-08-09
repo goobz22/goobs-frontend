@@ -123,6 +123,8 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
 
+  const inputStyles = (componentStyles.input ?? {}) as React.CSSProperties
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
@@ -195,7 +197,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
             paddingLeft: '16px',
             color: 'inherit',
             fontSize: styles?.fontSize || '16px',
-            fontFamily: componentStyles.input.fontFamily,
+            fontFamily: inputStyles.fontFamily,
             fontWeight: styles?.fontWeight,
             userSelect: 'none',
           }}
@@ -214,7 +216,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
           onBlur={handleBlur}
           placeholder={placeholder || '555-555-5555'}
           style={{
-            ...componentStyles.input,
+            ...inputStyles,
             paddingLeft: '8px',
             flex: 1,
           }}

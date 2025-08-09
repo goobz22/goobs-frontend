@@ -5,7 +5,8 @@
 'use client'
 
 import React, { forwardRef } from 'react'
-import { PaperStyles, getPaperStyles, SACRED_GLYPHS } from '../../theme'
+import { getPaperStyles, SACRED_GLYPHS } from '../../theme'
+import type { PaperStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

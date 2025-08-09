@@ -311,7 +311,7 @@ const AdministratorAddTaskCompanyProvided: React.FC<
           onClick={onClose}
           style={{
             ...styles.closeButton,
-            ...(isCloseHovered && styles.closeButtonHover),
+            ...(isCloseHovered ? styles.closeButtonHover : {}),
           }}
           onMouseEnter={() => setCloseHovered(true)}
           onMouseLeave={() => setCloseHovered(false)}
@@ -352,11 +352,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                 <SearchableSimple
                   label="Severity Level"
                   options={severityOptions}
-                  defaultValue={
-                    severityOptions.find(
+                  {...(() => {
+                    const dv = severityOptions.find(
                       opt => opt.attribute2 === selectedSeverityId
                     )?.value
-                  }
+                    return dv !== undefined ? { defaultValue: dv } : {}
+                  })()}
                   onChange={option =>
                     setSelectedSeverityId(option?.attribute2 || '')
                   }
@@ -368,10 +369,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                 <SearchableSimple
                   label="Associated Product (Queue)"
                   options={queueOptions}
-                  defaultValue={
-                    queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                      ?.value
-                  }
+                  {...(() => {
+                    const dv = queueOptions.find(
+                      opt => opt.attribute1 === selectedQueueId
+                    )?.value
+                    return dv !== undefined ? { defaultValue: dv } : {}
+                  })()}
                   onChange={option =>
                     setSelectedQueueId(option?.attribute1 || '')
                   }
@@ -383,11 +386,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                 <SearchableSimple
                   label="Status"
                   options={statusOptions}
-                  defaultValue={
-                    statusOptions.find(
+                  {...(() => {
+                    const dv = statusOptions.find(
                       opt => opt.attribute1 === selectedStatusId
                     )?.value
-                  }
+                    return dv !== undefined ? { defaultValue: dv } : {}
+                  })()}
                   onChange={option => {
                     const newStatus = option?.value || ''
                     setSelectedStatus(newStatus)
@@ -401,11 +405,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                 <SearchableSimple
                   label="Substatus"
                   options={finalSubStatusOptions}
-                  defaultValue={
-                    finalSubStatusOptions.find(
+                  {...(() => {
+                    const dv = finalSubStatusOptions.find(
                       opt => opt.attribute2 === selectedSubStatusId
                     )?.value
-                  }
+                    return dv !== undefined ? { defaultValue: dv } : {}
+                  })()}
                   onChange={option =>
                     setSelectedSubStatusId(option?.attribute2 || '')
                   }

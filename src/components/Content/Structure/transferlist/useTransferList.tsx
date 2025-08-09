@@ -1,5 +1,5 @@
 import React from 'react'
-import TransferList, { TransferListProps } from '../../../TransferList'
+import TransferList, { type TransferListProps } from '../../../TransferList'
 
 const useTransferList = (props: {
   transferlist?: TransferListProps | TransferListProps[]

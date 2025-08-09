@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import MACAddressField, {
-  MACAddressFieldProps,
+  type MACAddressFieldProps,
 } from '../../../Field/IPAM/MACAddress'
 
 const useMacAddress = (props: {

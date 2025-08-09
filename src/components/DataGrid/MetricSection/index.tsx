@@ -31,25 +31,6 @@ const premiumStyles = {
     maxWidth: '100%',
     boxSizing: 'border-box',
   } as React.CSSProperties,
-
-  cardWrapper: {
-    // Mobile: 1 column (100% width minus gap)
-    flex: '1 1 calc(100% - 0rem)',
-    minWidth: '280px',
-    maxWidth: '100%',
-
-    // Tablet: 2 columns (50% width minus gap)
-    '@media (min-width: 768px)': {
-      flex: '1 1 calc(50% - 0.5rem)',
-      maxWidth: 'calc(50% - 0.5rem)',
-    },
-
-    // Desktop: 4 columns (25% width minus gap)
-    '@media (min-width: 1024px)': {
-      flex: '1 1 calc(25% - 0.75rem)',
-      maxWidth: 'calc(25% - 0.75rem)',
-    },
-  } as React.CSSProperties,
 }
 
 // Sacred theme styles (when sacredtheme=true)
@@ -71,25 +52,6 @@ const sacredStyles = {
     width: '100%',
     maxWidth: '100%',
     boxSizing: 'border-box',
-  } as React.CSSProperties,
-
-  cardWrapper: {
-    // Mobile: 1 column (100% width minus gap)
-    flex: '1 1 calc(100% - 0rem)',
-    minWidth: '280px',
-    maxWidth: '100%',
-
-    // Tablet: 2 columns (50% width minus gap)
-    '@media (min-width: 768px)': {
-      flex: '1 1 calc(50% - 0.5rem)',
-      maxWidth: 'calc(50% - 0.5rem)',
-    },
-
-    // Desktop: 4 columns (25% width minus gap)
-    '@media (min-width: 1024px)': {
-      flex: '1 1 calc(25% - 0.75rem)',
-      maxWidth: 'calc(25% - 0.75rem)',
-    },
   } as React.CSSProperties,
 }
 
@@ -119,11 +81,13 @@ const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
             <MetricCard
               title={metric.title}
               value={metric.value}
-              subtitle={metric.subtitle}
-              icon={metric.icon}
-              trend={metric.trend}
-              glyph={metric.glyph}
-              styles={styles}
+              {...(metric.subtitle !== undefined
+                ? { subtitle: metric.subtitle }
+                : {})}
+              {...(metric.icon !== undefined ? { icon: metric.icon } : {})}
+              {...(metric.trend !== undefined ? { trend: metric.trend } : {})}
+              {...(metric.glyph !== undefined ? { glyph: metric.glyph } : {})}
+              {...(styles !== undefined ? { styles } : {})}
             />
           </div>
         ))}

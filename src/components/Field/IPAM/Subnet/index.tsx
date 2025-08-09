@@ -399,10 +399,35 @@ const calculateNetworkRange = (
   } else {
     maskStr = mask
   }
-  const networkParts = network.split('.').map(part => parseInt(part, 10))
-  const maskParts = maskStr.split('.').map(part => parseInt(part, 10))
-  const startParts = networkParts.map((part, i) => part & maskParts[i])
-  const endParts = startParts.map((part, i) => part | (~maskParts[i] & 255))
+  const networkSegs = network.split('.')
+  const maskSegs = maskStr.split('.')
+  if (networkSegs.length !== 4 || maskSegs.length !== 4) {
+    return { start: '', end: '' }
+  }
+  const networkParts = networkSegs.map(p => parseInt(p, 10)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  const maskParts = maskSegs.map(p => parseInt(p, 10)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  const startParts: [number, number, number, number] = [
+    networkParts[0] & maskParts[0],
+    networkParts[1] & maskParts[1],
+    networkParts[2] & maskParts[2],
+    networkParts[3] & maskParts[3],
+  ]
+  const endParts: [number, number, number, number] = [
+    startParts[0] | (~maskParts[0] & 255),
+    startParts[1] | (~maskParts[1] & 255),
+    startParts[2] | (~maskParts[2] & 255),
+    startParts[3] | (~maskParts[3] & 255),
+  ]
   return { start: startParts.join('.'), end: endParts.join('.') }
 }
 
@@ -445,9 +470,34 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   const isIPInNetwork = useCallback(
     (ip: string, network: string, mask: string): boolean => {
       if (!ip || !network || !mask) return true
-      const ipParts = ip.split('.').map(part => parseInt(part, 10))
-      const networkParts = network.split('.').map(part => parseInt(part, 10))
-      const maskParts = mask.split('.').map(part => parseInt(part, 10))
+      const ipSegments = ip.split('.')
+      const networkSegments = network.split('.')
+      const maskSegments = mask.split('.')
+      if (
+        ipSegments.length !== 4 ||
+        networkSegments.length !== 4 ||
+        maskSegments.length !== 4
+      ) {
+        return true
+      }
+      const ipParts = ipSegments.map(part => parseInt(part, 10)) as [
+        number,
+        number,
+        number,
+        number,
+      ]
+      const networkParts = networkSegments.map(part => parseInt(part, 10)) as [
+        number,
+        number,
+        number,
+        number,
+      ]
+      const maskParts = maskSegments.map(part => parseInt(part, 10)) as [
+        number,
+        number,
+        number,
+        number,
+      ]
       if (
         ipParts.some(isNaN) ||
         networkParts.some(isNaN) ||
@@ -455,11 +505,13 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
       ) {
         return true
       }
-      for (let i = 0; i < 4; i++) {
-        if ((ipParts[i] & maskParts[i]) !== (networkParts[i] & maskParts[i])) {
-          return false
-        }
-      }
+      const [ip0, ip1, ip2, ip3] = ipParts
+      const [n0, n1, n2, n3] = networkParts
+      const [m0, m1, m2, m3] = maskParts
+      if ((ip0 & m0) !== (n0 & m0)) return false
+      if ((ip1 & m1) !== (n1 & m1)) return false
+      if ((ip2 & m2) !== (n2 & m2)) return false
+      if ((ip3 & m3) !== (n3 & m3)) return false
       return true
     },
     []
@@ -546,8 +598,8 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         initialValue={mask.toString()}
         onChange={handleMaskChange}
         label={label}
-        min={min}
-        max={max}
+        min={min as number}
+        max={max as number}
         maskType={maskType}
         required={required}
         style={{ width: '100%' }}

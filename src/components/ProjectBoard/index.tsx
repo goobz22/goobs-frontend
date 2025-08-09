@@ -90,7 +90,7 @@ function ProjectBoardContent({
   styles,
 }: ProjectBoardProps) {
   const [columnState, setColumnState] = useAtom(columnsAtom)
-  const mergedColumns = useMemo(
+  const mergedColumns = useMemo<ColumnData[]>(
     () => mergeColumnsAndTasks(columns, tasks, boardType),
     [columns, tasks, boardType]
   )
@@ -172,9 +172,12 @@ function ProjectBoardContent({
         })
 
         if (targetColumnIndex !== -1) {
+          const currentColumn = newColumns[targetColumnIndex]!
           newColumns[targetColumnIndex] = {
-            ...newColumns[targetColumnIndex],
-            tasks: [...newColumns[targetColumnIndex].tasks, taskWithId],
+            _id: currentColumn._id,
+            title: currentColumn.title,
+            description: currentColumn.description,
+            tasks: [...currentColumn.tasks, taskWithId],
           }
         }
 
@@ -276,9 +279,9 @@ function ProjectBoardContent({
           label: 'Search...',
           value: searchTerm,
           onChange: handleSearchChange,
-          styles: { theme: styles?.theme },
+          styles: { theme: styles?.theme || 'light' },
         }}
-        styles={{ theme: styles?.theme }}
+        styles={{ theme: styles?.theme || 'light' }}
       />
 
       <div style={computedStyles.toolbarContainer}>
@@ -288,7 +291,7 @@ function ProjectBoardContent({
           onTaskSelect={handleTaskSelect}
           columnDragAndDrop={columnDragAndDrop}
           taskDragAndDrop={taskDragAndDrop}
-          styles={{ theme: styles?.theme }}
+          styles={{ theme: styles?.theme || 'light' }}
         />
       </div>
 
@@ -381,7 +384,7 @@ function ProjectBoardContent({
           severityLevels={rawSeverityLevels}
           createdUserId={currentUser._id}
           companyId={companyId || ''}
-          styles={{ theme: styles?.theme }}
+          styles={{ theme: styles?.theme || 'light' }}
         />
       )}
 
@@ -424,7 +427,7 @@ function ProjectBoardContent({
           topicOptions={rawTopics}
           knowledgebaseArticleOptions={rawArticles}
           teamMemberOptions={rawEmployees}
-          styles={{ theme: styles?.theme }}
+          styles={{ theme: styles?.theme || 'light' }}
         />
       )}
     </div>

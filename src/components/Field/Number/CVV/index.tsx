@@ -160,7 +160,10 @@ const CVV: React.FC<CVVProps> = ({
     [onBlur]
   )
 
-  const computedStyles = getStyles({ ...styles, disabled }, isFocused)
+  const computedStyles = getStyles(
+    { ...styles, ...(disabled !== undefined ? { disabled } : {}) },
+    isFocused
+  )
 
   const CVVAdornment = () => (
     <div

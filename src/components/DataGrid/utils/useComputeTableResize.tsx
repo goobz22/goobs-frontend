@@ -19,7 +19,10 @@ import { dataGridStore } from './useInitializeGrid'
 function arraysAreEqual(a: ColumnDef[], b: ColumnDef[]) {
   if (a.length !== b.length) return false
   for (let i = 0; i < a.length; i++) {
-    if (a[i].field !== b[i].field) return false
+    const aCol = a[i]
+    const bCol = b[i]
+    if (!aCol || !bCol) return false
+    if (aCol.field !== bCol.field) return false
   }
   return true
 }
@@ -42,7 +45,7 @@ export function useComputeTableResize({
   showOverflowDropdown,
 }: UseComputeTableResizeParams) {
   // The ref to the container that we measure to decide how many columns can fit
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   // The subset of columns that actually fit
   const [fittedDesktopColumns, setFittedDesktopColumns] = useState<ColumnDef[]>(
@@ -128,6 +131,9 @@ export function useComputeTableResize({
 
     for (let i = 0; i < visibleCols.length; i++) {
       const col = visibleCols[i]
+      if (!col) {
+        continue
+      }
       const needed = measureColumnNeededWidth(col)
 
       if (col.width != null || col.computedWidth != null) {

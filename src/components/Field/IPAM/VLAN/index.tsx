@@ -9,7 +9,10 @@ const MIN_VLAN_ID = 1
 const MAX_VLAN_ID = 4094
 
 export interface VLANFieldProps
-  extends Omit<InternalIncrementNumberFieldProps, 'onChange'> {
+  extends Omit<
+    InternalIncrementNumberFieldProps,
+    'onChange' | 'value' | 'initialValue'
+  > {
   initialValue?: string
   /**
    * A standard ChangeEvent<HTMLInputElement> so parent can do
@@ -153,6 +156,10 @@ const VLANField: React.FC<VLANFieldProps> = ({
 
           // Store the event to be processed in useEffect
           pendingEventRef.current = syntheticEvent
+          // Force an update to trigger the useEffect and controlled value sync
+          setCurrentValue(prev =>
+            prev === validValue ? prev + ' ' : validValue
+          )
           return
         }
 
@@ -167,6 +174,10 @@ const VLANField: React.FC<VLANFieldProps> = ({
 
         // Store the event to be processed in useEffect
         pendingEventRef.current = syntheticEvent
+        // Force an update to trigger the useEffect and controlled value sync
+        setCurrentValue(prev =>
+          prev === stringValue ? prev + ' ' : stringValue
+        )
         return
       }
 
@@ -183,23 +194,37 @@ const VLANField: React.FC<VLANFieldProps> = ({
     [reservedVLANs]
   )
 
-  return (
-    <InternalIncrementNumberField
-      initialValue={currentValue}
-      onChange={handleChange}
-      label={label}
-      min={MIN_VLAN_ID}
-      max={MAX_VLAN_ID}
-      helperText={errorMessage}
-      placeholder={`${MIN_VLAN_ID}-${MAX_VLAN_ID}`}
-      styles={{
-        ...rest.styles,
-        helperTextType: !isValid ? 'error' : 'info',
-        disabled: disabled !== undefined ? disabled : rest.styles?.disabled,
-      }}
-      {...rest}
-    />
-  )
+  const computedStyles = (() => {
+    const { disabled: stylesDisabled, ...stylesWithoutDisabled } =
+      rest.styles || {}
+    const merged = {
+      ...stylesWithoutDisabled,
+      helperTextType: !isValid ? 'error' : 'info',
+    } as Omit<NonNullable<typeof rest.styles>, 'disabled'> & {
+      helperTextType: 'error' | 'info'
+    }
+    if (disabled !== undefined) return { ...merged, disabled }
+    if (stylesDisabled !== undefined)
+      return { ...merged, disabled: stylesDisabled }
+    return merged as unknown as typeof merged & { disabled?: never }
+  })()
+
+  const numberFieldProps: InternalIncrementNumberFieldProps = {
+    ...(rest as Omit<InternalIncrementNumberFieldProps, 'onChange' | 'value'>),
+    value: currentValue,
+    onChange: handleChange,
+    label,
+    min: MIN_VLAN_ID,
+    max: MAX_VLAN_ID,
+    placeholder: `${MIN_VLAN_ID}-${MAX_VLAN_ID}`,
+    styles: computedStyles as any,
+  }
+
+  if (errorMessage !== undefined) {
+    numberFieldProps.helperText = errorMessage
+  }
+
+  return <InternalIncrementNumberField {...numberFieldProps} />
 }
 
 export default VLANField

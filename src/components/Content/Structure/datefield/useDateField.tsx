@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import DateField, { DateFieldProps } from '../../../Field/Date/DateField'
+import DateField, { type DateFieldProps } from '../../../Field/Date/DateField'
 
 export interface UseDateFieldProps {
   dateField?: DateFieldProps | DateFieldProps[]
@@ -18,11 +18,11 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
 }) => {
   return (
     <DateField
-      onChange={onChange}
-      label={label}
-      value={value}
-      helperText={helperText}
-      styles={styles}
+      onChange={onChange ?? (() => {})}
+      {...(label !== undefined ? { label } : {})}
+      {...(value !== undefined ? { value } : {})}
+      {...(helperText !== undefined ? { helperText } : {})}
+      {...(styles !== undefined ? { styles } : {})}
       {...rest}
     />
   )

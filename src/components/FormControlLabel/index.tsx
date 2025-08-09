@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-  FormFieldStyles,
   injectSacredKeyframes,
   SACRED_GLYPHS,
   getSharedFormFieldStyles,
 } from '../../theme'
+import type { FormFieldStyles } from '../../theme'
 
 export interface FormControlLabelStyles extends FormFieldStyles {
   disabled?: boolean

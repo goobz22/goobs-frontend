@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import CodeCopy, { CodeCopyProps } from './../../../../components/CodeCopy'
+import CodeCopy, { type CodeCopyProps } from './../../../../components/CodeCopy'
 
 const useCodeCopy = (props: {
   codecopy?: CodeCopyProps | CodeCopyProps[]

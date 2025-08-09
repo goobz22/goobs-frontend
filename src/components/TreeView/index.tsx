@@ -13,10 +13,10 @@ import React, {
   useImperativeHandle,
   createContext,
   useContext,
-  ReactNode,
-  FC,
 } from 'react'
-import { TreeViewStyles, getTreeViewStyles, SACRED_GLYPHS } from '../../theme'
+import type { ReactNode, FC } from 'react'
+import { getTreeViewStyles, SACRED_GLYPHS } from '../../theme'
+import type { TreeViewStyles } from '../../theme'
 import ExpandMoreIcon from '../Icons/ExpandMore'
 
 // --------------------------------------------------------------------------
@@ -471,7 +471,8 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.2,
         vy: (Math.random() - 0.5) * 0.2,
-        glyph: SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)],
+        glyph:
+          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)] ?? '',
         size: 10 + Math.random() * 6,
         opacity: Math.random() * 0.15 + 0.05,
         maxOpacity: Math.random() * 0.2 + 0.1,
@@ -598,13 +599,8 @@ const TreeItem: FC<TreeItemProps> = ({
         context.onToggleSelection(event, itemId)
       }
 
-      // Handle expansion if content triggers expansion
-      if (
-        hasChildren &&
-        (expansionTrigger === 'content' ||
-          expansionTrigger === 'iconContainer') &&
-        !isDisabled
-      ) {
+      // Handle expansion only when content triggers expansion
+      if (hasChildren && expansionTrigger === 'content' && !isDisabled) {
         onToggleExpansion?.(event, itemId)
         context.onToggleExpansion(event, itemId)
       }
@@ -634,12 +630,19 @@ const TreeItem: FC<TreeItemProps> = ({
       event.preventDefault()
       event.stopPropagation()
 
-      if (hasChildren) {
+      if (hasChildren && expansionTrigger === 'iconContainer') {
         onToggleExpansion?.(event, itemId)
         context.onToggleExpansion(event, itemId)
       }
     },
-    [isDisabled, hasChildren, onToggleExpansion, context, itemId]
+    [
+      isDisabled,
+      hasChildren,
+      onToggleExpansion,
+      context,
+      itemId,
+      expansionTrigger,
+    ]
   )
 
   const handleCheckboxChange = useCallback(

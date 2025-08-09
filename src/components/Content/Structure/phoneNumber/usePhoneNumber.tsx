@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import PhoneNumberField, {
-  PhoneNumberFieldProps,
+  type PhoneNumberFieldProps,
 } from '../../../Field/PhoneNumber'
 
 const usePhoneNumber = (props: {

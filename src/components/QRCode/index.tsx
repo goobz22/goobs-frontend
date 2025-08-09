@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useMemo, useEffect, FC } from 'react'
+import React, { useMemo, useEffect } from 'react'
+import type { FC } from 'react'
 import QRCode from 'react-qr-code'
 import { authenticator } from 'otplib'
 import { getQRCodeStyles, type QRCodeStyles } from '../../theme/qrcode'
@@ -152,7 +153,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
               isValid={false}
               codeLength={6}
               value={confirmationCode}
-              onChange={onConfirmationCodeChange}
+              onChange={val => onConfirmationCodeChange?.(val)}
               showActionButtons={false}
               onDisableVerification={() => {}}
               styles={{ theme: styles?.theme || 'light' }}

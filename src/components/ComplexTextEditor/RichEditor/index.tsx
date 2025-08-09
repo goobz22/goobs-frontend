@@ -5,11 +5,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import Toolbar from '../Toolbars/Editor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
-import {
-  ComplexTextEditorStyles,
-  getComplexTextEditorStyles,
-  SACRED_GLYPHS,
-} from '../../../theme/'
+import { getComplexTextEditorStyles, SACRED_GLYPHS } from '../../../theme/'
+import type { ComplexTextEditorStyles } from '../../../theme/'
 
 export interface RichTextEditorProps {
   value: string
@@ -70,7 +67,7 @@ export function RichTextEditor({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet = document.styleSheets?.[0]
       const keyframes = `
         @keyframes richTextEditorBorderPulse {
           0%, 100% { border-color: rgba(255, 215, 0, 0.3); }
@@ -82,7 +79,9 @@ export function RichTextEditor({
         }
       `
       try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        if (styleSheet) {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        }
       } catch {
         // Keyframes might already exist
       }
@@ -125,7 +124,7 @@ export function RichTextEditor({
         markdownMode={false}
         setMarkdown={() => {}}
         toolbarType="richtext"
-        styles={editorStyles}
+        styles={editorStyles as ComplexTextEditorStyles}
       />
       <div style={{ position: 'relative' }}>
         <div
@@ -159,7 +158,7 @@ export function RichTextEditor({
         <Accordion
           expanded={expanded}
           onChange={handleAccordionChange}
-          styles={{ theme: editorStyles?.theme }}
+          styles={{ theme: editorStyles?.theme || 'light' }}
           summary={
             <Typography
               styles={{

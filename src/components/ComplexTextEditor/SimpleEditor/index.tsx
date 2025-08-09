@@ -2,11 +2,8 @@
 
 'use client'
 import React, { useEffect, useState } from 'react'
-import {
-  ComplexTextEditorStyles,
-  getComplexTextEditorStyles,
-  SACRED_GLYPHS,
-} from '../../../theme/'
+import { getComplexTextEditorStyles, SACRED_GLYPHS } from '../../../theme/'
+import type { ComplexTextEditorStyles } from '../../../theme/'
 
 type SimpleEditorProps = {
   value: string
@@ -48,7 +45,10 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes simpleEditorInputGlow {
           0%, 100% { 
@@ -65,10 +65,12 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
           50% { opacity: 0.5; }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [isSacredTheme])

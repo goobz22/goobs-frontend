@@ -5,7 +5,7 @@ import SearchableSimple from '../../Field/Dropdown/SearchableSimple'
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import Searchbar from '../../Field/Search'
-import { DataGridFilter, ColumnDef, RowData } from '../types'
+import type { DataGridFilter, ColumnDef, RowData } from '../types'
 import type { DataGridStyles } from '../../../theme'
 import { SACRED_GLYPHS } from '../../../theme'
 
@@ -22,8 +22,8 @@ export interface FilterSectionProps {
   styles?: DataGridStyles
 }
 
-function useWindowSize() {
-  const [size, setSize] = useState([0, 0])
+function useWindowSize(): [number, number] {
+  const [size, setSize] = useState<[number, number]>([0, 0])
   useEffect(() => {
     function updateSize() {
       setSize([window.innerWidth, window.innerHeight])
@@ -160,7 +160,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes sacredGlow {
           0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
@@ -175,10 +178,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           50% { transform: translateY(-3px) scale(1.05); opacity: 0.8; }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [isSacredTheme])
@@ -256,7 +261,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               (filter.value as string) ? new Date(filter.value as string) : null
             }
             onChange={filter.onChange as (date: Date | null) => void}
-            placeholder={filter.placeholder}
+            {...(filter.placeholder !== undefined
+              ? { placeholder: filter.placeholder }
+              : {})}
             styles={{
               theme: isSacredTheme ? 'sacred' : 'light',
             }}
@@ -276,7 +283,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           onChange={
             filter.onChange as (value: { value: string } | null) => void
           }
-          placeholder={filter.placeholder}
+          {...(filter.placeholder !== undefined
+            ? { placeholder: filter.placeholder }
+            : {})}
           styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
         />
       </div>

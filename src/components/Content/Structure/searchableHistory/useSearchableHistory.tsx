@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import SearchableHistory, {
-  SearchableHistoryProps,
+  type SearchableHistoryProps,
 } from '../../../Field/Dropdown/SearchableHistory'
 
 const useSearchableHistory = (props: {

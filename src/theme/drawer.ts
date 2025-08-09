@@ -164,29 +164,39 @@ export const getDrawerTheme = (styles?: DrawerStyles): DrawerTheme => {
     return baseTheme
   }
 
+  const permanentConfig: DrawerTheme['permanent'] = {
+    background: styles.permanentBackground || baseTheme.permanent.background,
+    borderRight: styles.permanentBorderRight || baseTheme.permanent.borderRight,
+    borderLeft: styles.permanentBorderLeft || baseTheme.permanent.borderLeft,
+    boxShadow: styles.permanentBoxShadow || baseTheme.permanent.boxShadow,
+    backdropFilter:
+      styles.permanentBackdropFilter || baseTheme.permanent.backdropFilter,
+  }
+
+  const permanentImage =
+    styles.permanentBackgroundImage ?? baseTheme.permanent.backgroundImage
+  if (permanentImage !== undefined) {
+    permanentConfig.backgroundImage = permanentImage
+  }
+
+  const temporaryConfig: DrawerTheme['temporary'] = {
+    background: styles.temporaryBackground || baseTheme.temporary.background,
+    borderRight: styles.temporaryBorderRight || baseTheme.temporary.borderRight,
+    borderLeft: styles.temporaryBorderLeft || baseTheme.temporary.borderLeft,
+    boxShadow: styles.temporaryBoxShadow || baseTheme.temporary.boxShadow,
+    backdropFilter:
+      styles.temporaryBackdropFilter || baseTheme.temporary.backdropFilter,
+  }
+
+  const temporaryImage =
+    styles.temporaryBackgroundImage ?? baseTheme.temporary.backgroundImage
+  if (temporaryImage !== undefined) {
+    temporaryConfig.backgroundImage = temporaryImage
+  }
+
   return {
-    permanent: {
-      background: styles.permanentBackground || baseTheme.permanent.background,
-      borderRight:
-        styles.permanentBorderRight || baseTheme.permanent.borderRight,
-      borderLeft: styles.permanentBorderLeft || baseTheme.permanent.borderLeft,
-      boxShadow: styles.permanentBoxShadow || baseTheme.permanent.boxShadow,
-      backdropFilter:
-        styles.permanentBackdropFilter || baseTheme.permanent.backdropFilter,
-      backgroundImage:
-        styles.permanentBackgroundImage || baseTheme.permanent.backgroundImage,
-    },
-    temporary: {
-      background: styles.temporaryBackground || baseTheme.temporary.background,
-      borderRight:
-        styles.temporaryBorderRight || baseTheme.temporary.borderRight,
-      borderLeft: styles.temporaryBorderLeft || baseTheme.temporary.borderLeft,
-      boxShadow: styles.temporaryBoxShadow || baseTheme.temporary.boxShadow,
-      backdropFilter:
-        styles.temporaryBackdropFilter || baseTheme.temporary.backdropFilter,
-      backgroundImage:
-        styles.temporaryBackgroundImage || baseTheme.temporary.backgroundImage,
-    },
+    permanent: permanentConfig,
+    temporary: temporaryConfig,
     backdrop: {
       backgroundColor:
         styles.backdropBackgroundColor || baseTheme.backdrop.backgroundColor,
@@ -250,7 +260,9 @@ export const getDrawerStyles = (
     }),
     boxShadow: themeConfig.permanent.boxShadow,
     backdropFilter: themeConfig.permanent.backdropFilter,
-    backgroundImage: themeConfig.permanent.backgroundImage,
+    ...(themeConfig.permanent.backgroundImage !== undefined
+      ? { backgroundImage: themeConfig.permanent.backgroundImage }
+      : {}),
     zIndex: styles?.zIndex || 30,
     opacity: styles?.disabled ? 0.5 : 1,
     pointerEvents: styles?.disabled ? 'none' : 'auto',
@@ -282,7 +294,9 @@ export const getDrawerStyles = (
         : themeConfig.temporary.borderLeft,
     boxShadow: themeConfig.temporary.boxShadow,
     backdropFilter: themeConfig.temporary.backdropFilter,
-    backgroundImage: themeConfig.temporary.backgroundImage,
+    ...(themeConfig.temporary.backgroundImage !== undefined
+      ? { backgroundImage: themeConfig.temporary.backgroundImage }
+      : {}),
     zIndex: styles?.zIndex || 50,
     transition: themeConfig.transition,
     [effectiveAnchor]: 0,
@@ -329,7 +343,9 @@ export const getDrawerStyles = (
     }),
     boxShadow: themeConfig.temporary.boxShadow,
     backdropFilter: themeConfig.temporary.backdropFilter,
-    backgroundImage: themeConfig.temporary.backgroundImage,
+    ...(themeConfig.temporary.backgroundImage !== undefined
+      ? { backgroundImage: themeConfig.temporary.backgroundImage }
+      : {}),
     zIndex: styles?.zIndex || 50,
     transition: themeConfig.transition,
     transform: open

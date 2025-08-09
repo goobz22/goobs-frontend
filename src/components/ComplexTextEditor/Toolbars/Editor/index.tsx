@@ -10,7 +10,7 @@ import {
   replaceSelectedText,
 } from '../../utils/useMarkdownEditor'
 import { black, grey } from '../../../../theme/'
-import { ComplexTextEditorStyles } from '../../../../theme/'
+import type { ComplexTextEditorStyles } from '../../../../theme/'
 
 import LinkIcon from '../../../Icons/Link'
 import UndoIcon from '../../../Icons/Undo'
@@ -194,17 +194,22 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   // CSS keyframes for sacred animations
   useEffect(() => {
     if (isSacredTheme) {
-      const styleSheet = document.styleSheets[0]
+      const styleSheet =
+        typeof document !== 'undefined' && document.styleSheets?.length
+          ? document.styleSheets[0]
+          : undefined
       const keyframes = `
         @keyframes toolbarIconGlow {
           0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
           50% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8)); }
         }
       `
-      try {
-        styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-      } catch {
-        // Keyframes might already exist
+      if (styleSheet) {
+        try {
+          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+        } catch {
+          // Keyframes might already exist
+        }
       }
     }
   }, [isSacredTheme])
@@ -480,7 +485,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     const isActive = isFormatActive(format)
 
     return {
-      theme: styles?.theme,
+      theme: styles?.theme || 'light',
       backgroundColor: isActive
         ? isSacredTheme
           ? 'rgba(255, 215, 0, 0.2)'

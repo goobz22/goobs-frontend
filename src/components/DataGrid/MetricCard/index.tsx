@@ -188,14 +188,18 @@ export default function MetricCard({
 
   const cardColor = getColorValue('primary')
   const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : { r: 0, g: 0, b: 0 }
+    const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    if (!match) {
+      return { r: 0, g: 0, b: 0 }
+    }
+    const rHex = match[1]!
+    const gHex = match[2]!
+    const bHex = match[3]!
+    return {
+      r: parseInt(rHex, 16),
+      g: parseInt(gHex, 16),
+      b: parseInt(bHex, 16),
+    }
   }
 
   const rgb = hexToRgb(cardColor)
@@ -213,11 +217,13 @@ export default function MetricCard({
       cursor: 'pointer',
       position: 'relative',
       overflow: 'hidden',
-      ...(isHovered && {
-        transform: 'translateY(-4px)',
-        boxShadow: `0 10px 25px ${rgbaColor(0.2)}`,
-        borderColor: rgbaColor(0.4),
-      }),
+      ...(isHovered
+        ? {
+            transform: 'translateY(-4px)',
+            boxShadow: `0 10px 25px ${rgbaColor(0.2)}`,
+            borderColor: rgbaColor(0.4),
+          }
+        : {}),
     }
 
     const standardContentStyle: React.CSSProperties = {
@@ -320,15 +326,16 @@ export default function MetricCard({
     transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     animation: 'sacredGlow 4s ease-in-out infinite',
     cursor: 'pointer',
-    ...(isHovered && {
-      transform: 'translateY(-8px) scale(1.02)',
-      borderColor: rgbaColor(0.8),
-      boxShadow: `0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px ${rgbaColor(0.4)}, inset 0 0 20px ${rgbaColor(0.1)}`,
-    }),
+    ...(isHovered
+      ? {
+          transform: 'translateY(-8px) scale(1.02)',
+          borderColor: rgbaColor(0.8),
+          boxShadow: `0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px ${rgbaColor(0.4)}, inset 0 0 20px ${rgbaColor(0.1)}`,
+        }
+      : {}),
   }
 
   const cosmicEnergyStyle: React.CSSProperties = {
-    content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
@@ -341,7 +348,6 @@ export default function MetricCard({
   }
 
   const borderShimmerStyle: React.CSSProperties = {
-    content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
@@ -363,9 +369,11 @@ export default function MetricCard({
     zIndex: 2,
     transition: 'all 0.3s ease',
     textShadow: `0 0 10px ${rgbaColor(0.3)}`,
-    ...(isHovered && {
-      transform: 'scale(1.1) rotate(15deg)',
-    }),
+    ...(isHovered
+      ? {
+          transform: 'scale(1.1) rotate(15deg)',
+        }
+      : {}),
   }
 
   const dataStreamStyle: React.CSSProperties = {
@@ -380,7 +388,6 @@ export default function MetricCard({
   }
 
   const dataStreamAfterStyle: React.CSSProperties = {
-    content: '""',
     position: 'absolute',
     top: 0,
     left: 0,

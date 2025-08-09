@@ -478,8 +478,8 @@ const InteractiveDemoComponent = () => {
           value={value}
           onChange={val => setValue(val)}
           enableIncrement={increment}
-          min={min}
-          max={max}
+          {...(min !== undefined ? { min } : {})}
+          {...(max !== undefined ? { max } : {})}
           helperText={
             error
               ? 'Invalid amount'

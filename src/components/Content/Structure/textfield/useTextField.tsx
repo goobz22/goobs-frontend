@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import TextField, { TextFieldProps } from '../../../Field/Text'
+import TextField, { type TextFieldProps } from '../../../Field/Text'
 
 const useTextField = (props: {
   textfield?: TextFieldProps | TextFieldProps[]
