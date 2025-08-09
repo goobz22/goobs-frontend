@@ -692,7 +692,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
         {(() => {
           const firstDay = new Date(viewedYear, viewedMonth, 1).getDay()
           const daysInMonth = new Date(viewedYear, viewedMonth + 1, 0).getDate()
-          const cells = []
+          const cells: React.ReactNode[] = []
           for (let i = 0; i < firstDay; i++) {
             cells.push(<div key={`empty-${i}`} />)
           }

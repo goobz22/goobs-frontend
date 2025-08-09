@@ -627,7 +627,7 @@ const DateField: React.FC<DateFieldProps> = ({
               viewedMonth + 1,
               0
             ).getDate()
-            const cells = []
+            const cells: React.ReactNode[] = []
             for (let i = 0; i < firstDay; i++) {
               cells.push(<div key={`empty-${i}`} />)
             }
