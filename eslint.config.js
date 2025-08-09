@@ -1,63 +1,36 @@
-import js from '@eslint/js'
+import next from 'eslint-config-next'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tseslintParser from '@typescript-eslint/parser'
-import reactPlugin from 'eslint-plugin-react'
-import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import prettierPlugin from 'eslint-plugin-prettier'
-import nextPlugin from '@next/eslint-plugin-next'
-import _globals from 'globals'
+import unusedImports from 'eslint-plugin-unused-imports'
 
-// Combine globals from the 'globals' package:
-const combinedGlobals = {
-  ..._globals.browser,
-  ..._globals.es2021,
-  ..._globals.node,
-}
-
+// Use the official Next.js flat config to satisfy plugin detection and recommended rules
 export default [
+  ...next(),
+  { ignores: ['eslint.config.js'] },
   {
-    files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
-
+    files: ['**/*.{ts,tsx}'],
     plugins: {
       '@typescript-eslint': tseslint,
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin,
       prettier: prettierPlugin,
-      '@next/next': nextPlugin,
+      'unused-imports': unusedImports,
     },
-
     languageOptions: {
       parser: tseslintParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
         project: './tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
       },
-      globals: combinedGlobals,
     },
-
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-
     rules: {
-      // Core ESLint rules
-      'no-unused-vars': 'off', // Turn off base rule in favor of TypeScript rule
-      'no-undef': 'warn',
-      'no-empty': 'warn',
-      'no-unreachable': 'error',
-      'no-unreachable-loop': 'error',
-      'no-fallthrough': 'error',
-
-      // TypeScript rules (non-type-aware)
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
         {
           vars: 'all',
           varsIgnorePattern: '^_',
@@ -65,33 +38,35 @@ export default [
           argsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-
-      // TypeScript rules (type-aware) - these catch implicit any and unsafe usage
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-
-      // React rules
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/display-name': 'warn',
-      'react/no-unescaped-entities': 'warn',
-
-      // React Hooks
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'error',
-
-      // Prettier
       'prettier/prettier': 'warn',
-
-      // Misc
-      'no-case-declarations': 'warn',
-      'no-useless-catch': 'warn',
+    },
+  },
+  {
+    files: ['**/*.{js,mjs,cjs,jsx}'],
+    plugins: {
+      prettier: prettierPlugin,
+      'unused-imports': unusedImports,
+    },
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      'prettier/prettier': 'warn',
     },
   },
 ]
