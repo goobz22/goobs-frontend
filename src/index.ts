@@ -358,6 +358,19 @@ export { alpha, keyframes, css, commonKeyframes }
 
 export type { Task }
 export type { RawCustomer }
+// Re-export additional ProjectBoard types for external consumers
+export type {
+  CommentEditHistory,
+  RawCompany,
+  CurrentUser,
+} from './components/ProjectBoard/types'
+export type {
+  RawStatus,
+  RawSubStatus,
+  RawTopic,
+  RawQueue,
+  RawArticle,
+} from './components/ProjectBoard/types'
 export type { CheckboxProps }
 export type { AccountNumberProps }
 export type { RoutingNumberProps }
