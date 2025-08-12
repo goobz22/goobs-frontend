@@ -16,7 +16,6 @@ import AccountNumber from '../../../Field/Number/AccountNumber'
 import RoutingNumber from '../../../Field/Number/RoutingNumber'
 import Button from '../../../Button'
 import type { DropdownOption } from '../../../Field/Dropdown/SearchableSimple'
-import type { CardType } from '../../../Field/Number/CreditCardNumber'
 import type { SubnetFieldValue } from '../../../Field/IPAM/Subnet'
 // IPAM field imports
 import IPAddressField from '../../../Field/IPAM/Address'
@@ -230,7 +229,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <CVV
             value={String(value ?? '')}
-            onChange={(newValue: string, _isValid: boolean) =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
@@ -247,11 +246,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <CreditCardNumber
             value={String(value ?? '')}
-            onChange={(
-              newValue: string,
-              _isValid: boolean,
-              _cardType: CardType
-            ) => onCreationFieldChange?.(column.field, newValue)}
+            onChange={(newValue: string) =>
+              onCreationFieldChange?.(column.field, newValue)
+            }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
               : {})}
@@ -266,7 +263,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <AccountNumber
             value={String(value ?? '')}
-            onChange={(newValue: string, _isValid: boolean) =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
@@ -283,7 +280,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <RoutingNumber
             value={String(value ?? '')}
-            onChange={(newValue: string, _isValid: boolean) =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder

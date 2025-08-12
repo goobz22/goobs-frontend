@@ -1,14 +1,13 @@
 'use client'
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
-import CustomToolbar from '../Toolbar'
+import DataGridToolbar from './Toolbar/index'
 import Table from './Table'
 import CustomFooter from './Footer'
 import FilterSection from './FilterSection'
 import MetricSection from './MetricSection'
 import ManageColumnsSimple from './ManageColumnsSimple'
 import Snackbar from '../Snackbar'
-import { useSearchbar } from './utils/useToolbarSearchbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
@@ -20,8 +19,6 @@ function DataGrid({
   columns,
   rows: providedRows,
   buttons,
-  dropdowns,
-  searchbarProps,
   error = null,
   onDuplicate,
   onDelete,
@@ -120,6 +117,8 @@ function DataGrid({
   )
 
   const [rows, setRows] = useState<RowData[]>(providedRows || [])
+  // Search-driven filtered rows (managed by FilterSection)
+  const [filteredRows, setFilteredRows] = useState<RowData[]>(rows)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [editingCell, setEditingCell] = useState<{
@@ -133,9 +132,7 @@ function DataGrid({
   const [creationRowData, setCreationRowData] = useState<
     Record<string, unknown>
   >({})
-  const [_creationRowErrors, setCreationRowErrors] = useState<
-    Record<string, string>
-  >({})
+  const [, setCreationRowErrors] = useState<Record<string, string>>({})
 
   // Snackbar state for validation errors
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -143,7 +140,8 @@ function DataGrid({
 
   const autoPageSize = useAutoRowHeight(containerRef, {
     headerHeight:
-      (filters?.length ? 50 : 0) + (metrics?.length ? 120 : 0) + 150,
+      // Always include searchbar area within FilterSection (+50), plus filters and metrics
+      50 + (filters?.length ? 50 : 0) + (metrics?.length ? 120 : 0) + 150,
     footerHeight: 56,
     rowHeight: 53,
     minRows: 5,
@@ -167,6 +165,11 @@ function DataGrid({
   }, [])
 
   useInitializeGrid({ columns: visibleColumns, providedRows, setRows })
+
+  // Keep filteredRows in sync when base rows change (e.g., initialization, external updates)
+  useEffect(() => {
+    setFilteredRows(rows)
+  }, [rows])
 
   const handleSelectionChange = (newSelectedIds: string[]) => {
     setSelectedRows(newSelectedIds)
@@ -358,11 +361,16 @@ function DataGrid({
     setCreationRowErrors({})
   }, [])
 
-  const { filteredRows, updatedSearchbarProps } = useSearchbar({
-    columns: visibleColumns,
-    rows: rows,
-    ...(searchbarProps !== undefined ? { searchbarProps } : {}),
-  })
+  // Handle search results from FilterSection
+  const handleSearchFilter = useCallback(
+    (...args: [string, RowData[], string[]]) => {
+      const nextFilteredRows = args[1]
+      setFilteredRows(nextFilteredRows)
+      // Note: we keep column visibility unchanged; search only filters rows.
+      setPage(0)
+    },
+    []
+  )
   const { handleManageRowClose, handleManage } = useManageRow({
     ...(onManage !== undefined ? { onManage } : {}),
     selectedRows,
@@ -557,15 +565,17 @@ function DataGrid({
         )}
 
         {/* Filters Section */}
-        {filters && filters.length > 0 && (
-          <FilterSection
-            filters={filters}
-            {...(styles !== undefined ? { styles } : {})}
-          />
-        )}
+        {/* Always render FilterSection so the searchbar is always visible */}
+        <FilterSection
+          {...(filters !== undefined ? { filters } : {})}
+          columns={visibleColumns}
+          rows={rows}
+          onSearchFilter={handleSearchFilter}
+          {...(styles !== undefined ? { styles } : {})}
+        />
 
-        {/* Toolbar - positioned inside DataGrid */}
-        <CustomToolbar
+        {/* Toolbar - positioned inside DataGrid (search removed; search lives in FilterSection) */}
+        <DataGridToolbar
           buttons={
             allowRowCreation && !isCreatingRow
               ? [
@@ -580,11 +590,9 @@ function DataGrid({
                 ]
               : (buttons ?? [])
           }
-          {...(dropdowns?.[0] ? { dropdowns: [dropdowns[0]] } : {})}
-          searchbarProps={updatedSearchbarProps}
           {...(selectedRows.length > 0
             ? {
-                rightCenterProps: {
+                manageRowProps: {
                   selectedRows,
                   rows,
                   ...(onDuplicate

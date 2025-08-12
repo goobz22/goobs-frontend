@@ -129,7 +129,7 @@ function ManageRow({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: '48px',
-    width: '100%',
+    width: 'auto',
     maxWidth: '100%',
     minWidth: '0',
     padding: '0 8px',
@@ -152,13 +152,13 @@ function ManageRow({
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
-    width: '100%',
+    width: 'auto',
     minWidth: '0',
     maxWidth: '100%',
   }
 
   const titleContainerStyle = {
-    flex: '1 1 auto',
+    flex: '0 1 auto',
     display: 'flex',
     alignItems: 'center',
     padding: '0 8px',

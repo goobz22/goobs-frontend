@@ -10,7 +10,7 @@ import type { DataGridStyles } from '../../../theme'
 import { SACRED_GLYPHS } from '../../../theme'
 
 export interface FilterSectionProps {
-  filters: DataGridFilter[]
+  filters?: DataGridFilter[] | undefined
   columns?: ColumnDef[]
   rows?: RowData[]
   onSearchFilter?: (
@@ -36,7 +36,7 @@ function useWindowSize(): [number, number] {
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
-  filters,
+  filters = [],
   columns = [],
   rows = [],
   onSearchFilter,
@@ -188,14 +188,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   }, [isSacredTheme])
 
-  if (!filters && !columns.length) {
-    return null
-  }
+  // Always render the search UI. If no columns are provided, the search will be a no-op.
 
   // Determine grid columns based on screen size and number of filters + searchbar
   const getGridColumns = () => {
-    const totalItems = filters.length + 1 // +1 for searchbar
-    const hasDateRange = filters.some(f => f.type === 'daterange')
+    const totalItems = (filters?.length ?? 0) + 1 // +1 for searchbar
+    const hasDateRange = filters?.some(f => f.type === 'daterange') ?? false
 
     if (isMobile) return { gridTemplateColumns: '1fr' }
     if (isTablet) {
@@ -370,7 +368,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         </div>
 
         {/* Other filters */}
-        {filters.map((filter, index) => (
+        {filters?.map((filter, index) => (
           <div
             key={`${filter.label}-${index}`}
             style={{

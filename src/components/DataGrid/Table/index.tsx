@@ -142,19 +142,24 @@ function Table({
   // Apply styles for horizontal scrolling
   const tableContainerStyle = {
     ...computedStyles.table.tableContainer,
-    overflowX: 'auto' as const,
+    // The container itself should not scroll; wrapper will handle it
+    overflowX: 'hidden' as const,
     width: '100%',
   }
 
   const tableWrapperStyle = {
     ...computedStyles.table.tableWrapper,
+    // Own the horizontal scroll here
     overflowX: 'auto' as const,
     width: '100%',
+    // Ensure there is breathing room on the right edge when scrolled fully
+    paddingRight: '16px',
   }
 
   const tableStyle = {
     ...computedStyles.table.table,
-    width: 'max-content', // Allow table to grow wider than container
+    // Allow table to grow wider than container and provide breathing room
+    width: 'max-content',
     minWidth: '100%',
   }
 

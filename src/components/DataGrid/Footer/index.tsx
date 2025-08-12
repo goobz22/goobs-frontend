@@ -330,7 +330,6 @@ function CustomFooter({
   rowCount,
   onPageChange,
   onPageSizeChange,
-  columns: _columns,
   styles,
 }: CustomFooterProps) {
   const isSacredTheme = styles?.theme === 'sacred'
