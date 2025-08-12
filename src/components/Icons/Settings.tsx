@@ -18,9 +18,7 @@ const SettingsIcon: React.FC<SettingsIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
 
   // Inject CSS keyframes for sacred animations
   useEffect(() => {
@@ -28,6 +26,10 @@ const SettingsIcon: React.FC<SettingsIconProps> = ({
       injectSacredKeyframes()
     }
   }, [styles?.theme])
+
+  useEffect(() => {
+    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
+  }, [])
 
   // Compute styles based on theme and state
   const computedStyles = useMemo(

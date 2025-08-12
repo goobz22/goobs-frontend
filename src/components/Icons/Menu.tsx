@@ -18,9 +18,8 @@ const MenuIcon: React.FC<MenuIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  // Use a deterministic initial glyph to avoid SSR/CSR mismatch
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
 
   // Inject CSS keyframes for sacred animations
   useEffect(() => {
@@ -28,6 +27,11 @@ const MenuIcon: React.FC<MenuIconProps> = ({
       injectSacredKeyframes()
     }
   }, [styles?.theme])
+
+  // Randomize glyph only after hydration on the client
+  useEffect(() => {
+    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
+  }, [])
 
   // Compute styles based on theme and state
   const computedStyles = useMemo(

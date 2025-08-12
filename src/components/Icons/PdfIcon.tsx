@@ -14,9 +14,10 @@ interface PdfIconProps extends React.SVGProps<SVGSVGElement> {
 
 const PdfIcon: React.FC<PdfIconProps> = ({ styles, style = {}, ...props }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
+  useEffect(() => {
+    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
+  }, [])
 
   useEffect(() => {
     if (styles?.theme === 'sacred') {
