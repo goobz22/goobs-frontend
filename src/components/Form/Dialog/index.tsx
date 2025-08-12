@@ -33,26 +33,30 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
+export interface CustomDialogStyles {
+  theme?: 'sacred' | 'light' | 'dark'
+  width?: number
+}
+
 export interface CustomDialogProps {
   title?: string
   description?: string
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
-  width?: number
   buttons?: ButtonProps[]
-  sacredtheme?: boolean
+  styles?: CustomDialogStyles
 }
 
-const getStyles = (sacredtheme?: boolean, width?: number) => ({
+const getStyles = (dialogStyles?: CustomDialogStyles) => ({
   container: {
-    width: `${width}px`,
+    width: `${dialogStyles?.width ?? 450}px`,
     maxWidth: '100%',
     maxHeight: '90vh',
     margin: 'auto',
     overflow: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    ...(sacredtheme
+    ...((dialogStyles?.theme || 'sacred') === 'sacred'
       ? {
           position: 'relative',
           backgroundColor: 'rgba(0, 0, 0, 0.85)',
@@ -104,7 +108,7 @@ const getStyles = (sacredtheme?: boolean, width?: number) => ({
     justifyContent: 'space-between',
     gap: '0.5rem',
     marginTop: '1rem',
-    ...(sacredtheme && {
+    ...((dialogStyles?.theme || 'sacred') === 'sacred' && {
       borderTop: '1px solid rgba(255, 215, 0, 0.2)',
       paddingTop: '1rem',
     }),
@@ -114,7 +118,7 @@ const getStyles = (sacredtheme?: boolean, width?: number) => ({
     overflow: 'auto',
     minHeight: 0,
     paddingRight: '0.625rem',
-    ...(sacredtheme && {
+    ...((dialogStyles?.theme || 'sacred') === 'sacred' && {
       position: 'relative',
       zIndex: 10,
     }),
@@ -138,11 +142,11 @@ function CustomDialog({
   description,
   grids,
   content,
-  width = 450,
   buttons,
-  sacredtheme = true,
+  styles: dialogStyles,
 }: CustomDialogProps) {
-  const styles = getStyles(sacredtheme, width)
+  const styles = getStyles(dialogStyles)
+  const isSacredTheme = (dialogStyles?.theme || 'sacred') === 'sacred'
   const headerGrid = useMemo(
     (): ContentSectionProps['grids'][0] => ({
       typography: [
@@ -150,28 +154,28 @@ function CustomDialog({
           text: title,
           styles: {
             variant: 'merrih4',
-            color: sacredtheme ? '#FFD700' : 'black',
-            theme: sacredtheme ? 'sacred' : 'light',
+            color: isSacredTheme ? '#FFD700' : 'black',
+            theme: isSacredTheme ? 'sacred' : 'light',
           },
         },
         {
           text: description,
           styles: {
             variant: 'merrih5',
-            color: sacredtheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
-            theme: sacredtheme ? 'sacred' : 'light',
+            color: isSacredTheme ? 'rgba(255, 255, 255, 0.9)' : 'black',
+            theme: isSacredTheme ? 'sacred' : 'light',
           },
         },
       ] as TypographyProps[],
     }),
-    [title, description, sacredtheme]
+    [title, description, isSacredTheme]
   )
 
   const renderHeader = useMemo(() => {
     if (!title && !description) return null
     return (
       <>
-        {sacredtheme && (
+        {isSacredTheme && (
           <div style={styles.headerGlyphs}>
             {SACRED_GLYPHS.slice(0, 5).map((glyph, index) => (
               <Typography key={index}>{glyph}</Typography>
@@ -181,7 +185,7 @@ function CustomDialog({
         <ContentSection grids={[headerGrid]} />
       </>
     )
-  }, [headerGrid, sacredtheme, title, description, styles])
+  }, [headerGrid, isSacredTheme, title, description, styles])
 
   const renderButtons = useMemo(() => {
     if (!buttons || buttons.length === 0) return null
@@ -192,18 +196,18 @@ function CustomDialog({
             key={index}
             {...buttonProps}
             styles={{
-              theme: sacredtheme ? 'sacred' : 'light',
+              theme: isSacredTheme ? 'sacred' : 'light',
               ...buttonProps.styles,
             }}
           />
         ))}
       </div>
     )
-  }, [buttons, sacredtheme, styles])
+  }, [buttons, isSacredTheme, styles])
 
   return (
     <div style={styles.container}>
-      {sacredtheme && (
+      {isSacredTheme && (
         <>
           <div style={{ ...styles.shimmer, animationDelay: '0s' }} />
           <div
@@ -234,18 +238,12 @@ function CustomDialog({
 
       <div style={styles.contentContainer}>
         {content ||
-          (grids && <ContentSection grids={grids} sacredtheme={sacredtheme} />)}
+          (grids && (
+            <ContentSection grids={grids} sacredtheme={isSacredTheme} />
+          ))}
       </div>
 
       {renderButtons}
-
-      {sacredtheme && (
-        <div style={styles.footerGlyphs}>
-          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography key={index}>{glyph}</Typography>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

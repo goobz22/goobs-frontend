@@ -44,7 +44,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   showLabel = false,
   label,
   'aria-label': ariaLabel,
-  'aria-required': ariaRequired,
   styles,
 }) => {
   const isIndeterminate = variant === 'indeterminate'
@@ -82,7 +81,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         style={computedStyles.container}
         role="progressbar"
         aria-label={ariaLabel || 'Progress'}
-        aria-required={ariaRequired}
         aria-valuemin={isIndeterminate ? undefined : 0}
         aria-valuemax={isIndeterminate ? undefined : 100}
         aria-valuenow={getAriaValueNow()}

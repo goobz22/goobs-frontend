@@ -67,7 +67,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const [valueState, setValueState] = useState<string>(startValue)
   const value = valueProp !== undefined ? valueProp : valueState
   const [mode, setMode] = useState<EditorMode>(startMode)
-  const [isFocused, _setIsFocused] = useState(false)
+  const [isFocused] = useState(false)
   const [accordionExpanded, setAccordionExpanded] =
     useState<boolean>(defaultExpanded)
 

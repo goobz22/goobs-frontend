@@ -113,7 +113,11 @@ const LeftCenter: FC<LeftCenterProps> = props => {
   const searchbarStyles = createSearchbarStyles(styles)
 
   // Ensure required onChange is always provided to Searchbar
-  const effectiveOnChange: SearchbarProps['onChange'] = onChange ?? (_e => {})
+  const effectiveOnChange: SearchbarProps['onChange'] =
+    onChange ??
+    (value => {
+      void value
+    })
 
   // Build props while respecting exactOptionalPropertyTypes: only include
   // optional props when defined.

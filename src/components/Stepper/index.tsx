@@ -299,11 +299,7 @@ const Stepper: React.FC<StepperProps> = ({
 
   return (
     <div style={computedStyles.container}>
-      {isSacredTheme && (
-        <div style={computedStyles.sacredGlyph}>
-          {SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]}
-        </div>
-      )}
+      {isSacredTheme && <SacredGlyphDecoration />}
       <div
         style={{
           ...computedStyles.stepperContainer,
@@ -407,3 +403,18 @@ const Stepper: React.FC<StepperProps> = ({
 }
 
 export default Stepper
+
+// Render glyph only after hydration to avoid SSR/CSR mismatch
+const SacredGlyphDecoration: React.FC = () => {
+  const [glyph, setGlyph] = useState<string | null>(null)
+
+  useEffect(() => {
+    setGlyph(
+      SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)] ?? null
+    )
+  }, [])
+
+  if (!glyph) return null
+  const styles = getStepperStyles({ theme: 'sacred' })
+  return <div style={styles.sacredGlyph}>{glyph}</div>
+}

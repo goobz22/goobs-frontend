@@ -195,7 +195,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
       const val = e.target.value
       if (!/^\d*$/.test(val)) return
-      let newValueArr = internalValue.padEnd(codeLength, '').split('')
+      const newValueArr = internalValue.padEnd(codeLength, '').split('')
       if (val.length > 1)
         val.split('').forEach((digit, i) => {
           if (index + i < codeLength) newValueArr[index + i] = digit

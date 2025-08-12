@@ -335,7 +335,7 @@ const Accordion: FC<AccordionProps> = props => {
             position: 'absolute',
             left: '8px',
             top: '50%',
-            transform: 'translateY(-50%)',
+            transform: `translateY(-50%) ${computedStyles.icon.transform || ''}`,
             zIndex: 1,
           }}
         />

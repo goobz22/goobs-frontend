@@ -113,25 +113,7 @@ const SacredBackground: React.FC<{
       }}
     >
       {/* Sacred Glyphs Background */}
-      {SACRED_GLYPHS.slice(0, 4).map((glyph: string, index: number) => (
-        <div
-          key={index}
-          style={{
-            position: 'absolute',
-            fontSize: Math.random() * 20 + 12,
-            opacity: isHovered ? 0.08 : 0.03,
-            color: '#FFD700',
-            left: `${Math.random() * 80 + 10}%`,
-            top: `${Math.random() * 80 + 10}%`,
-            transform: `rotate(${Math.random() * 360}deg)`,
-            userSelect: 'none',
-            transition: 'opacity 0.3s ease',
-            animation: `rotateGlyph ${Math.random() * 40 + 60}s linear infinite`,
-          }}
-        >
-          {glyph}
-        </div>
-      ))}
+      <SacredBackgroundGlyphs isHovered={isHovered} />
 
       {/* Shimmer effect on hover */}
       {isHovered && (
@@ -150,6 +132,56 @@ const SacredBackground: React.FC<{
         />
       )}
     </div>
+  )
+}
+
+const SacredBackgroundGlyphs: React.FC<{ isHovered: boolean }> = ({
+  isHovered,
+}) => {
+  const [randoms, setRandoms] = React.useState(
+    Array.from({ length: 4 }, () => ({
+      fontSize: 16,
+      left: '50%',
+      top: '50%',
+      rotation: 0,
+      duration: 60,
+    }))
+  )
+
+  React.useEffect(() => {
+    setRandoms(
+      Array.from({ length: 4 }, () => ({
+        fontSize: Math.random() * 20 + 12,
+        left: `${Math.random() * 80 + 10}%`,
+        top: `${Math.random() * 80 + 10}%`,
+        rotation: Math.random() * 360,
+        duration: Math.random() * 40 + 60,
+      }))
+    )
+  }, [])
+
+  return (
+    <>
+      {SACRED_GLYPHS.slice(0, 4).map((glyph: string, index: number) => (
+        <div
+          key={index}
+          style={{
+            position: 'absolute',
+            fontSize: randoms[index]?.fontSize ?? 16,
+            opacity: isHovered ? 0.08 : 0.03,
+            color: '#FFD700',
+            left: randoms[index]?.left ?? '50%',
+            top: randoms[index]?.top ?? '50%',
+            transform: `rotate(${randoms[index]?.rotation ?? 0}deg)`,
+            userSelect: 'none',
+            transition: 'opacity 0.3s ease',
+            animation: `rotateGlyph ${randoms[index]?.duration ?? 60}s linear infinite`,
+          }}
+        >
+          {glyph}
+        </div>
+      ))}
+    </>
   )
 }
 

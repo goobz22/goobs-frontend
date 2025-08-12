@@ -316,7 +316,7 @@ const Pagination: FC<PaginationProps> = ({
   const isSacredTheme = styles?.theme === 'sacred'
 
   const computedStyles = useMemo(
-    () => getPaginationStyles(styles, false, false, isDisabled),
+    () => getPaginationStyles(styles, isDisabled),
     [styles, isDisabled]
   )
 

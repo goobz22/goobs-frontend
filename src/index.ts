@@ -260,6 +260,13 @@ import { keyframes, css, commonKeyframes } from './utils/keyframes'
 import ShowTask, {
   ShowTaskProps,
 } from './components/ProjectBoard/forms/ShowTask/client'
+import BigCalendar, {
+  BigCalendarProps,
+  CalendarView,
+  CalendarEvent,
+  CalendarFilterOptions,
+} from './components/BigCalendar'
+import type { BigCalendarStyles } from './theme/bigcalendar'
 
 export { AppBar }
 export { CustomButton }
@@ -352,6 +359,7 @@ export { Divider }
 export { Fade }
 export { Slide }
 export { Zoom }
+export { BigCalendar }
 
 // Export utilities
 export { alpha, keyframes, css, commonKeyframes }
@@ -466,6 +474,13 @@ export type {
 } // <-- Export TreeView types
 export type { DrawerProps } // <-- Export Drawer types
 export type { RawSeverityLevel }
+export type {
+  BigCalendarProps,
+  CalendarView,
+  CalendarEvent,
+  BigCalendarStyles,
+  CalendarFilterOptions,
+}
 
 /* -------------------------------------------------------------------------- */
 /*                              Color Exports                                 */

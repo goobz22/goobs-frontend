@@ -249,6 +249,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
     [isSacredTheme, isDarkTheme, isHovered, draggable]
   )
 
+  const TaskCardGlyph: React.FC = () => {
+    const [glyph, setGlyph] = React.useState<string | null>(null)
+    React.useEffect(() => {
+      const index = Math.floor(Math.random() * SACRED_GLYPHS.length)
+      setGlyph(SACRED_GLYPHS[index] ?? null)
+    }, [])
+    if (!glyph) return null
+    return <div style={taskCardStyles.glyph}>{glyph}</div>
+  }
+
   return (
     <div
       style={taskCardStyles.container}
@@ -261,11 +271,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isSacredTheme && (
-        <div style={taskCardStyles.glyph}>
-          {SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]}
-        </div>
-      )}
+      {isSacredTheme && <TaskCardGlyph />}
 
       <input
         type="checkbox"

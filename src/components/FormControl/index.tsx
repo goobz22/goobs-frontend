@@ -25,22 +25,25 @@ const FormControl: React.FC<FormControlProps> = ({
   styles,
   fullWidth = false,
   disabled = false,
-  error: _error = false,
-  variant: _variant = 'standard',
-  size: _size = 'medium',
   margin = 'none',
   style = {},
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  // hydration-safe glyph
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
 
   // Inject CSS keyframes for sacred animations
   useEffect(() => {
     if (styles?.theme === 'sacred') {
       injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Randomize only after hydration
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
     }
   }, [styles?.theme])
 

@@ -35,6 +35,11 @@ const SACRED_GLYPHS = [
   '𓊵',
 ]
 
+export interface PopupStyles {
+  theme?: 'sacred' | 'light' | 'dark'
+  width?: number
+}
+
 export interface PopupProps {
   open: boolean
   close: boolean
@@ -43,21 +48,17 @@ export interface PopupProps {
   description?: string
   grids?: ContentSectionProps['grids']
   content?: React.ReactNode
-  width?: number
   buttons?: ButtonProps[]
-  sacredtheme?: boolean
-  theme?: 'sacred' | 'light' | 'dark'
+  styles?: PopupStyles
 }
 
 const getStyles = (
-  sacredtheme?: boolean,
-  width: number = 450,
+  options: PopupStyles | undefined,
   dragPosition?: { x: number; y: number },
-  isDragging?: boolean,
-  theme?: 'sacred' | 'light' | 'dark'
+  isDragging?: boolean
 ) => {
-  // Determine the actual theme, with backward compatibility
-  const actualTheme = theme || (sacredtheme ? 'sacred' : 'light')
+  const actualTheme = options?.theme || 'sacred'
+  const width = options?.width ?? 450
 
   // Theme-specific colors for action buttons
   const getActionButtonColors = () => {
@@ -206,24 +207,17 @@ function Popup({
   description,
   grids,
   content,
-  width = 450,
   buttons,
-  sacredtheme = true,
-  theme,
+  styles: popupStyles,
 }: PopupProps) {
   const [isOpen, setIsOpen] = useState(open)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
-  const actualTheme = theme || (sacredtheme ? 'sacred' : 'light')
-  const styles = getStyles(
-    sacredtheme,
-    width,
-    dragPosition,
-    isDragging,
-    actualTheme
-  )
+  const actualTheme = popupStyles?.theme || 'sacred'
+  const widthValue = popupStyles?.width ?? 450
+  const styles = getStyles(popupStyles, dragPosition, isDragging)
 
   useEffect(() => {
     setIsOpen(open)
@@ -256,7 +250,7 @@ function Popup({
           currentX = rect.left
           currentY = rect.top
         } else {
-          currentX = window.innerWidth / 2 - width / 2
+          currentX = window.innerWidth / 2 - widthValue / 2
           currentY = window.innerHeight / 2 - 300
         }
       }
@@ -265,7 +259,7 @@ function Popup({
         y: e.clientY - currentY,
       })
     },
-    [dragPosition, width]
+    [dragPosition, widthValue]
   )
 
   const handleMouseMove = useCallback(
@@ -274,7 +268,7 @@ function Popup({
         const newX = e.clientX - dragOffset.x
         const newY = e.clientY - dragOffset.y
         const maxX = window.innerWidth - 100
-        const minX = -width + 100
+        const minX = -widthValue + 100
         const maxY = window.innerHeight - 100
         const minY = -200
         setDragPosition({
@@ -283,7 +277,7 @@ function Popup({
         })
       }
     },
-    [isDragging, dragOffset, width]
+    [isDragging, dragOffset, widthValue]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -313,13 +307,7 @@ function Popup({
   }
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={handleClose}
-      styles={{
-        theme: actualTheme,
-      }}
-    >
+    <Dialog open={isOpen} onClose={handleClose} styles={{ theme: actualTheme }}>
       {actualTheme === 'sacred' && (
         <>
           <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
@@ -383,8 +371,11 @@ function Popup({
             variant:
               actualTheme === 'sacred' ? 'cinzelparagraph' : 'merriparagraph',
             theme: actualTheme,
-            textAlign: 'center',
-            padding: '0 1.5rem',
+            textAlign: 'left',
+            paddingLeft: '1rem',
+            paddingRight: '1.5rem',
+            maxWidth: '100%',
+            width: '100%',
             marginBottom: '1rem',
           }}
         />
@@ -415,13 +406,7 @@ function Popup({
         </div>
       )}
 
-      {actualTheme === 'sacred' && (
-        <div style={styles.footerGlyphs}>
-          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography key={index}>{glyph}</Typography>
-          ))}
-        </div>
-      )}
+      {/* Footer glyphs removed to eliminate extra bottom padding */}
     </Dialog>
   )
 }

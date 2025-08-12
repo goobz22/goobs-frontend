@@ -38,14 +38,20 @@ const Select: React.FC<SelectProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(
-    SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-  )
+  // hydration-safe glyph
+  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
 
   // Inject CSS keyframes for sacred animations
   useEffect(() => {
     if (styles?.theme === 'sacred') {
       injectSacredKeyframes()
+    }
+  }, [styles?.theme])
+
+  // Randomize only after hydration
+  useEffect(() => {
+    if (styles?.theme === 'sacred') {
+      setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
     }
   }, [styles?.theme])
 
@@ -67,15 +73,42 @@ const Select: React.FC<SelectProps> = ({
     fontFamily: themeConfig.fontFamily,
     color: error ? '#d32f2f' : themeConfig.text,
     width: fullWidth ? '100%' : 'auto',
-    border:
+    // Set all border properties consistently
+    borderTopWidth: variant === 'outlined' ? '1px' : '0',
+    borderRightWidth: variant === 'outlined' ? '1px' : '0',
+    borderBottomWidth:
+      variant === 'outlined' || variant === 'standard' ? '1px' : '0',
+    borderLeftWidth: variant === 'outlined' ? '1px' : '0',
+    borderTopStyle: variant === 'outlined' ? 'solid' : 'none',
+    borderRightStyle: variant === 'outlined' ? 'solid' : 'none',
+    borderBottomStyle:
+      variant === 'outlined' || variant === 'standard' ? 'solid' : 'none',
+    borderLeftStyle: variant === 'outlined' ? 'solid' : 'none',
+    borderTopColor:
       variant === 'outlined'
-        ? `1px solid ${error ? '#d32f2f' : borderColor}`
-        : 'none',
+        ? error
+          ? '#d32f2f'
+          : borderColor
+        : 'transparent',
+    borderRightColor:
+      variant === 'outlined'
+        ? error
+          ? '#d32f2f'
+          : borderColor
+        : 'transparent',
+    borderBottomColor:
+      variant === 'outlined' || variant === 'standard'
+        ? error
+          ? '#d32f2f'
+          : borderColor
+        : 'transparent',
+    borderLeftColor:
+      variant === 'outlined'
+        ? error
+          ? '#d32f2f'
+          : borderColor
+        : 'transparent',
     borderRadius: variant === 'outlined' ? styles?.borderRadius || '4px' : '0',
-    borderBottom:
-      variant === 'standard'
-        ? `1px solid ${error ? '#d32f2f' : borderColor}`
-        : undefined,
     backgroundColor:
       variant === 'filled'
         ? isSacredTheme

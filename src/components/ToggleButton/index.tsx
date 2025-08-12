@@ -79,7 +79,16 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
           ? 'rgba(255, 215, 0, 0.2)'
           : 'rgba(255, 215, 0, 0.05)',
         color: selected ? '#FFD700' : 'rgba(255, 215, 0, 0.8)',
-        border: selected
+        borderTop: selected
+          ? '1px solid rgba(255, 215, 0, 0.8)'
+          : '1px solid rgba(255, 215, 0, 0.3)',
+        borderBottom: selected
+          ? '1px solid rgba(255, 215, 0, 0.8)'
+          : '1px solid rgba(255, 215, 0, 0.3)',
+        borderLeft: selected
+          ? '1px solid rgba(255, 215, 0, 0.8)'
+          : '1px solid rgba(255, 215, 0, 0.3)',
+        borderRight: selected
           ? '1px solid rgba(255, 215, 0, 0.8)'
           : '1px solid rgba(255, 215, 0, 0.3)',
         fontFamily: 'var(--font-cinzel), serif',
@@ -111,7 +120,16 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
           ? 'rgba(59, 130, 246, 0.3)'
           : 'rgba(75, 85, 99, 0.3)',
         color: selected ? '#60a5fa' : '#d1d5db',
-        border: selected
+        borderTop: selected
+          ? '1px solid #60a5fa'
+          : '1px solid rgba(75, 85, 99, 0.8)',
+        borderBottom: selected
+          ? '1px solid #60a5fa'
+          : '1px solid rgba(75, 85, 99, 0.8)',
+        borderLeft: selected
+          ? '1px solid #60a5fa'
+          : '1px solid rgba(75, 85, 99, 0.8)',
+        borderRight: selected
           ? '1px solid #60a5fa'
           : '1px solid rgba(75, 85, 99, 0.8)',
         ...(isHovered &&
@@ -128,7 +146,16 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
           ? 'rgba(59, 130, 246, 0.1)'
           : 'rgba(241, 245, 249, 0.8)',
         color: selected ? '#2563eb' : '#475569',
-        border: selected
+        borderTop: selected
+          ? '1px solid #2563eb'
+          : '1px solid rgba(226, 232, 240, 0.8)',
+        borderBottom: selected
+          ? '1px solid #2563eb'
+          : '1px solid rgba(226, 232, 240, 0.8)',
+        borderLeft: selected
+          ? '1px solid #2563eb'
+          : '1px solid rgba(226, 232, 240, 0.8)',
+        borderRight: selected
           ? '1px solid #2563eb'
           : '1px solid rgba(226, 232, 240, 0.8)',
         ...(isHovered &&
@@ -145,8 +172,14 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
     if (isFirst || isLast) {
       groupStyles = {
         borderRadius: isFirst ? '7px 0 0 7px' : isLast ? '0 7px 7px 0' : '0',
-        borderRight: !isLast ? 'none' : undefined,
         margin: 0,
+      }
+      // Remove right border for non-last items in group
+      if (!isLast) {
+        groupStyles = {
+          ...groupStyles,
+          borderRight: 'none',
+        }
       }
     }
 

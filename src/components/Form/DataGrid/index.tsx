@@ -24,6 +24,8 @@ const getStyles = (sacredtheme?: boolean) => ({
     width: '100%',
     height: 'auto',
     overflow: 'hidden',
+    // Container should not add extra spacing; inner wrapper will handle gutters
+    boxSizing: 'border-box' as const,
     ...(sacredtheme && {
       position: 'relative',
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
@@ -121,6 +123,9 @@ const getStyles = (sacredtheme?: boolean) => ({
       overflow: 'hidden',
       border: '1px solid rgba(255, 215, 0, 0.3)',
       backgroundColor: 'rgba(0,0,0,0.5)',
+      // Provide symmetric gutters so the grid respects content pane width
+      padding: '0 16px 16px 16px',
+      boxSizing: 'border-box',
     }),
   } as React.CSSProperties,
   footerGlyphs: {

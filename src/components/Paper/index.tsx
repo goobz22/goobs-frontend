@@ -25,8 +25,30 @@ export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
 // SACRED THEME BACKGROUND DECORATIONS
 // --------------------------------------------------------------------------
 
+// Generate deterministic pseudo-random values based on index
+const getPseudoRandom = (seed: number, multiplier: number) => {
+  const x = Math.sin(seed * 12.9898 + multiplier * 78.233) * 43758.5453
+  return x - Math.floor(x)
+}
+
 const SacredBackground: React.FC<{ isVisible: boolean }> = ({ isVisible }) => {
-  if (!isVisible) return null
+  const [isClient, setIsClient] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isVisible || !isClient) return null
+
+  // Pre-calculate deterministic positions for each glyph
+  const glyphConfigs = SACRED_GLYPHS.slice(0, 6).map((glyph, index) => ({
+    glyph,
+    fontSize: getPseudoRandom(index, 1) * 30 + 15,
+    left: getPseudoRandom(index, 2) * 90 + 5,
+    top: getPseudoRandom(index, 3) * 90 + 5,
+    rotation: getPseudoRandom(index, 4) * 360,
+    duration: getPseudoRandom(index, 5) * 30 + 30,
+  }))
 
   return (
     <div
@@ -42,22 +64,22 @@ const SacredBackground: React.FC<{ isVisible: boolean }> = ({ isVisible }) => {
       }}
     >
       {/* Sacred Glyphs Background */}
-      {SACRED_GLYPHS.slice(0, 6).map((glyph, index) => (
+      {glyphConfigs.map((config, index) => (
         <div
           key={index}
           style={{
             position: 'absolute',
-            fontSize: Math.random() * 30 + 15,
+            fontSize: `${config.fontSize}px`,
             opacity: 0.03,
             color: '#FFD700',
-            left: `${Math.random() * 90 + 5}%`,
-            top: `${Math.random() * 90 + 5}%`,
-            transform: `rotate(${Math.random() * 360}deg)`,
+            left: `${config.left}%`,
+            top: `${config.top}%`,
+            transform: `rotate(${config.rotation}deg)`,
             userSelect: 'none',
-            animation: `rotateGlyph ${Math.random() * 30 + 30}s linear infinite`,
+            animation: `rotateGlyph ${config.duration}s linear infinite`,
           }}
         >
-          {glyph}
+          {config.glyph}
         </div>
       ))}
     </div>
