@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.122.1",
+  "version": "0.122.2",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -30,6 +30,7 @@
   "dependencies": {
     "@storybook/addon-links": "^9",
     "@types/lodash": "^4",
+    "date-fns": "^4.1.0",
     "formik": "^2",
     "highlight.js": "^11",
     "jotai": "^2",
