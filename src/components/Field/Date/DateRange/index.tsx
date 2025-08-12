@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Calendar from '../../../Icons/Calendar'
 import ArrowBack from '../../../Icons/ArrowBack'
 import {
@@ -11,6 +12,7 @@ import {
   getRequiredIndicatorStyle,
   getRequiredProps,
   type SharedFormFieldProps,
+  injectSacredKeyframes,
 } from '../../../../theme'
 
 import Dropdown from '../../Dropdown/Regular'
@@ -212,6 +214,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   const [activeSelection, setActiveSelection] = useState<DateSelection>('start')
   const [isFocused, setIsFocused] = useState(false)
   const popoverRef = useRef<HTMLDivElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth()
@@ -221,8 +224,21 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  const sacredtheme = fieldStyles?.theme === 'sacred'
+  const effectiveStyles = React.useMemo(
+    () => ({
+      ...(fieldStyles || {}),
+      theme: (fieldStyles?.theme ?? 'sacred') as 'light' | 'dark' | 'sacred',
+    }),
+    [fieldStyles]
+  )
+  const sacredtheme = effectiveStyles.theme === 'sacred'
   const pickerStyles = getStyles(sacredtheme, isDragging)
+
+  useEffect(() => {
+    if (sacredtheme) {
+      injectSacredKeyframes()
+    }
+  }, [sacredtheme])
 
   const {
     themeConfig,
@@ -231,11 +247,11 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
     adornmentColor,
     footerTextColor,
     transition,
-  } = getSharedFormFieldStyles(fieldStyles, isFocused)
+  } = getSharedFormFieldStyles(effectiveStyles, isFocused)
 
   const componentStyles: Record<string, React.CSSProperties> = {
     container: {
-      ...getSharedContainerStyles(fieldStyles),
+      ...getSharedContainerStyles(effectiveStyles),
       display: 'flex',
       alignItems: 'center',
       gap: '1rem',
@@ -244,10 +260,10 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      height: fieldStyles?.height || '40px',
+      height: effectiveStyles?.height || '40px',
       width: '100%',
-      border: `${fieldStyles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: fieldStyles?.borderRadius || '8px',
+      border: `${effectiveStyles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderRadius: effectiveStyles?.borderRadius || '8px',
       backgroundColor: themeConfig.background,
       color: themeConfig.text,
       margin: 0,
@@ -261,11 +277,11 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
       backgroundColor: 'transparent',
       outline: 'none',
       border: 'none',
-      padding: fieldStyles?.padding || '8px 16px',
+      padding: effectiveStyles?.padding || '8px 16px',
       paddingRight: '48px', // Space for calendar icon
-      fontSize: fieldStyles?.fontSize || '16px',
-      fontWeight: fieldStyles?.fontWeight,
-      lineHeight: fieldStyles?.lineHeight,
+      fontSize: effectiveStyles?.fontSize || '16px',
+      fontWeight: effectiveStyles?.fontWeight,
+      lineHeight: effectiveStyles?.lineHeight,
       fontFamily: themeConfig.fontFamily,
       color: 'inherit',
       boxSizing: 'border-box',
@@ -275,7 +291,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
     footerText: getSharedFooterTextStyles(
       footerTextColor,
       themeConfig,
-      fieldStyles
+      effectiveStyles
     ),
   }
 
@@ -313,46 +329,51 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
 
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
-      if (
-        popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node)
-      ) {
-        closePicker()
-      }
+      const target = event.target as Node
+      // If click happened inside the trigger inputs/icons or inside the popover, ignore
+      if (rootRef.current?.contains(target)) return
+      if (popoverRef.current?.contains(target)) return
+      closePicker()
     },
-    [closePicker, popoverRef]
+    [closePicker]
   )
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
+    // Use capture phase to ensure we can observe the click before React's bubbling handlers
+    document.addEventListener('click', handleClickOutside, true)
+    return () => document.removeEventListener('click', handleClickOutside, true)
   }, [handleClickOutside])
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       setIsDragging(true)
-      let currentX = dragPosition.x
-      let currentY = dragPosition.y
+      const currentX = dragPosition.x
+      const currentY = dragPosition.y
       setDragOffset({ x: e.clientX - currentX, y: e.clientY - currentY })
+      // Blur active element to prevent select dropdowns from reacting to drag
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
     },
     [dragPosition]
   )
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (isDragging) {
-        const newX = e.clientX - dragOffset.x
-        const newY = e.clientY - dragOffset.y
-        const maxX = window.innerWidth - 100
-        const minX = -250
-        const maxY = window.innerHeight - 100
-        const minY = -200
-        setDragPosition({
-          x: Math.max(minX, Math.min(maxX, newX)),
-          y: Math.max(minY, Math.min(maxY, newY)),
-        })
-      }
+      if (!isDragging) return
+      e.preventDefault()
+      e.stopPropagation()
+      const newX = e.clientX - dragOffset.x
+      const newY = e.clientY - dragOffset.y
+      const maxX = window.innerWidth - 100
+      const minX = -250
+      const maxY = window.innerHeight - 100
+      const minY = -200
+      setDragPosition({
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
+      })
     },
     [isDragging, dragOffset]
   )
@@ -361,18 +382,21 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mousemove', handleMouseMove, true)
+      document.addEventListener('mouseup', handleMouseUp, true)
       document.body.style.userSelect = 'none'
+      document.body.style.pointerEvents = 'none'
     } else {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mousemove', handleMouseMove, true)
+      document.removeEventListener('mouseup', handleMouseUp, true)
       document.body.style.userSelect = ''
+      document.body.style.pointerEvents = ''
     }
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mousemove', handleMouseMove, true)
+      document.removeEventListener('mouseup', handleMouseUp, true)
       document.body.style.userSelect = ''
+      document.body.style.pointerEvents = ''
     }
   }, [isDragging, handleMouseMove, handleMouseUp])
 
@@ -453,11 +477,63 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
 
   const handleStartIconClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    // Prevent the global document click handler from firing on the same click
+    // which would immediately close the popover right after opening
+    // by stopping native propagation as well.
+    // Some environments may not support stopImmediatePropagation on the native event.
+    // Use optional chaining to avoid runtime errors.
+    ;(
+      e.nativeEvent as unknown as { stopImmediatePropagation?: () => void }
+    )?.stopImmediatePropagation?.()
+    // Position the popover relative to the clicked icon
+    const target = e.currentTarget as HTMLElement
+    if (target) {
+      const rect = target.getBoundingClientRect()
+      const estimatedWidth = 360
+      const estimatedHeight = 420
+      const margin = 8
+      let left = rect.left
+      let top = rect.bottom + margin
+      // Clamp within viewport
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      if (left + estimatedWidth > vw - margin) {
+        left = Math.max(margin, vw - estimatedWidth - margin)
+      }
+      if (top + estimatedHeight > vh - margin) {
+        top = Math.max(margin, rect.top - estimatedHeight - margin)
+      }
+      setDragPosition({ x: left, y: top })
+    }
     setActiveSelection('start')
     setIsStartDateOpen(true)
   }
   const handleEndIconClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    // See note above
+    ;(
+      e.nativeEvent as unknown as { stopImmediatePropagation?: () => void }
+    )?.stopImmediatePropagation?.()
+    // Position the popover relative to the clicked icon
+    const target = e.currentTarget as HTMLElement
+    if (target) {
+      const rect = target.getBoundingClientRect()
+      const estimatedWidth = 360
+      const estimatedHeight = 420
+      const margin = 8
+      let left = rect.left
+      let top = rect.bottom + margin
+      // Clamp within viewport
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      if (left + estimatedWidth > vw - margin) {
+        left = Math.max(margin, vw - estimatedWidth - margin)
+      }
+      if (top + estimatedHeight > vh - margin) {
+        top = Math.max(margin, rect.top - estimatedHeight - margin)
+      }
+      setDragPosition({ x: left, y: top })
+    }
     setActiveSelection('end')
     setIsEndDateOpen(true)
   }
@@ -572,157 +648,171 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
     rest.onClick?.(e)
   }
 
-  const CustomDatePicker = () => (
-    <div
-      ref={popoverRef}
-      style={{
-        ...pickerStyles.datePicker,
-        position: 'absolute',
-        left: dragPosition.x,
-        top: dragPosition.y,
-      }}
-    >
-      <div style={{ ...pickerStyles.header, flexDirection: 'column' }}>
-        <p style={pickerStyles.headerSubtitle} onMouseDown={handleMouseDown}>
-          Click and drag to move
-        </p>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            gap: '0.5rem',
-          }}
-        >
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              handlePrev()
-            }}
-            onMouseDown={e => e.stopPropagation()}
-            style={pickerStyles.backButton}
-          >
-            <ArrowBack
-              style={{
-                height: '1.25rem',
-                width: '1.25rem',
-                color: sacredtheme ? '#FFD700' : '#4B5563',
-              }}
-            />
-          </button>
+  const CustomDatePicker = () =>
+    createPortal(
+      <div
+        ref={popoverRef}
+        style={{
+          ...pickerStyles.datePicker,
+          position: 'fixed',
+          left: dragPosition.x,
+          top: dragPosition.y,
+          zIndex: 2147483647,
+        }}
+      >
+        <div style={{ ...pickerStyles.header, flexDirection: 'column' }}>
+          <p style={pickerStyles.headerSubtitle} onMouseDown={handleMouseDown}>
+            Click and drag to move
+          </p>
           <div
             style={{
               display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
               gap: '0.5rem',
-              transform: 'translateY(-5px)',
+              pointerEvents: isDragging ? 'none' : 'auto',
             }}
           >
-            <Dropdown
-              options={(disableFutureDateValidation || viewedYear > currentYear
-                ? MONTHS
-                : MONTHS.slice(currentMonth)
-              ).map(month => ({ value: month }))}
-              value={String(MONTHS[viewedMonth] ?? MONTHS[0])}
-              onChange={e => setViewedMonth(MONTHS.indexOf(e.target.value))}
-              label=""
-              styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
-                height: '2rem',
-                fontSize: '1rem',
-                padding: '0.25rem 1.5rem 0.25rem 0.5rem',
-                width: '120px',
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                handlePrev()
               }}
-            />
-            <Dropdown
-              options={generateYears().map(y => ({ value: y.toString() }))}
-              value={viewedYear.toString()}
-              onChange={e => setViewedYear(parseInt(e.target.value))}
-              label=""
-              styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
-                height: '2rem',
-                fontSize: '1rem',
-                padding: '0.25rem 1.5rem 0.25rem 0.5rem',
-                width: '80px',
-              }}
-            />
-          </div>
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              handleNext()
-            }}
-            onMouseDown={e => e.stopPropagation()}
-            style={pickerStyles.backButton}
-          >
-            <ArrowBack
+              onMouseDown={e => e.stopPropagation()}
+              style={pickerStyles.backButton}
+            >
+              <ArrowBack
+                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                style={{
+                  height: '1.25rem',
+                  width: '1.25rem',
+                  color: sacredtheme ? '#FFD700' : '#4B5563',
+                }}
+              />
+            </button>
+            <div
               style={{
-                height: '1.25rem',
-                width: '1.25rem',
-                color: sacredtheme ? '#FFD700' : '#4B5563',
-                transform: 'rotate(180deg)',
+                display: 'flex',
+                gap: '0.5rem',
+                transform: 'translateY(-5px)',
               }}
-            />
-          </button>
-        </div>
-      </div>
-
-      <div
-        style={{
-          ...pickerStyles.grid,
-          ...pickerStyles.grid7Col,
-          marginBottom: '0.5rem',
-        }}
-      >
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div
-            key={day}
-            style={{
-              textAlign: 'center' as const,
-              fontWeight: 'bold',
-              color: sacredtheme ? '#FFD700' : '#4B5563',
-            }}
-          >
-            {day}
+            >
+              <Dropdown
+                options={(disableFutureDateValidation ||
+                viewedYear > currentYear
+                  ? MONTHS
+                  : MONTHS.slice(currentMonth)
+                ).map(month => ({ value: month }))}
+                value={String(MONTHS[viewedMonth] ?? MONTHS[0])}
+                onChange={e => setViewedMonth(MONTHS.indexOf(e.target.value))}
+                label=""
+                styles={{
+                  theme: sacredtheme ? 'sacred' : 'light',
+                  height: '2rem',
+                  fontSize: '1rem',
+                  padding: '0.25rem 1.5rem 0.25rem 0.5rem',
+                  width: '120px',
+                  disabled: isDragging,
+                }}
+              />
+              <Dropdown
+                options={generateYears().map(y => ({ value: y.toString() }))}
+                value={viewedYear.toString()}
+                onChange={e => setViewedYear(parseInt(e.target.value))}
+                label=""
+                styles={{
+                  theme: sacredtheme ? 'sacred' : 'light',
+                  height: '2rem',
+                  fontSize: '1rem',
+                  padding: '0.25rem 1.5rem 0.25rem 0.5rem',
+                  width: '80px',
+                  disabled: isDragging,
+                }}
+              />
+            </div>
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                handleNext()
+              }}
+              onMouseDown={e => e.stopPropagation()}
+              style={pickerStyles.backButton}
+            >
+              <ArrowBack
+                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                style={{
+                  height: '1.25rem',
+                  width: '1.25rem',
+                  color: sacredtheme ? '#FFD700' : '#4B5563',
+                  transform: 'rotate(180deg)',
+                }}
+              />
+            </button>
           </div>
-        ))}
-      </div>
-      <div style={{ ...pickerStyles.grid, ...pickerStyles.grid7Col }}>
-        {(() => {
-          const firstDay = new Date(viewedYear, viewedMonth, 1).getDay()
-          const daysInMonth = new Date(viewedYear, viewedMonth + 1, 0).getDate()
-          const cells: React.ReactNode[] = []
-          for (let i = 0; i < firstDay; i++) {
-            cells.push(<div key={`empty-${i}`} />)
-          }
-          for (let d = 1; d <= daysInMonth; d++) {
-            const date = new Date(viewedYear, viewedMonth, d)
-            date.setHours(0, 0, 0, 0)
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-            let isValid = disableFutureDateValidation || date > today
-            if (activeSelection === 'start') {
-              isValid = isValid && (!dateRange.end || date < dateRange.end)
-            } else {
-              isValid = isValid && (!dateRange.start || date > dateRange.start)
+        </div>
+
+        <div
+          style={{
+            ...pickerStyles.grid,
+            ...pickerStyles.grid7Col,
+            marginBottom: '0.5rem',
+          }}
+        >
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div
+              key={day}
+              style={{
+                textAlign: 'center' as const,
+                fontWeight: 'bold',
+                color: sacredtheme ? '#FFD700' : '#4B5563',
+              }}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+        <div style={{ ...pickerStyles.grid, ...pickerStyles.grid7Col }}>
+          {(() => {
+            const firstDay = new Date(viewedYear, viewedMonth, 1).getDay()
+            const daysInMonth = new Date(
+              viewedYear,
+              viewedMonth + 1,
+              0
+            ).getDate()
+            const cells: React.ReactNode[] = []
+            for (let i = 0; i < firstDay; i++) {
+              cells.push(<div key={`empty-${i}`} />)
             }
-            cells.push(
-              <button
-                key={d}
-                onClick={() => isValid && handleDaySelect(d)}
-                disabled={!isValid}
-                style={pickerStyles.pickerButton}
-              >
-                {d}
-              </button>
-            )
-          }
-          return cells
-        })()}
-      </div>
-    </div>
-  )
+            for (let d = 1; d <= daysInMonth; d++) {
+              const date = new Date(viewedYear, viewedMonth, d)
+              date.setHours(0, 0, 0, 0)
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
+              let isValid = disableFutureDateValidation || date > today
+              if (activeSelection === 'start') {
+                isValid = isValid && (!dateRange.end || date < dateRange.end)
+              } else {
+                isValid =
+                  isValid && (!dateRange.start || date > dateRange.start)
+              }
+              cells.push(
+                <button
+                  key={d}
+                  onClick={() => isValid && handleDaySelect(d)}
+                  disabled={!isValid}
+                  style={pickerStyles.pickerButton}
+                >
+                  {d}
+                </button>
+              )
+            }
+            return cells
+          })()}
+        </div>
+      </div>,
+      document.body
+    )
 
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
@@ -767,7 +857,10 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
         </div>
       )}
       <div onClick={onClick} style={{ cursor: 'pointer' }}>
-        <Calendar style={pickerStyles.calendarIcon} />
+        <Calendar
+          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+          style={pickerStyles.calendarIcon}
+        />
       </div>
     </div>
   )
@@ -784,8 +877,8 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
         <label style={componentStyles.label}>
           {label}
           {rest.required && (
-            <span style={getRequiredIndicatorStyle(fieldStyles)}>
-              {fieldStyles?.requiredIndicatorText || ' *'}
+            <span style={getRequiredIndicatorStyle(effectiveStyles)}>
+              {effectiveStyles?.requiredIndicatorText || ' *'}
             </span>
           )}
         </label>
@@ -819,7 +912,7 @@ const DateRangeComponent: React.FC<DateRangeProps> = ({
   )
 
   return (
-    <div style={componentStyles.container}>
+    <div ref={rootRef} style={componentStyles.container}>
       {createInputField(
         startLabel,
         startDateInputValue,

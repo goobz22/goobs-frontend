@@ -28,6 +28,9 @@ const createPlaceholderStyles = (theme: string, placeholderColor: string) => {
   const className = `searchbar-placeholder-${theme}`
 
   const css = `
+    .${className} {
+      text-transform: none !important;
+    }
     .${className}::placeholder {
       color: ${placeholderColor} !important;
       opacity: 0.7;
@@ -101,6 +104,7 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
       fontFamily: themeConfig.fontFamily,
       color: 'inherit',
       boxSizing: 'border-box',
+      textTransform: 'none' as const,
     },
     label: getSharedLabelStyles(labelColor, themeConfig),
     startAdornment: {
@@ -191,6 +195,9 @@ const Searchbar: React.FC<SearchbarProps> = ({
           onBlur={handleBlur}
           style={computedStyles.input}
           className={placeholderStyles.className}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           {...getRequiredProps(styles?.required)}
         />
       </div>

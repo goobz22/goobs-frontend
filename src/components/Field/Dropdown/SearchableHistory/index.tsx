@@ -227,11 +227,11 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   const [selectedOption, setSelectedOption] = useState<DropdownOption | null>(
     null
   )
-  const [searchTerm, setSearchTerm] = useState<string>('')
   const [history, setHistory] = useState<DropdownOption[]>([])
-  const [activeTab, setActiveTab] = useState<'options' | 'history'>('options')
+  // Currently not used; keep logic simple with a single select
+  // const [activeTab, setActiveTab] = useState<'options' | 'history'>('options')
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  // const inputRef = useRef<HTMLInputElement>(null)
 
   const componentStyles = getStyles(styles, isOpen)
   const triggerStyle: React.CSSProperties = {
@@ -245,7 +245,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     const defaultOption = options.find(option => option.value === defaultValue)
     if (defaultOption) {
       setSelectedOption(defaultOption)
-      setSearchTerm(defaultOption.value)
     }
   }, [defaultValue, options])
 
@@ -298,7 +297,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
   const handleSelect = (option: DropdownOption) => {
     setSelectedOption(option)
-    setSearchTerm(option.value)
     setIsOpen(false)
     onChange?.(option)
     setHistory(prevHistory =>
@@ -306,33 +304,33 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     )
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-    setIsOpen(true)
-    // Clear selected option if search doesn't match
-    if (selectedOption && selectedOption.value !== e.target.value) {
-      setSelectedOption(null)
-    }
-  }
+  // Handlers for text input are not used with native select
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSearchTerm(e.target.value)
+  //   setIsOpen(true)
+  //   if (selectedOption && selectedOption.value !== e.target.value) {
+  //     setSelectedOption(null)
+  //   }
+  // }
 
-  const handleInputFocus = () => {
-    setIsOpen(true)
-  }
+  // const handleInputFocus = () => {
+  //   setIsOpen(true)
+  // }
 
-  const handleArrowClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsOpen(!isOpen)
-    if (!isOpen) {
-      inputRef.current?.focus()
-    }
-  }
+  // const handleArrowClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   setIsOpen(!isOpen)
+  //   if (!isOpen) {
+  //     inputRef.current?.focus()
+  //   }
+  // }
 
-  const filteredOptions = options.filter(option =>
-    option.value.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // const filteredOptions = options.filter(option =>
+  //   option.value.toLowerCase().includes(searchTerm.toLowerCase())
+  // )
 
   // Don't filter history by search term - show all history items
-  const filteredHistory = history
+  // const filteredHistory = history
 
   return (
     <div style={componentStyles.container} ref={containerRef}>
@@ -348,91 +346,62 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       )}
 
       <div style={{ position: 'relative', width: '100%' }}>
-        <div style={triggerStyle}>
-          <input
-            ref={inputRef}
-            type="text"
-            className="searchable-history-input"
-            style={componentStyles.input}
-            value={searchTerm}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            placeholder={placeholder}
-            disabled={styles?.disabled}
-            {...getRequiredProps(styles?.required)}
-          />
-          <button
-            type="button"
-            style={componentStyles.arrowButton}
-            onClick={handleArrowClick}
-            disabled={styles?.disabled}
-          >
-            <ArrowDropDownIcon
-              styles={{ theme: styles?.theme || 'sacred' }}
-              style={{
-                transition: 'transform 0.2s',
-                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            />
-          </button>
+        <select
+          value={selectedOption?.value || ''}
+          onChange={e => {
+            const option = options.find(opt => opt.value === e.target.value)
+            if (option) {
+              handleSelect(option)
+            }
+          }}
+          style={{
+            ...triggerStyle,
+            width: '100%',
+            appearance: 'none',
+            paddingRight: '40px',
+            cursor: 'pointer',
+          }}
+          disabled={styles?.disabled}
+          {...getRequiredProps(styles?.required)}
+        >
+          <option value="">{placeholder || 'Select...'}</option>
+          {/* Show history options first if available */}
+          {history.length > 0 && (
+            <>
+              <optgroup label="Recent">
+                {history.map(option => (
+                  <option
+                    key={`history-${option._id || option.value}`}
+                    value={option.value}
+                  >
+                    {capitalizeText(option.attribute1 || option.value || '')}
+                  </option>
+                ))}
+              </optgroup>
+            </>
+          )}
+          <optgroup label="All Options">
+            {options.map((option, index) => (
+              <option
+                key={`option-${option._id || option.value}-${index}`}
+                value={option.value}
+              >
+                {capitalizeText(option.attribute1 || option.value || '')}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+        <div
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none',
+          }}
+        >
+          <ArrowDropDownIcon styles={{ theme: styles?.theme || 'sacred' }} />
         </div>
-
-        {isOpen && (
-          <div
-            style={componentStyles.listbox}
-            className="searchable-history-listbox"
-          >
-            <div style={componentStyles.tabContainer}>
-              <button
-                onClick={() => setActiveTab('options')}
-                style={componentStyles.tabButton(activeTab === 'options')}
-              >
-                Options
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('history')
-                  setSearchTerm('') // Clear search term when switching to history
-                }}
-                style={componentStyles.tabButton(activeTab === 'history')}
-              >
-                History
-              </button>
-            </div>
-            {activeTab === 'options' && (
-              <div>
-                {filteredOptions.map((option, index) => (
-                  <div
-                    key={option._id || `${option.value}-${index}`}
-                    style={componentStyles.option}
-                    onClick={() => handleSelect(option)}
-                  >
-                    {capitalizeText(option.value)}
-                  </div>
-                ))}
-                {filteredOptions.length === 0 && (
-                  <div style={componentStyles.option}>No options found</div>
-                )}
-              </div>
-            )}
-            {activeTab === 'history' && (
-              <div>
-                {filteredHistory.map((option, index) => (
-                  <div
-                    key={option._id || `${option.value}-${index}`}
-                    style={componentStyles.option}
-                    onClick={() => handleSelect(option)}
-                  >
-                    {capitalizeText(option.value)}
-                  </div>
-                ))}
-                {filteredHistory.length === 0 && (
-                  <div style={componentStyles.option}>No history found</div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}

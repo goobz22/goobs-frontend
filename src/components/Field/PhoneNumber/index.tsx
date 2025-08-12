@@ -12,7 +12,7 @@ import {
 } from '../../../theme'
 
 const formatPhoneNumber = (inputValue: string): string => {
-  let digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
+  const digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
   const limitedDigits = digits.slice(0, 10)
   let formattedNumber = '+1 '
   if (limitedDigits.length > 0) {
@@ -128,7 +128,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
-      let strippedInput = input.replace(/\D/g, '').slice(0, 10)
+      const strippedInput = input.replace(/\D/g, '').slice(0, 10)
 
       // Format just the digits part for display with stable formatting
       let formattedDigits = ''

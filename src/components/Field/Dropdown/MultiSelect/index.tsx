@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -9,7 +9,6 @@ import {
   getRequiredIndicatorStyle,
   type FormFieldStyles,
 } from '../../../../theme'
-import Checkbox from '../../../Checkbox'
 import Chip from '../../../Chip'
 import ExpandMoreIcon from '../../../Icons/ExpandMore'
 
@@ -42,7 +41,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     useState<string[]>(defaultSelected)
   const [focused, setFocused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  // Remove dropdownRef as it's no longer needed
 
   const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
     getSharedFormFieldStyles(styles, focused)
@@ -140,10 +139,14 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (styles?.disabled) return
       event.preventDefault()
-      setIsOpen(!isOpen)
-      setFocused(true)
+      // Let the select element handle the opening
+      const selectElement =
+        event.currentTarget.parentElement?.querySelector('select')
+      if (selectElement) {
+        selectElement.focus()
+      }
     },
-    [isOpen, styles?.disabled]
+    [styles?.disabled]
   )
 
   const handleFocus = useCallback(
@@ -155,38 +158,9 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     [onFocus, styles?.disabled]
   )
 
-  const handleOptionClick = useCallback(
-    (value: string, event: React.MouseEvent) => {
-      event.preventDefault()
-      event.stopPropagation()
-      handleToggle(value)
-      // Keep dropdown open for multi-select - don't close here
-    },
-    [handleToggle]
-  )
+  // Remove handleOptionClick as it's no longer needed with native select
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-
-      // Check if click is outside both the container and dropdown
-      const isOutsideContainer =
-        containerRef.current && !containerRef.current.contains(target)
-      const isOutsideDropdown =
-        dropdownRef.current && !dropdownRef.current.contains(target)
-
-      if (isOutsideContainer && isOutsideDropdown) {
-        setIsOpen(false)
-        setFocused(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen])
+  // Native select handles its own outside click behavior
 
   return (
     <div style={componentStyles.container}>
@@ -199,68 +173,70 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
         )}
       </label>
       <div style={componentStyles.selectWrapper}>
-        <div
-          ref={containerRef}
-          onClick={handleContainerClick}
-          onFocus={handleFocus}
-          style={componentStyles.chipContainer}
-          tabIndex={styles?.disabled ? -1 : 0}
-          aria-required={styles?.required || undefined}
-        >
-          {selectedValues.length === 0 ? (
-            <span style={componentStyles.placeholder}>{label}</span>
-          ) : (
-            selectedValues.map(value => (
-              <Chip
-                key={value}
-                label={value}
-                {...(styles?.disabled
-                  ? {}
-                  : { onDelete: () => handleToggle(value) })}
-                styles={{
-                  theme: styles?.theme || 'light',
-                }}
-              />
-            ))
-          )}
-        </div>
-        <div style={componentStyles.iconWrapper}>
-          <ExpandMoreIcon
-            styles={{ theme: styles?.theme || 'sacred' }}
-            style={componentStyles.icon}
-          />
-        </div>
-        {isOpen && (
-          <div ref={dropdownRef} style={componentStyles.dropdown}>
-            {options.map(option => (
-              <div
-                key={option._id || option.value}
-                onClick={event => handleOptionClick(option.value, event)}
-                style={componentStyles.option}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor =
-                    (styles?.theme || 'light') === 'light'
-                      ? '#F7FAFC'
-                      : (styles?.theme || 'light') === 'dark'
-                        ? '#2D3748'
-                        : 'rgba(255, 215, 0, 0.1)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                <Checkbox
-                  checked={selectedValues.includes(option.value)}
-                  onChange={() => handleToggle(option.value)}
+        <div style={{ position: 'relative', width: '100%' }}>
+          <div
+            ref={containerRef}
+            onClick={handleContainerClick}
+            onFocus={handleFocus}
+            style={componentStyles.chipContainer}
+            tabIndex={styles?.disabled ? -1 : 0}
+            aria-required={styles?.required || undefined}
+          >
+            {selectedValues.length === 0 ? (
+              <span style={componentStyles.placeholder}>{label}</span>
+            ) : (
+              selectedValues.map(value => (
+                <Chip
+                  key={value}
+                  label={value}
+                  {...(styles?.disabled
+                    ? {}
+                    : { onDelete: () => handleToggle(value) })}
                   styles={{
                     theme: styles?.theme || 'light',
                   }}
                 />
-                <div style={componentStyles.optionLabel}>{option.value}</div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        )}
+          <select
+            multiple
+            value={selectedValues}
+            onChange={e => {
+              const selected = Array.from(
+                e.target.selectedOptions,
+                option => option.value
+              )
+              setSelectedValues(selected)
+              onChange?.(selected)
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              cursor: 'pointer',
+            }}
+            disabled={styles?.disabled}
+            size={isOpen ? Math.min(options.length, 6) : 1}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setIsOpen(false)}
+          >
+            {options.map(option => (
+              <option key={option._id || option.value} value={option.value}>
+                {option.value}
+              </option>
+            ))}
+          </select>
+          <div style={componentStyles.iconWrapper}>
+            <ExpandMoreIcon
+              styles={{ theme: styles?.theme || 'sacred' }}
+              style={componentStyles.icon}
+            />
+          </div>
+        </div>
       </div>
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>

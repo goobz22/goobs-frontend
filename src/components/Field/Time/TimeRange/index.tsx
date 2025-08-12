@@ -434,8 +434,8 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     (e: React.MouseEvent) => {
       e.preventDefault()
       setIsDragging(true)
-      let currentX = dragPosition.x
-      let currentY = dragPosition.y
+      const currentX = dragPosition.x
+      const currentY = dragPosition.y
       setDragOffset({ x: e.clientX - currentX, y: e.clientY - currentY })
     },
     [dragPosition]

@@ -230,8 +230,8 @@ const calculateUsableIPRange = (
   const range = calculateNetworkRange(subnetAddress, subnetMask)
   const networkNum = ipToNumber(range.start)
   const broadcastNum = ipToNumber(range.end)
-  let usableStart = networkNum + 1
-  let usableEnd = broadcastNum - 1
+  const usableStart = networkNum + 1
+  const usableEnd = broadcastNum - 1
   if (gatewayIP && isValidIPAddress(gatewayIP)) {
     const gatewayNum = ipToNumber(gatewayIP)
     if (gatewayNum >= usableStart && gatewayNum <= usableEnd) {
@@ -493,7 +493,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   const validateIPAddress = useCallback(
     (ip: string): boolean => {
       if (ip === '') return true
-      let valid = allowIncomplete
+      const valid = allowIncomplete
         ? ip.split('.').every(isValidSegment)
         : isValidIPAddress(ip)
       if (isValidIPAddress(ip)) {

@@ -88,9 +88,9 @@ const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
     boxShadow: sacredtheme
       ? '0 0 1.5rem rgba(255, 215, 0, 0.2)'
       : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    border: sacredtheme
-      ? '2px solid rgba(255, 215, 0, 0.5)'
-      : '1px solid #E5E7EB',
+    borderWidth: sacredtheme ? '2px' : '1px',
+    borderStyle: 'solid',
+    borderColor: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#E5E7EB',
     animation: sacredtheme
       ? 'date-field-sacred-glow 2s infinite alternate'
       : 'none',
@@ -262,7 +262,9 @@ const DateField: React.FC<DateFieldProps> = ({
       alignItems: 'center',
       height: styles?.height || '40px',
       width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
+      borderWidth: styles?.borderWidth || '1px',
+      borderStyle: 'solid',
+      borderColor: borderColor,
       borderRadius: styles?.borderRadius || '8px',
       backgroundColor: themeConfig.background,
       color: themeConfig.text,
@@ -425,8 +427,8 @@ const DateField: React.FC<DateFieldProps> = ({
     (e: React.MouseEvent) => {
       e.preventDefault()
       setIsDragging(true)
-      let currentX = dragPosition.x
-      let currentY = dragPosition.y
+      const currentX = dragPosition.x
+      const currentY = dragPosition.y
       setDragOffset({ x: e.clientX - currentX, y: e.clientY - currentY })
     },
     [dragPosition]

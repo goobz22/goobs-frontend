@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import {
   getDropdownStyles,
   getRequiredIndicatorStyle,
-  getRequiredProps,
   type DropdownStyles,
 } from '../../../../theme'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
@@ -37,9 +36,7 @@ const getStyles = (
   styles?: DropdownStyles,
   isOpen?: boolean,
   isFocused?: boolean
-) => {
-  return getDropdownStyles(styles, isOpen, isFocused)
-}
+) => getDropdownStyles(styles, isOpen, isFocused)
 
 const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   label,
@@ -54,9 +51,8 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   const [selectedOption, setSelectedOption] = useState<DropdownOption | null>(
     null
   )
-  const [searchTerm, setSearchTerm] = useState<string>('')
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  // const inputRef = useRef<HTMLInputElement>(null)
 
   const componentStyles = getStyles(styles, isOpen, false)
   const triggerStyle: React.CSSProperties = {
@@ -70,7 +66,6 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     const defaultOption = options.find(option => option.value === defaultValue)
     if (defaultOption) {
       setSelectedOption(defaultOption)
-      setSearchTerm(defaultOption.value || '')
     }
   }, [defaultValue, options])
 
@@ -111,37 +106,31 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
 
   const handleSelect = (option: DropdownOption) => {
     setSelectedOption(option)
-    setSearchTerm(option.value || '')
     setIsOpen(false)
     onChange?.(option)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-    setIsOpen(true)
-    // Clear selected option if search doesn't match
-    if (selectedOption && (selectedOption.value || '') !== e.target.value) {
-      setSelectedOption(null)
-    }
-  }
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   // Disabled for now - pure dropdown
+  // }
 
-  const handleInputFocus = () => {
-    setIsOpen(true)
-  }
+  // const handleInputFocus = () => {
+  //   // Disabled for now - pure dropdown
+  // }
 
-  const handleArrowClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsOpen(!isOpen)
-    if (!isOpen) {
-      inputRef.current?.focus()
-    }
-  }
+  // const handleArrowClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   setIsOpen(!isOpen)
+  //   if (!isOpen) {
+  //     inputRef.current?.focus()
+  //   }
+  // }
 
-  const filteredOptions = options.filter(option =>
-    option.value && searchTerm
-      ? option.value.toLowerCase().includes(searchTerm.toLowerCase())
-      : Boolean(option.value)
-  )
+  // const filteredOptions = options.filter(option =>
+  //   option.value && searchTerm
+  //     ? option.value.toLowerCase().includes(searchTerm.toLowerCase())
+  //     : Boolean(option.value)
+  // )
 
   return (
     <div style={componentStyles.container} ref={containerRef}>
@@ -157,51 +146,41 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       )}
 
       <div style={{ position: 'relative', width: '100%' }}>
-        <div style={triggerStyle}>
-          <input
-            ref={inputRef}
-            type="text"
-            className="dropdown-input"
-            style={componentStyles.input}
-            value={searchTerm}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            placeholder={placeholder}
-            disabled={styles?.disabled}
-            {...getRequiredProps(styles?.required)}
-          />
-          <button
-            type="button"
-            style={componentStyles.arrowButton}
-            onClick={handleArrowClick}
-            disabled={styles?.disabled}
-          >
-            <ArrowDropDownIcon
-              styles={{ theme: styles?.theme || 'sacred' }}
-              style={{
-                transition: 'transform 0.2s',
-                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            />
-          </button>
+        <select
+          value={selectedOption?.value || ''}
+          onChange={e => {
+            const option = options.find(opt => opt.value === e.target.value)
+            if (option) {
+              handleSelect(option)
+            }
+          }}
+          style={{
+            ...triggerStyle,
+            width: '100%',
+            appearance: 'none',
+            paddingRight: '40px',
+            cursor: 'pointer',
+          }}
+          disabled={styles?.disabled}
+        >
+          <option value="">{placeholder || 'Select...'}</option>
+          {options.map(option => (
+            <option key={option._id || option.value} value={option.value}>
+              {capitalizeText(option.attribute1 || option.value || '')}
+            </option>
+          ))}
+        </select>
+        <div
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none',
+          }}
+        >
+          <ArrowDropDownIcon styles={{ theme: styles?.theme || 'sacred' }} />
         </div>
-
-        {isOpen && (
-          <div style={componentStyles.dropdown} className="dropdown-listbox">
-            {filteredOptions.map(option => (
-              <div
-                key={option._id || option.value}
-                style={componentStyles.option}
-                onClick={() => handleSelect(option)}
-              >
-                {capitalizeText(option.value || '')}
-              </div>
-            ))}
-            {filteredOptions.length === 0 && (
-              <div style={componentStyles.option}>No options found</div>
-            )}
-          </div>
-        )}
       </div>
 
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
