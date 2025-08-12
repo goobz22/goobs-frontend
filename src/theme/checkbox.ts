@@ -13,7 +13,9 @@ export interface CheckboxTheme {
     height: string
   }
   box: {
-    border: string
+    borderWidth: string
+    borderStyle: string
+    borderColor: string
     borderRadius: string
     backgroundColor: string
     backdropFilter: string
@@ -23,6 +25,8 @@ export interface CheckboxTheme {
   }
   boxHover: {
     backgroundColor: string
+    borderWidth?: string
+    borderStyle?: string
     borderColor: string
     transform: string
     boxShadow: string
@@ -30,18 +34,24 @@ export interface CheckboxTheme {
   }
   boxChecked: {
     backgroundColor: string
+    borderWidth?: string
+    borderStyle?: string
     borderColor: string
     boxShadow: string
     backgroundImage?: string
   }
   boxIndeterminate: {
     backgroundColor: string
+    borderWidth?: string
+    borderStyle?: string
     borderColor: string
     boxShadow: string
     backgroundImage?: string
   }
   boxDisabled: {
     backgroundColor: string
+    borderWidth?: string
+    borderStyle?: string
     borderColor: string
     transform: string
     boxShadow: string
@@ -142,7 +152,9 @@ export const checkboxThemes: Record<
       height: '24px',
     },
     box: {
-      border: '2px solid rgb(59, 130, 246)',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'rgb(59, 130, 246)',
       borderRadius: '4px',
       backgroundColor: 'rgba(249, 250, 251, 0.9)',
       backdropFilter: 'blur(4px)',
@@ -196,7 +208,9 @@ export const checkboxThemes: Record<
       height: '24px',
     },
     box: {
-      border: '2px solid rgb(96, 165, 250)',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'rgb(96, 165, 250)',
       borderRadius: '4px',
       backgroundColor: 'rgba(31, 41, 55, 0.9)',
       backdropFilter: 'blur(4px)',
@@ -250,7 +264,9 @@ export const checkboxThemes: Record<
       height: '28px',
     },
     box: {
-      border: '2px solid rgba(255, 215, 0, 0.4)',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'rgba(255, 215, 0, 0.4)',
       borderRadius: '6px',
       backgroundColor: 'rgba(10, 10, 10, 0.9)',
       backdropFilter: 'blur(8px)',
@@ -329,9 +345,9 @@ export const getCheckboxTheme = (styles?: CheckboxStyles): CheckboxTheme => {
       height: styles.height || baseTheme.container.height,
     },
     box: {
-      border: styles.borderColor
-        ? `${styles.borderWidth || '2px'} solid ${styles.borderColor}`
-        : baseTheme.box.border,
+      borderWidth: styles.borderWidth || baseTheme.box.borderWidth,
+      borderStyle: styles.borderColor ? 'solid' : baseTheme.box.borderStyle,
+      borderColor: styles.borderColor || baseTheme.box.borderColor,
       borderRadius: styles.borderRadius || baseTheme.box.borderRadius,
       backgroundColor: styles.backgroundColor || baseTheme.box.backgroundColor,
       backdropFilter: styles.backdropFilter || baseTheme.box.backdropFilter,
@@ -474,7 +490,9 @@ export const getCheckboxStyles = (
     pointerEvents: 'none',
     width: '100%',
     height: '100%',
-    border: themeConfig.box.border,
+    borderWidth: themeConfig.box.borderWidth,
+    borderStyle: themeConfig.box.borderStyle,
+    borderColor: themeConfig.box.borderColor,
     borderRadius: themeConfig.box.borderRadius,
     transition: themeConfig.box.transition,
     backgroundColor: themeConfig.box.backgroundColor,
@@ -489,6 +507,10 @@ export const getCheckboxStyles = (
     ...(isHovered &&
       !isDisabled && {
         backgroundColor: themeConfig.boxHover.backgroundColor,
+        borderWidth:
+          themeConfig.boxHover.borderWidth || themeConfig.box.borderWidth,
+        borderStyle:
+          themeConfig.boxHover.borderStyle || themeConfig.box.borderStyle,
         borderColor: themeConfig.boxHover.borderColor,
         transform: themeConfig.boxHover.transform,
         boxShadow: themeConfig.boxHover.boxShadow,
@@ -496,25 +518,39 @@ export const getCheckboxStyles = (
       }),
     ...(isChecked && {
       backgroundColor: themeConfig.boxChecked.backgroundColor,
+      borderWidth:
+        themeConfig.boxChecked.borderWidth || themeConfig.box.borderWidth,
+      borderStyle:
+        themeConfig.boxChecked.borderStyle || themeConfig.box.borderStyle,
       borderColor: themeConfig.boxChecked.borderColor,
       boxShadow: themeConfig.boxChecked.boxShadow,
       backgroundImage: themeConfig.boxChecked.backgroundImage,
     }),
     ...(isIndeterminate && {
       backgroundColor: themeConfig.boxIndeterminate.backgroundColor,
+      borderWidth:
+        themeConfig.boxIndeterminate.borderWidth || themeConfig.box.borderWidth,
+      borderStyle:
+        themeConfig.boxIndeterminate.borderStyle || themeConfig.box.borderStyle,
       borderColor: themeConfig.boxIndeterminate.borderColor,
       boxShadow: themeConfig.boxIndeterminate.boxShadow,
       backgroundImage: themeConfig.boxIndeterminate.backgroundImage,
     }),
     ...(isDisabled && {
       backgroundColor: themeConfig.boxDisabled.backgroundColor,
+      borderWidth:
+        themeConfig.boxDisabled.borderWidth || themeConfig.box.borderWidth,
+      borderStyle:
+        themeConfig.boxDisabled.borderStyle || themeConfig.box.borderStyle,
       borderColor: themeConfig.boxDisabled.borderColor,
       transform: themeConfig.boxDisabled.transform,
       boxShadow: themeConfig.boxDisabled.boxShadow,
     }),
     // Apply outline override
     ...(styles?.outline === false && {
-      border: 'none',
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
       boxShadow: 'none',
     }),
   }

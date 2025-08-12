@@ -1043,7 +1043,7 @@ export const getTreeItemStyles = (
   const totalIndent = baseIndent + level * incrementIndent
 
   // Base item styles - Use longhand properties only
-  let itemStyles: React.CSSProperties = {
+  const itemStyles: React.CSSProperties = {
     backgroundColor: theme.item.backgroundColor,
     backgroundImage: 'none',
     backgroundRepeat: 'no-repeat',

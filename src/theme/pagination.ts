@@ -194,8 +194,6 @@ const sizeVariants = {
 
 export const getPaginationStyles = (
   styles: PaginationStyles = {},
-  _isHovered: boolean = false,
-  _isActive: boolean = false,
   isDisabled: boolean = false
 ): ComputedPaginationStyles => {
   const theme = getPaginationTheme(styles.theme)

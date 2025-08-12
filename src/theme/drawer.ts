@@ -214,8 +214,10 @@ export const getDrawerStyles = (
   styles?: DrawerStyles,
   open?: boolean,
   anchor?: 'left' | 'right' | 'top' | 'bottom',
-  _variant?: 'permanent' | 'temporary'
+  variant?: 'permanent' | 'temporary'
 ) => {
+  // variant currently does not affect style computation directly
+  void variant
   const themeConfig = getDrawerTheme(styles)
   const anchorSide = anchor || 'left'
   const isHorizontal = anchorSide === 'top' || anchorSide === 'bottom'

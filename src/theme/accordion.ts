@@ -5,8 +5,10 @@ import React from 'react'
 
 export interface AccordionTheme {
   container: {
-    background: string
-    border: string
+    backgroundColor: string
+    borderWidth: string
+    borderStyle: string
+    borderColor: string
     borderRadius: string
     boxShadow: string
     backdropFilter: string
@@ -19,12 +21,12 @@ export interface AccordionTheme {
   }
   containerExpanded: {
     boxShadow: string
-    background: string
+    backgroundColor: string
     borderColor?: string
     backgroundImage?: string
   }
   summary: {
-    background: string
+    backgroundColor: string
     color: string
     fontFamily: string
     fontSize: string
@@ -54,7 +56,7 @@ export interface AccordionTheme {
     textShadow?: string
   }
   details: {
-    background: string
+    backgroundColor: string
     borderTop: string
     color: string
     fontFamily: string
@@ -202,8 +204,10 @@ export const accordionThemes: Record<
 > = {
   light: {
     container: {
-      background: 'white',
-      border: 'none',
+      backgroundColor: 'white',
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
       borderRadius: '8px',
       boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
       backdropFilter: 'none',
@@ -214,10 +218,10 @@ export const accordionThemes: Record<
     },
     containerExpanded: {
       boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.12)',
-      background: '#fafafa',
+      backgroundColor: '#fafafa',
     },
     summary: {
-      background: '#f5f7fa',
+      backgroundColor: '#f5f7fa',
       color: 'inherit',
       fontFamily: 'merriweather',
       fontSize: '14px',
@@ -241,7 +245,7 @@ export const accordionThemes: Record<
       fontWeight: 500,
     },
     details: {
-      background: 'white',
+      backgroundColor: 'white',
       borderTop: '1px solid rgba(0, 0, 0, 0.08)',
       color: 'inherit',
       fontFamily: 'inherit',
@@ -281,8 +285,10 @@ export const accordionThemes: Record<
   },
   dark: {
     container: {
-      background: 'rgba(31, 41, 55, 0.95)',
-      border: 'none',
+      backgroundColor: 'rgba(31, 41, 55, 0.95)',
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
       borderRadius: '8px',
       boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.3)',
       backdropFilter: 'blur(8px)',
@@ -293,10 +299,10 @@ export const accordionThemes: Record<
     },
     containerExpanded: {
       boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.3)',
-      background: 'rgba(30, 58, 138, 0.2)',
+      backgroundColor: 'rgba(30, 58, 138, 0.2)',
     },
     summary: {
-      background: 'rgba(17, 24, 39, 0.5)',
+      backgroundColor: 'rgba(17, 24, 39, 0.5)',
       color: 'rgb(243, 244, 246)',
       fontFamily: 'merriweather',
       fontSize: '14px',
@@ -320,7 +326,7 @@ export const accordionThemes: Record<
       fontWeight: 500,
     },
     details: {
-      background: 'rgba(17, 24, 39, 0.8)',
+      backgroundColor: 'rgba(17, 24, 39, 0.8)',
       borderTop: '1px solid rgba(75, 85, 99, 0.5)',
       color: 'rgb(209, 213, 219)',
       fontFamily: 'inherit',
@@ -360,8 +366,10 @@ export const accordionThemes: Record<
   },
   sacred: {
     container: {
-      background: '#0a0a0a',
-      border: '1px solid rgba(255, 215, 0, 0.3)',
+      backgroundColor: '#0a0a0a',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'rgba(255, 215, 0, 0.3)',
       borderRadius: '8px',
       boxShadow:
         '0 0 15px rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3)',
@@ -379,7 +387,7 @@ export const accordionThemes: Record<
     containerExpanded: {
       boxShadow:
         '0 0 30px rgba(255, 215, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.5)',
-      background: '#0a0a0a',
+      backgroundColor: '#0a0a0a',
       borderColor: '#FFD700',
       backgroundImage: `
         linear-gradient(rgba(255, 215, 0, 0.02), rgba(255, 215, 0, 0.02)),
@@ -387,7 +395,7 @@ export const accordionThemes: Record<
       `,
     },
     summary: {
-      background: 'transparent',
+      backgroundColor: 'transparent',
       color: 'rgba(255, 215, 0, 0.9)',
       fontFamily: '"Cinzel", serif',
       fontSize: '14px',
@@ -414,7 +422,7 @@ export const accordionThemes: Record<
       textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
     },
     details: {
-      background: 'transparent',
+      backgroundColor: 'transparent',
       borderTop: '1px solid rgba(255, 215, 0, 0.2)',
       color: 'rgba(255, 215, 0, 0.8)',
       fontFamily: 'inherit',
@@ -493,10 +501,13 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
   return {
     ...baseTheme,
     container: {
-      background: styles.backgroundColor || baseTheme.container.background,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
+      backgroundColor:
+        styles.backgroundColor || baseTheme.container.backgroundColor,
+      borderWidth: styles.borderWidth || baseTheme.container.borderWidth,
+      borderStyle: styles.borderColor
+        ? 'solid'
+        : baseTheme.container.borderStyle,
+      borderColor: styles.borderColor || baseTheme.container.borderColor,
       borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
@@ -518,9 +529,9 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
     containerExpanded: {
       boxShadow:
         styles.expandedBoxShadow || baseTheme.containerExpanded.boxShadow,
-      background:
+      backgroundColor:
         styles.expandedBackgroundColor ||
-        baseTheme.containerExpanded.background,
+        baseTheme.containerExpanded.backgroundColor,
       ...(expandedBorderColor !== undefined
         ? { borderColor: expandedBorderColor }
         : {}),
@@ -533,7 +544,8 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
         : {}),
     },
     summary: {
-      background: styles.summaryBackgroundColor || baseTheme.summary.background,
+      backgroundColor:
+        styles.summaryBackgroundColor || baseTheme.summary.backgroundColor,
       color: styles.summaryColor || baseTheme.summary.color,
       fontFamily: styles.summaryFontFamily || baseTheme.summary.fontFamily,
       fontSize: styles.summaryFontSize || baseTheme.summary.fontSize,
@@ -587,7 +599,8 @@ export const getAccordionTheme = (styles?: AccordionStyles): AccordionTheme => {
         : {}),
     },
     details: {
-      background: styles.detailsBackgroundColor || baseTheme.details.background,
+      backgroundColor:
+        styles.detailsBackgroundColor || baseTheme.details.backgroundColor,
       borderTop: styles.detailsBorderTop || baseTheme.details.borderTop,
       color: styles.detailsColor || baseTheme.details.color,
       fontFamily: styles.detailsFontFamily || baseTheme.details.fontFamily,
@@ -698,8 +711,10 @@ export const getAccordionStyles = (
     overflow: 'hidden',
     position: 'relative',
     transition: themeConfig.transition,
-    backgroundColor: themeConfig.container.background,
-    border: themeConfig.container.border,
+    backgroundColor: themeConfig.container.backgroundColor,
+    borderWidth: themeConfig.container.borderWidth,
+    borderStyle: themeConfig.container.borderStyle,
+    borderColor: themeConfig.container.borderColor,
     boxShadow: themeConfig.container.boxShadow,
     backdropFilter: themeConfig.container.backdropFilter,
     backgroundImage: themeConfig.container.backgroundImage,
@@ -712,7 +727,7 @@ export const getAccordionStyles = (
     ...(isExpanded &&
       !isDisabled && {
         boxShadow: themeConfig.containerExpanded.boxShadow,
-        background: themeConfig.containerExpanded.background,
+        backgroundColor: themeConfig.containerExpanded.backgroundColor,
         borderColor: themeConfig.containerExpanded.borderColor,
         backgroundImage: themeConfig.containerExpanded.backgroundImage,
       }),
@@ -721,7 +736,12 @@ export const getAccordionStyles = (
       backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.8)' : '#f8f8f8',
       borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.1)' : undefined,
     }),
-    ...(styles?.outline === false && { border: 'none', boxShadow: 'none' }),
+    ...(styles?.outline === false && {
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
+      boxShadow: 'none',
+    }),
   }
 
   // Base summary styles with level-based indentation
@@ -735,7 +755,7 @@ export const getAccordionStyles = (
     minWidth: 'fit-content',
     transition: themeConfig.transition,
     position: 'relative',
-    backgroundColor: themeConfig.summary.background,
+    backgroundColor: themeConfig.summary.backgroundColor,
     color: themeConfig.summary.color,
     fontFamily: themeConfig.summary.fontFamily,
     fontWeight: themeConfig.summary.fontWeight,
@@ -772,7 +792,7 @@ export const getAccordionStyles = (
   const detailsStyle: React.CSSProperties = {
     padding: styles?.detailsPadding || '16px',
     position: 'relative',
-    backgroundColor: themeConfig.details.background,
+    backgroundColor: themeConfig.details.backgroundColor,
     borderTop: themeConfig.details.borderTop,
     color: themeConfig.details.color,
     fontFamily: themeConfig.details.fontFamily,

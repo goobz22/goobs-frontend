@@ -3,6 +3,30 @@
 // --------------------------------------------------------------------------
 import React from 'react'
 
+// One-time global reset to prevent unwanted uppercase/capitalization on text inputs
+let formFieldGlobalsInjected = false
+const injectFormFieldGlobalResets = () => {
+  if (formFieldGlobalsInjected) return
+  if (typeof document === 'undefined') return
+  try {
+    const styleId = 'formfield-global-resets'
+    if (document.getElementById(styleId)) {
+      formFieldGlobalsInjected = true
+      return
+    }
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      /* Enforce no text transform on inputs across the app */
+      input, textarea, [contenteditable="true"], [contenteditable=""] {
+        text-transform: none !important;
+      }
+    `
+    document.head.appendChild(style)
+    formFieldGlobalsInjected = true
+  } catch {}
+}
+
 export interface FormFieldTheme {
   background: string
   border: {
@@ -189,7 +213,9 @@ export const formFieldThemes: Record<
       error: 'rgba(239, 68, 68, 1)', // #EF4444
       info: 'rgba(255, 215, 0, 0.8)', // Gold with slight transparency
     },
-    fontFamily: '"Cinzel", serif',
+    // Cinzel renders lowercase as small caps, which makes inputs appear uppercased.
+    // Use Inter for form fields to preserve true lowercase input rendering.
+    fontFamily: '"Inter", sans-serif',
   },
 }
 
@@ -238,6 +264,9 @@ export const getSharedFormFieldStyles = (
   styles?: FormFieldStyles,
   isFocused?: boolean
 ) => {
+  // Ensure global resets are applied on first use in the client
+  injectFormFieldGlobalResets()
+
   const themeConfig = getFormFieldTheme(styles)
 
   // Determine helper text type
@@ -294,6 +323,7 @@ export const getSharedLabelStyles = (
   lineHeight: '1.2',
   letterSpacing: '0.01em',
   pointerEvents: 'auto',
+  textTransform: 'none',
 })
 
 export const getSharedContainerStyles = (
@@ -311,6 +341,8 @@ export const getSharedContainerStyles = (
   marginLeft: styles?.marginLeft,
   marginRight: styles?.marginRight,
   margin: styles?.margin,
+  // Ensure inputs and text content do not inherit uppercase from parent containers
+  textTransform: 'none',
 })
 
 export const getSharedFooterTextStyles = (
@@ -325,6 +357,7 @@ export const getSharedFooterTextStyles = (
   fontFamily: themeConfig.fontFamily,
   lineHeight: '1.3',
   fontWeight: 400,
+  textTransform: 'none',
 })
 
 export const getSharedAdornmentStyles = (

@@ -659,6 +659,9 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     animation: themeConfig.container.animation,
     padding: themeConfig.container.padding,
     transition: themeConfig.transition,
+    // Ensure the grid never causes page-level horizontal scroll
+    overflowX: 'hidden',
+    boxSizing: 'border-box',
     // Layout styling
     height: styles?.height,
     maxWidth: styles?.maxWidth,
@@ -678,6 +681,7 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     overflow: themeConfig.contentWrapper.overflow,
     boxShadow: themeConfig.contentWrapper.boxShadow,
     transition: themeConfig.transition,
+    boxSizing: 'border-box',
   }
 
   const errorStyle: React.CSSProperties = {
@@ -699,6 +703,7 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
     position: themeConfig.tableContainer.position as any,
     margin: themeConfig.tableContainer.margin,
     padding: themeConfig.tableContainer.padding,
+    boxSizing: 'border-box',
   }
 
   const sectionDividerStyle: React.CSSProperties = {
@@ -739,11 +744,14 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
       overflow: themeConfig.table.tableContainer.overflow,
       border: themeConfig.table.tableContainer.border,
       backgroundColor: themeConfig.table.tableContainer.backgroundColor,
+      // Include borders/padding in width calculations to avoid unexpected shift
+      boxSizing: 'border-box',
     } as React.CSSProperties,
     tableWrapper: {
       overflowX: themeConfig.table.tableWrapper.overflowX as any,
       width: themeConfig.table.tableWrapper.width,
       minWidth: themeConfig.table.tableWrapper.minWidth,
+      boxSizing: 'border-box',
     } as React.CSSProperties,
     table: {
       width: themeConfig.table.table.width,
