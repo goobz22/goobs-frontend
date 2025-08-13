@@ -57,6 +57,8 @@ export interface ColumnDef {
     type:
       | 'text'
       | 'date'
+      | 'currency'
+      | 'usd'
       | 'dropdown'
       | 'searchableDropdown'
       | 'multiselect'

@@ -24,6 +24,7 @@ import VLANField from '../../../Field/IPAM/VLAN'
 import CIDRField from '../../../Field/IPAM/CIDR'
 import SupernetField from '../../../Field/IPAM/Supernet'
 import MACAddressField from '../../../Field/IPAM/MACAddress'
+import USDField from '../../../Field/USD'
 
 interface CreationRowProps {
   columns: ColumnDef[]
@@ -71,6 +72,24 @@ const CreationRow: React.FC<CreationRowProps> = ({
     }
 
     switch (fieldConfig.type) {
+      case 'currency':
+      case 'usd': {
+        return (
+          <USDField
+            initialValue={String(value ?? '')}
+            onChange={(newValue: string) =>
+              onCreationFieldChange?.(column.field, newValue)
+            }
+            {...(fieldConfig.placeholder
+              ? { placeholder: fieldConfig.placeholder }
+              : {})}
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
+            styles={fieldStyles}
+          />
+        )
+      }
       case 'text':
         return (
           <TextField
