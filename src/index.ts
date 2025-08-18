@@ -191,6 +191,10 @@ import type {
   MetricCardData,
 } from './components/DataGrid/types'
 
+// DataGrid components
+import MetricCard from './components/DataGrid/MetricCard'
+import MetricSection from './components/DataGrid/MetricSection'
+
 // Colors
 import {
   moss,
@@ -360,6 +364,7 @@ export { Fade }
 export { Slide }
 export { Zoom }
 export { BigCalendar }
+export { MetricCard, MetricSection }
 
 // Export utilities
 export { alpha, keyframes, css, commonKeyframes }
