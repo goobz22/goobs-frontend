@@ -6,33 +6,11 @@
 import React, { forwardRef, useState, useMemo } from 'react'
 import { getCardStyles } from '../../theme/card'
 import type { CardStyles } from '../../theme/card'
+import { SACRED_GLYPHS, injectKeyframes } from '../../theme/shared'
 
 // --------------------------------------------------------------------------
-// SACRED GLYPHS CONSTANTS
+// SACRED GLYPHS CONSTANTS (from shared)
 // --------------------------------------------------------------------------
-
-const SACRED_GLYPHS: string[] = [
-  '⧈',
-  '◊',
-  '✦',
-  '⟡',
-  '◈',
-  '⬟',
-  '◉',
-  '⬢',
-  '⟐',
-  '◆',
-  '⬝',
-  '⟢',
-  '◇',
-  '⬡',
-  '⬛',
-  '⟁',
-  '◊',
-  '⬜',
-  '⟐',
-  '◈',
-]
 
 // --------------------------------------------------------------------------
 // CARD PROPS
@@ -126,7 +104,7 @@ const SacredBackground: React.FC<{
             height: '100%',
             background:
               'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-            animation: 'shimmer 1.5s ease-in-out',
+            animation: 'sacredShimmer 1.5s ease-in-out',
             zIndex: 1,
           }}
         />
@@ -175,7 +153,7 @@ const SacredBackgroundGlyphs: React.FC<{ isHovered: boolean }> = ({
             transform: `rotate(${randoms[index]?.rotation ?? 0}deg)`,
             userSelect: 'none',
             transition: 'opacity 0.3s ease',
-            animation: `rotateGlyph ${randoms[index]?.duration ?? 60}s linear infinite`,
+            animation: `sacredGlyphRotate ${randoms[index]?.duration ?? 60}s linear infinite`,
           }}
         >
           {glyph}
@@ -194,6 +172,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     const [isHovered, setIsHovered] = useState(false)
     const isDisabled = styles?.disabled
     const isSacredTheme = styles?.theme === 'sacred'
+
+    React.useEffect(() => {
+      injectKeyframes()
+    }, [])
 
     const computedStyles = useMemo(
       () => getCardStyles(styles, isHovered, isDisabled, elevation),
@@ -294,6 +276,13 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
     ref
   ) => {
     const computedStyles = useMemo(() => getCardStyles(styles), [styles])
+    const themeName = styles?.theme || 'light'
+    const subtitleColor =
+      themeName === 'sacred'
+        ? 'rgba(255, 215, 0, 0.75)'
+        : themeName === 'dark'
+          ? 'rgba(248, 250, 252, 0.7)'
+          : 'rgba(0, 0, 0, 0.6)'
 
     return (
       <div
@@ -320,7 +309,7 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
             <div
               style={{
                 fontSize: '0.875rem',
-                color: 'rgba(0, 0, 0, 0.6)',
+                color: subtitleColor,
                 lineHeight: 1.43,
               }}
             >
@@ -340,20 +329,3 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 CardHeader.displayName = 'CardHeader'
 
 export default Card
-
-// Add keyframes for animations if needed
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style')
-  styleSheet.textContent = `
-    @keyframes rotateGlyph {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-  `
-  document.head.appendChild(styleSheet)
-}
