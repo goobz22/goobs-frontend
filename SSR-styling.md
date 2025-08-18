@@ -3,6 +3,7 @@
 This document explains what the MUI + Next.js SSR integration solves, how our current library differs, and a minimal, custom approach to render styles correctly on the server so the first paint is already styled (no FOUC), while keeping our current API and theming model.
 
 ### What MUI’s integration actually solves (in brief)
+
 - **Critical CSS inlined on the server** so the page renders styled immediately.
 - **Per-request style cache/registry** to keep server/client class order consistent.
 - **Cleanup after hydration** to remove server-inserted style tags.
@@ -10,6 +11,7 @@ This document explains what the MUI + Next.js SSR integration solves, how our cu
 This improves perceived performance (no flicker) and avoids hydration warnings; it does not make component logic faster at runtime.
 
 ## Our current state
+
 - Components use inline `React.CSSProperties` computed at render.
 - Keyframes and global animations are injected on the client (`utils/keyframes.ts`).
 - Many components are marked `'use client'`, so style application often happens after hydration.
@@ -17,11 +19,13 @@ This improves perceived performance (no flicker) and avoids hydration warnings; 
 Implication: Inline styles SSR fine by default, but anything that depends on client-only effects (e.g., dynamic keyframes, syntax highlighting) may flicker on first paint.
 
 ## Goals
+
 - Keep our API and theme system.
 - Avoid flicker by ensuring any needed CSS (keyframes, global rules) is present in the initial HTML from the server.
 - Keep hydration consistent and dedupe client styles against server styles.
 
 ## Proposed approach: a tiny SSR style registry
+
 We introduce a small, framework-agnostic registry that works on both server and client:
 
 - **On the server**: collect keyframes/global CSS requested during the render pass; inline them into `<style>` via Next’s `useServerInsertedHTML`.
@@ -29,6 +33,7 @@ We introduce a small, framework-agnostic registry that works on both server and 
 - **Deterministic IDs**: keyframe names and global rule identifiers are consistent across server and client.
 
 ### Minimal API surface
+
 ```ts
 // src/ssr/StyleRegistry.tsx
 import React, { createContext, useContext, useRef } from 'react'
@@ -89,6 +94,7 @@ export function useServerStyles() {
 ```
 
 ### Deterministic keyframe IDs
+
 Replace random names in `utils/keyframes.ts` with a content hash (or caller-provided id). On the server, call `registry.insert({ id, cssText })` instead of directly touching `document`. On the client, only inject if not already present.
 
 ```ts
@@ -98,7 +104,9 @@ import { stableHash } from './stableHash' // simple djb2 or murmurhash
 
 export const useKeyframes = (nameOrSource: string, animation?: string) => {
   const registry = useStyleRegistry()
-  const id = animation ? `${nameOrSource}-${stableHash(animation)}` : nameOrSource
+  const id = animation
+    ? `${nameOrSource}-${stableHash(animation)}`
+    : nameOrSource
   const cssText = `@keyframes ${id} { ${animation ?? ''} }`
   if (!registry.has(id)) registry.insert({ id, cssText })
   return id
@@ -106,6 +114,7 @@ export const useKeyframes = (nameOrSource: string, animation?: string) => {
 ```
 
 ### Integrate in `app/layout.tsx` (Next 13+ App Router)
+
 Wrap the tree with `StyleProvider` and call `useServerStyles()` once at the top level so collected CSS inlines during SSR.
 
 ```tsx
@@ -114,7 +123,11 @@ import React from 'react'
 import { StyleProvider } from '../ssr/StyleRegistry'
 import { useServerStyles } from '../ssr/useServerStyles'
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   useServerStyles()
   return (
     <html lang="en">
@@ -127,6 +140,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 ### Using it in components
+
 - Where we currently call `keyframes/css`, switch to `useKeyframes` to register keyframes during render.
 - Inline styles keep working as-is. The only change is how we generate animation names and ensure their CSS exists server-side.
 
@@ -144,11 +158,13 @@ const pulse = useKeyframes('pulse', `
 ```
 
 ## Optional improvements
+
 - **Syntax highlighting (CodeCopy)**: pre-highlight on the server (e.g., using a lightweight highlighter in a server component) and hydrate on the client to avoid a flicker.
 - **Global styles**: add a `GlobalStyles` helper that registers resets/font-face rules via the same registry.
 - **Client cleanup**: if desired, remove the `data-goobs-ssr` style tag after hydration. It’s harmless to keep if rules match.
 
 ## File structure proposal
+
 - `src/ssr/StyleRegistry.tsx` – context and registry.
 - `src/ssr/useServerStyles.tsx` – `useServerInsertedHTML` bridge.
 - `src/utils/stableHash.ts` – deterministic hash for rule IDs.
@@ -156,6 +172,7 @@ const pulse = useKeyframes('pulse', `
 - `src/app/layout.tsx` – wrap with `StyleProvider` and call `useServerStyles()`.
 
 ## Theme and style utilities audit
+
 Most theme files return plain style objects and are SSR-safe. A few utilities directly touch `document` and should be routed through the SSR registry:
 
 - Needs update
@@ -169,16 +186,19 @@ Most theme files return plain style objects and are SSR-safe. A few utilities di
   - `src/theme/index.ts` and the component-specific theme files (e.g., `button.ts`, `alert.ts`, `accordion.ts`, etc.) appear to compute plain objects without accessing browser globals.
 
 Guidelines for updating the above:
+
 - Generate deterministic IDs (hash of CSS content) for all inserted rules.
 - Use the registry’s `insert({ id, cssText })`; avoid direct DOM access.
 - Keep client runtime able to no-op if the rule already exists (dedupe against SSR-inlined styles).
 
 ## FAQ
+
 - **Does this make components render faster?** No. It improves perceived performance by eliminating style flicker and ensuring hydration consistency.
 - **Do we need to convert inline styles to classes?** No. We only need SSR for rule-based CSS (keyframes/global). Inline styles already SSR fine.
 - **Do we have to change component props?** No. We can keep the current `styles` prop model; components only change how they acquire animation names.
 
 ## Rollout plan (safe and incremental)
+
 1. Add the registry files and wrap `app/layout.tsx`.
 2. Replace random keyframe names with `useKeyframes` in a few high-visibility components (`Button`, `CodeCopy`, `DataGrid`).
 3. Verify no FOUC on first paint; compare before/after.
@@ -193,6 +213,7 @@ Use this to track which components have been updated to the SSR style-registry a
 - Legend: [ ] not started, [~] in progress, [x] done
 
 #### Core UI
+
 - [ ] `src/components/AppBar/index.tsx`
 - [ ] `src/components/Avatar/index.tsx`
 - [ ] `src/components/Badge/index.tsx`
@@ -237,13 +258,16 @@ Use this to track which components have been updated to the SSR style-registry a
 - [ ] `src/components/Zoom/index.tsx`
 
 #### Feedback
+
 - [ ] `src/components/Alert/index.tsx`
 
 #### Disclosure & Navigation
+
 - [ ] `src/components/Accordion/index.tsx`
 - [ ] `src/components/Breadcrumb/index.tsx`
 
 #### Editors & Content Blocks
+
 - [ ] `src/components/CodeCopy/index.tsx`
 - [ ] `src/components/ComplexTextEditor/index.tsx`
 - [ ] `src/components/ComplexTextEditor/MarkdownEditor/index.tsx`
@@ -253,16 +277,19 @@ Use this to track which components have been updated to the SSR style-registry a
 - [ ] `src/components/ComplexTextEditor/Toolbars/Editor/index.tsx`
 
 #### Calendar & Scheduling
+
 - [ ] `src/components/BigCalendar/index.tsx`
 - [ ] `src/components/Stepper/index.tsx`
 
 #### Forms (containers)
+
 - [ ] `src/components/Form/Dialog/index.tsx`
 - [ ] `src/components/Form/Popup/index.tsx`
 - [ ] `src/components/Form/DataGrid/index.tsx`
 - [ ] `src/components/Form/ProjectBoard/index.tsx`
 
 #### Fields
+
 - [ ] `src/components/ConfirmationCodeInput/index.tsx`
 - [ ] `src/components/Field/Date/DateField/index.tsx`
 - [ ] `src/components/Field/Date/DateRange/index.tsx`
@@ -295,6 +322,7 @@ Use this to track which components have been updated to the SSR style-registry a
 - [ ] `src/components/InputLabel/index.tsx`
 
 #### DataGrid (and subcomponents)
+
 - [ ] `src/components/DataGrid/index.tsx`
 - [ ] `src/components/DataGrid/Toolbar/index.tsx`
 - [ ] `src/components/DataGrid/Footer/index.tsx`
@@ -310,6 +338,7 @@ Use this to track which components have been updated to the SSR style-registry a
 - [ ] `src/components/DataGrid/VerticalDivider/index.tsx`
 
 #### ProjectBoard
+
 - [ ] `src/components/ProjectBoard/index.tsx`
 - [ ] `src/components/ProjectBoard/board/index.tsx`
 - [ ] `src/components/ProjectBoard/forms/AddTask/administrator/companyDropdown/index.tsx`
@@ -321,8 +350,7 @@ Use this to track which components have been updated to the SSR style-registry a
 - [ ] `src/components/ProjectBoard/types/index.tsx`
 
 #### Icons
+
 - [ ] `src/components/Icons/*` (all icons; 272 files)
 
 Note: The above checklist is generated from current `index.tsx` entries and known component paths. If any component is missing, add it under the appropriate heading. For the Icons set, track progress as a group, or split into alphabetical chunks if you plan to touch their styling.
-
-
