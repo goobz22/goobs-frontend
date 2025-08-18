@@ -11,7 +11,9 @@ import { TRANSITIONS, SHADOWS } from './shared'
 export interface CardTheme {
   container: {
     background: string
-    border: string
+    borderWidth?: string
+    borderStyle?: React.CSSProperties['borderStyle']
+    borderColor?: string
     borderRadius: string
     boxShadow: string
     backdropFilter: string
@@ -86,6 +88,7 @@ export interface CardStyles {
   borderColor?: string
   borderRadius?: string
   borderWidth?: string
+  borderStyle?: React.CSSProperties['borderStyle']
   boxShadow?: string
   backdropFilter?: string
   backgroundImage?: string
@@ -136,7 +139,9 @@ export interface CardStyles {
 const lightTheme: CardTheme = {
   container: {
     background: 'rgba(255, 255, 255, 0.95)',
-    border: '1px solid rgba(226, 232, 240, 0.6)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(226, 232, 240, 0.6)',
     borderRadius: '8px',
     boxShadow: SHADOWS.light.small,
     backdropFilter: 'blur(8px)',
@@ -175,7 +180,9 @@ const lightTheme: CardTheme = {
 const darkTheme: CardTheme = {
   container: {
     background: 'rgba(30, 41, 59, 0.95)',
-    border: '1px solid rgba(71, 85, 105, 0.6)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(71, 85, 105, 0.6)',
     borderRadius: '8px',
     boxShadow: SHADOWS.dark.small,
     backdropFilter: 'blur(12px)',
@@ -219,7 +226,9 @@ const sacredTheme: CardTheme = {
       rgba(26, 26, 26, 0.97) 50%,
       rgba(10, 10, 10, 0.95) 100%
     )`,
-    border: '2px solid rgba(255, 215, 0, 0.4)',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(255, 215, 0, 0.4)',
     borderRadius: '12px',
     boxShadow: `${SHADOWS.sacred.small}, 0 8px 32px rgba(0, 0, 0, 0.3)`,
     backdropFilter: 'blur(16px)',
@@ -337,6 +346,7 @@ export const getCardStyles = (
     boxShadow,
     ...(styles?.backgroundColor && { backgroundColor: styles.backgroundColor }),
     ...(styles?.borderColor && { borderColor: styles.borderColor }),
+    ...(styles?.borderWidth && { borderWidth: styles.borderWidth }),
     ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
     ...(styles?.boxShadow && { boxShadow: styles.boxShadow }),
     ...(styles?.color && { color: styles.color }),

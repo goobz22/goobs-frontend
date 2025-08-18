@@ -594,6 +594,27 @@ export const getChipStyles = (
 ) => {
   const themeConfig = getChipTheme(styles)
 
+  const parseBorder = (border: string) => {
+    if (!border) {
+      return {
+        width: undefined as string | undefined,
+        style: undefined as string | undefined,
+        color: undefined as string | undefined,
+      }
+    }
+    const parts = border.trim().split(' ')
+    const width = parts[0]
+    const style = parts[1]
+    const color = parts.slice(2).join(' ')
+    return { width, style, color }
+  }
+
+  const {
+    width: baseBorderWidth,
+    style: baseBorderStyle,
+    color: baseBorderColor,
+  } = parseBorder(themeConfig.container.border)
+
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -601,7 +622,12 @@ export const getChipStyles = (
     overflow: styles?.whiteSpace === 'normal' ? 'visible' : 'hidden',
     transition: themeConfig.transition,
     borderRadius: themeConfig.container.borderRadius,
-    border: themeConfig.container.border,
+    borderWidth:
+      baseBorderStyle === 'none'
+        ? 0
+        : (baseBorderWidth as unknown as number | string),
+    borderStyle: baseBorderStyle as any,
+    borderColor: baseBorderColor,
     backgroundColor: themeConfig.container.background,
     backdropFilter: themeConfig.container.backdropFilter,
     boxShadow: themeConfig.container.boxShadow,
@@ -644,7 +670,7 @@ export const getChipStyles = (
       }),
     // Apply outline override
     ...(styles?.outline === false && {
-      border: 'none',
+      borderWidth: 0,
       boxShadow: 'none',
     }),
   }
