@@ -717,7 +717,7 @@ export const typographyThemes: Record<
 export const getTypographyTheme = (
   styles?: TypographyStyles
 ): TypographyTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = typographyThemes[theme]
 
   if (!styles) {

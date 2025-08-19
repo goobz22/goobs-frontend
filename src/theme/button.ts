@@ -228,7 +228,7 @@ export const buttonThemes: Record<'light' | 'dark' | 'sacred', ButtonTheme> = {
 
 // Helper function to get computed theme with custom style overrides
 export const getButtonTheme = (styles?: ButtonStyles): ButtonTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = buttonThemes[theme]
 
   if (!styles) {

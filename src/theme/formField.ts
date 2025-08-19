@@ -199,17 +199,17 @@ export const formFieldThemes: Record<
     },
     text: 'rgba(255, 215, 0, 1)', // #FFD700
     label: {
-      default: 'rgba(107, 114, 128, 1)', // #6B7280
+      default: 'rgba(255, 215, 0, 0.9)', // Gold for sacred theme labels
       focused: 'rgba(255, 215, 0, 1)', // #FFD700
       error: 'rgba(239, 68, 68, 1)', // #EF4444
       shrunkBackground: 'rgba(10, 10, 10, 0.9)',
     },
     adornment: {
-      default: 'rgba(107, 114, 128, 1)', // #6B7280
+      default: 'rgba(255, 215, 0, 0.7)', // Gold for sacred theme adornments
       focused: 'rgba(255, 215, 0, 1)', // #FFD700
     },
     footerText: {
-      default: 'rgba(107, 114, 128, 1)', // #6B7280
+      default: 'rgba(255, 215, 0, 0.6)', // Gold for sacred theme footer text
       error: 'rgba(239, 68, 68, 1)', // #EF4444
       info: 'rgba(255, 215, 0, 0.8)', // Gold with slight transparency
     },
@@ -221,7 +221,7 @@ export const formFieldThemes: Record<
 
 // Helper function to get computed theme with custom style overrides
 export const getFormFieldTheme = (styles?: FormFieldStyles): FormFieldTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = formFieldThemes[theme]
 
   if (!styles) {

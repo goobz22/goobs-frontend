@@ -267,7 +267,7 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
 
 // Helper function to get computed theme with custom style overrides
 export const getDialogTheme = (styles?: DialogStyles): DialogTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = dialogThemes[theme]
 
   if (!styles) {
@@ -441,25 +441,25 @@ export const getDialogStyles = (
 
   // Generate CSS for webkit scrollbar styling
   const scrollbarCSS = `
-    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar {
+    .dialog-content-${styles?.theme || 'sacred'}::-webkit-scrollbar {
       width: ${themeConfig.scrollbar.width};
       background-color: ${themeConfig.scrollbar.backgroundColor};
       border-radius: ${themeConfig.scrollbar.borderRadius};
     }
     
-    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-thumb {
+    .dialog-content-${styles?.theme || 'sacred'}::-webkit-scrollbar-thumb {
       background-color: ${themeConfig.scrollbarThumb.backgroundColor};
       border-radius: ${themeConfig.scrollbarThumb.borderRadius};
       ${themeConfig.scrollbarThumb.border ? `border: ${themeConfig.scrollbarThumb.border};` : ''}
       ${themeConfig.scrollbarThumb.backgroundImage ? `background-image: ${themeConfig.scrollbarThumb.backgroundImage};` : ''}
     }
     
-    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-track {
+    .dialog-content-${styles?.theme || 'sacred'}::-webkit-scrollbar-track {
       background-color: ${themeConfig.scrollbarTrack.backgroundColor};
       border-radius: ${themeConfig.scrollbarTrack.borderRadius};
     }
     
-    .dialog-content-${styles?.theme || 'light'}::-webkit-scrollbar-thumb:hover {
+    .dialog-content-${styles?.theme || 'sacred'}::-webkit-scrollbar-thumb:hover {
       opacity: 0.8;
     }
   `
@@ -469,6 +469,6 @@ export const getDialogStyles = (
     dialog: dialogStyle,
     content: contentStyle,
     scrollbarCSS,
-    contentClassName: `dialog-content-${styles?.theme || 'light'}`,
+    contentClassName: `dialog-content-${styles?.theme || 'sacred'}`,
   }
 }

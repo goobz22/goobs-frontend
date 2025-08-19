@@ -369,7 +369,7 @@ export const dropdownThemes: Record<
       fontFamily: '"Cinzel", serif',
     },
     label: {
-      color: 'rgba(107, 114, 128, 1)',
+      color: 'rgba(255, 215, 0, 0.9)',
       fontSize: '14px',
       fontWeight: 600,
       marginBottom: '6px',
@@ -417,7 +417,7 @@ export const dropdownThemes: Record<
       transition: TRANSITIONS.medium,
     },
     footerText: {
-      color: 'rgba(107, 114, 128, 1)',
+      color: 'rgba(255, 215, 0, 0.6)',
       fontSize: '12px',
       fontFamily: '"Cinzel", serif',
       marginTop: '8px',
@@ -445,7 +445,7 @@ export const dropdownThemes: Record<
 
 // Helper function to get computed theme with custom style overrides
 export const getDropdownTheme = (styles?: DropdownStyles): DropdownTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = dropdownThemes[theme]
 
   if (!styles) {

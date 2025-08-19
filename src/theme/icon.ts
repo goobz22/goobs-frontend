@@ -196,7 +196,7 @@ export const iconThemes: Record<'light' | 'dark' | 'sacred', IconTheme> = {
 
 // Helper function to get computed theme with custom style overrides
 export const getIconTheme = (styles?: IconStyles): IconTheme => {
-  const theme = styles?.theme || 'light'
+  const theme = styles?.theme || 'sacred'
   const baseTheme = iconThemes[theme]
 
   if (!styles) {
