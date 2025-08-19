@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import ShowTask from './forms/ShowTask/client'
 
 const meta = {
-  title: 'Components/ProjectBoard/ShowTask',
+  title: 'ProjectBoard/Forms/ShowTask',
   component: ShowTask,
   parameters: {
     layout: 'fullscreen',

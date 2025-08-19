@@ -25,9 +25,9 @@ const meta: Meta<typeof NoUserAddTask> = {
     layout: 'fullscreen',
   },
   argTypes: {
-    sacredtheme: {
-      control: { type: 'boolean' },
-      description: 'Enable sacred theme styling',
+    styles: {
+      control: { type: 'object' },
+      description: 'Theme styling options',
     },
   },
 }
@@ -66,7 +66,7 @@ export const LightTheme: Story = {
   ),
   args: {
     ...commonArgs,
-    sacredtheme: false,
+    styles: { theme: 'light' },
   },
 }
 
@@ -101,7 +101,7 @@ export const DarkTheme: Story = {
   ),
   args: {
     ...commonArgs,
-    sacredtheme: false,
+    styles: { theme: 'dark' },
   },
 }
 
@@ -136,6 +136,6 @@ export const SacredTheme: Story = {
   ),
   args: {
     ...commonArgs,
-    sacredtheme: true,
+    styles: { theme: 'sacred' },
   },
 }
