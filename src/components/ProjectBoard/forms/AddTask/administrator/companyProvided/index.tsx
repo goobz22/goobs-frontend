@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import Dialog from '../../../../../Dialog'
-import CloseIcon from '../../../../../Icons/Close'
+
 import Typography from '../../../../../Typography'
 import SearchableSimple, {
   DropdownOption,
@@ -20,6 +20,7 @@ import type {
   RawArticle,
   RawSeverityLevel,
 } from '../../../../types'
+import type { ProjectBoardStyles } from '../../../../../../theme'
 
 const SACRED_GLYPHS = ['𓁹', '𓂀', '𓊖', '𓊹']
 
@@ -65,99 +66,109 @@ interface AdministratorAddTaskCompanyProvidedProps {
   severityLevels: RawSeverityLevel[]
   companyId: string
   createdUserId: string
-  sacredtheme?: boolean
+  styles?: ProjectBoardStyles
 }
 
 const getStyles = (
-  sacredtheme?: boolean,
+  styles?: ProjectBoardStyles,
   screenSize?: 'mobile' | 'tablet' | 'desktop'
-) => ({
-  dialog: {
-    width: '100%',
-    pointerEvents: 'auto',
-    borderRadius: '0.5rem',
-    overflow: 'hidden',
-    ...(sacredtheme && {
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      animation: 'add-task-glow-pulse 2s infinite alternate',
-    }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '0.75rem',
-    fontSize: '1.125rem',
-    color: 'rgba(255, 215, 0, 0.3)',
-    zIndex: 10,
-    animation: 'add-task-float-glyph 5s infinite alternate',
-  } as React.CSSProperties,
-  closeButton: {
-    position: 'absolute',
-    right: '0.5rem',
-    top: '0.5rem',
-    zIndex: 20,
-    padding: '0.25rem',
-    borderRadius: '9999px',
-    color: sacredtheme ? '#FFD700' : '#6B7280',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-  closeButtonHover: {
-    color: sacredtheme ? '#FBBF24' : '#1F2937',
-  } as React.CSSProperties,
-  header: {
-    padding: '1.5rem',
-    ...(sacredtheme && {
-      borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
-      backgroundColor: 'rgba(255, 215, 0, 0.05)',
-    }),
-  } as React.CSSProperties,
-  title: {
-    marginBottom: '1.5rem',
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      letterSpacing: '0.05em',
-      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-      color: '#FFD700',
-    }),
-  } as React.CSSProperties,
-  formContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  } as React.CSSProperties,
-  // Full width items span all columns
-  fullWidth: {
-    width: '100%',
-  } as React.CSSProperties,
-  // Dropdown row container - responsive grid
-  dropdownRow: {
-    display: 'grid',
-    gridTemplateColumns:
-      screenSize === 'mobile'
-        ? '1fr'
-        : screenSize === 'tablet'
-          ? 'repeat(2, 1fr)'
-          : 'repeat(3, 1fr)', // desktop gets 3 columns
-    gap: '1rem',
-    width: '100%',
-    alignItems: 'start', // Ensure fields align properly
-  } as React.CSSProperties,
+) => {
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
 
-  // Individual field wrapper for responsive layout
-  fieldWrapper: {
-    width: '100%',
-  } as React.CSSProperties,
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '0.75rem',
-    marginTop: '1.5rem',
-    flexDirection: screenSize === 'mobile' ? 'column' : 'row',
-  } as React.CSSProperties,
-})
+  return {
+    dialog: {
+      width: '100%',
+      pointerEvents: 'auto',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      ...(isSacredTheme && {
+        border: '2px solid rgba(255, 215, 0, 0.5)',
+        boxShadow: '0 0 1.5rem rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        animation: 'add-task-glow-pulse 2s infinite alternate',
+      }),
+    } as React.CSSProperties,
+    glyph: {
+      position: 'absolute',
+      top: '0.75rem',
+      fontSize: '1.125rem',
+      color: 'rgba(255, 215, 0, 0.3)',
+      zIndex: 10,
+      animation: 'add-task-float-glyph 5s infinite alternate',
+    } as React.CSSProperties,
+    closeButton: {
+      position: 'absolute',
+      right: '0.5rem',
+      top: '0.5rem',
+      zIndex: 20,
+      padding: '0.25rem',
+      borderRadius: '9999px',
+      color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E5E7EB' : '#6B7280',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+    } as React.CSSProperties,
+    closeButtonHover: {
+      color: isSacredTheme ? '#FBBF24' : isDarkTheme ? '#F9FAFB' : '#1F2937',
+    } as React.CSSProperties,
+    header: {
+      padding: '1.5rem',
+      ...(isSacredTheme && {
+        borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+      }),
+    } as React.CSSProperties,
+    title: {
+      marginBottom: '1.5rem',
+      ...(isSacredTheme && {
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.05em',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+        color: '#FFD700',
+      }),
+    } as React.CSSProperties,
+    formContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+    } as React.CSSProperties,
+    fieldWrapper: {
+      marginBottom: '16px',
+    } as React.CSSProperties,
+    severityWrapper: {
+      marginBottom: '8px',
+    } as React.CSSProperties,
+    // Full width items span all columns
+    fullWidth: {
+      width: '100%',
+    } as React.CSSProperties,
+    // Dropdown row container - responsive grid
+    dropdownRow: {
+      display: 'grid',
+      gridTemplateColumns:
+        screenSize === 'mobile'
+          ? '1fr'
+          : screenSize === 'tablet'
+            ? 'repeat(2, 1fr)'
+            : 'repeat(3, 1fr)', // desktop gets 3 columns
+      gap: '1rem',
+      width: '100%',
+      alignItems: 'start', // Ensure fields align properly
+    } as React.CSSProperties,
+
+    // Individual field wrapper for responsive layout
+    dropdownFieldWrapper: {
+      width: '100%',
+    } as React.CSSProperties,
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      gap: '0.75rem',
+      marginTop: '1.5rem',
+      flexDirection: screenSize === 'mobile' ? 'column' : 'row',
+    } as React.CSSProperties,
+  }
+}
 
 const AdministratorAddTaskCompanyProvided: React.FC<
   AdministratorAddTaskCompanyProvidedProps
@@ -173,7 +184,7 @@ const AdministratorAddTaskCompanyProvided: React.FC<
   severityLevels,
   companyId,
   createdUserId,
-  sacredtheme = false,
+  styles,
 }) => {
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
   const [selectedQueueId, setSelectedQueueId] = useState('')
@@ -184,9 +195,8 @@ const AdministratorAddTaskCompanyProvided: React.FC<
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
-  const [isCloseHovered, setCloseHovered] = useState(false)
   const screenSize = useScreenSize()
-  const styles = getStyles(sacredtheme, screenSize)
+  const computedStyles = getStyles(styles, screenSize)
 
   const severityOptions: DropdownOption[] = severityLevels.map(sl => ({
     value: String(sl.severityLevel),
@@ -288,17 +298,17 @@ const AdministratorAddTaskCompanyProvided: React.FC<
     <Dialog
       open={open}
       onClose={onClose}
-      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+      styles={{ theme: styles?.theme || 'light' }}
     >
-      <div style={styles.dialog}>
-        {sacredtheme && (
+      <div style={computedStyles.dialog}>
+        {styles?.theme === 'sacred' && (
           <>
-            <div style={{ ...styles.glyph, left: '0.75rem' }}>
+            <div style={{ ...computedStyles.glyph, left: '0.75rem' }}>
               {SACRED_GLYPHS[0]}
             </div>
             <div
               style={{
-                ...styles.glyph,
+                ...computedStyles.glyph,
                 right: '3rem',
                 animationDirection: 'reverse',
               }}
@@ -307,48 +317,49 @@ const AdministratorAddTaskCompanyProvided: React.FC<
             </div>
           </>
         )}
-        <button
-          onClick={onClose}
-          style={{
-            ...styles.closeButton,
-            ...(isCloseHovered ? styles.closeButtonHover : {}),
-          }}
-          onMouseEnter={() => setCloseHovered(true)}
-          onMouseLeave={() => setCloseHovered(false)}
-        >
-          <CloseIcon style={{ height: '1.5rem', width: '1.5rem' }} />
-        </button>
 
-        <div style={styles.header}>
-          <Typography styles={{ theme: 'sacred', variant: 'cinzelh5' }}>
+        <div style={computedStyles.header}>
+          <Typography
+            styles={{ theme: styles?.theme || 'light', variant: 'cinzelh5' }}
+          >
             Create Task
           </Typography>
 
-          <div style={styles.formContainer}>
-            <div style={styles.fullWidth}>
+          <div style={computedStyles.formContainer}>
+            <div
+              style={{
+                ...computedStyles.fullWidth,
+                ...computedStyles.fieldWrapper,
+              }}
+            >
               <TextField
                 label="Task Title"
                 value={taskTitle}
                 onChange={setTaskTitle}
                 placeholder="Enter Task Title"
-                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
-            <div style={styles.fullWidth}>
+            <div
+              style={{
+                ...computedStyles.fullWidth,
+                ...computedStyles.fieldWrapper,
+              }}
+            >
               <ComplexTextEditor
                 label="Task Description"
                 value={taskDescription}
                 onChange={setTaskDescription}
                 editorType="simple"
                 minRows={5}
-                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
 
             {/* First row of dropdowns */}
             {/* Single responsive grid for all dropdown fields */}
-            <div style={styles.dropdownRow}>
-              <div style={styles.fieldWrapper}>
+            <div style={computedStyles.dropdownRow}>
+              <div style={computedStyles.severityWrapper}>
                 <SearchableSimple
                   label="Severity Level"
                   options={severityOptions}
@@ -362,10 +373,10 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                     setSelectedSeverityId(option?.attribute2 || '')
                   }
                   placeholder="Select severity level"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               </div>
-              <div style={styles.fieldWrapper}>
+              <div style={computedStyles.dropdownFieldWrapper}>
                 <SearchableSimple
                   label="Associated Product (Queue)"
                   options={queueOptions}
@@ -379,10 +390,10 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                     setSelectedQueueId(option?.attribute1 || '')
                   }
                   placeholder="Select product queue"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               </div>
-              <div style={styles.fieldWrapper}>
+              <div style={computedStyles.dropdownFieldWrapper}>
                 <SearchableSimple
                   label="Status"
                   options={statusOptions}
@@ -398,10 +409,10 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                     setSelectedStatusId(option?.attribute1 || '')
                   }}
                   placeholder="Select status"
-                  styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                  styles={{ theme: styles?.theme || 'light' }}
                 />
               </div>
-              <div style={styles.fieldWrapper}>
+              <div style={computedStyles.dropdownFieldWrapper}>
                 <SearchableSimple
                   label="Substatus"
                   options={finalSubStatusOptions}
@@ -420,12 +431,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                       : 'Please select a status first'
                   }
                   styles={{
-                    theme: sacredtheme ? 'sacred' : 'light',
+                    theme: styles?.theme || 'light',
                     disabled: !selectedStatus,
                   }}
                 />
               </div>
-              <div style={styles.fieldWrapper}>
+              <div style={computedStyles.dropdownFieldWrapper}>
                 {React.useMemo(() => {
                   const topicOptions = topics.map(t => ({
                     value: t.topic || `Topic ${t._id}`,
@@ -449,12 +460,12 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                         })
                         setSelectedTopicIds(newSelectedIds)
                       }}
-                      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                      styles={{ theme: styles?.theme || 'light' }}
                     />
                   )
-                }, [topics, selectedTopicIds, sacredtheme])}
+                }, [topics, selectedTopicIds, styles?.theme])}
               </div>
-              <div style={styles.fieldWrapper}>
+              <div style={computedStyles.dropdownFieldWrapper}>
                 {React.useMemo(() => {
                   const articleOptions = knowledgebaseArticles.map(a => ({
                     value: a.articleTitle || `Article ${a._id}`,
@@ -482,23 +493,23 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                         })
                         setSelectedArticleIds(newSelectedIds)
                       }}
-                      styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                      styles={{ theme: styles?.theme || 'light' }}
                     />
                   )
-                }, [knowledgebaseArticles, selectedArticleIds, sacredtheme])}
+                }, [knowledgebaseArticles, selectedArticleIds, styles?.theme])}
               </div>
             </div>
 
-            <div style={styles.buttonContainer}>
+            <div style={computedStyles.buttonContainer}>
               <CustomButton
                 text="Cancel"
                 onClick={onClose}
-                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
               <CustomButton
                 text="Create Task"
                 onClick={handleSubmit}
-                styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+                styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
           </div>

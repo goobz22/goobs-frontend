@@ -7,6 +7,7 @@ import ComplexTextEditor from '../../../../ComplexTextEditor'
 import SearchableSimple from '../../../../Field/Dropdown/SearchableSimple'
 import CustomButton from '../../../../Button'
 import type { RawSeverityLevel } from '../../../types'
+import type { ProjectBoardStyles } from '../../../../../theme'
 
 interface NoUserAddTaskProps {
   onAdd: (newTask: {
@@ -16,57 +17,83 @@ interface NoUserAddTaskProps {
     severityId: string
   }) => void
   severityLevels: RawSeverityLevel[]
-  sacredtheme?: boolean
+  styles?: ProjectBoardStyles
 }
 
-const getStyles = (sacredtheme?: boolean) => ({
-  container: {
-    padding: '0.75rem',
-    position: 'relative',
-    ...(sacredtheme && {
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      borderRadius: '0.5rem',
-      overflow: 'hidden',
-      boxShadow: '0 0 1rem rgba(255, 215, 0, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      animation: 'no-user-add-task-glow-pulse 2s infinite alternate',
-    }),
-  } as React.CSSProperties,
-  glyph: {
-    position: 'absolute',
-    top: '0.75rem',
-    fontSize: '1.125rem',
-    color: 'rgba(255, 215, 0, 0.3)',
-    zIndex: 10,
-    animation: 'no-user-add-task-float-glyph 5s infinite alternate',
-  } as React.CSSProperties,
-  title: {
-    marginBottom: '0.75rem',
-    fontSize: '1.25rem',
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      letterSpacing: '0.05em',
-      textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
-      color: '#FFD700',
-    }),
-  } as React.CSSProperties,
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  } as React.CSSProperties,
-})
+const getStyles = (styles?: ProjectBoardStyles) => {
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
+
+  return {
+    container: {
+      padding: '0.75rem',
+      position: 'relative',
+      ...(isSacredTheme && {
+        border: '2px solid rgba(255, 215, 0, 0.5)',
+        borderRadius: '0.5rem',
+        overflow: 'hidden',
+        boxShadow: '0 0 1rem rgba(255, 215, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        animation: 'no-user-add-task-glow-pulse 2s infinite alternate',
+      }),
+      ...(isDarkTheme && {
+        backgroundColor: 'rgba(31, 41, 55, 0.95)',
+        border: '2px solid rgba(75, 85, 99, 0.5)',
+        borderRadius: '0.5rem',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+      }),
+    } as React.CSSProperties,
+    glyph: {
+      position: 'absolute',
+      top: '0.75rem',
+      fontSize: '1.125rem',
+      color: isSacredTheme
+        ? 'rgba(255, 215, 0, 0.3)'
+        : isDarkTheme
+          ? 'rgba(156, 163, 175, 0.3)'
+          : 'rgba(107, 114, 128, 0.3)',
+      zIndex: 10,
+      animation: isSacredTheme
+        ? 'no-user-add-task-float-glyph 5s infinite alternate'
+        : 'none',
+    } as React.CSSProperties,
+    title: {
+      marginBottom: '0.75rem',
+      fontSize: '1.25rem',
+      ...(isSacredTheme && {
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.05em',
+        textShadow: '0 0 5px rgba(255, 215, 0, 0.5)',
+        color: '#FFD700',
+      }),
+      ...(isDarkTheme && {
+        color: '#E5E7EB',
+      }),
+    } as React.CSSProperties,
+    form: {
+      display: 'flex',
+      flexDirection: 'column',
+    } as React.CSSProperties,
+    fieldWrapper: {
+      marginBottom: '16px',
+    } as React.CSSProperties,
+    severityWrapper: {
+      marginBottom: '8px',
+    } as React.CSSProperties,
+  }
+}
 
 const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   onAdd,
   severityLevels,
-  sacredtheme = false,
+  styles,
 }) => {
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
   const [email, setEmail] = useState('')
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
-  const styles = getStyles(sacredtheme)
+  const computedStyles = getStyles(styles)
+  const isSacredTheme = styles?.theme === 'sacred'
 
   const severityOptions = severityLevels.map((sl: RawSeverityLevel) => ({
     value: String(sl.severityLevel),
@@ -92,13 +119,13 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
   )
 
   return (
-    <div style={styles.container}>
-      {sacredtheme && (
+    <div style={computedStyles.container}>
+      {isSacredTheme && (
         <>
-          <div style={{ ...styles.glyph, left: '0.75rem' }}>𓁹</div>
+          <div style={{ ...computedStyles.glyph, left: '0.75rem' }}>𓁹</div>
           <div
             style={{
-              ...styles.glyph,
+              ...computedStyles.glyph,
               right: '0.75rem',
               animationDirection: 'reverse',
             }}
@@ -107,52 +134,71 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
           </div>
         </>
       )}
-      <Typography {...(sacredtheme ? { styles: { color: '#FFD700' } } : {})}>
-        Create Task
-      </Typography>
+      <Typography
+        text="Create Task"
+        styles={{
+          theme: styles?.theme || 'light',
+          variant: styles?.theme === 'sacred' ? 'cinzelh5' : 'merrih5',
+          marginBottom: '0.75rem',
+          color:
+            styles?.theme === 'sacred'
+              ? '#FFD700'
+              : styles?.theme === 'dark'
+                ? '#E5E7EB'
+                : '#1F2937',
+        }}
+      />
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <TextField
-          label="Task Title"
-          value={taskTitle}
-          onChange={setTaskTitle}
-          placeholder="Enter Task Title"
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-        />
-        <ComplexTextEditor
-          label="Task Description"
-          value={taskDescription}
-          onChange={setTaskDescription}
-          editorType="simple"
-          minRows={5}
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-        />
-        <TextField
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          placeholder="Enter your email"
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-        />
-        <SearchableSimple
-          label="Severity Level"
-          options={severityOptions}
-          defaultValue={
-            severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
-              ?.value || ''
-          }
-          onChange={option =>
-            setSelectedSeverityId(
-              (option as { attribute2: string })?.attribute2 || ''
-            )
-          }
-          placeholder="Select severity level"
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
-        />
+      <form onSubmit={handleSubmit} style={computedStyles.form}>
+        <div style={computedStyles.fieldWrapper}>
+          <TextField
+            label="Task Title"
+            value={taskTitle}
+            onChange={setTaskTitle}
+            placeholder="Enter Task Title"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.fieldWrapper}>
+          <ComplexTextEditor
+            label="Task Description"
+            value={taskDescription}
+            onChange={setTaskDescription}
+            editorType="simple"
+            minRows={5}
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.fieldWrapper}>
+          <TextField
+            label="Email"
+            value={email}
+            onChange={setEmail}
+            placeholder="Enter your email"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.severityWrapper}>
+          <SearchableSimple
+            label="Severity Level"
+            options={severityOptions}
+            defaultValue={
+              severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
+                ?.value || ''
+            }
+            onChange={option =>
+              setSelectedSeverityId(
+                (option as { attribute2: string })?.attribute2 || ''
+              )
+            }
+            placeholder="Select severity level"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
         <CustomButton
           text="Create Task"
           onClick={() => handleSubmit()}
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+          styles={{ theme: styles?.theme || 'light' }}
         />
       </form>
     </div>

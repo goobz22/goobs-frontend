@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 import Dialog from '../../../../Dialog'
-import CloseIcon from '../../../../Icons/Close'
+
 import Typography from '../../../../Typography'
 import SearchableSimple from '../../../../Field/Dropdown/SearchableSimple'
 import MultiSelect from '../../../../Field/Dropdown/MultiSelect'
@@ -59,21 +59,7 @@ const getStyles = (styles?: ProjectBoardStyles) => {
       zIndex: 10,
       animation: 'add-task-float-glyph 5s infinite alternate',
     } as React.CSSProperties,
-    closeButton: {
-      position: 'absolute',
-      right: '0.5rem',
-      top: '0.5rem',
-      zIndex: 20,
-      padding: '0.25rem',
-      borderRadius: '9999px',
-      color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E5E7EB' : '#6B7280',
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-    } as React.CSSProperties,
-    closeButtonHover: {
-      color: isSacredTheme ? '#FBBF24' : isDarkTheme ? '#F9FAFB' : '#1F2937',
-    } as React.CSSProperties,
+
     header: {
       padding: '0.75rem',
       ...(isSacredTheme && {
@@ -100,7 +86,12 @@ const getStyles = (styles?: ProjectBoardStyles) => {
     formContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.25rem',
+    } as React.CSSProperties,
+    fieldWrapper: {
+      marginBottom: '16px',
+    } as React.CSSProperties,
+    severityWrapper: {
+      marginBottom: '8px',
     } as React.CSSProperties,
     row: {
       display: 'flex',
@@ -145,7 +136,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([])
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
-  const [isCloseHovered, setCloseHovered] = useState(false)
+
   const computedStyles = getStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
 
@@ -210,7 +201,7 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+      styles={{ theme: styles?.theme || 'light' }}
     >
       <div style={computedStyles.dialog}>
         {isSacredTheme && (
@@ -229,105 +220,107 @@ const CustomerAddTask: React.FC<CustomerAddTaskProps> = ({
             </div>
           </>
         )}
-        <button
-          onClick={onClose}
-          style={{
-            ...computedStyles.closeButton,
-            ...(isCloseHovered && computedStyles.closeButtonHover),
-          }}
-          onMouseEnter={() => setCloseHovered(true)}
-          onMouseLeave={() => setCloseHovered(false)}
-        >
-          <CloseIcon style={{ height: '1.5rem', width: '1.5rem' }} />
-        </button>
 
         <div style={computedStyles.header}>
-          <Typography styles={{ theme: 'sacred', variant: 'cinzelh5' }}>
+          <Typography
+            styles={{ theme: styles?.theme || 'light', variant: 'cinzelh5' }}
+          >
             Create Task
           </Typography>
 
           <div style={computedStyles.formContainer}>
-            <TextField
-              label="Task Title"
-              value={taskTitle}
-              onChange={setTaskTitle}
-              placeholder="Enter Task Title"
-              {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
-            />
-            <ComplexTextEditor
-              label="Task Description"
-              value={taskDescription}
-              onChange={setTaskDescription}
-              editorType="simple"
-              minRows={5}
-              {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
-            />
+            <div style={computedStyles.fieldWrapper}>
+              <TextField
+                label="Task Title"
+                value={taskTitle}
+                onChange={setTaskTitle}
+                placeholder="Enter Task Title"
+                {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
+              />
+            </div>
+            <div style={computedStyles.fieldWrapper}>
+              <ComplexTextEditor
+                label="Task Description"
+                value={taskDescription}
+                onChange={setTaskDescription}
+                editorType="simple"
+                minRows={5}
+                {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
+              />
+            </div>
             <div style={computedStyles.row}>
               <div style={computedStyles.col}>
-                <SearchableSimple
-                  label="Severity Level"
-                  options={severityOptions}
-                  defaultValue={
-                    severityOptions.find(
-                      opt => opt.attribute2 === selectedSeverityId
-                    )?.value || ''
-                  }
-                  onChange={option =>
-                    setSelectedSeverityId(option?.attribute2 || '')
-                  }
-                  placeholder="Select severity level"
-                  {...(styles?.theme
-                    ? { styles: { theme: styles.theme } }
-                    : {})}
-                />
+                <div style={computedStyles.severityWrapper}>
+                  <SearchableSimple
+                    label="Severity Level"
+                    options={severityOptions}
+                    defaultValue={
+                      severityOptions.find(
+                        opt => opt.attribute2 === selectedSeverityId
+                      )?.value || ''
+                    }
+                    onChange={option =>
+                      setSelectedSeverityId(option?.attribute2 || '')
+                    }
+                    placeholder="Select severity level"
+                    {...(styles?.theme
+                      ? { styles: { theme: styles.theme } }
+                      : {})}
+                  />
+                </div>
               </div>
               <div style={computedStyles.col}>
-                <SearchableSimple
-                  label="Associated Product (Queue)"
-                  options={queueOptions}
-                  defaultValue={
-                    queueOptions.find(opt => opt.attribute1 === selectedQueueId)
-                      ?.value || ''
-                  }
-                  onChange={option =>
-                    setSelectedQueueId(option?.attribute1 || '')
-                  }
-                  placeholder="Select product queue"
-                  {...(styles?.theme
-                    ? { styles: { theme: styles.theme } }
-                    : {})}
-                />
+                <div style={computedStyles.fieldWrapper}>
+                  <SearchableSimple
+                    label="Associated Product (Queue)"
+                    options={queueOptions}
+                    defaultValue={
+                      queueOptions.find(
+                        opt => opt.attribute1 === selectedQueueId
+                      )?.value || ''
+                    }
+                    onChange={option =>
+                      setSelectedQueueId(option?.attribute1 || '')
+                    }
+                    placeholder="Select product queue"
+                    {...(styles?.theme
+                      ? { styles: { theme: styles.theme } }
+                      : {})}
+                  />
+                </div>
               </div>
             </div>
-            {React.useMemo(() => {
-              const topicOptions = topics.map(t => ({
-                value: t.topic || `Topic ${t._id}`,
-                attribute1: t._id,
-              }))
-              const selectedTopicValues = selectedTopicIds.map(id => {
-                const topic = topics.find(t => t._id === id)
-                return topic ? topic.topic || `Topic ${topic._id}` : id
-              })
-              return (
-                <MultiSelect
-                  label="Topics"
-                  options={topicOptions}
-                  defaultSelected={selectedTopicValues}
-                  onChange={selectedValues => {
-                    const newSelectedIds = selectedValues.map(value => {
-                      const matchingTopic = topicOptions.find(
-                        opt => opt.value === value
-                      )
-                      return matchingTopic?.attribute1 || value
-                    })
-                    setSelectedTopicIds(newSelectedIds)
-                  }}
-                  {...(styles?.theme
-                    ? { styles: { theme: styles.theme } }
-                    : {})}
-                />
-              )
-            }, [topics, selectedTopicIds, styles?.theme])}
+            <div style={computedStyles.fieldWrapper}>
+              {React.useMemo(() => {
+                const topicOptions = topics.map(t => ({
+                  value: t.topic || `Topic ${t._id}`,
+                  attribute1: t._id,
+                }))
+                const selectedTopicValues = selectedTopicIds.map(id => {
+                  const topic = topics.find(t => t._id === id)
+                  return topic ? topic.topic || `Topic ${topic._id}` : id
+                })
+                return (
+                  <MultiSelect
+                    label="Topics"
+                    options={topicOptions}
+                    defaultSelected={selectedTopicValues}
+                    onChange={selectedValues => {
+                      const newSelectedIds = selectedValues.map(value => {
+                        const matchingTopic = topicOptions.find(
+                          opt => opt.value === value
+                        )
+                        return matchingTopic?.attribute1 || value
+                      })
+                      setSelectedTopicIds(newSelectedIds)
+                    }}
+                    {...(styles?.theme
+                      ? { styles: { theme: styles.theme } }
+                      : {})}
+                  />
+                )
+              }, [topics, selectedTopicIds, styles?.theme])}
+            </div>
 
             <div style={computedStyles.buttonContainer}>
               <CustomButton

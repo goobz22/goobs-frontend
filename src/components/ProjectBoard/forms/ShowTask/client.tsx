@@ -580,12 +580,20 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               />
             ) : (
               <>
-                <Typography styles={{ theme: 'sacred', variant: 'cinzelh4' }}>
+                <Typography
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelh4',
+                  }}
+                >
                   {formData.taskTitle}
                 </Typography>
                 <Typography
                   text={`created by ${createdBy}`}
-                  styles={{ theme: 'sacred', variant: 'cinzelh5' }}
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelh5',
+                  }}
                 />
               </>
             )}
@@ -595,7 +603,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <StyledTooltip
               title={isEditing ? 'Save' : 'Edit'}
               tooltipplacement="bottom"
-              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+              styles={{ theme: styles?.theme || 'light' }}
             >
               <CustomButton
                 {...(isEditing
@@ -603,7 +611,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   : {
                       icon: (
                         <EditIcon
-                          styles={{ theme: styles?.theme || 'sacred' }}
+                          styles={{ theme: styles?.theme || 'light' }}
                         />
                       ),
                     })}
@@ -614,11 +622,11 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <StyledTooltip
               title="Delete"
               tooltipplacement="bottom"
-              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+              styles={{ theme: styles?.theme || 'light' }}
             >
               <CustomButton
                 icon={
-                  <DeleteIcon styles={{ theme: styles?.theme || 'sacred' }} />
+                  <DeleteIcon styles={{ theme: styles?.theme || 'light' }} />
                 }
                 onClick={onDelete}
                 styles={{ theme: styles?.theme || 'light' }}
@@ -627,12 +635,12 @@ const ShowTask: React.FC<ShowTaskProps> = ({
             <StyledTooltip
               title="Duplicate"
               tooltipplacement="bottom"
-              styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+              styles={{ theme: styles?.theme || 'light' }}
             >
               <CustomButton
                 icon={
                   <ContentCopyIcon
-                    styles={{ theme: styles?.theme || 'sacred' }}
+                    styles={{ theme: styles?.theme || 'light' }}
                   />
                 }
                 onClick={onDuplicate}
@@ -640,7 +648,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               />
             </StyledTooltip>
             <CustomButton
-              icon={<CloseIcon styles={{ theme: styles?.theme || 'sacred' }} />}
+              icon={<CloseIcon styles={{ theme: styles?.theme || 'light' }} />}
               onClick={onClose}
               styles={{
                 theme: styles?.theme || 'light',
@@ -669,7 +677,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   <Typography
                     text="Task Description"
                     styles={{
-                      theme: 'sacred',
+                      theme: styles?.theme || 'light',
                       variant: 'cinzelh5',
                       margin: '5px 0',
                     }}
@@ -677,7 +685,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                   <Typography
                     text={formData.description}
                     styles={{
-                      theme: 'sacred',
+                      theme: styles?.theme || 'light',
                       variant: 'cinzelh6',
                       margin: '0 0 5px 0',
                     }}
@@ -756,7 +764,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                             style={computedStyles.moreVertIcon}
                           >
                             <MoreVertIcon
-                              styles={{ theme: styles?.theme || 'sacred' }}
+                              styles={{ theme: styles?.theme || 'light' }}
                             />
                           </div>
 
@@ -798,7 +806,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                                   >
                                     <EditIcon
                                       styles={{
-                                        theme: styles?.theme || 'sacred',
+                                        theme: styles?.theme || 'light',
                                       }}
                                     />
                                     Edit
@@ -846,7 +854,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                         <Typography
                           text={displayedText}
                           styles={{
-                            theme: 'sacred',
+                            theme: styles?.theme || 'light',
                             variant: 'cinzelparagraph',
                             margin: '0',
                             padding: '0',
@@ -970,7 +978,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
                 {!isEditing && (
                   <Typography
                     text={label}
-                    styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      variant: 'cinzelparagraph',
+                    }}
                   />
                 )}
                 {isEditing ? (
@@ -1006,7 +1017,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   text="Topics"
-                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelparagraph',
+                  }}
                 />
               )}
               {isEditing ? (
@@ -1041,7 +1055,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   text="Knowledgebase Articles"
-                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelparagraph',
+                  }}
                 />
               )}
               {isEditing ? (
@@ -1081,7 +1098,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               {!isEditing && (
                 <Typography
                   text="Next Action Date"
-                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelparagraph',
+                  }}
                 />
               )}
               {isEditing ? (
@@ -1114,7 +1134,10 @@ const ShowTask: React.FC<ShowTaskProps> = ({
               ) : formData.nextActionDate ? (
                 <Typography
                   text={formData.nextActionDate}
-                  styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+                  styles={{
+                    theme: styles?.theme || 'light',
+                    variant: 'cinzelparagraph',
+                  }}
                 />
               ) : null}
             </div>

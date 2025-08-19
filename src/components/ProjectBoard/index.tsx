@@ -314,7 +314,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCompanies={rawCompanies || []}
-              sacredtheme={styles?.theme === 'sacred'}
+              styles={{ theme: styles?.theme || 'light' }}
             />
           ) : (
             <AdministratorAddTaskCompanyProvided
@@ -329,7 +329,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               companyId={companyId || ''}
-              sacredtheme={styles?.theme === 'sacred'}
+              styles={{ theme: styles?.theme || 'light' }}
             />
           )}
         </>
@@ -353,7 +353,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               rawCustomers={rawCustomers || []}
-              sacredtheme={styles?.theme === 'sacred'}
+              styles={{ theme: styles?.theme || 'light' }}
             />
           ) : (
             <CompanyAddTaskCustomerProvided
@@ -368,7 +368,7 @@ function ProjectBoardContent({
               severityLevels={rawSeverityLevels}
               createdUserId={currentUser._id}
               customerId={customerId || ''}
-              sacredtheme={styles?.theme === 'sacred'}
+              styles={{ theme: styles?.theme || 'light' }}
             />
           )}
         </>
