@@ -8,7 +8,6 @@ import React, { useRef, useMemo, useState, useCallback } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
-  getSharedContainerStyles,
   getSharedFooterTextStyles,
   getSharedAdornmentStyles,
   getRequiredIndicatorStyle,
@@ -71,7 +70,21 @@ const getStyles = (
   } = getSharedFormFieldStyles(styles, isFocused)
 
   const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
+    container: {
+      position: 'relative',
+      width: styles?.width || '100%',
+      minWidth: styles?.minWidth,
+      maxWidth: styles?.maxWidth,
+      height: styles?.height || 'auto',
+      minHeight: styles?.minHeight,
+      maxHeight: styles?.maxHeight,
+      marginTop: styles?.marginTop || '0',
+      marginLeft: styles?.marginLeft,
+      marginRight: styles?.marginRight,
+      textTransform: 'none',
+      // Apply marginBottom last to ensure it's not overridden
+      marginBottom: styles?.marginBottom || '0',
+    },
     inputWrapper: {
       position: 'relative',
       display: 'flex',

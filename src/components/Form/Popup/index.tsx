@@ -7,33 +7,7 @@ import DragIcon from '../../Icons/Drag'
 import ContentSection, { ContentSectionProps } from '../../Content'
 import CustomButton, { ButtonProps } from '../../Button'
 import Typography from '../../Typography'
-
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+import { SACRED_GLYPHS } from '../../../theme/shared'
 
 export interface PopupStyles {
   theme?: 'sacred' | 'light' | 'dark'
