@@ -65,7 +65,14 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
       {/* Left: Buttons */}
       <div style={leftStyle}>
         {buttons?.map((btn, idx) => (
-          <Button key={idx} {...btn} />
+          <Button
+            key={idx}
+            {...btn}
+            styles={{
+              ...btn.styles,
+              theme: btn.styles?.theme || styles?.theme || 'light',
+            }}
+          />
         ))}
       </div>
 
