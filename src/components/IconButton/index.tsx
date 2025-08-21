@@ -57,16 +57,28 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       default: { backgroundColor: 'transparent', color: 'inherit' },
     }
 
+    // Don't apply border if sacred theme is being used
+    const shouldApplyBorder = color === 'default' && styles?.theme !== 'sacred'
+
     const buttonStyles = {
       ...sizeMap[size],
       ...colorMap[color],
       borderRadius: '50%',
-      border: color === 'default' ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+      border: shouldApplyBorder ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       minWidth: 'auto',
       ...styles,
+      // Force remove all borders if sacred theme
+      ...(styles?.theme === 'sacred' && {
+        outline: false, // This is the key property that removes borders in getButtonStyles
+        border: 'none',
+        borderWidth: '0',
+        borderStyle: 'none',
+        borderColor: 'transparent',
+        boxShadow: 'none',
+      }),
     }
 
     return (

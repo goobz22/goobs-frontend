@@ -2,7 +2,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 import Typography from '../../Typography'
@@ -152,6 +152,28 @@ function FormDataGrid({
 }: FormDataGridProps) {
   const styles = getStyles(sacredtheme)
 
+  // Memoize the styles to prevent infinite re-renders
+  const dataGridStyles = useMemo(
+    () => ({
+      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
+    }),
+    [sacredtheme]
+  )
+
+  const alertStyles = useMemo(
+    () => ({
+      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
+    }),
+    [sacredtheme]
+  )
+
+  const progressBarStyles = useMemo(
+    () => ({
+      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
+    }),
+    [sacredtheme]
+  )
+
   if (isLoading) {
     return (
       <div style={styles.container}>
@@ -190,12 +212,7 @@ function FormDataGrid({
           <div style={styles.description}>{description}</div>
         </div>
         <div style={{ marginTop: '0.75rem' }}>
-          <ProgressBar
-            variant="indeterminate"
-            styles={{
-              theme: sacredtheme ? 'sacred' : 'light',
-            }}
-          />
+          <ProgressBar variant="indeterminate" styles={progressBarStyles} />
         </div>
       </div>
     )
@@ -247,9 +264,7 @@ function FormDataGrid({
             const baseProps: AlertProps = {
               severity: alert.severity,
               message: alert.message,
-              styles: {
-                theme: sacredtheme ? 'sacred' : 'light',
-              },
+              styles: alertStyles,
             }
             return alert.onClose ? (
               <Alert {...baseProps} onClose={alert.onClose} />
@@ -261,12 +276,7 @@ function FormDataGrid({
       )}
 
       <div style={styles.dataGridContainer}>
-        <DataGrid
-          {...datagrid}
-          styles={{
-            theme: sacredtheme ? 'sacred' : 'light',
-          }}
-        />
+        <DataGrid {...datagrid} styles={dataGridStyles} />
       </div>
 
       {sacredtheme && (
