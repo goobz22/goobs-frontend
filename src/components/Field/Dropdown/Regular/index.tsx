@@ -23,6 +23,7 @@ export interface DropdownOption {
   icon?: React.ReactNode
   attribute1?: string
   attribute2?: string
+  _id?: string
 }
 
 export interface DropdownProps {
@@ -370,7 +371,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
     return (
       <option
-        key={option.value}
+        key={option._id || option.value}
         value={option.value}
         data-sacred-theme={styles?.theme === 'sacred'}
       >

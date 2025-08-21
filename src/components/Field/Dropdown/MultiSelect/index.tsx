@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -28,7 +28,7 @@ export interface MultiSelectChipProps {
 }
 
 const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
-  label = 'Select options',
+  label = '',
   options = [],
   defaultSelected = [],
   onChange,
@@ -36,15 +36,44 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   helperText,
   styles,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
   const [selectedValues, setSelectedValues] =
     useState<string[]>(defaultSelected)
   const [focused, setFocused] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  // Remove dropdownRef as it's no longer needed
 
   const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
     getSharedFormFieldStyles(styles, focused)
+
+  // Get theme name for conditional styling
+  const themeName = styles?.theme || 'sacred'
+  const isSacredTheme = themeName === 'sacred'
+
+  // Update selected values from external changes
+  useEffect(() => {
+    if (defaultSelected) {
+      setSelectedValues(defaultSelected)
+    }
+  }, [defaultSelected])
+
+  // Handle clicks outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [isOpen])
 
   const componentStyles = {
     container: getSharedContainerStyles(styles),
@@ -54,16 +83,17 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     },
     chipContainer: {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start', // Changed to allow vertical expansion
       flexWrap: 'wrap' as const,
-      gap: '0.25rem',
+      gap: '6px', // Increased gap for better spacing
       minHeight: styles?.height || '40px',
+      height: 'auto', // Allow height to grow with content
       flex: 1,
       border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
       borderRadius: styles?.borderRadius || '8px',
       backgroundColor: themeConfig.background,
       color: themeConfig.text,
-      padding: styles?.padding || '8px 40px 8px 16px',
+      padding: styles?.padding || '12px 40px 12px 16px', // Increased vertical padding
       cursor: styles?.disabled ? 'not-allowed' : 'pointer',
       transition,
       ...(styles?.disabled && {
@@ -75,16 +105,15 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     placeholder: {
       color: themeConfig.text,
       opacity: 0.6,
+      padding: '2px 0', // Add padding to align with chips
     },
     iconWrapper: {
       position: 'absolute' as const,
-      top: styles?.arrowTop || '0',
-      right: styles?.arrowRight || '0',
-      bottom: styles?.arrowBottom || '0',
-      left: styles?.arrowLeft || 'auto',
+      top: '50%',
+      right: '12px',
+      transform: 'translateY(-50%)',
       display: 'flex',
       alignItems: 'center',
-      padding: styles?.arrowPadding || '0 12px',
       pointerEvents: 'none' as const,
     },
     icon: {
@@ -96,18 +125,18 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     },
     dropdown: {
       position: 'absolute' as const,
-      top: '100%',
+      top: 'calc(100% + 4px)',
       left: '0',
       right: '0',
-      zIndex: 1000,
+      zIndex: 99999,
       maxHeight: '200px',
       overflowY: 'auto' as const,
+      overflowX: 'hidden' as const,
       border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
       borderRadius: styles?.borderRadius || '8px',
       backgroundColor: themeConfig.background,
       boxShadow:
         '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      marginTop: '4px',
     },
     option: {
       display: 'flex',
@@ -115,22 +144,27 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       padding: '8px 12px',
       cursor: 'pointer',
       transition,
-    },
-    optionLabel: {
-      marginLeft: '8px',
       color: themeConfig.text,
+    },
+    checkbox: {
+      marginRight: '8px',
     },
     footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
 
   const handleToggle = useCallback(
-    (value: string) => {
+    (value: string, event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
       if (styles?.disabled) return
       const newSelectedValues = selectedValues.includes(value)
         ? selectedValues.filter(v => v !== value)
         : [...selectedValues, value]
       setSelectedValues(newSelectedValues)
       onChange?.(newSelectedValues)
+      // Don't close the dropdown - let user select multiple items
     },
     [selectedValues, onChange, styles?.disabled]
   )
@@ -139,14 +173,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (styles?.disabled) return
       event.preventDefault()
-      // Let the select element handle the opening
-      const selectElement =
-        event.currentTarget.parentElement?.querySelector('select')
-      if (selectElement) {
-        selectElement.focus()
-      }
+      event.stopPropagation()
+      setIsOpen(!isOpen)
     },
-    [styles?.disabled]
+    [isOpen, styles?.disabled]
   )
 
   const handleFocus = useCallback(
@@ -158,9 +188,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     [onFocus, styles?.disabled]
   )
 
-  // Remove handleOptionClick as it's no longer needed with native select
-
-  // Native select handles its own outside click behavior
+  const handleBlur = useCallback(() => {
+    if (styles?.disabled) return
+    setFocused(false)
+  }, [styles?.disabled])
 
   return (
     <div style={componentStyles.container}>
@@ -173,17 +204,16 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
         )}
       </label>
       <div style={componentStyles.selectWrapper}>
-        <div style={{ position: 'relative', width: '100%' }}>
+        <div style={{ position: 'relative', width: '100%' }} ref={containerRef}>
           <div
-            ref={containerRef}
+            style={componentStyles.chipContainer}
             onClick={handleContainerClick}
             onFocus={handleFocus}
-            style={componentStyles.chipContainer}
+            onBlur={handleBlur}
             tabIndex={styles?.disabled ? -1 : 0}
-            aria-required={styles?.required || undefined}
           >
             {selectedValues.length === 0 ? (
-              <span style={componentStyles.placeholder}>{label}</span>
+              <span style={componentStyles.placeholder}>Select items...</span>
             ) : (
               selectedValues.map(value => (
                 <Chip
@@ -194,48 +224,64 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                     : { onDelete: () => handleToggle(value) })}
                   styles={{
                     theme: styles?.theme || 'light',
+                    padding: '6px 12px', // Better padding for chips
+                    height: 'auto', // Allow chip height to adjust
+                    fontSize: '14px', // Consistent font size
+                    whiteSpace: 'normal', // Allow text wrapping if needed
+                    wordBreak: 'break-word', // Break long words
                   }}
                 />
               ))
             )}
           </div>
-          <select
-            multiple
-            value={selectedValues}
-            onChange={e => {
-              const selected = Array.from(
-                e.target.selectedOptions,
-                option => option.value
-              )
-              setSelectedValues(selected)
-              onChange?.(selected)
-            }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              opacity: 0,
-              cursor: 'pointer',
-            }}
-            disabled={styles?.disabled}
-            size={isOpen ? Math.min(options.length, 6) : 1}
-            onFocus={() => setIsOpen(true)}
-            onBlur={() => setIsOpen(false)}
-          >
-            {options.map(option => (
-              <option key={option._id || option.value} value={option.value}>
-                {option.value}
-              </option>
-            ))}
-          </select>
           <div style={componentStyles.iconWrapper}>
             <ExpandMoreIcon
               styles={{ theme: styles?.theme || 'sacred' }}
               style={componentStyles.icon}
             />
           </div>
+          {isOpen && (
+            <div style={componentStyles.dropdown}>
+              {options.map(option => {
+                const isSelected = selectedValues.includes(option.value)
+                return (
+                  <div
+                    key={option._id || option.value}
+                    style={{
+                      ...componentStyles.option,
+                      backgroundColor: isSelected
+                        ? isSacredTheme
+                          ? 'rgba(255, 215, 0, 0.2)'
+                          : 'rgba(59, 130, 246, 0.1)'
+                        : 'transparent',
+                    }}
+                    onClick={e => handleToggle(option.value, e)}
+                    onMouseEnter={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = isSacredTheme
+                          ? 'rgba(255, 215, 0, 0.1)'
+                          : 'rgba(229, 231, 235, 1)'
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      style={componentStyles.checkbox}
+                      onClick={e => e.stopPropagation()}
+                    />
+                    <span>{option.value}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}

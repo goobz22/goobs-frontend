@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -143,7 +143,11 @@ const Searchbar: React.FC<SearchbarProps> = ({
   }
 
   const placeholderColor = getPlaceholderColor()
-  const placeholderStyles = createPlaceholderStyles(theme, placeholderColor)
+
+  // Memoize placeholder styles to prevent infinite re-renders
+  const placeholderStyles = useMemo(() => {
+    return createPlaceholderStyles(theme, placeholderColor)
+  }, [theme, placeholderColor])
 
   // Inject placeholder styles
   useEffect(() => {
@@ -165,7 +169,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
         element.remove()
       }
     }
-  }, [theme, placeholderStyles.css])
+  }, [theme, placeholderColor, placeholderStyles.css])
 
   const handleFocus = () => setFocused(true)
   const handleBlur = () => setFocused(false)

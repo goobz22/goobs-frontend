@@ -120,7 +120,7 @@ const PageSizeSelector: React.FC<{
       <span style={{ whiteSpace: 'nowrap' }}>
         {isSacredTheme ? 'Show:' : 'Show:'}
       </span>
-      <div style={{ minWidth: '70px', marginTop: '-15px' }}>
+      <div style={{ minWidth: '60px', marginTop: '-15px' }}>
         <Dropdown
           label=""
           value={selectedValue}
@@ -225,7 +225,9 @@ const TablePagination: React.FC<{
   const paginationContainerStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '6px',
+    flexShrink: 0,
+    flexWrap: 'nowrap' as const,
   }
 
   const paginationTextStyle = {
@@ -282,7 +284,7 @@ const TablePagination: React.FC<{
       <PageSizeSelector
         pageSize={pageSize}
         onPageSizeChange={onPageSizeChange}
-        {...(styles !== undefined ? { styles } : {})}
+        {...(styles && { styles })}
       />
 
       <PaginationButton
@@ -290,7 +292,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to first page"
       >
-        <LastPageIcon styles={{ theme: styles?.theme || 'sacred' }} />
+        <LastPageIcon {...(styles && { styles })} />
       </PaginationButton>
 
       <PaginationButton
@@ -298,7 +300,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to previous page"
       >
-        <KeyboardArrowLeftIcon styles={{ theme: styles?.theme || 'sacred' }} />
+        <KeyboardArrowLeftIcon {...(styles && { styles })} />
       </PaginationButton>
 
       <div style={paginationTextStyle}>
@@ -310,7 +312,7 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to next page"
       >
-        <KeyboardArrowRightIcon styles={{ theme: styles?.theme || 'sacred' }} />
+        <KeyboardArrowRightIcon {...(styles && { styles })} />
       </PaginationButton>
 
       <PaginationButton
@@ -318,7 +320,7 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to last page"
       >
-        <FirstPageIcon styles={{ theme: styles?.theme || 'sacred' }} />
+        <FirstPageIcon {...(styles && { styles })} />
       </PaginationButton>
     </div>
   )
@@ -340,6 +342,7 @@ function CustomFooter({
     height: '56px',
     position: 'sticky' as const,
     left: 0,
+    boxSizing: 'border-box' as const,
     ...(isSacredTheme && {
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
       borderTop: '2px solid rgba(255, 215, 0, 0.3)',
@@ -356,6 +359,7 @@ function CustomFooter({
     height: '100%',
     padding: '0 1rem',
     overflow: 'hidden',
+    boxSizing: 'border-box' as const,
   }
 
   const leftSectionStyle = {
@@ -378,8 +382,9 @@ function CustomFooter({
     alignItems: 'center',
     height: '100%',
     marginLeft: 'auto',
-    overflow: 'hidden',
-    paddingRight: '16px',
+    overflow: 'visible',
+    paddingRight: '1rem',
+    flexShrink: 0,
   }
 
   return (
@@ -399,7 +404,7 @@ function CustomFooter({
             rowCount={rowCount}
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
-            {...(styles !== undefined ? { styles } : {})}
+            {...(styles && { styles })}
           />
         </div>
       </div>

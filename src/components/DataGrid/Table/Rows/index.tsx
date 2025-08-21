@@ -2,8 +2,9 @@
 
 import React from 'react'
 import { ColumnDef } from '../../types'
-import StyledTooltip from '../../../Tooltip'
 import Dropdown from '../../../Field/Dropdown/Regular'
+import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
+import Chip from '../../../Chip'
 import type { RowData } from '../../types'
 import type { DataGridStyles } from '../../../../theme'
 import { getRowId } from '../index'
@@ -861,6 +862,19 @@ const Rows: React.FC<RowsProps> = ({
         const rowId = getRowId(row)
         const isSelected = selectedRowIds.includes(rowId)
 
+        // Check if any cell in this row is editing with multiselect
+        const hasEditingMultiselect = columns.some(col => {
+          const value = row[col.field]
+          const isEditing =
+            editingCell?.rowId === rowId && editingCell?.field === col.field
+          return (
+            isEditing &&
+            (Array.isArray(value) ||
+              col.creationField?.type === 'multiselect') &&
+            col.creationField?.options
+          )
+        })
+
         const rowStyle: React.CSSProperties = {
           ...computedStyles.table.tableRow,
           ...(isSelected
@@ -872,6 +886,9 @@ const Rows: React.FC<RowsProps> = ({
             : {}),
           cursor: 'pointer',
           transition: 'background-color 0.2s ease',
+          // Allow row height expansion for multiselect
+          height: hasEditingMultiselect ? 'auto' : undefined,
+          minHeight: hasEditingMultiselect ? '120px' : undefined,
         }
 
         const rowHoverStyle: React.CSSProperties = {
@@ -919,7 +936,72 @@ const Rows: React.FC<RowsProps> = ({
                 cellContent = '---'
               } else if (isEditing) {
                 // Show input field or dropdown for editing
-                if (col.type === 'dropdown' && col.dropdownOptions) {
+                // First check if this is an array field that should use multiselect
+                if (
+                  (Array.isArray(value) ||
+                    col.creationField?.type === 'multiselect') &&
+                  col.creationField?.options
+                ) {
+                  // Render multiselect for array fields or fields configured with multiselect
+                  const currentIds = Array.isArray(value)
+                    ? (value as any[]).map(item => {
+                        // If items are objects, extract their IDs
+                        if (typeof item === 'object' && item !== null) {
+                          return item._id || item.id || item.value || ''
+                        }
+                        return String(item)
+                      })
+                    : []
+
+                  // Map IDs to their display values from options
+                  const currentValues = currentIds
+                    .map(id => {
+                      const option = col.creationField?.options?.find(
+                        opt => opt._id === id
+                      )
+                      return option?.value || '' // Use the display value only
+                    })
+                    .filter(v => v !== '') // Remove empty values
+
+                  cellContent = (
+                    <div
+                      style={{
+                        width: '100%',
+                        position: 'relative',
+                        zIndex: 10000,
+                        minHeight: '80px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'visible',
+                      }}
+                      onClick={e => {
+                        // Prevent click from bubbling up to the cell
+                        e.stopPropagation()
+                      }}
+                    >
+                      <MultiSelectChip
+                        options={col.creationField.options.map(opt => ({
+                          value: opt.value || '',
+                          _id: opt._id || '',
+                        }))}
+                        defaultSelected={currentValues}
+                        onChange={(values: string[]) => {
+                          // Update the editing value as JSON string so it saves when user clicks outside
+                          onEditingValueChange?.(JSON.stringify(values))
+                          // Don't auto-save for multiselect - let user finish selecting
+                          // The save will happen when they click outside the cell
+                        }}
+                        styles={{
+                          theme: isSacredTheme ? 'sacred' : 'light',
+                          fontSize: '14px',
+                          height: 'auto',
+                          minHeight: '40px',
+                          padding: '8px',
+                        }}
+                      />
+                    </div>
+                  )
+                } else if (col.type === 'dropdown' && col.dropdownOptions) {
                   // Render dropdown for dropdown columns
                   cellContent = (
                     <div style={{ width: '100%' }}>
@@ -927,8 +1009,8 @@ const Rows: React.FC<RowsProps> = ({
                         label=""
                         value={editingValue ?? ''}
                         options={col.dropdownOptions.map(opt => ({
-                          value: opt.value,
-                          label: opt.label || opt.value,
+                          value: opt.value || '',
+                          _id: opt._id || '',
                         }))}
                         onChange={e => {
                           const newValue = e.target.value
@@ -1029,7 +1111,68 @@ const Rows: React.FC<RowsProps> = ({
                 }
               } else {
                 // Show formatted value
-                if (col.type === 'currency') {
+                // Check if the value is an array and should be displayed as chips
+                if (Array.isArray(value)) {
+                  // Handle array values - display as chips
+                  const arrayItems = value as any[]
+
+                  // Check if it's an array of objects with label/name properties
+                  const isObjectArray =
+                    arrayItems.length > 0 && typeof arrayItems[0] === 'object'
+
+                  cellContent = (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        padding: '4px 0',
+                        alignItems: 'center',
+                      }}
+                    >
+                      {arrayItems.map((item, index) => {
+                        let label = ''
+
+                        if (isObjectArray && item) {
+                          // Try to get a display value from the object
+                          label =
+                            item.positionName ||
+                            item.name ||
+                            item.label ||
+                            item.title ||
+                            item._id ||
+                            ''
+                        } else {
+                          // It's a primitive value
+                          label = String(item)
+                        }
+
+                        return (
+                          <Chip
+                            key={index}
+                            label={label}
+                            styles={{
+                              theme: isSacredTheme ? 'sacred' : 'light',
+                              fontSize: '12px',
+                              backgroundColor: isSacredTheme
+                                ? 'rgba(255, 215, 0, 0.1)'
+                                : '#f0f0f0',
+                              color: isSacredTheme ? '#FFD700' : '#333',
+                              borderColor: isSacredTheme
+                                ? '#FFD700'
+                                : '#d0d0d0',
+                            }}
+                          />
+                        )
+                      })}
+                      {arrayItems.length === 0 && (
+                        <span style={{ color: '#999', fontSize: '14px' }}>
+                          No items
+                        </span>
+                      )}
+                    </div>
+                  )
+                } else if (col.type === 'currency') {
                   cellContent = formatCurrency(value, isSacredTheme).element
                 } else if (col.type === 'credit_card') {
                   cellContent = formatCreditCard(value, isSacredTheme).element
@@ -1133,6 +1276,13 @@ const Rows: React.FC<RowsProps> = ({
                 }
               }
 
+              // Check if this cell is editing with multiselect
+              const isEditingMultiselect =
+                isEditing &&
+                (Array.isArray(value) ||
+                  col.creationField?.type === 'multiselect') &&
+                col.creationField?.options
+
               return (
                 <td
                   key={col.field}
@@ -1144,11 +1294,29 @@ const Rows: React.FC<RowsProps> = ({
                       col.editable !== false
                         ? 'pointer'
                         : 'default',
+                    // Allow height expansion for multiselect
+                    height: isEditingMultiselect
+                      ? 'auto'
+                      : computedStyles.table.tableCell.height,
+                    minHeight: isEditingMultiselect
+                      ? '120px'
+                      : computedStyles.table.tableCell.minHeight,
+                    padding: isEditingMultiselect
+                      ? '12px'
+                      : computedStyles.table.tableCell.padding,
+                    verticalAlign: isEditingMultiselect ? 'top' : 'middle',
+                    overflow: isEditingMultiselect ? 'visible' : 'hidden',
+                    position: isEditingMultiselect ? 'relative' : 'static',
+                    zIndex: isEditingMultiselect ? 1000 : 'auto',
                   }}
                   onClick={e => {
+                    // If we're editing, prevent any click handling
+                    if (isEditing) {
+                      e.stopPropagation()
+                      return
+                    }
                     // Only handle cell click if not editing, row is selected, and column is editable
                     if (
-                      !isEditing &&
                       selectedRowIds.includes(rowId) &&
                       col.editable !== false
                     ) {
@@ -1157,21 +1325,16 @@ const Rows: React.FC<RowsProps> = ({
                     }
                   }}
                 >
-                  <StyledTooltip
-                    title={safeString(row[col.field])}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+                  <div
+                    style={{
+                      overflow: isEditingMultiselect ? 'visible' : 'hidden',
+                      textOverflow: isEditingMultiselect ? 'unset' : 'ellipsis',
+                      whiteSpace: isEditingMultiselect ? 'normal' : 'nowrap',
+                      color: computedStyles.table.tableCell.color,
+                    }}
                   >
-                    <div
-                      style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        color: computedStyles.table.tableCell.color,
-                      }}
-                    >
-                      {cellContent}
-                    </div>
-                  </StyledTooltip>
+                    {cellContent}
+                  </div>
                 </td>
               )
             })}

@@ -148,6 +148,7 @@ const Drawer: FC<DrawerProps> = ({
   styles = {},
   ...other
 }) => {
+  const [isMounted, setIsMounted] = useState(false)
   const [isVisible, setIsVisible] = useState(open)
   const [containerSize, setContainerSize] = useState({
     width: 320,
@@ -157,6 +158,11 @@ const Drawer: FC<DrawerProps> = ({
   const backdropRef = useRef<HTMLDivElement>(null)
 
   const isSacredTheme = styles.theme === 'sacred'
+
+  // Ensure hydration consistency
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Handle visibility transitions
   useEffect(() => {
@@ -285,7 +291,10 @@ const Drawer: FC<DrawerProps> = ({
 
   // Get computed styles - map 'persistent' to 'temporary' for getDrawerStyles function
   const styleVariant = variant === 'persistent' ? 'temporary' : variant
-  const computedStyles = getDrawerStyles(styles, open, anchor, styleVariant)
+  // Use a safe initial state for SSR - always closed initially to ensure hydration consistency
+  // Permanent drawers are always open, so we don't need to handle open state for them
+  const safeOpen = variant === 'permanent' ? true : isMounted ? open : false
+  const computedStyles = getDrawerStyles(styles, safeOpen, anchor, styleVariant)
 
   // Don't render if not visible and temporary
   if (!isVisible && variant === 'temporary') {

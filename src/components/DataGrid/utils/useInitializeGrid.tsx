@@ -41,8 +41,14 @@ export function useInitializeGrid({
   const initialized = useRef(false)
 
   // (1) Sync local rows if parent changes them
+  // Use a ref to track previous rows to avoid unnecessary updates
+  const prevRowsRef = useRef(providedRows)
   useEffect(() => {
-    setRows(providedRows || [])
+    // Only update if rows have actually changed
+    if (JSON.stringify(prevRowsRef.current) !== JSON.stringify(providedRows)) {
+      setRows(providedRows || [])
+      prevRowsRef.current = providedRows
+    }
   }, [providedRows, setRows])
 
   // (2) Initialize columns in Jotai (only once)

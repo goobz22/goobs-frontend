@@ -42,7 +42,13 @@ export interface ColumnDef {
   // Format the column values as styled routing numbers
   formatRoutingNumber?: boolean
   // Dropdown options for editing
-  dropdownOptions?: Array<{ value: string; label?: string }>
+  dropdownOptions?: Array<{
+    value: string | number
+    label?: string
+    _id?: string
+    attribute1?: string
+    attribute2?: string
+  }>
 
   renderCell?: (params: {
     row: RowData

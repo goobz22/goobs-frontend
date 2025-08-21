@@ -20,10 +20,15 @@ export function useColumnResize({
   const [tempWidth, setTempWidth] = useState<number | null>(null)
   const resizingElementRef = useRef<HTMLElement | null>(null)
 
-  // Update columns when props change
+  // Update columns when props change - use deep comparison to avoid infinite loops
   useEffect(() => {
-    setUpdatedColumns(columns)
-  }, [columns])
+    // Only update if the columns have actually changed in content, not just reference
+    const columnsChanged =
+      JSON.stringify(columns) !== JSON.stringify(updatedColumns)
+    if (columnsChanged) {
+      setUpdatedColumns(columns)
+    }
+  }, [columns]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, columnField: string) => {
