@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   IconStyles,
   getIconStyles,
@@ -18,21 +18,15 @@ const SecurityIcon: React.FC<SecurityIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
-  useEffect(() => {
-    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
-  }, [])
+  const glyph = SACRED_GLYPHS[18]
 
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      injectSacredKeyframes()
-    }
-  }, [styles?.theme])
+  // Inject CSS keyframes for sacred animations
+  if (styles?.theme === 'sacred') {
+    injectSacredKeyframes()
+  }
 
-  const computedStyles = useMemo(
-    () => getIconStyles(styles, isHovered, styles?.disabled),
-    [styles, isHovered]
-  )
+  // Compute styles based on theme and state
+  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
 
   return (
     <div

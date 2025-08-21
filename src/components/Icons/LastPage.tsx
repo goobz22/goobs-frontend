@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   IconStyles,
   getIconStyles,
@@ -18,23 +18,18 @@ const LastPageIcon: React.FC<LastPageIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
-  useEffect(() => {
-    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
-  }, [])
+
+  // Use a deterministic glyph index to avoid hydration mismatches
+  // Use a fixed index or derive from props for consistency
+  const glyph = SACRED_GLYPHS[0]
 
   // Inject CSS keyframes for sacred animations
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      injectSacredKeyframes()
-    }
-  }, [styles?.theme])
+  if (styles?.theme === 'sacred') {
+    injectSacredKeyframes()
+  }
 
   // Compute styles based on theme and state
-  const computedStyles = useMemo(
-    () => getIconStyles(styles, isHovered, styles?.disabled),
-    [styles, isHovered]
-  )
+  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
 
   const iconStyle = {
     ...computedStyles.icon,

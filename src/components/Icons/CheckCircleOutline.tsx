@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   IconStyles,
   getIconStyles,
@@ -18,23 +18,15 @@ const CheckCircleOutlineIcon: React.FC<CheckCircleOutlineIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
-  useEffect(() => {
-    setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
-  }, [])
+  const glyph = SACRED_GLYPHS[6]
 
   // Inject CSS keyframes for sacred animations
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      injectSacredKeyframes()
-    }
-  }, [styles?.theme])
+  if (styles?.theme === 'sacred') {
+    injectSacredKeyframes()
+  }
 
   // Compute styles based on theme and state
-  const computedStyles = useMemo(
-    () => getIconStyles(styles, isHovered, styles?.disabled),
-    [styles, isHovered]
-  )
+  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
 
   const iconStyle = {
     ...computedStyles.icon,

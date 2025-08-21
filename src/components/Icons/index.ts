@@ -1,5 +1,6 @@
 export { default as AccessTimeIcon } from './AccessTime'
 export { default as AccountBalanceIcon } from './AccountBalance'
+export { default as AccountIcon } from './Account'
 export { default as AddIcon } from './Add'
 export { default as AddCircleIcon } from './AddCircle'
 export { default as AddCircleOutlineIcon } from './AddCircleOutline'
