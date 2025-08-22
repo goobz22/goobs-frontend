@@ -19,6 +19,7 @@ const config: StorybookConfig = {
         uses.forEach(use => {
           if (
             typeof use === 'object' &&
+            use !== null &&
             use.loader?.includes('eslint-loader')
           ) {
             rule.use = []
