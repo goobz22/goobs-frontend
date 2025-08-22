@@ -7,11 +7,13 @@ import CustomFooter from './Footer'
 import FilterSection from './FilterSection'
 import MetricSection from './MetricSection'
 import ManageColumnsSimple from './ManageColumnsSimple'
+import MobileCardView from './MobileCardView'
 import Snackbar from '../Snackbar'
 import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
+import useIsMobile from './utils/useIsMobile'
 import type { DatagridProps, RowData } from './types'
 import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
 
@@ -36,6 +38,7 @@ function DataGrid({
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile(768)
 
   const isSacredTheme = styles?.theme === 'sacred'
   const computedStyles = getDataGridStyles(styles)
@@ -503,7 +506,7 @@ function DataGrid({
 
   return (
     <div style={computedStyles.container} ref={containerRef}>
-      {isSacredTheme && (
+      {isSacredTheme && !isMobile && (
         <>
           <div
             style={{ ...computedStyles.glyph, top: '0.75rem', left: '0.75rem' }}
@@ -523,7 +526,7 @@ function DataGrid({
         </>
       )}
 
-      {isSacredTheme && (
+      {isSacredTheme && !isMobile && (
         <div
           style={{
             display: 'flex',
@@ -555,113 +558,137 @@ function DataGrid({
         </div>
       )}
 
-      <div style={computedStyles.contentWrapper}>
-        {/* Metrics Section */}
-        {metrics && metrics.length > 0 && (
-          <MetricSection
-            metrics={metrics}
-            {...(styles !== undefined ? { styles } : {})}
-          />
-        )}
-
-        {/* Filters Section */}
-        {/* Always render FilterSection so the searchbar is always visible */}
-        <FilterSection
-          {...(filters !== undefined ? { filters } : {})}
+      {isMobile ? (
+        <MobileCardView
           columns={visibleColumns}
-          rows={rows}
-          onSearchFilter={handleSearchFilter}
-          {...(styles !== undefined ? { styles } : {})}
-        />
-
-        {/* Toolbar - positioned inside DataGrid (search removed; search lives in FilterSection) */}
-        <DataGridToolbar
-          buttons={
-            allowRowCreation && !isCreatingRow
-              ? [
-                  ...(buttons ?? []),
-                  {
-                    text: 'Add Row',
-                    onClick: handleStartRowCreation,
-                    styles: {
-                      theme: styles?.theme || 'light',
-                    },
-                  },
-                ]
-              : (buttons ?? [])
-          }
-          {...(selectedRows.length > 0
-            ? {
-                manageRowProps: {
-                  selectedRows,
-                  rows,
-                  ...(onDuplicate
-                    ? { onDuplicate: () => onDuplicate(selectedRows) }
-                    : {}),
-                  ...(onDelete
-                    ? {
-                        onDelete: () => {
-                          onDelete(selectedRows)
-                          handleSelectionChange([])
-                        },
-                      }
-                    : {}),
-                  ...(onManage ? { onManage: handleManage } : {}),
-                  ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
-                  handleClose: handleManageRowClose,
-                },
-              }
-            : {})}
-          styles={{
-            theme: styles?.theme || 'light',
-          }}
-        />
-
-        <div style={computedStyles.sectionDivider} />
-
-        <Table
-          columns={visibleColumns}
-          rows={visibleRows}
-          selectedRowIds={selectedRows}
+          rows={filteredRows}
+          selectedRows={selectedRows}
           onRowClick={handleRowClick}
-          allRowsSelected={allRowsSelected}
-          someRowsSelected={someRowsSelected}
-          onHeaderCheckboxChange={handleHeaderCheckboxChange}
-          onColumnResize={handleColumnResize}
+          {...(onCellSave !== undefined ? { onCellSave } : {})}
+          {...(onRowCreation !== undefined ? { onRowCreation } : {})}
+          allowRowCreation={allowRowCreation}
+          creationRowPosition={creationRowPosition}
+          {...(onManage !== undefined ? { onManage } : {})}
+          {...(onDelete !== undefined ? { onDelete } : {})}
+          {...(onDuplicate !== undefined ? { onDuplicate } : {})}
+          {...(onShow !== undefined ? { onShow } : {})}
+          {...(onSelectionChange !== undefined ? { onSelectionChange } : {})}
           {...(styles !== undefined ? { styles } : {})}
           editingCell={editingCell}
           editingValue={editingValue}
           onCellClick={handleCellClick}
-          onCellSave={handleCellSave}
           onCellCancel={handleCellCancel}
           onEditingValueChange={handleEditingValueChange}
-          isCreatingRow={isCreatingRow}
-          creationRowData={creationRowData}
-          onCreationFieldChange={handleCreationFieldChange}
-          onCreateRowSave={handleCreateRowSave}
-          onCreateRowCancel={handleCreateRowCancel}
-          creationRowPosition={creationRowPosition}
-          onColumnSort={handleColumnSort}
-          onManageColumns={handleToggleManageColumns}
-          draggedColumn={draggedColumn}
-          onColumnDragStart={handleColumnDragStart}
-          onColumnDragOver={handleColumnDragOver}
-          onColumnDrop={handleColumnDrop}
-          onColumnDragEnd={handleColumnDragEnd}
         />
+      ) : (
+        <div style={computedStyles.contentWrapper}>
+          {/* Metrics Section */}
+          {metrics && metrics.length > 0 && (
+            <MetricSection
+              metrics={metrics}
+              {...(styles !== undefined ? { styles } : {})}
+            />
+          )}
 
-        <CustomFooter
-          page={page}
-          pageSize={pageSize}
-          rowCount={filteredRows.length}
-          onPageChange={setPage}
-          onPageSizeChange={handlePageSizeChange}
-          columns={visibleColumns}
-          {...(styles !== undefined ? { styles } : {})}
-        />
-      </div>
+          {/* Filters Section */}
+          {/* Always render FilterSection so the searchbar is always visible */}
+          <FilterSection
+            {...(filters !== undefined ? { filters } : {})}
+            columns={visibleColumns}
+            rows={rows}
+            onSearchFilter={handleSearchFilter}
+            {...(styles !== undefined ? { styles } : {})}
+          />
 
-      {isSacredTheme && (
+          {/* Toolbar - positioned inside DataGrid (search removed; search lives in FilterSection) */}
+          <DataGridToolbar
+            buttons={
+              allowRowCreation && !isCreatingRow
+                ? [
+                    ...(buttons ?? []),
+                    {
+                      text: 'Add Row',
+                      onClick: handleStartRowCreation,
+                      styles: {
+                        theme: styles?.theme || 'light',
+                      },
+                    },
+                  ]
+                : (buttons ?? [])
+            }
+            {...(selectedRows.length > 0
+              ? {
+                  manageRowProps: {
+                    selectedRows,
+                    rows,
+                    ...(onDuplicate
+                      ? { onDuplicate: () => onDuplicate(selectedRows) }
+                      : {}),
+                    ...(onDelete
+                      ? {
+                          onDelete: () => {
+                            onDelete(selectedRows)
+                            handleSelectionChange([])
+                          },
+                        }
+                      : {}),
+                    ...(onManage ? { onManage: handleManage } : {}),
+                    ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
+                    handleClose: handleManageRowClose,
+                  },
+                }
+              : {})}
+            styles={{
+              theme: styles?.theme || 'light',
+            }}
+          />
+
+          <div style={computedStyles.sectionDivider} />
+
+          <Table
+            columns={visibleColumns}
+            rows={visibleRows}
+            selectedRowIds={selectedRows}
+            onRowClick={handleRowClick}
+            allRowsSelected={allRowsSelected}
+            someRowsSelected={someRowsSelected}
+            onHeaderCheckboxChange={handleHeaderCheckboxChange}
+            onColumnResize={handleColumnResize}
+            {...(styles !== undefined ? { styles } : {})}
+            editingCell={editingCell}
+            editingValue={editingValue}
+            onCellClick={handleCellClick}
+            onCellSave={handleCellSave}
+            onCellCancel={handleCellCancel}
+            onEditingValueChange={handleEditingValueChange}
+            isCreatingRow={isCreatingRow}
+            creationRowData={creationRowData}
+            onCreationFieldChange={handleCreationFieldChange}
+            onCreateRowSave={handleCreateRowSave}
+            onCreateRowCancel={handleCreateRowCancel}
+            creationRowPosition={creationRowPosition}
+            onColumnSort={handleColumnSort}
+            onManageColumns={handleToggleManageColumns}
+            draggedColumn={draggedColumn}
+            onColumnDragStart={handleColumnDragStart}
+            onColumnDragOver={handleColumnDragOver}
+            onColumnDrop={handleColumnDrop}
+            onColumnDragEnd={handleColumnDragEnd}
+          />
+
+          <CustomFooter
+            page={page}
+            pageSize={pageSize}
+            rowCount={filteredRows.length}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+            columns={visibleColumns}
+            {...(styles !== undefined ? { styles } : {})}
+          />
+        </div>
+      )}
+
+      {isSacredTheme && !isMobile && (
         <div style={computedStyles.footerContainer}>
           {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
             <p
