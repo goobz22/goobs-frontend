@@ -129,5 +129,8 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
+  },
+  "overrides": {
+    "eslint-scope": "^7.2.2"
   }
 }
