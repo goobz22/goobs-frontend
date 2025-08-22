@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.122.7",
+  "version": "0.122.8",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -21,13 +21,13 @@
     "lint:fix": "next lint --fix --quiet --progress",
     "lint:verbose": "eslint \"src/**/*.{js,mjs,cjs,jsx,ts,tsx}\" --fix --format=pretty --max-warnings=0 --debug",
     "lint:progress": "eslint \"src/**/*.{js,mjs,cjs,jsx,ts,tsx}\" --fix --format=unix --max-warnings=0",
-    "lint:test": "eslint \"src/components/Button/Button.tsx\" --fix --format=stylish --debug",
     "clean-unused": "bun run lint:progress && echo \"✅ Linting complete, now formatting...\" && bun run format",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^1.7.4",
     "@storybook/addon-links": "^9",
     "@types/lodash": "^4",
     "date-fns": "^4",
@@ -47,19 +47,11 @@
     "zod-formik-adapter": "^1"
   },
   "devDependencies": {
-    "@babel/core": "^7",
-    "@babel/generator": "^7",
-    "@babel/parser": "^7",
-    "@babel/traverse": "^7",
-    "@babel/types": "^7",
     "@chromatic-com/storybook": "^4",
     "@next/eslint-plugin-next": "^15",
     "@storybook/addon-onboarding": "^9",
     "@storybook/nextjs": "^9",
     "@storybook/react": "^9",
-    "@storybook/test": "^8",
-    "@types/babel__generator": "^7",
-    "@types/babel__traverse": "^7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/parser": "^8",
