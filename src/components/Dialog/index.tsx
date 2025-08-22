@@ -42,9 +42,20 @@ export interface DialogProps {
   children: React.ReactNode
   /** Custom styles to apply to the dialog using the theme system */
   styles?: DialogStyles
+  /** Custom dialog styles for positioning (used for dragging) */
+  customDialogStyles?: React.CSSProperties
+  /** Data attribute for dialog paper (used for drag detection) */
+  dataDialogPaper?: boolean
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
+const Dialog: React.FC<DialogProps> = ({
+  open,
+  onClose,
+  children,
+  styles,
+  customDialogStyles,
+  dataDialogPaper,
+}) => {
   const dialogRef = useRef<HTMLDivElement>(null)
   const styleRef = useRef<HTMLStyleElement | null>(null)
   const screenSize = useScreenSize()
@@ -103,8 +114,12 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, styles }) => {
     <div style={computedStyles.backdrop} onClick={onClose}>
       <div
         ref={dialogRef}
-        style={computedStyles.dialog}
+        style={{
+          ...computedStyles.dialog,
+          ...customDialogStyles,
+        }}
         onClick={e => e.stopPropagation()}
+        data-dialog-paper={dataDialogPaper ? 'true' : undefined}
       >
         <div
           className={computedStyles.contentClassName}
