@@ -1,5 +1,5 @@
 {
-  "buildCommand": "NODE_OPTIONS='--max-old-space-size=4096' bun run build-storybook",
+  "buildCommand": "node -r ./patch-eslint-scope.js ./node_modules/.bin/storybook build",
   "devCommand": "bun run storybook",
   "installCommand": "bun install --frozen-lockfile",
   "framework": null,
