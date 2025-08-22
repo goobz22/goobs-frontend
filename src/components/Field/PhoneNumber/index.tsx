@@ -77,6 +77,14 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
 
   const sacredtheme = styles?.theme === 'sacred'
 
+  // Filter out non-HTML props that shouldn't be passed to the input element
+  const filteredProps = useMemo(() => {
+    const { sacredtheme, ...validProps } = restProps as any
+    // sacredtheme is intentionally excluded from the props passed to the input
+    void sacredtheme
+    return validProps
+  }, [restProps])
+
   const {
     themeConfig,
     borderColor,
@@ -205,7 +213,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
           +1
         </div>
         <input
-          {...restProps}
+          {...filteredProps}
           {...getRequiredProps(styles?.required)}
           type="tel"
           id={id}

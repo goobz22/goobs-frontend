@@ -5,7 +5,6 @@ import {
   getSharedLabelStyles,
   getSharedContainerStyles,
   getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
   getRequiredIndicatorStyle,
   getRequiredProps,
   type FormFieldStyles,
@@ -60,17 +59,23 @@ const createPlaceholderStyles = (theme: string, placeholderColor: string) => {
   return { css, className }
 }
 
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
+interface SearchStyles {
+  container: React.CSSProperties
+  inputWrapper: React.CSSProperties
+  input: React.CSSProperties
+  label: React.CSSProperties
+  startAdornment: React.CSSProperties
+  footerText: React.CSSProperties
+}
 
-  const componentStyles: Record<string, React.CSSProperties> = {
+const getStyles = (
+  styles?: FormFieldStyles,
+  isFocused?: boolean
+): SearchStyles => {
+  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
+    getSharedFormFieldStyles(styles, isFocused)
+
+  const componentStyles: SearchStyles = {
     container: getSharedContainerStyles(styles),
     inputWrapper: {
       position: 'relative',
@@ -102,14 +107,20 @@ const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
       fontWeight: styles?.fontWeight,
       lineHeight: styles?.lineHeight,
       fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
+      color: styles?.theme === 'sacred' ? '#FFD700' : themeConfig.text,
       boxSizing: 'border-box',
       textTransform: 'none' as const,
     },
     label: getSharedLabelStyles(labelColor, themeConfig),
     startAdornment: {
-      ...getSharedAdornmentStyles(adornmentColor),
+      position: 'absolute',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      alignItems: 'center',
       left: '16px',
+      color:
+        styles?.theme === 'sacred' ? '#FFD700' : themeConfig.adornment.default,
     },
     footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
   }
@@ -136,7 +147,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
       case 'dark':
         return '#9CA3AF' // Light gray for dark theme
       case 'sacred':
-        return 'rgba(255, 215, 0, 0.7)' // Gold for sacred theme
+        return '#FFD700' // Pure gold for sacred theme
       default:
         return '#9CA3AF' // Medium gray for light theme
     }
@@ -149,9 +160,9 @@ const Searchbar: React.FC<SearchbarProps> = ({
     return createPlaceholderStyles(theme, placeholderColor)
   }, [theme, placeholderColor])
 
-  // Inject placeholder styles
+  // Inject placeholder styles and force sacred icon color
   useEffect(() => {
-    const styleId = `searchbar-placeholder-${theme}`
+    const styleId = `searchbar-styles-${theme}`
     let styleElement = document.getElementById(styleId)
 
     if (!styleElement) {
@@ -160,7 +171,21 @@ const Searchbar: React.FC<SearchbarProps> = ({
       document.head.appendChild(styleElement)
     }
 
-    styleElement.textContent = placeholderStyles.css
+    let css = placeholderStyles.css
+
+    // Force sacred theme icon color with high specificity
+    if (theme === 'sacred') {
+      css += `
+        .searchbar-sacred-container svg,
+        .searchbar-sacred-container svg path,
+        .searchbar-sacred-container * {
+          color: #FFD700 !important;
+          fill: #FFD700 !important;
+        }
+      `
+    }
+
+    styleElement.textContent = css
 
     return () => {
       // Clean up on unmount
@@ -187,8 +212,38 @@ const Searchbar: React.FC<SearchbarProps> = ({
         </label>
       )}
       <div style={computedStyles.inputWrapper}>
-        <div style={computedStyles.startAdornment}>
-          <SearchIcon styles={{ theme: theme || 'sacred' }} />
+        <div
+          className={
+            styles?.theme === 'sacred' ? 'searchbar-sacred-container' : ''
+          }
+          style={{
+            ...computedStyles.startAdornment,
+            ...(styles?.theme === 'sacred' && {
+              color: '#FFD700',
+              fill: '#FFD700',
+            }),
+          }}
+        >
+          {styles?.theme === 'sacred' ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24"
+              viewBox="0 0 24 24"
+              width="24"
+              fill="#FFD700"
+              style={{
+                color: '#FFD700 !important',
+                fill: '#FFD700 !important',
+              }}
+            >
+              <path
+                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                fill="#FFD700"
+              />
+            </svg>
+          ) : (
+            <SearchIcon styles={{ theme: theme || 'light' }} />
+          )}
         </div>
         <input
           type="text"

@@ -156,6 +156,14 @@ const TextField: React.FC<TextFieldProps> = props => {
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Filter out non-HTML props that shouldn't be passed to the input element
+  const filteredProps = useMemo(() => {
+    const { sacredtheme, ...validProps } = rest as any
+    // sacredtheme is intentionally excluded from the props passed to the input
+    void sacredtheme
+    return validProps
+  }, [rest])
+
   const computedStyles = useMemo(
     () => getStyles(styles, isFocused, !!startAdornment, !!endAdornment),
     [styles, isFocused, startAdornment, endAdornment]
@@ -222,7 +230,7 @@ const TextField: React.FC<TextFieldProps> = props => {
 
         <input
           ref={inputRef}
-          {...rest}
+          {...filteredProps}
           {...getRequiredProps(styles?.required)}
           value={value || ''}
           disabled={styles?.disabled}
