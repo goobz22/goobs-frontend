@@ -1,7 +1,5 @@
 import type { Preview } from '@storybook/react'
 
-// Note: isSecureContext override removed as it's not needed for Storybook and causes issues in modern browsers
-
 const preview: Preview = {
   parameters: {
     controls: {
