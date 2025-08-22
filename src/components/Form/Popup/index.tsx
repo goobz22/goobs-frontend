@@ -1,6 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
 import Dialog from '../../Dialog'
 import CloseIcon from '../../Icons/Close'
 import DragIcon from '../../Icons/Drag'
@@ -29,7 +31,8 @@ export interface PopupProps {
 const getStyles = (
   options: PopupStyles | undefined,
   dragPosition?: { x: number; y: number },
-  isDragging?: boolean
+  isDragging?: boolean,
+  hasDragged?: boolean
 ) => {
   const actualTheme = options?.theme || 'sacred'
   const width = options?.width ?? 450
@@ -61,17 +64,24 @@ const getStyles = (
 
   const actionButtonColors = getActionButtonColors()
 
+  // Only apply positioning styles if the dialog has been dragged
+  const positionStyles = hasDragged
+    ? {
+        position: 'fixed' as const,
+        top: `${dragPosition?.y}px`,
+        left: `${dragPosition?.x}px`,
+        transform: 'none',
+        transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+        willChange: 'transform',
+      }
+    : {}
+
   return {
     dialog: {
       width: `${width}px`,
       maxHeight: '90vh',
-      top: dragPosition?.y === 0 ? '50%' : `${dragPosition?.y}px`,
-      left: dragPosition?.x === 0 ? '50%' : `${dragPosition?.x}px`,
-      transform:
-        dragPosition?.x === 0 && dragPosition?.y === 0
-          ? 'translate(-50%, -50%)'
-          : 'none',
       cursor: isDragging ? 'grabbing' : 'default',
+      ...positionStyles,
       backgroundColor:
         actualTheme === 'sacred'
           ? 'rgba(0,0,0,0.85)'
@@ -88,7 +98,7 @@ const getStyles = (
       borderRadius: '0.75rem',
       padding: '1.5rem',
       animation:
-        actualTheme === 'sacred'
+        actualTheme === 'sacred' && !isDragging
           ? 'popup-glow-pulse 2s infinite alternate'
           : 'none',
       boxShadow:
@@ -135,11 +145,10 @@ const getStyles = (
       flex: 1,
       overflow: 'auto',
       minHeight: 0,
-      padding: '1rem', // Add padding to all sides for better spacing
-      paddingRight: '1.5rem', // Extra padding on right for scrollbar
-      borderRadius: '0.5rem', // Match the popup's rounded corners
+      padding: '1rem',
+      paddingRight: '1.5rem',
+      borderRadius: '0.5rem',
       ...(actualTheme === 'sacred' && {
-        // Add subtle border for sacred theme to define the scroll area
         border: '1px solid rgba(255, 215, 0, 0.1)',
       }),
     } as React.CSSProperties,
@@ -187,11 +196,13 @@ function Popup({
   const [isOpen, setIsOpen] = useState(open)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [hasDragged, setHasDragged] = useState(false)
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+  const dragHandleRef = useRef<HTMLButtonElement>(null)
+  const dragStartPos = useRef({ x: 0, y: 0, mouseX: 0, mouseY: 0 })
   const actualTheme = popupStyles?.theme || 'sacred'
   const widthValue = popupStyles?.width ?? 450
-  const styles = getStyles(popupStyles, dragPosition, isDragging)
+  const styles = getStyles(popupStyles, dragPosition, isDragging, hasDragged)
 
   useEffect(() => {
     setIsOpen(open)
@@ -206,74 +217,88 @@ function Popup({
   useEffect(() => {
     if (open) {
       setDragPosition({ x: 0, y: 0 })
+      setHasDragged(false)
     }
   }, [open])
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      setIsDragging(true)
-      let currentX = dragPosition.x
-      let currentY = dragPosition.y
-      if (dragPosition.x === 0 && dragPosition.y === 0) {
-        const popup = document.querySelector(
-          '[data-dialog-paper="true"]'
-        ) as HTMLElement
-        if (popup) {
-          const rect = popup.getBoundingClientRect()
-          currentX = rect.left
-          currentY = rect.top
-        } else {
-          currentX = window.innerWidth / 2 - widthValue / 2
-          currentY = window.innerHeight / 2 - 300
-        }
-      }
-      setDragOffset({
-        x: e.clientX - currentX,
-        y: e.clientY - currentY,
-      })
-    },
-    [dragPosition, widthValue]
-  )
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging) {
-        const newX = e.clientX - dragOffset.x
-        const newY = e.clientY - dragOffset.y
-        const maxX = window.innerWidth - 100
-        const minX = -widthValue + 100
-        const maxY = window.innerHeight - 100
-        const minY = -200
-        setDragPosition({
-          x: Math.max(minX, Math.min(maxX, newX)),
-          y: Math.max(minY, Math.min(maxY, newY)),
-        })
-      }
-    },
-    [isDragging, dragOffset, widthValue]
-  )
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false)
-  }, [])
-
+  // Setup pragmatic-drag-and-drop
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = 'none'
-    } else {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = ''
-    }
+    const dragHandle = dragHandleRef.current
+    if (!dragHandle || !isOpen) return
+
+    const cleanup = draggable({
+      element: dragHandle,
+      getInitialData: () => ({ type: 'popup-drag-handle' }),
+      onDragStart: () => {
+        setIsDragging(true)
+
+        // If first drag, capture the centered position
+        if (!hasDragged) {
+          const popup = document.querySelector(
+            '[data-dialog-paper="true"]'
+          ) as HTMLElement
+          if (popup) {
+            const rect = popup.getBoundingClientRect()
+            dragStartPos.current = {
+              x: rect.left,
+              y: rect.top,
+              mouseX: 0,
+              mouseY: 0,
+            }
+            setDragPosition({ x: rect.left, y: rect.top })
+            setHasDragged(true)
+          }
+        } else {
+          dragStartPos.current = {
+            x: dragPosition.x,
+            y: dragPosition.y,
+            mouseX: 0,
+            mouseY: 0,
+          }
+        }
+      },
+      onDrop: () => {
+        setIsDragging(false)
+      },
+    })
+
+    // Monitor drag movements
+    const unsubscribe = monitorForElements({
+      onDragStart: ({ location, source }) => {
+        if (source.data.type === 'popup-drag-handle') {
+          dragStartPos.current.mouseX = location.current.input.clientX
+          dragStartPos.current.mouseY = location.current.input.clientY
+        }
+      },
+      onDrag: ({ location, source }) => {
+        if (source.data.type === 'popup-drag-handle') {
+          const deltaX =
+            location.current.input.clientX - dragStartPos.current.mouseX
+          const deltaY =
+            location.current.input.clientY - dragStartPos.current.mouseY
+
+          const newX = dragStartPos.current.x + deltaX
+          const newY = dragStartPos.current.y + deltaY
+
+          // Apply boundaries
+          const maxX = window.innerWidth - 100
+          const minX = -widthValue + 100
+          const maxY = window.innerHeight - 100
+          const minY = 0
+
+          setDragPosition({
+            x: Math.max(minX, Math.min(maxX, newX)),
+            y: Math.max(minY, Math.min(maxY, newY)),
+          })
+        }
+      },
+    })
+
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = ''
+      cleanup()
+      unsubscribe()
     }
-  }, [isDragging, handleMouseMove, handleMouseUp])
+  }, [isOpen, hasDragged, dragPosition, widthValue])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -281,106 +306,112 @@ function Popup({
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} styles={{ theme: actualTheme }}>
-      {actualTheme === 'sacred' && (
-        <>
-          <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
-            {SACRED_GLYPHS[10]}
-          </div>
-          <div
-            style={{
-              ...styles.glyph,
-              top: '0.75rem',
-              right: '3rem',
-              animationDirection: 'reverse',
-            }}
-          >
-            {SACRED_GLYPHS[11]}
-          </div>
-        </>
-      )}
-
-      <div style={styles.headerActions}>
-        <button
-          onMouseDown={handleMouseDown}
-          style={{
-            ...styles.actionButton,
-            ...(hoveredButton === 'drag' && styles.actionButtonHover),
-          }}
-          onMouseEnter={() => setHoveredButton('drag')}
-          onMouseLeave={() => setHoveredButton(null)}
-        >
-          <DragIcon styles={{ theme: actualTheme || 'sacred' }} />
-        </button>
-        <button
-          onClick={handleClose}
-          onMouseDown={e => e.stopPropagation()}
-          style={{
-            ...styles.actionButton,
-            ...(hoveredButton === 'close' && styles.actionButtonHover),
-          }}
-          onMouseEnter={() => setHoveredButton('close')}
-          onMouseLeave={() => setHoveredButton(null)}
-        >
-          <CloseIcon styles={{ theme: actualTheme || 'sacred' }} />
-        </button>
-      </div>
-
-      {title && (
-        <Typography
-          text={title}
-          styles={{
-            variant: actualTheme === 'sacred' ? 'cinzelh4' : 'merrih4',
-            theme: actualTheme,
-            textAlign: 'center',
-            padding: '0 1rem',
-            marginBottom: '0.25rem',
-          }}
-        />
-      )}
-      {description && (
-        <Typography
-          text={description}
-          styles={{
-            variant:
-              actualTheme === 'sacred' ? 'cinzelparagraph' : 'merriparagraph',
-            theme: actualTheme,
-            textAlign: 'left',
-            paddingLeft: '1rem',
-            paddingRight: '1.5rem',
-            maxWidth: '100%',
-            width: '100%',
-            marginBottom: '1rem',
-          }}
-        />
-      )}
-
-      <div style={styles.contentContainer}>
-        {content ||
-          (grids && (
-            <ContentSection
-              grids={grids}
-              sacredtheme={actualTheme === 'sacred'}
-            />
-          ))}
-      </div>
-
-      {buttons && buttons.length > 0 && (
-        <div style={styles.buttonContainer}>
-          {buttons.map((buttonProps, index) => (
-            <CustomButton
-              key={index}
-              {...buttonProps}
-              styles={{
-                theme: actualTheme,
-                ...buttonProps.styles,
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      styles={{ theme: actualTheme }}
+      customDialogStyles={styles.dialog}
+      dataDialogPaper={true}
+    >
+      <div>
+        {actualTheme === 'sacred' && (
+          <>
+            <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
+              {SACRED_GLYPHS[10]}
+            </div>
+            <div
+              style={{
+                ...styles.glyph,
+                top: '0.75rem',
+                right: '3rem',
+                animationDirection: 'reverse',
               }}
-            />
-          ))}
-        </div>
-      )}
+            >
+              {SACRED_GLYPHS[11]}
+            </div>
+          </>
+        )}
 
-      {/* Footer glyphs removed to eliminate extra bottom padding */}
+        <div style={styles.headerActions}>
+          <button
+            ref={dragHandleRef}
+            style={{
+              ...styles.actionButton,
+              cursor: isDragging ? 'grabbing' : 'grab',
+              ...(hoveredButton === 'drag' && styles.actionButtonHover),
+            }}
+            onMouseEnter={() => setHoveredButton('drag')}
+            onMouseLeave={() => setHoveredButton(null)}
+          >
+            <DragIcon styles={{ theme: actualTheme || 'sacred' }} />
+          </button>
+          <button
+            onClick={handleClose}
+            style={{
+              ...styles.actionButton,
+              ...(hoveredButton === 'close' && styles.actionButtonHover),
+            }}
+            onMouseEnter={() => setHoveredButton('close')}
+            onMouseLeave={() => setHoveredButton(null)}
+          >
+            <CloseIcon styles={{ theme: actualTheme || 'sacred' }} />
+          </button>
+        </div>
+
+        {title && (
+          <Typography
+            text={title}
+            styles={{
+              variant: actualTheme === 'sacred' ? 'cinzelh4' : 'merrih4',
+              theme: actualTheme,
+              textAlign: 'center',
+              padding: '0 1rem',
+              marginBottom: '0.25rem',
+            }}
+          />
+        )}
+        {description && (
+          <Typography
+            text={description}
+            styles={{
+              variant:
+                actualTheme === 'sacred' ? 'cinzelparagraph' : 'merriparagraph',
+              theme: actualTheme,
+              textAlign: 'left',
+              paddingLeft: '1rem',
+              paddingRight: '1.5rem',
+              maxWidth: '100%',
+              width: '100%',
+              marginBottom: '1rem',
+            }}
+          />
+        )}
+
+        <div style={styles.contentContainer}>
+          {content ||
+            (grids && (
+              <ContentSection
+                grids={grids}
+                sacredtheme={actualTheme === 'sacred'}
+              />
+            ))}
+        </div>
+
+        {buttons && buttons.length > 0 && (
+          <div style={styles.buttonContainer}>
+            {buttons.map((buttonProps, index) => (
+              <CustomButton
+                key={index}
+                {...buttonProps}
+                styles={{
+                  theme: actualTheme,
+                  ...buttonProps.styles,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </Dialog>
   )
 }
