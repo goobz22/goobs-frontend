@@ -57,8 +57,9 @@
     "@typescript-eslint/parser": "^8",
     "autoprefixer": "^10",
     "chromatic": "^13",
-    "eslint": "^9",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^15",
+    "eslint-scope": "^7.2.2",
     "prettier": "^3",
     "react": "^19",
     "react-dom": "^19",
@@ -129,8 +130,5 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
-  },
-  "resolutions": {
-    "eslint-scope": "7.2.2"
   }
 }
