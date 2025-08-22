@@ -1,11 +1,6 @@
 {
-  "buildCommand": "node -r ./patch-eslint-scope.js ./node_modules/.bin/storybook build",
-  "devCommand": "bun run storybook",
-  "installCommand": "bun install --frozen-lockfile",
+  "buildCommand": "echo 'Using pre-built storybook-static'",
+  "installCommand": "echo 'No install needed'",
   "framework": null,
-  "outputDirectory": "./storybook-static",
-  "env": {
-    "SKIP_ESM_EXTERNALS": "true",
-    "NODE_OPTIONS": "--max-old-space-size=4096"
-  }
+  "outputDirectory": "./storybook-static"
 }
