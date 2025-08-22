@@ -343,7 +343,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       inset: '0 0 0 auto',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 12px',
+      padding: '5px 12px 0 12px',
       pointerEvents: 'none' as const,
     },
     icon: {
