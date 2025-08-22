@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.122.8",
+  "version": "0.122.9",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@atlaskit/pragmatic-drag-and-drop": "^1.7.4",
+    "@atlaskit/pragmatic-drag-and-drop": "^1",
     "@storybook/addon-links": "^9",
     "@types/lodash": "^4",
     "date-fns": "^4",
@@ -124,5 +124,10 @@
     "typescript",
     "typography",
     "ui-library"
-  ]
+  ],
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
+  }
 }
