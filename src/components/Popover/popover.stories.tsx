@@ -4,7 +4,7 @@
  */
 import React, { useState, useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, expect, userEvent } from '@storybook/test'
+import { within, expect, userEvent } from 'storybook/test'
 import Popover from './index'
 import Button from '../Button'
 

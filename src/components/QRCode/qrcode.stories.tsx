@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, expect } from '@storybook/test'
+import { within, expect } from 'storybook/test'
 import QRCodeComponent from './index'
 
 const meta: Meta<typeof QRCodeComponent> = {

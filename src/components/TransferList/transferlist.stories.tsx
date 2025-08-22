@@ -3,7 +3,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import TransferList, { TransferListDropdownDataMap } from './index'
-import { userEvent, within } from '@storybook/test'
+import { userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof TransferList> = {
   title: 'Components/TransferList',

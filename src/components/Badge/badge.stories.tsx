@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within } from '@storybook/test'
+import { userEvent, within } from 'storybook/test'
 import Badge from './index'
 
 const meta: Meta<typeof Badge> = {

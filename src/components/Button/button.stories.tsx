@@ -5,7 +5,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from '@storybook/test'
+import { userEvent, within, expect } from 'storybook/test'
 import Button from './index'
 import { useState } from 'react'
 import { ButtonGroup } from './index' // Import ButtonGroup

@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from '@storybook/test'
+import { userEvent, within, expect } from 'storybook/test'
 import { ToggleButton, ToggleButtonGroup } from './index'
 
 const meta: Meta<typeof ToggleButton> = {

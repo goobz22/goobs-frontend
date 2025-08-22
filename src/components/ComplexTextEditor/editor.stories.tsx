@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from '@storybook/test'
+import { userEvent, within, expect } from 'storybook/test'
 import ComplexTextEditor from './index'
 
 // Wrapper component for state management

@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, expect } from '@storybook/test'
+import { within, expect } from 'storybook/test'
 import DateRangeComponent, { DateRange } from './index'
 
 // Wrapper component for state management

@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { within, expect, userEvent } from '@storybook/test'
+import { within, expect, userEvent } from 'storybook/test'
 import RadioGroup, { RadioOption } from './index'
 
 const meta: Meta<typeof RadioGroup> = {
