@@ -1,0 +1,14 @@
+# Ignore eslint config files during build
+.eslintrc*
+eslint.config.*
+
+# Ignore test files
+**/*.test.*
+**/*.spec.*
+
+# Ignore source maps
+**/*.map
+
+# Development files
+.env.local
+.env.development
