@@ -6,7 +6,6 @@ import CustomToolbar from './index'
 import type { CustomToolbarProps } from './index'
 
 import type { SearchbarProps } from '../Field/Search'
-import type { DropdownProps } from '../Field/Dropdown/Regular'
 import type { ButtonProps } from '../Button'
 
 const sampleButtons: ButtonProps[] = [
@@ -19,12 +18,6 @@ const sampleSearchProps: SearchbarProps = {
   placeholder: 'Type here...',
   value: '',
   onChange: e => console.log('Searching =>', e.target.value),
-}
-
-const sampleDropdown: DropdownProps = {
-  label: 'Pick an Option',
-  options: [{ value: 'Alpha' }, { value: 'Beta' }, { value: 'Gamma' }],
-  onChange: e => console.log('Single dropdown =>', e.target.value),
 }
 
 const meta: Meta<typeof CustomToolbar> = {
@@ -57,13 +50,6 @@ export const LightTheme: Story = {
   args: {
     buttons: sampleButtons,
     searchbarProps: sampleSearchProps,
-    rightCenterProps: {
-      selectedRows: ['1'],
-      rows: [{ id: '1' }],
-      onDuplicate: () => console.log('duplicate'),
-      onDelete: () => console.log('delete'),
-    },
-    dropdowns: [sampleDropdown],
     styles: { theme: 'light' },
   },
 }
@@ -104,8 +90,6 @@ const InteractiveDemoRenderer = () => {
   const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
   const [showButtons, setShowButtons] = React.useState(true)
   const [showSearch, setShowSearch] = React.useState(true)
-  const [showRightCenter, setShowRightCenter] = React.useState(true)
-  const [showDropdowns, setShowDropdowns] = React.useState(true)
 
   const backgroundClass =
     theme === 'sacred'
@@ -149,34 +133,12 @@ const InteractiveDemoRenderer = () => {
             />{' '}
             Show Search
           </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={showRightCenter}
-              onChange={e => setShowRightCenter(e.target.checked)}
-            />{' '}
-            Show Right Center
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={showDropdowns}
-              onChange={e => setShowDropdowns(e.target.checked)}
-            />{' '}
-            Show Dropdowns
-          </label>
         </div>
       </div>
       {(() => {
         const toolbarProps: CustomToolbarProps = { styles: { theme } }
         if (showButtons) toolbarProps.buttons = sampleButtons
         if (showSearch) toolbarProps.searchbarProps = sampleSearchProps
-        if (showRightCenter)
-          toolbarProps.rightCenterProps = {
-            selectedRows: ['1'],
-            rows: [{ id: '1' }],
-          }
-        if (showDropdowns) toolbarProps.dropdowns = [sampleDropdown]
         return <CustomToolbar {...toolbarProps} />
       })()}
     </div>

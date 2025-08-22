@@ -1,99 +1,106 @@
 'use client'
 
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import type { FC } from 'react'
-import Left from './left'
-import LeftCenter from './leftCenter'
-import Right from './right'
-import RightCenter, { RightCenterProps } from './rightCenter'
-import { ButtonProps } from '../Button'
-import { DropdownProps } from '../Field/Dropdown/Regular'
-import { SearchbarProps } from '../Field/Search'
+import CustomButton, { ButtonProps } from '../Button'
+import Searchbar, { SearchbarProps } from '../Field/Search'
 import { getToolbarStyles } from '../../theme'
-import type { ToolbarStyles } from '../../theme'
+import type { ToolbarStyles, FormFieldStyles } from '../../theme'
 
 export interface CustomToolbarProps {
   buttons?: ButtonProps[]
   searchbarProps?: SearchbarProps
-  rightCenterProps?: RightCenterProps
-  dropdowns?: DropdownProps[]
   styles?: ToolbarStyles
+}
+
+// Create themed FormFieldStyles based on toolbar theme
+const createSearchbarStyles = (
+  toolbarStyles?: ToolbarStyles
+): FormFieldStyles => {
+  const theme = toolbarStyles?.theme || 'light'
+
+  switch (theme) {
+    case 'dark':
+      return {
+        theme: 'dark',
+        backgroundColor: '#1E293B',
+        borderColor: '#334155',
+        borderFocusedColor: '#475569',
+        textColor: '#E2E8F0',
+        labelColor: '#E2E8F0',
+        labelFocusedColor: '#F1F5F9',
+        adornmentColor: '#9CA3AF',
+        adornmentFocusedColor: '#E2E8F0',
+        borderRadius: '8px',
+        height: '40px',
+        fontFamily: 'Inter, sans-serif',
+      }
+    case 'sacred':
+      return {
+        theme: 'sacred',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderColor: 'rgba(255, 215, 0, 0.5)',
+        borderFocusedColor: 'rgba(255, 215, 0, 0.8)',
+        textColor: '#FBBF24',
+        labelColor: '#FBBF24',
+        labelFocusedColor: '#FFD700',
+        adornmentColor: 'rgba(255, 215, 0, 0.6)',
+        adornmentFocusedColor: '#FFD700',
+        borderRadius: '8px',
+        height: '40px',
+        fontFamily: 'Cinzel, serif',
+      }
+    default: // light theme
+      return {
+        theme: 'light',
+        backgroundColor: '#FFFFFF',
+        borderColor: '#E2E8F0',
+        borderFocusedColor: '#94A3B8',
+        textColor: '#374151',
+        labelColor: '#374151',
+        labelFocusedColor: '#1F2937',
+        adornmentColor: '#6B7280',
+        adornmentFocusedColor: '#374151',
+        borderRadius: '8px',
+        height: '40px',
+        fontFamily: 'Inter, sans-serif',
+      }
+  }
 }
 
 const CustomToolbar: FC<CustomToolbarProps> = ({
   buttons,
   searchbarProps,
-  rightCenterProps,
-  dropdowns,
   styles,
 }) => {
   const computedStyles = useMemo(() => getToolbarStyles(styles), [styles])
-
   const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
 
-  useEffect(() => {
-    const style = document.createElement('style')
-    style.textContent = `
-      .toolbar-container {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow: hidden;
-      }
-      
-      @media (min-width: 768px) {
-        .toolbar-mobile-container {
-          display: none !important;
-        }
-        .toolbar-tablet-container {
-          display: flex !important;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          max-width: 100%;
-          box-sizing: border-box;
-          gap: 1rem;
-          overflow: hidden;
-        }
-      }
-      @media (min-width: 1280px) {
-        .toolbar-container {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-        .toolbar-tablet-container {
-            display: none !important;
-        }
-        .toolbar-desktop-left, .toolbar-desktop-right {
-          display: flex !important;
-          align-items: center;
-          gap: 1rem;
-          flex-wrap: nowrap;
-          min-width: 0;
-          box-sizing: border-box;
-          overflow: hidden;
-        }
-        .toolbar-desktop-left {
-          flex: 0 0 auto;
-          max-width: 50%;
-        }
-        .toolbar-desktop-right {
-          flex: 1 1 auto;
-          justify-content: flex-end;
-          max-width: 50%;
-          min-width: 0;
-        }
-      }
-    `
-    document.head.appendChild(style)
-    return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
+  // Create proper FormFieldStyles based on the toolbar theme
+  const searchbarStyles = createSearchbarStyles(styles)
+
+  // Vertical divider styles
+  const dividerStyle: React.CSSProperties = {
+    height: '20px',
+    borderLeft: isSacredTheme
+      ? '2px solid rgba(255, 215, 0, 0.6)'
+      : isDarkTheme
+        ? '2px solid rgba(156, 163, 175, 0.6)'
+        : '2px solid rgba(0, 0, 0, 0.6)',
+    ...(isSacredTheme && {
+      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
+    }),
+  }
+
+  // Content container styles - all left aligned
+  const contentStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    width: '100%',
+    flexWrap: 'wrap',
+  }
 
   return (
     <div
@@ -101,119 +108,59 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
         ...computedStyles.container,
         width: '100%',
         maxWidth: '100%',
-        minWidth: '0',
         boxSizing: 'border-box',
         overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
       }}
-      className="toolbar-container"
     >
       {isSacredTheme && <span style={computedStyles.glyph}>𓊗</span>}
 
-      {/* Desktop */}
-      <div style={computedStyles.desktopLeft} className="toolbar-desktop-left">
-        <Left
-          {...(buttons ? { buttons } : {})}
-          {...(styles ? { styles } : {})}
-        />
+      <div style={contentStyle}>
+        {/* Vertical Divider */}
+        <div style={{ padding: '0 8px' }}>
+          <div style={dividerStyle} />
+        </div>
+
+        {/* Buttons */}
+        {buttons?.map((btn, i) => (
+          <CustomButton
+            key={i}
+            {...(btn.text ? { text: btn.text } : {})}
+            onClick={btn.onClick}
+            disabled={!!btn.disabled}
+            {...(styles?.theme ? { styles: { theme: styles.theme } } : {})}
+          />
+        ))}
+
+        {/* Searchbar */}
         {searchbarProps && (
-          <LeftCenter {...searchbarProps} {...(styles ? { styles } : {})} />
-        )}
-      </div>
-      <div
-        style={{
-          ...computedStyles.desktopRight,
-          minWidth: '0',
-          flex: '1 1 auto',
-          maxWidth: '100%',
-          overflow: 'hidden',
-        }}
-        className="toolbar-desktop-right"
-      >
-        {rightCenterProps && (
-          <RightCenter {...rightCenterProps} {...(styles ? { styles } : {})} />
-        )}
-        {dropdowns?.map((dd, index) => (
-          <Right key={index} dropdown={dd} {...(styles ? { styles } : {})} />
-        ))}
-      </div>
-
-      {/* Tablet */}
-      <div
-        style={{
-          ...computedStyles.tabletContainer,
-          maxWidth: '100%',
-          overflow: 'hidden',
-        }}
-        className="toolbar-tablet-container"
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            flex: '1 1 auto',
-            minWidth: '0',
-            overflow: 'hidden',
-          }}
-        >
-          <Left
-            {...(buttons ? { buttons } : {})}
-            {...(styles ? { styles } : {})}
-          />
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            flex: '0 0 auto',
-            minWidth: '0',
-            maxWidth: '100%',
-            overflow: 'hidden',
-          }}
-        >
-          {rightCenterProps && (
-            <RightCenter
-              {...rightCenterProps}
-              {...(styles ? { styles } : {})}
-            />
-          )}
-          {dropdowns?.map((dd, index) => (
-            <Right key={index} dropdown={dd} {...(styles ? { styles } : {})} />
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile */}
-      <div
-        style={{
-          ...computedStyles.mobileContainer,
-          maxWidth: '100%',
-          overflow: 'hidden',
-        }}
-        className="toolbar-mobile-container"
-      >
-        <div style={computedStyles.mobileRow}>
-          <Left
-            {...(buttons ? { buttons } : {})}
-            {...(styles ? { styles } : {})}
-          />
-        </div>
-        {rightCenterProps && (
-          <div style={{ minWidth: '0', maxWidth: '100%' }}>
-            <RightCenter
-              {...rightCenterProps}
-              {...(styles ? { styles } : {})}
+          <div
+            style={{
+              flex: '1 1 auto',
+              maxWidth: '24rem',
+              minWidth: '200px',
+              marginBottom: '15px',
+            }}
+          >
+            <Searchbar
+              value={searchbarProps.value}
+              onChange={searchbarProps.onChange}
+              {...(isSacredTheme
+                ? { label: 'Divine Search' }
+                : searchbarProps.label
+                  ? { label: searchbarProps.label }
+                  : {})}
+              {...(isSacredTheme
+                ? { placeholder: 'Seek ancient wisdom...' }
+                : searchbarProps.placeholder
+                  ? { placeholder: searchbarProps.placeholder }
+                  : {})}
+              styles={searchbarStyles}
             />
           </div>
         )}
-        {dropdowns?.map((dd, index) => (
-          <div key={index} style={{ minWidth: '0', maxWidth: '100%' }}>
-            <Right dropdown={dd} {...(styles ? { styles } : {})} />
-          </div>
-        ))}
       </div>
     </div>
   )
