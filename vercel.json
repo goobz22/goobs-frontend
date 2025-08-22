@@ -1,7 +1,11 @@
 {
-  "buildCommand": "bun run build-storybook",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=4096' bun run build-storybook",
   "devCommand": "bun run storybook",
-  "installCommand": "bun install",
+  "installCommand": "bun install --frozen-lockfile",
   "framework": null,
-  "outputDirectory": "./storybook-static"
+  "outputDirectory": "./storybook-static",
+  "env": {
+    "SKIP_ESM_EXTERNALS": "true",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
+  }
 }
