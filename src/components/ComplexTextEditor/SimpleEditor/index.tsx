@@ -98,6 +98,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
     resize: 'vertical' as const,
     fontFamily: 'inherit',
     boxSizing: 'border-box',
+    textTransform: 'none' as const, // Prevent inheritance of text-transform styles
     ...(isSacredTheme && {
       paddingRight: '50px', // Make room for glyphs
     }),
