@@ -51,6 +51,55 @@ export interface TextFieldProps
 }
 
 // --------------------------------------------------------------------------
+// AUTOFILL STYLING INJECTION
+// --------------------------------------------------------------------------
+
+// One-time global autofill style injection to handle browser autofill styling
+let textFieldAutofillStylesInjected = false
+const injectTextFieldAutofillStyles = () => {
+  if (textFieldAutofillStylesInjected) return
+  if (typeof document === 'undefined') return
+  try {
+    const styleId = 'textfield-autofill-styles'
+    if (document.getElementById(styleId)) {
+      textFieldAutofillStylesInjected = true
+      return
+    }
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      /* Override browser autofill styling to maintain theme consistency */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: inherit !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        transition: background-color 0s 600000s, color 0s 600000s !important;
+      }
+      
+      /* Additional autofill override for Firefox */
+      input:-moz-autofill,
+      input:-moz-autofill-preview {
+        background-color: transparent !important;
+        color: inherit !important;
+        filter: none !important;
+      }
+      
+      /* Override Edge autofill */
+      input:-ms-input-placeholder {
+        color: inherit !important;
+      }
+    `
+    document.head.appendChild(style)
+    textFieldAutofillStylesInjected = true
+  } catch {}
+}
+
+// --------------------------------------------------------------------------
 // STYLING LOGIC
 // --------------------------------------------------------------------------
 
@@ -151,6 +200,9 @@ const TextField: React.FC<TextFieldProps> = props => {
     styles,
     ...rest
   } = props
+
+  // Inject autofill styles on first render
+  injectTextFieldAutofillStyles()
 
   // Focus state management for styling
   const [isFocused, setIsFocused] = useState(false)
