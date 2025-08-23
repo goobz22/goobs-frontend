@@ -8,7 +8,6 @@ import Check from '../Icons/Check'
 import CircleOutline from '../Icons/CircleOutline'
 import Lock from '../Icons/Lock'
 import Error from '../Icons/Error'
-import InfoOutline from '../Icons/InfoOutline'
 import CustomButton from '../Button'
 
 // --------------------------------------------------------------------------
@@ -28,6 +27,7 @@ export interface StepperProps {
     statusLink?: string
     description?: string
     content?: React.ReactNode // For wizard mode
+    icon?: React.ReactNode // Custom icon for this step (used when active/inactive)
   }[]
 
   // Wizard mode specific props
@@ -36,6 +36,7 @@ export interface StepperProps {
   onBack?: () => void
   onReset?: () => void
   finalActions?: React.ReactNode
+  stepActions?: React.ReactNode // Custom actions to show during step navigation
 
   /** Comprehensive styling options including theme, custom colors, and layout properties */
   styles?: StepperStyles
@@ -81,6 +82,7 @@ const Stepper: React.FC<StepperProps> = ({
   onBack,
   onReset,
   finalActions,
+  stepActions,
   styles,
 }) => {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null)
@@ -113,6 +115,7 @@ const Stepper: React.FC<StepperProps> = ({
 
   const getStepIcon = (
     status: 'completed' | 'active' | 'error' | 'inactive',
+    step: StepperProps['steps'][0],
     stepNumber?: number
   ): JSX.Element => {
     switch (status) {
@@ -131,8 +134,16 @@ const Stepper: React.FC<StepperProps> = ({
         )
       }
       case 'inactive':
+        // Use custom icon if provided, otherwise use Lock
+        if (step.icon) {
+          return <div style={computedStyles.inactiveIcon}>{step.icon}</div>
+        }
         return <Lock style={computedStyles.inactiveIcon} />
       default:
+        // Use custom icon if provided, otherwise use CircleOutline
+        if (step.icon) {
+          return <div style={computedStyles.icon}>{step.icon}</div>
+        }
         return <CircleOutline style={computedStyles.icon} />
     }
   }
@@ -273,7 +284,12 @@ const Stepper: React.FC<StepperProps> = ({
           )}
         </div>
 
-        <div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {stepActions && (
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              {stepActions}
+            </div>
+          )}
           {!isLastStep && onNext && (
             <CustomButton
               text={isLastStep ? 'Finish' : 'Continue →'}
@@ -336,11 +352,11 @@ const Stepper: React.FC<StepperProps> = ({
                         }
                         onMouseLeave={() => setHoveredErrorIcon(null)}
                       >
-                        {getStepIcon(status, step.stepNumber)}
+                        {getStepIcon(status, step, step.stepNumber)}
                       </div>
                     </Tooltip>
                   ) : (
-                    getStepIcon(status, step.stepNumber)
+                    getStepIcon(status, step, step.stepNumber)
                   )}
                 </div>
 
@@ -366,21 +382,6 @@ const Stepper: React.FC<StepperProps> = ({
                   >
                     {step.label}
                   </button>
-
-                  {step.description && status !== 'error' && (
-                    <Tooltip title={step.description} styles={computedStyles}>
-                      <button
-                        style={{
-                          ...computedStyles.infoButton,
-                          ...(isHovered && computedStyles.infoButtonHover),
-                        }}
-                      >
-                        <InfoOutline
-                          style={{ width: '1rem', height: '1rem' }}
-                        />
-                      </button>
-                    </Tooltip>
-                  )}
                 </div>
               </div>
 
