@@ -3,6 +3,7 @@
  */
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { getTooltipStyles } from '../../theme'
 import type { TooltipStyles } from '../../theme'
 
@@ -20,6 +21,12 @@ export interface TooltipProps {
   onClose?: () => void
   enterDelay?: number
   leaveDelay?: number
+  /** Render tooltip in a portal (useful for modals) */
+  usePortal?: boolean
+  /** Portal container (defaults to document.body) */
+  portalContainer?: Element
+  /** Custom arrow positioning - percentage from left/top edge (0-100) */
+  arrowPosition?: number
 }
 
 const StyledTooltip: React.FC<TooltipProps> = ({
@@ -35,6 +42,9 @@ const StyledTooltip: React.FC<TooltipProps> = ({
   onClose,
   enterDelay = 100,
   leaveDelay = 0,
+  usePortal = false,
+  portalContainer,
+  arrowPosition,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -169,36 +179,56 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         ? '#FFD700'
         : backgroundColor
 
+    // Extract border size from theme arrow styles
+    const borderSizeMatch = (themeStyles.arrow.border as string)?.match(
+      /(\d+)px/
+    )
+    const borderSize = borderSizeMatch ? `${borderSizeMatch[1]}px` : '5px'
+
+    // Base arrow styles without the shorthand border property
+    const baseArrowStyle: React.CSSProperties = {
+      position: themeStyles.arrow.position,
+      width: themeStyles.arrow.width,
+      height: themeStyles.arrow.height,
+      // Use individual border properties instead of shorthand
+      borderWidth: borderSize,
+      borderStyle: 'solid',
+      borderColor: 'transparent',
+    }
+
+    // Use custom arrow position if provided, otherwise center (50%)
+    const arrowPos = arrowPosition !== undefined ? `${arrowPosition}%` : '50%'
+
     switch (tooltipplacement) {
       case 'top':
         return {
-          ...themeStyles.arrow,
+          ...baseArrowStyle,
           top: '100%',
-          left: '50%',
+          left: arrowPos,
           transform: 'translateX(-50%)',
           borderTopColor: borderColor,
         }
       case 'bottom':
         return {
-          ...themeStyles.arrow,
+          ...baseArrowStyle,
           bottom: '100%',
-          left: '50%',
+          left: arrowPos,
           transform: 'translateX(-50%)',
           borderBottomColor: borderColor,
         }
       case 'left':
         return {
-          ...themeStyles.arrow,
+          ...baseArrowStyle,
           left: '100%',
-          top: '50%',
+          top: arrowPos,
           transform: 'translateY(-50%)',
           borderLeftColor: borderColor,
         }
       case 'right':
         return {
-          ...themeStyles.arrow,
+          ...baseArrowStyle,
           right: '100%',
-          top: '50%',
+          top: arrowPos,
           transform: 'translateY(-50%)',
           borderRightColor: borderColor,
         }
@@ -206,6 +236,25 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         return {}
     }
   }
+
+  const tooltipElement = title && showTooltip && (
+    <div
+      ref={tooltipRef}
+      style={{
+        ...themeStyles.tooltip,
+        ...themeStyles.tooltipVisible,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        // Ensure tooltip appears above modals
+        zIndex: Math.max(10000, (themeStyles.tooltip.zIndex as number) || 9999),
+      }}
+    >
+      <div style={themeStyles.content}>
+        {title}
+        {arrow && <div style={getArrowStyle()} />}
+      </div>
+    </div>
+  )
 
   return (
     <>
@@ -218,22 +267,9 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         {children}
       </div>
 
-      {title && (
-        <div
-          ref={tooltipRef}
-          style={{
-            ...themeStyles.tooltip,
-            ...(showTooltip && themeStyles.tooltipVisible),
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-          }}
-        >
-          <div style={themeStyles.content}>
-            {title}
-            {arrow && <div style={getArrowStyle()} />}
-          </div>
-        </div>
-      )}
+      {usePortal && typeof window !== 'undefined'
+        ? createPortal(tooltipElement, portalContainer || document.body)
+        : tooltipElement}
     </>
   )
 }
