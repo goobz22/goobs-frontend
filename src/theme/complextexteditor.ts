@@ -243,7 +243,7 @@ export const complexTextEditorThemes: Record<
       background: 'rgba(0, 0, 0, 0.8)',
       borderColor: 'rgba(255, 215, 0, 0.3)',
       color: 'rgba(255, 215, 0, 0.9)',
-      fontFamily: '"Cinzel", serif',
+      fontFamily: '"Inter", sans-serif',
       fontSize: '16px',
       lineHeight: '1.6',
       padding: '24px',
