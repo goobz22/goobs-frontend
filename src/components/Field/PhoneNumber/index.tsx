@@ -188,7 +188,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     <div style={componentStyles.container}>
       {label && (
         <label style={componentStyles.label}>
-          {sacredtheme ? 'Sacred Connection' : label}
+          {sacredtheme ? 'Phone Number' : label}
           {styles?.required && (
             <span style={getRequiredIndicatorStyle(styles)}>
               {styles?.requiredIndicatorText || ' *'}
