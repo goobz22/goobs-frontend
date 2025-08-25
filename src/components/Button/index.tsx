@@ -238,7 +238,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const [isHovered, setIsHovered] = useState(false)
     const [isActive, setIsActive] = useState(false)
 
-    const isDisabled = styles?.disabled || restProps.disabled
+    // Filter out non-HTML props that shouldn't be passed to the button element
+    const filteredProps = useMemo(() => {
+      const { sacredtheme, ...validProps } = restProps as any
+      // sacredtheme is intentionally excluded from the props passed to the button
+      void sacredtheme
+      return validProps
+    }, [restProps])
+
+    const isDisabled = styles?.disabled || filteredProps.disabled
     const isIconOnly = !!icon && !text
     const isSacredTheme = styles?.theme === 'sacred'
     const iconLocation = styles?.iconLocation || 'left'
@@ -289,7 +297,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onClick={handleClick}
-        {...restProps}
+        {...filteredProps}
       >
         {isSacredTheme && (
           <SacredGlyphs

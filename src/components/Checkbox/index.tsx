@@ -10,7 +10,6 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useRef,
-  useId,
   useMemo,
   useCallback,
 } from 'react'
@@ -20,6 +19,16 @@ import { getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
 import type { CheckboxStyles } from '../../theme'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
+
+// --------------------------------------------------------------------------
+// STABLE ID GENERATOR
+// --------------------------------------------------------------------------
+
+let checkboxIdCounter = 0
+
+const generateStableId = () => {
+  return `checkbox-${++checkboxIdCounter}`
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -155,10 +164,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     onFocus,
     onBlur,
     styles,
+    id: providedId,
     ...rest
   } = props
 
-  const id = useId()
+  const [stableId] = useState(() => providedId || generateStableId())
   const internalRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 
@@ -231,7 +241,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
 
   return (
     <label
-      htmlFor={id}
+      htmlFor={stableId}
       style={computedStyles.wrapper}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -249,7 +259,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
       <div style={computedStyles.container}>
         <input
           type="checkbox"
-          id={id}
+          id={stableId}
           ref={internalRef}
           style={computedStyles.input}
           aria-checked={indeterminate ? 'mixed' : undefined}
@@ -261,7 +271,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           {...rest}
         />
         <div style={computedStyles.box}></div>
-        <div style={computedStyles.icon}>
+        <div style={{ ...computedStyles.icon, transform: indeterminate ? 'translateY(1px) translateX(2px)' : 'translateY(5px) translateX(3px)' }}>
           {indeterminate ? (
             <IndeterminateCheckBoxIcon
               styles={{
