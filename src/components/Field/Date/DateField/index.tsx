@@ -221,6 +221,7 @@ const DateField: React.FC<DateFieldProps> = ({
   label = 'Select Date',
   value,
   disableFutureDateValidation = false,
+  helperText,
   styles,
   ...rest
 }) => {
@@ -746,6 +747,8 @@ const DateField: React.FC<DateFieldProps> = ({
       </div>
 
       {isOpen && <CustomDatePicker />}
+      
+      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )
 }

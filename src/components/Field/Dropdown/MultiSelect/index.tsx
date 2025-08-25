@@ -51,10 +51,14 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
 
   // Update selected values from external changes
   useEffect(() => {
-    if (defaultSelected) {
+    if (defaultSelected && Array.isArray(defaultSelected)) {
       setSelectedValues(defaultSelected)
+    } else if (!defaultSelected) {
+      setSelectedValues([])
     }
   }, [defaultSelected])
+
+
 
   // Handle clicks outside to close dropdown
   useEffect(() => {
@@ -215,23 +219,31 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
             {selectedValues.length === 0 ? (
               <span style={componentStyles.placeholder}>Select items...</span>
             ) : (
-              selectedValues.map(value => (
-                <Chip
-                  key={value}
-                  label={value}
-                  {...(styles?.disabled
-                    ? {}
-                    : { onDelete: () => handleToggle(value) })}
-                  styles={{
-                    theme: styles?.theme || 'light',
-                    padding: '6px 12px', // Better padding for chips
-                    height: 'auto', // Allow chip height to adjust
-                    fontSize: '14px', // Consistent font size
-                    whiteSpace: 'normal', // Allow text wrapping if needed
-                    wordBreak: 'break-word', // Break long words
-                  }}
-                />
-              ))
+              selectedValues.map(selectedValue => {
+                // Find the option to get the display name
+                // First try to match by _id, then by value
+                const option = options.find(opt => opt._id === selectedValue) || 
+                              options.find(opt => opt.value === selectedValue)
+                const displayLabel = option ? option.value : selectedValue
+                
+                return (
+                  <Chip
+                    key={selectedValue}
+                    label={displayLabel}
+                    {...(styles?.disabled
+                      ? {}
+                      : { onDelete: () => handleToggle(selectedValue) })}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      padding: '6px 12px', // Better padding for chips
+                      height: 'auto', // Allow chip height to adjust
+                      fontSize: '14px', // Consistent font size
+                      whiteSpace: 'normal', // Allow text wrapping if needed
+                      wordBreak: 'break-word', // Break long words
+                    }}
+                  />
+                )
+              })
             )}
           </div>
           <div style={componentStyles.iconWrapper}>
@@ -243,7 +255,8 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
           {isOpen && (
             <div style={componentStyles.dropdown}>
               {options.map(option => {
-                const isSelected = selectedValues.includes(option.value)
+                const isSelected = selectedValues.includes(option._id || option.value)
+                
                 return (
                   <div
                     key={option._id || option.value}
@@ -255,7 +268,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                           : 'rgba(59, 130, 246, 0.1)'
                         : 'transparent',
                     }}
-                    onClick={e => handleToggle(option.value, e)}
+                    onClick={e => handleToggle(option._id || option.value, e)}
                     onMouseEnter={e => {
                       if (!isSelected) {
                         e.currentTarget.style.backgroundColor = isSacredTheme

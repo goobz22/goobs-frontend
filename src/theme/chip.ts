@@ -6,7 +6,7 @@ import { TRANSITIONS, SHADOWS } from './shared'
 
 export interface ChipTheme {
   container: {
-    background: string
+    backgroundColor: string
     border: string
     borderRadius: string
     boxShadow: string
@@ -59,7 +59,7 @@ export interface ChipTheme {
     padding: string
     borderRadius: string
     border: string
-    background: string
+    backgroundColor: string
     color: string
     transition: string
   }
@@ -100,7 +100,7 @@ export interface ChipTheme {
     left: string
     width: string
     height: string
-    background: string
+    backgroundImage: string
     animation: string
   }
   transition: string
@@ -176,7 +176,7 @@ export interface ChipStyles {
 export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
   light: {
     container: {
-      background: 'rgba(59, 130, 246, 0.1)',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
       border: '1px solid rgba(59, 130, 246, 0.2)',
       borderRadius: '16px',
       boxShadow: SHADOWS.light.small,
@@ -225,7 +225,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       padding: '2px',
       borderRadius: '50%',
       border: 'none',
-      background: 'transparent',
+      backgroundColor: 'transparent',
       color: 'rgba(59, 130, 246, 0.7)',
       transition: TRANSITIONS.fast,
     },
@@ -265,7 +265,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       left: '-100%',
       width: '100%',
       height: '100%',
-      background:
+      backgroundImage:
         'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent)',
       animation: 'sacredShimmer 3s ease-in-out infinite',
     },
@@ -273,7 +273,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
   },
   dark: {
     container: {
-      background: 'rgba(59, 130, 246, 0.15)',
+      backgroundColor: 'rgba(59, 130, 246, 0.15)',
       border: '1px solid rgba(59, 130, 246, 0.3)',
       borderRadius: '16px',
       boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
@@ -322,7 +322,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       padding: '2px',
       borderRadius: '50%',
       border: 'none',
-      background: 'transparent',
+      backgroundColor: 'transparent',
       color: 'rgba(96, 165, 250, 0.7)',
       transition: TRANSITIONS.fast,
     },
@@ -362,7 +362,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       left: '-100%',
       width: '100%',
       height: '100%',
-      background:
+      backgroundImage:
         'linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.2), transparent)',
       animation: 'sacredShimmer 3s ease-in-out infinite',
     },
@@ -370,7 +370,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
   },
   sacred: {
     container: {
-      background: 'rgba(10, 10, 10, 0.9)',
+      backgroundColor: 'rgba(10, 10, 10, 0.9)',
       border: '1px solid rgba(255, 215, 0, 0.3)',
       borderRadius: '20px',
       boxShadow: SHADOWS.sacred.small,
@@ -423,7 +423,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       padding: '3px',
       borderRadius: '50%',
       border: 'none',
-      background: 'transparent',
+      backgroundColor: 'transparent',
       color: 'rgba(255, 215, 0, 0.7)',
       transition: TRANSITIONS.premium,
     },
@@ -464,7 +464,7 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       left: '-100%',
       width: '100%',
       height: '100%',
-      background:
+      backgroundImage:
         'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent)',
       animation: 'sacredShimmer 3s ease-in-out infinite',
     },
@@ -504,7 +504,7 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
 
   return {
     container: {
-      background: styles.backgroundColor || baseTheme.container.background,
+      backgroundColor: styles.backgroundColor || baseTheme.container.backgroundColor,
       border: styles.borderColor
         ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
         : baseTheme.container.border,
@@ -628,7 +628,7 @@ export const getChipStyles = (
         : (baseBorderWidth as unknown as number | string),
     borderStyle: baseBorderStyle as any,
     borderColor: baseBorderColor,
-    backgroundColor: themeConfig.container.background,
+    backgroundColor: themeConfig.container.backgroundColor,
     backdropFilter: themeConfig.container.backdropFilter,
     boxShadow: themeConfig.container.boxShadow,
     cursor: 'default',
