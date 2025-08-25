@@ -58,8 +58,6 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     }
   }, [defaultSelected])
 
-
-
   // Handle clicks outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -222,10 +220,11 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               selectedValues.map(selectedValue => {
                 // Find the option to get the display name
                 // First try to match by _id, then by value
-                const option = options.find(opt => opt._id === selectedValue) || 
-                              options.find(opt => opt.value === selectedValue)
+                const option =
+                  options.find(opt => opt._id === selectedValue) ||
+                  options.find(opt => opt.value === selectedValue)
                 const displayLabel = option ? option.value : selectedValue
-                
+
                 return (
                   <Chip
                     key={selectedValue}
@@ -255,8 +254,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
           {isOpen && (
             <div style={componentStyles.dropdown}>
               {options.map(option => {
-                const isSelected = selectedValues.includes(option._id || option.value)
-                
+                const isSelected = selectedValues.includes(
+                  option._id || option.value
+                )
+
                 return (
                   <div
                     key={option._id || option.value}

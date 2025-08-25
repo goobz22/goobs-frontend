@@ -126,7 +126,9 @@ function DataGrid({
   const prevProvidedRowsRef = useRef<RowData[] | undefined>(undefined)
   const [rows, setRows] = useState<RowData[]>(() => providedRows || [])
   // Search-driven filtered rows (managed by FilterSection)
-  const [filteredRows, setFilteredRows] = useState<RowData[]>(() => providedRows || [])
+  const [filteredRows, setFilteredRows] = useState<RowData[]>(
+    () => providedRows || []
+  )
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [editingCell, setEditingCell] = useState<{
@@ -200,11 +202,11 @@ function DataGrid({
       // Only allow editing if the row is already selected
       if (selectedRows.includes(rowId)) {
         setEditingCell({ rowId, field })
-        
+
         // Find the column to check if it's a multiselect field
         const column = columns.find(col => col.field === field)
         const isMultiselect = column?.creationField?.type === 'multiselect'
-        
+
         // Handle different value types safely
         if (currentValue == null) {
           setEditingValue(isMultiselect ? '[]' : '')
@@ -236,9 +238,9 @@ function DataGrid({
       // Find the column to check if it's a multiselect field
       const column = columns.find(col => col.field === field)
       const isMultiselect = column?.creationField?.type === 'multiselect'
-      
+
       let processedValue = value
-      
+
       // For multiselect fields, parse the JSON string back to array
       if (isMultiselect) {
         try {

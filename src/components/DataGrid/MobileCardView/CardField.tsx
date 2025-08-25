@@ -131,7 +131,13 @@ function CardField({
     } else {
       onCellSave?.(rowId, column.field, editingValue)
     }
-  }, [rowId, column.field, editingValue, onCellSave, column.creationField?.type])
+  }, [
+    rowId,
+    column.field,
+    editingValue,
+    onCellSave,
+    column.creationField?.type,
+  ])
 
   // Handle key events
   const handleKeyDown = useCallback(
@@ -161,7 +167,10 @@ function CardField({
     }
 
     // Handle multiselect for inline editing
-    if (column.creationField?.type === 'multiselect' && column.creationField.options) {
+    if (
+      column.creationField?.type === 'multiselect' &&
+      column.creationField.options
+    ) {
       let currentValues: string[] = []
       try {
         currentValues = Array.isArray(value) ? value : JSON.parse(editingValue)

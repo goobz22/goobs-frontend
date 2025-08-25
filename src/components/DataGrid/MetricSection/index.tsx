@@ -90,11 +90,11 @@ const useScreenSize = () => {
   return screenSize
 }
 
-const MetricSection: React.FC<MetricSectionProps> = ({ 
-  metrics, 
-  styles, 
+const MetricSection: React.FC<MetricSectionProps> = ({
+  metrics,
+  styles,
   collapsible = false,
-  defaultExpanded = false 
+  defaultExpanded = false,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
   const componentStyles = isSacredTheme ? sacredStyles : premiumStyles

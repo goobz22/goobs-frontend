@@ -4,15 +4,18 @@ import type { RowData } from '../types'
  * Efficiently compares two arrays of rows to determine if they're equal
  * Uses ID and update timestamp for comparison to avoid deep object comparison
  */
-export function areRowsEqual(a: RowData[] | undefined, b: RowData[] | undefined): boolean {
+export function areRowsEqual(
+  a: RowData[] | undefined,
+  b: RowData[] | undefined
+): boolean {
   // Handle undefined/null cases
   if (!a && !b) return true
   if (!a || !b) return false
   if (a.length !== b.length) return false
-  
+
   // Empty arrays are equal
   if (a.length === 0) return true
-  
+
   // Create signatures based on IDs and timestamps for efficient comparison
   // This avoids expensive deep equality checks
   const createSignature = (rows: RowData[]): string => {
@@ -27,10 +30,10 @@ export function areRowsEqual(a: RowData[] | undefined, b: RowData[] | undefined)
       })
       .join('|')
   }
-  
+
   const aSignature = createSignature(a)
   const bSignature = createSignature(b)
-  
+
   return aSignature === bSignature
 }
 
@@ -46,13 +49,22 @@ export function getRowKey(row: RowData): string {
 /**
  * Compares rows by their IDs only (useful for checking if the set of rows changed)
  */
-export function areRowIdsEqual(a: RowData[] | undefined, b: RowData[] | undefined): boolean {
+export function areRowIdsEqual(
+  a: RowData[] | undefined,
+  b: RowData[] | undefined
+): boolean {
   if (!a && !b) return true
   if (!a || !b) return false
   if (a.length !== b.length) return false
-  
-  const aIds = a.map(r => r._id || r.id || '').sort().join(',')
-  const bIds = b.map(r => r._id || r.id || '').sort().join(',')
-  
+
+  const aIds = a
+    .map(r => r._id || r.id || '')
+    .sort()
+    .join(',')
+  const bIds = b
+    .map(r => r._id || r.id || '')
+    .sort()
+    .join(',')
+
   return aIds === bIds
 }

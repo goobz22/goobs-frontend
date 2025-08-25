@@ -271,7 +271,14 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           {...rest}
         />
         <div style={computedStyles.box}></div>
-        <div style={{ ...computedStyles.icon, transform: indeterminate ? 'translateY(1px) translateX(2px)' : 'translateY(5px) translateX(3px)' }}>
+        <div
+          style={{
+            ...computedStyles.icon,
+            transform: indeterminate
+              ? 'translateY(1px) translateX(2px)'
+              : 'translateY(5px) translateX(3px)',
+          }}
+        >
           {indeterminate ? (
             <IndeterminateCheckBoxIcon
               styles={{

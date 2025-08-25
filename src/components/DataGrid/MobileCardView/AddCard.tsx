@@ -163,9 +163,7 @@ function AddCard({
         <MultiSelectChip
           label=""
           defaultSelected={Array.isArray(value) ? value : []}
-          onChange={selectedIds =>
-            handleFieldChange(column.field, selectedIds)
-          }
+          onChange={selectedIds => handleFieldChange(column.field, selectedIds)}
           options={fieldConfig.options.map(opt => ({
             value: String(opt.value),
             _id: opt._id || String(opt.value),

@@ -747,7 +747,7 @@ const DateField: React.FC<DateFieldProps> = ({
       </div>
 
       {isOpen && <CustomDatePicker />}
-      
+
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )

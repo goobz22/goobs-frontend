@@ -504,7 +504,8 @@ export const getChipTheme = (styles?: ChipStyles): ChipTheme => {
 
   return {
     container: {
-      backgroundColor: styles.backgroundColor || baseTheme.container.backgroundColor,
+      backgroundColor:
+        styles.backgroundColor || baseTheme.container.backgroundColor,
       border: styles.borderColor
         ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
         : baseTheme.container.border,
