@@ -10,6 +10,10 @@ interface MetricSectionProps {
   metrics: MetricCardData[]
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
+  /** Force the metrics to be collapsible regardless of screen size */
+  collapsible?: boolean
+  /** Default expanded state when collapsible is true */
+  defaultExpanded?: boolean
 }
 
 // Premium theme styles (when sacredtheme=false)
@@ -86,7 +90,12 @@ const useScreenSize = () => {
   return screenSize
 }
 
-const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
+const MetricSection: React.FC<MetricSectionProps> = ({ 
+  metrics, 
+  styles, 
+  collapsible = false,
+  defaultExpanded = false 
+}) => {
   const isSacredTheme = styles?.theme === 'sacred'
   const componentStyles = isSacredTheme ? sacredStyles : premiumStyles
   const screenSize = useScreenSize()
@@ -123,14 +132,14 @@ const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
     </div>
   )
 
-  // On tablet, wrap in accordion; on desktop, show expanded
-  if (screenSize === 'tablet') {
+  // If collapsible prop is true, always use accordion; otherwise use original tablet logic
+  if (collapsible || screenSize === 'tablet') {
     return (
       <div style={componentStyles.container}>
         <Accordion
           summary="Metrics"
           details={metricsContent}
-          defaultExpanded={false}
+          defaultExpanded={collapsible ? defaultExpanded : false}
           styles={{
             theme: styles?.theme || 'sacred',
           }}
@@ -139,7 +148,7 @@ const MetricSection: React.FC<MetricSectionProps> = ({ metrics, styles }) => {
     )
   }
 
-  // Desktop and mobile - show expanded
+  // Desktop and mobile - show expanded (when not collapsible)
   return <div style={componentStyles.container}>{metricsContent}</div>
 }
 

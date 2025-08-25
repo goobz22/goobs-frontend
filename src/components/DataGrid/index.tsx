@@ -14,6 +14,7 @@ import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import useIsMobile from './utils/useIsMobile'
+import { areRowsEqual } from './utils/rowComparison'
 import type { DatagridProps, RowData } from './types'
 import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
 
@@ -35,6 +36,8 @@ function DataGrid({
   showIdColumns = false,
   filters,
   metrics,
+  metricsCollapsible = false,
+  metricsDefaultExpanded = false,
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -119,9 +122,11 @@ function DataGrid({
     [onColumnResize]
   )
 
-  const [rows, setRows] = useState<RowData[]>(providedRows || [])
+  // Use ref to track previous providedRows to prevent unnecessary re-renders
+  const prevProvidedRowsRef = useRef<RowData[] | undefined>(undefined)
+  const [rows, setRows] = useState<RowData[]>(() => providedRows || [])
   // Search-driven filtered rows (managed by FilterSection)
-  const [filteredRows, setFilteredRows] = useState<RowData[]>(rows)
+  const [filteredRows, setFilteredRows] = useState<RowData[]>(() => providedRows || [])
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [editingCell, setEditingCell] = useState<{
@@ -167,12 +172,16 @@ function DataGrid({
     setPage(0) // Reset to first page when changing page size
   }, [])
 
-  useInitializeGrid({ columns: visibleColumns, providedRows, setRows })
-
-  // Keep filteredRows in sync when base rows change (e.g., initialization, external updates)
+  // Smart update that only triggers when providedRows content actually changes
   useEffect(() => {
-    setFilteredRows(rows)
-  }, [rows])
+    if (!areRowsEqual(prevProvidedRowsRef.current, providedRows)) {
+      setRows(providedRows || [])
+      setFilteredRows(providedRows || [])
+      prevProvidedRowsRef.current = providedRows
+    }
+  }, [providedRows])
+
+  useInitializeGrid({ columns: visibleColumns, providedRows, setRows })
 
   const handleSelectionChange = (newSelectedIds: string[]) => {
     setSelectedRows(newSelectedIds)
@@ -191,14 +200,22 @@ function DataGrid({
       // Only allow editing if the row is already selected
       if (selectedRows.includes(rowId)) {
         setEditingCell({ rowId, field })
+        
+        // Find the column to check if it's a multiselect field
+        const column = columns.find(col => col.field === field)
+        const isMultiselect = column?.creationField?.type === 'multiselect'
+        
         // Handle different value types safely
         if (currentValue == null) {
-          setEditingValue('')
+          setEditingValue(isMultiselect ? '[]' : '')
+        } else if (isMultiselect && Array.isArray(currentValue)) {
+          // For multiselect, convert array to JSON string
+          setEditingValue(JSON.stringify(currentValue))
         } else if (typeof currentValue === 'object') {
           try {
             setEditingValue(JSON.stringify(currentValue))
           } catch {
-            setEditingValue('[object]')
+            setEditingValue(isMultiselect ? '[]' : '[object]')
           }
         } else if (
           typeof currentValue === 'string' ||
@@ -207,18 +224,33 @@ function DataGrid({
         ) {
           setEditingValue(String(currentValue))
         } else {
-          setEditingValue('')
+          setEditingValue(isMultiselect ? '[]' : '')
         }
       }
     },
-    [selectedRows]
+    [selectedRows, columns]
   )
 
   const handleCellSave = useCallback(
     (rowId: string, field: string, value: string) => {
+      // Find the column to check if it's a multiselect field
+      const column = columns.find(col => col.field === field)
+      const isMultiselect = column?.creationField?.type === 'multiselect'
+      
+      let processedValue = value
+      
+      // For multiselect fields, parse the JSON string back to array
+      if (isMultiselect) {
+        try {
+          processedValue = JSON.parse(value) as any
+        } catch {
+          processedValue = [] as any
+        }
+      }
+
       // Call the external onCellSave callback if it exists
       if (onCellSave) {
-        onCellSave(rowId, field, value)
+        onCellSave(rowId, field, processedValue)
       }
 
       // Update the local row data for immediate UI feedback
@@ -226,7 +258,7 @@ function DataGrid({
         prevRows.map(row => {
           const currentRowId = String(row._id ?? row.id)
           if (currentRowId === rowId) {
-            return { ...row, [field]: value }
+            return { ...row, [field]: processedValue }
           }
           return row
         })
@@ -234,7 +266,7 @@ function DataGrid({
       setEditingCell(null)
       setEditingValue('')
     },
-    [onCellSave]
+    [onCellSave, columns]
   )
 
   const handleCellCancel = useCallback(() => {
@@ -586,6 +618,8 @@ function DataGrid({
           {metrics && metrics.length > 0 && (
             <MetricSection
               metrics={metrics}
+              collapsible={metricsCollapsible}
+              defaultExpanded={metricsDefaultExpanded}
               {...(styles !== undefined ? { styles } : {})}
             />
           )}

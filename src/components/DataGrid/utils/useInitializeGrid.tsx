@@ -6,6 +6,7 @@ import {
   columnVisibilityAtom,
   columnVisibilityActions,
 } from '../Jotai/atom'
+import { areRowsEqual } from './rowComparison'
 import type { ColumnDef, RowData } from '../types'
 
 // Create a single shared store instance
@@ -42,10 +43,10 @@ export function useInitializeGrid({
 
   // (1) Sync local rows if parent changes them
   // Use a ref to track previous rows to avoid unnecessary updates
-  const prevRowsRef = useRef(providedRows)
+  const prevRowsRef = useRef<RowData[] | undefined>(undefined)
   useEffect(() => {
-    // Only update if rows have actually changed
-    if (JSON.stringify(prevRowsRef.current) !== JSON.stringify(providedRows)) {
+    // Only update if rows have actually changed using efficient comparison
+    if (!areRowsEqual(prevRowsRef.current, providedRows)) {
       setRows(providedRows || [])
       prevRowsRef.current = providedRows
     }

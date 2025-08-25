@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
+import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import type { ColumnDef } from '../types'
 
 interface CardFieldProps {
@@ -91,6 +92,12 @@ function CardField({
     (val: unknown): string => {
       if (val == null || val === '') return '—'
 
+      // Handle array values for multiselect fields
+      if (Array.isArray(val)) {
+        if (val.length === 0) return '—'
+        return val.map(v => `{{${v}}}`).join(', ')
+      }
+
       if (column.type === 'currency') {
         const num = typeof val === 'number' ? val : parseFloat(String(val))
         if (!isNaN(num)) {
@@ -110,10 +117,21 @@ function CardField({
     [column.type]
   )
 
-  // Handle save
+  // Handle save - need to handle multiselect differently
   const handleSave = useCallback(() => {
-    onCellSave?.(rowId, column.field, editingValue)
-  }, [rowId, column.field, editingValue, onCellSave])
+    if (column.creationField?.type === 'multiselect') {
+      // For multiselect, parse the editingValue as JSON array
+      try {
+        const arrayValue = JSON.parse(editingValue)
+        onCellSave?.(rowId, column.field, arrayValue as any)
+      } catch {
+        // If parsing fails, treat as empty array
+        onCellSave?.(rowId, column.field, [] as any)
+      }
+    } else {
+      onCellSave?.(rowId, column.field, editingValue)
+    }
+  }, [rowId, column.field, editingValue, onCellSave, column.creationField?.type])
 
   // Handle key events
   const handleKeyDown = useCallback(
@@ -140,6 +158,36 @@ function CardField({
       backgroundColor: customColors.inputBackground,
       color: customColors.text,
       outline: 'none',
+    }
+
+    // Handle multiselect for inline editing
+    if (column.creationField?.type === 'multiselect' && column.creationField.options) {
+      let currentValues: string[] = []
+      try {
+        currentValues = Array.isArray(value) ? value : JSON.parse(editingValue)
+      } catch {
+        currentValues = Array.isArray(value) ? value : []
+      }
+
+      return (
+        <MultiSelectChip
+          label=""
+          defaultSelected={currentValues}
+          onChange={selectedIds => {
+            // Convert array to JSON string for editingValue compatibility
+            onEditingValueChange(JSON.stringify(selectedIds))
+          }}
+          options={column.creationField.options.map(opt => ({
+            value: String(opt.value),
+            _id: opt._id || String(opt.value),
+          }))}
+          helperText="Select variables..."
+          styles={{
+            theme: theme,
+            width: '100%',
+          }}
+        />
+      )
     }
 
     if (column.type === 'dropdown' && column.dropdownOptions) {

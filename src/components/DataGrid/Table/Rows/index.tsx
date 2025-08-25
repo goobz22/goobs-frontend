@@ -1111,8 +1111,18 @@ const Rows: React.FC<RowsProps> = ({
                 }
               } else {
                 // Show formatted value
+                // First check if column has custom renderCell function
+                if (col.renderCell) {
+                  cellContent = col.renderCell({
+                    row,
+                    value,
+                    field: col.field,
+                    rowIndex: rows.indexOf(row),
+                    columnIndex: columns.indexOf(col),
+                  })
+                }
                 // Check if the value is an array and should be displayed as chips
-                if (Array.isArray(value)) {
+                else if (Array.isArray(value)) {
                   // Handle array values - display as chips
                   const arrayItems = value as any[]
 

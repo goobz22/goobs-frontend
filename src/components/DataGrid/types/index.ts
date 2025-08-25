@@ -228,4 +228,8 @@ export interface DatagridProps {
   styles?: DataGridStyles
 
   metrics?: MetricCardData[]
+  /** Force the metrics section to be collapsible regardless of screen size */
+  metricsCollapsible?: boolean
+  /** Default expanded state for metrics when collapsible is true */
+  metricsDefaultExpanded?: boolean
 }

@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react'
 import TextField from '../../Field/Text'
 import DateField from '../../Field/Date/DateField'
 import SearchableDropdown from '../../Field/Dropdown/SearchableSimple'
+import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import InternalIncrement from '../../Field/Number/InternalIncrement'
 import Button from '../../Button'
 import type { ColumnDef } from '../types'
@@ -152,6 +153,28 @@ function AddCard({
           }))}
           placeholder={fieldConfig.placeholder || 'Select...'}
           styles={fieldStyles}
+        />
+      )
+    }
+
+    // Handle multiselect
+    if (fieldConfig.type === 'multiselect' && fieldConfig.options) {
+      return (
+        <MultiSelectChip
+          label=""
+          defaultSelected={Array.isArray(value) ? value : []}
+          onChange={selectedIds =>
+            handleFieldChange(column.field, selectedIds)
+          }
+          options={fieldConfig.options.map(opt => ({
+            value: String(opt.value),
+            _id: opt._id || String(opt.value),
+          }))}
+          helperText={fieldConfig.placeholder || 'Select...'}
+          styles={{
+            ...fieldStyles,
+            width: '100%',
+          }}
         />
       )
     }
