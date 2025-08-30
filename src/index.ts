@@ -1,548 +1,309 @@
-import CustomButton, { ButtonProps, ButtonGroup } from './components/Button'
-import IconButton, { IconButtonProps } from './components/IconButton'
-import Typography, { TypographyProps } from './components/Typography'
-import ConfirmationCodeInput, {
-  ConfirmationCodeInputsProps,
+// Optimized barrel export using re-exports for better tree-shaking
+// This allows Vite/Rollup to only bundle what's actually used
+// With sideEffects: false in package.json, unused exports will be eliminated
+
+// Components - using re-export syntax for optimal tree-shaking
+export {
+  default as CustomButton,
+  type ButtonProps,
+  ButtonGroup,
+} from './components/Button'
+export {
+  default as IconButton,
+  type IconButtonProps,
+} from './components/IconButton'
+export {
+  default as Typography,
+  type TypographyProps,
+} from './components/Typography'
+export {
+  default as ConfirmationCodeInput,
+  type ConfirmationCodeInputsProps,
 } from './components/ConfirmationCodeInput'
-import RadioGroup, {
-  RadioOption,
-  RadioGroupProps,
+export {
+  default as RadioGroup,
+  type RadioOption,
+  type RadioGroupProps,
 } from './components/RadioGroup'
-import Popup, { PopupProps } from './components/Form/Popup'
-import CustomDialog, { CustomDialogProps } from './components/Form/Dialog'
-import Dialog, { DialogProps } from './components/Dialog'
-import ContentSection, { ContentSectionProps } from './components/Content'
-import CodeCopy, { CodeCopyProps } from './components/CodeCopy'
-import PricingTable, { PricingProps } from './components/PricingTable'
-import Stepper, { StepperProps } from './components/Stepper'
-import AppBar, { AppBarProps } from './components/AppBar'
-import CustomToolbar, { CustomToolbarProps } from './components/Toolbar'
-import TransferList, { TransferListProps } from './components/TransferList'
-import StyledTooltip, { TooltipProps } from './components/Tooltip'
-import Popover, { PopoverProps } from './components/Popover'
-import QRCodeComponent, { QRCodeProps } from './components/QRCode'
-import FormProjectBoard, {
-  FormProjectBoardProps,
+export { default as Popup, type PopupProps } from './components/Form/Popup'
+export {
+  default as CustomDialog,
+  type CustomDialogProps,
+} from './components/Form/Dialog'
+export { default as Dialog, type DialogProps } from './components/Dialog'
+export {
+  default as ContentSection,
+  type ContentSectionProps,
+} from './components/Content'
+export { default as CodeCopy, type CodeCopyProps } from './components/CodeCopy'
+export {
+  default as PricingTable,
+  type PricingProps,
+} from './components/PricingTable'
+export { default as Stepper, type StepperProps } from './components/Stepper'
+export { default as AppBar, type AppBarProps } from './components/AppBar'
+export {
+  default as CustomToolbar,
+  type CustomToolbarProps,
+} from './components/Toolbar'
+export {
+  default as TransferList,
+  type TransferListProps,
+} from './components/TransferList'
+export {
+  default as StyledTooltip,
+  type TooltipProps,
+} from './components/Tooltip'
+export { default as Popover, type PopoverProps } from './components/Popover'
+export {
+  default as QRCodeComponent,
+  type QRCodeProps,
+} from './components/QRCode'
+export {
+  default as FormProjectBoard,
+  type FormProjectBoardProps,
 } from './components/Form/ProjectBoard'
-import MultiSelectChip, {
-  MultiSelectChipProps,
+export {
+  default as MultiSelectChip,
+  type MultiSelectChipProps,
 } from './components/Field/Dropdown/MultiSelect'
-import ComplexEditor, {
-  ComplexTextEditorProps,
+export {
+  default as ComplexEditor,
+  type ComplexTextEditorProps,
 } from './components/ComplexTextEditor'
-import FormControl, {
-  FormControlProps,
-  FormControlStyles,
+export {
+  default as FormControl,
+  type FormControlProps,
+  type FormControlStyles,
 } from './components/FormControl'
-import InputLabel, {
-  InputLabelProps,
-  InputLabelStyles,
+export {
+  default as InputLabel,
+  type InputLabelProps,
+  type InputLabelStyles,
 } from './components/InputLabel'
-import Select, { SelectProps, SelectStyles } from './components/Select'
-import MenuItem, { MenuItemProps, MenuItemStyles } from './components/MenuItem'
-import FormControlLabel, {
-  FormControlLabelProps,
-  FormControlLabelStyles,
+export {
+  default as Select,
+  type SelectProps,
+  type SelectStyles,
+} from './components/Select'
+export {
+  default as MenuItem,
+  type MenuItemProps,
+  type MenuItemStyles,
+} from './components/MenuItem'
+export {
+  default as FormControlLabel,
+  type FormControlLabelProps,
+  type FormControlLabelStyles,
 } from './components/FormControlLabel'
-// Import the Accordion component and its props
-import Accordion, { AccordionProps } from './components/Accordion'
-// Import the Breadcrumb component and its props
-import Breadcrumb, {
-  BreadcrumbProps,
-  BreadcrumbItem,
+export {
+  default as Accordion,
+  type AccordionProps,
+} from './components/Accordion'
+export {
+  default as Breadcrumb,
+  type BreadcrumbProps,
+  type BreadcrumbItem,
 } from './components/Breadcrumb'
-// Import the TreeView component and its props
-import TreeView, {
-  TreeViewProps,
-  TreeViewItem,
-  TreeViewItemId,
-  TreeViewApiRef,
-  TreeViewSelectionPropagation,
+export {
+  default as TreeView,
+  type TreeViewProps,
+  type TreeViewItem,
+  type TreeViewItemId,
+  type TreeViewApiRef,
+  type TreeViewSelectionPropagation,
   useTreeViewApiRef,
   useTreeViewContext,
 } from './components/TreeView'
-// Import the Drawer component and its props
-import Drawer, { DrawerProps } from './components/Drawer'
-import Alert, { AlertProps } from './components/Alert'
-import Badge, { BadgeProps } from './components/Badge'
-import { RawCustomer } from './components/ProjectBoard/types'
-import AdministratorAddTaskCompanyDropdown from './components/ProjectBoard/forms/AddTask/administrator/companyDropdown'
-import AdministratorAddTaskCompanyProvided from './components/ProjectBoard/forms/AddTask/administrator/companyProvided'
-import CompanyAddTaskCustomerDropdown from './components/ProjectBoard/forms/AddTask/company/customerDropdown'
-import CompanyAddTaskCustomerProvided from './components/ProjectBoard/forms/AddTask/company/customerProvided'
-import CustomerAddTask from './components/ProjectBoard/forms/AddTask/customer'
-import NoUserAddTask from './components/ProjectBoard/forms/AddTask/noUser'
-import { RawSeverityLevel } from './components/ProjectBoard/types'
-// Here is the new horizontal `Tabs` import
-import Tabs, { TabsProps, Tab, TabProps } from './components/Tabs'
-import ToggleButton, {
-  ToggleButtonProps,
+export { default as Drawer, type DrawerProps } from './components/Drawer'
+export { default as Alert, type AlertProps } from './components/Alert'
+export { default as Badge, type BadgeProps } from './components/Badge'
+export {
+  default as Tabs,
+  type TabsProps,
+  Tab,
+  type TabProps,
+} from './components/Tabs'
+export {
+  default as ToggleButton,
+  type ToggleButtonProps,
   ToggleButtonGroup,
-  ToggleButtonGroupProps,
+  type ToggleButtonGroupProps,
 } from './components/ToggleButton'
-import { Task } from './components/ProjectBoard/types'
-import Checkbox, { CheckboxProps } from './components/Checkbox'
-import Chip, { type ChipProps } from './components/Chip'
-import Switch, { type SwitchProps } from './components/Switch'
-import MACAddressField, {
-  MACAddressFieldProps,
+export { default as Checkbox, type CheckboxProps } from './components/Checkbox'
+export { default as Chip, type ChipProps } from './components/Chip'
+export { default as Switch, type SwitchProps } from './components/Switch'
+
+// Field Components
+export {
+  default as TextField,
+  type TextFieldProps,
+} from './components/Field/Text'
+export {
+  default as PasswordField,
+  type PasswordFieldProps,
+} from './components/Field/Password'
+export {
+  default as PhoneNumberField,
+  type PhoneNumberFieldProps,
+} from './components/Field/PhoneNumber'
+export {
+  default as SearchBar,
+  type SearchbarProps,
+} from './components/Field/Search'
+export {
+  default as PercentageField,
+  type PercentageFieldProps,
+} from './components/Field/Percentage'
+export { default as USDField, type USDFieldProps } from './components/Field/USD'
+export {
+  default as MACAddressField,
+  type MACAddressFieldProps,
 } from './components/Field/IPAM/MACAddress'
-import VLANField, { VLANFieldProps } from './components/Field/IPAM/VLAN'
-// New imports
-import DateField, { DateFieldProps } from './components/Field/Date/DateField'
-import DateRangeComponent, {
-  DateRangeProps,
+export {
+  default as VLANField,
+  type VLANFieldProps,
+} from './components/Field/IPAM/VLAN'
+export {
+  default as DateField,
+  type DateFieldProps,
+} from './components/Field/Date/DateField'
+export {
+  default as DateRangeComponent,
+  type DateRangeProps,
 } from './components/Field/Date/DateRange'
-import TimeRangeComponent, {
-  TimeRangeProps,
+export {
+  default as TimeRangeComponent,
+  default as TimeRange, // Alias for backward compatibility
+  type TimeRangeProps,
   AMERICAN_TIMEZONES,
 } from './components/Field/Time/TimeRange'
-import Dropdown, { DropdownProps } from './components/Field/Dropdown/Regular'
-import IncrementNumberField from './components/Field/Number/ExternalIncrement'
-import InternalIncrementNumberField, {
-  InternalIncrementNumberFieldProps,
-} from './components/Field/Number/InternalIncrement'
-import PasswordField, { PasswordFieldProps } from './components/Field/Password'
-import PhoneNumberField from './components/Field/PhoneNumber'
-import Searchbar, { SearchbarProps } from './components/Field/Search'
-import TextField, { TextFieldProps } from './components/Field/Text'
-import USDField, { USDFieldProps } from './components/Field/USD'
-import SearchableSimple, {
-  SearchableSimpleProps,
-  DropdownOption,
+export {
+  default as Dropdown,
+  type DropdownProps,
+  type DropdownOption,
+} from './components/Field/Dropdown/Regular'
+export {
+  default as SearchableSimple,
+  type SearchableSimpleProps,
+  type DropdownOption as SearchableSimpleDropdownOption,
 } from './components/Field/Dropdown/SearchableSimple'
-import SearchableHistory, {
-  SearchableHistoryProps,
+export {
+  default as SearchableHistory,
+  type SearchableHistoryProps,
+  type DropdownOption as SearchableHistoryDropdownOption,
 } from './components/Field/Dropdown/SearchableHistory'
-import AccountNumber, {
-  AccountNumberProps,
-} from './components/Field/Number/AccountNumber'
-import RoutingNumber, {
-  RoutingNumberProps,
-} from './components/Field/Number/RoutingNumber'
-import CVV, { CVVProps } from './components/Field/Number/CVV'
-import CreditCardNumber, {
-  CreditCardNumberProps,
-  CardType,
-} from './components/Field/Number/CreditCardNumber'
-import PercentageField, {
-  PercentageFieldProps,
-} from './components/Field/Percentage'
-import ProgressBar, { ProgressBarProps } from './components/ProgressBar'
-import Slider, { SliderProps } from './components/Field/Slider'
-import Pagination, { PaginationProps } from './components/Pagination'
-import Snackbar, { type SnackbarProps } from './components/Snackbar'
-import Paper, { PaperProps } from './components/Paper'
-import Card, {
-  CardProps,
-  CardContent,
-  CardContentProps,
-  CardActions,
-  CardActionsProps,
-  CardHeader,
-  CardHeaderProps,
-} from './components/Card'
-import Stack, { StackProps, StackStyles } from './components/Stack'
-import Container, { ContainerProps } from './components/Container'
-import Avatar, { AvatarProps } from './components/Avatar'
-import Divider, { DividerProps } from './components/Divider'
-import Fade, { FadeProps } from './components/Fade'
-import Slide, { SlideProps } from './components/Slide'
-import Zoom, { ZoomProps } from './components/Zoom'
-import * as Icons from './components/Icons'
-import {
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListProps,
-  ListItemProps,
-  ListItemIconProps,
-  ListItemTextProps,
-} from './components/List'
 
-// Add FormDataGrid import
-import FormDataGrid from './components/Form/DataGrid'
-import type { FormDataGridProps } from './components/Form/DataGrid'
-import Grid, { GridProps } from './components/Grid'
-import {
-  Table,
+// Layout Components
+export { default as Container } from './components/Container'
+export { default as Paper } from './components/Paper'
+export { default as Stack } from './components/Stack'
+export { default as Grid } from './components/Grid'
+export { default as Divider } from './components/Divider'
+
+// Animation Components
+export { default as Fade } from './components/Fade'
+export { default as Zoom } from './components/Zoom'
+export { default as Slide } from './components/Slide'
+
+// Data Display
+export { default as DataGrid } from './components/DataGrid'
+export {
+  default as Table,
   TableContainer,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
+  type TableContainerProps,
+  type TableHeadProps,
+  type TableBodyProps,
+  type TableRowProps,
+  type TableCellProps,
 } from './components/Table'
-import type { SimpleTableProps, TableStyles } from './components/Table'
-
-// Animations
-import { Animation } from './components/Content/Structure/animations'
-
-// Importing Extended Props
-import { ProjectBoardProps } from './components/ProjectBoard/types'
-
-// Consolidated import of all DataGrid types
-import type {
-  DatagridProps,
+export {
+  default as FormDataGrid,
+  type FormDataGridProps,
+} from './components/Form/DataGrid'
+export {
+  default as MetricCard,
+  type MetricCardProps,
+} from './components/DataGrid/MetricCard'
+export type {
   ColumnDef,
   RowData,
-  TableProps,
-  DataGridFilter,
-  MetricCardData,
+  DatagridProps,
 } from './components/DataGrid/types'
+export {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  type ListProps,
+  type ListItemProps,
+  type ListItemIconProps,
+  type ListItemTextProps,
+} from './components/List'
+export { default as Avatar } from './components/Avatar'
+export {
+  Card,
+  CardContent,
+  CardActions,
+  CardHeader,
+  type CardProps,
+  type CardContentProps,
+  type CardActionsProps,
+  type CardHeaderProps,
+} from './components/Card'
 
-// DataGrid components
-import MetricCard from './components/DataGrid/MetricCard'
-import MetricSection from './components/DataGrid/MetricSection'
+// Feedback Components
+export { default as Snackbar } from './components/Snackbar'
+export { default as ProgressBar } from './components/ProgressBar'
+export { default as Pagination } from './components/Pagination'
 
-// Colors
-import {
-  moss,
-  aqua,
-  madder,
-  woad,
-  marine,
-  pansy,
-  stainlessSteel,
-  coal,
-  ocean,
-  sky,
-  salmon,
-  lightning,
-  sage,
-  lilac,
-  gunpowder,
-  lightMadder,
-  black,
-  white,
-  none,
-  semiTransparentWhite,
-  semiTransparentBlack,
-  red,
-  green,
-  grey,
-} from './theme/'
+// Calendar Components
+export { default as BigCalendar } from './components/BigCalendar'
 
-// Typography
-import {
-  arapeyh1,
-  arapeyh2,
-  arapeyh3,
-  arapeyh4,
-  arapeyh5,
-  arapeyh6,
-  arapeyparagraph,
-  interh1,
-  interh2,
-  interh3,
-  interh4,
-  interh5,
-  interh6,
-  interparagraph,
-  interhelperheader,
-  interhelperfooter,
-  merrih1,
-  merrih2,
-  merrih3,
-  merrih4,
-  merrih5,
-  merrih6,
-  merriparagraph,
-  merrihelperfooter,
-} from './theme/'
+// Slider Component
+export { default as Slider, type SliderProps } from './components/Field/Slider'
 
-// Utilities
-import { alpha } from './utils/alpha'
-import { keyframes, css, commonKeyframes } from './utils/keyframes'
+// Icons - Re-export all as namespace
+export * as Icons from './components/Icons'
 
-// Styles
-// Note: formContainerStyle was removed as the file './styles/Form' doesn't exist
+// Utils
+export { alpha } from './utils/alpha'
+export * from './utils/keyframes'
 
-/* -------------------------------------------------------------------------- */
-/*                      NEW: ProjectBoard Sub-Components                      */
-/* -------------------------------------------------------------------------- */
-import ShowTask, {
-  ShowTaskProps,
-} from './components/ProjectBoard/forms/ShowTask/client'
-import BigCalendar, {
-  BigCalendarProps,
-  CalendarView,
-  CalendarEvent,
-  CalendarFilterOptions,
-} from './components/BigCalendar'
-import type { BigCalendarStyles } from './theme/bigcalendar'
+// Theme exports
+export * from './theme'
 
-export { AppBar }
-export { CustomButton }
-export { IconButton }
-export { Typography }
-export { ConfirmationCodeInput }
-export { RadioGroup }
-export { Popup }
-export { ContentSection }
-export { CodeCopy }
-export { PricingTable }
-export { Stepper }
-export { CustomToolbar }
-export { TransferList }
-export { StyledTooltip }
-export { Popover }
-export { QRCodeComponent }
-export { MultiSelectChip }
-export { Tabs, Tab }
-export { ToggleButton, ToggleButtonGroup }
-export { ComplexEditor }
-export { FormControl }
-export { InputLabel }
-export { Select }
-export { MenuItem }
-export { FormControlLabel }
-export { Accordion } // <-- Export Accordion here
-export { Breadcrumb } // <-- Export Breadcrumb here
-export { TreeView }
-export { useTreeViewApiRef, useTreeViewContext }
-export { Drawer }
-export { Alert }
-export { Badge }
-export { AdministratorAddTaskCompanyDropdown }
-export { AdministratorAddTaskCompanyProvided }
-export { CompanyAddTaskCustomerDropdown }
-export { CompanyAddTaskCustomerProvided }
-export { CustomerAddTask }
-export { NoUserAddTask }
-export { Checkbox }
-export { Chip }
-export { Switch }
-export { Icons }
-export { ButtonGroup }
-// New named exports
-export { DateField }
-export { DateRangeComponent as DateRange }
-export { TimeRangeComponent as TimeRange }
-export { AMERICAN_TIMEZONES }
-export { Dropdown }
-export { IncrementNumberField }
-export { InternalIncrementNumberField }
-export { PasswordField }
-export { PhoneNumberField }
-export { Searchbar }
-export { TextField }
-export { USDField }
-export { CustomDialog }
-export { Dialog }
-export { MACAddressField }
-export { VLANField }
-// Add FormDataGrid to named exports
-export { FormDataGrid }
-export { FormProjectBoard }
-export { Grid }
-export { Table, TableContainer, TableHead, TableBody, TableRow, TableCell }
-export { List, ListItem, ListItemIcon, ListItemText }
-export type { InternalIncrementNumberFieldProps }
-export type { PasswordFieldProps }
-export type { SearchbarProps }
-export type { TextFieldProps }
-export type { USDFieldProps }
-export type { SearchableSimpleProps }
-export type { SearchableHistoryProps }
-export type { MACAddressFieldProps }
-export type { VLANFieldProps }
-// NEW: Export AddTask / ShowTask / ManageTask
-export { ShowTask }
-export { PercentageField }
-export { ProgressBar }
-export { Slider }
-export { Pagination }
-export { Snackbar }
-export { Paper }
-export { Card, CardContent, CardActions, CardHeader }
-export { Stack }
-export { Container }
-export { Avatar }
-export { Divider }
-export { Fade }
-export { Slide }
-export { Zoom }
-export { BigCalendar }
-export { MetricCard, MetricSection }
-
-// Export utilities
-export { alpha, keyframes, css, commonKeyframes }
-
-export type { Task }
-export type { RawCustomer }
-// Re-export additional ProjectBoard types for external consumers
+// Types
 export type {
+  RawCustomer,
+  RawSeverityLevel,
+  Task,
+  Comment,
   CommentEditHistory,
-  RawCompany,
-  CurrentUser,
-} from './components/ProjectBoard/types'
-export type {
+  ColumnData,
+  BoardType,
   RawStatus,
   RawSubStatus,
   RawTopic,
   RawQueue,
   RawArticle,
+  RawEmployee,
+  RawCompany,
+  BoardVariant,
+  CurrentUser,
+  ProjectBoardProps,
 } from './components/ProjectBoard/types'
-export type { CheckboxProps }
-export type { AccountNumberProps }
-export type { RoutingNumberProps }
-export type { CVVProps }
-export type { CreditCardNumberProps }
-export type { CardType }
-export type { DateRangeProps }
-export type { TimeRangeProps }
-export type { PercentageFieldProps }
-export type { ChipProps }
-export type { SwitchProps }
-export type { ProgressBarProps }
-export type { PaginationProps }
-export type { AlertProps }
-export type { SnackbarProps }
-export type { SliderProps }
-export type { BadgeProps }
-export type { PaperProps }
-export type { CardProps, CardContentProps, CardActionsProps, CardHeaderProps }
-export type { StackProps, StackStyles }
-export type { ContainerProps }
-export type { AvatarProps }
-export type { DividerProps }
-export type { FadeProps }
-export type { SlideProps }
-export type { ZoomProps }
-export type { ListProps, ListItemProps, ListItemIconProps, ListItemTextProps }
 
-/* -------------------------------------------------------------------------- */
-/*                           Named Type Exports                               */
-/* -------------------------------------------------------------------------- */
-
-export { SearchableSimple }
-export { SearchableHistory }
-export { AccountNumber }
-export { RoutingNumber }
-export { CVV }
-export { CreditCardNumber }
-// 1) Form DataGrid
-export type { FormDataGridProps }
-export type { CustomDialogProps }
-export type { DialogProps }
-export type { GridProps }
-export type { SimpleTableProps, TableStyles }
-
-// 2) All DataGrid Types
-export type { DatagridProps }
-export type { ColumnDef, RowData }
-export type { TableProps }
-export type { DataGridFilter }
-export type { MetricCardData }
-export type { MultiSelectChipProps }
-export type { DateFieldProps }
-export type { DropdownProps }
-// "Local" type exports for existing components
-export type { ButtonProps }
-export type { IconButtonProps }
-export type { ComplexTextEditorProps }
-export type { FormControlProps, FormControlStyles }
-export type { InputLabelProps, InputLabelStyles }
-export type { SelectProps, SelectStyles }
-export type { MenuItemProps, MenuItemStyles }
-export type { FormControlLabelProps, FormControlLabelStyles }
-export type { TypographyProps }
-export type { ConfirmationCodeInputsProps }
-export type { RadioOption, RadioGroupProps }
-export type { PopupProps }
-export type { ContentSectionProps }
-export type { CodeCopyProps }
-export type { PricingProps }
-export type { StepperProps }
-export type { AppBarProps }
-export type { CustomToolbarProps }
-export type { FormProjectBoardProps }
-export type { TransferListProps }
-export type { TooltipProps }
-export type { PopoverProps }
-export type { ProjectBoardProps }
-export type { QRCodeProps }
-export type { DropdownOption }
-export type { TabsProps, TabProps }
-export type { ToggleButtonProps, ToggleButtonGroupProps }
-export type { ShowTaskProps }
-export type { Animation }
-export type { AccordionProps } // <-- Export AccordionProps
-export type { BreadcrumbProps, BreadcrumbItem } // <-- Export Breadcrumb types
-export type {
-  TreeViewProps,
-  TreeViewItem,
-  TreeViewItemId,
-  TreeViewApiRef,
-  TreeViewSelectionPropagation,
-} // <-- Export TreeView types
-export type { DrawerProps } // <-- Export Drawer types
-export type { RawSeverityLevel }
-export type {
-  BigCalendarProps,
-  CalendarView,
-  CalendarEvent,
-  BigCalendarStyles,
-  CalendarFilterOptions,
-}
-
-/* -------------------------------------------------------------------------- */
-/*                              Color Exports                                 */
-/* -------------------------------------------------------------------------- */
-export {
-  moss,
-  aqua,
-  madder,
-  woad,
-  marine,
-  pansy,
-  stainlessSteel,
-  coal,
-  ocean,
-  sky,
-  salmon,
-  lightning,
-  sage,
-  lilac,
-  gunpowder,
-  lightMadder,
-  black,
-  white,
-  none,
-  semiTransparentWhite,
-  semiTransparentBlack,
-  red,
-  green,
-  grey,
-}
-
-/* -------------------------------------------------------------------------- */
-/*                           Typography Exports                               */
-/* -------------------------------------------------------------------------- */
-export {
-  arapeyh1,
-  arapeyh2,
-  arapeyh3,
-  arapeyh4,
-  arapeyh5,
-  arapeyh6,
-  arapeyparagraph,
-  interh1,
-  interh2,
-  interh3,
-  interh4,
-  interh5,
-  interh6,
-  interparagraph,
-  interhelperheader,
-  interhelperfooter,
-  merrih1,
-  merrih2,
-  merrih3,
-  merrih4,
-  merrih5,
-  merrih6,
-  merriparagraph,
-  merrihelperfooter,
-}
+// Task Management Components
+export { default as ProjectBoard } from './components/ProjectBoard'
+export { default as AdministratorAddTaskCompanyDropdown } from './components/ProjectBoard/forms/AddTask/administrator/companyDropdown'
+export { default as AdministratorAddTaskCompanyProvided } from './components/ProjectBoard/forms/AddTask/administrator/companyProvided'
+export { default as CompanyAddTaskCustomerDropdown } from './components/ProjectBoard/forms/AddTask/company/customerDropdown'
+export { default as CompanyAddTaskCustomerProvided } from './components/ProjectBoard/forms/AddTask/company/customerProvided'
+export { default as CustomerAddTask } from './components/ProjectBoard/forms/AddTask/customer'
+export { default as NoUserAddTask } from './components/ProjectBoard/forms/AddTask/noUser'
+export { default as ShowTask } from './components/ProjectBoard/forms/ShowTask/client'
