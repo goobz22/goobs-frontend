@@ -249,7 +249,9 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
                     } else {
                       onFiltersChange({
                         ...filters,
-                        resources: opt?.value ? [opt._id || opt.value] : [],
+                        resources: opt?.value
+                          ? [String(opt._id || opt.value)]
+                          : [],
                       })
                     }
                   }}

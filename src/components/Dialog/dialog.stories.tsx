@@ -200,7 +200,10 @@ const UserProfileForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           options={roleOptions}
           defaultValue={formData.role}
           onChange={option =>
-            setFormData(prev => ({ ...prev, role: option?.value || '' }))
+            setFormData(prev => ({
+              ...prev,
+              role: String(option?.value || ''),
+            }))
           }
           placeholder="Select role"
           styles={{ theme, required: true }}
@@ -710,7 +713,7 @@ const SettingsDialog = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           onChange={option =>
             setSettings(prev => ({
               ...prev,
-              notifications: option?.value || '',
+              notifications: String(option?.value || ''),
             }))
           }
           placeholder="Select notification preference"
@@ -748,7 +751,10 @@ const SettingsDialog = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           options={timezoneOptions}
           defaultValue={settings.timezone}
           onChange={option =>
-            setSettings(prev => ({ ...prev, timezone: option?.value || '' }))
+            setSettings(prev => ({
+              ...prev,
+              timezone: String(option?.value || ''),
+            }))
           }
           placeholder="Select timezone"
           styles={{ theme }}

@@ -29,11 +29,11 @@ export interface DropdownOption {
 export interface DropdownProps {
   label: string
   options: DropdownOption[]
-  defaultValue?: string
+  defaultValue?: string | number
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void
   onBlur?: FocusEventHandler<HTMLSelectElement>
   onFocus?: FocusEventHandler<HTMLSelectElement>
-  value?: string
+  value?: string | number
   showIdColumns?: boolean
   helperText?: string
   styles?: FormFieldStyles
@@ -51,7 +51,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   helperText,
   styles,
 }) => {
-  const [selectedValue, setSelectedValue] = useState<string>('')
+  const [selectedValue, setSelectedValue] = useState<string | number>('')
   const [focused, setFocused] = useState(false)
 
   const filteredOptions = React.useMemo(() => {

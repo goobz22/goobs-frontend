@@ -417,11 +417,11 @@ const SearchableSimpleDemo = () => {
   const [error, setError] = useState('')
 
   const handleCountryChange = (option: DropdownOption | null) => {
-    setSelectedCountry(option?.value || '')
+    setSelectedCountry(String(option?.value || ''))
   }
 
   const handleFruitChange = (option: DropdownOption | null) => {
-    setSelectedFruit(option?.value || '')
+    setSelectedFruit(String(option?.value || ''))
   }
 
   const handleSubmit = () => {

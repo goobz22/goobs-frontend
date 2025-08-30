@@ -162,7 +162,7 @@ export interface DataGridFilter {
   value: string | { start: Date | null; end: Date | null }
   options?: DropdownOption[]
   onChange:
-    | ((value: { value: string } | null) => void)
+    | ((value: DropdownOption | null) => void)
     | ((value: { start: Date | null; end: Date | null }) => void)
     | ((date: Date | null) => void)
   placeholder?: string

@@ -20,6 +20,8 @@ export interface TypographyProps {
   children?: React.ReactNode
   /** Custom styles to apply to the component using the theme system. */
   styles?: TypographyStyles
+  /** Sacred theme flag - used for theming but filtered out before DOM rendering */
+  sacredtheme?: boolean
 }
 
 // --------------------------------------------------------------------------
@@ -35,6 +37,10 @@ const Typography: React.FC<TypographyProps> = ({
   styles,
   ...rest
 }) => {
+  // Extract sacredtheme prop to prevent it from being passed to DOM elements
+  const { sacredtheme, ...validProps } = rest as any
+  // sacredtheme is intentionally excluded from the props passed to the DOM element
+  void sacredtheme
   // Inject sacred animation keyframes when sacred theme is used
   useEffect(() => {
     if (styles?.theme === 'sacred') {
@@ -67,7 +73,7 @@ const Typography: React.FC<TypographyProps> = ({
   const content = children || text
 
   return (
-    <p style={computedStyles.container} {...rest}>
+    <p style={computedStyles.container} {...validProps}>
       {content}
     </p>
   )

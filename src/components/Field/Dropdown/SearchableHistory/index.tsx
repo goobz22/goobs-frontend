@@ -13,7 +13,7 @@ import {
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 export interface DropdownOption {
-  value: string
+  value: string | number
   attribute1?: string
   attribute2?: string
   _id?: string
@@ -22,7 +22,7 @@ export interface DropdownOption {
 export interface SearchableHistoryProps {
   label: string
   options: DropdownOption[]
-  defaultValue?: string
+  defaultValue?: string | number
   onChange?: (value: DropdownOption | null) => void
   placeholder?: string
   helperText?: string
@@ -374,7 +374,9 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     key={`history-${option._id || option.value}`}
                     value={option.value}
                   >
-                    {capitalizeText(option.attribute1 || option.value || '')}
+                    {capitalizeText(
+                      option.attribute1 || String(option.value) || ''
+                    )}
                   </option>
                 ))}
               </optgroup>
@@ -386,7 +388,9 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                 key={`option-${option._id || option.value}-${index}`}
                 value={option.value}
               >
-                {capitalizeText(option.attribute1 || option.value || '')}
+                {capitalizeText(
+                  option.attribute1 || String(option.value) || ''
+                )}
               </option>
             ))}
           </optgroup>

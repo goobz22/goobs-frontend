@@ -9,7 +9,7 @@ import {
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 export interface DropdownOption {
-  value: string
+  value: string | number
   attribute1?: string
   attribute2?: string
   _id?: string
@@ -18,7 +18,7 @@ export interface DropdownOption {
 export interface SearchableSimpleProps {
   label: string
   options: DropdownOption[]
-  defaultValue?: string
+  defaultValue?: string | number
   onChange?: (value: DropdownOption | null) => void
   placeholder?: string
   helperText?: string
@@ -166,7 +166,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
           <option value="">{placeholder || 'Select...'}</option>
           {options.map(option => (
             <option key={option._id || option.value} value={option.value}>
-              {capitalizeText(option.attribute1 || option.value || '')}
+              {capitalizeText(option.attribute1 || String(option.value) || '')}
             </option>
           ))}
         </select>

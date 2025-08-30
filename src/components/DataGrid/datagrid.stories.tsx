@@ -10,6 +10,7 @@ import type {
   DataGridFilter,
   MetricCardData,
 } from './types'
+import type { DropdownOption } from '../Field/Dropdown/Regular'
 import type { ButtonProps } from '../Button'
 
 const sampleColumns: ColumnDef[] = [
@@ -447,7 +448,7 @@ const sampleFilters: DataGridFilter[] = [
       { value: 'Adventure' },
       { value: 'Construction' },
     ],
-    onChange: (value: { value: string } | null) => {
+    onChange: (value: DropdownOption | null) => {
       console.log('Department filter changed:', value)
     },
     placeholder: 'All Departments',
@@ -468,7 +469,7 @@ const sampleFilters: DataGridFilter[] = [
       { value: 'Flying' },
       { value: 'Building' },
     ],
-    onChange: (value: { value: string } | null) => {
+    onChange: (value: DropdownOption | null) => {
       console.log('Status filter changed:', value)
     },
     placeholder: 'All Statuses',
@@ -1005,7 +1006,7 @@ const financialFilters: DataGridFilter[] = [
       { value: 'Transportation' },
       { value: 'Capital Expenses' },
     ],
-    onChange: (value: { value: string } | null) => {
+    onChange: (value: DropdownOption | null) => {
       console.log('Category filter changed:', value)
     },
     placeholder: 'All Categories',
@@ -1015,7 +1016,7 @@ const financialFilters: DataGridFilter[] = [
     value: 'all',
     type: 'dropdown',
     options: [{ value: 'all' }, { value: 'Income' }, { value: 'Expense' }],
-    onChange: (value: { value: string } | null) => {
+    onChange: (value: DropdownOption | null) => {
       console.log('Type filter changed:', value)
     },
     placeholder: 'All Types',
@@ -1031,7 +1032,7 @@ const financialFilters: DataGridFilter[] = [
       { value: 'Reconciled' },
       { value: 'Processing' },
     ],
-    onChange: (value: { value: string } | null) => {
+    onChange: (value: DropdownOption | null) => {
       console.log('Status filter changed:', value)
     },
     placeholder: 'All Statuses',

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import SearchableSimple from '../../Field/Dropdown/SearchableSimple'
+import SearchableSimple, {
+  type DropdownOption,
+} from '../../Field/Dropdown/SearchableSimple'
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import Searchbar from '../../Field/Search'
@@ -278,9 +280,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           label={filter.label}
           options={filter.options || []}
           defaultValue={filter.value === 'all' ? '' : (filter.value as string)}
-          onChange={
-            filter.onChange as (value: { value: string } | null) => void
-          }
+          onChange={filter.onChange as (value: DropdownOption | null) => void}
           {...(filter.placeholder !== undefined
             ? { placeholder: filter.placeholder }
             : {})}

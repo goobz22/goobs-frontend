@@ -292,7 +292,7 @@ const Stepper: React.FC<StepperProps> = ({
           )}
           {!isLastStep && onNext && (
             <CustomButton
-              text={isLastStep ? 'Finish' : 'Continue →'}
+              text={isLastStep ? 'Finish' : 'Continue'}
               onClick={onNext}
               styles={{
                 theme: styles?.theme || 'light',

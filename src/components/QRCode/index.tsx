@@ -12,12 +12,20 @@ import ConfirmationCodeInputs, {
 } from '../ConfirmationCodeInput'
 
 export interface QRCodeProps {
+  /** The value/URL for the QR code (if provided, username and appName are ignored) */
+  value?: string
   /** The username for the QR code */
-  username: string
+  username?: string
   /** The app name for the QR code */
   appName?: string
   /** The size of the QR code */
   size?: number
+  /** QR code error correction level */
+  level?: 'L' | 'M' | 'Q' | 'H'
+  /** Background color */
+  bgColor?: string
+  /** Foreground color */
+  fgColor?: string
   /** The title to display above the QR code */
   title?: string
   /** Callback when the secret is generated */
@@ -50,9 +58,13 @@ export interface QRCodeProps {
 
 const QRCodeComponent: FC<QRCodeProps> = React.memo(
   ({
+    value,
     username,
     appName = 'ThothOS',
     size = 256,
+    level = 'H',
+    bgColor = '#FFFFFF',
+    fgColor = '#000000',
     title,
     onSecretGenerated,
     showVerifyButton = false,
@@ -69,14 +81,22 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     styles,
   }) => {
     const { secret, otpAuth } = useMemo(() => {
-      const generatedSecret = authenticator.generateSecret()
-      const otpAuthUrl = authenticator.keyuri(
-        username,
-        appName,
-        generatedSecret
-      )
-      return { secret: generatedSecret, otpAuth: otpAuthUrl }
-    }, [username, appName])
+      // If value is provided, use it directly
+      if (value) {
+        return { secret: '', otpAuth: value }
+      }
+      // Otherwise generate from username and appName
+      if (username) {
+        const generatedSecret = authenticator.generateSecret()
+        const otpAuthUrl = authenticator.keyuri(
+          username,
+          appName,
+          generatedSecret
+        )
+        return { secret: generatedSecret, otpAuth: otpAuthUrl }
+      }
+      return { secret: '', otpAuth: '' }
+    }, [value, username, appName])
 
     useEffect(() => {
       if (onSecretGenerated && secret) {
@@ -139,14 +159,19 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
           <QRCode
             value={otpAuth}
             size={
-              styles?.theme === 'sacred' ? responsiveSize - 32 : responsiveSize
+              styles?.theme === 'sacred' ? responsiveSize - 40 : responsiveSize
             }
+            level={level}
+            bgColor={styles?.theme === 'sacred' ? bgColor : bgColor}
+            fgColor={styles?.theme === 'sacred' ? fgColor : fgColor}
             style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
             data-testid="mfa-qrcode"
           />
         </div>
-        <div style={computedStyles.infoText}>{`${appName}: ${username}`}</div>
+        {username && (
+          <div style={computedStyles.infoText}>{`${appName}: ${username}`}</div>
+        )}
         {showConfirmationInput && (
           <div style={computedStyles.confirmationContainer}>
             <ConfirmationCodeInputs
@@ -182,22 +207,6 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
                 (showConfirmationInput && confirmationCode.length < 6)
               }
             />
-          </div>
-        )}
-        {styles?.theme === 'sacred' && (
-          <div style={computedStyles.decorativeGlyphs}>
-            {['𓂀', '𓊖', '𓏏'].map((glyph, i) => (
-              <span
-                key={i}
-                style={{
-                  ...computedStyles.decorativeGlyph,
-                  animationDelay: `${i * 0.5}s`,
-                  animationDuration: `${2.5 + i * 0.5}s`,
-                }}
-              >
-                {glyph}
-              </span>
-            ))}
           </div>
         )}
       </div>

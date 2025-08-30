@@ -404,7 +404,7 @@ const AdministratorAddTaskCompanyProvided: React.FC<
                     return dv !== undefined ? { defaultValue: dv } : {}
                   })()}
                   onChange={option => {
-                    const newStatus = option?.value || ''
+                    const newStatus = String(option?.value || '')
                     setSelectedStatus(newStatus)
                     setSelectedStatusId(option?.attribute1 || '')
                   }}

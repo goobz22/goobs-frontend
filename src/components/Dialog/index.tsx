@@ -79,7 +79,7 @@ const Dialog: React.FC<DialogProps> = ({
   }, [open, onClose])
 
   useEffect(() => {
-    // Inject scrollbar CSS when dialog opens
+    // Inject scrollbar CSS and handle scroll behavior when dialog opens
     if (open) {
       const computedStyles = getDialogStyles(styles, screenSize)
 
@@ -93,6 +93,76 @@ const Dialog: React.FC<DialogProps> = ({
       styleElement.textContent = computedStyles.scrollbarCSS
       document.head.appendChild(styleElement)
       styleRef.current = styleElement
+
+      // Block body scroll when dialog is open
+      document.body.style.overflow = 'hidden'
+
+      // Handle scroll events on backdrop to redirect to dialog content
+      const handleWheelEvent = (event: WheelEvent) => {
+        if (dialogRef.current) {
+          // Try multiple selectors to find the scrollable content
+          let scrollableContent = dialogRef.current.querySelector(
+            'div[style*="overflow-y: auto"]'
+          ) as HTMLElement
+          if (!scrollableContent) {
+            scrollableContent = dialogRef.current.querySelector(
+              'div[style*="overflow"]'
+            ) as HTMLElement
+          }
+          if (!scrollableContent) {
+            // Fallback to the first child div (content wrapper)
+            scrollableContent = dialogRef.current.querySelector(
+              'div'
+            ) as HTMLElement
+          }
+
+          if (scrollableContent) {
+            // Check if content is scrollable and has room to scroll
+            const hasVerticalScrollbar =
+              scrollableContent.scrollHeight > scrollableContent.clientHeight
+            if (hasVerticalScrollbar) {
+              const canScrollDown =
+                scrollableContent.scrollTop <
+                scrollableContent.scrollHeight - scrollableContent.clientHeight
+              const canScrollUp = scrollableContent.scrollTop > 0
+
+              if (
+                (event.deltaY > 0 && canScrollDown) ||
+                (event.deltaY < 0 && canScrollUp)
+              ) {
+                // Redirect scroll to the dialog content
+                scrollableContent.scrollTop += event.deltaY
+                event.preventDefault()
+              }
+            }
+          }
+        }
+      }
+
+      // Add wheel event listener to backdrop and dialog
+      const backdrop = dialogRef.current?.parentElement
+      const dialog = dialogRef.current
+
+      if (backdrop) {
+        backdrop.addEventListener('wheel', handleWheelEvent, { passive: false })
+      }
+
+      // Also add to dialog itself for direct popup scrolling
+      if (dialog) {
+        dialog.addEventListener('wheel', handleWheelEvent, { passive: false })
+      }
+
+      return () => {
+        // Restore body scroll
+        document.body.style.overflow = ''
+        // Remove wheel event listeners
+        if (backdrop) {
+          backdrop.removeEventListener('wheel', handleWheelEvent)
+        }
+        if (dialog) {
+          dialog.removeEventListener('wheel', handleWheelEvent)
+        }
+      }
     }
 
     // Cleanup on unmount or when dialog closes
@@ -101,6 +171,8 @@ const Dialog: React.FC<DialogProps> = ({
         document.head.removeChild(styleRef.current)
         styleRef.current = null
       }
+      // Ensure body scroll is restored
+      document.body.style.overflow = ''
     }
   }, [open, styles, screenSize])
 

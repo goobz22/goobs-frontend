@@ -51,7 +51,7 @@ const SearchableHistoryWithState = ({
   const handleChange = (option: DropdownOption | null) => {
     // Handle change if needed for demo purposes
     console.log('Selected option:', option)
-    setSelectedValue(option?.value || '')
+    setSelectedValue(String(option?.value || ''))
   }
 
   return (
@@ -420,11 +420,11 @@ const SearchableHistoryDemo = () => {
   const [error, setError] = useState('')
 
   const handleCountryChange = (option: DropdownOption | null) => {
-    setSelectedCountry(option?.value || '')
+    setSelectedCountry(String(option?.value || ''))
   }
 
   const handleFruitChange = (option: DropdownOption | null) => {
-    setSelectedFruit(option?.value || '')
+    setSelectedFruit(String(option?.value || ''))
   }
 
   const handleSubmit = () => {
@@ -505,7 +505,7 @@ const HistoryTestDemo = () => {
   const [lastSelected, setLastSelected] = useState<string>('')
 
   const handleChange = (option: DropdownOption | null) => {
-    setLastSelected(option?.value || '')
+    setLastSelected(String(option?.value || ''))
     console.log('Selected:', option)
   }
 
@@ -558,7 +558,7 @@ const DarkHistoryTestDemo = () => {
   const [lastSelected, setLastSelected] = useState<string>('')
 
   const handleChange = (option: DropdownOption | null) => {
-    setLastSelected(option?.value || '')
+    setLastSelected(String(option?.value || ''))
     console.log('Selected:', option)
   }
 
@@ -612,7 +612,7 @@ const HistoryDebugDemo = () => {
 
   const handleChange = (option: DropdownOption | null) => {
     if (option) {
-      setSelectionHistory(prev => [...prev, option.value])
+      setSelectionHistory(prev => [...prev, String(option.value)])
       setRenderCount(prev => prev + 1)
       console.log('Parent component received selection:', option.value)
     }

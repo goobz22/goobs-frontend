@@ -78,8 +78,12 @@ const getStyles = (
 
   return {
     dialog: {
-      width: `${width}px`,
+      width: `min(${width}px, calc(100vw - 2rem))`,
+      maxWidth: '95vw',
       maxHeight: '90vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
       cursor: isDragging ? 'grabbing' : 'default',
       ...positionStyles,
       backgroundColor:
@@ -145,6 +149,7 @@ const getStyles = (
       flex: 1,
       overflow: 'auto',
       minHeight: 0,
+      maxHeight: '100%',
       padding: '1rem',
       paddingRight: '1.5rem',
       borderRadius: '0.5rem',
@@ -232,7 +237,7 @@ function Popup({
       onDragStart: () => {
         setIsDragging(true)
 
-        // If first drag, capture the centered position
+        // If first drag, capture the current position
         if (!hasDragged) {
           const popup = document.querySelector(
             '[data-dialog-paper="true"]'
@@ -280,11 +285,16 @@ function Popup({
           const newX = dragStartPos.current.x + deltaX
           const newY = dragStartPos.current.y + deltaY
 
-          // Apply boundaries
+          // Apply boundaries - respect layout constraints
+          const isDesktop = window.innerWidth >= 1200
+          const drawerWidth = isDesktop ? 320 : 0
+          const appBarHeight = 80
+          const bottomPadding = 20
+
           const maxX = window.innerWidth - 100
-          const minX = -widthValue + 100
-          const maxY = window.innerHeight - 100
-          const minY = 0
+          const minX = drawerWidth + (isDesktop ? 0 : -widthValue + 100)
+          const maxY = window.innerHeight - bottomPadding - 50 // Leave space at bottom
+          const minY = appBarHeight
 
           setDragPosition({
             x: Math.max(minX, Math.min(maxX, newX)),

@@ -420,7 +420,7 @@ const CompanyAddTaskCustomerDropdown: React.FC<
                     )?.value ?? ''
                   }
                   onChange={option => {
-                    const newStatus = option?.value || ''
+                    const newStatus = String(option?.value || '')
                     setSelectedStatus(newStatus)
                     setSelectedStatusId(option?.attribute1 || '')
                   }}
