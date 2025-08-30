@@ -555,6 +555,16 @@ export const getConfirmationCodeInputTheme = (
   }
 }
 
+// Helper function to parse border shorthand into individual properties
+const parseBorder = (borderString: string) => {
+  const parts = borderString.split(' ')
+  return {
+    borderWidth: parts[0] || '1px',
+    borderStyle: parts[1] || 'solid',
+    borderColor: parts.slice(2).join(' ') || 'transparent',
+  }
+}
+
 // Main style generator function
 export const getConfirmationCodeInputStyles = (
   styles?: ConfirmationCodeInputStyles,
@@ -563,6 +573,10 @@ export const getConfirmationCodeInputStyles = (
   isDisabled?: boolean
 ) => {
   const themeConfig = getConfirmationCodeInputTheme(styles)
+  const containerBorder = parseBorder(themeConfig.container.border)
+  const successContainerBorder = parseBorder(
+    themeConfig.successContainer.border
+  )
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
@@ -581,7 +595,9 @@ export const getConfirmationCodeInputStyles = (
     marginLeft: styles?.marginLeft,
     marginRight: styles?.marginRight,
     background: themeConfig.container.background,
-    border: themeConfig.container.border,
+    borderWidth: containerBorder.borderWidth,
+    borderStyle: containerBorder.borderStyle,
+    borderColor: containerBorder.borderColor,
     borderRadius: themeConfig.container.borderRadius,
     boxShadow: themeConfig.container.boxShadow,
     backdropFilter: themeConfig.container.backdropFilter,
@@ -605,7 +621,9 @@ export const getConfirmationCodeInputStyles = (
     gap: '0.5rem',
     width: '100%',
     background: themeConfig.successContainer.background,
-    border: themeConfig.successContainer.border,
+    borderWidth: successContainerBorder.borderWidth,
+    borderStyle: successContainerBorder.borderStyle,
+    borderColor: successContainerBorder.borderColor,
     borderRadius: themeConfig.successContainer.borderRadius,
     boxShadow: themeConfig.successContainer.boxShadow,
     backdropFilter: themeConfig.successContainer.backdropFilter,
@@ -644,7 +662,9 @@ export const getConfirmationCodeInputStyles = (
     letterSpacing: themeConfig.input.letterSpacing,
     color: themeConfig.input.color,
     backgroundColor: themeConfig.input.backgroundColor,
-    border: `${themeConfig.input.borderWidth} solid ${themeConfig.input.borderColor}`,
+    borderWidth: themeConfig.input.borderWidth,
+    borderStyle: 'solid',
+    borderColor: themeConfig.input.borderColor,
     borderRadius: themeConfig.input.borderRadius,
     textShadow: themeConfig.input.textShadow,
     animation: themeConfig.input.animation,

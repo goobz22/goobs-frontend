@@ -108,7 +108,7 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
     backdrop: {
       position: 'fixed',
       inset: '0',
-      zIndex: 50,
+      zIndex: 1400,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -159,7 +159,7 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
     backdrop: {
       position: 'fixed',
       inset: '0',
-      zIndex: 50,
+      zIndex: 1400,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -210,7 +210,7 @@ export const dialogThemes: Record<'light' | 'dark' | 'sacred', DialogTheme> = {
     backdrop: {
       position: 'fixed',
       inset: '0',
-      zIndex: 50,
+      zIndex: 1400,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

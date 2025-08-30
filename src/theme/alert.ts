@@ -7,7 +7,9 @@ import { TRANSITIONS, SHADOWS } from './shared'
 export interface AlertTheme {
   container: {
     background: string
-    border: string
+    borderWidth: string
+    borderStyle: string
+    borderColor: string
     borderRadius: string
     boxShadow: string
     backdropFilter: string
@@ -177,7 +179,9 @@ export const alertThemes: Record<'light' | 'dark' | 'sacred', AlertTheme> = {
   light: {
     container: {
       background: 'rgba(255, 255, 255, 0.95)',
-      border: '1px solid',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'rgba(229, 231, 235, 0.8)',
       borderRadius: '12px',
       boxShadow: SHADOWS.light.small,
       backdropFilter: 'blur(8px)',
@@ -241,7 +245,9 @@ export const alertThemes: Record<'light' | 'dark' | 'sacred', AlertTheme> = {
   dark: {
     container: {
       background: 'rgba(31, 41, 55, 0.95)',
-      border: '1px solid',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'rgba(75, 85, 99, 0.8)',
       borderRadius: '12px',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2)',
       backdropFilter: 'blur(8px)',
@@ -304,7 +310,9 @@ export const alertThemes: Record<'light' | 'dark' | 'sacred', AlertTheme> = {
   sacred: {
     container: {
       background: 'rgba(10, 10, 10, 0.9)',
-      border: '2px solid rgba(255, 215, 0, 0.4)',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'rgba(255, 215, 0, 0.4)',
       borderRadius: '12px',
       boxShadow: SHADOWS.sacred.small,
       backdropFilter: 'blur(8px)',
@@ -394,9 +402,9 @@ export const getAlertTheme = (styles?: AlertStyles): AlertTheme => {
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
+      borderWidth: styles.borderWidth || '1px',
+      borderStyle: 'solid',
+      borderColor: styles.borderColor ? styles.borderColor : 'transparent',
       borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
@@ -567,6 +575,11 @@ export const getAlertStyles = (
     ? themeConfig.severity[severity]
     : themeConfig.severity.info
 
+  // Use border properties directly from theme config
+  const borderWidth = themeConfig.container.borderWidth
+  const borderStyle = themeConfig.container.borderStyle
+  const borderColor = themeConfig.container.borderColor
+
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -587,7 +600,9 @@ export const getAlertStyles = (
     minHeight: styles?.minHeight,
     // Apply base container styles
     background: themeConfig.container.background,
-    border: themeConfig.container.border,
+    borderWidth: borderWidth,
+    borderStyle: borderStyle,
+    borderColor: borderColor,
     borderRadius: themeConfig.container.borderRadius,
     boxShadow: themeConfig.container.boxShadow,
     backdropFilter: themeConfig.container.backdropFilter,
@@ -598,14 +613,19 @@ export const getAlertStyles = (
     backgroundImage: themeConfig.container.backgroundImage,
     // Apply severity-specific styles
     backgroundColor: severityConfig.backgroundColor,
-    borderColor: severityConfig.borderColor,
     color: severityConfig.color,
     textShadow: severityConfig.textShadow,
+    // Override borderColor with severity-specific color
+    ...(severityConfig.borderColor && {
+      borderColor: severityConfig.borderColor,
+    }),
     // Apply hover styles
     ...(isHovered && {
       transform: themeConfig.containerHover.transform,
       boxShadow: themeConfig.containerHover.boxShadow,
-      borderColor: themeConfig.containerHover.borderColor,
+      ...(themeConfig.containerHover.borderColor && {
+        borderColor: themeConfig.containerHover.borderColor,
+      }),
     }),
     // Apply closing animation
     ...(isClosing && {
@@ -614,7 +634,9 @@ export const getAlertStyles = (
     }),
     // Apply outline override
     ...(styles?.outline === false && {
-      border: 'none',
+      borderWidth: '0',
+      borderStyle: 'none',
+      borderColor: 'transparent',
       boxShadow: 'none',
     }),
   }
