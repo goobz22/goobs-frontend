@@ -16,4 +16,7 @@ yarn.lock
 .git/
 
 # Generated files
-*.tsbuildinfo 
+*.tsbuildinfo
+**/*.d.ts
+**/*.js
+**/*.js.map
