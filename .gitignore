@@ -45,3 +45,9 @@ next-env.d.ts
 # distribution files
 /dist
 *storybook.log
+
+# Generated build files in src
+src/**/*.d.ts
+src/**/*.d.ts.map
+src/**/*.js
+src/**/*.js.map
