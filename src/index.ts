@@ -233,6 +233,8 @@ export type {
   ColumnDef,
   RowData,
   DatagridProps,
+  DataGridFilter,
+  MetricCardData,
 } from './components/DataGrid/types'
 export {
   List,
@@ -262,7 +264,11 @@ export { default as ProgressBar } from './components/ProgressBar'
 export { default as Pagination } from './components/Pagination'
 
 // Calendar Components
-export { default as BigCalendar } from './components/BigCalendar'
+export { 
+  default as BigCalendar,
+  type CalendarEvent,
+  type CalendarFilterOptions
+} from './components/BigCalendar'
 
 // Slider Component
 export { default as Slider, type SliderProps } from './components/Field/Slider'
