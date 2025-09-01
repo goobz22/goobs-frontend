@@ -959,7 +959,7 @@ const Rows: React.FC<RowsProps> = ({
                       const option = col.creationField?.options?.find(
                         opt => opt._id === id
                       )
-                      return option?.value || '' // Use the display value only
+                      return String(option?.value || '') // Use the display value only
                     })
                     .filter(v => v !== '') // Remove empty values
 

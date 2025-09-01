@@ -33,6 +33,9 @@ interface MobileCardViewProps {
   onCellClick: (rowId: string, field: string, currentValue: unknown) => void
   onCellCancel: () => void
   onEditingValueChange: (value: string) => void
+  permissions?: {
+    access: 'no-access' | 'read' | 'write'
+  } | undefined
 }
 
 function MobileCardView({
@@ -55,6 +58,7 @@ function MobileCardView({
   onCellClick,
   onCellCancel,
   onEditingValueChange,
+  permissions,
 }: MobileCardViewProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddingCard, setIsAddingCard] = useState(false)
@@ -482,6 +486,7 @@ function MobileCardView({
               onCellCancel={onCellCancel}
               onEditingValueChange={onEditingValueChange}
               {...(styles && { styles })}
+              permissions={permissions}
             />
           )
         })}
@@ -553,8 +558,8 @@ function MobileCardView({
       {portalContainer &&
         createPortal(
           <>
-            {/* Delete Button - shows when cards are selected and onDelete is provided */}
-            {selectedRows.length > 0 && onDelete && (
+            {/* Delete Button - shows when cards are selected, onDelete is provided, and user has write permissions */}
+            {selectedRows.length > 0 && onDelete && (!permissions || permissions.access === 'write') && (
               <button
                 style={{
                   ...mobileStyles.fab,
@@ -577,8 +582,8 @@ function MobileCardView({
               </button>
             )}
 
-            {/* Duplicate Button - shows when cards are selected and onDuplicate is provided */}
-            {selectedRows.length > 0 && onDuplicate && (
+            {/* Duplicate Button - shows when cards are selected, onDuplicate is provided, and user has write permissions */}
+            {selectedRows.length > 0 && onDuplicate && (!permissions || permissions.access === 'write') && (
               <button
                 style={{
                   ...mobileStyles.fab,
@@ -605,8 +610,8 @@ function MobileCardView({
               </button>
             )}
 
-            {/* Add Button - always shows when allowRowCreation is true */}
-            {allowRowCreation && !selectionMode && !isAddingCard && (
+            {/* Add Button - shows when allowRowCreation is true and user has write permissions */}
+            {allowRowCreation && !selectionMode && !isAddingCard && (!permissions || permissions.access === 'write') && (
               <button
                 style={{
                   ...mobileStyles.fab,
@@ -632,17 +637,17 @@ function MobileCardView({
               Show
             </button>
           )}
-          {onManage && (
+          {onManage && (!permissions || permissions.access === 'write') && (
             <button style={mobileStyles.actionButton} onClick={handleManage}>
               Manage
             </button>
           )}
-          {onDuplicate && (
+          {onDuplicate && (!permissions || permissions.access === 'write') && (
             <button style={mobileStyles.actionButton} onClick={handleDuplicate}>
               Duplicate
             </button>
           )}
-          {onDelete && (
+          {onDelete && (!permissions || permissions.access === 'write') && (
             <button
               style={{ ...mobileStyles.actionButton, color: '#ef4444' }}
               onClick={handleDelete}

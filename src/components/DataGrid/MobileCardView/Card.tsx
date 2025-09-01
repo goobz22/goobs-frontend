@@ -23,6 +23,9 @@ interface CardProps {
     borderColor?: string
     borderRadius?: string
   }
+  permissions?: {
+    access: 'no-access' | 'read' | 'write'
+  } | undefined
 }
 
 function Card({
@@ -39,6 +42,7 @@ function Card({
   onCellCancel,
   onEditingValueChange,
   styles,
+  permissions,
 }: CardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const longPressTimer = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -100,8 +104,8 @@ function Card({
       const isFieldValue = target.closest('[data-field-value]')
 
       if (!selectionMode) {
-        // If clicking on a field value and card is already selected, allow edit
-        if (isFieldValue && isSelected) {
+        // If clicking on a field value and card is already selected, allow edit only if user has write permissions
+        if (isFieldValue && isSelected && (!permissions || permissions.access === 'write')) {
           const fieldElement = target.closest('[data-field]') as HTMLElement
           if (fieldElement) {
             const field = fieldElement.dataset.field
@@ -117,7 +121,7 @@ function Card({
         onTap()
       }
     },
-    [selectionMode, onTap, isSelected, onCellClick, rowId, row]
+    [selectionMode, onTap, isSelected, onCellClick, rowId, row, permissions]
   )
 
   // Cleanup timer on unmount

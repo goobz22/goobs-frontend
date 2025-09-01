@@ -18,14 +18,21 @@ export interface DataGridToolbarProps {
     onShow?: () => void
     onExport?: () => void
     handleClose?: () => void
+    permissions?: {
+      access: 'no-access' | 'read' | 'write'
+    } | undefined
   }
   styles?: DataGridStyles
+  permissions?: {
+    access: 'no-access' | 'read' | 'write'
+  } | undefined
 }
 
 const DataGridToolbar: FC<DataGridToolbarProps> = ({
   buttons,
   manageRowProps,
   styles,
+  permissions,
 }) => {
   const computedStyles = useMemo(() => getDataGridStyles(styles), [styles])
   // const isSacredTheme = styles?.theme === 'sacred'
@@ -60,11 +67,26 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     overflow: 'hidden',
   }
 
+  // Filter buttons based on permissions
+  const filteredButtons = useMemo(() => {
+    if (!permissions || permissions.access === 'write') {
+      return buttons // Show all buttons for write access
+    }
+    // For read-only access, filter out action buttons (like Create, Delete, etc.)
+    return buttons?.filter(btn => {
+      const text = btn.text?.toLowerCase() || ''
+      // Hide buttons that perform write operations
+      return !text.includes('create') && !text.includes('add') && 
+             !text.includes('delete') && !text.includes('remove') &&
+             !text.includes('edit') && !text.includes('update')
+    })
+  }, [buttons, permissions])
+
   return (
     <div style={{ ...computedStyles.tableContainer, ...containerStyle }}>
       {/* Left: Buttons */}
       <div style={leftStyle}>
-        {buttons?.map((btn, idx) => (
+        {filteredButtons?.map((btn, idx) => (
           <Button
             key={idx}
             {...btn}
@@ -103,6 +125,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
               ? { handleClose: manageRowProps.handleClose }
               : {})}
             {...(styles !== undefined ? { styles } : {})}
+            {...(permissions !== undefined ? { permissions } : {})}
           />
         )}
       </div>

@@ -23,6 +23,7 @@ function DataGrid({
   rows: providedRows,
   buttons,
   error = null,
+  permissions,
   onDuplicate,
   onDelete,
   onManage,
@@ -45,6 +46,7 @@ function DataGrid({
 
   const isSacredTheme = styles?.theme === 'sacred'
   const computedStyles = getDataGridStyles(styles)
+
 
   // Column state management
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null)
@@ -601,6 +603,7 @@ function DataGrid({
           {...(onCellSave !== undefined ? { onCellSave } : {})}
           {...(onRowCreation !== undefined ? { onRowCreation } : {})}
           allowRowCreation={allowRowCreation}
+          permissions={permissions}
           creationRowPosition={creationRowPosition}
           {...(onManage !== undefined ? { onManage } : {})}
           {...(onDelete !== undefined ? { onDelete } : {})}
@@ -652,6 +655,7 @@ function DataGrid({
                   ]
                 : (buttons ?? [])
             }
+            permissions={permissions}
             {...(selectedRows.length > 0
               ? {
                   manageRowProps: {
@@ -671,6 +675,7 @@ function DataGrid({
                     ...(onManage ? { onManage: handleManage } : {}),
                     ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
                     handleClose: handleManageRowClose,
+                    permissions,
                   },
                 }
               : {})}
@@ -696,6 +701,7 @@ function DataGrid({
             onCellClick={handleCellClick}
             onCellSave={handleCellSave}
             onCellCancel={handleCellCancel}
+            permissions={permissions}
             onEditingValueChange={handleEditingValueChange}
             isCreatingRow={isCreatingRow}
             creationRowData={creationRowData}

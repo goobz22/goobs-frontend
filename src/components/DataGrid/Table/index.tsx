@@ -100,6 +100,7 @@ function Table({
   onColumnDragOver,
   onColumnDrop,
   onColumnDragEnd,
+  permissions,
 }: TableProps) {
   const computedStyles = getDataGridStyles(styles)
   const theme = styles?.theme || 'light'
@@ -187,7 +188,7 @@ function Table({
             />
           </thead>
           <tbody>
-            {isCreatingRow && creationRowPosition === 'top' && (
+            {isCreatingRow && creationRowPosition === 'top' && (!permissions || permissions.access === 'write') && (
               <CreationRow
                 columns={updatedColumns}
                 creationRowData={creationRowData}
@@ -195,6 +196,7 @@ function Table({
                 {...(onCreateRowSave ? { onCreateRowSave } : {})}
                 {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
                 {...(styles ? { styles } : {})}
+                {...(permissions ? { permissions } : {})}
               />
             )}
             <Rows
@@ -209,8 +211,9 @@ function Table({
               {...(onCellSave ? { onCellSave } : {})}
               {...(onCellCancel ? { onCellCancel } : {})}
               {...(onEditingValueChange ? { onEditingValueChange } : {})}
+              {...(permissions ? { permissions } : {})}
             />
-            {isCreatingRow && creationRowPosition === 'bottom' && (
+            {isCreatingRow && creationRowPosition === 'bottom' && (!permissions || permissions.access === 'write') && (
               <CreationRow
                 columns={updatedColumns}
                 creationRowData={creationRowData}
@@ -218,6 +221,7 @@ function Table({
                 {...(onCreateRowSave ? { onCreateRowSave } : {})}
                 {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
                 {...(styles ? { styles } : {})}
+                {...(permissions ? { permissions } : {})}
               />
             )}
           </tbody>

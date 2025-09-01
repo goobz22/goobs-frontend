@@ -60,8 +60,8 @@ export interface ShowTaskProps {
   teamMemberOptions: RawEmployee[]
   currentUserName: string
   onCloseTask: (taskId: string) => void
-  onComment: (commentText: string, _id: string) => void
-  onEdit: (updatedData: {
+  onComment?: ((commentText: string, _id: string) => void) | undefined
+  onEdit?: ((updatedData: {
     taskTitle: string
     description: string
     customerAssigned: string
@@ -73,10 +73,10 @@ export interface ShowTaskProps {
     knowledgebaseArticles: string[]
     teamMemberAssigned: string
     nextActionDate: string
-  }) => void
-  onDelete: () => void
-  onDuplicate: () => void
-  onEditComment: (commentId: string, newText: string, taskId: string) => void
+  }) => void) | undefined
+  onDelete?: (() => void) | undefined
+  onDuplicate?: (() => void) | undefined
+  onEditComment?: ((commentId: string, newText: string, taskId: string) => void) | undefined
   onRevisionHistory: (
     commentId: string,
     revisionHistory: CommentEditHistory[]
@@ -443,7 +443,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
     }
 
     setLocalComments([...localComments, newLocalComment])
-    onComment(trimmed, taskId)
+    onComment?.(trimmed, taskId)
     setNewComment('')
   }
 
@@ -454,7 +454,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
 
   const saveEditingComment = (commentId: string) => {
     const now = new Date()
-    onEditComment(commentId, editingCommentText, taskId)
+    onEditComment?.(commentId, editingCommentText, taskId)
     setLocalComments(prev =>
       prev.map(c => {
         if (c._id !== commentId) return c
@@ -484,7 +484,7 @@ const ShowTask: React.FC<ShowTaskProps> = ({
 
   const handleEditToggle = () => {
     if (isEditing) {
-      onEdit({
+      onEdit?.({
         taskTitle: formData.taskTitle,
         description: formData.description,
         customerAssigned: formData.customerAssigned,
@@ -600,53 +600,59 @@ const ShowTask: React.FC<ShowTaskProps> = ({
           </div>
 
           <div style={computedStyles.headerActions}>
-            <StyledTooltip
-              title={isEditing ? 'Save' : 'Edit'}
-              tooltipplacement="bottom"
-              styles={{ theme: styles?.theme || 'light' }}
-            >
-              <CustomButton
-                {...(isEditing
-                  ? { text: 'Save' }
-                  : {
-                      icon: (
-                        <EditIcon
-                          styles={{ theme: styles?.theme || 'light' }}
-                        />
-                      ),
-                    })}
-                onClick={handleEditToggle}
+            {onEdit && (
+              <StyledTooltip
+                title={isEditing ? 'Save' : 'Edit'}
+                tooltipplacement="bottom"
                 styles={{ theme: styles?.theme || 'light' }}
-              />
-            </StyledTooltip>
-            <StyledTooltip
-              title="Delete"
-              tooltipplacement="bottom"
-              styles={{ theme: styles?.theme || 'light' }}
-            >
-              <CustomButton
-                icon={
-                  <DeleteIcon styles={{ theme: styles?.theme || 'light' }} />
-                }
-                onClick={onDelete}
+              >
+                <CustomButton
+                  {...(isEditing
+                    ? { text: 'Save' }
+                    : {
+                        icon: (
+                          <EditIcon
+                            styles={{ theme: styles?.theme || 'light' }}
+                          />
+                        ),
+                      })}
+                  onClick={handleEditToggle}
+                  styles={{ theme: styles?.theme || 'light' }}
+                />
+              </StyledTooltip>
+            )}
+            {onDelete && (
+              <StyledTooltip
+                title="Delete"
+                tooltipplacement="bottom"
                 styles={{ theme: styles?.theme || 'light' }}
-              />
-            </StyledTooltip>
-            <StyledTooltip
-              title="Duplicate"
-              tooltipplacement="bottom"
-              styles={{ theme: styles?.theme || 'light' }}
-            >
-              <CustomButton
-                icon={
-                  <ContentCopyIcon
-                    styles={{ theme: styles?.theme || 'light' }}
-                  />
-                }
-                onClick={onDuplicate}
+              >
+                <CustomButton
+                  icon={
+                    <DeleteIcon styles={{ theme: styles?.theme || 'light' }} />
+                  }
+                  onClick={onDelete}
+                  styles={{ theme: styles?.theme || 'light' }}
+                />
+              </StyledTooltip>
+            )}
+            {onDuplicate && (
+              <StyledTooltip
+                title="Duplicate"
+                tooltipplacement="bottom"
                 styles={{ theme: styles?.theme || 'light' }}
-              />
-            </StyledTooltip>
+              >
+                <CustomButton
+                  icon={
+                    <ContentCopyIcon
+                      styles={{ theme: styles?.theme || 'light' }}
+                    />
+                  }
+                  onClick={onDuplicate}
+                  styles={{ theme: styles?.theme || 'light' }}
+                />
+              </StyledTooltip>
+            )}
             <CustomButton
               icon={<CloseIcon styles={{ theme: styles?.theme || 'light' }} />}
               onClick={onClose}

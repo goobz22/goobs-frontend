@@ -138,7 +138,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               const valueToUse =
                 column.field === 'state'
                   ? option?.attribute1 || ''
-                  : option?.value || ''
+                  : String(option?.value || '')
               onCreationFieldChange?.(column.field, valueToUse)
             }}
             {...(fieldConfig.placeholder
@@ -214,7 +214,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               const valueToUse =
                 column.field === 'state'
                   ? option?.attribute1 || ''
-                  : option?.value || ''
+                  : String(option?.value || '')
               onCreationFieldChange?.(column.field, valueToUse)
             }}
             {...(fieldConfig.placeholder

@@ -88,6 +88,7 @@ function ProjectBoardContent({
   companyId,
   preferDropdown,
   styles,
+  permissions,
 }: ProjectBoardProps) {
   const [columnState, setColumnState] = useAtom(columnsAtom)
   const mergedColumns = useMemo<ColumnData[]>(
@@ -237,11 +238,15 @@ function ProjectBoardContent({
       .find(task => task._id === showTaskOpen)
   }, [columnState, showTaskOpen])
 
-  // Toolbar buttons
+  // Toolbar buttons - respect permissions
   const buttons = useMemo(
-    () => [
-      { text: 'Create Task', onClick: () => setAddTaskOpen(true) },
-      {
+    () => {
+      const btns = []
+      // Only show Create Task button if user has write permissions
+      if (!permissions || permissions.access === 'write') {
+        btns.push({ text: 'Create Task', onClick: () => setAddTaskOpen(true) })
+      }
+      btns.push({
         text: 'Show Task',
         onClick: () => {
           if (selectedTaskId) {
@@ -249,9 +254,10 @@ function ProjectBoardContent({
           }
         },
         disabled: !selectedTaskId,
-      },
-    ],
-    [selectedTaskId]
+      })
+      return btns
+    },
+    [selectedTaskId, permissions]
   )
 
   return (
@@ -408,14 +414,33 @@ function ProjectBoardContent({
           teamMemberAssigned={currentShowTask.teamMember}
           nextActionDate={currentShowTask.nextActionDate}
           currentUserName={`${currentUser.firstName} ${currentUser.lastName}`}
-          onEdit={updatedData => {
-            onEdit({ _id: showTaskOpen, ...updatedData })
-          }}
-          onDelete={() => onDelete({ _id: showTaskOpen })}
-          onDuplicate={() => onDuplicate({ _id: showTaskOpen })}
-          onComment={text => onComment(text, showTaskOpen)}
-          onEditComment={(commentId, newText) =>
-            handleEditComment(commentId, newText, showTaskOpen)
+          onEdit={
+            !permissions || permissions.access === 'write'
+              ? updatedData => {
+                  onEdit({ _id: showTaskOpen, ...updatedData })
+                }
+              : undefined
+          }
+          onDelete={
+            !permissions || permissions.access === 'write'
+              ? () => onDelete({ _id: showTaskOpen })
+              : undefined
+          }
+          onDuplicate={
+            !permissions || permissions.access === 'write'
+              ? () => onDuplicate({ _id: showTaskOpen })
+              : undefined
+          }
+          onComment={
+            !permissions || permissions.access === 'write'
+              ? (text, _id) => onComment(text, _id)
+              : undefined
+          }
+          onEditComment={
+            !permissions || permissions.access === 'write'
+              ? (commentId, newText) =>
+                  handleEditComment(commentId, newText, showTaskOpen)
+              : undefined
           }
           onCloseTask={handleCloseTask}
           onRevisionHistory={onRevisionHistory}

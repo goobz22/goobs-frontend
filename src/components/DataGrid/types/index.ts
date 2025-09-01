@@ -154,6 +154,9 @@ export interface TableProps {
   onColumnDragOver?: (e: React.DragEvent) => void
   onColumnDrop?: (targetField: string) => void
   onColumnDragEnd?: () => void
+  permissions?: {
+    access: 'no-access' | 'read' | 'write'
+  } | undefined
 }
 
 // New filter interface for embedded DataGrid filtering
@@ -192,6 +195,11 @@ export interface DatagridProps {
 
   // Controls whether ID columns (id/_id) are visible
   showIdColumns?: boolean
+
+  // Permissions control - determines read/write access
+  permissions: {
+    access: 'no-access' | 'read' | 'write'
+  }
 
   // Single or multi selection callbacks:
   onManage?: (selectedRows: string[]) => void

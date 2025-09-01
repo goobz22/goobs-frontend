@@ -212,4 +212,8 @@ export interface ProjectBoardProps {
   ) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ProjectBoardStyles
+  /** Permissions control - determines read/write access */
+  permissions?: {
+    access: 'no-access' | 'read' | 'write'
+  }
 }
