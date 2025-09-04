@@ -313,7 +313,6 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       <div style={computedStyles.successContainer}>
         <CheckCircleOutline style={computedStyles.successIcon} />
         <h3 style={computedStyles.successMessage}>{successMessage}</h3>
-        {isSacredTheme && <SacredSuccessDecorations />}
         <div style={computedStyles.buttonContainer}>
           <CustomButton
             text="Disable Verification"

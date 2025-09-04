@@ -620,6 +620,7 @@ export const getConfirmationCodeInputStyles = (
     alignItems: 'center',
     gap: '0.5rem',
     width: '100%',
+    maxWidth: '400px',
     background: themeConfig.successContainer.background,
     borderWidth: successContainerBorder.borderWidth,
     borderStyle: successContainerBorder.borderStyle,
@@ -649,6 +650,9 @@ export const getConfirmationCodeInputStyles = (
     textTransform: themeConfig.successMessage.textTransform as any,
     textShadow: themeConfig.successMessage.textShadow,
     textAlign: 'center',
+    wordWrap: 'break-word',
+    wordBreak: 'break-word',
+    maxWidth: '100%',
     margin: 0,
   }
 
