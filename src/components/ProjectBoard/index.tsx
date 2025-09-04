@@ -239,26 +239,23 @@ function ProjectBoardContent({
   }, [columnState, showTaskOpen])
 
   // Toolbar buttons - respect permissions
-  const buttons = useMemo(
-    () => {
-      const btns = []
-      // Only show Create Task button if user has write permissions
-      if (!permissions || permissions.access === 'write') {
-        btns.push({ text: 'Create Task', onClick: () => setAddTaskOpen(true) })
-      }
-      btns.push({
-        text: 'Show Task',
-        onClick: () => {
-          if (selectedTaskId) {
-            setShowTaskOpen(selectedTaskId)
-          }
-        },
-        disabled: !selectedTaskId,
-      })
-      return btns
-    },
-    [selectedTaskId, permissions]
-  )
+  const buttons = useMemo(() => {
+    const btns = []
+    // Only show Create Task button if user has write permissions
+    if (!permissions || permissions.access === 'write') {
+      btns.push({ text: 'Create Task', onClick: () => setAddTaskOpen(true) })
+    }
+    btns.push({
+      text: 'Show Task',
+      onClick: () => {
+        if (selectedTaskId) {
+          setShowTaskOpen(selectedTaskId)
+        }
+      },
+      disabled: !selectedTaskId,
+    })
+    return btns
+  }, [selectedTaskId, permissions])
 
   return (
     <div style={computedStyles.container}>

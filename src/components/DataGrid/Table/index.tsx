@@ -188,17 +188,19 @@ function Table({
             />
           </thead>
           <tbody>
-            {isCreatingRow && creationRowPosition === 'top' && (!permissions || permissions.access === 'write') && (
-              <CreationRow
-                columns={updatedColumns}
-                creationRowData={creationRowData}
-                {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
-                {...(onCreateRowSave ? { onCreateRowSave } : {})}
-                {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
-                {...(styles ? { styles } : {})}
-                {...(permissions ? { permissions } : {})}
-              />
-            )}
+            {isCreatingRow &&
+              creationRowPosition === 'top' &&
+              (!permissions || permissions.access === 'write') && (
+                <CreationRow
+                  columns={updatedColumns}
+                  creationRowData={creationRowData}
+                  {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
+                  {...(onCreateRowSave ? { onCreateRowSave } : {})}
+                  {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
+                  {...(styles ? { styles } : {})}
+                  {...(permissions ? { permissions } : {})}
+                />
+              )}
             <Rows
               rows={rows}
               columns={updatedColumns}
@@ -213,17 +215,19 @@ function Table({
               {...(onEditingValueChange ? { onEditingValueChange } : {})}
               {...(permissions ? { permissions } : {})}
             />
-            {isCreatingRow && creationRowPosition === 'bottom' && (!permissions || permissions.access === 'write') && (
-              <CreationRow
-                columns={updatedColumns}
-                creationRowData={creationRowData}
-                {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
-                {...(onCreateRowSave ? { onCreateRowSave } : {})}
-                {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
-                {...(styles ? { styles } : {})}
-                {...(permissions ? { permissions } : {})}
-              />
-            )}
+            {isCreatingRow &&
+              creationRowPosition === 'bottom' &&
+              (!permissions || permissions.access === 'write') && (
+                <CreationRow
+                  columns={updatedColumns}
+                  creationRowData={creationRowData}
+                  {...(onCreationFieldChange ? { onCreationFieldChange } : {})}
+                  {...(onCreateRowSave ? { onCreateRowSave } : {})}
+                  {...(onCreateRowCancel ? { onCreateRowCancel } : {})}
+                  {...(styles ? { styles } : {})}
+                  {...(permissions ? { permissions } : {})}
+                />
+              )}
           </tbody>
         </table>
       </div>

@@ -264,10 +264,10 @@ export { default as ProgressBar } from './components/ProgressBar'
 export { default as Pagination } from './components/Pagination'
 
 // Calendar Components
-export { 
+export {
   default as BigCalendar,
   type CalendarEvent,
-  type CalendarFilterOptions
+  type CalendarFilterOptions,
 } from './components/BigCalendar'
 
 // Slider Component

@@ -47,7 +47,6 @@ function DataGrid({
   const isSacredTheme = styles?.theme === 'sacred'
   const computedStyles = getDataGridStyles(styles)
 
-
   // Column state management
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null)
   const [columnOrder, setColumnOrder] = useState<string[]>([])

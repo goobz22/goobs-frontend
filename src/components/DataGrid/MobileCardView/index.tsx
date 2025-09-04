@@ -33,9 +33,11 @@ interface MobileCardViewProps {
   onCellClick: (rowId: string, field: string, currentValue: unknown) => void
   onCellCancel: () => void
   onEditingValueChange: (value: string) => void
-  permissions?: {
-    access: 'no-access' | 'read' | 'write'
-  } | undefined
+  permissions?:
+    | {
+        access: 'no-access' | 'read' | 'write'
+      }
+    | undefined
 }
 
 function MobileCardView({
@@ -559,72 +561,79 @@ function MobileCardView({
         createPortal(
           <>
             {/* Delete Button - shows when cards are selected, onDelete is provided, and user has write permissions */}
-            {selectedRows.length > 0 && onDelete && (!permissions || permissions.access === 'write') && (
-              <button
-                style={{
-                  ...mobileStyles.fab,
-                  position: 'fixed' as const,
-                  bottom: onDuplicate ? '210px' : '140px',
-                  right: '20px',
-                  backgroundColor: '#ef4444',
-                  backgroundImage: 'none',
-                  border: theme === 'sacred' ? '2px solid #ef4444' : 'none',
-                  boxShadow:
-                    '0 4px 8px rgba(239, 68, 68, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
-                }}
-                onClick={() => {
-                  onDelete(selectedRows)
-                  onSelectionChange?.([])
-                }}
-                aria-label="Delete selected items"
-              >
-                🗑️
-              </button>
-            )}
+            {selectedRows.length > 0 &&
+              onDelete &&
+              (!permissions || permissions.access === 'write') && (
+                <button
+                  style={{
+                    ...mobileStyles.fab,
+                    position: 'fixed' as const,
+                    bottom: onDuplicate ? '210px' : '140px',
+                    right: '20px',
+                    backgroundColor: '#ef4444',
+                    backgroundImage: 'none',
+                    border: theme === 'sacred' ? '2px solid #ef4444' : 'none',
+                    boxShadow:
+                      '0 4px 8px rgba(239, 68, 68, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                  onClick={() => {
+                    onDelete(selectedRows)
+                    onSelectionChange?.([])
+                  }}
+                  aria-label="Delete selected items"
+                >
+                  🗑️
+                </button>
+              )}
 
             {/* Duplicate Button - shows when cards are selected, onDuplicate is provided, and user has write permissions */}
-            {selectedRows.length > 0 && onDuplicate && (!permissions || permissions.access === 'write') && (
-              <button
-                style={{
-                  ...mobileStyles.fab,
-                  position: 'fixed' as const,
-                  bottom: '140px',
-                  right: '20px',
-                  backgroundColor: theme === 'sacred' ? '#FFD700' : '#10b981',
-                  backgroundImage:
-                    theme === 'sacred'
-                      ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-                      : 'none',
-                  border:
-                    theme === 'sacred'
-                      ? '2px solid rgba(255, 215, 0, 0.8)'
-                      : 'none',
-                }}
-                onClick={() => {
-                  onDuplicate?.(selectedRows)
-                  onSelectionChange?.([])
-                }}
-                aria-label="Duplicate selected items"
-              >
-                📋
-              </button>
-            )}
+            {selectedRows.length > 0 &&
+              onDuplicate &&
+              (!permissions || permissions.access === 'write') && (
+                <button
+                  style={{
+                    ...mobileStyles.fab,
+                    position: 'fixed' as const,
+                    bottom: '140px',
+                    right: '20px',
+                    backgroundColor: theme === 'sacred' ? '#FFD700' : '#10b981',
+                    backgroundImage:
+                      theme === 'sacred'
+                        ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                        : 'none',
+                    border:
+                      theme === 'sacred'
+                        ? '2px solid rgba(255, 215, 0, 0.8)'
+                        : 'none',
+                  }}
+                  onClick={() => {
+                    onDuplicate?.(selectedRows)
+                    onSelectionChange?.([])
+                  }}
+                  aria-label="Duplicate selected items"
+                >
+                  📋
+                </button>
+              )}
 
             {/* Add Button - shows when allowRowCreation is true and user has write permissions */}
-            {allowRowCreation && !selectionMode && !isAddingCard && (!permissions || permissions.access === 'write') && (
-              <button
-                style={{
-                  ...mobileStyles.fab,
-                  position: 'fixed' as const,
-                  bottom: '70px',
-                  right: '20px',
-                }}
-                onClick={handleStartRowCreation}
-                aria-label="Add new item"
-              >
-                +
-              </button>
-            )}
+            {allowRowCreation &&
+              !selectionMode &&
+              !isAddingCard &&
+              (!permissions || permissions.access === 'write') && (
+                <button
+                  style={{
+                    ...mobileStyles.fab,
+                    position: 'fixed' as const,
+                    bottom: '70px',
+                    right: '20px',
+                  }}
+                  onClick={handleStartRowCreation}
+                  aria-label="Add new item"
+                >
+                  +
+                </button>
+              )}
           </>,
           portalContainer
         )}

@@ -18,14 +18,18 @@ export interface DataGridToolbarProps {
     onShow?: () => void
     onExport?: () => void
     handleClose?: () => void
-    permissions?: {
-      access: 'no-access' | 'read' | 'write'
-    } | undefined
+    permissions?:
+      | {
+          access: 'no-access' | 'read' | 'write'
+        }
+      | undefined
   }
   styles?: DataGridStyles
-  permissions?: {
-    access: 'no-access' | 'read' | 'write'
-  } | undefined
+  permissions?:
+    | {
+        access: 'no-access' | 'read' | 'write'
+      }
+    | undefined
 }
 
 const DataGridToolbar: FC<DataGridToolbarProps> = ({
@@ -76,9 +80,14 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     return buttons?.filter(btn => {
       const text = btn.text?.toLowerCase() || ''
       // Hide buttons that perform write operations
-      return !text.includes('create') && !text.includes('add') && 
-             !text.includes('delete') && !text.includes('remove') &&
-             !text.includes('edit') && !text.includes('update')
+      return (
+        !text.includes('create') &&
+        !text.includes('add') &&
+        !text.includes('delete') &&
+        !text.includes('remove') &&
+        !text.includes('edit') &&
+        !text.includes('update')
+      )
     })
   }, [buttons, permissions])
 

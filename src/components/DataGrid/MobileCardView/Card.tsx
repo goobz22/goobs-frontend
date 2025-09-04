@@ -23,9 +23,11 @@ interface CardProps {
     borderColor?: string
     borderRadius?: string
   }
-  permissions?: {
-    access: 'no-access' | 'read' | 'write'
-  } | undefined
+  permissions?:
+    | {
+        access: 'no-access' | 'read' | 'write'
+      }
+    | undefined
 }
 
 function Card({
@@ -105,7 +107,11 @@ function Card({
 
       if (!selectionMode) {
         // If clicking on a field value and card is already selected, allow edit only if user has write permissions
-        if (isFieldValue && isSelected && (!permissions || permissions.access === 'write')) {
+        if (
+          isFieldValue &&
+          isSelected &&
+          (!permissions || permissions.access === 'write')
+        ) {
           const fieldElement = target.closest('[data-field]') as HTMLElement
           if (fieldElement) {
             const field = fieldElement.dataset.field

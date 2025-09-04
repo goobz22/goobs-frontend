@@ -61,22 +61,26 @@ export interface ShowTaskProps {
   currentUserName: string
   onCloseTask: (taskId: string) => void
   onComment?: ((commentText: string, _id: string) => void) | undefined
-  onEdit?: ((updatedData: {
-    taskTitle: string
-    description: string
-    customerAssigned: string
-    severity: string
-    schedulingQueue: string
-    status: string
-    subStatus: string
-    topics: string[]
-    knowledgebaseArticles: string[]
-    teamMemberAssigned: string
-    nextActionDate: string
-  }) => void) | undefined
+  onEdit?:
+    | ((updatedData: {
+        taskTitle: string
+        description: string
+        customerAssigned: string
+        severity: string
+        schedulingQueue: string
+        status: string
+        subStatus: string
+        topics: string[]
+        knowledgebaseArticles: string[]
+        teamMemberAssigned: string
+        nextActionDate: string
+      }) => void)
+    | undefined
   onDelete?: (() => void) | undefined
   onDuplicate?: (() => void) | undefined
-  onEditComment?: ((commentId: string, newText: string, taskId: string) => void) | undefined
+  onEditComment?:
+    | ((commentId: string, newText: string, taskId: string) => void)
+    | undefined
   onRevisionHistory: (
     commentId: string,
     revisionHistory: CommentEditHistory[]

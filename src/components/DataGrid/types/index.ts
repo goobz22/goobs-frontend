@@ -154,9 +154,11 @@ export interface TableProps {
   onColumnDragOver?: (e: React.DragEvent) => void
   onColumnDrop?: (targetField: string) => void
   onColumnDragEnd?: () => void
-  permissions?: {
-    access: 'no-access' | 'read' | 'write'
-  } | undefined
+  permissions?:
+    | {
+        access: 'no-access' | 'read' | 'write'
+      }
+    | undefined
 }
 
 // New filter interface for embedded DataGrid filtering
