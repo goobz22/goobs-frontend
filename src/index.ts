@@ -191,7 +191,7 @@ export {
 export {
   default as SearchableHistory,
   type SearchableHistoryProps,
-  type DropdownOption as SearchableHistoryDropdownOption,
+  type NavigationItem,
 } from './components/Field/Dropdown/SearchableHistory'
 
 // Layout Components
