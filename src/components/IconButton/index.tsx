@@ -47,25 +47,26 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     }
 
     // Map color to theme colors (only apply if not sacred theme)
-    const colorMap = styles?.theme === 'sacred' ? 
-      { 
-        primary: { backgroundColor: 'transparent', color: '#FFD700' },
-        secondary: { backgroundColor: 'transparent', color: '#FFD700' },
-        success: { backgroundColor: 'transparent', color: '#10B981' },
-        error: { backgroundColor: 'transparent', color: '#EF4444' },
-        info: { backgroundColor: 'transparent', color: '#3B82F6' },
-        warning: { backgroundColor: 'transparent', color: '#F59E0B' },
-        default: { backgroundColor: 'transparent', color: '#FFD700' },
-      } :
-      {
-        primary: { backgroundColor: '#1976d2', color: 'white' },
-        secondary: { backgroundColor: '#9c27b0', color: 'white' },
-        success: { backgroundColor: '#2e7d32', color: 'white' },
-        error: { backgroundColor: '#d32f2f', color: 'white' },
-        info: { backgroundColor: '#0288d1', color: 'white' },
-        warning: { backgroundColor: '#ed6c02', color: 'white' },
-        default: { backgroundColor: 'transparent', color: 'inherit' },
-      }
+    const colorMap =
+      styles?.theme === 'sacred'
+        ? {
+            primary: { backgroundColor: 'transparent', color: '#FFD700' },
+            secondary: { backgroundColor: 'transparent', color: '#FFD700' },
+            success: { backgroundColor: 'transparent', color: '#10B981' },
+            error: { backgroundColor: 'transparent', color: '#EF4444' },
+            info: { backgroundColor: 'transparent', color: '#3B82F6' },
+            warning: { backgroundColor: 'transparent', color: '#F59E0B' },
+            default: { backgroundColor: 'transparent', color: '#FFD700' },
+          }
+        : {
+            primary: { backgroundColor: '#1976d2', color: 'white' },
+            secondary: { backgroundColor: '#9c27b0', color: 'white' },
+            success: { backgroundColor: '#2e7d32', color: 'white' },
+            error: { backgroundColor: '#d32f2f', color: 'white' },
+            info: { backgroundColor: '#0288d1', color: 'white' },
+            warning: { backgroundColor: '#ed6c02', color: 'white' },
+            default: { backgroundColor: 'transparent', color: 'inherit' },
+          }
 
     // Don't apply border if sacred theme is being used
     const shouldApplyBorder = color === 'default' && styles?.theme !== 'sacred'
