@@ -24,6 +24,7 @@ export interface ColumnDef {
     | 'account_number'
     | 'routing_number'
     | 'dropdown'
+    | 'date'
     | 'ipAddress'
     | 'subnet'
     | 'vlan'
@@ -63,6 +64,7 @@ export interface ColumnDef {
     type:
       | 'text'
       | 'date'
+      | 'monthYear'
       | 'currency'
       | 'usd'
       | 'dropdown'

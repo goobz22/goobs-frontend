@@ -65,10 +65,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
         | 'sacred',
       required: !!fieldConfig.required,
       fontSize: '14px',
-      height: fieldConfig.type === 'internalIncrement' ? '40px' : '32px', // 8px bigger for internal increment
-      padding: '4px 8px',
+      height: fieldConfig.type === 'internalIncrement' ? '48px' : '45px', // Consistent height for all fields
+      minHeight: '45px', // Ensure minimum height
+      padding: '10px 12px', // Better padding for cell filling
       borderRadius: '4px',
       helperTextType: 'error' as const,
+      width: '100%', // Ensure fields take full width
     }
 
     switch (fieldConfig.type) {
@@ -76,6 +78,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'usd': {
         return (
           <USDField
+            label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
@@ -126,6 +129,51 @@ const CreationRow: React.FC<CreationRowProps> = ({
             styles={fieldStyles}
           />
         )
+
+      case 'monthYear': {
+        // Parse MM/YY or MM/YYYY format to Date
+        let dateValue: Date | null = null
+        if (value instanceof Date) {
+          dateValue = value
+        } else if (value) {
+          const valueStr = String(value)
+          const parts = valueStr.split('/')
+          if (parts.length === 2 && parts[0] && parts[1]) {
+            const month = parseInt(parts[0], 10)
+            const yearStr = parts[1]
+            let year = parseInt(yearStr, 10)
+
+            // Handle 2-digit year
+            if (yearStr.length === 2) {
+              year = year < 50 ? 2000 + year : 1900 + year
+            }
+
+            if (!isNaN(month) && !isNaN(year)) {
+              dateValue = new Date(year, month - 1, 1)
+            }
+          }
+        }
+
+        return (
+          <DateField
+            value={dateValue}
+            onChange={(newValue: Date | null) => {
+              if (newValue) {
+                const month = String(newValue.getMonth() + 1).padStart(2, '0')
+                const year = String(newValue.getFullYear()).slice(-2)
+                onCreationFieldChange?.(column.field, `${month}/${year}`)
+              } else {
+                onCreationFieldChange?.(column.field, null)
+              }
+            }}
+            variant="month-year"
+            {...(fieldConfig.helperText
+              ? { helperText: fieldConfig.helperText }
+              : {})}
+            styles={fieldStyles}
+          />
+        )
+      }
 
       case 'searchableDropdown':
         return (
@@ -230,6 +278,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'phoneNumber':
         return (
           <PhoneNumberField
+            label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
@@ -247,8 +296,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'cvv':
         return (
           <CVV
+            label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
-            onChange={(newValue: string) =>
+            onChange={(newValue: string, isValid: boolean) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
@@ -264,8 +314,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'creditCardNumber':
         return (
           <CreditCardNumber
+            label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
-            onChange={(newValue: string) =>
+            onChange={(newValue: string, isValid: boolean, cardType: any) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
@@ -281,6 +332,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'accountNumber':
         return (
           <AccountNumber
+            label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
@@ -298,6 +350,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'routingNumber':
         return (
           <RoutingNumber
+            label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
@@ -315,6 +368,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'ipAddress':
         return (
           <IPAddressField
+            label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(column.field, event.target.value)
@@ -353,6 +407,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'subnet':
         return (
           <SubnetField
+            label="" // Explicitly pass empty label to override default
             value={
               (value as unknown as {
                 address: string
@@ -366,7 +421,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
-              ? { label: fieldConfig.placeholder }
+              ? { placeholder: fieldConfig.placeholder }
               : {})}
             {...(typeof fieldConfig.required === 'boolean'
               ? { required: fieldConfig.required }
@@ -393,6 +448,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'vlan':
         return (
           <VLANField
+            label="" // Explicitly pass empty label to override default
             initialValue={value?.toString() ?? ''}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(
@@ -413,6 +469,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'cidr':
         return (
           <CIDRField
+            label="" // Explicitly pass empty label to override default
             initialValue={value?.toString() ?? '24'}
             onChange={(
               eventOrNumber: React.ChangeEvent<HTMLInputElement> | number
@@ -450,6 +507,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'supernet':
         return (
           <SupernetField
+            label="" // Explicitly pass empty label to override default
             value={
               (value as unknown as {
                 address: string
@@ -463,7 +521,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
-              ? { label: fieldConfig.placeholder }
+              ? { placeholder: fieldConfig.placeholder }
               : {})}
             {...(typeof fieldConfig.required === 'boolean'
               ? { required: fieldConfig.required }
@@ -475,6 +533,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
       case 'macAddress':
         return (
           <MACAddressField
+            label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(column.field, event.target.value)
@@ -559,12 +618,22 @@ const CreationRow: React.FC<CreationRowProps> = ({
           key={column.field}
           style={{
             ...computedStyles.table.tableCell,
-            padding: '8px',
-            verticalAlign: 'top',
+            padding: '4px',
+            verticalAlign: 'middle',
+            height: '53px', // Match standard row height
           }}
         >
           {column.creationField ? (
-            <div style={{ width: '100%' }}>{renderCreationField(column)}</div>
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {renderCreationField(column)}
+            </div>
           ) : (
             <span style={{ color: '#9CA3AF', fontSize: '12px' }}>—</span>
           )}

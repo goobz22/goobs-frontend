@@ -12,6 +12,7 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  useId,
 } from 'react'
 import type { ChangeEvent } from 'react'
 import type { InputHTMLAttributes } from 'react'
@@ -21,14 +22,8 @@ import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 
 // --------------------------------------------------------------------------
-// STABLE ID GENERATOR
+// STABLE ID GENERATOR - Removed in favor of React.useId()
 // --------------------------------------------------------------------------
-
-let checkboxIdCounter = 0
-
-const generateStableId = () => {
-  return `checkbox-${++checkboxIdCounter}`
-}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -168,7 +163,9 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     ...rest
   } = props
 
-  const [stableId] = useState(() => providedId || generateStableId())
+  // Use React's useId for stable IDs across server and client
+  const generatedId = useId()
+  const stableId = providedId || generatedId
   const internalRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 

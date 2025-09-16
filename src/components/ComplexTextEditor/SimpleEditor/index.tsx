@@ -96,11 +96,12 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
     maxWidth: '100%',
     minWidth: '0',
     resize: 'vertical' as const,
-    fontFamily: 'inherit',
+    fontFamily: '"Inter", sans-serif', // Use Inter font for content, not Cinzel
     boxSizing: 'border-box',
     textTransform: 'none' as const, // Prevent inheritance of text-transform styles
     ...(isSacredTheme && {
       paddingRight: '50px', // Make room for glyphs
+      fontFamily: '"Inter", sans-serif', // Ensure Inter font even in sacred theme
     }),
   }
 

@@ -14,6 +14,7 @@ interface CreationFieldConfig {
   type?:
     | 'text'
     | 'date'
+    | 'monthYear'
     | 'currency'
     | 'usd'
     | 'dropdown'
@@ -187,6 +188,25 @@ function AddCard({
             const dateValue = date ? date.toISOString().split('T')[0] : ''
             handleFieldChange(column.field, dateValue)
           }}
+          {...(fieldConfig.placeholder && {
+            helperText: fieldConfig.placeholder,
+          })}
+          styles={fieldStyles}
+        />
+      )
+    }
+
+    // Handle monthYear field
+    if (fieldConfig.type === 'monthYear') {
+      return (
+        <DateField
+          value={value ? new Date(String(value)) : null}
+          onChange={date => {
+            // Store date as ISO string or empty string
+            const dateValue = date ? date.toISOString().split('T')[0] : ''
+            handleFieldChange(column.field, dateValue)
+          }}
+          variant="month-year"
           {...(fieldConfig.placeholder && {
             helperText: fieldConfig.placeholder,
           })}

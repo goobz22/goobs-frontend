@@ -344,7 +344,7 @@ const Accordion: FC<AccordionProps> = props => {
         <div
           style={{
             flex: 1,
-            paddingLeft: isMenuType ? '16px' : '30px',
+            paddingLeft: isMenuType ? '16px' : '40px',
             paddingRight: '24px',
             whiteSpace: 'nowrap',
             minWidth: 'fit-content',

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Calendar from '../../../Icons/Calendar'
 import ArrowBack from '../../../Icons/ArrowBack'
 import Dropdown from '../../Dropdown/Regular'
@@ -64,6 +65,7 @@ export interface DateFieldProps {
   helperText?: string
   label?: React.ReactNode
   styles?: FormFieldStyles
+  variant?: 'full' | 'month-year' // New variant prop
   // Additional HTML input props
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
@@ -79,7 +81,7 @@ const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
     position: 'fixed' as const,
     top: '100%',
     left: 0,
-    zIndex: 50,
+    zIndex: 9999,
     backgroundColor: sacredtheme ? 'rgba(0,0,0,0.95)' : 'white',
     borderRadius: '0.5rem',
     padding: '1.25rem',
@@ -134,11 +136,12 @@ const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
     cursor: 'pointer',
   },
   headerSubtitle: {
-    fontSize: '1rem',
+    fontSize: '0.85rem',
     color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#6B7280',
-    fontFamily: sacredtheme ? 'Arapey, serif' : 'Inter, sans-serif',
-    cursor: isDragging ? 'grabbing' : 'grab',
+    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
     textAlign: 'center' as const,
+    fontWeight: 500,
+    letterSpacing: '0.05em',
   },
   grid: {
     display: 'grid',
@@ -154,17 +157,13 @@ const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
     padding: '0.5rem',
     borderRadius: '9999px',
     textAlign: 'center' as const,
-    transition: 'background-color 0.2s',
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.8)' : 'black',
+    transition: 'all 0.2s',
+    color: sacredtheme ? '#FFD700' : 'black',
     backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.1)' : '#F3F4F6',
-    '&:hover': {
-      backgroundColor: sacredtheme ? 'rgba(255, 215, 0, 0.2)' : '#E5E7EB',
-    },
-    '&:disabled': {
-      backgroundColor: 'transparent',
-      color: sacredtheme ? 'rgba(255, 215, 0, 0.3)' : '#D1D5DB',
-      '&:hover': { backgroundColor: 'transparent' },
-    },
+    border: sacredtheme ? '1px solid rgba(255, 215, 0, 0.3)' : 'none',
+    cursor: 'pointer',
+    fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+    fontWeight: sacredtheme ? 600 : 400,
   },
   confirmation: {
     textAlign: 'center' as const,
@@ -199,37 +198,103 @@ const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
 const useDatePicker = () => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const openPicker = () => setIsOpen(true)
-  const closePicker = () => setIsOpen(false)
+  const ignoreNextClick = useRef(false)
+
+  const openPicker = () => {
+    console.log('[DatePicker] Opening picker')
+    setIsOpen(true)
+    // Ignore the next click to prevent immediate close
+    ignoreNextClick.current = true
+    setTimeout(() => {
+      ignoreNextClick.current = false
+    }, 100)
+  }
+
+  const closePicker = () => {
+    console.log('[DatePicker] Closing picker')
+    setIsOpen(false)
+  }
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (ignoreNextClick.current) {
+        console.log('[DatePicker] Ignoring click for opening')
+        return
+      }
+
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
+        console.log('[DatePicker] Click outside detected, closing')
         closePicker()
       }
     }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [containerRef])
+
+    if (isOpen) {
+      // Add listener only when open, with a small delay to avoid catching the opening click
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside)
+      }, 10)
+
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [isOpen])
+
   return { isOpen, openPicker, closePicker, containerRef }
 }
 
 const DateField: React.FC<DateFieldProps> = ({
   onChange,
-  label = 'Select Date',
+  label,
   value,
   disableFutureDateValidation = false,
   helperText,
   styles,
+  variant = 'full',
   ...rest
 }) => {
   const { isOpen, openPicker, closePicker, containerRef } = useDatePicker()
-  const formatDate = (date: Date | null) =>
-    date
-      ? `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`
-      : ''
+  const inputWrapperRef = useRef<HTMLDivElement>(null)
+
+  // Add CSS animations for sacred theme if needed
+  useEffect(() => {
+    if (styles?.theme === 'sacred' && typeof document !== 'undefined') {
+      const styleId = 'date-field-sacred-animations'
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style')
+        style.id = styleId
+        style.textContent = `
+          @keyframes date-field-sacred-glow {
+            0% { box-shadow: 0 0 1.5rem rgba(255, 215, 0, 0.2); }
+            50% { box-shadow: 0 0 2rem rgba(255, 215, 0, 0.4); }
+            100% { box-shadow: 0 0 1.5rem rgba(255, 215, 0, 0.2); }
+          }
+          @keyframes sacred-icon-glow {
+            0% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8)); }
+            100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+          }
+          @keyframes date-field-float-glyph {
+            0% { transform: translateY(0px); opacity: 0.4; }
+            50% { transform: translateY(-5px); opacity: 0.6; }
+            100% { transform: translateY(0px); opacity: 0.4; }
+          }
+        `
+        document.head.appendChild(style)
+      }
+    }
+  }, [styles?.theme])
+  const formatDate = (date: Date | null) => {
+    if (!date) return ''
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    if (variant === 'month-year') {
+      return `${month}/${year}`
+    }
+    const day = date.getDate().toString().padStart(2, '0')
+    return `${month}/${day}/${year}`
+  }
   const [selectedDate, setSelectedDate] = useState<Date | null>(value || null)
   const [inputValue, setInputValue] = useState(formatDate(selectedDate))
   const [viewedYear, setViewedYear] = useState(new Date().getFullYear())
@@ -295,13 +360,22 @@ const DateField: React.FC<DateFieldProps> = ({
   }
 
   const formatInput = (input: string): string => {
-    const digits = input.replace(/\D/g, '').slice(0, 8)
-    if (digits.length > 4) {
-      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
-    } else if (digits.length > 2) {
-      return `${digits.slice(0, 2)}/${digits.slice(2)}`
+    const digits = input.replace(/\D/g, '')
+    if (variant === 'month-year') {
+      const truncated = digits.slice(0, 6) // MM + YYYY = 6 digits max
+      if (truncated.length > 2) {
+        return `${truncated.slice(0, 2)}/${truncated.slice(2)}`
+      }
+      return truncated
+    } else {
+      const truncated = digits.slice(0, 8) // MM + DD + YYYY = 8 digits max
+      if (truncated.length > 4) {
+        return `${truncated.slice(0, 2)}/${truncated.slice(2, 4)}/${truncated.slice(4)}`
+      } else if (truncated.length > 2) {
+        return `${truncated.slice(0, 2)}/${truncated.slice(2)}`
+      }
+      return truncated
     }
-    return digits
   }
 
   useEffect(() => {
@@ -315,7 +389,19 @@ const DateField: React.FC<DateFieldProps> = ({
 
   const parseDate = (dateString: string): Date | null => {
     const parts = dateString.split('/')
-    if (parts.length === 3) {
+    if (variant === 'month-year' && parts.length === 2) {
+      const [monthStr, yearStr] = parts
+      const month = parseInt(monthStr ?? '', 10)
+      const year = parseInt(yearStr ?? '', 10)
+      if (!isNaN(month) && !isNaN(year) && month >= 1 && month <= 12) {
+        // For month-year, default to first day of month
+        const date = new Date(year, month - 1, 1)
+        if (date.getFullYear() === year && date.getMonth() === month - 1) {
+          if (disableFutureDateValidation || isValidFutureDate(year, month, 1))
+            return date
+        }
+      }
+    } else if (variant === 'full' && parts.length === 3) {
       const [monthStr, dayStr, yearStr] = parts
       const month = parseInt(monthStr ?? '', 10)
       const day = parseInt(dayStr ?? '', 10)
@@ -355,35 +441,62 @@ const DateField: React.FC<DateFieldProps> = ({
       e.preventDefault()
       const inc = e.key === 'ArrowUp' ? 1 : -1
       const parts = inputValue.split('/').map(p => parseInt(p ?? '', 10))
-      let month = (parts[0] ?? 1) as number
-      let day = (parts[1] ?? 1) as number
-      let year = (parts[2] ?? new Date().getFullYear()) as number
-      if (isNaN(month)) month = 1
-      if (isNaN(day)) day = 1
-      if (isNaN(year)) year = new Date().getFullYear()
-      const selectedPart = pos <= 2 ? 'month' : pos <= 5 ? 'day' : 'year'
-      if (selectedPart === 'month') {
-        month = ((month + inc - 1 + 12) % 12) + 1
-      } else if (selectedPart === 'day') {
-        const daysInMonth = new Date(year, month, 0).getDate()
-        day = ((day + inc - 1 + daysInMonth) % daysInMonth) + 1
+
+      if (variant === 'month-year') {
+        let month = (parts[0] ?? 1) as number
+        let year = (parts[1] ?? new Date().getFullYear()) as number
+        if (isNaN(month)) month = 1
+        if (isNaN(year)) year = new Date().getFullYear()
+        const selectedPart = pos <= 2 ? 'month' : 'year'
+        if (selectedPart === 'month') {
+          month = ((month + inc - 1 + 12) % 12) + 1
+        } else {
+          year += inc
+          year = Math.max(1900, Math.min(2100, year))
+        }
+        const newValue = `${month.toString().padStart(2, '0')}/${year}`
+        setInputValue(newValue)
+        const parsed = parseDate(newValue)
+        if (parsed) setSelectedDate(parsed)
+        if (onChange) onChange(parsed)
+        setTimeout(() => {
+          if (selectedPart === 'month') input.setSelectionRange(0, 2)
+          else input.setSelectionRange(3, 7)
+        }, 0)
       } else {
-        year += inc
-        year = Math.max(1900, Math.min(2100, year))
+        let month = (parts[0] ?? 1) as number
+        let day = (parts[1] ?? 1) as number
+        let year = (parts[2] ?? new Date().getFullYear()) as number
+        if (isNaN(month)) month = 1
+        if (isNaN(day)) day = 1
+        if (isNaN(year)) year = new Date().getFullYear()
+        const selectedPart = pos <= 2 ? 'month' : pos <= 5 ? 'day' : 'year'
+        if (selectedPart === 'month') {
+          month = ((month + inc - 1 + 12) % 12) + 1
+        } else if (selectedPart === 'day') {
+          const daysInMonth = new Date(year, month, 0).getDate()
+          day = ((day + inc - 1 + daysInMonth) % daysInMonth) + 1
+        } else {
+          year += inc
+          year = Math.max(1900, Math.min(2100, year))
+        }
+        const newValue = `${month.toString().padStart(2, '0')}/${day
+          .toString()
+          .padStart(2, '0')}/${year}`
+        setInputValue(newValue)
+        const parsed = parseDate(newValue)
+        if (parsed) setSelectedDate(parsed)
+        if (onChange) onChange(parsed)
+        setTimeout(() => {
+          if (selectedPart === 'month') input.setSelectionRange(0, 2)
+          else if (selectedPart === 'day') input.setSelectionRange(3, 5)
+          else input.setSelectionRange(6, 10)
+        }, 0)
       }
-      const newValue = `${month.toString().padStart(2, '0')}/${day
-        .toString()
-        .padStart(2, '0')}/${year}`
-      setInputValue(newValue)
-      const parsed = parseDate(newValue)
-      if (parsed) setSelectedDate(parsed)
-      if (onChange) onChange(parsed)
-      setTimeout(() => {
-        if (selectedPart === 'month') input.setSelectionRange(0, 2)
-        else if (selectedPart === 'day') input.setSelectionRange(3, 5)
-        else input.setSelectionRange(6, 10)
-      }, 0)
-    } else if (e.key === 'Backspace' && (pos === 3 || pos === 6)) {
+    } else if (
+      e.key === 'Backspace' &&
+      (pos === 3 || (variant === 'full' && pos === 6))
+    ) {
       e.preventDefault()
       let newValue = inputValue
       if (pos === 3) {
@@ -405,23 +518,64 @@ const DateField: React.FC<DateFieldProps> = ({
     const pos = input.selectionStart || 0
     let start = 0,
       end = 2
-    if (pos > 2 && pos <= 5) {
-      start = 3
-      end = 5
-    } else if (pos > 5) {
-      start = 6
-      end = 10
+    if (variant === 'month-year') {
+      if (pos > 2) {
+        start = 3
+        end = 7
+      }
+    } else {
+      if (pos > 2 && pos <= 5) {
+        start = 3
+        end = 5
+      } else if (pos > 5) {
+        start = 6
+        end = 10
+      }
     }
     setTimeout(() => input.setSelectionRange(start, end), 0)
     rest.onClick?.(e)
   }
 
   const handleIconClick = (e: React.MouseEvent) => {
+    console.log('[DatePicker] Icon clicked')
     e.stopPropagation()
+    e.preventDefault()
     openPicker()
-    const centerX = window.innerWidth / 2 - 175 // assuming 350px width
-    const centerY = window.innerHeight / 2 - 200 // assuming 400px height
-    setDragPosition({ x: centerX, y: centerY })
+
+    // Position the picker relative to the input field
+    if (inputWrapperRef.current) {
+      const rect = inputWrapperRef.current.getBoundingClientRect()
+      console.log('[DatePicker] Input wrapper rect:', rect)
+      const pickerWidth = 350
+      const pickerHeight = 400
+
+      // Calculate position to show below the input if there's space, otherwise above
+      let x = rect.left
+      let y = rect.bottom + 5
+
+      // Check if picker would go off screen horizontally
+      if (x + pickerWidth > window.innerWidth) {
+        x = window.innerWidth - pickerWidth - 10
+      }
+
+      // Check if picker would go off screen vertically
+      if (y + pickerHeight > window.innerHeight) {
+        y = rect.top - pickerHeight - 5
+        if (y < 0) {
+          // If no space above either, center it
+          y = window.innerHeight / 2 - pickerHeight / 2
+        }
+      }
+
+      console.log('[DatePicker] Setting position:', { x, y })
+      setDragPosition({ x, y })
+    } else {
+      console.log('[DatePicker] No input wrapper ref, using center position')
+      // Fallback to center if ref not available
+      const centerX = window.innerWidth / 2 - 175
+      const centerY = window.innerHeight / 2 - 200
+      setDragPosition({ x: centerX, y: centerY })
+    }
   }
 
   const handleMouseDown = useCallback(
@@ -485,6 +639,19 @@ const DateField: React.FC<DateFieldProps> = ({
     }
   }
 
+  const handleMonthYearSelect = () => {
+    const date = new Date(viewedYear, viewedMonth, 1)
+    date.setHours(0, 0, 0, 0)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (disableFutureDateValidation || date > today) {
+      setSelectedDate(date)
+      setInputValue(formatDate(date))
+      if (onChange) onChange(date)
+      closePicker()
+    }
+  }
+
   const handlePrev = () => {
     setViewedMonth(m => {
       if (m === 0) {
@@ -504,187 +671,295 @@ const DateField: React.FC<DateFieldProps> = ({
     })
   }
 
-  const CustomDatePicker = () => (
-    <div
-      ref={containerRef}
-      style={{
-        ...pickerStyles.datePicker,
-        position: 'absolute',
-        left: dragPosition.x,
-        top: dragPosition.y,
-      }}
-    >
-      <div style={{ ...pickerStyles.header, flexDirection: 'column' }}>
-        <p style={pickerStyles.headerSubtitle} onMouseDown={handleMouseDown}>
-          Click and drag to move
-        </p>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            gap: '0.5rem',
-          }}
-        >
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              handlePrev()
+  const CustomDatePicker = () => {
+    console.log(
+      '[DatePicker] CustomDatePicker rendering at position:',
+      dragPosition
+    )
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          ...pickerStyles.datePicker,
+          position: 'fixed', // Changed from absolute to fixed for portal
+          left: dragPosition.x,
+          top: dragPosition.y,
+          // Remove debug border and use theme-appropriate background
+          backgroundColor: sacredtheme ? 'rgba(0,0,0,0.95)' : 'white',
+          border: sacredtheme
+            ? '2px solid rgba(255, 215, 0, 0.5)'
+            : '1px solid #E5E7EB',
+          boxShadow: sacredtheme
+            ? '0 0 1.5rem rgba(255, 215, 0, 0.2)'
+            : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <div style={{ ...pickerStyles.header, flexDirection: 'column' }}>
+          <div
+            style={{
+              ...pickerStyles.headerSubtitle,
+              cursor: isDragging ? 'grabbing' : 'grab',
+              userSelect: 'none',
+              padding: '0.5rem',
+              borderRadius: '0.25rem',
+              backgroundColor: sacredtheme
+                ? 'rgba(255, 215, 0, 0.05)'
+                : 'rgba(0, 0, 0, 0.05)',
             }}
-            onMouseDown={e => e.stopPropagation()}
-            style={pickerStyles.backButton}
+            onMouseDown={handleMouseDown}
           >
-            <ArrowBack
-              style={{
-                height: '1.25rem',
-                width: '1.25rem',
-                color: sacredtheme ? '#FFD700' : '#4B5563',
-              }}
-            />
-          </button>
+            ⋮⋮⋮ Drag to move ⋮⋮⋮
+          </div>
           <div
             style={{
               display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
               gap: '0.5rem',
-              transform: 'translateY(-5px)',
             }}
+            onMouseDown={e => e.stopPropagation()} // Prevent drag when interacting with controls
           >
-            <Dropdown
-              options={(disableFutureDateValidation || viewedYear > currentYear
-                ? MONTHS
-                : MONTHS.slice(currentMonth)
-              ).map(month => ({ value: month }))}
-              value={MONTHS[viewedMonth] || ''}
-              onChange={e => setViewedMonth(MONTHS.indexOf(e.target.value))}
-              label=""
-              styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
-                height: '2rem',
-                fontSize: '1rem',
-                padding: '0.25rem 1.5rem 0.25rem 0.5rem',
-                width: '120px',
-              }}
-            />
-            <Dropdown
-              options={generateYears().map(y => ({ value: y.toString() }))}
-              value={viewedYear.toString()}
-              onChange={e => setViewedYear(parseInt(e.target.value))}
-              label=""
-              styles={{
-                theme: sacredtheme ? 'sacred' : 'light',
-                height: '2rem',
-                fontSize: '1rem',
-                padding: '0.25rem 1.5rem 0.25rem 0.5rem',
-                width: '80px',
-              }}
-            />
-          </div>
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              handleNext()
-            }}
-            onMouseDown={e => e.stopPropagation()}
-            style={pickerStyles.backButton}
-          >
-            <ArrowBack
-              style={{
-                height: '1.25rem',
-                width: '1.25rem',
-                color: sacredtheme ? '#FFD700' : '#4B5563',
-                transform: 'rotate(180deg)',
-              }}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* day grid */}
-      <>
-        <div
-          style={{
-            ...pickerStyles.grid,
-            ...pickerStyles.grid7Col,
-            marginBottom: '0.5rem',
-          }}
-        >
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {variant !== 'month-year' && (
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  handlePrev()
+                }}
+                onMouseDown={e => e.stopPropagation()}
+                style={pickerStyles.backButton}
+              >
+                <ArrowBack
+                  style={{
+                    height: '1.25rem',
+                    width: '1.25rem',
+                    color: sacredtheme ? '#FFD700' : '#4B5563',
+                  }}
+                />
+              </button>
+            )}
             <div
-              key={day}
               style={{
-                textAlign: 'center' as const,
-                fontWeight: 'bold',
-                color: sacredtheme ? '#FFD700' : '#4B5563',
+                display: 'flex',
+                gap: '0.5rem',
+                pointerEvents: 'auto',
+              }}
+              onMouseDown={e => e.stopPropagation()}
+            >
+              <Dropdown
+                options={(disableFutureDateValidation ||
+                viewedYear > currentYear
+                  ? MONTHS
+                  : MONTHS.slice(currentMonth)
+                ).map(month => ({ value: month }))}
+                value={MONTHS[viewedMonth] || ''}
+                onChange={e => {
+                  e.stopPropagation()
+                  setViewedMonth(MONTHS.indexOf(e.target.value))
+                }}
+                label=""
+                styles={{
+                  theme: sacredtheme ? 'sacred' : 'light',
+                  height: '2rem',
+                  fontSize: '1rem',
+                  padding: '0.25rem 1.5rem 0.25rem 0.5rem',
+                  width: '120px',
+                }}
+              />
+              <Dropdown
+                options={generateYears().map(y => ({ value: y.toString() }))}
+                value={viewedYear.toString()}
+                onChange={e => {
+                  e.stopPropagation()
+                  setViewedYear(parseInt(e.target.value))
+                }}
+                label=""
+                styles={{
+                  theme: sacredtheme ? 'sacred' : 'light',
+                  height: '2rem',
+                  fontSize: '1rem',
+                  padding: '0.25rem 1.5rem 0.25rem 0.5rem',
+                  width: '80px',
+                }}
+              />
+            </div>
+            {variant !== 'month-year' && (
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  handleNext()
+                }}
+                onMouseDown={e => e.stopPropagation()}
+                style={pickerStyles.backButton}
+              >
+                <ArrowBack
+                  style={{
+                    height: '1.25rem',
+                    width: '1.25rem',
+                    color: sacredtheme ? '#FFD700' : '#4B5563',
+                    transform: 'rotate(180deg)',
+                  }}
+                />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* day grid or month-year selection */}
+        {variant === 'month-year' ? (
+          <div style={{ padding: '1rem', textAlign: 'center' }}>
+            <button
+              onClick={handleMonthYearSelect}
+              style={{
+                padding: '0.75rem 2rem',
+                borderRadius: '0.5rem',
+                backgroundColor: sacredtheme
+                  ? 'rgba(255, 215, 0, 0.2)'
+                  : '#3B82F6',
+                color: sacredtheme ? '#FFD700' : 'white',
+                fontWeight: 600,
+                fontSize: '1rem',
+                border: sacredtheme ? '2px solid #FFD700' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontFamily: sacredtheme ? 'Cinzel, serif' : 'Inter, sans-serif',
+                textShadow: sacredtheme
+                  ? '0 0 10px rgba(255, 215, 0, 0.5)'
+                  : 'none',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = sacredtheme
+                  ? 'rgba(255, 215, 0, 0.3)'
+                  : '#2563EB'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = sacredtheme
+                  ? 'rgba(255, 215, 0, 0.2)'
+                  : '#3B82F6'
               }}
             >
-              {day}
-            </div>
-          ))}
-        </div>
-        <div style={{ ...pickerStyles.grid, ...pickerStyles.grid7Col }}>
-          {(() => {
-            const firstDay = new Date(viewedYear, viewedMonth, 1).getDay()
-            const daysInMonth = new Date(
-              viewedYear,
-              viewedMonth + 1,
-              0
-            ).getDate()
-            const cells: React.ReactNode[] = []
-            for (let i = 0; i < firstDay; i++) {
-              cells.push(<div key={`empty-${i}`} />)
-            }
-            for (let d = 1; d <= daysInMonth; d++) {
-              const date = new Date(viewedYear, viewedMonth, d)
-              date.setHours(0, 0, 0, 0)
-              const today = new Date()
-              today.setHours(0, 0, 0, 0)
-              const isValid = disableFutureDateValidation || date > today
-              cells.push(
-                <button
-                  key={d}
-                  onClick={() => isValid && handleDaySelect(d)}
-                  disabled={!isValid}
-                  style={pickerStyles.pickerButton}
+              Select {MONTHS[viewedMonth]} {viewedYear}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                ...pickerStyles.grid,
+                ...pickerStyles.grid7Col,
+                marginBottom: '0.5rem',
+              }}
+            >
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div
+                  key={day}
+                  style={{
+                    textAlign: 'center' as const,
+                    fontWeight: 'bold',
+                    color: sacredtheme ? '#FFD700' : '#4B5563',
+                  }}
                 >
-                  {d}
-                </button>
-              )
-            }
-            return cells
-          })()}
-        </div>
-      </>
-    </div>
-  )
-
-  const DateAdornment = () => (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}
-    >
-      {sacredtheme && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '-1.25rem',
-            color: 'rgba(255,215,0,0.4)',
-            fontSize: '0.75rem',
-            animation: 'date-field-float-glyph 4s infinite alternate',
-          }}
-        >
-          𓇳
-        </div>
-      )}
-      <div onClick={handleIconClick} style={{ cursor: 'pointer' }}>
-        <Calendar style={pickerStyles.calendarIcon} />
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div style={{ ...pickerStyles.grid, ...pickerStyles.grid7Col }}>
+              {(() => {
+                const firstDay = new Date(viewedYear, viewedMonth, 1).getDay()
+                const daysInMonth = new Date(
+                  viewedYear,
+                  viewedMonth + 1,
+                  0
+                ).getDate()
+                const cells: React.ReactNode[] = []
+                for (let i = 0; i < firstDay; i++) {
+                  cells.push(<div key={`empty-${i}`} />)
+                }
+                for (let d = 1; d <= daysInMonth; d++) {
+                  const date = new Date(viewedYear, viewedMonth, d)
+                  date.setHours(0, 0, 0, 0)
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  const isValid = disableFutureDateValidation || date > today
+                  cells.push(
+                    <button
+                      key={d}
+                      onClick={() => isValid && handleDaySelect(d)}
+                      disabled={!isValid}
+                      style={{
+                        ...pickerStyles.pickerButton,
+                        opacity: !isValid ? 0.3 : 1,
+                        cursor: !isValid ? 'not-allowed' : 'pointer',
+                      }}
+                      onMouseEnter={e => {
+                        if (isValid) {
+                          e.currentTarget.style.backgroundColor = sacredtheme
+                            ? 'rgba(255, 215, 0, 0.3)'
+                            : '#E5E7EB'
+                          e.currentTarget.style.transform = 'scale(1.1)'
+                          if (sacredtheme) {
+                            e.currentTarget.style.boxShadow =
+                              '0 0 10px rgba(255, 215, 0, 0.5)'
+                          }
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.backgroundColor = sacredtheme
+                          ? 'rgba(255, 215, 0, 0.1)'
+                          : '#F3F4F6'
+                        e.currentTarget.style.transform = 'scale(1)'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }}
+                    >
+                      {d}
+                    </button>
+                  )
+                }
+                return cells
+              })()}
+            </div>
+          </>
+        )}
       </div>
-    </div>
-  )
+    )
+  }
+
+  const DateAdornment = () => {
+    console.log('[DatePicker] DateAdornment rendered')
+    return (
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+        }}
+      >
+        {sacredtheme && (
+          <div
+            style={{
+              position: 'absolute',
+              left: '-1.25rem',
+              color: 'rgba(255,215,0,0.4)',
+              fontSize: '0.75rem',
+              animation: 'date-field-float-glyph 4s infinite alternate',
+            }}
+          >
+            𓇳
+          </div>
+        )}
+        <div
+          onClick={e => {
+            console.log('[DatePicker] Calendar icon div clicked')
+            handleIconClick(e)
+          }}
+          style={{ cursor: 'pointer', zIndex: 100 }}
+        >
+          <Calendar style={pickerStyles.calendarIcon} />
+        </div>
+      </div>
+    )
+  }
 
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
@@ -721,7 +996,7 @@ const DateField: React.FC<DateFieldProps> = ({
         </label>
       )}
 
-      <div style={componentStyles.inputWrapper}>
+      <div ref={inputWrapperRef} style={componentStyles.inputWrapper}>
         <input
           {...rest}
           {...getRequiredProps(styles?.required)}
@@ -732,7 +1007,10 @@ const DateField: React.FC<DateFieldProps> = ({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onClick={handleClick}
-          placeholder={rest.placeholder ?? 'MM/DD/YYYY'}
+          placeholder={
+            rest.placeholder ??
+            (variant === 'month-year' ? 'MM/YYYY' : 'MM/DD/YYYY')
+          }
           style={componentStyles.input}
         />
 
@@ -746,7 +1024,21 @@ const DateField: React.FC<DateFieldProps> = ({
         </div>
       </div>
 
-      {isOpen && <CustomDatePicker />}
+      {(() => {
+        console.log(
+          '[DatePicker] Render check - isOpen:',
+          isOpen,
+          'document exists:',
+          typeof document !== 'undefined',
+          'dragPosition:',
+          dragPosition
+        )
+        if (isOpen && typeof document !== 'undefined') {
+          console.log('[DatePicker] Rendering picker via portal')
+          return createPortal(<CustomDatePicker />, document.body)
+        }
+        return null
+      })()}
 
       {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>

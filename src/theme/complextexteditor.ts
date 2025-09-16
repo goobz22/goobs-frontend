@@ -225,7 +225,7 @@ export const complexTextEditorThemes: Record<
     container: {
       background: 'rgba(10, 10, 10, 0.9)',
       borderRadius: '12px',
-      fontFamily: '"Cinzel", serif',
+      fontFamily: '"Inter", sans-serif',
     },
     toolbar: {
       background: 'rgba(0, 0, 0, 0.5)',
@@ -355,6 +355,11 @@ const injectScrollbarStyles = (
 ) => {
   const className = `complex-text-editor-scrollbar-${theme}`
 
+  // Check if we're in a browser environment
+  if (typeof document === 'undefined') {
+    return className
+  }
+
   // Check if styles are already injected
   if (document.getElementById(className)) {
     return className
@@ -459,9 +464,19 @@ export const getComplexTextEditorStyles = (
 
   const editorAreaStyle: React.CSSProperties = {
     background: themeConfig.editorArea.background,
-    border: `1px solid ${isFocused ? formFieldTheme.border.focused : themeConfig.editorArea.borderColor}`,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor:
+      styles?.helperTextType === 'error'
+        ? formFieldTheme.border.error
+        : isFocused
+          ? formFieldTheme.border.focused
+          : themeConfig.editorArea.borderColor,
     borderRadius: themeConfig.editorArea.borderRadius,
-    color: themeConfig.editorArea.color,
+    color:
+      styles?.helperTextType === 'error'
+        ? formFieldTheme.footerText.error
+        : themeConfig.editorArea.color,
     fontFamily: themeConfig.editorArea.fontFamily,
     fontSize: themeConfig.editorArea.fontSize,
     lineHeight: themeConfig.editorArea.lineHeight,
@@ -477,11 +492,6 @@ export const getComplexTextEditorStyles = (
     // Sacred theme effects
     ...(isSacredTheme && {
       textShadow: themeConfig.sacred.textGlow,
-    }),
-    // Error state
-    ...(styles?.helperTextType === 'error' && {
-      borderColor: formFieldTheme.border.error,
-      color: formFieldTheme.footerText.error,
     }),
   }
 

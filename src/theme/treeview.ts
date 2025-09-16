@@ -1079,7 +1079,10 @@ export const getTreeItemStyles = (
   // Apply level-based indentation
   itemStyles.paddingLeft = `${totalIndent}px`
 
-  // Apply state-based styles
+  // Apply state-based styles - Ensure hydration consistency
+  // Only apply hover styles on client side to prevent hydration mismatch
+  const isClient = typeof window !== 'undefined'
+
   if (isDisabled) {
     itemStyles.backgroundColor = theme.itemDisabled.backgroundColor
     itemStyles.color = theme.itemDisabled.color
@@ -1114,7 +1117,8 @@ export const getTreeItemStyles = (
     if (theme.itemExpanded.textShadow) {
       itemStyles.textShadow = theme.itemExpanded.textShadow
     }
-  } else if (isHovered) {
+  } else if (isClient && isHovered) {
+    // Only apply hover styles on client to prevent hydration mismatch
     itemStyles.backgroundColor = theme.itemHover.backgroundColor
     if (theme.itemHover.borderColor) {
       itemStyles.borderColor = theme.itemHover.borderColor

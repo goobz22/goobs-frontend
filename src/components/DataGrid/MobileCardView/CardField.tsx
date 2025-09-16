@@ -7,6 +7,7 @@ import type { ColumnDef } from '../types'
 interface CardFieldProps {
   column: ColumnDef
   value: unknown
+  row?: any // Add row prop to pass full row data for renderCell
   rowId: string
   isEditing: boolean
   editingValue: string
@@ -28,6 +29,7 @@ interface CardFieldProps {
 function CardField({
   column,
   value,
+  row,
   rowId,
   isEditing,
   editingValue,
@@ -56,11 +58,11 @@ function CardField({
         }
       case 'sacred':
         return {
-          text: '#FBBF24',
-          secondaryText: '#D97706',
-          border: 'rgba(255, 215, 0, 0.5)',
-          inputBackground: 'rgba(0, 0, 0, 0.9)',
-          buttonBackground: 'rgba(255, 215, 0, 0.2)',
+          text: '#FFD700',
+          secondaryText: 'rgba(255, 215, 0, 0.7)',
+          border: 'rgba(255, 215, 0, 0.3)',
+          inputBackground: 'rgba(0, 0, 0, 0.5)',
+          buttonBackground: 'rgba(255, 215, 0, 0.1)',
           primary: '#FFD700',
         }
       default: // light
@@ -89,8 +91,28 @@ function CardField({
 
   // Format value for display
   const formatValue = useCallback(
-    (val: unknown): string => {
+    (val: unknown): string | React.ReactNode => {
+      // If column has a renderCell function and we have full row data, use it
+      if (column.renderCell && row) {
+        const result = column.renderCell({
+          row: row,
+          value: val,
+        } as any)
+        return result || '—'
+      }
+
       if (val == null || val === '') return '—'
+
+      // Handle dropdown fields - show label instead of value
+      if (column.type === 'dropdown' && column.dropdownOptions) {
+        const option = column.dropdownOptions.find(
+          opt => String(opt.value) === String(val)
+        )
+        if (option) {
+          // Use attribute1 for display if available, otherwise use label or value
+          return option.attribute1 || option.label || String(option.value)
+        }
+      }
 
       // Handle array values for multiselect fields
       if (Array.isArray(val)) {
@@ -114,7 +136,14 @@ function CardField({
 
       return String(val)
     },
-    [column.type]
+    [
+      column.type,
+      column.renderCell,
+      column.dropdownOptions,
+      row,
+      rowId,
+      column.field,
+    ]
   )
 
   // Handle save - need to handle multiselect differently
@@ -218,6 +247,20 @@ function CardField({
       )
     }
 
+    // Handle date field
+    if (column.type === 'date') {
+      return (
+        <input
+          ref={inputRef as React.RefObject<HTMLInputElement>}
+          type="date"
+          value={editingValue ? editingValue.split('T')[0] : ''}
+          onChange={e => onEditingValueChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          style={inputStyles}
+        />
+      )
+    }
+
     const inputType = column.type === 'currency' ? 'number' : 'text'
 
     return (
@@ -256,6 +299,7 @@ function CardField({
       cursor: 'pointer',
       borderRadius: '0.25rem',
       transition: 'background-color 0.15s ease',
+      wordBreak: 'break-word' as const,
     },
     editContainer: {
       display: 'flex',
@@ -309,7 +353,7 @@ function CardField({
         </div>
       ) : (
         <div style={fieldStyles.value} data-field-value="true">
-          {formatValue(value)}
+          {column.renderCell && row ? formatValue(row) : formatValue(value)}
         </div>
       )}
     </div>

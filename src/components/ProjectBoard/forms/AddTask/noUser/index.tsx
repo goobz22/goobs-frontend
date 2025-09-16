@@ -6,17 +6,17 @@ import TextField from '../../../../Field/Text'
 import ComplexTextEditor from '../../../../ComplexTextEditor'
 import SearchableSimple from '../../../../Field/Dropdown/SearchableSimple'
 import CustomButton from '../../../../Button'
-import type { RawSeverityLevel } from '../../../types'
 import type { ProjectBoardStyles } from '../../../../../theme'
 
 interface NoUserAddTaskProps {
   onAdd: (newTask: {
+    fullName: string
+    email: string
+    phoneNumber: string
     title: string
     description: string
-    email: string
-    severityId: string
+    category: string
   }) => void
-  severityLevels: RawSeverityLevel[]
   styles?: ProjectBoardStyles
 }
 
@@ -83,39 +83,56 @@ const getStyles = (styles?: ProjectBoardStyles) => {
   }
 }
 
-const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
-  onAdd,
-  severityLevels,
-  styles,
-}) => {
+const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({ onAdd, styles }) => {
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
-  const [email, setEmail] = useState('')
-  const [selectedSeverityId, setSelectedSeverityId] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
   const computedStyles = getStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
 
-  const severityOptions = severityLevels.map((sl: RawSeverityLevel) => ({
-    value: String(sl.severityLevel),
-    attribute1: sl.description || '',
-    attribute2: sl._id,
-  }))
+  const categoryOptions = [
+    { value: 'Sales' },
+    { value: 'Investing' },
+    { value: 'General Questions' },
+    { value: 'Service Issue' },
+    { value: 'Billing' },
+    { value: 'Want to Work With Us' },
+  ]
 
   const handleSubmit = useCallback(
     (e?: FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault()
-      if (!taskTitle || !taskDescription || !email || !selectedSeverityId) {
-        alert('Please fill out all fields.')
+      if (
+        !fullName ||
+        !email ||
+        !taskTitle ||
+        !taskDescription ||
+        !selectedCategory
+      ) {
+        alert('Please fill out all required fields.')
         return
       }
       onAdd({
+        fullName,
+        email,
+        phoneNumber,
         title: taskTitle,
         description: taskDescription,
-        email,
-        severityId: selectedSeverityId,
+        category: selectedCategory,
       })
     },
-    [taskTitle, taskDescription, email, selectedSeverityId, onAdd]
+    [
+      fullName,
+      email,
+      phoneNumber,
+      taskTitle,
+      taskDescription,
+      selectedCategory,
+      onAdd,
+    ]
   )
 
   return (
@@ -152,16 +169,43 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
       <form onSubmit={handleSubmit} style={computedStyles.form}>
         <div style={computedStyles.fieldWrapper}>
           <TextField
-            label="Task Title"
+            label="Full Name *"
+            value={fullName}
+            onChange={setFullName}
+            placeholder="Enter your full name"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.fieldWrapper}>
+          <TextField
+            label="Email *"
+            value={email}
+            onChange={setEmail}
+            placeholder="Enter your email"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.fieldWrapper}>
+          <TextField
+            label="Phone Number"
+            value={phoneNumber}
+            onChange={setPhoneNumber}
+            placeholder="Enter your phone number"
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+        </div>
+        <div style={computedStyles.fieldWrapper}>
+          <TextField
+            label="Subject *"
             value={taskTitle}
             onChange={setTaskTitle}
-            placeholder="Enter Task Title"
+            placeholder="Enter subject"
             styles={{ theme: styles?.theme || 'light' }}
           />
         </div>
         <div style={computedStyles.fieldWrapper}>
           <ComplexTextEditor
-            label="Task Description"
+            label="Message *"
             value={taskDescription}
             onChange={setTaskDescription}
             editorType="simple"
@@ -169,34 +213,20 @@ const NoUserAddTask: React.FC<NoUserAddTaskProps> = ({
             styles={{ theme: styles?.theme || 'light' }}
           />
         </div>
-        <div style={computedStyles.fieldWrapper}>
-          <TextField
-            label="Email"
-            value={email}
-            onChange={setEmail}
-            placeholder="Enter your email"
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
         <div style={computedStyles.severityWrapper}>
           <SearchableSimple
-            label="Severity Level"
-            options={severityOptions}
-            defaultValue={
-              severityOptions.find(opt => opt.attribute2 === selectedSeverityId)
-                ?.value || ''
-            }
+            label="Category *"
+            options={categoryOptions}
+            defaultValue={selectedCategory}
             onChange={option =>
-              setSelectedSeverityId(
-                (option as { attribute2: string })?.attribute2 || ''
-              )
+              setSelectedCategory((option as { value: string })?.value || '')
             }
-            placeholder="Select severity level"
+            placeholder="Select a category"
             styles={{ theme: styles?.theme || 'light' }}
           />
         </div>
         <CustomButton
-          text="Create Task"
+          text="Submit Request"
           onClick={() => handleSubmit()}
           styles={{ theme: styles?.theme || 'light' }}
         />

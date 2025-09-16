@@ -551,8 +551,6 @@ const TreeItem: FC<TreeItemProps> = ({
 }) => {
   const context = useTreeViewContext()
   const [isHovered, setIsHovered] = useState(false)
-  const [backgroundGlyph, setBackgroundGlyph] = useState(SACRED_GLYPHS[0])
-  const [isHydrated, setIsHydrated] = useState(false)
   const itemRef = useRef<HTMLDivElement>(null)
 
   const itemId = context.getItemId(item)
@@ -560,13 +558,19 @@ const TreeItem: FC<TreeItemProps> = ({
   const isDisabled = context.isItemDisabled(item)
   const isSacredTheme = styles.theme === 'sacred'
 
-  // Set random background glyph only on client side after hydration
-  useEffect(() => {
-    if (!isHydrated && isSacredTheme) {
-      setBackgroundGlyph(SACRED_GLYPHS[Math.floor(Math.random() * 5)])
-      setIsHydrated(true)
+  // Use stable background glyph based on item ID to prevent hydration mismatch
+  const backgroundGlyph = useMemo(() => {
+    if (!isSacredTheme) return ''
+    // Generate consistent glyph based on item ID hash
+    let hash = 0
+    for (let i = 0; i < itemId.length; i++) {
+      const char = itemId.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // Convert to 32bit integer
     }
-  }, [isHydrated, isSacredTheme])
+    const index = Math.abs(hash) % SACRED_GLYPHS.length
+    return SACRED_GLYPHS[index] || SACRED_GLYPHS[0]
+  }, [itemId, isSacredTheme])
 
   // Get computed styles
   const itemStyles = useMemo(() => {
@@ -699,7 +703,7 @@ const TreeItem: FC<TreeItemProps> = ({
   const sacredDecorations = isSacredTheme && (
     <>
       {/* Background glyph */}
-      {styles.theme === 'sacred' && (
+      {styles.theme === 'sacred' && backgroundGlyph && (
         <div
           style={{
             position: 'absolute',
@@ -854,6 +858,12 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
     })
     const [focusedItem, setFocusedItem] = useState<TreeViewItemId | null>(null)
     const [disabledItems] = useState<Set<TreeViewItemId>>(new Set())
+    const [isMounted, setIsMounted] = useState(false)
+
+    // Set mounted state to ensure consistent rendering
+    useEffect(() => {
+      setIsMounted(true)
+    }, [])
 
     // Selection and expansion state
     const { selectedItems, setSelectedItems, toggleItemSelection } =
@@ -1171,8 +1181,8 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
           id={id}
           {...other}
         >
-          {/* Sacred background */}
-          {styles.theme === 'sacred' && (
+          {/* Sacred background - only render after mount to prevent hydration issues */}
+          {styles.theme === 'sacred' && isMounted && (
             <SacredBackground
               width={containerSize.width}
               height={containerSize.height}

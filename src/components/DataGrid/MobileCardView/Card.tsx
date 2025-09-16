@@ -64,10 +64,10 @@ function Card({
         }
       case 'sacred':
         return {
-          background: 'rgba(0, 0, 0, 0.9)',
-          border: 'rgba(255, 215, 0, 0.5)',
+          background: 'rgba(0, 0, 0, 0.95)',
+          border: 'rgba(255, 215, 0, 0.3)',
           primary: '#FFD700',
-          secondaryText: '#D97706',
+          secondaryText: 'rgba(255, 215, 0, 0.7)',
         }
       default: // light
         return {
@@ -142,29 +142,34 @@ function Card({
   const cardStyles = {
     card: {
       backgroundColor:
-        isSelected && theme === 'sacred'
-          ? 'rgba(255, 215, 0, 0.1)'
-          : themeConfig.background,
+        theme === 'sacred'
+          ? isSelected
+            ? 'rgba(0, 0, 0, 0.98)'
+            : 'rgba(0, 0, 0, 0.95)'
+          : isSelected
+            ? theme === 'dark'
+              ? '#273746'
+              : '#F9FAFB'
+            : themeConfig.background,
       backgroundImage:
         isSelected && theme === 'sacred'
-          ? 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 40%, transparent 70%)'
+          ? 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 40%, transparent 70%)'
           : 'none',
-      borderRadius: '0.5rem',
+      borderRadius: theme === 'sacred' ? '8px' : '0.5rem',
       padding: '1rem',
       marginBottom: '0.75rem',
-      border: `1px solid ${
-        isSelected
-          ? themeConfig.primary
-          : theme === 'sacred'
-            ? '#FFD700'
-            : themeConfig.border
-      }`,
+      border:
+        theme === 'sacred'
+          ? isSelected
+            ? '2px solid rgba(255, 215, 0, 0.6)'
+            : '1px solid rgba(255, 215, 0, 0.3)'
+          : `1px solid ${isSelected ? themeConfig.primary : themeConfig.border}`,
       boxShadow: isSelected
         ? theme === 'sacred'
-          ? '0 0 20px rgba(255, 215, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.2)'
+          ? '0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(255, 215, 0, 0.05)'
           : '0 0 0 2px rgba(37, 99, 235, 0.2)'
         : theme === 'sacred'
-          ? '0 1px 3px rgba(255, 215, 0, 0.1)'
+          ? '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 215, 0, 0.1)'
           : '0 1px 3px rgba(0, 0, 0, 0.1)',
       cursor: 'pointer',
       userSelect: 'none' as const,
@@ -179,11 +184,22 @@ function Card({
       width: '20px',
       height: '20px',
       borderRadius: '4px',
-      border: `2px solid ${themeConfig.border}`,
-      backgroundColor: isSelected ? themeConfig.primary : 'transparent',
+      border:
+        theme === 'sacred'
+          ? `2px solid ${isSelected ? '#FFD700' : 'rgba(255, 215, 0, 0.5)'}`
+          : `2px solid ${themeConfig.border}`,
+      backgroundColor: isSelected
+        ? theme === 'sacred'
+          ? 'rgba(255, 215, 0, 0.9)'
+          : themeConfig.primary
+        : 'transparent',
       display: selectionMode ? 'flex' : 'none',
       alignItems: 'center',
       justifyContent: 'center',
+      boxShadow:
+        theme === 'sacred' && isSelected
+          ? '0 0 10px rgba(255, 215, 0, 0.5)'
+          : 'none',
     },
     checkmark: {
       color: theme === 'sacred' ? '#000000' : 'white',
@@ -229,6 +245,7 @@ function Card({
             key={column.field}
             column={column}
             value={row[column.field]}
+            row={row}
             rowId={rowId}
             isEditing={
               editingCell?.rowId === rowId &&
@@ -250,6 +267,7 @@ function Card({
                   key={column.field}
                   column={column}
                   value={row[column.field]}
+                  row={row}
                   rowId={rowId}
                   isEditing={
                     editingCell?.rowId === rowId &&

@@ -2,8 +2,7 @@
 
 import React from 'react'
 import { ColumnDef } from '../../types'
-import Dropdown from '../../../Field/Dropdown/Regular'
-import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
+import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
 import type { RowData } from '../../types'
 import type { DataGridStyles } from '../../../../theme'
@@ -935,180 +934,20 @@ const Rows: React.FC<RowsProps> = ({
                 // but keeping it for robustness if it somehow re-appears.
                 cellContent = '---'
               } else if (isEditing) {
-                // Show input field or dropdown for editing
-                // First check if this is an array field that should use multiselect
-                if (
-                  (Array.isArray(value) ||
-                    col.creationField?.type === 'multiselect') &&
-                  col.creationField?.options
-                ) {
-                  // Render multiselect for array fields or fields configured with multiselect
-                  const currentIds = Array.isArray(value)
-                    ? (value as any[]).map(item => {
-                        // If items are objects, extract their IDs
-                        if (typeof item === 'object' && item !== null) {
-                          return item._id || item.id || item.value || ''
-                        }
-                        return String(item)
-                      })
-                    : []
-
-                  // Map IDs to their display values from options
-                  const currentValues = currentIds
-                    .map(id => {
-                      const option = col.creationField?.options?.find(
-                        opt => opt._id === id
-                      )
-                      return String(option?.value || '') // Use the display value only
-                    })
-                    .filter(v => v !== '') // Remove empty values
-
-                  cellContent = (
-                    <div
-                      style={{
-                        width: '100%',
-                        position: 'relative',
-                        zIndex: 10000,
-                        minHeight: '80px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'visible',
-                      }}
-                      onClick={e => {
-                        // Prevent click from bubbling up to the cell
-                        e.stopPropagation()
-                      }}
-                    >
-                      <MultiSelectChip
-                        options={col.creationField.options.map(opt => ({
-                          value: opt.value || '',
-                          _id: opt._id || '',
-                        }))}
-                        defaultSelected={currentValues}
-                        onChange={(values: string[]) => {
-                          // Update the editing value as JSON string so it saves when user clicks outside
-                          onEditingValueChange?.(JSON.stringify(values))
-                          // Don't auto-save for multiselect - let user finish selecting
-                          // The save will happen when they click outside the cell
-                        }}
-                        styles={{
-                          theme: isSacredTheme ? 'sacred' : 'light',
-                          fontSize: '14px',
-                          height: 'auto',
-                          minHeight: '40px',
-                          padding: '8px',
-                        }}
-                      />
-                    </div>
-                  )
-                } else if (col.type === 'dropdown' && col.dropdownOptions) {
-                  // Render dropdown for dropdown columns
-                  cellContent = (
-                    <div style={{ width: '100%' }}>
-                      <Dropdown
-                        label=""
-                        value={editingValue ?? ''}
-                        options={col.dropdownOptions.map(opt => ({
-                          value: opt.value || '',
-                          _id: opt._id || '',
-                        }))}
-                        onChange={e => {
-                          const newValue = e.target.value
-                          onEditingValueChange?.(newValue)
-                          // Auto-save on selection change
-                          onCellSave?.(rowId, col.field, newValue)
-                        }}
-                        styles={{
-                          theme: isSacredTheme ? 'sacred' : 'light',
-                          fontSize: '14px',
-                          height: '32px',
-                        }}
-                      />
-                    </div>
-                  )
-                } else if (
-                  col.type === 'ipAddress' ||
-                  col.type === 'macAddress' ||
-                  col.type === 'vlan' ||
-                  col.type === 'cidr'
-                ) {
-                  // For IPAM fields that use string values, use specialized input handling
-                  cellContent = (
-                    <div style={{ width: '100%' }}>
-                      <input
-                        type="text"
-                        value={editingValue}
-                        onChange={e => onEditingValueChange?.(e.target.value)}
-                        onBlur={() =>
-                          onCellSave?.(rowId, col.field, editingValue || '')
-                        }
-                        onKeyPress={e => {
-                          if (e.key === 'Enter') {
-                            onCellSave?.(rowId, col.field, editingValue || '')
-                          } else if (e.key === 'Escape') {
-                            onCellCancel?.()
-                          }
-                        }}
-                        style={{
-                          width: '100%',
-                          border: '1px solid #ccc',
-                          padding: '4px',
-                          fontSize: '14px',
-                          borderRadius: '4px',
-                          backgroundColor: isSacredTheme
-                            ? 'rgba(0, 0, 0, 0.8)'
-                            : 'white',
-                          color: isSacredTheme ? '#FFD700' : '#333',
-                        }}
-                        autoFocus
-                        placeholder={
-                          col.type === 'ipAddress'
-                            ? '192.168.1.1'
-                            : col.type === 'macAddress'
-                              ? 'AA:BB:CC:DD:EE:FF'
-                              : col.type === 'vlan'
-                                ? '1-4094'
-                                : col.type === 'cidr'
-                                  ? '/24'
-                                  : undefined
-                        }
-                      />
-                    </div>
-                  )
-                } else {
-                  // Render text input for other columns
-                  cellContent = (
-                    <div style={{ width: '100%' }}>
-                      <input
-                        type="text"
-                        value={editingValue}
-                        onChange={e => onEditingValueChange?.(e.target.value)}
-                        onBlur={() =>
-                          onCellSave?.(rowId, col.field, editingValue || '')
-                        }
-                        onKeyPress={e => {
-                          if (e.key === 'Enter') {
-                            onCellSave?.(rowId, col.field, editingValue || '')
-                          } else if (e.key === 'Escape') {
-                            onCellCancel?.()
-                          }
-                        }}
-                        style={{
-                          width: '100%',
-                          border: '1px solid #ccc',
-                          padding: '4px',
-                          fontSize: '14px',
-                          borderRadius: '4px',
-                          backgroundColor: isSacredTheme
-                            ? 'rgba(0, 0, 0, 0.8)'
-                            : 'white',
-                          color: isSacredTheme ? '#FFD700' : '#333',
-                        }}
-                        autoFocus
-                      />
-                    </div>
-                  )
-                }
+                // Use EditableCell component for all inline editing
+                cellContent = (
+                  <EditableCell
+                    column={col}
+                    value={value}
+                    editingValue={editingValue || ''}
+                    onEditingValueChange={onEditingValueChange || (() => {})}
+                    onSave={() =>
+                      onCellSave?.(rowId, col.field, editingValue || '')
+                    }
+                    onCancel={() => onCellCancel?.()}
+                    styles={styles}
+                  />
+                )
               } else {
                 // Show formatted value
                 // First check if column has custom renderCell function
