@@ -714,10 +714,6 @@ const DesktopAnalyticsForm = ({
     marginBottom: '1.5rem',
   }
 
-  const fullWidthStyle: React.CSSProperties = {
-    gridColumn: '1 / -1',
-  }
-
   const toggleSectionStyle: React.CSSProperties = {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
