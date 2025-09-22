@@ -76,7 +76,7 @@ export interface DateFieldProps {
   autoComplete?: string
 }
 
-const getStyles = (sacredtheme?: boolean, isDragging?: boolean) => ({
+const getStyles = (sacredtheme?: boolean) => ({
   datePicker: {
     position: 'fixed' as const,
     top: '100%',
@@ -285,16 +285,19 @@ const DateField: React.FC<DateFieldProps> = ({
       }
     }
   }, [styles?.theme])
-  const formatDate = (date: Date | null) => {
-    if (!date) return ''
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-    if (variant === 'month-year') {
-      return `${month}/${year}`
-    }
-    const day = date.getDate().toString().padStart(2, '0')
-    return `${month}/${day}/${year}`
-  }
+  const formatDate = useCallback(
+    (date: Date | null) => {
+      if (!date) return ''
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const year = date.getFullYear()
+      if (variant === 'month-year') {
+        return `${month}/${year}`
+      }
+      const day = date.getDate().toString().padStart(2, '0')
+      return `${month}/${day}/${year}`
+    },
+    [variant]
+  )
   const [selectedDate, setSelectedDate] = useState<Date | null>(value || null)
   const [inputValue, setInputValue] = useState(formatDate(selectedDate))
   const [viewedYear, setViewedYear] = useState(new Date().getFullYear())
@@ -305,7 +308,7 @@ const DateField: React.FC<DateFieldProps> = ({
   const [isFocused, setIsFocused] = useState(false)
 
   const sacredtheme = styles?.theme === 'sacred'
-  const pickerStyles = getStyles(sacredtheme, isDragging)
+  const pickerStyles = getStyles(sacredtheme)
 
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
@@ -385,7 +388,7 @@ const DateField: React.FC<DateFieldProps> = ({
       setViewedYear(value.getFullYear())
       setViewedMonth(value.getMonth())
     }
-  }, [value])
+  }, [value, formatDate])
 
   const parseDate = (dateString: string): Date | null => {
     const parts = dateString.split('/')
