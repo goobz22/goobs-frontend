@@ -34,8 +34,6 @@ export type SearchableHistoryProps = {
   helperText?: string
   styles?: FormFieldStyles
   maxHistoryItems?: number
-  showCategories?: boolean
-  showIcons?: boolean
 }
 
 const SearchableHistory: React.FC<SearchableHistoryProps> = ({
@@ -46,8 +44,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   helperText,
   styles,
   maxHistoryItems = 10,
-  showCategories = true,
-  showIcons = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -306,19 +302,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       item.description?.toLowerCase().includes(term)
     )
   })
-
-  // Group items by category if enabled
-  const groupedItems = showCategories
-    ? filteredItems.reduce(
-        (acc, item) => {
-          const category = item.category || 'Other'
-          if (!acc[category]) acc[category] = []
-          acc[category].push(item)
-          return acc
-        },
-        {} as Record<string, NavigationItem[]>
-      )
-    : { '': filteredItems }
 
   const renderItem = (item: NavigationItem) => {
     const isSelected = selectedItem?.id === item.id
