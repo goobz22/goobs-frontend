@@ -68,35 +68,6 @@ const SacredGlyphs: React.FC = () => {
   )
 }
 
-const SacredSuccessDecorations: React.FC = () => {
-  const decorativeStyles = useMemo(
-    () => ({
-      glyphContainer: {
-        display: 'flex',
-        gap: '0.25rem',
-        marginTop: '0.25rem',
-      } as React.CSSProperties,
-      glyph: (i: number) =>
-        ({
-          color: 'rgba(255, 215, 0, 0.6)',
-          fontSize: '1.25rem',
-          animation: `sacred-glyph-float ${3 + i * 0.5}s infinite alternate`,
-        }) as React.CSSProperties,
-    }),
-    []
-  )
-
-  return (
-    <div style={decorativeStyles.glyphContainer}>
-      {['𓅨', '𓂋', '𓏭'].map((glyph, i) => (
-        <span key={i} style={decorativeStyles.glyph(i)}>
-          {glyph}
-        </span>
-      ))}
-    </div>
-  )
-}
-
 const SacredBottomDecorations: React.FC = () => {
   const decorativeStyles = useMemo(
     () => ({
