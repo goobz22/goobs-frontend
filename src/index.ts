@@ -179,6 +179,10 @@ export {
   AMERICAN_TIMEZONES,
 } from './components/Field/Time/TimeRange'
 export {
+  default as TimeField,
+  type TimeFieldProps,
+} from './components/Field/Time/TimeField'
+export {
   default as Dropdown,
   type DropdownProps,
   type DropdownOption,
