@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { ColumnDef } from '../../types'
-import { getDataGridStyles } from '../../../../theme'
 import type { DataGridStyles } from '../../../../theme'
 // Field component imports
 import TextField from '../../../Field/Text'
@@ -45,7 +44,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   onCancel,
   styles,
 }) => {
-  const computedStyles = getDataGridStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
   const cellRef = React.useRef<HTMLDivElement>(null)
 
@@ -281,9 +279,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <CVV
             label=""
             value={editingValue}
-            onChange={(newValue: string, isValid: boolean) =>
-              onEditingValueChange(newValue)
-            }
+            onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
             styles={fieldStyles}
           />
@@ -296,9 +292,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <CreditCardNumber
             label=""
             value={editingValue}
-            onChange={(newValue: string, isValid: boolean, cardType: any) =>
-              onEditingValueChange(newValue)
-            }
+            onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
             styles={fieldStyles}
           />
@@ -311,9 +305,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <AccountNumber
             label=""
             value={editingValue}
-            onChange={(newValue: string, isValid: boolean) =>
-              onEditingValueChange(newValue)
-            }
+            onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
             styles={fieldStyles}
           />
@@ -326,9 +318,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <RoutingNumber
             label=""
             value={editingValue}
-            onChange={(newValue: string, isValid: boolean) =>
-              onEditingValueChange(newValue)
-            }
+            onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
             styles={fieldStyles}
           />

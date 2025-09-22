@@ -136,14 +136,7 @@ function CardField({
 
       return String(val)
     },
-    [
-      column.type,
-      column.renderCell,
-      column.dropdownOptions,
-      row,
-      rowId,
-      column.field,
-    ]
+    [column, row]
   )
 
   // Handle save - need to handle multiselect differently

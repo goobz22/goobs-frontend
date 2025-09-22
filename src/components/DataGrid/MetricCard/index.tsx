@@ -210,6 +210,8 @@ export default function MetricCard({
     // Enhanced standard theme
     const standardCardStyle: React.CSSProperties = {
       height: '100%',
+      width: 'max-content',
+      minWidth: '250px',
       background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -319,6 +321,8 @@ export default function MetricCard({
   // Enhanced sacred theme with full Egyptian styling
   const sacredCardStyle: React.CSSProperties = {
     height: '100%',
+    width: 'max-content',
+    minWidth: '250px',
     background: `linear-gradient(135deg, ${egyptianStyles.cardBackground} 0%, rgba(22, 33, 62, 0.95) 100%)`,
     borderWidth: '2px',
     borderStyle: 'solid',

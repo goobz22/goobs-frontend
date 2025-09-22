@@ -298,7 +298,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <CVV
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
-            onChange={(newValue: string, isValid: boolean) =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder
@@ -316,7 +316,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <CreditCardNumber
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
-            onChange={(newValue: string, isValid: boolean, cardType: any) =>
+            onChange={(newValue: string) =>
               onCreationFieldChange?.(column.field, newValue)
             }
             {...(fieldConfig.placeholder

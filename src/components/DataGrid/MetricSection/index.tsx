@@ -20,11 +20,10 @@ interface MetricSectionProps {
 const premiumStyles = {
   container: {
     width: '100%',
-    maxWidth: '100%',
     marginBottom: '0',
     padding: '1rem',
     boxSizing: 'border-box',
-    overflow: 'hidden',
+    overflow: 'visible',
   } as React.CSSProperties,
 
   flexContainer: {
@@ -33,8 +32,9 @@ const premiumStyles = {
     gap: '1rem',
     justifyContent: 'flex-start',
     width: '100%',
-    maxWidth: '100%',
     boxSizing: 'border-box',
+    alignItems: 'flex-start',
+    overflow: 'visible',
   } as React.CSSProperties,
 }
 
@@ -42,11 +42,10 @@ const premiumStyles = {
 const sacredStyles = {
   container: {
     width: '100%',
-    maxWidth: '100%',
     marginBottom: '0',
     padding: '1rem',
     boxSizing: 'border-box',
-    overflow: 'hidden',
+    overflow: 'visible',
   } as React.CSSProperties,
 
   flexContainer: {
@@ -55,8 +54,9 @@ const sacredStyles = {
     gap: '1rem',
     justifyContent: 'flex-start',
     width: '100%',
-    maxWidth: '100%',
     boxSizing: 'border-box',
+    alignItems: 'flex-start',
+    overflow: 'visible',
   } as React.CSSProperties,
 }
 
@@ -104,9 +104,7 @@ const MetricSection: React.FC<MetricSectionProps> = ({
   // that works with flexbox and natural wrapping behavior
   const getResponsiveCardStyle = (): React.CSSProperties => {
     return {
-      flex: '1 1 0',
-      minWidth: '250px',
-      maxWidth: '350px',
+      flex: '0 0 auto',
       boxSizing: 'border-box',
     }
   }
