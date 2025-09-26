@@ -3,9 +3,11 @@
 import React, { useState, useCallback } from 'react'
 import TextField from '../../Field/Text'
 import DateField from '../../Field/Date/DateField'
+import TimeField from '../../Field/Time/TimeField'
 import SearchableDropdown from '../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import InternalIncrement from '../../Field/Number/InternalIncrement'
+import ComplexTextEditor from '../../ComplexTextEditor'
 import Button from '../../Button'
 import type { ColumnDef } from '../types'
 
@@ -15,6 +17,7 @@ interface CreationFieldConfig {
     | 'text'
     | 'date'
     | 'monthYear'
+    | 'time'
     | 'currency'
     | 'usd'
     | 'dropdown'
@@ -32,13 +35,11 @@ interface CreationFieldConfig {
     | 'cidr'
     | 'supernet'
     | 'macAddress'
+    | 'simpleeditor'
   required?: boolean
   placeholder?: string
   options?: Array<{
     value: string
-    label?: string
-    attribute1?: string
-    attribute2?: string
     _id?: string
   }>
   defaultValue?: string | string[] | Date | null
@@ -47,6 +48,8 @@ interface CreationFieldConfig {
   min?: number
   max?: number
   step?: number
+  // For simpleeditor field
+  minRows?: number
 }
 
 interface AddCardProps {
@@ -149,7 +152,6 @@ function AddCard({
           }
           options={fieldConfig.options.map(opt => ({
             value: String(opt.value),
-            attribute1: opt.label || String(opt.value),
             ...(opt._id && { _id: opt._id }),
           }))}
           placeholder={fieldConfig.placeholder || 'Select...'}
@@ -215,6 +217,22 @@ function AddCard({
       )
     }
 
+    // Handle time field
+    if (fieldConfig.type === 'time') {
+      return (
+        <TimeField
+          value={String(value || '')}
+          onChange={time => {
+            handleFieldChange(column.field, time)
+          }}
+          {...(fieldConfig.placeholder && {
+            helperText: fieldConfig.placeholder,
+          })}
+          styles={fieldStyles}
+        />
+      )
+    }
+
     // Handle internal increment (number field)
     if (fieldConfig.type === 'internalIncrement') {
       return (
@@ -245,7 +263,6 @@ function AddCard({
           }
           options={fieldConfig.options.map(opt => ({
             value: String(opt.value),
-            attribute1: opt.label || String(opt.value),
             ...(opt._id && { _id: opt._id }),
           }))}
           placeholder={fieldConfig.placeholder || 'Select...'}
@@ -265,11 +282,28 @@ function AddCard({
           }
           options={column.dropdownOptions.map(opt => ({
             value: String(opt.value),
-            attribute1: opt.label || String(opt.value),
             ...(opt._id && { _id: opt._id }),
           }))}
           placeholder={fieldConfig.placeholder || 'Select...'}
           styles={fieldStyles}
+        />
+      )
+    }
+
+    // Handle simple editor
+    if (fieldConfig.type === 'simpleeditor') {
+      return (
+        <ComplexTextEditor
+          value={String(value || '')}
+          onChange={(textValue: string) => {
+            handleFieldChange(column.field, textValue)
+          }}
+          editorType="simple"
+          minRows={fieldConfig.minRows || 4}
+          styles={{
+            theme: fieldStyles.theme,
+            width: '100%',
+          }}
         />
       )
     }

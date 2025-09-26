@@ -109,8 +109,8 @@ function CardField({
           opt => String(opt.value) === String(val)
         )
         if (option) {
-          // Use attribute1 for display if available, otherwise use label or value
-          return option.attribute1 || option.label || String(option.value)
+          // Use value for display
+          return String(option.value)
         }
       }
 
@@ -233,7 +233,7 @@ function CardField({
           <option value="">Select...</option>
           {column.dropdownOptions.map(option => (
             <option key={option.value} value={option.value}>
-              {option.label || option.value}
+              {option.value}
             </option>
           ))}
         </select>

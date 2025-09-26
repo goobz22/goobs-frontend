@@ -235,6 +235,7 @@ export {
 } from './components/DataGrid/MetricCard'
 export type {
   ColumnDef,
+  CompositeFieldConfig,
   RowData,
   DatagridProps,
   DataGridFilter,

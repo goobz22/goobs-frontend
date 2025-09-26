@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import ColumnHeaderRow from './ColumnHeaderRow'
 import Rows from './Rows'
 import CreationRow from './CreationRow'
+import CompositeFieldEditModal from '../CompositeFieldEditModal'
 import { useColumnResize } from '../utils/useColumnResize'
 import { getDataGridStyles } from '../../../theme'
 import { getDataGridTheme } from '../../../theme/datagrid'
-import type { TableProps } from '../types'
+import type { TableProps, ColumnDef, CompositeFieldConfig } from '../types'
 
 export function getRowId(row: {
   id?: string | number
@@ -118,6 +119,59 @@ function Table({
   // Create scrollbar styles
   const scrollbarStyles = createScrollbarStyles(theme, themeConfig.scrollbar)
 
+  // Composite editing state
+  const [compositeEditingData, setCompositeEditingData] = useState<{
+    rowData: any
+    column: ColumnDef
+  } | null>(null)
+
+  // Composite editing handlers
+  const handleCompositeFieldSave = useCallback(
+    (fieldUpdates: Record<string, any>) => {
+      if (compositeEditingData && onCellSave) {
+        // Capture the rowId before clearing the state
+        const rowId = getRowId(compositeEditingData.rowData)
+
+        // Defer the state updates to avoid setState during render
+        setTimeout(() => {
+          // Call onCellSave for each field that was updated
+          Object.entries(fieldUpdates).forEach(([field, value]) => {
+            onCellSave(rowId, field, value)
+          })
+        }, 0)
+      }
+      setCompositeEditingData(null)
+    },
+    [compositeEditingData, onCellSave]
+  )
+
+  const handleCompositeEditClose = useCallback(() => {
+    setCompositeEditingData(null)
+  }, [])
+
+  // Enhanced cell click handler that detects composite fields
+  const handleCellClick = useCallback(
+    (rowId: string, field: string, currentValue: unknown) => {
+      // Find the column to check if it has composite fields
+      const column = columns.find(col => col.field === field)
+
+      if (column && Array.isArray(column.type)) {
+        // Handle composite field editing - find the row data
+        const rowData = rows.find(row => getRowId(row) === rowId)
+        if (rowData) {
+          setCompositeEditingData({
+            rowData,
+            column,
+          })
+        }
+      } else {
+        // Handle regular inline editing
+        onCellClick?.(rowId, field, currentValue)
+      }
+    },
+    [columns, rows, onCellClick]
+  )
+
   // Inject scrollbar styles into document head
   useEffect(() => {
     const styleId = `datagrid-scrollbar-${theme}`
@@ -209,7 +263,7 @@ function Table({
               {...(styles ? { styles } : {})}
               {...(editingCell ? { editingCell } : {})}
               {...(editingValue != null ? { editingValue } : {})}
-              {...(onCellClick ? { onCellClick } : {})}
+              {...(onCellClick ? { onCellClick: handleCellClick } : {})}
               {...(onCellSave ? { onCellSave } : {})}
               {...(onCellCancel ? { onCellCancel } : {})}
               {...(onEditingValueChange ? { onEditingValueChange } : {})}
@@ -231,6 +285,20 @@ function Table({
           </tbody>
         </table>
       </div>
+
+      {/* Composite Field Edit Modal */}
+      {compositeEditingData && (
+        <CompositeFieldEditModal
+          open={true}
+          onClose={handleCompositeEditClose}
+          rowData={compositeEditingData.rowData}
+          compositeFields={
+            compositeEditingData.column.type as CompositeFieldConfig[]
+          }
+          onSave={handleCompositeFieldSave}
+          {...(styles && { styles })}
+        />
+      )}
     </div>
   )
 }

@@ -1170,6 +1170,8 @@ const Rows: React.FC<RowsProps> = ({
                       col.editable !== false
                     ) {
                       e.stopPropagation()
+
+                      // Handle cell editing
                       onCellClick?.(rowId, col.field, value)
                     }
                   }}

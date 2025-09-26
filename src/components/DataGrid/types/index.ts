@@ -7,6 +7,77 @@ import type { SearchbarProps } from '../../Field/Search'
 import type { DropdownOption } from '../../Field/Dropdown/SearchableSimple'
 import type { DataGridStyles } from '../../../theme'
 
+// Base field types supported by EditableCell and CompositeEdit
+export type FieldType =
+  // All existing EditableCell types
+  | 'text'
+  | 'date'
+  | 'monthYear'
+  | 'time'
+  | 'currency'
+  | 'usd'
+  | 'dropdown'
+  | 'searchableDropdown'
+  | 'multiselect'
+  | 'internalIncrement'
+  | 'phoneNumber'
+  | 'cvv'
+  | 'creditCardNumber'
+  | 'accountNumber'
+  | 'routingNumber'
+  | 'ipAddress'
+  | 'subnet'
+  | 'vlan'
+  | 'cidr'
+  | 'supernet'
+  | 'macAddress'
+  // NEW: ComplexTextEditor simple variant
+  | 'simpleeditor'
+
+// Composite field configuration for multi-field editing in modal popups
+export interface CompositeFieldConfig {
+  field: string // The actual data field name (e.g., 'name', 'description')
+  label: string // Display label in modal
+  type: FieldType
+
+  required?: boolean
+  placeholder?: string
+  helperText?: string
+  validation?: (value: any) => string | undefined
+
+  // Field-specific configurations (inherited from EditableCell)
+  options?: Array<{
+    value: string
+    _id?: string
+    attribute1?: string // For display text in dropdowns
+  }>
+
+  // For numeric fields
+  min?: number
+  max?: number
+  step?: number
+
+  // For simpleeditor field
+  minRows?: number
+
+  // For IPAM fields
+  subnetAddress?: string
+  subnetCIDR?: number
+  supernetAddress?: string
+  supernetMask?: string | number
+  reservedVLANs?: number[]
+  maskType?: 'subnet' | 'supernet'
+  showSubnetInfo?: boolean
+  allowIncomplete?: boolean
+  autoInsertDots?: boolean
+  isGateway?: boolean
+  isRange?: boolean
+  isStartIP?: boolean
+  isEndIP?: boolean
+
+  defaultValue?: any
+}
+
 export interface ColumnDef {
   field: string
   headerName: string
@@ -16,7 +87,9 @@ export interface ColumnDef {
   width?: number
   resizable?: boolean
   editable?: boolean // Optional property to control if column is editable
-  // Column type for formatting
+  // Column type for formatting OR composite field configuration
+  // If string: single field inline editing
+  // If CompositeFieldConfig[]: multi-field modal editing
   type?:
     | 'currency'
     | 'credit_card'
@@ -32,6 +105,7 @@ export interface ColumnDef {
     | 'supernet'
     | 'macAddress'
     | 'default'
+    | CompositeFieldConfig[] // NEW: Array triggers composite editing
   // Format the column values as USD currency
   formatCurrency?: boolean
   // Format the column values as masked credit card numbers
@@ -45,10 +119,7 @@ export interface ColumnDef {
   // Dropdown options for editing
   dropdownOptions?: Array<{
     value: string | number
-    label?: string
     _id?: string
-    attribute1?: string
-    attribute2?: string
   }>
 
   renderCell?: (params: {
@@ -65,6 +136,7 @@ export interface ColumnDef {
       | 'text'
       | 'date'
       | 'monthYear'
+      | 'time'
       | 'currency'
       | 'usd'
       | 'dropdown'
@@ -82,13 +154,11 @@ export interface ColumnDef {
       | 'cidr'
       | 'supernet'
       | 'macAddress'
+      | 'simpleeditor'
     required?: boolean
     placeholder?: string
     options?: Array<{
       value: string
-      label?: string
-      attribute1?: string
-      attribute2?: string
       _id?: string
     }>
     defaultValue?: string | string[] | Date | null
@@ -140,6 +210,15 @@ export interface TableProps {
   onCellSave?: (rowId: string, field: string, value: string) => void
   onCellCancel?: () => void
   onEditingValueChange?: (value: string) => void
+
+  // Composite editing props
+  compositeEditingRow?: string | null
+  onCompositeEditStart?: (rowId: string, column: ColumnDef) => void
+  onCompositeFieldSave?: (
+    rowId: string,
+    fieldUpdates: Record<string, any>
+  ) => void
+  onCompositeEditCancel?: () => void
   // Row creation props
   isCreatingRow?: boolean
   creationRowData?: Record<string, any>
@@ -224,6 +303,12 @@ export interface DatagridProps {
     rowId: string,
     field: string,
     value: any
+  ) => void | Promise<void>
+
+  // Optional callback for composite field editing saves
+  onCompositeFieldSave?: (
+    rowId: string,
+    fieldUpdates: Record<string, any>
   ) => void | Promise<void>
 
   // Optional callback for inline row creation
