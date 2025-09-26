@@ -201,8 +201,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onChange={(option: DropdownOption | null) => {
               const valueToUse = String(option?.value || '')
               onEditingValueChange(valueToUse)
-              // Auto-save on selection
-              setTimeout(onSave, 0)
+              // Don't auto-save on selection - let the user click outside or press Enter
             }}
             styles={fieldStyles}
           />

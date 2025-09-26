@@ -266,6 +266,18 @@ function DataGrid({
           return row
         })
       )
+
+      // Also update filteredRows to ensure immediate visual feedback
+      setFilteredRows(prevRows =>
+        prevRows.map(row => {
+          const currentRowId = String(row._id ?? row.id)
+          if (currentRowId === rowId) {
+            return { ...row, [field]: processedValue }
+          }
+          return row
+        })
+      )
+
       setEditingCell(null)
       setEditingValue('')
     },
