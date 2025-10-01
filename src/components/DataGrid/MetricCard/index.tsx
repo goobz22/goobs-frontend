@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import type { DataGridStyles } from '../../../theme'
 
 export interface MetricCardProps {
@@ -128,7 +128,7 @@ if (typeof document !== 'undefined') {
   }
 }
 
-export default function MetricCard({
+const MetricCard = memo(function MetricCard({
   title,
   value,
   subtitle,
@@ -139,18 +139,19 @@ export default function MetricCard({
 }: MetricCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [selectedGlyph, setSelectedGlyph] = useState(glyph || SACRED_GLYPHS[0])
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [, setIsHydrated] = useState(false)
   const isSacredTheme = styles?.theme === 'sacred'
 
-  // Set random glyph only on client side after hydration if no glyph prop provided
+  // Set random glyph only once on client side after hydration if no glyph prop provided
   useEffect(() => {
-    if (!isHydrated && !glyph) {
+    if (!glyph) {
       setSelectedGlyph(
         SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
       )
-      setIsHydrated(true)
     }
-  }, [isHydrated, glyph])
+    setIsHydrated(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const getColorValue = (colorName: string = 'primary') => {
     if (isSacredTheme) {
@@ -330,41 +331,16 @@ export default function MetricCard({
     borderRadius: '12px',
     position: 'relative',
     overflow: 'hidden',
-    backdropFilter: 'blur(20px)',
     transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-    animation: 'sacredGlow 4s ease-in-out infinite',
     cursor: 'pointer',
+    boxShadow: `0 4px 12px rgba(0, 0, 0, 0.3), 0 0 20px ${rgbaColor(0.2)}`,
     ...(isHovered
       ? {
           transform: 'translateY(-8px) scale(1.02)',
           borderColor: rgbaColor(0.8),
-          boxShadow: `0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px ${rgbaColor(0.4)}, inset 0 0 20px ${rgbaColor(0.1)}`,
+          boxShadow: `0 20px 40px rgba(0, 0, 0, 0.6), 0 0 40px ${rgbaColor(0.4)}`,
         }
       : {}),
-  }
-
-  const cosmicEnergyStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: `conic-gradient(from 0deg at 50% 50%, ${rgbaColor(0.1)} 0deg, transparent 60deg, ${rgbaColor(0.05)} 120deg, transparent 180deg, ${rgbaColor(0.1)} 240deg, transparent 300deg, ${rgbaColor(0.05)} 360deg)`,
-    opacity: 0.4,
-    zIndex: 0,
-    animation: 'rotateGlyph 60s linear infinite',
-  }
-
-  const borderShimmerStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
-    backgroundSize: '200% 100%',
-    animation: 'sacredShimmer 3s linear infinite',
-    zIndex: 1,
   }
 
   const sacredGlyphStyle: React.CSSProperties = {
@@ -373,36 +349,13 @@ export default function MetricCard({
     right: '16px',
     color: rgbaColor(0.4),
     fontSize: '28px',
-    animation: 'floatAnimation 8s ease-in-out infinite',
     zIndex: 2,
     transition: 'all 0.3s ease',
-    textShadow: `0 0 10px ${rgbaColor(0.3)}`,
     ...(isHovered
       ? {
-          transform: 'scale(1.1) rotate(15deg)',
+          transform: 'scale(1.1)',
         }
       : {}),
-  }
-
-  const dataStreamStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '2px',
-    height: '100%',
-    overflow: 'hidden',
-    zIndex: 1,
-  }
-
-  const dataStreamAfterStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    background: `linear-gradient(180deg, transparent, ${cardColor}, transparent)`,
-    animation: 'dataStreamAnimation 6s linear infinite',
   }
 
   const sacredContentStyle: React.CSSProperties = {
@@ -429,7 +382,6 @@ export default function MetricCard({
     borderWidth: '1px',
     borderStyle: 'solid',
     borderColor: rgbaColor(0.3),
-    boxShadow: `0 0 10px ${rgbaColor(0.2)}`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -440,7 +392,6 @@ export default function MetricCard({
     fontWeight: 600,
     letterSpacing: '0.5px',
     fontFamily: '"Cinzel", serif',
-    textShadow: `0 0 10px ${rgbaColor(0.3)}`,
     fontSize: '16px',
     lineHeight: '1.2',
     margin: 0,
@@ -453,7 +404,6 @@ export default function MetricCard({
     fontSize: '48px',
     lineHeight: '1.1',
     margin: '0 0 8px 0',
-    textShadow: `0 0 15px ${rgbaColor(0.5)}`,
     fontFamily: '"Cinzel", serif',
     letterSpacing: '0.02em',
   }
@@ -474,22 +424,8 @@ export default function MetricCard({
     alignItems: 'center',
     gap: '4px',
     fontFamily: '"Crimson Text", serif',
-    textShadow: `0 0 8px ${trend?.isPositive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
     fontSize: '15px',
     marginTop: 'auto',
-  }
-
-  const bottomShimmerStyle: React.CSSProperties = {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    background: `linear-gradient(90deg, transparent, ${cardColor}, transparent)`,
-    backgroundSize: '200% 100%',
-    animation: 'sacredShimmer 3s linear infinite',
-    animationDelay: '1.5s',
-    opacity: 0.6,
   }
 
   return (
@@ -498,19 +434,8 @@ export default function MetricCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Cosmic energy pattern */}
-      <div style={cosmicEnergyStyle} />
-
-      {/* Animated border shimmer */}
-      <div style={borderShimmerStyle} />
-
       {/* Sacred glyph decoration */}
       <div style={sacredGlyphStyle}>{selectedGlyph}</div>
-
-      {/* Data stream animation */}
-      <div style={dataStreamStyle}>
-        <div style={dataStreamAfterStyle} />
-      </div>
 
       {/* Main content */}
       <div style={sacredContentStyle}>
@@ -532,9 +457,10 @@ export default function MetricCard({
           </div>
         )}
       </div>
-
-      {/* Bottom border shimmer */}
-      <div style={bottomShimmerStyle} />
     </div>
   )
-}
+})
+
+MetricCard.displayName = 'MetricCard'
+
+export default MetricCard
