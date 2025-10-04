@@ -157,6 +157,10 @@ export {
 } from './components/Field/Percentage'
 export { default as USDField, type USDFieldProps } from './components/Field/USD'
 export {
+  default as InternalIncrementNumberField,
+  type InternalIncrementNumberFieldProps,
+} from './components/Field/Number/InternalIncrement'
+export {
   default as MACAddressField,
   type MACAddressFieldProps,
 } from './components/Field/IPAM/MACAddress'
