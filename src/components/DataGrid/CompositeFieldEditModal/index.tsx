@@ -344,7 +344,11 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               options={options}
               defaultValue={String(value || '')}
               onChange={(option: DropdownOption | null) => {
-                const valueToUse = option?.value || ''
+                // For ID fields (ending with 'Id'), use _id; otherwise use value
+                const fieldEndsWithId = fieldConfig.field.endsWith('Id')
+                const valueToUse = fieldEndsWithId
+                  ? option?._id || ''
+                  : option?.value || ''
                 handleFieldChange(fieldConfig.field, valueToUse)
               }}
               placeholder={fieldConfig.placeholder || ''}

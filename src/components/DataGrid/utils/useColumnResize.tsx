@@ -20,11 +20,21 @@ export function useColumnResize({
   const [tempWidth, setTempWidth] = useState<number | null>(null)
   const resizingElementRef = useRef<HTMLElement | null>(null)
 
-  // Update columns when props change - use deep comparison to avoid infinite loops
+  // Update columns when props change - preserve all properties including functions
   useEffect(() => {
-    // Only update if the columns have actually changed in content, not just reference
+    // Check if columns array length changed or if any field changed
     const columnsChanged =
-      JSON.stringify(columns) !== JSON.stringify(updatedColumns)
+      columns.length !== updatedColumns.length ||
+      columns.some((col, idx) => {
+        const prevCol = updatedColumns[idx]
+        return (
+          !prevCol ||
+          col.field !== prevCol.field ||
+          col.width !== prevCol.width ||
+          col.headerName !== prevCol.headerName
+        )
+      })
+
     if (columnsChanged) {
       setUpdatedColumns(columns)
     }

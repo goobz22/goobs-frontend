@@ -1,6 +1,7 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ColumnDef } from '../../types'
 import { getDataGridStyles } from '../../../../theme'
 import type { DataGridStyles } from '../../../../theme'
@@ -25,6 +26,7 @@ import CIDRField from '../../../Field/IPAM/CIDR'
 import SupernetField from '../../../Field/IPAM/Supernet'
 import MACAddressField from '../../../Field/IPAM/MACAddress'
 import USDField from '../../../Field/USD'
+import CompositeFieldEditModal from '../../CompositeFieldEditModal'
 
 interface CreationRowProps {
   columns: ColumnDef[]
@@ -45,34 +47,116 @@ const CreationRow: React.FC<CreationRowProps> = ({
 }) => {
   const computedStyles = getDataGridStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
+  const [openModalField, setOpenModalField] = useState<string | null>(null)
 
-  const renderCreationField = (column: ColumnDef) => {
-    const fieldConfig = column.creationField
-    if (!fieldConfig) return null
+  const renderCompositeFields = (column: ColumnDef) => {
+    // Check if column.type is an array (composite fields)
+    if (!Array.isArray(column.type)) return null
 
-    const value = creationRowData[column.field] as
-      | string
-      | number
-      | boolean
-      | Date
-      | string[]
-      | null
-      | undefined
-    const fieldStyles = {
-      theme: (isSacredTheme ? 'sacred' : 'light') as
-        | 'light'
-        | 'dark'
-        | 'sacred',
-      required: !!fieldConfig.required,
-      fontSize: '14px',
-      height: fieldConfig.type === 'internalIncrement' ? '48px' : '45px', // Consistent height for all fields
-      minHeight: '45px', // Ensure minimum height
-      padding: '10px 12px', // Better padding for cell filling
-      borderRadius: '4px',
-      helperTextType: 'error' as const,
-      width: '100%', // Ensure fields take full width
-    }
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%',
+        }}
+      >
+        {column.type.map((fieldConfig: any) => {
+          const value = creationRowData[fieldConfig.field]
+          const fieldStyles = {
+            theme: (isSacredTheme ? 'sacred' : 'light') as
+              | 'light'
+              | 'dark'
+              | 'sacred',
+            required: !!fieldConfig.required,
+            fontSize: '12px',
+            height: '35px',
+            minHeight: '35px',
+            padding: '6px 8px',
+            borderRadius: '4px',
+            helperTextType: 'error' as const,
+            width: '100%',
+          }
 
+          return (
+            <div key={fieldConfig.field} style={{ width: '100%' }}>
+              <div
+                style={{
+                  fontSize: '10px',
+                  marginBottom: '2px',
+                  color: isSacredTheme ? 'rgba(255, 215, 0, 0.7)' : '#666',
+                }}
+              >
+                {fieldConfig.label}
+              </div>
+              {renderFieldByConfig(fieldConfig, value, fieldStyles)}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  const renderModalBasedCompositeField = (column: ColumnDef) => {
+    if (!Array.isArray(column.type)) return null
+
+    // Check if any of the composite fields have values
+    const hasValues = column.type.some((fieldConfig: any) => {
+      const value = creationRowData[fieldConfig.field]
+      return (
+        value !== undefined && value !== null && value !== '' && value !== 0
+      )
+    })
+
+    // Always show button for modal-based composite fields
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          padding: '8px',
+          width: '100%',
+        }}
+      >
+        <button
+          onClick={() => setOpenModalField(column.field)}
+          style={{
+            background: isSacredTheme
+              ? 'rgba(255, 215, 0, 0.15)'
+              : 'rgba(59, 130, 246, 0.15)',
+            border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : 'rgba(59, 130, 246, 0.5)'}`,
+            color: isSacredTheme ? '#FFD700' : '#3B82F6',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontFamily: isSacredTheme ? 'Cinzel, serif' : 'inherit',
+            fontWeight: '500',
+            whiteSpace: 'nowrap',
+            padding: '4px 10px',
+            borderRadius: '3px',
+          }}
+          type="button"
+        >
+          {hasValues ? 'Edit Details' : 'Add Details'}
+        </button>
+      </div>
+    )
+  }
+
+  const handleModalSave = (field: string, values: Record<string, any>) => {
+    // Update all the composite field values
+    Object.keys(values).forEach(key => {
+      onCreationFieldChange?.(key, values[key])
+    })
+  }
+
+  const renderFieldByConfig = (
+    fieldConfig: any,
+    value: any,
+    fieldStyles: any
+  ) => {
     switch (fieldConfig.type) {
       case 'currency':
       case 'usd': {
@@ -81,7 +165,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -98,7 +182,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <TextField
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -121,7 +205,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
                   : null
             }
             onChange={(newValue: Date | null) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
@@ -161,9 +245,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
               if (newValue) {
                 const month = String(newValue.getMonth() + 1).padStart(2, '0')
                 const year = String(newValue.getFullYear()).slice(-2)
-                onCreationFieldChange?.(column.field, `${month}/${year}`)
+                onCreationFieldChange?.(fieldConfig.field, `${month}/${year}`)
               } else {
-                onCreationFieldChange?.(column.field, null)
+                onCreationFieldChange?.(fieldConfig.field, null)
               }
             }}
             variant="month-year"
@@ -184,10 +268,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
             onChange={(option: DropdownOption | null) => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
-                column.field === 'state'
+                fieldConfig.field === 'state'
                   ? option?.attribute1 || ''
                   : String(option?.value || '')
-              onCreationFieldChange?.(column.field, valueToUse)
+              onCreationFieldChange?.(fieldConfig.field, valueToUse)
             }}
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -206,7 +290,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             options={fieldConfig.options || []}
             defaultSelected={Array.isArray(value) ? (value as string[]) : []}
             onChange={(values: string[]) =>
-              onCreationFieldChange?.(column.field, values)
+              onCreationFieldChange?.(fieldConfig.field, values)
             }
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
@@ -231,7 +315,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 numValue = parseInt(eventOrValue.target.value, 10)
               }
               onCreationFieldChange?.(
-                column.field,
+                fieldConfig.field,
                 isNaN(numValue) ? 0 : numValue
               )
             }}
@@ -260,10 +344,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
             onChange={(option: DropdownOption | null) => {
               // For state fields, use the abbreviation (attribute1) instead of the full name (value)
               const valueToUse =
-                column.field === 'state'
+                fieldConfig.field === 'state'
                   ? option?.attribute1 || ''
                   : String(option?.value || '')
-              onCreationFieldChange?.(column.field, valueToUse)
+              onCreationFieldChange?.(fieldConfig.field, valueToUse)
             }}
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -281,7 +365,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -299,7 +383,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -317,7 +401,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -335,7 +419,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -353,7 +437,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -371,7 +455,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onCreationFieldChange?.(column.field, event.target.value)
+              onCreationFieldChange?.(fieldConfig.field, event.target.value)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -418,7 +502,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               }
             }
             onChange={(newValue: SubnetFieldValue) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -452,7 +536,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             initialValue={value?.toString() ?? ''}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               onCreationFieldChange?.(
-                column.field,
+                fieldConfig.field,
                 parseInt(event.target.value) || 0
               )
             }
@@ -484,7 +568,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 )
               }
               onCreationFieldChange?.(
-                column.field,
+                fieldConfig.field,
                 isNaN(cidrValue) ? 24 : cidrValue
               )
             }}
@@ -518,7 +602,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
               }
             }
             onChange={(newValue: SubnetFieldValue) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -536,7 +620,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onCreationFieldChange?.(column.field, event.target.value)
+              onCreationFieldChange?.(fieldConfig.field, event.target.value)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -550,7 +634,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <TextField
             value={String(value ?? '')}
             onChange={(newValue: string) =>
-              onCreationFieldChange?.(column.field, newValue)
+              onCreationFieldChange?.(fieldConfig.field, newValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -564,82 +648,165 @@ const CreationRow: React.FC<CreationRowProps> = ({
     }
   }
 
-  return (
-    <tr
-      style={{
-        ...computedStyles.table.tableRow,
-        backgroundColor: isSacredTheme
-          ? 'rgba(255, 215, 0, 0.05)'
-          : 'rgba(59, 130, 246, 0.05)',
-        borderBottom: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
-      }}
-    >
-      {/* Checkbox column */}
-      <td style={computedStyles.table.tableCell}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Button
-            text="Save"
-            onClick={onCreateRowSave}
-            styles={{
-              theme: isSacredTheme ? 'sacred' : 'light',
-              fontSize: '12px',
-              height: '28px',
-              padding: '2px 8px',
-              backgroundColor: isSacredTheme
-                ? 'rgba(255, 215, 0, 0.1)'
-                : 'rgba(34, 197, 94, 0.1)',
-              borderColor: isSacredTheme
-                ? 'rgba(255, 215, 0, 0.5)'
-                : 'rgba(34, 197, 94, 0.5)',
-            }}
-          />
-          <Button
-            text="Cancel"
-            onClick={onCreateRowCancel}
-            styles={{
-              theme: isSacredTheme ? 'sacred' : 'light',
-              fontSize: '12px',
-              height: '28px',
-              padding: '2px 8px',
-              backgroundColor: isSacredTheme
-                ? 'rgba(255, 215, 0, 0.1)'
-                : 'rgba(239, 68, 68, 0.1)',
-              borderColor: isSacredTheme
-                ? 'rgba(255, 215, 0, 0.5)'
-                : 'rgba(239, 68, 68, 0.5)',
-            }}
-          />
-        </div>
-      </td>
+  const renderCreationField = (column: ColumnDef) => {
+    // Check if this is a composite field (type is an array)
+    if (Array.isArray(column.type)) {
+      // Check if column has useModalForCreation flag
+      const columnWithModal = column as any
+      if (columnWithModal.useModalForCreation) {
+        return renderModalBasedCompositeField(column)
+      }
+      return renderCompositeFields(column)
+    }
 
-      {/* Data columns */}
-      {columns.map(column => (
-        <td
-          key={column.field}
-          style={{
-            ...computedStyles.table.tableCell,
-            padding: '4px',
-            verticalAlign: 'middle',
-            height: '53px', // Match standard row height
-          }}
-        >
-          {column.creationField ? (
-            <div
+    // Otherwise, render single field using creationField config
+    const fieldConfig = column.creationField
+    if (!fieldConfig) return null
+
+    const value = creationRowData[column.field] as
+      | string
+      | number
+      | boolean
+      | Date
+      | string[]
+      | null
+      | undefined
+    const fieldStyles = {
+      theme: (isSacredTheme ? 'sacred' : 'light') as
+        | 'light'
+        | 'dark'
+        | 'sacred',
+      required: !!fieldConfig.required,
+      fontSize: '14px',
+      height: fieldConfig.type === 'internalIncrement' ? '48px' : '45px',
+      minHeight: '45px',
+      padding: '10px 12px',
+      borderRadius: '4px',
+      helperTextType: 'error' as const,
+      width: '100%',
+    }
+
+    // Create a unified field config that works with renderFieldByConfig
+    const unifiedFieldConfig = {
+      ...fieldConfig,
+      field: column.field,
+    }
+
+    return renderFieldByConfig(unifiedFieldConfig, value, fieldStyles)
+  }
+
+  // Render modal outside of table using portal
+  const renderModal = () => {
+    if (!openModalField || typeof document === 'undefined') return null
+
+    const column = columns.find(
+      col => col.field === openModalField && Array.isArray(col.type)
+    )
+    if (!column) return null
+
+    const compositeFields = column.type as any[]
+
+    return createPortal(
+      <CompositeFieldEditModal
+        open={true}
+        onClose={() => setOpenModalField(null)}
+        rowData={creationRowData}
+        compositeFields={compositeFields}
+        onSave={fieldUpdates => handleModalSave(column.field, fieldUpdates)}
+        {...(styles ? { styles } : {})}
+      />,
+      document.body
+    )
+  }
+
+  return (
+    <>
+      <tr
+        style={{
+          ...computedStyles.table.tableRow,
+          backgroundColor: isSacredTheme
+            ? 'rgba(255, 215, 0, 0.05)'
+            : 'rgba(59, 130, 246, 0.05)',
+          borderBottom: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
+        }}
+      >
+        {/* Checkbox column */}
+        <td style={computedStyles.table.tableCell}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Button
+              text="Save"
+              onClick={onCreateRowSave}
+              styles={{
+                theme: isSacredTheme ? 'sacred' : 'light',
+                fontSize: '12px',
+                height: '28px',
+                padding: '2px 8px',
+                backgroundColor: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.1)'
+                  : 'rgba(34, 197, 94, 0.1)',
+                borderColor: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.5)'
+                  : 'rgba(34, 197, 94, 0.5)',
+              }}
+            />
+            <Button
+              text="Cancel"
+              onClick={onCreateRowCancel}
+              styles={{
+                theme: isSacredTheme ? 'sacred' : 'light',
+                fontSize: '12px',
+                height: '28px',
+                padding: '2px 8px',
+                backgroundColor: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.1)'
+                  : 'rgba(239, 68, 68, 0.1)',
+                borderColor: isSacredTheme
+                  ? 'rgba(255, 215, 0, 0.5)'
+                  : 'rgba(239, 68, 68, 0.5)',
+              }}
+            />
+          </div>
+        </td>
+
+        {/* Data columns */}
+        {columns.map(column => {
+          const isComposite = Array.isArray(column.type)
+          const hasCreationField = column.creationField || isComposite
+
+          return (
+            <td
+              key={column.field}
               style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
+                ...computedStyles.table.tableCell,
+                padding: '4px',
+                verticalAlign: isComposite ? 'top' : 'middle',
+                height: isComposite ? 'auto' : '53px',
+                minHeight: '53px',
               }}
             >
-              {renderCreationField(column)}
-            </div>
-          ) : (
-            <span style={{ color: '#9CA3AF', fontSize: '12px' }}>—</span>
-          )}
-        </td>
-      ))}
-    </tr>
+              {hasCreationField ? (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: isComposite ? 'flex-start' : 'center',
+                    paddingTop: isComposite ? '4px' : '0',
+                  }}
+                >
+                  {renderCreationField(column)}
+                </div>
+              ) : (
+                <span style={{ color: '#9CA3AF', fontSize: '12px' }}>—</span>
+              )}
+            </td>
+          )
+        })}
+      </tr>
+
+      {/* Render modal outside of table using portal */}
+      {renderModal()}
+    </>
   )
 }
 
