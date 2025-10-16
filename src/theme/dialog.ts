@@ -85,6 +85,9 @@ export interface DialogStyles {
   padding?: string
   margin?: string
 
+  // Positioning
+  topOffset?: string // Distance from top of screen (e.g., '100px', '10vh')
+
   // Scrolling
   enableScrolling?: boolean
   scrollbarStyle?: 'auto' | 'thin' | 'none'
@@ -396,11 +399,14 @@ export const getDialogStyles = (
     inset: themeConfig.backdrop.inset as any,
     zIndex: themeConfig.backdrop.zIndex,
     display: themeConfig.backdrop.display as any,
-    alignItems: themeConfig.backdrop.alignItems as any,
+    alignItems: styles?.topOffset
+      ? 'flex-start'
+      : (themeConfig.backdrop.alignItems as any),
     justifyContent: themeConfig.backdrop.justifyContent as any,
     backgroundColor: themeConfig.backdrop.backgroundColor,
     backdropFilter: themeConfig.backdrop.backdropFilter,
     padding: getResponsivePadding(),
+    paddingTop: styles?.topOffset || undefined,
     overflow: themeConfig.backdrop.overflow as any,
   }
 
@@ -413,13 +419,18 @@ export const getDialogStyles = (
     backdropFilter: themeConfig.dialog.backdropFilter,
     backgroundImage: themeConfig.dialog.backgroundImage,
     transition: themeConfig.transition,
-    maxHeight: themeConfig.dialog.maxHeight,
+    maxHeight: styles?.topOffset
+      ? `calc(100vh - 2rem - ${styles.topOffset})`
+      : themeConfig.dialog.maxHeight,
     maxWidth: getResponsiveMaxWidth(),
     minWidth: screenSize === 'mobile' ? '280px' : themeConfig.dialog.minWidth,
     display: themeConfig.dialog.display as any,
     flexDirection: themeConfig.dialog.flexDirection as any,
     // Layout and sizing overrides
-    width: styles?.width || (styles?.fullWidth ? '100%' : undefined),
+    width:
+      styles?.width === 'fit-content'
+        ? 'fit-content'
+        : styles?.width || (styles?.fullWidth ? '100%' : undefined),
     height: styles?.height,
     minHeight: styles?.minHeight,
     padding: undefined, // Let content wrapper handle padding
@@ -429,7 +440,12 @@ export const getDialogStyles = (
   const contentStyle: React.CSSProperties = {
     overflowY: themeConfig.content.overflowY as any,
     overflowX: themeConfig.content.overflowX as any,
-    maxHeight: themeConfig.content.maxHeight,
+    maxHeight:
+      styles?.maxHeight === 'none'
+        ? 'none'
+        : styles?.topOffset
+          ? `calc(100vh - 4rem - ${styles.topOffset})`
+          : themeConfig.content.maxHeight,
     scrollbarColor: themeConfig.content.scrollbarColor,
     msOverflowStyle: themeConfig.content.msOverflowStyle as any,
     scrollbarWidth: themeConfig.content.WebkitScrollbarWidth as any,

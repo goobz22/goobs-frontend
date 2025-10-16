@@ -720,6 +720,9 @@ export const getConfirmationCodeInputStyles = (
     display: 'flex',
     gap: '0.5rem',
     width: '100%',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    maxWidth: '100%',
   }
 
   return {

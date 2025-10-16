@@ -13,7 +13,11 @@ import {
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
-export interface USDFieldProps {
+export interface USDFieldProps
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    'onChange' | 'value' | 'style' | 'type' | 'inputMode'
+  > {
   initialValue?: string
   onChange?: (value: string) => void
   label?: string
@@ -167,6 +171,7 @@ const USDField: React.FC<USDFieldProps> = ({
   onBlur,
   helperText,
   styles,
+  // Explicitly destructure to prevent spreading to input
   ...rest
 }) => {
   const [internalValue, setInternalValue] = useState(value || initialValue)

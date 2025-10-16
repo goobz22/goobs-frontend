@@ -11,6 +11,38 @@ import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
 } from '../ConfirmationCodeInput'
 
+/**
+ * Generate a cryptographically secure random secret for browser environments
+ * Uses Web Crypto API which is available in all modern browsers
+ */
+function generateBrowserSecret(length = 20): string {
+  if (
+    typeof window === 'undefined' ||
+    !window.crypto ||
+    !window.crypto.getRandomValues
+  ) {
+    // Server-side or crypto not available: return empty string, will be generated on client
+    return ''
+  }
+
+  // Use Web Crypto API for secure random bytes
+  const array = new Uint8Array(length)
+  window.crypto.getRandomValues(array)
+
+  // Convert to base32 string (compatible with authenticator apps)
+  const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+  let secret = ''
+
+  for (let i = 0; i < array.length; i++) {
+    const byte = array[i]
+    if (byte !== undefined) {
+      secret += base32chars[byte % 32]
+    }
+  }
+
+  return secret
+}
+
 export interface QRCodeProps {
   /** The value/URL for the QR code (if provided, username and appName are ignored) */
   value?: string
@@ -87,7 +119,8 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
       }
       // Otherwise generate from username and appName
       if (username) {
-        const generatedSecret = authenticator.generateSecret()
+        // Use browser-compatible secret generation
+        const generatedSecret = generateBrowserSecret()
         const otpAuthUrl = authenticator.keyuri(
           username,
           appName,

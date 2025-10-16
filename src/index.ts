@@ -31,10 +31,6 @@ export {
   type CustomDialogProps,
 } from './components/Form/Dialog'
 export { default as Dialog, type DialogProps } from './components/Dialog'
-export {
-  default as ContentSection,
-  type ContentSectionProps,
-} from './components/Content'
 export { default as CodeCopy, type CodeCopyProps } from './components/CodeCopy'
 export {
   default as PricingTable,
