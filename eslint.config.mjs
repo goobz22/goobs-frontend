@@ -1,13 +1,6 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
+import js from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import globals from 'globals'
 
 const eslintConfig = [
   {
@@ -18,16 +11,32 @@ const eslintConfig = [
       'build/**',
       'next-env.d.ts',
       'public/**',
+      'src/data/**/*',
+      '**/*.js',
+      '**/*.mjs',
+      '**/*.cjs',
+      '**/*.d.ts',
     ],
   },
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    ignores: ['src/data/**/*', 'public/**/*'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
-      'no-unused-vars': 'off', // Turn off base rule as it can report incorrect errors
-      'react-hooks/exhaustive-deps': 'error',
+      'no-unused-vars': 'off',
+      'no-duplicate-imports': 'error',
+      'linebreak-style': 'off', // Don't enforce line ending style - let .gitattributes handle it
+      'eol-last': 'off', // Don't enforce newline at end of file
+    },
+  },
+  {
+    files: ['.storybook/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
   },
 ]
