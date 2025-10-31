@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { getSharedFormFieldStyles } from '../../../theme'
-import type { FormFieldStyles } from '../../../theme'
+import { getSharedFormFieldStyles, type FormFieldStyles } from '../../../theme'
 
 export interface SliderProps {
   value: number

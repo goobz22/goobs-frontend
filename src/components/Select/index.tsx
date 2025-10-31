@@ -5,8 +5,8 @@ import {
   getSharedFormFieldStyles,
   injectSacredKeyframes,
   SACRED_GLYPHS,
+  type FormFieldStyles,
 } from '../../theme'
-import type { FormFieldStyles } from '../../theme'
 
 export interface SelectStyles extends FormFieldStyles {
   variant?: 'standard' | 'outlined' | 'filled'

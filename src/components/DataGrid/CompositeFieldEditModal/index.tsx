@@ -11,7 +11,9 @@ import type { DataGridStyles } from '../../../theme'
 import TextField from '../../Field/Text'
 import DateField from '../../Field/Date/DateField'
 import TimeField from '../../Field/Time/TimeField'
-import SearchableSimple from '../../Field/Dropdown/SearchableSimple'
+import SearchableSimple, {
+  type DropdownOption,
+} from '../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import InternalIncrementNumberField from '../../Field/Number/InternalIncrement'
 import PhoneNumberField from '../../Field/PhoneNumber'
@@ -23,13 +25,11 @@ import USDField from '../../Field/USD'
 import ComplexTextEditor from '../../ComplexTextEditor'
 // IPAM field imports
 import IPAddressField from '../../Field/IPAM/Address'
-import SubnetField from '../../Field/IPAM/Subnet'
+import SubnetField, { type SubnetFieldValue } from '../../Field/IPAM/Subnet'
 import VLANField from '../../Field/IPAM/VLAN'
 import CIDRField from '../../Field/IPAM/CIDR'
 import SupernetField from '../../Field/IPAM/Supernet'
 import MACAddressField from '../../Field/IPAM/MACAddress'
-import type { SubnetFieldValue } from '../../Field/IPAM/Subnet'
-import type { DropdownOption } from '../../Field/Dropdown/SearchableSimple'
 
 interface CompositeFieldEditModalProps {
   open: boolean
@@ -336,7 +336,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           )
 
         case 'searchableDropdown':
-        case 'dropdown':
+        case 'dropdown': {
           const options = fieldConfig.options || []
           return fieldContainer(
             <SearchableSimple
@@ -355,8 +355,9 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               styles={fieldStyles}
             />
           )
+        }
 
-        case 'multiselect':
+        case 'multiselect': {
           const multiOptions = fieldConfig.options || []
           let currentValues: string[] = []
           try {
@@ -387,6 +388,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               }}
             />
           )
+        }
 
         case 'internalIncrement':
           return fieldContainer(
@@ -482,7 +484,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
             />
           )
 
-        case 'subnet':
+        case 'subnet': {
           const subnetValue = (() => {
             try {
               return typeof value === 'object'
@@ -503,6 +505,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               styles={fieldStyles}
             />
           )
+        }
 
         case 'vlan':
           return fieldContainer(
@@ -542,7 +545,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
             />
           )
 
-        case 'supernet':
+        case 'supernet': {
           const supernetValue = (() => {
             try {
               return typeof value === 'object'
@@ -563,6 +566,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               styles={fieldStyles}
             />
           )
+        }
 
         case 'macAddress':
           return fieldContainer(

@@ -28,8 +28,10 @@ import Paper from '../Paper'
 import Typography from '../Typography'
 import StyledTooltip from '../Tooltip'
 import ToggleButton, { ToggleButtonGroup } from '../ToggleButton'
-import { getBigCalendarStyles } from '../../theme/bigcalendar'
-import type { BigCalendarStyles } from '../../theme/bigcalendar'
+import {
+  getBigCalendarStyles,
+  type BigCalendarStyles,
+} from '../../theme/bigcalendar'
 import type { ButtonStyles, PaperStyles, TooltipStyles } from '../../theme'
 import { CalendarFilters, CalendarFilterOptions } from './CalendarFilters'
 

@@ -1,11 +1,9 @@
 'use client'
 
-import React, { useMemo } from 'react'
-import type { FC } from 'react'
+import React, { useMemo, type FC } from 'react'
 import Button, { type ButtonProps } from '../../Button'
 import ManageRow from '../ManageRow'
-import type { DataGridStyles } from '../../../theme'
-import { getDataGridStyles } from '../../../theme'
+import { getDataGridStyles, type DataGridStyles } from '../../../theme'
 
 export interface DataGridToolbarProps {
   buttons?: ButtonProps[]

@@ -24,7 +24,9 @@ const injectFormFieldGlobalResets = () => {
     `
     document.head.appendChild(style)
     formFieldGlobalsInjected = true
-  } catch {}
+  } catch {
+    // Ignore DOM errors in SSR
+  }
 }
 
 export interface FormFieldTheme {

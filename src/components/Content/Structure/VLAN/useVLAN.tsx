@@ -1,6 +1,5 @@
 import React from 'react'
-import VLANStructure from '../../../Field/IPAM/VLAN'
-import type { VLANFieldProps } from '../../../Field/IPAM/VLAN'
+import VLANStructure, { type VLANFieldProps } from '../../../Field/IPAM/VLAN'
 
 export interface UseVLANProps {
   vlan?: VLANFieldProps | VLANFieldProps[]

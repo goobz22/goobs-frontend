@@ -2,8 +2,7 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import CustomToolbar from './index'
-import type { CustomToolbarProps } from './index'
+import CustomToolbar, { type CustomToolbarProps } from './index'
 
 import type { SearchbarProps } from '../Field/Search'
 import type { ButtonProps } from '../Button'

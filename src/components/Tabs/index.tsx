@@ -1,8 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { getTabsStyles } from '../../theme'
-import type { TabsStyles } from '../../theme'
+import { getTabsStyles, type TabsStyles } from '../../theme'
 
 export interface TabsItem {
   title?: string

@@ -1,13 +1,11 @@
 'use client'
 
 import React from 'react'
-import { ColumnDef } from '../../types'
+import { ColumnDef, type RowData } from '../../types'
 import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
-import type { RowData } from '../../types'
-import type { DataGridStyles } from '../../../../theme'
 import { getRowId } from '../index'
-import { getDataGridStyles } from '../../../../theme'
+import { getDataGridStyles, type DataGridStyles } from '../../../../theme'
 
 /**
  * Safely convert a value to a string without triggering the default

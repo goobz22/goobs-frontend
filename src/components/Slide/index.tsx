@@ -5,8 +5,7 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { getSlideStyles } from '../../theme'
-import type { SlideStyles } from '../../theme'
+import { getSlideStyles, type SlideStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

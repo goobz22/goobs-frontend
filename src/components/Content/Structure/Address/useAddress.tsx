@@ -1,6 +1,7 @@
 import React from 'react'
-import AddressStructure from '../../../Field/IPAM/Address'
-import type { IPAddressFieldProps } from '../../../Field/IPAM/Address'
+import AddressStructure, {
+  type IPAddressFieldProps,
+} from '../../../Field/IPAM/Address'
 
 export interface UseAddressProps {
   address?: IPAddressFieldProps | IPAddressFieldProps[]

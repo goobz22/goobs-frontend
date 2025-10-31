@@ -1,15 +1,24 @@
 'use client'
 
-import React, { useMemo } from 'react'
-import type { FC } from 'react'
+import React, { useMemo, type FC } from 'react'
 import CustomButton, { ButtonProps } from '../Button'
 import Searchbar, { SearchbarProps } from '../Field/Search'
-import { getToolbarStyles } from '../../theme'
-import type { ToolbarStyles, FormFieldStyles } from '../../theme'
+import Dropdown, { type DropdownOption } from '../Field/Dropdown/Regular'
+import {
+  getToolbarStyles,
+  type ToolbarStyles,
+  type FormFieldStyles,
+} from '../../theme'
 
 export interface CustomToolbarProps {
   buttons?: ButtonProps[]
   searchbarProps?: SearchbarProps
+  filterDropdown?: {
+    label?: string
+    options: DropdownOption[]
+    value: string
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  }
   styles?: ToolbarStyles
 }
 
@@ -71,6 +80,7 @@ const createSearchbarStyles = (
 const CustomToolbar: FC<CustomToolbarProps> = ({
   buttons,
   searchbarProps,
+  filterDropdown,
   styles,
 }) => {
   const computedStyles = useMemo(() => getToolbarStyles(styles), [styles])
@@ -134,6 +144,24 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
           />
         ))}
 
+        {/* Filter Dropdown */}
+        {filterDropdown && (
+          <div
+            style={{
+              minWidth: '180px',
+              maxWidth: '200px',
+            }}
+          >
+            <Dropdown
+              label={filterDropdown.label || 'Filter'}
+              options={filterDropdown.options}
+              value={filterDropdown.value}
+              onChange={filterDropdown.onChange}
+              styles={{ theme: styles?.theme || 'light' }}
+            />
+          </div>
+        )}
+
         {/* Searchbar */}
         {searchbarProps && (
           <div
@@ -147,16 +175,10 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
             <Searchbar
               value={searchbarProps.value}
               onChange={searchbarProps.onChange}
-              {...(isSacredTheme
-                ? { label: 'Divine Search' }
-                : searchbarProps.label
-                  ? { label: searchbarProps.label }
-                  : {})}
-              {...(isSacredTheme
-                ? { placeholder: 'Seek ancient wisdom...' }
-                : searchbarProps.placeholder
-                  ? { placeholder: searchbarProps.placeholder }
-                  : {})}
+              {...(searchbarProps.label ? { label: searchbarProps.label } : {})}
+              {...(searchbarProps.placeholder
+                ? { placeholder: searchbarProps.placeholder }
+                : {})}
               styles={searchbarStyles}
             />
           </div>

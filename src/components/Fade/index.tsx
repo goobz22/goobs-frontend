@@ -5,8 +5,7 @@
 'use client'
 
 import React, { useMemo, forwardRef } from 'react'
-import { getFadeStyles } from '../../theme'
-import type { FadeStyles } from '../../theme'
+import { getFadeStyles, type FadeStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

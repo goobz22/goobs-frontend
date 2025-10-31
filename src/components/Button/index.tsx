@@ -10,10 +10,9 @@ import React, {
   useCallback,
   useEffect,
   forwardRef,
+  type ReactNode,
 } from 'react'
-import type { ReactNode } from 'react'
-import { getButtonStyles, SACRED_GLYPHS } from '../../theme'
-import type { ButtonStyles } from '../../theme'
+import { getButtonStyles, SACRED_GLYPHS, type ButtonStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

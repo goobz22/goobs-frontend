@@ -1,12 +1,21 @@
 // src/components/ConfirmationCodeInput/index.tsx
 
 'use client'
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import type { FC } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  type FC,
+} from 'react'
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
 import CustomButton, { type ButtonProps } from '../Button'
-import { getConfirmationCodeInputStyles, SACRED_GLYPHS } from '../../theme'
-import type { ConfirmationCodeInputStyles } from '../../theme'
+import {
+  getConfirmationCodeInputStyles,
+  SACRED_GLYPHS,
+  type ConfirmationCodeInputStyles,
+} from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

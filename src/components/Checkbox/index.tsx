@@ -13,11 +13,14 @@ import React, {
   useMemo,
   useCallback,
   useId,
+  type ChangeEvent,
+  type InputHTMLAttributes,
 } from 'react'
-import type { ChangeEvent } from 'react'
-import type { InputHTMLAttributes } from 'react'
-import { getCheckboxStyles, SACRED_GLYPHS } from '../../theme'
-import type { CheckboxStyles } from '../../theme'
+import {
+  getCheckboxStyles,
+  SACRED_GLYPHS,
+  type CheckboxStyles,
+} from '../../theme'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 

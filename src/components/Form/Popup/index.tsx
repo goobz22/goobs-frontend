@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
-import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+import {
+  draggable,
+  monitorForElements,
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
 import Dialog from '../../Dialog'
 import CloseIcon from '../../Icons/Close'
 import DragIcon from '../../Icons/Drag'

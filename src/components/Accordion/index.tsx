@@ -4,12 +4,21 @@
  * Also supports menu items for navigation.
  */
 'use client'
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import type { FC, ReactNode } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type FC,
+  type ReactNode,
+} from 'react'
 import Link from 'next/link'
 import ExpandMoreIcon from '../Icons/ExpandMore'
-import { getAccordionStyles, SACRED_GLYPHS } from '../../theme'
-import type { AccordionStyles } from '../../theme'
+import {
+  getAccordionStyles,
+  SACRED_GLYPHS,
+  type AccordionStyles,
+} from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

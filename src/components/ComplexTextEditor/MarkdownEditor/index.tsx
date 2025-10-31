@@ -4,8 +4,10 @@
 import React, { useEffect, useState } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
-import { getComplexTextEditorStyles } from '../../../theme/'
-import type { ComplexTextEditorStyles } from '../../../theme/'
+import {
+  getComplexTextEditorStyles,
+  type ComplexTextEditorStyles,
+} from '../../../theme/'
 import { mdToHtml } from '../utils/conversion'
 
 type MarkdownEditorProps = {

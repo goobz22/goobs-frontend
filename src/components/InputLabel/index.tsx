@@ -6,8 +6,8 @@ import {
   getSharedLabelStyles,
   SACRED_GLYPHS,
   injectSacredKeyframes,
+  type FormFieldStyles,
 } from '../../theme'
-import type { FormFieldStyles } from '../../theme'
 
 export interface InputLabelStyles extends FormFieldStyles {
   focused?: boolean

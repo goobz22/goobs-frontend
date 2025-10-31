@@ -38,7 +38,7 @@ export function useColumnResize({
     if (columnsChanged) {
       setUpdatedColumns(columns)
     }
-  }, [columns]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [columns])
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, columnField: string) => {

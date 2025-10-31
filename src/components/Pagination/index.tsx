@@ -4,10 +4,18 @@
  */
 'use client'
 
-import React, { useState, useMemo, useCallback } from 'react'
-import type { FC, ReactNode } from 'react'
-import { getPaginationStyles, SACRED_GLYPHS } from '../../theme'
-import type { PaginationStyles } from '../../theme'
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  type FC,
+  type ReactNode,
+} from 'react'
+import {
+  getPaginationStyles,
+  SACRED_GLYPHS,
+  type PaginationStyles,
+} from '../../theme'
 import FirstPageIcon from '../Icons/FirstPage'
 import LastPageIcon from '../Icons/LastPage'
 import KeyboardArrowLeftIcon from '../Icons/KeyboardArrowLeft'

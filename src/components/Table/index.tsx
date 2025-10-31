@@ -1,8 +1,10 @@
 'use client'
 
 import React from 'react'
-import { getTableStyles } from '../../theme'
-import type { TableStyles as ThemeTableStyles } from '../../theme'
+import {
+  getTableStyles,
+  type TableStyles as ThemeTableStyles,
+} from '../../theme'
 
 export type TableStyles = ThemeTableStyles
 

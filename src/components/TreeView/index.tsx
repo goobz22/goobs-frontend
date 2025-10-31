@@ -13,10 +13,14 @@ import React, {
   useImperativeHandle,
   createContext,
   useContext,
+  type ReactNode,
+  type FC,
 } from 'react'
-import type { ReactNode, FC } from 'react'
-import { getTreeViewStyles, SACRED_GLYPHS } from '../../theme'
-import type { TreeViewStyles } from '../../theme'
+import {
+  getTreeViewStyles,
+  SACRED_GLYPHS,
+  type TreeViewStyles,
+} from '../../theme'
 import ExpandMoreIcon from '../Icons/ExpandMore'
 
 // --------------------------------------------------------------------------

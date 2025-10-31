@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react'
 import type { ColumnDef } from '../../types'
-import type { DataGridStyles } from '../../../../theme'
+import { getDataGridStyles, type DataGridStyles } from '../../../../theme'
 import Checkbox from '../../../Checkbox'
 import MoreVertIcon from '../../../Icons/MoreVert'
 import Popover from '../../../Popover'
-import { getDataGridStyles } from '../../../../theme'
 
 interface ColumnHeaderRowProps {
   allRowsSelected: boolean

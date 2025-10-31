@@ -3,12 +3,21 @@
  */
 'use client'
 
-import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
-import type { FC } from 'react'
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  type FC,
+} from 'react'
 import Button from '../../components/Button'
 import hljs from 'highlight.js'
-import { getCodeCopyStyles, SACRED_GLYPHS } from '../../theme'
-import type { CodeCopyStyles } from '../../theme'
+import {
+  getCodeCopyStyles,
+  SACRED_GLYPHS,
+  type CodeCopyStyles,
+} from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

@@ -9,8 +9,7 @@ import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import ErrorIcon from '../Icons/Error'
 import WarningIcon from '../Icons/Warning'
-import { getAlertStyles, SACRED_GLYPHS } from '../../theme'
-import type { AlertStyles } from '../../theme'
+import { getAlertStyles, SACRED_GLYPHS, type AlertStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

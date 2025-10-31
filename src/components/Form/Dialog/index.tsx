@@ -2,9 +2,8 @@
 
 import React, { useMemo } from 'react'
 import ContentSection, { ContentSectionProps } from '../../Content'
-import { TypographyProps } from '../../Typography'
+import Typography, { type TypographyProps } from '../../Typography'
 import CustomButton, { ButtonProps } from '../../Button'
-import Typography from '../../Typography'
 
 const SACRED_GLYPHS = [
   '𓁟',

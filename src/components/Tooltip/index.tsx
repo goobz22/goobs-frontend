@@ -4,8 +4,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { getTooltipStyles } from '../../theme'
-import type { TooltipStyles } from '../../theme'
+import { getTooltipStyles, type TooltipStyles } from '../../theme'
 
 export interface TooltipProps {
   children: React.ReactNode

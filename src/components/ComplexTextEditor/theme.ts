@@ -4,8 +4,7 @@
 // --------------------------------------------------------------------------
 import React from 'react'
 import { TRANSITIONS, SHADOWS } from '../../theme/shared'
-import type { FormFieldStyles } from '../../theme/formField'
-import { getFormFieldTheme } from '../../theme/formField'
+import { getFormFieldTheme, type FormFieldStyles } from '../../theme/formField'
 
 export interface ComplexTextEditorTheme {
   // Container styling

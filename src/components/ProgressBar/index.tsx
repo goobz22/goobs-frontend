@@ -6,8 +6,7 @@
 'use client'
 
 import React, { useMemo, useCallback, useEffect } from 'react'
-import { getProgressBarStyles } from '../../theme'
-import type { ProgressBarStyles } from '../../theme'
+import { getProgressBarStyles, type ProgressBarStyles } from '../../theme'
 import { injectKeyframes } from '../../theme/shared'
 
 // --------------------------------------------------------------------------

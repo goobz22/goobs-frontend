@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { getSwitchStyles, SACRED_GLYPHS } from '../../theme'
-import type { SwitchStyles } from '../../theme'
+import { getSwitchStyles, SACRED_GLYPHS, type SwitchStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

@@ -1,6 +1,7 @@
 import React from 'react'
-import SubnetField from '../../../../components/Field/IPAM/Subnet'
-import type { SubnetFieldProps } from '../../../../components/Field/IPAM/Subnet'
+import SubnetField, {
+  type SubnetFieldProps,
+} from '../../../../components/Field/IPAM/Subnet'
 
 interface UseSubnetProps {
   subnet?: SubnetFieldProps | SubnetFieldProps[]

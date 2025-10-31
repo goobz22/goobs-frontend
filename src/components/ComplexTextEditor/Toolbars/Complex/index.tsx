@@ -6,8 +6,10 @@ import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
 import Button, { ButtonGroup } from '../../../Button'
-import { getComplexTextEditorStyles } from '../../../../theme/'
-import type { ComplexTextEditorStyles } from '../../../../theme/'
+import {
+  getComplexTextEditorStyles,
+  type ComplexTextEditorStyles,
+} from '../../../../theme/'
 import { convertValue } from '../../utils/conversion'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'

@@ -4,8 +4,7 @@
 'use client'
 
 import React, { forwardRef, useState, useMemo } from 'react'
-import { getCardStyles } from '../../theme/card'
-import type { CardStyles } from '../../theme/card'
+import { getCardStyles, type CardStyles } from '../../theme/card'
 import { SACRED_GLYPHS, injectKeyframes } from '../../theme/shared'
 
 // --------------------------------------------------------------------------

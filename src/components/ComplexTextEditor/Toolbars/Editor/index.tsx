@@ -9,8 +9,7 @@ import {
   handleItalicClick as markdownItalicClick,
   replaceSelectedText,
 } from '../../utils/useMarkdownEditor'
-import { black, grey } from '../../../../theme/'
-import type { ComplexTextEditorStyles } from '../../../../theme/'
+import { black, grey, type ComplexTextEditorStyles } from '../../../../theme/'
 
 import LinkIcon from '../../../Icons/Link'
 import UndoIcon from '../../../Icons/Undo'

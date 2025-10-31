@@ -1,8 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { getBreadcrumbStyles, SACRED_GLYPHS } from '../../theme'
-import type { BreadcrumbStyles } from '../../theme'
+import {
+  getBreadcrumbStyles,
+  SACRED_GLYPHS,
+  type BreadcrumbStyles,
+} from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

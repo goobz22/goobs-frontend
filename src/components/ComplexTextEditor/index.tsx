@@ -3,8 +3,7 @@
  */
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
-import ComplexToolbar from './Toolbars/Complex'
-import type { EditorMode } from './Toolbars/Complex'
+import ComplexToolbar, { type EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
 import {
@@ -13,8 +12,8 @@ import {
   getSharedLabelStyles,
   getSharedFooterTextStyles,
   SACRED_GLYPHS,
+  type ComplexTextEditorStyles,
 } from '../../theme/'
-import type { ComplexTextEditorStyles } from '../../theme/'
 
 export interface ComplexTextEditorProps {
   /** The current value of the editor (for controlled usage). */

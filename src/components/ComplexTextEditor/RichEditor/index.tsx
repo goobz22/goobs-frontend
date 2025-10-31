@@ -5,8 +5,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import Toolbar from '../Toolbars/Editor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
-import { getComplexTextEditorStyles, SACRED_GLYPHS } from '../../../theme/'
-import type { ComplexTextEditorStyles } from '../../../theme/'
+import {
+  getComplexTextEditorStyles,
+  SACRED_GLYPHS,
+  type ComplexTextEditorStyles,
+} from '../../../theme/'
 
 export interface RichTextEditorProps {
   value: string

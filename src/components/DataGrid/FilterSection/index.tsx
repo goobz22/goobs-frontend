@@ -8,8 +8,7 @@ import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import Searchbar from '../../Field/Search'
 import type { DataGridFilter, ColumnDef, RowData } from '../types'
-import type { DataGridStyles } from '../../../theme'
-import { SACRED_GLYPHS } from '../../../theme'
+import { SACRED_GLYPHS, type DataGridStyles } from '../../../theme'
 
 export interface FilterSectionProps {
   filters?: DataGridFilter[] | undefined
@@ -24,17 +23,24 @@ export interface FilterSectionProps {
   styles?: DataGridStyles
 }
 
-function useWindowSize(): [number, number] {
-  const [size, setSize] = useState<[number, number]>([0, 0])
+function useWindowSize(): [number, number, boolean] {
+  const [size, setSize] = useState<[number, number]>([
+    typeof window !== 'undefined' ? window.innerWidth : 1024,
+    typeof window !== 'undefined' ? window.innerHeight : 768,
+  ])
+  const [isReady, setIsReady] = useState(false)
+
   useEffect(() => {
     function updateSize() {
       setSize([window.innerWidth, window.innerHeight])
+      setIsReady(true)
     }
     window.addEventListener('resize', updateSize)
     updateSize()
     return () => window.removeEventListener('resize', updateSize)
   }, [])
-  return size
+
+  return [size[0], size[1], isReady]
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -44,7 +50,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   onSearchFilter,
   styles,
 }) => {
-  const [width] = useWindowSize()
+  const [width, , isReady] = useWindowSize()
   const [searchTerm, setSearchTerm] = useState('')
   const isMobile = width < 600
   const isTablet = width < 900
@@ -297,6 +303,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     padding: '1rem',
     boxSizing: 'border-box' as const,
     overflow: 'hidden',
+    opacity: isReady ? 1 : 0,
+    transition: 'opacity 0.15s ease-in',
     ...(isSacredTheme && {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
       backgroundImage:

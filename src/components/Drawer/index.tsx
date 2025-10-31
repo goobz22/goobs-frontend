@@ -3,10 +3,15 @@
  * Supports light, dark, and sacred themes with TreeView integration.
  */
 'use client'
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import type { ReactNode, FC } from 'react'
-import { getDrawerStyles, SACRED_GLYPHS } from '../../theme'
-import type { DrawerStyles } from '../../theme'
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+  type FC,
+} from 'react'
+import { getDrawerStyles, SACRED_GLYPHS, type DrawerStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // TYPES AND INTERFACES

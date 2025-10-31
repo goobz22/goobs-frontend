@@ -5,8 +5,8 @@ import {
   injectSacredKeyframes,
   SACRED_GLYPHS,
   getSharedFormFieldStyles,
+  type FormFieldStyles,
 } from '../../theme'
-import type { FormFieldStyles } from '../../theme'
 
 export interface FormControlLabelStyles extends FormFieldStyles {
   disabled?: boolean

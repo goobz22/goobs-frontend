@@ -6,7 +6,9 @@ import type { DataGridStyles } from '../../../../theme'
 // Field component imports
 import TextField from '../../../Field/Text'
 import DateField from '../../../Field/Date/DateField'
-import SearchableSimple from '../../../Field/Dropdown/SearchableSimple'
+import SearchableSimple, {
+  type DropdownOption,
+} from '../../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
 import InternalIncrementNumberField from '../../../Field/Number/InternalIncrement'
 import PhoneNumberField from '../../../Field/PhoneNumber'
@@ -17,13 +19,11 @@ import RoutingNumber from '../../../Field/Number/RoutingNumber'
 import USDField from '../../../Field/USD'
 // IPAM field imports
 import IPAddressField from '../../../Field/IPAM/Address'
-import SubnetField from '../../../Field/IPAM/Subnet'
+import SubnetField, { type SubnetFieldValue } from '../../../Field/IPAM/Subnet'
 import VLANField from '../../../Field/IPAM/VLAN'
 import CIDRField from '../../../Field/IPAM/CIDR'
 import SupernetField from '../../../Field/IPAM/Supernet'
 import MACAddressField from '../../../Field/IPAM/MACAddress'
-import type { SubnetFieldValue } from '../../../Field/IPAM/Subnet'
-import type { DropdownOption } from '../../../Field/Dropdown/SearchableSimple'
 
 interface EditableCellProps {
   column: ColumnDef
@@ -190,7 +190,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     }
 
     case 'searchableDropdown':
-    case 'dropdown':
+    case 'dropdown': {
       const options = fieldConfig?.options || column.dropdownOptions || []
       return (
         <div ref={cellRef} style={{ width: '100%' }}>
@@ -207,8 +207,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
           />
         </div>
       )
+    }
 
-    case 'multiselect':
+    case 'multiselect': {
       const multiOptions = fieldConfig?.options || []
       let currentValues: string[] = []
       try {
@@ -237,6 +238,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           />
         </div>
       )
+    }
 
     case 'internalIncrement':
       return (
@@ -338,7 +340,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         </div>
       )
 
-    case 'subnet':
+    case 'subnet': {
       const subnetValue = (() => {
         try {
           return typeof value === 'object' ? value : JSON.parse(editingValue)
@@ -359,6 +361,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           />
         </div>
       )
+    }
 
     case 'vlan':
       return (
@@ -399,7 +402,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         </div>
       )
 
-    case 'supernet':
+    case 'supernet': {
       const supernetValue = (() => {
         try {
           return typeof value === 'object' ? value : JSON.parse(editingValue)
@@ -420,6 +423,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           />
         </div>
       )
+    }
 
     case 'macAddress':
       return (

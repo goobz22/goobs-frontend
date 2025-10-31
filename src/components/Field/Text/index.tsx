@@ -96,7 +96,9 @@ const injectTextFieldAutofillStyles = () => {
     `
     document.head.appendChild(style)
     textFieldAutofillStylesInjected = true
-  } catch {}
+  } catch {
+    // Ignore DOM errors in SSR
+  }
 }
 
 // --------------------------------------------------------------------------

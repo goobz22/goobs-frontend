@@ -150,7 +150,6 @@ const MetricCard = memo(function MetricCard({
       )
     }
     setIsHydrated(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getColorValue = (colorName: string = 'primary') => {

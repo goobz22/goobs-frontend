@@ -1,10 +1,9 @@
 // src/components/Switch/switch.stories.tsx
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from 'storybook/test'
 import Switch from './index'
-import { useState } from 'react'
 
 const meta: Meta<typeof Switch> = {
   title: 'Components/Switch',

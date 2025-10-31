@@ -7,8 +7,7 @@ import FirstPageIcon from '../../Icons/FirstPage'
 import LastPageIcon from '../../Icons/LastPage'
 import KeyboardArrowLeftIcon from '../../Icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '../../Icons/KeyboardArrowRight'
-import type { DataGridStyles } from '../../../theme'
-import type { FormFieldStyles } from '../../../theme'
+import type { DataGridStyles, FormFieldStyles } from '../../../theme'
 
 export interface CustomFooterProps {
   page: number

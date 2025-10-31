@@ -4,10 +4,15 @@
  */
 'use client'
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import type { FC, ReactNode } from 'react'
-import { getAppBarStyles, SACRED_GLYPHS } from '../../theme'
-import type { AppBarStyles } from '../../theme'
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type FC,
+  type ReactNode,
+} from 'react'
+import { getAppBarStyles, SACRED_GLYPHS, type AppBarStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

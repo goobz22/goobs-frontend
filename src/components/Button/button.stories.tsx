@@ -3,12 +3,10 @@
  * These stories showcase the different themes, variants, and states of the Button,
  * demonstrating its usage with React and JSX.
  */
-import React from 'react'
+import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from 'storybook/test'
-import Button from './index'
-import { useState } from 'react'
-import { ButtonGroup } from './index' // Import ButtonGroup
+import Button, { ButtonGroup } from './index'
 import SendIcon from '../Icons/Send'
 import AddIcon from '../Icons/Add'
 import DownloadIcon from '../Icons/Download'

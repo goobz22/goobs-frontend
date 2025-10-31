@@ -311,10 +311,5 @@ export type {
 
 // Task Management Components
 export { default as ProjectBoard } from './components/ProjectBoard'
-export { default as AdministratorAddTaskCompanyDropdown } from './components/ProjectBoard/forms/AddTask/administrator/companyDropdown'
-export { default as AdministratorAddTaskCompanyProvided } from './components/ProjectBoard/forms/AddTask/administrator/companyProvided'
-export { default as CompanyAddTaskCustomerDropdown } from './components/ProjectBoard/forms/AddTask/company/customerDropdown'
-export { default as CompanyAddTaskCustomerProvided } from './components/ProjectBoard/forms/AddTask/company/customerProvided'
-export { default as CustomerAddTask } from './components/ProjectBoard/forms/AddTask/customer'
-export { default as NoUserAddTask } from './components/ProjectBoard/forms/AddTask/noUser'
-export { default as ShowTask } from './components/ProjectBoard/forms/ShowTask/client'
+export { InlineAddTask } from './components/ProjectBoard/forms/AddTask/inline'
+export { InlineShowTask } from './components/ProjectBoard/forms/ShowTask/inline'

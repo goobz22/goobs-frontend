@@ -1,6 +1,5 @@
 import React from 'react'
-import CIDRStructure from '../../../Field/IPAM/CIDR'
-import type { CIDRFieldProps } from '../../../Field/IPAM/CIDR'
+import CIDRStructure, { type CIDRFieldProps } from '../../../Field/IPAM/CIDR'
 
 export interface UseCIDRProps {
   cidr?: CIDRFieldProps | CIDRFieldProps[]
