@@ -1,5 +1,8 @@
 import type { ProjectBoardStyles } from '../../../theme'
 
+// Re-export ProjectBoardStyles for convenience
+export type { ProjectBoardStyles }
+
 /** A minimal typed comment for any type of task. */
 export type Comment = {
   _id: string
@@ -9,13 +12,30 @@ export type Comment = {
   editHistory: CommentEditHistory[]
 }
 
-/** A history record for comment edits. */
+/** A history record for comment edits or case updates. */
 export type CommentEditHistory = {
   _id: string
   editedBy?: string
   editedAt?: Date
   text: string
   isOriginal: boolean
+}
+
+/** A case update entry for tracking all task changes and activities. */
+export type CaseUpdate = {
+  _id: string
+  updatedBy: string
+  updatedAt: Date
+  updateType:
+    | 'status_change'
+    | 'assignment'
+    | 'comment'
+    | 'field_update'
+    | 'created'
+  description: string
+  fieldChanged?: string
+  oldValue?: string
+  newValue?: string
 }
 
 /**
@@ -54,6 +74,8 @@ export type Task = {
   updatedAt: Date
   createdBy: string
   editHistory: CommentEditHistory[]
+  /** Case updates tracking all task changes and activities */
+  caseUpdates: CaseUpdate[]
   /**
    * If you want to store the actual comments (rather than just commentIds),
    * so ShowTask can display them directly.
@@ -65,6 +87,10 @@ export type Task = {
   severity: string
   /** Scheduling Queue text (e.g. "Technologies Unlimited"). */
   schedulingQueue: string
+  /** Region ID. */
+  regionId: string
+  /** Region text (e.g. "North America"). */
+  region: string
   /** High-level status text (e.g. "Open"). */
   status: string
   /** Sub-status text (e.g. "In Progress"). */
@@ -83,6 +109,16 @@ export type Task = {
   teamMember: string
   /** If you store the next action date/time as a string (e.g. "09/15/2023 - 8:30AM CST"). */
   nextActionDate: string
+  /** Whether this task is for a product or service. */
+  productOrService: 'product' | 'service'
+  /** The name of the product or service. */
+  productServiceName: string
+  /** The product ID if this task is for a product. */
+  productId: string
+  /** The service ID if this task is for a service. */
+  serviceId: string
+  /** Customer internal notes (staff-only, tied to customer record). */
+  customerInternalNotes: string
 }
 
 /** Each "column" references an array of Task objects. */
@@ -131,6 +167,12 @@ export type RawQueue = {
   queueName: string
 }
 
+/** Raw typed data for "regions." */
+export type RawRegion = {
+  _id: string
+  regionName: string
+}
+
 /** Raw typed data for "articles." */
 export type RawArticle = {
   _id: string
@@ -155,6 +197,16 @@ export type RawEmployee = {
 export type RawCompany = {
   _id: string
   companyName: string
+}
+
+export type RawProduct = {
+  _id: string
+  productName: string
+}
+
+export type RawService = {
+  _id: string
+  serviceName: string
 }
 
 /** The 3 variants we support in Add/Manage: 'administrator' | 'company' | 'customer'. */
@@ -186,18 +238,20 @@ export interface ProjectBoardProps {
   rawArticles: RawArticle[]
   rawCustomers: RawCustomer[]
   rawEmployees: RawEmployee[]
-  rawCompanies?: RawCompany[]
+  rawCompanies: RawCompany[]
+  rawProducts: RawProduct[]
+  rawServices: RawService[]
+  rawRegions: RawRegion[]
   rawSeverityLevels: RawSeverityLevel[]
   onEdit: (args: { _id: string }) => void
   onDelete: (args: { _id: string }) => void
-  onDuplicate: (args: { _id: string }) => void
   onEditComment: (commentId: string, newText: string, taskId: string) => void
   onAdd: (newTask: Omit<Task, '_id'>) => void
   currentUser: CurrentUser
-  customerId?: string
-  companyId?: string
+  customerId: string
+  companyId: string
   /** Whether to prefer the dropdown version of AddTask forms instead of using the 'provided' version. */
-  preferDropdown?: boolean
+  preferDropdown: boolean
   /**
    * If ShowTask calls onComment with both commentText and _id,
    * define the signature here. You can also do (text: string) => void if that's your design.
@@ -211,9 +265,29 @@ export interface ProjectBoardProps {
     revisionHistory: CommentEditHistory[]
   ) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: ProjectBoardStyles
+  styles: ProjectBoardStyles
   /** Permissions control - determines read/write access */
-  permissions?: {
+  permissions: {
     access: 'no-access' | 'read' | 'write'
   }
 }
+
+/** View state for inline interface - tracks which view is currently displayed */
+export type ViewState = 'board' | 'addTask' | 'showTask'
+
+/** Animation origin coordinates for expand-from-origin animation */
+export type AnimationOrigin = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** Form type for AddTask variants */
+export type AddTaskFormType =
+  | 'administratorCompanyDropdown'
+  | 'administratorCompanyProvided'
+  | 'companyCustomerDropdown'
+  | 'companyCustomerProvided'
+  | 'customer'
+  | 'noUser'

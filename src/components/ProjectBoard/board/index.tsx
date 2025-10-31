@@ -33,7 +33,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
   checked,
   onCheck,
   onEdit,
-  onDelete,
   draggable = false,
   onDragStart,
   onDragOver,
@@ -317,23 +316,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <>
           <h4 style={taskCardStyles.title}>{title}</h4>
           <p style={taskCardStyles.description}>{description}</p>
-          <div style={taskCardStyles.actions}>
-            <button
-              style={{ ...taskCardStyles.button, ...taskCardStyles.editButton }}
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
-            </button>
-            <button
-              style={{
-                ...taskCardStyles.button,
-                ...taskCardStyles.deleteButton,
-              }}
-              onClick={onDelete}
-            >
-              Delete
-            </button>
-          </div>
         </>
       )}
     </div>

@@ -1,28 +1,39 @@
 /**
  * @fileoverview Defines the ProjectBoard component for managing project tasks with drag-and-drop functionality.
  * It supports light, dark, and sacred themes with comprehensive customization options.
+ * Now with inline view transitions (Wolken-style) instead of dialog popups.
  */
 'use client'
 
-import React, { useMemo, useEffect, useState, useCallback } from 'react'
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
 import { useAtom } from 'jotai'
-import { columnsAtom } from './jotai/atom'
+import {
+  columnsAtom,
+  viewStateAtom,
+  animationOriginAtom,
+  activeAddTaskFormAtom,
+  activeTaskIdAtom,
+} from './jotai/atom'
 import { JotaiProvider } from './jotai/provider'
 
 import Toolbar from '../Toolbar'
-import AdministratorAddTaskCompanyDropdown from './forms/AddTask/administrator/companyDropdown'
-import AdministratorAddTaskCompanyProvided from './forms/AddTask/administrator/companyProvided'
-import CompanyAddTaskCustomerDropdown from './forms/AddTask/company/customerDropdown'
-import CompanyAddTaskCustomerProvided from './forms/AddTask/company/customerProvided'
-import CustomerAddTask from './forms/AddTask/customer'
-
-import ShowTask from './forms/ShowTask/client'
-import { ProjectBoardProps, ColumnData, Task, BoardType } from './types'
+import { InlineShowTask } from './forms/ShowTask/inline'
+import { InlineAddTask } from './forms/AddTask/inline'
+import {
+  ProjectBoardProps,
+  ColumnData,
+  Task,
+  BoardType,
+  AnimationOrigin,
+  AddTaskFormType,
+} from './types'
 
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from './utils/useDragandDrop/tasks'
 import Board from './board'
 import { getProjectBoardStyles, SACRED_GLYPHS } from '../../theme'
+import { Breadcrumb } from './Breadcrumb'
+import { AnimationWrapper } from './AnimationWrapper'
 
 // --------------------------------------------------------------------------
 // HELPER FUNCTIONS
@@ -75,10 +86,12 @@ function ProjectBoardContent({
   rawCustomers,
   rawEmployees,
   rawCompanies,
+  rawProducts,
+  rawServices,
+  rawRegions,
   rawSeverityLevels,
   onEdit,
   onDelete,
-  onDuplicate,
   onEditComment,
   onAdd,
   onComment,
@@ -91,6 +104,13 @@ function ProjectBoardContent({
   permissions,
 }: ProjectBoardProps) {
   const [columnState, setColumnState] = useAtom(columnsAtom)
+  const [viewState, setViewState] = useAtom(viewStateAtom)
+  const [animationOrigin, setAnimationOrigin] = useAtom(animationOriginAtom)
+  const [activeAddTaskForm, setActiveAddTaskForm] = useAtom(
+    activeAddTaskFormAtom
+  )
+  const [activeTaskId, setActiveTaskId] = useAtom(activeTaskIdAtom)
+
   const mergedColumns = useMemo<ColumnData[]>(
     () => mergeColumnsAndTasks(columns, tasks, boardType),
     [columns, tasks, boardType]
@@ -108,17 +128,33 @@ function ProjectBoardContent({
     setColumnState(mergedColumns)
   }, [mergedColumns, setColumnState])
 
-  // Simplified state management - only track what's necessary
+  // Local state
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
-  const [showTaskOpen, setShowTaskOpen] = useState<string>('-1')
-  const [addTaskOpen, setAddTaskOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [productServiceFilter, setProductServiceFilter] =
+    useState<string>('all')
+  const createTaskButtonRef = useRef<HTMLButtonElement>(null)
 
   // Drag and drop hooks
   const columnDragAndDrop = useColumnDragAndDrop(columnState, setColumnState)
   const taskDragAndDrop = useTaskDragAndDrop()
 
-  // Task selection handler
+  // Helper to capture element bounds for animation
+  const captureElementOrigin = useCallback(
+    (element: HTMLElement | null): AnimationOrigin | null => {
+      if (!element) return null
+      const rect = element.getBoundingClientRect()
+      return {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      }
+    },
+    []
+  )
+
+  // Task selection handler - only toggles selection, doesn't open the task
   const handleTaskSelect = useCallback((taskId: string) => {
     setSelectedTaskId(prev => (prev === taskId ? null : taskId))
   }, [])
@@ -131,20 +167,57 @@ function ProjectBoardContent({
     []
   )
 
-  // Filter columns based on search
-  const filteredColumnState = useMemo(() => {
-    if (!searchTerm) return columnState
+  // Product/Service filter handler
+  const handleProductServiceFilterChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setProductServiceFilter(e.target.value)
+    },
+    []
+  )
 
-    const lowerTerm = searchTerm.toLowerCase()
-    return columnState.map(col => {
-      const filteredTasks = col.tasks.filter(
-        t =>
-          t.title.toLowerCase().includes(lowerTerm) ||
-          t.description.toLowerCase().includes(lowerTerm)
-      )
-      return { ...col, tasks: filteredTasks }
-    })
-  }, [columnState, searchTerm])
+  // Filter columns based on search and product/service filter
+  const filteredColumnState = useMemo(() => {
+    let filtered = columnState
+
+    // Apply product/service filter
+    if (productServiceFilter !== 'all') {
+      filtered = filtered.map(col => {
+        const filteredTasks = col.tasks.filter(task => {
+          // Check if task has productId or serviceId
+          if (productServiceFilter === 'product') {
+            return task.productId || task.productOrService === 'product'
+          } else if (productServiceFilter === 'service') {
+            return task.serviceId || task.productOrService === 'service'
+          }
+          return true
+        })
+        return { ...col, tasks: filteredTasks }
+      })
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase()
+      filtered = filtered.map(col => {
+        const filteredTasks = col.tasks.filter(
+          t =>
+            t.title.toLowerCase().includes(lowerTerm) ||
+            t.description.toLowerCase().includes(lowerTerm)
+        )
+        return { ...col, tasks: filteredTasks }
+      })
+    }
+
+    return filtered
+  }, [columnState, searchTerm, productServiceFilter])
+
+  // Handle back to board navigation (defined early so other callbacks can use it)
+  const handleBackToBoard = useCallback(() => {
+    setViewState('board')
+    setAnimationOrigin(null)
+    setActiveAddTaskForm(null)
+    setActiveTaskId(null)
+  }, [setViewState, setAnimationOrigin, setActiveAddTaskForm, setActiveTaskId])
 
   // Task operations
   const handleAddTask = useCallback(
@@ -185,10 +258,11 @@ function ProjectBoardContent({
         return newColumns
       })
 
-      setAddTaskOpen(false)
+      // Return to board view
+      handleBackToBoard()
       onAdd(newTask)
     },
-    [boardType, onAdd, setColumnState]
+    [boardType, onAdd, setColumnState, handleBackToBoard]
   )
 
   const handleEditComment = useCallback(
@@ -213,53 +287,203 @@ function ProjectBoardContent({
     [onEditComment, setColumnState]
   )
 
-  const handleCloseTask = useCallback(
-    (taskId: string) => {
-      setColumnState(oldCols =>
-        oldCols.map(col => {
-          const updatedTasks = col.tasks.map(task => {
-            if (task._id === taskId) {
-              return { ...task, closedAt: new Date() }
-            }
-            return task
-          })
-          return { ...col, tasks: updatedTasks }
-        })
-      )
-      setShowTaskOpen('-1')
-    },
-    [setColumnState]
-  )
-
-  // Find current task for show dialog
+  // Find current task for show view
   const currentShowTask = useMemo(() => {
+    if (!activeTaskId) return null
     return columnState
       .flatMap(col => col.tasks)
-      .find(task => task._id === showTaskOpen)
-  }, [columnState, showTaskOpen])
+      .find(task => task._id === activeTaskId)
+  }, [columnState, activeTaskId])
+
+  // Handle Create Task button click
+  const handleCreateTaskClick = useCallback(() => {
+    const origin = captureElementOrigin(createTaskButtonRef.current)
+    setAnimationOrigin(origin)
+
+    // Determine which form to show based on variant and preferDropdown
+    let formType: AddTaskFormType = 'customer'
+    if (variant === 'administrator') {
+      formType =
+        preferDropdown === true ||
+        (preferDropdown !== false && rawCompanies && rawCompanies.length > 0)
+          ? 'administratorCompanyDropdown'
+          : 'administratorCompanyProvided'
+    } else if (variant === 'company') {
+      formType =
+        preferDropdown === true ||
+        (preferDropdown !== false && rawCustomers && rawCustomers.length > 0)
+          ? 'companyCustomerDropdown'
+          : 'companyCustomerProvided'
+    }
+
+    setActiveAddTaskForm(formType)
+    setViewState('addTask')
+  }, [
+    captureElementOrigin,
+    setAnimationOrigin,
+    variant,
+    preferDropdown,
+    rawCompanies,
+    rawCustomers,
+    setActiveAddTaskForm,
+    setViewState,
+  ])
+
+  // Handle Show Task button click
+  const handleShowTaskClick = useCallback(() => {
+    if (!selectedTaskId) return
+
+    // Verify the task exists before transitioning
+    const taskExists = columnState
+      .flatMap(col => col.tasks)
+      .some(task => task._id === selectedTaskId)
+
+    if (!taskExists) {
+      console.warn(`Task with ID ${selectedTaskId} not found in columnState`)
+      return
+    }
+
+    const origin = captureElementOrigin(createTaskButtonRef.current)
+    setAnimationOrigin(origin)
+    setActiveTaskId(selectedTaskId)
+    setViewState('showTask')
+  }, [
+    selectedTaskId,
+    columnState,
+    captureElementOrigin,
+    setAnimationOrigin,
+    setActiveTaskId,
+    setViewState,
+  ])
 
   // Toolbar buttons - respect permissions
   const buttons = useMemo(() => {
     const btns = []
     // Only show Create Task button if user has write permissions
     if (!permissions || permissions.access === 'write') {
-      btns.push({ text: 'Create Task', onClick: () => setAddTaskOpen(true) })
+      btns.push({
+        text: 'Create Task',
+        onClick: handleCreateTaskClick,
+        ref: createTaskButtonRef,
+      })
     }
     btns.push({
-      text: 'Show Task',
-      onClick: () => {
-        if (selectedTaskId) {
-          setShowTaskOpen(selectedTaskId)
-        }
-      },
+      text: 'Manage',
+      onClick: handleShowTaskClick,
       disabled: !selectedTaskId,
     })
     return btns
-  }, [selectedTaskId, permissions])
+  }, [selectedTaskId, permissions, handleCreateTaskClick, handleShowTaskClick])
+
+  // Render add task form based on active form type
+  const renderAddTaskForm = () => {
+    if (viewState !== 'addTask' || !activeAddTaskForm) return null
+
+    // Unified inline form for all variants
+    return (
+      <InlineAddTask
+        onAdd={handleAddTask}
+        onCancel={handleBackToBoard}
+        topics={rawTopics}
+        severityLevels={rawSeverityLevels}
+        statuses={rawStatuses}
+        subStatuses={rawSubStatuses}
+        createdUserId={currentUser._id}
+        companyId={companyId}
+        customerId={customerId}
+        rawCompanies={
+          activeAddTaskForm === 'administratorCompanyDropdown'
+            ? rawCompanies
+            : []
+        }
+        rawCustomers={
+          activeAddTaskForm === 'companyCustomerDropdown' ? rawCustomers : []
+        }
+        rawProducts={rawProducts}
+        rawServices={rawServices}
+        rawRegions={rawRegions}
+        styles={styles}
+      />
+    )
+  }
+
+  // Render show task form
+  const renderShowTaskForm = () => {
+    if (viewState !== 'showTask' || !currentShowTask || !activeTaskId)
+      return null
+
+    const editCallback = (updatedData: any) => {
+      if (!permissions || permissions.access === 'write') {
+        onEdit({ _id: activeTaskId, ...updatedData })
+      }
+    }
+
+    const deleteCallback = () => {
+      if (!permissions || permissions.access === 'write') {
+        onDelete({ _id: activeTaskId })
+        handleBackToBoard()
+      }
+    }
+
+    const commentCallback = (text: string, _id: string) => {
+      if (!permissions || permissions.access === 'write') {
+        onComment(text, _id)
+      }
+    }
+
+    const editCommentCallback = (commentId: string, newText: string) => {
+      if (!permissions || permissions.access === 'write') {
+        handleEditComment(commentId, newText, activeTaskId)
+      }
+    }
+
+    return (
+      <InlineShowTask
+        taskId={activeTaskId}
+        taskTitle={currentShowTask.title}
+        createdBy={currentShowTask.createdBy}
+        description={currentShowTask.description}
+        comments={currentShowTask.comments}
+        caseUpdates={currentShowTask.caseUpdates}
+        customerAssigned={currentShowTask.customerAssigned}
+        severity={currentShowTask.severity}
+        schedulingQueue={currentShowTask.schedulingQueue}
+        status={currentShowTask.status}
+        subStatus={currentShowTask.subStatus}
+        topics={currentShowTask.topicLabels}
+        knowledgebaseArticles={currentShowTask.kbArticles}
+        teamMemberAssigned={currentShowTask.teamMember}
+        nextActionDate={currentShowTask.nextActionDate}
+        currentUserName={`${currentUser.firstName} ${currentUser.lastName}`}
+        productOrService={currentShowTask.productOrService}
+        productServiceName={currentShowTask.productServiceName}
+        productId={currentShowTask.productId}
+        serviceId={currentShowTask.serviceId}
+        region={currentShowTask.region}
+        onEdit={editCallback}
+        onDelete={deleteCallback}
+        onComment={commentCallback}
+        onEditComment={editCommentCallback}
+        onRevisionHistory={onRevisionHistory}
+        onBack={handleBackToBoard}
+        severityOptions={rawSeverityLevels}
+        schedulingQueueOptions={rawQueues}
+        statusOptions={rawStatuses}
+        subStatusOptions={rawSubStatuses}
+        topicOptions={rawTopics}
+        knowledgebaseArticleOptions={rawArticles}
+        teamMemberOptions={rawEmployees}
+        rawProducts={rawProducts}
+        rawServices={rawServices}
+        regionOptions={rawRegions}
+        styles={styles}
+      />
+    )
+  }
 
   return (
     <div style={computedStyles.container}>
-      {isSacredTheme && (
+      {isSacredTheme && viewState === 'board' && (
         <>
           <div style={computedStyles.glyphPositions.topLeft}>
             {SACRED_GLYPHS[0]}
@@ -276,182 +500,69 @@ function ProjectBoardContent({
         </>
       )}
 
-      <Toolbar
-        buttons={buttons}
-        searchbarProps={{
-          label: 'Search...',
-          value: searchTerm,
-          onChange: handleSearchChange,
-          styles: { theme: styles?.theme || 'light' },
-        }}
-        styles={{ theme: styles?.theme || 'light' }}
-      />
-
-      <div style={computedStyles.toolbarContainer}>
-        <Board
-          columns={filteredColumnState}
-          selectedTaskId={selectedTaskId}
-          onTaskSelect={handleTaskSelect}
-          columnDragAndDrop={columnDragAndDrop}
-          taskDragAndDrop={taskDragAndDrop}
-          styles={{ theme: styles?.theme || 'light' }}
+      {/* Show breadcrumb when not on board view */}
+      {viewState !== 'board' && (
+        <Breadcrumb
+          viewState={viewState}
+          onBack={handleBackToBoard}
+          {...(styles && { styles })}
         />
-      </div>
+      )}
 
-      {/* Add Task Forms */}
-      {variant === 'administrator' && (
+      {/* Board View */}
+      {viewState === 'board' && (
         <>
-          {preferDropdown === true ||
-          (preferDropdown !== false &&
-            rawCompanies &&
-            rawCompanies.length > 0) ? (
-            <AdministratorAddTaskCompanyDropdown
-              open={addTaskOpen}
-              onClose={() => setAddTaskOpen(false)}
-              onAdd={handleAddTask}
-              statuses={rawStatuses}
-              subStatuses={rawSubStatuses}
-              topics={rawTopics}
-              schedulingQueues={rawQueues}
-              knowledgebaseArticles={rawArticles}
-              severityLevels={rawSeverityLevels}
-              createdUserId={currentUser._id}
-              rawCompanies={rawCompanies || []}
+          <Toolbar
+            buttons={buttons}
+            filterDropdown={{
+              label: 'Type',
+              options: [
+                { value: 'all', _id: 'all' },
+                { value: 'product', _id: 'product' },
+                { value: 'service', _id: 'service' },
+              ],
+              value: productServiceFilter,
+              onChange: handleProductServiceFilterChange,
+            }}
+            searchbarProps={{
+              label: 'Search...',
+              value: searchTerm,
+              onChange: handleSearchChange,
+              styles: { theme: styles?.theme || 'light' },
+            }}
+            styles={{ theme: styles?.theme || 'light' }}
+          />
+
+          <div style={computedStyles.toolbarContainer}>
+            <Board
+              columns={filteredColumnState}
+              selectedTaskId={selectedTaskId}
+              onTaskSelect={handleTaskSelect}
+              columnDragAndDrop={columnDragAndDrop}
+              taskDragAndDrop={taskDragAndDrop}
               styles={{ theme: styles?.theme || 'light' }}
             />
-          ) : (
-            <AdministratorAddTaskCompanyProvided
-              open={addTaskOpen}
-              onClose={() => setAddTaskOpen(false)}
-              onAdd={handleAddTask}
-              statuses={rawStatuses}
-              subStatuses={rawSubStatuses}
-              topics={rawTopics}
-              schedulingQueues={rawQueues}
-              knowledgebaseArticles={rawArticles}
-              severityLevels={rawSeverityLevels}
-              createdUserId={currentUser._id}
-              companyId={companyId || ''}
-              styles={{ theme: styles?.theme || 'light' }}
-            />
-          )}
+          </div>
         </>
       )}
 
-      {variant === 'company' && (
-        <>
-          {preferDropdown === true ||
-          (preferDropdown !== false &&
-            rawCustomers &&
-            rawCustomers.length > 0) ? (
-            <CompanyAddTaskCustomerDropdown
-              open={addTaskOpen}
-              onClose={() => setAddTaskOpen(false)}
-              onAdd={handleAddTask}
-              statuses={rawStatuses}
-              subStatuses={rawSubStatuses}
-              topics={rawTopics}
-              schedulingQueues={rawQueues}
-              knowledgebaseArticles={rawArticles}
-              severityLevels={rawSeverityLevels}
-              createdUserId={currentUser._id}
-              rawCustomers={rawCustomers || []}
-              styles={{ theme: styles?.theme || 'light' }}
-            />
-          ) : (
-            <CompanyAddTaskCustomerProvided
-              open={addTaskOpen}
-              onClose={() => setAddTaskOpen(false)}
-              onAdd={handleAddTask}
-              statuses={rawStatuses}
-              subStatuses={rawSubStatuses}
-              topics={rawTopics}
-              schedulingQueues={rawQueues}
-              knowledgebaseArticles={rawArticles}
-              severityLevels={rawSeverityLevels}
-              createdUserId={currentUser._id}
-              customerId={customerId || ''}
-              styles={{ theme: styles?.theme || 'light' }}
-            />
-          )}
-        </>
-      )}
+      {/* Add Task Form View - Inline with Animation */}
+      <AnimationWrapper
+        origin={animationOrigin}
+        isVisible={viewState === 'addTask'}
+        {...(styles && { styles })}
+      >
+        {renderAddTaskForm()}
+      </AnimationWrapper>
 
-      {variant === 'customer' && (
-        <CustomerAddTask
-          open={addTaskOpen}
-          onClose={() => setAddTaskOpen(false)}
-          onAdd={handleAddTask}
-          topics={rawTopics}
-          schedulingQueues={rawQueues}
-          severityLevels={rawSeverityLevels}
-          createdUserId={currentUser._id}
-          companyId={companyId || ''}
-          styles={{ theme: styles?.theme || 'light' }}
-        />
-      )}
-
-      {/* Show Task Dialog */}
-      {currentShowTask && (
-        <ShowTask
-          open={true}
-          onClose={() => setShowTaskOpen('-1')}
-          taskId={showTaskOpen}
-          taskTitle={currentShowTask.title}
-          createdBy={currentShowTask.createdBy}
-          description={currentShowTask.description}
-          comments={currentShowTask.comments}
-          customerAssigned={currentShowTask.customerAssigned}
-          severity={currentShowTask.severity}
-          schedulingQueue={currentShowTask.schedulingQueue}
-          status={currentShowTask.status}
-          subStatus={currentShowTask.subStatus}
-          topics={currentShowTask.topicLabels}
-          knowledgebaseArticles={currentShowTask.kbArticles}
-          teamMemberAssigned={currentShowTask.teamMember}
-          nextActionDate={currentShowTask.nextActionDate}
-          currentUserName={`${currentUser.firstName} ${currentUser.lastName}`}
-          onEdit={
-            !permissions || permissions.access === 'write'
-              ? updatedData => {
-                  onEdit({ _id: showTaskOpen, ...updatedData })
-                }
-              : undefined
-          }
-          onDelete={
-            !permissions || permissions.access === 'write'
-              ? () => onDelete({ _id: showTaskOpen })
-              : undefined
-          }
-          onDuplicate={
-            !permissions || permissions.access === 'write'
-              ? () => onDuplicate({ _id: showTaskOpen })
-              : undefined
-          }
-          onComment={
-            !permissions || permissions.access === 'write'
-              ? (text, _id) => onComment(text, _id)
-              : undefined
-          }
-          onEditComment={
-            !permissions || permissions.access === 'write'
-              ? (commentId, newText) =>
-                  handleEditComment(commentId, newText, showTaskOpen)
-              : undefined
-          }
-          onCloseTask={handleCloseTask}
-          onRevisionHistory={onRevisionHistory}
-          customerOptions={rawCustomers}
-          severityOptions={rawSeverityLevels}
-          schedulingQueueOptions={rawQueues}
-          statusOptions={rawStatuses}
-          subStatusOptions={rawSubStatuses}
-          topicOptions={rawTopics}
-          knowledgebaseArticleOptions={rawArticles}
-          teamMemberOptions={rawEmployees}
-          styles={{ theme: styles?.theme || 'light' }}
-        />
-      )}
+      {/* Show Task Form View - Inline with Animation */}
+      <AnimationWrapper
+        origin={animationOrigin}
+        isVisible={viewState === 'showTask'}
+        {...(styles && { styles })}
+      >
+        {renderShowTaskForm()}
+      </AnimationWrapper>
     </div>
   )
 }
