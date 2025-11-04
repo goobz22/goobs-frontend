@@ -1,22 +1,15 @@
-/**
- * @fileoverview This file defines the Button component, a versatile and themeable button element.
- * It supports light, dark, and sacred themes with extensive customization options for icons, text, and layout.
- */
 'use client'
 
 import React, {
   useState,
   useMemo,
   useCallback,
-  useEffect,
   forwardRef,
   type ReactNode,
 } from 'react'
-import { getButtonStyles, SACRED_GLYPHS, type ButtonStyles } from '../../theme'
+import { alpha } from '../../utils'
 
-// --------------------------------------------------------------------------
-// PROPS INTERFACE
-// --------------------------------------------------------------------------
+const SACRED_GOLD = '#FFD700'
 
 export interface ButtonGroupProps {
   value: string
@@ -26,7 +19,7 @@ export interface ButtonGroupProps {
     newValue: string | null
   ) => void
   children: React.ReactNode
-  styles?: ButtonStyles // Reuse Button's styles for consistency
+  styles?: ButtonStyles
 }
 
 export const ButtonGroup: React.FC<ButtonGroupProps> = ({
@@ -36,7 +29,6 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   children,
   styles,
 }) => {
-  const groupStyles = getButtonStyles(styles) // Get base styles from Button's theme function
   const childrenArray = React.Children.toArray(children)
   const totalChildren = childrenArray.length
 
@@ -47,44 +39,26 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
       const isSelected =
         ((child.props as { value?: string }).value || '') === value
 
-      // Get border color from theme
-      const borderColor =
-        styles?.theme === 'sacred'
-          ? 'rgba(255, 215, 0, 0.4)'
-          : styles?.theme === 'dark'
-            ? 'rgba(75, 85, 99, 0.8)'
-            : 'rgba(226, 232, 240, 0.8)'
+      const borderColor = alpha(SACRED_GOLD, 0.4)
 
       return React.cloneElement(child, {
         ...child.props,
         styles: {
           ...child.props.styles,
-          ...styles, // Merge group styles with individual
-          // Remove individual button borders and adjust border radius
+          ...styles,
           borderColor: 'transparent',
           borderWidth: '0',
           boxShadow: 'none',
           margin: '0',
-          padding: '8px 16px', // Add proper padding for text readability
-          borderRadius: isFirst
-            ? `${groupStyles.container.borderRadius || '8px'} 0 0 ${groupStyles.container.borderRadius || '8px'}`
-            : isLast
-              ? `0 ${groupStyles.container.borderRadius || '8px'} ${groupStyles.container.borderRadius || '8px'} 0`
-              : '0',
-          // Add right border for all except last using border-right
+          padding: '8px 16px',
+          borderRadius: isFirst ? '8px 0 0 8px' : isLast ? '0 8px 8px 0' : '0',
           ...(!isLast && {
             borderRightWidth: '1px',
             borderRightStyle: 'solid',
             borderRightColor: borderColor,
           }),
-          // Selected state background override
           ...(isSelected && {
-            backgroundColor:
-              styles?.theme === 'sacred'
-                ? 'rgba(255, 215, 0, 0.2)'
-                : styles?.theme === 'dark'
-                  ? 'rgba(59, 130, 246, 0.3)'
-                  : 'rgba(59, 130, 246, 0.1)',
+            backgroundColor: alpha(SACRED_GOLD, 0.2),
           }),
         },
         onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -95,166 +69,70 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
             child.props.onClick(e)
           }
         },
-        // Inject selected based on value
         selected: isSelected,
       })
     }
     return child
   })
 
-  const computedGroupStyle: React.CSSProperties = {
+  const groupStyle: React.CSSProperties = {
     display: 'flex',
-    borderRadius: groupStyles.container.borderRadius || '8px',
+    borderRadius: '8px',
     overflow: 'hidden',
     background: 'transparent',
-    boxShadow: groupStyles.container.boxShadow,
-    border: groupStyles.container.border,
+    boxShadow: `0 0 10px ${alpha(SACRED_GOLD, 0.3)}`,
+    border: `1px solid ${alpha(SACRED_GOLD, 0.3)}`,
     padding: '0',
   }
 
-  return <div style={computedGroupStyle}>{enhancedChildren}</div>
+  return <div style={groupStyle}>{enhancedChildren}</div>
 }
 
-// Update ButtonProps to include optional 'selected' and 'value' for toggle support
+export interface ButtonStyles {
+  disabled?: boolean
+  theme?: string
+  width?: string
+  minWidth?: string
+  maxWidth?: string
+  height?: string
+  padding?: string
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+  fontSize?: string
+  fontWeight?: string | number
+  borderRadius?: string
+  borderWidth?: string
+  borderColor?: string
+  boxShadow?: string
+  iconLocation?: 'left' | 'right' | 'above'
+  [key: string]: any
+}
+
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
-  /** The text content of the button. */
   text?: string
-  /** An icon to display within the button. Can be a React node or a component. */
   icon?: ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ButtonStyles
-  selected?: boolean // New optional prop for toggle state
-  value?: string // New optional prop for toggle value
+  selected?: boolean
+  value?: string
 }
 
-// --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
-// --------------------------------------------------------------------------
-
-const SacredGlyphs: React.FC<{
-  isHovered: boolean
-  isDisabled: boolean
-  isIconOnly: boolean
-}> = ({ isHovered, isDisabled, isIconOnly }) => {
-  // Initialize with consistent values to prevent hydration mismatch
-  const [leftGlyph, setLeftGlyph] = useState(SACRED_GLYPHS[0])
-  const [rightGlyph, setRightGlyph] = useState(SACRED_GLYPHS[1])
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  // Set random glyphs only on client side after hydration
-  useEffect(() => {
-    if (!isHydrated) {
-      setLeftGlyph(
-        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-      )
-      setRightGlyph(
-        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-      )
-      setIsHydrated(true)
-    }
-  }, [isHydrated])
-
-  // Change sacred glyphs on hover for a dynamic effect
-  useEffect(() => {
-    if (isHovered && isHydrated) {
-      const timer = setTimeout(() => {
-        setLeftGlyph(
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-        )
-        setRightGlyph(
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-        )
-      }, 300) // Debounce to avoid excessive changes
-      return () => clearTimeout(timer)
-    }
-  }, [isHovered, isHydrated])
-
-  const glyphStyles = useMemo(
-    () => ({
-      glyph: {
-        position: 'absolute' as const,
-        fontSize: '14px',
-        color: 'rgba(255, 215, 0, 0.3)',
-        transition: 'all 0.3s ease',
-        opacity: 0,
-        pointerEvents: 'none' as const,
-      },
-      glyphLeft: {
-        left: '8px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphRight: {
-        right: '8px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphVisible: {
-        opacity: 1,
-      },
-    }),
-    []
-  )
-
-  if (isIconOnly) {
-    return null
-  }
-
-  return (
-    <>
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphLeft,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-        }}
-      >
-        {leftGlyph}
-      </div>
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphRight,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-        }}
-      >
-        {rightGlyph}
-      </div>
-    </>
-  )
-}
-
-// --------------------------------------------------------------------------
-// MAIN BUTTON COMPONENT
-// --------------------------------------------------------------------------
-
-/**
- * A versatile and themeable button component.
- */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
     const [isHovered, setIsHovered] = useState(false)
     const [isActive, setIsActive] = useState(false)
 
-    // Filter out non-HTML props that shouldn't be passed to the button element
     const filteredProps = useMemo(() => {
       const { sacredtheme, ...validProps } = restProps as any
-      // sacredtheme is intentionally excluded from the props passed to the button
       void sacredtheme
       return validProps
     }, [restProps])
 
     const isDisabled = styles?.disabled || filteredProps.disabled
-    const isIconOnly = !!icon && !text
-    const isSacredTheme = styles?.theme === 'sacred'
     const iconLocation = styles?.iconLocation || 'left'
-
-    const computedStyles = useMemo(
-      () =>
-        getButtonStyles(styles, isHovered, isActive || selected, isDisabled), // Treat selected as active for styling
-      [styles, isHovered, isActive, selected, isDisabled]
-    )
 
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true)
@@ -282,14 +160,62 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       [isDisabled, onClick]
     )
 
+    const buttonStyle: React.CSSProperties = {
+      position: 'relative',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: iconLocation === 'above' ? '4px' : '8px',
+      flexDirection: iconLocation === 'above' ? 'column' : 'row',
+      width: styles?.width || 'auto',
+      minWidth: styles?.minWidth,
+      maxWidth: styles?.maxWidth,
+      height: styles?.height || '40px',
+      padding: styles?.padding || '8px 16px',
+      margin: styles?.margin,
+      marginTop: styles?.marginTop,
+      marginBottom: styles?.marginBottom,
+      marginLeft: styles?.marginLeft,
+      marginRight: styles?.marginRight,
+      fontSize: styles?.fontSize || '14px',
+      fontWeight: styles?.fontWeight || 500,
+      fontFamily: '"Cinzel", serif',
+      color: isDisabled
+        ? 'rgba(255, 255, 255, 0.4)'
+        : 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: isDisabled
+        ? 'rgba(0, 0, 0, 0.3)'
+        : isActive || selected
+          ? alpha(SACRED_GOLD, 0.3)
+          : isHovered
+            ? alpha(SACRED_GOLD, 0.2)
+            : 'rgba(0, 0, 0, 0.6)',
+      border: `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, isHovered ? 0.6 : 0.3)}`,
+      borderRadius: styles?.borderRadius || '8px',
+      boxShadow:
+        styles?.boxShadow ||
+        (isHovered && !isDisabled
+          ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}`
+          : 'none'),
+      cursor: isDisabled ? 'not-allowed' : 'pointer',
+      transition: 'all 0.3s ease',
+      outline: 'none',
+      userSelect: 'none',
+      textTransform: 'none',
+      letterSpacing: '0.05em',
+      boxSizing: 'border-box',
+    }
+
     const iconComponent = useMemo(() => {
-      return icon ? <span>{icon}</span> : null
+      return icon ? (
+        <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
+      ) : null
     }, [icon])
 
     return (
       <button
         ref={ref}
-        style={computedStyles.container}
+        style={buttonStyle}
         disabled={isDisabled}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -298,19 +224,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={handleClick}
         {...filteredProps}
       >
-        {isSacredTheme && (
-          <SacredGlyphs
-            isHovered={isHovered}
-            isDisabled={!!isDisabled}
-            isIconOnly={isIconOnly}
-          />
-        )}
-
         {iconLocation === 'above' && iconComponent}
         {iconLocation === 'left' && iconComponent}
-
         {text && <span>{text}</span>}
-
         {iconLocation === 'right' && iconComponent}
       </button>
     )
