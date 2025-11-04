@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.122.25",
+  "version": "0.122.26",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -22,7 +22,9 @@
     "prepublishOnly": "bun run build",
     "start": "storybook dev -p 6006",
     "typecheck": "tsc --noEmit",
+    "typecheck:file": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{jsx,ts,tsx}\" --fix --max-warnings=0",
+    "lint:file": "eslint --fix --max-warnings=0",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
