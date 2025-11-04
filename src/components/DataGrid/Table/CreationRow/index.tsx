@@ -265,11 +265,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             options={fieldConfig.options || []}
             defaultValue={String(value ?? '')}
             onChange={(option: DropdownOption | null) => {
-              // For state fields, use the abbreviation (attribute1) instead of the full name (value)
-              const valueToUse =
-                fieldConfig.field === 'state'
-                  ? option?.attribute1 || ''
-                  : String(option?.value || '')
+              const valueToUse = String(option?.value || '')
               onCreationFieldChange?.(fieldConfig.field, valueToUse)
             }}
             {...(fieldConfig.placeholder
@@ -341,11 +337,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             options={fieldConfig.options || []}
             defaultValue={String(value ?? '')}
             onChange={(option: DropdownOption | null) => {
-              // For state fields, use the abbreviation (attribute1) instead of the full name (value)
-              const valueToUse =
-                fieldConfig.field === 'state'
-                  ? option?.attribute1 || ''
-                  : String(option?.value || '')
+              const valueToUse = String(option?.value || '')
               onCreationFieldChange?.(fieldConfig.field, valueToUse)
             }}
             {...(fieldConfig.placeholder

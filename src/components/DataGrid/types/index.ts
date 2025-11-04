@@ -49,7 +49,6 @@ export interface CompositeFieldConfig {
   options?: Array<{
     value: string
     _id?: string
-    attribute1?: string // For display text in dropdowns
   }>
 
   // For numeric fields
