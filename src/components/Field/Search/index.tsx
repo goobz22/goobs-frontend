@@ -1,15 +1,9 @@
 'use client'
-import React, { useState, useEffect, useMemo } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../theme'
-import SearchIcon from '../../Icons/Search'
+
+import React, { useState } from 'react'
+import { alpha } from '../../../utils'
+
+const SACRED_GOLD = '#FFD700'
 
 export interface SearchbarProps {
   label?: string
@@ -18,251 +12,170 @@ export interface SearchbarProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   helperText?: string
   className?: string
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: FormFieldStyles
-}
-
-// Create a unique ID for this component instance
-const createPlaceholderStyles = (theme: string, placeholderColor: string) => {
-  const className = `searchbar-placeholder-${theme}`
-
-  const css = `
-    .${className} {
-      text-transform: none !important;
-    }
-    .${className}::placeholder {
-      color: ${placeholderColor} !important;
-      opacity: 0.7;
-    }
-    
-    .${className}::-webkit-input-placeholder {
-      color: ${placeholderColor} !important;
-      opacity: 0.7;
-    }
-    
-    .${className}::-moz-placeholder {
-      color: ${placeholderColor} !important;
-      opacity: 0.7;
-    }
-    
-    .${className}:-ms-input-placeholder {
-      color: ${placeholderColor} !important;
-      opacity: 0.7;
-    }
-    
-    .${className}::-ms-input-placeholder {
-      color: ${placeholderColor} !important;
-      opacity: 0.7;
-    }
-  `
-
-  return { css, className }
-}
-
-interface SearchStyles {
-  container: React.CSSProperties
-  inputWrapper: React.CSSProperties
-  input: React.CSSProperties
-  label: React.CSSProperties
-  startAdornment: React.CSSProperties
-  footerText: React.CSSProperties
-}
-
-const getStyles = (
-  styles?: FormFieldStyles,
-  isFocused?: boolean
-): SearchStyles => {
-  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
-    getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: SearchStyles = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px 8px 48px', // Left padding for search icon
-      paddingLeft: styles?.paddingLeft || '48px',
-      paddingRight: styles?.paddingRight || '16px',
-      paddingTop: styles?.paddingTop || '8px',
-      paddingBottom: styles?.paddingBottom || '8px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: styles?.theme === 'sacred' ? '#FFD700' : themeConfig.text,
-      boxSizing: 'border-box',
-      textTransform: 'none' as const,
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    startAdornment: {
-      position: 'absolute',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'flex',
-      alignItems: 'center',
-      left: '16px',
-      color:
-        styles?.theme === 'sacred' ? '#FFD700' : themeConfig.adornment.default,
-    },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
+  styles?: {
+    disabled?: boolean
+    required?: boolean
+    theme?: string
+    width?: string
+    minWidth?: string
+    maxWidth?: string
+    height?: string
+    minHeight?: string
+    maxHeight?: string
+    marginTop?: string
+    marginBottom?: string
+    marginLeft?: string
+    marginRight?: string
+    padding?: string
+    paddingLeft?: string
+    paddingRight?: string
+    paddingTop?: string
+    paddingBottom?: string
+    fontSize?: string
+    fontWeight?: string | number
+    lineHeight?: string
+    borderWidth?: string
+    borderRadius?: string
+    helperTextType?: 'error' | 'info'
+    requiredIndicatorText?: string
+    [key: string]: any
   }
-
-  return componentStyles
 }
 
 const Searchbar: React.FC<SearchbarProps> = ({
   label,
-  placeholder,
+  placeholder = 'Search...',
   value,
   onChange,
   helperText,
   styles,
 }) => {
-  const [focused, setFocused] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
-  const computedStyles = getStyles(styles, focused)
-  const theme = styles?.theme || 'light'
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
-  // Get the appropriate placeholder color based on theme
-  const getPlaceholderColor = () => {
-    switch (theme) {
-      case 'dark':
-        return '#9CA3AF' // Light gray for dark theme
-      case 'sacred':
-        return '#FFD700' // Pure gold for sacred theme
-      default:
-        return '#9CA3AF' // Medium gray for light theme
-    }
+  const containerStyle: React.CSSProperties = {
+    position: 'relative',
+    width: styles?.width || '100%',
+    minWidth: styles?.minWidth,
+    maxWidth: styles?.maxWidth,
+    height: styles?.height || 'auto',
+    minHeight: styles?.minHeight,
+    maxHeight: styles?.maxHeight,
+    marginTop: styles?.marginTop || '0',
+    marginBottom: styles?.marginBottom || '16px',
+    marginLeft: styles?.marginLeft,
+    marginRight: styles?.marginRight,
   }
 
-  const placeholderColor = getPlaceholderColor()
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    marginBottom: '8px',
+    color: SACRED_GOLD,
+    fontSize: '14px',
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.05em',
+  }
 
-  // Memoize placeholder styles to prevent infinite re-renders
-  const placeholderStyles = useMemo(() => {
-    return createPlaceholderStyles(theme, placeholderColor)
-  }, [theme, placeholderColor])
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: styles?.height || '40px',
+    width: '100%',
+    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
+    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    borderRadius: styles?.borderRadius || '8px',
+    transition: 'all 0.3s ease',
+    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
+    boxSizing: 'border-box',
+  }
 
-  // Inject placeholder styles and force sacred icon color
-  useEffect(() => {
-    const styleId = `searchbar-styles-${theme}`
-    let styleElement = document.getElementById(styleId)
+  const searchIconStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    color: SACRED_GOLD,
+    pointerEvents: 'none',
+  }
 
-    if (!styleElement) {
-      styleElement = document.createElement('style')
-      styleElement.id = styleId
-      document.head.appendChild(styleElement)
-    }
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    paddingLeft: styles?.paddingLeft || '48px',
+    paddingRight: styles?.paddingRight || '16px',
+    paddingTop: styles?.paddingTop || '8px',
+    paddingBottom: styles?.paddingBottom || '8px',
+    fontSize: styles?.fontSize || '16px',
+    fontWeight: styles?.fontWeight,
+    lineHeight: styles?.lineHeight,
+    fontFamily: '"Crimson Text", serif',
+    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+    boxSizing: 'border-box',
+  }
 
-    let css = placeholderStyles.css
-
-    // Force sacred theme icon color with high specificity
-    if (theme === 'sacred') {
-      css += `
-        .searchbar-sacred-container svg,
-        .searchbar-sacred-container svg path,
-        .searchbar-sacred-container * {
-          color: #FFD700 !important;
-          fill: #FFD700 !important;
-        }
-      `
-    }
-
-    styleElement.textContent = css
-
-    return () => {
-      // Clean up on unmount
-      const element = document.getElementById(styleId)
-      if (element) {
-        element.remove()
-      }
-    }
-  }, [theme, placeholderColor, placeholderStyles.css])
-
-  const handleFocus = () => setFocused(true)
-  const handleBlur = () => setFocused(false)
+  const helperTextStyle: React.CSSProperties = {
+    marginTop: '4px',
+    fontSize: '12px',
+    color:
+      styles?.helperTextType === 'error'
+        ? '#ff6b6b'
+        : 'rgba(255, 255, 255, 0.6)',
+    fontFamily: '"Crimson Text", serif',
+  }
 
   return (
-    <div style={computedStyles.container}>
+    <div style={containerStyle}>
       {label && (
-        <label style={computedStyles.label}>
+        <label style={labelStyle}>
           {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
+          {required && (
+            <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
+              {styles?.requiredIndicatorText || '*'}
             </span>
           )}
         </label>
       )}
-      <div style={computedStyles.inputWrapper}>
-        <div
-          className={
-            styles?.theme === 'sacred' ? 'searchbar-sacred-container' : ''
-          }
-          style={{
-            ...computedStyles.startAdornment,
-            ...(styles?.theme === 'sacred' && {
-              color: '#FFD700',
-              fill: '#FFD700',
-            }),
-          }}
-        >
-          {styles?.theme === 'sacred' ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24"
-              viewBox="0 0 24 24"
-              width="24"
-              fill="#FFD700"
-              style={{
-                color: '#FFD700 !important',
-                fill: '#FFD700 !important',
-              }}
-            >
-              <path
-                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-                fill="#FFD700"
-              />
-            </svg>
-          ) : (
-            <SearchIcon styles={{ theme: theme || 'light' }} />
-          )}
+
+      <div style={inputWrapperStyle}>
+        <div style={searchIconStyle}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="20"
+            viewBox="0 0 24 24"
+            width="20"
+            fill={SACRED_GOLD}
+          >
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+          </svg>
         </div>
+
         <input
           type="text"
-          placeholder={placeholder}
           value={value}
           onChange={onChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          style={computedStyles.input}
-          className={placeholderStyles.className}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          disabled={disabled}
+          required={required}
+          placeholder={placeholder}
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
-          {...getRequiredProps(styles?.required)}
+          style={inputStyle}
         />
       </div>
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
+
+      {helperText && <div style={helperTextStyle}>{helperText}</div>}
     </div>
   )
 }
+
+Searchbar.displayName = 'Searchbar'
 
 export default Searchbar
