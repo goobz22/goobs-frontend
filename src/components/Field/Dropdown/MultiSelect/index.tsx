@@ -42,7 +42,8 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   helperText,
   styles,
 }) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>(defaultSelected)
+  const [selectedValues, setSelectedValues] =
+    useState<string[]>(defaultSelected)
   const [focused, setFocused] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -153,7 +154,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   const helperTextStyle: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
-    color: styles?.helperTextType === 'error' ? '#ff6b6b' : 'rgba(255, 255, 255, 0.6)',
+    color:
+      styles?.helperTextType === 'error'
+        ? '#ff6b6b'
+        : 'rgba(255, 255, 255, 0.6)',
     fontFamily: '"Crimson Text", serif',
   }
 
@@ -263,7 +267,9 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                 transition: 'all 0.3s ease',
                 color: 'rgba(255, 255, 255, 0.9)',
                 fontFamily: '"Crimson Text", serif',
-                backgroundColor: isSelected ? alpha(SACRED_GOLD, 0.2) : 'transparent',
+                backgroundColor: isSelected
+                  ? alpha(SACRED_GOLD, 0.2)
+                  : 'transparent',
               }
 
               return (
@@ -273,7 +279,10 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                   onClick={e => handleToggle(option._id || option.value, e)}
                   onMouseEnter={e => {
                     if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = alpha(SACRED_GOLD, 0.1)
+                      e.currentTarget.style.backgroundColor = alpha(
+                        SACRED_GOLD,
+                        0.1
+                      )
                     }
                   }}
                   onMouseLeave={e => {

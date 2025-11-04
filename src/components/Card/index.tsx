@@ -1,170 +1,56 @@
-/**
- * @fileoverview Card component system with Content and Actions sub-components
- */
 'use client'
 
-import React, { forwardRef, useState, useMemo } from 'react'
-import { getCardStyles, type CardStyles } from '../../theme/card'
-import { SACRED_GLYPHS, injectKeyframes } from '../../theme/shared'
+import React, { forwardRef, useState } from 'react'
+import { alpha } from '../../utils'
 
-// --------------------------------------------------------------------------
-// SACRED GLYPHS CONSTANTS (from shared)
-// --------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------
-// CARD PROPS
-// --------------------------------------------------------------------------
+const SACRED_GOLD = '#FFD700'
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The content to display inside the card. */
   children: React.ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: CardStyles
-  /** Optional elevation level for depth appearance (0-24). */
+  styles?: {
+    disabled?: boolean
+    theme?: string
+    width?: string
+    height?: string
+    padding?: string
+    borderRadius?: string
+    [key: string]: any
+  }
   elevation?: number
 }
 
-// --------------------------------------------------------------------------
-// CARD CONTENT PROPS
-// --------------------------------------------------------------------------
-
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The content to display inside the card content area. */
   children: React.ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: CardStyles
+  styles?: {
+    theme?: string
+    padding?: string
+    [key: string]: any
+  }
 }
-
-// --------------------------------------------------------------------------
-// CARD ACTIONS PROPS
-// --------------------------------------------------------------------------
 
 export interface CardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The actions/buttons to display in the card actions area. */
   children: React.ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: CardStyles
+  styles?: {
+    theme?: string
+    padding?: string
+    justifyContent?: string
+    [key: string]: any
+  }
 }
-
-// --------------------------------------------------------------------------
-// CARD HEADER PROPS
-// --------------------------------------------------------------------------
 
 export interface CardHeaderProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
-  /** The header content to display in the card header area. */
   children?: React.ReactNode
-  /** The title text for the card header. */
   title?: string
-  /** The subtitle text for the card header. */
   subtitle?: string
-  /** Action element to display on the right side of the header. */
   action?: React.ReactNode
-  /** Avatar element to display on the left side of the header. */
   avatar?: React.ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: CardStyles
+  styles?: {
+    theme?: string
+    padding?: string
+    [key: string]: any
+  }
 }
-
-// --------------------------------------------------------------------------
-// SACRED THEME BACKGROUND DECORATIONS
-// --------------------------------------------------------------------------
-
-const SacredBackground: React.FC<{
-  isVisible: boolean
-  isHovered: boolean
-}> = ({ isVisible, isHovered }) => {
-  if (!isVisible) return null
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    >
-      {/* Sacred Glyphs Background */}
-      <SacredBackgroundGlyphs isHovered={isHovered} />
-
-      {/* Shimmer effect on hover */}
-      {isHovered && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '100%',
-            height: '100%',
-            background:
-              'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-            animation: 'sacredShimmer 1.5s ease-in-out',
-            zIndex: 1,
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-const SacredBackgroundGlyphs: React.FC<{ isHovered: boolean }> = ({
-  isHovered,
-}) => {
-  const [randoms, setRandoms] = React.useState(
-    Array.from({ length: 4 }, () => ({
-      fontSize: 16,
-      left: '50%',
-      top: '50%',
-      rotation: 0,
-      duration: 60,
-    }))
-  )
-
-  React.useEffect(() => {
-    setRandoms(
-      Array.from({ length: 4 }, () => ({
-        fontSize: Math.random() * 20 + 12,
-        left: `${Math.random() * 80 + 10}%`,
-        top: `${Math.random() * 80 + 10}%`,
-        rotation: Math.random() * 360,
-        duration: Math.random() * 40 + 60,
-      }))
-    )
-  }, [])
-
-  return (
-    <>
-      {SACRED_GLYPHS.slice(0, 4).map((glyph: string, index: number) => (
-        <div
-          key={index}
-          style={{
-            position: 'absolute',
-            fontSize: randoms[index]?.fontSize ?? 16,
-            opacity: isHovered ? 0.08 : 0.03,
-            color: '#FFD700',
-            left: randoms[index]?.left ?? '50%',
-            top: randoms[index]?.top ?? '50%',
-            transform: `rotate(${randoms[index]?.rotation ?? 0}deg)`,
-            userSelect: 'none',
-            transition: 'opacity 0.3s ease',
-            animation: `sacredGlyphRotate ${randoms[index]?.duration ?? 60}s linear infinite`,
-          }}
-        >
-          {glyph}
-        </div>
-      ))}
-    </>
-  )
-}
-
-// --------------------------------------------------------------------------
-// MAIN CARD COMPONENT
-// --------------------------------------------------------------------------
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, styles, elevation = 1, className, ...restProps }, ref) => {
@@ -172,14 +58,30 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     const isDisabled = styles?.disabled
     const isSacredTheme = styles?.theme === 'sacred'
 
-    React.useEffect(() => {
-      injectKeyframes()
-    }, [])
+    const getElevationShadow = (level: number, hovered: boolean) => {
+      const baseLevel = hovered ? level + 2 : level
+      if (isSacredTheme) {
+        return `0 ${baseLevel * 2}px ${baseLevel * 8}px ${alpha(SACRED_GOLD, 0.2)}`
+      }
+      return `0 ${baseLevel}px ${baseLevel * 4}px rgba(0, 0, 0, 0.1)`
+    }
 
-    const computedStyles = useMemo(
-      () => getCardStyles(styles, isHovered, isDisabled, elevation),
-      [styles, isHovered, isDisabled, elevation]
-    )
+    const containerStyle: React.CSSProperties = {
+      position: 'relative',
+      width: styles?.width || '100%',
+      height: styles?.height || 'auto',
+      padding: styles?.padding || '0',
+      borderRadius: styles?.borderRadius || '12px',
+      backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.85)' : '#ffffff',
+      border: isSacredTheme
+        ? `1px solid ${alpha(SACRED_GOLD, isHovered ? 0.5 : 0.3)}`
+        : '1px solid rgba(0, 0, 0, 0.12)',
+      boxShadow: getElevationShadow(elevation, isHovered),
+      transition: 'all 0.3s ease',
+      overflow: 'hidden',
+      cursor: isDisabled ? 'not-allowed' : 'default',
+      opacity: isDisabled ? 0.6 : 1,
+    }
 
     const handleMouseEnter = () => {
       if (!isDisabled) setIsHovered(true)
@@ -193,16 +95,12 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={className}
-        style={computedStyles.container}
+        style={containerStyle}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         {...restProps}
       >
-        {/* Sacred theme background decorations */}
-        <SacredBackground isVisible={isSacredTheme} isHovered={isHovered} />
-
-        {/* Main content */}
-        <div style={{ position: 'relative', zIndex: 2 }}>{children}</div>
+        {children}
       </div>
     )
   }
@@ -210,21 +108,18 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card'
 
-// --------------------------------------------------------------------------
-// CARD CONTENT COMPONENT
-// --------------------------------------------------------------------------
-
 export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
   ({ children, styles, className, ...restProps }, ref) => {
-    const computedStyles = useMemo(() => getCardStyles(styles), [styles])
+    const isSacredTheme = styles?.theme === 'sacred'
+
+    const contentStyle: React.CSSProperties = {
+      padding: styles?.padding || '16px',
+      color: isSacredTheme ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+      fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
+    }
 
     return (
-      <div
-        ref={ref}
-        className={className}
-        style={computedStyles.content}
-        {...restProps}
-      >
+      <div ref={ref} className={className} style={contentStyle} {...restProps}>
         {children}
       </div>
     )
@@ -233,21 +128,23 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
 
 CardContent.displayName = 'CardContent'
 
-// --------------------------------------------------------------------------
-// CARD ACTIONS COMPONENT
-// --------------------------------------------------------------------------
-
 export const CardActions = forwardRef<HTMLDivElement, CardActionsProps>(
   ({ children, styles, className, ...restProps }, ref) => {
-    const computedStyles = useMemo(() => getCardStyles(styles), [styles])
+    const isSacredTheme = styles?.theme === 'sacred'
+
+    const actionsStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'center',
+      padding: styles?.padding || '8px 16px',
+      justifyContent: styles?.justifyContent || 'flex-end',
+      gap: '8px',
+      borderTop: isSacredTheme
+        ? `1px solid ${alpha(SACRED_GOLD, 0.2)}`
+        : '1px solid rgba(0, 0, 0, 0.12)',
+    }
 
     return (
-      <div
-        ref={ref}
-        className={className}
-        style={computedStyles.actions}
-        {...restProps}
-      >
+      <div ref={ref} className={className} style={actionsStyle} {...restProps}>
         {children}
       </div>
     )
@@ -255,10 +152,6 @@ export const CardActions = forwardRef<HTMLDivElement, CardActionsProps>(
 )
 
 CardActions.displayName = 'CardActions'
-
-// --------------------------------------------------------------------------
-// CARD HEADER COMPONENT
-// --------------------------------------------------------------------------
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   (
@@ -274,47 +167,36 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
     },
     ref
   ) => {
-    const computedStyles = useMemo(() => getCardStyles(styles), [styles])
-    const themeName = styles?.theme || 'light'
-    const subtitleColor =
-      themeName === 'sacred'
-        ? 'rgba(255, 215, 0, 0.75)'
-        : themeName === 'dark'
-          ? 'rgba(248, 250, 252, 0.7)'
-          : 'rgba(0, 0, 0, 0.6)'
+    const isSacredTheme = styles?.theme === 'sacred'
+
+    const headerStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'flex-start',
+      padding: styles?.padding || '16px',
+    }
+
+    const titleStyle: React.CSSProperties = {
+      fontSize: '1.25rem',
+      fontWeight: 500,
+      lineHeight: 1.6,
+      marginBottom: subtitle ? '4px' : 0,
+      color: isSacredTheme ? SACRED_GOLD : 'rgba(0, 0, 0, 0.87)',
+      fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
+    }
+
+    const subtitleStyle: React.CSSProperties = {
+      fontSize: '0.875rem',
+      lineHeight: 1.43,
+      color: isSacredTheme ? 'rgba(255, 215, 0, 0.75)' : 'rgba(0, 0, 0, 0.6)',
+      fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
+    }
 
     return (
-      <div
-        ref={ref}
-        className={className}
-        style={computedStyles.header}
-        {...restProps}
-      >
+      <div ref={ref} className={className} style={headerStyle} {...restProps}>
         {avatar && <div style={{ marginRight: '16px' }}>{avatar}</div>}
         <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-          {title && (
-            <div
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 500,
-                lineHeight: 1.6,
-                marginBottom: subtitle ? '4px' : 0,
-              }}
-            >
-              {title}
-            </div>
-          )}
-          {subtitle && (
-            <div
-              style={{
-                fontSize: '0.875rem',
-                color: subtitleColor,
-                lineHeight: 1.43,
-              }}
-            >
-              {subtitle}
-            </div>
-          )}
+          {title && <div style={titleStyle}>{title}</div>}
+          {subtitle && <div style={subtitleStyle}>{subtitle}</div>}
           {children}
         </div>
         {action && (

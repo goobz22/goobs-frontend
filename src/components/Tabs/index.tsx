@@ -46,7 +46,14 @@ const Tabs: React.FC<TabsProps> = ({
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
-    justifyContent: alignment === 'left' ? 'flex-start' : alignment === 'right' ? 'flex-end' : alignment === 'justify' ? 'space-between' : 'center',
+    justifyContent:
+      alignment === 'left'
+        ? 'flex-start'
+        : alignment === 'right'
+          ? 'flex-end'
+          : alignment === 'justify'
+            ? 'space-between'
+            : 'center',
     alignItems: 'center',
     gap: '8px',
     marginBottom: '16px',
@@ -109,8 +116,10 @@ export const Tab: React.FC<TabProps> = ({
 
   const getBackgroundColor = () => {
     if (disabled) return 'transparent'
-    if (isActive) return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.2)}, ${alpha(SACRED_GOLD, 0.1)})`
-    if (isHovered) return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.1)}, ${alpha(SACRED_GOLD, 0.05)})`
+    if (isActive)
+      return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.2)}, ${alpha(SACRED_GOLD, 0.1)})`
+    if (isHovered)
+      return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.1)}, ${alpha(SACRED_GOLD, 0.05)})`
     return 'transparent'
   }
 

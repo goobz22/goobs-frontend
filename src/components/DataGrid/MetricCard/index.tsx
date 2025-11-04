@@ -73,7 +73,9 @@ const MetricCard = memo(function MetricCard({
     color: isSacredTheme ? SACRED_GOLD : '#1976d2',
     padding: '8px',
     borderRadius: '8px',
-    backgroundColor: isSacredTheme ? alpha(SACRED_GOLD, 0.15) : 'rgba(25, 118, 210, 0.1)',
+    backgroundColor: isSacredTheme
+      ? alpha(SACRED_GOLD, 0.15)
+      : 'rgba(25, 118, 210, 0.1)',
     border: isSacredTheme ? `1px solid ${alpha(SACRED_GOLD, 0.3)}` : 'none',
     display: 'flex',
     alignItems: 'center',

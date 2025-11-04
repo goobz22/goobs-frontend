@@ -1,65 +1,34 @@
-/**
- * @fileoverview Defines the Accordion component, a collapsible content panel.
- * It supports both controlled and uncontrolled states, and features light, dark, and sacred themes.
- * Also supports menu items for navigation.
- */
 'use client'
+
 import React, {
   useState,
   useEffect,
-  useMemo,
   useCallback,
   type FC,
   type ReactNode,
 } from 'react'
 import Link from 'next/link'
-import ExpandMoreIcon from '../Icons/ExpandMore'
-import {
-  getAccordionStyles,
-  SACRED_GLYPHS,
-  type AccordionStyles,
-} from '../../theme'
+import { alpha } from '../../utils'
 
-// --------------------------------------------------------------------------
-// PROPS INTERFACE
-// --------------------------------------------------------------------------
+const SACRED_GOLD = '#FFD700'
 
 export interface AccordionProps {
-  /** Content displayed in the accordion header. */
   summary: ReactNode
-  /** Content displayed when the accordion is expanded. */
   details?: ReactNode
-  /** Controls the expanded state (for a controlled component). */
   expanded?: boolean
-  /** Sets the initial expanded state (for an uncontrolled component). */
   defaultExpanded?: boolean
-  /** Callback fired when the expanded state changes. */
   onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: AccordionStyles
-  /** Nesting level for indentation (0 = no indent, 1+ = progressively indented) */
+  styles?: {
+    disabled?: boolean
+    theme?: string
+    level?: number
+    [key: string]: any
+  }
   level?: number
-  /** Type of component: 'accordion' for expandable sections, 'menu' for clickable items */
   type?: 'accordion' | 'menu'
-  /** Callback fired when menu item is clicked (only used when type is 'menu') */
   onClick?: (event: React.SyntheticEvent) => void
-  /** URL for navigation (only used when type is 'menu') */
   href?: string
-  /** Whether the menu item is currently active (only used when type is 'menu') */
   isActive?: boolean
-}
-
-// --------------------------------------------------------------------------
-// HELPER HOOK for state management
-// --------------------------------------------------------------------------
-
-type UseAccordionStateArgs = {
-  expanded?: boolean | undefined
-  defaultExpanded?: boolean | undefined
-  onChange?:
-    | ((event: React.SyntheticEvent, expanded: boolean) => void)
-    | undefined
-  styles?: AccordionStyles | undefined
 }
 
 const useAccordionState = ({
@@ -67,7 +36,12 @@ const useAccordionState = ({
   defaultExpanded = false,
   onChange,
   styles,
-}: UseAccordionStateArgs) => {
+}: {
+  expanded?: boolean
+  defaultExpanded?: boolean
+  onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
+  styles?: AccordionProps['styles']
+}) => {
   const { current: isControlled } = React.useRef(
     controlledExpanded !== undefined
   )
@@ -96,157 +70,6 @@ const useAccordionState = ({
   return { expanded, handleToggle }
 }
 
-// --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
-// --------------------------------------------------------------------------
-
-const SacredGlyphs: FC<{
-  isExpanded: boolean
-  isHovered: boolean
-  isDisabled: boolean
-}> = ({ isExpanded, isHovered, isDisabled }) => {
-  const glyphStyles = useMemo(
-    () => ({
-      backgroundGlyphs: {
-        position: 'absolute' as const,
-        top: '8px',
-        right: '8px',
-        color: 'rgba(255, 215, 0, 0.2)',
-        fontSize: '12px',
-        animation: 'sacredFloat 3s ease-in-out infinite',
-        pointerEvents: 'none' as const,
-      },
-      glyph: {
-        position: 'absolute' as const,
-        color: 'rgba(255, 215, 0, 0.4)',
-        fontSize: '16px',
-        transition: 'all 0.3s ease',
-        opacity: 0,
-      },
-      glyphLeft: {
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphRight: {
-        right: '48px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphVisible: {
-        opacity: 1,
-      },
-      glyphExpanded: {
-        opacity: 1,
-        animation: 'sacredGlyphRotate 20s linear infinite',
-      },
-      decorativeGlyphs: {
-        position: 'absolute' as const,
-        bottom: '8px',
-        right: '16px',
-        display: 'flex',
-        gap: '4px',
-        opacity: 0.3,
-      },
-      decorativeGlyph: {
-        color: '#FFD700',
-        fontSize: '12px',
-        animation: 'sacredGlow 3s ease-in-out infinite',
-      },
-    }),
-    []
-  )
-
-  return (
-    <>
-      {/* Sacred background glyphs */}
-      <div style={glyphStyles.backgroundGlyphs}>{SACRED_GLYPHS[0]}</div>
-
-      {/* Left glyph */}
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphLeft,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-          ...(isExpanded && !isDisabled && glyphStyles.glyphExpanded),
-        }}
-      >
-        {SACRED_GLYPHS[3]}
-      </div>
-
-      {/* Right glyph */}
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphRight,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-          ...(isExpanded && !isDisabled && glyphStyles.glyphExpanded),
-        }}
-      >
-        {SACRED_GLYPHS[7]}
-      </div>
-    </>
-  )
-}
-
-const SacredDetailsDecorations: FC = () => {
-  const decorativeStyles = useMemo(
-    () => ({
-      decorativeGlyphs: {
-        position: 'absolute' as const,
-        bottom: '8px',
-        right: '16px',
-        display: 'flex',
-        gap: '4px',
-        opacity: 0.3,
-      },
-      decorativeGlyph: {
-        color: '#FFD700',
-        fontSize: '12px',
-        animation: 'sacredGlow 3s ease-in-out infinite',
-      },
-    }),
-    []
-  )
-
-  return (
-    <div style={decorativeStyles.decorativeGlyphs}>
-      <span
-        style={{
-          ...decorativeStyles.decorativeGlyph,
-          animationDelay: '0s',
-        }}
-      >
-        {SACRED_GLYPHS[20]}
-      </span>
-      <span
-        style={{
-          ...decorativeStyles.decorativeGlyph,
-          animationDelay: '1s',
-        }}
-      >
-        {SACRED_GLYPHS[21]}
-      </span>
-      <span
-        style={{
-          ...decorativeStyles.decorativeGlyph,
-          animationDelay: '2s',
-        }}
-      >
-        {SACRED_GLYPHS[22]}
-      </span>
-    </div>
-  )
-}
-
-// --------------------------------------------------------------------------
-// MAIN ACCORDION COMPONENT
-// --------------------------------------------------------------------------
-
-/**
- * A collapsible content panel that supports multiple themes and controlled/uncontrolled states.
- * Also supports menu items for navigation.
- */
 const Accordion: FC<AccordionProps> = props => {
   const {
     summary,
@@ -263,130 +86,142 @@ const Accordion: FC<AccordionProps> = props => {
     ...rest
   } = props
 
-  const { expanded, handleToggle } = useAccordionState({
-    expanded: controlledExpanded,
-    defaultExpanded,
-    onChange,
-    styles,
-  })
+  const stateConfig: {
+    expanded?: boolean
+    defaultExpanded?: boolean
+    onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
+    styles?: typeof styles
+  } = {}
+
+  if (controlledExpanded !== undefined) {
+    stateConfig.expanded = controlledExpanded
+  }
+  if (defaultExpanded !== undefined) {
+    stateConfig.defaultExpanded = defaultExpanded
+  }
+  if (onChange !== undefined) {
+    stateConfig.onChange = onChange
+  }
+  if (styles !== undefined) {
+    stateConfig.styles = styles
+  }
+
+  const { expanded, handleToggle } = useAccordionState(stateConfig)
   const [isHovered, setIsHovered] = useState(false)
 
-  const computedStyles = useMemo(() => {
-    // Pass level through styles to the theme system
-    const stylesWithLevel = {
-      ...styles,
-      level,
-    }
-    return getAccordionStyles(
-      stylesWithLevel,
-      isHovered,
-      expanded,
-      styles?.disabled
-    )
-  }, [styles, level, isHovered, expanded])
-
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isMenuType = type === 'menu'
+  const disabled = styles?.disabled || false
 
   const handleClick = useCallback(
     (event: React.SyntheticEvent) => {
-      if (styles?.disabled) return
-
-      if (type === 'menu') {
+      if (disabled) return
+      if (isMenuType) {
         onClick?.(event)
       } else {
         handleToggle(event)
       }
     },
-    [type, onClick, handleToggle, styles?.disabled]
+    [isMenuType, onClick, handleToggle, disabled]
   )
 
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isMenuType = type === 'menu'
+  const containerStyle: React.CSSProperties = {
+    position: 'relative',
+    marginBottom: '4px',
+    borderRadius: '8px',
+    backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.4)' : '#fff',
+    border: isSacredTheme
+      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
+      : '1px solid #e5e7eb',
+    transition: 'all 0.3s ease',
+    overflow: 'hidden',
+  }
 
-  // Add active state styling for menu items
-  const summaryStyleWithActive = useMemo(() => {
-    if (isMenuType && isActive) {
-      return {
-        ...computedStyles.summary,
-        backgroundColor: isSacredTheme
-          ? 'rgba(255, 215, 0, 0.15)'
-          : 'rgba(59, 130, 246, 0.1)',
-        color: isSacredTheme ? '#FFD700' : '#3B82F6',
-        fontWeight: 600,
-      }
-    }
-    return computedStyles.summary
-  }, [computedStyles.summary, isMenuType, isActive, isSacredTheme])
+  const summaryStyle: React.CSSProperties = {
+    position: 'relative',
+    padding: '12px',
+    paddingLeft: isMenuType ? `${16 + level * 20}px` : `${40 + level * 20}px`,
+    paddingRight: '24px',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor:
+      isActive && isMenuType
+        ? isSacredTheme
+          ? alpha(SACRED_GOLD, 0.15)
+          : 'rgba(59, 130, 246, 0.1)'
+        : isHovered && !disabled
+          ? isSacredTheme
+            ? alpha(SACRED_GOLD, 0.1)
+            : '#f9fafb'
+          : 'transparent',
+    color:
+      isActive && isMenuType
+        ? isSacredTheme
+          ? SACRED_GOLD
+          : '#3B82F6'
+        : isSacredTheme
+          ? 'rgba(255, 255, 255, 0.9)'
+          : '#111827',
+    fontWeight: isActive && isMenuType ? 600 : 400,
+    fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
+    whiteSpace: 'nowrap',
+    minWidth: 'fit-content',
+  }
+
+  const iconStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: `${8 + level * 20}px`,
+    top: '50%',
+    transform: `translateY(-50%) ${expanded ? 'rotate(180deg)' : 'rotate(0deg)'}`,
+    transition: 'transform 0.3s ease',
+    color: isSacredTheme ? SACRED_GOLD : '#6b7280',
+    width: '20px',
+    height: '20px',
+  }
+
+  const detailsStyle: React.CSSProperties = {
+    padding: '12px',
+    paddingLeft: `${24 + level * 20}px`,
+    color: isSacredTheme ? 'rgba(255, 255, 255, 0.8)' : '#374151',
+    fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
+    fontSize: '14px',
+    borderTop: isSacredTheme
+      ? `1px solid ${alpha(SACRED_GOLD, 0.2)}`
+      : '1px solid #e5e7eb',
+  }
+
+  const arrowIconSvg = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      style={iconStyle}
+    >
+      <path d="M7 10l5 5 5-5z" />
+    </svg>
+  )
 
   const summaryContent = (
     <div
-      style={summaryStyleWithActive}
+      style={summaryStyle}
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       role="button"
-      tabIndex={styles?.disabled ? -1 : 0}
+      tabIndex={disabled ? -1 : 0}
       aria-expanded={isMenuType ? undefined : expanded}
-      data-testid={isMenuType ? 'menu-item' : 'accordion-summary'}
       {...rest}
     >
-      {!isMenuType && (
-        <ExpandMoreIcon
-          styles={{ theme: styles?.theme || 'sacred' }}
-          style={{
-            ...computedStyles.icon,
-            position: 'absolute',
-            left: '8px',
-            top: '50%',
-            transform: `translateY(-50%) ${computedStyles.icon.transform || ''}`,
-            zIndex: 1,
-          }}
-        />
-      )}
-      {isSacredTheme && (
-        <div
-          style={{
-            flex: 1,
-            paddingLeft: isMenuType ? '16px' : '40px',
-            paddingRight: '24px',
-            whiteSpace: 'nowrap',
-            minWidth: 'fit-content',
-          }}
-        >
-          {summary}
-        </div>
-      )}
-      {!isSacredTheme && (
-        <div
-          style={{
-            flex: 1,
-            paddingLeft: isMenuType ? '16px' : '30px',
-            whiteSpace: 'nowrap',
-            minWidth: 'fit-content',
-          }}
-        >
-          {summary}
-        </div>
-      )}
+      {!isMenuType && arrowIconSvg}
+      {summary}
     </div>
   )
 
   return (
-    <div style={computedStyles.container}>
-      {isSacredTheme && !isMenuType && (
-        <SacredGlyphs
-          isExpanded={!!expanded}
-          isHovered={isHovered}
-          isDisabled={!!styles?.disabled}
-        />
-      )}
-
+    <div style={containerStyle}>
       {isMenuType && href ? (
         <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
           {summaryContent}
@@ -396,10 +231,7 @@ const Accordion: FC<AccordionProps> = props => {
       )}
 
       {!isMenuType && expanded && details && (
-        <div style={computedStyles.details}>
-          <div style={{ position: 'relative', zIndex: 1 }}>{details}</div>
-          {isSacredTheme && <SacredDetailsDecorations />}
-        </div>
+        <div style={detailsStyle}>{details}</div>
       )}
     </div>
   )

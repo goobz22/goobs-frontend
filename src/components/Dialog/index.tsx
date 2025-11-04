@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { getDialogStyles, type DialogStyles } from '../../theme/dialog'
+import { alpha } from '../../utils'
 
-// Hook to detect screen size for responsive behavior
+const SACRED_GOLD = '#FFD700'
+
 const useScreenSize = () => {
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>(
     'desktop'
@@ -20,13 +21,8 @@ const useScreenSize = () => {
       }
     }
 
-    // Check on mount
     checkScreenSize()
-
-    // Add event listener
     window.addEventListener('resize', checkScreenSize)
-
-    // Cleanup
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
@@ -34,17 +30,20 @@ const useScreenSize = () => {
 }
 
 export interface DialogProps {
-  /** Whether the dialog is open */
   open: boolean
-  /** Function to call when the dialog should close */
   onClose: () => void
-  /** The content to display in the dialog */
   children: React.ReactNode
-  /** Custom styles to apply to the dialog using the theme system */
-  styles?: DialogStyles
-  /** Custom dialog styles for positioning (used for dragging) */
+  styles?: {
+    theme?: string
+    maxWidth?: string
+    width?: string
+    height?: string
+    maxHeight?: string
+    padding?: string
+    borderRadius?: string
+    [key: string]: any
+  }
   customDialogStyles?: React.CSSProperties
-  /** Data attribute for dialog paper (used for drag detection) */
   dataDialogPaper?: boolean
 }
 
@@ -59,6 +58,8 @@ const Dialog: React.FC<DialogProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null)
   const styleRef = useRef<HTMLStyleElement | null>(null)
   const screenSize = useScreenSize()
+
+  const isSacredTheme = styles?.theme === 'sacred'
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -79,28 +80,55 @@ const Dialog: React.FC<DialogProps> = ({
   }, [open, onClose])
 
   useEffect(() => {
-    // Inject scrollbar CSS and handle scroll behavior when dialog opens
     if (open) {
-      const computedStyles = getDialogStyles(styles, screenSize)
-
-      // Remove existing style if it exists
+      // Inject custom scrollbar styles
       if (styleRef.current) {
         document.head.removeChild(styleRef.current)
       }
 
-      // Create and inject new style
+      const scrollbarCSS = isSacredTheme
+        ? `
+          .dialog-content::-webkit-scrollbar {
+            width: 8px;
+          }
+          .dialog-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+          }
+          .dialog-content::-webkit-scrollbar-thumb {
+            background: ${alpha(SACRED_GOLD, 0.5)};
+            border-radius: 4px;
+          }
+          .dialog-content::-webkit-scrollbar-thumb:hover {
+            background: ${alpha(SACRED_GOLD, 0.7)};
+          }
+        `
+        : `
+          .dialog-content::-webkit-scrollbar {
+            width: 8px;
+          }
+          .dialog-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+          .dialog-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+          }
+          .dialog-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
+        `
+
       const styleElement = document.createElement('style')
-      styleElement.textContent = computedStyles.scrollbarCSS
+      styleElement.textContent = scrollbarCSS
       document.head.appendChild(styleElement)
       styleRef.current = styleElement
 
-      // Block body scroll when dialog is open
       document.body.style.overflow = 'hidden'
 
-      // Handle scroll events on backdrop to redirect to dialog content
       const handleWheelEvent = (event: WheelEvent) => {
         if (dialogRef.current) {
-          // Try multiple selectors to find the scrollable content
           let scrollableContent = dialogRef.current.querySelector(
             'div[style*="overflow-y: auto"]'
           ) as HTMLElement
@@ -110,14 +138,12 @@ const Dialog: React.FC<DialogProps> = ({
             ) as HTMLElement
           }
           if (!scrollableContent) {
-            // Fallback to the first child div (content wrapper)
             scrollableContent = dialogRef.current.querySelector(
               'div'
             ) as HTMLElement
           }
 
           if (scrollableContent) {
-            // Check if content is scrollable and has room to scroll
             const hasVerticalScrollbar =
               scrollableContent.scrollHeight > scrollableContent.clientHeight
             if (hasVerticalScrollbar) {
@@ -130,7 +156,6 @@ const Dialog: React.FC<DialogProps> = ({
                 (event.deltaY > 0 && canScrollDown) ||
                 (event.deltaY < 0 && canScrollUp)
               ) {
-                // Redirect scroll to the dialog content
                 scrollableContent.scrollTop += event.deltaY
                 event.preventDefault()
               }
@@ -139,7 +164,6 @@ const Dialog: React.FC<DialogProps> = ({
         }
       }
 
-      // Add wheel event listener to backdrop and dialog
       const backdrop = dialogRef.current?.parentElement
       const dialog = dialogRef.current
 
@@ -147,15 +171,12 @@ const Dialog: React.FC<DialogProps> = ({
         backdrop.addEventListener('wheel', handleWheelEvent, { passive: false })
       }
 
-      // Also add to dialog itself for direct popup scrolling
       if (dialog) {
         dialog.addEventListener('wheel', handleWheelEvent, { passive: false })
       }
 
       return () => {
-        // Restore body scroll
         document.body.style.overflow = ''
-        // Remove wheel event listeners
         if (backdrop) {
           backdrop.removeEventListener('wheel', handleWheelEvent)
         }
@@ -165,38 +186,85 @@ const Dialog: React.FC<DialogProps> = ({
       }
     }
 
-    // Cleanup on unmount or when dialog closes
     return () => {
       if (styleRef.current && document.head.contains(styleRef.current)) {
         document.head.removeChild(styleRef.current)
         styleRef.current = null
       }
-      // Ensure body scroll is restored
       document.body.style.overflow = ''
     }
-  }, [open, styles, screenSize])
+  }, [open, isSacredTheme])
 
   if (!open) {
     return null
   }
 
-  const computedStyles = getDialogStyles(styles, screenSize)
+  const getMaxWidth = () => {
+    if (screenSize === 'mobile') return '95vw'
+    if (screenSize === 'tablet') return '80vw'
+    return styles?.maxWidth || '600px'
+  }
+
+  const getMaxHeight = () => {
+    if (screenSize === 'mobile') return '90vh'
+    return styles?.maxHeight || '80vh'
+  }
+
+  const backdropStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: isSacredTheme
+      ? 'rgba(0, 0, 0, 0.85)'
+      : 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    padding: '16px',
+  }
+
+  const dialogStyle: React.CSSProperties = {
+    position: 'relative',
+    backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.95)' : '#ffffff',
+    border: isSacredTheme
+      ? `2px solid ${alpha(SACRED_GOLD, 0.5)}`
+      : '1px solid rgba(0, 0, 0, 0.12)',
+    borderRadius: styles?.borderRadius || '12px',
+    boxShadow: isSacredTheme
+      ? `0 8px 32px ${alpha(SACRED_GOLD, 0.3)}`
+      : '0 8px 32px rgba(0, 0, 0, 0.2)',
+    maxWidth: getMaxWidth(),
+    width: styles?.width || '100%',
+    maxHeight: getMaxHeight(),
+    height: styles?.height || 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  }
+
+  const contentStyle: React.CSSProperties = {
+    padding: styles?.padding || '24px',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    color: isSacredTheme ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+    fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
+  }
 
   return (
-    <div style={computedStyles.backdrop} onClick={onClose}>
+    <div style={backdropStyle} onClick={onClose}>
       <div
         ref={dialogRef}
         style={{
-          ...computedStyles.dialog,
+          ...dialogStyle,
           ...customDialogStyles,
         }}
         onClick={e => e.stopPropagation()}
         data-dialog-paper={dataDialogPaper ? 'true' : undefined}
       >
-        <div
-          className={computedStyles.contentClassName}
-          style={computedStyles.content}
-        >
+        <div className="dialog-content" style={contentStyle}>
           {children}
         </div>
       </div>

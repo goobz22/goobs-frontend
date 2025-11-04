@@ -5,7 +5,8 @@ import { alpha } from '../../utils'
 
 const SACRED_GOLD = '#FFD700'
 
-export interface DividerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface DividerProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
   children?: React.ReactNode
   styles?: {
     orientation?: 'horizontal' | 'vertical'
@@ -23,23 +24,24 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
   ({ children, styles, ...restProps }, ref) => {
     const orientation = styles?.orientation || 'horizontal'
 
-    const containerStyle: React.CSSProperties = orientation === 'horizontal'
-      ? {
-          width: styles?.width || '100%',
-          height: styles?.height || '2px',
-          background: `linear-gradient(90deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
-          margin: styles?.margin || '24px 0',
-          marginTop: styles?.marginTop,
-          marginBottom: styles?.marginBottom,
-          position: 'relative',
-        }
-      : {
-          width: styles?.width || '2px',
-          height: styles?.height || '100%',
-          background: `linear-gradient(180deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
-          margin: styles?.margin || '0 24px',
-          position: 'relative',
-        }
+    const containerStyle: React.CSSProperties =
+      orientation === 'horizontal'
+        ? {
+            width: styles?.width || '100%',
+            height: styles?.height || '2px',
+            background: `linear-gradient(90deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
+            margin: styles?.margin || '24px 0',
+            marginTop: styles?.marginTop,
+            marginBottom: styles?.marginBottom,
+            position: 'relative',
+          }
+        : {
+            width: styles?.width || '2px',
+            height: styles?.height || '100%',
+            background: `linear-gradient(180deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
+            margin: styles?.margin || '0 24px',
+            position: 'relative',
+          }
 
     const contentStyle: React.CSSProperties = {
       position: 'absolute',
