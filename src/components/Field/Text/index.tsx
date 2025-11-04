@@ -1,242 +1,94 @@
-/**
- * @fileoverview Defines the TextField component, a modern and themeable input field.
- * It supports "light", "dark", and "sacred" themes, adornments, floating labels, and error states.
- * This component is built using standard React hooks for state management and a comprehensive theme system.
- */
 'use client'
-import React, { useRef, useMemo, useState, useCallback } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../theme'
 
-// --------------------------------------------------------------------------
-// TYPE DEFINITIONS
-// --------------------------------------------------------------------------
+import React, { useState, useRef, useCallback } from 'react'
+import { alpha } from '../../../utils'
 
-export interface TextFieldProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    | 'value'
-    | 'defaultValue'
-    | 'onChange'
-    | 'onFocus'
-    | 'onBlur'
-    | 'disabled'
-    | 'required'
-  > {
-  /** The value of the input. */
+const SACRED_GOLD = '#FFD700'
+
+export interface TextFieldProps {
   value: string
-  /** Callback fired when the value changes. */
   onChange: (value: string) => void
-  /** Callback fired when the input is focused. */
-  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
-  /** Callback fired when the input loses focus. */
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
-  /** Helper text to display (can be error or info based on styles.helperTextType). */
-  helperText?: string
-  /** A React node to display at the start of the input. */
-  startAdornment?: React.ReactNode
-  /** A React node to display at the end of the input. */
-  endAdornment?: React.ReactNode
-  /** The label for the input. Can be a string or a React node. */
+  onFocus?: (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
+  onBlur?: (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
+  onKeyDown?: (
+    event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
   label?: React.ReactNode
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: FormFieldStyles
-}
-
-// --------------------------------------------------------------------------
-// AUTOFILL STYLING INJECTION
-// --------------------------------------------------------------------------
-
-// One-time global autofill style injection to handle browser autofill styling
-let textFieldAutofillStylesInjected = false
-const injectTextFieldAutofillStyles = () => {
-  if (textFieldAutofillStylesInjected) return
-  if (typeof document === 'undefined') return
-  try {
-    const styleId = 'textfield-autofill-styles'
-    if (document.getElementById(styleId)) {
-      textFieldAutofillStylesInjected = true
-      return
-    }
-    const style = document.createElement('style')
-    style.id = styleId
-    style.textContent = `
-      /* Override browser autofill styling to maintain theme consistency */
-      input:-webkit-autofill,
-      input:-webkit-autofill:hover,
-      input:-webkit-autofill:focus,
-      input:-webkit-autofill:active {
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: inherit !important;
-        background-color: transparent !important;
-        background-image: none !important;
-        box-shadow: none !important;
-        transition: background-color 0s 600000s, color 0s 600000s !important;
-      }
-      
-      /* Additional autofill override for Firefox */
-      input:-moz-autofill,
-      input:-moz-autofill-preview {
-        background-color: transparent !important;
-        color: inherit !important;
-        filter: none !important;
-      }
-      
-      /* Override Edge autofill */
-      input:-ms-input-placeholder {
-        color: inherit !important;
-      }
-    `
-    document.head.appendChild(style)
-    textFieldAutofillStylesInjected = true
-  } catch {
-    // Ignore DOM errors in SSR
+  helperText?: string
+  startAdornment?: React.ReactNode
+  endAdornment?: React.ReactNode
+  placeholder?: string | undefined
+  type?: string
+  multiline?: boolean
+  minRows?: number
+  styles?: {
+    disabled?: boolean
+    required?: boolean
+    theme?: string
+    width?: string
+    minWidth?: string
+    maxWidth?: string
+    height?: string
+    minHeight?: string
+    maxHeight?: string
+    marginTop?: string
+    marginBottom?: string
+    marginLeft?: string
+    marginRight?: string
+    padding?: string
+    paddingLeft?: string
+    paddingRight?: string
+    paddingTop?: string
+    paddingBottom?: string
+    fontSize?: string
+    fontWeight?: string | number
+    lineHeight?: string
+    borderWidth?: string
+    borderRadius?: string
+    startAdornmentOffset?: string
+    endAdornmentOffset?: string
+    helperTextType?: 'error' | 'info'
+    requiredIndicatorText?: string
+    [key: string]: any
   }
 }
 
-// --------------------------------------------------------------------------
-// STYLING LOGIC
-// --------------------------------------------------------------------------
-
-const getStyles = (
-  styles?: FormFieldStyles,
-  isFocused?: boolean,
-  hasStartAdornment?: boolean,
-  hasEndAdornment?: boolean
-) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: {
-      position: 'relative',
-      width: styles?.width || '100%',
-      minWidth: styles?.minWidth,
-      maxWidth: styles?.maxWidth,
-      height: styles?.height || 'auto',
-      minHeight: styles?.minHeight,
-      maxHeight: styles?.maxHeight,
-      marginTop: styles?.marginTop || '0',
-      marginLeft: styles?.marginLeft,
-      marginRight: styles?.marginRight,
-      textTransform: 'none',
-      // Apply marginBottom last to ensure it's not overridden
-      marginBottom: styles?.marginBottom || '0',
-    },
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      borderWidth: styles?.borderWidth || '1px',
-      borderStyle: 'solid',
-      borderColor: borderColor,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px',
-      paddingLeft:
-        styles?.paddingLeft ||
-        (hasStartAdornment ? styles?.startAdornmentOffset || '48px' : '16px'),
-      paddingRight:
-        styles?.paddingRight ||
-        (hasEndAdornment ? styles?.endAdornmentOffset || '48px' : '16px'),
-      paddingTop: styles?.paddingTop || '8px',
-      paddingBottom: styles?.paddingBottom || '8px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    adornment: getSharedAdornmentStyles(adornmentColor),
-    startAdornment: { left: '16px' },
-    endAdornment: { right: '16px' },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
-}
-
-// --------------------------------------------------------------------------
-// TEXTFIELD COMPONENT
-// --------------------------------------------------------------------------
-
-const TextField: React.FC<TextFieldProps> = props => {
-  const {
-    value,
-    onChange,
-    onFocus,
-    onBlur,
-    helperText,
-    startAdornment,
-    endAdornment,
-    label,
-    styles,
-    ...rest
-  } = props
-
-  // Inject autofill styles on first render
-  injectTextFieldAutofillStyles()
-
-  // Focus state management for styling
+const TextField: React.FC<TextFieldProps> = ({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  onKeyDown,
+  label,
+  helperText,
+  startAdornment,
+  endAdornment,
+  placeholder,
+  type = 'text',
+  multiline = false,
+  minRows = 3,
+  styles,
+}) => {
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Filter out non-HTML props that shouldn't be passed to the input element
-  const filteredProps = useMemo(() => {
-    const { sacredtheme, ...validProps } = rest as any
-    // sacredtheme is intentionally excluded from the props passed to the input
-    void sacredtheme
-    return validProps
-  }, [rest])
-
-  const computedStyles = useMemo(
-    () => getStyles(styles, isFocused, !!startAdornment, !!endAdornment),
-    [styles, isFocused, startAdornment, endAdornment]
-  )
-
-  const handleContainerClick = () => {
-    inputRef.current?.focus()
-  }
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value
-      onChange(newValue)
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange(e.target.value)
     },
     [onChange]
   )
 
   const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
+    (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setIsFocused(true)
       onFocus?.(e)
     },
@@ -244,23 +96,114 @@ const TextField: React.FC<TextFieldProps> = props => {
   )
 
   const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
+    (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setIsFocused(false)
       onBlur?.(e)
     },
     [onBlur]
   )
 
+  const handleContainerClick = () => {
+    if (multiline) {
+      textareaRef.current?.focus()
+    } else {
+      inputRef.current?.focus()
+    }
+  }
+
+  const hasStartAdornment = !!startAdornment
+  const hasEndAdornment = !!endAdornment
+
+  const containerStyle: React.CSSProperties = {
+    position: 'relative',
+    width: styles?.width || '100%',
+    minWidth: styles?.minWidth,
+    maxWidth: styles?.maxWidth,
+    height: styles?.height || 'auto',
+    minHeight: styles?.minHeight,
+    maxHeight: styles?.maxHeight,
+    marginTop: styles?.marginTop || '0',
+    marginBottom: styles?.marginBottom || '16px',
+    marginLeft: styles?.marginLeft,
+    marginRight: styles?.marginRight,
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    marginBottom: '8px',
+    color: SACRED_GOLD,
+    fontSize: '14px',
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.05em',
+  }
+
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: multiline ? 'flex-start' : 'center',
+    width: '100%',
+    minHeight: multiline ? undefined : styles?.height || '40px',
+    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
+    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    borderRadius: styles?.borderRadius || '8px',
+    transition: 'all 0.3s ease',
+    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
+    boxSizing: 'border-box',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: multiline ? undefined : '100%',
+    minHeight: multiline ? `${minRows * 1.5}em` : undefined,
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    padding: styles?.padding || '8px 16px',
+    paddingLeft:
+      styles?.paddingLeft ||
+      (hasStartAdornment ? styles?.startAdornmentOffset || '48px' : '16px'),
+    paddingRight:
+      styles?.paddingRight ||
+      (hasEndAdornment ? styles?.endAdornmentOffset || '48px' : '16px'),
+    paddingTop: styles?.paddingTop || '8px',
+    paddingBottom: styles?.paddingBottom || '8px',
+    fontSize: styles?.fontSize || '16px',
+    fontWeight: styles?.fontWeight,
+    lineHeight: styles?.lineHeight,
+    fontFamily: '"Crimson Text", serif',
+    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+    boxSizing: 'border-box',
+    resize: multiline ? 'vertical' : undefined,
+  }
+
+  const adornmentStyle: React.CSSProperties = {
+    position: 'absolute',
+    display: 'flex',
+    alignItems: 'center',
+    color: SACRED_GOLD,
+    pointerEvents: 'none',
+  }
+
+  const helperTextStyle: React.CSSProperties = {
+    marginTop: '4px',
+    fontSize: '12px',
+    color:
+      styles?.helperTextType === 'error'
+        ? '#ff6b6b'
+        : 'rgba(255, 255, 255, 0.6)',
+    fontFamily: '"Crimson Text", serif',
+  }
+
   return (
-    <div style={computedStyles.container}>
+    <div style={containerStyle}>
       {label && (
-        <label style={computedStyles.label}>
+        <label style={labelStyle}>
           {typeof label === 'string' ? (
             <>
               {label}
-              {styles?.required && (
-                <span style={getRequiredIndicatorStyle(styles)}>
-                  {styles?.requiredIndicatorText || ' *'}
+              {required && (
+                <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
+                  {styles?.requiredIndicatorText || '*'}
                 </span>
               )}
             </>
@@ -270,42 +213,60 @@ const TextField: React.FC<TextFieldProps> = props => {
         </label>
       )}
 
-      <div style={computedStyles.inputWrapper} onClick={handleContainerClick}>
+      <div style={inputWrapperStyle} onClick={handleContainerClick}>
         {startAdornment && (
           <div
             style={{
-              ...computedStyles.adornment,
-              ...computedStyles.startAdornment,
+              ...adornmentStyle,
+              left: '16px',
             }}
           >
             {startAdornment}
           </div>
         )}
 
-        <input
-          ref={inputRef}
-          {...filteredProps}
-          {...getRequiredProps(styles?.required)}
-          value={value || ''}
-          disabled={styles?.disabled}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          style={computedStyles.input}
-        />
+        {multiline ? (
+          <textarea
+            ref={textareaRef}
+            value={value || ''}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onKeyDown={onKeyDown}
+            disabled={disabled}
+            required={required}
+            placeholder={placeholder}
+            style={inputStyle}
+          />
+        ) : (
+          <input
+            ref={inputRef}
+            type={type}
+            value={value || ''}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onKeyDown={onKeyDown}
+            disabled={disabled}
+            required={required}
+            placeholder={placeholder}
+            style={inputStyle}
+          />
+        )}
 
         {endAdornment && (
           <div
             style={{
-              ...computedStyles.adornment,
-              ...computedStyles.endAdornment,
+              ...adornmentStyle,
+              right: '16px',
             }}
           >
             {endAdornment}
           </div>
         )}
       </div>
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
+
+      {helperText && <div style={helperTextStyle}>{helperText}</div>}
     </div>
   )
 }
