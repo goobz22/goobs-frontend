@@ -47,7 +47,7 @@ function Card({
   permissions,
 }: CardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const longPressTimer = useRef<NodeJS.Timeout | undefined>(undefined)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const rowId = String(row._id ?? row.id ?? '')
 
   const theme = styles?.theme || 'sacred'

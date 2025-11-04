@@ -234,7 +234,6 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                     ? {}
                     : { onDelete: () => handleToggle(selectedValue) })}
                   styles={{
-                    theme: styles?.theme || 'light',
                     padding: '6px 12px',
                     height: 'auto',
                     fontSize: '14px',

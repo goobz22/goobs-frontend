@@ -25,11 +25,6 @@ export {
   type RadioOption,
   type RadioGroupProps,
 } from './components/RadioGroup'
-export { default as Popup, type PopupProps } from './components/Form/Popup'
-export {
-  default as CustomDialog,
-  type CustomDialogProps,
-} from './components/Form/Dialog'
 export { default as Dialog, type DialogProps } from './components/Dialog'
 export { default as CodeCopy, type CodeCopyProps } from './components/CodeCopy'
 export {

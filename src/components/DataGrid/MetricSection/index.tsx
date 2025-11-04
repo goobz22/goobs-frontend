@@ -78,7 +78,7 @@ const useScreenSize = () => {
     checkScreenSize()
 
     // Debounce resize events to prevent excessive re-renders
-    let timeoutId: NodeJS.Timeout
+    let timeoutId: ReturnType<typeof setTimeout>
     const debouncedCheckScreenSize = () => {
       clearTimeout(timeoutId)
       timeoutId = setTimeout(checkScreenSize, 150)
