@@ -1,17 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import {
-  getDropdownStyles,
-  getRequiredIndicatorStyle,
-  type DropdownStyles,
-} from '../../../../theme'
-import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { alpha } from '../../../../utils'
+
+const SACRED_GOLD = '#FFD700'
 
 export interface DropdownOption {
   value: string | number
-  attribute1?: string
-  attribute2?: string
   _id?: string
 }
 
@@ -22,168 +17,309 @@ export interface SearchableSimpleProps {
   onChange?: (value: DropdownOption | null) => void
   placeholder?: string
   helperText?: string
-  styles?: DropdownStyles
+  styles?: {
+    disabled?: boolean
+    required?: boolean
+    theme?: string
+    [key: string]: any
+  }
 }
-
-const capitalizeText = (text: string) => {
-  return text
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-}
-
-const getStyles = (
-  styles?: DropdownStyles,
-  isOpen?: boolean,
-  isFocused?: boolean
-) => getDropdownStyles(styles, isOpen, isFocused)
 
 const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   label,
   options,
   defaultValue,
   onChange,
-  placeholder,
+  placeholder = 'Select...',
   helperText,
   styles,
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedOption, setSelectedOption] = useState<DropdownOption | null>(
-    null
-  )
-  const containerRef = useRef<HTMLDivElement>(null)
-  // const inputRef = useRef<HTMLInputElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [value, setValue] = useState<string | number>('')
 
-  const componentStyles = getStyles(styles, isOpen, false)
-  const triggerStyle: React.CSSProperties = {
-    ...componentStyles.trigger,
-    boxSizing: 'border-box',
-    height: styles?.height || '40px',
-    minHeight: styles?.minHeight || '40px',
-  }
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
+  // Set initial value from defaultValue
   useEffect(() => {
-    const defaultOption = options.find(option => option.value === defaultValue)
-    if (defaultOption) {
-      setSelectedOption(defaultOption)
+    if (defaultValue !== undefined && defaultValue !== null) {
+      setValue(defaultValue)
     }
-  }, [defaultValue, options])
+  }, [defaultValue])
 
-  useEffect(() => {
-    // Inject scrollbar styles
-    const styleId = 'dropdown-scrollbar-styles'
-    let styleElement = document.getElementById(styleId)
+  // Use useMemo to filter options based on search term
+  const filteredOptions = useMemo(() => {
+    const filtered = searchTerm
+      ? options.filter(option =>
+          String(option.value).toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : options
 
-    if (!styleElement) {
-      styleElement = document.createElement('style')
-      styleElement.id = styleId
-      document.head.appendChild(styleElement)
-    }
+    // Limit to first 100 results for performance
+    return filtered.slice(0, 100)
+  }, [searchTerm, options])
 
-    styleElement.textContent = componentStyles.scrollbarStyles
-
-    return () => {
-      // Clean up when component unmounts
-      const element = document.getElementById(styleId)
-      if (element) {
-        element.remove()
-      }
-    }
-  }, [componentStyles.scrollbarStyles])
-
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false)
+        setSearchTerm('')
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   const handleSelect = (option: DropdownOption) => {
-    setSelectedOption(option)
-    setIsOpen(false)
+    setValue(option.value)
     onChange?.(option)
+    setIsOpen(false)
+    setSearchTerm('')
   }
 
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   // Disabled for now - pure dropdown
-  // }
-
-  // const handleInputFocus = () => {
-  //   // Disabled for now - pure dropdown
-  // }
-
-  // const handleArrowClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation()
-  //   setIsOpen(!isOpen)
-  //   if (!isOpen) {
-  //     inputRef.current?.focus()
-  //   }
-  // }
-
-  // const filteredOptions = options.filter(option =>
-  //   option.value && searchTerm
-  //     ? option.value.toLowerCase().includes(searchTerm.toLowerCase())
-  //     : Boolean(option.value)
-  // )
+  // Find option by either value or _id
+  const selectedOption = options.find(
+    opt =>
+      String(opt.value) === String(value) || String(opt._id) === String(value)
+  )
+  const displayValue = selectedOption?.value || value || placeholder
 
   return (
-    <div style={componentStyles.container} ref={containerRef}>
+    <div
+      ref={dropdownRef}
+      style={{ position: 'relative', width: '100%', marginBottom: '16px' }}
+    >
+      {/* Label */}
       {label && (
-        <label style={componentStyles.label}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '8px',
+            color: SACRED_GOLD,
+            fontSize: '14px',
+            fontFamily: '"Cinzel", serif',
+            letterSpacing: '0.05em',
+          }}
+        >
           {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
+          {required && (
+            <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
           )}
         </label>
       )}
 
-      <div style={{ position: 'relative', width: '100%' }}>
-        <select
-          value={selectedOption?.value || ''}
-          onChange={e => {
-            const option = options.find(opt => opt.value === e.target.value)
-            if (option) {
-              handleSelect(option)
-            }
-          }}
+      {/* Dropdown Button */}
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          backgroundColor: disabled
+            ? 'rgba(0, 0, 0, 0.3)'
+            : 'rgba(0, 0, 0, 0.6)',
+          border: `1px solid ${alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3)}`,
+          borderRadius: '8px',
+          color: disabled
+            ? 'rgba(255, 255, 255, 0.4)'
+            : 'rgba(255, 255, 255, 0.9)',
+          fontFamily: '"Crimson Text", serif',
+          fontSize: '16px',
+          textAlign: 'left',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          boxShadow: isOpen ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
+          outline: 'none',
+        }}
+        onMouseEnter={e => {
+          if (!disabled) {
+            e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.5)
+            e.currentTarget.style.boxShadow = `0 0 10px ${alpha(SACRED_GOLD, 0.2)}`
+          }
+        }}
+        onMouseLeave={e => {
+          if (!disabled && !isOpen) {
+            e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.3)
+            e.currentTarget.style.boxShadow = 'none'
+          }
+        }}
+      >
+        <span>{displayValue}</span>
+        <span
           style={{
-            ...triggerStyle,
-            width: '100%',
-            appearance: 'none',
-            paddingRight: '40px',
-            cursor: 'pointer',
+            marginLeft: '8px',
+            width: '0',
+            height: '0',
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: `5px solid ${SACRED_GOLD}`,
+            transition: 'transform 0.3s ease',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            display: 'inline-block',
           }}
-          disabled={styles?.disabled}
-        >
-          <option value="">{placeholder || 'Select...'}</option>
-          {options.map(option => (
-            <option key={option._id || option.value} value={option.value}>
-              {capitalizeText(option.attribute1 || String(option.value) || '')}
-            </option>
-          ))}
-        </select>
+        />
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && !disabled && (
         <div
           style={{
             position: 'absolute',
-            right: '12px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            pointerEvents: 'none',
+            top: '100%',
+            left: 0,
+            right: 0,
+            marginTop: '4px',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            border: `1px solid ${alpha(SACRED_GOLD, 0.4)}`,
+            borderRadius: '8px',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            zIndex: 1000,
+            boxShadow: `0 8px 32px ${alpha(SACRED_GOLD, 0.2)}`,
+            backdropFilter: 'blur(10px)',
           }}
         >
-          <ArrowDropDownIcon styles={{ theme: styles?.theme || 'sacred' }} />
-        </div>
-      </div>
+          {/* Search Input */}
+          <div
+            style={{
+              padding: '8px',
+              borderBottom: `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                border: `1px solid ${alpha(SACRED_GOLD, 0.3)}`,
+                borderRadius: '6px',
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontFamily: '"Crimson Text", serif',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.5)
+                e.currentTarget.style.boxShadow = `0 0 10px ${alpha(SACRED_GOLD, 0.2)}`
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.3)
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            />
+          </div>
 
-      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
+          {/* Options List */}
+          <div>
+            {filteredOptions.length === 0 ? (
+              <div
+                style={{
+                  padding: '12px 16px',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontFamily: '"Crimson Text", serif',
+                  textAlign: 'center',
+                }}
+              >
+                No options found
+              </div>
+            ) : (
+              filteredOptions.map((option, index) => {
+                const isSelected =
+                  String(option.value) === String(value) ||
+                  String(option._id) === String(value)
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSelect(option)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: isSelected
+                        ? alpha(SACRED_GOLD, 0.2)
+                        : 'transparent',
+                      border: 'none',
+                      borderBottom:
+                        index < filteredOptions.length - 1
+                          ? `1px solid ${alpha(SACRED_GOLD, 0.1)}`
+                          : 'none',
+                      color: isSelected
+                        ? SACRED_GOLD
+                        : 'rgba(255, 255, 255, 0.9)',
+                      fontFamily: '"Crimson Text", serif',
+                      fontSize: '14px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      outline: 'none',
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = alpha(
+                        SACRED_GOLD,
+                        0.15
+                      )
+                      e.currentTarget.style.color = SACRED_GOLD
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'
+                      } else {
+                        e.currentTarget.style.backgroundColor = alpha(
+                          SACRED_GOLD,
+                          0.2
+                        )
+                        e.currentTarget.style.color = SACRED_GOLD
+                      }
+                    }}
+                  >
+                    {String(option.value)}
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Helper Text */}
+      {helperText && (
+        <div
+          style={{
+            marginTop: '4px',
+            fontSize: '12px',
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: '"Crimson Text", serif',
+          }}
+        >
+          {helperText}
+        </div>
+      )}
     </div>
   )
 }
