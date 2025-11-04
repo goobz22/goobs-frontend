@@ -1,84 +1,125 @@
-/**
- * @fileoverview Defines the Typography component for rendering text with various styles and themes.
- * It supports multiple semantic HTML tags and theming through a centralized theme system.
- */
 'use client'
-import React, { useEffect } from 'react'
-import {
-  getTypographyStyles,
-  type TypographyStyles,
-} from '../../theme/typography'
 
-// --------------------------------------------------------------------------
-// TYPE DEFINITIONS
-// --------------------------------------------------------------------------
+import React from 'react'
 
 export interface TypographyProps {
-  /** The text content to display. Can be used instead of children. */
   text?: string
-  /** The content to display. Takes precedence over the `text` prop. */
   children?: React.ReactNode
-  /** Custom styles to apply to the component using the theme system. */
-  styles?: TypographyStyles
-  /** Sacred theme flag - used for theming but filtered out before DOM rendering */
+  variant?: 'h5' | 'body1' | 'body2' | 'h1' | 'h2' | 'h3' | 'h4' | 'h6' | string
+  color?: string
+  fontSize?: string
+  fontFamily?: string
+  textAlign?: 'left' | 'center' | 'right'
+  marginBottom?: string
+  styles?: {
+    variant?: string
+    color?: string
+    fontSize?: string
+    fontFamily?: string
+    textAlign?: 'left' | 'center' | 'right'
+    marginBottom?: string
+    theme?: string
+    [key: string]: any
+  }
   sacredtheme?: boolean
 }
 
-// --------------------------------------------------------------------------
-// TYPOGRAPHY COMPONENT
-// --------------------------------------------------------------------------
-
-/**
- * A component for rendering text with consistent styling and theming.
- */
 const Typography: React.FC<TypographyProps> = ({
   text,
   children,
+  variant = 'body1',
+  color,
+  fontSize,
+  fontFamily,
+  textAlign = 'left',
+  marginBottom = '0px',
   styles,
-  ...rest
 }) => {
-  // Extract sacredtheme prop to prevent it from being passed to DOM elements
-  const { sacredtheme, ...validProps } = rest as any
-  // sacredtheme is intentionally excluded from the props passed to the DOM element
-  void sacredtheme
-  // Inject sacred animation keyframes when sacred theme is used
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      const styleElement = document.getElementById('sacred-keyframes')
-      if (!styleElement) {
-        const style = document.createElement('style')
-        style.id = 'sacred-keyframes'
-        style.textContent = `
-          @keyframes sacredTextGlow {
-            0% {
-              text-shadow: 
-                0 0 20px rgba(255, 215, 0, 0.8), 
-                0 0 40px rgba(255, 215, 0, 0.4);
-            }
-            100% {
-              text-shadow: 
-                0 0 30px rgba(255, 215, 0, 1), 
-                0 0 60px rgba(255, 215, 0, 0.6),
-                0 0 90px rgba(255, 215, 0, 0.3);
-            }
-          }
-        `
-        document.head.appendChild(style)
+  // Extract from styles if provided
+  const finalVariant = styles?.variant || variant
+  const finalColor = styles?.color || color || 'rgba(255, 255, 255, 0.9)'
+  const finalFontSize = styles?.fontSize || fontSize
+  const finalFontFamily =
+    styles?.fontFamily || fontFamily || '"Crimson Text", serif'
+  const finalTextAlign = styles?.textAlign || textAlign
+  const finalMarginBottom = styles?.marginBottom || marginBottom
+
+  const getVariantStyles = () => {
+    const v = String(finalVariant).toLowerCase()
+    if (v.includes('h1')) {
+      return {
+        fontSize: finalFontSize || '2.5rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
       }
     }
-  }, [styles?.theme])
+    if (v.includes('h2')) {
+      return {
+        fontSize: finalFontSize || '2rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    }
+    if (v.includes('h3')) {
+      return {
+        fontSize: finalFontSize || '1.75rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    }
+    if (v.includes('h4')) {
+      return {
+        fontSize: finalFontSize || '1.5rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    }
+    if (v.includes('h5')) {
+      return {
+        fontSize: finalFontSize || '1.25rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    }
+    if (v.includes('h6')) {
+      return {
+        fontSize: finalFontSize || '1rem',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    }
+    if (v.includes('body2') || v.includes('small')) {
+      return {
+        fontSize: finalFontSize || '0.875rem',
+        fontWeight: 400,
+      }
+    }
+    // body1 and default
+    return {
+      fontSize: finalFontSize || '1rem',
+      fontWeight: 400,
+    }
+  }
 
-  const computedStyles = getTypographyStyles(styles || {})
+  const variantStyles = getVariantStyles()
+  const isHeading = String(finalVariant).toLowerCase().includes('h')
 
-  const content = children || text
+  const content = text || children
 
   return (
-    <p style={computedStyles.container} {...validProps}>
+    <p
+      style={{
+        ...variantStyles,
+        color: finalColor,
+        fontFamily: isHeading ? variantStyles.fontFamily : finalFontFamily,
+        textAlign: finalTextAlign,
+        marginBottom: finalMarginBottom,
+        margin: finalMarginBottom ? `0 0 ${finalMarginBottom} 0` : '0',
+      }}
+    >
       {content}
     </p>
   )
 }
-
-Typography.displayName = 'Typography'
 
 export default Typography
