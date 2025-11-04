@@ -1,15 +1,9 @@
 'use client'
-import React, { useCallback, useState, useMemo, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../theme'
+
+import React, { useState, useCallback, useEffect } from 'react'
+import { alpha } from '../../../utils'
+
+const SACRED_GOLD = '#FFD700'
 
 const formatPhoneNumber = (inputValue: string): string => {
   const digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
@@ -39,99 +33,62 @@ const parseExistingPhoneNumber = (value: string): string => {
 export interface PhoneNumberFieldProps {
   value?: string | number
   onChange?: (value: string) => void
-  label?: React.ReactNode
-  helperText?: string
-  styles?: FormFieldStyles
-  // Additional HTML input props
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
-  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
+  label?: React.ReactNode
+  helperText?: string
   placeholder?: string
   id?: string
   autoComplete?: string
+  styles?: {
+    disabled?: boolean
+    required?: boolean
+    theme?: string
+    width?: string
+    minWidth?: string
+    maxWidth?: string
+    height?: string
+    minHeight?: string
+    maxHeight?: string
+    marginTop?: string
+    marginBottom?: string
+    marginLeft?: string
+    marginRight?: string
+    padding?: string
+    fontSize?: string
+    fontWeight?: string | number
+    lineHeight?: string
+    borderWidth?: string
+    borderRadius?: string
+    helperTextType?: 'error' | 'info'
+    requiredIndicatorText?: string
+    [key: string]: any
+  }
 }
 
-const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
-  const {
-    label = 'Phone Number',
-    placeholder,
-    onChange,
-    onFocus,
-    onBlur,
-    value = '',
-    helperText,
-    id,
-    styles,
-    ...restProps
-  } = props
-
+const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
+  value = '',
+  onChange,
+  onFocus,
+  onBlur,
+  label = 'Phone Number',
+  helperText,
+  placeholder = '555-555-5555',
+  id,
+  autoComplete,
+  styles,
+}) => {
   const [phoneNumber, setPhoneNumber] = useState(() =>
     parseExistingPhoneNumber(String(value || ''))
   )
   const [isFocused, setIsFocused] = useState(false)
 
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
+
   useEffect(() => {
     setPhoneNumber(parseExistingPhoneNumber(String(value || '')))
   }, [value])
-
-  const sacredtheme = styles?.theme === 'sacred'
-
-  // Filter out non-HTML props that shouldn't be passed to the input element
-  const filteredProps = useMemo(() => {
-    const { sacredtheme, ...validProps } = restProps as any
-    // sacredtheme is intentionally excluded from the props passed to the input
-    void sacredtheme
-    return validProps
-  }, [restProps])
-
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px',
-      paddingRight: sacredtheme ? '48px' : '16px', // Space for sacred icon
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    endAdornment: getSharedAdornmentStyles(adornmentColor),
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  const inputStyles = (componentStyles.input ?? {}) as React.CSSProperties
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,74 +135,121 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = React.memo(props => {
     [onBlur]
   )
 
-  const endAdornment = useMemo(
-    () =>
-      sacredtheme ? <span style={componentStyles.endAdornment}>𓋴</span> : null,
-    [sacredtheme, componentStyles.endAdornment]
-  )
+  const containerStyle: React.CSSProperties = {
+    position: 'relative',
+    width: styles?.width || '100%',
+    minWidth: styles?.minWidth,
+    maxWidth: styles?.maxWidth,
+    height: styles?.height || 'auto',
+    minHeight: styles?.minHeight,
+    maxHeight: styles?.maxHeight,
+    marginTop: styles?.marginTop || '0',
+    marginBottom: styles?.marginBottom || '16px',
+    marginLeft: styles?.marginLeft,
+    marginRight: styles?.marginRight,
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    marginBottom: '8px',
+    color: SACRED_GOLD,
+    fontSize: '14px',
+    fontFamily: '"Cinzel", serif',
+    letterSpacing: '0.05em',
+  }
+
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: styles?.height || '40px',
+    width: '100%',
+    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
+    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    borderRadius: styles?.borderRadius || '8px',
+    transition: 'all 0.3s ease',
+    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
+    boxSizing: 'border-box',
+  }
+
+  const prefixStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '16px',
+    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+    fontSize: styles?.fontSize || '16px',
+    fontFamily: '"Crimson Text", serif',
+    fontWeight: styles?.fontWeight,
+    userSelect: 'none',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    flex: 1,
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    paddingLeft: '8px',
+    paddingRight: '16px',
+    fontSize: styles?.fontSize || '16px',
+    fontWeight: styles?.fontWeight,
+    lineHeight: styles?.lineHeight,
+    fontFamily: '"Crimson Text", serif',
+    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+    boxSizing: 'border-box',
+  }
+
+  const helperTextStyle: React.CSSProperties = {
+    marginTop: '4px',
+    fontSize: '12px',
+    color:
+      styles?.helperTextType === 'error'
+        ? '#ff6b6b'
+        : 'rgba(255, 255, 255, 0.6)',
+    fontFamily: '"Crimson Text", serif',
+  }
 
   return (
-    <div style={componentStyles.container}>
+    <div style={containerStyle}>
       {label && (
-        <label style={componentStyles.label}>
-          {sacredtheme ? 'Phone Number' : label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
+        <label style={labelStyle}>
+          {typeof label === 'string' ? (
+            <>
+              {label}
+              {required && (
+                <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
+                  {styles?.requiredIndicatorText || '*'}
+                </span>
+              )}
+            </>
+          ) : (
+            label
           )}
         </label>
       )}
 
-      <div style={componentStyles.inputWrapper}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            paddingLeft: '16px',
-            color: 'inherit',
-            fontSize: styles?.fontSize || '16px',
-            fontFamily: inputStyles.fontFamily,
-            fontWeight: styles?.fontWeight,
-            userSelect: 'none',
-          }}
-        >
-          +1
-        </div>
+      <div style={inputWrapperStyle}>
+        <div style={prefixStyle}>+1</div>
         <input
-          {...filteredProps}
-          {...getRequiredProps(styles?.required)}
           type="tel"
           id={id}
           value={phoneNumber}
-          disabled={styles?.disabled}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder={placeholder || '555-555-5555'}
-          style={{
-            ...inputStyles,
-            paddingLeft: '8px',
-            flex: 1,
-          }}
+          disabled={disabled}
+          required={required}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          style={inputStyle}
         />
-
-        {endAdornment && (
-          <div
-            style={{
-              ...componentStyles.endAdornment,
-              right: '16px',
-            }}
-          >
-            {endAdornment}
-          </div>
-        )}
       </div>
 
-      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
+      {helperText && <div style={helperTextStyle}>{helperText}</div>}
     </div>
   )
-})
+}
 
 PhoneNumberField.displayName = 'PhoneNumberField'
+
 export default PhoneNumberField
