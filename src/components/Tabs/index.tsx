@@ -1,73 +1,40 @@
 'use client'
-import React, { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import { getTabsStyles, type TabsStyles } from '../../theme'
+
+import React, { useState } from 'react'
+import { alpha } from '../../utils'
+
+const SACRED_GOLD = '#FFD700'
 
 export interface TabsItem {
   title?: string
+  label?: string
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
 }
 
-export interface ActiveTabValue {
-  tabId: string | false
-}
-
 export interface TabsProps {
   items: TabsItem[]
+  activeTab?: number
+  onChange?: (index: number) => void
   alignment?: 'left' | 'center' | 'right' | 'justify'
-  navname?: string
-  /** Comprehensive styling options including theme, custom colors, and layout properties */
-  styles?: TabsStyles
-  /** @deprecated Use styles.theme instead */
-  sacredtheme?: boolean
+  styles?: {
+    theme?: string
+    [key: string]: any
+  }
 }
 
-function Tabs({
+const Tabs: React.FC<TabsProps> = ({
   items,
-  alignment = 'left',
-  navname = '',
-  styles,
-  sacredtheme = false,
-}: TabsProps) {
-  const [activeTabValues, setActiveTabValues] = useState<
-    Record<string, ActiveTabValue>
-  >({})
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null)
-  const pathname = usePathname()
+  activeTab = 0,
+  onChange,
+  alignment = 'center',
+}) => {
+  const [hoveredTab, setHoveredTab] = useState<number | null>(null)
 
-  // Handle backwards compatibility with sacredtheme prop
-  const effectiveStyles = {
-    ...styles,
-    theme: styles?.theme || (sacredtheme ? 'sacred' : 'light'),
-    alignment: styles?.alignment || alignment,
-  } as TabsStyles
-
-  const computedStyles = getTabsStyles(
-    effectiveStyles,
-    hoveredTab,
-    activeTabValues[navname]?.tabId as string
-  )
-
-  useEffect(() => {
-    const currentTab = items.find(item => item.route === pathname)
-    setActiveTabValues(prev => ({
-      ...prev,
-      [navname]: { tabId: currentTab?.title || false },
-    }))
-  }, [items, navname, pathname])
-
-  const handleTabChange = (newValue: string) => {
-    setActiveTabValues(prev => ({
-      ...prev,
-      [navname]: { tabId: newValue },
-    }))
-  }
-
-  const handleTabClick = (tab: TabsItem) => {
-    if (tab.title) {
-      handleTabChange(tab.title)
+  const handleTabClick = (index: number, tab: TabsItem) => {
+    if (onChange) {
+      onChange(index)
     }
 
     if (tab.trigger === 'route' && tab.route) {
@@ -77,96 +44,124 @@ function Tabs({
     }
   }
 
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: alignment === 'left' ? 'flex-start' : alignment === 'right' ? 'flex-end' : alignment === 'justify' ? 'space-between' : 'center',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '16px',
+    borderBottom: `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
+    flexWrap: 'wrap',
+  }
+
   return (
-    <div style={computedStyles.container}>
-      <div style={computedStyles.tabsContainer}>
-        <div style={computedStyles.tabsInnerContainer}>
-          {items.map(item => {
-            const isActive = activeTabValues[navname]?.tabId === item.title
-            const isHovered = hoveredTab === item.title
+    <div style={containerStyle}>
+      {items.map((tab, index) => {
+        const isActive = activeTab === index
+        const isHovered = hoveredTab === index
+        const label = tab.label || tab.title || ''
 
-            const tabStyle: React.CSSProperties = {
-              ...computedStyles.tab,
-              ...(isHovered && !isActive && computedStyles.tabHover),
-              ...(isActive && computedStyles.tabActive),
-              ...computedStyles.tabLeftBorder,
-              ...computedStyles.tabRightBorder,
-            }
-
-            const tabIndicatorStyle: React.CSSProperties = {
-              ...computedStyles.tabIndicator,
-              ...(isActive && computedStyles.tabIndicatorActive),
-            }
-
-            return (
-              <button
-                key={item.title}
-                onClick={() => handleTabClick(item)}
-                style={tabStyle}
-                onMouseEnter={() => setHoveredTab(item.title || '')}
-                onMouseLeave={() => setHoveredTab(null)}
-              >
-                <div style={tabIndicatorStyle} />
-                <div style={computedStyles.tabContent}>
-                  <span>{item.title || ''}</span>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+        return (
+          <Tab
+            key={index}
+            label={label}
+            isActive={isActive}
+            isHovered={isHovered}
+            onClick={() => handleTabClick(index, tab)}
+            onMouseEnter={() => setHoveredTab(index)}
+            onMouseLeave={() => setHoveredTab(null)}
+          />
+        )
+      })}
     </div>
   )
 }
 
-// Individual Tab component for standalone use
 export interface TabProps {
-  children?: React.ReactNode
-  value?: string | number
-  label?: string
+  label: string
+  isActive: boolean
+  isHovered?: boolean
+  onClick: () => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
   disabled?: boolean
-  styles?: TabsStyles
-  onClick?: () => void
+  styles?: {
+    [key: string]: any
+  }
 }
 
 export const Tab: React.FC<TabProps> = ({
-  children,
-  value,
   label,
-  disabled = false,
-  styles,
+  isActive,
+  isHovered = false,
   onClick,
-  ...props
+  onMouseEnter,
+  onMouseLeave,
+  disabled = false,
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!disabled) {
+      onClick()
+    }
+  }
 
-  const computedStyles = getTabsStyles(
-    styles,
-    isHovered ? String(value) : null,
-    ''
-  )
+  const getBackgroundColor = () => {
+    if (disabled) return 'transparent'
+    if (isActive) return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.2)}, ${alpha(SACRED_GOLD, 0.1)})`
+    if (isHovered) return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.1)}, ${alpha(SACRED_GOLD, 0.05)})`
+    return 'transparent'
+  }
+
+  const getBorderBottomColor = () => {
+    if (disabled) return 'transparent'
+    if (isActive) return SACRED_GOLD
+    if (isHovered) return alpha(SACRED_GOLD, 0.5)
+    return 'transparent'
+  }
+
+  const getColor = () => {
+    if (disabled) return 'rgba(255, 255, 255, 0.4)'
+    if (isActive) return SACRED_GOLD
+    if (isHovered) return 'rgba(255, 215, 0, 0.9)'
+    return 'rgba(255, 255, 255, 0.7)'
+  }
 
   const tabStyle: React.CSSProperties = {
-    ...computedStyles.tab,
-    ...(isHovered && computedStyles.tabHover),
-    ...(disabled && { opacity: 0.6, pointerEvents: 'none' }),
+    position: 'relative',
+    padding: '12px 24px',
+    background: getBackgroundColor(),
+    border: 'none',
+    borderBottom: `2px solid ${getBorderBottomColor()}`,
+    color: getColor(),
+    fontFamily: '"Cinzel", serif',
+    fontSize: '14px',
+    fontWeight: isActive ? 600 : 400,
+    letterSpacing: '0.05em',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: 'all 0.3s ease',
+    textShadow: isActive ? `0 0 10px ${alpha(SACRED_GOLD, 0.5)}` : 'none',
+    boxShadow: isActive ? `0 0 20px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
+    outline: 'none',
+    opacity: disabled ? 0.6 : 1,
   }
 
   return (
     <button
+      type="button"
+      onClick={handleClick}
       style={tabStyle}
-      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       disabled={disabled}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      {...props}
     >
-      <div style={computedStyles.tabContent}>
-        <span>{label}</span>
-        {children}
-      </div>
+      {label}
     </button>
   )
 }
+
+Tabs.displayName = 'Tabs'
+Tab.displayName = 'Tab'
 
 export default Tabs
