@@ -99,8 +99,8 @@ export const appBarThemes: Record<'light' | 'dark' | 'sacred', AppBarTheme> = {
     },
     toolbar: {
       padding: '0 16px',
-      minHeight: '64px',
-      gap: '12px',
+      minHeight: '48px',
+      gap: '8px',
     },
     glyph: {
       color: 'rgba(107, 114, 128, 0.3)',
@@ -118,8 +118,8 @@ export const appBarThemes: Record<'light' | 'dark' | 'sacred', AppBarTheme> = {
     },
     toolbar: {
       padding: '0 16px',
-      minHeight: '64px',
-      gap: '12px',
+      minHeight: '48px',
+      gap: '8px',
     },
     glyph: {
       color: 'rgba(156, 163, 175, 0.3)',
@@ -140,7 +140,7 @@ export const appBarThemes: Record<'light' | 'dark' | 'sacred', AppBarTheme> = {
     },
     toolbar: {
       padding: '0 12px',
-      minHeight: '60px',
+      minHeight: '48px',
       gap: '8px',
     },
     glyph: {

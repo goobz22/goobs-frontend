@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import ReactDOM from 'react-dom'
 import { alpha } from '../../../../utils'
 import Chip from '../../../Chip'
 
@@ -47,9 +48,33 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   const [focused, setFocused] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const chipContainerButtonRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  })
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+
+  // Create portal container on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const container = document.createElement('div')
+      container.id = 'multiselect-dropdown-portal'
+      document.body.appendChild(container)
+      setPortalContainer(container)
+
+      return () => {
+        document.body.removeChild(container)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (defaultSelected && Array.isArray(defaultSelected)) {
@@ -59,12 +84,27 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     }
   }, [defaultSelected])
 
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isOpen && chipContainerButtonRef.current) {
+      const rect = chipContainerButtonRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }, [isOpen])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node
+      const clickedOutsideContainer =
+        containerRef.current && !containerRef.current.contains(target)
+      const clickedOutsideMenu =
+        menuRef.current && !menuRef.current.contains(target)
+
+      if (clickedOutsideContainer && clickedOutsideMenu) {
         setIsOpen(false)
       }
     }
@@ -136,21 +176,6 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     transition: 'transform 0.3s ease',
   }
 
-  const dropdownStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 'calc(100% + 4px)',
-    left: '0',
-    right: '0',
-    zIndex: 99999,
-    maxHeight: '200px',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
-    borderRadius: styles?.borderRadius || '8px',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    boxShadow: `0 4px 6px ${alpha(SACRED_GOLD, 0.2)}`,
-  }
-
   const helperTextStyle: React.CSSProperties = {
     marginTop: '4px',
     fontSize: '12px',
@@ -215,6 +240,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       )}
       <div style={{ position: 'relative', width: '100%' }} ref={containerRef}>
         <div
+          ref={chipContainerButtonRef}
           style={chipContainerStyle}
           onClick={handleContainerClick}
           onFocus={handleFocus}
@@ -252,58 +278,77 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
         <div style={iconWrapperStyle}>
           <div style={arrowStyle} />
         </div>
-        {isOpen && (
-          <div style={dropdownStyle}>
-            {options.map(option => {
-              const isSelected = selectedValues.includes(
-                option._id || option.value
-              )
+        {isOpen &&
+          portalContainer &&
+          ReactDOM.createPortal(
+            <div
+              ref={menuRef}
+              style={{
+                position: 'fixed',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
+                zIndex: 999999,
+                maxHeight: '200px',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
+                borderRadius: styles?.borderRadius || '8px',
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                boxShadow: `0 4px 6px ${alpha(SACRED_GOLD, 0.2)}`,
+              }}
+            >
+              {options.map(option => {
+                const isSelected = selectedValues.includes(
+                  option._id || option.value
+                )
 
-              const optionStyle: React.CSSProperties = {
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontFamily: '"Crimson Text", serif',
-                backgroundColor: isSelected
-                  ? alpha(SACRED_GOLD, 0.2)
-                  : 'transparent',
-              }
+                const optionStyle: React.CSSProperties = {
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontFamily: '"Crimson Text", serif',
+                  backgroundColor: isSelected
+                    ? alpha(SACRED_GOLD, 0.2)
+                    : 'transparent',
+                }
 
-              return (
-                <div
-                  key={option._id || option.value}
-                  style={optionStyle}
-                  onClick={e => handleToggle(option._id || option.value, e)}
-                  onMouseEnter={e => {
-                    if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = alpha(
-                        SACRED_GOLD,
-                        0.1
-                      )
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => {}}
-                    style={{ marginRight: '8px' }}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  <span>{option.value}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
+                return (
+                  <div
+                    key={option._id || option.value}
+                    style={optionStyle}
+                    onClick={e => handleToggle(option._id || option.value, e)}
+                    onMouseEnter={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = alpha(
+                          SACRED_GOLD,
+                          0.1
+                        )
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      style={{ marginRight: '8px' }}
+                      onClick={e => e.stopPropagation()}
+                    />
+                    <span>{option.value}</span>
+                  </div>
+                )
+              })}
+            </div>,
+            portalContainer
+          )}
       </div>
       {helperText && <div style={helperTextStyle}>{helperText}</div>}
     </div>

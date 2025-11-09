@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
+import ReactDOM from 'react-dom'
 import { alpha } from '../../../../utils'
 
 const SACRED_GOLD = '#FFD700'
@@ -43,10 +44,34 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState<string | number>('')
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  })
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+
+  // Create portal container on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const container = document.createElement('div')
+      container.id = 'dropdown-portal'
+      document.body.appendChild(container)
+      setPortalContainer(container)
+
+      return () => {
+        document.body.removeChild(container)
+      }
+    }
+  }, [])
 
   // Set initial value from defaultValue or externalValue
   useEffect(() => {
@@ -66,13 +91,28 @@ const Dropdown: React.FC<DropdownProps> = ({
     })
   }, [options, showIdColumns])
 
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }, [isOpen])
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node
+      const clickedOutsideContainer =
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      const clickedOutsideMenu =
+        menuRef.current && !menuRef.current.contains(target)
+
+      if (clickedOutsideContainer && clickedOutsideMenu) {
         setIsOpen(false)
       }
     }
@@ -108,16 +148,12 @@ const Dropdown: React.FC<DropdownProps> = ({
   const displayValue = selectedOption?.value || value || 'Select...'
 
   return (
-    <div
-      ref={dropdownRef}
-      style={{ position: 'relative', width: '100%', marginBottom: '16px' }}
-    >
+    <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
       {/* Label */}
       {label && (
         <label
           style={{
             display: 'block',
-            marginBottom: '8px',
             color: SACRED_GOLD,
             fontSize: '14px',
             fontFamily: '"Cinzel", serif',
@@ -133,6 +169,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       {/* Dropdown Button */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onBlur={onBlur as any}
@@ -140,7 +177,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         disabled={disabled}
         style={{
           width: '100%',
-          padding: '12px 16px',
+          height: '40px',
+          padding: '0 12px',
           backgroundColor: disabled
             ? 'rgba(0, 0, 0, 0.3)'
             : 'rgba(0, 0, 0, 0.6)',
@@ -159,6 +197,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           transition: 'all 0.3s ease',
           boxShadow: isOpen ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
           outline: 'none',
+          boxSizing: 'border-box',
         }}
         onMouseEnter={e => {
           if (!disabled) {
@@ -190,100 +229,105 @@ const Dropdown: React.FC<DropdownProps> = ({
       </button>
 
       {/* Dropdown Menu */}
-      {isOpen && !disabled && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: '4px',
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
-            border: `1px solid ${alpha(SACRED_GOLD, 0.4)}`,
-            borderRadius: '8px',
-            maxHeight: '300px',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            zIndex: 1000,
-            boxShadow: `0 8px 32px ${alpha(SACRED_GOLD, 0.2)}`,
-            backdropFilter: 'blur(10px)',
-          }}
-        >
-          {/* Options List */}
-          <div>
-            {filteredOptions.length === 0 ? (
-              <div
-                style={{
-                  padding: '12px 16px',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  fontFamily: '"Crimson Text", serif',
-                  textAlign: 'center',
-                }}
-              >
-                No options available
-              </div>
-            ) : (
-              filteredOptions.map((option, index) => {
-                const isSelected =
-                  String(option.value) === String(value) ||
-                  String(option._id) === String(value)
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => handleSelect(option)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: isSelected
-                        ? alpha(SACRED_GOLD, 0.2)
-                        : 'transparent',
-                      border: 'none',
-                      borderBottom:
-                        index < filteredOptions.length - 1
-                          ? `1px solid ${alpha(SACRED_GOLD, 0.1)}`
-                          : 'none',
-                      color: isSelected
-                        ? SACRED_GOLD
-                        : 'rgba(255, 255, 255, 0.9)',
-                      fontFamily: '"Crimson Text", serif',
-                      fontSize: '14px',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      whiteSpace: 'normal',
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = alpha(
-                        SACRED_GOLD,
-                        0.15
-                      )
-                      e.currentTarget.style.color = SACRED_GOLD
-                    }}
-                    onMouseLeave={e => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'
-                      } else {
+      {isOpen &&
+        !disabled &&
+        portalContainer &&
+        ReactDOM.createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              position: 'fixed',
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              border: `1px solid ${alpha(SACRED_GOLD, 0.4)}`,
+              borderRadius: '8px',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              zIndex: 999999,
+              boxShadow: `0 8px 32px ${alpha(SACRED_GOLD, 0.2)}`,
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            {/* Options List */}
+            <div>
+              {filteredOptions.length === 0 ? (
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontFamily: '"Crimson Text", serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  No options available
+                </div>
+              ) : (
+                filteredOptions.map((option, index) => {
+                  const isSelected =
+                    String(option.value) === String(value) ||
+                    String(option._id) === String(value)
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSelect(option)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: isSelected
+                          ? alpha(SACRED_GOLD, 0.2)
+                          : 'transparent',
+                        border: 'none',
+                        borderBottom:
+                          index < filteredOptions.length - 1
+                            ? `1px solid ${alpha(SACRED_GOLD, 0.1)}`
+                            : 'none',
+                        color: isSelected
+                          ? SACRED_GOLD
+                          : 'rgba(255, 255, 255, 0.9)',
+                        fontFamily: '"Crimson Text", serif',
+                        fontSize: '14px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        whiteSpace: 'normal',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                      }}
+                      onMouseEnter={e => {
                         e.currentTarget.style.backgroundColor = alpha(
                           SACRED_GOLD,
-                          0.2
+                          0.15
                         )
                         e.currentTarget.style.color = SACRED_GOLD
-                      }
-                    }}
-                  >
-                    {String(option.value)}
-                  </button>
-                )
-              })
-            )}
-          </div>
-        </div>
-      )}
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                          e.currentTarget.style.color =
+                            'rgba(255, 255, 255, 0.9)'
+                        } else {
+                          e.currentTarget.style.backgroundColor = alpha(
+                            SACRED_GOLD,
+                            0.2
+                          )
+                          e.currentTarget.style.color = SACRED_GOLD
+                        }
+                      }}
+                    >
+                      {String(option.value)}
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          </div>,
+          portalContainer
+        )}
 
       {/* Helper Text */}
       {helperText && (
