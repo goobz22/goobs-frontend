@@ -14,22 +14,18 @@ import type { FormFieldStyles } from '../../../../theme'
  */
 const sampleOptions: DropdownOption[] = [
   { value: 'javascript' },
-  { value: 'typescript', attribute1: 'Type-safe' },
-  {
-    value: 'react',
-    attribute1: 'Library',
-    attribute2: 'Frontend',
-  },
-  { value: 'nodejs', attribute1: 'Runtime' },
+  { value: 'typescript' },
+  { value: 'react' },
+  { value: 'nodejs' },
   { value: 'python' },
 ]
 
 const countryOptions: DropdownOption[] = [
-  { value: 'usa', attribute1: 'United States', attribute2: 'North America' },
-  { value: 'canada', attribute1: 'Canada', attribute2: 'North America' },
-  { value: 'uk', attribute1: 'United Kingdom', attribute2: 'Europe' },
-  { value: 'france', attribute1: 'France', attribute2: 'Europe' },
-  { value: 'japan', attribute1: 'Japan', attribute2: 'Asia' },
+  { value: 'usa' },
+  { value: 'canada' },
+  { value: 'uk' },
+  { value: 'france' },
+  { value: 'japan' },
 ]
 
 // Wrapper component for state management

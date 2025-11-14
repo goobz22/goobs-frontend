@@ -31,7 +31,6 @@ const meta: Meta<typeof Tabs> = {
   title: 'Components/Tabs',
   component: Tabs,
   argTypes: {
-    sacredtheme: { control: 'boolean' },
     alignment: {
       control: 'radio',
       options: ['left', 'center', 'right', 'justify'],
@@ -67,7 +66,6 @@ export const PremiumTheme: Story = {
   args: {
     items: basicTabs,
     alignment: 'left',
-    navname: 'premiumNav',
     styles: {
       theme: 'light',
       height: '60px',
@@ -148,7 +146,6 @@ const InteractiveDemoRenderer = () => {
       <Tabs
         items={mixedTriggerTabs}
         alignment={alignment}
-        navname="interactiveNav"
         styles={{
           theme,
           height: '60px',

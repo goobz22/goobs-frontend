@@ -236,8 +236,8 @@ export const DarkWithBothButtons: Story = {
   },
 }
 
-export const DarkSuccess: Story = {
-  name: 'Dark/Success State',
+export const DarkSuccessWithCustom: Story = {
+  name: 'Dark/Success State With Custom Button',
   args: {
     username: 'mystic.user@example.com',
     appName: 'AuthApp',

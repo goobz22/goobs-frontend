@@ -665,6 +665,7 @@ const InteractiveDemoComponent: React.FC = () => {
         buttons={[{ text: 'Add New' }] as ButtonProps[]}
         searchbarProps={{ value: '', onChange: () => {} }}
         filters={sampleFilters}
+        permissions={{ access: 'write' }}
         styles={{
           theme: theme,
         }}
@@ -1505,11 +1506,11 @@ const BillingInformationExampleDemo: React.FC = () => {
         required: true,
         placeholder: 'Select state',
         options: [
-          { value: 'NY', label: 'New York' },
-          { value: 'CA', label: 'California' },
-          { value: 'TX', label: 'Texas' },
-          { value: 'FL', label: 'Florida' },
-          { value: 'IL', label: 'Illinois' },
+          { value: 'NY' },
+          { value: 'CA' },
+          { value: 'TX' },
+          { value: 'FL' },
+          { value: 'IL' },
         ],
       },
     },
@@ -1601,6 +1602,7 @@ const BillingInformationExampleDemo: React.FC = () => {
           )
         }}
         searchbarProps={{ value: '', onChange: () => {} }}
+        permissions={{ access: 'write' }}
         styles={{
           theme: 'light',
         }}

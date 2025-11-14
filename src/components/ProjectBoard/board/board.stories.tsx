@@ -3,7 +3,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react'
 import ProjectBoard from '../index'
-import { JotaiProvider } from '../jotai/provider'
+import { ProjectBoardProvider } from '../context/ProjectBoardContext'
 import {
   Task,
   BoardVariant,
@@ -166,6 +166,14 @@ const sampleTasks: Task[] = [
     createdAt: new Date(),
     closedAt: new Date(),
     updatedAt: new Date(),
+    caseUpdates: [],
+    regionId: 'r1',
+    region: 'North America',
+    productOrService: 'product',
+    productServiceName: 'Product A',
+    productId: 'p1',
+    serviceId: '',
+    customerInternalNotes: '',
   },
   {
     _id: 't2',
@@ -196,6 +204,14 @@ const sampleTasks: Task[] = [
     createdAt: new Date(),
     closedAt: new Date(),
     updatedAt: new Date(),
+    caseUpdates: [],
+    regionId: 'r2',
+    region: 'Europe',
+    productOrService: 'service',
+    productServiceName: 'Service B',
+    productId: '',
+    serviceId: 's1',
+    customerInternalNotes: '',
   },
 ]
 
@@ -254,7 +270,7 @@ type Story = StoryObj<typeof ProjectBoard>
 export const LightTheme: Story = {
   name: 'Light Theme',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#f8fafc',
@@ -275,7 +291,7 @@ export const LightTheme: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -288,7 +304,7 @@ export const LightTheme: Story = {
 export const DarkTheme: Story = {
   name: 'Dark Theme',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#0f172a',
@@ -309,7 +325,7 @@ export const DarkTheme: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -322,7 +338,7 @@ export const DarkTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#1C1917',
@@ -343,7 +359,7 @@ export const SacredTheme: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -356,7 +372,7 @@ export const SacredTheme: Story = {
 export const SeverityBoard: Story = {
   name: 'Severity Board',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#f8fafc',
@@ -377,7 +393,7 @@ export const SeverityBoard: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -397,7 +413,7 @@ export const SeverityBoard: Story = {
 export const TopicBoard: Story = {
   name: 'Topic Board',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#0f172a',
@@ -418,7 +434,7 @@ export const TopicBoard: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -446,7 +462,7 @@ export const TopicBoard: Story = {
 export const CompanyVariant: Story = {
   name: 'Company Variant',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#f8fafc',
@@ -467,7 +483,7 @@ export const CompanyVariant: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
@@ -482,7 +498,7 @@ export const CompanyVariant: Story = {
 export const CustomerVariant: Story = {
   name: 'Customer Variant',
   render: args => (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <div
         style={{
           backgroundColor: '#1C1917',
@@ -503,7 +519,7 @@ export const CustomerVariant: Story = {
         </div>
         <ProjectBoard {...args} />
       </div>
-    </JotaiProvider>
+    </ProjectBoardProvider>
   ),
   args: {
     ...commonArgs,
