@@ -7,8 +7,9 @@ import SearchableSimple, {
 import DateField from '../../Field/Date/DateField'
 import DateRange from '../../Field/Date/DateRange'
 import Searchbar from '../../Field/Search'
+import Accordion from '../../Accordion'
 import type { DataGridFilter, ColumnDef, RowData } from '../types'
-import { SACRED_GLYPHS, type DataGridStyles } from '../../../theme'
+import { type DataGridStyles } from '../../../theme'
 
 export interface FilterSectionProps {
   filters?: DataGridFilter[] | undefined
@@ -21,6 +22,10 @@ export interface FilterSectionProps {
   ) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
+  /** Make the filter section collapsible */
+  collapsible?: boolean
+  /** Default expanded state when collapsible is true */
+  defaultExpanded?: boolean
 }
 
 function useWindowSize(): [number, number, boolean] {
@@ -49,6 +54,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   rows = [],
   onSearchFilter,
   styles,
+  collapsible = false,
+  defaultExpanded = false,
 }) => {
   const [width, , isReady] = useWindowSize()
   const [searchTerm, setSearchTerm] = useState('')
@@ -300,7 +307,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     width: '100%',
     maxWidth: '100%',
     position: 'relative' as const,
-    padding: '1rem',
+    padding: '0.5rem',
     boxSizing: 'border-box' as const,
     overflow: 'hidden',
     opacity: isReady ? 1 : 0,
@@ -321,41 +328,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     ...getGridColumns(),
   }
 
-  return (
+  const filterContent = (
     <div style={filterSectionStyle}>
-      {/* Sacred decorative glyphs */}
-      {isSacredTheme && (
-        <>
-          <div
-            style={{
-              position: 'absolute',
-              fontSize: '12px',
-              color: 'rgba(255, 215, 0, 0.3)',
-              animation: 'sacredFloat 2s ease-in-out infinite',
-              zIndex: 10,
-              top: '8px',
-              left: '8px',
-            }}
-          >
-            {SACRED_GLYPHS[15]} {/* Filter/sieve symbol */}
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              fontSize: '12px',
-              color: 'rgba(255, 215, 0, 0.3)',
-              animation: 'sacredFloat 2s ease-in-out infinite',
-              zIndex: 10,
-              bottom: '8px',
-              right: '8px',
-              animationDirection: 'reverse',
-            }}
-          >
-            {SACRED_GLYPHS[16]} {/* Filter/refine symbol */}
-          </div>
-        </>
-      )}
-
       <div style={gridStyle}>
         {/* Searchbar - always first */}
         <div
@@ -393,38 +367,27 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           </div>
         ))}
       </div>
-
-      {/* Bottom sacred decoration */}
-      {isSacredTheme && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '4px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: '2px',
-            opacity: 0.5,
-          }}
-        >
-          {[SACRED_GLYPHS[4], SACRED_GLYPHS[5], SACRED_GLYPHS[4]].map(
-            (glyph, i) => (
-              <div
-                key={i}
-                style={{
-                  color: 'rgba(255, 215, 0, 0.4)',
-                  fontSize: '8px',
-                  animation: `sacredFloat ${2 + i * 0.3}s ease-in-out infinite`,
-                }}
-              >
-                {glyph}
-              </div>
-            )
-          )}
-        </div>
-      )}
     </div>
   )
+
+  if (collapsible) {
+    return (
+      <div
+        style={{ width: '100%', boxSizing: 'border-box', padding: '0.5rem' }}
+      >
+        <Accordion
+          summary="Search & Filters"
+          details={filterContent}
+          defaultExpanded={defaultExpanded}
+          styles={{
+            theme: styles?.theme || 'light',
+          }}
+        />
+      </div>
+    )
+  }
+
+  return filterContent
 }
 
 export default FilterSection

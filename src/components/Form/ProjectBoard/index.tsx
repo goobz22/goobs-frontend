@@ -1,36 +1,10 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import ContentSection from '../../Content'
 import { ProjectBoardProps } from '../../ProjectBoard/types'
-import Typography from '../../Typography'
 
-const SACRED_GLYPHS = [
-  '𓁟',
-  '𓂀',
-  '𓃀',
-  '𓄿',
-  '𓊖',
-  '𓊗',
-  '𓋴',
-  '𓏏',
-  '𓊨',
-  '𓁦',
-  '𓅓',
-  '𓆄',
-  '𓇳',
-  '𓈖',
-  '𓊹',
-  '𓊺',
-  '𓊻',
-  '𓋹',
-  '𓌻',
-  '𓍿',
-  '𓅨',
-  '𓂋',
-  '𓏭',
-  '𓊵',
-]
+// Sacred glyphs removed
 
 export interface FormProjectBoardProps {
   title: string
@@ -90,7 +64,6 @@ const sacredStyles = {
     border: '2px solid rgba(255, 215, 0, 0.5)',
     borderRadius: '12px',
     padding: '24px',
-    animation: 'formProjectBoardGlowPulse 4s ease-in-out infinite',
   } as React.CSSProperties,
 
   topShimmer: {
@@ -99,9 +72,7 @@ const sacredStyles = {
     left: 0,
     right: 0,
     height: '1px',
-    background:
-      'linear-gradient(90deg, transparent, rgba(255, 215, 0, 1), transparent)',
-    animation: 'formProjectBoardShimmer 3s linear infinite',
+    background: 'rgba(255, 215, 0, 0.5)',
   } as React.CSSProperties,
 
   bottomShimmer: {
@@ -110,9 +81,7 @@ const sacredStyles = {
     left: 0,
     right: 0,
     height: '1px',
-    background:
-      'linear-gradient(90deg, transparent, rgba(255, 215, 0, 1), transparent)',
-    animation: 'formProjectBoardShimmer 3s linear infinite',
+    background: 'rgba(255, 215, 0, 0.5)',
   } as React.CSSProperties,
 
   decorativeGlyph: {
@@ -176,18 +145,7 @@ const sacredStyles = {
     left: 0,
     right: 0,
     height: '2px',
-    overflow: 'hidden',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background:
-        'linear-gradient(90deg, transparent, rgba(255, 215, 0, 1), transparent)',
-      animation: 'formProjectBoardTaskFlow 4s linear infinite',
-    },
+    background: 'rgba(255, 215, 0, 0.5)',
   } as React.CSSProperties,
 
   projectBoardContainer: {
@@ -211,47 +169,6 @@ function FormProjectBoard({
   projectboard,
   sacredtheme = true,
 }: FormProjectBoardProps) {
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (sacredtheme) {
-      const styleSheet =
-        typeof document !== 'undefined' && document.styleSheets?.length
-          ? document.styleSheets[0]
-          : undefined
-      const keyframes = `
-        @keyframes formProjectBoardGlowPulse {
-          0%, 100% { 
-            border-color: rgba(255, 215, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-          }
-          50% { 
-            border-color: rgba(255, 215, 0, 0.8);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-          }
-        }
-        @keyframes formProjectBoardShimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        @keyframes formProjectBoardFloat {
-          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-          50% { transform: translateY(-5px) rotate(180deg); opacity: 0.5; }
-        }
-        @keyframes formProjectBoardTaskFlow {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `
-      if (styleSheet) {
-        try {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        } catch {
-          // Keyframes might already exist
-        }
-      }
-    }
-  }, [sacredtheme])
-
   const styles = sacredtheme ? sacredStyles : premiumStyles
 
   return (
@@ -260,47 +177,7 @@ function FormProjectBoard({
         <>
           <div style={sacredStyles.topShimmer} />
           <div style={sacredStyles.bottomShimmer} />
-          <div
-            style={{
-              ...sacredStyles.decorativeGlyph,
-              ...sacredStyles.topLeftGlyph,
-            }}
-          >
-            {SACRED_GLYPHS[22]}
-          </div>
-          <div
-            style={{
-              ...sacredStyles.decorativeGlyph,
-              ...sacredStyles.topRightGlyph,
-            }}
-          >
-            {SACRED_GLYPHS[23]}
-          </div>
         </>
-      )}
-
-      {sacredtheme && (
-        <div style={sacredStyles.headerGlyphs}>
-          {[
-            SACRED_GLYPHS[6],
-            SACRED_GLYPHS[14],
-            SACRED_GLYPHS[17],
-            SACRED_GLYPHS[14],
-            SACRED_GLYPHS[6],
-          ].map((glyph, index) => (
-            <Typography
-              key={index}
-              styles={{
-                color: 'rgba(255, 215, 0, 0.6)',
-                fontSize: '16px',
-                animation: 'formProjectBoardFloat 5s ease-in-out infinite',
-                animationDelay: `${index * 0.2}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
-          ))}
-        </div>
       )}
 
       <div style={styles.titleContainer}>
@@ -320,24 +197,6 @@ function FormProjectBoard({
           sacredtheme={sacredtheme}
         />
       </div>
-
-      {sacredtheme && (
-        <div style={sacredStyles.bottomGlyphs}>
-          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography
-              key={index}
-              styles={{
-                color: 'rgba(255, 215, 0, 1)',
-                fontSize: '12px',
-                animation: 'formProjectBoardFloat 5s ease-in-out infinite',
-                animationDelay: `${2 + index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </Typography>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

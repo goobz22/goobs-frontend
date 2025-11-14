@@ -1,14 +1,11 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
-import { useAtom } from 'jotai'
-import { columnsAtom } from '../jotai/atom'
+import { useProjectBoard } from '../context/ProjectBoardContext'
 import type { ProjectBoardStyles } from '../../../theme'
 import { useColumnDragAndDrop } from '../utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from '../utils/useDragandDrop/tasks'
 import type { ColumnData } from '../types'
-
-const SACRED_GLYPHS = ['𓏭', '𓊵', '𓂋', '𓊹']
 
 // Built-in TaskCard component
 interface TaskCardProps {
@@ -248,16 +245,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     [isSacredTheme, isDarkTheme, isHovered, draggable]
   )
 
-  const TaskCardGlyph: React.FC = () => {
-    const [glyph, setGlyph] = React.useState<string | null>(null)
-    React.useEffect(() => {
-      const index = Math.floor(Math.random() * SACRED_GLYPHS.length)
-      setGlyph(SACRED_GLYPHS[index] ?? null)
-    }, [])
-    if (!glyph) return null
-    return <div style={taskCardStyles.glyph}>{glyph}</div>
-  }
-
   return (
     <div
       style={taskCardStyles.container}
@@ -270,8 +257,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isSacredTheme && <TaskCardGlyph />}
-
       <input
         type="checkbox"
         checked={checked}
@@ -590,7 +575,7 @@ export default function Board({
   taskDragAndDrop,
   styles,
 }: BoardProps) {
-  const [allColumns, setAllColumns] = useAtom(columnsAtom)
+  const { columns: allColumns, setColumns: setAllColumns } = useProjectBoard()
   const { isMobile, isTablet } = useResponsiveLayout()
 
   const boardStyles = useMemo(
@@ -742,12 +727,6 @@ export default function Board({
 
       return (
         <div key={column._id} className="board-column" style={columnStyle}>
-          {isSacredTheme && (
-            <div style={boardStyles.glyph}>
-              {SACRED_GLYPHS[columnIndex % SACRED_GLYPHS.length]}
-            </div>
-          )}
-
           {/* Column Header - Only this area is draggable for column reordering */}
           <div
             style={boardStyles.columnHeader}

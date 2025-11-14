@@ -8,9 +8,7 @@ import {
   useEffect,
 } from 'react'
 import type { ColumnDef } from '../types'
-import { useAtomValue } from 'jotai'
-import { columnVisibilityAtom } from '../Jotai/atom'
-import { dataGridStore } from './useInitializeGrid'
+import { useColumnVisibility } from '../context/ColumnVisibilityContext'
 
 /**
  * A simple check to see if two arrays of ColumnDef differ
@@ -58,10 +56,8 @@ export function useComputeTableResize({
   // The field currently selected among the overflow columns
   const [selectedOverflowField, setSelectedOverflowField] = useState('')
 
-  // We rely on Jotai for column visibility
-  const columnVisibility = useAtomValue(columnVisibilityAtom, {
-    store: dataGridStore,
-  })
+  // Get column visibility from context
+  const { columnVisibility } = useColumnVisibility()
 
   /**
    * measureTextWidth: Use a canvas to measure text length for column headers,

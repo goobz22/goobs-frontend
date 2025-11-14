@@ -328,4 +328,8 @@ export interface DatagridProps {
   metricsCollapsible?: boolean
   /** Default expanded state for metrics when collapsible is true */
   metricsDefaultExpanded?: boolean
+  /** Make the filter section collapsible */
+  filtersCollapsible?: boolean
+  /** Default expanded state for filters when collapsible is true */
+  filtersDefaultExpanded?: boolean
 }

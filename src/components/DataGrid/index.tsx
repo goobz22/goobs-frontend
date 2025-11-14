@@ -16,9 +16,10 @@ import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import useIsMobile from './utils/useIsMobile'
 import { areRowsEqual } from './utils/rowComparison'
 import type { DatagridProps, RowData } from './types'
-import { getDataGridStyles, SACRED_GLYPHS } from '../../theme'
+import { getDataGridStyles } from '../../theme'
+import { ColumnVisibilityProvider } from './context/ColumnVisibilityContext'
 
-function DataGrid({
+function DataGridContent({
   columns,
   rows: providedRows,
   buttons,
@@ -37,14 +38,15 @@ function DataGrid({
   showIdColumns = false,
   filters,
   metrics,
-  metricsCollapsible = false,
+  metricsCollapsible = true,
   metricsDefaultExpanded = false,
+  filtersCollapsible = true,
+  filtersDefaultExpanded = false,
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile(768)
 
-  const isSacredTheme = styles?.theme === 'sacred'
   const computedStyles = getDataGridStyles(styles)
 
   // Column state management
@@ -130,6 +132,8 @@ function DataGrid({
   const [filteredRows, setFilteredRows] = useState<RowData[]>(
     () => providedRows || []
   )
+  // Store original metrics to prevent them from changing when data is filtered
+  const [originalMetrics] = useState(() => metrics)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [editingCell, setEditingCell] = useState<{
@@ -553,58 +557,6 @@ function DataGrid({
 
   return (
     <div style={computedStyles.container} ref={containerRef}>
-      {isSacredTheme && !isMobile && (
-        <>
-          <div
-            style={{ ...computedStyles.glyph, top: '0.75rem', left: '0.75rem' }}
-          >
-            {SACRED_GLYPHS[10]}
-          </div>
-          <div
-            style={{
-              ...computedStyles.glyph,
-              top: '0.75rem',
-              right: '0.75rem',
-              animationDirection: 'reverse',
-            }}
-          >
-            {SACRED_GLYPHS[11]}
-          </div>
-        </>
-      )}
-
-      {isSacredTheme && !isMobile && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            marginBottom: '1rem',
-            opacity: 0.6,
-          }}
-        >
-          {[
-            SACRED_GLYPHS[13],
-            SACRED_GLYPHS[3],
-            SACRED_GLYPHS[23],
-            SACRED_GLYPHS[3],
-            SACRED_GLYPHS[13],
-          ].map((glyph, index) => (
-            <p
-              key={index}
-              style={{
-                color: '#FFD700',
-                fontSize: '0.875rem',
-                animation: 'datagrid-float 3s ease-in-out infinite',
-                animationDelay: `${index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </p>
-          ))}
-        </div>
-      )}
-
       {isMobile ? (
         <MobileCardView
           columns={visibleColumns}
@@ -631,9 +583,9 @@ function DataGrid({
       ) : (
         <div style={computedStyles.contentWrapper}>
           {/* Metrics Section */}
-          {metrics && metrics.length > 0 && (
+          {originalMetrics && originalMetrics.length > 0 && (
             <MetricSection
-              metrics={metrics}
+              metrics={originalMetrics}
               collapsible={metricsCollapsible}
               defaultExpanded={metricsDefaultExpanded}
               {...(styles !== undefined ? { styles } : {})}
@@ -648,6 +600,8 @@ function DataGrid({
             rows={rows}
             onSearchFilter={handleSearchFilter}
             {...(styles !== undefined ? { styles } : {})}
+            collapsible={filtersCollapsible}
+            defaultExpanded={filtersDefaultExpanded}
           />
 
           {/* Toolbar - positioned inside DataGrid (search removed; search lives in FilterSection) */}
@@ -741,22 +695,6 @@ function DataGrid({
         </div>
       )}
 
-      {isSacredTheme && !isMobile && (
-        <div style={computedStyles.footerContainer}>
-          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <p
-              key={index}
-              style={{
-                ...computedStyles.footerGlyph,
-                animationDelay: `${2 + index * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </p>
-          ))}
-        </div>
-      )}
-
       {/* Manage Columns Modal */}
       {showManageColumns && (
         <ManageColumnsSimple
@@ -782,6 +720,14 @@ function DataGrid({
         }}
       />
     </div>
+  )
+}
+
+function DataGrid(props: DatagridProps) {
+  return (
+    <ColumnVisibilityProvider>
+      <DataGridContent {...props} />
+    </ColumnVisibilityProvider>
   )
 }
 

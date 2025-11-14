@@ -21,7 +21,7 @@ const premiumStyles = {
   container: {
     width: '100%',
     marginBottom: '0',
-    padding: '1rem',
+    padding: '0.5rem',
     boxSizing: 'border-box',
     overflow: 'visible',
   } as React.CSSProperties,
@@ -43,7 +43,7 @@ const sacredStyles = {
   container: {
     width: '100%',
     marginBottom: '0',
-    padding: '1rem',
+    padding: '0.5rem',
     boxSizing: 'border-box',
     overflow: 'visible',
   } as React.CSSProperties,

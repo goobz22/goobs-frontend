@@ -1,16 +1,8 @@
 'use client'
 import { useRef, useEffect } from 'react'
-import { useSetAtom, useAtomValue, createStore } from 'jotai'
-import {
-  columnsAtom,
-  columnVisibilityAtom,
-  columnVisibilityActions,
-} from '../Jotai/atom'
+import { useColumnVisibility } from '../context/ColumnVisibilityContext'
 import { areRowsEqual } from './rowComparison'
 import type { ColumnDef, RowData } from '../types'
-
-// Create a single shared store instance
-export const dataGridStore = createStore()
 
 interface UseInitializeGridProps {
   columns: ColumnDef[]
@@ -21,22 +13,14 @@ interface UseInitializeGridProps {
 /**
  * A custom hook that:
  * 1) Syncs the local rows whenever the parent-provided `rows` changes.
- * 2) Initializes columns in Jotai the very first time.
+ * 2) Initializes columns in the context the very first time.
  */
 export function useInitializeGrid({
   columns,
   providedRows,
   setRows,
 }: UseInitializeGridProps) {
-  // We retrieve or modify atoms here, so that DataGrid doesn't need its own useEffect.
-  // Use the custom store instead of the default one
-  const setColumns = useSetAtom(columnsAtom, { store: dataGridStore })
-  const columnVisibility = useAtomValue(columnVisibilityAtom, {
-    store: dataGridStore,
-  })
-  const updateVisibility = useSetAtom(columnVisibilityActions, {
-    store: dataGridStore,
-  })
+  const { columnVisibility, setColumns, saveVisibility } = useColumnVisibility()
 
   // We'll track whether we've run the "first-time" logic for columns and visibility
   const initialized = useRef(false)
@@ -52,10 +36,10 @@ export function useInitializeGrid({
     }
   }, [providedRows, setRows])
 
-  // (2) Initialize columns in Jotai (only once)
+  // (2) Initialize columns in context (only once)
   useEffect(() => {
     if (!initialized.current) {
-      // Save column fields in columnsAtom
+      // Save column fields
       setColumns(columns.map(col => col.field))
 
       // If some columns have never been set in columnVisibility, default them to `true`
@@ -66,15 +50,12 @@ export function useInitializeGrid({
         }
       })
 
-      // If we have at least one column that was never set, update our Jotai atom
+      // If we have at least one column that was never set, update our context
       if (Object.keys(initialVisibility).length > 0) {
-        updateVisibility({
-          type: 'save',
-          newState: { ...columnVisibility, ...initialVisibility },
-        })
+        saveVisibility({ ...columnVisibility, ...initialVisibility })
       }
 
       initialized.current = true
     }
-  }, [columns, columnVisibility, setColumns, updateVisibility])
+  }, [columns, columnVisibility, setColumns, saveVisibility])
 }

@@ -5,10 +5,8 @@
 import React, { useMemo } from 'react'
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
-import Typography from '../../Typography'
 import Alert, { AlertProps } from '../../Alert'
 import ProgressBar from '../../ProgressBar'
-import { SACRED_GLYPHS } from '../../../theme/'
 
 export interface FormDataGridProps {
   title: string
@@ -177,36 +175,6 @@ function FormDataGrid({
   if (isLoading) {
     return (
       <div style={styles.container}>
-        {sacredtheme && (
-          <>
-            <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
-              {SACRED_GLYPHS[10]}
-            </div>
-            <div
-              style={{
-                ...styles.glyph,
-                top: '0.75rem',
-                right: '0.75rem',
-                animationDirection: 'reverse',
-              }}
-            >
-              {SACRED_GLYPHS[11]}
-            </div>
-          </>
-        )}
-        {sacredtheme && (
-          <div style={styles.headerGlyphs}>
-            {[
-              SACRED_GLYPHS[13],
-              SACRED_GLYPHS[3],
-              SACRED_GLYPHS[23],
-              SACRED_GLYPHS[3],
-              SACRED_GLYPHS[13],
-            ].map((glyph, index) => (
-              <Typography key={index}>{glyph}</Typography>
-            ))}
-          </div>
-        )}
         <div style={styles.titleContainer}>
           <div style={styles.title}>{title}</div>
           <div style={styles.description}>{description}</div>
@@ -220,38 +188,6 @@ function FormDataGrid({
 
   return (
     <div style={styles.container}>
-      {sacredtheme && (
-        <>
-          <div style={{ ...styles.glyph, top: '0.75rem', left: '0.75rem' }}>
-            {SACRED_GLYPHS[10]}
-          </div>
-          <div
-            style={{
-              ...styles.glyph,
-              top: '0.75rem',
-              right: '0.75rem',
-              animationDirection: 'reverse',
-            }}
-          >
-            {SACRED_GLYPHS[11]}
-          </div>
-        </>
-      )}
-
-      {sacredtheme && (
-        <div style={styles.headerGlyphs}>
-          {[
-            SACRED_GLYPHS[13],
-            SACRED_GLYPHS[3],
-            SACRED_GLYPHS[23],
-            SACRED_GLYPHS[3],
-            SACRED_GLYPHS[13],
-          ].map((glyph, index) => (
-            <Typography key={index}>{glyph}</Typography>
-          ))}
-        </div>
-      )}
-
       <div style={{ ...styles.titleContainer, position: 'relative' }}>
         <div style={styles.title}>{title}</div>
         <div style={styles.description}>{description}</div>
@@ -278,14 +214,6 @@ function FormDataGrid({
       <div style={styles.dataGridContainer}>
         <DataGrid {...datagrid} styles={dataGridStyles} />
       </div>
-
-      {sacredtheme && (
-        <div style={styles.footerGlyphs}>
-          {['𓊖', '𓊗', '𓊖'].map((glyph, index) => (
-            <Typography key={index}>{glyph}</Typography>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

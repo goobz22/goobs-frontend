@@ -6,15 +6,10 @@
 'use client'
 
 import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
-import { useAtom } from 'jotai'
 import {
-  columnsAtom,
-  viewStateAtom,
-  animationOriginAtom,
-  activeAddTaskFormAtom,
-  activeTaskIdAtom,
-} from './jotai/atom'
-import { JotaiProvider } from './jotai/provider'
+  useProjectBoard,
+  ProjectBoardProvider,
+} from './context/ProjectBoardContext'
 
 import Toolbar from '../Toolbar'
 import { InlineShowTask } from './forms/ShowTask/inline'
@@ -31,7 +26,7 @@ import {
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from './utils/useDragandDrop/tasks'
 import Board from './board'
-import { getProjectBoardStyles, SACRED_GLYPHS } from '../../theme'
+import { getProjectBoardStyles } from '../../theme'
 import { Breadcrumb } from './Breadcrumb'
 import { AnimationWrapper } from './AnimationWrapper'
 
@@ -103,20 +98,24 @@ function ProjectBoardContent({
   styles,
   permissions,
 }: ProjectBoardProps) {
-  const [columnState, setColumnState] = useAtom(columnsAtom)
-  const [viewState, setViewState] = useAtom(viewStateAtom)
-  const [animationOrigin, setAnimationOrigin] = useAtom(animationOriginAtom)
-  const [activeAddTaskForm, setActiveAddTaskForm] = useAtom(
-    activeAddTaskFormAtom
-  )
-  const [activeTaskId, setActiveTaskId] = useAtom(activeTaskIdAtom)
+  const {
+    columns: columnState,
+    setColumns: setColumnState,
+    viewState,
+    setViewState,
+    animationOrigin,
+    setAnimationOrigin,
+    activeAddTaskForm,
+    setActiveAddTaskForm,
+    activeTaskId,
+    setActiveTaskId,
+  } = useProjectBoard()
 
   const mergedColumns = useMemo<ColumnData[]>(
     () => mergeColumnsAndTasks(columns, tasks, boardType),
     [columns, tasks, boardType]
   )
 
-  const isSacredTheme = styles?.theme === 'sacred'
   const isDisabled = styles?.disabled
 
   const computedStyles = useMemo(
@@ -483,23 +482,6 @@ function ProjectBoardContent({
 
   return (
     <div style={computedStyles.container}>
-      {isSacredTheme && viewState === 'board' && (
-        <>
-          <div style={computedStyles.glyphPositions.topLeft}>
-            {SACRED_GLYPHS[0]}
-          </div>
-          <div style={computedStyles.glyphPositions.topRight}>
-            {SACRED_GLYPHS[13]}
-          </div>
-          <div style={computedStyles.glyphPositions.bottomLeft}>
-            {SACRED_GLYPHS[5]}
-          </div>
-          <div style={computedStyles.glyphPositions.bottomRight}>
-            {SACRED_GLYPHS[9]}
-          </div>
-        </>
-      )}
-
       {/* Show breadcrumb when not on board view */}
       {viewState !== 'board' && (
         <Breadcrumb
@@ -573,9 +555,9 @@ function ProjectBoardContent({
 
 function ProjectBoard(props: ProjectBoardProps) {
   return (
-    <JotaiProvider>
+    <ProjectBoardProvider>
       <ProjectBoardContent {...props} />
-    </JotaiProvider>
+    </ProjectBoardProvider>
   )
 }
 

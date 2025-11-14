@@ -275,7 +275,7 @@ export interface ProjectBoardProps {
 /** View state for inline interface - tracks which view is currently displayed */
 export type ViewState = 'board' | 'addTask' | 'showTask'
 
-/** Animation origin coordinates for expand-from-origin animation */
+/** Animation origin for expand-from-origin transitions */
 export type AnimationOrigin = {
   x: number
   y: number

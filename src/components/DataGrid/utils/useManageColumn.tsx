@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import { columnVisibilityAtom, columnVisibilityActions } from '../Jotai/atom'
+import { useColumnVisibility } from '../context/ColumnVisibilityContext'
 import type { ColumnDef } from '../types'
-import { dataGridStore } from './useInitializeGrid'
 
 type ColumnVisibilityModel = { [key: string]: boolean }
 
@@ -21,12 +19,7 @@ export const useManageColumn = ({
 }: UseManageColumnProps) => {
   const [tempVisibleColumns, setTempVisibleColumns] =
     useState<ColumnVisibilityModel>({})
-  const [columnVisibility] = useAtom(columnVisibilityAtom, {
-    store: dataGridStore,
-  })
-  const updateVisibility = useSetAtom(columnVisibilityActions, {
-    store: dataGridStore,
-  })
+  const { columnVisibility, saveVisibility } = useColumnVisibility()
   const [searchInput, setSearchInput] = useState(initialSearchInput)
   const [isAllChecked, setIsAllChecked] = useState(true)
   const initialized = useRef(false)
@@ -81,9 +74,9 @@ export const useManageColumn = ({
   )
 
   const onSaveColumnView = useCallback(() => {
-    updateVisibility({ type: 'save', newState: tempVisibleColumns })
+    saveVisibility(tempVisibleColumns)
     handleClose()
-  }, [tempVisibleColumns, updateVisibility, handleClose])
+  }, [tempVisibleColumns, saveVisibility, handleClose])
 
   const formatColumnName = useCallback((fieldName: string): string => {
     return fieldName
