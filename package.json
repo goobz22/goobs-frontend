@@ -37,7 +37,6 @@
     "eslint-config-next": "^16",
     "formik": "^2",
     "highlight.js": "^11",
-    "jotai": "^2",
     "lodash": "^4",
     "next": "^16",
     "otplib": "^12",
