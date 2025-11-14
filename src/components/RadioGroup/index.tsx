@@ -63,7 +63,6 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
 
   return (
     <div style={computedStyles.formControl}>
-      {styles?.theme === 'sacred' && <div style={computedStyles.glyph}>𓋴</div>}
       <label id={`${name}-label`} style={computedStyles.formLabel}>
         {labelText || label}
       </label>

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react'
 import CloseIcon from '../Icons/Close'
-import { getChipStyles, SACRED_GLYPHS, type ChipStyles } from '../../theme'
+import { getChipStyles, type ChipStyles } from '../../theme'
 
 export interface ChipProps {
   label: string
@@ -27,7 +27,6 @@ const Chip: React.FC<ChipProps> = ({
   const [isCloseHovered, setIsCloseHovered] = useState(false)
 
   const isDisabled = styles?.disabled
-  const isSacredTheme = styles?.theme === 'sacred'
   const isClickable = !!onClick
 
   const computedStyles = getChipStyles(styles, isHovered, isDisabled)
@@ -54,31 +53,6 @@ const Chip: React.FC<ChipProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
     >
-      {/* Sacred theme effects */}
-      {isSacredTheme && (
-        <>
-          <span
-            style={{
-              ...computedStyles.glyph,
-              ...computedStyles.glyphLeft,
-              ...(isHovered && !isDisabled && computedStyles.glyphVisible),
-            }}
-          >
-            {SACRED_GLYPHS[7]}
-          </span>
-          <span
-            style={{
-              ...computedStyles.glyph,
-              ...computedStyles.glyphRight,
-              ...(isHovered && !isDisabled && computedStyles.glyphVisible),
-            }}
-          >
-            {SACRED_GLYPHS[13]}
-          </span>
-          {isHovered && !isDisabled && <div style={computedStyles.shimmer} />}
-        </>
-      )}
-
       {/* Icon */}
       {icon && <span style={computedStyles.icon}>{icon}</span>}
 

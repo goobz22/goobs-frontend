@@ -1,11 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import {
-  getBreadcrumbStyles,
-  SACRED_GLYPHS,
-  type BreadcrumbStyles,
-} from '../../theme'
+import React, { useState } from 'react'
+import { getBreadcrumbStyles, type BreadcrumbStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -41,41 +37,8 @@ export interface BreadcrumbProps {
 
 const SacredGlyph: React.FC<{
   isHovered: boolean
-}> = ({ isHovered }) => {
-  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  useEffect(() => {
-    if (!isHydrated) {
-      setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
-      setIsHydrated(true)
-    }
-  }, [isHydrated])
-
-  useEffect(() => {
-    if (isHovered && isHydrated) {
-      const timer = setTimeout(() => {
-        setGlyph(
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-        )
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [isHovered, isHydrated])
-
-  const glyphStyles = {
-    position: 'absolute' as const,
-    top: '-8px',
-    right: '-8px',
-    fontSize: '12px',
-    color: 'rgba(255, 215, 0, 0.3)',
-    transition: 'all 0.3s ease',
-    opacity: isHovered ? 0.6 : 0,
-    pointerEvents: 'none' as const,
-    animation: isHovered ? 'sacredGlyphRotate 20s linear infinite' : 'none',
-  }
-
-  return <div style={glyphStyles}>{glyph}</div>
+}> = () => {
+  return null
 }
 
 // --------------------------------------------------------------------------

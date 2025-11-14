@@ -13,11 +13,7 @@ import React, {
 } from 'react'
 import Button from '../../components/Button'
 import hljs from 'highlight.js'
-import {
-  getCodeCopyStyles,
-  SACRED_GLYPHS,
-  type CodeCopyStyles,
-} from '../../theme'
+import { getCodeCopyStyles, type CodeCopyStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -37,70 +33,7 @@ export interface CodeCopyProps {
 // --------------------------------------------------------------------------
 
 const SacredGlyphs: FC = () => {
-  const glyphStyles = useMemo(
-    () => ({
-      backgroundGlyphs: {
-        position: 'absolute' as const,
-        top: '8px',
-        right: '8px',
-        color: 'rgba(255, 215, 0, 0.2)',
-        fontSize: '12px',
-        animation: 'sacredFloat 3s ease-in-out infinite',
-        pointerEvents: 'none' as const,
-      },
-      decorativeGlyphs: {
-        position: 'absolute' as const,
-        bottom: '0.5rem',
-        right: '0.5rem',
-        fontSize: '3.75rem',
-        color: 'rgba(255, 215, 0, 0.2)',
-        pointerEvents: 'none' as const,
-      },
-      floatingGlyphs: {
-        position: 'absolute' as const,
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        display: 'flex',
-        gap: '0.5rem',
-        opacity: 0.05,
-        pointerEvents: 'none' as const,
-      },
-      floatingGlyph: {
-        color: '#FFD700',
-        fontSize: '1.5rem',
-      },
-    }),
-    []
-  )
-
-  return (
-    <>
-      {/* Sacred background glyphs */}
-      <div style={glyphStyles.backgroundGlyphs}>{SACRED_GLYPHS[0]}</div>
-
-      {/* Large decorative glyph */}
-      <div style={glyphStyles.decorativeGlyphs}>{SACRED_GLYPHS[18]}</div>
-
-      {/* Floating glyphs */}
-      <div style={glyphStyles.floatingGlyphs}>
-        {[SACRED_GLYPHS[8], SACRED_GLYPHS[12], SACRED_GLYPHS[16]].map(
-          (glyph, i) => (
-            <div
-              key={i}
-              style={{
-                ...glyphStyles.floatingGlyph,
-                animation: `sacred-glyph-float ${4 + i}s infinite`,
-                animationDelay: `${i * 0.5}s`,
-              }}
-            >
-              {glyph}
-            </div>
-          )
-        )}
-      </div>
-    </>
-  )
+  return null
 }
 
 const SacredLineNumbers: FC<{
@@ -109,7 +42,6 @@ const SacredLineNumbers: FC<{
 }> = ({ lineNumbers, computedStyles }) => {
   return (
     <div style={computedStyles.lineNumbers}>
-      <div style={computedStyles.lineNumbersGlyph}>{SACRED_GLYPHS[11]}</div>
       {lineNumbers.map(num => (
         <div
           key={num}
@@ -217,9 +149,6 @@ const CodeCopy: FC<CodeCopyProps> = props => {
             overflow: 'hidden',
           }}
         >
-          {isSacredTheme && (
-            <span style={computedStyles.langGlyph}>{SACRED_GLYPHS[5]}</span>
-          )}
           <span
             style={{
               ...computedStyles.langText,

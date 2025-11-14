@@ -11,7 +11,7 @@ import React, {
   type ReactNode,
   type FC,
 } from 'react'
-import { getDrawerStyles, SACRED_GLYPHS, type DrawerStyles } from '../../theme'
+import { getDrawerStyles, type DrawerStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // TYPES AND INTERFACES
@@ -74,16 +74,12 @@ const SacredBackground: FC<SacredBackgroundProps> = ({ width, height }) => {
     }> = []
 
     for (let i = 0; i < 12; i++) {
-      const randomIndex = Math.floor(Math.random() * SACRED_GLYPHS.length)
-      const defaultGlyph = '𓁟'
-      const glyph = SACRED_GLYPHS[randomIndex] ?? defaultGlyph
-
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        glyph,
+        glyph: '',
         size: 10 + Math.random() * 6,
         opacity: Math.random() * 0.15 + 0.05,
         maxOpacity: Math.random() * 0.2 + 0.1,

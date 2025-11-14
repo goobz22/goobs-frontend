@@ -9,7 +9,7 @@ import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import ErrorIcon from '../Icons/Error'
 import WarningIcon from '../Icons/Warning'
-import { getAlertStyles, SACRED_GLYPHS, type AlertStyles } from '../../theme'
+import { getAlertStyles, type AlertStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -32,40 +32,8 @@ export interface AlertProps {
 
 const SacredGlyphs: React.FC<{
   severity: 'error' | 'warning' | 'info' | 'success'
-}> = ({ severity }) => {
-  const glyphIndex = { error: 0, warning: 1, info: 2, success: 3 }[severity]
-
-  const glyphStyles = useMemo(
-    () => ({
-      glyph: {
-        position: 'absolute' as const,
-        fontSize: '12px',
-        opacity: 0.2,
-        color: '#FFD700',
-        pointerEvents: 'none' as const,
-      },
-      glyphTopRight: {
-        top: '8px',
-        right: '8px',
-      },
-      glyphBottomLeft: {
-        bottom: '8px',
-        left: '8px',
-      },
-    }),
-    []
-  )
-
-  return (
-    <>
-      <div style={{ ...glyphStyles.glyph, ...glyphStyles.glyphTopRight }}>
-        {SACRED_GLYPHS[glyphIndex]}
-      </div>
-      <div style={{ ...glyphStyles.glyph, ...glyphStyles.glyphBottomLeft }}>
-        {SACRED_GLYPHS[(glyphIndex + 2) % 4]}
-      </div>
-    </>
-  )
+}> = () => {
+  return null
 }
 
 // --------------------------------------------------------------------------

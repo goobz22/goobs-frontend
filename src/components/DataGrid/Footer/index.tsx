@@ -119,7 +119,7 @@ const PageSizeSelector: React.FC<{
       <span style={{ whiteSpace: 'nowrap' }}>
         {isSacredTheme ? 'Show:' : 'Show:'}
       </span>
-      <div style={{ minWidth: '60px', marginTop: '-15px' }}>
+      <div style={{ minWidth: '60px' }}>
         <Dropdown
           label=""
           value={selectedValue}

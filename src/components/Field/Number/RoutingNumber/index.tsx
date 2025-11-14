@@ -191,8 +191,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
         ...computedStyles.startAdornment,
       }}
     >
-      {sacredTheme && <span style={computedStyles.sacredGlyph}>𓂋</span>}
-      <span>⚡</span>
+      {sacredTheme && <span>⚡</span>}
     </div>
   )
 

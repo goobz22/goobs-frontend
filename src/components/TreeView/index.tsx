@@ -16,11 +16,7 @@ import React, {
   type ReactNode,
   type FC,
 } from 'react'
-import {
-  getTreeViewStyles,
-  SACRED_GLYPHS,
-  type TreeViewStyles,
-} from '../../theme'
+import { getTreeViewStyles, type TreeViewStyles } from '../../theme'
 import ExpandMoreIcon from '../Icons/ExpandMore'
 
 // --------------------------------------------------------------------------
@@ -475,8 +471,7 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.2,
         vy: (Math.random() - 0.5) * 0.2,
-        glyph:
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)] ?? '',
+        glyph: '',
         size: 10 + Math.random() * 6,
         opacity: Math.random() * 0.15 + 0.05,
         maxOpacity: Math.random() * 0.2 + 0.1,
@@ -560,21 +555,6 @@ const TreeItem: FC<TreeItemProps> = ({
   const itemId = context.getItemId(item)
   const label = context.getItemLabel(item)
   const isDisabled = context.isItemDisabled(item)
-  const isSacredTheme = styles.theme === 'sacred'
-
-  // Use stable background glyph based on item ID to prevent hydration mismatch
-  const backgroundGlyph = useMemo(() => {
-    if (!isSacredTheme) return ''
-    // Generate consistent glyph based on item ID hash
-    let hash = 0
-    for (let i = 0; i < itemId.length; i++) {
-      const char = itemId.charCodeAt(i)
-      hash = (hash << 5) - hash + char
-      hash = hash & hash // Convert to 32bit integer
-    }
-    const index = Math.abs(hash) % SACRED_GLYPHS.length
-    return SACRED_GLYPHS[index] || SACRED_GLYPHS[0]
-  }, [itemId, isSacredTheme])
 
   // Get computed styles
   const itemStyles = useMemo(() => {
@@ -704,67 +684,7 @@ const TreeItem: FC<TreeItemProps> = ({
   )
 
   // Sacred theme decorations
-  const sacredDecorations = isSacredTheme && (
-    <>
-      {/* Background glyph */}
-      {styles.theme === 'sacred' && backgroundGlyph && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            color: 'rgba(255, 215, 0, 0.2)',
-            fontSize: '12px',
-            animation: 'sacredFloat 3s ease-in-out infinite',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        >
-          {backgroundGlyph}
-        </div>
-      )}
-
-      {/* Hover glyphs */}
-      {(isHovered || isSelected) && (
-        <>
-          <div
-            style={{
-              position: 'absolute',
-              left: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'rgba(255, 215, 0, 0.4)',
-              fontSize: '14px',
-              animation: isSelected
-                ? 'sacredGlyphRotate 20s linear infinite'
-                : undefined,
-              pointerEvents: 'none',
-              zIndex: 1,
-            }}
-          >
-            {SACRED_GLYPHS[3]}
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              right: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'rgba(255, 215, 0, 0.4)',
-              fontSize: '14px',
-              animation: isSelected
-                ? 'sacredGlyphRotate 20s linear infinite'
-                : undefined,
-              pointerEvents: 'none',
-              zIndex: 1,
-            }}
-          >
-            {SACRED_GLYPHS[7]}
-          </div>
-        </>
-      )}
-    </>
-  )
+  const sacredDecorations = null
 
   return (
     <div

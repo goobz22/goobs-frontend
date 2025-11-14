@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import {
   getSharedFormFieldStyles,
   injectSacredKeyframes,
-  SACRED_GLYPHS,
   type FormFieldStyles,
 } from '../../theme'
 
@@ -38,20 +37,11 @@ const Select: React.FC<SelectProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  // hydration-safe glyph
-  const [glyph, setGlyph] = useState(SACRED_GLYPHS[0])
 
   // Inject CSS keyframes for sacred animations
   useEffect(() => {
     if (styles?.theme === 'sacred') {
       injectSacredKeyframes()
-    }
-  }, [styles?.theme])
-
-  // Randomize only after hydration
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      setGlyph(SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)])
     }
   }, [styles?.theme])
 
@@ -189,26 +179,6 @@ const Select: React.FC<SelectProps> = ({
       >
         ▼
       </div>
-      {isSacredTheme && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '-8px',
-            right: '-8px',
-            color: 'rgba(255, 215, 0, 0.4)',
-            fontSize: '12px',
-            zIndex: 10,
-            opacity: isHovered ? 1 : 0,
-            transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1)',
-            pointerEvents: 'none',
-            animation: isHovered
-              ? 'sacredGlyphRotate 20s linear infinite'
-              : 'none',
-          }}
-        >
-          {glyph}
-        </div>
-      )}
     </div>
   )
 }

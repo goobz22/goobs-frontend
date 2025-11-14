@@ -58,10 +58,10 @@ const planOptions: RadioOption[] = [
 ]
 
 const mysticalOptions: RadioOption[] = [
-  { label: '🔮 Divine Insight' },
-  { label: '⚡ Sacred Lightning' },
-  { label: '🌙 Lunar Wisdom' },
-  { label: '🔥 Phoenix Fire' },
+  { label: 'Divine Insight' },
+  { label: 'Sacred Lightning' },
+  { label: 'Lunar Wisdom' },
+  { label: 'Phoenix Fire' },
 ]
 
 // --------------------------------------------------------------------------
@@ -163,18 +163,18 @@ export const DarkWithCustomColors: Story = {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME STORIES
+// DARK THEME STORIES (CONTINUED)
 // --------------------------------------------------------------------------
 
-export const Sacred: Story = {
-  name: 'Sacred/Basic',
+export const DarkBasic: Story = {
+  name: 'Dark/Basic Options',
   args: {
-    name: 'sacred-radio',
-    label: '⚡ Choose Your Sacred Power',
+    name: 'dark-basic-radio',
+    label: 'Choose Your Power',
     options: mysticalOptions,
-    defaultValue: '🔮 Divine Insight',
+    defaultValue: 'Divine Insight',
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
     },
   },
   parameters: {
@@ -182,15 +182,15 @@ export const Sacred: Story = {
   },
 }
 
-export const SacredWithGlyph: Story = {
-  name: 'Sacred/With Sacred Glyph',
+export const DarkWithGlyph: Story = {
+  name: 'Dark/With Glyph',
   args: {
-    name: 'sacred-glyph-radio',
-    labelText: '🌟 Select Your Divine Blessing',
+    name: 'dark-glyph-radio',
+    labelText: 'Select Your Divine Blessing',
     options: mysticalOptions,
-    defaultValue: '⚡ Sacred Lightning',
+    defaultValue: 'Sacred Lightning',
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
       showGlyph: true,
     },
   },
@@ -199,15 +199,15 @@ export const SacredWithGlyph: Story = {
   },
 }
 
-export const SacredCustomized: Story = {
-  name: 'Sacred/Customized',
+export const DarkCustomized: Story = {
+  name: 'Dark/Customized',
   args: {
-    name: 'sacred-custom-radio',
-    labelText: '🔮 Channel Arcane Energy',
+    name: 'dark-custom-radio',
+    labelText: 'Channel Arcane Energy',
     options: mysticalOptions,
-    defaultValue: '🌙 Lunar Wisdom',
+    defaultValue: 'Lunar Wisdom',
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
       radioSize: '22px',
       labelFontSize: '1rem',
       padding: '0.75rem 0',
@@ -368,7 +368,7 @@ const FormIntegrationComponent: React.FC = () => {
   const [formData, setFormData] = useState({
     notifications: 'Email notifications',
     plan: 'Pro Plan - $19/month',
-    theme: '🔮 Divine Insight',
+    theme: 'Divine Insight',
   })
 
   const handleNotificationChange = (
@@ -416,11 +416,11 @@ const FormIntegrationComponent: React.FC = () => {
       <div style={{ marginBottom: '30px' }}>
         <RadioGroup
           name="theme"
-          labelText="🌟 Choose your sacred theme:"
+          labelText="Choose your theme:"
           options={mysticalOptions}
           defaultValue={formData.theme}
           onChange={handleThemeChange}
-          styles={{ theme: 'sacred' }}
+          styles={{ theme: 'dark' }}
         />
       </div>
 

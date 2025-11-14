@@ -12,7 +12,7 @@ import React, {
   type FC,
   type ReactNode,
 } from 'react'
-import { getAppBarStyles, SACRED_GLYPHS, type AppBarStyles } from '../../theme'
+import { getAppBarStyles, type AppBarStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -40,106 +40,8 @@ export interface AppBarProps {
 const SacredGlyphs: FC<{
   isHovered: boolean
   isDisabled: boolean
-}> = ({ isHovered, isDisabled }) => {
-  // Initialize with consistent values to prevent hydration mismatch
-  const [leftGlyph, setLeftGlyph] = useState(SACRED_GLYPHS[0])
-  const [rightGlyph, setRightGlyph] = useState(SACRED_GLYPHS[1])
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  // Set random glyphs only on client side after hydration
-  useEffect(() => {
-    if (!isHydrated) {
-      setLeftGlyph(
-        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-      )
-      setRightGlyph(
-        SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-      )
-      setIsHydrated(true)
-    }
-  }, [isHydrated])
-
-  // Change sacred glyphs on hover for a dynamic effect
-  useEffect(() => {
-    if (isHovered && isHydrated) {
-      const timer = setTimeout(() => {
-        setLeftGlyph(
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-        )
-        setRightGlyph(
-          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)]
-        )
-      }, 300) // Debounce to avoid excessive changes
-      return () => clearTimeout(timer)
-    }
-  }, [isHovered, isHydrated])
-
-  const glyphStyles = useMemo(
-    () => ({
-      glyph: {
-        position: 'absolute' as const,
-        fontSize: '16px',
-        color: 'rgba(255, 215, 0, 0.4)',
-        transition: 'all 0.3s ease',
-        opacity: 0,
-        pointerEvents: 'none' as const,
-        animation: 'sacredFloat 3s ease-in-out infinite',
-      },
-      glyphLeft: {
-        left: '12px',
-        top: '8px',
-      },
-      glyphRight: {
-        right: '12px',
-        top: '8px',
-      },
-      glyphVisible: {
-        opacity: 1,
-      },
-      decorativeGlyphs: {
-        position: 'absolute' as const,
-        bottom: '0',
-        left: '0',
-        right: '0',
-        height: '1px',
-        background:
-          'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent)',
-        backgroundSize: '200% 100%',
-        animation: 'sacredShimmer 3s linear infinite',
-        animationDelay: '1.5s',
-      },
-    }),
-    []
-  )
-
-  return (
-    <>
-      {/* Left corner glyph */}
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphLeft,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-        }}
-      >
-        {leftGlyph}
-      </div>
-
-      {/* Right corner glyph */}
-      <div
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphRight,
-          ...(isHovered && !isDisabled && glyphStyles.glyphVisible),
-        }}
-      >
-        {rightGlyph}
-      </div>
-
-      {/* Bottom shimmer line */}
-      <div style={glyphStyles.decorativeGlyphs} />
-    </>
-  )
+}> = () => {
+  return null
 }
 
 const SacredShimmer: FC = () => {

@@ -252,14 +252,14 @@ export const DarkWithMenu: Story = {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME STORIES
+// DARK THEME STORIES (CONTINUED)
 // --------------------------------------------------------------------------
 
-export const Sacred: Story = {
-  name: 'Sacred/Basic',
+export const DarkBasic: Story = {
+  name: 'Dark/Basic Popover',
   render: () => (
-    <InteractivePopover styles={{ theme: 'sacred' }}>
-      <PopoverContent theme="sacred" />
+    <InteractivePopover styles={{ theme: 'dark' }}>
+      <PopoverContent theme="dark" />
     </InteractivePopover>
   ),
   parameters: {
@@ -267,10 +267,10 @@ export const Sacred: Story = {
   },
 }
 
-export const SacredWithMysticalContent: Story = {
-  name: 'Sacred/Mystical Content',
+export const DarkWithContent: Story = {
+  name: 'Dark/With Content',
   render: () => (
-    <InteractivePopover styles={{ theme: 'sacred', padding: '20px' }}>
+    <InteractivePopover styles={{ theme: 'dark', padding: '20px' }}>
       <div style={{ minWidth: '250px', color: '#f5f5dc' }}>
         <h3
           style={{
@@ -281,7 +281,7 @@ export const SacredWithMysticalContent: Story = {
             textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
           }}
         >
-          ⚡ Sacred Powers ⚡
+          Powers
         </h3>
         <div style={{ marginBottom: '16px' }}>
           {['Divine Protection', 'Mystic Insight', 'Sacred Healing'].map(
@@ -297,13 +297,12 @@ export const SacredWithMysticalContent: Story = {
                   gap: '8px',
                 }}
               >
-                <span style={{ color: '#FFD700' }}>✨</span>
                 {power}
               </div>
             )
           )}
         </div>
-        <Button styles={{ theme: 'sacred', width: '100%' }}>
+        <Button styles={{ theme: 'dark', width: '100%' }}>
           Activate Power
         </Button>
       </div>
@@ -338,7 +337,7 @@ export const CustomColors: Story = {
             color: '#dc2626',
           }}
         >
-          🚨 Warning
+          Warning
         </h3>
         <p
           style={{

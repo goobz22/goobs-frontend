@@ -272,6 +272,7 @@ export type {
   Task,
   Comment,
   CommentEditHistory,
+  CaseUpdate,
   ColumnData,
   BoardType,
   RawStatus,
@@ -281,9 +282,15 @@ export type {
   RawArticle,
   RawEmployee,
   RawCompany,
+  RawProduct,
+  RawService,
+  RawRegion,
   BoardVariant,
   CurrentUser,
   ProjectBoardProps,
+  ViewState,
+  AddTaskFormType,
+  ProjectBoardStyles,
 } from './components/ProjectBoard/types'
 
 // Task Management Components

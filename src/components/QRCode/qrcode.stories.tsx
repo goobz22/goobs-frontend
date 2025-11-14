@@ -175,17 +175,17 @@ export const DarkSuccess: Story = {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME STORIES
+// DARK THEME STORIES (CONTINUED)
 // --------------------------------------------------------------------------
 
-export const Sacred: Story = {
-  name: 'Sacred/Basic',
+export const DarkBasic: Story = {
+  name: 'Dark/Basic Setup',
   args: {
-    username: 'mystic.user@sacred.realm',
-    appName: '⚡ SacredAuth',
-    title: '🔮 Sacred Authentication Portal',
+    username: 'mystic.user@example.com',
+    appName: 'AuthApp',
+    title: 'Authentication Portal',
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
     },
   },
   parameters: {
@@ -193,19 +193,19 @@ export const Sacred: Story = {
   },
 }
 
-export const SacredWithMysticalElements: Story = {
-  name: 'Sacred/With Mystical Elements',
+export const DarkWithElements: Story = {
+  name: 'Dark/With Elements',
   args: {
-    username: 'mystic.user@sacred.realm',
-    appName: '⚡ SacredAuth',
-    title: '🔮 Channel Divine Power',
+    username: 'mystic.user@example.com',
+    appName: 'AuthApp',
+    title: 'Channel Divine Power',
     showVerifyButton: true,
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
       showGlyphs: true,
     },
     verifyButtonProps: {
-      text: '✨ Activate Sacred Shield',
+      text: 'Activate Shield',
     },
   },
   parameters: {
@@ -213,12 +213,12 @@ export const SacredWithMysticalElements: Story = {
   },
 }
 
-export const SacredWithBothButtons: Story = {
-  name: 'Sacred/With Send/Resend + Verify Buttons',
+export const DarkWithBothButtons: Story = {
+  name: 'Dark/With Send/Resend + Verify Buttons',
   args: {
-    username: 'mystic.user@sacred.realm',
-    appName: '⚡ SacredAuth',
-    title: '🔮 Sacred Authentication Portal',
+    username: 'mystic.user@example.com',
+    appName: 'AuthApp',
+    title: 'Authentication Portal',
     showVerifyButton: false,
     showConfirmationInput: true,
     confirmationCode: '123456',
@@ -228,7 +228,7 @@ export const SacredWithBothButtons: Story = {
       codeSent: true,
     },
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
     },
   },
   parameters: {
@@ -236,18 +236,18 @@ export const SacredWithBothButtons: Story = {
   },
 }
 
-export const SacredSuccess: Story = {
-  name: 'Sacred/Success State',
+export const DarkSuccess: Story = {
+  name: 'Dark/Success State',
   args: {
-    username: 'mystic.user@sacred.realm',
-    appName: '⚡ SacredAuth',
+    username: 'mystic.user@example.com',
+    appName: 'AuthApp',
     showSuccessState: true,
-    successMessage: '⚡ Divine Protection Activated! ⚡',
+    successMessage: 'Protection Activated!',
     styles: {
-      theme: 'sacred',
+      theme: 'dark',
     },
     disableVerificationButtonProps: {
-      text: '🔓 Deactivate Sacred Shield',
+      text: 'Deactivate Shield',
     },
   },
   parameters: {
@@ -324,7 +324,7 @@ const SendResendVerifyComponent: React.FC = () => {
         username="demo@example.com"
         appName="DemoApp"
         showSuccessState={true}
-        successMessage="🎉 Two-Factor Authentication Verified!"
+        successMessage="Two-Factor Authentication Verified!"
         onDisableVerification={handleDisable}
         styles={{ theme: 'light' }}
       />
@@ -357,8 +357,8 @@ export const SendResendAndVerify: Story = {
   render: () => <SendResendVerifyComponent />,
 }
 
-// Component for Sacred Send/Resend + Verify Buttons
-const SacredSendResendVerifyComponent: React.FC = () => {
+// Component for Dark Send/Resend + Verify Buttons
+const DarkSendResendVerifyComponent: React.FC = () => {
   const [codeSent, setCodeSent] = useState(false)
   const [code, setCode] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
@@ -366,9 +366,7 @@ const SacredSendResendVerifyComponent: React.FC = () => {
   const handleSendResend = () => {
     setCodeSent(true)
     setCode('')
-    console.log(
-      codeSent ? 'Resending sacred code...' : 'Sending sacred code...'
-    )
+    console.log(codeSent ? 'Resending code...' : 'Sending code...')
   }
 
   const handleVerify = () => {
@@ -386,14 +384,14 @@ const SacredSendResendVerifyComponent: React.FC = () => {
   if (showSuccess) {
     return (
       <QRCodeComponent
-        username="mystic.user@sacred.realm"
-        appName="⚡ SacredAuth"
+        username="mystic.user@example.com"
+        appName="AuthApp"
         showSuccessState={true}
-        successMessage="⚡ Divine Authentication Verified! ⚡"
+        successMessage="Authentication Verified!"
         onDisableVerification={handleDisable}
-        styles={{ theme: 'sacred' }}
+        styles={{ theme: 'dark' }}
         disableVerificationButtonProps={{
-          text: '🔓 Deactivate Sacred Shield',
+          text: 'Deactivate Shield',
         }}
       />
     )
@@ -401,9 +399,9 @@ const SacredSendResendVerifyComponent: React.FC = () => {
 
   return (
     <QRCodeComponent
-      username="mystic.user@sacred.realm"
-      appName="⚡ SacredAuth"
-      title="🔮 Sacred Authentication Portal"
+      username="mystic.user@example.com"
+      appName="AuthApp"
+      title="Authentication Portal"
       showVerifyButton={false}
       showConfirmationInput={true}
       confirmationCode={code}
@@ -415,20 +413,20 @@ const SacredSendResendVerifyComponent: React.FC = () => {
         onSendResend: handleSendResend,
         onVerify: handleVerify,
         sendResendButtonProps: {
-          text: codeSent ? '🔄 Resend Sacred Code' : '📡 Send Sacred Code',
+          text: codeSent ? 'Resend Code' : 'Send Code',
         },
         verifyButtonProps: {
-          text: '✨ Verify Sacred Code',
+          text: 'Verify Code',
         },
       }}
-      styles={{ theme: 'sacred' }}
+      styles={{ theme: 'dark' }}
     />
   )
 }
 
-export const SacredSendResendAndVerify: Story = {
-  name: 'Sacred/Send/Resend + Verify Buttons',
-  render: () => <SacredSendResendVerifyComponent />,
+export const DarkSendResendAndVerify: Story = {
+  name: 'Dark/Send/Resend + Verify Buttons',
+  render: () => <DarkSendResendVerifyComponent />,
   parameters: {
     backgrounds: { default: 'dark' },
   },
@@ -456,7 +454,7 @@ const InteractiveSetupComponent: React.FC = () => {
         username="demo@example.com"
         appName="DemoApp"
         showSuccessState={true}
-        successMessage="🎉 Two-Factor Authentication Enabled!"
+        successMessage="Two-Factor Authentication Enabled!"
         onDisableVerification={handleDisable}
         styles={{ theme: 'light' }}
       />

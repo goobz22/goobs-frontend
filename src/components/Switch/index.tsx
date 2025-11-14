@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { getSwitchStyles, SACRED_GLYPHS, type SwitchStyles } from '../../theme'
+import { getSwitchStyles, type SwitchStyles } from '../../theme'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -87,28 +87,6 @@ const Switch: React.FC<SwitchProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Sacred glyphs */}
-      {isSacredTheme && (
-        <>
-          <span
-            style={{
-              ...computedStyles.glyph,
-              ...computedStyles.glyphLeft,
-            }}
-          >
-            {SACRED_GLYPHS[9]}
-          </span>
-          <span
-            style={{
-              ...computedStyles.glyph,
-              ...computedStyles.glyphRight,
-            }}
-          >
-            {SACRED_GLYPHS[16]}
-          </span>
-        </>
-      )}
-
       {leftLabel && <span style={computedStyles.leftLabel}>{leftLabel}</span>}
 
       <div style={computedStyles.track}>

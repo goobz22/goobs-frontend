@@ -11,7 +11,6 @@ import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
   getSharedFooterTextStyles,
-  SACRED_GLYPHS,
   type ComplexTextEditorStyles,
 } from '../../theme/'
 
@@ -208,9 +207,6 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           onChange={handleAccordionChange}
           styles={{ theme: styles?.theme || 'light' }}
         />
-        {isSacredTheme && (
-          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
-        )}
       </div>
     )
   }
@@ -221,9 +217,6 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
       <div style={computedStyles.container}>
         {createEditorContent()}
         {helperTextElement}
-        {isSacredTheme && (
-          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[14]}</div>
-        )}
       </div>
     </div>
   )

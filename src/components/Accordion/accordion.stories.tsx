@@ -72,13 +72,13 @@ export const DarkTheme: Story = {
   },
 }
 
-/** The sacred theme provides a mystical, golden appearance. */
-export const SacredTheme: Story = {
-  name: 'Sacred Theme',
+/** An alternative dark theme accordion. */
+export const DarkThemeAlt: Story = {
+  name: 'Dark Theme Alt',
   args: {
-    summary: 'Sacred Theme Accordion',
+    summary: 'Alternative Dark Accordion',
     details: sampleDetails,
-    styles: { theme: 'sacred' },
+    styles: { theme: 'dark' },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -116,21 +116,21 @@ export const DisabledStates: Story = {
         styles={{ theme: 'dark', disabled: true }}
       />
       <Accordion
-        summary="Disabled Sacred"
+        summary="Disabled Alternative"
         details={sampleDetails}
-        styles={{ theme: 'sacred', disabled: true }}
+        styles={{ theme: 'dark', disabled: true }}
       />
     </div>
   ),
 }
 
-/** A sacred theme accordion that is also disabled. */
-export const SacredDisabled: Story = {
-  name: 'State/Sacred Disabled',
+/** A dark theme accordion that is also disabled. */
+export const DarkDisabled: Story = {
+  name: 'State/Dark Disabled',
   args: {
-    summary: 'Sacred & Disabled',
+    summary: 'Dark & Disabled',
     details: sampleDetails,
-    styles: { theme: 'sacred', disabled: true },
+    styles: { theme: 'dark', disabled: true },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -314,25 +314,27 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
+      {/* Alternative Dark Theme Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+          Alternative Dark Theme
+        </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Accordion
-            summary="Sacred Basic"
+            summary="Alternative Basic"
             details={sampleDetails}
-            styles={{ theme: 'sacred' }}
+            styles={{ theme: 'dark' }}
           />
           <Accordion
-            summary="Sacred Expanded"
+            summary="Alternative Expanded"
             details={sampleDetails}
             defaultExpanded={true}
-            styles={{ theme: 'sacred' }}
+            styles={{ theme: 'dark' }}
           />
           <Accordion
-            summary="Sacred Disabled"
+            summary="Alternative Disabled"
             details={sampleDetails}
-            styles={{ theme: 'sacred', disabled: true }}
+            styles={{ theme: 'dark', disabled: true }}
           />
         </div>
       </div>
@@ -614,7 +616,7 @@ export const WidthBehaviorComparison: Story = {
 
 const createLevelContent = (
   level: number,
-  theme: 'light' | 'sacred'
+  theme: 'light' | 'dark'
 ): React.ReactNode => {
   if (level >= 6) {
     return (
@@ -782,16 +784,16 @@ export const SixLevelNavigationTest: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Navigation */}
+      {/* Dark Theme Navigation */}
       <div style={{ minWidth: 'fit-content' }}>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
-          Sacred Theme Navigation
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+          Dark Theme Navigation
         </h3>
         <div
           style={{
             width: '300px',
-            backgroundColor: '#0a0a0a',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
+            backgroundColor: '#1f2937',
+            border: '1px solid #374151',
             borderRadius: '8px',
             overflow: 'visible',
             minWidth: 'fit-content',
@@ -803,7 +805,7 @@ export const SixLevelNavigationTest: Story = {
             href="/"
             isActive={true}
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               level: 0,
               levelIndentBase: 16,
               levelIndentIncrement: 12,
@@ -812,9 +814,9 @@ export const SixLevelNavigationTest: Story = {
           />
           <Accordion
             summary="Dashboard"
-            details={createLevelContent(0, 'sacred')}
+            details={createLevelContent(0, 'dark')}
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               level: 0,
               levelIndentBase: 16,
               levelIndentIncrement: 12,
@@ -824,9 +826,9 @@ export const SixLevelNavigationTest: Story = {
           />
           <Accordion
             summary="Analytics"
-            details={createLevelContent(0, 'sacred')}
+            details={createLevelContent(0, 'dark')}
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               level: 0,
               levelIndentBase: 16,
               levelIndentIncrement: 12,
@@ -838,7 +840,7 @@ export const SixLevelNavigationTest: Story = {
             summary="Help"
             href="/help"
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               level: 0,
               levelIndentBase: 16,
               levelIndentIncrement: 12,
@@ -847,9 +849,9 @@ export const SixLevelNavigationTest: Story = {
           />
           <Accordion
             summary="Settings"
-            details={createLevelContent(0, 'sacred')}
+            details={createLevelContent(0, 'dark')}
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               level: 0,
               levelIndentBase: 16,
               levelIndentIncrement: 12,

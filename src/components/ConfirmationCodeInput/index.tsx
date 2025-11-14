@@ -13,7 +13,6 @@ import CheckCircleOutline from '../Icons/CheckCircleOutline'
 import CustomButton, { type ButtonProps } from '../Button'
 import {
   getConfirmationCodeInputStyles,
-  SACRED_GLYPHS,
   type ConfirmationCodeInputStyles,
 } from '../../theme'
 
@@ -50,31 +49,7 @@ export interface ConfirmationCodeInputsProps {
 // --------------------------------------------------------------------------
 
 const SacredGlyphs: React.FC = () => {
-  const glyphStyles = useMemo(
-    () => ({
-      decorativeGlyph: (top: string, side: string, delay?: string) =>
-        ({
-          position: 'absolute' as const,
-          top,
-          [side]: side,
-          color: 'rgba(255, 215, 0, 0.2)',
-          fontSize: '1rem',
-          animation: `sacred-glyph-float 4s infinite alternate ${delay || ''}`,
-        }) as React.CSSProperties,
-    }),
-    []
-  )
-
-  return (
-    <>
-      <div style={glyphStyles.decorativeGlyph('0.5rem', 'left')}>
-        {SACRED_GLYPHS[8]}
-      </div>
-      <div style={glyphStyles.decorativeGlyph('0.5rem', 'right', '3s')}>
-        {SACRED_GLYPHS[12]}
-      </div>
-    </>
-  )
+  return null
 }
 
 const SacredBottomDecorations: React.FC = () => {

@@ -13,13 +13,12 @@ import type { FormFieldStyles } from '../../../../theme'
  * Reusable mock options using the unified DropdownOption interface
  */
 const sampleOptions: DropdownOption[] = [
-  { value: 'javascript', icon: '🚀' },
-  { value: 'typescript', attribute1: 'Type-safe', icon: '✨' },
+  { value: 'javascript' },
+  { value: 'typescript', attribute1: 'Type-safe' },
   {
     value: 'react',
     attribute1: 'Library',
     attribute2: 'Frontend',
-    icon: '⚛️',
   },
   { value: 'nodejs', attribute1: 'Runtime' },
   { value: 'python' },
@@ -131,13 +130,13 @@ export const DarkTheme: Story = {
   },
 }
 
-export const SacredTheme: Story = {
-  name: 'Sacred Theme',
+export const DarkThemeAlt: Story = {
+  name: 'Dark Theme Alt',
   render: () => (
     <DropdownWithState
-      label="Ancient Wisdom"
+      label="Select Option"
       options={sampleOptions}
-      styles={{ theme: 'sacred' }}
+      styles={{ theme: 'dark' }}
     />
   ),
   parameters: {
@@ -360,10 +359,10 @@ export const DisabledStates: Story = {
         styles={{ theme: 'dark' }}
       />
       <DropdownWithState
-        label="Disabled Sacred"
+        label="Disabled Alternative"
         options={sampleOptions}
         disabled
-        styles={{ theme: 'sacred' }}
+        styles={{ theme: 'dark' }}
       />
     </div>
   ),
@@ -439,27 +438,29 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
+      {/* Alternative Dark Theme Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+          Alternative Dark Theme
+        </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <DropdownWithState
-            label="Ancient Selection"
+            label="Alternative Selection"
             options={sampleOptions}
-            styles={{ theme: 'sacred' }}
+            styles={{ theme: 'dark' }}
           />
           <DropdownWithState
-            label="Mystical Error"
+            label="Error State"
             options={countryOptions}
-            error="The spirits reject this choice"
-            styles={{ theme: 'sacred' }}
+            error="Invalid selection"
+            styles={{ theme: 'dark' }}
           />
           <DropdownWithState
-            label="Divine Choice"
+            label="Styled Choice"
             initialValue="typescript"
             options={sampleOptions}
             styles={{
-              theme: 'sacred',
+              theme: 'dark',
               borderRadius: '16px',
               height: '48px',
             }}

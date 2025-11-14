@@ -10,7 +10,6 @@ import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
 // Remove Switch import
 // import Switch from '../Switch';
-import { SACRED_GLYPHS } from '../../theme'
 // Remove clsx import
 
 // --------------------------------------------------------------------------
@@ -334,7 +333,7 @@ const PricingTable: FC<PricingProps> = props => {
 
   return (
     <div style={styles.container}>
-      {isSacredTheme && <div style={styles.glyph}>{SACRED_GLYPHS[0]}</div>}
+      {isSacredTheme && <div style={styles.glyph}>✦</div>}
 
       {tabletitle && <h5 style={styles.header}>{tabletitle.text}</h5>}
 
@@ -514,19 +513,17 @@ const PricingTable: FC<PricingProps> = props => {
 
       {isSacredTheme && (
         <div style={styles.sacredFooter}>
-          {[SACRED_GLYPHS[20], SACRED_GLYPHS[21], SACRED_GLYPHS[20]].map(
-            (glyph, i) => (
-              <span
-                key={i}
-                style={{
-                  ...styles.sacredFooterGlyph,
-                  animationDuration: `${2 + i * 0.3}s`,
-                }}
-              >
-                {glyph}
-              </span>
-            )
-          )}
+          {['✦', '◆', '✦'].map((glyph, i) => (
+            <span
+              key={i}
+              style={{
+                ...styles.sacredFooterGlyph,
+                animationDuration: `${2 + i * 0.3}s`,
+              }}
+            >
+              {glyph}
+            </span>
+          ))}
         </div>
       )}
     </div>

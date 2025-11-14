@@ -134,56 +134,56 @@ const hierarchicalData: TreeViewItem[] = [
   },
 ]
 
-const sacredTreeData: TreeViewItem[] = [
+const elementTreeData: TreeViewItem[] = [
   {
     id: 'elements',
-    label: '🔮 The Four Elements',
+    label: 'The Four Elements',
     children: [
       {
         id: 'fire',
-        label: '🔥 Fire',
+        label: 'Fire',
         children: [
-          { id: 'phoenix', label: '🔥 Phoenix' },
-          { id: 'dragon', label: '🔥 Dragon' },
-          { id: 'salamander', label: '🔥 Salamander' },
+          { id: 'phoenix', label: 'Phoenix' },
+          { id: 'dragon', label: 'Dragon' },
+          { id: 'salamander', label: 'Salamander' },
         ],
       },
       {
         id: 'water',
-        label: '💧 Water',
+        label: 'Water',
         children: [
-          { id: 'undine', label: '💧 Undine' },
-          { id: 'leviathan', label: '💧 Leviathan' },
-          { id: 'kraken', label: '💧 Kraken' },
+          { id: 'undine', label: 'Undine' },
+          { id: 'leviathan', label: 'Leviathan' },
+          { id: 'kraken', label: 'Kraken' },
         ],
       },
       {
         id: 'earth',
-        label: '🌍 Earth',
+        label: 'Earth',
         children: [
-          { id: 'gnome', label: '🌍 Gnome' },
-          { id: 'golem', label: '🌍 Golem' },
-          { id: 'titan', label: '🌍 Titan' },
+          { id: 'gnome', label: 'Gnome' },
+          { id: 'golem', label: 'Golem' },
+          { id: 'titan', label: 'Titan' },
         ],
       },
       {
         id: 'air',
-        label: '💨 Air',
+        label: 'Air',
         children: [
-          { id: 'sylph', label: '💨 Sylph' },
-          { id: 'griffin', label: '💨 Griffin' },
-          { id: 'thunderbird', label: '💨 Thunderbird' },
+          { id: 'sylph', label: 'Sylph' },
+          { id: 'griffin', label: 'Griffin' },
+          { id: 'thunderbird', label: 'Thunderbird' },
         ],
       },
     ],
   },
   {
     id: 'celestial',
-    label: '✨ Celestial Bodies',
+    label: 'Celestial Bodies',
     children: [
-      { id: 'sun', label: '☀️ Sol' },
-      { id: 'moon', label: '🌙 Luna' },
-      { id: 'stars', label: '⭐ Stellar Realm' },
+      { id: 'sun', label: 'Sol' },
+      { id: 'moon', label: 'Luna' },
+      { id: 'stars', label: 'Stellar Realm' },
     ],
   },
 ]
@@ -234,13 +234,13 @@ export const DarkTheme: Story = {
   },
 }
 
-/** The sacred theme provides a mystical, golden appearance with floating glyphs. */
-export const SacredTheme: Story = {
-  name: 'Sacred Theme',
+/** The dark theme with element data. */
+export const DarkThemeElements: Story = {
+  name: 'Dark Theme Elements',
   args: {
-    items: sacredTreeData,
+    items: elementTreeData,
     defaultExpandedItems: ['elements'],
-    styles: { theme: 'sacred' },
+    styles: { theme: 'dark' },
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -550,7 +550,7 @@ export const DarkWithCheckboxes: Story = {
   },
 }
 
-const SacredThemeExample = () => {
+const DarkThemeElementsExample = () => {
   const [selectedItems, setSelectedItems] = React.useState<string[]>(['fire'])
   const [expandedItems, setExpandedItems] = React.useState<string[]>([
     'elements',
@@ -559,7 +559,7 @@ const SacredThemeExample = () => {
 
   return (
     <TreeView
-      items={sacredTreeData}
+      items={elementTreeData}
       selectedItems={selectedItems}
       expandedItems={expandedItems}
       multiSelect={true}
@@ -575,15 +575,15 @@ const SacredThemeExample = () => {
       ) => {
         setExpandedItems(itemIds)
       }}
-      styles={{ theme: 'sacred' }}
+      styles={{ theme: 'dark' }}
     />
   )
 }
 
-/** Sacred themed tree with mystical elements. */
-export const SacredInteractive: Story = {
-  name: 'Themes/Sacred Interactive',
-  render: () => <SacredThemeExample />,
+/** Dark themed tree with element data. */
+export const DarkInteractiveElements: Story = {
+  name: 'Themes/Dark Interactive Elements',
+  render: () => <DarkThemeElementsExample />,
   parameters: {
     backgrounds: { default: 'dark' },
   },
@@ -655,29 +655,31 @@ export const ComprehensiveShowcase: Story = {
         </p>
       </div>
 
-      {/* Sacred Theme Section */}
+      {/* Dark Theme Elements Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+          Dark Theme Elements
+        </h3>
         <div
           style={{
             height: '400px',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
+            border: '1px solid #374151',
             borderRadius: '8px',
-            backgroundColor: '#0a0a0a',
+            backgroundColor: '#1f2937',
           }}
         >
           <TreeView
-            items={sacredTreeData}
+            items={elementTreeData}
             defaultExpandedItems={['elements']}
             defaultSelectedItems={['fire']}
             multiSelect={true}
-            styles={{ theme: 'sacred' }}
+            styles={{ theme: 'dark' }}
           />
         </div>
         <p
-          style={{ margin: '0.5rem 0 0 0', fontSize: '14px', color: '#FFD700' }}
+          style={{ margin: '0.5rem 0 0 0', fontSize: '14px', color: '#9CA3AF' }}
         >
-          Mystical theme with floating glyphs
+          Dark theme with element hierarchy
         </p>
       </div>
 

@@ -7,7 +7,6 @@ import Typography from '../../Typography'
 import Accordion from '../../Accordion'
 import {
   getComplexTextEditorStyles,
-  SACRED_GLYPHS,
   type ComplexTextEditorStyles,
 } from '../../../theme/'
 
@@ -146,9 +145,6 @@ export function RichTextEditor({
           }}
           dangerouslySetInnerHTML={{ __html: value }}
         />
-        {isSacredTheme && (
-          <div style={computedStyles.sacredGlyph}>{SACRED_GLYPHS[2]}</div>
-        )}
       </div>
     </div>
   )

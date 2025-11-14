@@ -170,7 +170,7 @@ type Story = StoryObj<typeof Stepper>
  * Account Setup Wizard - A typical onboarding flow with user registration
  */
 export const AccountSetupWizard: Story = {
-  name: '🧙‍♂️ Account Setup Wizard',
+  name: 'Account Setup Wizard',
   render: () => {
     const Component = () => {
       const [isOpen, setIsOpen] = useState(true)
@@ -264,7 +264,7 @@ export const AccountSetupWizard: Story = {
  * E-commerce Checkout Process with error handling
  */
 export const CheckoutProcess: Story = {
-  name: '🛒 E-commerce Checkout',
+  name: 'E-commerce Checkout',
   render: () => {
     const Component = () => {
       const [isOpen, setIsOpen] = useState(true)
@@ -359,118 +359,116 @@ export const CheckoutProcess: Story = {
 }
 
 /**
- * Sacred Ritual Configuration - Mystical themed setup
+ * Dark Configuration Process - Themed setup
  */
-export const SacredRitualSetup: Story = {
-  name: '🔮 Sacred Ritual Configuration',
+export const DarkConfigurationSetup: Story = {
+  name: 'Dark Configuration Process',
   render: () => {
     const Component = () => {
       const [isOpen, setIsOpen] = useState(true)
 
-      const ritualSteps: StepperProps['steps'] = [
+      const configSteps: StepperProps['steps'] = [
         {
           stepNumber: 1,
           label: 'Preparation',
           stepLink: '#prepare',
           status: 'completed',
           description:
-            'Gather the required mystical components and cleanse the sacred space',
+            'Gather the required components and prepare the workspace',
         },
         {
           stepNumber: 2,
-          label: 'Invocation',
-          stepLink: '#invoke',
+          label: 'Initialization',
+          stepLink: '#init',
           status: 'completed',
           description:
-            'Call upon the ancient powers and establish the magical circle',
+            'Set up initial parameters and establish the configuration',
         },
         {
           stepNumber: 3,
-          label: 'Channeling',
-          stepLink: '#channel',
+          label: 'Processing',
+          stepLink: '#process',
           status: 'error',
           description:
-            'The mystical energies are unstable. Realign the ethereal conduits to proceed.',
+            'The process encountered an error. Realign the parameters to proceed.',
         },
         {
           stepNumber: 4,
-          label: 'Manifestation',
-          stepLink: '#manifest',
+          label: 'Validation',
+          stepLink: '#validate',
           status: 'inactive',
           description:
-            'Focus your will to manifest the desired outcome in the physical realm',
+            'Validate the configuration and ensure all requirements are met',
         },
         {
           stepNumber: 5,
-          label: 'Sealing',
-          stepLink: '#seal',
+          label: 'Finalization',
+          stepLink: '#finalize',
           status: 'inactive',
-          description:
-            'Bind the ritual energies and close the sacred circle safely',
+          description: 'Complete the process and finalize the configuration',
         },
       ]
 
       return (
         <div className="min-h-screen bg-black p-8">
-          <Button onClick={() => setIsOpen(true)} theme="sacred">
-            Begin Sacred Ritual
+          <Button onClick={() => setIsOpen(true)} theme="dark">
+            Begin Configuration
           </Button>
 
           <Dialog
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
-            title="⚡ Arcane Configuration Ritual ⚡"
-            theme="sacred"
+            title="Configuration Process"
+            theme="dark"
           >
             <div className="space-y-8">
               <Stepper
-                steps={ritualSteps}
+                steps={configSteps}
                 styles={{
-                  theme: 'sacred',
+                  theme: 'dark',
                   orientation: 'horizontal',
                 }}
               />
 
               <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-4 text-yellow-400 font-serif">
-                  🔮 Ethereal Realignment Required
+                  Realignment Required
                 </h3>
                 <p className="text-yellow-100 mb-6 font-serif">
-                  The cosmic energies are in discord. Adjust the mystical
-                  parameters to stabilize the channeling process.
+                  Parameters are not properly aligned. Adjust the configuration
+                  settings to continue.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField label="Lunar Phase Alignment" theme="sacred">
+                  <FormField label="Phase Alignment" theme="dark">
                     <select className="w-full px-3 py-2 border border-yellow-400/30 bg-black/50 text-yellow-100 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                      <option>New Moon</option>
-                      <option>Waxing Crescent</option>
-                      <option>Full Moon</option>
-                      <option>Waning Gibbous</option>
+                      <option>Phase 1</option>
+                      <option>Phase 2</option>
+                      <option>Phase 3</option>
+                      <option>Phase 4</option>
                     </select>
                   </FormField>
-                  <FormField label="Elemental Focus" theme="sacred">
+                  <FormField label="Focus Mode" theme="dark">
                     <select className="w-full px-3 py-2 border border-yellow-400/30 bg-black/50 text-yellow-100 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                      <option>Fire</option>
-                      <option>Water</option>
-                      <option>Earth</option>
-                      <option>Air</option>
-                      <option>Void</option>
+                      <option>Mode A</option>
+                      <option>Mode B</option>
+                      <option>Mode C</option>
+                      <option>Mode D</option>
                     </select>
                   </FormField>
-                  <FormField label="Arcane Frequency (Hz)" theme="sacred">
-                    <Input placeholder="432.0" theme="sacred" />
+                  <FormField label="Frequency (Hz)" theme="dark">
+                    <Input placeholder="432.0" theme="dark" />
                   </FormField>
-                  <FormField label="Crystal Resonance" theme="sacred">
-                    <Input placeholder="Amethyst Matrix" theme="sacred" />
+                  <FormField label="Resonance Pattern" theme="dark">
+                    <Input placeholder="Pattern Matrix" theme="dark" />
                   </FormField>
                 </div>
               </div>
 
               <div className="flex justify-between">
-                <Button variant="secondary" theme="sacred">
-                  ← Return to Invocation
+                <Button variant="secondary" theme="dark">
+                  Return to Initialization
                 </Button>
-                <Button theme="sacred">Realign Energies ⚡</Button>
+                <Button theme="dark">Realign Parameters</Button>
               </div>
             </div>
           </Dialog>
@@ -485,7 +483,7 @@ export const SacredRitualSetup: Story = {
  * Vertical Project Setup - Development workflow
  */
 export const ProjectSetupFlow: Story = {
-  name: '⚙️ Project Setup (Vertical)',
+  name: 'Project Setup (Vertical)',
   render: () => {
     const Component = () => {
       const [isOpen, setIsOpen] = useState(true)
@@ -543,7 +541,7 @@ export const ProjectSetupFlow: Story = {
           <Dialog
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
-            title="🚀 New Project Setup"
+            title="New Project Setup"
             theme="light"
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -588,7 +586,7 @@ export const ProjectSetupFlow: Story = {
 
                   <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <h4 className="font-medium text-green-900 mb-2">
-                      ✅ Configuration Tips:
+                      Configuration Tips:
                     </h4>
                     <ul className="text-sm text-green-700 space-y-1">
                       <li>• Use environment variables for sensitive data</li>
@@ -620,7 +618,7 @@ export const ProjectSetupFlow: Story = {
  * Interactive Demo with Theme Switching
  */
 export const InteractiveDemo: Story = {
-  name: '🎮 Interactive Demo',
+  name: 'Interactive Demo',
   render: () => {
     const Component = () => {
       const [theme, setTheme] = useState<'light' | 'dark' | 'sacred'>('light')
@@ -780,7 +778,7 @@ export const InteractiveDemo: Story = {
  * Simple Theme Showcase
  */
 export const ThemeShowcase: Story = {
-  name: '🎨 Theme Showcase',
+  name: 'Theme Showcase',
   render: () => {
     const basicSteps: StepperProps['steps'] = [
       { stepNumber: 1, label: 'Start', stepLink: '#1', status: 'completed' },
@@ -805,7 +803,7 @@ export const ThemeShowcase: Story = {
           {/* Light Theme */}
           <div className="bg-white rounded-xl p-8 shadow-lg">
             <h2 className="text-xl font-semibold mb-6 text-gray-900">
-              ☀️ Light Theme
+              Light Theme
             </h2>
             <Stepper steps={basicSteps} styles={{ theme: 'light' }} />
           </div>
@@ -813,17 +811,9 @@ export const ThemeShowcase: Story = {
           {/* Dark Theme */}
           <div className="bg-gray-900 rounded-xl p-8 shadow-lg">
             <h2 className="text-xl font-semibold mb-6 text-gray-100">
-              🌙 Dark Theme
+              Dark Theme
             </h2>
             <Stepper steps={basicSteps} styles={{ theme: 'dark' }} />
-          </div>
-
-          {/* Sacred Theme */}
-          <div className="bg-black rounded-xl p-8 shadow-lg border-2 border-yellow-400/30">
-            <h2 className="text-xl font-semibold mb-6 text-yellow-400 font-serif">
-              🔮 Sacred Theme
-            </h2>
-            <Stepper steps={basicSteps} styles={{ theme: 'sacred' }} />
           </div>
         </div>
       </div>

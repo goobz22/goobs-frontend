@@ -16,11 +16,7 @@ import React, {
   type ChangeEvent,
   type InputHTMLAttributes,
 } from 'react'
-import {
-  getCheckboxStyles,
-  SACRED_GLYPHS,
-  type CheckboxStyles,
-} from '../../theme'
+import { getCheckboxStyles, type CheckboxStyles } from '../../theme'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 
@@ -59,63 +55,8 @@ export interface CheckboxProps
 
 const SacredGlyphs: React.FC<{
   isHovered: boolean
-}> = ({ isHovered }) => {
-  const glyphStyles = useMemo(
-    () => ({
-      glyph: {
-        position: 'absolute' as const,
-        fontSize: '12px',
-        color: 'rgba(255, 215, 0, 0.3)',
-        transition: 'all 0.3s ease',
-        pointerEvents: 'none' as const,
-      },
-      glyphLeft: {
-        left: '-24px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphRight: {
-        right: '-24px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-      },
-      glyphVisible: {
-        opacity: 0.6,
-      },
-      glyphFloating: {
-        animation: 'sacredFloat 3s ease-in-out infinite',
-      },
-      glyphDelayedFloating: {
-        animation: 'sacredFloat 3s ease-in-out infinite 1.5s',
-      },
-    }),
-    []
-  )
-
-  return (
-    <>
-      <span
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphLeft,
-          ...(isHovered && glyphStyles.glyphVisible),
-          ...glyphStyles.glyphFloating,
-        }}
-      >
-        {SACRED_GLYPHS[11]}
-      </span>
-      <span
-        style={{
-          ...glyphStyles.glyph,
-          ...glyphStyles.glyphRight,
-          ...(isHovered && glyphStyles.glyphVisible),
-          ...glyphStyles.glyphDelayedFloating,
-        }}
-      >
-        {SACRED_GLYPHS[15]}
-      </span>
-    </>
-  )
+}> = () => {
+  return null
 }
 
 const PremiumAccent: React.FC<{
