@@ -151,7 +151,6 @@ const sacredTheme: TooltipTheme = {
     fontWeight: 'bold',
     letterSpacing: '0.05em',
     textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-    animation: 'sacredTooltipGlow 3s ease-in-out infinite alternate',
   },
   arrow: {
     position: 'absolute',

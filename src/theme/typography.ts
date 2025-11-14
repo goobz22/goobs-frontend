@@ -548,7 +548,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merrih2: {
         fontSize: '2rem',
@@ -557,7 +556,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merrih3: {
         fontSize: '1.75rem',
@@ -566,7 +564,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 12px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merrih4: {
         fontSize: '1.5rem',
@@ -575,7 +572,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merrih5: {
         fontSize: '1.25rem',
@@ -584,7 +580,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 8px rgba(255, 215, 0, 0.4), 0 0 16px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merrih6: {
         fontSize: '1.125rem',
@@ -593,7 +588,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.1)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       merriparagraph: {
         fontSize: '1rem',
@@ -623,7 +617,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelh2: {
         fontSize: '2rem',
@@ -632,7 +625,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelh3: {
         fontSize: '1.75rem',
@@ -641,7 +633,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 12px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelh4: {
         fontSize: '1.5rem',
@@ -650,7 +641,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelh5: {
         fontSize: '1.25rem',
@@ -659,7 +649,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 8px rgba(255, 215, 0, 0.4), 0 0 16px rgba(255, 215, 0, 0.2)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelh6: {
         fontSize: '1.125rem',
@@ -668,7 +657,6 @@ export const typographyThemes: Record<
         color: '#FFD700',
         textShadow:
           '0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.1)',
-        animation: 'sacredTextGlow 3s ease-in-out infinite alternate',
       },
       cinzelparagraph: {
         fontSize: '1rem',

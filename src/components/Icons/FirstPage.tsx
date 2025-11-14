@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface FirstPageIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -20,10 +15,7 @@ const FirstPageIcon: React.FC<FirstPageIconProps> = ({
   const [isHovered, setIsHovered] = useState(false)
 
   // Use a deterministic glyph index to avoid hydration mismatches
-  // Use a fixed index or derive from props for consistency
-  const glyph = SACRED_GLYPHS[11]
-
-  // Inject CSS keyframes for sacred animations
+  // Use a fixed index or derive from props for consistency  // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
   }
@@ -53,9 +45,7 @@ const FirstPageIcon: React.FC<FirstPageIconProps> = ({
       >
         <path d="M220.615-160v-640h61.539v640H220.615Zm520-320-280-280v560l280-280Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

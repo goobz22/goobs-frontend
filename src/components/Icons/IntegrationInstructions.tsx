@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface IntegrationInstructionsIconProps
   extends React.SVGProps<SVGSVGElement> {
@@ -17,7 +12,6 @@ const IntegrationInstructionsIcon: React.FC<
   IntegrationInstructionsIconProps
 > = ({ styles, style = {}, ...props }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(SACRED_GLYPHS[16 % SACRED_GLYPHS.length])
 
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
@@ -49,9 +43,7 @@ const IntegrationInstructionsIcon: React.FC<
       >
         <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M17,12H7V10H17V12M17,16H7V14H17V16M17,8H7V6H17V8Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

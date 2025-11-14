@@ -4,12 +4,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface EngineeringIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -21,8 +16,6 @@ const EngineeringIcon: React.FC<EngineeringIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[17]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -56,9 +49,7 @@ const EngineeringIcon: React.FC<EngineeringIconProps> = ({
         <path d="M16.5 5.5L18.5 7.5L23 3L21.5 1.5L18.5 4.5L17 3L16.5 5.5Z" />
         <path d="M15.5 10L17 8.5L19 10.5L22.5 7L21 5.5L19 7.5L18 6.5L15.5 10Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

@@ -28,7 +28,7 @@ export interface ProgressBarTheme {
     boxShadow: string
     backgroundImage?: string
     filter?: string
-    animation: string
+    animation?: string
     position?: string
   }
   label: {
@@ -45,7 +45,7 @@ export interface ProgressBarTheme {
     animation: string
   }
   pulse?: {
-    animation: string
+    animation?: string
     boxShadow: string
   }
 }
@@ -241,7 +241,6 @@ export const progressBarThemes: Record<
       boxShadow:
         '0 0 20px rgba(255, 215, 0, 0.9), 0 4px 12px rgba(255, 215, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
       filter: 'drop-shadow(0 0 12px rgba(255, 215, 0, 1))',
-      animation: 'sacredProgressIndeterminate 2.5s ease-in-out infinite',
       position: 'absolute',
     },
     label: {
@@ -260,7 +259,6 @@ export const progressBarThemes: Record<
       animation: 'progressStripes 0.8s linear infinite',
     },
     pulse: {
-      animation: 'sacredProgressPulse 2s ease-in-out infinite',
       boxShadow: '0 0 0 rgba(255, 215, 0, 0.8)',
     },
   },
@@ -337,9 +335,14 @@ export const getProgressBarTheme = (
       ...(indeterminateFilter !== undefined
         ? { filter: indeterminateFilter }
         : {}),
-      animation:
-        styles.indeterminateBarAnimation ||
-        baseTheme.indeterminateBar.animation,
+      ...(styles.indeterminateBarAnimation ||
+      baseTheme.indeterminateBar.animation
+        ? {
+            animation:
+              styles.indeterminateBarAnimation ||
+              baseTheme.indeterminateBar.animation,
+          }
+        : {}),
       ...(indeterminatePosition !== undefined
         ? { position: indeterminatePosition }
         : {}),

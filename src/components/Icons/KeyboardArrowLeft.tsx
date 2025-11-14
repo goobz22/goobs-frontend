@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface KeyboardArrowLeftIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -20,10 +15,7 @@ const KeyboardArrowLeftIcon: React.FC<KeyboardArrowLeftIconProps> = ({
   const [isHovered, setIsHovered] = useState(false)
 
   // Use a deterministic glyph index to avoid hydration mismatches
-  // Use a fixed index or derive from props for consistency
-  const glyph = SACRED_GLYPHS[2]
-
-  // Inject CSS keyframes for sacred animations
+  // Use a fixed index or derive from props for consistency  // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
   }
@@ -53,9 +45,7 @@ const KeyboardArrowLeftIcon: React.FC<KeyboardArrowLeftIconProps> = ({
       >
         <path d="M561.538-220.615 302.153-480l259.385-259.385 43.077 43.077-216.308 216.308 216.308 216.308-43.077 43.077Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

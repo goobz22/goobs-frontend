@@ -101,7 +101,6 @@ export interface ChipTheme {
     width: string
     height: string
     backgroundImage: string
-    animation: string
   }
   transition: string
 }
@@ -267,7 +266,6 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       height: '100%',
       backgroundImage:
         'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent)',
-      animation: 'sacredShimmer 3s ease-in-out infinite',
     },
     transition: TRANSITIONS.medium,
   },
@@ -364,7 +362,6 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       height: '100%',
       backgroundImage:
         'linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.2), transparent)',
-      animation: 'sacredShimmer 3s ease-in-out infinite',
     },
     transition: TRANSITIONS.medium,
   },
@@ -466,7 +463,6 @@ export const chipThemes: Record<'light' | 'dark' | 'sacred', ChipTheme> = {
       height: '100%',
       backgroundImage:
         'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent)',
-      animation: 'sacredShimmer 3s ease-in-out infinite',
     },
     transition: TRANSITIONS.premium,
   },

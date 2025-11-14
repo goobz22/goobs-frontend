@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface LastPageIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -20,10 +15,7 @@ const LastPageIcon: React.FC<LastPageIconProps> = ({
   const [isHovered, setIsHovered] = useState(false)
 
   // Use a deterministic glyph index to avoid hydration mismatches
-  // Use a fixed index or derive from props for consistency
-  const glyph = SACRED_GLYPHS[0]
-
-  // Inject CSS keyframes for sacred animations
+  // Use a fixed index or derive from props for consistency  // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
   }
@@ -53,9 +45,7 @@ const LastPageIcon: React.FC<LastPageIconProps> = ({
       >
         <path d="M220.615-440 501.23-720v560L220.615-440Zm458.232-280v640h-61.539v-640h61.539Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

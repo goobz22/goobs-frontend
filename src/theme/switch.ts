@@ -413,7 +413,6 @@ const sacredTheme: SwitchTheme = {
     color: 'rgba(255, 215, 0, 0.3)',
     transition: TRANSITIONS.premium,
     pointerEvents: 'none',
-    animation: 'sacredSwitchFloat 3s ease-in-out infinite',
   },
   glyphLeft: {
     left: '-16px',
@@ -436,7 +435,6 @@ const sacredTheme: SwitchTheme = {
     height: '100%',
     background:
       'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent)',
-    animation: 'sacredSwitchShimmer 2s ease-in-out infinite',
     borderRadius: 'inherit',
   },
   leftLabel: {

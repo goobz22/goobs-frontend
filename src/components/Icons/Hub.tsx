@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface HubIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,8 +9,6 @@ interface HubIconProps extends React.SVGProps<SVGSVGElement> {
 
 const HubIcon: React.FC<HubIconProps> = ({ styles, style = {}, ...props }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[10]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -48,9 +41,7 @@ const HubIcon: React.FC<HubIconProps> = ({ styles, style = {}, ...props }) => {
         <circle cx="12" cy="12" r="3" />
         <path d="M12 1v6m0 10v6m11-7h-6M6 11H0m15.5-6.5l-4.24 4.24m-6.52 6.52L.5 19.5M19.5 19.5l-4.24-4.24M5.74 5.74 1.5 1.5" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

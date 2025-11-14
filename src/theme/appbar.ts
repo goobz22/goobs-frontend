@@ -26,7 +26,7 @@ export interface AppBarTheme {
   }
   shimmer?: {
     background: string
-    animation: string
+    animation?: string
   }
   transition: string
 }
@@ -136,7 +136,6 @@ export const appBarThemes: Record<'light' | 'dark' | 'sacred', AppBarTheme> = {
       borderRadius: '0',
       boxShadow: SHADOWS.sacred.medium,
       backdropFilter: 'blur(10px)',
-      animation: 'sacredGlow 4s ease-in-out infinite',
     },
     toolbar: {
       padding: '0 12px',
@@ -146,12 +145,6 @@ export const appBarThemes: Record<'light' | 'dark' | 'sacred', AppBarTheme> = {
     glyph: {
       color: 'rgba(255, 215, 0, 0.4)',
       fontSize: '16px',
-      animation: 'sacredFloat 3s ease-in-out infinite',
-    },
-    shimmer: {
-      background:
-        'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent)',
-      animation: 'sacredShimmer 3s linear infinite',
     },
     transition: TRANSITIONS.slow,
   },
@@ -226,13 +219,18 @@ export const getAppBarTheme = (styles?: AppBarStyles): AppBarTheme => {
       return glyph
     })(),
     ...(baseTheme.shimmer
-      ? {
-          shimmer: {
+      ? (() => {
+          const shimmer: AppBarTheme['shimmer'] = {
             background:
               styles.shimmerBackground || baseTheme.shimmer.background,
-            animation: styles.shimmerAnimation || baseTheme.shimmer.animation,
-          },
-        }
+          }
+          const resolvedAnimation =
+            styles.shimmerAnimation ?? baseTheme.shimmer.animation
+          if (resolvedAnimation !== undefined) {
+            shimmer.animation = resolvedAnimation
+          }
+          return { shimmer }
+        })()
       : {}),
     transition: styles.transitionDuration
       ? `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`

@@ -339,7 +339,6 @@ export const pricingTableThemes: Record<
       fontFamily: '"Cinzel", serif',
       fontWeight: '600',
       letterSpacing: '0.05em',
-      animation: 'sacred-glow 1.5s infinite alternate',
       textShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
     },
     price: {
@@ -384,12 +383,10 @@ export const pricingTableThemes: Record<
     checkIcon: {
       color: '#FFD700',
       filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.8))',
-      animation: 'sacred-float 2s infinite',
     },
     glyph: {
       color: 'rgba(255, 215, 0, 0.2)',
       fontSize: '1.5rem',
-      animation: 'glyph-rotate 20s linear infinite',
     },
     transition: TRANSITIONS.slow,
   },
@@ -731,7 +728,6 @@ export const getPricingTableStyles = (
   const sacredFooterGlyphStyle: React.CSSProperties = {
     color: 'rgba(255, 215, 0, 0.3)',
     fontSize: '0.75rem',
-    animation: 'sacred-float 3s infinite ease-in-out',
   }
 
   return {

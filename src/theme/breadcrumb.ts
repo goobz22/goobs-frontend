@@ -245,7 +245,6 @@ const sacredTheme: BreadcrumbTheme = {
       height: '100%',
       background:
         'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-      animation: 'sacredShimmer 3s ease-in-out infinite',
       pointerEvents: 'none',
       zIndex: 1,
     },

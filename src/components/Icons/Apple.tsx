@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface AppleIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -18,7 +13,6 @@ const AppleIcon: React.FC<AppleIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[15]
 
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -43,9 +37,7 @@ const AppleIcon: React.FC<AppleIconProps> = ({
       >
         <path d="M480-120q-151 0-255.5-104.5T120-480q0-151 104.5-255.5T480-840q151 0 255.5 104.5T840-480q0 151-104.5 255.5T480-120Zm0-80q117 0 198.5-81.5T760-480q0-117-81.5-198.5T480-760q-117 0-198.5 81.5T200-480q0 117 81.5 198.5T480-200Zm0-280Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

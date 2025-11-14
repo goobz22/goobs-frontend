@@ -241,7 +241,7 @@ export interface TreeViewTheme {
       backgroundAttachment: string
       backgroundOrigin: string
       backgroundClip: string
-      animation: string
+      animation?: string
       pointerEvents: string
     }
     backgroundGlyph: {
@@ -250,7 +250,7 @@ export interface TreeViewTheme {
       right: string
       color: string
       fontSize: string
-      animation: string
+      animation?: string
       pointerEvents: string
       zIndex: number
     }
@@ -907,7 +907,6 @@ export const treeViewThemes: Record<
       },
       glyphVisible: {
         opacity: 1,
-        animation: 'sacredGlyphRotate 20s linear infinite',
       },
       shimmer: {
         position: 'absolute',
@@ -924,7 +923,6 @@ export const treeViewThemes: Record<
         backgroundAttachment: 'scroll',
         backgroundOrigin: 'padding-box',
         backgroundClip: 'border-box',
-        animation: 'sacredShimmer 3s ease-in-out infinite',
         pointerEvents: 'none',
       },
       backgroundGlyph: {
@@ -933,7 +931,6 @@ export const treeViewThemes: Record<
         right: '8px',
         color: 'rgba(255, 215, 0, 0.2)',
         fontSize: '12px',
-        animation: 'sacredFloat 3s ease-in-out infinite',
         pointerEvents: 'none',
         zIndex: 0,
       },

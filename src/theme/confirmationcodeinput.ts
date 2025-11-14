@@ -354,7 +354,6 @@ export const confirmationCodeInputThemes: Record<
       fontSize: '3.75rem',
       color: '#FFD700',
       filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))',
-      animation: 'sacred-pulse 1.5s infinite',
     },
     successMessage: {
       fontSize: '1.5rem',
@@ -380,7 +379,6 @@ export const confirmationCodeInputThemes: Record<
       borderRadius: '8px',
       borderWidth: '1px',
       textShadow: '0 0 2px rgba(255, 215, 0, 0.5)',
-      animation: 'sacred-input-glow 3s infinite alternate',
     },
     inputFocus: {
       borderColor: '#FFD700',
@@ -397,7 +395,6 @@ export const confirmationCodeInputThemes: Record<
     },
     statusIndicatorValid: {
       backgroundColor: '#FFD700',
-      animation: 'sacred-status-glow 1.5s infinite alternate',
     },
     transition: TRANSITIONS.slow,
   },

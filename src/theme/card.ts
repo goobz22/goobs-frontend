@@ -74,7 +74,7 @@ export interface CardTheme {
     width: string
     height: string
     background: string
-    animation: string
+    animation?: string
     zIndex: number
   }
 }
@@ -288,7 +288,6 @@ const sacredTheme: CardTheme = {
     height: '100%',
     background:
       'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)',
-    animation: 'sacredShimmer 2s ease-in-out',
     zIndex: 1,
   },
 }

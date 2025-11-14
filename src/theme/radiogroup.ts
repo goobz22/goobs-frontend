@@ -274,7 +274,6 @@ export const radioGroupThemes: Record<
     },
     radioInnerChecked: {
       transform: 'scale(1)',
-      animation: 'radio-glow-pulse 2s ease-in-out infinite',
     },
     text: {
       color: 'rgba(255, 215, 0, 0.9)',
@@ -291,8 +290,9 @@ export const radioGroupThemes: Record<
       top: '-5px',
       right: '0',
       fontSize: '16px',
-      color: 'rgba(255, 215, 0, 0.3)',
-      animation: 'glyph-rotate 10s linear infinite',
+      color: 'transparent',
+      animation: 'none',
+      display: 'none',
     },
     transition: TRANSITIONS.premium,
   },

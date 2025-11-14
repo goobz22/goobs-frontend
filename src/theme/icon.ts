@@ -179,7 +179,6 @@ const sacredTheme: IconTheme = {
   },
   glyphVisible: {
     opacity: 1,
-    animation: 'sacredGlyphRotate 20s linear infinite',
   },
   transition: TRANSITIONS.premium,
 }

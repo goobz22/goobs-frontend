@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface LanIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,8 +9,6 @@ interface LanIconProps extends React.SVGProps<SVGSVGElement> {
 
 const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[10]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -49,9 +42,7 @@ const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
         <rect x="15" y="2" width="6" height="8" rx="1" />
         <rect x="15" y="14" width="6" height="8" rx="1" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

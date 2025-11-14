@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface ShoppingBasketIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -18,8 +13,6 @@ const ShoppingBasketIcon: React.FC<ShoppingBasketIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[22]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -50,9 +43,7 @@ const ShoppingBasketIcon: React.FC<ShoppingBasketIconProps> = ({
       >
         <path d="M240-80q-50 0-85-35t-35-85v-120h-40q-33 0-56.5-23.5T0-400v-80q0-33 23.5-56.5T80-560h800q33 0 56.5 23.5T960-480v80q0 33-23.5 56.5T880-320h-40v120q0 50-35 85t-85 35H240Zm0-80h480v-120H200v120h40Zm-160-200h800v-80H80v80Zm200-160h400l-75-200H355l-75 200Zm200 160Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

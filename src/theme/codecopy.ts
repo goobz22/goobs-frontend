@@ -2,7 +2,7 @@
  * @fileoverview CodeCopy component theme system with light, dark, and sacred themes.
  */
 import React from 'react'
-import { SACRED_ANIMATIONS, TRANSITIONS, SHADOWS } from './shared'
+import { TRANSITIONS, SHADOWS } from './shared'
 
 export interface CodeCopyTheme {
   /** Base container styling */
@@ -259,7 +259,6 @@ const sacredTheme: CodeCopyTheme = {
     width: '100%',
     maxWidth: '100%',
     overflow: 'hidden',
-    animation: SACRED_ANIMATIONS.glow,
     boxShadow: SHADOWS.sacred.medium,
     boxSizing: 'border-box',
   },
@@ -291,7 +290,6 @@ const sacredTheme: CodeCopyTheme = {
   langGlyph: {
     color: 'rgba(255, 215, 0, 0.6)',
     fontSize: '0.875rem',
-    animation: 'glyph-rotate 10s linear infinite',
   },
   langText: {
     fontSize: '0.75rem',
@@ -352,7 +350,6 @@ const sacredTheme: CodeCopyTheme = {
     backgroundImage:
       'linear-gradient(to bottom right, transparent, rgba(255, 215, 0, 0.05), transparent)',
     backgroundSize: '200% 100%',
-    animation: 'sacred-code-shimmer 4s linear infinite',
     pointerEvents: 'none',
     zIndex: 10,
   },

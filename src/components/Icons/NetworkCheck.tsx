@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface NetworkCheckIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -18,8 +13,6 @@ const NetworkCheckIcon: React.FC<NetworkCheckIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[23]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -49,9 +42,7 @@ const NetworkCheckIcon: React.FC<NetworkCheckIconProps> = ({
         <path d="M12 16l5.33-5.33c.78-.78 1.81-1.17 2.84-1.17s2.06.39 2.86 1.17L24 9.5c-1.56-1.56-4.09-1.56-5.66 0L12 16z" />
         <circle cx="15.5" cy="9.5" r="1.5" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface ShowHideEyeIconProps extends React.SVGProps<SVGSVGElement> {
   visible?: boolean
@@ -20,8 +15,6 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[0]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -116,9 +109,7 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
           <path d="M1 1l22 22" />
         </svg>
       )}
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

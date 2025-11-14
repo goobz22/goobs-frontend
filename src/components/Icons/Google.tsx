@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface GoogleIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -18,8 +13,6 @@ const GoogleIcon: React.FC<GoogleIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[22]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -50,9 +43,7 @@ const GoogleIcon: React.FC<GoogleIconProps> = ({
       >
         <path d="M480-240q-33 0-56.5-23.5T400-320v-320q0-33 23.5-56.5T480-720q33 0 56.5 23.5T560-640v320q0 33-23.5 56.5T480-240Zm-160 80q-33 0-56.5-23.5T240-240v-480q0-33 23.5-56.5T320-800q33 0 56.5 23.5T400-720v480q0 33-23.5 56.5T320-160Zm320 0q-33 0-56.5-23.5T560-240v-480q0-33 23.5-56.5T640-800q33 0 56.5 23.5T720-720v480q0 33-23.5 56.5T640-160Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

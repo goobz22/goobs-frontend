@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface KeyboardReturnIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -18,7 +13,6 @@ const KeyboardReturnIcon: React.FC<KeyboardReturnIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [glyph] = useState(SACRED_GLYPHS[21 % SACRED_GLYPHS.length])
 
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
@@ -50,9 +44,7 @@ const KeyboardReturnIcon: React.FC<KeyboardReturnIconProps> = ({
       >
         <path d="M647-440H160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h487L423-744q-12-12-11.5-28t12.5-28q12-11 28-11.5t28 11.5l264 264q6 6 8.5 13t2.5 15q0 8-2.5 15t-8.5 13L480-216q-11 11-27.5 11T424-216q-11-11-11-28t11-28l224-224Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

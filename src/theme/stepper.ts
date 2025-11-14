@@ -561,7 +561,6 @@ const sacredTheme: StepperTheme = {
       inset 0 0 40px rgba(255, 215, 0, 0.2)
     `,
     transform: 'scale(1.12)',
-    animation: 'sacred-glow-pulse 2.5s ease-in-out infinite alternate',
   },
   stepIconContainerError: {
     backgroundColor: 'transparent',
@@ -686,7 +685,6 @@ const sacredTheme: StepperTheme = {
     color: 'rgba(255, 215, 0, 0.95)',
     transition: TRANSITIONS.premium,
     filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
-    animation: 'sacred-icon-glow 3s ease-in-out infinite alternate',
   },
   errorIcon: {
     width: '1.75rem',
@@ -695,7 +693,6 @@ const sacredTheme: StepperTheme = {
     transition: TRANSITIONS.premium,
     cursor: 'pointer',
     filter: 'drop-shadow(0 0 12px rgba(184, 134, 11, 0.7))',
-    animation: 'sacred-error-icon-pulse 2s ease-in-out infinite alternate',
   },
   errorIconHover: {
     transform: 'scale(1.1)',

@@ -282,7 +282,6 @@ export const qrCodeThemes: Record<'light' | 'dark' | 'sacred', QRCodeTheme> = {
       border: '2px solid rgba(255, 215, 0, 0.5)',
       position: 'relative',
       overflow: 'visible',
-      animation: 'sacred-glow-pulse 3s ease-in-out infinite',
       backdropFilter: 'blur(20px)',
     },
     title: {
@@ -338,7 +337,6 @@ export const qrCodeThemes: Record<'light' | 'dark' | 'sacred', QRCodeTheme> = {
       height: '60px',
       color: '#FFD700',
       filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
-      animation: 'sacred-float 3s infinite ease-in-out',
     },
     successMessage: {
       textAlign: 'center',
@@ -372,7 +370,6 @@ export const qrCodeThemes: Record<'light' | 'dark' | 'sacred', QRCodeTheme> = {
       right: '0.5rem',
       fontSize: '1.25rem',
       color: 'rgba(255, 215, 0, 0.3)',
-      animation: 'glyph-rotate 10s linear infinite',
     },
     decorativeGlyphs: {
       display: 'flex',
@@ -384,7 +381,6 @@ export const qrCodeThemes: Record<'light' | 'dark' | 'sacred', QRCodeTheme> = {
     decorativeGlyph: {
       color: '#FFD700',
       fontSize: '1.25rem',
-      animation: 'sacred-float 3s infinite ease-in-out',
       textShadow:
         '0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.4)',
       opacity: 0.8,

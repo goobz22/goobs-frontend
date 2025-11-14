@@ -203,12 +203,7 @@ export {
 } from './pagination'
 
 // Export shared elements
-export {
-  SACRED_GLYPHS,
-  SACRED_ANIMATIONS,
-  TRANSITIONS,
-  SHADOWS,
-} from './shared'
+export { TRANSITIONS, SHADOWS } from './shared'
 
 // Export Typography types for use throughout the application
 export type { TypographyProps }

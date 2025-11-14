@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  IconStyles,
-  getIconStyles,
-  injectSacredKeyframes,
-  SACRED_GLYPHS,
-} from '../../theme'
+import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
 interface PrecisionManufacturingIconProps
   extends React.SVGProps<SVGSVGElement> {
@@ -19,8 +14,6 @@ const PrecisionManufacturingIcon: React.FC<PrecisionManufacturingIconProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const glyph = SACRED_GLYPHS[18]
-
   // Inject CSS keyframes for sacred animations
   if (styles?.theme === 'sacred') {
     injectSacredKeyframes()
@@ -51,9 +44,7 @@ const PrecisionManufacturingIcon: React.FC<PrecisionManufacturingIconProps> = ({
       >
         <path d="M160-120v-200h160v200H160Zm240 0v-440h160v440H400Zm240 0v-320h160v320H640ZM160-400v-160h160v160H160Zm240 0v-160h160v160H400Zm240-160v-160h160v160H640ZM160-640v-200h160v200H160Zm240 0v-200h160v200H400Zm240 0v-200h160v200H640Z" />
       </svg>
-      {computedStyles.isSacredTheme && (
-        <div style={computedStyles.glyph}>{glyph}</div>
-      )}
+      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
   )
 }

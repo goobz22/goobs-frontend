@@ -305,7 +305,6 @@ export const tabsThemes: Record<'light' | 'dark' | 'sacred', TabsTheme> = {
       borderBottom: '2px solid rgba(255, 215, 0, 0.4)',
       backdropFilter: 'blur(8px)',
       boxShadow: SHADOWS.sacred.small,
-      animation: 'sacred-glow-pulse 2s infinite alternate',
       padding: '12px 20px',
       minHeight: '64px',
     },
@@ -347,7 +346,6 @@ export const tabsThemes: Record<'light' | 'dark' | 'sacred', TabsTheme> = {
       color: '#FFD700',
       textShadow: '0 0 12px rgba(255, 215, 0, 0.6)',
       transform: 'translateY(-2px)',
-      animation: 'sacred-shimmer 1s forwards',
       boxShadow: '0 4px 12px rgba(255, 215, 0, 0.2)',
     },
     tabActive: {
