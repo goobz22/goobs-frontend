@@ -204,6 +204,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       textTransform: 'none',
       letterSpacing: '0.05em',
       boxSizing: 'border-box',
+      whiteSpace: styles?.whiteSpace as any,
     }
 
     const iconComponent = useMemo(() => {
