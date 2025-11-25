@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useMemo, useEffect, type FC } from 'react'
-import QRCode from 'react-qr-code'
-import { authenticator } from 'otplib'
+import React, { useEffect, useRef, useMemo, type FC } from 'react'
+import QRCode from 'qrcode'
 import { getQRCodeStyles, type QRCodeStyles } from '../../theme/qrcode'
 import CustomButton, { ButtonProps } from '../Button'
 import CheckCircle from '../Icons/CheckCircle'
@@ -10,94 +9,36 @@ import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
 } from '../ConfirmationCodeInput'
 
-/**
- * Generate a cryptographically secure random secret for browser environments
- * Uses Web Crypto API which is available in all modern browsers
- */
-function generateBrowserSecret(length = 20): string {
-  if (
-    typeof window === 'undefined' ||
-    !window.crypto ||
-    !window.crypto.getRandomValues
-  ) {
-    // Server-side or crypto not available: return empty string, will be generated on client
-    return ''
-  }
-
-  // Use Web Crypto API for secure random bytes
-  const array = new Uint8Array(length)
-  window.crypto.getRandomValues(array)
-
-  // Convert to base32 string (compatible with authenticator apps)
-  const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-  let secret = ''
-
-  for (let i = 0; i < array.length; i++) {
-    const byte = array[i]
-    if (byte !== undefined) {
-      secret += base32chars[byte % 32]
-    }
-  }
-
-  return secret
-}
-
 export interface QRCodeProps {
-  /** The value/URL for the QR code (if provided, username and appName are ignored) */
   value?: string
-  /** The username for the QR code */
-  username?: string
-  /** The app name for the QR code */
-  appName?: string
-  /** The size of the QR code */
   size?: number
-  /** QR code error correction level */
   level?: 'L' | 'M' | 'Q' | 'H'
-  /** Background color */
   bgColor?: string
-  /** Foreground color */
   fgColor?: string
-  /** The title to display above the QR code */
   title?: string
-  /** Callback when the secret is generated */
-  onSecretGenerated?: (secret: string) => void
-  /** Whether to show the verify button */
   showVerifyButton?: boolean
-  /** Callback when verify is clicked */
   onVerify?: () => void | Promise<void>
-  /** Callback when disable verification is clicked */
   onDisableVerification?: () => void | Promise<void>
-  /** Props for the verify button */
   verifyButtonProps?: Partial<ButtonProps>
-  /** Props for the disable verification button */
   disableVerificationButtonProps?: Partial<ButtonProps>
-  /** Whether to show the success state */
   showSuccessState?: boolean
-  /** The success message to display */
   successMessage?: string
-  /** Whether to show the confirmation input */
   showConfirmationInput?: boolean
-  /** The confirmation code value */
   confirmationCode?: string
-  /** Callback when confirmation code changes */
   onConfirmationCodeChange?: (value: string) => void
-  /** Props for the confirmation code input */
   confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
-  /** Custom styles to apply using the theme system */
+  onSecretGenerated?: (secret: string) => void
   styles?: QRCodeStyles
 }
 
 const QRCodeComponent: FC<QRCodeProps> = React.memo(
   ({
     value,
-    username,
-    appName = 'ThothOS',
     size = 256,
     level = 'H',
     bgColor = '#FFFFFF',
     fgColor = '#000000',
     title,
-    onSecretGenerated,
     showVerifyButton = false,
     onVerify,
     onDisableVerification,
@@ -111,30 +52,8 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     confirmationCodeProps = {},
     styles,
   }) => {
-    const { secret, otpAuth } = useMemo(() => {
-      // If value is provided, use it directly
-      if (value) {
-        return { secret: '', otpAuth: value }
-      }
-      // Otherwise generate from username and appName
-      if (username) {
-        // Use browser-compatible secret generation
-        const generatedSecret = generateBrowserSecret()
-        const otpAuthUrl = authenticator.keyuri(
-          username,
-          appName,
-          generatedSecret
-        )
-        return { secret: generatedSecret, otpAuth: otpAuthUrl }
-      }
-      return { secret: '', otpAuth: '' }
-    }, [value, username, appName])
-
-    useEffect(() => {
-      if (onSecretGenerated && secret) {
-        onSecretGenerated(secret)
-      }
-    }, [secret, onSecretGenerated])
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const qrValue = value
 
     const responsiveSize = useMemo(() => {
       if (typeof window !== 'undefined') {
@@ -145,11 +64,33 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
 
     const computedStyles = getQRCodeStyles(styles, responsiveSize)
 
-    if (!otpAuth) {
+    // Generate QR code on canvas
+    useEffect(() => {
+      if (canvasRef.current && qrValue) {
+        QRCode.toCanvas(
+          canvasRef.current,
+          qrValue,
+          {
+            width: styles?.theme === 'sacred' ? responsiveSize - 40 : responsiveSize,
+            margin: 2,
+            color: {
+              dark: fgColor,
+              light: bgColor,
+            },
+            errorCorrectionLevel: level,
+          },
+          error => {
+            if (error) console.error('QR Code generation error:', error)
+          }
+        )
+      }
+    }, [qrValue, responsiveSize, bgColor, fgColor, level, styles?.theme])
+
+    if (!qrValue) {
       return (
         <div style={computedStyles.errorContainer} role="alert">
           <span style={computedStyles.errorText}>
-            Error: Failed to generate QR code
+            Error: No QR code value provided
           </span>
         </div>
       )
@@ -188,22 +129,13 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
       <div style={computedStyles.container}>
         {title && <h5 style={computedStyles.title}>{title}</h5>}
         <div style={computedStyles.qrCodeContainer}>
-          <QRCode
-            value={otpAuth}
-            size={
-              styles?.theme === 'sacred' ? responsiveSize - 40 : responsiveSize
-            }
-            level={level}
-            bgColor={styles?.theme === 'sacred' ? bgColor : bgColor}
-            fgColor={styles?.theme === 'sacred' ? fgColor : fgColor}
-            style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+          <canvas
+            ref={canvasRef}
+            style={{ display: 'block', height: 'auto', maxWidth: '100%' }}
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
             data-testid="mfa-qrcode"
           />
         </div>
-        {username && (
-          <div style={computedStyles.infoText}>{`${appName}: ${username}`}</div>
-        )}
         {showConfirmationInput && (
           <div style={computedStyles.confirmationContainer}>
             <ConfirmationCodeInputs
@@ -249,24 +181,3 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
 QRCodeComponent.displayName = 'QRCodeComponent'
 
 export default QRCodeComponent
-
-export function verifyMFAToken(token: string, secret: string): boolean {
-  if (!token || typeof token !== 'string') {
-    throw new Error('Invalid token')
-  }
-  if (!secret || typeof secret !== 'string') {
-    throw new Error('Invalid secret')
-  }
-
-  try {
-    authenticator.options = {
-      window: 1,
-      step: 30,
-      digits: 6,
-    }
-    return authenticator.verify({ token, secret })
-  } catch (error) {
-    console.error('MFA verification error:', error)
-    return false
-  }
-}
