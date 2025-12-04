@@ -153,10 +153,9 @@ export {
   type DateRangeProps,
 } from './components/Field/Date/DateRange'
 export {
-  default as TimeRangeComponent,
-  default as TimeRange, // Alias for backward compatibility
+  default as TimeRange,
   type TimeRangeProps,
-  AMERICAN_TIMEZONES,
+  type TimeRange as TimeRangeValue,
 } from './components/Field/Time/TimeRange'
 export {
   default as TimeField,
