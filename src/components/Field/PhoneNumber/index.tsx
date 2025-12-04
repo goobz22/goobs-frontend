@@ -62,7 +62,10 @@ export interface PhoneNumberFieldProps {
     borderRadius?: string
     helperTextType?: 'error' | 'info'
     requiredIndicatorText?: string
-    [key: string]: any
+    backgroundColor?: string
+    borderColor?: string
+    color?: string
+    fontFamily?: string
   }
 }
 
@@ -194,7 +197,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     fontSize: styles?.fontSize || '16px',
     fontWeight: styles?.fontWeight,
     lineHeight: styles?.lineHeight,
-    fontFamily: '"Crimson Text", serif',
+    fontFamily: styles?.fontFamily || '"Crimson Text", serif',
     color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
     boxSizing: 'border-box',
   }

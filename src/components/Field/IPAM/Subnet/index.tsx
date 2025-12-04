@@ -15,8 +15,10 @@ import {
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
-export interface InternalIncrementNumberFieldProps
-  extends Omit<SharedFormFieldProps, 'onChange'> {
+export interface InternalIncrementNumberFieldProps extends Omit<
+  SharedFormFieldProps,
+  'onChange'
+> {
   initialValue?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
   min?: number

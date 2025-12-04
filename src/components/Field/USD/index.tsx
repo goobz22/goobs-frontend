@@ -13,11 +13,10 @@ import {
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
-export interface USDFieldProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    'onChange' | 'value' | 'style' | 'type' | 'inputMode'
-  > {
+export interface USDFieldProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange' | 'value' | 'style' | 'type' | 'inputMode'
+> {
   initialValue?: string
   onChange?: (value: string) => void
   label?: string

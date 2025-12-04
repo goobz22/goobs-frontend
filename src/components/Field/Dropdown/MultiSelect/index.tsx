@@ -25,12 +25,20 @@ export interface MultiSelectChipProps {
     theme?: string
     width?: string
     height?: string
+    minHeight?: string
     borderWidth?: string
     borderRadius?: string
     padding?: string
+    fontSize?: string
+    marginBottom?: string
     helperTextType?: 'error' | 'info'
     requiredIndicatorText?: string
-    [key: string]: any
+    backgroundColor?: string
+    borderColor?: string
+    arrowRight?: string
+    arrowTop?: string
+    arrowPadding?: string
+    arrowBottom?: string
   }
 }
 
@@ -137,11 +145,13 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     alignItems: 'flex-start',
     flexWrap: 'wrap',
     gap: '6px',
-    minHeight: styles?.height || '40px',
-    height: 'auto',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, focused ? 0.6 : 0.3)}`,
+    minHeight: styles?.minHeight || styles?.height || '40px',
+    height: styles?.height || 'auto',
+    border: `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, focused ? 0.6 : 0.3)}`,
     borderRadius: styles?.borderRadius || '8px',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
+    backgroundColor:
+      styles?.backgroundColor ||
+      (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
     padding: styles?.padding || '12px 40px 12px 16px',
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'all 0.3s ease',
@@ -158,12 +168,14 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
 
   const iconWrapperStyle: React.CSSProperties = {
     position: 'absolute',
-    top: '50%',
-    right: '12px',
-    transform: 'translateY(-50%)',
+    top: styles?.arrowTop || '50%',
+    right: styles?.arrowRight || '12px',
+    bottom: styles?.arrowBottom,
+    transform: styles?.arrowTop ? undefined : 'translateY(-50%)',
     display: 'flex',
     alignItems: 'center',
     pointerEvents: 'none',
+    padding: styles?.arrowPadding,
   }
 
   const arrowStyle: React.CSSProperties = {

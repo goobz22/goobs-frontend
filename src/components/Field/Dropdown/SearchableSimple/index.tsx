@@ -22,7 +22,20 @@ export interface SearchableSimpleProps {
     disabled?: boolean
     required?: boolean
     theme?: string
-    [key: string]: any
+    width?: string
+    minWidth?: string
+    height?: string
+    minHeight?: string
+    borderRadius?: string
+    fontSize?: string
+    fontFamily?: string
+    padding?: string
+    marginTop?: string
+    helperTextType?: 'error' | 'info'
+    marginBottom?: string
+    backgroundColor?: string
+    borderColor?: string
+    textColor?: string
   }
 }
 
@@ -139,7 +152,11 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   return (
     <div
       ref={dropdownRef}
-      style={{ position: 'relative', width: '100%', marginBottom: '16px' }}
+      style={{
+        position: 'relative',
+        width: '100%',
+        marginBottom: styles?.marginBottom || '16px',
+      }}
     >
       {/* Label */}
       {label && (
@@ -169,14 +186,16 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
         style={{
           width: '100%',
           padding: '12px 16px',
-          backgroundColor: disabled
-            ? 'rgba(0, 0, 0, 0.3)'
-            : 'rgba(0, 0, 0, 0.6)',
-          border: `1px solid ${alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3)}`,
+          backgroundColor:
+            styles?.backgroundColor ||
+            (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
+          border: `1px solid ${styles?.borderColor || alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3)}`,
           borderRadius: '8px',
-          color: disabled
-            ? 'rgba(255, 255, 255, 0.4)'
-            : 'rgba(255, 255, 255, 0.9)',
+          color:
+            styles?.textColor ||
+            (disabled
+              ? 'rgba(255, 255, 255, 0.4)'
+              : 'rgba(255, 255, 255, 0.9)'),
           fontFamily: '"Crimson Text", serif',
           fontSize: '16px',
           textAlign: 'left',

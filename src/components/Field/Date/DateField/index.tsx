@@ -16,7 +16,15 @@ export interface DateFieldProps {
     disabled?: boolean
     required?: boolean
     theme?: string
-    [key: string]: any
+    helperTextType?: string
+    height?: string
+    fontSize?: string
+    borderRadius?: string
+    marginBottom?: string
+    marginTop?: string
+    width?: string
+    minHeight?: string
+    padding?: string
   }
   helperText?: string
 }
@@ -53,7 +61,15 @@ const DateField: React.FC<DateFieldProps> = ({
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', marginBottom: '16px' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: styles?.width || '100%',
+        marginBottom: styles?.marginBottom || '16px',
+        marginTop: styles?.marginTop,
+        minHeight: styles?.minHeight,
+      }}
+    >
       {/* Label */}
       <label
         style={{
@@ -81,7 +97,7 @@ const DateField: React.FC<DateFieldProps> = ({
         onBlur={() => setIsFocused(false)}
         style={{
           width: '100%',
-          padding: '12px 16px',
+          padding: styles?.padding || '12px 16px',
           backgroundColor: disabled
             ? 'rgba(0, 0, 0, 0.3)'
             : 'rgba(0, 0, 0, 0.6)',

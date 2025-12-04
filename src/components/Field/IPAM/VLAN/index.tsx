@@ -8,11 +8,10 @@ import InternalIncrementNumberField, {
 const MIN_VLAN_ID = 1
 const MAX_VLAN_ID = 4094
 
-export interface VLANFieldProps
-  extends Omit<
-    InternalIncrementNumberFieldProps,
-    'onChange' | 'value' | 'initialValue'
-  > {
+export interface VLANFieldProps extends Omit<
+  InternalIncrementNumberFieldProps,
+  'onChange' | 'value' | 'initialValue'
+> {
   initialValue?: string
   /**
    * A standard ChangeEvent<HTMLInputElement> so parent can do

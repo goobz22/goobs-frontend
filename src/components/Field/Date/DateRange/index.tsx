@@ -42,8 +42,10 @@ export interface DateRange {
   end: Date | null
 }
 
-export interface DateRangeProps
-  extends Omit<SharedFormFieldProps, 'onChange' | 'label'> {
+export interface DateRangeProps extends Omit<
+  SharedFormFieldProps,
+  'onChange' | 'label'
+> {
   onChange?: (dateRange: DateRange) => void
   value?: DateRange
   disableFutureDateValidation?: boolean

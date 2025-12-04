@@ -46,6 +46,7 @@ export interface TextFieldProps {
     paddingBottom?: string
     fontSize?: string
     fontWeight?: string | number
+    fontFamily?: string
     lineHeight?: string
     borderWidth?: string
     borderRadius?: string
@@ -53,7 +54,12 @@ export interface TextFieldProps {
     endAdornmentOffset?: string
     helperTextType?: 'error' | 'info'
     requiredIndicatorText?: string
-    [key: string]: any
+    backgroundColor?: string
+    borderColor?: string
+    color?: string
+    textColor?: string
+    background?: string
+    border?: string
   }
 }
 
@@ -143,8 +149,13 @@ const TextField: React.FC<TextFieldProps> = ({
     alignItems: multiline ? 'flex-start' : 'center',
     width: '100%',
     minHeight: multiline ? undefined : styles?.height || '40px',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    backgroundColor:
+      styles?.background ||
+      styles?.backgroundColor ||
+      (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
+    border:
+      styles?.border ||
+      `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
     borderRadius: styles?.borderRadius || '8px',
     transition: 'all 0.3s ease',
     boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
@@ -170,8 +181,11 @@ const TextField: React.FC<TextFieldProps> = ({
     fontSize: styles?.fontSize || '16px',
     fontWeight: styles?.fontWeight,
     lineHeight: styles?.lineHeight,
-    fontFamily: '"Crimson Text", serif',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+    fontFamily: styles?.fontFamily || '"Crimson Text", serif',
+    color:
+      styles?.textColor ||
+      styles?.color ||
+      (disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)'),
     boxSizing: 'border-box',
     resize: multiline ? 'vertical' : undefined,
   }

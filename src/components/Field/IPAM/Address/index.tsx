@@ -11,8 +11,10 @@ import {
 } from '../../../../theme'
 import Typography from '../../../../components/Typography'
 
-export interface IPAddressFieldProps
-  extends Omit<SharedFormFieldProps, 'onChange'> {
+export interface IPAddressFieldProps extends Omit<
+  SharedFormFieldProps,
+  'onChange'
+> {
   initialValue?: string
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   label?: string

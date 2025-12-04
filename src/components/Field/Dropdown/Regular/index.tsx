@@ -26,7 +26,18 @@ export interface DropdownProps {
     disabled?: boolean
     required?: boolean
     theme?: string
-    [key: string]: any
+    helperTextType?: 'error' | 'warning' | 'info' | string
+    height?: string
+    fontSize?: string
+    padding?: string
+    width?: string
+    marginBottom?: string
+    marginTop?: string
+    fullWidth?: boolean
+    background?: string
+    backdropFilter?: string
+    fontFamily?: string
+    borderRadius?: string
   }
 }
 
@@ -148,7 +159,14 @@ const Dropdown: React.FC<DropdownProps> = ({
   const displayValue = selectedOption?.value || value || 'Select...'
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
+    <div
+      ref={dropdownRef}
+      style={{
+        position: 'relative',
+        width: styles?.fullWidth ? '100%' : styles?.width || '100%',
+        marginBottom: styles?.marginBottom,
+      }}
+    >
       {/* Label */}
       {label && (
         <label
@@ -240,7 +258,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,
               width: `${dropdownPosition.width}px`,
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: styles?.background || 'rgba(0, 0, 0, 0.95)',
               border: `1px solid ${alpha(SACRED_GOLD, 0.4)}`,
               borderRadius: '8px',
               maxHeight: '300px',
@@ -248,7 +266,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               overflowX: 'hidden',
               zIndex: 999999,
               boxShadow: `0 8px 32px ${alpha(SACRED_GOLD, 0.2)}`,
-              backdropFilter: 'blur(10px)',
+              backdropFilter: styles?.backdropFilter || 'blur(10px)',
             }}
           >
             {/* Options List */}

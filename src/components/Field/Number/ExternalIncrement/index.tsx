@@ -12,8 +12,10 @@ import {
 
 type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>
 
-export interface ExternalIncrementNumberFieldProps
-  extends Omit<TextFieldProps, 'onChange' | 'disabled' | 'required'> {
+export interface ExternalIncrementNumberFieldProps extends Omit<
+  TextFieldProps,
+  'onChange' | 'disabled' | 'required'
+> {
   initialValue?: string
   onChange?: () => void
   label?: string
