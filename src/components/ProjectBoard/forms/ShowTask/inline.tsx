@@ -58,6 +58,17 @@ interface InlineShowTaskProps {
   rawProducts: RawProduct[]
   rawServices: RawService[]
   styles: ProjectBoardStyles
+  // Meeting scheduling props (optional for backwards compatibility)
+  meetings?: TaskMeeting[]
+  onScheduleMeeting?: (meetingData: NewMeetingData) => Promise<void> | void
+  onCancelMeeting?: (meetingId: string, reason: string) => Promise<void> | void
+  onConfirmMeeting?: (meetingId: string) => Promise<void> | void
+  onRescheduleMeeting?: (
+    meetingId: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => Promise<void> | void
+  currentDate?: Date
 }
 
 type TabType =
@@ -66,6 +77,29 @@ type TabType =
   | 'caseNotes'
   | 'caseUpdates'
   | 'resolution'
+  | 'scheduling'
+
+/**
+ * Meeting type for scheduling meetings related to tasks
+ */
+export interface TaskMeeting {
+  _id: string
+  eventTypeName: string
+  attendeeName: string
+  attendeeEmail: string
+  startTime: string
+  endTime: string
+  status: 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'pending'
+  location: string
+  notes?: string
+  meetingType: 'video' | 'phone' | 'in-person'
+  taskId: string
+}
+
+/**
+ * New meeting form data (without _id and taskId which are auto-set)
+ */
+export type NewMeetingData = Omit<TaskMeeting, '_id' | 'taskId'>
 
 export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   taskId,
@@ -106,6 +140,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   rawProducts,
   rawServices,
   styles,
+  // Meeting scheduling props
+  meetings = [],
+  onScheduleMeeting,
+  onCancelMeeting,
+  onConfirmMeeting,
+  onRescheduleMeeting,
+  currentDate = new Date(),
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details')
   const [isEditMode, setIsEditMode] = useState(false)
@@ -115,6 +156,32 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [newCaseNoteText, setNewCaseNoteText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
+
+  // Meeting scheduling state
+  const [schedulingView, setSchedulingView] = useState<
+    'list' | 'form' | 'details' | 'reschedule'
+  >('list')
+  const [selectedMeeting, setSelectedMeeting] = useState<TaskMeeting | null>(
+    null
+  )
+  const [meetingTitle, setMeetingTitle] = useState('')
+  const [meetingAttendeeName, setMeetingAttendeeName] = useState('')
+  const [meetingAttendeeEmail, setMeetingAttendeeEmail] = useState('')
+  const [meetingDate, setMeetingDate] = useState('')
+  const [meetingTime, setMeetingTime] = useState('')
+  const [meetingDuration, setMeetingDuration] = useState('30')
+  const [meetingType, setMeetingType] = useState<
+    'video' | 'phone' | 'in-person'
+  >('video')
+  const [meetingLocation, setMeetingLocation] = useState('')
+  const [meetingNotes, setMeetingNotes] = useState('')
+  const [meetingError, setMeetingError] = useState<string | null>(null)
+  const [isSubmittingMeeting, setIsSubmittingMeeting] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  // Reschedule state
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleTime, setRescheduleTime] = useState('')
+  const [rescheduleDuration, setRescheduleDuration] = useState('30')
 
   // Edit mode state for editable fields
   const [editedSeverityId, setEditedSeverityId] = useState(
@@ -1431,6 +1498,1114 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     )
   }
 
+  // Filter meetings for this task
+  const taskMeetings = meetings.filter(m => m.taskId === taskId)
+
+  // Meeting form reset helper
+  const resetMeetingForm = () => {
+    setMeetingTitle(`Meeting: ${taskTitle}`)
+    setMeetingAttendeeName('')
+    setMeetingAttendeeEmail('')
+    setMeetingDate('')
+    setMeetingTime('')
+    setMeetingDuration('30')
+    setMeetingType('video')
+    setMeetingLocation('')
+    setMeetingNotes('')
+    setMeetingError(null)
+  }
+
+  // Meeting form submission handler
+  const handleScheduleMeeting = async () => {
+    if (!onScheduleMeeting) return
+
+    // Validation
+    if (!meetingTitle.trim()) {
+      setMeetingError('Please enter a meeting title')
+      return
+    }
+    if (!meetingAttendeeName.trim()) {
+      setMeetingError('Please enter attendee name')
+      return
+    }
+    if (!meetingAttendeeEmail.trim()) {
+      setMeetingError('Please enter attendee email')
+      return
+    }
+    if (!meetingDate || !meetingTime) {
+      setMeetingError('Please select a date and time')
+      return
+    }
+
+    setIsSubmittingMeeting(true)
+    setMeetingError(null)
+
+    try {
+      const startDateTime = new Date(`${meetingDate}T${meetingTime}`)
+      const endDateTime = new Date(
+        startDateTime.getTime() + parseInt(meetingDuration) * 60000
+      )
+
+      await onScheduleMeeting({
+        eventTypeName: meetingTitle,
+        attendeeName: meetingAttendeeName,
+        attendeeEmail: meetingAttendeeEmail,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        status: 'pending',
+        location:
+          meetingType === 'video'
+            ? 'Video Call'
+            : meetingType === 'phone'
+              ? 'Phone Call'
+              : meetingLocation,
+        notes: meetingNotes,
+        meetingType,
+      })
+
+      resetMeetingForm()
+      setSchedulingView('list')
+    } catch (err) {
+      setMeetingError(
+        err instanceof Error ? err.message : 'Failed to schedule meeting'
+      )
+    } finally {
+      setIsSubmittingMeeting(false)
+    }
+  }
+
+  // Meeting cancel handler
+  const handleCancelMeetingAction = async (meetingId: string) => {
+    if (!onCancelMeeting) return
+    await onCancelMeeting(meetingId, cancelReason)
+    setCancelReason('')
+    setSelectedMeeting(null)
+    setSchedulingView('list')
+  }
+
+  // Meeting confirm handler
+  const handleConfirmMeetingAction = async (meetingId: string) => {
+    if (!onConfirmMeeting) return
+    await onConfirmMeeting(meetingId)
+    setSelectedMeeting(null)
+    setSchedulingView('list')
+  }
+
+  // Meeting reschedule handler
+  const handleRescheduleMeetingAction = async () => {
+    if (!onRescheduleMeeting || !selectedMeeting) return
+
+    if (!rescheduleDate || !rescheduleTime) {
+      setMeetingError('Please select a new date and time')
+      return
+    }
+
+    setIsSubmittingMeeting(true)
+    setMeetingError(null)
+
+    try {
+      const newStartDateTime = new Date(`${rescheduleDate}T${rescheduleTime}`)
+      const newEndDateTime = new Date(
+        newStartDateTime.getTime() + parseInt(rescheduleDuration) * 60000
+      )
+
+      await onRescheduleMeeting(
+        selectedMeeting._id,
+        newStartDateTime.toISOString(),
+        newEndDateTime.toISOString()
+      )
+
+      setRescheduleDate('')
+      setRescheduleTime('')
+      setRescheduleDuration('30')
+      setSelectedMeeting(null)
+      setSchedulingView('list')
+    } catch (err) {
+      setMeetingError(
+        err instanceof Error ? err.message : 'Failed to reschedule meeting'
+      )
+    } finally {
+      setIsSubmittingMeeting(false)
+    }
+  }
+
+  // Initialize reschedule form with current meeting values
+  const initializeRescheduleForm = (meeting: TaskMeeting) => {
+    const start = new Date(meeting.startTime)
+    const end = new Date(meeting.endTime)
+    const durationMins = Math.round((end.getTime() - start.getTime()) / 60000)
+
+    const dateStr = start.toISOString().split('T')[0] ?? ''
+    setRescheduleDate(dateStr)
+    setRescheduleTime(start.toTimeString().slice(0, 5))
+    setRescheduleDuration(String(durationMins))
+    setMeetingError(null)
+  }
+
+  // Format meeting time for display
+  const formatMeetingTime = (start: string, end: string): string => {
+    const startTime = new Date(start)
+    const endTime = new Date(end)
+    return `${startTime.toLocaleDateString()} · ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+
+  // Get relative time from now
+  const getRelativeTime = (dateString: string): string => {
+    const now = currentDate
+    const date = new Date(dateString)
+    const diffMs = date.getTime() - now.getTime()
+    if (diffMs < 0) return 'Past'
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    )
+    if (diffDays === 0) {
+      if (diffHours === 0) return 'Less than an hour'
+      return `${diffHours} hours`
+    } else if (diffDays === 1) {
+      return 'Tomorrow'
+    }
+    return `${diffDays} days`
+  }
+
+  // Get status color for meeting
+  const getMeetingStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return { bg: 'rgba(76, 175, 80, 0.2)', color: '#4CAF50' }
+      case 'pending':
+        return { bg: 'rgba(33, 150, 243, 0.2)', color: '#2196F3' }
+      case 'cancelled':
+        return { bg: 'rgba(244, 67, 54, 0.2)', color: '#F44336' }
+      case 'rescheduled':
+        return { bg: 'rgba(255, 152, 0, 0.2)', color: '#FF9800' }
+      case 'completed':
+        return { bg: 'rgba(158, 158, 158, 0.2)', color: '#9E9E9E' }
+      default:
+        return { bg: 'rgba(158, 158, 158, 0.2)', color: '#9E9E9E' }
+    }
+  }
+
+  // Scheduling tab input styles
+  const meetingInputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px',
+    fontSize: '0.875rem',
+    backgroundColor: bgColor,
+    color: textColor,
+    border: `1px solid ${borderColor}`,
+    borderRadius: '8px',
+    outline: 'none',
+    boxSizing: 'border-box',
+    fontFamily: 'inherit',
+  }
+
+  const meetingSelectStyle: React.CSSProperties = {
+    ...meetingInputStyle,
+    cursor: 'pointer',
+  }
+
+  const meetingLabelStyle: React.CSSProperties = {
+    display: 'block',
+    marginBottom: '8px',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    color: isSacred ? 'rgba(255, 215, 0, 0.8)' : secondaryTextColor,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  }
+
+  const meetingRadioLabelStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: `1px solid ${borderColor}`,
+    backgroundColor: bgColor,
+    color: textColor,
+    fontSize: '0.875rem',
+    transition: 'all 0.2s ease',
+  }
+
+  const renderSchedulingTab = () => {
+    // Render meeting form view
+    if (schedulingView === 'form') {
+      return (
+        <div style={cardStyle}>
+          <div
+            style={{
+              ...sectionTitleStyle,
+              marginTop: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>Schedule New Meeting</span>
+            <button
+              onClick={() => {
+                resetMeetingForm()
+                setSchedulingView('list')
+              }}
+              style={{
+                ...buttonStyle,
+                padding: '6px 12px',
+                fontSize: '0.75rem',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+
+          {meetingError && (
+            <div
+              style={{
+                padding: '12px 16px',
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                border: '1px solid rgba(244, 67, 54, 0.5)',
+                borderRadius: '8px',
+                color: '#f44336',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
+              }}
+            >
+              {meetingError}
+            </div>
+          )}
+
+          {/* Meeting Title */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={meetingLabelStyle}>Meeting Title *</label>
+            <input
+              type="text"
+              value={meetingTitle}
+              onChange={e => setMeetingTitle(e.target.value)}
+              placeholder="e.g., Project Discussion, Sprint Planning"
+              style={meetingInputStyle}
+            />
+          </div>
+
+          {/* Meeting Type */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={meetingLabelStyle}>Meeting Type *</label>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {(['video', 'phone', 'in-person'] as const).map(type => (
+                <label
+                  key={type}
+                  style={{
+                    ...meetingRadioLabelStyle,
+                    backgroundColor:
+                      meetingType === type
+                        ? isSacred
+                          ? 'rgba(255, 215, 0, 0.2)'
+                          : isDark
+                            ? '#374151'
+                            : '#E5E7EB'
+                        : bgColor,
+                    borderColor:
+                      meetingType === type
+                        ? isSacred
+                          ? '#FFD700'
+                          : isDark
+                            ? '#60A5FA'
+                            : '#3B82F6'
+                        : borderColor,
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="meetingType"
+                    value={type}
+                    checked={meetingType === type}
+                    onChange={() => setMeetingType(type)}
+                    style={{ accentColor: isSacred ? '#FFD700' : '#3B82F6' }}
+                  />
+                  {type === 'video'
+                    ? 'Video Call'
+                    : type === 'phone'
+                      ? 'Phone Call'
+                      : 'In-Person'}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Location (for in-person) */}
+          {meetingType === 'in-person' && (
+            <div style={{ marginBottom: '20px' }}>
+              <label style={meetingLabelStyle}>Location *</label>
+              <input
+                type="text"
+                value={meetingLocation}
+                onChange={e => setMeetingLocation(e.target.value)}
+                placeholder="e.g., Conference Room A"
+                style={meetingInputStyle}
+              />
+            </div>
+          )}
+
+          {/* Attendee Info */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '16px',
+              marginBottom: '20px',
+            }}
+          >
+            <div>
+              <label style={meetingLabelStyle}>Attendee Name *</label>
+              <input
+                type="text"
+                value={meetingAttendeeName}
+                onChange={e => setMeetingAttendeeName(e.target.value)}
+                placeholder="Full name"
+                style={meetingInputStyle}
+              />
+            </div>
+            <div>
+              <label style={meetingLabelStyle}>Attendee Email *</label>
+              <input
+                type="email"
+                value={meetingAttendeeEmail}
+                onChange={e => setMeetingAttendeeEmail(e.target.value)}
+                placeholder="email@example.com"
+                style={meetingInputStyle}
+              />
+            </div>
+          </div>
+
+          {/* Date & Time */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: '16px',
+              marginBottom: '20px',
+            }}
+          >
+            <div>
+              <label style={meetingLabelStyle}>Date *</label>
+              <input
+                type="date"
+                value={meetingDate}
+                onChange={e => setMeetingDate(e.target.value)}
+                min={currentDate.toISOString().split('T')[0]}
+                style={meetingInputStyle}
+              />
+            </div>
+            <div>
+              <label style={meetingLabelStyle}>Start Time *</label>
+              <input
+                type="time"
+                value={meetingTime}
+                onChange={e => setMeetingTime(e.target.value)}
+                style={meetingInputStyle}
+              />
+            </div>
+            <div>
+              <label style={meetingLabelStyle}>Duration</label>
+              <select
+                value={meetingDuration}
+                onChange={e => setMeetingDuration(e.target.value)}
+                style={meetingSelectStyle}
+              >
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={meetingLabelStyle}>Notes</label>
+            <textarea
+              value={meetingNotes}
+              onChange={e => setMeetingNotes(e.target.value)}
+              placeholder="Any additional information..."
+              rows={3}
+              style={{
+                ...meetingInputStyle,
+                resize: 'vertical',
+                minHeight: '80px',
+              }}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}
+          >
+            <button
+              onClick={() => {
+                resetMeetingForm()
+                setSchedulingView('list')
+              }}
+              disabled={isSubmittingMeeting}
+              style={{
+                ...buttonStyle,
+                opacity: isSubmittingMeeting ? 0.5 : 1,
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleScheduleMeeting}
+              disabled={isSubmittingMeeting || !onScheduleMeeting}
+              style={{
+                ...buttonStyle,
+                backgroundColor: isSacred
+                  ? '#FFD700'
+                  : isDark
+                    ? '#3B82F6'
+                    : '#3B82F6',
+                color: isSacred ? '#000000' : '#FFFFFF',
+                opacity: isSubmittingMeeting || !onScheduleMeeting ? 0.5 : 1,
+              }}
+            >
+              {isSubmittingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    // Render meeting details view
+    if (schedulingView === 'details' && selectedMeeting) {
+      const statusColors = getMeetingStatusColor(selectedMeeting.status)
+      const startTime = new Date(selectedMeeting.startTime)
+      const endTime = new Date(selectedMeeting.endTime)
+      const isUpcoming = startTime > currentDate
+      const isPending = selectedMeeting.status === 'pending'
+      const isActive =
+        selectedMeeting.status !== 'cancelled' &&
+        selectedMeeting.status !== 'completed'
+
+      return (
+        <div style={cardStyle}>
+          <div
+            style={{
+              ...sectionTitleStyle,
+              marginTop: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>Meeting Details</span>
+            <button
+              onClick={() => {
+                setSelectedMeeting(null)
+                setSchedulingView('list')
+              }}
+              style={{
+                ...buttonStyle,
+                padding: '6px 12px',
+                fontSize: '0.75rem',
+              }}
+            >
+              Back to List
+            </button>
+          </div>
+
+          {/* Status Badge */}
+          <div style={{ marginBottom: '24px' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '6px 16px',
+                borderRadius: '16px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                backgroundColor: statusColors.bg,
+                color: statusColors.color,
+                border: `1px solid ${statusColors.color}`,
+              }}
+            >
+              {selectedMeeting.status.charAt(0).toUpperCase() +
+                selectedMeeting.status.slice(1)}
+            </span>
+          </div>
+
+          {/* Meeting Title */}
+          <div style={{ marginBottom: '20px' }}>
+            <div
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: textColor,
+                marginBottom: '8px',
+              }}
+            >
+              {selectedMeeting.eventTypeName}
+            </div>
+          </div>
+
+          {/* Meeting Info Grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              marginBottom: '24px',
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '4px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Date
+              </div>
+              <div style={{ color: textColor }}>
+                {startTime.toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '4px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Time
+              </div>
+              <div style={{ color: textColor }}>
+                {startTime.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                -{' '}
+                {endTime.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '4px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Attendee
+              </div>
+              <div style={{ color: textColor }}>
+                {selectedMeeting.attendeeName}
+              </div>
+              <div style={{ fontSize: '0.85rem', color: secondaryTextColor }}>
+                {selectedMeeting.attendeeEmail}
+              </div>
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '4px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Location
+              </div>
+              <div style={{ color: textColor }}>
+                {selectedMeeting.location || 'Not specified'}
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {selectedMeeting.notes && (
+            <div
+              style={{
+                marginBottom: '24px',
+                padding: '16px',
+                backgroundColor: sidebarBg,
+                borderRadius: '8px',
+                border: `1px solid ${borderColor}`,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '8px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Notes
+              </div>
+              <div style={{ color: textColor, whiteSpace: 'pre-wrap' }}>
+                {selectedMeeting.notes}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {isPending && onConfirmMeeting && (
+              <button
+                onClick={() => handleConfirmMeetingAction(selectedMeeting._id)}
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: '#4CAF50',
+                  color: '#FFFFFF',
+                }}
+              >
+                Confirm Meeting
+              </button>
+            )}
+            {isActive && isUpcoming && onRescheduleMeeting && (
+              <button
+                onClick={() => {
+                  initializeRescheduleForm(selectedMeeting)
+                  setSchedulingView('reschedule')
+                }}
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: isSacred ? '#FFD700' : '#FF9800',
+                  color: isSacred ? '#000000' : '#FFFFFF',
+                }}
+              >
+                Reschedule
+              </button>
+            )}
+            {isActive && isUpcoming && onCancelMeeting && (
+              <button
+                onClick={() => handleCancelMeetingAction(selectedMeeting._id)}
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: '#F44336',
+                  color: '#FFFFFF',
+                }}
+              >
+                Cancel Meeting
+              </button>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    // Render reschedule view
+    if (schedulingView === 'reschedule' && selectedMeeting) {
+      const originalStart = new Date(selectedMeeting.startTime)
+
+      return (
+        <div style={cardStyle}>
+          <div
+            style={{
+              ...sectionTitleStyle,
+              marginTop: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>Reschedule Meeting</span>
+            <button
+              onClick={() => {
+                setRescheduleDate('')
+                setRescheduleTime('')
+                setRescheduleDuration('30')
+                setMeetingError(null)
+                setSchedulingView('details')
+              }}
+              style={{
+                ...buttonStyle,
+                padding: '6px 12px',
+                fontSize: '0.75rem',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+
+          {meetingError && (
+            <div
+              style={{
+                padding: '12px 16px',
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                border: '1px solid rgba(244, 67, 54, 0.5)',
+                borderRadius: '8px',
+                color: '#f44336',
+                marginBottom: '16px',
+                fontSize: '0.875rem',
+              }}
+            >
+              {meetingError}
+            </div>
+          )}
+
+          {/* Current Meeting Info */}
+          <div
+            style={{
+              padding: '16px',
+              backgroundColor: sidebarBg,
+              borderRadius: '8px',
+              border: `1px solid ${borderColor}`,
+              marginBottom: '24px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '0.75rem',
+                color: secondaryTextColor,
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Current Schedule
+            </div>
+            <div
+              style={{ fontWeight: 600, color: textColor, marginBottom: '4px' }}
+            >
+              {selectedMeeting.eventTypeName}
+            </div>
+            <div style={{ color: secondaryTextColor, fontSize: '0.875rem' }}>
+              {originalStart.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+              {' at '}
+              {originalStart.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </div>
+          </div>
+
+          {/* New Date & Time */}
+          <div style={{ marginBottom: '24px' }}>
+            <div
+              style={{
+                ...meetingLabelStyle,
+                marginBottom: '16px',
+                fontSize: '0.85rem',
+              }}
+            >
+              Select New Date & Time
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <label style={meetingLabelStyle}>New Date *</label>
+                <input
+                  type="date"
+                  value={rescheduleDate}
+                  onChange={e => setRescheduleDate(e.target.value)}
+                  min={currentDate.toISOString().split('T')[0]}
+                  style={meetingInputStyle}
+                />
+              </div>
+              <div>
+                <label style={meetingLabelStyle}>New Time *</label>
+                <input
+                  type="time"
+                  value={rescheduleTime}
+                  onChange={e => setRescheduleTime(e.target.value)}
+                  style={meetingInputStyle}
+                />
+              </div>
+              <div>
+                <label style={meetingLabelStyle}>Duration</label>
+                <select
+                  value={rescheduleDuration}
+                  onChange={e => setRescheduleDuration(e.target.value)}
+                  style={meetingSelectStyle}
+                >
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Preview New Time */}
+          {rescheduleDate && rescheduleTime && (
+            <div
+              style={{
+                padding: '16px',
+                backgroundColor: isSacred
+                  ? 'rgba(255, 215, 0, 0.1)'
+                  : isDark
+                    ? 'rgba(59, 130, 246, 0.1)'
+                    : 'rgba(59, 130, 246, 0.05)',
+                borderRadius: '8px',
+                border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`,
+                marginBottom: '24px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: secondaryTextColor,
+                  marginBottom: '8px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                New Schedule Preview
+              </div>
+              <div
+                style={{
+                  fontWeight: 600,
+                  color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
+                }}
+              >
+                {new Date(
+                  `${rescheduleDate}T${rescheduleTime}`
+                ).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                {' at '}
+                {new Date(
+                  `${rescheduleDate}T${rescheduleTime}`
+                ).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+                {' - '}
+                {new Date(
+                  new Date(`${rescheduleDate}T${rescheduleTime}`).getTime() +
+                    parseInt(rescheduleDuration) * 60000
+                ).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}
+          >
+            <button
+              onClick={() => {
+                setRescheduleDate('')
+                setRescheduleTime('')
+                setRescheduleDuration('30')
+                setMeetingError(null)
+                setSchedulingView('details')
+              }}
+              disabled={isSubmittingMeeting}
+              style={{
+                ...buttonStyle,
+                opacity: isSubmittingMeeting ? 0.5 : 1,
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleRescheduleMeetingAction}
+              disabled={
+                isSubmittingMeeting || !rescheduleDate || !rescheduleTime
+              }
+              style={{
+                ...buttonStyle,
+                backgroundColor: isSacred ? '#FFD700' : '#FF9800',
+                color: isSacred ? '#000000' : '#FFFFFF',
+                opacity:
+                  isSubmittingMeeting || !rescheduleDate || !rescheduleTime
+                    ? 0.5
+                    : 1,
+              }}
+            >
+              {isSubmittingMeeting ? 'Rescheduling...' : 'Confirm Reschedule'}
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    // Render meeting list view (default)
+    return (
+      <div style={cardStyle}>
+        <div
+          style={{
+            ...sectionTitleStyle,
+            marginTop: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span>Meetings ({taskMeetings.length})</span>
+          {onScheduleMeeting && (
+            <button
+              onClick={() => {
+                setMeetingTitle(`Meeting: ${taskTitle}`)
+                setSchedulingView('form')
+              }}
+              style={{
+                ...buttonStyle,
+                backgroundColor: isSacred
+                  ? '#FFD700'
+                  : isDark
+                    ? '#3B82F6'
+                    : '#3B82F6',
+                color: isSacred ? '#000000' : '#FFFFFF',
+              }}
+            >
+              Schedule Meeting
+            </button>
+          )}
+        </div>
+
+        {taskMeetings.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <p
+              style={{
+                color: secondaryTextColor,
+                fontSize: '0.875rem',
+                marginBottom: '16px',
+              }}
+            >
+              No meetings scheduled for this task yet.
+            </p>
+            {onScheduleMeeting && (
+              <button
+                onClick={() => {
+                  setMeetingTitle(`Meeting: ${taskTitle}`)
+                  setSchedulingView('form')
+                }}
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 215, 0, 0.2)'
+                    : isDark
+                      ? '#374151'
+                      : '#E5E7EB',
+                  color: textColor,
+                }}
+              >
+                Schedule First Meeting
+              </button>
+            )}
+          </div>
+        ) : (
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
+            {taskMeetings.map(meeting => {
+              const statusColors = getMeetingStatusColor(meeting.status)
+              return (
+                <div
+                  key={meeting._id}
+                  onClick={() => {
+                    setSelectedMeeting(meeting)
+                    setSchedulingView('details')
+                  }}
+                  style={{
+                    padding: '16px',
+                    backgroundColor: bgColor,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = isSacred
+                      ? '#FFD700'
+                      : isDark
+                        ? '#60A5FA'
+                        : '#3B82F6'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = borderColor
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, color: textColor }}>
+                      {meeting.eventTypeName}
+                    </div>
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        backgroundColor: statusColors.bg,
+                        color: statusColors.color,
+                      }}
+                    >
+                      {meeting.status.charAt(0).toUpperCase() +
+                        meeting.status.slice(1)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '16px',
+                      fontSize: '0.85rem',
+                      color: secondaryTextColor,
+                    }}
+                  >
+                    <span>
+                      {formatMeetingTime(meeting.startTime, meeting.endTime)}
+                    </span>
+                    <span>·</span>
+                    <span>{meeting.attendeeName}</span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.75rem',
+                      color: secondaryTextColor,
+                      marginTop: '8px',
+                    }}
+                  >
+                    {getRelativeTime(meeting.startTime)} from now
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'details':
@@ -1441,6 +2616,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         return renderCaseNotesTab()
       case 'caseUpdates':
         return renderCaseUpdatesTab()
+      case 'scheduling':
+        return renderSchedulingTab()
       case 'resolution':
         return (
           <div style={cardStyle}>
@@ -1485,6 +2662,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             onClick={() => setActiveTab('caseUpdates')}
           >
             Case Updates
+          </div>
+          <div
+            style={tabStyle(activeTab === 'scheduling')}
+            onClick={() => setActiveTab('scheduling')}
+          >
+            Scheduling
           </div>
           <div
             style={tabStyle(activeTab === 'resolution')}
