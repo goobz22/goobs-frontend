@@ -13,8 +13,7 @@ export interface MenuItemStyles extends FormFieldStyles {
   selected?: boolean
 }
 
-export interface MenuItemProps
-  extends React.OptionHTMLAttributes<HTMLOptionElement> {
+export interface MenuItemProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
   children?: React.ReactNode
   styles?: MenuItemStyles
   dense?: boolean

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { getPopoverStyles, type PopoverStyles } from '../../theme/popover'
 
 export interface PopoverProps {
@@ -24,42 +25,104 @@ const Popover: React.FC<PopoverProps> = ({
   styles,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+  // Track if a click started inside the popover
+  const clickStartedInsideRef = useRef(false)
+
+  // Ensure we're on the client side for portal
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Stable onClose reference
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      const target = event.target as Node
+      const popover = popoverRef.current
+
+      console.log('[Popover] handleClickOutside called', {
+        clickStartedInside: clickStartedInsideRef.current,
+        target: (target as HTMLElement)?.tagName,
+        targetText: (target as HTMLElement)?.textContent?.slice(0, 30),
+        popoverExists: !!popover,
+        popoverContainsTarget: popover?.contains(target),
+        anchorContainsTarget: anchorEl?.contains(target),
+      })
+
+      // If click started inside popover, don't close
+      if (clickStartedInsideRef.current) {
+        console.log('[Popover] Click started inside, not closing')
+        clickStartedInsideRef.current = false
+        return
+      }
+
+      // Check if click is inside popover
+      if (popover && popover.contains(target)) {
+        console.log('[Popover] Click is inside popover, not closing')
+        return
+      }
+
+      // Check if click is on anchor element
+      if (anchorEl && anchorEl.contains(target)) {
+        console.log('[Popover] Click is on anchor, not closing')
+        return
+      }
+
+      console.log('[Popover] Closing popover')
+      onCloseRef.current()
+    },
+    [anchorEl]
+  )
+
+  const handleMouseDownInside = useCallback(() => {
+    console.log('[Popover] mousedown inside popover - setting flag')
+    clickStartedInsideRef.current = true
+  }, [])
+
+  const handleEscape = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      onCloseRef.current()
+    }
+  }, [])
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node) &&
-        anchorEl &&
-        !anchorEl.contains(event.target as Node)
-      ) {
-        onClose()
-      }
-    }
+    if (!open) return
 
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside)
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    // Add listeners after a tick to avoid catching the opening click
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside, true)
+      document.addEventListener('keydown', handleEscape)
+    }, 10)
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      clearTimeout(timeoutId)
+      document.removeEventListener('click', handleClickOutside, true)
+      document.removeEventListener('keydown', handleEscape)
     }
-  }, [open, onClose, anchorEl])
+  }, [open, handleClickOutside, handleEscape])
 
-  if (!open || !anchorEl) {
+  if (!open || !anchorEl || !mounted) {
     return null
   }
 
   const rect = anchorEl.getBoundingClientRect()
   const computedStyles = getPopoverStyles(styles, rect)
 
-  return (
-    <div ref={popoverRef} style={computedStyles.popover}>
+  const popoverContent = (
+    <div
+      ref={popoverRef}
+      style={computedStyles.popover}
+      onMouseDown={handleMouseDownInside}
+    >
       {children}
     </div>
   )
+
+  // Use portal to render at document body level
+  return createPortal(popoverContent, document.body)
 }
 
 export default Popover

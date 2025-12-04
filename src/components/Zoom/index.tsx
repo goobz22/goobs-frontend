@@ -11,8 +11,10 @@ import { getZoomStyles, type ZoomStyles } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface ZoomProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface ZoomProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'style'
+> {
   /** The content to be wrapped with zoom transition. */
   children: React.ReactNode
   /** Comprehensive styling options including theme, animation timing, and transform properties. */

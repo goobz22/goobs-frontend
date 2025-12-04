@@ -11,8 +11,10 @@ import { getSlideStyles, type SlideStyles } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface SlideProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface SlideProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'style'
+> {
   /** The content to be wrapped with slide transition. */
   children: React.ReactNode
   /** Comprehensive styling options including theme, animation timing, direction, and transition properties. */

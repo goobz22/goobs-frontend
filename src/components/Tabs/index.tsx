@@ -20,7 +20,13 @@ export interface TabsProps {
   alignment?: 'left' | 'center' | 'right' | 'justify'
   styles?: {
     theme?: string
-    [key: string]: any
+    padding?: string
+    gap?: string
+    borderBottom?: string
+    height?: string
+    tabLeftBorder?: string | boolean
+    tabRightBorder?: string | boolean
+    backgroundColor?: string
   }
 }
 
@@ -29,6 +35,7 @@ const Tabs: React.FC<TabsProps> = ({
   activeTab = 0,
   onChange,
   alignment = 'center',
+  styles,
 }) => {
   const [hoveredTab, setHoveredTab] = useState<number | null>(null)
 
@@ -44,6 +51,22 @@ const Tabs: React.FC<TabsProps> = ({
     }
   }
 
+  // Handle tabLeftBorder - convert boolean to string
+  const tabLeftBorderValue =
+    styles?.tabLeftBorder === true
+      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
+      : styles?.tabLeftBorder === false
+        ? undefined
+        : styles?.tabLeftBorder
+
+  // Handle tabRightBorder - convert boolean to string
+  const tabRightBorderValue =
+    styles?.tabRightBorder === true
+      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
+      : styles?.tabRightBorder === false
+        ? undefined
+        : styles?.tabRightBorder
+
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent:
@@ -55,9 +78,15 @@ const Tabs: React.FC<TabsProps> = ({
             ? 'space-between'
             : 'center',
     alignItems: 'center',
-    gap: '8px',
+    gap: styles?.gap || '8px',
+    padding: styles?.padding,
+    height: styles?.height,
     marginBottom: '16px',
-    borderBottom: `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
+    borderBottom:
+      styles?.borderBottom || `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
+    borderLeft: tabLeftBorderValue,
+    borderRight: tabRightBorderValue,
+    backgroundColor: styles?.backgroundColor,
     flexWrap: 'wrap',
   }
 
@@ -93,7 +122,10 @@ export interface TabProps {
   onMouseLeave?: () => void
   disabled?: boolean
   styles?: {
-    [key: string]: any
+    theme?: string
+    padding?: string
+    fontSize?: string
+    fontWeight?: string | number
   }
 }
 

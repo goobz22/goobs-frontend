@@ -91,10 +91,12 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
 export interface ButtonStyles {
   disabled?: boolean
   theme?: string
+  variant?: string
   width?: string
   minWidth?: string
   maxWidth?: string
   height?: string
+  minHeight?: string
   padding?: string
   margin?: string
   marginTop?: string
@@ -103,16 +105,38 @@ export interface ButtonStyles {
   marginRight?: string
   fontSize?: string
   fontWeight?: string | number
+  fontFamily?: string
+  letterSpacing?: string
+  textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase'
   borderRadius?: string
   borderWidth?: string
   borderColor?: string
+  border?: string
   boxShadow?: string
   iconLocation?: 'left' | 'right' | 'above'
-  [key: string]: any
+  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line'
+  backgroundColor?: string
+  background?: string
+  color?: string
+  borderRightWidth?: string
+  borderRightStyle?: string
+  borderRightColor?: string
+  outline?: string | boolean
+  hoverBackgroundColor?: string
+  hoverBorderColor?: string
+  hoverTransform?: string
+  hoverBoxShadow?: string
+  textShadow?: string
+  flex?: string | number
+  opacity?: number | string
+  cursor?: string
+  size?: string
 }
 
-export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'> {
+export interface ButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'style'
+> {
   text?: string
   icon?: ReactNode
   styles?: ButtonStyles
@@ -160,6 +184,44 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       [isDisabled, onClick]
     )
 
+    // Handle outline prop - convert boolean to string
+    const outlineValue =
+      styles?.outline === true
+        ? 'none'
+        : styles?.outline === false
+          ? undefined
+          : styles?.outline || 'none'
+
+    // Determine background color based on state
+    const getBackgroundColor = () => {
+      if (isDisabled) return 'rgba(0, 0, 0, 0.3)'
+      if (
+        (styles?.backgroundColor || styles?.background) &&
+        !isHovered &&
+        !isActive &&
+        !selected
+      ) {
+        return styles?.backgroundColor || styles?.background
+      }
+      if (isActive || selected) return alpha(SACRED_GOLD, 0.3)
+      if (isHovered) {
+        return styles?.hoverBackgroundColor || alpha(SACRED_GOLD, 0.2)
+      }
+      return (
+        styles?.backgroundColor || styles?.background || 'rgba(0, 0, 0, 0.6)'
+      )
+    }
+
+    // Determine border based on state
+    const getBorderValue = () => {
+      if (styles?.border) return styles.border
+      const borderColor =
+        isHovered && styles?.hoverBorderColor
+          ? styles.hoverBorderColor
+          : styles?.borderColor || alpha(SACRED_GOLD, isHovered ? 0.6 : 0.3)
+      return `${styles?.borderWidth || '1px'} solid ${borderColor}`
+    }
+
     const buttonStyle: React.CSSProperties = {
       position: 'relative',
       display: 'inline-flex',
@@ -168,9 +230,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       gap: iconLocation === 'above' ? '4px' : '8px',
       flexDirection: iconLocation === 'above' ? 'column' : 'row',
       width: styles?.width || 'auto',
-      minWidth: styles?.minWidth,
+      minWidth: styles?.minWidth || 'fit-content',
       maxWidth: styles?.maxWidth,
-      height: styles?.height || '40px',
+      height: styles?.height || 'auto',
+      minHeight: styles?.minHeight || '40px',
       padding: styles?.padding || '8px 16px',
       margin: styles?.margin,
       marginTop: styles?.marginTop,
@@ -179,32 +242,33 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       marginRight: styles?.marginRight,
       fontSize: styles?.fontSize || '14px',
       fontWeight: styles?.fontWeight || 500,
-      fontFamily: '"Cinzel", serif',
-      color: isDisabled
-        ? 'rgba(255, 255, 255, 0.4)'
-        : 'rgba(255, 255, 255, 0.9)',
-      backgroundColor: isDisabled
-        ? 'rgba(0, 0, 0, 0.3)'
-        : isActive || selected
-          ? alpha(SACRED_GOLD, 0.3)
-          : isHovered
-            ? alpha(SACRED_GOLD, 0.2)
-            : 'rgba(0, 0, 0, 0.6)',
-      border: `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, isHovered ? 0.6 : 0.3)}`,
+      fontFamily: styles?.fontFamily || '"Cinzel", serif',
+      color:
+        styles?.color ||
+        (isDisabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)'),
+      backgroundColor: getBackgroundColor(),
+      border: getBorderValue(),
       borderRadius: styles?.borderRadius || '8px',
       boxShadow:
-        styles?.boxShadow ||
-        (isHovered && !isDisabled
-          ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}`
-          : 'none'),
-      cursor: isDisabled ? 'not-allowed' : 'pointer',
+        isHovered && styles?.hoverBoxShadow
+          ? styles.hoverBoxShadow
+          : styles?.boxShadow ||
+            (isHovered && !isDisabled
+              ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}`
+              : 'none'),
+      textShadow: styles?.textShadow,
+      flex: styles?.flex,
+      cursor: styles?.cursor || (isDisabled ? 'not-allowed' : 'pointer'),
       transition: 'all 0.3s ease',
-      outline: 'none',
+      transform:
+        isHovered && styles?.hoverTransform ? styles.hoverTransform : undefined,
+      outline: outlineValue,
       userSelect: 'none',
-      textTransform: 'none',
-      letterSpacing: '0.05em',
+      textTransform: styles?.textTransform || 'none',
+      letterSpacing: styles?.letterSpacing || '0.05em',
       boxSizing: 'border-box',
-      whiteSpace: styles?.whiteSpace as any,
+      whiteSpace: (styles?.whiteSpace as any) || 'nowrap',
+      opacity: styles?.opacity,
     }
 
     const iconComponent = useMemo(() => {

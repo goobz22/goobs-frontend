@@ -38,10 +38,18 @@ export interface DialogProps {
     maxWidth?: string
     width?: string
     height?: string
+    minHeight?: string
     maxHeight?: string
     padding?: string
     borderRadius?: string
-    [key: string]: any
+    backgroundColor?: string
+    border?: string
+    borderColor?: string
+    topOffset?: string
+    fullWidth?: boolean
+    backdropBackgroundColor?: string
+    backdropFilter?: string
+    boxShadow?: string
   }
   customDialogStyles?: React.CSSProperties
   dataDialogPaper?: boolean
@@ -216,29 +224,41 @@ const Dialog: React.FC<DialogProps> = ({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: isSacredTheme
-      ? 'rgba(0, 0, 0, 0.85)'
-      : 'rgba(0, 0, 0, 0.5)',
+    backgroundColor:
+      styles?.backdropBackgroundColor ||
+      (isSacredTheme ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.5)'),
     display: 'flex',
-    alignItems: 'center',
+    alignItems: styles?.topOffset ? 'flex-start' : 'center',
     justifyContent: 'center',
     zIndex: 9999,
     padding: '16px',
+    paddingTop: styles?.topOffset || '16px',
+    backdropFilter: styles?.backdropFilter,
   }
+
+  // Construct border value
+  const dialogBorder = styles?.border
+    ? styles.border
+    : styles?.borderColor
+      ? `2px solid ${styles.borderColor}`
+      : isSacredTheme
+        ? `2px solid ${alpha(SACRED_GOLD, 0.5)}`
+        : '1px solid rgba(0, 0, 0, 0.12)'
 
   const dialogStyle: React.CSSProperties = {
     position: 'relative',
     backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.95)' : '#ffffff',
-    border: isSacredTheme
-      ? `2px solid ${alpha(SACRED_GOLD, 0.5)}`
-      : '1px solid rgba(0, 0, 0, 0.12)',
+    border: dialogBorder,
     borderRadius: styles?.borderRadius || '12px',
-    boxShadow: isSacredTheme
-      ? `0 8px 32px ${alpha(SACRED_GOLD, 0.3)}`
-      : '0 8px 32px rgba(0, 0, 0, 0.2)',
-    maxWidth: getMaxWidth(),
-    width: styles?.width || '100%',
+    boxShadow:
+      styles?.boxShadow ||
+      (isSacredTheme
+        ? `0 8px 32px ${alpha(SACRED_GOLD, 0.3)}`
+        : '0 8px 32px rgba(0, 0, 0, 0.2)'),
+    maxWidth: styles?.fullWidth ? '100%' : getMaxWidth(),
+    width: styles?.fullWidth ? '100%' : styles?.width || '100%',
     maxHeight: getMaxHeight(),
+    minHeight: styles?.minHeight,
     height: styles?.height || 'auto',
     display: 'flex',
     flexDirection: 'column',

@@ -11,8 +11,10 @@ import { getFadeStyles, type FadeStyles } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface FadeProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface FadeProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'style'
+> {
   /** The content to be wrapped with fade transition. */
   children: React.ReactNode
   /** Comprehensive styling options including theme, animation timing, and transition properties. */

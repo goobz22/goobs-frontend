@@ -3,8 +3,7 @@
 import React, { useState } from 'react'
 import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
 
-interface PrecisionManufacturingIconProps
-  extends React.SVGProps<SVGSVGElement> {
+interface PrecisionManufacturingIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
 }
 

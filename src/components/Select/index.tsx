@@ -13,8 +13,10 @@ export interface SelectStyles extends FormFieldStyles {
   fullWidth?: boolean
 }
 
-export interface SelectProps
-  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
+export interface SelectProps extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  'size'
+> {
   children?: React.ReactNode
   styles?: SelectStyles
   variant?: 'standard' | 'outlined' | 'filled'

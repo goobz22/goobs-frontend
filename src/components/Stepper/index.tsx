@@ -31,7 +31,9 @@ export interface StepperProps {
   styles?: {
     orientation?: 'horizontal' | 'vertical'
     theme?: string
-    [key: string]: any
+    gap?: string
+    padding?: string
+    marginBottom?: string
   }
 }
 

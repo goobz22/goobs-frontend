@@ -22,7 +22,17 @@ export interface AccordionProps {
     disabled?: boolean
     theme?: string
     level?: number
-    [key: string]: any
+    padding?: string
+    borderRadius?: string
+    backgroundColor?: string
+    summaryBackgroundColor?: string
+    summaryColor?: string
+    outline?: string | boolean
+    levelIndentBase?: number
+    levelIndentIncrement?: number
+    borderColor?: string
+    borderWidth?: string
+    marginBottom?: string
   }
   level?: number
   type?: 'accordion' | 'menu'
@@ -125,44 +135,71 @@ const Accordion: FC<AccordionProps> = props => {
     [isMenuType, onClick, handleToggle, disabled]
   )
 
+  // Calculate indent based on level
+  const levelIndentBase = styles?.levelIndentBase ?? 20
+  const levelIndentIncrement = styles?.levelIndentIncrement ?? 20
+  const levelIndent = levelIndentBase + level * levelIndentIncrement
+
+  // Handle outline prop - convert boolean to string
+  const outlineValue =
+    styles?.outline === true
+      ? 'none'
+      : styles?.outline === false
+        ? undefined
+        : styles?.outline
+
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    marginBottom: '4px',
-    borderRadius: '8px',
-    backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.4)' : '#fff',
-    border: isSacredTheme
-      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
-      : '1px solid #e5e7eb',
+    marginBottom: styles?.marginBottom || '4px',
+    borderRadius: styles?.borderRadius || '8px',
+    backgroundColor:
+      styles?.backgroundColor ||
+      (isSacredTheme ? 'rgba(0, 0, 0, 0.4)' : '#fff'),
+    border: styles?.borderColor
+      ? `${styles?.borderWidth || '1px'} solid ${styles.borderColor}`
+      : isSacredTheme
+        ? `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`
+        : `${styles?.borderWidth || '1px'} solid #e5e7eb`,
     transition: 'all 0.3s ease',
     overflow: 'hidden',
+    outline: outlineValue,
+  }
+
+  // Determine summary background color
+  const getSummaryBackgroundColor = () => {
+    // Use explicit summaryBackgroundColor if provided
+    if (styles?.summaryBackgroundColor && !isHovered && !isActive) {
+      return styles.summaryBackgroundColor
+    }
+    if (isActive && isMenuType) {
+      return isSacredTheme
+        ? alpha(SACRED_GOLD, 0.15)
+        : 'rgba(59, 130, 246, 0.1)'
+    }
+    if (isHovered && !disabled) {
+      return isSacredTheme ? alpha(SACRED_GOLD, 0.1) : '#f9fafb'
+    }
+    return styles?.summaryBackgroundColor || 'transparent'
   }
 
   const summaryStyle: React.CSSProperties = {
     position: 'relative',
-    padding: '12px',
-    paddingLeft: isMenuType ? `${16 + level * 20}px` : `${40 + level * 20}px`,
+    padding: styles?.padding || '12px',
+    paddingLeft: isMenuType ? `${16 + levelIndent}px` : `${40 + levelIndent}px`,
     paddingRight: '24px',
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'flex',
     alignItems: 'center',
-    backgroundColor:
-      isActive && isMenuType
-        ? isSacredTheme
-          ? alpha(SACRED_GOLD, 0.15)
-          : 'rgba(59, 130, 246, 0.1)'
-        : isHovered && !disabled
-          ? isSacredTheme
-            ? alpha(SACRED_GOLD, 0.1)
-            : '#f9fafb'
-          : 'transparent',
+    backgroundColor: getSummaryBackgroundColor(),
     color:
-      isActive && isMenuType
+      styles?.summaryColor ||
+      (isActive && isMenuType
         ? isSacredTheme
           ? SACRED_GOLD
           : '#3B82F6'
         : isSacredTheme
           ? 'rgba(255, 255, 255, 0.9)'
-          : '#111827',
+          : '#111827'),
     fontWeight: isActive && isMenuType ? 600 : 400,
     fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
     fontSize: '14px',
@@ -173,7 +210,7 @@ const Accordion: FC<AccordionProps> = props => {
 
   const iconStyle: React.CSSProperties = {
     position: 'absolute',
-    left: `${8 + level * 20}px`,
+    left: `${8 + levelIndent}px`,
     top: '50%',
     transform: `translateY(-50%) ${expanded ? 'rotate(180deg)' : 'rotate(0deg)'}`,
     transition: 'transform 0.3s ease',
@@ -183,8 +220,8 @@ const Accordion: FC<AccordionProps> = props => {
   }
 
   const detailsStyle: React.CSSProperties = {
-    padding: '12px',
-    paddingLeft: `${24 + level * 20}px`,
+    padding: styles?.padding || '12px',
+    paddingLeft: `${24 + levelIndent}px`,
     color: isSacredTheme ? 'rgba(255, 255, 255, 0.8)' : '#374151',
     fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
     fontSize: '14px',

@@ -13,8 +13,15 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     width?: string
     height?: string
     padding?: string
+    contentPadding?: string
     borderRadius?: string
-    [key: string]: any
+    backgroundColor?: string
+    border?: string
+    marginBottom?: string
+    marginTop?: string
+    borderColor?: string
+    borderWidth?: string
+    borderStyle?: string
   }
   elevation?: number
 }
@@ -24,7 +31,8 @@ export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   styles?: {
     theme?: string
     padding?: string
-    [key: string]: any
+    contentPadding?: string
+    color?: string
   }
 }
 
@@ -34,12 +42,14 @@ export interface CardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
     theme?: string
     padding?: string
     justifyContent?: string
-    [key: string]: any
+    gap?: string
   }
 }
 
-export interface CardHeaderProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
+export interface CardHeaderProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'children' | 'title'
+> {
   children?: React.ReactNode
   title?: string
   subtitle?: string
@@ -48,7 +58,8 @@ export interface CardHeaderProps
   styles?: {
     theme?: string
     padding?: string
-    [key: string]: any
+    titleColor?: string
+    subtitleColor?: string
   }
 }
 
@@ -71,11 +82,17 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       width: styles?.width || '100%',
       height: styles?.height || 'auto',
       padding: styles?.padding || '0',
+      marginBottom: styles?.marginBottom,
+      marginTop: styles?.marginTop,
       borderRadius: styles?.borderRadius || '12px',
       backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.85)' : '#ffffff',
-      border: isSacredTheme
-        ? `1px solid ${alpha(SACRED_GOLD, isHovered ? 0.5 : 0.3)}`
-        : '1px solid rgba(0, 0, 0, 0.12)',
+      border: styles?.border
+        ? styles.border
+        : styles?.borderColor
+          ? `${styles?.borderWidth || '1px'} ${styles?.borderStyle || 'solid'} ${styles.borderColor}`
+          : isSacredTheme
+            ? `${styles?.borderWidth || '1px'} ${styles?.borderStyle || 'solid'} ${alpha(SACRED_GOLD, isHovered ? 0.5 : 0.3)}`
+            : `${styles?.borderWidth || '1px'} ${styles?.borderStyle || 'solid'} rgba(0, 0, 0, 0.12)`,
       boxShadow: getElevationShadow(elevation, isHovered),
       transition: 'all 0.3s ease',
       overflow: 'hidden',
@@ -113,7 +130,7 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
     const isSacredTheme = styles?.theme === 'sacred'
 
     const contentStyle: React.CSSProperties = {
-      padding: styles?.padding || '16px',
+      padding: styles?.contentPadding || styles?.padding || '16px',
       color: isSacredTheme ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
       fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
     }

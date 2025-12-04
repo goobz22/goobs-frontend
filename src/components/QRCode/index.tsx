@@ -71,7 +71,8 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
           canvasRef.current,
           qrValue,
           {
-            width: styles?.theme === 'sacred' ? responsiveSize - 40 : responsiveSize,
+            width:
+              styles?.theme === 'sacred' ? responsiveSize - 40 : responsiveSize,
             margin: 2,
             color: {
               dark: fgColor,

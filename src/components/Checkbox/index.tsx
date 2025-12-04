@@ -28,11 +28,10 @@ import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface CheckboxProps
-  extends Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'size' | 'value' | 'defaultValue' | 'onChange' | 'onFocus' | 'onBlur'
-  > {
+export interface CheckboxProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'size' | 'value' | 'defaultValue' | 'onChange' | 'onFocus' | 'onBlur'
+> {
   /** Whether the checkbox is checked */
   checked?: boolean
   /** Default checked state for uncontrolled mode */

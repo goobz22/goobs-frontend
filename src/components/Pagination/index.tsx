@@ -23,7 +23,8 @@ export interface PaginationProps {
   styles?: {
     disabled?: boolean
     theme?: string
-    [key: string]: any
+    gap?: string
+    padding?: string
   }
   renderItem?: (item: PaginationRenderItemParams) => ReactNode
 }

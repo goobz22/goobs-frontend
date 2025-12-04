@@ -11,8 +11,10 @@ import { getAvatarStyles, type AvatarStyles } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface AvatarProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface AvatarProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'style'
+> {
   /** The content to be displayed within the avatar (icon, text, or image). */
   children: React.ReactNode
   /** Comprehensive styling options including theme, size, colors, and layout properties. */

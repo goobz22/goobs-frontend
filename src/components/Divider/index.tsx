@@ -5,42 +5,64 @@ import { alpha } from '../../utils'
 
 const SACRED_GOLD = '#FFD700'
 
-export interface DividerProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface DividerProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'style'
+> {
   children?: React.ReactNode
   styles?: {
     orientation?: 'horizontal' | 'vertical'
     margin?: string
     marginTop?: string
     marginBottom?: string
+    marginLeft?: string
+    marginRight?: string
     height?: string
     width?: string
     color?: string
-    [key: string]: any
+    theme?: string
+    disabled?: boolean
+    backgroundColor?: string
   }
 }
 
 const Divider = forwardRef<HTMLDivElement, DividerProps>(
   ({ children, styles, ...restProps }, ref) => {
     const orientation = styles?.orientation || 'horizontal'
+    const disabled = styles?.disabled || false
+
+    // Determine background - use backgroundColor if provided, otherwise gradient
+    const getBackground = () => {
+      if (styles?.backgroundColor) return styles.backgroundColor
+      const gradientColor = alpha(SACRED_GOLD, disabled ? 0.15 : 0.3)
+      return orientation === 'horizontal'
+        ? `linear-gradient(90deg, transparent, ${gradientColor}, transparent)`
+        : `linear-gradient(180deg, transparent, ${gradientColor}, transparent)`
+    }
 
     const containerStyle: React.CSSProperties =
       orientation === 'horizontal'
         ? {
             width: styles?.width || '100%',
             height: styles?.height || '2px',
-            background: `linear-gradient(90deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
+            background: getBackground(),
             margin: styles?.margin || '24px 0',
             marginTop: styles?.marginTop,
             marginBottom: styles?.marginBottom,
+            marginLeft: styles?.marginLeft,
+            marginRight: styles?.marginRight,
             position: 'relative',
+            opacity: disabled ? 0.5 : 1,
           }
         : {
             width: styles?.width || '2px',
             height: styles?.height || '100%',
-            background: `linear-gradient(180deg, transparent, ${alpha(SACRED_GOLD, 0.3)}, transparent)`,
+            background: getBackground(),
             margin: styles?.margin || '0 24px',
+            marginLeft: styles?.marginLeft,
+            marginRight: styles?.marginRight,
             position: 'relative',
+            opacity: disabled ? 0.5 : 1,
           }
 
     const contentStyle: React.CSSProperties = {

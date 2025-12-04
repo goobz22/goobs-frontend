@@ -7,8 +7,7 @@ import { getSwitchStyles, type SwitchStyles } from '../../theme'
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
-export interface SwitchProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /** Label text to display on the left side of the switch */
   leftLabel?: string
   /** Label text to display on the right side of the switch */
