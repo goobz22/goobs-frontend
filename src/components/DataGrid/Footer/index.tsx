@@ -1,13 +1,140 @@
 'use client'
 
-import React from 'react'
-import type { ColumnDef } from '../types'
+import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import type { ColumnDef, RowData } from '../types'
 import Dropdown from '../../Field/Dropdown/Regular'
-import FirstPageIcon from '../../Icons/FirstPage'
-import LastPageIcon from '../../Icons/LastPage'
-import KeyboardArrowLeftIcon from '../../Icons/KeyboardArrowLeft'
-import KeyboardArrowRightIcon from '../../Icons/KeyboardArrowRight'
 import type { DataGridStyles, FormFieldStyles } from '../../../theme'
+
+// Settings cog icon
+const SettingsIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+)
+
+// Download icon for CSV export
+const DownloadIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+)
+
+// PDF icon for PDF export
+const PdfIcon: React.FC<{ color?: string }> = ({ color = 'currentColor' }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+)
+
+// Inline SVG icons for pagination - cleaner and more controllable
+const ChevronFirstIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="11 17 6 12 11 7" />
+    <polyline points="18 17 13 12 18 7" />
+  </svg>
+)
+
+const ChevronLastIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 17 11 12 6 7" />
+    <polyline points="13 17 18 12 13 7" />
+  </svg>
+)
+
+const ChevronLeftIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+)
+
+const ChevronRightIcon: React.FC<{ color?: string }> = ({
+  color = 'currentColor',
+}) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+)
 
 export interface CustomFooterProps {
   page: number
@@ -16,6 +143,10 @@ export interface CustomFooterProps {
   onPageChange: (newPage: number) => void
   onPageSizeChange: (newPageSize: number) => void
   columns: ColumnDef[]
+  /** Row data for export functionality */
+  rows?: RowData[]
+  /** Callback for PDF export - receives columns and rows */
+  onExportPdf: (columns: ColumnDef[], rows: RowData[]) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
 }
@@ -278,6 +409,18 @@ const TablePagination: React.FC<{
     )
   }
 
+  // Get icon color based on theme and disabled state
+  const getIconColor = (disabled: boolean) => {
+    if (disabled) {
+      return isSacredTheme
+        ? 'rgba(255, 215, 0, 0.3)'
+        : isDarkTheme
+          ? 'rgba(156, 163, 175, 0.3)'
+          : 'rgba(107, 114, 128, 0.3)'
+    }
+    return isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151'
+  }
+
   return (
     <div style={paginationContainerStyle}>
       <PageSizeSelector
@@ -291,7 +434,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to first page"
       >
-        <LastPageIcon {...(styles && { styles })} />
+        <ChevronFirstIcon color={getIconColor(page === 0)} />
       </PaginationButton>
 
       <PaginationButton
@@ -299,7 +442,7 @@ const TablePagination: React.FC<{
         disabled={page === 0}
         aria-label="Go to previous page"
       >
-        <KeyboardArrowLeftIcon {...(styles && { styles })} />
+        <ChevronLeftIcon color={getIconColor(page === 0)} />
       </PaginationButton>
 
       <div style={paginationTextStyle}>
@@ -311,7 +454,7 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to next page"
       >
-        <KeyboardArrowRightIcon {...(styles && { styles })} />
+        <ChevronRightIcon color={getIconColor(page >= totalPages - 1)} />
       </PaginationButton>
 
       <PaginationButton
@@ -319,8 +462,319 @@ const TablePagination: React.FC<{
         disabled={page >= totalPages - 1}
         aria-label="Go to last page"
       >
-        <FirstPageIcon {...(styles && { styles })} />
+        <ChevronLastIcon color={getIconColor(page >= totalPages - 1)} />
       </PaginationButton>
+    </div>
+  )
+}
+
+// CSV Export utility function
+// Helper to format a value for CSV export
+const formatValueForCSV = (value: unknown): string => {
+  if (value === null || value === undefined) return ''
+
+  // Handle Date objects
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+
+  // Handle ISO date strings - format them nicely
+  if (typeof value === 'string') {
+    // Check if it's an ISO date string
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
+    if (isoDateRegex.test(value)) {
+      try {
+        const date = new Date(value)
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleString()
+        }
+      } catch {
+        // If parsing fails, return original string
+      }
+    }
+    return value
+  }
+
+  // Handle arrays - join with semicolons
+  if (Array.isArray(value)) {
+    return value.map(v => formatValueForCSV(v)).join('; ')
+  }
+
+  // Handle objects
+  if (typeof value === 'object') {
+    return JSON.stringify(value)
+  }
+
+  return String(value)
+}
+
+const exportToCSV = (
+  columns: ColumnDef[],
+  rows: RowData[],
+  filename: string = 'export'
+) => {
+  if (rows.length === 0) {
+    // No data to export
+    return
+  }
+
+  // Collect all unique fields from the data rows (excluding internal fields)
+  const excludedFields = new Set(['_id', 'id', '__v'])
+  const allFields = new Set<string>()
+
+  rows.forEach(row => {
+    Object.keys(row).forEach(key => {
+      if (!excludedFields.has(key)) {
+        allFields.add(key)
+      }
+    })
+  })
+
+  // Create headers: use column headerName if field matches, otherwise use field name
+  const fieldToHeader: Record<string, string> = {}
+  columns.forEach(col => {
+    fieldToHeader[col.field] = col.headerName || col.field
+  })
+
+  const fields = Array.from(allFields)
+  const headers = fields.map(field => fieldToHeader[field] || field)
+
+  // Build CSV content
+  const csvRows: string[] = []
+
+  // Add header row
+  csvRows.push(headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(','))
+
+  // Add data rows
+  rows.forEach(row => {
+    const values = fields.map(field => {
+      const value = row[field]
+      const formatted = formatValueForCSV(value)
+      return `"${formatted.replace(/"/g, '""')}"`
+    })
+    csvRows.push(values.join(','))
+  })
+
+  const csvContent = csvRows.join('\n')
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+
+  link.setAttribute('href', url)
+  link.setAttribute('download', `${filename}.csv`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+// Export Menu Component with Settings Cog and Dropdown using React Portal
+const ExportMenu: React.FC<{
+  columns: ColumnDef[]
+  rows: RowData[]
+  onExportPdf: (columns: ColumnDef[], rows: RowData[]) => void
+  styles?: DataGridStyles
+}> = ({ columns, rows, onExportPdf, styles }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const isSacredTheme = styles?.theme === 'sacred'
+  const isDarkTheme = styles?.theme === 'dark'
+
+  // Update menu position when opening
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      // Position dropdown above the button
+      setMenuPosition({
+        top: rect.top - 4, // 4px margin above button
+        left: rect.left,
+      })
+    }
+  }, [isOpen])
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(target)
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const getIconColor = () => {
+    return isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151'
+  }
+
+  const cogButtonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease-in-out',
+    backgroundColor: isOpen
+      ? isSacredTheme
+        ? 'rgba(255, 215, 0, 0.25)'
+        : isDarkTheme
+          ? '#475569'
+          : '#E2E8F0'
+      : isSacredTheme
+        ? 'rgba(255, 215, 0, 0.15)'
+        : isDarkTheme
+          ? '#334155'
+          : '#F1F5F9',
+    border: isSacredTheme
+      ? '1px solid rgba(255, 215, 0, 0.4)'
+      : isDarkTheme
+        ? '1px solid #475569'
+        : '1px solid #E2E8F0',
+  }
+
+  const dropdownStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: menuPosition.top,
+    left: menuPosition.left,
+    transform: 'translateY(-100%)',
+    minWidth: '160px',
+    backgroundColor: isSacredTheme
+      ? 'rgba(0, 0, 0, 0.95)'
+      : isDarkTheme
+        ? '#1E293B'
+        : '#FFFFFF',
+    border: isSacredTheme
+      ? '1px solid rgba(255, 215, 0, 0.5)'
+      : isDarkTheme
+        ? '1px solid #475569'
+        : '1px solid #E2E8F0',
+    borderRadius: '6px',
+    boxShadow: isSacredTheme
+      ? '0 -4px 12px rgba(255, 215, 0, 0.2)'
+      : '0 -4px 12px rgba(0, 0, 0, 0.15)',
+    zIndex: 9999,
+    overflow: 'hidden',
+  }
+
+  const menuItemStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 14px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151',
+    fontFamily: isSacredTheme ? '"Cinzel", serif' : '"Inter", sans-serif',
+    backgroundColor: 'transparent',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left' as const,
+    transition: 'background-color 0.15s ease',
+  }
+
+  const handleExportCSV = () => {
+    exportToCSV(columns, rows, 'datagrid-export')
+    setIsOpen(false)
+  }
+
+  const handleExportPdf = () => {
+    onExportPdf(columns, rows)
+    setIsOpen(false)
+  }
+
+  // Render dropdown menu via portal
+  const renderDropdown = () => {
+    if (!isOpen || typeof document === 'undefined') return null
+
+    return createPortal(
+      <div ref={menuRef} style={dropdownStyle}>
+        <button
+          onClick={handleExportCSV}
+          style={menuItemStyle}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = isSacredTheme
+              ? 'rgba(255, 215, 0, 0.15)'
+              : isDarkTheme
+                ? '#334155'
+                : '#F3F4F6'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          <DownloadIcon color={getIconColor()} />
+          Export CSV
+        </button>
+        <button
+          onClick={handleExportPdf}
+          style={menuItemStyle}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = isSacredTheme
+              ? 'rgba(255, 215, 0, 0.15)'
+              : isDarkTheme
+                ? '#334155'
+                : '#F3F4F6'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          <PdfIcon color={getIconColor()} />
+          Export PDF
+        </button>
+      </div>,
+      document.body
+    )
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        ref={buttonRef}
+        onClick={() => setIsOpen(!isOpen)}
+        style={cogButtonStyle}
+        aria-label="Export options"
+        title="Export options"
+        onMouseEnter={e => {
+          if (!isOpen) {
+            e.currentTarget.style.backgroundColor = isSacredTheme
+              ? 'rgba(255, 215, 0, 0.25)'
+              : isDarkTheme
+                ? '#475569'
+                : '#E2E8F0'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isOpen) {
+            e.currentTarget.style.backgroundColor = isSacredTheme
+              ? 'rgba(255, 215, 0, 0.15)'
+              : isDarkTheme
+                ? '#334155'
+                : '#F1F5F9'
+          }
+        }}
+      >
+        <SettingsIcon color={getIconColor()} />
+      </button>
+
+      {renderDropdown()}
     </div>
   )
 }
@@ -331,6 +785,9 @@ function CustomFooter({
   rowCount,
   onPageChange,
   onPageSizeChange,
+  columns,
+  rows = [],
+  onExportPdf,
   styles,
 }: CustomFooterProps) {
   const isSacredTheme = styles?.theme === 'sacred'
@@ -389,8 +846,15 @@ function CustomFooter({
   return (
     <div style={containerStyle}>
       <div style={innerContainerStyle}>
-        {/* Left Section: Empty */}
-        <div style={leftSectionStyle}></div>
+        {/* Left Section: Export Menu with Settings Cog */}
+        <div style={leftSectionStyle}>
+          <ExportMenu
+            columns={columns}
+            rows={rows}
+            onExportPdf={onExportPdf}
+            {...(styles && { styles })}
+          />
+        </div>
 
         {/* Center Section: Empty */}
         <div style={centerSectionStyle}></div>

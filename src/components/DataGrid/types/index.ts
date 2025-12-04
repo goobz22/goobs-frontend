@@ -332,4 +332,7 @@ export interface DatagridProps {
   filtersCollapsible?: boolean
   /** Default expanded state for filters when collapsible is true */
   filtersDefaultExpanded?: boolean
+
+  /** Optional callback for PDF export - receives columns and rows */
+  onExportPdf?: (columns: ColumnDef[], rows: RowData[]) => void
 }

@@ -47,6 +47,8 @@ const getStyles = (styles?: DataGridStyles) => {
       fontWeight: '600',
       textAlign: 'left',
       color: computedStyles.table.tableHeaderCell.color,
+      borderRight: computedStyles.table.tableHeaderCell.borderRight,
+      borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
     } as React.CSSProperties,
     checkboxCell: {
       padding: '0.75rem',
@@ -55,6 +57,7 @@ const getStyles = (styles?: DataGridStyles) => {
       maxWidth: '48px',
       textAlign: 'center',
       borderRight: computedStyles.table.tableHeaderCell.borderRight,
+      borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
       verticalAlign: 'middle',
       fontWeight: '600',
       color: computedStyles.table.tableHeaderCell.color,
@@ -93,6 +96,7 @@ const getStyles = (styles?: DataGridStyles) => {
         minWidth: width ? `${width}px` : undefined,
         maxWidth: width ? `${width}px` : '200px',
         borderRight: computedStyles.table.tableHeaderCell.borderRight,
+        borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
         fontWeight: '600',
         textAlign: 'left',
         color: computedStyles.table.tableHeaderCell.color,
@@ -121,6 +125,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   const componentStyles = getStyles(styles)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const headerRefs = React.useRef<Record<string, HTMLTableCellElement | null>>(
+    {}
+  )
 
   // Wrapper function to convert boolean to ChangeEvent
   const handleCheckboxChange = (checked: boolean) => {
@@ -152,6 +159,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         return (
           <th
             key={col.field}
+            ref={el => {
+              headerRefs.current[col.field] = el
+            }}
             style={{
               ...cellStyle,
               position: 'relative',
@@ -187,7 +197,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
-                  setAnchorEl(e.currentTarget)
+                  // Use the header cell as anchor for better positioning
+                  const headerCell = headerRefs.current[col.field]
+                  setAnchorEl(headerCell || e.currentTarget)
                   setOpenDropdown(col.field)
                 }}
                 style={{
@@ -236,7 +248,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 {/* Sorting options */}
                 <button
                   onClick={() => {
+                    console.log('[ColumnHeaderRow] Sort A-Z clicked', {
+                      field: col.field,
+                      onColumnSort: !!onColumnSort,
+                    })
                     onColumnSort?.(col.field, 'asc')
+                    console.log(
+                      '[ColumnHeaderRow] Sort complete, closing dropdown'
+                    )
                     setOpenDropdown(null)
                   }}
                   style={{
@@ -269,7 +288,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 </button>
                 <button
                   onClick={() => {
+                    console.log('[ColumnHeaderRow] Sort Z-A clicked', {
+                      field: col.field,
+                      onColumnSort: !!onColumnSort,
+                    })
                     onColumnSort?.(col.field, 'desc')
+                    console.log(
+                      '[ColumnHeaderRow] Sort complete, closing dropdown'
+                    )
                     setOpenDropdown(null)
                   }}
                   style={{

@@ -6,14 +6,12 @@ import React, { useMemo } from 'react'
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 import Alert, { AlertProps } from '../../Alert'
-import ProgressBar from '../../ProgressBar'
 
 export interface FormDataGridProps {
   title: string
   description: string
   datagrid: DatagridProps
   sacredtheme?: boolean
-  isLoading?: boolean
   alert?: AlertProps
 }
 
@@ -117,12 +115,8 @@ const getStyles = (sacredtheme?: boolean) => ({
   dataGridContainer: {
     ...(sacredtheme && {
       position: 'relative',
-      borderRadius: '0.5rem',
       overflow: 'hidden',
-      border: '1px solid rgba(255, 215, 0, 0.3)',
       backgroundColor: 'rgba(0,0,0,0.5)',
-      // Provide symmetric gutters so the grid respects content pane width
-      padding: '0 16px 16px 16px',
       boxSizing: 'border-box',
     }),
   } as React.CSSProperties,
@@ -145,7 +139,6 @@ function FormDataGrid({
   description,
   datagrid,
   sacredtheme = true,
-  isLoading = false,
   alert,
 }: FormDataGridProps) {
   const styles = getStyles(sacredtheme)
@@ -165,27 +158,6 @@ function FormDataGrid({
     [sacredtheme]
   )
 
-  const progressBarStyles = useMemo(
-    () => ({
-      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
-    }),
-    [sacredtheme]
-  )
-
-  if (isLoading) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.titleContainer}>
-          <div style={styles.title}>{title}</div>
-          <div style={styles.description}>{description}</div>
-        </div>
-        <div style={{ marginTop: '0.75rem' }}>
-          <ProgressBar variant="indeterminate" styles={progressBarStyles} />
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div style={styles.container}>
       <div style={{ ...styles.titleContainer, position: 'relative' }}>
@@ -194,7 +166,7 @@ function FormDataGrid({
         {sacredtheme && <div style={styles.shimmer} />}
       </div>
 
-      {alert && !isLoading && (
+      {alert && (
         <div style={styles.alertContainer}>
           {(() => {
             const baseProps: AlertProps = {

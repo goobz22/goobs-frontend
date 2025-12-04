@@ -855,9 +855,10 @@ const Rows: React.FC<RowsProps> = ({
   }
   return (
     <>
-      {rows.map(row => {
+      {rows.map((row, rowIndex) => {
         const rowId = getRowId(row)
         const isSelected = selectedRowIds.includes(rowId)
+        const isAlternateRow = rowIndex % 2 === 1
 
         // Check if any cell in this row is editing with multiselect
         const hasEditingMultiselect = columns.some(col => {
@@ -880,7 +881,12 @@ const Rows: React.FC<RowsProps> = ({
                   ? 'rgba(255, 215, 0, 0.15)'
                   : 'rgba(219, 234, 254, 1)',
               }
-            : {}),
+            : isAlternateRow
+              ? {
+                  backgroundColor:
+                    computedStyles.table.tableRowAlternate.backgroundColor,
+                }
+              : {}),
           cursor: 'pointer',
           transition: 'background-color 0.2s ease',
           // Allow row height expansion for multiselect
@@ -916,7 +922,6 @@ const Rows: React.FC<RowsProps> = ({
                 minWidth: '48px',
                 maxWidth: '48px',
                 padding: '0',
-                border: 'none',
               }}
             ></td>
 

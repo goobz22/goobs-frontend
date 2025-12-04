@@ -3,21 +3,18 @@
 import React, { useEffect } from 'react'
 import FileCopy from '../../Icons/FileCopy'
 import Delete from '../../Icons/Delete'
-import Download from '../../Icons/Download'
 import Edit from '../../Icons/Edit'
 import type { DataGridStyles } from '../../../theme'
 
-type ModalType = 'duplicate' | 'delete' | 'export' | 'manage' | 'show'
+type ModalType = 'duplicate' | 'delete' | 'manage' | 'show'
 
 interface ManageRowProps {
   handleClose?: () => void
   selectedRows?: string[]
-  rows?: Array<{ [key: string]: unknown }>
   onDuplicate?: () => void
   onDelete?: () => void
   onManage?: () => void
   onShow?: () => void
-  onExport?: () => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
 }
@@ -25,12 +22,10 @@ interface ManageRowProps {
 function ManageRow({
   handleClose = () => {},
   selectedRows = [],
-  rows = [],
   onDuplicate,
   onDelete,
   onManage,
   onShow,
-  onExport,
   styles,
 }: ManageRowProps) {
   const isSacredTheme = styles?.theme === 'sacred'
@@ -78,14 +73,6 @@ function ManageRow({
           }
         }
         break
-      case 'export':
-        if (onExport) {
-          onExport()
-        } else {
-          handleExport()
-        }
-        handleClose()
-        break
       case 'manage':
         if (selectedRows.length === 1 && onManage) {
           onManage()
@@ -96,27 +83,6 @@ function ManageRow({
         onShow?.()
         handleClose()
         break
-    }
-  }
-
-  const handleExport = () => {
-    const selectedData = rows.filter(row =>
-      selectedRows.includes((row.id ?? row._id) as string)
-    )
-    const csvContent = selectedData
-      .map(row => Object.values(row).join(','))
-      .join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', 'exported_data.csv')
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
     }
   }
 
@@ -378,38 +344,6 @@ function ManageRow({
                   }}
                 >
                   Delete
-                </span>
-              </div>
-            )}
-
-            {onExport && (
-              <div
-                onClick={e => {
-                  e.stopPropagation()
-                  handleActionSelection('export')
-                }}
-                style={actionButtonStyle}
-              >
-                <div style={iconContainerStyle}>
-                  <Download
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                    width="16"
-                    height="16"
-                    style={{ width: '16px', height: '16px' }}
-                  />
-                </div>
-                <span
-                  style={{
-                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    margin: '0',
-                    padding: '0',
-                    lineHeight: '1',
-                    display: 'block',
-                  }}
-                >
-                  Export
                 </span>
               </div>
             )}

@@ -16,7 +16,10 @@ export interface MetricCardProps {
   }
   styles?: {
     theme?: string
-    [key: string]: any
+    width?: string
+    height?: string
+    padding?: string
+    borderRadius?: string
   }
 }
 

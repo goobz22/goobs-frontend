@@ -15,9 +15,127 @@ import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
 import useIsMobile from './utils/useIsMobile'
 import { areRowsEqual } from './utils/rowComparison'
-import type { DatagridProps, RowData } from './types'
+import type { DatagridProps, RowData, ColumnDef } from './types'
 import { getDataGridStyles } from '../../theme'
 import { ColumnVisibilityProvider } from './context/ColumnVisibilityContext'
+
+// Store ref to container for PDF export - will be set by DataGridContent
+let exportContainerRef: HTMLDivElement | null = null
+
+// Default PDF export handler using html2canvas and jsPDF
+// Captures the actual DataGrid element to preserve exact styling
+// Note: columns and rows params are part of the signature for API consistency
+// but we capture the rendered element directly for exact visual fidelity
+const defaultExportToPdf = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  columns: ColumnDef[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  rows: RowData[]
+): Promise<void> => {
+  // Get the container element
+  const container = exportContainerRef
+  if (!container) {
+    console.error('DataGrid container not found for PDF export')
+    return
+  }
+
+  // Dynamically import html2canvas and jsPDF to avoid bundling if not used
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ])
+
+  // Store original styles to restore after capture
+  const originalStyles: Map<
+    HTMLElement,
+    { overflow: string; width: string; maxWidth: string; position: string }
+  > = new Map()
+
+  try {
+    // Find all scrollable elements and expand them to show full content
+    const scrollableElements = container.querySelectorAll<HTMLElement>('*')
+    scrollableElements.forEach(el => {
+      const style = window.getComputedStyle(el)
+      if (
+        style.overflow === 'auto' ||
+        style.overflow === 'scroll' ||
+        style.overflowX === 'auto' ||
+        style.overflowX === 'scroll' ||
+        style.overflowY === 'auto' ||
+        style.overflowY === 'scroll'
+      ) {
+        originalStyles.set(el, {
+          overflow: el.style.overflow,
+          width: el.style.width,
+          maxWidth: el.style.maxWidth,
+          position: el.style.position,
+        })
+        el.style.overflow = 'visible'
+        el.style.width = 'auto'
+        el.style.maxWidth = 'none'
+      }
+    })
+
+    // Also expand the container itself
+    originalStyles.set(container, {
+      overflow: container.style.overflow,
+      width: container.style.width,
+      maxWidth: container.style.maxWidth,
+      position: container.style.position,
+    })
+    container.style.overflow = 'visible'
+    container.style.width = 'auto'
+    container.style.maxWidth = 'none'
+
+    // Get the full scroll dimensions
+    const fullWidth = Math.max(container.scrollWidth, container.offsetWidth)
+    const fullHeight = Math.max(container.scrollHeight, container.offsetHeight)
+
+    // Capture the actual DataGrid as canvas, preserving its exact appearance
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      // Use null to capture the actual background
+      backgroundColor: null,
+      // Capture the full dimensions
+      width: fullWidth,
+      height: fullHeight,
+      windowWidth: fullWidth,
+      windowHeight: fullHeight,
+    })
+
+    // Calculate PDF dimensions
+    const imgWidth = canvas.width
+    const imgHeight = canvas.height
+    const orientation = imgWidth > imgHeight ? 'landscape' : 'portrait'
+
+    // Create PDF with dimensions matching the captured image
+    const pdf = new jsPDF({
+      orientation: orientation as 'portrait' | 'landscape',
+      unit: 'px',
+      format: [imgWidth + 40, imgHeight + 40],
+    })
+
+    const imgData = canvas.toDataURL('image/png')
+    pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight)
+
+    // Download the PDF
+    pdf.save('datagrid-export.pdf')
+  } catch (error) {
+    console.error('Error exporting DataGrid to PDF:', error)
+    throw error
+  } finally {
+    // Restore original styles
+    originalStyles.forEach((styles, el) => {
+      el.style.overflow = styles.overflow
+      el.style.width = styles.width
+      el.style.maxWidth = styles.maxWidth
+      el.style.position = styles.position
+    })
+  }
+}
 
 function DataGridContent({
   columns,
@@ -42,10 +160,19 @@ function DataGridContent({
   metricsDefaultExpanded = false,
   filtersCollapsible = true,
   filtersDefaultExpanded = false,
+  onExportPdf,
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile(768)
+
+  // Update the module-level ref for PDF export whenever containerRef changes
+  useEffect(() => {
+    exportContainerRef = containerRef.current
+    return () => {
+      exportContainerRef = null
+    }
+  }, [])
 
   const computedStyles = getDataGridStyles(styles)
 
@@ -434,47 +561,76 @@ function DataGridContent({
   // Column action handlers (defined after filteredRows is available)
   const handleColumnSort = useCallback(
     (field: string, direction: 'asc' | 'desc') => {
-      setRows(prevRows => {
-        const sorted = [...prevRows].sort((a, b) => {
-          const aValue = a[field]
-          const bValue = b[field]
+      console.log('[DataGrid] handleColumnSort called', { field, direction })
+      console.log('[DataGrid] Current rows count:', rows.length)
+      console.log('[DataGrid] Current filteredRows count:', filteredRows.length)
+      console.log(
+        '[DataGrid] First few rows before sort:',
+        rows.slice(0, 3).map(r => ({ id: r.id || r._id, [field]: r[field] }))
+      )
 
-          // Handle different data types
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return direction === 'asc'
-              ? aValue.localeCompare(bValue)
-              : bValue.localeCompare(aValue)
-          }
+      const sortFn = (a: RowData, b: RowData) => {
+        const aValue = a[field]
+        const bValue = b[field]
 
-          if (typeof aValue === 'number' && typeof bValue === 'number') {
-            return direction === 'asc' ? aValue - bValue : bValue - aValue
-          }
-
-          // Fallback to string comparison
-          const aStr =
-            aValue != null
-              ? typeof aValue === 'string' ||
-                typeof aValue === 'number' ||
-                typeof aValue === 'boolean'
-                ? String(aValue)
-                : JSON.stringify(aValue)
-              : ''
-          const bStr =
-            bValue != null
-              ? typeof bValue === 'string' ||
-                typeof bValue === 'number' ||
-                typeof bValue === 'boolean'
-                ? String(bValue)
-                : JSON.stringify(bValue)
-              : ''
+        // Handle different data types
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
           return direction === 'asc'
-            ? aStr.localeCompare(bStr)
-            : bStr.localeCompare(aStr)
-        })
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue)
+        }
+
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return direction === 'asc' ? aValue - bValue : bValue - aValue
+        }
+
+        // Fallback to string comparison
+        const aStr =
+          aValue != null
+            ? typeof aValue === 'string' ||
+              typeof aValue === 'number' ||
+              typeof aValue === 'boolean'
+              ? String(aValue)
+              : JSON.stringify(aValue)
+            : ''
+        const bStr =
+          bValue != null
+            ? typeof bValue === 'string' ||
+              typeof bValue === 'number' ||
+              typeof bValue === 'boolean'
+              ? String(bValue)
+              : JSON.stringify(bValue)
+            : ''
+        return direction === 'asc'
+          ? aStr.localeCompare(bStr)
+          : bStr.localeCompare(aStr)
+      }
+
+      // Sort both rows and filteredRows
+      console.log('[DataGrid] About to call setRows and setFilteredRows')
+      setRows(prevRows => {
+        const sorted = [...prevRows].sort(sortFn)
+        console.log(
+          '[DataGrid] setRows - sorted rows:',
+          sorted
+            .slice(0, 3)
+            .map(r => ({ id: r.id || r._id, [field]: r[field] }))
+        )
         return sorted
       })
+      setFilteredRows(prevRows => {
+        const sorted = [...prevRows].sort(sortFn)
+        console.log(
+          '[DataGrid] setFilteredRows - sorted rows:',
+          sorted
+            .slice(0, 3)
+            .map(r => ({ id: r.id || r._id, [field]: r[field] }))
+        )
+        return sorted
+      })
+      console.log('[DataGrid] Sort complete')
     },
-    []
+    [rows.length, filteredRows.length]
   )
 
   const handleColumnHide = useCallback((field: string) => {
@@ -690,6 +846,8 @@ function DataGridContent({
             onPageChange={setPage}
             onPageSizeChange={handlePageSizeChange}
             columns={visibleColumns}
+            rows={filteredRows}
+            onExportPdf={onExportPdf || defaultExportToPdf}
             {...(styles !== undefined ? { styles } : {})}
           />
         </div>
@@ -699,7 +857,7 @@ function DataGridContent({
       {showManageColumns && (
         <ManageColumnsSimple
           open={showManageColumns}
-          columns={visibleColumns}
+          columns={columnsWithWidths}
           hiddenColumns={hiddenColumns}
           onColumnShow={handleColumnShow}
           onColumnHide={handleColumnHide}

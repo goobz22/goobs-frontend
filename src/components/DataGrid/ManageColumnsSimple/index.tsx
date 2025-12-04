@@ -28,12 +28,28 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
 
   if (!open) return null
 
+  // Calculate the number of currently visible columns
+  const visibleColumnCount = columns.filter(
+    col => !hiddenColumns.has(col.field)
+  ).length
+
   const handleToggleColumn = (field: string, visible: boolean) => {
     if (visible) {
       onColumnShow(field)
     } else {
+      // Prevent hiding the last visible column
+      if (visibleColumnCount <= 1) {
+        return
+      }
       onColumnHide(field)
     }
+  }
+
+  // Check if a column can be hidden (not the last visible one)
+  const canHideColumn = (field: string) => {
+    const isVisible = !hiddenColumns.has(field)
+    // Can hide if: column is hidden (checking won't hide it) OR there's more than 1 visible column
+    return !isVisible || visibleColumnCount > 1
   }
 
   const overlayStyle: React.CSSProperties = {
@@ -102,20 +118,39 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={e => e.stopPropagation()}>
-        <h3 style={titleStyle}>
-          {isSacredTheme ? 'Sacred Column Management' : 'Manage Columns'}
-        </h3>
+        <h3 style={titleStyle}>{'Manage Columns'}</h3>
 
         <div>
           {columns.map(column => {
             const isVisible = !hiddenColumns.has(column.field)
+            const canHide = canHideColumn(column.field)
+            const isLastVisible = isVisible && visibleColumnCount === 1
             return (
               <div key={column.field} style={columnItemStyle}>
-                <span style={columnNameStyle}>
+                <span
+                  style={{
+                    ...columnNameStyle,
+                    ...(isLastVisible && { opacity: 0.6 }),
+                  }}
+                >
                   {column.headerName || column.field}
+                  {isLastVisible && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        marginLeft: '8px',
+                        color: isSacredTheme
+                          ? 'rgba(255, 215, 0, 0.5)'
+                          : '#9CA3AF',
+                      }}
+                    >
+                      (required)
+                    </span>
+                  )}
                 </span>
                 <Checkbox
                   checked={isVisible}
+                  disabled={!canHide}
                   onChange={checked =>
                     handleToggleColumn(column.field, checked)
                   }

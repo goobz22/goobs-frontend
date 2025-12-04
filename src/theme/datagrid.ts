@@ -78,18 +78,23 @@ export interface DataGridTheme {
       borderBottom: string
       backgroundColor?: string
     }
+    tableRowAlternate: {
+      backgroundColor: string
+    }
     tableRowHover: {
       backgroundColor: string
     }
     tableCell: {
       padding: string
       borderRight?: string
+      borderBottom?: string
       verticalAlign: string
       color: string
     }
     tableHeaderCell: {
       padding: string
       borderRight?: string
+      borderBottom?: string
       verticalAlign: string
       fontWeight: string
       textAlign: string
@@ -250,18 +255,23 @@ export const dataGridThemes: Record<
         borderBottom: '1px solid #F3F4F6',
         backgroundColor: '#FFFFFF',
       },
+      tableRowAlternate: {
+        backgroundColor: '#F8FAFC',
+      },
       tableRowHover: {
         backgroundColor: '#F9FAFB',
       },
       tableCell: {
         padding: '0.75rem',
         borderRight: '1px solid #F3F4F6',
+        borderBottom: '1px solid #E2E8F0',
         verticalAlign: 'middle',
         color: '#374151',
       },
       tableHeaderCell: {
         padding: '0.75rem',
         borderRight: '1px solid #E2E8F0',
+        borderBottom: '2px solid #E2E8F0',
         verticalAlign: 'middle',
         fontWeight: '600',
         textAlign: 'left',
@@ -377,18 +387,23 @@ export const dataGridThemes: Record<
         borderBottom: '1px solid #334155',
         backgroundColor: '#1E293B',
       },
+      tableRowAlternate: {
+        backgroundColor: '#253145',
+      },
       tableRowHover: {
         backgroundColor: '#273746',
       },
       tableCell: {
         padding: '0.75rem',
         borderRight: '1px solid #334155',
+        borderBottom: '1px solid #334155',
         verticalAlign: 'middle',
         color: '#E2E8F0',
       },
       tableHeaderCell: {
         padding: '0.75rem',
         borderRight: '1px solid #334155',
+        borderBottom: '2px solid #334155',
         verticalAlign: 'middle',
         fontWeight: '600',
         textAlign: 'left',
@@ -501,8 +516,11 @@ export const dataGridThemes: Record<
         fontWeight: '600',
       },
       tableRow: {
-        borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+        borderBottom: '1px solid rgba(255, 215, 0, 0.5)',
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      },
+      tableRowAlternate: {
+        backgroundColor: 'rgba(255, 215, 0, 0.05)',
       },
       tableRowHover: {
         backgroundColor: 'rgba(255, 215, 0, 0.2)',
@@ -510,12 +528,14 @@ export const dataGridThemes: Record<
       tableCell: {
         padding: '0.75rem',
         borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+        borderBottom: '1px solid rgba(255, 215, 0, 0.5)',
         verticalAlign: 'middle',
         color: '#FBBF24',
       },
       tableHeaderCell: {
         padding: '0.75rem',
         borderRight: '1px solid rgba(255, 215, 0, 0.5)',
+        borderBottom: '2px solid rgba(255, 215, 0, 0.5)',
         verticalAlign: 'middle',
         fontWeight: '600',
         textAlign: 'left',
@@ -771,18 +791,23 @@ export const getDataGridStyles = (styles?: DataGridStyles) => {
       borderBottom: themeConfig.table.tableRow.borderBottom,
       backgroundColor: themeConfig.table.tableRow.backgroundColor,
     } as React.CSSProperties,
+    tableRowAlternate: {
+      backgroundColor: themeConfig.table.tableRowAlternate.backgroundColor,
+    } as React.CSSProperties,
     tableRowHover: {
       backgroundColor: themeConfig.table.tableRowHover.backgroundColor,
     } as React.CSSProperties,
     tableCell: {
       padding: themeConfig.table.tableCell.padding,
       borderRight: themeConfig.table.tableCell.borderRight,
+      borderBottom: themeConfig.table.tableCell.borderBottom,
       verticalAlign: themeConfig.table.tableCell.verticalAlign as any,
       color: themeConfig.table.tableCell.color,
     } as React.CSSProperties,
     tableHeaderCell: {
       padding: themeConfig.table.tableHeaderCell.padding,
       borderRight: themeConfig.table.tableHeaderCell.borderRight,
+      borderBottom: themeConfig.table.tableHeaderCell.borderBottom,
       verticalAlign: themeConfig.table.tableHeaderCell.verticalAlign as any,
       fontWeight: themeConfig.table.tableHeaderCell.fontWeight,
       textAlign: themeConfig.table.tableHeaderCell.textAlign as any,
