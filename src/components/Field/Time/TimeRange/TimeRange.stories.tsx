@@ -20,14 +20,6 @@ const meta: Meta<typeof TimeRangeComponent> = {
       control: { type: 'text' },
       description: 'Label for the end time field',
     },
-    showTimezone: {
-      control: { type: 'boolean' },
-      description: 'Whether to display timezone selector',
-    },
-    timezone: {
-      control: { type: 'text' },
-      description: 'Current timezone string',
-    },
     styles: {
       control: 'object',
       description: 'Custom styles using the theme system',
@@ -45,8 +37,6 @@ const commonArgs = {
     start: new Date(),
     end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
   },
-  showTimezone: true,
-  timezone: 'UTC',
 }
 
 export const LightTheme: Story = {
@@ -160,41 +150,6 @@ export const SacredTheme: Story = {
   },
 }
 
-export const WithoutTimezone: Story = {
-  name: 'Without Timezone',
-  render: args => (
-    <div
-      style={{
-        backgroundColor: '#f8fafc',
-        minHeight: '100vh',
-        padding: '2rem',
-        margin: 0,
-        boxSizing: 'border-box',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ maxWidth: '600px', width: '100%' }}>
-        <div
-          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
-        >
-          <strong>Without Timezone:</strong> Simplified time range picker
-          without timezone selector for local time scenarios.
-        </div>
-        <TimeRangeComponent {...args} />
-      </div>
-    </div>
-  ),
-  args: {
-    ...commonArgs,
-    showTimezone: false,
-    styles: {
-      theme: 'light',
-    },
-  },
-}
-
 export const CustomLabels: Story = {
   name: 'Custom Labels',
   render: args => (
@@ -232,7 +187,6 @@ export const CustomLabels: Story = {
 }
 
 const InteractiveDemoComponent = () => {
-  const [showTimezone, setShowTimezone] = React.useState(true)
   const [value, setValue] = React.useState<TimeRange>({
     start: new Date(),
     end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
@@ -282,8 +236,8 @@ const InteractiveDemoComponent = () => {
             color: getTextColor(),
           }}
         >
-          <strong>Interactive Demo:</strong> Try different themes and settings
-          to see how the time range picker adapts.
+          <strong>Interactive Demo:</strong> Try different themes to see how the
+          time range picker adapts.
         </div>
         <div
           style={{
@@ -316,15 +270,6 @@ const InteractiveDemoComponent = () => {
             }}
           >
             <label style={{ color: getTextColor() }}>
-              <input
-                type="checkbox"
-                checked={showTimezone}
-                onChange={e => setShowTimezone(e.target.checked)}
-                style={{ marginRight: '0.5rem' }}
-              />
-              Show Timezone
-            </label>
-            <label style={{ color: getTextColor() }}>
               <select
                 value={theme}
                 onChange={e =>
@@ -355,7 +300,6 @@ const InteractiveDemoComponent = () => {
         <TimeRangeComponent
           value={value}
           onChange={setValue}
-          showTimezone={showTimezone}
           styles={{ theme }}
         />
       </div>
