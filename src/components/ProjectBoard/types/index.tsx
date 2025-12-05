@@ -28,10 +28,24 @@ export type CaseUpdate = {
   updatedAt: Date
   updateType:
     | 'status_change'
+    | 'substatus_change'
     | 'assignment'
     | 'comment'
+    | 'internal_comment'
     | 'field_update'
     | 'created'
+    | 'customer_notes_update'
+    | 'meeting_scheduled'
+    | 'meeting_cancelled'
+    | 'meeting_rescheduled'
+    | 'meeting_confirmed'
+    | 'knowledgebase_attached'
+    | 'knowledgebase_removed'
+    | 'resolution_update'
+    | 'topic_change'
+    | 'region_change'
+    | 'severity_change'
+    | 'queue_change'
   description: string
   fieldChanged?: string
   oldValue?: string
@@ -177,6 +191,16 @@ export type RawRegion = {
 export type RawArticle = {
   _id: string
   articleTitle: string
+  /** Optional fields for enhanced search and display */
+  purpose?: string
+  symptoms?: string
+  cause?: string
+  impact?: string
+  resolution?: string
+  workaround?: string
+  categoryName?: string
+  /** Linked tasks/cases that reference this article */
+  linkedTasks?: { _id: string; title: string }[]
 }
 
 /** Raw typed data for "customers." */
@@ -270,10 +294,66 @@ export interface ProjectBoardProps {
   permissions: {
     access: 'no-access' | 'read' | 'write'
   }
+  /** Meeting scheduling props */
+  meetings: TaskMeeting[]
+  onScheduleMeeting: (meetingData: NewMeetingData) => Promise<void> | void
+  onCancelMeeting: (meetingId: string, reason: string) => Promise<void> | void
+  onConfirmMeeting: (meetingId: string) => Promise<void> | void
+  onRescheduleMeeting: (
+    meetingId: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => Promise<void> | void
+  currentDate: Date
+  /** Callback for updating customer internal notes (travels with the customer, not task-specific) */
+  onUpdateCustomerNotes: (
+    customerId: string,
+    notes: string
+  ) => Promise<void> | void
+  /** Callback for logging case history updates (audit trail) */
+  onCaseUpdate?: (caseUpdate: {
+    updateType: CaseUpdate['updateType']
+    description: string
+    fieldChanged?: string
+    oldValue?: string
+    newValue?: string
+  }) => Promise<void> | void
 }
 
 /** View state for inline interface - tracks which view is currently displayed */
 export type ViewState = 'board' | 'addTask' | 'showTask'
+
+/**
+ * Meeting type for scheduling meetings related to tasks
+ */
+export interface TaskMeeting {
+  _id: string
+  eventTypeName: string
+  attendeeName: string
+  attendeeEmail: string
+  startTime: string
+  endTime: string
+  status: 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'pending'
+  location: string
+  notes?: string
+  meetingType: 'video' | 'phone' | 'in-person'
+  taskId: string
+}
+
+/**
+ * Data for creating a new meeting
+ */
+export interface NewMeetingData {
+  eventTypeName: string
+  attendeeName: string
+  attendeeEmail: string
+  startTime: string
+  endTime: string
+  status: 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'pending'
+  location: string
+  notes?: string
+  meetingType: 'video' | 'phone' | 'in-person'
+}
 
 /** Animation origin for expand-from-origin transitions */
 export type AnimationOrigin = {

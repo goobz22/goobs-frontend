@@ -324,16 +324,33 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           )
         }
 
-        case 'time':
+        case 'time': {
+          // Convert string value to Date for TimeField
+          const timeValue = (() => {
+            if (!value) return null
+            const timeStr = String(value)
+            const [hours, minutes] = timeStr.split(':').map(Number)
+            if (isNaN(hours!) || isNaN(minutes!)) return null
+            const date = new Date()
+            date.setHours(hours!, minutes!, 0, 0)
+            return date
+          })()
           return fieldContainer(
             <TimeField
-              value={String(value || '')}
-              onChange={(newValue: string) =>
-                handleFieldChange(fieldConfig.field, newValue)
-              }
+              value={timeValue}
+              onChange={(newTime: Date | null) => {
+                if (!newTime) {
+                  handleFieldChange(fieldConfig.field, '')
+                  return
+                }
+                const hours = String(newTime.getHours()).padStart(2, '0')
+                const minutes = String(newTime.getMinutes()).padStart(2, '0')
+                handleFieldChange(fieldConfig.field, `${hours}:${minutes}`)
+              }}
               styles={fieldStyles}
             />
           )
+        }
 
         case 'searchableDropdown':
         case 'dropdown': {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, ChangeEvent } from 'react'
 import type { ProjectBoardStyles } from '../../../../theme'
 import type {
   Comment,
@@ -15,9 +15,14 @@ import type {
   RawEmployee,
   RawProduct,
   RawService,
+  TaskMeeting,
+  NewMeetingData,
 } from '../../types'
 import Dropdown, { type DropdownOption } from '../../../Field/Dropdown/Regular'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
+import SearchBar from '../../../Field/Search'
+import DateField from '../../../Field/Date/DateField'
+import TimeField from '../../../Field/Time/TimeField'
 
 interface InlineShowTaskProps {
   taskId: string
@@ -27,6 +32,8 @@ interface InlineShowTaskProps {
   comments: Comment[]
   caseUpdates: CaseUpdate[]
   customerAssigned: string
+  customerId: string
+  customerInternalNotes?: string
   severity: string
   schedulingQueue: string
   region: string
@@ -46,6 +53,10 @@ interface InlineShowTaskProps {
   onComment: (text: string, taskId: string) => void
   onEditComment: (commentId: string, newText: string) => void
   onRevisionHistory: (commentId: string, revisionHistory: any[]) => void
+  onUpdateCustomerNotes: (
+    customerId: string,
+    notes: string
+  ) => Promise<void> | void
   onBack: () => void
   severityOptions: RawSeverityLevel[]
   schedulingQueueOptions: RawQueue[]
@@ -58,48 +69,34 @@ interface InlineShowTaskProps {
   rawProducts: RawProduct[]
   rawServices: RawService[]
   styles: ProjectBoardStyles
-  // Meeting scheduling props (optional for backwards compatibility)
-  meetings?: TaskMeeting[]
-  onScheduleMeeting?: (meetingData: NewMeetingData) => Promise<void> | void
-  onCancelMeeting?: (meetingId: string, reason: string) => Promise<void> | void
-  onConfirmMeeting?: (meetingId: string) => Promise<void> | void
-  onRescheduleMeeting?: (
+  // Meeting scheduling props
+  meetings: TaskMeeting[]
+  onScheduleMeeting: (meetingData: NewMeetingData) => Promise<void> | void
+  onCancelMeeting: (meetingId: string, reason: string) => Promise<void> | void
+  onConfirmMeeting: (meetingId: string) => Promise<void> | void
+  onRescheduleMeeting: (
     meetingId: string,
     newStartTime: string,
     newEndTime: string
   ) => Promise<void> | void
-  currentDate?: Date
+  currentDate: Date
+  // Case history audit logging callback
+  onCaseUpdate?: (caseUpdate: {
+    updateType: CaseUpdate['updateType']
+    description: string
+    fieldChanged?: string
+    oldValue?: string
+    newValue?: string
+  }) => Promise<void> | void
 }
 
 type TabType =
   | 'details'
   | 'comments'
-  | 'caseNotes'
   | 'caseUpdates'
   | 'resolution'
   | 'scheduling'
-
-/**
- * Meeting type for scheduling meetings related to tasks
- */
-export interface TaskMeeting {
-  _id: string
-  eventTypeName: string
-  attendeeName: string
-  attendeeEmail: string
-  startTime: string
-  endTime: string
-  status: 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'pending'
-  location: string
-  notes?: string
-  meetingType: 'video' | 'phone' | 'in-person'
-  taskId: string
-}
-
-/**
- * New meeting form data (without _id and taskId which are auto-set)
- */
-export type NewMeetingData = Omit<TaskMeeting, '_id' | 'taskId'>
+  | 'knowledgeBase'
 
 export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   taskId,
@@ -109,6 +106,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   comments,
   caseUpdates,
   customerAssigned,
+  customerId,
+  customerInternalNotes,
   severity,
   schedulingQueue,
   region,
@@ -128,6 +127,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onComment,
   onEditComment,
   onRevisionHistory,
+  onUpdateCustomerNotes,
   onBack,
   severityOptions,
   schedulingQueueOptions,
@@ -141,19 +141,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   rawServices,
   styles,
   // Meeting scheduling props
-  meetings = [],
+  meetings,
   onScheduleMeeting,
   onCancelMeeting,
   onConfirmMeeting,
   onRescheduleMeeting,
-  currentDate = new Date(),
+  currentDate,
+  // Case history audit logging
+  onCaseUpdate,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details')
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
   const [editedDescription, setEditedDescription] = useState(description)
   const [newCommentText, setNewCommentText] = useState('')
-  const [newCaseNoteText, setNewCaseNoteText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
 
@@ -167,8 +168,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [meetingTitle, setMeetingTitle] = useState('')
   const [meetingAttendeeName, setMeetingAttendeeName] = useState('')
   const [meetingAttendeeEmail, setMeetingAttendeeEmail] = useState('')
-  const [meetingDate, setMeetingDate] = useState('')
-  const [meetingTime, setMeetingTime] = useState('')
+  const [meetingDate, setMeetingDate] = useState<Date | null>(null)
+  const [meetingTime, setMeetingTime] = useState<Date | null>(null)
   const [meetingDuration, setMeetingDuration] = useState('30')
   const [meetingType, setMeetingType] = useState<
     'video' | 'phone' | 'in-person'
@@ -179,8 +180,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [isSubmittingMeeting, setIsSubmittingMeeting] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
   // Reschedule state
-  const [rescheduleDate, setRescheduleDate] = useState('')
-  const [rescheduleTime, setRescheduleTime] = useState('')
+  const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null)
+  const [rescheduleTime, setRescheduleTime] = useState<Date | null>(null)
   const [rescheduleDuration, setRescheduleDuration] = useState('30')
 
   // Edit mode state for editable fields
@@ -212,6 +213,65 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       .filter(a => knowledgebaseArticles.includes(a.articleTitle))
       .map(a => a._id)
   )
+
+  // Knowledge Base tab state
+  const [kbSearchTerm, setKbSearchTerm] = useState('')
+  const [selectedArticleForView, setSelectedArticleForView] =
+    useState<RawArticle | null>(null)
+
+  // Comments tab section state
+  const [commentSection, setCommentSection] = useState<'external' | 'internal'>(
+    'external'
+  )
+
+  // Customer notes editing state (separate from task comments)
+  const [isEditingCustomerNotes, setIsEditingCustomerNotes] = useState(false)
+  const [editedCustomerNotes, setEditedCustomerNotes] = useState(
+    customerInternalNotes || ''
+  )
+
+  // Resolution tab state
+  const [isEditingResolution, setIsEditingResolution] = useState(false)
+  const [resolutionReason, setResolutionReason] = useState('')
+  const [resolutionPrevention, setResolutionPrevention] = useState('')
+  const [resolutionRecurring, setResolutionRecurring] = useState('')
+  const [resolutionWriteup, setResolutionWriteup] = useState('')
+
+  // Sidebar collapsed state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  // Helper function to log case updates for audit trail
+  const logCaseUpdate = (
+    updateType: CaseUpdate['updateType'],
+    description: string,
+    fieldChanged?: string,
+    oldValue?: string,
+    newValue?: string
+  ) => {
+    if (onCaseUpdate) {
+      // Build the case update object, only including defined optional properties
+      const caseUpdateData: {
+        updateType: CaseUpdate['updateType']
+        description: string
+        fieldChanged?: string
+        oldValue?: string
+        newValue?: string
+      } = {
+        updateType,
+        description,
+      }
+      if (fieldChanged !== undefined) {
+        caseUpdateData.fieldChanged = fieldChanged
+      }
+      if (oldValue !== undefined) {
+        caseUpdateData.oldValue = oldValue
+      }
+      if (newValue !== undefined) {
+        caseUpdateData.newValue = newValue
+      }
+      void onCaseUpdate(caseUpdateData)
+    }
+  }
 
   // Keep edited values in sync with current props
   useEffect(() => {
@@ -402,12 +462,39 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   }
 
   const sidebarStyle: React.CSSProperties = {
-    width: '280px',
+    width: isSidebarCollapsed ? '48px' : '280px',
     backgroundColor: sidebarBg,
     borderRight: `1px solid ${borderColor}`,
-    padding: '1.5rem',
+    padding: isSidebarCollapsed ? '0.5rem' : '1.5rem',
     overflowY: 'auto',
+    overflowX: 'hidden',
     flexShrink: 0,
+    transition: 'width 0.3s ease, padding 0.3s ease',
+    position: 'relative',
+  }
+
+  const collapseButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '0.75rem',
+    right: isSidebarCollapsed ? '50%' : '0.75rem',
+    transform: isSidebarCollapsed ? 'translateX(50%)' : 'none',
+    width: '28px',
+    height: '28px',
+    borderRadius: '6px',
+    border: `1px solid ${borderColor}`,
+    backgroundColor: isSacred
+      ? 'rgba(255, 215, 0, 0.1)'
+      : isDark
+        ? '#374151'
+        : '#F3F4F6',
+    color: textColor,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.875rem',
+    transition: 'all 0.2s ease',
+    zIndex: 10,
   }
 
   const mainContentStyle: React.CSSProperties = {
@@ -520,6 +607,122 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const handleSaveEdit = () => {
     if (onEdit) {
+      // Log case updates for each changed field
+      const currentSeverityId =
+        severityOptions.find(s => s.description === severity)?._id || ''
+      const currentStatusId =
+        statusOptions.find(s => s.status === status)?._id || ''
+      const currentSubStatusId =
+        subStatusOptions.find(s => s.subStatus === subStatus)?._id || ''
+      const currentQueueId =
+        schedulingQueueOptions.find(q => q.queueName === schedulingQueue)
+          ?._id || ''
+      const currentRegionId =
+        regionOptions.find(r => r.regionName === region)?._id || ''
+      const currentTopicIds = topicOptions
+        .filter(t => topics.includes(t.topic))
+        .map(t => t._id)
+
+      // Log severity change
+      if (editedSeverityId !== currentSeverityId) {
+        const newSeverity =
+          severityOptions.find(s => s._id === editedSeverityId)?.description ||
+          'Unknown'
+        logCaseUpdate(
+          'severity_change',
+          `Changed severity from "${severity}" to "${newSeverity}"`,
+          'severity',
+          severity,
+          newSeverity
+        )
+      }
+
+      // Log status change
+      if (editedStatusId !== currentStatusId) {
+        const newStatus =
+          statusOptions.find(s => s._id === editedStatusId)?.status || 'Unknown'
+        logCaseUpdate(
+          'status_change',
+          `Changed status from "${status}" to "${newStatus}"`,
+          'status',
+          status,
+          newStatus
+        )
+      }
+
+      // Log substatus change
+      if (editedSubStatusId !== currentSubStatusId) {
+        const newSubStatus =
+          subStatusOptions.find(s => s._id === editedSubStatusId)?.subStatus ||
+          'Unknown'
+        logCaseUpdate(
+          'substatus_change',
+          `Changed sub-status from "${subStatus}" to "${newSubStatus}"`,
+          'subStatus',
+          subStatus,
+          newSubStatus
+        )
+      }
+
+      // Log queue change
+      if (editedQueueId !== currentQueueId) {
+        const newQueue =
+          schedulingQueueOptions.find(q => q._id === editedQueueId)
+            ?.queueName || 'Unknown'
+        logCaseUpdate(
+          'queue_change',
+          `Changed scheduling queue from "${schedulingQueue}" to "${newQueue}"`,
+          'schedulingQueue',
+          schedulingQueue,
+          newQueue
+        )
+      }
+
+      // Log region change
+      if (editedRegionId !== currentRegionId) {
+        const newRegion =
+          regionOptions.find(r => r._id === editedRegionId)?.regionName ||
+          'Unknown'
+        logCaseUpdate(
+          'region_change',
+          `Changed region from "${region}" to "${newRegion}"`,
+          'region',
+          region,
+          newRegion
+        )
+      }
+
+      // Log team member assignment change
+      if (editedTeamMember !== teamMemberAssigned) {
+        logCaseUpdate(
+          'assignment',
+          `Changed assignment from "${teamMemberAssigned || 'Unassigned'}" to "${editedTeamMember || 'Unassigned'}"`,
+          'teamMember',
+          teamMemberAssigned || 'Unassigned',
+          editedTeamMember || 'Unassigned'
+        )
+      }
+
+      // Log topic changes
+      const topicsChanged =
+        editedTopicIds.length !== currentTopicIds.length ||
+        !editedTopicIds.every(id => currentTopicIds.includes(id))
+      if (topicsChanged) {
+        const oldTopics = topics.join(', ') || 'None'
+        const newTopics =
+          topicOptions
+            .filter(t => editedTopicIds.includes(t._id))
+            .map(t => t.topic)
+            .join(', ') || 'None'
+        logCaseUpdate(
+          'topic_change',
+          `Changed topics from "${oldTopics}" to "${newTopics}"`,
+          'topics',
+          oldTopics,
+          newTopics
+        )
+      }
+
       onEdit({
         title: editedTitle,
         description: editedDescription,
@@ -570,245 +773,380 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const renderSidebar = () => (
     <div style={sidebarStyle}>
-      <div style={sectionTitleStyle}>Ticket Summary</div>
+      {/* Collapse/Expand Button */}
+      <button
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        style={collapseButtonStyle}
+        title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {isSidebarCollapsed ? '»' : '«'}
+      </button>
 
-      <div style={fieldRowStyle}>
-        <div style={fieldLabelStyle}>Ticket #</div>
-        <div style={fieldValueStyle}>{taskId.substring(0, 8)}</div>
-      </div>
-
-      {/* Product or Service - Dynamically determined */}
-      <div style={fieldRowStyle}>
-        <div style={fieldLabelStyle}>{productServiceInfo.label}</div>
-        <div style={fieldValueStyle}>{productServiceInfo.name}</div>
-      </div>
-
-      {/* Queue - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <Dropdown
-            label="Queue"
-            options={queueDropdownOptions}
-            value={editedQueueId}
-            onChange={e => setEditedQueueId(e.target.value)}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        <div style={fieldRowStyle}>
-          <div style={fieldLabelStyle}>Queue</div>
-          <div style={fieldValueStyle}>{schedulingQueue}</div>
-        </div>
-      )}
-
-      {/* Region - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <Dropdown
-            label="Region"
-            options={regionDropdownOptions}
-            value={editedRegionId}
-            onChange={e => setEditedRegionId(e.target.value)}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        <div style={fieldRowStyle}>
-          <div style={fieldLabelStyle}>Region</div>
-          <div style={fieldValueStyle}>{region || 'Not set'}</div>
-        </div>
-      )}
-
-      {/* Status - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <Dropdown
-            label="Status"
-            options={statusDropdownOptions}
-            value={editedStatusId}
-            onChange={e => {
-              setEditedStatusId(e.target.value)
-              setEditedSubStatusId('') // Reset substatus when status changes
+      {/* Collapsed State - Show icon only */}
+      {isSidebarCollapsed ? (
+        <div
+          style={{
+            marginTop: '48px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1rem',
+          }}
+        >
+          <div
+            title="Ticket Summary"
+            style={{
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isSacred
+                ? 'rgba(255, 215, 0, 0.1)'
+                : isDark
+                  ? '#374151'
+                  : '#E5E7EB',
+              borderRadius: '6px',
+              fontSize: '1rem',
             }}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
+          >
+            📋
+          </div>
         </div>
       ) : (
-        <div style={fieldRowStyle}>
-          <div style={fieldLabelStyle}>Status</div>
-          <div style={fieldValueStyle}>{status}</div>
-        </div>
-      )}
+        <>
+          <div style={{ ...sectionTitleStyle, marginTop: '2rem' }}>
+            Ticket Summary
+          </div>
 
-      {/* Substatus - Editable in edit mode */}
-      {isEditMode
-        ? filteredSubStatusOptions.length > 0 && (
+          <div style={fieldRowStyle}>
+            <div style={fieldLabelStyle}>Ticket #</div>
+            <div style={fieldValueStyle}>{taskId.substring(0, 8)}</div>
+          </div>
+
+          {/* Product or Service - Dynamically determined */}
+          <div style={fieldRowStyle}>
+            <div style={fieldLabelStyle}>{productServiceInfo.label}</div>
+            <div style={fieldValueStyle}>{productServiceInfo.name}</div>
+          </div>
+
+          {/* Queue - Editable in edit mode */}
+          {isEditMode ? (
             <div style={{ marginBottom: '1rem' }}>
               <Dropdown
-                label="Substatus"
-                options={subStatusDropdownOptions}
-                value={editedSubStatusId}
-                onChange={e => setEditedSubStatusId(e.target.value)}
-                styles={{
-                  theme: styles?.theme || 'light',
-                  disabled: !editedStatusId,
-                }}
+                label="Queue"
+                options={queueDropdownOptions}
+                value={editedQueueId}
+                onChange={e => setEditedQueueId(e.target.value)}
+                styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
-          )
-        : subStatus && (
+          ) : (
             <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Substatus</div>
-              <div style={fieldValueStyle}>{subStatus}</div>
+              <div style={fieldLabelStyle}>Queue</div>
+              <div style={fieldValueStyle}>{schedulingQueue}</div>
             </div>
           )}
 
-      {/* Severity - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <Dropdown
-            label="Severity"
-            options={severityDropdownOptions}
-            value={editedSeverityId}
-            onChange={e => setEditedSeverityId(e.target.value)}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        <div style={fieldRowStyle}>
-          <div style={fieldLabelStyle}>Severity</div>
-          <div style={fieldValueStyle}>{severity}</div>
-        </div>
-      )}
-
-      {/* Assigned To - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <Dropdown
-            label="Assigned To"
-            options={teamMemberDropdownOptions}
-            value={
-              teamMemberOptions.find(
-                m => `${m.firstName} ${m.lastName}` === editedTeamMember
-              )?._id || ''
-            }
-            onChange={e => {
-              const member = teamMemberOptions.find(
-                m => m._id === e.target.value
-              )
-              setEditedTeamMember(
-                member ? `${member.firstName} ${member.lastName}` : ''
-              )
-            }}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        teamMemberAssigned && (
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Assigned To</div>
-            <div style={fieldValueStyle}>{teamMemberAssigned}</div>
-          </div>
-        )
-      )}
-
-      {/* Topics - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <MultiSelectChip
-            label="Topics"
-            defaultSelected={editedTopicIds}
-            onChange={(selectedIds: string[]) => setEditedTopicIds(selectedIds)}
-            options={topicOptions.map(t => ({
-              value: t.topic,
-              _id: t._id,
-            }))}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        topics.length > 0 && (
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Topics</div>
-            <div style={fieldValueStyle}>{topics.join(', ')}</div>
-          </div>
-        )
-      )}
-
-      {/* KB Articles - Editable in edit mode */}
-      {isEditMode ? (
-        <div style={{ marginBottom: '1rem' }}>
-          <MultiSelectChip
-            label="KB Articles"
-            defaultSelected={editedArticleIds}
-            onChange={(selectedIds: string[]) =>
-              setEditedArticleIds(selectedIds)
-            }
-            options={knowledgebaseArticleOptions.map(a => ({
-              value: a.articleTitle,
-              _id: a._id,
-            }))}
-            styles={{ theme: styles?.theme || 'light' }}
-          />
-        </div>
-      ) : (
-        knowledgebaseArticles.length > 0 && (
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>KB Articles</div>
-            <div style={fieldValueStyle}>
-              {knowledgebaseArticles.join(', ')}
+          {/* Region - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <Dropdown
+                label="Region"
+                options={regionDropdownOptions}
+                value={editedRegionId}
+                onChange={e => setEditedRegionId(e.target.value)}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
             </div>
+          ) : (
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Region</div>
+              <div style={fieldValueStyle}>{region || 'Not set'}</div>
+            </div>
+          )}
+
+          {/* Status - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <Dropdown
+                label="Status"
+                options={statusDropdownOptions}
+                value={editedStatusId}
+                onChange={e => {
+                  setEditedStatusId(e.target.value)
+                  setEditedSubStatusId('') // Reset substatus when status changes
+                }}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </div>
+          ) : (
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Status</div>
+              <div style={fieldValueStyle}>{status}</div>
+            </div>
+          )}
+
+          {/* Substatus - Editable in edit mode */}
+          {isEditMode
+            ? filteredSubStatusOptions.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <Dropdown
+                    label="Substatus"
+                    options={subStatusDropdownOptions}
+                    value={editedSubStatusId}
+                    onChange={e => setEditedSubStatusId(e.target.value)}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      disabled: !editedStatusId,
+                    }}
+                  />
+                </div>
+              )
+            : subStatus && (
+                <div style={fieldRowStyle}>
+                  <div style={fieldLabelStyle}>Substatus</div>
+                  <div style={fieldValueStyle}>{subStatus}</div>
+                </div>
+              )}
+
+          {/* Severity - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <Dropdown
+                label="Severity"
+                options={severityDropdownOptions}
+                value={editedSeverityId}
+                onChange={e => setEditedSeverityId(e.target.value)}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </div>
+          ) : (
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Severity</div>
+              <div style={fieldValueStyle}>{severity}</div>
+            </div>
+          )}
+
+          {/* Assigned To - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <Dropdown
+                label="Assigned To"
+                options={teamMemberDropdownOptions}
+                value={
+                  teamMemberOptions.find(
+                    m => `${m.firstName} ${m.lastName}` === editedTeamMember
+                  )?._id || ''
+                }
+                onChange={e => {
+                  const member = teamMemberOptions.find(
+                    m => m._id === e.target.value
+                  )
+                  setEditedTeamMember(
+                    member ? `${member.firstName} ${member.lastName}` : ''
+                  )
+                }}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </div>
+          ) : (
+            teamMemberAssigned && (
+              <div style={fieldRowStyle}>
+                <div style={fieldLabelStyle}>Assigned To</div>
+                <div style={fieldValueStyle}>{teamMemberAssigned}</div>
+              </div>
+            )
+          )}
+
+          {/* Topics - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <MultiSelectChip
+                label="Topics"
+                defaultSelected={editedTopicIds}
+                onChange={(selectedIds: string[]) =>
+                  setEditedTopicIds(selectedIds)
+                }
+                options={topicOptions.map(t => ({
+                  value: t.topic,
+                  _id: t._id,
+                }))}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </div>
+          ) : (
+            topics.length > 0 && (
+              <div style={fieldRowStyle}>
+                <div style={fieldLabelStyle}>Topics</div>
+                <div style={fieldValueStyle}>{topics.join(', ')}</div>
+              </div>
+            )
+          )}
+
+          {/* KB Articles - Editable in edit mode */}
+          {isEditMode ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <MultiSelectChip
+                label="KB Articles"
+                defaultSelected={editedArticleIds}
+                onChange={(selectedIds: string[]) =>
+                  setEditedArticleIds(selectedIds)
+                }
+                options={knowledgebaseArticleOptions.map(a => ({
+                  value: a.articleTitle,
+                  _id: a._id,
+                }))}
+                styles={{ theme: styles?.theme || 'light' }}
+              />
+            </div>
+          ) : (
+            knowledgebaseArticles.length > 0 && (
+              <div style={fieldRowStyle}>
+                <div style={fieldLabelStyle}>KB Articles</div>
+                <div style={fieldValueStyle}>
+                  {knowledgebaseArticles.join(', ')}
+                </div>
+              </div>
+            )
+          )}
+
+          {nextActionDate && (
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Next Action</div>
+              <div style={fieldValueStyle}>{nextActionDate}</div>
+            </div>
+          )}
+
+          <div style={actionButtonsStyle}>
+            {isEditMode ? (
+              <>
+                <button
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    backgroundColor: isSacred
+                      ? 'rgba(34, 197, 94, 0.2)'
+                      : isDark
+                        ? '#065f46'
+                        : '#10b981',
+                    color: isSacred ? '#4ade80' : '#FFFFFF',
+                  }}
+                  onClick={handleSaveEdit}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(34, 197, 94, 0.3)'
+                      : isDark
+                        ? '#047857'
+                        : '#059669'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(34, 197, 94, 0.2)'
+                      : isDark
+                        ? '#065f46'
+                        : '#10b981'
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    backgroundColor: 'transparent',
+                    color: textColor,
+                  }}
+                  onClick={handleCancelEdit}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? '#374151'
+                        : '#F3F4F6'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    backgroundColor: isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? '#374151'
+                        : '#F3F4F6',
+                  }}
+                  onClick={handleEditClick}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(255, 215, 0, 0.2)'
+                      : isDark
+                        ? '#4B5563'
+                        : '#E5E7EB'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? '#374151'
+                        : '#F3F4F6'
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  style={{
+                    ...buttonStyle,
+                    backgroundColor: isSacred
+                      ? 'rgba(220, 38, 38, 0.1)'
+                      : isDark
+                        ? '#7F1D1D'
+                        : '#FEF2F2',
+                    color: isSacred
+                      ? '#ff6b6b'
+                      : isDark
+                        ? '#FCA5A5'
+                        : '#DC2626',
+                  }}
+                  onClick={onDelete}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(220, 38, 38, 0.2)'
+                      : isDark
+                        ? '#991B1B'
+                        : '#FEE2E2'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = isSacred
+                      ? 'rgba(220, 38, 38, 0.1)'
+                      : isDark
+                        ? '#7F1D1D'
+                        : '#FEF2F2'
+                  }}
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
-        )
-      )}
 
-      {nextActionDate && (
-        <div style={fieldRowStyle}>
-          <div style={fieldLabelStyle}>Next Action</div>
-          <div style={fieldValueStyle}>{nextActionDate}</div>
-        </div>
-      )}
-
-      <div style={actionButtonsStyle}>
-        {isEditMode ? (
-          <>
+          <div style={{ ...actionButtonsStyle, marginTop: '1rem' }}>
             <button
               style={{
                 ...buttonStyle,
-                flex: 1,
-                backgroundColor: isSacred
-                  ? 'rgba(34, 197, 94, 0.2)'
-                  : isDark
-                    ? '#065f46'
-                    : '#10b981',
-                color: isSacred ? '#4ade80' : '#FFFFFF',
-              }}
-              onClick={handleSaveEdit}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(34, 197, 94, 0.3)'
-                  : isDark
-                    ? '#047857'
-                    : '#059669'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(34, 197, 94, 0.2)'
-                  : isDark
-                    ? '#065f46'
-                    : '#10b981'
-              }}
-            >
-              Save
-            </button>
-            <button
-              style={{
-                ...buttonStyle,
-                flex: 1,
+                width: '100%',
                 backgroundColor: 'transparent',
                 color: textColor,
               }}
-              onClick={handleCancelEdit}
+              onClick={onBack}
               onMouseEnter={e => {
                 e.currentTarget.style.backgroundColor = isSacred
                   ? 'rgba(255, 215, 0, 0.1)'
@@ -820,169 +1158,285 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 e.currentTarget.style.backgroundColor = 'transparent'
               }}
             >
-              Cancel
+              Back to Board
             </button>
-          </>
-        ) : (
-          <>
-            <button
-              style={{
-                ...buttonStyle,
-                flex: 1,
-                backgroundColor: isSacred
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : isDark
-                    ? '#374151'
-                    : '#F3F4F6',
-              }}
-              onClick={handleEditClick}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : isDark
-                    ? '#4B5563'
-                    : '#E5E7EB'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : isDark
-                    ? '#374151'
-                    : '#F3F4F6'
-              }}
-            >
-              Edit
-            </button>
-            <button
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred
-                  ? 'rgba(220, 38, 38, 0.1)'
-                  : isDark
-                    ? '#7F1D1D'
-                    : '#FEF2F2',
-                color: isSacred ? '#ff6b6b' : isDark ? '#FCA5A5' : '#DC2626',
-              }}
-              onClick={onDelete}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(220, 38, 38, 0.2)'
-                  : isDark
-                    ? '#991B1B'
-                    : '#FEE2E2'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(220, 38, 38, 0.1)'
-                  : isDark
-                    ? '#7F1D1D'
-                    : '#FEF2F2'
-              }}
-            >
-              Delete
-            </button>
-          </>
-        )}
-      </div>
-
-      <div style={{ ...actionButtonsStyle, marginTop: '1rem' }}>
-        <button
-          style={{
-            ...buttonStyle,
-            width: '100%',
-            backgroundColor: 'transparent',
-            color: textColor,
-          }}
-          onClick={onBack}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = isSacred
-              ? 'rgba(255, 215, 0, 0.1)'
-              : isDark
-                ? '#374151'
-                : '#F3F4F6'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-          }}
-        >
-          Back to Board
-        </button>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   )
 
-  const renderDetailsTab = () => (
-    <>
-      <div style={twoColumnGridStyle}>
-        {/* Left Column - User Info */}
-        <div style={cardStyle}>
-          <div style={{ ...sectionTitleStyle, marginTop: 0 }}>User</div>
+  const renderDetailsTab = () => {
+    // Handler for saving customer notes (updates customer record, NOT task comments)
+    const handleSaveCustomerNotes = () => {
+      if (onUpdateCustomerNotes && customerId) {
+        onUpdateCustomerNotes(customerId, editedCustomerNotes)
 
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Requestor</div>
-            <div style={fieldValueStyle}>{createdBy}</div>
+        // Log case update for customer notes
+        logCaseUpdate(
+          'customer_notes_update',
+          `Updated customer internal notes`,
+          'customerInternalNotes',
+          customerInternalNotes || '(empty)',
+          editedCustomerNotes.substring(0, 100) +
+            (editedCustomerNotes.length > 100 ? '...' : '')
+        )
+
+        setIsEditingCustomerNotes(false)
+      }
+    }
+
+    return (
+      <>
+        <div style={twoColumnGridStyle}>
+          {/* Left Column - User Info */}
+          <div style={cardStyle}>
+            <div style={{ ...sectionTitleStyle, marginTop: 0 }}>User</div>
+
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Requestor</div>
+              <div style={fieldValueStyle}>{createdBy}</div>
+            </div>
+
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Customer</div>
+              <div style={fieldValueStyle}>{customerAssigned}</div>
+            </div>
           </div>
 
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Customer</div>
-            <div style={fieldValueStyle}>{customerAssigned}</div>
+          {/* Right Column - Details */}
+          <div style={cardStyle}>
+            <div style={{ ...sectionTitleStyle, marginTop: 0 }}>Details</div>
+
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Title</div>
+              <div style={fieldValueStyle}>{taskTitle}</div>
+            </div>
+
+            <div style={fieldRowStyle}>
+              <div style={fieldLabelStyle}>Description</div>
+              <div style={fieldValueStyle}>{description}</div>
+            </div>
+
+            {topics.length > 0 && (
+              <div style={fieldRowStyle}>
+                <div style={fieldLabelStyle}>Topics</div>
+                <div style={fieldValueStyle}>{topics.join(', ')}</div>
+              </div>
+            )}
+
+            {knowledgebaseArticles.length > 0 && (
+              <div style={fieldRowStyle}>
+                <div style={fieldLabelStyle}>KB Articles</div>
+                <div style={fieldValueStyle}>
+                  {knowledgebaseArticles.join(', ')}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column - Details */}
-        <div style={cardStyle}>
-          <div style={{ ...sectionTitleStyle, marginTop: 0 }}>Details</div>
-
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Title</div>
-            <div style={fieldValueStyle}>{taskTitle}</div>
-          </div>
-
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Description</div>
-            <div style={fieldValueStyle}>{description}</div>
-          </div>
-
-          {topics.length > 0 && (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Topics</div>
-              <div style={fieldValueStyle}>{topics.join(', ')}</div>
+        {/* Internal Customer Notes Section - These travel with the customer, NOT task-specific */}
+        <div style={{ ...cardStyle, marginTop: '2rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <div
+              style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+            >
+              Internal Customer Notes
             </div>
-          )}
+            {!isEditingCustomerNotes && (
+              <button
+                onClick={() => {
+                  setEditedCustomerNotes(customerInternalNotes || '')
+                  setIsEditingCustomerNotes(true)
+                }}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 215, 0, 0.1)'
+                    : isDark
+                      ? '#374151'
+                      : '#F3F4F6',
+                  color: isSacred ? '#FFD700' : textColor,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                }}
+              >
+                {customerInternalNotes ? 'Edit Note' : '+ Add Note'}
+              </button>
+            )}
+          </div>
 
-          {knowledgebaseArticles.length > 0 && (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>KB Articles</div>
-              <div style={fieldValueStyle}>
-                {knowledgebaseArticles.join(', ')}
+          <p
+            style={{
+              fontSize: '0.8rem',
+              color: secondaryTextColor,
+              marginBottom: '1rem',
+              padding: '0.75rem',
+              backgroundColor: isSacred
+                ? 'rgba(255, 152, 0, 0.05)'
+                : isDark
+                  ? '#111827'
+                  : '#FEF3C7',
+              borderRadius: '6px',
+              borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
+            }}
+          >
+            These notes are attached to the customer record and will appear on
+            all tasks for this customer. For task-specific internal comments,
+            use the Comments tab.
+          </p>
+
+          {/* Edit Customer Notes Form */}
+          {isEditingCustomerNotes ? (
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: isSacred
+                  ? 'rgba(255, 152, 0, 0.05)'
+                  : isDark
+                    ? '#1F2937'
+                    : '#F9FAFB',
+                borderRadius: '8px',
+                border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
+              }}
+            >
+              <textarea
+                value={editedCustomerNotes}
+                onChange={e => setEditedCustomerNotes(e.target.value)}
+                placeholder="Add internal notes about this customer..."
+                style={{
+                  width: '100%',
+                  minHeight: '100px',
+                  padding: '0.75rem',
+                  borderRadius: '6px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
+                  backgroundColor: bgColor,
+                  color: textColor,
+                  fontSize: '0.875rem',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box',
+                }}
+              />
+              <div
+                style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}
+              >
+                <button
+                  onClick={handleSaveCustomerNotes}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: isSacred
+                      ? 'rgba(255, 152, 0, 0.2)'
+                      : isDark
+                        ? '#78350f'
+                        : '#F59E0B',
+                    color: isSacred ? '#FF9800' : '#FFFFFF',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  Save Note
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingCustomerNotes(false)
+                    setEditedCustomerNotes(customerInternalNotes || '')
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${borderColor}`,
+                    backgroundColor: 'transparent',
+                    color: textColor,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
+          ) : customerInternalNotes ? (
+            /* Display Customer Notes - from customer record */
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: isSacred
+                  ? 'rgba(255, 193, 7, 0.1)'
+                  : isDark
+                    ? '#1F2937'
+                    : '#FEF9C3',
+                borderRadius: '8px',
+                border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
+                borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: isSacred ? '#FFD700' : '#92400E',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                <span>📋</span>
+                <span>Customer Notes</span>
+              </div>
+              <div
+                style={{
+                  fontSize: '0.875rem',
+                  color: textColor,
+                  lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {customerInternalNotes}
+              </div>
+            </div>
+          ) : (
+            /* Empty State */
+            <div
+              style={{
+                padding: '1.5rem',
+                borderRadius: '6px',
+                border: `1px dashed ${borderColor}`,
+                backgroundColor: isSacred
+                  ? 'rgba(0, 0, 0, 0.2)'
+                  : isDark
+                    ? '#111827'
+                    : '#F9FAFB',
+                color: secondaryTextColor,
+                fontSize: '0.875rem',
+                textAlign: 'center',
+              }}
+            >
+              No internal customer notes yet. Click &quot;+ Add Note&quot; to
+              add one.
+            </div>
           )}
         </div>
-      </div>
-
-      {/* Customer Internal Notes Section - Display Only */}
-      <div style={{ ...cardStyle, marginTop: '2rem' }}>
-        <div style={{ ...sectionTitleStyle, marginTop: 0 }}>
-          Customer Internal Notes
-        </div>
-        <div
-          style={{
-            padding: '0.75rem',
-            borderRadius: '6px',
-            border: `1px solid ${borderColor}`,
-            backgroundColor: bgColor,
-            color: secondaryTextColor,
-            fontSize: '0.875rem',
-            lineHeight: '1.5',
-            minHeight: '100px',
-          }}
-        >
-          No customer internal notes available.
-        </div>
-      </div>
-    </>
-  )
+      </>
+    )
+  }
 
   const renderCommentsTab = () => {
     const handleEditCommentClick = (comment: Comment) => {
@@ -1003,29 +1457,148 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       setEditingCommentText('')
     }
 
-    // Filter out internal notes from comments
+    // Filter comments based on section
     const publicComments = comments.filter(
       c => !c.text.startsWith('[INTERNAL]')
     )
+    const internalNotes = comments.filter(c => c.text.startsWith('[INTERNAL]'))
+
+    const currentComments =
+      commentSection === 'external' ? publicComments : internalNotes
+
+    const handleAddComment = () => {
+      if (newCommentText.trim()) {
+        if (commentSection === 'internal') {
+          // Prefix with [INTERNAL] for internal notes
+          onComment(`[INTERNAL] ${newCommentText.trim()}`, taskId)
+          logCaseUpdate(
+            'internal_comment',
+            `Added internal comment`,
+            'internalComment',
+            undefined,
+            newCommentText.trim().substring(0, 100) +
+              (newCommentText.trim().length > 100 ? '...' : '')
+          )
+        } else {
+          onComment(newCommentText.trim(), taskId)
+          logCaseUpdate(
+            'comment',
+            `Added external comment`,
+            'comment',
+            undefined,
+            newCommentText.trim().substring(0, 100) +
+              (newCommentText.trim().length > 100 ? '...' : '')
+          )
+        }
+        setNewCommentText('')
+      }
+    }
+
+    // Section toggle button style
+    const sectionButtonStyle = (isActive: boolean): React.CSSProperties => ({
+      flex: 1,
+      padding: '0.75rem 1rem',
+      backgroundColor: isActive
+        ? isSacred
+          ? 'rgba(255, 215, 0, 0.2)'
+          : isDark
+            ? '#374151'
+            : '#3B82F6'
+        : isSacred
+          ? 'rgba(255, 215, 0, 0.05)'
+          : isDark
+            ? '#1F2937'
+            : '#F3F4F6',
+      border: `1px solid ${
+        isActive
+          ? isSacred
+            ? 'rgba(255, 215, 0, 0.5)'
+            : '#3B82F6'
+          : borderColor
+      }`,
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: isActive ? 600 : 400,
+      fontSize: '0.875rem',
+      color: isActive ? (isSacred ? '#FFD700' : '#FFFFFF') : secondaryTextColor,
+      transition: 'all 0.2s',
+    })
 
     return (
       <div style={cardStyle}>
-        <div style={{ ...sectionTitleStyle, marginTop: 0 }}>
-          Comments ({publicComments.length})
+        {/* Section Toggle */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <button
+            style={sectionButtonStyle(commentSection === 'external')}
+            onClick={() => setCommentSection('external')}
+          >
+            External Comments ({publicComments.length})
+          </button>
+          <button
+            style={sectionButtonStyle(commentSection === 'internal')}
+            onClick={() => setCommentSection('internal')}
+          >
+            Internal Comments ({internalNotes.length})
+          </button>
         </div>
+
+        {/* Section Description */}
+        <p
+          style={{
+            fontSize: '0.8rem',
+            color: secondaryTextColor,
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            backgroundColor: isSacred
+              ? 'rgba(255, 215, 0, 0.05)'
+              : isDark
+                ? '#111827'
+                : '#F9FAFB',
+            borderRadius: '6px',
+            borderLeft: `3px solid ${
+              commentSection === 'external'
+                ? isSacred
+                  ? '#FFD700'
+                  : '#3B82F6'
+                : isSacred
+                  ? '#FF9800'
+                  : '#F59E0B'
+            }`,
+          }}
+        >
+          {commentSection === 'external'
+            ? 'External comments are visible to the customer and can be used for customer communication.'
+            : 'Internal notes are only visible to employees and are used for internal case discussions.'}
+        </p>
 
         {/* Add Comment */}
         <div style={{ marginBottom: '1.5rem' }}>
           <textarea
             value={newCommentText}
             onChange={e => setNewCommentText(e.target.value)}
-            placeholder="Add a comment..."
+            placeholder={
+              commentSection === 'external'
+                ? 'Add a comment for the customer...'
+                : 'Add an internal note (only visible to employees)...'
+            }
             style={{
               width: '100%',
               minHeight: '80px',
               padding: '0.75rem',
               borderRadius: '6px',
-              border: `1px solid ${borderColor}`,
+              border: `1px solid ${
+                commentSection === 'internal'
+                  ? isSacred
+                    ? 'rgba(255, 152, 0, 0.3)'
+                    : '#F59E0B'
+                  : borderColor
+              }`,
               backgroundColor: bgColor,
               color: textColor,
               fontSize: '0.875rem',
@@ -1038,27 +1611,38 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             style={{
               ...buttonStyle,
               marginTop: '0.5rem',
-              backgroundColor: isSacred
-                ? 'rgba(255, 215, 0, 0.2)'
-                : isDark
-                  ? '#374151'
-                  : '#3B82F6',
-              color: isSacred ? '#FFD700' : '#FFFFFF',
+              backgroundColor:
+                commentSection === 'internal'
+                  ? isSacred
+                    ? 'rgba(255, 152, 0, 0.2)'
+                    : isDark
+                      ? '#78350f'
+                      : '#F59E0B'
+                  : isSacred
+                    ? 'rgba(255, 215, 0, 0.2)'
+                    : isDark
+                      ? '#374151'
+                      : '#3B82F6',
+              color:
+                commentSection === 'internal'
+                  ? isSacred
+                    ? '#FF9800'
+                    : '#FFFFFF'
+                  : isSacred
+                    ? '#FFD700'
+                    : '#FFFFFF',
             }}
-            onClick={() => {
-              if (newCommentText.trim()) {
-                onComment(newCommentText, taskId)
-                setNewCommentText('')
-              }
-            }}
+            onClick={handleAddComment}
           >
-            Add Comment
+            {commentSection === 'external'
+              ? 'Send to Customer'
+              : 'Add Internal Note'}
           </button>
         </div>
 
         {/* Comments List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {publicComments.length === 0 ? (
+          {currentComments.length === 0 ? (
             <p
               style={{
                 color: secondaryTextColor,
@@ -1066,348 +1650,205 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 textAlign: 'center',
               }}
             >
-              No comments yet. Be the first to comment!
+              {commentSection === 'external'
+                ? 'No external comments yet. Be the first to communicate with the customer!'
+                : 'No internal notes yet. Add notes for your team!'}
             </p>
           ) : (
-            publicComments.map(comment => (
-              <div
-                key={comment._id}
-                style={{
-                  padding: '1rem',
-                  backgroundColor: bgColor,
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: '6px',
-                }}
-              >
+            currentComments.map(comment => {
+              // For internal notes, strip the [INTERNAL] prefix for display
+              const displayText =
+                commentSection === 'internal'
+                  ? comment.text.replace(/^\[INTERNAL\]\s*/, '')
+                  : comment.text
+
+              return (
                 <div
+                  key={comment._id}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '0.5rem',
+                    padding: '1rem',
+                    backgroundColor: bgColor,
+                    border: `1px solid ${
+                      commentSection === 'internal'
+                        ? isSacred
+                          ? 'rgba(255, 152, 0, 0.2)'
+                          : 'rgba(245, 158, 11, 0.3)'
+                        : borderColor
+                    }`,
+                    borderRadius: '6px',
+                    borderLeft:
+                      commentSection === 'internal'
+                        ? `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`
+                        : undefined,
                   }}
                 >
                   <div
                     style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '0.5rem',
                     }}
                   >
                     <div
                       style={{
-                        fontWeight: 600,
-                        fontSize: '0.875rem',
-                        color: textColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                       }}
                     >
-                      {comment.createdBy}
-                    </div>
-                    <div
-                      style={{ fontSize: '0.75rem', color: secondaryTextColor }}
-                    >
-                      {new Date(comment.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '0.5rem',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {comment.editHistory && comment.editHistory.length > 1 && (
-                      <button
-                        onClick={() =>
-                          onRevisionHistory(comment._id, comment.editHistory)
-                        }
+                      <div
                         style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          backgroundColor: 'transparent',
-                          color: secondaryTextColor,
-                          border: 'none',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                        }}
-                      >
-                        View History
-                      </button>
-                    )}
-                    {comment.createdBy === currentUserName &&
-                      editingCommentId !== comment._id && (
-                        <button
-                          onClick={() => handleEditCommentClick(comment)}
-                          style={{
-                            fontSize: '0.75rem',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            backgroundColor: 'transparent',
-                            color: isSacred
-                              ? '#FFD700'
-                              : isDark
-                                ? '#60A5FA'
-                                : '#3B82F6',
-                            border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : isDark ? '#60A5FA' : '#3B82F6'}`,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Edit
-                        </button>
-                      )}
-                  </div>
-                </div>
-                {editingCommentId === comment._id ? (
-                  <div>
-                    <textarea
-                      value={editingCommentText}
-                      onChange={e => setEditingCommentText(e.target.value)}
-                      style={{
-                        width: '100%',
-                        minHeight: '60px',
-                        padding: '0.5rem',
-                        borderRadius: '4px',
-                        border: `1px solid ${borderColor}`,
-                        backgroundColor: bgColor,
-                        color: textColor,
-                        fontSize: '0.875rem',
-                        resize: 'vertical',
-                        fontFamily: 'inherit',
-                        marginBottom: '0.5rem',
-                      }}
-                    />
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        onClick={() => handleSaveCommentEdit(comment._id)}
-                        style={{
-                          ...buttonStyle,
-                          fontSize: '0.75rem',
-                          padding: '4px 12px',
-                          backgroundColor: isSacred
-                            ? 'rgba(34, 197, 94, 0.2)'
-                            : isDark
-                              ? '#065f46'
-                              : '#10b981',
-                          color: isSacred ? '#4ade80' : '#FFFFFF',
-                        }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={handleCancelCommentEdit}
-                        style={{
-                          ...buttonStyle,
-                          fontSize: '0.75rem',
-                          padding: '4px 12px',
-                          backgroundColor: 'transparent',
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
                           color: textColor,
                         }}
                       >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      lineHeight: '1.5',
-                      color: textColor,
-                      whiteSpace: 'pre-wrap',
-                    }}
-                  >
-                    {comment.text}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const renderCaseNotesTab = () => {
-    // Filter comments that are marked as internal case notes
-    // These are different from customer notes - they're notes about the case/task itself
-    const internalNotes = comments.filter(c => c.text.startsWith('[INTERNAL]'))
-
-    const handleAddCaseNote = () => {
-      if (newCaseNoteText.trim() && onComment) {
-        // Prefix with [INTERNAL] to differentiate from public comments
-        onComment(`[INTERNAL] ${newCaseNoteText.trim()}`, taskId)
-        setNewCaseNoteText('')
-      }
-    }
-
-    return (
-      <div style={cardStyle}>
-        <div style={{ ...sectionTitleStyle, marginTop: 0 }}>
-          Internal Case Notes ({internalNotes.length})
-        </div>
-
-        {/* Add Case Note */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <textarea
-            value={newCaseNoteText}
-            onChange={e => setNewCaseNoteText(e.target.value)}
-            placeholder="Add an internal case note (only visible to team members)..."
-            style={{
-              width: '100%',
-              minHeight: '80px',
-              padding: '0.75rem',
-              borderRadius: '6px',
-              border: `1px solid ${borderColor}`,
-              backgroundColor: bgColor,
-              color: textColor,
-              fontSize: '0.875rem',
-              resize: 'vertical',
-              fontFamily: 'inherit',
-              boxSizing: 'border-box',
-            }}
-          />
-          <button
-            style={{
-              ...buttonStyle,
-              marginTop: '0.5rem',
-              backgroundColor: isSacred
-                ? 'rgba(255, 215, 0, 0.2)'
-                : isDark
-                  ? '#374151'
-                  : '#3B82F6',
-              color: isSacred ? '#FFD700' : '#FFFFFF',
-              opacity: !newCaseNoteText.trim() ? 0.5 : 1,
-              cursor: !newCaseNoteText.trim() ? 'not-allowed' : 'pointer',
-            }}
-            onClick={handleAddCaseNote}
-            disabled={!newCaseNoteText.trim()}
-          >
-            Add Internal Note
-          </button>
-        </div>
-
-        {/* Case Notes List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {internalNotes.length === 0 ? (
-            <p
-              style={{
-                color: secondaryTextColor,
-                fontSize: '0.875rem',
-                textAlign: 'center',
-              }}
-            >
-              No internal case notes yet. These notes are only visible to your
-              team.
-            </p>
-          ) : (
-            internalNotes.map(note => (
-              <div
-                key={note._id}
-                style={{
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 215, 0, 0.05)'
-                    : isDark
-                      ? '#1F2937'
-                      : '#F9FAFB',
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: '6px',
-                  borderLeft: `4px solid ${isSacred ? '#FFD700' : '#8B5CF6'}`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        color: textColor,
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {note.createdBy}
-                    </span>
-                    <span
-                      style={{ fontSize: '0.75rem', color: secondaryTextColor }}
-                    >
-                      {note.createdAt instanceof Date
-                        ? note.createdAt.toLocaleString()
-                        : new Date(note.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        backgroundColor: isSacred
-                          ? 'rgba(139, 92, 246, 0.2)'
-                          : isDark
-                            ? 'rgba(139, 92, 246, 0.3)'
-                            : 'rgba(139, 92, 246, 0.1)',
-                        color: isSacred
-                          ? '#a78bfa'
-                          : isDark
-                            ? '#c4b5fd'
-                            : '#8B5CF6',
-                        fontWeight: 600,
-                      }}
-                    >
-                      INTERNAL
-                    </span>
-                    {note.editHistory && note.editHistory.length > 1 && (
-                      <button
-                        onClick={() =>
-                          onRevisionHistory(note._id, note.editHistory)
-                        }
+                        {comment.createdBy}
+                      </div>
+                      <div
                         style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          backgroundColor: 'transparent',
+                          fontSize: '0.75rem',
                           color: secondaryTextColor,
-                          border: 'none',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
                         }}
                       >
-                        View History
-                      </button>
-                    )}
+                        {new Date(comment.createdAt).toLocaleString()}
+                      </div>
+                      {commentSection === 'internal' && (
+                        <span
+                          style={{
+                            fontSize: '0.65rem',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            backgroundColor: isSacred
+                              ? 'rgba(255, 152, 0, 0.15)'
+                              : 'rgba(245, 158, 11, 0.15)',
+                            color: isSacred ? '#FF9800' : '#F59E0B',
+                            fontWeight: 600,
+                          }}
+                        >
+                          INTERNAL
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '0.5rem',
+                        alignItems: 'center',
+                      }}
+                    >
+                      {comment.editHistory &&
+                        comment.editHistory.length > 1 && (
+                          <button
+                            onClick={() =>
+                              onRevisionHistory(
+                                comment._id,
+                                comment.editHistory
+                              )
+                            }
+                            style={{
+                              fontSize: '0.7rem',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: 'transparent',
+                              color: secondaryTextColor,
+                              border: 'none',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                          >
+                            View History
+                          </button>
+                        )}
+                      {comment.createdBy === currentUserName &&
+                        editingCommentId !== comment._id && (
+                          <button
+                            onClick={() => handleEditCommentClick(comment)}
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              backgroundColor: 'transparent',
+                              color: isSacred
+                                ? '#FFD700'
+                                : isDark
+                                  ? '#60A5FA'
+                                  : '#3B82F6',
+                              border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : isDark ? '#60A5FA' : '#3B82F6'}`,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Edit
+                          </button>
+                        )}
+                    </div>
                   </div>
+                  {editingCommentId === comment._id ? (
+                    <div>
+                      <textarea
+                        value={editingCommentText}
+                        onChange={e => setEditingCommentText(e.target.value)}
+                        style={{
+                          width: '100%',
+                          minHeight: '60px',
+                          padding: '0.5rem',
+                          borderRadius: '4px',
+                          border: `1px solid ${borderColor}`,
+                          backgroundColor: bgColor,
+                          color: textColor,
+                          fontSize: '0.875rem',
+                          resize: 'vertical',
+                          fontFamily: 'inherit',
+                          marginBottom: '0.5rem',
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => handleSaveCommentEdit(comment._id)}
+                          style={{
+                            ...buttonStyle,
+                            fontSize: '0.75rem',
+                            padding: '4px 12px',
+                            backgroundColor: isSacred
+                              ? 'rgba(34, 197, 94, 0.2)'
+                              : isDark
+                                ? '#065f46'
+                                : '#10b981',
+                            color: isSacred ? '#4ade80' : '#FFFFFF',
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelCommentEdit}
+                          style={{
+                            ...buttonStyle,
+                            fontSize: '0.75rem',
+                            padding: '4px 12px',
+                            backgroundColor: 'transparent',
+                            color: textColor,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        lineHeight: '1.5',
+                        color: textColor,
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {displayText}
+                    </div>
+                  )}
                 </div>
-                <div
-                  style={{
-                    color: textColor,
-                    fontSize: '0.875rem',
-                    lineHeight: '1.6',
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {note.text.replace('[INTERNAL] ', '')}
-                </div>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </div>
@@ -1506,8 +1947,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     setMeetingTitle(`Meeting: ${taskTitle}`)
     setMeetingAttendeeName('')
     setMeetingAttendeeEmail('')
-    setMeetingDate('')
-    setMeetingTime('')
+    setMeetingDate(null)
+    setMeetingTime(null)
     setMeetingDuration('30')
     setMeetingType('video')
     setMeetingLocation('')
@@ -1541,7 +1982,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     setMeetingError(null)
 
     try {
-      const startDateTime = new Date(`${meetingDate}T${meetingTime}`)
+      // Combine date and time into a single DateTime
+      const startDateTime = new Date(meetingDate)
+      startDateTime.setHours(
+        meetingTime.getHours(),
+        meetingTime.getMinutes(),
+        0,
+        0
+      )
       const endDateTime = new Date(
         startDateTime.getTime() + parseInt(meetingDuration) * 60000
       )
@@ -1563,6 +2011,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         meetingType,
       })
 
+      // Log case update for meeting scheduled
+      logCaseUpdate(
+        'meeting_scheduled',
+        `Scheduled ${meetingType} meeting with ${meetingAttendeeName} for ${startDateTime.toLocaleString()}`,
+        'meeting',
+        undefined,
+        `${meetingTitle} - ${startDateTime.toLocaleString()}`
+      )
+
       resetMeetingForm()
       setSchedulingView('list')
     } catch (err) {
@@ -1577,7 +2034,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   // Meeting cancel handler
   const handleCancelMeetingAction = async (meetingId: string) => {
     if (!onCancelMeeting) return
+    const meeting = meetings.find(m => m._id === meetingId)
     await onCancelMeeting(meetingId, cancelReason)
+
+    // Log case update for meeting cancelled
+    logCaseUpdate(
+      'meeting_cancelled',
+      `Cancelled meeting: ${meeting?.eventTypeName || 'Unknown'}`,
+      'meeting',
+      meeting?.eventTypeName,
+      `Cancelled - Reason: ${cancelReason || 'No reason provided'}`
+    )
+
     setCancelReason('')
     setSelectedMeeting(null)
     setSchedulingView('list')
@@ -1586,7 +2054,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   // Meeting confirm handler
   const handleConfirmMeetingAction = async (meetingId: string) => {
     if (!onConfirmMeeting) return
+    const meeting = meetings.find(m => m._id === meetingId)
     await onConfirmMeeting(meetingId)
+
+    // Log case update for meeting confirmed
+    logCaseUpdate(
+      'meeting_confirmed',
+      `Confirmed meeting: ${meeting?.eventTypeName || 'Unknown'}`,
+      'meeting',
+      undefined,
+      `Confirmed - ${new Date(meeting?.startTime || '').toLocaleString()}`
+    )
+
     setSelectedMeeting(null)
     setSchedulingView('list')
   }
@@ -1604,7 +2083,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     setMeetingError(null)
 
     try {
-      const newStartDateTime = new Date(`${rescheduleDate}T${rescheduleTime}`)
+      const originalStart = new Date(selectedMeeting.startTime)
+      // Combine date and time into a single DateTime
+      const newStartDateTime = new Date(rescheduleDate)
+      newStartDateTime.setHours(
+        rescheduleTime.getHours(),
+        rescheduleTime.getMinutes(),
+        0,
+        0
+      )
       const newEndDateTime = new Date(
         newStartDateTime.getTime() + parseInt(rescheduleDuration) * 60000
       )
@@ -1615,8 +2102,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         newEndDateTime.toISOString()
       )
 
-      setRescheduleDate('')
-      setRescheduleTime('')
+      // Log case update for meeting rescheduled
+      logCaseUpdate(
+        'meeting_rescheduled',
+        `Rescheduled meeting: ${selectedMeeting.eventTypeName}`,
+        'meeting',
+        originalStart.toLocaleString(),
+        newStartDateTime.toLocaleString()
+      )
+
+      setRescheduleDate(null)
+      setRescheduleTime(null)
       setRescheduleDuration('30')
       setSelectedMeeting(null)
       setSchedulingView('list')
@@ -1635,9 +2131,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     const end = new Date(meeting.endTime)
     const durationMins = Math.round((end.getTime() - start.getTime()) / 60000)
 
-    const dateStr = start.toISOString().split('T')[0] ?? ''
-    setRescheduleDate(dateStr)
-    setRescheduleTime(start.toTimeString().slice(0, 5))
+    // Set date (just the date part)
+    const dateOnly = new Date(start)
+    dateOnly.setHours(0, 0, 0, 0)
+    setRescheduleDate(dateOnly)
+
+    // Set time
+    const timeOnly = new Date()
+    timeOnly.setHours(start.getHours(), start.getMinutes(), 0, 0)
+    setRescheduleTime(timeOnly)
+
     setRescheduleDuration(String(durationMins))
     setMeetingError(null)
   }
@@ -1698,11 +2201,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
-  }
-
-  const meetingSelectStyle: React.CSSProperties = {
-    ...meetingInputStyle,
-    cursor: 'pointer',
   }
 
   const meetingLabelStyle: React.CSSProperties = {
@@ -1886,40 +2384,32 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               marginBottom: '20px',
             }}
           >
-            <div>
-              <label style={meetingLabelStyle}>Date *</label>
-              <input
-                type="date"
-                value={meetingDate}
-                onChange={e => setMeetingDate(e.target.value)}
-                min={currentDate.toISOString().split('T')[0]}
-                style={meetingInputStyle}
-              />
-            </div>
-            <div>
-              <label style={meetingLabelStyle}>Start Time *</label>
-              <input
-                type="time"
-                value={meetingTime}
-                onChange={e => setMeetingTime(e.target.value)}
-                style={meetingInputStyle}
-              />
-            </div>
-            <div>
-              <label style={meetingLabelStyle}>Duration</label>
-              <select
-                value={meetingDuration}
-                onChange={e => setMeetingDuration(e.target.value)}
-                style={meetingSelectStyle}
-              >
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="90">1.5 hours</option>
-                <option value="120">2 hours</option>
-              </select>
-            </div>
+            <DateField
+              label="Date *"
+              value={meetingDate}
+              onChange={date => setMeetingDate(date)}
+              styles={{ theme: 'sacred', marginBottom: '0' }}
+            />
+            <TimeField
+              label="Start Time *"
+              value={meetingTime}
+              onChange={time => setMeetingTime(time)}
+              styles={{ theme: 'sacred' }}
+            />
+            <Dropdown
+              label="Duration"
+              value={meetingDuration}
+              onChange={e => setMeetingDuration(e.target.value)}
+              options={[
+                { value: '15', _id: '15' },
+                { value: '30', _id: '30' },
+                { value: '45', _id: '45' },
+                { value: '60', _id: '60' },
+                { value: '90', _id: '90' },
+                { value: '120', _id: '120' },
+              ]}
+              styles={{ theme: 'sacred', marginBottom: '0' }}
+            />
           </div>
 
           {/* Notes */}
@@ -2163,7 +2653,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {isPending && onConfirmMeeting && (
+            {isPending && (
               <button
                 onClick={() => handleConfirmMeetingAction(selectedMeeting._id)}
                 style={{
@@ -2175,7 +2665,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 Confirm Meeting
               </button>
             )}
-            {isActive && isUpcoming && onRescheduleMeeting && (
+            {isActive && isUpcoming && (
               <button
                 onClick={() => {
                   initializeRescheduleForm(selectedMeeting)
@@ -2190,7 +2680,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 Reschedule
               </button>
             )}
-            {isActive && isUpcoming && onCancelMeeting && (
+            {isActive && isUpcoming && (
               <button
                 onClick={() => handleCancelMeetingAction(selectedMeeting._id)}
                 style={{
@@ -2225,8 +2715,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <span>Reschedule Meeting</span>
             <button
               onClick={() => {
-                setRescheduleDate('')
-                setRescheduleTime('')
+                setRescheduleDate(null)
+                setRescheduleTime(null)
                 setRescheduleDuration('30')
                 setMeetingError(null)
                 setSchedulingView('details')
@@ -2315,40 +2805,32 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 gap: '16px',
               }}
             >
-              <div>
-                <label style={meetingLabelStyle}>New Date *</label>
-                <input
-                  type="date"
-                  value={rescheduleDate}
-                  onChange={e => setRescheduleDate(e.target.value)}
-                  min={currentDate.toISOString().split('T')[0]}
-                  style={meetingInputStyle}
-                />
-              </div>
-              <div>
-                <label style={meetingLabelStyle}>New Time *</label>
-                <input
-                  type="time"
-                  value={rescheduleTime}
-                  onChange={e => setRescheduleTime(e.target.value)}
-                  style={meetingInputStyle}
-                />
-              </div>
-              <div>
-                <label style={meetingLabelStyle}>Duration</label>
-                <select
-                  value={rescheduleDuration}
-                  onChange={e => setRescheduleDuration(e.target.value)}
-                  style={meetingSelectStyle}
-                >
-                  <option value="15">15 minutes</option>
-                  <option value="30">30 minutes</option>
-                  <option value="45">45 minutes</option>
-                  <option value="60">1 hour</option>
-                  <option value="90">1.5 hours</option>
-                  <option value="120">2 hours</option>
-                </select>
-              </div>
+              <DateField
+                label="New Date *"
+                value={rescheduleDate}
+                onChange={date => setRescheduleDate(date)}
+                styles={{ theme: 'sacred', marginBottom: '0' }}
+              />
+              <TimeField
+                label="New Time *"
+                value={rescheduleTime}
+                onChange={time => setRescheduleTime(time)}
+                styles={{ theme: 'sacred' }}
+              />
+              <Dropdown
+                label="Duration"
+                value={rescheduleDuration}
+                onChange={e => setRescheduleDuration(e.target.value)}
+                options={[
+                  { value: '15', _id: '15' },
+                  { value: '30', _id: '30' },
+                  { value: '45', _id: '45' },
+                  { value: '60', _id: '60' },
+                  { value: '90', _id: '90' },
+                  { value: '120', _id: '120' },
+                ]}
+                styles={{ theme: 'sacred', marginBottom: '0' }}
+              />
             </div>
           </div>
 
@@ -2383,29 +2865,39 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
                 }}
               >
-                {new Date(
-                  `${rescheduleDate}T${rescheduleTime}`
-                ).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-                {' at '}
-                {new Date(
-                  `${rescheduleDate}T${rescheduleTime}`
-                ).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-                {' - '}
-                {new Date(
-                  new Date(`${rescheduleDate}T${rescheduleTime}`).getTime() +
-                    parseInt(rescheduleDuration) * 60000
-                ).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {(() => {
+                  const previewDateTime = new Date(rescheduleDate)
+                  previewDateTime.setHours(
+                    rescheduleTime.getHours(),
+                    rescheduleTime.getMinutes(),
+                    0,
+                    0
+                  )
+                  const endTime = new Date(
+                    previewDateTime.getTime() +
+                      parseInt(rescheduleDuration) * 60000
+                  )
+                  return (
+                    <>
+                      {previewDateTime.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                      {' at '}
+                      {previewDateTime.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                      {' - '}
+                      {endTime.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </>
+                  )
+                })()}
               </div>
             </div>
           )}
@@ -2416,8 +2908,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           >
             <button
               onClick={() => {
-                setRescheduleDate('')
-                setRescheduleTime('')
+                setRescheduleDate(null)
+                setRescheduleTime(null)
                 setRescheduleDuration('30')
                 setMeetingError(null)
                 setSchedulingView('details')
@@ -2465,25 +2957,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           }}
         >
           <span>Meetings ({taskMeetings.length})</span>
-          {onScheduleMeeting && (
-            <button
-              onClick={() => {
-                setMeetingTitle(`Meeting: ${taskTitle}`)
-                setSchedulingView('form')
-              }}
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred
-                  ? '#FFD700'
-                  : isDark
-                    ? '#3B82F6'
-                    : '#3B82F6',
-                color: isSacred ? '#000000' : '#FFFFFF',
-              }}
-            >
-              Schedule Meeting
-            </button>
-          )}
+          <button
+            onClick={() => {
+              setMeetingTitle(`Meeting: ${taskTitle}`)
+              setSchedulingView('form')
+            }}
+            style={{
+              ...buttonStyle,
+              backgroundColor: isSacred
+                ? '#FFD700'
+                : isDark
+                  ? '#3B82F6'
+                  : '#3B82F6',
+              color: isSacred ? '#000000' : '#FFFFFF',
+            }}
+          >
+            Schedule Meeting
+          </button>
         </div>
 
         {taskMeetings.length === 0 ? (
@@ -2497,25 +2987,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             >
               No meetings scheduled for this task yet.
             </p>
-            {onScheduleMeeting && (
-              <button
-                onClick={() => {
-                  setMeetingTitle(`Meeting: ${taskTitle}`)
-                  setSchedulingView('form')
-                }}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 215, 0, 0.2)'
-                    : isDark
-                      ? '#374151'
-                      : '#E5E7EB',
-                  color: textColor,
-                }}
-              >
-                Schedule First Meeting
-              </button>
-            )}
+            <button
+              onClick={() => {
+                setMeetingTitle(`Meeting: ${taskTitle}`)
+                setSchedulingView('form')
+              }}
+              style={{
+                ...buttonStyle,
+                backgroundColor: isSacred
+                  ? 'rgba(255, 215, 0, 0.2)'
+                  : isDark
+                    ? '#374151'
+                    : '#E5E7EB',
+                color: textColor,
+              }}
+            >
+              Schedule First Meeting
+            </button>
           </div>
         ) : (
           <div
@@ -2606,14 +3094,591 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     )
   }
 
+  // Filter articles based on search term for Knowledge Base tab
+  const filteredKbArticles = useMemo(() => {
+    if (!kbSearchTerm) return knowledgebaseArticleOptions
+    const term = kbSearchTerm.toLowerCase()
+    return knowledgebaseArticleOptions.filter(article => {
+      const titleMatch = article.articleTitle?.toLowerCase().includes(term)
+      const purposeMatch = article.purpose?.toLowerCase().includes(term)
+      const symptomsMatch = article.symptoms?.toLowerCase().includes(term)
+      const resolutionMatch = article.resolution?.toLowerCase().includes(term)
+      return titleMatch || purposeMatch || symptomsMatch || resolutionMatch
+    })
+  }, [knowledgebaseArticleOptions, kbSearchTerm])
+
+  // Get linked articles (articles that are linked to this task)
+  const linkedArticles = useMemo(() => {
+    return knowledgebaseArticleOptions.filter(a =>
+      knowledgebaseArticles.includes(a.articleTitle)
+    )
+  }, [knowledgebaseArticleOptions, knowledgebaseArticles])
+
+  const renderKnowledgeBaseTab = () => {
+    // If viewing a specific article
+    if (selectedArticleForView) {
+      const isLinkedToCase = knowledgebaseArticles.includes(
+        selectedArticleForView.articleTitle
+      )
+
+      const handleToggleLinkCase = () => {
+        if (isLinkedToCase) {
+          // Unlink - remove from editedArticleIds
+          const newArticleIds = editedArticleIds.filter(
+            id => id !== selectedArticleForView._id
+          )
+          setEditedArticleIds(newArticleIds)
+          // Log case update for article removed
+          logCaseUpdate(
+            'knowledgebase_removed',
+            `Removed knowledge base article: ${selectedArticleForView.articleTitle}`,
+            'knowledgebaseArticles',
+            selectedArticleForView.articleTitle,
+            undefined
+          )
+          // Also save immediately
+          if (onEdit) {
+            onEdit({
+              title: taskTitle,
+              description: description,
+              severityId: editedSeverityId,
+              statusId: editedStatusId,
+              substatusId: editedSubStatusId,
+              schedulingQueueId: editedQueueId,
+              regionId: editedRegionId,
+              teamMember: editedTeamMember,
+              nextActionDate: editedNextActionDate,
+              topicIds: editedTopicIds,
+              articleIds: newArticleIds,
+            })
+          }
+        } else {
+          // Link - add to editedArticleIds
+          const newArticleIds = [
+            ...editedArticleIds,
+            selectedArticleForView._id,
+          ]
+          setEditedArticleIds(newArticleIds)
+          // Log case update for article attached
+          logCaseUpdate(
+            'knowledgebase_attached',
+            `Attached knowledge base article: ${selectedArticleForView.articleTitle}`,
+            'knowledgebaseArticles',
+            undefined,
+            selectedArticleForView.articleTitle
+          )
+          // Also save immediately
+          if (onEdit) {
+            onEdit({
+              title: taskTitle,
+              description: description,
+              severityId: editedSeverityId,
+              statusId: editedStatusId,
+              substatusId: editedSubStatusId,
+              schedulingQueueId: editedQueueId,
+              regionId: editedRegionId,
+              teamMember: editedTeamMember,
+              nextActionDate: editedNextActionDate,
+              topicIds: editedTopicIds,
+              articleIds: newArticleIds,
+            })
+          }
+        }
+      }
+
+      return (
+        <div style={cardStyle}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <button
+              onClick={() => setSelectedArticleForView(null)}
+              style={{
+                background: 'none',
+                border: `1px solid ${borderColor}`,
+                borderRadius: '6px',
+                padding: '0.5rem 1rem',
+                cursor: 'pointer',
+                color: textColor,
+                fontSize: '0.875rem',
+              }}
+            >
+              ← Back to Articles
+            </button>
+            <button
+              onClick={handleToggleLinkCase}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: isLinkedToCase
+                  ? isSacred
+                    ? 'rgba(239, 68, 68, 0.2)'
+                    : isDark
+                      ? '#7F1D1D'
+                      : '#FEE2E2'
+                  : isSacred
+                    ? 'rgba(34, 197, 94, 0.2)'
+                    : isDark
+                      ? '#065f46'
+                      : '#D1FAE5',
+                color: isLinkedToCase
+                  ? isSacred
+                    ? '#ff6b6b'
+                    : isDark
+                      ? '#FCA5A5'
+                      : '#DC2626'
+                  : isSacred
+                    ? '#4ade80'
+                    : isDark
+                      ? '#6EE7B7'
+                      : '#059669',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              {isLinkedToCase ? '✕ Unlink from Case' : '✓ Link to Case'}
+            </button>
+          </div>
+
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              color: textColor,
+              marginBottom: '1rem',
+              ...(isSacred && {
+                fontFamily: 'Cinzel, serif',
+                color: '#FFD700',
+              }),
+            }}
+          >
+            {selectedArticleForView.articleTitle}
+          </h2>
+
+          {selectedArticleForView.categoryName && (
+            <div
+              style={{
+                display: 'inline-block',
+                padding: '0.25rem 0.75rem',
+                backgroundColor: isSacred
+                  ? 'rgba(255, 215, 0, 0.15)'
+                  : isDark
+                    ? '#374151'
+                    : '#E5E7EB',
+                borderRadius: '20px',
+                fontSize: '0.75rem',
+                color: isSacred ? '#FFD700' : textColor,
+                marginBottom: '1.5rem',
+              }}
+            >
+              {selectedArticleForView.categoryName}
+            </div>
+          )}
+
+          {selectedArticleForView.purpose && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={sectionTitleStyle}>Purpose</div>
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                }}
+              >
+                {selectedArticleForView.purpose}
+              </p>
+            </div>
+          )}
+
+          {selectedArticleForView.symptoms && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={sectionTitleStyle}>Symptoms</div>
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                }}
+              >
+                {selectedArticleForView.symptoms}
+              </p>
+            </div>
+          )}
+
+          {selectedArticleForView.cause && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={sectionTitleStyle}>Cause</div>
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                }}
+              >
+                {selectedArticleForView.cause}
+              </p>
+            </div>
+          )}
+
+          {selectedArticleForView.resolution && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={sectionTitleStyle}>Resolution</div>
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                }}
+              >
+                {selectedArticleForView.resolution}
+              </p>
+            </div>
+          )}
+
+          {selectedArticleForView.workaround && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={sectionTitleStyle}>Workaround</div>
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                }}
+              >
+                {selectedArticleForView.workaround}
+              </p>
+            </div>
+          )}
+
+          {/* Other Linked Cases Section - Placeholder */}
+          {selectedArticleForView.linkedTasks &&
+            selectedArticleForView.linkedTasks.length > 0 && (
+              <div
+                style={{
+                  marginTop: '2rem',
+                  padding: '1rem',
+                  backgroundColor: isSacred
+                    ? 'rgba(139, 92, 246, 0.1)'
+                    : isDark
+                      ? 'rgba(139, 92, 246, 0.1)'
+                      : '#F3E8FF',
+                  borderRadius: '8px',
+                  border: `1px solid ${isSacred ? 'rgba(139, 92, 246, 0.3)' : '#C4B5FD'}`,
+                }}
+              >
+                <div style={sectionTitleStyle}>
+                  Other Cases Using This Article (
+                  {selectedArticleForView.linkedTasks.length})
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem',
+                    marginTop: '0.5rem',
+                  }}
+                >
+                  {selectedArticleForView.linkedTasks.map(
+                    (linkedTask: { _id: string; title: string }) => (
+                      <span
+                        key={linkedTask._id}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          backgroundColor: isSacred
+                            ? 'rgba(139, 92, 246, 0.15)'
+                            : isDark
+                              ? '#4C1D95'
+                              : '#DDD6FE',
+                          borderRadius: '20px',
+                          fontSize: '0.75rem',
+                          color: isSacred
+                            ? '#a78bfa'
+                            : isDark
+                              ? '#C4B5FD'
+                              : '#6D28D9',
+                        }}
+                      >
+                        {linkedTask.title}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+        </div>
+      )
+    }
+
+    return (
+      <div>
+        {/* Linked Articles Section */}
+        {linkedArticles.length > 0 && (
+          <div style={{ ...cardStyle, marginBottom: '1.5rem' }}>
+            <div style={sectionTitleStyle}>
+              Linked Articles ({linkedArticles.length})
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '1rem',
+                marginTop: '1rem',
+              }}
+            >
+              {linkedArticles.map(article => (
+                <div
+                  key={article._id}
+                  onClick={() => setSelectedArticleForView(article)}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? 'rgba(59, 130, 246, 0.1)'
+                        : 'rgba(59, 130, 246, 0.05)',
+                    border: `2px solid ${isSacred ? '#FFD700' : '#3B82F6'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: textColor,
+                        margin: 0,
+                      }}
+                    >
+                      {article.articleTitle}
+                    </h3>
+                    <span
+                      style={{
+                        color: isSacred ? '#FFD700' : '#3B82F6',
+                        fontSize: '1rem',
+                      }}
+                    >
+                      ✓
+                    </span>
+                  </div>
+                  {article.categoryName && (
+                    <div
+                      style={{
+                        fontSize: '0.7rem',
+                        color: isSacred
+                          ? 'rgba(255, 215, 0, 0.7)'
+                          : isDark
+                            ? '#60A5FA'
+                            : '#3B82F6',
+                        marginTop: '0.5rem',
+                      }}
+                    >
+                      {article.categoryName}
+                    </div>
+                  )}
+                  {article.purpose && (
+                    <p
+                      style={{
+                        fontSize: '0.8rem',
+                        color: secondaryTextColor,
+                        margin: '0.5rem 0 0',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {article.purpose}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Search & Browse Section */}
+        <div style={cardStyle}>
+          <div style={sectionTitleStyle}>Search Knowledge Base</div>
+          <p
+            style={{
+              fontSize: '0.875rem',
+              color: secondaryTextColor,
+              marginBottom: '1rem',
+            }}
+          >
+            Find relevant articles for this ticket.
+          </p>
+
+          {/* Search Bar */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <SearchBar
+              label="Search Articles"
+              placeholder="Search by title, symptoms, resolution..."
+              value={kbSearchTerm}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setKbSearchTerm(e.target.value)
+              }
+              styles={{
+                theme: styles?.theme || 'light',
+              }}
+            />
+          </div>
+
+          {/* Results */}
+          <div style={sectionTitleStyle}>
+            {kbSearchTerm
+              ? `Search Results (${filteredKbArticles.length})`
+              : `All Articles (${knowledgebaseArticleOptions.length})`}
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '1rem',
+              marginTop: '1rem',
+            }}
+          >
+            {filteredKbArticles.length === 0 ? (
+              <p
+                style={{
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                  gridColumn: '1 / -1',
+                  padding: '2rem',
+                }}
+              >
+                {kbSearchTerm
+                  ? 'No articles match your search.'
+                  : 'No knowledge base articles available.'}
+              </p>
+            ) : (
+              filteredKbArticles.map(article => {
+                const isLinked = knowledgebaseArticles.includes(
+                  article.articleTitle
+                )
+                return (
+                  <div
+                    key={article._id}
+                    onClick={() => setSelectedArticleForView(article)}
+                    style={{
+                      padding: '1rem',
+                      backgroundColor: isLinked
+                        ? isSacred
+                          ? 'rgba(255, 215, 0, 0.1)'
+                          : isDark
+                            ? 'rgba(59, 130, 246, 0.1)'
+                            : 'rgba(59, 130, 246, 0.05)'
+                        : isSacred
+                          ? 'rgba(0, 0, 0, 0.3)'
+                          : isDark
+                            ? '#111827'
+                            : '#F9FAFB',
+                      border: `1px solid ${
+                        isLinked
+                          ? isSacred
+                            ? '#FFD700'
+                            : '#3B82F6'
+                          : borderColor
+                      }`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: '0.95rem',
+                          fontWeight: 600,
+                          color: textColor,
+                          margin: 0,
+                          flex: 1,
+                        }}
+                      >
+                        {article.articleTitle}
+                      </h3>
+                      {isLinked && (
+                        <span
+                          style={{
+                            color: isSacred ? '#FFD700' : '#3B82F6',
+                            fontSize: '1rem',
+                            marginLeft: '0.5rem',
+                          }}
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </div>
+                    {article.categoryName && (
+                      <div
+                        style={{
+                          fontSize: '0.7rem',
+                          color: isSacred
+                            ? 'rgba(255, 215, 0, 0.7)'
+                            : isDark
+                              ? '#60A5FA'
+                              : '#3B82F6',
+                          marginTop: '0.5rem',
+                        }}
+                      >
+                        {article.categoryName}
+                      </div>
+                    )}
+                    {article.purpose && (
+                      <p
+                        style={{
+                          fontSize: '0.8rem',
+                          color: secondaryTextColor,
+                          margin: '0.5rem 0 0',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}
+                      >
+                        {article.purpose}
+                      </p>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'details':
         return renderDetailsTab()
       case 'comments':
         return renderCommentsTab()
-      case 'caseNotes':
-        return renderCaseNotesTab()
       case 'caseUpdates':
         return renderCaseUpdatesTab()
       case 'scheduling':
@@ -2621,12 +3686,341 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       case 'resolution':
         return (
           <div style={cardStyle}>
-            <div style={sectionTitleStyle}>Resolution Information</div>
-            <p style={{ color: secondaryTextColor, fontSize: '0.875rem' }}>
-              Resolution details will appear here...
-            </p>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem',
+              }}
+            >
+              <div
+                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+              >
+                Resolution Information
+              </div>
+              {!isEditingResolution && (
+                <button
+                  onClick={() => setIsEditingResolution(true)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
+                    backgroundColor: isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? '#374151'
+                        : '#F3F4F6',
+                    color: isSacred ? '#FFD700' : textColor,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  {resolutionWriteup ? 'Edit Resolution' : '+ Add Resolution'}
+                </button>
+              )}
+            </div>
+
+            {isEditingResolution ? (
+              <>
+                {/* Reason for case being opened */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <Dropdown
+                    label="Reason for Case Being Opened"
+                    value={resolutionReason}
+                    onChange={e => setResolutionReason(e.target.value)}
+                    options={[
+                      { value: 'Technical Issue', _id: 'technical' },
+                      { value: 'Billing Question', _id: 'billing' },
+                      { value: 'Feature Request', _id: 'feature' },
+                      { value: 'Account Access', _id: 'access' },
+                      { value: 'Training/How-To', _id: 'training' },
+                      { value: 'Bug Report', _id: 'bug' },
+                      { value: 'Configuration Change', _id: 'config' },
+                      { value: 'Integration Issue', _id: 'integration' },
+                      { value: 'Performance Problem', _id: 'performance' },
+                      { value: 'Security Concern', _id: 'security' },
+                      { value: 'Other', _id: 'other' },
+                    ]}
+                    styles={{ theme: 'sacred' }}
+                  />
+                </div>
+
+                {/* Anything we can do to prevent this */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <Dropdown
+                    label="Anything We Can Do to Prevent This?"
+                    value={resolutionPrevention}
+                    onChange={e => setResolutionPrevention(e.target.value)}
+                    options={[
+                      { value: 'Better Documentation', _id: 'docs' },
+                      { value: 'Improved Training', _id: 'training' },
+                      { value: 'Product Enhancement', _id: 'product' },
+                      { value: 'Process Improvement', _id: 'process' },
+                      { value: 'Communication Update', _id: 'communication' },
+                      { value: 'Automation Opportunity', _id: 'automation' },
+                      { value: 'UI/UX Improvement', _id: 'uiux' },
+                      { value: 'Not Preventable', _id: 'not-preventable' },
+                      { value: 'Already Addressed', _id: 'addressed' },
+                      { value: 'Under Investigation', _id: 'investigating' },
+                    ]}
+                    styles={{ theme: 'sacred' }}
+                  />
+                </div>
+
+                {/* Is this a recurring issue with this customer */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <Dropdown
+                    label="Is This a Recurring Issue With This Customer?"
+                    value={resolutionRecurring}
+                    onChange={e => setResolutionRecurring(e.target.value)}
+                    options={[
+                      { value: 'No - First Time', _id: 'first-time' },
+                      { value: 'Yes - Second Occurrence', _id: 'second' },
+                      { value: 'Yes - Recurring (3+ times)', _id: 'recurring' },
+                      { value: 'Yes - Chronic Issue', _id: 'chronic' },
+                      { value: 'Related to Previous Case', _id: 'related' },
+                      { value: 'Unknown', _id: 'unknown' },
+                    ]}
+                    styles={{ theme: 'sacred' }}
+                  />
+                </div>
+
+                {/* Resolution Writeup */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      marginBottom: '8px',
+                      color: isSacred ? '#FFD700' : secondaryTextColor,
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Resolution Writeup
+                  </label>
+                  <textarea
+                    value={resolutionWriteup}
+                    onChange={e => setResolutionWriteup(e.target.value)}
+                    placeholder="Describe how this case was resolved, what steps were taken, and any follow-up actions needed..."
+                    style={{
+                      width: '100%',
+                      minHeight: '150px',
+                      padding: '0.75rem',
+                      borderRadius: '6px',
+                      border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
+                      backgroundColor: bgColor,
+                      color: textColor,
+                      fontSize: '0.875rem',
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                {/* Save/Cancel Buttons */}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <button
+                    onClick={() => setIsEditingResolution(false)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: 'transparent',
+                      color: textColor,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Save resolution data - this would call onEdit with resolution fields
+                      onEdit({
+                        resolutionReason,
+                        resolutionPrevention,
+                        resolutionRecurring,
+                        resolutionWriteup,
+                      })
+
+                      // Log case update for resolution
+                      logCaseUpdate(
+                        'resolution_update',
+                        `Updated resolution: ${resolutionReason || 'No reason specified'}`,
+                        'resolution',
+                        undefined,
+                        `Reason: ${resolutionReason}, Prevention: ${resolutionPrevention}, Recurring: ${resolutionRecurring}`
+                      )
+
+                      setIsEditingResolution(false)
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: isSacred
+                        ? 'rgba(255, 215, 0, 0.2)'
+                        : isDark
+                          ? '#059669'
+                          : '#10B981',
+                      color: isSacred ? '#FFD700' : '#FFFFFF',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Save Resolution
+                  </button>
+                </div>
+              </>
+            ) : resolutionWriteup || resolutionReason ? (
+              /* Display saved resolution */
+              <>
+                {resolutionReason && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: secondaryTextColor,
+                        marginBottom: '0.25rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Reason for Case
+                    </div>
+                    <div style={{ color: textColor }}>{resolutionReason}</div>
+                  </div>
+                )}
+
+                {resolutionPrevention && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: secondaryTextColor,
+                        marginBottom: '0.25rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Prevention
+                    </div>
+                    <div style={{ color: textColor }}>
+                      {resolutionPrevention}
+                    </div>
+                  </div>
+                )}
+
+                {resolutionRecurring && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: secondaryTextColor,
+                        marginBottom: '0.25rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Recurring Issue
+                    </div>
+                    <div style={{ color: textColor }}>
+                      {resolutionRecurring}
+                    </div>
+                  </div>
+                )}
+
+                {resolutionWriteup && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: secondaryTextColor,
+                        marginBottom: '0.5rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Resolution Details
+                    </div>
+                    <div
+                      style={{
+                        padding: '1rem',
+                        backgroundColor: isSacred
+                          ? 'rgba(255, 215, 0, 0.05)'
+                          : isDark
+                            ? '#1F2937'
+                            : '#F9FAFB',
+                        borderRadius: '8px',
+                        border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.2)' : borderColor}`,
+                        color: textColor,
+                        fontSize: '0.875rem',
+                        lineHeight: 1.6,
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {resolutionWriteup}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Empty state */
+              <div
+                style={{
+                  padding: '2rem',
+                  borderRadius: '8px',
+                  border: `1px dashed ${borderColor}`,
+                  backgroundColor: isSacred
+                    ? 'rgba(0, 0, 0, 0.2)'
+                    : isDark
+                      ? '#111827'
+                      : '#F9FAFB',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '1.5rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  📋
+                </div>
+                <div
+                  style={{
+                    color: secondaryTextColor,
+                    fontSize: '0.875rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  No resolution information yet
+                </div>
+                <div
+                  style={{
+                    color: secondaryTextColor,
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  Click &quot;+ Add Resolution&quot; to document how this case
+                  was resolved
+                </div>
+              </div>
+            )}
           </div>
         )
+      case 'knowledgeBase':
+        return renderKnowledgeBaseTab()
       default:
         return null
     }
@@ -2652,28 +4046,30 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             Comments
           </div>
           <div
-            style={tabStyle(activeTab === 'caseNotes')}
-            onClick={() => setActiveTab('caseNotes')}
-          >
-            Case Notes
-          </div>
-          <div
-            style={tabStyle(activeTab === 'caseUpdates')}
-            onClick={() => setActiveTab('caseUpdates')}
-          >
-            Case Updates
-          </div>
-          <div
             style={tabStyle(activeTab === 'scheduling')}
             onClick={() => setActiveTab('scheduling')}
           >
             Scheduling
           </div>
           <div
+            style={tabStyle(activeTab === 'knowledgeBase')}
+            onClick={() => setActiveTab('knowledgeBase')}
+          >
+            Knowledgebase{' '}
+            {knowledgebaseArticles.length > 0 &&
+              `(${knowledgebaseArticles.length})`}
+          </div>
+          <div
             style={tabStyle(activeTab === 'resolution')}
             onClick={() => setActiveTab('resolution')}
           >
-            Resolution Information
+            Resolution
+          </div>
+          <div
+            style={tabStyle(activeTab === 'caseUpdates')}
+            onClick={() => setActiveTab('caseUpdates')}
+          >
+            Case History
           </div>
         </div>
 

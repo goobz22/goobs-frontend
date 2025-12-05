@@ -38,31 +38,38 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
   ({ children, styles, elevation = 1, className, ...restProps }, ref) => {
     const isSacredTheme = styles?.theme === 'sacred'
 
+    // Sacred theme glow effect based on elevation
+    const getSacredGlow = (level: number) => {
+      const baseGlow = `0 0 ${20 + level * 10}px ${alpha(SACRED_GOLD, 0.3)}, 0 0 ${40 + level * 20}px ${alpha(SACRED_GOLD, 0.1)}`
+      return baseGlow
+    }
+
     const getElevationShadow = (level: number) => {
       if (isSacredTheme) {
-        return `0 ${level * 2}px ${level * 8}px ${alpha(SACRED_GOLD, 0.2)}`
+        return getSacredGlow(level)
       }
       return `0 ${level}px ${level * 4}px rgba(0, 0, 0, 0.1)`
     }
 
-    // Construct border value
+    // Construct border value - sacred theme gets 2px gold border
     const borderValue = styles?.border
       ? styles.border
       : styles?.borderColor
         ? `${styles?.borderWidth || '1px'} solid ${styles.borderColor}`
         : isSacredTheme
-          ? `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`
+          ? `2px solid ${alpha(SACRED_GOLD, 0.3)}`
           : `${styles?.borderWidth || '1px'} solid rgba(0, 0, 0, 0.12)`
 
     const containerStyle: React.CSSProperties = {
       position: 'relative',
+      boxSizing: 'border-box',
       width: styles?.width || '100%',
-      maxWidth: styles?.maxWidth,
+      maxWidth: styles?.maxWidth || '100%',
       minWidth: styles?.minWidth,
       height: styles?.height || 'auto',
       maxHeight: styles?.maxHeight,
       minHeight: styles?.minHeight,
-      padding: styles?.padding || '16px',
+      padding: styles?.padding || (isSacredTheme ? '24px' : '16px'),
       margin: styles?.margin,
       marginBottom: styles?.margin ? undefined : styles?.marginBottom,
       marginTop: styles?.margin ? undefined : styles?.marginTop,
@@ -71,11 +78,12 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
       borderRadius: styles?.borderRadius || '8px',
       backgroundColor:
         styles?.backgroundColor ||
-        (isSacredTheme ? 'rgba(0, 0, 0, 0.85)' : '#ffffff'),
+        (isSacredTheme ? 'rgba(0, 0, 0, 0.7)' : '#ffffff'),
       backgroundImage: styles?.backgroundImage,
       border: borderValue,
       boxShadow: styles?.boxShadow || getElevationShadow(elevation),
-      backdropFilter: styles?.backdropFilter,
+      backdropFilter:
+        styles?.backdropFilter || (isSacredTheme ? 'blur(20px)' : undefined),
       opacity: styles?.opacity,
       color: isSacredTheme ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
       fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',

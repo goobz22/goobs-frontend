@@ -219,11 +219,27 @@ function AddCard({
 
     // Handle time field
     if (fieldConfig.type === 'time') {
+      // Convert string value to Date for TimeField
+      const timeValue = (() => {
+        if (!value) return null
+        const timeStr = String(value)
+        const [hours, minutes] = timeStr.split(':').map(Number)
+        if (isNaN(hours!) || isNaN(minutes!)) return null
+        const date = new Date()
+        date.setHours(hours!, minutes!, 0, 0)
+        return date
+      })()
       return (
         <TimeField
-          value={String(value || '')}
-          onChange={time => {
-            handleFieldChange(column.field, time)
+          value={timeValue}
+          onChange={(newTime: Date | null) => {
+            if (!newTime) {
+              handleFieldChange(column.field, '')
+              return
+            }
+            const hours = String(newTime.getHours()).padStart(2, '0')
+            const minutes = String(newTime.getMinutes()).padStart(2, '0')
+            handleFieldChange(column.field, `${hours}:${minutes}`)
           }}
           {...(fieldConfig.placeholder && {
             helperText: fieldConfig.placeholder,

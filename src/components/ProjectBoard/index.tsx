@@ -97,6 +97,14 @@ function ProjectBoardContent({
   preferDropdown,
   styles,
   permissions,
+  meetings,
+  onScheduleMeeting,
+  onCancelMeeting,
+  onConfirmMeeting,
+  onRescheduleMeeting,
+  currentDate,
+  onUpdateCustomerNotes,
+  onCaseUpdate,
 }: ProjectBoardProps) {
   const {
     columns: columnState,
@@ -445,6 +453,8 @@ function ProjectBoardContent({
         comments={currentShowTask.comments}
         caseUpdates={currentShowTask.caseUpdates}
         customerAssigned={currentShowTask.customerAssigned}
+        customerId={currentShowTask.customerId}
+        customerInternalNotes={currentShowTask.customerInternalNotes}
         severity={currentShowTask.severity}
         schedulingQueue={currentShowTask.schedulingQueue}
         status={currentShowTask.status}
@@ -464,6 +474,7 @@ function ProjectBoardContent({
         onComment={commentCallback}
         onEditComment={editCommentCallback}
         onRevisionHistory={onRevisionHistory}
+        onUpdateCustomerNotes={onUpdateCustomerNotes}
         onBack={handleBackToBoard}
         severityOptions={rawSeverityLevels}
         schedulingQueueOptions={rawQueues}
@@ -476,6 +487,13 @@ function ProjectBoardContent({
         rawServices={rawServices}
         regionOptions={rawRegions}
         styles={styles}
+        meetings={meetings.filter(m => m.taskId === activeTaskId)}
+        onScheduleMeeting={onScheduleMeeting}
+        onCancelMeeting={onCancelMeeting}
+        onConfirmMeeting={onConfirmMeeting}
+        onRescheduleMeeting={onRescheduleMeeting}
+        currentDate={currentDate}
+        {...(onCaseUpdate && { onCaseUpdate })}
       />
     )
   }

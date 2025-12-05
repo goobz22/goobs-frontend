@@ -209,6 +209,7 @@ export {
   default as MetricCard,
   type MetricCardProps,
 } from './components/DataGrid/MetricCard'
+export { default as MetricSection } from './components/DataGrid/MetricSection'
 export type {
   ColumnDef,
   CompositeFieldConfig,
@@ -290,6 +291,8 @@ export type {
   ViewState,
   AddTaskFormType,
   ProjectBoardStyles,
+  TaskMeeting,
+  NewMeetingData,
 } from './components/ProjectBoard/types'
 
 // Task Management Components

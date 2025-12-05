@@ -49,7 +49,7 @@ import CardMembershipIcon from './CardMembership'
 import CategoryIcon from './Category'
 import ChatIcon from './Chat'
 import CheckIcon from './Check'
-import CheckBoxIcon from './CheckBoxIcon'
+import CheckBoxIcon from './CheckBox'
 import CheckCircleIcon from './CheckCircle'
 import CheckCircleOutlineIcon from './CheckCircleOutline'
 import ChevronLeftIcon from './ChevronLeft'
@@ -64,7 +64,7 @@ import CompareArrowsIcon from './CompareArrows'
 import ConstructionIcon from './Construction'
 import ContactsIcon from './Contacts'
 import ContentCopyIcon from './ContentCopy'
-import ContractIcon from './ContractIcon'
+import ContractIcon from './Contract'
 import CreateIcon from './Create'
 import CreateNewFolderIcon from './CreateNewFolder'
 import CreditCardIcon from './CreditCard'
@@ -82,7 +82,7 @@ import DomainIcon from './Domain'
 import DownloadIcon from './Download'
 import DragIcon from './Drag'
 import DragIndicatorIcon from './DragIndicator'
-import DuplicateIcon from './DuplicateIcon'
+import DuplicateIcon from './Duplicate'
 import EditIcon from './Edit'
 import EmailIcon from './Email'
 import EmojiEventsIcon from './EmojiEvents'
@@ -97,8 +97,6 @@ import ExpandMoreIcon from './ExpandMore'
 import ExtensionIcon from './Extension'
 import FavoriteIcon from './Favorite'
 import FavoriteBorderIcon from './FavoriteBorder'
-import FavoriteBorderIconIcon from './FavoriteBorderIcon'
-import FavoriteIconIcon from './FavoriteIcon'
 import FeedbackIcon from './Feedback'
 import FileCopyIcon from './FileCopy'
 import FilingIcon from './Filing'
@@ -117,7 +115,6 @@ import GavelIcon from './Gavel'
 import GestureIcon from './Gesture'
 import GoogleIcon from './Google'
 import GridViewIcon from './GridView'
-import GridViewIconIcon from './GridViewIcon'
 import GroupIcon from './Group'
 import GroupWorkIcon from './GroupWork'
 import GroupsIcon from './Groups'
@@ -128,7 +125,7 @@ import HomeIcon from './Home'
 import HomeWorkIcon from './HomeWork'
 import HourglassEmptyIcon from './HourglassEmpty'
 import HubIcon from './Hub'
-import ImageIcon from './ImageIcon'
+import ImageIcon from './Image'
 import InfoIcon from './Info'
 import InfoOutlineIcon from './InfoOutline'
 import InsightsIcon from './Insights'
@@ -148,7 +145,7 @@ import LocalGasStationIcon from './LocalGasStation'
 import LocalOfferIcon from './LocalOffer'
 import LocalShippingIcon from './LocalShipping'
 import LocationCityIcon from './LocationCity'
-import LocationIcon from './LocationIcon'
+import LocationIcon from './Location'
 import LocationOnIcon from './LocationOn'
 import LocationSearchingIcon from './LocationSearching'
 import LockIcon from './Lock'
@@ -177,7 +174,7 @@ import NotificationsIcon from './Notifications'
 import OutlookIcon from './Outlook'
 import PauseIcon from './Pause'
 import PaymentIcon from './Payment'
-import PdfIcon from './PdfIcon'
+import PdfIcon from './Pdf'
 import PendingActionsIcon from './PendingActions'
 import PeopleIcon from './People'
 import PersonIcon from './Person'
@@ -221,7 +218,7 @@ import ShoppingBasketIcon from './ShoppingBasket'
 import ShowChartIcon from './ShowChart'
 import ShowHideEyeIcon from './ShowHideEye'
 import SkipNextIcon from './SkipNext'
-import SmartButtonIcon from './SmartButtonIcon'
+import SmartButtonIcon from './SmartButton'
 import SmartphoneIcon from './Smartphone'
 import SmsIcon from './Sms'
 import SortIcon from './Sort'
@@ -229,7 +226,6 @@ import SpaIcon from './Spa'
 import SpeedIcon from './Speed'
 import StarIcon from './Star'
 import StarBorderIcon from './StarBorder'
-import StarIconIcon from './StarIcon'
 import StopIcon from './Stop'
 import StorageIcon from './Storage'
 import StoreIcon from './Store'
@@ -238,10 +234,10 @@ import StrikethroughSIcon from './StrikethroughS'
 import SupervisedUserCircleIcon from './SupervisedUserCircle'
 import SupportIcon from './Support'
 import SyncIcon from './Sync'
-import TableIcon from './TableIcon'
+import TableIcon from './Table'
 import TabletIcon from './Tablet'
-import TemplateIcon from './TemplateIcon'
-import TextFieldsIcon from './TextFieldsIcon'
+import TemplateIcon from './Template'
+import TextFieldsIcon from './TextFields'
 import ThumbUpIcon from './ThumbUp'
 import TimelineIcon from './Timeline'
 import TimerIcon from './Timer'
@@ -250,12 +246,11 @@ import TrendingDownIcon from './TrendingDown'
 import TrendingUpIcon from './TrendingUp'
 import UndoIcon from './Undo'
 import VerifiedUserIcon from './VerifiedUser'
-import VideoLibraryIcon from './VideoLibraryIcon'
+import VideoLibraryIcon from './VideoLibrary'
 import VideocamIcon from './Videocam'
 import ViewCompactIcon from './ViewCompact'
-import ViewCompactIconIcon from './ViewCompactIcon'
-import ViewHeadlineIcon from './ViewHeadlineIcon'
-import ViewIcon from './ViewIcon'
+import ViewHeadlineIcon from './ViewHeadline'
+import ViewIcon from './View'
 import ViewListIcon from './ViewList'
 import ViewModuleIcon from './ViewModule'
 import ViewSidebarIcon from './ViewSidebar'
@@ -387,8 +382,6 @@ const allIcons = [
   { name: 'Extension', component: ExtensionIcon },
   { name: 'Favorite', component: FavoriteIcon },
   { name: 'FavoriteBorder', component: FavoriteBorderIcon },
-  { name: 'FavoriteBorderIcon', component: FavoriteBorderIconIcon },
-  { name: 'FavoriteIcon', component: FavoriteIconIcon },
   { name: 'Feedback', component: FeedbackIcon },
   { name: 'FileCopy', component: FileCopyIcon },
   { name: 'Filing', component: FilingIcon },
@@ -407,7 +400,6 @@ const allIcons = [
   { name: 'Gesture', component: GestureIcon },
   { name: 'Google', component: GoogleIcon },
   { name: 'GridView', component: GridViewIcon },
-  { name: 'GridViewIcon', component: GridViewIconIcon },
   { name: 'Group', component: GroupIcon },
   { name: 'GroupWork', component: GroupWorkIcon },
   { name: 'Groups', component: GroupsIcon },
@@ -519,7 +511,6 @@ const allIcons = [
   { name: 'Speed', component: SpeedIcon },
   { name: 'Star', component: StarIcon },
   { name: 'StarBorder', component: StarBorderIcon },
-  { name: 'StarIcon', component: StarIconIcon },
   { name: 'Stop', component: StopIcon },
   { name: 'Storage', component: StorageIcon },
   { name: 'Store', component: StoreIcon },
@@ -543,9 +534,8 @@ const allIcons = [
   { name: 'VideoLibrary', component: VideoLibraryIcon },
   { name: 'Videocam', component: VideocamIcon },
   { name: 'ViewCompact', component: ViewCompactIcon },
-  { name: 'ViewCompactIcon', component: ViewCompactIconIcon },
   { name: 'ViewHeadline', component: ViewHeadlineIcon },
-  { name: 'ViewIcon', component: ViewIcon },
+  { name: 'View', component: ViewIcon },
   { name: 'ViewList', component: ViewListIcon },
   { name: 'ViewModule', component: ViewModuleIcon },
   { name: 'ViewSidebar', component: ViewSidebarIcon },
