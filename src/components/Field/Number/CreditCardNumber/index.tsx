@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -229,11 +229,14 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     [isDefaultValue, isFocused, hasBeenEdited, internalValue, maskCreditCard]
   )
 
-  useEffect(() => {
+  // Track previous value prop for derived state pattern
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     const safeValue = value || ''
     const formattedValue = formatInput(safeValue)
     setInternalValue(formattedValue)
-  }, [value, formatInput])
+  }
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,21 +273,6 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     isFocused
   )
 
-  const CardAdornment = () => (
-    <div
-      style={{
-        ...computedStyles.adornment,
-        ...computedStyles.startAdornment,
-        display: 'flex',
-        alignItems: 'center',
-        height: '100%',
-        marginTop: '-3px',
-      }}
-    >
-      <span>{getCardIcon()}</span>
-    </div>
-  )
-
   return (
     <div style={computedStyles.container}>
       {label && (
@@ -299,7 +287,18 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       )}
 
       <div style={computedStyles.inputWrapper}>
-        <CardAdornment />
+        <div
+          style={{
+            ...computedStyles.adornment,
+            ...computedStyles.startAdornment,
+            display: 'flex',
+            alignItems: 'center',
+            height: '100%',
+            marginTop: '-3px',
+          }}
+        >
+          <span>{getCardIcon()}</span>
+        </div>
         <input
           type="text"
           inputMode="numeric"

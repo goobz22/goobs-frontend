@@ -134,9 +134,6 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const valueSpanRef = useRef<HTMLSpanElement>(null)
-  const placeholderSpanRef = useRef<HTMLSpanElement>(null)
-  const [inputContentWidth, setInputContentWidth] = useState(0)
 
   const computedStyles = getStyles(styles, isFocused)
   const inputStyles = (computedStyles.input ?? {}) as React.CSSProperties
@@ -145,31 +142,18 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const displayValue =
     showPercentSymbol && currentValue ? `${currentValue}%` : currentValue
 
-  const measureStyle: React.CSSProperties = {
-    position: 'absolute',
-    visibility: 'hidden',
-    whiteSpace: 'pre',
-    fontSize: inputStyles.fontSize,
-    fontWeight: inputStyles.fontWeight,
-    lineHeight: inputStyles.lineHeight,
-    fontFamily: inputStyles.fontFamily,
-  }
-
-  useEffect(() => {
-    let valueWidth = 0
-    let placeholderWidth = 0
-    if (valueSpanRef.current) {
-      valueWidth = valueSpanRef.current.offsetWidth
-    }
-    if (placeholderSpanRef.current && placeholder) {
-      placeholderWidth = placeholderSpanRef.current.offsetWidth
-    }
-    setInputContentWidth(Math.max(valueWidth, placeholderWidth))
-  }, [displayValue, placeholder])
+  // Calculate width based on character count using CSS ch units
+  // This avoids the need for DOM measurements and useLayoutEffect
+  const contentLength = Math.max(
+    displayValue?.toString().length || 0,
+    placeholder?.length || 0,
+    3 // minimum 3 characters
+  )
 
   const padLeft = parseFloat(String(inputStyles.paddingLeft || '0')) || 0
   const padRight = parseFloat(String(inputStyles.paddingRight || '0')) || 0
-  const calculatedWidth = `${inputContentWidth + padLeft + padRight + 1}px`
+  // Use ch units for character-based width calculation
+  const calculatedWidth = `calc(${contentLength}ch + ${padLeft + padRight + 8}px)`
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -241,37 +225,6 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const handleFocus = useCallback(() => setIsFocused(true), [])
   const handleBlur = useCallback(() => setIsFocused(false), [])
 
-  const EndAdornment = () => (
-    <div style={computedStyles.adornmentContainer}>
-      <div style={computedStyles.buttonContainer}>
-        <button
-          type="button"
-          onMouseDown={() => handleMouseDown(handleIncrement)}
-          aria-label="increment"
-          disabled={styles?.disabled}
-          style={computedStyles.button}
-        >
-          <ArrowDropUpIcon
-            styles={{ theme: styles?.theme || 'sacred' }}
-            style={computedStyles.icon}
-          />
-        </button>
-        <button
-          type="button"
-          onMouseDown={() => handleMouseDown(handleDecrement)}
-          aria-label="decrement"
-          disabled={styles?.disabled}
-          style={{ ...computedStyles.button, marginTop: '2px' }}
-        >
-          <ArrowDropDownIcon
-            styles={{ theme: styles?.theme || 'sacred' }}
-            style={computedStyles.icon}
-          />
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <div
       style={{
@@ -312,14 +265,34 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
           {...rest}
         />
 
-        <span ref={valueSpanRef} style={measureStyle}>
-          {displayValue}
-        </span>
-        <span ref={placeholderSpanRef} style={measureStyle}>
-          {placeholder}
-        </span>
-
-        <EndAdornment />
+        <div style={computedStyles.adornmentContainer}>
+          <div style={computedStyles.buttonContainer}>
+            <button
+              type="button"
+              onMouseDown={() => handleMouseDown(handleIncrement)}
+              aria-label="increment"
+              disabled={styles?.disabled}
+              style={computedStyles.button}
+            >
+              <ArrowDropUpIcon
+                styles={{ theme: styles?.theme || 'sacred' }}
+                style={computedStyles.icon}
+              />
+            </button>
+            <button
+              type="button"
+              onMouseDown={() => handleMouseDown(handleDecrement)}
+              aria-label="decrement"
+              disabled={styles?.disabled}
+              style={{ ...computedStyles.button, marginTop: '2px' }}
+            >
+              <ArrowDropDownIcon
+                styles={{ theme: styles?.theme || 'sacred' }}
+                style={computedStyles.icon}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       {helperText && <div style={computedStyles.footerText}>{helperText}</div>}

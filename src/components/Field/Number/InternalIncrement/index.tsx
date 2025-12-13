@@ -144,12 +144,14 @@ const InternalIncrementNumberField: React.FC<
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync internal value when controlled `value` prop changes
-  useEffect(() => {
+  // Sync internal value when controlled `value` prop changes (derived state pattern)
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     if (value !== undefined) {
       setInternalValue(value)
     }
-  }, [value])
+  }
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -224,29 +226,6 @@ const InternalIncrementNumberField: React.FC<
 
   const computedStyles = getStyles(styles, isFocused)
 
-  const IncrementAdornment = () => (
-    <div style={computedStyles.buttonContainer}>
-      <button
-        type="button"
-        onMouseDown={() => handleMouseDown(handleIncrement)}
-        aria-label="increment"
-        disabled={styles?.disabled}
-        style={computedStyles.button}
-      >
-        <ArrowDropUpIcon style={computedStyles.icon} />
-      </button>
-      <button
-        type="button"
-        onMouseDown={() => handleMouseDown(handleDecrement)}
-        aria-label="decrement"
-        disabled={styles?.disabled}
-        style={{ ...computedStyles.button, marginTop: '2px' }}
-      >
-        <ArrowDropDownIcon style={computedStyles.icon} />
-      </button>
-    </div>
-  )
-
   return (
     <div style={computedStyles.container}>
       {label && (
@@ -281,7 +260,26 @@ const InternalIncrementNumberField: React.FC<
             ...computedStyles.endAdornment,
           }}
         >
-          <IncrementAdornment />
+          <div style={computedStyles.buttonContainer}>
+            <button
+              type="button"
+              onMouseDown={() => handleMouseDown(handleIncrement)}
+              aria-label="increment"
+              disabled={styles?.disabled}
+              style={computedStyles.button}
+            >
+              <ArrowDropUpIcon style={computedStyles.icon} />
+            </button>
+            <button
+              type="button"
+              onMouseDown={() => handleMouseDown(handleDecrement)}
+              aria-label="decrement"
+              disabled={styles?.disabled}
+              style={{ ...computedStyles.button, marginTop: '2px' }}
+            >
+              <ArrowDropDownIcon style={computedStyles.icon} />
+            </button>
+          </div>
         </div>
       </div>
       {helperText && <div style={computedStyles.footerText}>{helperText}</div>}

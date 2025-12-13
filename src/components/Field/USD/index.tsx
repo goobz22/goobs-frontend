@@ -261,84 +261,16 @@ const USDField: React.FC<USDFieldProps> = ({
   const computedStyles = getStyles(styles, isFocused, enableIncrement)
   const sacredTheme = styles?.theme === 'sacred'
 
-  const DollarAdornment = () => {
-    const { themeConfig, adornmentColor } = getSharedFormFieldStyles(
-      styles,
-      isFocused
-    )
-
-    const dollarSignColor = sacredTheme
-      ? isFocused
-        ? '#FFD700'
-        : 'rgba(255, 215, 0, 0.9)'
-      : adornmentColor
-
-    return (
-      <div
-        style={{
-          ...computedStyles.adornment,
-          ...computedStyles.startAdornment,
-        }}
-      >
-        {sacredTheme && <span style={computedStyles.sacredGlyph}>𓊹</span>}
-        <span
-          style={{
-            color: dollarSignColor,
-            fontSize: styles?.fontSize || '16px',
-            fontWeight: styles?.fontWeight || 500,
-            fontFamily: themeConfig.fontFamily,
-            ...(sacredTheme && {
-              textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-              filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
-            }),
-          }}
-        >
-          $
-        </span>
-      </div>
-    )
-  }
-
-  const IncrementAdornment = () =>
-    enableIncrement ? (
-      <div
-        style={{
-          ...computedStyles.adornment,
-          ...computedStyles.endAdornment,
-        }}
-      >
-        <div style={computedStyles.buttonContainer}>
-          <button
-            type="button"
-            onMouseDown={() => handleMouseDown(handleIncrement)}
-            aria-label="increment"
-            disabled={styles?.disabled}
-            style={computedStyles.button}
-          >
-            <ArrowDropUpIcon
-              style={computedStyles.icon}
-              styles={{
-                theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
-              }}
-            />
-          </button>
-          <button
-            type="button"
-            onMouseDown={() => handleMouseDown(handleDecrement)}
-            aria-label="decrement"
-            disabled={styles?.disabled}
-            style={{ ...computedStyles.button, marginTop: '2px' }}
-          >
-            <ArrowDropDownIcon
-              style={computedStyles.icon}
-              styles={{
-                theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
-              }}
-            />
-          </button>
-        </div>
-      </div>
-    ) : null
+  // Get dollar sign styling
+  const { themeConfig, adornmentColor } = getSharedFormFieldStyles(
+    styles,
+    isFocused
+  )
+  const dollarSignColor = sacredTheme
+    ? isFocused
+      ? '#FFD700'
+      : 'rgba(255, 215, 0, 0.9)'
+    : adornmentColor
 
   return (
     <div style={computedStyles.container}>
@@ -354,7 +286,28 @@ const USDField: React.FC<USDFieldProps> = ({
       )}
 
       <div style={computedStyles.inputWrapper}>
-        <DollarAdornment />
+        <div
+          style={{
+            ...computedStyles.adornment,
+            ...computedStyles.startAdornment,
+          }}
+        >
+          {sacredTheme && <span style={computedStyles.sacredGlyph}>𓊹</span>}
+          <span
+            style={{
+              color: dollarSignColor,
+              fontSize: styles?.fontSize || '16px',
+              fontWeight: styles?.fontWeight || 500,
+              fontFamily: themeConfig.fontFamily,
+              ...(sacredTheme && {
+                textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
+                filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
+              }),
+            }}
+          >
+            $
+          </span>
+        </div>
         <input
           type="text"
           inputMode="decimal"
@@ -369,7 +322,45 @@ const USDField: React.FC<USDFieldProps> = ({
           style={computedStyles.input}
           {...rest}
         />
-        <IncrementAdornment />
+        {enableIncrement && (
+          <div
+            style={{
+              ...computedStyles.adornment,
+              ...computedStyles.endAdornment,
+            }}
+          >
+            <div style={computedStyles.buttonContainer}>
+              <button
+                type="button"
+                onMouseDown={() => handleMouseDown(handleIncrement)}
+                aria-label="increment"
+                disabled={styles?.disabled}
+                style={computedStyles.button}
+              >
+                <ArrowDropUpIcon
+                  style={computedStyles.icon}
+                  styles={{
+                    theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
+                  }}
+                />
+              </button>
+              <button
+                type="button"
+                onMouseDown={() => handleMouseDown(handleDecrement)}
+                aria-label="decrement"
+                disabled={styles?.disabled}
+                style={{ ...computedStyles.button, marginTop: '2px' }}
+              >
+                <ArrowDropDownIcon
+                  style={computedStyles.icon}
+                  styles={{
+                    theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
+                  }}
+                />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
     </div>

@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -128,9 +128,12 @@ const CVV: React.FC<CVVProps> = ({
     [isDefaultValue, isFocused, hasBeenEdited, internalValue, maskCVV]
   )
 
-  useEffect(() => {
+  // Track previous value prop for derived state pattern
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     setInternalValue(value || '')
-  }, [value])
+  }
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,17 +168,6 @@ const CVV: React.FC<CVVProps> = ({
     isFocused
   )
 
-  const CVVAdornment = () => (
-    <div
-      style={{
-        ...computedStyles.adornment,
-        ...computedStyles.startAdornment,
-      }}
-    >
-      <span>🔒</span>
-    </div>
-  )
-
   return (
     <div style={computedStyles.container}>
       {label && (
@@ -190,7 +182,14 @@ const CVV: React.FC<CVVProps> = ({
       )}
 
       <div style={computedStyles.inputWrapper}>
-        <CVVAdornment />
+        <div
+          style={{
+            ...computedStyles.adornment,
+            ...computedStyles.startAdornment,
+          }}
+        >
+          <span>🔒</span>
+        </div>
         <input
           type="password"
           id={id}

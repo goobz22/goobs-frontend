@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { alpha } from '../../../utils'
 
 const SACRED_GOLD = '#FFD700'
@@ -89,9 +89,12 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  useEffect(() => {
+  // Track previous value prop for derived state pattern
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     setPhoneNumber(parseExistingPhoneNumber(String(value || '')))
-  }, [value])
+  }
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
