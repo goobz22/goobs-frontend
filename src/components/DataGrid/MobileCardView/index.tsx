@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Card from './Card'
 import AddCard from './AddCard'
@@ -62,12 +62,13 @@ function MobileCardView({
   onEditingValueChange,
   permissions,
 }: MobileCardViewProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQueryInternal] = useState('')
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [showActions, setShowActions] = useState(false)
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
+  // Initialize portal container with lazy initialization
+  const [portalContainer] = useState<HTMLElement | null>(() =>
+    typeof document !== 'undefined' ? document.body : null
   )
   const [currentPage, setCurrentPage] = useState(0)
   const [itemsPerPage] = useState(10) // Fixed items per page for mobile
@@ -77,6 +78,12 @@ function MobileCardView({
   const [creationRowErrors, setCreationRowErrors] = useState<
     Record<string, string>
   >({})
+
+  // Custom search handler that resets pagination when search changes
+  const setSearchQuery = useCallback((newQuery: string) => {
+    setSearchQueryInternal(newQuery)
+    setCurrentPage(0) // Reset to first page when search changes
+  }, [])
 
   const theme = styles?.theme || 'sacred'
   const computedStyles = getDataGridStyles({ ...styles, theme })
@@ -116,13 +123,6 @@ function MobileCardView({
 
   const themeConfig = getThemeColors(theme)
 
-  // Create portal container for FAB
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      setPortalContainer(document.body)
-    }
-  }, [])
-
   // Filter rows based on search query
   const filteredRows = useMemo(() => {
     if (!searchQuery.trim()) return rows
@@ -139,16 +139,12 @@ function MobileCardView({
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredRows.length / itemsPerPage)
+
   const paginatedRows = useMemo(() => {
     const start = currentPage * itemsPerPage
     const end = start + itemsPerPage
     return filteredRows.slice(start, end)
   }, [filteredRows, currentPage, itemsPerPage])
-
-  // Reset page when search changes
-  useEffect(() => {
-    setCurrentPage(0)
-  }, [searchQuery])
 
   // Handle long press for selection mode
   const handleLongPress = useCallback(

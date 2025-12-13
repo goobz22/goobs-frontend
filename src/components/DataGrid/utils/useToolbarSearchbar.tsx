@@ -67,12 +67,11 @@ export const useSearchbar = ({
   // Local state for the search input
   const [searchValue, setSearchValue] = useState('')
 
-  // Derived "tags" array from the current searchValue
-  const [tags, setTags] = useState<string[]>([])
-
-  useEffect(() => {
-    setTags(searchValue.trim() ? searchValue.toLowerCase().split(' ') : [])
-  }, [searchValue])
+  // Derived "tags" array from the current searchValue using useMemo (not useState + useEffect)
+  const tags = useMemo(
+    () => (searchValue.trim() ? searchValue.toLowerCase().split(' ') : []),
+    [searchValue]
+  )
 
   // Handler for the text input's onChange
   const handleSearchChange = useCallback(

@@ -8,6 +8,23 @@ interface UseColumnResizeProps {
   onColumnResize?: (columnField: string, newWidth: number) => void
 }
 
+// Helper to check if columns changed
+function columnsHaveChanged(
+  columns: ColumnDef[],
+  updatedColumns: ColumnDef[]
+): boolean {
+  if (columns.length !== updatedColumns.length) return true
+  return columns.some((col, idx) => {
+    const prevCol = updatedColumns[idx]
+    return (
+      !prevCol ||
+      col.field !== prevCol.field ||
+      col.width !== prevCol.width ||
+      col.headerName !== prevCol.headerName
+    )
+  })
+}
+
 export function useColumnResize({
   columns,
   onColumnResize,
@@ -20,25 +37,10 @@ export function useColumnResize({
   const [tempWidth, setTempWidth] = useState<number | null>(null)
   const resizingElementRef = useRef<HTMLElement | null>(null)
 
-  // Update columns when props change - preserve all properties including functions
-  useEffect(() => {
-    // Check if columns array length changed or if any field changed
-    const columnsChanged =
-      columns.length !== updatedColumns.length ||
-      columns.some((col, idx) => {
-        const prevCol = updatedColumns[idx]
-        return (
-          !prevCol ||
-          col.field !== prevCol.field ||
-          col.width !== prevCol.width ||
-          col.headerName !== prevCol.headerName
-        )
-      })
-
-    if (columnsChanged) {
-      setUpdatedColumns(columns)
-    }
-  }, [columns])
+  // Update columns when props change - use derived state pattern during render
+  if (columnsHaveChanged(columns, updatedColumns)) {
+    setUpdatedColumns(columns)
+  }
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, columnField: string) => {

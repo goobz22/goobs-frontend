@@ -187,12 +187,11 @@ function DataGridContent({
     return columns.filter(col => col.field !== 'id' && col.field !== '_id')
   }, [columns, showIdColumns])
 
-  // Initialize column order when columns change
-  useEffect(() => {
-    if (filteredColumns.length > 0 && columnOrder.length === 0) {
-      setColumnOrder(filteredColumns.map(col => col.field))
-    }
-  }, [filteredColumns, columnOrder.length])
+  // Initialize column order - use derived state pattern during render
+  // If columnOrder is empty and we have columns, update it
+  if (filteredColumns.length > 0 && columnOrder.length === 0) {
+    setColumnOrder(filteredColumns.map(col => col.field))
+  }
 
   // Reorder columns based on columnOrder state
   const orderedColumns = useMemo(() => {
@@ -289,15 +288,19 @@ function DataGridContent({
     minRows: 5,
   })
 
-  const [pageSize, setPageSize] = useState<number>(5) // Default to 5 rows per page
+  // Use auto page size as initial value if available, otherwise default to 5
+  const [pageSize, setPageSize] = useState<number>(5)
   const [manualPageSizeSet, setManualPageSizeSet] = useState<boolean>(true) // Track if user manually set page size - start as true to preserve default
+  // Track previous autoPageSize to detect changes during render
+  const [prevAutoPageSize, setPrevAutoPageSize] = useState<number>(autoPageSize)
 
-  // Only use auto page size if no manual page size has been set
-  useEffect(() => {
+  // Apply auto page size using derived state pattern during render
+  if (autoPageSize !== prevAutoPageSize) {
+    setPrevAutoPageSize(autoPageSize)
     if (autoPageSize > 0 && !manualPageSizeSet) {
       setPageSize(autoPageSize)
     }
-  }, [autoPageSize, manualPageSizeSet])
+  }
 
   // Handle page size changes from the footer dropdown
   const handlePageSizeChange = useCallback((newPageSize: number) => {
@@ -307,7 +310,8 @@ function DataGridContent({
   }, [])
 
   // Smart update that only triggers when providedRows content actually changes
-  useEffect(() => {
+  // Using layout effect to avoid cascading renders - this syncs external data before paint
+  React.useLayoutEffect(() => {
     if (!areRowsEqual(prevProvidedRowsRef.current, providedRows)) {
       setRows(providedRows || [])
       setFilteredRows(providedRows || [])
@@ -561,14 +565,6 @@ function DataGridContent({
   // Column action handlers (defined after filteredRows is available)
   const handleColumnSort = useCallback(
     (field: string, direction: 'asc' | 'desc') => {
-      console.log('[DataGrid] handleColumnSort called', { field, direction })
-      console.log('[DataGrid] Current rows count:', rows.length)
-      console.log('[DataGrid] Current filteredRows count:', filteredRows.length)
-      console.log(
-        '[DataGrid] First few rows before sort:',
-        rows.slice(0, 3).map(r => ({ id: r.id || r._id, [field]: r[field] }))
-      )
-
       const sortFn = (a: RowData, b: RowData) => {
         const aValue = a[field]
         const bValue = b[field]
@@ -606,31 +602,12 @@ function DataGridContent({
           : bStr.localeCompare(aStr)
       }
 
-      // Sort both rows and filteredRows
-      console.log('[DataGrid] About to call setRows and setFilteredRows')
-      setRows(prevRows => {
-        const sorted = [...prevRows].sort(sortFn)
-        console.log(
-          '[DataGrid] setRows - sorted rows:',
-          sorted
-            .slice(0, 3)
-            .map(r => ({ id: r.id || r._id, [field]: r[field] }))
-        )
-        return sorted
-      })
-      setFilteredRows(prevRows => {
-        const sorted = [...prevRows].sort(sortFn)
-        console.log(
-          '[DataGrid] setFilteredRows - sorted rows:',
-          sorted
-            .slice(0, 3)
-            .map(r => ({ id: r.id || r._id, [field]: r[field] }))
-        )
-        return sorted
-      })
-      console.log('[DataGrid] Sort complete')
+      // Sort both rows and filteredRows using functional updates
+      // No external deps needed since we use prevRows
+      setRows(prevRows => [...prevRows].sort(sortFn))
+      setFilteredRows(prevRows => [...prevRows].sort(sortFn))
     },
-    [rows.length, filteredRows.length]
+    []
   )
 
   const handleColumnHide = useCallback((field: string) => {

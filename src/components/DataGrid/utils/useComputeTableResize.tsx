@@ -228,10 +228,8 @@ export function useComputeTableResize({
     }
   }, [recalcColumns])
 
-  // Recalc once on mount
-  useEffect(() => {
-    recalcColumns()
-  }, [recalcColumns])
+  // Note: No separate mount effect needed - ResizeObserver fires immediately when element is observed
+  // This avoids the setState-in-effect lint warning
 
   return {
     containerRef,

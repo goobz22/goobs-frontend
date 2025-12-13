@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useColumnVisibility } from '../context/ColumnVisibilityContext'
 import type { ColumnDef } from '../types'
 
@@ -22,21 +22,23 @@ export const useManageColumn = ({
   const { columnVisibility, saveVisibility } = useColumnVisibility()
   const [searchInput, setSearchInput] = useState(initialSearchInput)
   const [isAllChecked, setIsAllChecked] = useState(true)
-  const initialized = useRef(false)
+  // Track previous popup state to detect when it opens
+  const [wasPopupOpen, setWasPopupOpen] = useState(false)
 
-  useEffect(() => {
-    if (isPopupOpen) {
-      const currentVisibility: ColumnVisibilityModel = {}
-      columns.forEach(column => {
-        currentVisibility[column.field] = columnVisibility[column.field] ?? true
-      })
-      setTempVisibleColumns(currentVisibility)
-      setIsAllChecked(
-        columns.every(column => currentVisibility[column.field] === true)
-      )
-      initialized.current = true
-    }
-  }, [isPopupOpen, columns, columnVisibility])
+  // Initialize visibility when popup opens using derived state pattern
+  if (isPopupOpen && !wasPopupOpen) {
+    setWasPopupOpen(true)
+    const currentVisibility: ColumnVisibilityModel = {}
+    columns.forEach(column => {
+      currentVisibility[column.field] = columnVisibility[column.field] ?? true
+    })
+    setTempVisibleColumns(currentVisibility)
+    setIsAllChecked(
+      columns.every(column => currentVisibility[column.field] === true)
+    )
+  } else if (!isPopupOpen && wasPopupOpen) {
+    setWasPopupOpen(false)
+  }
 
   const handleAllCols = useCallback(
     (checked: boolean) => {
