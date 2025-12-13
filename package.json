@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.123.01",
+  "version": "0.123.02",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",

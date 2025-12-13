@@ -1,44 +1,53 @@
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import globals from 'globals'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import nextVitals from 'eslint-config-next/core-web-vitals'
+import nextTs from 'eslint-config-next/typescript'
 
-const eslintConfig = [
-  {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
-      'next-env.d.ts',
-      'public/**',
-      'src/data/**/*',
-      '**/*.js',
-      '**/*.mjs',
-      '**/*.cjs',
-      '**/*.d.ts',
-    ],
-  },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([
+    'node_modules/**',
+    '.next/**',
+    '.storybook/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'public/**',
+    'src/data/**/*',
+    'fix-explicit-any.ts',
+    'eslint.config.mjs',
+    'scripts/**',
+  ]),
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      // TypeScript-aware unused vars rule - set to warn to allow incremental cleanup
       '@typescript-eslint/no-unused-vars': 'error',
-      'no-unused-vars': 'off',
+      // Disable no-explicit-any - too many existing usages to fix immediately
+      '@typescript-eslint/no-explicit-any': 'off',
+      // Disable empty object type - use Record<string, never> or {} as needed
+      '@typescript-eslint/no-empty-object-type': 'error',
+      // Disable React Compiler plugin rules - too strict for current codebase
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'error',
+      'react-hooks/static-components': 'error',
+      'react-hooks/set-state-in-render': 'error',
       'no-duplicate-imports': 'error',
-      'linebreak-style': 'off', // Don't enforce line ending style - let .gitattributes handle it
-      'eol-last': 'off', // Don't enforce newline at end of file
+      // Flag comments mentioning legacy or compat patterns
+      'no-warning-comments': [
+        'error',
+        {
+          terms: [
+            'backward compatibility',
+            'backwards compatibility',
+            'legacy alias',
+            'for backward',
+            'for backwards',
+          ],
+          location: 'anywhere',
+        },
+      ],
     },
   },
-  {
-    files: ['.storybook/**/*.js'],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-  },
-]
+])
 
 export default eslintConfig
