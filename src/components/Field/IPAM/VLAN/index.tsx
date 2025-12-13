@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import InternalIncrementNumberField, {
   InternalIncrementNumberFieldProps,
 } from '../../Number/InternalIncrement'
@@ -92,21 +92,28 @@ const VLANField: React.FC<VLANFieldProps> = ({
     [reservedVLANs]
   )
 
-  // Use effect to update state based on validation
-  // This ensures state updates don't happen during render
-  useEffect(() => {
-    const result = getValidationResult(currentValue)
-    setIsValid(result.isValid)
-    setErrorMessage(result.message)
-  }, [currentValue, getValidationResult])
+  // Compute validation result using useMemo (derived state)
+  const validationResult = useMemo(
+    () => getValidationResult(currentValue),
+    [currentValue, getValidationResult]
+  )
 
-  // Initialize with initial value
-  useEffect(() => {
+  // Sync validation state using derived state pattern
+  if (validationResult.isValid !== isValid) {
+    setIsValid(validationResult.isValid)
+  }
+  if (validationResult.message !== errorMessage) {
+    setErrorMessage(validationResult.message)
+  }
+
+  // Track previous initialValue for derived state pattern
+  const [prevInitialValue, setPrevInitialValue] = useState(initialValue)
+  if (initialValue !== prevInitialValue) {
+    setPrevInitialValue(initialValue)
     if (initialValue) {
       setCurrentValue(initialValue)
-      valueRef.current = initialValue
     }
-  }, [initialValue])
+  }
 
   // Handle deferred value updates
   useEffect(() => {

@@ -288,27 +288,6 @@ const InternalIncrementNumberField: React.FC<
     [onChange, effectiveMin, effectiveMax]
   )
 
-  const EndAdornment = () => (
-    <div style={pickerStyles.buttonContainer}>
-      <button
-        type="button"
-        onMouseDown={handleIncrementMouseDown}
-        disabled={rest.disabled}
-        style={pickerStyles.button}
-      >
-        <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
-      </button>
-      <button
-        type="button"
-        onMouseDown={handleDecrementMouseDown}
-        disabled={rest.disabled}
-        style={pickerStyles.button}
-      >
-        <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
-      </button>
-    </div>
-  )
-
   return (
     <div style={style}>
       <div style={componentStyles.container}>
@@ -341,7 +320,24 @@ const InternalIncrementNumberField: React.FC<
               right: '16px',
             }}
           >
-            <EndAdornment />
+            <div style={pickerStyles.buttonContainer}>
+              <button
+                type="button"
+                onMouseDown={handleIncrementMouseDown}
+                disabled={rest.disabled}
+                style={pickerStyles.button}
+              >
+                <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
+              </button>
+              <button
+                type="button"
+                onMouseDown={handleDecrementMouseDown}
+                disabled={rest.disabled}
+                style={pickerStyles.button}
+              >
+                <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

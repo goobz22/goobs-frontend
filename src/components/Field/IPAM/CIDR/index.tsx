@@ -179,14 +179,16 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     ),
   }
 
-  const clearTimers = useCallback(() => {
+  // Note: clearTimers can reference itself in useCallback because the function
+  // is stable (empty deps) and uses closures over refs, not direct self-reference
+  const clearTimers = useCallback(function clearTimersHandler() {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
     if (timerRef.current) clearInterval(timerRef.current)
     initialTimerRef.current = null
     timerRef.current = null
-    // Remove listeners added during press-and-hold
-    document.removeEventListener('mouseup', clearTimers)
-    document.removeEventListener('mouseleave', clearTimers)
+    // Remove listeners added during press-and-hold using the named function
+    document.removeEventListener('mouseup', clearTimersHandler)
+    document.removeEventListener('mouseleave', clearTimersHandler)
   }, [])
 
   const handleIncrement = useCallback(() => {

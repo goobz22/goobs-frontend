@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -363,78 +363,74 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     endIPValue,
   ])
 
-  useEffect(() => {
+  // Compute isInSubnet using useMemo (derived state pattern)
+  const computedIsInSubnet = useMemo(() => {
     if (
       isGateway &&
       isValidIPAddress(value) &&
       subnetAddress &&
-      subnetCIDR !== undefined &&
-      (value !== valueRef.current ||
-        subnetAddress !== subnetAddressRef.current ||
-        subnetCIDR !== subnetCIDRRef.current)
+      subnetCIDR !== undefined
     ) {
-      const subnetValid = isGatewayInSubnet(value, subnetAddress, subnetCIDR)
-      if (subnetValid !== isInSubnet) setIsInSubnet(subnetValid)
+      return isGatewayInSubnet(value, subnetAddress, subnetCIDR)
     }
-  }, [isGateway, value, subnetAddress, subnetCIDR, isInSubnet])
+    return true
+  }, [isGateway, value, subnetAddress, subnetCIDR])
 
-  useEffect(() => {
-    if (isRange && isValidIPAddress(value)) {
-      let bothInSubnet = true
-      if (subnetAddress && subnetCIDR !== undefined) {
-        if (isStartIP && endIPValue && isValidIPAddress(endIPValue)) {
-          const startInSubnet = isIPInSubnetCIDR(
-            value,
-            subnetAddress,
-            subnetCIDR
-          )
-          const endInSubnet = isIPInSubnetCIDR(
-            endIPValue,
-            subnetAddress,
-            subnetCIDR
-          )
-          const startInUsable = isIPInUsableRange(
-            value,
-            subnetAddress,
-            subnetCIDR
-          )
-          const endInUsable = isIPInUsableRange(
-            endIPValue,
-            subnetAddress,
-            subnetCIDR
-          )
-          bothInSubnet =
-            startInSubnet && endInSubnet && startInUsable && endInUsable
-        } else if (isEndIP && startIPValue && isValidIPAddress(startIPValue)) {
-          const startInSubnet = isIPInSubnetCIDR(
-            startIPValue,
-            subnetAddress,
-            subnetCIDR
-          )
-          const endInSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
-          const startInUsable = isIPInUsableRange(
-            startIPValue,
-            subnetAddress,
-            subnetCIDR
-          )
-          const endInUsable = isIPInUsableRange(
-            value,
-            subnetAddress,
-            subnetCIDR
-          )
-          bothInSubnet =
-            startInSubnet && endInSubnet && startInUsable && endInUsable
-        }
-      }
-      const rangeOrderValid =
-        isStartIP && endIPValue && isValidIPAddress(endIPValue)
-          ? isValidIPRange(value, endIPValue)
-          : isEndIP && startIPValue && isValidIPAddress(startIPValue)
-            ? isValidIPRange(startIPValue, value)
-            : true
-      const rangeValid = rangeOrderValid && bothInSubnet
-      if (rangeValid !== isValidRange) setIsValidRange(rangeValid)
+  // Sync isInSubnet state with computed value using derived state pattern
+  if (computedIsInSubnet !== isInSubnet) {
+    setIsInSubnet(computedIsInSubnet)
+  }
+
+  // Compute isValidRange using useMemo (derived state pattern)
+  const computedIsValidRange = useMemo(() => {
+    if (!isRange || !isValidIPAddress(value)) {
+      return true
     }
+    let bothInSubnet = true
+    if (subnetAddress && subnetCIDR !== undefined) {
+      if (isStartIP && endIPValue && isValidIPAddress(endIPValue)) {
+        const startInSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
+        const endInSubnet = isIPInSubnetCIDR(
+          endIPValue,
+          subnetAddress,
+          subnetCIDR
+        )
+        const startInUsable = isIPInUsableRange(
+          value,
+          subnetAddress,
+          subnetCIDR
+        )
+        const endInUsable = isIPInUsableRange(
+          endIPValue,
+          subnetAddress,
+          subnetCIDR
+        )
+        bothInSubnet =
+          startInSubnet && endInSubnet && startInUsable && endInUsable
+      } else if (isEndIP && startIPValue && isValidIPAddress(startIPValue)) {
+        const startInSubnet = isIPInSubnetCIDR(
+          startIPValue,
+          subnetAddress,
+          subnetCIDR
+        )
+        const endInSubnet = isIPInSubnetCIDR(value, subnetAddress, subnetCIDR)
+        const startInUsable = isIPInUsableRange(
+          startIPValue,
+          subnetAddress,
+          subnetCIDR
+        )
+        const endInUsable = isIPInUsableRange(value, subnetAddress, subnetCIDR)
+        bothInSubnet =
+          startInSubnet && endInSubnet && startInUsable && endInUsable
+      }
+    }
+    const rangeOrderValid =
+      isStartIP && endIPValue && isValidIPAddress(endIPValue)
+        ? isValidIPRange(value, endIPValue)
+        : isEndIP && startIPValue && isValidIPAddress(startIPValue)
+          ? isValidIPRange(startIPValue, value)
+          : true
+    return rangeOrderValid && bothInSubnet
   }, [
     isRange,
     isStartIP,
@@ -442,10 +438,14 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     value,
     startIPValue,
     endIPValue,
-    isValidRange,
     subnetAddress,
     subnetCIDR,
   ])
+
+  // Sync isValidRange state with computed value using derived state pattern
+  if (computedIsValidRange !== isValidRange) {
+    setIsValidRange(computedIsValidRange)
+  }
 
   const formatIPAddress = useCallback(
     (input: string, wasDelete: boolean): string => {

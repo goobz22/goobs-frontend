@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -74,13 +74,15 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   const [isFocused, setIsFocused] = useState(false)
   const lastInputTypeWasDelete = useRef(false)
 
-  // Validate initial value on mount
-  useEffect(() => {
+  // Track previous initialValue for derived state pattern
+  const [prevInitialValue, setPrevInitialValue] = useState(initialValue)
+  if (initialValue !== prevInitialValue) {
+    setPrevInitialValue(initialValue)
     if (initialValue) {
       const validMAC = isValidMACAddress(initialValue)
       setIsValid(validMAC)
     }
-  }, [initialValue])
+  }
 
   const formatMACAddress = useCallback(
     (input: string, wasDelete: boolean): string => {
