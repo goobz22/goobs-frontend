@@ -48,7 +48,19 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState<NavigationItem | null>(null)
-  const [history, setHistory] = useState<NavigationItem[]>([])
+  // Use lazy initialization to load history from localStorage
+  const [history, setHistory] = useState<NavigationItem[]>(() => {
+    if (typeof window === 'undefined') return []
+    const savedHistory = localStorage.getItem('searchableHistory')
+    if (savedHistory) {
+      try {
+        return JSON.parse(savedHistory)
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
   const [activeTab, setActiveTab] = useState<'overview' | 'history'>('overview')
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -59,33 +71,23 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     left: 0,
     width: 0,
   })
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
+  // Use lazy initialization for portal container
+  const [portalContainer] = useState<HTMLElement | null>(() => {
+    if (typeof window === 'undefined') return null
+    const container = document.createElement('div')
+    container.id = 'searchable-history-portal'
+    document.body.appendChild(container)
+    return container
+  })
 
-  // Load history from localStorage on mount and create portal container
+  // Cleanup portal container on unmount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedHistory = localStorage.getItem('searchableHistory')
-      if (savedHistory) {
-        try {
-          setHistory(JSON.parse(savedHistory))
-        } catch (e) {
-          console.error('Failed to load search history:', e)
-        }
-      }
-
-      // Create portal container
-      const container = document.createElement('div')
-      container.id = 'searchable-history-portal'
-      document.body.appendChild(container)
-      setPortalContainer(container)
-
-      return () => {
-        document.body.removeChild(container)
+    return () => {
+      if (portalContainer) {
+        document.body.removeChild(portalContainer)
       }
     }
-  }, [])
+  }, [portalContainer])
 
   // Save history to localStorage whenever it changes
   useEffect(() => {

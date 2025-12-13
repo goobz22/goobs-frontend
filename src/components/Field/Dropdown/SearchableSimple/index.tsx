@@ -59,33 +59,35 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     left: 0,
     width: 0,
   })
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
+  // Use lazy initialization for portal container
+  const [portalContainer] = useState<HTMLElement | null>(() => {
+    if (typeof window === 'undefined') return null
+    const container = document.createElement('div')
+    container.id = 'searchable-simple-portal'
+    document.body.appendChild(container)
+    return container
+  })
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Create portal container on mount
+  // Cleanup portal container on unmount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const container = document.createElement('div')
-      container.id = 'searchable-simple-portal'
-      document.body.appendChild(container)
-      setPortalContainer(container)
-
-      return () => {
-        document.body.removeChild(container)
+    return () => {
+      if (portalContainer) {
+        document.body.removeChild(portalContainer)
       }
     }
-  }, [])
+  }, [portalContainer])
 
-  // Set initial value from defaultValue
-  useEffect(() => {
+  // Track previous defaultValue to update using derived state pattern
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
+  if (defaultValue !== prevDefaultValue) {
+    setPrevDefaultValue(defaultValue)
     if (defaultValue !== undefined && defaultValue !== null) {
       setValue(defaultValue)
     }
-  }, [defaultValue])
+  }
 
   // Use useMemo to filter options based on search term
   const filteredOptions = useMemo(() => {

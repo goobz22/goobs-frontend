@@ -63,34 +63,41 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     left: 0,
     width: 0,
   })
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
+  // Use lazy initialization for portal container (creates synchronously on first client render)
+  const [portalContainer] = useState<HTMLElement | null>(() => {
+    if (typeof window === 'undefined') return null
+    const container = document.createElement('div')
+    container.id = 'multiselect-dropdown-portal'
+    document.body.appendChild(container)
+    return container
+  })
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Create portal container on mount
+  // Cleanup portal container on unmount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const container = document.createElement('div')
-      container.id = 'multiselect-dropdown-portal'
-      document.body.appendChild(container)
-      setPortalContainer(container)
-
-      return () => {
-        document.body.removeChild(container)
+    return () => {
+      if (portalContainer) {
+        document.body.removeChild(portalContainer)
       }
     }
-  }, [])
+  }, [portalContainer])
 
-  useEffect(() => {
+  // Track previous defaultSelected to update using derived state pattern
+  const [prevDefaultSelected, setPrevDefaultSelected] =
+    useState(defaultSelected)
+  if (
+    defaultSelected !== prevDefaultSelected &&
+    JSON.stringify(defaultSelected) !== JSON.stringify(prevDefaultSelected)
+  ) {
+    setPrevDefaultSelected(defaultSelected)
     if (defaultSelected && Array.isArray(defaultSelected)) {
       setSelectedValues(defaultSelected)
     } else if (!defaultSelected) {
       setSelectedValues([])
     }
-  }, [defaultSelected])
+  }
 
   // Update dropdown position when opened
   useEffect(() => {

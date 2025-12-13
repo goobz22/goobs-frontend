@@ -63,35 +63,41 @@ const Dropdown: React.FC<DropdownProps> = ({
     left: 0,
     width: 0,
   })
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
+  // Use lazy initialization for portal container (creates synchronously on first client render)
+  const [portalContainer] = useState<HTMLElement | null>(() => {
+    if (typeof window === 'undefined') return null
+    const container = document.createElement('div')
+    container.id = 'dropdown-portal'
+    document.body.appendChild(container)
+    return container
+  })
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Create portal container on mount
+  // Cleanup portal container on unmount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const container = document.createElement('div')
-      container.id = 'dropdown-portal'
-      document.body.appendChild(container)
-      setPortalContainer(container)
-
-      return () => {
-        document.body.removeChild(container)
+    return () => {
+      if (portalContainer) {
+        document.body.removeChild(portalContainer)
       }
     }
-  }, [])
+  }, [portalContainer])
 
-  // Set initial value from defaultValue or externalValue
-  useEffect(() => {
+  // Track previous externalValue/defaultValue to update using derived state pattern
+  const [prevExternalValue, setPrevExternalValue] = useState(externalValue)
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
+  if (externalValue !== prevExternalValue) {
+    setPrevExternalValue(externalValue)
     if (externalValue !== undefined && externalValue !== null) {
       setValue(externalValue)
-    } else if (defaultValue !== undefined && defaultValue !== null) {
+    }
+  } else if (defaultValue !== prevDefaultValue) {
+    setPrevDefaultValue(defaultValue)
+    if (defaultValue !== undefined && defaultValue !== null) {
       setValue(defaultValue)
     }
-  }, [externalValue, defaultValue])
+  }
 
   // Filter options
   const filteredOptions = useMemo(() => {
