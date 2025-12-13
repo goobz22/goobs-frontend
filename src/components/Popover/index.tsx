@@ -25,18 +25,16 @@ const Popover: React.FC<PopoverProps> = ({
   styles,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
+  // Use lazy initialization to check if we're on client side
+  const [mounted] = useState(() => typeof window !== 'undefined')
   // Track if a click started inside the popover
   const clickStartedInsideRef = useRef(false)
 
-  // Ensure we're on the client side for portal
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Stable onClose reference
+  // Stable onClose reference - update in effect to avoid render-time ref mutation
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {

@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the Popover component.
  * These stories showcase the various themes and styling options for the Popover component.
  */
-import React, { useState, useRef } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { within, expect, userEvent } from 'storybook/test'
 import Popover from './index'
@@ -75,12 +75,16 @@ const InteractivePopover = ({
   children: React.ReactNode
 }) => {
   const [open, setOpen] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
 
   return (
     <div style={{ padding: '100px' }}>
       <Button
-        ref={anchorRef}
+        ref={anchorRefCallback}
         styles={{ theme: styles?.theme || 'light' }}
         onClick={() => setOpen(!open)}
       >
@@ -89,7 +93,7 @@ const InteractivePopover = ({
       <Popover
         open={open}
         onClose={() => setOpen(false)}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         styles={styles}
       >
         {children}
@@ -394,12 +398,16 @@ export const CustomPosition: Story = {
 // Component for Interaction Test
 const InteractionTestComponent: React.FC = () => {
   const [open, setOpen] = useState(false)
-  const anchorRef = useRef<HTMLButtonElement>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
 
   return (
     <div style={{ padding: '100px' }}>
       <Button
-        ref={anchorRef}
+        ref={anchorRefCallback}
         styles={{ theme: 'light' }}
         onClick={() => setOpen(!open)}
         data-testid="toggle-popover"
@@ -409,7 +417,7 @@ const InteractionTestComponent: React.FC = () => {
       <Popover
         open={open}
         onClose={() => setOpen(false)}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         styles={{ theme: 'light' }}
       >
         <div style={{ padding: '16px' }}>
