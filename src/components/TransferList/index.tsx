@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Dropdown, { DropdownOption } from '../Field/Dropdown/Regular'
 import CustomCheckbox from '../Checkbox'
 
@@ -231,6 +231,53 @@ const sacredStyles = {
   } as React.CSSProperties,
 }
 
+// TransferButton component moved outside TransferList to avoid re-creation during render
+interface TransferButtonProps {
+  onClick: () => void
+  disabled: boolean
+  'aria-label': string
+  children: React.ReactNode
+  name: string
+  styles: typeof premiumStyles | typeof sacredStyles
+  sacredtheme: boolean
+  hoveredButton: string | null
+  setHoveredButton: (name: string | null) => void
+}
+
+const TransferButton: React.FC<TransferButtonProps> = ({
+  onClick,
+  disabled,
+  'aria-label': ariaLabel,
+  children,
+  name,
+  styles,
+  sacredtheme,
+  hoveredButton,
+  setHoveredButton,
+}) => {
+  const isHovered = hoveredButton === name
+  const buttonStyle: React.CSSProperties = {
+    ...styles.button,
+    ...(isHovered && !disabled && styles.buttonHover),
+    ...(disabled && styles.buttonDisabled),
+    ...(sacredtheme && {
+      animationDelay: name === 'all-left' ? '0.5s' : undefined,
+    }),
+  }
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      style={buttonStyle}
+      onMouseEnter={() => setHoveredButton(name)}
+      onMouseLeave={() => setHoveredButton(null)}
+    >
+      {children}
+    </button>
+  )
+}
+
 const TransferList: React.FC<TransferListProps> = ({
   variant = 'singleSelection',
   leftItems = [],
@@ -246,10 +293,22 @@ const TransferList: React.FC<TransferListProps> = ({
   className,
   style,
 }) => {
-  const [selectedDropdownValue, setSelectedDropdownValue] = useState<string>('')
+  const [selectedDropdownValue, setSelectedDropdownValueInternal] =
+    useState<string>('')
   const [checked, setChecked] = useState<readonly string[]>([])
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+
+  // Custom handler that resets checked when dropdown changes
+  const setSelectedDropdownValue = React.useCallback(
+    (value: string) => {
+      setSelectedDropdownValueInternal(value)
+      if (variant === 'multipleSelection') {
+        setChecked([])
+      }
+    },
+    [variant]
+  )
 
   const styles = sacredtheme ? sacredStyles : premiumStyles
 
@@ -260,12 +319,6 @@ const TransferList: React.FC<TransferListProps> = ({
     currentLeft = dropdownDataMap[selectedDropdownValue]?.leftItems ?? []
     currentRight = dropdownDataMap[selectedDropdownValue]?.rightItems ?? []
   }
-
-  useEffect(() => {
-    if (variant === 'multipleSelection') {
-      setChecked([])
-    }
-  }, [variant, selectedDropdownValue])
 
   const leftChecked = intersection(checked, currentLeft)
   const rightChecked = intersection(checked, currentRight)
@@ -389,42 +442,6 @@ const TransferList: React.FC<TransferListProps> = ({
     )
   }
 
-  const TransferButton = ({
-    onClick,
-    disabled,
-    'aria-label': ariaLabel,
-    children,
-    name,
-  }: {
-    onClick: () => void
-    disabled: boolean
-    'aria-label': string
-    children: React.ReactNode
-    name: string
-  }) => {
-    const isHovered = hoveredButton === name
-    const buttonStyle: React.CSSProperties = {
-      ...styles.button,
-      ...(isHovered && !disabled && styles.buttonHover),
-      ...(disabled && styles.buttonDisabled),
-      ...(sacredtheme && {
-        animationDelay: name === 'all-left' ? '0.5s' : undefined,
-      }),
-    }
-    return (
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        aria-label={ariaLabel}
-        style={buttonStyle}
-        onMouseEnter={() => setHoveredButton(name)}
-        onMouseLeave={() => setHoveredButton(null)}
-      >
-        {children}
-      </button>
-    )
-  }
-
   return (
     <div style={{ ...styles.container, ...style }} className={className}>
       {sacredtheme && <div style={sacredStyles.glyph}>𓊨</div>}
@@ -435,6 +452,10 @@ const TransferList: React.FC<TransferListProps> = ({
           disabled={currentLeft.length === 0}
           aria-label="move all right"
           name="all-right"
+          styles={styles}
+          sacredtheme={sacredtheme}
+          hoveredButton={hoveredButton}
+          setHoveredButton={setHoveredButton}
         >
           ≫
         </TransferButton>
@@ -443,6 +464,10 @@ const TransferList: React.FC<TransferListProps> = ({
           disabled={leftChecked.length === 0}
           aria-label="move selected right"
           name="checked-right"
+          styles={styles}
+          sacredtheme={sacredtheme}
+          hoveredButton={hoveredButton}
+          setHoveredButton={setHoveredButton}
         >
           &gt;
         </TransferButton>
@@ -451,6 +476,10 @@ const TransferList: React.FC<TransferListProps> = ({
           disabled={rightChecked.length === 0}
           aria-label="move selected left"
           name="checked-left"
+          styles={styles}
+          sacredtheme={sacredtheme}
+          hoveredButton={hoveredButton}
+          setHoveredButton={setHoveredButton}
         >
           &lt;
         </TransferButton>
@@ -459,6 +488,10 @@ const TransferList: React.FC<TransferListProps> = ({
           disabled={currentRight.length === 0}
           aria-label="move all left"
           name="all-left"
+          styles={styles}
+          sacredtheme={sacredtheme}
+          hoveredButton={hoveredButton}
+          setHoveredButton={setHoveredButton}
         >
           ≪
         </TransferButton>

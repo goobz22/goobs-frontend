@@ -56,13 +56,23 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const defaultExpanded = styles?.accordionDefaultExpanded || false
   const isSacredTheme = styles?.theme === 'sacred'
 
-  const startValue = initialValue
   const startMode = determineStartMode(
     editorType,
     initialMode,
     styles?.defaultMode
   )
-  const [valueState, setValueState] = useState<string>(startValue)
+
+  // Use lazy initialization to load draft from localStorage on mount
+  // This avoids the need for an effect that calls setState
+  const [valueState, setValueState] = useState<string>(() => {
+    if (autoSave && autoSaveKey && typeof window !== 'undefined') {
+      const draft = localStorage.getItem(autoSaveKey)
+      if (draft && !initialValue) {
+        return draft
+      }
+    }
+    return initialValue
+  })
   const value = valueProp !== undefined ? valueProp : valueState
   const [mode, setMode] = useState<EditorMode>(startMode)
   const [isFocused] = useState(false)
@@ -83,12 +93,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     isFocused
   )
 
-  useEffect(() => {
-    if (autoSave && autoSaveKey) {
-      const draft = localStorage.getItem(autoSaveKey)
-      if (draft && !value) setValueState(draft)
-    }
-  }, [autoSave, autoSaveKey, value])
+  // Auto-save to localStorage with debounce
   useEffect(() => {
     if (autoSave && autoSaveKey) {
       const timeout = setTimeout(

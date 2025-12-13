@@ -149,7 +149,8 @@ const Drawer: FC<DrawerProps> = ({
   styles = {},
   ...other
 }) => {
-  const [isMounted, setIsMounted] = useState(false)
+  // Use lazy initialization for hydration consistency
+  const [isMounted] = useState(() => typeof window !== 'undefined')
   const [isVisible, setIsVisible] = useState(open)
   const [containerSize, setContainerSize] = useState({
     width: 320,
@@ -160,21 +161,26 @@ const Drawer: FC<DrawerProps> = ({
 
   const isSacredTheme = styles.theme === 'sacred'
 
-  // Ensure hydration consistency
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  // Track previous open state for derived state pattern
+  const [prevOpen, setPrevOpen] = useState(open)
 
-  // Handle visibility transitions
+  // Handle visibility transitions using derived state pattern
+  // When open changes from false to true, immediately show
+  if (open && !prevOpen) {
+    setPrevOpen(true)
+    setIsVisible(true)
+  } else if (!open && prevOpen) {
+    setPrevOpen(false)
+    // Don't immediately hide - let the effect below handle delayed hiding
+  }
+
+  // Handle delayed hiding for exit animation
   useEffect(() => {
-    if (open) {
-      setIsVisible(true)
-    } else {
-      // Delay hiding to allow exit animation
+    if (!open && isVisible) {
       const timer = setTimeout(() => setIsVisible(false), 300)
       return () => clearTimeout(timer)
     }
-  }, [open])
+  }, [open, isVisible])
 
   // Track container size for sacred background
   useEffect(() => {

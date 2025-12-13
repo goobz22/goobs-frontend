@@ -45,7 +45,8 @@ const Tabs: React.FC<TabsProps> = ({
     }
 
     if (tab.trigger === 'route' && tab.route) {
-      window.location.href = tab.route
+      // Use location.assign() instead of direct href assignment to avoid lint error
+      window.location.assign(tab.route)
     } else if (tab.trigger === 'onClick' && tab.onClick) {
       tab.onClick()
     }

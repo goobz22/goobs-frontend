@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/MarkdownEditor/index.tsx
 
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
 import {
@@ -24,19 +24,21 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   minRows,
   styles,
 }) => {
-  const [markdownValue, setMarkdownValue] = useState(value)
+  // Use value prop directly - this is a controlled component
+  // No internal state needed for the value itself
   const [selectedText, setSelectedText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const hasInsertedKeyframes = useRef(false)
 
   const isSacredTheme = styles?.theme === 'sacred'
 
   // Get computed styles
   const computedStyles = getComplexTextEditorStyles(styles, isFocused)
 
-  // CSS keyframes for sacred animations
+  // CSS keyframes for sacred animations - only insert once
   useEffect(() => {
-    if (isSacredTheme) {
+    if (isSacredTheme && !hasInsertedKeyframes.current) {
       const styleSheet = document.styleSheets?.[0]
       const keyframes = `
         @keyframes markdownEditorCodeGlow {
@@ -51,25 +53,19 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       try {
         if (styleSheet) {
           styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
+          hasInsertedKeyframes.current = true
         }
       } catch {
         // Keyframes might already exist
+        hasInsertedKeyframes.current = true
       }
     }
   }, [isSacredTheme])
 
-  useEffect(() => {
-    if (value !== markdownValue) {
-      setMarkdownValue(value)
-    }
-  }, [value, markdownValue])
-
   const handleLocalMarkdownChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    const newValue = event.target.value
-    setMarkdownValue(newValue)
-    onChange(newValue)
+    onChange(event.target.value)
   }
 
   const handleSelect = (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -129,7 +125,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </button>
       <div style={{ display: 'flex' }}>
         <textarea
-          value={markdownValue}
+          value={value}
           onChange={handleLocalMarkdownChange}
           onSelect={handleSelect}
           onFocus={handleFocus}
@@ -145,7 +141,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         {showPreview && (
           <div
             style={{ width: '50%', borderLeft: '1px solid' }}
-            dangerouslySetInnerHTML={{ __html: mdToHtml(markdownValue) }}
+            dangerouslySetInnerHTML={{ __html: mdToHtml(value) }}
           />
         )}
       </div>

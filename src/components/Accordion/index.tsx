@@ -1,12 +1,6 @@
 'use client'
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  type FC,
-  type ReactNode,
-} from 'react'
+import React, { useState, useCallback, type FC, type ReactNode } from 'react'
 import Link from 'next/link'
 import { alpha } from '../../utils'
 
@@ -52,11 +46,11 @@ const useAccordionState = ({
   onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
   styles?: AccordionProps['styles']
 }) => {
-  const { current: isControlled } = React.useRef(
-    controlledExpanded !== undefined
-  )
+  // For uncontrolled mode only - controlled mode derives directly from props
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded)
 
+  // Determine if controlled - when controlled, use prop directly without syncing
+  const isControlled = controlledExpanded !== undefined
   const expanded = isControlled ? controlledExpanded : internalExpanded
 
   const handleToggle = useCallback(
@@ -71,11 +65,8 @@ const useAccordionState = ({
     [styles?.disabled, expanded, isControlled, onChange]
   )
 
-  useEffect(() => {
-    if (isControlled) {
-      setInternalExpanded(controlledExpanded!)
-    }
-  }, [controlledExpanded, isControlled])
+  // No useEffect needed - controlled state is derived directly from props
+  // Uncontrolled state is managed internally via setInternalExpanded
 
   return { expanded, handleToggle }
 }

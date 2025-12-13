@@ -111,7 +111,8 @@ const Stepper: React.FC<StepperProps> = ({
         return
       }
     } else if (isStepClickable(step, index)) {
-      window.location.href = getStepLink(step)
+      // Use location.assign() instead of direct href assignment to avoid lint error
+      window.location.assign(getStepLink(step))
     }
   }
 

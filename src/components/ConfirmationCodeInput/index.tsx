@@ -91,7 +91,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
   isValid,
   onChange,
-  value = '',
+  value: valueProp = '',
   'aria-label': ariaLabel,
   'aria-required': ariaRequired,
   'aria-invalid': ariaInvalid,
@@ -108,10 +108,18 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSuccessState = false,
   styles,
 }) => {
-  const [internalValue, setInternalValue] = useState(value)
+  // For uncontrolled mode - parent doesn't provide onChange
+  const [uncontrolledValue, setUncontrolledValue] = useState(valueProp)
   const [isHovered, setIsHovered] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const inputRefs = useRef<(HTMLInputElement | null)[]>(
+    Array.from({ length: codeLength }, () => null)
+  )
+  const hasAutoFocused = useRef(false)
+
+  // Use controlled value if onChange is provided, otherwise use internal state
+  const isControlled = onChange !== undefined
+  const currentValue = isControlled ? valueProp : uncontrolledValue
 
   const isSacredTheme = styles?.theme === 'sacred'
   const isDisabled = styles?.disabled
@@ -130,38 +138,46 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     setIsHovered(false)
   }, [])
 
+  // Auto-focus first input on mount (only once)
   useEffect(() => {
-    inputRefs.current = Array.from({ length: codeLength }, () => null)
-  }, [codeLength])
+    if (!hasAutoFocused.current) {
+      const timer = setTimeout(() => {
+        // Only focus if there's no value yet
+        if (inputRefs.current[0] && !inputRefs.current[0].value) {
+          inputRefs.current[0].focus()
+          hasAutoFocused.current = true
+        }
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, []) // Empty deps - only run on mount
 
-  useEffect(() => {
-    if (internalValue !== value) setInternalValue(value)
-  }, [value, internalValue])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputRefs.current[0] && internalValue.length === 0)
-        inputRefs.current[0].focus()
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [internalValue.length])
+  // Helper to update value
+  const updateValue = useCallback(
+    (newValue: string) => {
+      if (!isControlled) {
+        setUncontrolledValue(newValue)
+      }
+      onChange?.(newValue)
+    },
+    [isControlled, onChange]
+  )
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
       const val = e.target.value
       if (!/^\d*$/.test(val)) return
-      const newValueArr = internalValue.padEnd(codeLength, '').split('')
+      const newValueArr = currentValue.padEnd(codeLength, '').split('')
       if (val.length > 1)
         val.split('').forEach((digit, i) => {
           if (index + i < codeLength) newValueArr[index + i] = digit
         })
       else newValueArr[index] = val.charAt(val.length - 1)
       const newValue = newValueArr.join('').trimEnd()
-      setInternalValue(newValue)
-      onChange?.(newValue)
+      updateValue(newValue)
       if (val && index < codeLength - 1) inputRefs.current[index + 1]?.focus()
     },
-    [internalValue, codeLength, onChange]
+    [currentValue, codeLength, updateValue]
   )
 
   const handleKeyDown = useCallback(
@@ -170,19 +186,17 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         if (index > 0) {
           e.preventDefault()
           inputRefs.current[index - 1]?.focus()
-          const newValueArr = internalValue.split('')
+          const newValueArr = currentValue.split('')
           newValueArr[index - 1] = ''
           const newValue = newValueArr.join('').trimEnd()
-          setInternalValue(newValue)
-          onChange?.(newValue)
+          updateValue(newValue)
         }
       }
       const clearCurrent = () => {
-        const newValueArr = internalValue.split('')
+        const newValueArr = currentValue.split('')
         newValueArr[index] = ''
         const newValue = newValueArr.join('').trimEnd()
-        setInternalValue(newValue)
-        onChange?.(newValue)
+        updateValue(newValue)
       }
 
       switch (e.key) {
@@ -211,7 +225,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         case 'Enter':
           if (
             index === codeLength - 1 &&
-            internalValue.length >= codeLength &&
+            currentValue.length >= codeLength &&
             onVerify
           ) {
             e.preventDefault()
@@ -221,16 +235,15 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
         default:
           if (/^\d$/.test(e.key)) {
             e.preventDefault()
-            const newValueArr = internalValue.padEnd(codeLength, '').split('')
+            const newValueArr = currentValue.padEnd(codeLength, '').split('')
             newValueArr[index] = e.key
             const newValue = newValueArr.join('').trimEnd()
-            setInternalValue(newValue)
-            onChange?.(newValue)
+            updateValue(newValue)
             if (index < codeLength - 1) inputRefs.current[index + 1]?.focus()
           }
       }
     },
-    [internalValue, codeLength, onChange, onVerify]
+    [currentValue, codeLength, updateValue, onVerify]
   )
 
   const handlePaste = useCallback(
@@ -239,17 +252,16 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       const pastedData = e.clipboardData.getData('text') || ''
       const digits = pastedData.replace(/\D/g, '').slice(0, codeLength - index)
       if (digits) {
-        const newValueArr = internalValue.padEnd(codeLength, '').split('')
+        const newValueArr = currentValue.padEnd(codeLength, '').split('')
         for (let i = 0; i < digits.length; i++)
           if (index + i < codeLength) newValueArr[index + i] = digits.charAt(i)
         const newValue = newValueArr.join('').trimEnd()
-        setInternalValue(newValue)
-        onChange?.(newValue)
+        updateValue(newValue)
         const focusIndex = Math.min(index + digits.length, codeLength - 1)
         inputRefs.current[focusIndex || 0]?.focus()
       }
     },
-    [internalValue, codeLength, onChange]
+    [currentValue, codeLength, updateValue]
   )
 
   const handleFocus = useCallback((index: number) => {
@@ -260,8 +272,8 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     setFocusedIndex(null)
   }, [])
 
-  const digits = internalValue.padEnd(codeLength, '').split('')
-  const allFieldsFilled = internalValue.length >= codeLength
+  const digits = currentValue.padEnd(codeLength, '').split('')
+  const allFieldsFilled = currentValue.length >= codeLength
 
   if (showSuccessState) {
     return (
