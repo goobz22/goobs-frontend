@@ -5,7 +5,7 @@
  */
 'use client'
 
-import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
+import React, { useMemo, useEffect, useState, useCallback } from 'react'
 import {
   useProjectBoard,
   ProjectBoardProvider,
@@ -19,7 +19,6 @@ import {
   ColumnData,
   Task,
   BoardType,
-  AnimationOrigin,
   AddTaskFormType,
 } from './types'
 
@@ -140,26 +139,10 @@ function ProjectBoardContent({
   const [searchTerm, setSearchTerm] = useState('')
   const [productServiceFilter, setProductServiceFilter] =
     useState<string>('all')
-  const createTaskButtonRef = useRef<HTMLButtonElement>(null)
 
   // Drag and drop hooks
   const columnDragAndDrop = useColumnDragAndDrop(columnState, setColumnState)
   const taskDragAndDrop = useTaskDragAndDrop()
-
-  // Helper to capture element bounds for animation
-  const captureElementOrigin = useCallback(
-    (element: HTMLElement | null): AnimationOrigin | null => {
-      if (!element) return null
-      const rect = element.getBoundingClientRect()
-      return {
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
-      }
-    },
-    []
-  )
 
   // Task selection handler - only toggles selection, doesn't open the task
   const handleTaskSelect = useCallback((taskId: string) => {
@@ -303,9 +286,10 @@ function ProjectBoardContent({
   }, [columnState, activeTaskId])
 
   // Handle Create Task button click
+  // Note: Animation origin is set to null for simplicity - the animation
+  // will expand from center of viewport
   const handleCreateTaskClick = useCallback(() => {
-    const origin = captureElementOrigin(createTaskButtonRef.current)
-    setAnimationOrigin(origin)
+    setAnimationOrigin(null)
 
     // Determine which form to show based on variant and preferDropdown
     let formType: AddTaskFormType = 'customer'
@@ -326,7 +310,6 @@ function ProjectBoardContent({
     setActiveAddTaskForm(formType)
     setViewState('addTask')
   }, [
-    captureElementOrigin,
     setAnimationOrigin,
     variant,
     preferDropdown,
@@ -350,14 +333,13 @@ function ProjectBoardContent({
       return
     }
 
-    const origin = captureElementOrigin(createTaskButtonRef.current)
-    setAnimationOrigin(origin)
+    // Animation origin is set to null for simplicity
+    setAnimationOrigin(null)
     setActiveTaskId(selectedTaskId)
     setViewState('showTask')
   }, [
     selectedTaskId,
     columnState,
-    captureElementOrigin,
     setAnimationOrigin,
     setActiveTaskId,
     setViewState,
@@ -371,7 +353,6 @@ function ProjectBoardContent({
       btns.push({
         text: 'Create Task',
         onClick: handleCreateTaskClick,
-        ref: createTaskButtonRef,
       })
     }
     btns.push({

@@ -583,8 +583,6 @@ export default function Board({
     [styles?.theme, isMobile, isTablet]
   )
 
-  const isSacredTheme = styles?.theme === 'sacred'
-
   // Add scrollbar styles to the document head
   React.useEffect(() => {
     const styleId = 'board-scrollbar-styles'
@@ -807,7 +805,6 @@ export default function Board({
       columnDragAndDrop,
       handleColumnDragStart,
       handleColumnDragEnd,
-      isSacredTheme,
       taskDragAndDrop,
       allColumns,
       setAllColumns,

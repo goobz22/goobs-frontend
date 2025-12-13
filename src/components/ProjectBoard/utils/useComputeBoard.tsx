@@ -117,10 +117,7 @@ export function useComputeBoardResize({
     return () => window.removeEventListener('resize', handleResize)
   }, [recalcColumns])
 
-  // Recalc once on mount
-  useEffect(() => {
-    recalcColumns()
-  }, [recalcColumns])
+  // Note: No separate mount effect needed - ResizeObserver fires immediately when element is observed
 
   return {
     containerRef,

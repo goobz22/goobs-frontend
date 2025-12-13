@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import type { AnimationOrigin, ProjectBoardStyles } from './types'
 import { getProjectBoardTheme } from '../../theme/projectboard'
 
@@ -19,17 +19,31 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
 }) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const theme = getProjectBoardTheme(styles)
+  const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
+  // Track previous isVisible to detect when it becomes true
+  const [prevIsVisible, setPrevIsVisible] = useState(isVisible)
+  if (isVisible !== prevIsVisible) {
+    setPrevIsVisible(isVisible)
     if (isVisible) {
+      // When becoming visible, start animating
       setIsAnimating(true)
-      // Mark animation as complete after duration
-      const timer = setTimeout(() => {
-        setIsAnimating(false)
-      }, 400) // Match this with CSS animation duration
-      return () => clearTimeout(timer)
     }
-  }, [isVisible])
+  }
+
+  // Use effect only for the timer cleanup to stop animation
+  useEffect(() => {
+    if (isAnimating) {
+      animationTimerRef.current = setTimeout(() => {
+        setIsAnimating(false)
+      }, 400)
+      return () => {
+        if (animationTimerRef.current) {
+          clearTimeout(animationTimerRef.current)
+        }
+      }
+    }
+  }, [isAnimating])
 
   if (!isVisible) {
     return null
