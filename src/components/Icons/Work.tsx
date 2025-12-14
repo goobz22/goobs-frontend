@@ -35,13 +35,14 @@ const WorkIcon: React.FC<WorkIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40q0-33 23.5-56.5T440-920h80q33 0 56.5 23.5T600-840v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm0-80h400v-520H280v520Zm160-600h80v-40h-80v40Zm0 40Z" />
+        <path d="M0 0h24v24H0z" fill="none" />
+        <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
