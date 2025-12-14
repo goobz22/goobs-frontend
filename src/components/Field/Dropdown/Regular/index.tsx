@@ -63,26 +63,27 @@ const Dropdown: React.FC<DropdownProps> = ({
     left: 0,
     width: 0,
   })
-  // Use lazy initialization for portal container (creates synchronously on first client render)
-  const [portalContainer] = useState<HTMLElement | null>(() => {
-    if (typeof window === 'undefined') return null
-    const container = document.createElement('div')
-    container.id = 'dropdown-portal'
-    document.body.appendChild(container)
-    return container
-  })
+  // Portal container - created in useEffect to avoid hydration mismatch
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Cleanup portal container on unmount
+  // Create and cleanup portal container after mount (avoids SSR hydration issues)
   useEffect(() => {
+    const container = document.createElement('div')
+    container.id = `dropdown-portal-${Math.random().toString(36).slice(2, 9)}`
+    document.body.appendChild(container)
+    setPortalContainer(container)
+
     return () => {
-      if (portalContainer) {
-        document.body.removeChild(portalContainer)
+      if (container.parentNode) {
+        container.parentNode.removeChild(container)
       }
     }
-  }, [portalContainer])
+  }, [])
 
   // Track previous externalValue/defaultValue to update using derived state pattern
   const [prevExternalValue, setPrevExternalValue] = useState(externalValue)

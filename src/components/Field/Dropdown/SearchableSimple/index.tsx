@@ -59,26 +59,27 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     left: 0,
     width: 0,
   })
-  // Use lazy initialization for portal container
-  const [portalContainer] = useState<HTMLElement | null>(() => {
-    if (typeof window === 'undefined') return null
-    const container = document.createElement('div')
-    container.id = 'searchable-simple-portal'
-    document.body.appendChild(container)
-    return container
-  })
+  // Portal container - created in useEffect to avoid hydration mismatch
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Cleanup portal container on unmount
+  // Create and cleanup portal container after mount (avoids SSR hydration issues)
   useEffect(() => {
+    const container = document.createElement('div')
+    container.id = `searchable-simple-portal-${Math.random().toString(36).slice(2, 9)}`
+    document.body.appendChild(container)
+    setPortalContainer(container)
+
     return () => {
-      if (portalContainer) {
-        document.body.removeChild(portalContainer)
+      if (container.parentNode) {
+        container.parentNode.removeChild(container)
       }
     }
-  }, [portalContainer])
+  }, [])
 
   // Track previous defaultValue to update using derived state pattern
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)

@@ -71,23 +71,24 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     left: 0,
     width: 0,
   })
-  // Use lazy initialization for portal container
-  const [portalContainer] = useState<HTMLElement | null>(() => {
-    if (typeof window === 'undefined') return null
-    const container = document.createElement('div')
-    container.id = 'searchable-history-portal'
-    document.body.appendChild(container)
-    return container
-  })
+  // Portal container - created in useEffect to avoid hydration mismatch
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  )
 
-  // Cleanup portal container on unmount
+  // Create and cleanup portal container after mount (avoids SSR hydration issues)
   useEffect(() => {
+    const container = document.createElement('div')
+    container.id = `searchable-history-portal-${Math.random().toString(36).slice(2, 9)}`
+    document.body.appendChild(container)
+    setPortalContainer(container)
+
     return () => {
-      if (portalContainer) {
-        document.body.removeChild(portalContainer)
+      if (container.parentNode) {
+        container.parentNode.removeChild(container)
       }
     }
-  }, [portalContainer])
+  }, [])
 
   // Save history to localStorage whenever it changes
   useEffect(() => {
