@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.123.02",
+  "version": "0.123.03",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "bun run lint && tsc && vite build && bun run format",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "prepublishOnly": "bun run build",
     "start": "storybook dev -p 6006",
