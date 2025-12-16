@@ -108,14 +108,10 @@ const lightTheme: IconTheme = {
   },
   icon: {
     transition: TRANSITIONS.medium,
-    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
     color: 'currentColor',
     cursor: 'pointer',
   },
-  iconHover: {
-    transform: 'scale(1.05)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))',
-  },
+  iconHover: {},
   glyph: {
     display: 'none',
   },
@@ -195,7 +191,7 @@ export const iconThemes: Record<'light' | 'dark' | 'sacred', IconTheme> = {
 
 // Helper function to get computed theme with custom style overrides
 export const getIconTheme = (styles?: IconStyles): IconTheme => {
-  const theme = styles?.theme || 'sacred'
+  const theme = styles?.theme || 'light'
   const baseTheme = iconThemes[theme]
 
   if (!styles) {
