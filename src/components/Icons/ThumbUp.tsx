@@ -35,13 +35,14 @@ const ThumbUpIcon: React.FC<ThumbUpIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M720-120H280v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h258q32 0 56 24t24 56v80q0 7-2 15t-4 15L794-168q-9 20-30 34t-44 14Zm-360-80h360l120-280v-80H480l54-220-174 174v406Zm0-406v406-406Zm-80-34v80H160v360h120v80H80v-520h200Z" />
+        <path d="M0 0h24v24H0V0zm0 0h24v24H0V0z" fill="none" />
+        <path d="M9 21h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2zM9 9l4.34-4.34L12 10h9v2l-3 7H9V9zM1 9h4v12H1V9z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

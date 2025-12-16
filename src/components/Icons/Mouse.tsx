@@ -30,13 +30,14 @@ const MouseIcon: React.FC<MouseIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M480-80q-83 0-141.5-58.5T280-280v-200q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v200q0 83-58.5 141.5T480-80Zm-40-520v120h80v-120q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600Zm40 440q50 0 85-35t35-85v-200q0-50-35-85t-85-35q-50 0-85 35t-35 85v200q0 50 35 85t85 35Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M13 1.07V9h7c0-4.08-3.05-7.44-7-7.93zM4 15c0 4.42 3.58 8 8 8s8-3.58 8-8v-4H4v4zm7-13.93C7.05 1.56 4 4.92 4 9h7V1.07z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

@@ -37,13 +37,14 @@ const KeyboardArrowLeftIcon: React.FC<KeyboardArrowLeftIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M561.538-220.615 302.153-480l259.385-259.385 43.077 43.077-216.308 216.308 216.308 216.308-43.077 43.077Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

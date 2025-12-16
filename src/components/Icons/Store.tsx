@@ -35,13 +35,14 @@ const StoreIcon: React.FC<StoreIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-480h-40v-80h160v-40q0-33 23.5-56.5T320-880h320q33 0 56.5 23.5T720-800v40h160v80h-40ZM320-760h320v-40H320v40ZM200-200h560v-480H200v480Zm280-240q33 0 56.5-23.5T560-520v-40h-80v40q0 33 23.5 56.5T480-440Zm-160 0q33 0 56.5-23.5T400-520v-40h-80v40q0 33 23.5 56.5T320-440Zm320 0q33 0 56.5-23.5T720-520v-40h-80v40q0 33 23.5 56.5T640-440ZM200-200v-480 480Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

@@ -35,13 +35,14 @@ const SyncIcon: React.FC<SyncIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-54-87-87t-121-33q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 142-44.5T720-480h80q-44 116-153 188T480-160Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

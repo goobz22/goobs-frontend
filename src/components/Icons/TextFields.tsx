@@ -35,13 +35,14 @@ const TextFieldsIcon: React.FC<TextFieldsIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M280-160v-520H80v-120h520v120H400v520H280Zm400 0v-320H560v-120h320v120H760v320H680Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

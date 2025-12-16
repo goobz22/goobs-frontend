@@ -35,13 +35,14 @@ const AddShoppingCartIcon: React.FC<AddShoppingCartIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M440-600v-120q0-33 23.5-56.5T520-800h120q33 0 56.5 23.5T720-720v120h120q33 0 56.5 23.5T920-520v200q0 33-23.5 56.5T840-240H520q-33 0-56.5-23.5T440-320v-280Zm80 0h200v-120H520v120ZM280-80q-33 0-56.5-23.5T200-160v-560q0-8.5 5.75-14.25T220-740h40v-20q0-33 23.5-56.5T340-840h120q33 0 56.5 23.5T540-760v20h40q8.5 0 14.25 5.75T600-720q0 8.5-5.75 14.25T580-700H220v560h240q8.5 0 14.25 5.75T480-120q0 8.5-5.75 14.25T460-100H280Zm60-640h120v-20H340v20Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4l-3.87 7H8.53L4.27 2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

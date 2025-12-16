@@ -30,13 +30,14 @@ const PlayArrowIcon: React.FC<PlayArrowIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M8 5v14l11-7L8 5z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

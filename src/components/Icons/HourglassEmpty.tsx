@@ -35,13 +35,14 @@ const HourglassEmptyIcon: React.FC<HourglassEmptyIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M480-80q-75 0-127.5-52.5T300-260q0-42 19.5-78.5T374-388q-35-17-54.5-53.5T300-520q0-33 14.5-62T355-628q-26-17-40.5-46T300-736q0-58 41-99t99-41q58 0 99 41t41 99q0 33-14.5 62T540-628q26 17 40.5 46T595-520q0 42-19.5 78.5T521-388q35 17 54.5 53.5T595-260q0 75-52.5 127.5T480-80Zm0-80q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29Zm0-240q33 0 56.5-23.5T560-480q0-33-23.5-56.5T480-560q-33 0-56.5 23.5T400-480q0 33 23.5 56.5T480-400Zm0-240q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29Zm0-100Zm0 380Zm0 240Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zm-4-5l-4-4V4h8v3.5l-4 4z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

@@ -30,13 +30,14 @@ const OutlookIcon: React.FC<OutlookIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M120-160q-33 0-56.5-23.5T40-240v-480q0-33 23.5-56.5T120-800h720q33 0 56.5 23.5T920-720v480q0 33-23.5 56.5T840-160H120Zm360-90L120-587v347h720v-347L480-250Zm0-122 354-228H126l354 228ZM120-587v-133l360 225 360-225v133L480-428 120-587Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

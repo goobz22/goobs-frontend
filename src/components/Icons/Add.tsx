@@ -31,13 +31,14 @@ const AddIcon: React.FC<AddIconProps> = ({ styles, style = {}, ...props }) => {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

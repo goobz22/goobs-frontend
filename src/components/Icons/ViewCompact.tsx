@@ -35,13 +35,14 @@ const ViewCompactIcon: React.FC<ViewCompactIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M160-520v-240h640v240H160Zm80-80h480v-80H240v80ZM160-200v-240h320v240H160Zm80-80h160v-80H240v80Zm400 80v-240h320v240H640Zm80-80h160v-80H720v80Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M4 18h3V5H4v13zM18 5v13h3V5h-3zM8 18h9V5H8v13z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

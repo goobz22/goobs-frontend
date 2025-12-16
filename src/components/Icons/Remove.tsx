@@ -30,13 +30,14 @@ const RemoveIcon: React.FC<RemoveIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M200-440v-80h560v80H200Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M19 13H5v-2h14v2z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

@@ -35,13 +35,14 @@ const TransferIcon: React.FC<TransferIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M280-440v-80h560v80H280Zm-79.923-159.385L120.385-680l56.615-56.615L256.615-657l79.693-79.692L393-680l-79.692 79.692L370-543.692l-56.615-56.615-79.693 79.692-53.692-53.693ZM120-280v-80h560v80H120Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

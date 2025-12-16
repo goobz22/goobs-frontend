@@ -36,13 +36,14 @@ const FlagIcon: React.FC<FlagIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M200-120v-680q0-8.5 5.75-14.25T220-820q8.5 0 14.25 5.75T240-800v40h500q12.75 0 21.375 8.625T770-730v260q0 12.75-8.625 21.375T740-440H520v320q0 8.5-5.75 14.25T500-100q-8.5 0-14.25-5.75T480-120v-320H240v320q0 8.5-5.75 14.25T220-100q-8.5 0-14.25-5.75T200-120Zm40-400h490v-220H240v220Zm0 0v-220 220Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6z" />
       </svg>
     </div>
   )

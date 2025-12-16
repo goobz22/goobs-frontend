@@ -35,13 +35,14 @@ const ExtensionIcon: React.FC<ExtensionIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M354-120H200q-33 0-56.5-23.5T120-200v-154q48 0 84-30.5t36-77.5q0-47-36-77.5T120-570v-190q0-33 23.5-56.5T200-840h154q0-48 30.5-84t77.5-36q47 0 77.5 36t30.5 84h190q33 0 56.5 23.5T840-760v190q48 0 84 30.5t36 77.5q0 47-36 77.5T840-354v154q0 33-23.5 56.5T760-120H570q0-48-30.5-84T462-240q-47 0-77.5 36T354-120Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

@@ -37,13 +37,14 @@ const LastPageIcon: React.FC<LastPageIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M220.615-440 501.23-720v560L220.615-440Zm458.232-280v640h-61.539v-640h61.539Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" opacity=".87" />
+        <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6-1.41 1.41zM16 6h2v12h-2V6z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

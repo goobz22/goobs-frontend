@@ -30,13 +30,14 @@ const SendIcon: React.FC<SendIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M120-160v-244l321-76-321-76v-244l760 320-760 320Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2 .01 7z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

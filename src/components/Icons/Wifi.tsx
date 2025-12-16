@@ -35,13 +35,14 @@ const WifiIcon: React.FC<WifiIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M480-280q-25 0-42.5-17.5T420-340q0-25 17.5-42.5T480-400q25 0 42.5 17.5T540-340q0 25-17.5 42.5T480-280Zm-172-88L88-640l28-58 164 162v-204h80v128l120-90 120 90v-128h80v204l164-162 28 58-192 160v208L480-160l-172-108Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

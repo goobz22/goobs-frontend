@@ -35,13 +35,14 @@ const LocalOfferIcon: React.FC<LocalOfferIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="m840-234-60-11q-16-3-31-3t-31 3l-60 11q-52 10-99-16t-75-74l-51-84q-9-14-9-32t9-32l51-84q28-48 75-74t99-16l60 11q16 3 31 3t31-3l60-11q52-10 99 16t75 74l51 84q9 14 9 32t-9 32l-51 84q-28 48-75 74t-99 16ZM760-400q33 0 56.5-23.5T840-480q0-33-23.5-56.5T760-560q-33 0-56.5 23.5T680-480q0 33 23.5 56.5T760-400ZM126-80l-46-46 634-634 46 46L126-80Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

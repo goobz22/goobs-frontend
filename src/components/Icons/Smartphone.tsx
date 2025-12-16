@@ -30,13 +30,14 @@ const SmartphoneIcon: React.FC<SmartphoneIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={{ ...computedStyles.icon, ...style }}
         {...props}
       >
-        <path d="M400-120q-33 0-56.5-23.5T320-200v-560q0-33 23.5-56.5T400-840h160q33 0 56.5 23.5T640-760v560q0 33-23.5 56.5T560-120H400Zm0-80h160v-560H400v560Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

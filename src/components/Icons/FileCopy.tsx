@@ -35,13 +35,14 @@ const FileCopyIcon: React.FC<FileCopyIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M520-200q-20.75 0-35.375-14.625T470-250q0-20.75 14.625-35.375T520-300q20.75 0 35.375 14.625T570-250q0 20.75-14.625 35.375T520-200Zm-80 0q-20.75 0-35.375-14.625T390-250q0-20.75 14.625-35.375T440-300q20.75 0 35.375 14.625T490-250q0 20.75-14.625 35.375T440-200Zm160 0q-20.75 0-35.375-14.625T550-250q0-20.75 14.625-35.375T600-300q20.75 0 35.375 14.625T650-250q0 20.75-14.625 35.375T600-200ZM280-80q-33 0-56.5-23.5T200-160v-560q0-33 23.5-56.5T280-800h320l240 240v320q0 33-23.5 56.5T760-160H280Zm0-80h480v-280H560v-200H280v480Zm0 0v-480 480Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zm4 16H8V7h6v5h5v9z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

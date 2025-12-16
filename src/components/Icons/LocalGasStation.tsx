@@ -35,13 +35,14 @@ const LocalGasStationIcon: React.FC<LocalGasStationIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M160-120q-33 0-56.5-23.5T80-200v-360q0-33 23.5-56.5T160-640h40v-200q0-33 23.5-56.5T280-920h200q33 0 56.5 23.5T560-840v320h120q17 0 28.5 11.5T720-480q0 17-11.5 28.5T680-440H560v240q0 33-23.5 56.5T480-120H160Zm120-520h200v-200H280v200Zm-120 440h320v-360h-80q-33 0-56.5-23.5T320-640h-80v360Zm200-280v-240H280v240h80Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>

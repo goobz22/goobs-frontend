@@ -35,13 +35,14 @@ const SaveIcon: React.FC<SaveIconProps> = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="24"
-        viewBox="0 -960 960 960"
+        viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
         style={iconStyle}
         {...props}
       >
-        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160v400q0 33-23.5 56.5T760-120H200Zm360-320q-33 0-56.5-23.5T480-520q0-33 23.5-56.5T560-600q33 0 56.5 23.5T640-520q0 33-23.5 56.5T560-440ZM280-600h240v-160H280v160Z" />
+        <path d="M0 0h24v24H0V0z" fill="none" />
+        <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM6 6h9v4H6z" />
       </svg>
       {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
     </div>
