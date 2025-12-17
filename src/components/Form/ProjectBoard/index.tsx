@@ -19,6 +19,7 @@ const premiumStyles = {
     width: '100%',
     height: 'auto',
     overflow: 'hidden',
+    boxSizing: 'border-box',
   } as React.CSSProperties,
 
   titleContainer: {
@@ -26,6 +27,8 @@ const premiumStyles = {
     marginBottom: '12px',
     width: '100%',
     position: 'relative',
+    padding: '0 8px',
+    boxSizing: 'border-box',
   } as React.CSSProperties,
 
   title: {
@@ -33,18 +36,22 @@ const premiumStyles = {
     width: '100%',
     textAlign: 'left',
     fontFamily: 'Merriweather, serif',
-    fontSize: '24px',
+    fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
     fontWeight: 'normal',
     color: 'rgba(0, 0, 0, 1)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   } as React.CSSProperties,
 
   description: {
     width: '100%',
     textAlign: 'left',
     fontFamily: 'Merriweather, serif',
-    fontSize: '20px',
+    fontSize: 'clamp(1rem, 3vw, 1.25rem)',
     fontWeight: 'normal',
     color: 'rgba(0, 0, 0, 1)',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   } as React.CSSProperties,
 
   projectBoardContainer: {
@@ -63,7 +70,8 @@ const sacredStyles = {
     backdropFilter: 'blur(32px)',
     border: '2px solid rgba(255, 215, 0, 0.5)',
     borderRadius: '12px',
-    padding: '24px',
+    padding: '16px',
+    boxSizing: 'border-box',
   } as React.CSSProperties,
 
   topShimmer: {
@@ -115,6 +123,8 @@ const sacredStyles = {
     marginBottom: '12px',
     width: '100%',
     position: 'relative',
+    padding: '0 8px',
+    boxSizing: 'border-box',
   } as React.CSSProperties,
 
   title: {
@@ -122,21 +132,25 @@ const sacredStyles = {
     width: '100%',
     textAlign: 'center',
     fontFamily: '"Cinzel", serif',
-    fontSize: '30px',
+    fontSize: 'clamp(1.5rem, 5vw, 1.875rem)',
     fontWeight: 600,
     color: 'rgba(255, 215, 0, 1)',
     textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
     letterSpacing: '0.05em',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   } as React.CSSProperties,
 
   description: {
     width: '100%',
     textAlign: 'center',
     fontFamily: '"Crimson Text", serif',
-    fontSize: '18px',
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)',
     color: 'rgba(255, 255, 255, 0.9)',
     letterSpacing: '0.025em',
     marginBottom: '8px',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   } as React.CSSProperties,
 
   underline: {
