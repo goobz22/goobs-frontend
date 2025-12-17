@@ -1,55 +1,38 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import TextField from '../../Field/Text'
 import DateField from '../../Field/Date/DateField'
 import TimeField from '../../Field/Time/TimeField'
 import SearchableDropdown from '../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import InternalIncrement from '../../Field/Number/InternalIncrement'
+import PhoneNumberField from '../../Field/PhoneNumber'
 import ComplexTextEditor from '../../ComplexTextEditor'
 import Button from '../../Button'
-import type { ColumnDef } from '../types'
+import type { ColumnDef, CompositeFieldConfig } from '../types'
 
-// Type for creation field configuration
-interface CreationFieldConfig {
-  type?:
-    | 'text'
-    | 'date'
-    | 'monthYear'
-    | 'time'
-    | 'currency'
-    | 'usd'
-    | 'dropdown'
-    | 'searchableDropdown'
-    | 'multiselect'
-    | 'internalIncrement'
-    | 'phoneNumber'
-    | 'cvv'
-    | 'creditCardNumber'
-    | 'accountNumber'
-    | 'routingNumber'
-    | 'ipAddress'
-    | 'subnet'
-    | 'vlan'
-    | 'cidr'
-    | 'supernet'
-    | 'macAddress'
-    | 'simpleeditor'
-  required?: boolean
-  placeholder?: string
-  options?: Array<{
-    value: string
-    _id?: string
-  }>
-  defaultValue?: string | string[] | Date | null
-  helperText?: string
-  validation?: (value: any) => string | undefined
-  min?: number
-  max?: number
-  step?: number
-  // For simpleeditor field
-  minRows?: number
+// Unified field definition for rendering
+interface RenderableField {
+  field: string
+  label: string
+  type: string
+  required?: boolean | undefined
+  placeholder?: string | undefined
+  helperText?: string | undefined
+  options?: Array<{ value: string; _id?: string }> | undefined
+  min?: number | undefined
+  max?: number | undefined
+  step?: number | undefined
+  minRows?: number | undefined
+  validation?: ((value: unknown) => string | undefined) | undefined
+}
+
+// Helper to check if column type is a composite field array
+function isCompositeFieldArray(
+  type: ColumnDef['type']
+): type is CompositeFieldConfig[] {
+  return Array.isArray(type)
 }
 
 interface AddCardProps {
@@ -109,6 +92,53 @@ function AddCard({
 
   const themeConfig = getThemeColors(theme)
 
+  // Extract all renderable fields from columns
+  // This handles both creationField columns AND composite field columns
+  const renderableFields = useMemo((): RenderableField[] => {
+    const fields: RenderableField[] = []
+
+    columns.forEach(col => {
+      // Check if column has creationField (traditional approach)
+      if (col.creationField) {
+        fields.push({
+          field: col.field,
+          label: col.headerName,
+          type: col.creationField.type || 'text',
+          required: col.creationField.required,
+          placeholder: col.creationField.placeholder,
+          helperText: col.creationField.helperText,
+          options: col.creationField.options,
+          min: col.creationField.min,
+          max: col.creationField.max,
+          step: col.creationField.step,
+          minRows: (col.creationField as { minRows?: number }).minRows,
+          validation: col.creationField.validation,
+        })
+      }
+      // Check if column has composite fields (type is an array)
+      else if (isCompositeFieldArray(col.type)) {
+        col.type.forEach(compositeField => {
+          fields.push({
+            field: compositeField.field,
+            label: compositeField.label,
+            type: compositeField.type || 'text',
+            required: compositeField.required,
+            placeholder: compositeField.placeholder,
+            helperText: compositeField.helperText,
+            options: compositeField.options,
+            min: compositeField.min,
+            max: compositeField.max,
+            step: compositeField.step,
+            minRows: compositeField.minRows,
+            validation: compositeField.validation,
+          })
+        })
+      }
+    })
+
+    return fields
+  }, [columns])
+
   // Handle field change - just pass through to parent
   const handleFieldChange = useCallback(
     (field: string, value: unknown) => {
@@ -130,10 +160,9 @@ function AddCard({
   }, [onSave])
 
   // Render field input based on type
-  const renderField = (column: ColumnDef) => {
-    const fieldConfig: CreationFieldConfig = column.creationField || {}
-    const value = creationRowData[column.field]
-    const error = creationRowErrors[column.field]
+  const renderField = (fieldDef: RenderableField) => {
+    const value = creationRowData[fieldDef.field]
+    const error = creationRowErrors[fieldDef.field]
 
     const fieldStyles = {
       theme: theme,
@@ -142,36 +171,42 @@ function AddCard({
     }
 
     // Handle searchable dropdown
-    if (fieldConfig.type === 'searchableDropdown' && fieldConfig.options) {
+    if (fieldDef.type === 'searchableDropdown' && fieldDef.options) {
       return (
         <SearchableDropdown
           label=""
           defaultValue={value ? String(value) : ''}
           onChange={selected =>
-            handleFieldChange(column.field, selected?.value || '')
+            handleFieldChange(fieldDef.field, selected?.value || '')
           }
-          options={fieldConfig.options.map(opt => ({
+          options={fieldDef.options.map(opt => ({
             value: String(opt.value),
             ...(opt._id && { _id: opt._id }),
           }))}
-          placeholder={fieldConfig.placeholder || 'Select...'}
+          placeholder={
+            fieldDef.placeholder || fieldDef.helperText || 'Select...'
+          }
           styles={fieldStyles}
         />
       )
     }
 
     // Handle multiselect
-    if (fieldConfig.type === 'multiselect' && fieldConfig.options) {
+    if (fieldDef.type === 'multiselect' && fieldDef.options) {
       return (
         <MultiSelectChip
           label=""
           defaultSelected={Array.isArray(value) ? value : []}
-          onChange={selectedIds => handleFieldChange(column.field, selectedIds)}
-          options={fieldConfig.options.map(opt => ({
+          onChange={selectedIds =>
+            handleFieldChange(fieldDef.field, selectedIds)
+          }
+          options={fieldDef.options.map(opt => ({
             value: String(opt.value),
             _id: opt._id || String(opt.value),
           }))}
-          helperText={fieldConfig.placeholder || 'Select...'}
+          helperText={
+            fieldDef.placeholder || fieldDef.helperText || 'Select...'
+          }
           styles={{
             ...fieldStyles,
             width: '100%',
@@ -181,45 +216,38 @@ function AddCard({
     }
 
     // Handle date field
-    if (fieldConfig.type === 'date') {
+    if (fieldDef.type === 'date') {
       return (
         <DateField
           value={value ? new Date(String(value)) : null}
           onChange={date => {
-            // Store date as ISO string or empty string
             const dateValue = date ? date.toISOString().split('T')[0] : ''
-            handleFieldChange(column.field, dateValue)
+            handleFieldChange(fieldDef.field, dateValue)
           }}
-          {...(fieldConfig.placeholder && {
-            helperText: fieldConfig.placeholder,
-          })}
+          {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
           styles={fieldStyles}
         />
       )
     }
 
     // Handle monthYear field
-    if (fieldConfig.type === 'monthYear') {
+    if (fieldDef.type === 'monthYear') {
       return (
         <DateField
           value={value ? new Date(String(value)) : null}
           onChange={date => {
-            // Store date as ISO string or empty string
             const dateValue = date ? date.toISOString().split('T')[0] : ''
-            handleFieldChange(column.field, dateValue)
+            handleFieldChange(fieldDef.field, dateValue)
           }}
           variant="month-year"
-          {...(fieldConfig.placeholder && {
-            helperText: fieldConfig.placeholder,
-          })}
+          {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
           styles={fieldStyles}
         />
       )
     }
 
     // Handle time field
-    if (fieldConfig.type === 'time') {
-      // Convert string value to Date for TimeField
+    if (fieldDef.type === 'time') {
       const timeValue = (() => {
         if (!value) return null
         const timeStr = String(value)
@@ -234,23 +262,21 @@ function AddCard({
           value={timeValue}
           onChange={(newTime: Date | null) => {
             if (!newTime) {
-              handleFieldChange(column.field, '')
+              handleFieldChange(fieldDef.field, '')
               return
             }
             const hours = String(newTime.getHours()).padStart(2, '0')
             const minutes = String(newTime.getMinutes()).padStart(2, '0')
-            handleFieldChange(column.field, `${hours}:${minutes}`)
+            handleFieldChange(fieldDef.field, `${hours}:${minutes}`)
           }}
-          {...(fieldConfig.placeholder && {
-            helperText: fieldConfig.placeholder,
-          })}
+          {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
           styles={fieldStyles}
         />
       )
     }
 
     // Handle internal increment (number field)
-    if (fieldConfig.type === 'internalIncrement') {
+    if (fieldDef.type === 'internalIncrement') {
       return (
         <InternalIncrement
           value={String(Number(value) || 0)}
@@ -259,63 +285,59 @@ function AddCard({
               typeof newValue === 'number'
                 ? newValue
                 : parseInt(String(newValue), 10) || 0
-            handleFieldChange(column.field, numericValue)
+            handleFieldChange(fieldDef.field, numericValue)
           }}
-          {...(fieldConfig.min !== undefined && { min: fieldConfig.min })}
-          {...(fieldConfig.max !== undefined && { max: fieldConfig.max })}
+          {...(fieldDef.min !== undefined && { min: fieldDef.min })}
+          {...(fieldDef.max !== undefined && { max: fieldDef.max })}
           styles={fieldStyles}
         />
       )
     }
 
     // Handle regular dropdown
-    if (fieldConfig.type === 'dropdown' && fieldConfig.options) {
+    if (fieldDef.type === 'dropdown' && fieldDef.options) {
       return (
         <SearchableDropdown
           label=""
           defaultValue={value ? String(value) : ''}
           onChange={selected =>
-            handleFieldChange(column.field, selected?.value || '')
+            handleFieldChange(fieldDef.field, selected?.value || '')
           }
-          options={fieldConfig.options.map(opt => ({
+          options={fieldDef.options.map(opt => ({
             value: String(opt.value),
             ...(opt._id && { _id: opt._id }),
           }))}
-          placeholder={fieldConfig.placeholder || 'Select...'}
+          placeholder={
+            fieldDef.placeholder || fieldDef.helperText || 'Select...'
+          }
           styles={fieldStyles}
         />
       )
     }
 
-    // Handle dropdown from column definition (legacy support)
-    if (column.type === 'dropdown' && column.dropdownOptions) {
+    // Handle phone number field
+    if (fieldDef.type === 'phoneNumber') {
       return (
-        <SearchableDropdown
-          label=""
-          defaultValue={value ? String(value) : ''}
-          onChange={selected =>
-            handleFieldChange(column.field, selected?.value || '')
-          }
-          options={column.dropdownOptions.map(opt => ({
-            value: String(opt.value),
-            ...(opt._id && { _id: opt._id }),
-          }))}
-          placeholder={fieldConfig.placeholder || 'Select...'}
+        <PhoneNumberField
+          value={String(value || '')}
+          onChange={phoneValue => {
+            handleFieldChange(fieldDef.field, phoneValue)
+          }}
           styles={fieldStyles}
         />
       )
     }
 
     // Handle simple editor
-    if (fieldConfig.type === 'simpleeditor') {
+    if (fieldDef.type === 'simpleeditor') {
       return (
         <ComplexTextEditor
           value={String(value || '')}
           onChange={(textValue: string) => {
-            handleFieldChange(column.field, textValue)
+            handleFieldChange(fieldDef.field, textValue)
           }}
           editorType="simple"
-          minRows={fieldConfig.minRows || 4}
+          minRows={fieldDef.minRows || 4}
           styles={{
             theme: fieldStyles.theme,
             width: '100%',
@@ -329,9 +351,13 @@ function AddCard({
       <TextField
         value={String(value || '')}
         onChange={textValue => {
-          handleFieldChange(column.field, textValue)
+          handleFieldChange(fieldDef.field, textValue)
         }}
-        placeholder={fieldConfig.placeholder || `Enter ${column.headerName}`}
+        placeholder={
+          fieldDef.placeholder ||
+          fieldDef.helperText ||
+          `Enter ${fieldDef.label}`
+        }
         styles={fieldStyles}
       />
     )
@@ -384,24 +410,20 @@ function AddCard({
     <div style={cardStyles.card}>
       <div style={cardStyles.header}>Add New Item</div>
 
-      {columns
-        .filter(col => col.creationField)
-        .map(column => (
-          <div key={column.field} style={cardStyles.fieldContainer}>
-            <label style={cardStyles.label}>
-              {column.headerName}
-              {column.creationField?.required && (
-                <span style={cardStyles.required}>*</span>
-              )}
-            </label>
-            {renderField(column)}
-            {creationRowErrors[column.field] && (
-              <div style={cardStyles.error}>
-                {creationRowErrors[column.field]}
-              </div>
-            )}
-          </div>
-        ))}
+      {renderableFields.map(fieldDef => (
+        <div key={fieldDef.field} style={cardStyles.fieldContainer}>
+          <label style={cardStyles.label}>
+            {fieldDef.label}
+            {fieldDef.required && <span style={cardStyles.required}>*</span>}
+          </label>
+          {renderField(fieldDef)}
+          {creationRowErrors[fieldDef.field] && (
+            <div style={cardStyles.error}>
+              {creationRowErrors[fieldDef.field]}
+            </div>
+          )}
+        </div>
+      ))}
 
       <div style={cardStyles.buttonContainer}>
         <Button

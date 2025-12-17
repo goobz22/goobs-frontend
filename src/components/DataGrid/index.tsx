@@ -706,6 +706,7 @@ function DataGridContent({
           {...(onDuplicate !== undefined ? { onDuplicate } : {})}
           {...(onShow !== undefined ? { onShow } : {})}
           {...(onSelectionChange !== undefined ? { onSelectionChange } : {})}
+          {...(buttons !== undefined ? { buttons } : {})}
           {...(styles !== undefined ? { styles } : {})}
           editingCell={editingCell}
           editingValue={editingValue}

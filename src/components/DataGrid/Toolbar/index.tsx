@@ -49,14 +49,16 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     maxWidth: '100%',
     boxSizing: 'border-box',
     padding: '0.5rem 0.5rem',
+    flexWrap: 'wrap',
   }
 
   const leftStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    flex: '0 0 auto',
+    flex: '1 1 auto',
     minWidth: 0,
+    flexWrap: 'wrap',
   }
 
   const rightStyle: React.CSSProperties = {
@@ -66,7 +68,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     gap: '0.5rem',
     flex: '1 1 auto',
     minWidth: 0,
-    overflow: 'hidden',
+    flexWrap: 'wrap',
   }
 
   // Filter buttons based on permissions

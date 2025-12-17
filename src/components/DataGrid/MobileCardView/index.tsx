@@ -5,8 +5,23 @@ import { createPortal } from 'react-dom'
 import Card from './Card'
 import AddCard from './AddCard'
 import Searchbar from '../../Field/Search'
+import DataGridToolbar from '../Toolbar'
 import { getDataGridStyles } from '../../../theme'
 import type { ColumnDef, RowData } from '../types'
+import type { ButtonProps } from '../../Button'
+
+// Helper to check if column type is a composite field array
+// Defined outside component to avoid dependency issues in useCallback
+function isCompositeFieldArray(type: unknown): type is Array<{
+  field: string
+  label: string
+  type: string
+  defaultValue?: unknown
+  required?: boolean
+  validation?: (value: unknown) => string | undefined
+}> {
+  return Array.isArray(type)
+}
 
 interface MobileCardViewProps {
   columns: ColumnDef[]
@@ -22,6 +37,7 @@ interface MobileCardViewProps {
   onDuplicate?: (selectedRows: string[]) => void
   onShow?: (selectedRows: string[]) => void
   onSelectionChange?: (newSelectedIds: string[]) => void
+  buttons?: ButtonProps[]
   styles?: {
     theme?: 'light' | 'dark' | 'sacred'
     backgroundColor?: string
@@ -54,6 +70,7 @@ function MobileCardView({
   onDuplicate,
   onShow,
   onSelectionChange,
+  buttons,
   styles,
   editingCell,
   editingValue,
@@ -213,10 +230,21 @@ function MobileCardView({
     // Initialize creation row data with default values
     const initialData: Record<string, unknown> = {}
     columns.forEach(col => {
+      // Handle creationField columns
       if (col.creationField?.defaultValue !== undefined) {
         initialData[col.field] = col.creationField.defaultValue
-      } else {
+      } else if (col.creationField) {
         initialData[col.field] = ''
+      }
+      // Handle composite field columns (type is an array)
+      else if (isCompositeFieldArray(col.type)) {
+        col.type.forEach(compositeField => {
+          if (compositeField.defaultValue !== undefined) {
+            initialData[compositeField.field] = compositeField.defaultValue
+          } else {
+            initialData[compositeField.field] = ''
+          }
+        })
       }
     })
     setCreationRowData(initialData)
@@ -252,6 +280,7 @@ function MobileCardView({
     let hasErrors = false
 
     columns.forEach(col => {
+      // Validate creationField columns
       if (col.creationField?.required) {
         const value = creationRowData[col.field]
         if (!value || (typeof value === 'string' && value.trim() === '')) {
@@ -260,7 +289,7 @@ function MobileCardView({
         }
       }
 
-      // Run custom validation if provided
+      // Run custom validation for creationField
       if (col.creationField?.validation) {
         const validationError = col.creationField.validation(
           creationRowData[col.field]
@@ -269,6 +298,41 @@ function MobileCardView({
           errors[col.field] = validationError
           hasErrors = true
         }
+      }
+
+      // Validate composite field columns
+      if (isCompositeFieldArray(col.type)) {
+        col.type.forEach(
+          (compositeField: {
+            field: string
+            label: string
+            required?: boolean
+            validation?: (value: unknown) => string | undefined
+          }) => {
+            if (compositeField.required) {
+              const value = creationRowData[compositeField.field]
+              if (
+                !value ||
+                (typeof value === 'string' && value.trim() === '')
+              ) {
+                errors[compositeField.field] =
+                  `${compositeField.label} is required`
+                hasErrors = true
+              }
+            }
+
+            // Run custom validation for composite field
+            if (compositeField.validation) {
+              const validationError = compositeField.validation(
+                creationRowData[compositeField.field]
+              )
+              if (validationError) {
+                errors[compositeField.field] = validationError
+                hasErrors = true
+              }
+            }
+          }
+        )
       }
     })
 
@@ -448,6 +512,42 @@ function MobileCardView({
             }}
           />
         </div>
+      )}
+
+      {/* Toolbar - Mobile friendly with buttons and ManageRow */}
+      {!selectionMode && (buttons || selectedRows.length > 0) && (
+        <DataGridToolbar
+          {...(buttons !== undefined ? { buttons } : {})}
+          {...(permissions !== undefined ? { permissions } : {})}
+          {...(selectedRows.length > 0
+            ? {
+                manageRowProps: {
+                  selectedRows,
+                  rows,
+                  ...(onDuplicate
+                    ? { onDuplicate: () => onDuplicate(selectedRows) }
+                    : {}),
+                  ...(onDelete
+                    ? {
+                        onDelete: () => {
+                          onDelete(selectedRows)
+                          onSelectionChange?.([])
+                        },
+                      }
+                    : {}),
+                  ...(onManage
+                    ? { onManage: () => onManage(selectedRows) }
+                    : {}),
+                  ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
+                  handleClose: handleExitSelectionMode,
+                  permissions,
+                },
+              }
+            : {})}
+          styles={{
+            theme: theme,
+          }}
+        />
       )}
 
       {/* Cards Container */}

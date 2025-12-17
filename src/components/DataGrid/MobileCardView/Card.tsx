@@ -117,8 +117,15 @@ function Card({
           const fieldElement = target.closest('[data-field]') as HTMLElement
           if (fieldElement) {
             const field = fieldElement.dataset.field
-            const fieldValue = row[field!]
-            onCellClick(rowId, field!, fieldValue)
+            // Check if the column is editable
+            const column = columns.find(col => col.field === field)
+            if (column?.editable !== false) {
+              const fieldValue = row[field!]
+              onCellClick(rowId, field!, fieldValue)
+            } else {
+              // Column is not editable, just select/deselect the card
+              onTap()
+            }
           }
         } else {
           // Otherwise, select/deselect the card
@@ -129,7 +136,16 @@ function Card({
         onTap()
       }
     },
-    [selectionMode, onTap, isSelected, onCellClick, rowId, row, permissions]
+    [
+      selectionMode,
+      onTap,
+      isSelected,
+      onCellClick,
+      rowId,
+      row,
+      permissions,
+      columns,
+    ]
   )
 
   // Cleanup timer on unmount
