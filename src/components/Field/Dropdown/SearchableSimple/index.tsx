@@ -59,27 +59,9 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     left: 0,
     width: 0,
   })
-  // Portal container - created in useEffect to avoid hydration mismatch
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
-
-  // Create and cleanup portal container after mount (avoids SSR hydration issues)
-  useEffect(() => {
-    const container = document.createElement('div')
-    container.id = `searchable-simple-portal-${Math.random().toString(36).slice(2, 9)}`
-    document.body.appendChild(container)
-    setPortalContainer(container)
-
-    return () => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container)
-      }
-    }
-  }, [])
 
   // Track previous defaultValue to update using derived state pattern
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
@@ -242,7 +224,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       {/* Dropdown Menu */}
       {isOpen &&
         !disabled &&
-        portalContainer &&
+        typeof document !== 'undefined' &&
         ReactDOM.createPortal(
           <div
             ref={menuRef}
@@ -372,7 +354,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
               )}
             </div>
           </div>,
-          portalContainer
+          document.body
         )}
 
       {/* Helper Text */}

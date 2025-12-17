@@ -63,27 +63,9 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     left: 0,
     width: 0,
   })
-  // Portal container - created in useEffect to avoid hydration mismatch
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
-
-  // Create and cleanup portal container after mount (avoids SSR hydration issues)
-  useEffect(() => {
-    const container = document.createElement('div')
-    container.id = `multiselect-dropdown-portal-${Math.random().toString(36).slice(2, 9)}`
-    document.body.appendChild(container)
-    setPortalContainer(container)
-
-    return () => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container)
-      }
-    }
-  }, [])
 
   // Track previous defaultSelected to update using derived state pattern
   const [prevDefaultSelected, setPrevDefaultSelected] =
@@ -246,6 +228,9 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     setFocused(false)
   }, [disabled])
 
+  // Check if we're in browser environment for portal
+  const canUsePortal = typeof document !== 'undefined'
+
   return (
     <div style={containerStyle}>
       {label && (
@@ -299,7 +284,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
           <div style={arrowStyle} />
         </div>
         {isOpen &&
-          portalContainer &&
+          canUsePortal &&
           ReactDOM.createPortal(
             <div
               ref={menuRef}
@@ -367,7 +352,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                 )
               })}
             </div>,
-            portalContainer
+            document.body
           )}
       </div>
       {helperText && <div style={helperTextStyle}>{helperText}</div>}

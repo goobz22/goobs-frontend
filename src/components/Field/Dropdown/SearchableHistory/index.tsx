@@ -71,24 +71,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     left: 0,
     width: 0,
   })
-  // Portal container - created in useEffect to avoid hydration mismatch
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
-
-  // Create and cleanup portal container after mount (avoids SSR hydration issues)
-  useEffect(() => {
-    const container = document.createElement('div')
-    container.id = `searchable-history-portal-${Math.random().toString(36).slice(2, 9)}`
-    document.body.appendChild(container)
-    setPortalContainer(container)
-
-    return () => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container)
-      }
-    }
-  }, [])
 
   // Save history to localStorage whenever it changes
   useEffect(() => {
@@ -427,7 +409,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
           </button>
         </div>
         {isOpen &&
-          portalContainer &&
+          typeof document !== 'undefined' &&
           ReactDOM.createPortal(
             <div
               ref={dropdownRef}
@@ -679,7 +661,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                 )}
               </div>
             </div>,
-            portalContainer
+            document.body
           )}
       </div>
 

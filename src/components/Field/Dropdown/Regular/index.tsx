@@ -63,27 +63,9 @@ const Dropdown: React.FC<DropdownProps> = ({
     left: 0,
     width: 0,
   })
-  // Portal container - created in useEffect to avoid hydration mismatch
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null
-  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
-
-  // Create and cleanup portal container after mount (avoids SSR hydration issues)
-  useEffect(() => {
-    const container = document.createElement('div')
-    container.id = `dropdown-portal-${Math.random().toString(36).slice(2, 9)}`
-    document.body.appendChild(container)
-    setPortalContainer(container)
-
-    return () => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container)
-      }
-    }
-  }, [])
 
   // Track previous externalValue/defaultValue to update using derived state pattern
   const [prevExternalValue, setPrevExternalValue] = useState(externalValue)
@@ -164,6 +146,9 @@ const Dropdown: React.FC<DropdownProps> = ({
       String(opt.value) === String(value) || String(opt._id) === String(value)
   )
   const displayValue = selectedOption?.value || value || 'Select...'
+
+  // Check if we're in browser environment for portal
+  const canUsePortal = typeof document !== 'undefined'
 
   return (
     <div
@@ -256,7 +241,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       {/* Dropdown Menu */}
       {isOpen &&
         !disabled &&
-        portalContainer &&
+        canUsePortal &&
         ReactDOM.createPortal(
           <div
             ref={menuRef}
@@ -351,7 +336,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               )}
             </div>
           </div>,
-          portalContainer
+          document.body
         )}
 
       {/* Helper Text */}
