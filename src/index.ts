@@ -149,7 +149,7 @@ export {
   type DateFieldProps,
 } from './components/Field/Date/DateField'
 export {
-  default as DateRangeComponent,
+  default as DateRange,
   type DateRangeProps,
 } from './components/Field/Date/DateRange'
 export {

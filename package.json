@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.123.04",
+  "version": "0.123.05",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -98,7 +98,6 @@
     "confirmationCode",
     "complexeditor",
     "contentSection",
-    "customizable-components",
     "dataGrid",
     "dialog",
     "dropdown",
@@ -118,7 +117,6 @@
     "password",
     "phonenumber",
     "popup",
-    "pricing-table",
     "projectBoard",
     "qrCode",
     "radioButton",
@@ -135,8 +133,6 @@
     "transferList",
     "2fa",
     "two-factor-auth",
-    "typescript",
-    "typography",
     "ui-library"
   ],
   "eslintConfig": {
