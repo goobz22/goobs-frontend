@@ -948,6 +948,7 @@ export const getTreeViewStyles = (
 
   return {
     // Base container styles - Use longhand properties only
+    boxSizing: 'border-box',
     backgroundColor: theme.container.backgroundColor,
     backgroundImage: theme.container.backgroundImage || 'none',
     backgroundRepeat: 'no-repeat',

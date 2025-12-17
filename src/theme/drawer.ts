@@ -330,6 +330,7 @@ export const getDrawerStyles = (
     minHeight: styles?.minHeight,
     padding: styles?.padding,
     margin: styles?.margin,
+    boxSizing: 'border-box',
     background: themeConfig.temporary.background,
     ...(effectiveAnchor === 'left' && {
       borderRight: themeConfig.temporary.borderRight,

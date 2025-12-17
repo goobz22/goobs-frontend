@@ -332,6 +332,7 @@ const Drawer: FC<DrawerProps> = ({
           zIndex: 1,
           height: '100%',
           overflow: 'auto',
+          boxSizing: 'border-box',
         }}
       >
         {children}

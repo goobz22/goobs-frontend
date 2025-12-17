@@ -1114,7 +1114,14 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
           )}
 
           {/* Tree content */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              boxSizing: 'border-box',
+              width: '100%',
+            }}
+          >
             {children || renderTree(items)}
           </div>
         </div>
