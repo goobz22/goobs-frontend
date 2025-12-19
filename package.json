@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.123.05",
+  "version": "0.123.06",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -76,7 +76,7 @@
     "typescript": "^5",
     "vite": "^7",
     "vite-plugin-dts": "^4",
-    "vite-tsconfig-paths": "^5"
+    "vite-tsconfig-paths": "^6"
   },
   "files": [
     "dist"
