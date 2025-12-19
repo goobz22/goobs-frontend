@@ -57,7 +57,9 @@ const Dropdown: React.FC<DropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const [value, setValue] = useState<string | number>('')
+  const [value, setValue] = useState<string | number>(
+    externalValue ?? defaultValue ?? ''
+  )
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
