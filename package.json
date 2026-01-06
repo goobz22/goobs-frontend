@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.123.06",
+  "version": "0.123.07",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "formik": "^2",
     "highlight.js": "^11",
     "html2canvas": "^1",
-    "jspdf": "^3",
+    "jspdf": "^4",
     "lodash": "^4",
     "next": "^16",
     "otplib": "^12",
