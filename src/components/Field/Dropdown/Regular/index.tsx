@@ -105,7 +105,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen])
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -119,12 +119,23 @@ const Dropdown: React.FC<DropdownProps> = ({
       }
     }
 
+    const handleScroll = (event: Event) => {
+      // Don't close if scrolling inside the dropdown menu itself
+      if (menuRef.current && menuRef.current.contains(event.target as Node)) {
+        return
+      }
+      setIsOpen(false)
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      // Use capture phase to catch scroll events on any scrollable ancestor
+      window.addEventListener('scroll', handleScroll, true)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('scroll', handleScroll, true)
     }
   }, [isOpen])
 

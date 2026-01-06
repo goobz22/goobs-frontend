@@ -79,7 +79,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     }
   }, [history])
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -93,9 +93,26 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
         setIsOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+
+    const handleScroll = (event: Event) => {
+      // Don't close if scrolling inside the dropdown menu itself
+      if (dropdownRef.current && dropdownRef.current.contains(event.target as Node)) {
+        return
+      }
+      setIsOpen(false)
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      // Use capture phase to catch scroll events on any scrollable ancestor
+      window.addEventListener('scroll', handleScroll, true)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('scroll', handleScroll, true)
+    }
+  }, [isOpen])
 
   // Update dropdown position when opened
   useEffect(() => {

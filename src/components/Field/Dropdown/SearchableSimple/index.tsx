@@ -53,7 +53,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const [value, setValue] = useState<string | number>('')
+  const [value, setValue] = useState<string | number>(defaultValue ?? '')
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
@@ -96,7 +96,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     }
   }, [isOpen])
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -111,12 +111,24 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       }
     }
 
+    const handleScroll = (event: Event) => {
+      // Don't close if scrolling inside the dropdown menu itself
+      if (menuRef.current && menuRef.current.contains(event.target as Node)) {
+        return
+      }
+      setIsOpen(false)
+      setSearchTerm('')
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      // Use capture phase to catch scroll events on any scrollable ancestor
+      window.addEventListener('scroll', handleScroll, true)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('scroll', handleScroll, true)
     }
   }, [isOpen])
 
