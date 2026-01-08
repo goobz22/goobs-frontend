@@ -96,7 +96,10 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
     const handleScroll = (event: Event) => {
       // Don't close if scrolling inside the dropdown menu itself
-      if (dropdownRef.current && dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        dropdownRef.current.contains(event.target as Node)
+      ) {
         return
       }
       setIsOpen(false)

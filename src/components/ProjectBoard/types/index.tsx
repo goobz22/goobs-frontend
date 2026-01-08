@@ -345,6 +345,7 @@ export interface TaskMeeting {
  */
 export interface NewMeetingData {
   eventTypeName: string
+  eventTypeId?: string
   attendeeName: string
   attendeeEmail: string
   startTime: string
@@ -353,6 +354,7 @@ export interface NewMeetingData {
   location: string
   notes?: string
   meetingType: 'video' | 'phone' | 'in-person'
+  taskId: string
 }
 
 /** Animation origin for expand-from-origin transitions */

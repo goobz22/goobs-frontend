@@ -2009,6 +2009,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               : meetingLocation,
         notes: meetingNotes,
         meetingType,
+        taskId,
       })
 
       // Log case update for meeting scheduled
