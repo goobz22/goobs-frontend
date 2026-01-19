@@ -1,0 +1,68 @@
+# Codacy configuration file
+# https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+
+---
+engines:
+  eslint:
+    enabled: true
+  stylelint:
+    enabled: true
+  markdownlint:
+    enabled: true
+  psscriptanalyzer:
+    enabled: false  # Disable PowerShell analysis (test scripts only)
+  csslint:
+    enabled: false  # Using Stylelint instead
+
+exclude_paths:
+  - "node_modules/**"
+  - ".next/**"
+  - "dist/**"
+  - "build/**"
+  - "coverage/**"
+  - "**/*.min.js"
+  - "storybook-static/**"
+
+# Disable specific patterns/rules
+engines_overrides:
+  - engine: "codacy-patterns"
+    patterns:
+      # Disable trailing whitespace detection
+      - pattern_id: "trailing_whitespace"
+        enabled: false
+      - pattern_id: "no-trailing-whitespace"
+        enabled: false
+      # Disable semicolon warnings (Prettier handles this)
+      - pattern_id: "asi"
+        enabled: false
+      # Disable iterator warnings (intentional use of for...in)
+      - pattern_id: "iterator"
+        enabled: false
+  - engine: "eslint"
+    patterns:
+      - pattern_id: "no-trailing-spaces"
+        enabled: false
+  - engine: "stylelint"
+    patterns:
+      # Disable style preference rules
+      - pattern_id: "comment-empty-line-before"
+        enabled: false
+      - pattern_id: "rule-empty-line-before"
+        enabled: false
+      - pattern_id: "selector-list-comma-newline-after"
+        enabled: false
+  - engine: "csslint"
+    patterns:
+      # Disable CSS style preference rules
+      - pattern_id: "adjoining-classes"
+        enabled: false
+      - pattern_id: "order-alphabetical"
+        enabled: false
+      - pattern_id: "fallback-colors"
+        enabled: false
+      - pattern_id: "important"
+        enabled: false
+      - pattern_id: "box-model"
+        enabled: false
+      - pattern_id: "box-sizing"
+        enabled: false
