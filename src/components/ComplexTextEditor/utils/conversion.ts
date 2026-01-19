@@ -27,18 +27,24 @@ export function mdToHtml(md: string): string {
 
 function htmlToMd(html: string): string {
   let md = html
-  md = md.replace(/<h1>(.*?)<\/h1>/g, '# $1\n')
-  md = md.replace(/<h2>(.*?)<\/h2>/g, '## $1\n')
-  md = md.replace(/<h3>(.*?)<\/h3>/g, '### $1\n')
-  md = md.replace(/<strong>(.*?)<\/strong>/g, '**$1**')
-  md = md.replace(/<em>(.*?)<\/em>/g, '*$1*')
-  md = md.replace(/(.*?)<\/s>/g, '~~$1~~')
-  md = md.replace(/<code>(.*?)<\/code>/g, '`$1`')
-  md = md.replace(/<a href="(.*?)">(.*?)<\/a>/g, '[$2]($1)')
-  md = md.replace(/<li>(.*?)<\/li>/g, '- $1\n')
-  md = md.replace(/<br>/g, '\n')
-  md = md.replace(/<p>(.*?)<\/p>/g, '$1\n\n')
-  md = md.replace(/<[^>]+>/g, '')
+  // Use non-greedy patterns with negated character classes to prevent ReDoS
+  md = md.replace(/<h1>([^<]*)<\/h1>/g, '# $1\n')
+  md = md.replace(/<h2>([^<]*)<\/h2>/g, '## $1\n')
+  md = md.replace(/<h3>([^<]*)<\/h3>/g, '### $1\n')
+  md = md.replace(/<strong>([^<]*)<\/strong>/g, '**$1**')
+  md = md.replace(/<em>([^<]*)<\/em>/g, '*$1*')
+  md = md.replace(/<s>([^<]*)<\/s>/g, '~~$1~~')
+  md = md.replace(/<code>([^<]*)<\/code>/g, '`$1`')
+  md = md.replace(/<a href="([^"]*)"[^>]*>([^<]*)<\/a>/g, '[$2]($1)')
+  md = md.replace(/<li>([^<]*)<\/li>/g, '- $1\n')
+  md = md.replace(/<br\s*\/?>/g, '\n')
+  md = md.replace(/<p>([^<]*)<\/p>/g, '$1\n\n')
+  // Remove remaining HTML tags using a loop to handle nested tags
+  let prevMd = ''
+  while (prevMd !== md) {
+    prevMd = md
+    md = md.replace(/<[^>]+>/g, '')
+  }
   return md.trim()
 }
 
@@ -48,8 +54,13 @@ function textToHtml(text: string): string {
 
 function htmlToText(html: string): string {
   let text = html
-  text = text.replace(/<br>/g, '\n')
-  text = text.replace(/<[^>]+>/g, '')
+  text = text.replace(/<br\s*\/?>/g, '\n')
+  // Remove HTML tags using a loop to handle nested tags completely
+  let prevText = ''
+  while (prevText !== text) {
+    prevText = text
+    text = text.replace(/<[^>]+>/g, '')
+  }
   return text
 }
 
