@@ -515,6 +515,22 @@ const meta: Meta<typeof DataGrid> = {
   component: DataGrid,
   parameters: {
     layout: 'fullscreen',
+    viewport: {
+      viewports: {
+        mobile: {
+          name: 'Mobile',
+          styles: { width: '375px', height: '667px' },
+        },
+        tablet: {
+          name: 'Tablet',
+          styles: { width: '768px', height: '1024px' },
+        },
+        desktop: {
+          name: 'Desktop',
+          styles: { width: '1440px', height: '900px' },
+        },
+      },
+    },
   },
   argTypes: {
     styles: {
@@ -1615,4 +1631,116 @@ export const BillingInformationExample: Story = {
   name: 'Billing Information Example',
   render: () => <BillingInformationExampleDemo />,
   args: {},
+}
+
+// Responsive viewport stories
+export const Mobile: Story = {
+  name: 'Mobile',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#e5e7eb',
+        minHeight: '100vh',
+        padding: '1rem',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: '375px',
+          maxWidth: '375px',
+          backgroundColor: '#f3f4f6',
+          minHeight: '667px',
+          padding: '0.5rem',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+        }}
+      >
+        <DataGrid {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const Tablet: Story = {
+  name: 'Tablet',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#e5e7eb',
+        minHeight: '100vh',
+        padding: '1rem',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: '768px',
+          maxWidth: '768px',
+          backgroundColor: '#f3f4f6',
+          minHeight: '1024px',
+          padding: '1rem',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+        }}
+      >
+        <DataGrid {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+export const Desktop: Story = {
+  name: 'Desktop',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#e5e7eb',
+        minHeight: '100vh',
+        padding: '1rem',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: '1440px',
+          maxWidth: '1440px',
+          backgroundColor: '#f3f4f6',
+          minHeight: '900px',
+          padding: '1rem',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+        }}
+      >
+        <DataGrid {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
 }

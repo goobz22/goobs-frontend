@@ -330,6 +330,7 @@ const Drawer: FC<DrawerProps> = ({
         style={{
           position: 'relative',
           zIndex: 1,
+          width: '100%',
           height: '100%',
           overflow: 'auto',
           boxSizing: 'border-box',

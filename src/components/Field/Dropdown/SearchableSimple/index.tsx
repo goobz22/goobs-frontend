@@ -186,7 +186,10 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
           backgroundColor:
             styles?.backgroundColor ||
             (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
-          border: `1px solid ${styles?.borderColor || alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3)}`,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor:
+            styles?.borderColor || alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3),
           borderRadius: '8px',
           color:
             styles?.textColor ||
@@ -272,7 +275,9 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                   width: '100%',
                   padding: '8px 12px',
                   backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  border: `1px solid ${alpha(SACRED_GOLD, 0.3)}`,
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: alpha(SACRED_GOLD, 0.3),
                   borderRadius: '6px',
                   color: 'rgba(255, 255, 255, 0.9)',
                   fontFamily: '"Crimson Text", serif',

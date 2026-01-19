@@ -40,17 +40,43 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
         : `linear-gradient(180deg, transparent, ${gradientColor}, transparent)`
     }
 
+    // Build margin styles without mixing shorthand and longhand
+    const getHorizontalMargins = () => {
+      // If any individual margin is specified, use individual properties only
+      if (styles?.marginTop !== undefined || styles?.marginBottom !== undefined ||
+          styles?.marginLeft !== undefined || styles?.marginRight !== undefined) {
+        return {
+          marginTop: styles?.marginTop ?? '24px',
+          marginBottom: styles?.marginBottom ?? '24px',
+          marginLeft: styles?.marginLeft ?? '0',
+          marginRight: styles?.marginRight ?? '0',
+        }
+      }
+      // Otherwise use the shorthand
+      return { margin: styles?.margin || '24px 0' }
+    }
+
+    const getVerticalMargins = () => {
+      // If any individual margin is specified, use individual properties only
+      if (styles?.marginLeft !== undefined || styles?.marginRight !== undefined) {
+        return {
+          marginTop: styles?.marginTop ?? '0',
+          marginBottom: styles?.marginBottom ?? '0',
+          marginLeft: styles?.marginLeft ?? '24px',
+          marginRight: styles?.marginRight ?? '24px',
+        }
+      }
+      // Otherwise use the shorthand
+      return { margin: styles?.margin || '0 24px' }
+    }
+
     const containerStyle: React.CSSProperties =
       orientation === 'horizontal'
         ? {
             width: styles?.width || '100%',
             height: styles?.height || '2px',
             background: getBackground(),
-            margin: styles?.margin || '24px 0',
-            marginTop: styles?.marginTop,
-            marginBottom: styles?.marginBottom,
-            marginLeft: styles?.marginLeft,
-            marginRight: styles?.marginRight,
+            ...getHorizontalMargins(),
             position: 'relative',
             opacity: disabled ? 0.5 : 1,
           }
@@ -58,9 +84,7 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
             width: styles?.width || '2px',
             height: styles?.height || '100%',
             background: getBackground(),
-            margin: styles?.margin || '0 24px',
-            marginLeft: styles?.marginLeft,
-            marginRight: styles?.marginRight,
+            ...getVerticalMargins(),
             position: 'relative',
             opacity: disabled ? 0.5 : 1,
           }
