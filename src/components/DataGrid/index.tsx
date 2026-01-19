@@ -13,7 +13,7 @@ import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
-import useIsMobile from './utils/useIsMobile'
+import useContainerWidth from './utils/useContainerWidth'
 import { areRowsEqual } from './utils/rowComparison'
 import type { DatagridProps, RowData, ColumnDef } from './types'
 import { getDataGridStyles } from '../../theme'
@@ -154,6 +154,7 @@ function DataGridContent({
   allowRowCreation = false,
   creationRowPosition = 'top',
   showIdColumns = false,
+  forceMobile = false,
   filters,
   metrics,
   metricsCollapsible = true,
@@ -164,7 +165,8 @@ function DataGridContent({
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile(768)
+  const detectedMobile = useContainerWidth(containerRef, 768)
+  const isMobile = forceMobile || detectedMobile
 
   // Update the module-level ref for PDF export whenever containerRef changes
   useEffect(() => {

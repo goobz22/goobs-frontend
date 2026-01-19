@@ -278,6 +278,9 @@ export interface DatagridProps {
   // Controls whether ID columns (id/_id) are visible
   showIdColumns?: boolean
 
+  // Force mobile card view regardless of screen size (useful for Storybook demos)
+  forceMobile?: boolean
+
   // Permissions control - determines read/write access
   permissions: {
     access: 'no-access' | 'read' | 'write'

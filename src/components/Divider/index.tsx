@@ -43,8 +43,12 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
     // Build margin styles without mixing shorthand and longhand
     const getHorizontalMargins = () => {
       // If any individual margin is specified, use individual properties only
-      if (styles?.marginTop !== undefined || styles?.marginBottom !== undefined ||
-          styles?.marginLeft !== undefined || styles?.marginRight !== undefined) {
+      if (
+        styles?.marginTop !== undefined ||
+        styles?.marginBottom !== undefined ||
+        styles?.marginLeft !== undefined ||
+        styles?.marginRight !== undefined
+      ) {
         return {
           marginTop: styles?.marginTop ?? '24px',
           marginBottom: styles?.marginBottom ?? '24px',
@@ -58,7 +62,10 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
 
     const getVerticalMargins = () => {
       // If any individual margin is specified, use individual properties only
-      if (styles?.marginLeft !== undefined || styles?.marginRight !== undefined) {
+      if (
+        styles?.marginLeft !== undefined ||
+        styles?.marginRight !== undefined
+      ) {
         return {
           marginTop: styles?.marginTop ?? '0',
           marginBottom: styles?.marginBottom ?? '0',

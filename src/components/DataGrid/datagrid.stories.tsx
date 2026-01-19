@@ -483,6 +483,7 @@ const commonArgs: Partial<DatagridProps> = {
   searchbarProps: { value: '', onChange: () => {} },
   filters: sampleFilters,
   metrics: employeeMetrics,
+  permissions: { access: 'write' },
   // Add manage row callback functions so the toolbar shows when rows are selected
   onManage: (selectedRows: string[]) => {
     console.log('Manage rows:', selectedRows)
@@ -1635,8 +1636,8 @@ export const BillingInformationExample: Story = {
 
 // Responsive viewport stories
 export const Mobile: Story = {
-  name: 'Mobile',
-  render: args => (
+  name: 'Mobile (Card View)',
+  render: () => (
     <div
       style={{
         backgroundColor: '#e5e7eb',
@@ -1659,21 +1660,19 @@ export const Mobile: Story = {
           borderRadius: '8px',
         }}
       >
-        <DataGrid {...args} />
+        <DataGrid
+          {...commonArgs}
+          forceMobile={true}
+          styles={{ theme: 'light' }}
+        />
       </div>
     </div>
   ),
-  args: {
-    ...commonArgs,
-    styles: {
-      theme: 'light',
-    },
-  },
 }
 
 export const Tablet: Story = {
-  name: 'Tablet',
-  render: args => (
+  name: 'Tablet (Card View)',
+  render: () => (
     <div
       style={{
         backgroundColor: '#e5e7eb',
@@ -1696,16 +1695,14 @@ export const Tablet: Story = {
           borderRadius: '8px',
         }}
       >
-        <DataGrid {...args} />
+        <DataGrid
+          {...commonArgs}
+          forceMobile={true}
+          styles={{ theme: 'light' }}
+        />
       </div>
     </div>
   ),
-  args: {
-    ...commonArgs,
-    styles: {
-      theme: 'light',
-    },
-  },
 }
 
 export const Desktop: Story = {
