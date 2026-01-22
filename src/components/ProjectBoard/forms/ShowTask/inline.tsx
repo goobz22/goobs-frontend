@@ -152,6 +152,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details')
   const [isEditMode, setIsEditMode] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
   const [editedDescription, setEditedDescription] = useState(description)
   const [newCommentText, setNewCommentText] = useState('')
@@ -239,6 +240,28 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Sidebar collapsed state
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const mediaQuery = window.matchMedia('(max-width: 960px)')
+    const handleChange = () => setIsMobile(mediaQuery.matches)
+
+    handleChange()
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    }
+
+    mediaQuery.addListener(handleChange)
+    return () => mediaQuery.removeListener(handleChange)
+  }, [])
+
+  useEffect(() => {
+    if (isMobile && isSidebarCollapsed) {
+      setIsSidebarCollapsed(false)
+    }
+  }, [isMobile, isSidebarCollapsed])
 
   // Helper function to log case updates for audit trail
   const logCaseUpdate = (
@@ -454,23 +477,33 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
-    height: '100vh',
+    flexDirection: isMobile ? 'column' : 'row',
+    height: isMobile ? 'auto' : '100vh',
+    minHeight: '100vh',
     width: '100%',
     backgroundColor: bgColor,
     color: textColor,
-    overflow: 'hidden',
+    overflow: isMobile ? 'visible' : 'hidden',
+    paddingRight: isMobile ? '0.5rem' : undefined,
+    boxSizing: 'border-box',
   }
 
   const sidebarStyle: React.CSSProperties = {
-    width: isSidebarCollapsed ? '48px' : '280px',
+    width: isMobile ? '100%' : isSidebarCollapsed ? '48px' : '280px',
     backgroundColor: sidebarBg,
-    borderRight: `1px solid ${borderColor}`,
-    padding: isSidebarCollapsed ? '0.5rem' : '1.5rem',
-    overflowY: 'auto',
+    borderRight: isMobile ? 'none' : `1px solid ${borderColor}`,
+    borderBottom: isMobile ? `1px solid ${borderColor}` : 'none',
+    padding: isMobile
+      ? '1rem 1.5rem 1rem 1rem'
+      : isSidebarCollapsed
+        ? '0.5rem'
+        : '1.5rem',
+    overflowY: isMobile ? 'visible' : 'auto',
     overflowX: 'hidden',
     flexShrink: 0,
     transition: 'width 0.3s ease, padding 0.3s ease',
     position: 'relative',
+    boxSizing: 'border-box',
   }
 
   const collapseButtonStyle: React.CSSProperties = {
@@ -489,7 +522,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         : '#F3F4F6',
     color: textColor,
     cursor: 'pointer',
-    display: 'flex',
+    display: isMobile ? 'none' : 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '0.875rem',
@@ -501,19 +534,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
+    overflow: isMobile ? 'visible' : 'hidden',
   }
 
   const tabsContainerStyle: React.CSSProperties = {
     display: 'flex',
-    gap: '0.5rem',
-    padding: '1rem 1.5rem 0',
+    gap: isMobile ? '0.4rem' : '0.5rem',
+    padding: isMobile ? '0.75rem 1rem 0' : '1rem 1.5rem 0',
     borderBottom: `1px solid ${borderColor}`,
     backgroundColor: bgColor,
+    flexWrap: isMobile ? 'wrap' : 'nowrap',
   }
 
   const tabStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: '0.75rem 1.5rem',
+    padding: isMobile ? '0.5rem 0.85rem' : '0.75rem 1.5rem',
     backgroundColor: isActive ? tabActiveBg : tabInactiveBg,
     border: `1px solid ${borderColor}`,
     borderBottom: isActive ? 'none' : `1px solid ${borderColor}`,
@@ -522,7 +556,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     fontWeight: isActive ? 600 : 400,
     color: isActive ? textColor : secondaryTextColor,
     transition: 'all 0.2s',
-    fontSize: '0.875rem',
+    fontSize: isMobile ? '0.75rem' : '0.875rem',
     ...(isActive && {
       transform: 'translateY(1px)',
     }),
@@ -530,8 +564,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const contentAreaStyle: React.CSSProperties = {
     flex: 1,
-    overflowY: 'auto',
-    padding: '1.5rem',
+    overflowY: isMobile ? 'visible' : 'auto',
+    padding: isMobile ? '1rem' : '1.5rem',
   }
 
   const sectionTitleStyle: React.CSSProperties = {
@@ -549,9 +583,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const fieldRowStyle: React.CSSProperties = {
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: isMobile ? 'flex-start' : 'center',
+    gap: isMobile ? '0.35rem' : '0',
     padding: '0.75rem 0',
+    paddingRight: isMobile ? '0.5rem' : undefined,
     borderBottom: `1px solid ${borderColor}`,
   }
 
@@ -565,22 +602,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     fontSize: '0.875rem',
     color: textColor,
     fontWeight: 500,
-    textAlign: 'right',
-    maxWidth: '60%',
+    textAlign: isMobile ? 'left' : 'right',
+    maxWidth: isMobile ? '100%' : '60%',
+    width: isMobile ? '100%' : 'auto',
     wordWrap: 'break-word',
   }
 
   const twoColumnGridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '2rem',
+    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+    gap: isMobile ? '1rem' : '2rem',
   }
 
   const cardStyle: React.CSSProperties = {
     backgroundColor: sidebarBg,
     border: `1px solid ${borderColor}`,
     borderRadius: '8px',
-    padding: '1.5rem',
+    padding: isMobile ? '1rem' : '1.5rem',
   }
 
   const buttonStyle: React.CSSProperties = {
@@ -593,12 +631,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     cursor: 'pointer',
     transition: 'all 0.2s',
     fontWeight: 500,
+    width: isMobile ? '100%' : 'auto',
+    maxWidth: isMobile ? 'calc(100% - 0.5rem)' : undefined,
+    boxSizing: 'border-box',
   }
 
   const actionButtonsStyle: React.CSSProperties = {
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     gap: '0.5rem',
     marginTop: '1.5rem',
+    paddingRight: isMobile ? '0.5rem' : undefined,
   }
 
   const handleEditClick = () => {
@@ -2958,23 +3001,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           }}
         >
           <span>Meetings ({taskMeetings.length})</span>
-          <button
-            onClick={() => {
-              setMeetingTitle(`Meeting: ${taskTitle}`)
-              setSchedulingView('form')
-            }}
-            style={{
-              ...buttonStyle,
-              backgroundColor: isSacred
-                ? '#FFD700'
-                : isDark
-                  ? '#3B82F6'
-                  : '#3B82F6',
-              color: isSacred ? '#000000' : '#FFFFFF',
-            }}
-          >
-            Schedule Meeting
-          </button>
         </div>
 
         {taskMeetings.length === 0 ? (
@@ -3003,7 +3029,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 color: textColor,
               }}
             >
-              Schedule First Meeting
+              Schedule Meeting
             </button>
           </div>
         ) : (
