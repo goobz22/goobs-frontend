@@ -89,7 +89,6 @@ function ProjectBoardContent({
   onEditComment,
   onAdd,
   onComment,
-  onRevisionHistory,
   currentUser,
   customerId,
   companyId,
@@ -102,8 +101,11 @@ function ProjectBoardContent({
   onConfirmMeeting,
   onRescheduleMeeting,
   currentDate,
+  onUpdateCompanyNotes,
   onUpdateCustomerNotes,
   onCaseUpdate,
+  employees,
+  administrators,
 }: ProjectBoardProps) {
   const {
     columns: columnState,
@@ -385,9 +387,11 @@ function ProjectBoardContent({
             : []
         }
         rawCustomers={
-          activeAddTaskForm === 'companyCustomerDropdown' ? rawCustomers : []
+          activeAddTaskForm === 'companyCustomerDropdown'
+            ? (rawCustomers ?? [])
+            : []
         }
-        rawProducts={rawProducts}
+        rawProducts={rawProducts ?? []}
         rawServices={rawServices}
         rawRegions={rawRegions}
         styles={styles}
@@ -434,8 +438,15 @@ function ProjectBoardContent({
         comments={currentShowTask.comments}
         caseUpdates={currentShowTask.caseUpdates}
         customerAssigned={currentShowTask.customerAssigned}
-        customerId={currentShowTask.customerId}
-        customerInternalNotes={currentShowTask.customerInternalNotes}
+        associatedCompanyId={currentShowTask.companyId}
+        {...(currentShowTask.companyInternalNotes !== undefined && {
+          companyInternalNotes: currentShowTask.companyInternalNotes,
+        })}
+        {...(onUpdateCompanyNotes && { onUpdateCompanyNotes })}
+        associatedCustomerId={currentShowTask.customerId}
+        {...(currentShowTask.customerInternalNotes !== undefined && {
+          customerInternalNotes: currentShowTask.customerInternalNotes,
+        })}
         severity={currentShowTask.severity}
         schedulingQueue={currentShowTask.schedulingQueue}
         status={currentShowTask.status}
@@ -454,8 +465,7 @@ function ProjectBoardContent({
         onDelete={deleteCallback}
         onComment={commentCallback}
         onEditComment={editCommentCallback}
-        onRevisionHistory={onRevisionHistory}
-        onUpdateCustomerNotes={onUpdateCustomerNotes}
+        {...(onUpdateCustomerNotes && { onUpdateCustomerNotes })}
         onBack={handleBackToBoard}
         severityOptions={rawSeverityLevels}
         schedulingQueueOptions={rawQueues}
@@ -464,7 +474,7 @@ function ProjectBoardContent({
         topicOptions={rawTopics}
         knowledgebaseArticleOptions={rawArticles}
         teamMemberOptions={rawEmployees}
-        rawProducts={rawProducts}
+        rawProducts={rawProducts ?? []}
         rawServices={rawServices}
         regionOptions={rawRegions}
         styles={styles}
@@ -475,6 +485,8 @@ function ProjectBoardContent({
         onRescheduleMeeting={onRescheduleMeeting}
         currentDate={currentDate}
         {...(onCaseUpdate && { onCaseUpdate })}
+        {...(employees && { employees })}
+        {...(administrators && { administrators })}
       />
     )
   }

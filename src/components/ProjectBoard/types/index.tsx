@@ -131,8 +131,10 @@ export type Task = {
   productId: string
   /** The service ID if this task is for a service. */
   serviceId: string
-  /** Customer internal notes (staff-only, tied to customer record). */
-  customerInternalNotes: string
+  /** Company internal notes (staff-only, tied to company record - for admin -> company context). Only used in administrator variant. */
+  companyInternalNotes?: string
+  /** Customer internal notes (staff-only, tied to customer record - for company -> customer context). Only used in company variant. */
+  customerInternalNotes?: string
 }
 
 /** Each "column" references an array of Task objects. */
@@ -260,10 +262,12 @@ export interface ProjectBoardProps {
   rawTopics: RawTopic[]
   rawQueues: RawQueue[]
   rawArticles: RawArticle[]
-  rawCustomers: RawCustomer[]
+  /** Raw customers - only required for company variant (companies deal with customers) */
+  rawCustomers?: RawCustomer[]
   rawEmployees: RawEmployee[]
   rawCompanies: RawCompany[]
-  rawProducts: RawProduct[]
+  /** Raw products - only required for company variant (admin only has services) */
+  rawProducts?: RawProduct[]
   rawServices: RawService[]
   rawRegions: RawRegion[]
   rawSeverityLevels: RawSeverityLevel[]
@@ -281,13 +285,6 @@ export interface ProjectBoardProps {
    * define the signature here. You can also do (text: string) => void if that's your design.
    */
   onComment: (commentText: string, _id: string) => void
-  /**
-   * New callback for passing the revision history of a comment.
-   */
-  onRevisionHistory: (
-    commentId: string,
-    revisionHistory: CommentEditHistory[]
-  ) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles: ProjectBoardStyles
   /** Permissions control - determines read/write access */
@@ -305,19 +302,31 @@ export interface ProjectBoardProps {
     newEndTime: string
   ) => Promise<void> | void
   currentDate: Date
-  /** Callback for updating customer internal notes (travels with the customer, not task-specific) */
-  onUpdateCustomerNotes: (
+  /** Callback for updating company internal notes (travels with the company, not task-specific - for admin -> company context) */
+  onUpdateCompanyNotes?: (
+    companyId: string,
+    notes: string
+  ) => Promise<void> | void
+  /** Callback for updating customer internal notes (travels with the customer, not task-specific - for company -> customer context) */
+  onUpdateCustomerNotes?: (
     customerId: string,
     notes: string
   ) => Promise<void> | void
   /** Callback for logging case history updates (audit trail) */
-  onCaseUpdate?: (caseUpdate: {
-    updateType: CaseUpdate['updateType']
-    description: string
-    fieldChanged?: string
-    oldValue?: string
-    newValue?: string
-  }) => Promise<void> | void
+  onCaseUpdate?: (
+    taskId: string,
+    caseUpdate: {
+      updateType: CaseUpdate['updateType']
+      description: string
+      fieldChanged?: string
+      oldValue?: string
+      newValue?: string
+    }
+  ) => Promise<void> | void
+  /** Company employees (for resolving comment authors) */
+  employees?: Array<{ _id: string; firstName: string; lastName: string }>
+  /** Administrator users (for resolving comment authors in admin context) */
+  administrators?: Array<{ _id: string; firstName: string; lastName: string }>
 }
 
 /** View state for inline interface - tracks which view is currently displayed */

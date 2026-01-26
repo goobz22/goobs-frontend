@@ -36,8 +36,10 @@ interface InlineAddTaskProps {
   companyId: string
   customerId: string
   rawCompanies: RawCompany[]
-  rawCustomers: RawCustomer[]
-  rawProducts: RawProduct[]
+  /** Raw customers - only required for company variant (companies deal with customers) */
+  rawCustomers?: RawCustomer[]
+  /** Raw products - only required for company variant (admin only has services) */
+  rawProducts?: RawProduct[]
   rawServices: RawService[]
   rawRegions: RawRegion[]
   knowledgebaseArticles?: RawArticle[]
@@ -55,8 +57,8 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   companyId,
   customerId,
   rawCompanies,
-  rawCustomers,
-  rawProducts,
+  rawCustomers = [],
+  rawProducts = [],
   rawServices,
   rawRegions,
   knowledgebaseArticles = [],
@@ -384,6 +386,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             '',
       productId: productOrService === 'product' ? productServiceId : '',
       serviceId: productOrService === 'service' ? productServiceId : '',
+      companyInternalNotes: '',
       customerInternalNotes: '',
     }
 

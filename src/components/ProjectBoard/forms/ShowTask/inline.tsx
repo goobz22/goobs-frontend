@@ -32,8 +32,6 @@ interface InlineShowTaskProps {
   comments: Comment[]
   caseUpdates: CaseUpdate[]
   customerAssigned: string
-  customerId: string
-  customerInternalNotes?: string
   severity: string
   schedulingQueue: string
   region: string
@@ -52,12 +50,23 @@ interface InlineShowTaskProps {
   onDelete: () => void
   onComment: (text: string, taskId: string) => void
   onEditComment: (commentId: string, newText: string) => void
-  onRevisionHistory: (commentId: string, revisionHistory: any[]) => void
-  onUpdateCustomerNotes: (
+  onBack: () => void
+  // Company notes (for administration -> company context)
+  associatedCompanyId?: string
+  associatedCompanyName?: string
+  companyInternalNotes?: string
+  onUpdateCompanyNotes?: (
+    companyId: string,
+    notes: string
+  ) => Promise<void> | void
+  // Customer notes (for company -> customer context)
+  associatedCustomerId?: string
+  associatedCustomerName?: string
+  customerInternalNotes?: string
+  onUpdateCustomerNotes?: (
     customerId: string,
     notes: string
   ) => Promise<void> | void
-  onBack: () => void
   severityOptions: RawSeverityLevel[]
   schedulingQueueOptions: RawQueue[]
   regionOptions: RawRegion[]
@@ -66,8 +75,13 @@ interface InlineShowTaskProps {
   topicOptions: RawTopic[]
   knowledgebaseArticleOptions: RawArticle[]
   teamMemberOptions: RawEmployee[]
-  rawProducts: RawProduct[]
+  /** Raw products - only required for company variant (admin only has services) */
+  rawProducts?: RawProduct[]
   rawServices: RawService[]
+  /** Company employees (for resolving comment authors in company context) */
+  employees?: Array<{ _id: string; firstName: string; lastName: string }>
+  /** Administrator users (for resolving comment authors in admin context) */
+  administrators?: Array<{ _id: string; firstName: string; lastName: string }>
   styles: ProjectBoardStyles
   // Meeting scheduling props
   meetings: TaskMeeting[]
@@ -81,13 +95,16 @@ interface InlineShowTaskProps {
   ) => Promise<void> | void
   currentDate: Date
   // Case history audit logging callback
-  onCaseUpdate?: (caseUpdate: {
-    updateType: CaseUpdate['updateType']
-    description: string
-    fieldChanged?: string
-    oldValue?: string
-    newValue?: string
-  }) => Promise<void> | void
+  onCaseUpdate?: (
+    taskId: string,
+    caseUpdate: {
+      updateType: CaseUpdate['updateType']
+      description: string
+      fieldChanged?: string
+      oldValue?: string
+      newValue?: string
+    }
+  ) => Promise<void> | void
 }
 
 type TabType =
@@ -106,8 +123,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   comments,
   caseUpdates,
   customerAssigned,
-  customerId,
-  customerInternalNotes,
   severity,
   schedulingQueue,
   region,
@@ -126,9 +141,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onDelete,
   onComment,
   onEditComment,
-  onRevisionHistory,
-  onUpdateCustomerNotes,
   onBack,
+  // Company notes props
+  associatedCompanyId,
+  associatedCompanyName,
+  companyInternalNotes,
+  onUpdateCompanyNotes,
+  // Customer notes props
+  associatedCustomerId,
+  associatedCustomerName,
+  customerInternalNotes,
+  onUpdateCustomerNotes,
   severityOptions,
   schedulingQueueOptions,
   regionOptions,
@@ -137,8 +160,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   topicOptions,
   knowledgebaseArticleOptions,
   teamMemberOptions,
-  rawProducts,
+  rawProducts = [],
   rawServices,
+  employees,
+  administrators,
   styles,
   // Meeting scheduling props
   meetings,
@@ -158,6 +183,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [newCommentText, setNewCommentText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
+  // Internal state for viewing revision history (handled locally, no prop needed)
+  const [viewingRevisionHistoryId, setViewingRevisionHistoryId] = useState<
+    string | null
+  >(null)
 
   // Meeting scheduling state
   const [schedulingView, setSchedulingView] = useState<
@@ -184,6 +213,26 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null)
   const [rescheduleTime, setRescheduleTime] = useState<Date | null>(null)
   const [rescheduleDuration, setRescheduleDuration] = useState('30')
+
+  // Helper function to resolve author name from ID
+  // Checks administrators first, then employees, falls back to the original value
+  const resolveAuthorName = (createdBy: string): string => {
+    // If it looks like an ID (24 char hex string), try to resolve it
+    if (/^[a-f0-9]{24}$/i.test(createdBy)) {
+      // Check administrators first
+      const admin = administrators?.find(a => a._id === createdBy)
+      if (admin) {
+        return `${admin.firstName} ${admin.lastName}`.trim()
+      }
+      // Then check employees
+      const employee = employees?.find(e => e._id === createdBy)
+      if (employee) {
+        return `${employee.firstName} ${employee.lastName}`.trim()
+      }
+    }
+    // Return as-is if not an ID or not found
+    return createdBy
+  }
 
   // Edit mode state for editable fields
   const [editedSeverityId, setEditedSeverityId] = useState(
@@ -225,7 +274,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     'external'
   )
 
-  // Customer notes editing state (separate from task comments)
+  // Company notes editing state (for administration -> company context)
+  const [isEditingCompanyNotes, setIsEditingCompanyNotes] = useState(false)
+  const [editedCompanyNotes, setEditedCompanyNotes] = useState(
+    companyInternalNotes || ''
+  )
+
+  // Customer notes editing state (for company -> customer context)
   const [isEditingCustomerNotes, setIsEditingCustomerNotes] = useState(false)
   const [editedCustomerNotes, setEditedCustomerNotes] = useState(
     customerInternalNotes || ''
@@ -292,7 +347,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       if (newValue !== undefined) {
         caseUpdateData.newValue = newValue
       }
-      void onCaseUpdate(caseUpdateData)
+      void onCaseUpdate(taskId, caseUpdateData)
     }
   }
 
@@ -1210,10 +1265,29 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   )
 
   const renderDetailsTab = () => {
+    // Handler for saving company notes (updates company record, NOT task comments)
+    const handleSaveCompanyNotes = () => {
+      if (onUpdateCompanyNotes && associatedCompanyId) {
+        onUpdateCompanyNotes(associatedCompanyId, editedCompanyNotes)
+
+        // Log case update for company notes
+        logCaseUpdate(
+          'customer_notes_update',
+          `Updated company internal notes`,
+          'companyInternalNotes',
+          companyInternalNotes || '(empty)',
+          editedCompanyNotes.substring(0, 100) +
+            (editedCompanyNotes.length > 100 ? '...' : '')
+        )
+
+        setIsEditingCompanyNotes(false)
+      }
+    }
+
     // Handler for saving customer notes (updates customer record, NOT task comments)
     const handleSaveCustomerNotes = () => {
-      if (onUpdateCustomerNotes && customerId) {
-        onUpdateCustomerNotes(customerId, editedCustomerNotes)
+      if (onUpdateCustomerNotes && associatedCustomerId) {
+        onUpdateCustomerNotes(associatedCustomerId, editedCustomerNotes)
 
         // Log case update for customer notes
         logCaseUpdate(
@@ -1279,204 +1353,425 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
         </div>
 
-        {/* Internal Customer Notes Section - These travel with the customer, NOT task-specific */}
-        <div style={{ ...cardStyle, marginTop: '2rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1rem',
-            }}
-          >
-            <div
-              style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
-            >
-              Internal Customer Notes
-            </div>
-            {!isEditingCustomerNotes && (
-              <button
-                onClick={() => {
-                  setEditedCustomerNotes(customerInternalNotes || '')
-                  setIsEditingCustomerNotes(true)
-                }}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 215, 0, 0.1)'
-                    : isDark
-                      ? '#374151'
-                      : '#F3F4F6',
-                  color: isSacred ? '#FFD700' : textColor,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                }}
-              >
-                {customerInternalNotes ? 'Edit Note' : '+ Add Note'}
-              </button>
-            )}
-          </div>
-
-          <p
-            style={{
-              fontSize: '0.8rem',
-              color: secondaryTextColor,
-              marginBottom: '1rem',
-              padding: '0.75rem',
-              backgroundColor: isSacred
-                ? 'rgba(255, 152, 0, 0.05)'
-                : isDark
-                  ? '#111827'
-                  : '#FEF3C7',
-              borderRadius: '6px',
-              borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
-            }}
-          >
-            These notes are attached to the customer record and will appear on
-            all tasks for this customer. For task-specific internal comments,
-            use the Comments tab.
-          </p>
-
-          {/* Edit Customer Notes Form */}
-          {isEditingCustomerNotes ? (
+        {/* Internal Company Notes Section - Shown when associatedCompanyId is provided */}
+        {associatedCompanyId && (
+          <div style={{ ...cardStyle, marginTop: '2rem' }}>
             <div
               style={{
-                padding: '1rem',
-                backgroundColor: isSacred
-                  ? 'rgba(255, 152, 0, 0.05)'
-                  : isDark
-                    ? '#1F2937'
-                    : '#F9FAFB',
-                borderRadius: '8px',
-                border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1rem',
               }}
             >
-              <textarea
-                value={editedCustomerNotes}
-                onChange={e => setEditedCustomerNotes(e.target.value)}
-                placeholder="Add internal notes about this customer..."
-                style={{
-                  width: '100%',
-                  minHeight: '100px',
-                  padding: '0.75rem',
-                  borderRadius: '6px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
-                  backgroundColor: bgColor,
-                  color: textColor,
-                  fontSize: '0.875rem',
-                  resize: 'vertical',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                }}
-              />
               <div
-                style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}
+                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
               >
+                Internal Company Notes
+                {associatedCompanyName && (
+                  <span style={{ fontWeight: 400, marginLeft: '0.5rem' }}>
+                    ({associatedCompanyName})
+                  </span>
+                )}
+              </div>
+              {!isEditingCompanyNotes && (
                 <button
-                  onClick={handleSaveCustomerNotes}
+                  onClick={() => {
+                    setEditedCompanyNotes(companyInternalNotes || '')
+                    setIsEditingCompanyNotes(true)
+                  }}
                   style={{
                     padding: '0.5rem 1rem',
                     borderRadius: '6px',
-                    border: 'none',
+                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
                     backgroundColor: isSacred
-                      ? 'rgba(255, 152, 0, 0.2)'
+                      ? 'rgba(255, 215, 0, 0.1)'
                       : isDark
-                        ? '#78350f'
-                        : '#F59E0B',
-                    color: isSacred ? '#FF9800' : '#FFFFFF',
+                        ? '#374151'
+                        : '#F3F4F6',
+                    color: isSacred ? '#FFD700' : textColor,
                     fontSize: '0.875rem',
                     cursor: 'pointer',
                     fontWeight: 500,
                   }}
                 >
-                  Save Note
+                  {companyInternalNotes ? 'Edit Note' : '+ Add Note'}
                 </button>
+              )}
+            </div>
+
+            <p
+              style={{
+                fontSize: '0.8rem',
+                color: secondaryTextColor,
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                backgroundColor: isSacred
+                  ? 'rgba(255, 152, 0, 0.05)'
+                  : isDark
+                    ? '#111827'
+                    : '#FEF3C7',
+                borderRadius: '6px',
+                borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
+              }}
+            >
+              These notes are attached to the company record and will appear on
+              all tasks for this company. For task-specific internal comments,
+              use the Comments tab.
+            </p>
+
+            {/* Edit Company Notes Form */}
+            {isEditingCompanyNotes ? (
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 152, 0, 0.05)'
+                    : isDark
+                      ? '#1F2937'
+                      : '#F9FAFB',
+                  borderRadius: '8px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
+                }}
+              >
+                <textarea
+                  value={editedCompanyNotes}
+                  onChange={e => setEditedCompanyNotes(e.target.value)}
+                  placeholder="Add internal notes about this company..."
+                  style={{
+                    width: '100%',
+                    minHeight: '100px',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    fontSize: '0.875rem',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    marginTop: '0.75rem',
+                  }}
+                >
+                  <button
+                    onClick={handleSaveCompanyNotes}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: isSacred
+                        ? 'rgba(255, 152, 0, 0.2)'
+                        : isDark
+                          ? '#78350f'
+                          : '#F59E0B',
+                      color: isSacred ? '#FF9800' : '#FFFFFF',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Save Note
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingCompanyNotes(false)
+                      setEditedCompanyNotes(companyInternalNotes || '')
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: 'transparent',
+                      color: textColor,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : companyInternalNotes ? (
+              /* Display Company Notes - from company record */
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 193, 7, 0.1)'
+                    : isDark
+                      ? '#1F2937'
+                      : '#FEF9C3',
+                  borderRadius: '8px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
+                  borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: isSacred ? '#FFD700' : '#92400E',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  <span>🏢</span>
+                  <span>Company Notes</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.875rem',
+                    color: textColor,
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {companyInternalNotes}
+                </div>
+              </div>
+            ) : (
+              /* Empty State */
+              <div
+                style={{
+                  padding: '1.5rem',
+                  borderRadius: '6px',
+                  border: `1px dashed ${borderColor}`,
+                  backgroundColor: isSacred
+                    ? 'rgba(0, 0, 0, 0.2)'
+                    : isDark
+                      ? '#111827'
+                      : '#F9FAFB',
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                }}
+              >
+                No internal company notes yet. Click &quot;+ Add Note&quot; to
+                add one.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Internal Customer Notes Section - Shown when associatedCustomerId is provided */}
+        {associatedCustomerId && (
+          <div style={{ ...cardStyle, marginTop: '2rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              <div
+                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+              >
+                Internal Customer Notes
+                {associatedCustomerName && (
+                  <span style={{ fontWeight: 400, marginLeft: '0.5rem' }}>
+                    ({associatedCustomerName})
+                  </span>
+                )}
+              </div>
+              {!isEditingCustomerNotes && (
                 <button
                   onClick={() => {
-                    setIsEditingCustomerNotes(false)
                     setEditedCustomerNotes(customerInternalNotes || '')
+                    setIsEditingCustomerNotes(true)
                   }}
                   style={{
                     padding: '0.5rem 1rem',
                     borderRadius: '6px',
-                    border: `1px solid ${borderColor}`,
-                    backgroundColor: 'transparent',
-                    color: textColor,
+                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
+                    backgroundColor: isSacred
+                      ? 'rgba(255, 215, 0, 0.1)'
+                      : isDark
+                        ? '#374151'
+                        : '#F3F4F6',
+                    color: isSacred ? '#FFD700' : textColor,
                     fontSize: '0.875rem',
                     cursor: 'pointer',
+                    fontWeight: 500,
                   }}
                 >
-                  Cancel
+                  {customerInternalNotes ? 'Edit Note' : '+ Add Note'}
                 </button>
-              </div>
+              )}
             </div>
-          ) : customerInternalNotes ? (
-            /* Display Customer Notes - from customer record */
-            <div
+
+            <p
               style={{
-                padding: '1rem',
+                fontSize: '0.8rem',
+                color: secondaryTextColor,
+                marginBottom: '1rem',
+                padding: '0.75rem',
                 backgroundColor: isSacred
-                  ? 'rgba(255, 193, 7, 0.1)'
-                  : isDark
-                    ? '#1F2937'
-                    : '#FEF9C3',
-                borderRadius: '8px',
-                border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
-                borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: isSacred ? '#FFD700' : '#92400E',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                <span>📋</span>
-                <span>Customer Notes</span>
-              </div>
-              <div
-                style={{
-                  fontSize: '0.875rem',
-                  color: textColor,
-                  lineHeight: 1.6,
-                  whiteSpace: 'pre-wrap',
-                }}
-              >
-                {customerInternalNotes}
-              </div>
-            </div>
-          ) : (
-            /* Empty State */
-            <div
-              style={{
-                padding: '1.5rem',
-                borderRadius: '6px',
-                border: `1px dashed ${borderColor}`,
-                backgroundColor: isSacred
-                  ? 'rgba(0, 0, 0, 0.2)'
+                  ? 'rgba(255, 152, 0, 0.05)'
                   : isDark
                     ? '#111827'
-                    : '#F9FAFB',
-                color: secondaryTextColor,
-                fontSize: '0.875rem',
-                textAlign: 'center',
+                    : '#FEF3C7',
+                borderRadius: '6px',
+                borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
               }}
             >
-              No internal customer notes yet. Click &quot;+ Add Note&quot; to
-              add one.
-            </div>
-          )}
-        </div>
+              These notes are attached to the customer record and will appear on
+              all tasks for this customer. For task-specific internal comments,
+              use the Comments tab.
+            </p>
+
+            {/* Edit Customer Notes Form */}
+            {isEditingCustomerNotes ? (
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 152, 0, 0.05)'
+                    : isDark
+                      ? '#1F2937'
+                      : '#F9FAFB',
+                  borderRadius: '8px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
+                }}
+              >
+                <textarea
+                  value={editedCustomerNotes}
+                  onChange={e => setEditedCustomerNotes(e.target.value)}
+                  placeholder="Add internal notes about this customer..."
+                  style={{
+                    width: '100%',
+                    minHeight: '100px',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    fontSize: '0.875rem',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                ></textarea>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    marginTop: '0.75rem',
+                  }}
+                >
+                  <button
+                    onClick={handleSaveCustomerNotes}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: isSacred
+                        ? 'rgba(255, 152, 0, 0.2)'
+                        : isDark
+                          ? '#78350f'
+                          : '#F59E0B',
+                      color: isSacred ? '#FF9800' : '#FFFFFF',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Save Note
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingCustomerNotes(false)
+                      setEditedCustomerNotes(customerInternalNotes || '')
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: 'transparent',
+                      color: textColor,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : customerInternalNotes ? (
+              /* Display Customer Notes - from customer record */
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: isSacred
+                    ? 'rgba(255, 193, 7, 0.1)'
+                    : isDark
+                      ? '#1F2937'
+                      : '#FEF9C3',
+                  borderRadius: '8px',
+                  border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
+                  borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: isSacred ? '#FFD700' : '#92400E',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  <span>📋</span>
+                  <span>Customer Notes</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.875rem',
+                    color: textColor,
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {customerInternalNotes}
+                </div>
+              </div>
+            ) : (
+              /* Empty State */
+              <div
+                style={{
+                  padding: '1.5rem',
+                  borderRadius: '6px',
+                  border: `1px dashed ${borderColor}`,
+                  backgroundColor: isSacred
+                    ? 'rgba(0, 0, 0, 0.2)'
+                    : isDark
+                      ? '#111827'
+                      : '#F9FAFB',
+                  color: secondaryTextColor,
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                }}
+              >
+                No internal customer notes yet. Click &quot;+ Add Note&quot; to
+                add one.
+              </div>
+            )}
+          </div>
+        )}
       </>
     )
   }
@@ -1747,7 +2042,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                           color: textColor,
                         }}
                       >
-                        {comment.createdBy}
+                        {resolveAuthorName(comment.createdBy)}
                       </div>
                       <div
                         style={{
@@ -1785,9 +2080,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         comment.editHistory.length > 1 && (
                           <button
                             onClick={() =>
-                              onRevisionHistory(
-                                comment._id,
-                                comment.editHistory
+                              setViewingRevisionHistoryId(
+                                viewingRevisionHistoryId === comment._id
+                                  ? null
+                                  : comment._id
                               )
                             }
                             style={{
@@ -1801,7 +2097,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                               textDecoration: 'underline',
                             }}
                           >
-                            View History
+                            {viewingRevisionHistoryId === comment._id
+                              ? 'Hide History'
+                              : 'View History'}
                           </button>
                         )}
                       {comment.createdBy === currentUserName &&
@@ -1889,6 +2187,91 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       {displayText}
                     </div>
                   )}
+                  {/* Inline revision history display */}
+                  {viewingRevisionHistoryId === comment._id &&
+                    comment.editHistory &&
+                    comment.editHistory.length > 1 && (
+                      <div
+                        style={{
+                          marginTop: '0.75rem',
+                          padding: '0.75rem',
+                          backgroundColor: isSacred
+                            ? 'rgba(255, 215, 0, 0.05)'
+                            : isDark
+                              ? 'rgba(0, 0, 0, 0.3)'
+                              : 'rgba(0, 0, 0, 0.03)',
+                          borderRadius: '6px',
+                          border: `1px solid ${borderColor}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: secondaryTextColor,
+                            marginBottom: '0.5rem',
+                          }}
+                        >
+                          Edit History ({comment.editHistory.length} revisions)
+                        </div>
+                        {comment.editHistory
+                          .slice()
+                          .reverse()
+                          .map((revision, idx) => (
+                            <div
+                              key={revision._id}
+                              style={{
+                                padding: '0.5rem',
+                                marginBottom:
+                                  idx < comment.editHistory.length - 1
+                                    ? '0.5rem'
+                                    : 0,
+                                backgroundColor: revision.isOriginal
+                                  ? isSacred
+                                    ? 'rgba(255, 215, 0, 0.1)'
+                                    : 'rgba(59, 130, 246, 0.1)'
+                                  : 'transparent',
+                                borderRadius: '4px',
+                                borderLeft: `3px solid ${
+                                  revision.isOriginal
+                                    ? isSacred
+                                      ? '#FFD700'
+                                      : '#3B82F6'
+                                    : borderColor
+                                }`,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: '0.7rem',
+                                  color: secondaryTextColor,
+                                  marginBottom: '0.25rem',
+                                }}
+                              >
+                                {revision.isOriginal
+                                  ? 'Original'
+                                  : `Edited by ${revision.editedBy || 'Unknown'}`}
+                                {revision.editedAt && (
+                                  <span style={{ marginLeft: '0.5rem' }}>
+                                    {new Date(
+                                      revision.editedAt
+                                    ).toLocaleString()}
+                                  </span>
+                                )}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: '0.8rem',
+                                  color: textColor,
+                                  whiteSpace: 'pre-wrap',
+                                }}
+                              >
+                                {revision.text}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                 </div>
               )
             })
