@@ -1,0 +1,43 @@
+/* QR Code Component - Mobile-Friendly Styles */
+
+.container {
+  max-width: 100%;
+  width: auto;
+  /* Remove outer border to avoid double outline */
+  border: none !important;
+}
+
+.qrCodeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.canvas {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem !important;
+  }
+
+  .qrCodeContainer {
+    padding: 12px !important;
+    /* Remove border on mobile to avoid double outline */
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .canvas {
+    max-width: 180px;
+    width: 180px;
+    height: auto;
+  }
+}

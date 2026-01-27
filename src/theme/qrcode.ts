@@ -279,7 +279,7 @@ export const qrCodeThemes: Record<'light' | 'dark' | 'sacred', QRCodeTheme> = {
         'linear-gradient(135deg, rgba(26, 18, 11, 0.98) 0%, rgba(10, 10, 10, 0.95) 100%)',
       background:
         'linear-gradient(135deg, rgba(26, 18, 11, 0.98) 0%, rgba(10, 10, 10, 0.95) 100%)',
-      border: '2px solid rgba(255, 215, 0, 0.5)',
+      border: 'none',
       position: 'relative',
       overflow: 'visible',
       backdropFilter: 'blur(20px)',

@@ -8,6 +8,7 @@ import CheckCircle from '../Icons/CheckCircle'
 import ConfirmationCodeInputs, {
   ConfirmationCodeInputsProps,
 } from '../ConfirmationCodeInput'
+import cssStyles from './QRCode.module.css'
 
 export interface QRCodeProps {
   value?: string
@@ -127,12 +128,15 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     }
 
     return (
-      <div style={computedStyles.container}>
+      <>
         {title && <h5 style={computedStyles.title}>{title}</h5>}
-        <div style={computedStyles.qrCodeContainer}>
+        <div
+          className={cssStyles.qrCodeContainer}
+          style={computedStyles.qrCodeContainer}
+        >
           <canvas
             ref={canvasRef}
-            style={{ display: 'block', height: 'auto', maxWidth: '100%' }}
+            className={cssStyles.canvas}
             aria-label={`QR Code for ${title || 'MFA Setup'}`}
             data-testid="mfa-qrcode"
           />
@@ -146,7 +150,6 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
               onChange={val => onConfirmationCodeChange?.(val)}
               showActionButtons={false}
               onDisableVerification={() => {}}
-              styles={{ theme: styles?.theme || 'light' }}
               {...confirmationCodeProps}
             />
           </div>
@@ -174,7 +177,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
             />
           </div>
         )}
-      </div>
+      </>
     )
   }
 )
