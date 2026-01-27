@@ -1,0 +1,215 @@
+/* ==========================================================================
+   DATE FIELD COMPONENT - CSS MODULE
+   Prevents FOUC by using CSS instead of JavaScript for styling
+   Sacred theme is the default (hardcoded), light/dark are overrides
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Container
+   -------------------------------------------------------------------------- */
+
+.container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Label - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffd700;
+  font-size: 14px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+.requiredIndicator {
+  color: #ffd700;
+  margin-left: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Date Input - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  color-scheme: dark;
+}
+
+.input:focus {
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.input:hover:not(:disabled):not(:focus) {
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.input:disabled {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Helper Text
+   -------------------------------------------------------------------------- */
+
+.helperText {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Crimson Text', serif;
+}
+
+.helperText.error {
+  color: #ff6b6b;
+}
+
+/* --------------------------------------------------------------------------
+   Light Theme Override
+   -------------------------------------------------------------------------- */
+
+.container[data-theme='light'] .label {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #374151;
+}
+
+.container[data-theme='light'] .requiredIndicator {
+  color: #ef4444;
+}
+
+.container[data-theme='light'] .input {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #374151;
+  color-scheme: light;
+}
+
+.container[data-theme='light'] .input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.container[data-theme='light'] .input:hover:not(:disabled):not(:focus) {
+  border-color: #cbd5e1;
+}
+
+.container[data-theme='light'] .input:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.container[data-theme='light'] .helperText {
+  color: #6b7280;
+}
+
+/* --------------------------------------------------------------------------
+   Dark Theme Override
+   -------------------------------------------------------------------------- */
+
+.container[data-theme='dark'] .label {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e2e8f0;
+}
+
+.container[data-theme='dark'] .requiredIndicator {
+  color: #ef4444;
+}
+
+.container[data-theme='dark'] .input {
+  background-color: #1e293b;
+  border-color: #334155;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e2e8f0;
+  color-scheme: dark;
+}
+
+.container[data-theme='dark'] .input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.container[data-theme='dark'] .input:hover:not(:disabled):not(:focus) {
+  border-color: #475569;
+}
+
+.container[data-theme='dark'] .input:disabled {
+  background-color: #0f172a;
+  color: #64748b;
+}
+
+.container[data-theme='dark'] .helperText {
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   Tablet Responsive (769px - 1024px)
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    margin-bottom: 14px;
+  }
+
+  .label {
+    font-size: 13px;
+    margin-bottom: 7px;
+  }
+
+  .input {
+    padding: 11px 15px;
+    font-size: 15px;
+  }
+
+  .helperText {
+    font-size: 11px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Responsive (max-width: 768px)
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .container {
+    margin-bottom: 12px;
+  }
+
+  .label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .input {
+    padding: 10px 14px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .helperText {
+    font-size: 11px;
+  }
+}

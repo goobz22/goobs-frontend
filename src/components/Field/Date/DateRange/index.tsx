@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { alpha } from '../../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import React from 'react'
+import cssStyles from './DateRange.module.css'
 
 export interface DateRange {
   start: Date | null
@@ -24,8 +22,8 @@ export interface DateRangeProps {
   styles?: {
     disabled?: boolean
     required?: boolean
-    theme?: string
-    helperTextType?: string
+    theme?: 'sacred' | 'light' | 'dark'
+    helperTextType?: 'error' | 'info'
     height?: string
     fontSize?: string
     borderRadius?: string
@@ -51,11 +49,9 @@ const DateRange: React.FC<DateRangeProps> = ({
   styles,
   helperText,
 }) => {
-  const [isStartFocused, setIsStartFocused] = useState(false)
-  const [isEndFocused, setIsEndFocused] = useState(false)
-
   const disabled = disabledProp || styles?.disabled || false
   const required = requiredProp || styles?.required || false
+  const theme = styles?.theme || 'sacred'
   const displayHelperText = error || helperText
 
   const formatDateForInput = (date: Date | null): string => {
@@ -98,102 +94,99 @@ const DateRange: React.FC<DateRangeProps> = ({
     }
   }
 
-  const inputStyle = (isFocused: boolean): React.CSSProperties => ({
-    width: '100%',
-    padding: styles?.padding || '12px 16px',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `1px solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
-    borderRadius: '8px',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
-    fontFamily: '"Crimson Text", serif',
-    fontSize: '16px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-    colorScheme: 'dark',
-  })
+  // Build helper text class names
+  const helperTextClassNames = [
+    cssStyles.helperText,
+    (error || styles?.helperTextType === 'error') && cssStyles.error,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
+  // Container style overrides
+  const containerStyleOverrides: React.CSSProperties = {
+    ...style,
   }
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.marginBottom)
+    containerStyleOverrides.marginBottom = styles.marginBottom
+  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
+  if (styles?.minHeight) containerStyleOverrides.minHeight = styles.minHeight
+
+  // Fields wrapper style overrides
+  const fieldsWrapperStyleOverrides: React.CSSProperties = {}
+  if (styles?.gap) fieldsWrapperStyleOverrides.gap = styles.gap
+
+  // Input style overrides
+  const inputStyleOverrides: React.CSSProperties = {}
+  if (styles?.height) inputStyleOverrides.minHeight = styles.height
+  if (styles?.fontSize) inputStyleOverrides.fontSize = styles.fontSize
+  if (styles?.padding) inputStyleOverrides.padding = styles.padding
+  if (styles?.borderRadius)
+    inputStyleOverrides.borderRadius = styles.borderRadius
 
   return (
     <div
-      style={{
-        position: 'relative',
-        width: styles?.width || '100%',
-        marginBottom: styles?.marginBottom || '16px',
-        marginTop: styles?.marginTop,
-        minHeight: styles?.minHeight,
-        ...style,
-      }}
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
     >
       <div
-        style={{
-          display: 'flex',
-          gap: styles?.gap || '16px',
-          alignItems: 'flex-start',
-        }}
+        className={cssStyles.fieldsWrapper}
+        style={
+          Object.keys(fieldsWrapperStyleOverrides).length > 0
+            ? fieldsWrapperStyleOverrides
+            : undefined
+        }
       >
         {/* Start Date */}
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>
+        <div className={cssStyles.fieldContainer}>
+          <label className={cssStyles.label}>
             {startLabel}
-            {required && (
-              <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-            )}
+            {required && <span className={cssStyles.requiredIndicator}>*</span>}
           </label>
           <input
             type="date"
+            className={cssStyles.input}
             value={formatDateForInput(value?.start || null)}
             onChange={handleStartDateChange}
             disabled={disabled}
-            onFocus={() => setIsStartFocused(true)}
-            onBlur={() => setIsStartFocused(false)}
-            style={inputStyle(isStartFocused)}
+            style={
+              Object.keys(inputStyleOverrides).length > 0
+                ? inputStyleOverrides
+                : undefined
+            }
           />
         </div>
 
         {/* End Date */}
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>
+        <div className={cssStyles.fieldContainer}>
+          <label className={cssStyles.label}>
             {endLabel}
-            {required && (
-              <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-            )}
+            {required && <span className={cssStyles.requiredIndicator}>*</span>}
           </label>
           <input
             type="date"
+            className={cssStyles.input}
             value={formatDateForInput(value?.end || null)}
             onChange={handleEndDateChange}
             disabled={disabled}
             min={value?.start ? formatDateForInput(value.start) : undefined}
-            onFocus={() => setIsEndFocused(true)}
-            onBlur={() => setIsEndFocused(false)}
-            style={inputStyle(isEndFocused)}
+            style={
+              Object.keys(inputStyleOverrides).length > 0
+                ? inputStyleOverrides
+                : undefined
+            }
           />
         </div>
       </div>
 
       {/* Helper Text / Error */}
       {displayHelperText && (
-        <div
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: error ? '#ff6b6b' : 'rgba(255, 255, 255, 0.6)',
-            fontFamily: '"Crimson Text", serif',
-          }}
-        >
-          {displayHelperText}
-        </div>
+        <div className={helperTextClassNames}>{displayHelperText}</div>
       )}
     </div>
   )

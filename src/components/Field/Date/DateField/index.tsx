@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { alpha } from '../../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import React from 'react'
+import cssStyles from './DateField.module.css'
 
 export interface DateFieldProps {
   label?: string
@@ -15,8 +13,8 @@ export interface DateFieldProps {
   styles?: {
     disabled?: boolean
     required?: boolean
-    theme?: string
-    helperTextType?: string
+    theme?: 'sacred' | 'light' | 'dark'
+    helperTextType?: 'error' | 'info'
     height?: string
     fontSize?: string
     borderRadius?: string
@@ -36,10 +34,9 @@ const DateField: React.FC<DateFieldProps> = ({
   styles,
   helperText,
 }) => {
-  const [isFocused, setIsFocused] = useState(false)
-
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+  const theme = styles?.theme || 'sacred'
 
   const formatDateForInput = (date: Date | null): string => {
     if (!date) return ''
@@ -60,76 +57,64 @@ const DateField: React.FC<DateFieldProps> = ({
     }
   }
 
+  // Build helper text class names
+  const helperTextClassNames = [
+    cssStyles.helperText,
+    styles?.helperTextType === 'error' && cssStyles.error,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // Container style overrides
+  const containerStyleOverrides: React.CSSProperties = {}
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.marginBottom)
+    containerStyleOverrides.marginBottom = styles.marginBottom
+  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
+  if (styles?.minHeight) containerStyleOverrides.minHeight = styles.minHeight
+
+  // Input style overrides
+  const inputStyleOverrides: React.CSSProperties = {}
+  if (styles?.height) inputStyleOverrides.minHeight = styles.height
+  if (styles?.fontSize) inputStyleOverrides.fontSize = styles.fontSize
+  if (styles?.padding) inputStyleOverrides.padding = styles.padding
+  if (styles?.borderRadius)
+    inputStyleOverrides.borderRadius = styles.borderRadius
+
   return (
     <div
-      style={{
-        position: 'relative',
-        width: styles?.width || '100%',
-        marginBottom: styles?.marginBottom || '16px',
-        marginTop: styles?.marginTop,
-        minHeight: styles?.minHeight,
-      }}
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
     >
       {/* Label */}
-      <label
-        style={{
-          display: 'block',
-          marginBottom: '8px',
-          color: SACRED_GOLD,
-          fontSize: '14px',
-          fontFamily: '"Cinzel", serif',
-          letterSpacing: '0.05em',
-        }}
-      >
-        {label}
-        {required && (
-          <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-        )}
-      </label>
+      {label && (
+        <label className={cssStyles.label}>
+          {label}
+          {required && <span className={cssStyles.requiredIndicator}>*</span>}
+        </label>
+      )}
 
       {/* Date Input */}
       <input
         type="date"
+        className={cssStyles.input}
         value={formatDateForInput(value || null)}
         onChange={handleDateChange}
         disabled={disabled}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        style={{
-          width: '100%',
-          padding: styles?.padding || '12px 16px',
-          backgroundColor: disabled
-            ? 'rgba(0, 0, 0, 0.3)'
-            : 'rgba(0, 0, 0, 0.6)',
-          border: `1px solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
-          borderRadius: '8px',
-          color: disabled
-            ? 'rgba(255, 255, 255, 0.4)'
-            : 'rgba(255, 255, 255, 0.9)',
-          fontFamily: '"Crimson Text", serif',
-          fontSize: '16px',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          transition: 'all 0.3s ease',
-          boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-          outline: 'none',
-          boxSizing: 'border-box',
-          colorScheme: 'dark',
-        }}
+        style={
+          Object.keys(inputStyleOverrides).length > 0
+            ? inputStyleOverrides
+            : undefined
+        }
       />
 
       {/* Helper Text */}
-      {helperText && (
-        <div
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontFamily: '"Crimson Text", serif',
-          }}
-        >
-          {helperText}
-        </div>
-      )}
+      {helperText && <div className={helperTextClassNames}>{helperText}</div>}
     </div>
   )
 }
