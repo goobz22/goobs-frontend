@@ -1660,11 +1660,7 @@ export const Mobile: Story = {
           borderRadius: '8px',
         }}
       >
-        <DataGrid
-          {...commonArgs}
-          forceMobile={true}
-          styles={{ theme: 'light' }}
-        />
+        <DataGrid {...commonArgs} styles={{ theme: 'light' }} />
       </div>
     </div>
   ),
@@ -1695,11 +1691,7 @@ export const Tablet: Story = {
           borderRadius: '8px',
         }}
       >
-        <DataGrid
-          {...commonArgs}
-          forceMobile={true}
-          styles={{ theme: 'light' }}
-        />
+        <DataGrid {...commonArgs} styles={{ theme: 'light' }} />
       </div>
     </div>
   ),

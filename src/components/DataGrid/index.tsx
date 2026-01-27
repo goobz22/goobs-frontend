@@ -13,11 +13,10 @@ import { useManageRow } from './utils/useManageRow'
 import { useInitializeGrid } from './utils/useInitializeGrid'
 import { selectAllRows, selectRow } from './utils/useSelectRows'
 import { useAutoRowHeight } from './utils/useAutoRowHeight'
-import useContainerWidth from './utils/useContainerWidth'
 import { areRowsEqual } from './utils/rowComparison'
 import type { DatagridProps, RowData, ColumnDef } from './types'
-import { getDataGridStyles } from '../../theme'
 import { ColumnVisibilityProvider } from './context/ColumnVisibilityContext'
+import cssStyles from './DataGrid.module.css'
 
 // Store ref to container for PDF export - will be set by DataGridContent
 let exportContainerRef: HTMLDivElement | null = null
@@ -151,10 +150,7 @@ function DataGridContent({
   onColumnResize,
   onCellSave,
   onRowCreation,
-  allowRowCreation = false,
-  creationRowPosition = 'top',
   showIdColumns = false,
-  forceMobile = false,
   filters,
   metrics,
   metricsCollapsible = true,
@@ -165,8 +161,8 @@ function DataGridContent({
   styles,
 }: DatagridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const detectedMobile = useContainerWidth(containerRef, 768)
-  const isMobile = forceMobile || detectedMobile
+  // Default to 'sacred' to match CSS defaults and prevent FOUC
+  const theme = styles?.theme || 'sacred'
 
   // Update the module-level ref for PDF export whenever containerRef changes
   useEffect(() => {
@@ -175,8 +171,6 @@ function DataGridContent({
       exportContainerRef = null
     }
   }, [])
-
-  const computedStyles = getDataGridStyles(styles)
 
   // Column state management
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null)
@@ -432,7 +426,7 @@ function DataGridContent({
 
   // Row creation handlers
   const handleStartRowCreation = useCallback(() => {
-    if (!allowRowCreation) return
+    if (!onRowCreation) return
 
     // Initialize creation row data with default values
     const initialData: Record<string, unknown> = {}
@@ -447,7 +441,7 @@ function DataGridContent({
     setCreationRowData(initialData)
     setCreationRowErrors({})
     setIsCreatingRow(true)
-  }, [allowRowCreation, visibleColumns])
+  }, [onRowCreation, visibleColumns])
 
   const handleCreationFieldChange = useCallback(
     (field: string, value: unknown) => {
@@ -682,8 +676,8 @@ function DataGridContent({
 
   if (error) {
     return (
-      <div style={computedStyles.container}>
-        <div style={computedStyles.error}>
+      <div className={cssStyles.datagrid} data-theme={theme}>
+        <div className={cssStyles.error}>
           <div style={{ color: 'inherit' }}>Error: {error.message}</div>
         </div>
       </div>
@@ -691,8 +685,9 @@ function DataGridContent({
   }
 
   return (
-    <div style={computedStyles.container} ref={containerRef}>
-      {isMobile ? (
+    <div className={cssStyles.datagrid} data-theme={theme} ref={containerRef}>
+      {/* Mobile View - CSS controls visibility via media query */}
+      <div className={cssStyles.mobileView}>
         <MobileCardView
           columns={visibleColumns}
           rows={filteredRows}
@@ -700,9 +695,7 @@ function DataGridContent({
           onRowClick={handleRowClick}
           {...(onCellSave !== undefined ? { onCellSave } : {})}
           {...(onRowCreation !== undefined ? { onRowCreation } : {})}
-          allowRowCreation={allowRowCreation}
           permissions={permissions}
-          creationRowPosition={creationRowPosition}
           {...(onManage !== undefined ? { onManage } : {})}
           {...(onDelete !== undefined ? { onDelete } : {})}
           {...(onDuplicate !== undefined ? { onDuplicate } : {})}
@@ -716,122 +709,109 @@ function DataGridContent({
           onCellCancel={handleCellCancel}
           onEditingValueChange={handleEditingValueChange}
         />
-      ) : (
-        <div style={computedStyles.contentWrapper}>
-          {/* Metrics Section */}
-          {originalMetrics && originalMetrics.length > 0 && (
-            <MetricSection
-              metrics={originalMetrics}
-              collapsible={metricsCollapsible}
-              defaultExpanded={metricsDefaultExpanded}
-              {...(styles !== undefined ? { styles } : {})}
-            />
-          )}
+      </div>
 
-          {/* Filters Section */}
-          {/* Always render FilterSection so the searchbar is always visible */}
-          <FilterSection
-            {...(filters !== undefined ? { filters } : {})}
-            columns={visibleColumns}
-            rows={rows}
-            onSearchFilter={handleSearchFilter}
+      {/* Desktop View - CSS controls visibility via media query */}
+      <div className={`${cssStyles.contentWrapper} ${cssStyles.desktopView}`}>
+        {/* Metrics Section */}
+        {originalMetrics && originalMetrics.length > 0 && (
+          <MetricSection
+            metrics={originalMetrics}
+            collapsible={metricsCollapsible}
+            defaultExpanded={metricsDefaultExpanded}
             {...(styles !== undefined ? { styles } : {})}
-            collapsible={filtersCollapsible}
-            defaultExpanded={filtersDefaultExpanded}
           />
+        )}
 
-          {/* Toolbar - positioned inside DataGrid (search removed; search lives in FilterSection) */}
+        {/* Filters Section */}
+        {/* Always render FilterSection so the searchbar is always visible */}
+        <FilterSection
+          {...(filters !== undefined ? { filters } : {})}
+          columns={visibleColumns}
+          rows={rows}
+          onSearchFilter={handleSearchFilter}
+          {...(styles !== undefined ? { styles } : {})}
+          collapsible={filtersCollapsible}
+          defaultExpanded={filtersDefaultExpanded}
+        />
+
+        {/* Toolbar - sticky at top when scrolling */}
+        <div className={cssStyles.stickyToolbar}>
           <DataGridToolbar
-            buttons={
-              allowRowCreation && !isCreatingRow
-                ? [
-                    ...(buttons ?? []),
-                    {
-                      text: 'Add Row',
-                      onClick: handleStartRowCreation,
-                      styles: {
-                        theme: styles?.theme || 'light',
-                      },
-                    },
-                  ]
-                : (buttons ?? [])
-            }
+            buttons={buttons ?? []}
             permissions={permissions}
-            {...(selectedRows.length > 0
-              ? {
-                  manageRowProps: {
-                    selectedRows,
-                    rows,
-                    ...(onDuplicate
-                      ? { onDuplicate: () => onDuplicate(selectedRows) }
-                      : {}),
-                    ...(onDelete
-                      ? {
-                          onDelete: () => {
-                            onDelete(selectedRows)
-                            handleSelectionChange([])
-                          },
-                        }
-                      : {}),
-                    ...(onManage ? { onManage: handleManage } : {}),
-                    ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
-                    handleClose: handleManageRowClose,
-                    permissions,
-                  },
-                }
-              : {})}
+            manageRowProps={{
+              selectedRows,
+              rows,
+              ...(onRowCreation && !isCreatingRow
+                ? { onAdd: handleStartRowCreation }
+                : {}),
+              ...(onDuplicate
+                ? { onDuplicate: () => onDuplicate(selectedRows) }
+                : {}),
+              ...(onDelete
+                ? {
+                    onDelete: () => {
+                      onDelete(selectedRows)
+                      handleSelectionChange([])
+                    },
+                  }
+                : {}),
+              ...(onManage ? { onManage: handleManage } : {}),
+              ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
+              handleClose: handleManageRowClose,
+              permissions,
+            }}
             styles={{
-              theme: styles?.theme || 'light',
+              theme: styles?.theme || 'sacred',
             }}
           />
-
-          <div style={computedStyles.sectionDivider} />
-
-          <Table
-            columns={visibleColumns}
-            rows={visibleRows}
-            selectedRowIds={selectedRows}
-            onRowClick={handleRowClick}
-            allRowsSelected={allRowsSelected}
-            someRowsSelected={someRowsSelected}
-            onHeaderCheckboxChange={handleHeaderCheckboxChange}
-            onColumnResize={handleColumnResize}
-            {...(styles !== undefined ? { styles } : {})}
-            editingCell={editingCell}
-            editingValue={editingValue}
-            onCellClick={handleCellClick}
-            onCellSave={handleCellSave}
-            onCellCancel={handleCellCancel}
-            permissions={permissions}
-            onEditingValueChange={handleEditingValueChange}
-            isCreatingRow={isCreatingRow}
-            creationRowData={creationRowData}
-            onCreationFieldChange={handleCreationFieldChange}
-            onCreateRowSave={handleCreateRowSave}
-            onCreateRowCancel={handleCreateRowCancel}
-            creationRowPosition={creationRowPosition}
-            onColumnSort={handleColumnSort}
-            onManageColumns={handleToggleManageColumns}
-            draggedColumn={draggedColumn}
-            onColumnDragStart={handleColumnDragStart}
-            onColumnDragOver={handleColumnDragOver}
-            onColumnDrop={handleColumnDrop}
-            onColumnDragEnd={handleColumnDragEnd}
-          />
-
-          <CustomFooter
-            page={page}
-            pageSize={pageSize}
-            rowCount={filteredRows.length}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
-            columns={visibleColumns}
-            rows={filteredRows}
-            onExportPdf={onExportPdf || defaultExportToPdf}
-            {...(styles !== undefined ? { styles } : {})}
-          />
+          <div className={cssStyles.divider} />
         </div>
-      )}
+
+        <Table
+          columns={visibleColumns}
+          rows={visibleRows}
+          selectedRowIds={selectedRows}
+          onRowClick={handleRowClick}
+          allRowsSelected={allRowsSelected}
+          someRowsSelected={someRowsSelected}
+          onHeaderCheckboxChange={handleHeaderCheckboxChange}
+          onColumnResize={handleColumnResize}
+          {...(styles !== undefined ? { styles } : {})}
+          editingCell={editingCell}
+          editingValue={editingValue}
+          onCellClick={handleCellClick}
+          onCellSave={handleCellSave}
+          onCellCancel={handleCellCancel}
+          permissions={permissions}
+          onEditingValueChange={handleEditingValueChange}
+          isCreatingRow={isCreatingRow}
+          creationRowData={creationRowData}
+          onCreationFieldChange={handleCreationFieldChange}
+          onCreateRowSave={handleCreateRowSave}
+          onCreateRowCancel={handleCreateRowCancel}
+          onColumnSort={handleColumnSort}
+          onManageColumns={handleToggleManageColumns}
+          draggedColumn={draggedColumn}
+          onColumnDragStart={handleColumnDragStart}
+          onColumnDragOver={handleColumnDragOver}
+          onColumnDrop={handleColumnDrop}
+          onColumnDragEnd={handleColumnDragEnd}
+        />
+
+        <CustomFooter
+          page={page}
+          pageSize={pageSize}
+          rowCount={filteredRows.length}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+          columns={visibleColumns}
+          rows={filteredRows}
+          onExportPdf={onExportPdf || defaultExportToPdf}
+          {...(styles !== undefined ? { styles } : {})}
+        />
+      </div>
 
       {/* Manage Columns Modal */}
       {showManageColumns && (
@@ -854,7 +834,7 @@ function DataGridContent({
         severity="error"
         autoHideDuration={6000}
         styles={{
-          theme: styles?.theme || 'light',
+          theme: styles?.theme || 'sacred',
         }}
       />
     </div>

@@ -3,13 +3,14 @@
 import React, { useMemo, type FC } from 'react'
 import Button, { type ButtonProps } from '../../Button'
 import ManageRow from '../ManageRow'
-import { getDataGridStyles, type DataGridStyles } from '../../../theme'
+import type { DataGridStyles } from '../../../theme'
 
 export interface DataGridToolbarProps {
   buttons?: ButtonProps[]
   manageRowProps?: {
     selectedRows?: string[]
     rows?: Array<{ [key: string]: unknown }>
+    onAdd?: () => void
     onDuplicate?: () => void
     onDelete?: () => void
     onManage?: () => void
@@ -36,9 +37,6 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
   styles,
   permissions,
 }) => {
-  const computedStyles = useMemo(() => getDataGridStyles(styles), [styles])
-  // const isSacredTheme = styles?.theme === 'sacred'
-
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'row',
@@ -92,7 +90,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
   }, [buttons, permissions])
 
   return (
-    <div style={{ ...computedStyles.tableContainer, ...containerStyle }}>
+    <div style={containerStyle}>
       {/* Left: Buttons */}
       <div style={leftStyle}>
         {filteredButtons?.map((btn, idx) => (
@@ -107,36 +105,26 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
         ))}
       </div>
 
-      {/* Right: ManageRow actions (only if rows selected) */}
+      {/* Right: ManageRow actions - always visible */}
       <div style={rightStyle}>
-        {manageRowProps && (
-          <ManageRow
-            {...(manageRowProps.selectedRows
-              ? { selectedRows: manageRowProps.selectedRows }
-              : {})}
-            {...(manageRowProps.rows ? { rows: manageRowProps.rows } : {})}
-            {...(manageRowProps.onDuplicate
-              ? { onDuplicate: manageRowProps.onDuplicate }
-              : {})}
-            {...(manageRowProps.onDelete
-              ? { onDelete: manageRowProps.onDelete }
-              : {})}
-            {...(manageRowProps.onManage
-              ? { onManage: manageRowProps.onManage }
-              : {})}
-            {...(manageRowProps.onShow
-              ? { onShow: manageRowProps.onShow }
-              : {})}
-            {...(manageRowProps.onExport
-              ? { onExport: manageRowProps.onExport }
-              : {})}
-            {...(manageRowProps.handleClose
-              ? { handleClose: manageRowProps.handleClose }
-              : {})}
-            {...(styles !== undefined ? { styles } : {})}
-            {...(permissions !== undefined ? { permissions } : {})}
-          />
-        )}
+        <ManageRow
+          selectedRows={manageRowProps?.selectedRows || []}
+          {...(manageRowProps?.onAdd ? { onAdd: manageRowProps.onAdd } : {})}
+          {...(manageRowProps?.onDuplicate
+            ? { onDuplicate: manageRowProps.onDuplicate }
+            : {})}
+          {...(manageRowProps?.onDelete
+            ? { onDelete: manageRowProps.onDelete }
+            : {})}
+          {...(manageRowProps?.onManage
+            ? { onManage: manageRowProps.onManage }
+            : {})}
+          {...(manageRowProps?.onShow ? { onShow: manageRowProps.onShow } : {})}
+          {...(manageRowProps?.handleClose
+            ? { handleClose: manageRowProps.handleClose }
+            : {})}
+          {...(styles ? { styles } : {})}
+        />
       </div>
     </div>
   )

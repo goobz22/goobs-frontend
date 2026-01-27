@@ -5,7 +5,8 @@ import { ColumnDef, type RowData } from '../../types'
 import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
 import { getRowId } from '../index'
-import { getDataGridStyles, type DataGridStyles } from '../../../../theme'
+import type { DataGridStyles } from '../../../../theme'
+import cssStyles from '../../DataGrid.module.css'
 
 /**
  * Safely convert a value to a string without triggering the default
@@ -822,31 +823,15 @@ const Rows: React.FC<RowsProps> = ({
   onEditingValueChange,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
-  const computedStyles = getDataGridStyles(styles)
+  const theme = styles?.theme || 'light'
 
   if (!rows || rows.length === 0) {
     return (
-      <tr style={computedStyles.table.tableRow}>
-        <td
-          style={{
-            ...computedStyles.table.tableCell,
-            width: '48px',
-            minWidth: '48px',
-            maxWidth: '48px',
-            padding: '0',
-            border: 'none',
-          }}
-        ></td>
+      <tr className={cssStyles.row} data-theme={theme}>
+        <td className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}></td>
         <td
           colSpan={100}
-          style={{
-            ...computedStyles.table.tableCell,
-            textAlign: 'center',
-            padding: '3rem',
-            color: computedStyles.table.tableCell.color,
-            fontStyle: 'italic',
-            opacity: 0.6,
-          }}
+          className={`${cssStyles.cell} ${cssStyles.cellEmpty}`}
         >
           No data to display.
         </td>
@@ -873,57 +858,28 @@ const Rows: React.FC<RowsProps> = ({
           )
         })
 
-        const rowStyle: React.CSSProperties = {
-          ...computedStyles.table.tableRow,
-          ...(isSelected
-            ? {
-                backgroundColor: isSacredTheme
-                  ? 'rgba(255, 215, 0, 0.15)'
-                  : 'rgba(219, 234, 254, 1)',
-              }
-            : isAlternateRow
-              ? {
-                  backgroundColor:
-                    computedStyles.table.tableRowAlternate.backgroundColor,
-                }
-              : {}),
-          cursor: 'pointer',
-          transition: 'background-color 0.2s ease',
-          // Allow row height expansion for multiselect
-          height: hasEditingMultiselect ? 'auto' : undefined,
-          minHeight: hasEditingMultiselect ? '120px' : undefined,
-        }
-
-        const rowHoverStyle: React.CSSProperties = {
-          ...computedStyles.table.tableRowHover,
-        }
+        const rowClassName = [
+          cssStyles.row,
+          isSelected && cssStyles.rowSelected,
+          isAlternateRow && !isSelected && cssStyles.rowAlternate,
+        ]
+          .filter(Boolean)
+          .join(' ')
 
         return (
           <tr
             key={rowId}
             onClick={() => onRowClick?.(row)}
-            style={rowStyle}
-            onMouseEnter={e => {
-              if (!isSelected) {
-                Object.assign(e.currentTarget.style, rowHoverStyle)
-              }
-            }}
-            onMouseLeave={e => {
-              if (!isSelected) {
-                Object.assign(e.currentTarget.style, rowStyle)
-              }
-            }}
+            className={rowClassName}
+            data-theme={theme}
+            style={
+              hasEditingMultiselect
+                ? { height: 'auto', minHeight: '120px' }
+                : undefined
+            }
           >
             {/* Empty column to align with header checkbox */}
-            <td
-              style={{
-                ...computedStyles.table.tableCell,
-                width: '48px',
-                minWidth: '48px',
-                maxWidth: '48px',
-                padding: '0',
-              }}
-            ></td>
+            <td className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}></td>
 
             {/* Normal desktop columns */}
             {columns.map(col => {
@@ -1135,32 +1091,29 @@ const Rows: React.FC<RowsProps> = ({
                   col.creationField?.type === 'multiselect') &&
                 col.creationField?.options
 
+              const canEdit =
+                !isEditing &&
+                selectedRowIds.includes(rowId) &&
+                col.editable !== false
+
               return (
                 <td
                   key={col.field}
-                  style={{
-                    ...computedStyles.table.tableCell,
-                    cursor:
-                      !isEditing &&
-                      selectedRowIds.includes(rowId) &&
-                      col.editable !== false
-                        ? 'pointer'
-                        : 'default',
-                    // Allow height expansion for multiselect
-                    height: isEditingMultiselect
-                      ? 'auto'
-                      : computedStyles.table.tableCell.height,
-                    minHeight: isEditingMultiselect
-                      ? '120px'
-                      : computedStyles.table.tableCell.minHeight,
-                    padding: isEditingMultiselect
-                      ? '12px'
-                      : computedStyles.table.tableCell.padding,
-                    verticalAlign: isEditingMultiselect ? 'top' : 'middle',
-                    overflow: isEditingMultiselect ? 'visible' : 'hidden',
-                    position: isEditingMultiselect ? 'relative' : 'static',
-                    zIndex: isEditingMultiselect ? 1000 : 'auto',
-                  }}
+                  className={cssStyles.cell}
+                  style={
+                    isEditingMultiselect
+                      ? {
+                          height: 'auto',
+                          minHeight: '120px',
+                          padding: '12px',
+                          verticalAlign: 'top',
+                          overflow: 'visible',
+                          position: 'relative',
+                          zIndex: 1000,
+                          cursor: canEdit ? 'pointer' : 'default',
+                        }
+                      : { cursor: canEdit ? 'pointer' : 'default' }
+                  }
                   onClick={e => {
                     // If we're editing, prevent any click handling
                     if (isEditing) {
@@ -1168,10 +1121,7 @@ const Rows: React.FC<RowsProps> = ({
                       return
                     }
                     // Only handle cell click if not editing, row is selected, and column is editable
-                    if (
-                      selectedRowIds.includes(rowId) &&
-                      col.editable !== false
-                    ) {
+                    if (canEdit) {
                       e.stopPropagation()
 
                       // Handle cell editing
@@ -1179,16 +1129,7 @@ const Rows: React.FC<RowsProps> = ({
                     }
                   }}
                 >
-                  <div
-                    style={{
-                      overflow: isEditingMultiselect ? 'visible' : 'hidden',
-                      textOverflow: isEditingMultiselect ? 'unset' : 'ellipsis',
-                      whiteSpace: isEditingMultiselect ? 'normal' : 'nowrap',
-                      color: computedStyles.table.tableCell.color,
-                    }}
-                  >
-                    {cellContent}
-                  </div>
+                  <div className={cssStyles.cellContent}>{cellContent}</div>
                 </td>
               )
             })}

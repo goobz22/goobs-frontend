@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import CardField from './CardField'
 import type { ColumnDef, RowData } from '../types'
+import cssStyles from '../DataGrid.module.css'
 
 interface CardProps {
   row: RowData
@@ -47,41 +48,11 @@ function Card({
   permissions,
 }: CardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isPressed, setIsPressed] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   )
   const rowId = String(row._id ?? row.id ?? '')
-
-  const theme = styles?.theme || 'sacred'
-
-  // Create custom theme colors for properties not in DataGridTheme
-  const getThemeColors = (themeName: 'light' | 'dark' | 'sacred') => {
-    switch (themeName) {
-      case 'dark':
-        return {
-          background: '#1E293B',
-          border: '#334155',
-          primary: '#3B82F6',
-          secondaryText: '#94A3B8',
-        }
-      case 'sacred':
-        return {
-          background: 'rgba(0, 0, 0, 0.95)',
-          border: 'rgba(255, 215, 0, 0.3)',
-          primary: '#FFD700',
-          secondaryText: 'rgba(255, 215, 0, 0.7)',
-        }
-      default: // light
-        return {
-          background: '#FFFFFF',
-          border: '#E2E8F0',
-          primary: '#3B82F6',
-          secondaryText: '#6B7280',
-        }
-    }
-  }
-
-  const themeConfig = getThemeColors(theme)
 
   // Determine which fields to show prominently
   const primaryFields = columns.slice(0, 3)
@@ -90,12 +61,14 @@ function Card({
 
   // Handle touch events for long press
   const handleTouchStart = useCallback(() => {
+    setIsPressed(true)
     longPressTimer.current = setTimeout(() => {
       onLongPress()
     }, 500)
   }, [onLongPress])
 
   const handleTouchEnd = useCallback(() => {
+    setIsPressed(false)
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
     }
@@ -157,106 +130,37 @@ function Card({
     }
   }, [])
 
-  const cardStyles = {
-    card: {
-      backgroundColor:
-        theme === 'sacred'
-          ? isSelected
-            ? 'rgba(0, 0, 0, 0.98)'
-            : 'rgba(0, 0, 0, 0.95)'
-          : isSelected
-            ? theme === 'dark'
-              ? '#273746'
-              : '#F9FAFB'
-            : themeConfig.background,
-      backgroundImage:
-        isSelected && theme === 'sacred'
-          ? 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 40%, transparent 70%)'
-          : 'none',
-      borderRadius: theme === 'sacred' ? '8px' : '0.5rem',
-      padding: '1rem',
-      marginBottom: '0.75rem',
-      border:
-        theme === 'sacred'
-          ? isSelected
-            ? '2px solid rgba(255, 215, 0, 0.6)'
-            : '1px solid rgba(255, 215, 0, 0.3)'
-          : `1px solid ${isSelected ? themeConfig.primary : themeConfig.border}`,
-      boxShadow: isSelected
-        ? theme === 'sacred'
-          ? '0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(255, 215, 0, 0.05)'
-          : '0 0 0 2px rgba(37, 99, 235, 0.2)'
-        : theme === 'sacred'
-          ? '0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 215, 0, 0.1)'
-          : '0 1px 3px rgba(0, 0, 0, 0.1)',
-      cursor: 'pointer',
-      userSelect: 'none' as const,
-      WebkitUserSelect: 'none' as const,
-      transition: 'all 0.3s ease',
-      position: 'relative' as const,
-    },
-    checkbox: {
-      position: 'absolute' as const,
-      top: '0.75rem',
-      right: '0.75rem',
-      width: '20px',
-      height: '20px',
-      borderRadius: '4px',
-      border:
-        theme === 'sacred'
-          ? `2px solid ${isSelected ? '#FFD700' : 'rgba(255, 215, 0, 0.5)'}`
-          : `2px solid ${themeConfig.border}`,
-      backgroundColor: isSelected
-        ? theme === 'sacred'
-          ? 'rgba(255, 215, 0, 0.9)'
-          : themeConfig.primary
-        : 'transparent',
-      display: selectionMode ? 'flex' : 'none',
-      alignItems: 'center',
-      justifyContent: 'center',
-      boxShadow:
-        theme === 'sacred' && isSelected
-          ? '0 0 10px rgba(255, 215, 0, 0.5)'
-          : 'none',
-    },
-    checkmark: {
-      color: theme === 'sacred' ? '#000000' : 'white',
-      fontSize: '14px',
-      fontWeight: 'bold' as const,
-    },
-    expandButton: {
-      marginTop: '0.5rem',
-      padding: '0.25rem 0.5rem',
-      fontSize: '0.75rem',
-      color: theme === 'sacred' ? '#FFD700' : themeConfig.secondaryText,
-      backgroundColor: 'transparent',
-      border: 'none',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.25rem',
-    },
-    expandIcon: {
-      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-      transition: 'transform 0.2s ease',
-    },
-  }
-
   return (
     <div
-      style={cardStyles.card}
+      className={cssStyles.card}
+      data-selected={isSelected}
+      data-pressed={isPressed}
+      data-selection-mode={selectionMode}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
     >
-      {/* Selection Checkbox */}
-      <div style={cardStyles.checkbox}>
-        {isSelected && <span style={cardStyles.checkmark}>✓</span>}
+      {/* Left accent bar */}
+      <div className={cssStyles.accentBar} />
+
+      {/* Selection Indicator - Always visible */}
+      <div className={cssStyles.selectionIndicator}>
+        {isSelected ? (
+          <span className={cssStyles.checkmark}>✓</span>
+        ) : (
+          <div className={cssStyles.innerDot} />
+        )}
       </div>
 
-      {/* All Fields - no separation between primary and secondary */}
-      <div>
+      {/* Tap hint for first-time users */}
+      <span className={cssStyles.tapHint}>Tap to select</span>
+
+      {/* All Fields */}
+      <div className={cssStyles.fields}>
         {/* Always show first 3 fields */}
         {primaryFields.map(column => (
           <CardField
@@ -304,13 +208,15 @@ function Card({
       {/* Expand/Collapse Button - only show if more than 3 secondary fields */}
       {hasSecondaryFields && secondaryFields.length > 3 && (
         <button
-          style={cardStyles.expandButton}
+          className={cssStyles.expandBtn}
           onClick={e => {
             e.stopPropagation()
             setIsExpanded(!isExpanded)
           }}
         >
-          <span style={cardStyles.expandIcon}>▼</span>
+          <span className={cssStyles.expandIcon} data-expanded={isExpanded}>
+            ▼
+          </span>
           {isExpanded
             ? 'Show less'
             : `Show ${secondaryFields.length} more fields`}

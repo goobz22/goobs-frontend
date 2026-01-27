@@ -3,7 +3,8 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ColumnDef } from '../../types'
-import { getDataGridStyles, type DataGridStyles } from '../../../../theme'
+import type { DataGridStyles } from '../../../../theme'
+import cssStyles from '../../DataGrid.module.css'
 import TextField from '../../../Field/Text'
 import DateField from '../../../Field/Date/DateField'
 import SearchableSimple, {
@@ -44,8 +45,8 @@ const CreationRow: React.FC<CreationRowProps> = ({
   onCreateRowCancel,
   styles,
 }) => {
-  const computedStyles = getDataGridStyles(styles)
   const isSacredTheme = styles?.theme === 'sacred'
+  const theme = styles?.theme || 'light'
   const [openModalField, setOpenModalField] = useState<string | null>(null)
 
   const renderCompositeFields = (column: ColumnDef) => {
@@ -712,17 +713,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
 
   return (
     <>
-      <tr
-        style={{
-          ...computedStyles.table.tableRow,
-          backgroundColor: isSacredTheme
-            ? 'rgba(255, 215, 0, 0.05)'
-            : 'rgba(59, 130, 246, 0.05)',
-          borderBottom: `2px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
-        }}
-      >
+      <tr className={cssStyles.creationRow} data-theme={theme}>
         {/* Checkbox column */}
-        <td style={computedStyles.table.tableCell}>
+        <td className={cssStyles.creationCell}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Button
               text="Save"
@@ -767,9 +760,8 @@ const CreationRow: React.FC<CreationRowProps> = ({
           return (
             <td
               key={column.field}
+              className={cssStyles.creationCell}
               style={{
-                ...computedStyles.table.tableCell,
-                padding: '4px',
                 verticalAlign: isComposite ? 'top' : 'middle',
                 height: isComposite ? 'auto' : '53px',
                 minHeight: '53px',

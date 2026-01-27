@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useEffect } from 'react'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import type { ColumnDef } from '../types'
+import cssStyles from '../DataGrid.module.css'
 
 interface CardFieldProps {
   column: ColumnDef
@@ -43,41 +44,6 @@ function CardField({
   >(null)
 
   const theme = styles?.theme || 'sacred'
-
-  // Create custom theme colors for properties not in DataGridTheme
-  const getThemeColors = (themeName: 'light' | 'dark' | 'sacred') => {
-    switch (themeName) {
-      case 'dark':
-        return {
-          text: '#E2E8F0',
-          secondaryText: '#94A3B8',
-          border: '#334155',
-          inputBackground: '#1E293B',
-          buttonBackground: '#334155',
-          primary: '#3B82F6',
-        }
-      case 'sacred':
-        return {
-          text: '#FFD700',
-          secondaryText: 'rgba(255, 215, 0, 0.7)',
-          border: 'rgba(255, 215, 0, 0.3)',
-          inputBackground: 'rgba(0, 0, 0, 0.5)',
-          buttonBackground: 'rgba(255, 215, 0, 0.1)',
-          primary: '#FFD700',
-        }
-      default: // light
-        return {
-          text: '#374151',
-          secondaryText: '#6B7280',
-          border: '#E2E8F0',
-          inputBackground: '#FFFFFF',
-          buttonBackground: '#F3F4F6',
-          primary: '#3B82F6',
-        }
-    }
-  }
-
-  const customColors = getThemeColors(theme)
 
   // Focus input when entering edit mode
   useEffect(() => {
@@ -177,17 +143,6 @@ function CardField({
 
   // Render input based on column type
   const renderInput = () => {
-    const inputStyles = {
-      width: '100%',
-      padding: '0.375rem 0.5rem',
-      fontSize: '0.875rem',
-      borderRadius: '0.25rem',
-      border: `1px solid ${customColors.border}`,
-      backgroundColor: customColors.inputBackground,
-      color: customColors.text,
-      outline: 'none',
-    }
-
     // Handle multiselect for inline editing
     if (
       column.creationField?.type === 'multiselect' &&
@@ -228,7 +183,7 @@ function CardField({
           value={editingValue}
           onChange={e => onEditingValueChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          style={inputStyles}
+          className={cssStyles.fieldInput}
         >
           <option value="">Select...</option>
           {column.dropdownOptions.map(option => (
@@ -249,7 +204,7 @@ function CardField({
           value={editingValue ? editingValue.split('T')[0] : ''}
           onChange={e => onEditingValueChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          style={inputStyles}
+          className={cssStyles.fieldInput}
         />
       )
     }
@@ -263,70 +218,19 @@ function CardField({
         value={editingValue}
         onChange={e => onEditingValueChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        style={inputStyles}
+        className={cssStyles.fieldInput}
       />
     )
   }
 
-  const fieldStyles = {
-    container: {
-      marginBottom: '0.5rem',
-      minHeight: '44px', // Touch-friendly height
-    },
-    label: {
-      fontSize: '0.925rem',
-      fontWeight: 600,
-      color: theme === 'sacred' ? '#FFD700' : customColors.secondaryText,
-      marginBottom: '0.25rem',
-      display: 'block',
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.025em',
-    },
-    value: {
-      fontSize: '0.875rem',
-      color: customColors.text,
-      padding: '0.375rem 0',
-      minHeight: '32px',
-      display: 'flex',
-      alignItems: 'center',
-      cursor: 'pointer',
-      borderRadius: '0.25rem',
-      transition: 'background-color 0.15s ease',
-      wordBreak: 'break-word' as const,
-    },
-    editContainer: {
-      display: 'flex',
-      gap: '0.5rem',
-      alignItems: 'center',
-    },
-    button: {
-      padding: '0.375rem 0.75rem',
-      fontSize: '0.75rem',
-      fontWeight: 500,
-      borderRadius: '0.25rem',
-      border: 'none',
-      cursor: 'pointer',
-      minWidth: '48px',
-      height: '32px',
-    },
-    saveButton: {
-      backgroundColor: customColors.primary,
-      color: theme === 'sacred' ? '#000000' : 'white',
-    },
-    cancelButton: {
-      backgroundColor: customColors.buttonBackground,
-      color: customColors.text,
-    },
-  }
-
   return (
-    <div style={fieldStyles.container} data-field={column.field}>
-      <label style={fieldStyles.label}>{column.headerName}</label>
+    <div className={cssStyles.field} data-field={column.field}>
+      <label className={cssStyles.fieldLabel}>{column.headerName}</label>
       {isEditing ? (
-        <div style={fieldStyles.editContainer}>
+        <div className={cssStyles.fieldEditContainer}>
           {renderInput()}
           <button
-            style={{ ...fieldStyles.button, ...fieldStyles.saveButton }}
+            className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnSave}`}
             onClick={e => {
               e.stopPropagation()
               handleSave()
@@ -335,7 +239,7 @@ function CardField({
             ✓
           </button>
           <button
-            style={{ ...fieldStyles.button, ...fieldStyles.cancelButton }}
+            className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnCancel}`}
             onClick={e => {
               e.stopPropagation()
               onCellCancel()
@@ -345,7 +249,7 @@ function CardField({
           </button>
         </div>
       ) : (
-        <div style={fieldStyles.value} data-field-value="true">
+        <div className={cssStyles.fieldValue} data-field-value="true">
           {column.renderCell && row ? formatValue(row) : formatValue(value)}
         </div>
       )}

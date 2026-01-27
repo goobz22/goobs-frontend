@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import ColumnHeaderRow from './ColumnHeaderRow'
 import Rows from './Rows'
 import CreationRow from './CreationRow'
 import CompositeFieldEditModal from '../CompositeFieldEditModal'
 import { useColumnResize } from '../utils/useColumnResize'
-import { getDataGridStyles } from '../../../theme'
-import { getDataGridTheme } from '../../../theme/datagrid'
+import cssStyles from '../DataGrid.module.css'
 import type { TableProps, ColumnDef, CompositeFieldConfig } from '../types'
 
 export function getRowId(row: {
@@ -15,61 +14,6 @@ export function getRowId(row: {
   _id?: string | number
 }): string {
   return String(row.id ?? row._id ?? '')
-}
-
-interface ScrollbarConfig {
-  height: string
-  width: string
-  track: {
-    backgroundColor: string
-    borderRadius: string
-  }
-  thumb: {
-    backgroundColor: string
-    borderRadius: string
-    border?: string
-  }
-  thumbHover: {
-    backgroundColor: string
-  }
-}
-
-// Create themed scrollbar styles
-const createScrollbarStyles = (
-  theme: string,
-  scrollbarConfig: ScrollbarConfig
-) => {
-  const scrollbarClass = `datagrid-scrollbar-${theme}`
-
-  const css = `
-    .${scrollbarClass}::-webkit-scrollbar {
-      height: ${scrollbarConfig.height};
-      width: ${scrollbarConfig.width};
-    }
-    
-    .${scrollbarClass}::-webkit-scrollbar-track {
-      background-color: ${scrollbarConfig.track.backgroundColor};
-      border-radius: ${scrollbarConfig.track.borderRadius};
-    }
-    
-    .${scrollbarClass}::-webkit-scrollbar-thumb {
-      background-color: ${scrollbarConfig.thumb.backgroundColor};
-      border-radius: ${scrollbarConfig.thumb.borderRadius};
-      ${scrollbarConfig.thumb.border ? `border: ${scrollbarConfig.thumb.border};` : ''}
-    }
-    
-    .${scrollbarClass}::-webkit-scrollbar-thumb:hover {
-      background-color: ${scrollbarConfig.thumbHover.backgroundColor};
-    }
-    
-    /* Firefox scrollbar styles */
-    .${scrollbarClass} {
-      scrollbar-width: thin;
-      scrollbar-color: ${scrollbarConfig.thumb.backgroundColor} ${scrollbarConfig.track.backgroundColor};
-    }
-  `
-
-  return { css, className: scrollbarClass }
 }
 
 function Table({
@@ -103,11 +47,7 @@ function Table({
   onColumnDragEnd,
   permissions,
 }: TableProps) {
-  const computedStyles = getDataGridStyles(styles)
   const theme = styles?.theme || 'light'
-
-  // Get theme configuration directly
-  const themeConfig = getDataGridTheme(styles)
 
   // Use column resize hook
   const { updatedColumns, isResizing, resizingColumn, getResizeHandleProps } =
@@ -115,9 +55,6 @@ function Table({
       columns,
       ...(onColumnResize ? { onColumnResize } : {}),
     })
-
-  // Create scrollbar styles
-  const scrollbarStyles = createScrollbarStyles(theme, themeConfig.scrollbar)
 
   // Composite editing state
   const [compositeEditingData, setCompositeEditingData] = useState<{
@@ -172,57 +109,11 @@ function Table({
     [columns, rows, onCellClick]
   )
 
-  // Inject scrollbar styles into document head
-  useEffect(() => {
-    const styleId = `datagrid-scrollbar-${theme}`
-    let styleElement = document.getElementById(styleId)
-
-    if (!styleElement) {
-      styleElement = document.createElement('style')
-      styleElement.id = styleId
-      document.head.appendChild(styleElement)
-    }
-
-    styleElement.textContent = scrollbarStyles.css
-
-    return () => {
-      // Clean up on unmount
-      const element = document.getElementById(styleId)
-      if (element) {
-        element.remove()
-      }
-    }
-  }, [theme, scrollbarStyles.css])
-
-  // Apply styles for horizontal scrolling
-  const tableContainerStyle = {
-    ...computedStyles.table.tableContainer,
-    // The container itself should not scroll; wrapper will handle it
-    overflowX: 'hidden' as const,
-    width: '100%',
-  }
-
-  const tableWrapperStyle = {
-    ...computedStyles.table.tableWrapper,
-    // Own the horizontal scroll here
-    overflowX: 'auto' as const,
-    width: '100%',
-    // Ensure there is breathing room on the right edge when scrolled fully
-    paddingRight: '16px',
-  }
-
-  const tableStyle = {
-    ...computedStyles.table.table,
-    // Allow table to grow wider than container and provide breathing room
-    width: 'max-content',
-    minWidth: '100%',
-  }
-
   return (
-    <div style={tableContainerStyle}>
-      <div style={tableWrapperStyle} className={scrollbarStyles.className}>
-        <table style={tableStyle}>
-          <thead>
+    <div className={cssStyles.tableContainer} data-theme={theme}>
+      <div className={cssStyles.tableWrapper}>
+        <table className={cssStyles.table}>
+          <thead className={cssStyles.thead}>
             <ColumnHeaderRow
               allRowsSelected={allRowsSelected}
               someRowsSelected={someRowsSelected}

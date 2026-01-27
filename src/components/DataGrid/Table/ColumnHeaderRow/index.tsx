@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react'
 import type { ColumnDef } from '../../types'
-import { getDataGridStyles, type DataGridStyles } from '../../../../theme'
+import type { DataGridStyles } from '../../../../theme'
 import Checkbox from '../../../Checkbox'
 import MoreVertIcon from '../../../Icons/MoreVert'
 import Popover from '../../../Popover'
+import cssStyles from '../../DataGrid.module.css'
 
 interface ColumnHeaderRowProps {
   allRowsSelected: boolean
@@ -30,80 +31,6 @@ interface ColumnHeaderRowProps {
   onColumnDragEnd?: () => void
 }
 
-const getStyles = (styles?: DataGridStyles) => {
-  const computedStyles = getDataGridStyles(styles)
-
-  return {
-    headerRow: {
-      position: 'relative',
-      zIndex: 50,
-      height: '55px',
-      ...computedStyles.table.tableHeader,
-    } as React.CSSProperties,
-    headerCell: {
-      padding: '0.75rem',
-      lineHeight: '45px',
-      verticalAlign: 'bottom',
-      fontWeight: '600',
-      textAlign: 'left',
-      color: computedStyles.table.tableHeaderCell.color,
-      borderRight: computedStyles.table.tableHeaderCell.borderRight,
-      borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
-    } as React.CSSProperties,
-    checkboxCell: {
-      padding: '0.75rem',
-      width: '48px',
-      minWidth: '48px',
-      maxWidth: '48px',
-      textAlign: 'center',
-      borderRight: computedStyles.table.tableHeaderCell.borderRight,
-      borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
-      verticalAlign: 'middle',
-      fontWeight: '600',
-      color: computedStyles.table.tableHeaderCell.color,
-    } as React.CSSProperties,
-    mobileDropdownCell: {
-      width: '100%',
-      minWidth: '200px',
-      maxWidth: '100%',
-      boxSizing: 'border-box' as const,
-      overflow: 'visible',
-      position: 'relative',
-      zIndex: 50,
-      paddingRight: '0.5rem',
-      ...computedStyles.table.tableHeaderCell,
-      color: computedStyles.table.tableHeaderCell.color,
-    } as React.CSSProperties,
-    overflowCell: {
-      width: '275px',
-      minWidth: '275px',
-      boxSizing: 'border-box' as const,
-      overflow: 'visible',
-      position: 'relative',
-      zIndex: 50,
-      ...computedStyles.table.tableHeaderCell,
-      color: computedStyles.table.tableHeaderCell.color,
-    } as React.CSSProperties,
-    columnHeader: (width?: number) =>
-      ({
-        userSelect: 'none',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        verticalAlign: 'middle',
-        padding: '0.75rem',
-        width: width ? `${width}px` : undefined,
-        minWidth: width ? `${width}px` : undefined,
-        maxWidth: width ? `${width}px` : '200px',
-        borderRight: computedStyles.table.tableHeaderCell.borderRight,
-        borderBottom: computedStyles.table.tableHeaderCell.borderBottom,
-        fontWeight: '600',
-        textAlign: 'left',
-        color: computedStyles.table.tableHeaderCell.color,
-      }) as React.CSSProperties,
-  }
-}
-
 const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   allRowsSelected,
   someRowsSelected,
@@ -122,7 +49,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   onColumnDragEnd,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
-  const componentStyles = getStyles(styles)
+  const theme = styles?.theme || 'light'
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const headerRefs = React.useRef<Record<string, HTMLTableCellElement | null>>(
@@ -139,9 +66,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   }
 
   return (
-    <tr style={componentStyles.headerRow}>
+    <tr className={cssStyles.headerRow} data-theme={theme}>
       {/* Header checkbox for select all */}
-      <th style={componentStyles.checkboxCell}>
+      <th className={`${cssStyles.headerCell} ${cssStyles.headerCellCheckbox}`}>
         <Checkbox
           checked={allRowsSelected}
           indeterminate={someRowsSelected}
@@ -154,7 +81,13 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
 
       {/* All columns with horizontal scrolling */}
       {columns.map(col => {
-        const cellStyle = componentStyles.columnHeader(col.computedWidth)
+        const widthStyle = col.computedWidth
+          ? {
+              width: `${col.computedWidth}px`,
+              minWidth: `${col.computedWidth}px`,
+              maxWidth: `${col.computedWidth}px`,
+            }
+          : {}
 
         return (
           <th
@@ -162,9 +95,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             ref={el => {
               headerRefs.current[col.field] = el
             }}
+            className={cssStyles.headerCell}
             style={{
-              ...cellStyle,
-              position: 'relative',
+              ...widthStyle,
               opacity: draggedColumn === col.field ? 0.5 : 1,
             }}
             draggable
@@ -173,27 +106,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             onDrop={() => onColumnDrop?.(col.field)}
             onDragEnd={onColumnDragEnd}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'grab',
-              }}
-            >
-              <span
-                style={{
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  userSelect: 'none',
-                }}
-              >
+            <div className={cssStyles.headerCellContent}>
+              <span className={cssStyles.headerCellText}>
                 {col.headerName || col.field}
               </span>
 
               {/* More options button */}
               <button
+                className={cssStyles.headerMenuBtn}
                 onClick={e => {
                   e.preventDefault()
                   e.stopPropagation()
@@ -202,19 +122,6 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                   setAnchorEl(headerCell || e.currentTarget)
                   setOpenDropdown(col.field)
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: isSacredTheme ? '#FFD700' : '#6B7280',
-                  opacity: 0.7,
-                  transition: 'opacity 0.2s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
               >
                 <MoreVertIcon styles={{ theme: styles?.theme || 'sacred' }} />
               </button>
@@ -230,137 +137,34 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
               anchorEl={anchorEl}
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             >
-              <div
-                style={{
-                  padding: '8px',
-                  minWidth: '180px',
-                  maxHeight: '400px',
-                  overflow: 'auto',
-                  backgroundColor: isSacredTheme
-                    ? 'rgba(0, 0, 0, 0.9)'
-                    : 'white',
-                  borderRadius: '8px',
-                  boxShadow: isSacredTheme
-                    ? '0 10px 30px rgba(255, 215, 0, 0.3)'
-                    : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                }}
-              >
+              <div className={cssStyles.dropdownMenu} data-theme={theme}>
                 {/* Sorting options */}
                 <button
+                  className={cssStyles.dropdownBtn}
                   onClick={() => {
-                    console.log('[ColumnHeaderRow] Sort A-Z clicked', {
-                      field: col.field,
-                      onColumnSort: !!onColumnSort,
-                    })
                     onColumnSort?.(col.field, 'asc')
-                    console.log(
-                      '[ColumnHeaderRow] Sort complete, closing dropdown'
-                    )
                     setOpenDropdown(null)
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    border: `1px solid ${isSacredTheme ? '#FFD700' : '#E5E7EB'}`,
-                    background: isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.05)'
-                      : '#F9F9F9',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: isSacredTheme ? '#FFD700' : '#1F2937',
-                    borderRadius: '4px',
-                    display: 'block',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.2)'
-                      : 'rgba(59, 130, 246, 0.1)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.05)'
-                      : '#F9F9F9'
                   }}
                 >
                   Sort A → Z
                 </button>
                 <button
+                  className={cssStyles.dropdownBtn}
                   onClick={() => {
-                    console.log('[ColumnHeaderRow] Sort Z-A clicked', {
-                      field: col.field,
-                      onColumnSort: !!onColumnSort,
-                    })
                     onColumnSort?.(col.field, 'desc')
-                    console.log(
-                      '[ColumnHeaderRow] Sort complete, closing dropdown'
-                    )
                     setOpenDropdown(null)
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    border: `1px solid ${isSacredTheme ? '#FFD700' : '#E5E7EB'}`,
-                    background: isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.05)'
-                      : '#F9F9F9',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: isSacredTheme ? '#FFD700' : '#1F2937',
-                    borderRadius: '4px',
-                    marginTop: '2px',
-                    display: 'block',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.2)'
-                      : 'rgba(59, 130, 246, 0.1)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = isSacredTheme
-                      ? 'rgba(255, 215, 0, 0.05)'
-                      : '#F9F9F9'
                   }}
                 >
                   Sort Z → A
                 </button>
 
-                <hr
-                  style={{
-                    margin: '8px 0',
-                    border: 'none',
-                    borderTop: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : '#E5E7EB'}`,
-                  }}
-                />
-
-                {/* Column actions */}
-
-                <hr
-                  style={{
-                    margin: '8px 0',
-                    border: 'none',
-                    borderTop: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : '#E5E7EB'}`,
-                  }}
-                />
+                <hr className={cssStyles.dropdownDivider} />
 
                 <button
+                  className={cssStyles.dropdownBtn}
                   onClick={() => {
                     onManageColumns?.()
                     setOpenDropdown(null)
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    border: 'none',
-                    background: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: isSacredTheme ? '#FFD700' : '#1F2937',
                   }}
                 >
                   Manage All Columns
@@ -372,32 +176,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             {col.resizable !== false && (
               <div
                 {...getResizeHandleProps(col.field)}
-                style={{
-                  ...getResizeHandleProps(col.field).style,
-                  backgroundColor:
-                    resizingColumn === col.field
-                      ? 'rgba(59, 130, 246, 0.2)'
-                      : 'rgba(148, 163, 184, 0.1)',
-                  borderRight:
-                    resizingColumn === col.field
-                      ? '2px solid #3B82F6'
-                      : '1px solid rgba(148, 163, 184, 0.3)',
-                }}
-                onMouseEnter={e => {
-                  if (!isResizing) {
-                    e.currentTarget.style.backgroundColor =
-                      'rgba(59, 130, 246, 0.2)'
-                    e.currentTarget.style.borderRight = '2px solid #3B82F6'
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isResizing && resizingColumn !== col.field) {
-                    e.currentTarget.style.backgroundColor =
-                      'rgba(148, 163, 184, 0.1)'
-                    e.currentTarget.style.borderRight =
-                      '1px solid rgba(148, 163, 184, 0.3)'
-                  }
-                }}
+                className={`${cssStyles.resizeHandle} ${resizingColumn === col.field ? cssStyles.resizeHandleActive : ''}`}
                 title="Drag to resize column"
               />
             )}

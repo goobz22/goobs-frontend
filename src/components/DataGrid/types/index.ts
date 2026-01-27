@@ -218,13 +218,6 @@ export interface TableProps {
     fieldUpdates: Record<string, any>
   ) => void
   onCompositeEditCancel?: () => void
-  // Row creation props
-  isCreatingRow?: boolean
-  creationRowData?: Record<string, any>
-  onCreationFieldChange?: (field: string, value: any) => void
-  onCreateRowSave?: () => void
-  onCreateRowCancel?: () => void
-  creationRowPosition?: 'top' | 'bottom'
   // Column action props
   onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
   onManageColumns?: () => void
@@ -234,6 +227,13 @@ export interface TableProps {
   onColumnDragOver?: (e: React.DragEvent) => void
   onColumnDrop?: (targetField: string) => void
   onColumnDragEnd?: () => void
+  // Row creation props
+  isCreatingRow?: boolean
+  creationRowData?: Record<string, unknown>
+  onCreationFieldChange?: (field: string, value: unknown) => void
+  onCreateRowSave?: () => void
+  onCreateRowCancel?: () => void
+  creationRowPosition?: 'top' | 'bottom'
   permissions?:
     | {
         access: 'no-access' | 'read' | 'write'
@@ -278,9 +278,6 @@ export interface DatagridProps {
   // Controls whether ID columns (id/_id) are visible
   showIdColumns?: boolean
 
-  // Force mobile card view regardless of screen size (useful for Storybook demos)
-  forceMobile?: boolean
-
   // Permissions control - determines read/write access
   permissions: {
     access: 'no-access' | 'read' | 'write'
@@ -313,12 +310,8 @@ export interface DatagridProps {
     fieldUpdates: Record<string, any>
   ) => void | Promise<void>
 
-  // Optional callback for inline row creation
-  onRowCreation?: (rowData: Record<string, any>) => void | Promise<void>
-
-  // Row creation configuration
-  allowRowCreation?: boolean
-  creationRowPosition?: 'top' | 'bottom'
+  // Optional callback for row creation - when provided, Add button appears in ManageRow
+  onRowCreation?: (rowData: Record<string, unknown>) => void | Promise<void>
 
   // Optional embedded filters that appear between toolbar and table
   filters?: DataGridFilter[]

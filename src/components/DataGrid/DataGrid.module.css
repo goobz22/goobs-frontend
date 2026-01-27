@@ -1,0 +1,1569 @@
+/* ==========================================================================
+   DATAGRID COMPONENT - UNIFIED CSS MODULE
+   Prevents FOUC by using CSS instead of JavaScript for styling
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CSS Custom Properties (Theme Variables) - Table View
+   -------------------------------------------------------------------------- */
+
+/* Light Theme (default) */
+.datagrid {
+  --dg-container-bg: transparent;
+  --dg-content-bg: #ffffff;
+  --dg-content-border: #e2e8f0;
+  --dg-content-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --dg-header-bg: #f8fafc;
+  --dg-header-border: #e2e8f0;
+  --dg-header-color: #374151;
+
+  --dg-row-bg: #ffffff;
+  --dg-row-alt-bg: #f8fafc;
+  --dg-row-hover-bg: #f9fafb;
+  --dg-row-selected-bg: rgba(219, 234, 254, 1);
+  --dg-row-border: #f3f4f6;
+
+  --dg-cell-color: #374151;
+  --dg-cell-border: #f3f4f6;
+  --dg-cell-padding: 0.75rem;
+
+  --dg-error-bg: #fef2f2;
+  --dg-error-color: #b91c1c;
+  --dg-error-border: #fecaca;
+
+  --dg-divider-color: #e2e8f0;
+  --dg-divider-opacity: 0.6;
+
+  --dg-scrollbar-track: #f1f5f9;
+  --dg-scrollbar-thumb: #cbd5e1;
+  --dg-scrollbar-thumb-hover: #94a3b8;
+
+  --dg-primary: #3b82f6;
+  --dg-secondary-text: #6b7280;
+
+  --dg-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Theme */
+.datagrid[data-theme='dark'] {
+  --dg-container-bg: transparent;
+  --dg-content-bg: #1e293b;
+  --dg-content-border: #334155;
+  --dg-content-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  --dg-header-bg: #1e293b;
+  --dg-header-border: #334155;
+  --dg-header-color: #e2e8f0;
+
+  --dg-row-bg: #1e293b;
+  --dg-row-alt-bg: #253145;
+  --dg-row-hover-bg: #273746;
+  --dg-row-selected-bg: rgba(59, 130, 246, 0.2);
+  --dg-row-border: #334155;
+
+  --dg-cell-color: #e2e8f0;
+  --dg-cell-border: #334155;
+
+  --dg-error-bg: rgba(127, 29, 29, 0.3);
+  --dg-error-color: #f87171;
+  --dg-error-border: rgba(239, 68, 68, 0.3);
+
+  --dg-divider-color: #334155;
+
+  --dg-scrollbar-track: #1e293b;
+  --dg-scrollbar-thumb: #475569;
+  --dg-scrollbar-thumb-hover: #64748b;
+
+  --dg-primary: #3b82f6;
+  --dg-secondary-text: #94a3b8;
+}
+
+/* Sacred Theme */
+.datagrid[data-theme='sacred'] {
+  --dg-container-bg: transparent;
+  --dg-content-bg: rgba(0, 0, 0, 0.9);
+  --dg-content-border: rgba(255, 215, 0, 0.5);
+  --dg-content-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  --dg-header-bg: rgba(0, 0, 0, 0.9);
+  --dg-header-border: rgba(255, 215, 0, 0.5);
+  --dg-header-color: #ffd700;
+
+  --dg-row-bg: rgba(0, 0, 0, 0.9);
+  --dg-row-alt-bg: rgba(255, 215, 0, 0.05);
+  --dg-row-hover-bg: rgba(255, 215, 0, 0.2);
+  --dg-row-selected-bg: rgba(255, 215, 0, 0.15);
+  --dg-row-border: rgba(255, 215, 0, 0.5);
+
+  --dg-cell-color: #fbbf24;
+  --dg-cell-border: rgba(255, 215, 0, 0.5);
+
+  --dg-error-bg: rgba(239, 68, 68, 0.1);
+  --dg-error-color: #f87171;
+  --dg-error-border: rgba(239, 68, 68, 0.3);
+
+  --dg-divider-color: rgba(255, 215, 0, 0.3);
+  --dg-divider-opacity: 0.8;
+
+  --dg-scrollbar-track: rgba(0, 0, 0, 0.4);
+  --dg-scrollbar-thumb: rgba(255, 215, 0, 0.6);
+  --dg-scrollbar-thumb-hover: rgba(255, 215, 0, 0.8);
+
+  --dg-primary: #ffd700;
+  --dg-secondary-text: #d97706;
+}
+
+/* --------------------------------------------------------------------------
+   Container Styles
+   -------------------------------------------------------------------------- */
+
+.datagrid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--dg-container-bg);
+  border-radius: 0.75rem;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: var(--dg-transition);
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--dg-content-bg);
+  border-radius: 0.5rem;
+  border: 1px solid var(--dg-content-border);
+  overflow: auto;
+  max-height: 80vh;
+  box-shadow: var(--dg-content-shadow);
+  transition: var(--dg-transition);
+  box-sizing: border-box;
+}
+
+.datagrid[data-theme='sacred'] .contentWrapper {
+  border-width: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Error State
+   -------------------------------------------------------------------------- */
+
+.error {
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0.25rem;
+  background-color: var(--dg-error-bg);
+  color: var(--dg-error-color);
+  border-color: var(--dg-error-border);
+}
+
+/* --------------------------------------------------------------------------
+   Section Divider
+   -------------------------------------------------------------------------- */
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background-color: var(--dg-divider-color);
+  opacity: var(--dg-divider-opacity);
+}
+
+/* --------------------------------------------------------------------------
+   Sticky Toolbar Wrapper
+   -------------------------------------------------------------------------- */
+
+.stickyToolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--dg-content-bg);
+}
+
+/* --------------------------------------------------------------------------
+   Table Container
+   -------------------------------------------------------------------------- */
+
+.tableContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.tableOuter {
+  width: 100%;
+  overflow-x: hidden;
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  width: 100%;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Table Styles
+   -------------------------------------------------------------------------- */
+
+.table {
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
+  background-color: transparent;
+  border: 1px solid var(--dg-content-border);
+  border-collapse: separate;
+}
+
+/* --------------------------------------------------------------------------
+   Table Header
+   -------------------------------------------------------------------------- */
+
+.thead {
+  background-color: var(--dg-header-bg);
+}
+
+.headerRow {
+  position: relative;
+  z-index: 50;
+  height: 55px;
+  background-color: var(--dg-header-bg);
+  border-bottom: 2px solid var(--dg-header-border);
+}
+
+.headerCell {
+  padding: 0.75rem;
+  line-height: 45px;
+  vertical-align: bottom;
+  font-weight: 600;
+  text-align: left;
+  color: var(--dg-header-color);
+  border-right: 1px solid var(--dg-header-border);
+  border-bottom: 2px solid var(--dg-header-border);
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.headerCellCheckbox {
+  padding: 0.75rem;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.headerCellContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: grab;
+}
+
+.headerCellText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.headerMenuBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: var(--dg-secondary-text);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.headerMenuBtn:hover {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Table Body
+   -------------------------------------------------------------------------- */
+
+.row {
+  border-bottom: 1px solid var(--dg-row-border);
+  background-color: var(--dg-row-bg);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.rowAlternate {
+  background-color: var(--dg-row-alt-bg);
+}
+
+.row:hover {
+  background-color: var(--dg-row-hover-bg);
+}
+
+.rowSelected {
+  background-color: var(--dg-row-selected-bg);
+}
+
+.rowSelected:hover {
+  background-color: var(--dg-row-selected-bg);
+}
+
+.cell {
+  padding: var(--dg-cell-padding);
+  border-right: 1px solid var(--dg-cell-border);
+  border-bottom: 1px solid var(--dg-cell-border);
+  vertical-align: middle;
+  color: var(--dg-cell-color);
+}
+
+.cellCheckbox {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  padding: 0;
+}
+
+.cellEmpty {
+  text-align: center;
+  padding: 3rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.cellContent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dg-cell-color);
+}
+
+/* --------------------------------------------------------------------------
+   Resize Handle
+   -------------------------------------------------------------------------- */
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: rgba(148, 163, 184, 0.1);
+  border-right: 1px solid rgba(148, 163, 184, 0.3);
+  transition: all 0.15s ease;
+}
+
+.resizeHandle:hover,
+.resizeHandleActive {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-right: 2px solid #3b82f6;
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbar Styles
+   -------------------------------------------------------------------------- */
+
+.tableWrapper::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background-color: var(--dg-scrollbar-track);
+  border-radius: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background-color: var(--dg-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background-color: var(--dg-scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+.tableWrapper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--dg-scrollbar-thumb) var(--dg-scrollbar-track);
+}
+
+/* --------------------------------------------------------------------------
+   Footer Styles
+   -------------------------------------------------------------------------- */
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+  opacity: 0.5;
+}
+
+.footerGlyph {
+  color: var(--dg-secondary-text);
+  font-size: 0.75rem;
+}
+
+.datagrid[data-theme='sacred'] .footerGlyph {
+  color: #ffd700;
+  animation: datagridFloat 3s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Creation Row
+   -------------------------------------------------------------------------- */
+
+.creationRow {
+  background-color: var(--dg-row-bg);
+  border: 2px dashed var(--dg-primary);
+}
+
+.creationCell {
+  padding: 0.5rem;
+  vertical-align: middle;
+}
+
+/* --------------------------------------------------------------------------
+   Animations
+   -------------------------------------------------------------------------- */
+
+@keyframes datagridFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Menu Styles
+   -------------------------------------------------------------------------- */
+
+.dropdownMenu {
+  padding: 8px;
+  min-width: 180px;
+  max-height: 400px;
+  overflow: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.datagrid[data-theme='sacred'] .dropdownMenu {
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+}
+
+.dropdownBtn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1f2937;
+  border-radius: 4px;
+  display: block;
+  margin-top: 2px;
+}
+
+.dropdownBtn:first-child {
+  margin-top: 0;
+}
+
+.dropdownBtn:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.datagrid[data-theme='sacred'] .dropdownBtn {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.05);
+  color: #ffd700;
+}
+
+.datagrid[data-theme='sacred'] .dropdownBtn:hover {
+  background-color: rgba(255, 215, 0, 0.2);
+}
+
+.dropdownDivider {
+  margin: 8px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+.datagrid[data-theme='sacred'] .dropdownDivider {
+  border-top-color: rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Empty State (Table)
+   -------------------------------------------------------------------------- */
+
+.tableEmpty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--dg-secondary-text);
+}
+
+/* ==========================================================================
+   MOBILE CARD VIEW STYLES
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CSS Custom Properties (Theme Variables) - Mobile Card View
+   -------------------------------------------------------------------------- */
+
+/* Sacred Theme (default - matches JS default to prevent FOUC) */
+.mobileContainer {
+  --card-bg: rgba(15, 12, 5, 0.98);
+  --card-bg-hover: rgba(25, 20, 8, 0.99);
+  --card-bg-pressed: rgba(35, 28, 10, 1);
+  --card-bg-selected: rgba(30, 25, 8, 0.99);
+  --card-border: rgba(255, 215, 0, 0.6);
+  --card-border-hover: rgba(255, 215, 0, 0.8);
+  --card-border-selected: #ffd700;
+  --card-primary: #ffd700;
+  --card-primary-light: rgba(255, 215, 0, 0.18);
+  --card-text: #fbbf24;
+  --card-text-secondary: rgba(255, 215, 0, 0.85);
+  --card-select-hint: rgba(255, 215, 0, 0.65);
+  --card-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 215, 0, 0.3),
+    0 0 12px rgba(255, 215, 0, 0.15);
+  --card-shadow-selected:
+    0 0 30px rgba(255, 215, 0, 0.45), 0 0 60px rgba(255, 215, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 215, 0, 0.25);
+  --card-shadow-pressed:
+    0 2px 8px rgba(255, 215, 0, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  --card-gradient-selected:
+    radial-gradient(
+      ellipse at top left,
+      rgba(255, 215, 0, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(255, 215, 0, 0.2) 0%,
+      transparent 50%
+    );
+
+  --container-bg: rgba(0, 0, 0, 0.95);
+  --header-bg: rgba(0, 0, 0, 0.98);
+  --header-border: rgba(255, 215, 0, 0.5);
+  --pagination-bg: rgba(0, 0, 0, 0.98);
+  --pagination-border: rgba(255, 215, 0, 0.5);
+  --pagination-btn-bg: rgba(255, 215, 0, 0.15);
+  --pagination-btn-border: #ffd700;
+  --pagination-btn-text: #ffd700;
+  --empty-text: rgba(255, 215, 0, 0.65);
+
+  --fab-bg: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  --fab-text: #000000;
+  --fab-shadow: 0 0 30px rgba(255, 215, 0, 0.7), 0 4px 16px rgba(0, 0, 0, 0.5);
+  --fab-border: 2px solid rgba(255, 215, 0, 0.95);
+
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Hardcoded sacred theme - NO CSS variable dependency */
+  background-color: rgba(0, 0, 0, 0.95);
+}
+
+/* Light Theme */
+.mobileContainer[data-theme='light'] {
+  background-color: #ffffff;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f8fafc;
+  --card-bg-pressed: #f1f5f9;
+  --card-bg-selected: #eff6ff;
+  --card-border: #e2e8f0;
+  --card-border-hover: #cbd5e1;
+  --card-border-selected: #3b82f6;
+  --card-primary: #3b82f6;
+  --card-primary-light: rgba(59, 130, 246, 0.08);
+  --card-text: #374151;
+  --card-text-secondary: #6b7280;
+  --card-select-hint: #9ca3af;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --card-shadow-selected:
+    0 4px 20px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  --card-shadow-pressed:
+    0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  --card-gradient-selected: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    transparent 100%
+  );
+
+  --container-bg: #ffffff;
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+  --pagination-bg: #ffffff;
+  --pagination-border: #e2e8f0;
+  --pagination-btn-bg: transparent;
+  --pagination-btn-border: #e2e8f0;
+  --pagination-btn-text: #374151;
+  --empty-text: #6b7280;
+
+  --fab-bg: #3b82f6;
+  --fab-text: white;
+  --fab-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  --fab-border: none;
+}
+
+/* Dark Theme */
+.mobileContainer[data-theme='dark'] {
+  background-color: #1e293b;
+  --card-bg: #1e293b;
+  --card-bg-hover: #243447;
+  --card-bg-pressed: #2d3f52;
+  --card-bg-selected: #1e3a5f;
+  --card-border: #334155;
+  --card-border-hover: #475569;
+  --card-border-selected: #3b82f6;
+  --card-primary: #3b82f6;
+  --card-primary-light: rgba(59, 130, 246, 0.15);
+  --card-text: #e2e8f0;
+  --card-text-secondary: #94a3b8;
+  --card-select-hint: #64748b;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --card-shadow-selected:
+    0 4px 20px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2);
+  --card-shadow-pressed:
+    0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  --card-gradient-selected: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    transparent 100%
+  );
+
+  --container-bg: #1e293b;
+  --header-bg: #1e293b;
+  --header-border: #334155;
+  --pagination-bg: #1e293b;
+  --pagination-border: #334155;
+  --pagination-btn-bg: transparent;
+  --pagination-btn-border: #334155;
+  --pagination-btn-text: #e2e8f0;
+  --empty-text: #94a3b8;
+
+  --fab-bg: #3b82f6;
+  --fab-text: white;
+  --fab-shadow: 0 6px 10px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2);
+  --fab-border: none;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Container Elements - Hardcoded sacred theme values
+   -------------------------------------------------------------------------- */
+
+.mobileHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.98);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+  padding: 0.5rem;
+}
+
+.mobileContainer[data-theme='light'] .mobileHeader {
+  background-color: #ffffff;
+  border-bottom-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .mobileHeader {
+  background-color: #1e293b;
+  border-bottom-color: #334155;
+}
+
+.cardsContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+  padding-bottom: 5rem;
+  position: relative;
+}
+
+/* Mobile empty - hardcoded sacred theme */
+.mobileEmpty {
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255, 215, 0, 0.65);
+}
+
+.mobileContainer[data-theme='light'] .mobileEmpty {
+  color: #6b7280;
+}
+
+.mobileContainer[data-theme='dark'] .mobileEmpty {
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   Card Base Styles
+   -------------------------------------------------------------------------- */
+
+/* Card uses hardcoded sacred theme values - NO JS DEPENDENCY */
+/* Light/dark themes override via [data-theme] selectors */
+.card {
+  background-color: rgba(15, 12, 5, 0.98);
+  border-radius: 12px;
+  padding: 1rem;
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 215, 0, 0.3),
+    0 0 12px rgba(255, 215, 0, 0.15);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  transform: scale(1);
+  overflow: hidden;
+}
+
+/* Light theme override */
+.mobileContainer[data-theme='light'] .card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark theme override */
+.mobileContainer[data-theme='dark'] .card {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Pressed state - hardcoded sacred theme values */
+.card:active,
+.card[data-pressed='true'] {
+  background-color: rgba(35, 28, 10, 1);
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow:
+    0 2px 8px rgba(255, 215, 0, 0.35),
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  transform: scale(0.985);
+}
+
+.mobileContainer[data-theme='light'] .card:active,
+.mobileContainer[data-theme='light'] .card[data-pressed='true'] {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.mobileContainer[data-theme='dark'] .card:active,
+.mobileContainer[data-theme='dark'] .card[data-pressed='true'] {
+  background-color: #2d3f52;
+  border-color: #475569;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Selected state - hardcoded sacred theme values */
+.card[data-selected='true'] {
+  background-color: rgba(30, 25, 8, 0.99);
+  border-color: #ffd700;
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.45),
+    0 0 60px rgba(255, 215, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 215, 0, 0.25);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(255, 215, 0, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(255, 215, 0, 0.2) 0%,
+      transparent 50%
+    );
+}
+
+.mobileContainer[data-theme='light'] .card[data-selected='true'] {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow:
+    0 4px 20px rgba(59, 130, 246, 0.15),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+  background-image: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    transparent 100%
+  );
+}
+
+.mobileContainer[data-theme='dark'] .card[data-selected='true'] {
+  background-color: #1e3a5f;
+  border-color: #3b82f6;
+  box-shadow:
+    0 4px 20px rgba(59, 130, 246, 0.3),
+    0 0 0 1px rgba(59, 130, 246, 0.2);
+  background-image: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    transparent 100%
+  );
+}
+
+/* --------------------------------------------------------------------------
+   Card Accent Bar (Left Edge)
+   -------------------------------------------------------------------------- */
+
+.accentBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  border-radius: 12px 0 0 12px;
+}
+
+/* Selected accent bar - hardcoded sacred theme */
+.card[data-selected='true'] .accentBar {
+  background-color: #ffd700;
+}
+
+.mobileContainer[data-theme='light'] .card[data-selected='true'] .accentBar {
+  background-color: #3b82f6;
+}
+
+.mobileContainer[data-theme='dark'] .card[data-selected='true'] .accentBar {
+  background-color: #3b82f6;
+}
+
+/* Pressed accent bar - hardcoded sacred theme */
+.card[data-pressed='true'] .accentBar {
+  background-color: rgba(255, 215, 0, 0.8);
+}
+
+.mobileContainer[data-theme='light'] .card[data-pressed='true'] .accentBar {
+  background-color: #cbd5e1;
+}
+
+.mobileContainer[data-theme='dark'] .card[data-pressed='true'] .accentBar {
+  background-color: #475569;
+}
+
+/* --------------------------------------------------------------------------
+   Selection Indicator (Circle)
+   -------------------------------------------------------------------------- */
+
+/* Selection indicator - hardcoded sacred theme */
+.selectionIndicator {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.mobileContainer[data-theme='light'] .selectionIndicator {
+  border-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .selectionIndicator {
+  border-color: #334155;
+}
+
+/* Selection mode - hardcoded sacred theme */
+.card[data-selection-mode='true'] .selectionIndicator {
+  border-color: rgba(255, 215, 0, 0.8);
+  background-color: rgba(255, 215, 0, 0.18);
+}
+
+.mobileContainer[data-theme='light']
+  .card[data-selection-mode='true']
+  .selectionIndicator {
+  border-color: #cbd5e1;
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.mobileContainer[data-theme='dark']
+  .card[data-selection-mode='true']
+  .selectionIndicator {
+  border-color: #475569;
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Selected indicator - hardcoded sacred theme */
+.card[data-selected='true'] .selectionIndicator {
+  border-color: #ffd700;
+  background-color: #ffd700;
+  transform: scale(1.1);
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.5),
+    0 0 24px rgba(255, 215, 0, 0.25);
+}
+
+.mobileContainer[data-theme='light']
+  .card[data-selected='true']
+  .selectionIndicator {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mobileContainer[data-theme='dark']
+  .card[data-selected='true']
+  .selectionIndicator {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Checkmark - hardcoded sacred theme (black on gold) */
+.checkmark {
+  color: #000000;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobileContainer[data-theme='light'] .checkmark,
+.mobileContainer[data-theme='dark'] .checkmark {
+  color: white;
+}
+
+.card[data-selected='true'] .checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Inner Dot (unselected hint) - hardcoded sacred theme */
+.innerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 215, 0, 0.65);
+  opacity: 0.4;
+  transition: all 0.2s ease;
+}
+
+.mobileContainer[data-theme='light'] .innerDot {
+  background-color: #9ca3af;
+}
+
+.mobileContainer[data-theme='dark'] .innerDot {
+  background-color: #64748b;
+}
+
+.card[data-selection-mode='true'] .innerDot {
+  opacity: 0.8;
+}
+
+.card[data-selected='true'] .innerDot {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Tap Hint Text
+   -------------------------------------------------------------------------- */
+
+/* Tap hint - hardcoded sacred theme */
+.tapHint {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(255, 215, 0, 0.65);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.mobileContainer[data-theme='light'] .tapHint {
+  color: #9ca3af;
+}
+
+.mobileContainer[data-theme='dark'] .tapHint {
+  color: #64748b;
+}
+
+.card[data-selected='true'] .tapHint,
+.card[data-selection-mode='true'] .tapHint {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Fields Container
+   -------------------------------------------------------------------------- */
+
+.fields {
+  padding-right: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   Expand Button
+   -------------------------------------------------------------------------- */
+
+.expandBtn {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #ffd700;
+  background-color: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.mobileContainer[data-theme='light'] .expandBtn {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.expandIcon {
+  transition: transform 0.2s ease;
+  font-size: 0.625rem;
+}
+
+.expandIcon[data-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   Card Field Styles
+   -------------------------------------------------------------------------- */
+
+.field {
+  margin-bottom: 0;
+  padding: 0.75rem 0;
+  min-height: 44px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.mobileContainer[data-theme='light'] .field {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.mobileContainer[data-theme='dark'] .field {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Sacred theme is default (matches JS default to prevent FOUC) */
+.fieldLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 215, 0, 0.6);
+  margin-bottom: 0.375rem;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mobileContainer[data-theme='light'] .fieldLabel {
+  color: #9ca3af;
+}
+
+.mobileContainer[data-theme='dark'] .fieldLabel {
+  color: #64748b;
+}
+
+.fieldValue {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #ffd700;
+  padding: 0.25rem 0;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.mobileContainer[data-theme='light'] .fieldValue {
+  color: #1f2937;
+}
+
+.mobileContainer[data-theme='dark'] .fieldValue {
+  color: #f1f5f9;
+}
+
+.fieldEditContainer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #ffd700;
+  outline: none;
+}
+
+.mobileContainer[data-theme='light'] .fieldInput {
+  border-color: #e2e8f0;
+  background-color: #ffffff;
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .fieldInput {
+  border-color: #334155;
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.fieldBtn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  min-width: 48px;
+  height: 32px;
+}
+
+.fieldBtnSave {
+  background-color: #ffd700;
+  color: #000000;
+}
+
+.mobileContainer[data-theme='light'] .fieldBtnSave {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.fieldBtnCancel {
+  background-color: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+}
+
+.mobileContainer[data-theme='light'] .fieldBtnCancel {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .fieldBtnCancel {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+
+/* Pagination - hardcoded sacred theme */
+.pagination {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.98);
+  border-top: 1px solid rgba(255, 215, 0, 0.5);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  height: 48px;
+}
+
+.mobileContainer[data-theme='light'] .pagination {
+  background-color: #ffffff;
+  border-top-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .pagination {
+  background-color: #1e293b;
+  border-top-color: #334155;
+}
+
+/* Pagination button - hardcoded sacred theme */
+.paginationBtn {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 215, 0, 0.15);
+  border: 1px solid #ffd700;
+  border-radius: 0.375rem;
+  color: #ffd700;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.mobileContainer[data-theme='light'] .paginationBtn {
+  background-color: transparent;
+  border-color: #e2e8f0;
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .paginationBtn {
+  background-color: transparent;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pagination info - hardcoded sacred theme */
+.paginationInfo {
+  font-size: 0.875rem;
+  color: #ffd700;
+  font-weight: 500;
+}
+
+.mobileContainer[data-theme='light'] .paginationInfo {
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .paginationInfo {
+  color: #e2e8f0;
+}
+
+/* --------------------------------------------------------------------------
+   FAB (Floating Action Button)
+   -------------------------------------------------------------------------- */
+
+/* FAB - hardcoded sacred theme */
+.fab {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  color: #000000;
+  border: 2px solid rgba(255, 215, 0, 0.95);
+  font-size: 28px;
+  font-weight: bold;
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.7),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mobileContainer[data-theme='light'] .fab {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  box-shadow:
+    0 6px 10px rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobileContainer[data-theme='dark'] .fab {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  box-shadow:
+    0 6px 10px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fabAdd {
+  bottom: 70px;
+  right: 20px;
+}
+
+.fabDuplicate {
+  bottom: 140px;
+  right: 20px;
+}
+
+.fabDelete {
+  right: 20px;
+  background: #ef4444;
+  box-shadow:
+    0 4px 8px rgba(239, 68, 68, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fabDelete[data-has-duplicate='true'] {
+  bottom: 210px;
+}
+
+.fabDelete[data-has-duplicate='false'] {
+  bottom: 140px;
+}
+
+/* --------------------------------------------------------------------------
+   Selection Header - hardcoded sacred theme
+   -------------------------------------------------------------------------- */
+
+.selectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.98);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+  color: #fbbf24;
+}
+
+.mobileContainer[data-theme='light'] .selectionHeader {
+  background-color: #ffffff;
+  border-bottom-color: #e2e8f0;
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .selectionHeader {
+  background-color: #1e293b;
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+.selectionHeader span {
+  font-weight: 500;
+}
+
+.selectionHeader button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid currentColor;
+  background-color: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   Action Bar - hardcoded sacred theme
+   -------------------------------------------------------------------------- */
+
+.actionBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.98);
+  border-top: 1px solid rgba(255, 215, 0, 0.5);
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 20;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobileContainer[data-theme='light'] .actionBar {
+  background-color: #ffffff;
+  border-top-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .actionBar {
+  background-color: #1e293b;
+  border-top-color: #334155;
+}
+
+/* Action button - hardcoded sacred theme */
+.actionBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: transparent;
+  color: #fbbf24;
+}
+
+.mobileContainer[data-theme='light'] .actionBtn {
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .actionBtn {
+  color: #e2e8f0;
+}
+
+.actionBtnDelete {
+  color: #ef4444;
+}
+
+/* --------------------------------------------------------------------------
+   Add Card Styles - hardcoded sacred theme
+   -------------------------------------------------------------------------- */
+
+.addCard {
+  background-color: rgba(15, 12, 5, 0.98);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 2px dashed #ffd700;
+}
+
+.mobileContainer[data-theme='light'] .addCard {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.mobileContainer[data-theme='dark'] .addCard {
+  background-color: #1e293b;
+  border-color: #3b82f6;
+}
+
+/* Add card header - hardcoded sacred theme */
+.addCardHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fbbf24;
+}
+
+.mobileContainer[data-theme='light'] .addCardHeader {
+  color: #374151;
+}
+
+.mobileContainer[data-theme='dark'] .addCardHeader {
+  color: #e2e8f0;
+}
+
+.addCardField {
+  margin-bottom: 1rem;
+}
+
+/* Add card label - hardcoded sacred theme */
+.addCardLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 215, 0, 0.85);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mobileContainer[data-theme='light'] .addCardLabel {
+  color: #6b7280;
+}
+
+.mobileContainer[data-theme='dark'] .addCardLabel {
+  color: #94a3b8;
+}
+
+.addCardRequired {
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.addCardError {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin-top: 0.25rem;
+}
+
+.addCardButtons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  justify-content: space-between;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT - CSS-BASED (NO JAVASCRIPT FLASH)
+   ========================================================================== */
+
+/* Desktop View - visible on screens >= 768px */
+.desktopView {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile View - hidden on screens >= 768px */
+.mobileView {
+  display: none;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* Mobile breakpoint - switch views at 768px */
+@media (max-width: 767px) {
+  .desktopView {
+    display: none;
+  }
+
+  .mobileView {
+    display: flex;
+    flex-direction: column;
+  }
+}

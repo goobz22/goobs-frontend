@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import FileCopy from '../../Icons/FileCopy'
+import React from 'react'
+import Add from '../../Icons/Add'
+import ContentCopy from '../../Icons/ContentCopy'
 import Delete from '../../Icons/Delete'
 import Edit from '../../Icons/Edit'
+import Visibility from '../../Icons/Visibility'
 import type { DataGridStyles } from '../../../theme'
 
 type ModalType = 'duplicate' | 'delete' | 'manage' | 'show'
@@ -11,17 +13,18 @@ type ModalType = 'duplicate' | 'delete' | 'manage' | 'show'
 interface ManageRowProps {
   handleClose?: () => void
   selectedRows?: string[]
+  onAdd?: () => void
   onDuplicate?: () => void
   onDelete?: () => void
   onManage?: () => void
   onShow?: () => void
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: DataGridStyles
 }
 
 function ManageRow({
   handleClose = () => {},
   selectedRows = [],
+  onAdd,
   onDuplicate,
   onDelete,
   onManage,
@@ -29,35 +32,9 @@ function ManageRow({
   styles,
 }: ManageRowProps) {
   const isSacredTheme = styles?.theme === 'sacred'
-
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (isSacredTheme) {
-      const styleSheet =
-        typeof document !== 'undefined' && document.styleSheets?.length
-          ? document.styleSheets[0]
-          : undefined
-      const keyframes = `
-        @keyframes manageRowGlowPulse {
-          0%, 100% { 
-            border-color: rgba(255, 215, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-          }
-          50% { 
-            border-color: rgba(255, 215, 0, 0.8);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-          }
-        }
-      `
-      if (styleSheet) {
-        try {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        } catch {
-          // Keyframes might already exist
-        }
-      }
-    }
-  }, [isSacredTheme])
+  const isDarkTheme = styles?.theme === 'dark'
+  const hasSelection = selectedRows.length > 0
+  const isSingleSelection = selectedRows.length === 1
 
   const handleActionSelection = (type: ModalType) => {
     switch (type) {
@@ -86,270 +63,274 @@ function ManageRow({
     }
   }
 
-  if (selectedRows.length === 0) return null
-
-  const containerStyle = {
-    zIndex: 1300,
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '48px',
-    width: 'auto',
-    maxWidth: '100%',
-    minWidth: '0',
-    padding: '0 8px',
-    boxSizing: 'border-box' as const,
-    userSelect: 'none' as const,
-    boxShadow:
-      '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    borderRadius: '6px',
-    backgroundColor: isSacredTheme
-      ? 'rgba(0, 0, 0, 0.9)'
-      : 'rgba(255, 255, 255, 1)',
-    ...(isSacredTheme && {
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      backdropFilter: 'blur(8px)',
-      animation: 'manageRowGlowPulse 3s ease-in-out infinite',
-    }),
-  }
-
-  const innerContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    width: 'auto',
-    minWidth: '0',
-    maxWidth: '100%',
-  }
-
-  const titleContainerStyle = {
-    flex: '0 1 auto',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 8px',
-    minWidth: '0',
-    overflow: 'hidden',
-  }
-
-  const actionsContainerStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '2px',
-    flex: '0 0 auto',
-    minWidth: '0',
-  }
-
-  const dividerStyle = {
-    width: '1px',
-    height: '24px',
-    backgroundColor: isSacredTheme
+  // Theme colors
+  const colors = {
+    bg: isSacredTheme
+      ? 'rgba(0, 0, 0, 0.95)'
+      : isDarkTheme
+        ? '#1E293B'
+        : '#FFFFFF',
+    border: isSacredTheme
       ? 'rgba(255, 215, 0, 0.3)'
-      : 'rgba(229, 231, 235, 1)',
-    margin: '0 8px',
-    flexShrink: 0,
+      : isDarkTheme
+        ? '#334155'
+        : '#E2E8F0',
+    text: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151',
+    textMuted: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.5)'
+      : isDarkTheme
+        ? '#64748B'
+        : '#9CA3AF',
+    icon: isSacredTheme ? '#FFD700' : isDarkTheme ? '#94A3B8' : '#6B7280',
+    buttonHoverBg: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.12)'
+      : isDarkTheme
+        ? 'rgba(255, 255, 255, 0.08)'
+        : 'rgba(0, 0, 0, 0.04)',
+    deleteIcon: isSacredTheme ? '#FFD700' : '#EF4444',
+    deleteHoverBg: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.12)'
+      : 'rgba(239, 68, 68, 0.08)',
+    divider: isSacredTheme
+      ? 'rgba(255, 215, 0, 0.2)'
+      : isDarkTheme
+        ? '#475569'
+        : '#E5E7EB',
   }
 
-  const actionButtonStyle = {
-    display: 'flex',
-    flexDirection: 'column' as const,
+  const containerStyle: React.CSSProperties = {
+    display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '4px 8px',
-    cursor: 'pointer',
-    borderRadius: '4px',
-    transition: 'colors 0.3s ease',
-    userSelect: 'none' as const,
-    minWidth: '0',
-    height: '40px',
     gap: '2px',
-    whiteSpace: 'nowrap' as const,
+    height: '37px',
+    padding: '0 6px',
+    backgroundColor: colors.bg,
+    border: `1px solid ${colors.border}`,
+    borderRadius: '6px',
+    transition: 'all 0.15s ease',
   }
 
-  const iconContainerStyle = {
+  const countStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: isSacredTheme ? 'rgba(255, 215, 0, 1)' : 'rgba(55, 65, 81, 1)',
-    fontSize: '16px',
-    width: '20px',
-    height: '16px',
-    margin: '0',
-    padding: '0',
+    minWidth: '18px',
+    height: '18px',
+    padding: '0 4px',
+    backgroundColor: hasSelection
+      ? isSacredTheme
+        ? 'rgba(255, 215, 0, 0.15)'
+        : isDarkTheme
+          ? 'rgba(59, 130, 246, 0.15)'
+          : 'rgba(59, 130, 246, 0.1)'
+      : 'transparent',
+    borderRadius: '9px',
+    fontSize: '11px',
+    fontWeight: 600,
+    color: hasSelection
+      ? isSacredTheme
+        ? '#FFD700'
+        : '#3B82F6'
+      : colors.textMuted,
   }
 
-  const actionsRowStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    height: '100%',
+  const labelStyle: React.CSSProperties = {
+    fontSize: '12px',
+    fontWeight: 500,
+    color: hasSelection ? colors.text : colors.textMuted,
+    marginLeft: '4px',
+    marginRight: '4px',
+    whiteSpace: 'nowrap',
+  }
+
+  const dividerStyle: React.CSSProperties = {
+    width: '1px',
+    height: '16px',
+    backgroundColor: colors.divider,
+    margin: '0 2px',
+  }
+
+  const ActionButton = ({
+    onClick,
+    icon,
+    title,
+    isDelete = false,
+  }: {
+    onClick: () => void
+    icon: React.ReactNode
+    title: string
+    isDelete?: boolean
+  }) => {
+    const [isHovered, setIsHovered] = React.useState(false)
+
+    const buttonStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '26px',
+      height: '26px',
+      padding: 0,
+      backgroundColor: isHovered
+        ? isDelete
+          ? colors.deleteHoverBg
+          : colors.buttonHoverBg
+        : 'transparent',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.12s ease',
+      color: isDelete ? colors.deleteIcon : colors.icon,
+    }
+
+    return (
+      <button
+        onClick={e => {
+          e.stopPropagation()
+          onClick()
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={buttonStyle}
+        title={title}
+        type="button"
+      >
+        {icon}
+      </button>
+    )
+  }
+
+  const hasAnyAction = onManage || onShow || onDuplicate || onDelete
+  const hasSingleRowActions = onManage || onShow || onDuplicate
+
+  // Add button color (green/primary)
+  const addColor = isSacredTheme ? '#FFD700' : '#22C55E'
+  const addHoverBg = isSacredTheme
+    ? 'rgba(255, 215, 0, 0.12)'
+    : 'rgba(34, 197, 94, 0.08)'
+
+  const AddButton = () => {
+    const [isHovered, setIsHovered] = React.useState(false)
+
+    const buttonStyle: React.CSSProperties = {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '1px',
+      padding: '4px 8px',
+      backgroundColor: isHovered ? addHoverBg : 'transparent',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.12s ease',
+      color: addColor,
+    }
+
+    const labelStyle: React.CSSProperties = {
+      fontSize: '9px',
+      fontWeight: 500,
+      lineHeight: 1,
+    }
+
+    return (
+      <button
+        onClick={e => {
+          e.stopPropagation()
+          onAdd?.()
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={buttonStyle}
+        title="Add"
+        type="button"
+      >
+        <Add
+          styles={{ theme: styles?.theme || 'light' }}
+          width="14"
+          height="14"
+        />
+        <span style={labelStyle}>Add</span>
+      </button>
+    )
   }
 
   return (
     <div style={containerStyle}>
-      <div style={innerContainerStyle}>
-        <div style={titleContainerStyle}>
-          <span
-            style={{
-              color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-              fontSize: '14px',
-              fontWeight: '500',
-              margin: '0',
-              padding: '0',
-              lineHeight: '1',
-            }}
-          >
-            {`${selectedRows.length} ${
-              selectedRows.length === 1 ? 'item' : 'items'
-            } selected`}
-          </span>
-        </div>
+      {/* Add button - always visible when onAdd is provided */}
+      {onAdd && (
+        <>
+          <AddButton />
+          <div style={dividerStyle} />
+        </>
+      )}
 
-        <div style={actionsContainerStyle}>
-          <div style={actionsRowStyle}>
-            {selectedRows.length === 1 && onManage && (
-              <div
-                onClick={e => {
-                  e.stopPropagation()
-                  handleActionSelection('manage')
-                }}
-                style={actionButtonStyle}
-              >
-                <div style={iconContainerStyle}>
-                  <Edit
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                    width="16"
-                    height="16"
-                    style={{ width: '16px', height: '16px' }}
-                  />
-                </div>
-                <span
-                  style={{
-                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    margin: '0',
-                    padding: '0',
-                    lineHeight: '1',
-                    display: 'block',
-                  }}
-                >
-                  Manage
-                </span>
-              </div>
-            )}
+      <div style={countStyle}>{selectedRows.length}</div>
+      <span style={labelStyle}>{hasSelection ? 'selected' : 'select'}</span>
 
-            {selectedRows.length === 1 && onShow && (
-              <div
-                onClick={e => {
-                  e.stopPropagation()
-                  handleActionSelection('show')
-                }}
-                style={actionButtonStyle}
-              >
-                <div style={iconContainerStyle}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </div>
-                <span
-                  style={{
-                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    margin: '0',
-                    padding: '0',
-                    lineHeight: '1',
-                    display: 'block',
-                  }}
-                >
-                  Show
-                </span>
-              </div>
-            )}
+      {hasSelection && hasAnyAction && (
+        <>
+          <div style={dividerStyle} />
 
-            {selectedRows.length === 1 && onDuplicate && (
-              <div
-                onClick={e => {
-                  e.stopPropagation()
-                  handleActionSelection('duplicate')
-                }}
-                style={actionButtonStyle}
-              >
-                <div style={iconContainerStyle}>
-                  <FileCopy
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                    width="16"
-                    height="16"
-                    style={{ width: '16px', height: '16px' }}
-                  />
-                </div>
-                <span
-                  style={{
-                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    margin: '0',
-                    padding: '0',
-                    lineHeight: '1',
-                    display: 'block',
-                  }}
-                >
-                  Duplicate
-                </span>
-              </div>
-            )}
-
-            {selectedRows.length === 1 &&
-              (onManage || onShow || onDuplicate) && (
-                <div style={dividerStyle} />
+          {isSingleSelection && hasSingleRowActions && (
+            <>
+              {onManage && (
+                <ActionButton
+                  onClick={() => handleActionSelection('manage')}
+                  icon={
+                    <Edit
+                      styles={{ theme: styles?.theme || 'light' }}
+                      width="14"
+                      height="14"
+                    />
+                  }
+                  title="Edit"
+                />
               )}
+              {onShow && (
+                <ActionButton
+                  onClick={() => handleActionSelection('show')}
+                  icon={
+                    <Visibility
+                      styles={{ theme: styles?.theme || 'light' }}
+                      width="14"
+                      height="14"
+                    />
+                  }
+                  title="View"
+                />
+              )}
+              {onDuplicate && (
+                <ActionButton
+                  onClick={() => handleActionSelection('duplicate')}
+                  icon={
+                    <ContentCopy
+                      styles={{ theme: styles?.theme || 'light' }}
+                      width="14"
+                      height="14"
+                    />
+                  }
+                  title="Duplicate"
+                />
+              )}
+            </>
+          )}
 
-            {onDelete && (
-              <div
-                onClick={e => {
-                  e.stopPropagation()
-                  handleActionSelection('delete')
-                }}
-                style={actionButtonStyle}
-              >
-                <div style={iconContainerStyle}>
-                  <Delete
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                    width="16"
-                    height="16"
-                    style={{ width: '16px', height: '16px' }}
-                  />
-                </div>
-                <span
-                  style={{
-                    color: isSacredTheme ? '#FFD700' : 'rgba(55, 65, 81, 1)',
-                    fontSize: '10px',
-                    fontWeight: '500',
-                    margin: '0',
-                    padding: '0',
-                    lineHeight: '1',
-                    display: 'block',
-                  }}
-                >
-                  Delete
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+          {onDelete && (
+            <ActionButton
+              onClick={() => handleActionSelection('delete')}
+              icon={
+                <Delete
+                  styles={{ theme: styles?.theme || 'light' }}
+                  width="14"
+                  height="14"
+                />
+              }
+              title="Delete"
+              isDelete
+            />
+          )}
+        </>
+      )}
     </div>
   )
 }
