@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
   forwardRef,
+  useEffect,
   type ReactNode,
 } from 'react'
 import { alpha } from '../../utils'
@@ -148,6 +149,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
     const [isHovered, setIsHovered] = useState(false)
     const [isActive, setIsActive] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth <= 768)
+      }
+      checkMobile()
+      window.addEventListener('resize', checkMobile)
+      return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const filteredProps = useMemo(() => {
       const { sacredtheme, ...validProps } = restProps as any
@@ -233,14 +244,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       minWidth: styles?.minWidth || 'fit-content',
       maxWidth: styles?.maxWidth,
       height: styles?.height || 'auto',
-      minHeight: styles?.minHeight || '40px',
-      padding: styles?.padding || '8px 16px',
+      minHeight: styles?.minHeight || (isMobile ? '36px' : '40px'),
+      padding: styles?.padding || (isMobile ? '6px 12px' : '8px 16px'),
       margin: styles?.margin,
       marginTop: styles?.marginTop,
       marginBottom: styles?.marginBottom,
       marginLeft: styles?.marginLeft,
       marginRight: styles?.marginRight,
-      fontSize: styles?.fontSize || '14px',
+      fontSize: styles?.fontSize || (isMobile ? '12px' : '14px'),
       fontWeight: styles?.fontWeight || 500,
       fontFamily: styles?.fontFamily || '"Cinzel", serif',
       color:

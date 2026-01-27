@@ -104,9 +104,8 @@ export { checkboxThemes, getCheckboxTheme, getCheckboxStyles } from './checkbox'
 export type { CodeCopyTheme, CodeCopyStyles } from './codecopy'
 export { getCodeCopyStyles } from './codecopy'
 
-// Export datagrid theme system
+// Export datagrid types (CSS-based styling, no JS theme functions)
 export type { DataGridTheme, DataGridStyles } from './datagrid'
-export { dataGridThemes, getDataGridTheme, getDataGridStyles } from './datagrid'
 
 // Export complex text editor theme system
 export type {
@@ -543,7 +542,6 @@ export * from './button'
 export * from './card'
 export * from './checkbox'
 export * from './chip'
-export * from './datagrid'
 export * from './dialog'
 export * from './divider'
 export * from './drawer'
