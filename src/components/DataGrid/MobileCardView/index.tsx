@@ -337,35 +337,37 @@ function MobileCardView({
               }}
             />
           </div>
-          <DataGridToolbar
-            {...(buttons !== undefined ? { buttons } : {})}
-            {...(permissions !== undefined ? { permissions } : {})}
-            manageRowProps={{
-              selectedRows,
-              rows,
-              ...(onRowCreation && !isAddingCard
-                ? { onAdd: handleStartRowCreation }
-                : {}),
-              ...(onDuplicate
-                ? { onDuplicate: () => onDuplicate(selectedRows) }
-                : {}),
-              ...(onDelete
-                ? {
-                    onDelete: () => {
-                      onDelete(selectedRows)
-                      onSelectionChange?.([])
-                    },
-                  }
-                : {}),
-              ...(onManage ? { onManage: () => onManage(selectedRows) } : {}),
-              ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
-              handleClose: handleExitSelectionMode,
-              permissions,
-            }}
-            styles={{
-              theme: theme,
-            }}
-          />
+          <div className={cssStyles.mobileToolbar}>
+            <DataGridToolbar
+              {...(buttons !== undefined ? { buttons } : {})}
+              {...(permissions !== undefined ? { permissions } : {})}
+              manageRowProps={{
+                selectedRows,
+                rows,
+                ...(onRowCreation && !isAddingCard
+                  ? { onAdd: handleStartRowCreation }
+                  : {}),
+                ...(onDuplicate
+                  ? { onDuplicate: () => onDuplicate(selectedRows) }
+                  : {}),
+                ...(onDelete
+                  ? {
+                      onDelete: () => {
+                        onDelete(selectedRows)
+                        onSelectionChange?.([])
+                      },
+                    }
+                  : {}),
+                ...(onManage ? { onManage: () => onManage(selectedRows) } : {}),
+                ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
+                handleClose: handleExitSelectionMode,
+                permissions,
+              }}
+              styles={{
+                theme: theme,
+              }}
+            />
+          </div>
         </div>
       )}
 

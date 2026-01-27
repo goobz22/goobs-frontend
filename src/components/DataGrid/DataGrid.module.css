@@ -685,6 +685,64 @@
    Mobile Container Elements - Hardcoded sacred theme values
    -------------------------------------------------------------------------- */
 
+/* Mobile sticky toolbar - hardcoded sacred theme */
+.mobileContainer .stickyToolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.98);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.mobileContainer[data-theme='light'] .stickyToolbar {
+  background-color: #ffffff;
+  border-bottom-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .stickyToolbar {
+  background-color: #1e293b;
+  border-bottom-color: #334155;
+}
+
+/* Mobile toolbar wrapper - hardcoded sacred theme for ManageRow area */
+.mobileToolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+  background-color: rgba(0, 0, 0, 0.98);
+}
+
+.mobileContainer[data-theme='light'] .mobileToolbar {
+  background-color: #ffffff;
+}
+
+.mobileContainer[data-theme='dark'] .mobileToolbar {
+  background-color: #1e293b;
+}
+
+/* Style the ManageRow container within mobile toolbar */
+.mobileToolbar > div {
+  background-color: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+}
+
+.mobileContainer[data-theme='light'] .mobileToolbar > div {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.mobileContainer[data-theme='dark'] .mobileToolbar > div {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
 .mobileHeader {
   position: sticky;
   top: 0;
