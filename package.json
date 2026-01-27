@@ -1,19 +1,20 @@
 {
   "name": "goobs-frontend",
-  "version": "0.124.03",
+  "version": "0.124.04",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
   "main": "./dist/goobs-frontend.umd.js",
   "module": "./dist/goobs-frontend.es.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": true,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/goobs-frontend.es.js",
       "require": "./dist/goobs-frontend.umd.js"
     },
+    "./styles": "./dist/goobs-frontend.css",
     "./server": {
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
@@ -75,6 +76,7 @@
     "react-dom": "^19",
     "typescript": "^5",
     "vite": "^7",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^4",
     "vite-tsconfig-paths": "^6"
   },

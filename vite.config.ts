@@ -32,6 +32,7 @@ export default defineConfig({
       formats: ['es', 'umd'],
       fileName: format => `goobs-frontend.${format}.js`,
     },
+    cssCodeSplit: false,
     rollupOptions: {
       external: ['react', 'react-dom'],
       output: {
@@ -42,7 +43,7 @@ export default defineConfig({
       },
       treeshake: {
         preset: 'recommended',
-        moduleSideEffects: false,
+        moduleSideEffects: true,
       },
     },
     minify: 'esbuild',
