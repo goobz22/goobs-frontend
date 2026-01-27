@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useCallback } from 'react'
-import { alpha } from '../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './TextField.module.css'
 
 export interface TextFieldProps {
   value: string
@@ -28,7 +26,7 @@ export interface TextFieldProps {
   styles?: {
     disabled?: boolean
     required?: boolean
-    theme?: string
+    theme?: 'sacred' | 'light' | 'dark'
     width?: string
     minWidth?: string
     maxWidth?: string
@@ -85,6 +83,7 @@ const TextField: React.FC<TextFieldProps> = ({
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+  const theme = styles?.theme || 'sacred'
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -120,103 +119,99 @@ const TextField: React.FC<TextFieldProps> = ({
   const hasStartAdornment = !!startAdornment
   const hasEndAdornment = !!endAdornment
 
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    width: styles?.width || '100%',
-    minWidth: styles?.minWidth,
-    maxWidth: styles?.maxWidth,
-    height: styles?.height || 'auto',
-    minHeight: styles?.minHeight,
-    maxHeight: styles?.maxHeight,
-    marginTop: styles?.marginTop || '0',
-    marginBottom: styles?.marginBottom || '16px',
-    marginLeft: styles?.marginLeft,
-    marginRight: styles?.marginRight,
-  }
+  // Build wrapper class names
+  const wrapperClassNames = [
+    cssStyles.inputWrapper,
+    multiline && cssStyles.multiline,
+    isFocused && cssStyles.focused,
+    disabled && cssStyles.disabled,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
-  }
+  // Build input class names
+  const inputClassNames = [
+    multiline ? cssStyles.textarea : cssStyles.input,
+    hasStartAdornment && cssStyles.hasStartAdornment,
+    hasEndAdornment && cssStyles.hasEndAdornment,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: multiline ? 'flex-start' : 'center',
-    width: '100%',
-    minHeight: multiline ? undefined : styles?.height || '40px',
-    backgroundColor:
-      styles?.background ||
-      styles?.backgroundColor ||
-      (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
-    border:
-      styles?.border ||
-      `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
-    borderRadius: styles?.borderRadius || '8px',
-    transition: 'all 0.3s ease',
-    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-    boxSizing: 'border-box',
-  }
+  // Build helper text class names
+  const helperTextClassNames = [
+    cssStyles.helperText,
+    styles?.helperTextType === 'error' && cssStyles.error,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: multiline ? undefined : '100%',
-    minHeight: multiline ? `${minRows * 1.5}em` : undefined,
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: styles?.padding || '8px 16px',
-    paddingLeft:
-      styles?.paddingLeft ||
-      (hasStartAdornment ? styles?.startAdornmentOffset || '48px' : '16px'),
-    paddingRight:
-      styles?.paddingRight ||
-      (hasEndAdornment ? styles?.endAdornmentOffset || '48px' : '16px'),
-    paddingTop: styles?.paddingTop || '8px',
-    paddingBottom: styles?.paddingBottom || '8px',
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily || '"Crimson Text", serif',
-    color:
-      styles?.textColor ||
-      styles?.color ||
-      (disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)'),
-    boxSizing: 'border-box',
-    resize: multiline ? 'vertical' : undefined,
-  }
+  // Container style overrides (only explicit props)
+  const containerStyleOverrides: React.CSSProperties = {}
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.minWidth) containerStyleOverrides.minWidth = styles.minWidth
+  if (styles?.maxWidth) containerStyleOverrides.maxWidth = styles.maxWidth
+  if (styles?.height) containerStyleOverrides.height = styles.height
+  if (styles?.minHeight) containerStyleOverrides.minHeight = styles.minHeight
+  if (styles?.maxHeight) containerStyleOverrides.maxHeight = styles.maxHeight
+  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
+  if (styles?.marginBottom)
+    containerStyleOverrides.marginBottom = styles.marginBottom
+  if (styles?.marginLeft) containerStyleOverrides.marginLeft = styles.marginLeft
+  if (styles?.marginRight)
+    containerStyleOverrides.marginRight = styles.marginRight
 
-  const adornmentStyle: React.CSSProperties = {
-    position: 'absolute',
-    display: 'flex',
-    alignItems: 'center',
-    color: SACRED_GOLD,
-    pointerEvents: 'none',
+  // Input wrapper style overrides
+  const wrapperStyleOverrides: React.CSSProperties = {}
+  if (styles?.background || styles?.backgroundColor)
+    wrapperStyleOverrides.backgroundColor =
+      styles.background || styles.backgroundColor
+  if (styles?.border) wrapperStyleOverrides.border = styles.border
+  if (styles?.borderWidth || styles?.borderColor) {
+    wrapperStyleOverrides.borderWidth = styles.borderWidth
+    wrapperStyleOverrides.borderColor = styles.borderColor
   }
+  if (styles?.borderRadius)
+    wrapperStyleOverrides.borderRadius = styles.borderRadius
 
-  const helperTextStyle: React.CSSProperties = {
-    marginTop: '4px',
-    fontSize: '12px',
-    color:
-      styles?.helperTextType === 'error'
-        ? '#ff6b6b'
-        : 'rgba(255, 255, 255, 0.6)',
-    fontFamily: '"Crimson Text", serif',
-  }
+  // Input style overrides
+  const inputStyleOverrides: React.CSSProperties = {}
+  if (styles?.padding) inputStyleOverrides.padding = styles.padding
+  if (styles?.paddingLeft) inputStyleOverrides.paddingLeft = styles.paddingLeft
+  if (styles?.paddingRight)
+    inputStyleOverrides.paddingRight = styles.paddingRight
+  if (styles?.paddingTop) inputStyleOverrides.paddingTop = styles.paddingTop
+  if (styles?.paddingBottom)
+    inputStyleOverrides.paddingBottom = styles.paddingBottom
+  if (styles?.fontSize) inputStyleOverrides.fontSize = styles.fontSize
+  if (styles?.fontWeight) inputStyleOverrides.fontWeight = styles.fontWeight
+  if (styles?.fontFamily) inputStyleOverrides.fontFamily = styles.fontFamily
+  if (styles?.lineHeight) inputStyleOverrides.lineHeight = styles.lineHeight
+  if (styles?.textColor || styles?.color)
+    inputStyleOverrides.color = styles.textColor || styles.color
+  if (hasStartAdornment && styles?.startAdornmentOffset)
+    inputStyleOverrides.paddingLeft = styles.startAdornmentOffset
+  if (hasEndAdornment && styles?.endAdornmentOffset)
+    inputStyleOverrides.paddingRight = styles.endAdornmentOffset
+  if (multiline) inputStyleOverrides.minHeight = `${minRows * 1.5}em`
 
   return (
-    <div style={containerStyle}>
+    <div
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
+    >
       {label && (
-        <label style={labelStyle}>
+        <label className={cssStyles.label}>
           {typeof label === 'string' ? (
             <>
               {label}
               {required && (
-                <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
+                <span className={cssStyles.requiredIndicator}>
                   {styles?.requiredIndicatorText || '*'}
                 </span>
               )}
@@ -227,14 +222,17 @@ const TextField: React.FC<TextFieldProps> = ({
         </label>
       )}
 
-      <div style={inputWrapperStyle} onClick={handleContainerClick}>
+      <div
+        className={wrapperClassNames}
+        onClick={handleContainerClick}
+        style={
+          Object.keys(wrapperStyleOverrides).length > 0
+            ? wrapperStyleOverrides
+            : undefined
+        }
+      >
         {startAdornment && (
-          <div
-            style={{
-              ...adornmentStyle,
-              left: '16px',
-            }}
-          >
+          <div className={`${cssStyles.adornment} ${cssStyles.adornmentStart}`}>
             {startAdornment}
           </div>
         )}
@@ -242,6 +240,7 @@ const TextField: React.FC<TextFieldProps> = ({
         {multiline ? (
           <textarea
             ref={textareaRef}
+            className={inputClassNames}
             value={value || ''}
             onChange={handleChange}
             onFocus={handleFocus}
@@ -250,11 +249,16 @@ const TextField: React.FC<TextFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            style={inputStyle}
+            style={
+              Object.keys(inputStyleOverrides).length > 0
+                ? inputStyleOverrides
+                : undefined
+            }
           />
         ) : (
           <input
             ref={inputRef}
+            className={inputClassNames}
             type={type}
             value={value || ''}
             onChange={handleChange}
@@ -264,23 +268,22 @@ const TextField: React.FC<TextFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            style={inputStyle}
+            style={
+              Object.keys(inputStyleOverrides).length > 0
+                ? inputStyleOverrides
+                : undefined
+            }
           />
         )}
 
         {endAdornment && (
-          <div
-            style={{
-              ...adornmentStyle,
-              right: '16px',
-            }}
-          >
+          <div className={`${cssStyles.adornment} ${cssStyles.adornmentEnd}`}>
             {endAdornment}
           </div>
         )}
       </div>
 
-      {helperText && <div style={helperTextStyle}>{helperText}</div>}
+      {helperText && <div className={helperTextClassNames}>{helperText}</div>}
     </div>
   )
 }
