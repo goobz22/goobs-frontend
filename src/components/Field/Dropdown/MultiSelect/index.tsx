@@ -2,10 +2,8 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import ReactDOM from 'react-dom'
-import { alpha } from '../../../../utils'
 import Chip from '../../../Chip'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './MultiSelect.module.css'
 
 export interface SelectOption {
   value: string
@@ -22,7 +20,7 @@ export interface MultiSelectChipProps {
   styles?: {
     disabled?: boolean
     required?: boolean
-    theme?: string
+    theme?: 'sacred' | 'light' | 'dark'
     width?: string
     height?: string
     minHeight?: string
@@ -66,6 +64,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+  const theme = styles?.theme || 'sacred'
 
   // Track previous defaultSelected to update using derived state pattern
   const [prevDefaultSelected, setPrevDefaultSelected] =
@@ -128,79 +127,6 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     }
   }, [isOpen])
 
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    width: styles?.width || '100%',
-    marginBottom: '16px',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
-  }
-
-  const chipContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    gap: '6px',
-    minHeight: styles?.minHeight || styles?.height || '40px',
-    height: styles?.height || 'auto',
-    border: `${styles?.borderWidth || '1px'} solid ${styles?.borderColor || alpha(SACRED_GOLD, focused ? 0.6 : 0.3)}`,
-    borderRadius: styles?.borderRadius || '8px',
-    backgroundColor:
-      styles?.backgroundColor ||
-      (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
-    padding: styles?.padding || '12px 40px 12px 16px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: focused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-    boxSizing: 'border-box',
-  }
-
-  const placeholderStyle: React.CSSProperties = {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontFamily: '"Crimson Text", serif',
-    fontSize: '16px',
-    padding: '2px 0',
-  }
-
-  const iconWrapperStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: styles?.arrowTop || '50%',
-    right: styles?.arrowRight || '12px',
-    bottom: styles?.arrowBottom,
-    transform: styles?.arrowTop ? undefined : 'translateY(-50%)',
-    display: 'flex',
-    alignItems: 'center',
-    pointerEvents: 'none',
-    padding: styles?.arrowPadding,
-  }
-
-  const arrowStyle: React.CSSProperties = {
-    width: 0,
-    height: 0,
-    borderLeft: '5px solid transparent',
-    borderRight: '5px solid transparent',
-    borderTop: `5px solid ${SACRED_GOLD}`,
-    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-    transition: 'transform 0.3s ease',
-  }
-
-  const helperTextStyle: React.CSSProperties = {
-    marginTop: '4px',
-    fontSize: '12px',
-    color:
-      styles?.helperTextType === 'error'
-        ? '#ff6b6b'
-        : 'rgba(255, 255, 255, 0.6)',
-    fontFamily: '"Crimson Text", serif',
-  }
-
   const handleToggle = useCallback(
     (value: string, event?: React.MouseEvent) => {
       if (event) {
@@ -244,29 +170,106 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   // Check if we're in browser environment for portal
   const canUsePortal = typeof document !== 'undefined'
 
+  // Build chip container class names
+  const chipContainerClassNames = [
+    cssStyles.chipContainer,
+    focused && cssStyles.focused,
+    disabled && cssStyles.disabled,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // Build arrow class names
+  const arrowClassNames = [cssStyles.arrow, isOpen && cssStyles.open]
+    .filter(Boolean)
+    .join(' ')
+
+  // Build helper text class names
+  const helperTextClassNames = [
+    cssStyles.helperText,
+    styles?.helperTextType === 'error' && cssStyles.error,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // Container style overrides
+  const containerStyleOverrides: React.CSSProperties = {}
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.marginBottom)
+    containerStyleOverrides.marginBottom = styles.marginBottom
+
+  // Chip container style overrides
+  const chipContainerStyleOverrides: React.CSSProperties = {}
+  if (styles?.minHeight || styles?.height)
+    chipContainerStyleOverrides.minHeight = styles.minHeight || styles.height
+  if (styles?.height) chipContainerStyleOverrides.height = styles.height
+  if (styles?.borderWidth)
+    chipContainerStyleOverrides.borderWidth = styles.borderWidth
+  if (styles?.borderColor)
+    chipContainerStyleOverrides.borderColor = styles.borderColor
+  if (styles?.borderRadius)
+    chipContainerStyleOverrides.borderRadius = styles.borderRadius
+  if (styles?.backgroundColor)
+    chipContainerStyleOverrides.backgroundColor = styles.backgroundColor
+  if (styles?.padding) chipContainerStyleOverrides.padding = styles.padding
+
+  // Icon wrapper style overrides
+  const iconWrapperStyleOverrides: React.CSSProperties = {}
+  if (styles?.arrowTop) {
+    iconWrapperStyleOverrides.top = styles.arrowTop
+    iconWrapperStyleOverrides.transform = 'none'
+  }
+  if (styles?.arrowRight) iconWrapperStyleOverrides.right = styles.arrowRight
+  if (styles?.arrowBottom) iconWrapperStyleOverrides.bottom = styles.arrowBottom
+  if (styles?.arrowPadding)
+    iconWrapperStyleOverrides.padding = styles.arrowPadding
+
+  // Menu style overrides
+  const menuStyleOverrides: React.CSSProperties = {
+    top: `${dropdownPosition.top}px`,
+    left: `${dropdownPosition.left}px`,
+    width: `${dropdownPosition.width}px`,
+  }
+  if (styles?.borderWidth) menuStyleOverrides.borderWidth = styles.borderWidth
+  if (styles?.borderRadius)
+    menuStyleOverrides.borderRadius = styles.borderRadius
+
   return (
-    <div style={containerStyle}>
+    <div
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
+    >
       {label && (
-        <label style={labelStyle}>
+        <label className={cssStyles.label}>
           {label}
           {required && (
-            <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
+            <span className={cssStyles.requiredIndicator}>
               {styles?.requiredIndicatorText || '*'}
             </span>
           )}
         </label>
       )}
-      <div style={{ position: 'relative', width: '100%' }} ref={containerRef}>
+      <div className={cssStyles.wrapper} ref={containerRef}>
         <div
           ref={chipContainerButtonRef}
-          style={chipContainerStyle}
+          className={chipContainerClassNames}
           onClick={handleContainerClick}
           onFocus={handleFocus}
           onBlur={handleBlur}
           tabIndex={disabled ? -1 : 0}
+          style={
+            Object.keys(chipContainerStyleOverrides).length > 0
+              ? chipContainerStyleOverrides
+              : undefined
+          }
         >
           {selectedValues.length === 0 ? (
-            <span style={placeholderStyle}>Select items...</span>
+            <span className={cssStyles.placeholder}>Select items...</span>
           ) : (
             selectedValues.map(selectedValue => {
               const option =
@@ -293,71 +296,46 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
             })
           )}
         </div>
-        <div style={iconWrapperStyle}>
-          <div style={arrowStyle} />
+        <div
+          className={cssStyles.iconWrapper}
+          style={
+            Object.keys(iconWrapperStyleOverrides).length > 0
+              ? iconWrapperStyleOverrides
+              : undefined
+          }
+        >
+          <div className={arrowClassNames} />
         </div>
         {isOpen &&
           canUsePortal &&
           ReactDOM.createPortal(
             <div
               ref={menuRef}
-              style={{
-                position: 'fixed',
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                width: `${dropdownPosition.width}px`,
-                zIndex: 999999,
-                maxHeight: '200px',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
-                borderRadius: styles?.borderRadius || '8px',
-                backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                boxShadow: `0 4px 6px ${alpha(SACRED_GOLD, 0.2)}`,
-              }}
+              className={cssStyles.menu}
+              data-theme={theme}
+              style={menuStyleOverrides}
             >
               {options.map(option => {
                 const isSelected = selectedValues.includes(
                   option._id || option.value
                 )
-
-                const optionStyle: React.CSSProperties = {
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontFamily: '"Crimson Text", serif',
-                  backgroundColor: isSelected
-                    ? alpha(SACRED_GOLD, 0.2)
-                    : 'transparent',
-                }
+                const optionClassNames = [
+                  cssStyles.option,
+                  isSelected && cssStyles.selected,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
 
                 return (
                   <div
                     key={option._id || option.value}
-                    style={optionStyle}
+                    className={optionClassNames}
                     onClick={e => handleToggle(option._id || option.value, e)}
-                    onMouseEnter={e => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = alpha(
-                          SACRED_GOLD,
-                          0.1
-                        )
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }
-                    }}
                   >
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => {}}
-                      style={{ marginRight: '8px' }}
                       onClick={e => e.stopPropagation()}
                     />
                     <span>{option.value}</span>
@@ -368,7 +346,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
             document.body
           )}
       </div>
-      {helperText && <div style={helperTextStyle}>{helperText}</div>}
+      {helperText && <div className={helperTextClassNames}>{helperText}</div>}
     </div>
   )
 }

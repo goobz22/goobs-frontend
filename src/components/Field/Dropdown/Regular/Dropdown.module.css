@@ -1,0 +1,348 @@
+/* ==========================================================================
+   DROPDOWN COMPONENT - CSS MODULE
+   Prevents FOUC by using CSS instead of JavaScript for styling
+   Sacred theme is the default (hardcoded), light/dark are overrides
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Container
+   -------------------------------------------------------------------------- */
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Label - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffd700;
+  font-size: 14px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+.requiredIndicator {
+  color: #ffd700;
+  margin-left: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Button - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.button {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.button:hover:not(:disabled) {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.button.open {
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.button:disabled {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Arrow Icon
+   -------------------------------------------------------------------------- */
+
+.arrow {
+  margin-left: 8px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #ffd700;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Menu - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.menu {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 999999;
+  box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* --------------------------------------------------------------------------
+   Menu Option
+   -------------------------------------------------------------------------- */
+
+.option {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.option:last-child {
+  border-bottom: none;
+}
+
+.option:hover {
+  background-color: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+}
+
+.option.selected {
+  background-color: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+}
+
+/* --------------------------------------------------------------------------
+   Empty State
+   -------------------------------------------------------------------------- */
+
+.emptyState {
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Crimson Text', serif;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Helper Text
+   -------------------------------------------------------------------------- */
+
+.helperText {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Crimson Text', serif;
+}
+
+.helperText.error {
+  color: #ff6b6b;
+}
+
+/* --------------------------------------------------------------------------
+   Light Theme Override
+   -------------------------------------------------------------------------- */
+
+.container[data-theme='light'] .label {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #374151;
+}
+
+.container[data-theme='light'] .button {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #374151;
+}
+
+.container[data-theme='light'] .button:hover:not(:disabled) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.container[data-theme='light'] .button.open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.container[data-theme='light'] .button:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.container[data-theme='light'] .arrow {
+  border-top-color: #6b7280;
+}
+
+.container[data-theme='light'] .requiredIndicator {
+  color: #ef4444;
+}
+
+.container[data-theme='light'] .helperText {
+  color: #6b7280;
+}
+
+/* Light Theme Menu - Uses [data-theme] on the menu itself since it's portaled */
+.menu[data-theme='light'] {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: none;
+}
+
+.menu[data-theme='light'] .option {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #374151;
+  border-bottom-color: #e2e8f0;
+}
+
+.menu[data-theme='light'] .option:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.menu[data-theme='light'] .option.selected {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.menu[data-theme='light'] .emptyState {
+  color: #9ca3af;
+}
+
+/* --------------------------------------------------------------------------
+   Dark Theme Override
+   -------------------------------------------------------------------------- */
+
+.container[data-theme='dark'] .label {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e2e8f0;
+}
+
+.container[data-theme='dark'] .button {
+  background-color: #1e293b;
+  border-color: #334155;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e2e8f0;
+}
+
+.container[data-theme='dark'] .button:hover:not(:disabled) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.container[data-theme='dark'] .button.open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.container[data-theme='dark'] .button:disabled {
+  background-color: #0f172a;
+  color: #64748b;
+}
+
+.container[data-theme='dark'] .arrow {
+  border-top-color: #94a3b8;
+}
+
+.container[data-theme='dark'] .requiredIndicator {
+  color: #ef4444;
+}
+
+.container[data-theme='dark'] .helperText {
+  color: #94a3b8;
+}
+
+/* Dark Theme Menu */
+.menu[data-theme='dark'] {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  backdrop-filter: none;
+}
+
+.menu[data-theme='dark'] .option {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e2e8f0;
+  border-bottom-color: #334155;
+}
+
+.menu[data-theme='dark'] .option:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+.menu[data-theme='dark'] .option.selected {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.menu[data-theme='dark'] .emptyState {
+  color: #64748b;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .button {
+    min-height: 36px;
+    font-size: 14px;
+    padding: 0 10px;
+  }
+
+  .option {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .helperText {
+    font-size: 11px;
+  }
+}
