@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import ReactDOM from 'react-dom'
-import { alpha } from '../../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './SearchableSimple.module.css'
 
 export interface DropdownOption {
   value: string | number
@@ -21,7 +19,7 @@ export interface SearchableSimpleProps {
   styles?: {
     disabled?: boolean
     required?: boolean
-    theme?: string
+    theme?: 'sacred' | 'light' | 'dark'
     width?: string
     minWidth?: string
     height?: string
@@ -62,6 +60,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+  const theme = styles?.theme || 'sacred'
 
   // Track previous defaultValue to update using derived state pattern
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
@@ -146,31 +145,69 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   )
   const displayValue = selectedOption?.value || value || placeholder
 
+  // Build button class names
+  const buttonClassNames = [cssStyles.button, isOpen && cssStyles.open]
+    .filter(Boolean)
+    .join(' ')
+
+  // Build arrow class names
+  const arrowClassNames = [cssStyles.arrow, isOpen && cssStyles.open]
+    .filter(Boolean)
+    .join(' ')
+
+  // Build helper text class names
+  const helperTextClassNames = [
+    cssStyles.helperText,
+    styles?.helperTextType === 'error' && cssStyles.error,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // Container style overrides
+  const containerStyleOverrides: React.CSSProperties = {}
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.marginBottom)
+    containerStyleOverrides.marginBottom = styles.marginBottom
+  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
+
+  // Button style overrides
+  const buttonStyleOverrides: React.CSSProperties = {}
+  if (styles?.backgroundColor)
+    buttonStyleOverrides.backgroundColor = styles.backgroundColor
+  if (styles?.borderColor) buttonStyleOverrides.borderColor = styles.borderColor
+  if (styles?.textColor) buttonStyleOverrides.color = styles.textColor
+  if (styles?.height) buttonStyleOverrides.minHeight = styles.height
+  if (styles?.fontSize) buttonStyleOverrides.fontSize = styles.fontSize
+  if (styles?.fontFamily) buttonStyleOverrides.fontFamily = styles.fontFamily
+  if (styles?.padding) buttonStyleOverrides.padding = styles.padding
+  if (styles?.borderRadius)
+    buttonStyleOverrides.borderRadius = styles.borderRadius
+
+  // Menu style overrides
+  const menuStyleOverrides: React.CSSProperties = {
+    top: `${dropdownPosition.top}px`,
+    left: `${dropdownPosition.left}px`,
+    width: `${dropdownPosition.width}px`,
+  }
+  if (styles?.borderRadius)
+    menuStyleOverrides.borderRadius = styles.borderRadius
+
   return (
     <div
       ref={dropdownRef}
-      style={{
-        position: 'relative',
-        width: '100%',
-        marginBottom: styles?.marginBottom || '16px',
-      }}
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
     >
       {/* Label */}
       {label && (
-        <label
-          style={{
-            display: 'block',
-            marginBottom: '8px',
-            color: SACRED_GOLD,
-            fontSize: '14px',
-            fontFamily: '"Cinzel", serif',
-            letterSpacing: '0.05em',
-          }}
-        >
+        <label className={cssStyles.label}>
           {label}
-          {required && (
-            <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-          )}
+          {required && <span className={cssStyles.requiredIndicator}>*</span>}
         </label>
       )}
 
@@ -178,62 +215,17 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       <button
         ref={buttonRef}
         type="button"
+        className={buttonClassNames}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          backgroundColor:
-            styles?.backgroundColor ||
-            (disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)'),
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor:
-            styles?.borderColor || alpha(SACRED_GOLD, isOpen ? 0.6 : 0.3),
-          borderRadius: '8px',
-          color:
-            styles?.textColor ||
-            (disabled
-              ? 'rgba(255, 255, 255, 0.4)'
-              : 'rgba(255, 255, 255, 0.9)'),
-          fontFamily: '"Crimson Text", serif',
-          fontSize: '16px',
-          textAlign: 'left',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          transition: 'all 0.3s ease',
-          boxShadow: isOpen ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-          outline: 'none',
-        }}
-        onMouseEnter={e => {
-          if (!disabled) {
-            e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.5)
-            e.currentTarget.style.boxShadow = `0 0 10px ${alpha(SACRED_GOLD, 0.2)}`
-          }
-        }}
-        onMouseLeave={e => {
-          if (!disabled && !isOpen) {
-            e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.3)
-            e.currentTarget.style.boxShadow = 'none'
-          }
-        }}
+        style={
+          Object.keys(buttonStyleOverrides).length > 0
+            ? buttonStyleOverrides
+            : undefined
+        }
       >
         <span>{displayValue}</span>
-        <span
-          style={{
-            marginLeft: '8px',
-            width: '0',
-            height: '0',
-            borderLeft: '5px solid transparent',
-            borderRight: '5px solid transparent',
-            borderTop: `5px solid ${SACRED_GOLD}`,
-            transition: 'transform 0.3s ease',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            display: 'inline-block',
-          }}
-        />
+        <span className={arrowClassNames} />
       </button>
 
       {/* Dropdown Menu */}
@@ -243,126 +235,42 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
         ReactDOM.createPortal(
           <div
             ref={menuRef}
-            style={{
-              position: 'fixed',
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              width: `${dropdownPosition.width}px`,
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              border: `1px solid ${alpha(SACRED_GOLD, 0.4)}`,
-              borderRadius: '8px',
-              maxHeight: '300px',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              zIndex: 999999,
-              boxShadow: `0 8px 32px ${alpha(SACRED_GOLD, 0.2)}`,
-              backdropFilter: 'blur(10px)',
-            }}
+            className={cssStyles.menu}
+            data-theme={theme}
+            style={menuStyleOverrides}
           >
             {/* Search Input */}
-            <div
-              style={{
-                padding: '8px',
-                borderBottom: `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
-              }}
-            >
+            <div className={cssStyles.searchContainer}>
               <input
                 type="text"
+                className={cssStyles.searchInput}
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: alpha(SACRED_GOLD, 0.3),
-                  borderRadius: '6px',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontFamily: '"Crimson Text", serif',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.5)
-                  e.currentTarget.style.boxShadow = `0 0 10px ${alpha(SACRED_GOLD, 0.2)}`
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = alpha(SACRED_GOLD, 0.3)
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
               />
             </div>
 
             {/* Options List */}
             <div>
               {filteredOptions.length === 0 ? (
-                <div
-                  style={{
-                    padding: '12px 16px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontFamily: '"Crimson Text", serif',
-                    textAlign: 'center',
-                  }}
-                >
-                  No options found
-                </div>
+                <div className={cssStyles.emptyState}>No options found</div>
               ) : (
                 filteredOptions.map((option, index) => {
                   const isSelected =
                     String(option.value) === String(value) ||
                     String(option._id) === String(value)
+                  const optionClassNames = [
+                    cssStyles.option,
+                    isSelected && cssStyles.selected,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
                   return (
                     <button
                       key={index}
                       type="button"
+                      className={optionClassNames}
                       onClick={() => handleSelect(option)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        backgroundColor: isSelected
-                          ? alpha(SACRED_GOLD, 0.2)
-                          : 'transparent',
-                        border: 'none',
-                        borderBottom:
-                          index < filteredOptions.length - 1
-                            ? `1px solid ${alpha(SACRED_GOLD, 0.1)}`
-                            : 'none',
-                        color: isSelected
-                          ? SACRED_GOLD
-                          : 'rgba(255, 255, 255, 0.9)',
-                        fontFamily: '"Crimson Text", serif',
-                        fontSize: '14px',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        outline: 'none',
-                        whiteSpace: 'normal',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = alpha(
-                          SACRED_GOLD,
-                          0.15
-                        )
-                        e.currentTarget.style.color = SACRED_GOLD
-                      }}
-                      onMouseLeave={e => {
-                        if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = 'transparent'
-                          e.currentTarget.style.color =
-                            'rgba(255, 255, 255, 0.9)'
-                        } else {
-                          e.currentTarget.style.backgroundColor = alpha(
-                            SACRED_GOLD,
-                            0.2
-                          )
-                          e.currentTarget.style.color = SACRED_GOLD
-                        }
-                      }}
                     >
                       {String(option.value)}
                     </button>
@@ -375,18 +283,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
         )}
 
       {/* Helper Text */}
-      {helperText && (
-        <div
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontFamily: '"Crimson Text", serif',
-          }}
-        >
-          {helperText}
-        </div>
-      )}
+      {helperText && <div className={helperTextClassNames}>{helperText}</div>}
     </div>
   )
 }
