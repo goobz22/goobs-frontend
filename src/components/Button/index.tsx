@@ -1,16 +1,7 @@
 'use client'
 
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  forwardRef,
-  useEffect,
-  type ReactNode,
-} from 'react'
-import { alpha } from '../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import React, { useMemo, useCallback, forwardRef, type ReactNode } from 'react'
+import cssStyles from './Button.module.css'
 
 export interface ButtonGroupProps {
   value: string
@@ -30,37 +21,19 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   children,
   styles,
 }) => {
-  const childrenArray = React.Children.toArray(children)
-  const totalChildren = childrenArray.length
+  const theme = styles?.theme || 'sacred'
 
-  const enhancedChildren = React.Children.map(children, (child, index) => {
+  const enhancedChildren = React.Children.map(children, child => {
     if (React.isValidElement<ButtonProps>(child)) {
-      const isFirst = index === 0
-      const isLast = index === totalChildren - 1
       const isSelected =
         ((child.props as { value?: string }).value || '') === value
-
-      const borderColor = alpha(SACRED_GOLD, 0.4)
 
       return React.cloneElement(child, {
         ...child.props,
         styles: {
           ...child.props.styles,
           ...styles,
-          borderColor: 'transparent',
-          borderWidth: '0',
-          boxShadow: 'none',
-          margin: '0',
-          padding: '8px 16px',
-          borderRadius: isFirst ? '8px 0 0 8px' : isLast ? '0 8px 8px 0' : '0',
-          ...(!isLast && {
-            borderRightWidth: '1px',
-            borderRightStyle: 'solid',
-            borderRightColor: borderColor,
-          }),
-          ...(isSelected && {
-            backgroundColor: alpha(SACRED_GOLD, 0.2),
-          }),
+          theme,
         },
         onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
           if (exclusive) {
@@ -76,17 +49,11 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
     return child
   })
 
-  const groupStyle: React.CSSProperties = {
-    display: 'flex',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    background: 'transparent',
-    boxShadow: `0 0 10px ${alpha(SACRED_GOLD, 0.3)}`,
-    border: `1px solid ${alpha(SACRED_GOLD, 0.3)}`,
-    padding: '0',
-  }
-
-  return <div style={groupStyle}>{enhancedChildren}</div>
+  return (
+    <div className={cssStyles.buttonGroup} data-theme={theme}>
+      {enhancedChildren}
+    </div>
+  )
 }
 
 export interface ButtonStyles {
@@ -147,19 +114,6 @@ export interface ButtonProps extends Omit<
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
-    const [isHovered, setIsHovered] = useState(false)
-    const [isActive, setIsActive] = useState(false)
-    const [isMobile, setIsMobile] = useState(false)
-
-    useEffect(() => {
-      const checkMobile = () => {
-        setIsMobile(window.innerWidth <= 768)
-      }
-      checkMobile()
-      window.addEventListener('resize', checkMobile)
-      return () => window.removeEventListener('resize', checkMobile)
-    }, [])
-
     const filteredProps = useMemo(() => {
       const { sacredtheme, ...validProps } = restProps as any
       void sacredtheme
@@ -168,23 +122,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const isDisabled = styles?.disabled || filteredProps.disabled
     const iconLocation = styles?.iconLocation || 'left'
-
-    const handleMouseEnter = useCallback(() => {
-      setIsHovered(true)
-    }, [])
-
-    const handleMouseLeave = useCallback(() => {
-      setIsHovered(false)
-      setIsActive(false)
-    }, [])
-
-    const handleMouseDown = useCallback(() => {
-      setIsActive(true)
-    }, [])
-
-    const handleMouseUp = useCallback(() => {
-      setIsActive(false)
-    }, [])
+    const theme = styles?.theme || 'sacred'
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -201,102 +139,79 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ? 'none'
         : styles?.outline === false
           ? undefined
-          : styles?.outline || 'none'
+          : styles?.outline || undefined
 
-    // Determine background color based on state
-    const getBackgroundColor = () => {
-      if (isDisabled) return 'rgba(0, 0, 0, 0.3)'
-      if (
-        (styles?.backgroundColor || styles?.background) &&
-        !isHovered &&
-        !isActive &&
-        !selected
-      ) {
-        return styles?.backgroundColor || styles?.background
-      }
-      if (isActive || selected) return alpha(SACRED_GOLD, 0.3)
-      if (isHovered) {
-        return styles?.hoverBackgroundColor || alpha(SACRED_GOLD, 0.2)
-      }
-      return (
-        styles?.backgroundColor || styles?.background || 'rgba(0, 0, 0, 0.6)'
-      )
-    }
+    // Build dynamic inline styles for customizations that override CSS
+    const dynamicStyle: React.CSSProperties = {}
 
-    // Determine border based on state
-    const getBorderValue = () => {
-      if (styles?.border) return styles.border
-      const borderColor =
-        isHovered && styles?.hoverBorderColor
-          ? styles.hoverBorderColor
-          : styles?.borderColor || alpha(SACRED_GOLD, isHovered ? 0.6 : 0.3)
-      return `${styles?.borderWidth || '1px'} solid ${borderColor}`
-    }
+    // Apply custom sizing
+    if (styles?.width) dynamicStyle.width = styles.width
+    if (styles?.minWidth) dynamicStyle.minWidth = styles.minWidth
+    if (styles?.maxWidth) dynamicStyle.maxWidth = styles.maxWidth
+    if (styles?.height) dynamicStyle.height = styles.height
+    if (styles?.minHeight) dynamicStyle.minHeight = styles.minHeight
+    if (styles?.padding) dynamicStyle.padding = styles.padding
 
-    const buttonStyle: React.CSSProperties = {
-      position: 'relative',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: iconLocation === 'above' ? '4px' : '8px',
-      flexDirection: iconLocation === 'above' ? 'column' : 'row',
-      width: styles?.width || 'auto',
-      minWidth: styles?.minWidth || 'fit-content',
-      maxWidth: styles?.maxWidth,
-      height: styles?.height || 'auto',
-      minHeight: styles?.minHeight || (isMobile ? '36px' : '40px'),
-      padding: styles?.padding || (isMobile ? '6px 12px' : '8px 16px'),
-      margin: styles?.margin,
-      marginTop: styles?.marginTop,
-      marginBottom: styles?.marginBottom,
-      marginLeft: styles?.marginLeft,
-      marginRight: styles?.marginRight,
-      fontSize: styles?.fontSize || (isMobile ? '12px' : '14px'),
-      fontWeight: styles?.fontWeight || 500,
-      fontFamily: styles?.fontFamily || '"Cinzel", serif',
-      color:
-        styles?.color ||
-        (isDisabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)'),
-      backgroundColor: getBackgroundColor(),
-      border: getBorderValue(),
-      borderRadius: styles?.borderRadius || '8px',
-      boxShadow:
-        isHovered && styles?.hoverBoxShadow
-          ? styles.hoverBoxShadow
-          : styles?.boxShadow ||
-            (isHovered && !isDisabled
-              ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}`
-              : 'none'),
-      textShadow: styles?.textShadow,
-      flex: styles?.flex,
-      cursor: styles?.cursor || (isDisabled ? 'not-allowed' : 'pointer'),
-      transition: 'all 0.3s ease',
-      transform:
-        isHovered && styles?.hoverTransform ? styles.hoverTransform : undefined,
-      outline: outlineValue,
-      userSelect: 'none',
-      textTransform: styles?.textTransform || 'none',
-      letterSpacing: styles?.letterSpacing || '0.05em',
-      boxSizing: 'border-box',
-      whiteSpace: (styles?.whiteSpace as any) || 'nowrap',
-      opacity: styles?.opacity,
-    }
+    // Apply custom margins
+    if (styles?.margin) dynamicStyle.margin = styles.margin
+    if (styles?.marginTop) dynamicStyle.marginTop = styles.marginTop
+    if (styles?.marginBottom) dynamicStyle.marginBottom = styles.marginBottom
+    if (styles?.marginLeft) dynamicStyle.marginLeft = styles.marginLeft
+    if (styles?.marginRight) dynamicStyle.marginRight = styles.marginRight
+
+    // Apply custom typography
+    if (styles?.fontSize) dynamicStyle.fontSize = styles.fontSize
+    if (styles?.fontWeight) dynamicStyle.fontWeight = styles.fontWeight
+    if (styles?.fontFamily) dynamicStyle.fontFamily = styles.fontFamily
+    if (styles?.letterSpacing) dynamicStyle.letterSpacing = styles.letterSpacing
+    if (styles?.textTransform) dynamicStyle.textTransform = styles.textTransform
+    if (styles?.whiteSpace) dynamicStyle.whiteSpace = styles.whiteSpace
+
+    // Apply custom colors (only if explicitly set)
+    if (styles?.color) dynamicStyle.color = styles.color
+    if (styles?.backgroundColor)
+      dynamicStyle.backgroundColor = styles.backgroundColor
+    if (styles?.background) dynamicStyle.background = styles.background
+
+    // Apply custom border
+    if (styles?.border) dynamicStyle.border = styles.border
+    if (styles?.borderWidth) dynamicStyle.borderWidth = styles.borderWidth
+    if (styles?.borderColor) dynamicStyle.borderColor = styles.borderColor
+    if (styles?.borderRadius) dynamicStyle.borderRadius = styles.borderRadius
+    if (styles?.borderRightWidth)
+      dynamicStyle.borderRightWidth = styles.borderRightWidth
+    if (styles?.borderRightStyle)
+      dynamicStyle.borderRightStyle =
+        styles.borderRightStyle as React.CSSProperties['borderRightStyle']
+    if (styles?.borderRightColor)
+      dynamicStyle.borderRightColor = styles.borderRightColor
+
+    // Apply custom effects
+    if (styles?.boxShadow) dynamicStyle.boxShadow = styles.boxShadow
+    if (styles?.textShadow) dynamicStyle.textShadow = styles.textShadow
+    if (outlineValue) dynamicStyle.outline = outlineValue
+
+    // Apply custom flex and other
+    if (styles?.flex) dynamicStyle.flex = styles.flex
+    if (styles?.opacity !== undefined) dynamicStyle.opacity = styles.opacity
+    if (styles?.cursor) dynamicStyle.cursor = styles.cursor
+
+    // Build className
+    const classNames = [cssStyles.button]
+    if (iconLocation === 'above') classNames.push(cssStyles.iconAbove)
+    if (selected) classNames.push(cssStyles.selected)
 
     const iconComponent = useMemo(() => {
-      return icon ? (
-        <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
-      ) : null
+      return icon ? <span className={cssStyles.iconWrapper}>{icon}</span> : null
     }, [icon])
 
     return (
       <button
         ref={ref}
-        style={buttonStyle}
+        className={classNames.join(' ')}
+        data-theme={theme}
+        style={dynamicStyle}
         disabled={isDisabled}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
         onClick={handleClick}
         {...filteredProps}
       >
