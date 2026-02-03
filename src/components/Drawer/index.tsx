@@ -303,6 +303,17 @@ const Drawer: FC<DrawerProps> = ({
   const safeOpen = variant === 'permanent' ? true : isMounted ? open : false
   const computedStyles = getDrawerStyles(styles, safeOpen, anchor, styleVariant)
 
+  // For permanent variant, use relative positioning to let parent container control visibility
+  // This prevents hydration flash when parent CSS needs to hide the drawer
+  if (variant === 'permanent') {
+    delete computedStyles.paper.transform
+    delete computedStyles.paper.left
+    delete computedStyles.paper.right
+    delete computedStyles.paper.top
+    delete computedStyles.paper.bottom
+    computedStyles.paper.position = 'relative'
+  }
+
   // Don't render if not visible and temporary
   if (!isVisible && variant === 'temporary') {
     return null
