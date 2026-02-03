@@ -1,3 +1,39 @@
+/**
+ * =============================================================================
+ * DATAGRID TOOLBAR COMPONENT
+ * =============================================================================
+ *
+ * The toolbar sits above the table and provides action controls for the DataGrid.
+ * It has two main sections:
+ *
+ * LAYOUT:
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │ [Custom Buttons...]                              [ManageRow Actions...] │
+ * │ (Left side)                                              (Right side)   │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * LEFT SIDE - CUSTOM BUTTONS:
+ * - Passed via `buttons` prop from DataGrid
+ * - Typically includes action buttons like "Create New", "Export", etc.
+ * - Filtered based on permissions (write-only actions hidden in read mode)
+ *
+ * RIGHT SIDE - MANAGE ROW ACTIONS:
+ * - Rendered by ManageRow component
+ * - Provides CRUD operations for selected rows:
+ *   - Add (create new row)
+ *   - Duplicate (copy selected rows)
+ *   - Delete (remove selected rows)
+ *   - Manage (open detail editor)
+ *   - Show (open read-only view)
+ *
+ * PERMISSIONS FILTERING:
+ * - In 'read' mode, buttons with write-action keywords are hidden
+ * - Keywords: create, add, delete, remove, edit, update
+ * - 'write' mode shows all buttons
+ *
+ * =============================================================================
+ */
+
 'use client'
 
 import React, { useMemo, type FC } from 'react'
@@ -5,25 +41,48 @@ import Button, { type ButtonProps } from '../../Button'
 import ManageRow from '../ManageRow'
 import type { DataGridStyles } from '../../../theme'
 
+/**
+ * Props for the DataGridToolbar component.
+ */
 export interface DataGridToolbarProps {
+  /** Custom action buttons to display on the left side */
   buttons?: ButtonProps[]
+
+  /**
+   * Props for the ManageRow component (right side).
+   * Controls CRUD actions for selected rows.
+   */
   manageRowProps?: {
+    /** Currently selected row IDs */
     selectedRows?: string[]
+    /** Full row data (for context) */
     rows?: Array<{ [key: string]: unknown }>
+    /** Handler for Add action */
     onAdd?: () => void
+    /** Handler for Duplicate action */
     onDuplicate?: () => void
+    /** Handler for Delete action */
     onDelete?: () => void
+    /** Handler for Manage (edit) action */
     onManage?: () => void
+    /** Handler for Show (view) action */
     onShow?: () => void
+    /** Handler for Export action */
     onExport?: () => void
+    /** Handler for closing manage row UI */
     handleClose?: () => void
+    /** Permission level */
     permissions?:
       | {
           access: 'no-access' | 'read' | 'write'
         }
       | undefined
   }
+
+  /** Theme and style configuration */
   styles?: DataGridStyles
+
+  /** Permission level for filtering buttons */
   permissions?:
     | {
         access: 'no-access' | 'read' | 'write'
@@ -31,12 +90,22 @@ export interface DataGridToolbarProps {
     | undefined
 }
 
+/**
+ * DATAGRID TOOLBAR COMPONENT
+ * --------------------------
+ * Renders the action toolbar above the data table.
+ */
 const DataGridToolbar: FC<DataGridToolbarProps> = ({
   buttons,
   manageRowProps,
   styles,
   permissions,
 }) => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STYLES
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** Container: flexbox row with space-between for left/right sections */
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'row',
@@ -50,6 +119,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     flexWrap: 'wrap',
   }
 
+  /** Left section: custom buttons (flexible width, wraps on small screens) */
   const leftStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -59,6 +129,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     flexWrap: 'wrap',
   }
 
+  /** Right section: ManageRow actions (aligned right) */
   const rightStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -69,12 +140,23 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     flexWrap: 'wrap',
   }
 
-  // Filter buttons based on permissions
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PERMISSION-BASED BUTTON FILTERING
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Filter buttons based on user permissions.
+   * - 'write' access: Show all buttons
+   * - 'read' access: Hide buttons with write-action keywords in their text
+   *
+   * Keywords that indicate write operations:
+   * create, add, delete, remove, edit, update
+   */
   const filteredButtons = useMemo(() => {
     if (!permissions || permissions.access === 'write') {
       return buttons // Show all buttons for write access
     }
-    // For read-only access, filter out action buttons (like Create, Delete, etc.)
+    // For read-only access, filter out action buttons
     return buttons?.filter(btn => {
       const text = btn.text?.toLowerCase() || ''
       // Hide buttons that perform write operations
@@ -89,9 +171,17 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
     })
   }, [buttons, permissions])
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
+
   return (
     <div style={containerStyle}>
-      {/* Left: Buttons */}
+      {/* ─────────────────────────────────────────────────────────────────────
+          LEFT SECTION: Custom Buttons
+          These are passed from the DataGrid parent via the buttons prop.
+          Filtered based on permissions in read-only mode.
+          ───────────────────────────────────────────────────────────────────── */}
       <div style={leftStyle}>
         {filteredButtons?.map((btn, idx) => (
           <Button
@@ -105,7 +195,11 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
         ))}
       </div>
 
-      {/* Right: ManageRow actions - always visible */}
+      {/* ─────────────────────────────────────────────────────────────────────
+          RIGHT SECTION: ManageRow Actions
+          Provides CRUD operations for selected rows.
+          The ManageRow component handles permission-based visibility internally.
+          ───────────────────────────────────────────────────────────────────── */}
       <div style={rightStyle}>
         <ManageRow
           selectedRows={manageRowProps?.selectedRows || []}

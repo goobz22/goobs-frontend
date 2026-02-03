@@ -1,3 +1,50 @@
+/**
+ * =============================================================================
+ * ROWS COMPONENT
+ * =============================================================================
+ *
+ * Renders the data rows within the DataGrid table body.
+ * This is one of the most complex components as it handles:
+ *
+ * 1. ROW RENDERING:
+ *    - Iterates through rows and renders <tr> elements
+ *    - Applies selection styling when row is selected
+ *    - Applies alternating row colors for readability
+ *
+ * 2. CELL FORMATTING:
+ *    - Automatic formatting for special column types
+ *    - Currency formatting with color-coded amounts
+ *    - Credit card masking (shows last 4 digits)
+ *    - Expiration date with validity status
+ *    - Account/routing number masking
+ *    - Network types (IP, MAC, VLAN, CIDR, subnet)
+ *    - Array values displayed as chips
+ *
+ * 3. INLINE EDITING:
+ *    - Detects when a cell is being edited
+ *    - Renders EditableCell component for editing
+ *    - Handles click-to-edit on selected rows
+ *
+ * 4. CUSTOM RENDERING:
+ *    - Supports column.renderCell for custom cell content
+ *    - Passes row, value, field, and indices to render function
+ *
+ * FORMATTING FUNCTIONS:
+ * ---------------------
+ * - formatCurrency: USD amounts with color coding by value
+ * - formatCreditCard: Masked card numbers (•••• •••• •••• 1234)
+ * - formatExpirationDate: MM/YY with valid/expiring/expired status
+ * - formatAccountNumber: Masked account numbers
+ * - formatRoutingNumber: ABA routing numbers with validation
+ *
+ * THEMING:
+ * --------
+ * All formatters support both 'sacred' (dark/gold) and 'light' themes.
+ * Theme affects colors, backgrounds, and visual effects.
+ *
+ * =============================================================================
+ */
+
 'use client'
 
 import React from 'react'
@@ -8,13 +55,22 @@ import { getRowId } from '../index'
 import type { DataGridStyles } from '../../../../theme'
 import cssStyles from '../../DataGrid.module.css'
 
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
 /**
- * Safely convert a value to a string without triggering the default
- * '[object Object]' for objects. If the type is:
- *  - string/number/boolean => return it (lowercased if desired).
- *  - object => JSON.stringify it (or fallback to '').
- *  - null/undefined => ''.
- *  - otherwise => ''.
+ * Safely convert any value to a string for display.
+ * Prevents '[object Object]' by properly handling objects.
+ *
+ * @param value - Any value to convert
+ * @returns String representation safe for display
+ *
+ * @example
+ * safeString('hello')     // 'hello'
+ * safeString(123)         // '123'
+ * safeString(null)        // ''
+ * safeString({a: 1})      // '{"a":1}'
  */
 function safeString(value: unknown): string {
   if (value == null) return ''
@@ -38,9 +94,37 @@ function safeString(value: unknown): string {
   }
 }
 
+// =============================================================================
+// CELL FORMATTING FUNCTIONS
+// =============================================================================
+// Each formatter returns { formatted: string, element: ReactNode }
+// - formatted: Plain text version for copy/paste or accessibility
+// - element: Styled React component for visual display
+// =============================================================================
+
 /**
- * Format a value as USD currency with premium UI/UX styling
- * Returns both the formatted string and a React element for display
+ * FORMAT CURRENCY
+ * ---------------
+ * Formats numeric values as USD currency with premium visual styling.
+ *
+ * FEATURES:
+ * - Color-coded by value range (large amounts get emphasized styling)
+ * - Negative values shown in red with warning styling
+ * - Zero values shown in muted gray
+ * - Hover effects for interactivity
+ * - Optional pulse animation for large values
+ * - Shimmer effect on high-value amounts
+ *
+ * VALUE RANGES:
+ * - Large: >= $10,000 (most prominent styling)
+ * - Medium: $1,000 - $9,999 (moderate emphasis)
+ * - Small: < $1,000 (subtle styling)
+ * - Zero: Muted/disabled appearance
+ * - Negative: Red warning colors
+ *
+ * @param value - Numeric value or string to format
+ * @param sacredtheme - If true, uses dark/gold theme colors
+ * @returns { formatted: string, element: ReactNode }
  */
 function formatCurrency(
   value: unknown,
@@ -316,8 +400,25 @@ function formatCurrency(
 }
 
 /**
- * Format a value as a masked credit card number with premium security styling
- * Returns both the formatted string and a React element for display
+ * FORMAT CREDIT CARD
+ * ------------------
+ * Formats credit card numbers with security masking (PCI compliance).
+ * Shows only last 4 digits, masks the rest with bullet characters.
+ *
+ * FEATURES:
+ * - Masks all but last 4 digits for security
+ * - Groups digits in 4s (•••• •••• •••• 1234)
+ * - Security lock icon indicator
+ * - Premium styling with subtle gradients
+ * - Hover effects for interactivity
+ *
+ * SECURITY NOTE:
+ * This is display-only masking. The actual stored value should be
+ * tokenized or encrypted according to PCI DSS requirements.
+ *
+ * @param value - Card number (string or number)
+ * @param sacredtheme - If true, uses dark/gold theme colors
+ * @returns { formatted: string, element: ReactNode }
  */
 function formatCreditCard(
   value: unknown,
@@ -494,8 +595,24 @@ function formatCreditCard(
 }
 
 /**
- * Format a value as a styled expiration date with status indication
- * Returns both the formatted string and a React element for display
+ * FORMAT EXPIRATION DATE
+ * ----------------------
+ * Formats expiration dates (MM/YY) with validity status indication.
+ *
+ * STATUS INDICATORS:
+ * - Valid (✓): Green - expires more than 6 months from now
+ * - Expiring Soon (⏳): Yellow/Orange - expires within 6 months
+ * - Expired (✕): Red - already expired
+ * - Invalid (?): Gray - could not parse date
+ *
+ * INPUT FORMATS SUPPORTED:
+ * - "1224" -> 12/24 (December 2024)
+ * - "12/24" -> 12/24
+ * - "122024" -> 12/24
+ *
+ * @param value - Date string in various formats
+ * @param sacredtheme - If true, uses dark/gold theme colors
+ * @returns { formatted: string, element: ReactNode }
  */
 function formatExpirationDate(
   value: unknown,
@@ -644,8 +761,20 @@ function formatExpirationDate(
 }
 
 /**
- * Format a value as a masked account number with banking security styling
- * Returns both the formatted string and a React element for display
+ * FORMAT ACCOUNT NUMBER
+ * ---------------------
+ * Formats bank account numbers with security masking.
+ * Shows only last 4 digits for identification while protecting the full number.
+ *
+ * FEATURES:
+ * - Masks all but last 4 digits (••••1234)
+ * - Prefixed with # symbol
+ * - Monospace font for alignment
+ * - Theme-aware styling
+ *
+ * @param value - Account number (string or number)
+ * @param sacredtheme - If true, uses dark/gold theme colors
+ * @returns { formatted: string, element: ReactNode }
  */
 function formatAccountNumber(
   value: unknown,
@@ -718,8 +847,24 @@ function formatAccountNumber(
 }
 
 /**
- * Format a value as a styled routing number for banking
- * Returns both the formatted string and a React element for display
+ * FORMAT ROUTING NUMBER
+ * ---------------------
+ * Formats ABA routing numbers for banking applications.
+ * Validates that the routing number is exactly 9 digits.
+ *
+ * FEATURES:
+ * - Validates 9-digit ABA format
+ * - Shows "Invalid ABA" for incorrect length
+ * - Bank symbol (⑆) prefix
+ * - Interactive hover effect (expands letter spacing)
+ * - Monospace font for readability
+ *
+ * NOTE: This does not perform checksum validation.
+ * For full ABA validation, implement the checksum algorithm separately.
+ *
+ * @param value - Routing number (string or number)
+ * @param sacredtheme - If true, uses dark/gold theme colors
+ * @returns { formatted: string, element: ReactNode }
  */
 function formatRoutingNumber(
   value: unknown,
@@ -793,22 +938,58 @@ function formatRoutingNumber(
   return { formatted, element }
 }
 
+// =============================================================================
+// ROWS COMPONENT
+// =============================================================================
+
+/**
+ * Props for the Rows component.
+ * These are passed from the Table parent component.
+ */
 interface RowsProps {
+  /** Array of row data objects to display */
   rows: RowData[]
+  /** Column definitions determining display and editing behavior */
   columns: ColumnDef[]
+  /** Array of currently selected row IDs */
   selectedRowIds: string[]
+  /** Handler for row click (toggles selection) */
   onRowClick?: (row: RowData) => void
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  /** Theme and style configuration */
   styles?: DataGridStyles
-  // Inline editing props
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // INLINE EDITING PROPS
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Currently editing cell { rowId, field } or null */
   editingCell?: { rowId: string; field: string } | null
+  /** Current value in the editing input */
   editingValue?: string
+  /** Called when user clicks a cell to start editing */
   onCellClick?: (rowId: string, field: string, currentValue: unknown) => void
+  /** Called when user saves an edited cell */
   onCellSave?: (rowId: string, field: string, value: string) => void
+  /** Called when user cancels editing */
   onCellCancel?: () => void
+  /** Called as user types in edit input */
   onEditingValueChange?: (value: string) => void
 }
 
+/**
+ * ROWS COMPONENT
+ * --------------
+ * Renders all data rows in the table body.
+ *
+ * RENDERING LOGIC:
+ * 1. For each row, determine if selected and apply styles
+ * 2. For each cell, determine content based on:
+ *    a. Is it being edited? -> Render EditableCell
+ *    b. Does column have renderCell? -> Use custom renderer
+ *    c. Is value an array? -> Render as Chips
+ *    d. Does column have special type? -> Use formatter
+ *    e. Default -> Display as safe string
+ */
 const Rows: React.FC<RowsProps> = ({
   rows,
   columns,
@@ -822,9 +1003,13 @@ const Rows: React.FC<RowsProps> = ({
   onCellCancel,
   onEditingValueChange,
 }) => {
+  /** Check if using sacred (dark/gold) theme */
   const isSacredTheme = styles?.theme === 'sacred'
   const theme = styles?.theme || 'light'
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // EMPTY STATE
+  // ─────────────────────────────────────────────────────────────────────────────
   if (!rows || rows.length === 0) {
     return (
       <tr className={cssStyles.row} data-theme={theme}>
@@ -838,6 +1023,10 @@ const Rows: React.FC<RowsProps> = ({
       </tr>
     )
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // RENDER ROWS
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <>
       {rows.map((row, rowIndex) => {
@@ -846,6 +1035,7 @@ const Rows: React.FC<RowsProps> = ({
         const isAlternateRow = rowIndex % 2 === 1
 
         // Check if any cell in this row is editing with multiselect
+        // (multiselect needs extra row height for the chip picker)
         const hasEditingMultiselect = columns.some(col => {
           const value = row[col.field]
           const isEditing =
@@ -881,7 +1071,17 @@ const Rows: React.FC<RowsProps> = ({
             {/* Empty column to align with header checkbox */}
             <td className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}></td>
 
-            {/* Normal desktop columns */}
+            {/* ─────────────────────────────────────────────────────────────
+                CELL RENDERING
+                For each column, determine how to render the cell content.
+                Priority order:
+                1. __overflow__ special case (legacy)
+                2. Currently editing -> EditableCell
+                3. Custom renderCell function
+                4. Array value -> Chips
+                5. Special type (currency, credit_card, etc.) -> Formatter
+                6. Default -> safeString()
+                ───────────────────────────────────────────────────────────── */}
             {columns.map(col => {
               const value = row[col.field]
               const isEditing =
@@ -889,11 +1089,10 @@ const Rows: React.FC<RowsProps> = ({
               let cellContent: React.ReactNode
 
               if (col.field === '__overflow__') {
-                // This case should ideally not happen if overflow logic is removed
-                // but keeping it for robustness if it somehow re-appears.
+                // Legacy overflow column handling
                 cellContent = '---'
               } else if (isEditing) {
-                // Use EditableCell component for all inline editing
+                // EDITING STATE: Render EditableCell component
                 cellContent = (
                   <EditableCell
                     column={col}
@@ -908,8 +1107,11 @@ const Rows: React.FC<RowsProps> = ({
                   />
                 )
               } else {
-                // Show formatted value
-                // First check if column has custom renderCell function
+                // ─────────────────────────────────────────────────────────────
+                // DISPLAY STATE: Format value based on column configuration
+                // ─────────────────────────────────────────────────────────────
+
+                // Priority 1: Custom render function
                 if (col.renderCell) {
                   cellContent = col.renderCell({
                     row,
@@ -919,9 +1121,9 @@ const Rows: React.FC<RowsProps> = ({
                     columnIndex: columns.indexOf(col),
                   })
                 }
-                // Check if the value is an array and should be displayed as chips
+                // Priority 2: Array values -> Display as Chips
                 else if (Array.isArray(value)) {
-                  // Handle array values - display as chips
+                  // Arrays are rendered as a collection of Chip components
                   const arrayItems = value as any[]
 
                   // Check if it's an array of objects with label/name properties
@@ -980,7 +1182,12 @@ const Rows: React.FC<RowsProps> = ({
                       )}
                     </div>
                   )
-                } else if (col.type === 'currency') {
+                }
+                // ─────────────────────────────────────────────────────────────
+                // Priority 3: Column type-specific formatters
+                // Each type has a dedicated formatting function
+                // ─────────────────────────────────────────────────────────────
+                else if (col.type === 'currency') {
                   cellContent = formatCurrency(value, isSacredTheme).element
                 } else if (col.type === 'credit_card') {
                   cellContent = formatCreditCard(value, isSacredTheme).element

@@ -1,3 +1,43 @@
+/**
+ * =============================================================================
+ * FILTER SECTION COMPONENT
+ * =============================================================================
+ *
+ * Provides search and filtering capabilities for the DataGrid.
+ * Always renders a search bar, with optional additional filters.
+ *
+ * LAYOUT:
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │ ┌──────────────┐ ┌──────────────┐ ┌──────────────────────────────────┐ │
+ * │ │   Search     │ │  Dropdown    │ │       Date Range                 │ │
+ * │ │   (always)   │ │  Filter      │ │   (spans 2 columns)              │ │
+ * │ └──────────────┘ └──────────────┘ └──────────────────────────────────┘ │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * SEARCH FUNCTIONALITY:
+ * - Searches across ALL columns in the data
+ * - Smart detection: if search term matches column header, shows all rows
+ * - Content search: filters rows where any cell contains the search term
+ * - Case-insensitive matching
+ * - Handles objects by JSON stringifying them
+ *
+ * FILTER TYPES:
+ * 1. Dropdown: Searchable select with predefined options
+ * 2. Date: Single date picker
+ * 3. DateRange: Start and end date pickers (spans 2 columns)
+ *
+ * RESPONSIVE LAYOUT:
+ * - Mobile (< 600px): Single column
+ * - Tablet (< 900px): 1-2 columns
+ * - Desktop: Up to 3 columns depending on filter count
+ *
+ * COLLAPSIBLE MODE:
+ * - When collapsible=true, wraps content in an Accordion
+ * - Useful when filters take up too much vertical space
+ *
+ * =============================================================================
+ */
+
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -11,23 +51,39 @@ import Accordion from '../../Accordion'
 import type { DataGridFilter, ColumnDef, RowData } from '../types'
 import { type DataGridStyles } from '../../../theme'
 
+/**
+ * Props for the FilterSection component.
+ */
 export interface FilterSectionProps {
+  /** Optional array of filter configurations (dropdowns, dates, etc.) */
   filters?: DataGridFilter[] | undefined
+  /** Column definitions for search functionality */
   columns?: ColumnDef[]
+  /** Row data for search functionality */
   rows?: RowData[]
+  /**
+   * Callback when search/filter changes.
+   * @param searchTerm - Current search input value
+   * @param filteredRows - Rows after applying search filter
+   * @param visibleColumns - Column fields that match the search
+   */
   onSearchFilter?: (
     searchTerm: string,
     filteredRows: RowData[],
     visibleColumns: string[]
   ) => void
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
+  /** Theme and style configuration */
   styles?: DataGridStyles
-  /** Make the filter section collapsible */
+  /** Wrap filter section in collapsible accordion */
   collapsible?: boolean
-  /** Default expanded state when collapsible is true */
+  /** If collapsible, start expanded. Default: false */
   defaultExpanded?: boolean
 }
 
+/**
+ * Hook to track window dimensions for responsive layout.
+ * Returns [width, height, isReady] where isReady indicates client-side hydration complete.
+ */
 function useWindowSize(): [number, number, boolean] {
   const [size, setSize] = useState<[number, number]>([
     typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -48,6 +104,11 @@ function useWindowSize(): [number, number, boolean] {
   return [size[0], size[1], isReady]
 }
 
+/**
+ * FILTER SECTION COMPONENT
+ * ------------------------
+ * Renders search bar and optional filter controls above the DataGrid table.
+ */
 const FilterSection: React.FC<FilterSectionProps> = ({
   filters = [],
   columns = [],
@@ -57,17 +118,32 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   collapsible = false,
   defaultExpanded = false,
 }) => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STATE AND RESPONSIVE DETECTION
+  // ═══════════════════════════════════════════════════════════════════════════
+
   const [width, , isReady] = useWindowSize()
   const [searchTerm, setSearchTerm] = useState('')
+
+  /** Mobile breakpoint (< 600px) */
   const isMobile = width < 600
+  /** Tablet breakpoint (< 900px) */
   const isTablet = width < 900
+  /** Check if using sacred theme for styling */
   const isSacredTheme = styles?.theme === 'sacred'
 
-  // Helper function to safely convert values to lowercase strings for searching
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEARCH UTILITIES
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Safely convert any value to lowercase string for search matching.
+   * Handles null, undefined, objects, and primitives.
+   */
   const toLowerCaseString = (value: unknown): string => {
     if (value === null || value === undefined) return ''
 
-    // Handle objects by converting to JSON string or using toString if available
+    // Objects: JSON stringify for searchability
     if (typeof value === 'object') {
       try {
         return JSON.stringify(value).toLowerCase()
@@ -76,7 +152,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       }
     }
 
-    // Handle primitives safely
+    // Primitives: convert to string
     if (
       typeof value === 'string' ||
       typeof value === 'number' ||
@@ -88,13 +164,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     return ''
   }
 
-  // Filter rows based on search term
+  /**
+   * FILTER ROWS BY SEARCH TERM
+   * --------------------------
+   * Implements smart search that distinguishes between:
+   * 1. Column header searches (e.g., typing "email" to find email column)
+   * 2. Content searches (e.g., typing "john" to find rows with "john")
+   *
+   * ALGORITHM:
+   * 1. Split search into individual terms (space-separated)
+   * 2. Categorize each term as column header match or content search
+   * 3. If only header terms: show all rows (user is locating a column)
+   * 4. If content terms: filter rows where any cell matches any term
+   *
+   * @param searchValue - User's search input
+   * @returns Filtered array of rows
+   */
   const getFilteredRows = (searchValue: string): RowData[] => {
     if (!searchValue.trim() || !rows.length) return rows
 
     const searchTerms = searchValue.toLowerCase().trim().split(' ')
 
-    // Separate terms into column header matches and content matches
+    // Categorize terms: do they match column headers or are they content searches?
     const columnHeaderTerms: string[] = []
     const contentTerms: string[] = []
 
@@ -112,12 +203,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       }
     })
 
-    // If only column headers are being searched (no content terms), show all rows
+    // If only searching for column headers, show all rows
+    // (user is trying to locate a column, not filter data)
     if (columnHeaderTerms.length > 0 && contentTerms.length === 0) {
       return rows
     }
 
-    // If there are content terms, filter rows by those terms
+    // Filter rows by content terms
     if (contentTerms.length > 0) {
       return rows.filter(row =>
         contentTerms.some(term =>
@@ -133,7 +225,22 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     return rows
   }
 
-  // Get visible columns based on search term
+  /**
+   * GET VISIBLE COLUMNS BASED ON SEARCH
+   * ------------------------------------
+   * Determines which columns should be visible based on search term.
+   * A column is visible if:
+   * - Its header name matches the search
+   * - Its field name matches the search
+   * - Any row has matching data in that column
+   *
+   * NOTE: This function is called but column visibility is typically
+   * managed by the parent DataGrid. The return value is passed to the
+   * onSearchFilter callback for potential use.
+   *
+   * @param searchValue - User's search input
+   * @returns Array of field names that should be visible
+   */
   const getVisibleColumns = (searchValue: string): string[] => {
     if (!searchValue.trim() || !columns.length) {
       return columns.map(col => col.field)
@@ -160,7 +267,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       .map(col => col.field)
   }
 
-  // Handle search input changes
+  /**
+   * Handle search input changes.
+   * Filters rows and notifies parent via onSearchFilter callback.
+   */
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value
     setSearchTerm(newSearchTerm)
@@ -203,22 +313,29 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   }, [isSacredTheme])
 
-  // Always render the search UI. If no columns are provided, the search will be a no-op.
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RESPONSIVE GRID LAYOUT
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Determine grid columns based on screen size and number of filters + searchbar
+  /**
+   * Calculate grid column layout based on screen size and filter count.
+   * - Mobile: Single column
+   * - Tablet: 1-2 columns
+   * - Desktop: 1-3 columns based on item count
+   * - Date ranges span 2 columns and affect layout calculations
+   */
   const getGridColumns = () => {
     const totalItems = (filters?.length ?? 0) + 1 // +1 for searchbar
     const hasDateRange = filters?.some(f => f.type === 'daterange') ?? false
 
     if (isMobile) return { gridTemplateColumns: '1fr' }
     if (isTablet) {
-      // More conservative for tablet to prevent overflow
       return totalItems <= 2
         ? { gridTemplateColumns: '1fr' }
         : { gridTemplateColumns: 'repeat(2, 1fr)' }
     }
 
-    // Desktop - be conservative to prevent overflow
+    // Desktop layouts
     if (totalItems === 1) {
       return { gridTemplateColumns: '1fr' }
     } else if (totalItems === 2) {
@@ -226,19 +343,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     } else if (totalItems === 3) {
       return { gridTemplateColumns: 'repeat(2, 1fr)' }
     } else if (totalItems === 4) {
-      // If there's a date range, use 2 columns, otherwise 3
+      // Date ranges need more space
       return hasDateRange
         ? { gridTemplateColumns: 'repeat(2, 1fr)' }
         : { gridTemplateColumns: 'repeat(3, 1fr)' }
     } else {
-      // For 5+ items, max 3 columns to prevent overflow
+      // 5+ items: max 3 columns
       return hasDateRange
         ? { gridTemplateColumns: 'repeat(2, 1fr)' }
         : { gridTemplateColumns: 'repeat(3, 1fr)' }
     }
   }
 
-  // Helper function to render the appropriate filter component
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FILTER COMPONENT RENDERER
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Render the appropriate input component based on filter type.
+   * - 'daterange': DateRange component with start/end pickers
+   * - 'date': Single DateField picker
+   * - default: SearchableSimple dropdown
+   */
   const renderFilterComponent = (filter: DataGridFilter) => {
     // Check if this is a date range filter
     if (filter.type === 'daterange') {
