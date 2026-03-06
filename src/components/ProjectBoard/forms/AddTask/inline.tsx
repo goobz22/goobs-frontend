@@ -736,95 +736,83 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     </div>
                   )}
 
-                  {viewingArticle.purpose && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Purpose</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.purpose}
-                      </p>
-                    </div>
-                  )}
-
-                  {viewingArticle.symptoms && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Symptoms</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.symptoms}
-                      </p>
-                    </div>
-                  )}
-
-                  {viewingArticle.cause && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Cause</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.cause}
-                      </p>
-                    </div>
-                  )}
-
-                  {viewingArticle.resolution && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Resolution</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.resolution}
-                      </p>
-                    </div>
-                  )}
-
-                  {viewingArticle.workaround && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Workaround</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.workaround}
-                      </p>
-                    </div>
-                  )}
-
-                  {viewingArticle.impact && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>Impact</div>
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {viewingArticle.impact}
-                      </p>
-                    </div>
-                  )}
+                  {/* Render dynamic fieldValues if present, else fall back to legacy named fields */}
+                  {viewingArticle.fieldValues && Object.keys(viewingArticle.fieldValues).length > 0
+                    ? Object.entries(viewingArticle.fieldValues).map(([key, value]) => {
+                        if (!value || value.trim() === '') return null
+                        const label = key
+                          .replace(/([A-Z])/g, ' $1')
+                          .replace(/_/g, ' ')
+                          .replace(/^\w/, c => c.toUpperCase())
+                          .trim()
+                        return (
+                          <div key={key} style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>{label}</div>
+                            <div
+                              style={{
+                                color: secondaryTextColor,
+                                fontSize: '0.875rem',
+                                lineHeight: '1.6',
+                                whiteSpace: 'pre-wrap',
+                              }}
+                              dangerouslySetInnerHTML={{ __html: value }}
+                            />
+                          </div>
+                        )
+                      })
+                    : (
+                      <>
+                        {viewingArticle.purpose && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Purpose</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.purpose}
+                            </p>
+                          </div>
+                        )}
+                        {viewingArticle.symptoms && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Symptoms</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.symptoms}
+                            </p>
+                          </div>
+                        )}
+                        {viewingArticle.cause && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Cause</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.cause}
+                            </p>
+                          </div>
+                        )}
+                        {viewingArticle.resolution && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Resolution</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.resolution}
+                            </p>
+                          </div>
+                        )}
+                        {viewingArticle.workaround && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Workaround</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.workaround}
+                            </p>
+                          </div>
+                        )}
+                        {viewingArticle.impact && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={sectionTitleStyle}>Impact</div>
+                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
+                              {viewingArticle.impact}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )
+                  }
                 </div>
               ) : (
                 /* Article List View */

@@ -394,6 +394,7 @@ function ProjectBoardContent({
         rawProducts={rawProducts ?? []}
         rawServices={rawServices}
         rawRegions={rawRegions}
+        knowledgebaseArticles={rawArticles}
         styles={styles}
       />
     )

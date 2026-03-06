@@ -193,6 +193,8 @@ export type RawRegion = {
 export type RawArticle = {
   _id: string
   articleTitle: string
+  /** Dynamic field values from the article template (key = fieldId, value = content) */
+  fieldValues?: Record<string, string>
   /** Optional fields for enhanced search and display */
   purpose?: string
   symptoms?: string
