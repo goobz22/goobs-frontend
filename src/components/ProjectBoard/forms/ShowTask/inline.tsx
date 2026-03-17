@@ -94,6 +94,8 @@ interface InlineShowTaskProps {
     newEndTime: string
   ) => Promise<void> | void
   currentDate: Date
+  /** Whether this is being viewed by an employee (can accept/decline bookings) or a customer */
+  variant?: 'employee' | 'customer'
   // Case history audit logging callback
   onCaseUpdate?: (
     taskId: string,
@@ -174,6 +176,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   currentDate,
   // Case history audit logging
   onCaseUpdate,
+  variant = 'employee',
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details')
   const [isEditMode, setIsEditMode] = useState(false)
@@ -3372,6 +3375,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     }
 
     // Render meeting list view (default)
+    const bookingRequests = taskMeetings.filter(
+      m => m.status === 'pending' && new Date(m.startTime) > currentDate
+    )
+    const scheduledMeetings = taskMeetings.filter(
+      m => m.status !== 'pending' || new Date(m.startTime) <= currentDate
+    )
+
     return (
       <div style={cardStyle}>
         <div
@@ -3385,6 +3395,139 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         >
           <span>Meetings ({taskMeetings.length})</span>
         </div>
+
+        {/* Booking Requests section — shown at top for employee variant when there are pending meetings */}
+        {variant === 'employee' && bookingRequests.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <div
+              style={{
+                fontSize: '0.68rem',
+                fontFamily: isSacred ? '"Cinzel", serif' : 'inherit',
+                letterSpacing: '0.07em',
+                textTransform: 'uppercase' as const,
+                color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
+                marginBottom: '10px',
+                paddingBottom: '6px',
+                borderBottom: `1px solid ${isSacred ? 'rgba(255,215,0,0.2)' : borderColor}`,
+              }}
+            >
+              Booking Requests ({bookingRequests.length})
+            </div>
+            {bookingRequests.map(meeting => (
+              <div
+                key={meeting._id}
+                style={{
+                  padding: '14px 16px',
+                  backgroundColor: isSacred
+                    ? 'rgba(255,215,0,0.06)'
+                    : isDark
+                      ? 'rgba(96,165,250,0.06)'
+                      : 'rgba(59,130,246,0.04)',
+                  border: `1px solid ${isSacred ? 'rgba(255,215,0,0.35)' : isDark ? 'rgba(96,165,250,0.3)' : 'rgba(59,130,246,0.25)'}`,
+                  borderLeft: `3px solid ${isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6'}`,
+                  borderRadius: '8px',
+                  marginBottom: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        color: textColor,
+                        fontSize: '0.9rem',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {meeting.eventTypeName}
+                    </div>
+                    <div
+                      style={{ fontSize: '0.8rem', color: secondaryTextColor }}
+                    >
+                      {meeting.attendeeName}
+                      {meeting.attendeeEmail && (
+                        <span style={{ marginLeft: '6px', opacity: 0.75 }}>
+                          · {meeting.attendeeEmail}
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        color: secondaryTextColor,
+                        marginTop: '3px',
+                      }}
+                    >
+                      {formatMeetingTime(meeting.startTime, meeting.endTime)}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '6px',
+                      flexWrap: 'wrap',
+                      flexShrink: 0,
+                      alignSelf: 'center',
+                    }}
+                  >
+                    {/* Accept */}
+                    <button
+                      onClick={() => handleConfirmMeetingAction(meeting._id)}
+                      style={{
+                        ...buttonStyle,
+                        padding: '6px 12px',
+                        fontSize: '0.72rem',
+                        backgroundColor: '#4CAF50',
+                        color: '#fff',
+                      }}
+                    >
+                      Accept
+                    </button>
+                    {/* Propose new time */}
+                    <button
+                      onClick={() => {
+                        setSelectedMeeting(meeting)
+                        setSchedulingView('reschedule')
+                      }}
+                      style={{
+                        ...buttonStyle,
+                        padding: '6px 12px',
+                        fontSize: '0.72rem',
+                        backgroundColor: isSacred ? 'rgba(255,152,0,0.2)' : 'rgba(255,152,0,0.15)',
+                        color: '#FF9800',
+                        border: '1px solid rgba(255,152,0,0.4)',
+                      }}
+                    >
+                      New Time
+                    </button>
+                    {/* Decline */}
+                    <button
+                      onClick={() => handleCancelMeetingAction(meeting._id)}
+                      style={{
+                        ...buttonStyle,
+                        padding: '6px 12px',
+                        fontSize: '0.72rem',
+                        backgroundColor: 'rgba(244,67,54,0.15)',
+                        color: '#F44336',
+                        border: '1px solid rgba(244,67,54,0.35)',
+                      }}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {taskMeetings.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -3419,7 +3562,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div
             style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
-            {taskMeetings.map(meeting => {
+            {scheduledMeetings.map(meeting => {
               const statusColors = getMeetingStatusColor(meeting.status)
               return (
                 <div

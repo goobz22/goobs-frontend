@@ -485,6 +485,7 @@ function ProjectBoardContent({
         onConfirmMeeting={onConfirmMeeting}
         onRescheduleMeeting={onRescheduleMeeting}
         currentDate={currentDate}
+        variant={variant === 'customer' ? 'customer' : 'employee'}
         {...(onCaseUpdate && { onCaseUpdate })}
         {...(employees && { employees })}
         {...(administrators && { administrators })}
