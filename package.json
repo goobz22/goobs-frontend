@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.124.07",
+  "version": "0.124.08",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -66,7 +66,7 @@
     "@types/qrcode": "^1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^5",
+    "@vitejs/plugin-react": "^6",
     "ajv": "^8",
     "autoprefixer": "^10",
     "chromatic": "^15",
@@ -75,7 +75,7 @@
     "react": "^19",
     "react-dom": "^19",
     "typescript": "^5",
-    "vite": "^7",
+    "vite": "^8",
     "vite-plugin-css-injected-by-js": "^4",
     "vite-plugin-dts": "^4",
     "vite-tsconfig-paths": "^6"
