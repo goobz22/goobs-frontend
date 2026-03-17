@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import dts from 'vite-plugin-dts'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { resolve } from 'path'
 
 export default defineConfig({
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
     react(),
-    tsconfigPaths(),
     dts({
       insertTypesEntry: true,
       include: ['src'],
@@ -42,7 +43,6 @@ export default defineConfig({
         },
       },
       treeshake: {
-        preset: 'recommended',
         moduleSideEffects: true,
       },
     },
