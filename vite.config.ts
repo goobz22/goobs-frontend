@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  checks: {
+    pluginTimings: false,
+  },
   plugins: [
     react(),
     dts({
@@ -35,11 +38,14 @@ export default defineConfig({
     },
     cssCodeSplit: false,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: [/^react(\/.*)?$/, /^react-dom(\/.*)?$/, /^next(\/.*)?$/],
       output: {
         globals: {
           react: 'React',
+          'react/jsx-runtime': 'ReactJSXRuntime',
           'react-dom': 'ReactDOM',
+          'next/link': 'NextLink',
+          'next/image': 'NextImage',
         },
       },
       treeshake: {
