@@ -30,21 +30,13 @@ npm i goobs-frontend
 yarn add goobs-frontend
 ```
 
-**Step 2: Update next.config.js**
+**Step 2: Import and use**
 
-You must then transpile the package in next.config
+goobs-frontend works out of the box with Next.js 16 (Turbopack, Cache Components) — no `transpilePackages` or custom config needed. Just import and use:
 
-```javascript
-/** @type {import('next').NextConfig} */
-
-const nextConfig = {
-  transpilePackages: ['goobs-frontend'],
-}
-
-export default nextConfig
+```tsx
+import { Button, DataGrid, Icons } from 'goobs-frontend'
 ```
-
-After this is done, you can import components from goobs-frontend into your project.
 
 ## Component Library Overview
 
