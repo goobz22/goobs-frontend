@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/SimpleEditor/index.tsx
 
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import type { ComplexTextEditorStyles } from '../../../theme/'
 
 type SimpleEditorProps = {
@@ -20,6 +20,23 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   styles,
 }) => {
   const [isFocused, setIsFocused] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Listen for native input events from browser automation tools
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLTextAreaElement
+      if (target.value !== value) {
+        onChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   const isSacred = styles?.theme === 'sacred'
   const isDark = styles?.theme === 'dark'
@@ -67,6 +84,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
 
   return (
     <textarea
+      ref={textareaRef}
       value={value}
       onChange={handleChange}
       onFocus={() => setIsFocused(true)}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import cssStyles from './TextField.module.css'
 
 export interface TextFieldProps {
@@ -115,6 +115,24 @@ const TextField: React.FC<TextFieldProps> = ({
       inputRef.current?.focus()
     }
   }
+
+  // Listen for native input events from browser automation tools (e.g. form_input)
+  // that set input.value directly and dispatch native events, bypassing React's
+  // synthetic event system
+  useEffect(() => {
+    const el = multiline ? textareaRef.current : inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement | HTMLTextAreaElement
+      if (target.value !== value) {
+        onChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [multiline, onChange, value])
 
   const hasStartAdornment = !!startAdornment
   const hasEndAdornment = !!endAdornment

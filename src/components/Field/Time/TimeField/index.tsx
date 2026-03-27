@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { alpha } from '../../../../utils'
 
 const SACRED_GOLD = '#FFD700'
@@ -41,6 +41,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
   styles,
 }) => {
   const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -49,6 +50,23 @@ const TimeField: React.FC<TimeFieldProps> = ({
     const newTime = parseTimeInput(e.target.value)
     onChange?.(newTime)
   }
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== formatTimeForInput(value || null)) {
+        const newTime = parseTimeInput(target.value)
+        onChange?.(newTime)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
@@ -86,6 +104,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
           )}
         </label>
         <input
+          ref={inputRef}
           type="time"
           value={formatTimeForInput(value || null)}
           onChange={handleChange}

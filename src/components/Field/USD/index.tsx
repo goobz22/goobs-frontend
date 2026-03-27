@@ -177,6 +177,25 @@ const USDField: React.FC<USDFieldProps> = ({
   const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== internalValue) {
+        const formattedValue = formatCurrency(target.value)
+        setInternalValue(formattedValue)
+        onChange?.(formattedValue)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue])
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -309,6 +328,7 @@ const USDField: React.FC<USDFieldProps> = ({
           </span>
         </div>
         <input
+          ref={inputRef}
           type="text"
           inputMode="decimal"
           id={id}

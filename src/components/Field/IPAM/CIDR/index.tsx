@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -118,6 +118,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const cidrInfo = calculateCIDRInfo(parseInt(currentValue, 10) || 24)
 
@@ -271,6 +272,22 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     [onChange, minCidr, maxCidr]
   )
 
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== `/${currentValue}`) {
+        handleTextFieldChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [currentValue, handleTextFieldChange])
+
   const EndAdornment = () => (
     <div style={pickerStyles.buttonContainer}>
       <button
@@ -308,6 +325,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
 
         <div style={componentStyles.inputWrapper}>
           <input
+            ref={inputRef}
             {...rest}
             {...getRequiredProps(mergedStyles?.required)}
             value={`/${currentValue}`}

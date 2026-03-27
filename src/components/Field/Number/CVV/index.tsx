@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -98,6 +98,7 @@ const CVV: React.FC<CVVProps> = ({
   const [internalValue, setInternalValue] = useState<string>(value || '')
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const validateCVV = useCallback(
     (cvv: string): boolean => {
@@ -134,6 +135,27 @@ const CVV: React.FC<CVVProps> = ({
     setPrevValue(value)
     setInternalValue(value || '')
   }
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const formattedValue = formatInput(target.value)
+      const truncatedValue = formattedValue.slice(0, maxLength)
+      if (truncatedValue !== internalValue) {
+        setInternalValue(truncatedValue)
+        setHasBeenEdited(true)
+        const valid = validateCVV(truncatedValue)
+        onChange?.(truncatedValue, valid)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue, validateCVV, formatInput, maxLength])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,6 +213,7 @@ const CVV: React.FC<CVVProps> = ({
           <span>🔒</span>
         </div>
         <input
+          ref={inputRef}
           type="password"
           id={id}
           value={getDisplayValue()}

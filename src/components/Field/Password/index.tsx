@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -100,6 +100,27 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
 }) => {
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== value) {
+        const syntheticEvent = {
+          target,
+          currentTarget: target,
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange?.(syntheticEvent)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   const computedStyles = getStyles(styles, isFocused)
 
@@ -139,6 +160,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
 
       <div style={computedStyles.inputWrapper}>
         <input
+          ref={inputRef}
           type={passwordVisible ? 'text' : 'password'}
           id={id}
           value={value}

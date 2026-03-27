@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -93,6 +93,26 @@ const ExternalIncrementNumberField: React.FC<
 > = ({ initialValue = '0', onChange, label, helperText, styles, ...rest }) => {
   const [internalValue, setInternalValue] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const numValue = target.value.replace(/[^0-9]/g, '')
+      const newValue = numValue === '' ? '0' : numValue
+      if (newValue !== internalValue) {
+        setInternalValue(newValue)
+        onChange?.()
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue])
 
   const handleIncrement = useCallback(() => {
     if (styles?.disabled) return
@@ -151,6 +171,7 @@ const ExternalIncrementNumberField: React.FC<
           </label>
         )}
         <input
+          ref={inputRef}
           type="text"
           value={internalValue}
           onChange={handleChange}

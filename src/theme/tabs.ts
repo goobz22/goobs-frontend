@@ -189,6 +189,9 @@ export const tabsThemes: Record<'light' | 'dark' | 'sacred', TabsTheme> = {
     },
     border: {
       borderLeft: '1px solid rgba(226, 232, 240, 0.8)',
+      borderRight: 'none',
+      borderTop: 'none',
+      borderBottom: 'none',
     },
     glyph: {
       fontSize: '12px',
@@ -278,6 +281,9 @@ export const tabsThemes: Record<'light' | 'dark' | 'sacred', TabsTheme> = {
     },
     border: {
       borderLeft: '1px solid rgba(75, 85, 99, 0.8)',
+      borderRight: 'none',
+      borderTop: 'none',
+      borderBottom: 'none',
     },
     glyph: {
       fontSize: '12px',
@@ -374,6 +380,9 @@ export const tabsThemes: Record<'light' | 'dark' | 'sacred', TabsTheme> = {
     },
     border: {
       borderLeft: '1px solid rgba(255, 215, 0, 0.3)',
+      borderRight: 'none',
+      borderTop: 'none',
+      borderBottom: 'none',
     },
     glyph: {
       fontSize: '12px',

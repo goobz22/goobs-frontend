@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { alpha } from '../../../../utils'
 
 const SACRED_GOLD = '#FFD700'
@@ -49,6 +49,8 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
 }) => {
   const [isStartFocused, setIsStartFocused] = useState(false)
   const [isEndFocused, setIsEndFocused] = useState(false)
+  const startInputRef = useRef<HTMLInputElement>(null)
+  const endInputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -64,6 +66,37 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     const newRange = { start: value?.start || null, end: newEnd }
     onChange?.(newRange)
   }
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const startEl = startInputRef.current
+    const endEl = endInputRef.current
+
+    const handleNativeStartInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== formatTimeForInput(value?.start || null)) {
+        const newStart = parseTimeInput(target.value)
+        const newRange = { start: newStart, end: value?.end || null }
+        onChange?.(newRange)
+      }
+    }
+
+    const handleNativeEndInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== formatTimeForInput(value?.end || null)) {
+        const newEnd = parseTimeInput(target.value)
+        const newRange = { start: value?.start || null, end: newEnd }
+        onChange?.(newRange)
+      }
+    }
+
+    if (startEl) startEl.addEventListener('input', handleNativeStartInput)
+    if (endEl) endEl.addEventListener('input', handleNativeEndInput)
+    return () => {
+      if (startEl) startEl.removeEventListener('input', handleNativeStartInput)
+      if (endEl) endEl.removeEventListener('input', handleNativeEndInput)
+    }
+  }, [onChange, value])
 
   const inputStyle = (isFocused: boolean): React.CSSProperties => ({
     width: '100%',
@@ -103,6 +136,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
             )}
           </label>
           <input
+            ref={startInputRef}
             type="time"
             value={formatTimeForInput(value?.start || null)}
             onChange={handleStartChange}
@@ -122,6 +156,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
             )}
           </label>
           <input
+            ref={endInputRef}
             type="time"
             value={formatTimeForInput(value?.end || null)}
             onChange={handleEndChange}

@@ -7,8 +7,10 @@ import { TRANSITIONS, SHADOWS } from './shared'
 export interface PricingTableTheme {
   container: {
     background: string
-    border: string
     borderTop: string
+    borderRight: string
+    borderBottom: string
+    borderLeft: string
     borderRadius: string
     boxShadow: string
     backdropFilter: string
@@ -191,8 +193,10 @@ export const pricingTableThemes: Record<
   light: {
     container: {
       background: 'rgba(255, 255, 255, 0.95)',
-      border: '1px solid rgba(226, 232, 240, 0.8)',
       borderTop: '12px solid #00B8D4',
+      borderRight: '1px solid rgba(226, 232, 240, 0.8)',
+      borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+      borderLeft: '1px solid rgba(226, 232, 240, 0.8)',
       borderRadius: '0.375rem',
       boxShadow: SHADOWS.light.medium,
       backdropFilter: 'blur(8px)',
@@ -254,8 +258,10 @@ export const pricingTableThemes: Record<
   dark: {
     container: {
       background: 'rgba(31, 41, 55, 0.95)',
-      border: '1px solid rgba(75, 85, 99, 0.8)',
       borderTop: '12px solid #00B8D4',
+      borderRight: '1px solid rgba(75, 85, 99, 0.8)',
+      borderBottom: '1px solid rgba(75, 85, 99, 0.8)',
+      borderLeft: '1px solid rgba(75, 85, 99, 0.8)',
       borderRadius: '0.375rem',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3)',
       backdropFilter: 'blur(8px)',
@@ -317,8 +323,10 @@ export const pricingTableThemes: Record<
   sacred: {
     container: {
       background: 'rgba(28, 25, 23, 0.95)',
-      border: '1px solid rgba(255, 215, 0, 0.3)',
       borderTop: '12px solid #FFD700',
+      borderRight: '1px solid rgba(255, 215, 0, 0.3)',
+      borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+      borderLeft: '1px solid rgba(255, 215, 0, 0.3)',
       borderRadius: '0.375rem',
       boxShadow: SHADOWS.sacred.large,
       backdropFilter: 'blur(8px)',
@@ -437,12 +445,18 @@ export const getPricingTableTheme = (
   return {
     container: {
       background: styles.backgroundColor || baseTheme.container.background,
-      border: styles.borderColor
-        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-        : baseTheme.container.border,
       borderTop: styles.borderTopColor
         ? `${styles.borderTopWidth || '12px'} solid ${styles.borderTopColor}`
         : baseTheme.container.borderTop,
+      borderRight: styles.borderColor
+        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+        : baseTheme.container.borderRight,
+      borderBottom: styles.borderColor
+        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+        : baseTheme.container.borderBottom,
+      borderLeft: styles.borderColor
+        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+        : baseTheme.container.borderLeft,
       borderRadius: styles.borderRadius || baseTheme.container.borderRadius,
       boxShadow: styles.boxShadow || baseTheme.container.boxShadow,
       backdropFilter:
@@ -596,8 +610,10 @@ export const getPricingTableStyles = (
     marginLeft: styles?.marginLeft,
     marginRight: styles?.marginRight,
     background: themeConfig.container.background,
-    border: themeConfig.container.border,
     borderTop: themeConfig.container.borderTop,
+    borderRight: themeConfig.container.borderRight,
+    borderBottom: themeConfig.container.borderBottom,
+    borderLeft: themeConfig.container.borderLeft,
     borderRadius: themeConfig.container.borderRadius,
     boxShadow: themeConfig.container.boxShadow,
     backdropFilter: themeConfig.container.backdropFilter,

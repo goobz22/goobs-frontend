@@ -30,6 +30,23 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const [isFocused, setIsFocused] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const hasInsertedKeyframes = useRef(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Listen for native input events from browser automation tools
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLTextAreaElement
+      if (target.value !== value) {
+        onChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   const isSacredTheme = styles?.theme === 'sacred'
 
@@ -125,6 +142,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </button>
       <div style={{ display: 'flex' }}>
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={handleLocalMarkdownChange}
           onSelect={handleSelect}

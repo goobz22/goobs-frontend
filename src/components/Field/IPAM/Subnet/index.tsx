@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -140,6 +140,7 @@ const InternalIncrementNumberField: React.FC<
   })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const subnetInfo = calculateSubnetInfo(parseInt(currentValue) || effectiveMin)
 
@@ -288,6 +289,22 @@ const InternalIncrementNumberField: React.FC<
     [onChange, effectiveMin, effectiveMax]
   )
 
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== subnetInfo.mask) {
+        handleTextFieldChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [subnetInfo.mask, handleTextFieldChange])
+
   return (
     <div style={style}>
       <div style={componentStyles.container}>
@@ -304,6 +321,7 @@ const InternalIncrementNumberField: React.FC<
 
         <div style={componentStyles.inputWrapper}>
           <input
+            ref={inputRef}
             {...rest}
             {...getRequiredProps(rest.required)}
             value={subnetInfo.mask}

@@ -81,6 +81,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
   const [articleSearchTerm, setArticleSearchTerm] = useState('')
   const [viewingArticle, setViewingArticle] = useState<RawArticle | null>(null)
+  const [validationError, setValidationError] = useState('')
 
   const isSacred = styles?.theme === 'sacred'
   const isDark = styles?.theme === 'dark'
@@ -328,16 +329,18 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      alert('Please enter a title')
+      setValidationError('Please enter a title')
       return
     }
 
     if (!selectedSeverityId || !selectedStatusId || !productServiceId) {
-      alert(
+      setValidationError(
         'Please fill in all required fields (Severity, Status, Type, and Product/Service)'
       )
       return
     }
+
+    setValidationError('')
 
     const newTask: Omit<Task, '_id'> = {
       title: title.trim(),
@@ -516,8 +519,8 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 <Dropdown
                   label="Type"
                   options={[
-                    { value: 'product', _id: 'product' },
-                    { value: 'service', _id: 'service' },
+                    { value: 'Product', _id: 'product' },
+                    { value: 'Service', _id: 'service' },
                   ]}
                   value={productOrService}
                   onChange={e => {
@@ -1067,6 +1070,27 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   </div>
                 </>
               )}
+            </div>
+          )}
+
+          {/* Validation Error */}
+          {validationError && (
+            <div
+              style={{
+                marginTop: '1rem',
+                padding: '0.75rem 1rem',
+                backgroundColor: isSacred
+                  ? 'rgba(220, 38, 38, 0.15)'
+                  : isDark
+                    ? 'rgba(220, 38, 38, 0.2)'
+                    : '#FEF2F2',
+                border: `1px solid ${isSacred ? 'rgba(220, 38, 38, 0.4)' : isDark ? 'rgba(220, 38, 38, 0.4)' : '#FECACA'}`,
+                borderRadius: '6px',
+                color: isSacred ? '#FCA5A5' : isDark ? '#FCA5A5' : '#DC2626',
+                fontSize: '0.875rem',
+              }}
+            >
+              {validationError}
             </div>
           )}
 

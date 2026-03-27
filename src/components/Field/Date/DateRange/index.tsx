@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateRange.module.css'
 
 export interface DateRange {
@@ -53,6 +53,8 @@ const DateRange: React.FC<DateRangeProps> = ({
   const required = requiredProp || styles?.required || false
   const theme = styles?.theme || 'sacred'
   const displayHelperText = error || helperText
+  const startInputRef = useRef<HTMLInputElement>(null)
+  const endInputRef = useRef<HTMLInputElement>(null)
 
   const formatDateForInput = (date: Date | null): string => {
     if (!date) return ''
@@ -93,6 +95,49 @@ const DateRange: React.FC<DateRangeProps> = ({
       onChange?.({ start: value?.start || null, end: null })
     }
   }
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const startEl = startInputRef.current
+    const endEl = endInputRef.current
+
+    const handleNativeStartInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const dateString = target.value
+      if (dateString !== formatDateForInput(value?.start || null)) {
+        if (dateString) {
+          const date = new Date(dateString + 'T00:00:00')
+          const newRange = { start: date, end: value?.end || null }
+          if (newRange.end && date > newRange.end) {
+            newRange.end = null
+          }
+          onChange?.(newRange)
+        } else {
+          onChange?.({ start: null, end: value?.end || null })
+        }
+      }
+    }
+
+    const handleNativeEndInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const dateString = target.value
+      if (dateString !== formatDateForInput(value?.end || null)) {
+        if (dateString) {
+          const date = new Date(dateString + 'T00:00:00')
+          onChange?.({ start: value?.start || null, end: date })
+        } else {
+          onChange?.({ start: value?.start || null, end: null })
+        }
+      }
+    }
+
+    if (startEl) startEl.addEventListener('input', handleNativeStartInput)
+    if (endEl) endEl.addEventListener('input', handleNativeEndInput)
+    return () => {
+      if (startEl) startEl.removeEventListener('input', handleNativeStartInput)
+      if (endEl) endEl.removeEventListener('input', handleNativeEndInput)
+    }
+  }, [onChange, value])
 
   // Build helper text class names
   const helperTextClassNames = [
@@ -149,6 +194,7 @@ const DateRange: React.FC<DateRangeProps> = ({
             {required && <span className={cssStyles.requiredIndicator}>*</span>}
           </label>
           <input
+            ref={startInputRef}
             type="date"
             className={cssStyles.input}
             value={formatDateForInput(value?.start || null)}
@@ -169,6 +215,7 @@ const DateRange: React.FC<DateRangeProps> = ({
             {required && <span className={cssStyles.requiredIndicator}>*</span>}
           </label>
           <input
+            ref={endInputRef}
             type="date"
             className={cssStyles.input}
             value={formatDateForInput(value?.end || null)}

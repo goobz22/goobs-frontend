@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -73,6 +73,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   )
   const [isFocused, setIsFocused] = useState(false)
   const lastInputTypeWasDelete = useRef(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Track previous initialValue for derived state pattern
   const [prevInitialValue, setPrevInitialValue] = useState(initialValue)
@@ -193,6 +194,22 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     [formatMACAddress, onChange, validateMACAddress]
   )
 
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== value) {
+        handleTextFieldChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [value, handleTextFieldChange])
+
   const error = !isValid
     ? 'Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)'
     : helperText
@@ -265,6 +282,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
 
       <div style={componentStyles.inputWrapper}>
         <input
+          ref={inputRef}
           {...rest}
           {...getRequiredProps(computedStyles?.required)}
           value={value}

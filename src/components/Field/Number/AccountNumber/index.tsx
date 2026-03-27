@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -96,6 +96,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   const [internalValue, setInternalValue] = useState<string>(value)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const validateAccountNumber = useCallback(
     (accountNumber: string): boolean => {
@@ -137,6 +138,26 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   useEffect(() => {
     setInternalValue(value)
   }, [value])
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const formattedValue = formatInput(target.value)
+      if (formattedValue !== internalValue) {
+        setInternalValue(formattedValue)
+        setHasBeenEdited(true)
+        const valid = validateAccountNumber(formattedValue)
+        onChange?.(formattedValue, valid)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue, validateAccountNumber, formatInput])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,6 +218,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       <div style={computedStyles.inputWrapper}>
         <AccountAdornment />
         <input
+          ref={inputRef}
           type="text"
           id={id}
           value={getDisplayValue()}

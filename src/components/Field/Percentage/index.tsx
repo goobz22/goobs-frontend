@@ -134,6 +134,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const computedStyles = getStyles(styles, isFocused)
   const inputStyles = (computedStyles.input ?? {}) as React.CSSProperties
@@ -174,6 +175,30 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     },
     [min, max]
   )
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const rawValue = target.value
+      const numericInput = rawValue.replace(/%/g, '')
+      const currentDisplay = showPercentSymbol && (value || internalValue) ? `${value || internalValue}%` : (value || internalValue)
+      if (rawValue !== currentDisplay) {
+        const formattedValue = formatValue(numericInput)
+        setInternalValue(formattedValue)
+        const syntheticEvent = {
+          target: { ...target, value: formattedValue },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange?.(syntheticEvent)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value, internalValue, showPercentSymbol, formatValue])
 
   const handleIncrement = useCallback(() => {
     const currentValue = value || internalValue
@@ -246,6 +271,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
 
       <div style={{ ...computedStyles.inputWrapper, width: 'auto' }}>
         <input
+          ref={inputRef}
           type="text"
           inputMode="numeric"
           id={id}

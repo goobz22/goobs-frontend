@@ -139,14 +139,16 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, [isOpen])
 
   const handleSelect = (option: DropdownOption) => {
+    const selectedValue = option._id != null && option._id !== '' ? String(option._id) : String(option.value)
     setValue(option.value)
     setIsOpen(false)
 
     // Create synthetic event for onChange compatibility
+    // Use _id when available since forms typically track selection by ID
     if (onChange) {
       const syntheticEvent = {
-        target: { value: String(option.value) },
-        currentTarget: { value: String(option.value) },
+        target: { value: selectedValue },
+        currentTarget: { value: selectedValue },
       } as React.ChangeEvent<HTMLSelectElement>
       onChange(syntheticEvent)
     }

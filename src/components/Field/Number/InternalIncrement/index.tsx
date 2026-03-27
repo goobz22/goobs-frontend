@@ -143,6 +143,32 @@ const InternalIncrementNumberField: React.FC<
   const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const newValue = target.value.replace(/[^0-9]/g, '')
+      if (newValue !== internalValue) {
+        let finalValue = newValue
+        const numValue = parseInt(newValue, 10)
+        if (min !== undefined && numValue < min) finalValue = String(min)
+        else if (max !== undefined && numValue > max) finalValue = String(max)
+        setInternalValue(finalValue)
+        const syntheticEvent = {
+          target: { ...target, value: finalValue },
+        } as React.ChangeEvent<HTMLInputElement>
+        onChange?.(syntheticEvent)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue, min, max])
 
   // Sync internal value when controlled `value` prop changes (derived state pattern)
   const [prevValue, setPrevValue] = useState(value)
@@ -241,6 +267,7 @@ const InternalIncrementNumberField: React.FC<
 
       <div style={computedStyles.inputWrapper}>
         <input
+          ref={inputRef}
           type="text"
           inputMode="numeric"
           id={id}

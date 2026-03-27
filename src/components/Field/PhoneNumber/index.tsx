@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { alpha } from '../../../utils'
 
 const SACRED_GOLD = '#FFD700'
@@ -85,6 +85,38 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     parseExistingPhoneNumber(String(value || ''))
   )
   const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== phoneNumber) {
+        const strippedInput = target.value.replace(/\D/g, '').slice(0, 10)
+        const fullFormattedValue = strippedInput
+          ? formatPhoneNumber(strippedInput)
+          : '+1 '
+        let formattedDigits = ''
+        if (strippedInput.length > 0) {
+          formattedDigits = strippedInput.slice(0, 3)
+          if (strippedInput.length > 3) {
+            formattedDigits += '-' + strippedInput.slice(3, 6)
+            if (strippedInput.length > 6) {
+              formattedDigits += '-' + strippedInput.slice(6, 10)
+            }
+          }
+        }
+        setPhoneNumber(formattedDigits)
+        onChange?.(fullFormattedValue)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, phoneNumber])
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -237,6 +269,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
       <div style={inputWrapperStyle}>
         <div style={prefixStyle}>+1</div>
         <input
+          ref={inputRef}
           type="tel"
           id={id}
           value={phoneNumber}

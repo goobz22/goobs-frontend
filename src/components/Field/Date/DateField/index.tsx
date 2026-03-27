@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateField.module.css'
 
 export interface DateFieldProps {
@@ -37,6 +37,7 @@ const DateField: React.FC<DateFieldProps> = ({
   const disabled = styles?.disabled || false
   const required = styles?.required || false
   const theme = styles?.theme || 'sacred'
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const formatDateForInput = (date: Date | null): string => {
     if (!date) return ''
@@ -56,6 +57,28 @@ const DateField: React.FC<DateFieldProps> = ({
       onChange(null)
     }
   }
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const dateString = target.value
+      if (dateString !== formatDateForInput(value || null)) {
+        if (dateString) {
+          const date = new Date(dateString + 'T00:00:00')
+          onChange(date)
+        } else {
+          onChange(null)
+        }
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   // Build helper text class names
   const helperTextClassNames = [
@@ -101,6 +124,7 @@ const DateField: React.FC<DateFieldProps> = ({
 
       {/* Date Input */}
       <input
+        ref={inputRef}
         type="date"
         className={cssStyles.input}
         value={formatDateForInput(value || null)}

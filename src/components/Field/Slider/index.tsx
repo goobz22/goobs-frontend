@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { getSharedFormFieldStyles, type FormFieldStyles } from '../../../theme'
 
 export interface SliderProps {
@@ -23,7 +23,25 @@ const Slider: React.FC<SliderProps> = ({
   styles,
 }) => {
   const [focused, setFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const { themeConfig } = getSharedFormFieldStyles(styles, focused)
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const numValue = Number(target.value)
+      if (numValue !== value) {
+        onChange(numValue)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, value])
 
   const handleFocus = useCallback(() => {
     setFocused(true)
@@ -59,6 +77,7 @@ const Slider: React.FC<SliderProps> = ({
     <div style={componentStyles.container}>
       {label && <label style={componentStyles.label}>{label}</label>}
       <input
+        ref={inputRef}
         type="range"
         min={min}
         max={max}

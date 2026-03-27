@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -152,6 +152,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   const [internalValue, setInternalValue] = useState<string>(value || '')
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const detectCardType = useCallback((cardNumber: string): CardType => {
     const cleanNumber = cardNumber.replace(/\D/g, '')
@@ -238,6 +239,27 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     setInternalValue(formattedValue)
   }
 
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const formattedValue = formatInput(target.value).slice(0, 23)
+      if (formattedValue !== internalValue) {
+        setInternalValue(formattedValue)
+        setHasBeenEdited(true)
+        const detectedType = detectCardType(formattedValue)
+        const valid = validateCreditCard(formattedValue)
+        onChange?.(formattedValue.replace(/\D/g, ''), valid, detectedType)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue, formatInput, detectCardType, validateCreditCard])
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const rawValue = e.target.value
@@ -300,6 +322,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
           <span>{getCardIcon()}</span>
         </div>
         <input
+          ref={inputRef}
           type="text"
           inputMode="numeric"
           id={id}

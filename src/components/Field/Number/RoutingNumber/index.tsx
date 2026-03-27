@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import {
   getSharedFormFieldStyles,
   getSharedLabelStyles,
@@ -100,6 +100,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   const [internalValue, setInternalValue] = useState<string>(value)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const validateRoutingChecksum = useCallback(
     (routingNumber: string): boolean => {
@@ -152,6 +153,26 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   useEffect(() => {
     setInternalValue(value)
   }, [value])
+
+  // Listen for native 'input' events to support browser automation tools
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const formattedValue = formatInput(target.value).slice(0, 9)
+      if (formattedValue !== internalValue) {
+        setInternalValue(formattedValue)
+        setHasBeenEdited(true)
+        const valid = validateRoutingNumber(formattedValue)
+        onChange?.(formattedValue, valid)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [onChange, internalValue, validateRoutingNumber, formatInput])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +232,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       <div style={computedStyles.inputWrapper}>
         <RoutingAdornment />
         <input
+          ref={inputRef}
           type="text"
           id={id}
           value={getDisplayValue()}
