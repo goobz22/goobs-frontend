@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import ReactDOM from 'react-dom'
 import cssStyles from './Dropdown.module.css'
 
 export interface DropdownOption {
@@ -58,11 +57,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [value, setValue] = useState<string | number>(
     externalValue ?? defaultValue ?? ''
   )
-  const [dropdownPosition, setDropdownPosition] = useState({
-    top: 0,
-    left: 0,
-    width: 0,
-  })
+  // dropdownPosition removed — menu uses CSS position: absolute, top: 100%
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -92,17 +87,8 @@ const Dropdown: React.FC<DropdownProps> = ({
     })
   }, [options, showIdColumns])
 
-  // Update dropdown position when opened
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      })
-    }
-  }, [isOpen])
+  // Position is now handled by CSS (position: absolute, top: 100%)
+  // No JavaScript positioning needed
 
   // Close dropdown when clicking outside or scrolling
   useEffect(() => {
@@ -199,12 +185,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   if (styles?.borderRadius)
     buttonStyleOverrides.borderRadius = styles.borderRadius
 
-  // Menu style overrides
-  const menuStyleOverrides: React.CSSProperties = {
-    top: `${dropdownPosition.top}px`,
-    left: `${dropdownPosition.left}px`,
-    width: `${dropdownPosition.width}px`,
-  }
+  // Menu style overrides (position handled by CSS)
+  const menuStyleOverrides: React.CSSProperties = {}
   if (styles?.background) menuStyleOverrides.backgroundColor = styles.background
   if (styles?.backdropFilter)
     menuStyleOverrides.backdropFilter = styles.backdropFilter
@@ -234,6 +216,10 @@ const Dropdown: React.FC<DropdownProps> = ({
       <button
         ref={buttonRef}
         type="button"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={`${label}: ${displayValue}`}
         className={buttonClassNames}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onBlur={onBlur as any}
@@ -249,47 +235,43 @@ const Dropdown: React.FC<DropdownProps> = ({
         <span className={arrowClassNames} />
       </button>
 
-      {/* Dropdown Menu */}
-      {isOpen &&
-        !disabled &&
-        canUsePortal &&
-        ReactDOM.createPortal(
+      {/* Dropdown Menu — rendered inline for reliable positioning and extension access */}
+      {isOpen && !disabled && (
           <div
             ref={menuRef}
             className={cssStyles.menu}
             data-theme={theme}
-            style={menuStyleOverrides}
+            role="listbox"
+            aria-label={`${label} options`}
           >
-            {/* Options List */}
-            <div>
-              {filteredOptions.length === 0 ? (
-                <div className={cssStyles.emptyState}>No options available</div>
-              ) : (
-                filteredOptions.map((option, index) => {
-                  const isSelected =
-                    String(option.value) === String(value) ||
-                    String(option._id) === String(value)
-                  const optionClassNames = [
-                    cssStyles.option,
-                    isSelected && cssStyles.selected,
-                  ]
-                    .filter(Boolean)
-                    .join(' ')
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      className={optionClassNames}
-                      onClick={() => handleSelect(option)}
-                    >
-                      {String(option.value)}
-                    </button>
-                  )
-                })
-              )}
-            </div>
-          </div>,
-          document.body
+            {filteredOptions.length === 0 ? (
+              <div className={cssStyles.emptyState}>No options available</div>
+            ) : (
+              filteredOptions.map((option, index) => {
+                const isSelected =
+                  String(option.value) === String(value) ||
+                  String(option._id) === String(value)
+                const optionClassNames = [
+                  cssStyles.option,
+                  isSelected && cssStyles.selected,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    className={optionClassNames}
+                    onClick={() => handleSelect(option)}
+                  >
+                    {String(option.value)}
+                  </button>
+                )
+              })
+            )}
+          </div>
         )}
 
       {/* Helper Text */}
