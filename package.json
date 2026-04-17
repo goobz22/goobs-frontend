@@ -7,7 +7,7 @@
   "main": "./dist/goobs-frontend.es.js",
   "module": "./dist/goobs-frontend.es.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": true,
+  "sideEffects": ["*.css"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
