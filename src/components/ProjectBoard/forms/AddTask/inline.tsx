@@ -73,9 +73,11 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([])
   const [selectedCompanyId, setSelectedCompanyId] = useState(companyId)
   const [selectedCustomerId, setSelectedCustomerId] = useState(customerId)
+  const hasProducts = rawProducts.length > 0
+  const hasServices = rawServices.length > 0
   const [productOrService, setProductOrService] = useState<
     'product' | 'service'
-  >('product')
+  >(hasProducts ? 'product' : 'service')
   const [productServiceId, setProductServiceId] = useState('')
   const [selectedRegionId, setSelectedRegionId] = useState('')
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
@@ -328,15 +330,16 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   }
 
   const handleSubmit = () => {
-    if (!title.trim()) {
-      setValidationError('Please enter a title')
-      return
-    }
+    const missing: string[] = []
+    if (!title.trim()) missing.push('Title')
+    if (!description.trim()) missing.push('Description')
+    if (!selectedSeverityId) missing.push('Severity')
+    if (!selectedStatusId) missing.push('Status')
+    const hasProductServiceOptions = rawProducts.length > 0 || rawServices.length > 0
+    if (hasProductServiceOptions && !productServiceId) missing.push('Product/Service')
 
-    if (!selectedSeverityId || !selectedStatusId || !productServiceId) {
-      setValidationError(
-        'Please fill in all required fields (Severity, Status, Type, and Product/Service)'
-      )
+    if (missing.length > 0) {
+      setValidationError(`Please fill in all required fields (${missing.join(', ')})`)
       return
     }
 
@@ -422,8 +425,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             }}
           >
             <li>Title</li>
-            <li>Type</li>
-            <li>Product/Service</li>
+            <li>Description</li>
+            {(hasProducts || hasServices) && <li>Type</li>}
+            {(hasProducts || hasServices) && <li>Product/Service</li>}
             <li>Severity</li>
             <li>Status</li>
           </ul>
@@ -515,44 +519,66 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   />
                 )}
 
-                {/* Product or Service Type */}
-                <Dropdown
-                  label="Type"
-                  options={[
-                    { value: 'Product', _id: 'product' },
-                    { value: 'Service', _id: 'service' },
-                  ]}
-                  value={productOrService}
-                  onChange={e => {
-                    setProductOrService(e.target.value as 'product' | 'service')
-                    setProductServiceId('') // Reset selection when type changes
-                  }}
-                  styles={{ theme: styles?.theme || 'light', required: true }}
-                />
+                {/* Product or Service Type - only show when at least one type has data */}
+                {hasProducts && hasServices ? (
+                  <Dropdown
+                    label="Type"
+                    options={[
+                      { value: 'Product', _id: 'product' },
+                      { value: 'Service', _id: 'service' },
+                    ]}
+                    value={productOrService}
+                    onChange={e => {
+                      setProductOrService(
+                        e.target.value as 'product' | 'service'
+                      )
+                      setProductServiceId('') // Reset selection when type changes
+                    }}
+                    styles={{ theme: styles?.theme || 'light', required: true }}
+                  />
+                ) : (hasProducts || hasServices) ? (
+                  <Dropdown
+                    label="Type"
+                    options={[
+                      hasProducts
+                        ? { value: 'Product', _id: 'product' }
+                        : { value: 'Service', _id: 'service' },
+                    ]}
+                    value={productOrService}
+                    onChange={() => {}}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      required: true,
+                      disabled: true,
+                    }}
+                  />
+                ) : null}
 
-                {/* Product/Service Dropdown */}
-                <Dropdown
-                  label={productOrService === 'product' ? 'Product' : 'Service'}
-                  options={
-                    productOrService === 'product'
-                      ? productOptions
-                      : serviceOptions
-                  }
-                  value={productServiceId}
-                  onChange={e => {
-                    setProductServiceId(e.target.value)
-                    // Reset selection when switching between product/service
-                    if (
-                      (productOrService === 'product' &&
-                        !rawProducts.find(p => p._id === e.target.value)) ||
-                      (productOrService === 'service' &&
-                        !rawServices.find(s => s._id === e.target.value))
-                    ) {
-                      setProductServiceId('')
+                {/* Product/Service Dropdown - only show when options exist */}
+                {(hasProducts || hasServices) && (
+                  <Dropdown
+                    label={productOrService === 'product' ? 'Product' : 'Service'}
+                    options={
+                      productOrService === 'product'
+                        ? productOptions
+                        : serviceOptions
                     }
-                  }}
-                  styles={{ theme: styles?.theme || 'light', required: true }}
-                />
+                    value={productServiceId}
+                    onChange={e => {
+                      setProductServiceId(e.target.value)
+                      // Reset selection when switching between product/service
+                      if (
+                        (productOrService === 'product' &&
+                          !rawProducts.find(p => p._id === e.target.value)) ||
+                        (productOrService === 'service' &&
+                          !rawServices.find(s => s._id === e.target.value))
+                      ) {
+                        setProductServiceId('')
+                      }
+                    }}
+                    styles={{ theme: styles?.theme || 'light', required: true }}
+                  />
+                )}
 
                 {/* Severity */}
                 <Dropdown
