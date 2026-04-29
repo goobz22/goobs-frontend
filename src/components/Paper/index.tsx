@@ -32,10 +32,43 @@ export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
     marginRight?: string
   }
   elevation?: number
+  /**
+   * When this Paper is the surface for an inline form, set
+   * `dataForm="<verb>-<entity>"` (e.g. `"create-contract"`,
+   * `"manage-category"`) to mark the form root for tests:
+   *   `await expect(page.locator('[data-form="create-contract"]')).toBeVisible()`
+   * Generic `data-*` attributes already pass through via
+   * `...restProps`; this is the named, documented hook.
+   */
+  dataForm?: string
+  /**
+   * Singular entity noun (e.g. `"contract"`, `"category"`). Emitted as
+   * `data-subject="<value>"` so tests can disambiguate when multiple
+   * Papers (e.g. nested forms) live on the same page.
+   */
+  dataSubject?: string
+  /**
+   * Generic kind label (e.g. `"card"`, `"panel"`, `"summary"`)
+   * emitted as `data-paper="<value>"`. Use when the surface needs a
+   * stable selector but isn't a form.
+   */
+  dataPaper?: string
 }
 
 export const Paper = forwardRef<HTMLDivElement, PaperProps>(
-  ({ children, styles, elevation = 1, className, ...restProps }, ref) => {
+  (
+    {
+      children,
+      styles,
+      elevation = 1,
+      className,
+      dataForm,
+      dataSubject,
+      dataPaper,
+      ...restProps
+    },
+    ref
+  ) => {
     const isSacredTheme = styles?.theme === 'sacred'
 
     // Sacred theme glow effect based on elevation
@@ -95,6 +128,9 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
         ref={ref}
         className={className}
         style={containerStyle}
+        data-form={dataForm}
+        data-subject={dataSubject}
+        data-paper={dataPaper}
         {...restProps}
       >
         {children}

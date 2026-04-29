@@ -15,6 +15,24 @@ export interface PopoverProps {
   children: React.ReactNode
   /** Custom styles to apply to the popover using the theme system */
   styles?: PopoverStyles
+  /**
+   * ARIA role for the rendered surface. Defaults to `"dialog"`. Use
+   * `"menu"` for action lists, `"tooltip"` for hover-tip content,
+   * `"listbox"` for option pickers. Drives screenreader semantics.
+   */
+  role?: 'dialog' | 'menu' | 'tooltip' | 'listbox' | 'grid' | 'region'
+  /** `aria-label` on the popover surface — used when no labelled-by id. */
+  ariaLabel?: string
+  /** `aria-labelledby` — id of the heading inside `children`. */
+  ariaLabelledBy?: string
+  /**
+   * Stable test selector emitted as `data-popover="<value>"` on the
+   * popover root. Convention is a kebab-cased noun like
+   * `"row-actions"`, `"date-picker"`, `"filter-menu"`.
+   */
+  dataPopover?: string
+  /** Singular entity noun emitted as `data-subject="<value>"`. */
+  dataSubject?: string
 }
 
 const Popover: React.FC<PopoverProps> = ({
@@ -23,6 +41,11 @@ const Popover: React.FC<PopoverProps> = ({
   anchorEl,
   children,
   styles,
+  role = 'dialog',
+  ariaLabel,
+  ariaLabelledBy,
+  dataPopover,
+  dataSubject,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   // Use lazy initialization to check if we're on client side
@@ -41,42 +64,22 @@ const Popover: React.FC<PopoverProps> = ({
       const target = event.target as Node
       const popover = popoverRef.current
 
-      console.log('[Popover] handleClickOutside called', {
-        clickStartedInside: clickStartedInsideRef.current,
-        target: (target as HTMLElement)?.tagName,
-        targetText: (target as HTMLElement)?.textContent?.slice(0, 30),
-        popoverExists: !!popover,
-        popoverContainsTarget: popover?.contains(target),
-        anchorContainsTarget: anchorEl?.contains(target),
-      })
-
-      // If click started inside popover, don't close
+      // mousedown started inside popover — treat the whole click as
+      // internal even if mouseup landed outside (e.g. text drag-select).
       if (clickStartedInsideRef.current) {
-        console.log('[Popover] Click started inside, not closing')
         clickStartedInsideRef.current = false
         return
       }
 
-      // Check if click is inside popover
-      if (popover && popover.contains(target)) {
-        console.log('[Popover] Click is inside popover, not closing')
-        return
-      }
+      if (popover && popover.contains(target)) return
+      if (anchorEl && anchorEl.contains(target)) return
 
-      // Check if click is on anchor element
-      if (anchorEl && anchorEl.contains(target)) {
-        console.log('[Popover] Click is on anchor, not closing')
-        return
-      }
-
-      console.log('[Popover] Closing popover')
       onCloseRef.current()
     },
     [anchorEl]
   )
 
   const handleMouseDownInside = useCallback(() => {
-    console.log('[Popover] mousedown inside popover - setting flag')
     clickStartedInsideRef.current = true
   }, [])
 
@@ -114,6 +117,12 @@ const Popover: React.FC<PopoverProps> = ({
       ref={popoverRef}
       style={computedStyles.popover}
       onMouseDown={handleMouseDownInside}
+      role={role}
+      aria-modal={role === 'dialog' ? true : undefined}
+      aria-label={!ariaLabelledBy ? ariaLabel : undefined}
+      aria-labelledby={ariaLabelledBy}
+      data-popover={dataPopover}
+      data-subject={dataSubject}
     >
       {children}
     </div>

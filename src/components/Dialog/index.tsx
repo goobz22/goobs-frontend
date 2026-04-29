@@ -52,7 +52,45 @@ export interface DialogProps {
     boxShadow?: string
   }
   customDialogStyles?: React.CSSProperties
+  /**
+   * Legacy boolean — when true, renders `data-dialog-paper="true"` on the
+   * dialog root. Preserved for back-compat with existing call sites; new
+   * code should use `dataDialog` and `dataSubject` instead.
+   */
   dataDialogPaper?: boolean
+  /**
+   * Stable test selector emitted as `data-dialog="<value>"` on the dialog
+   * root. Convention is a verb-noun like `"confirm-delete"`,
+   * `"create-contract"`, `"manage-category"` so Playwright tests can
+   * locate the dialog without depending on visible title text:
+   *   `await expect(page.locator('[data-dialog="confirm-delete"]')).toBeVisible()`
+   */
+  dataDialog?: string
+  /**
+   * Singular entity noun (e.g. `"contract"`, `"category"`, `"employee"`)
+   * emitted as `data-subject="<value>"` on the dialog root. Pairs with
+   * `dataDialog` so multiple confirm dialogs on the same page disambiguate
+   * by entity:
+   *   `[data-dialog="confirm-delete"][data-subject="category"]`
+   */
+  dataSubject?: string
+  /**
+   * `aria-labelledby` for the dialog. Should be the id of the heading
+   * inside `children` (typically a `<Typography text="..." id="...">`).
+   * Required for proper screenreader announcement of the dialog purpose.
+   */
+  ariaLabelledBy?: string
+  /**
+   * `aria-describedby` for the dialog. Optional — point at a paragraph
+   * id inside `children` for screenreader description below the heading.
+   */
+  ariaDescribedBy?: string
+  /**
+   * `aria-label` fallback when there is no visible heading id to point
+   * `ariaLabelledBy` at (rare — prefer `ariaLabelledBy` so the heading
+   * is the source of truth).
+   */
+  ariaLabel?: string
 }
 
 const Dialog: React.FC<DialogProps> = ({
@@ -62,6 +100,11 @@ const Dialog: React.FC<DialogProps> = ({
   styles,
   customDialogStyles,
   dataDialogPaper,
+  dataDialog,
+  dataSubject,
+  ariaLabelledBy,
+  ariaDescribedBy,
+  ariaLabel,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
   const styleRef = useRef<HTMLStyleElement | null>(null)
@@ -274,7 +317,7 @@ const Dialog: React.FC<DialogProps> = ({
   }
 
   return (
-    <div style={backdropStyle} onClick={onClose}>
+    <div style={backdropStyle} onClick={onClose} data-dialog-backdrop="true">
       <div
         ref={dialogRef}
         style={{
@@ -282,7 +325,14 @@ const Dialog: React.FC<DialogProps> = ({
           ...customDialogStyles,
         }}
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        aria-label={!ariaLabelledBy ? ariaLabel : undefined}
         data-dialog-paper={dataDialogPaper ? 'true' : undefined}
+        data-dialog={dataDialog}
+        data-subject={dataSubject}
       >
         <div className="dialog-content" style={contentStyle}>
           {children}

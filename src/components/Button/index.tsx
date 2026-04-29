@@ -101,6 +101,37 @@ export interface ButtonStyles {
   size?: string
 }
 
+/**
+ * Canonical action verbs the auto-CRUD test scaffolder reasons about.
+ * Free-form strings are still accepted (the prop is `string`), but
+ * using the canonical set keeps `[data-action="..."]` selectors
+ * consistent across the app so a single Playwright helper can locate
+ * any "Create" / "Save" / "Delete" button regardless of which
+ * workspace it lives in.
+ */
+export type ButtonAction =
+  | 'create'
+  | 'save'
+  | 'submit'
+  | 'cancel'
+  | 'delete'
+  | 'edit'
+  | 'confirm'
+  | 'close'
+  | 'reset'
+  | 'apply'
+  | 'next'
+  | 'back'
+  | 'view'
+
+/**
+ * Visual variants. Drives the default colors when `styles` doesn't
+ * override. `primary` is the affirmative action (Create / Save /
+ * Confirm), `secondary` is neutral (Cancel / Close), `destructive`
+ * is for irreversible mutations (Delete).
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'destructive'
+
 export interface ButtonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   'style'
@@ -110,15 +141,89 @@ export interface ButtonProps extends Omit<
   styles?: ButtonStyles
   selected?: boolean
   value?: string
+  /**
+   * Action verb — emitted as `data-action="<verb>"` on the rendered
+   * `<button>`. Required so test selectors stay stable when label text
+   * changes (e.g. "Create" → "Create New" → "+ Add").
+   * Tests target via `[data-action="create"][data-subject="contract"]`.
+   */
+  action?: ButtonAction | string
+  /**
+   * Singular entity noun the action targets (e.g. `"contract"`,
+   * `"category"`, `"employee"`). Emitted as `data-subject="<value>"`.
+   * Pairs with `action` so multiple Create buttons on one page
+   * disambiguate by entity.
+   */
+  subject?: string
+  /**
+   * Visual variant. When set, applies a default color palette unless
+   * `styles` overrides specific keys. Also emitted as
+   * `data-variant="<value>"` so tests can assert intent
+   * (e.g. delete-confirmation modals expect a `destructive` confirm).
+   */
+  variant?: ButtonVariant
+}
+
+/**
+ * Variant-driven default colors. Applied BEFORE `styles` so caller
+ * overrides win. Sacred theme is the goobs default; these defaults
+ * match the visual language already used in ThothOS workspaces:
+ *   primary     → gold-on-dark   (Create / Save / Confirm)
+ *   secondary   → dim white      (Cancel / Close)
+ *   destructive → red            (Delete / irreversible mutations)
+ */
+function variantDefaults(variant: ButtonVariant | undefined): ButtonStyles {
+  if (!variant) return {}
+  if (variant === 'destructive') {
+    return {
+      backgroundColor: 'rgba(220, 53, 69, 0.15)',
+      borderColor: 'rgba(220, 53, 69, 0.5)',
+      color: '#FF6B6B',
+      hoverBackgroundColor: 'rgba(220, 53, 69, 0.25)',
+    }
+  }
+  if (variant === 'secondary') {
+    return {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      color: 'rgba(255, 255, 255, 0.85)',
+      hoverBackgroundColor: 'rgba(255, 255, 255, 0.1)',
+    }
+  }
+  return {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+    color: '#FFD700',
+    hoverBackgroundColor: 'rgba(255, 215, 0, 0.25)',
+  }
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ text, icon, styles, onClick, selected, ...restProps }, ref) => {
+  (
+    {
+      text,
+      icon,
+      styles,
+      onClick,
+      selected,
+      action,
+      subject,
+      variant,
+      ...restProps
+    },
+    ref
+  ) => {
     const filteredProps = useMemo(() => {
       const { sacredtheme, ...validProps } = restProps as any
       void sacredtheme
       return validProps
     }, [restProps])
+
+    // Variant defaults applied before user `styles` so caller wins.
+    const mergedStyles: ButtonStyles | undefined = variant
+      ? { ...variantDefaults(variant), ...styles }
+      : styles
+    styles = mergedStyles
 
     const isDisabled = styles?.disabled || filteredProps.disabled
     const iconLocation = styles?.iconLocation || 'left'
@@ -210,6 +315,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={classNames.join(' ')}
         data-theme={theme}
+        data-action={action}
+        data-subject={subject}
+        data-variant={variant}
         style={dynamicStyle}
         disabled={isDisabled}
         onClick={handleClick}

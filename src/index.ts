@@ -97,8 +97,13 @@ export { default as Badge, type BadgeProps } from './components/Badge'
 export {
   default as Tabs,
   type TabsProps,
+  type TabsItem,
+  type TabsItemCapabilities,
   Tab,
   type TabProps,
+  TabPanel,
+  type TabPanelProps,
+  tabPanelId,
 } from './components/Tabs'
 export {
   default as ToggleButton,
