@@ -185,7 +185,10 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       const target = e.target as HTMLInputElement
       const rawValue = target.value
       const numericInput = rawValue.replace(/%/g, '')
-      const currentDisplay = showPercentSymbol && (value || internalValue) ? `${value || internalValue}%` : (value || internalValue)
+      const currentDisplay =
+        showPercentSymbol && (value || internalValue)
+          ? `${value || internalValue}%`
+          : value || internalValue
       if (rawValue !== currentDisplay) {
         const formattedValue = formatValue(numericInput)
         setInternalValue(formattedValue)

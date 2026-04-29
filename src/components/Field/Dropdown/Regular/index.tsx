@@ -125,7 +125,10 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, [isOpen])
 
   const handleSelect = (option: DropdownOption) => {
-    const selectedValue = option._id != null && option._id !== '' ? String(option._id) : String(option.value)
+    const selectedValue =
+      option._id != null && option._id !== ''
+        ? String(option._id)
+        : String(option.value)
     setValue(option.value)
     setIsOpen(false)
 
@@ -237,42 +240,42 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       {/* Dropdown Menu — rendered inline for reliable positioning and extension access */}
       {isOpen && !disabled && (
-          <div
-            ref={menuRef}
-            className={cssStyles.menu}
-            data-theme={theme}
-            role="listbox"
-            aria-label={`${label} options`}
-          >
-            {filteredOptions.length === 0 ? (
-              <div className={cssStyles.emptyState}>No options available</div>
-            ) : (
-              filteredOptions.map((option, index) => {
-                const isSelected =
-                  String(option.value) === String(value) ||
-                  String(option._id) === String(value)
-                const optionClassNames = [
-                  cssStyles.option,
-                  isSelected && cssStyles.selected,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    className={optionClassNames}
-                    onClick={() => handleSelect(option)}
-                  >
-                    {String(option.value)}
-                  </button>
-                )
-              })
-            )}
-          </div>
-        )}
+        <div
+          ref={menuRef}
+          className={cssStyles.menu}
+          data-theme={theme}
+          role="listbox"
+          aria-label={`${label} options`}
+        >
+          {filteredOptions.length === 0 ? (
+            <div className={cssStyles.emptyState}>No options available</div>
+          ) : (
+            filteredOptions.map((option, index) => {
+              const isSelected =
+                String(option.value) === String(value) ||
+                String(option._id) === String(value)
+              const optionClassNames = [
+                cssStyles.option,
+                isSelected && cssStyles.selected,
+              ]
+                .filter(Boolean)
+                .join(' ')
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  className={optionClassNames}
+                  onClick={() => handleSelect(option)}
+                >
+                  {String(option.value)}
+                </button>
+              )
+            })
+          )}
+        </div>
+      )}
 
       {/* Helper Text */}
       {helperText && <div className={helperTextClassNames}>{helperText}</div>}

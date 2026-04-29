@@ -3501,7 +3501,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         ...buttonStyle,
                         padding: '6px 12px',
                         fontSize: '0.72rem',
-                        backgroundColor: isSacred ? 'rgba(255,152,0,0.2)' : 'rgba(255,152,0,0.15)',
+                        backgroundColor: isSacred
+                          ? 'rgba(255,152,0,0.2)'
+                          : 'rgba(255,152,0,0.15)',
                         color: '#FF9800',
                         border: '1px solid rgba(255,152,0,0.4)',
                       }}

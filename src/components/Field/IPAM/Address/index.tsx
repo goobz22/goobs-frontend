@@ -543,7 +543,10 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     const handleNativeInput = (e: Event) => {
       const target = e.target as HTMLInputElement
       if (target.value !== value) {
-        const formatted = formatIPAddress(target.value, lastInputTypeWasDelete.current)
+        const formatted = formatIPAddress(
+          target.value,
+          lastInputTypeWasDelete.current
+        )
         const valid = validateIPAddress(formatted)
         setIsValid(valid)
         setValue(formatted)

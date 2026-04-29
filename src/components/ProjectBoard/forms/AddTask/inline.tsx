@@ -335,11 +335,15 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     if (!description.trim()) missing.push('Description')
     if (!selectedSeverityId) missing.push('Severity')
     if (!selectedStatusId) missing.push('Status')
-    const hasProductServiceOptions = rawProducts.length > 0 || rawServices.length > 0
-    if (hasProductServiceOptions && !productServiceId) missing.push('Product/Service')
+    const hasProductServiceOptions =
+      rawProducts.length > 0 || rawServices.length > 0
+    if (hasProductServiceOptions && !productServiceId)
+      missing.push('Product/Service')
 
     if (missing.length > 0) {
-      setValidationError(`Please fill in all required fields (${missing.join(', ')})`)
+      setValidationError(
+        `Please fill in all required fields (${missing.join(', ')})`
+      )
       return
     }
 
@@ -536,7 +540,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     }}
                     styles={{ theme: styles?.theme || 'light', required: true }}
                   />
-                ) : (hasProducts || hasServices) ? (
+                ) : hasProducts || hasServices ? (
                   <Dropdown
                     label="Type"
                     options={[
@@ -557,7 +561,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 {/* Product/Service Dropdown - only show when options exist */}
                 {(hasProducts || hasServices) && (
                   <Dropdown
-                    label={productOrService === 'product' ? 'Product' : 'Service'}
+                    label={
+                      productOrService === 'product' ? 'Product' : 'Service'
+                    }
                     options={
                       productOrService === 'product'
                         ? productOptions
@@ -766,8 +772,10 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   )}
 
                   {/* Render dynamic fieldValues if present, else fall back to legacy named fields */}
-                  {viewingArticle.fieldValues && Object.keys(viewingArticle.fieldValues).length > 0
-                    ? Object.entries(viewingArticle.fieldValues).map(([key, value]) => {
+                  {viewingArticle.fieldValues &&
+                  Object.keys(viewingArticle.fieldValues).length > 0 ? (
+                    Object.entries(viewingArticle.fieldValues).map(
+                      ([key, value]) => {
                         if (!value || value.trim() === '') return null
                         const label = key
                           .replace(/([A-Z])/g, ' $1')
@@ -788,60 +796,96 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             />
                           </div>
                         )
-                      })
-                    : (
-                      <>
-                        {viewingArticle.purpose && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Purpose</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.purpose}
-                            </p>
-                          </div>
-                        )}
-                        {viewingArticle.symptoms && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Symptoms</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.symptoms}
-                            </p>
-                          </div>
-                        )}
-                        {viewingArticle.cause && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Cause</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.cause}
-                            </p>
-                          </div>
-                        )}
-                        {viewingArticle.resolution && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Resolution</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.resolution}
-                            </p>
-                          </div>
-                        )}
-                        {viewingArticle.workaround && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Workaround</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.workaround}
-                            </p>
-                          </div>
-                        )}
-                        {viewingArticle.impact && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>Impact</div>
-                            <p style={{ color: secondaryTextColor, fontSize: '0.875rem', lineHeight: '1.6' }}>
-                              {viewingArticle.impact}
-                            </p>
-                          </div>
-                        )}
-                      </>
+                      }
                     )
-                  }
+                  ) : (
+                    <>
+                      {viewingArticle.purpose && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Purpose</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.purpose}
+                          </p>
+                        </div>
+                      )}
+                      {viewingArticle.symptoms && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Symptoms</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.symptoms}
+                          </p>
+                        </div>
+                      )}
+                      {viewingArticle.cause && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Cause</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.cause}
+                          </p>
+                        </div>
+                      )}
+                      {viewingArticle.resolution && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Resolution</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.resolution}
+                          </p>
+                        </div>
+                      )}
+                      {viewingArticle.workaround && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Workaround</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.workaround}
+                          </p>
+                        </div>
+                      )}
+                      {viewingArticle.impact && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={sectionTitleStyle}>Impact</div>
+                          <p
+                            style={{
+                              color: secondaryTextColor,
+                              fontSize: '0.875rem',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            {viewingArticle.impact}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               ) : (
                 /* Article List View */
