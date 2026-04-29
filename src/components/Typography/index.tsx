@@ -239,9 +239,35 @@ const Typography: React.FC<TypographyProps> = ({
   const isHeading = String(finalVariant).toLowerCase().includes('h')
   const content = text || children
 
+  // ThothOS hydration fix (CF-185 follow-up):
+  //
+  // Typography previously rendered as <p>, which is "flow content"
+  // (block-level) per the HTML content-model spec. That's invalid as
+  // a child of <button>, <a>, <h1..h6>, and any other element whose
+  // content model is "phrasing content" only. Browsers auto-correct
+  // by closing the <p> BEFORE the parent element — but the React
+  // server-render produces literal `<button><p>...</p></button>` in
+  // the HTML stream, while the client's parser closes the <p> early.
+  // The two trees diverge → React fires a hydration mismatch and the
+  // dev-mode error overlay intercepts pointer events, breaking the
+  // very next click in any test on the page.
+  //
+  // Real-world repro: ThothOS automations workspace had Typography
+  // inside the Metrics Summary accordion <button>. Every test on
+  // that route failed because the dev overlay covered the "+ New
+  // Template" button.
+  //
+  // Fix: render <span> by default — phrasing content, valid as a
+  // child of every element above. Apply `display: 'block'` so the
+  // visual layout (margins, line-height, gutterBottom) is unchanged
+  // for callers that expected paragraph-like flow. Inline-context
+  // callers (inside button / heading) get correct nesting because
+  // <span style="display:block"> is still a <span> at the parser
+  // level — no auto-correction.
   return (
-    <p
+    <span
       style={{
+        display: 'block',
         ...variantStyles,
         color: variantStyles.color || finalColor,
         fontFamily:
@@ -284,7 +310,7 @@ const Typography: React.FC<TypographyProps> = ({
       }}
     >
       {content}
-    </p>
+    </span>
   )
 }
 
