@@ -1,99 +1,53 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
-type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>
-
-export interface ExternalIncrementNumberFieldProps extends Omit<
-  TextFieldProps,
-  'onChange' | 'disabled' | 'required'
-> {
+export interface ExternalIncrementNumberFieldProps {
   initialValue?: string
-  onChange?: () => void
-  label?: string
+  /**
+   * Fires whenever the value changes (typed input or +/- button).
+   *
+   * Bug fix: previously was `() => void` with no payload — callers
+   * couldn't actually read the new value, which made the component
+   * write-only. Now passes the resulting numeric value so the caller
+   * can wire it up to its own state.
+   */
+  onChange?: (value: number) => void
+  label?: React.ReactNode
   helperText?: string
-  styles?: FormFieldStyles
-}
-
-const getStyles = (
-  styles?: FormFieldStyles,
-  isFocused?: boolean,
-  helperText?: string
-) => {
-  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
-    getSharedFormFieldStyles(styles, isFocused)
-
-  const disabled = styles?.disabled
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      gap: '8px',
-      ...getSharedContainerStyles(styles),
-    },
-    button: {
-      padding: '4px 12px',
-      border: `1px solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '6px',
-      transition,
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      opacity: disabled ? 0.5 : 1,
-      fontFamily: themeConfig.fontFamily,
-      fontSize: styles?.fontSize || '14px',
-      fontWeight: 500,
-      minWidth: '32px',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: helperText ? '20px' : '0px',
-    } as React.CSSProperties,
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-    } as React.CSSProperties,
-    input: {
-      width: '64px',
-      height: '40px',
-      textAlign: 'center',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      outline: 'none',
-      transition,
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      opacity: disabled ? 0.5 : 1,
-      fontFamily: themeConfig.fontFamily,
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      padding: '8px',
-      boxSizing: 'border-box',
-    } as React.CSSProperties,
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  placeholder?: string
+  id?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
+  styles?: FieldStyleOverrides
 }
 
 const ExternalIncrementNumberField: React.FC<
   ExternalIncrementNumberFieldProps
-> = ({ initialValue = '0', onChange, label, helperText, styles, ...rest }) => {
+> = ({
+  initialValue = '0',
+  onChange,
+  label,
+  helperText,
+  error,
+  dataField,
+  dataFieldName,
+  placeholder,
+  id,
+  name,
+  styles,
+}) => {
   const [internalValue, setInternalValue] = useState(initialValue)
-  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
   // Listen for native 'input' events to support browser automation tools
   useEffect(() => {
@@ -106,7 +60,8 @@ const ExternalIncrementNumberField: React.FC<
       const newValue = numValue === '' ? '0' : numValue
       if (newValue !== internalValue) {
         setInternalValue(newValue)
-        onChange?.()
+        const parsed = parseInt(newValue, 10)
+        onChange?.(isNaN(parsed) ? 0 : parsed)
       }
     }
 
@@ -115,87 +70,126 @@ const ExternalIncrementNumberField: React.FC<
   }, [onChange, internalValue])
 
   const handleIncrement = useCallback(() => {
-    if (styles?.disabled) return
+    if (disabled) return
     setInternalValue((prev: string) => {
       const num = parseInt(prev, 10)
-      const newValue = (isNaN(num) ? 0 : num + 1).toString()
-      onChange?.()
-      return newValue
+      const nextNum = isNaN(num) ? 0 : num + 1
+      onChange?.(nextNum)
+      return nextNum.toString()
     })
-  }, [onChange, styles?.disabled])
+  }, [onChange, disabled])
 
   const handleDecrement = useCallback(() => {
-    if (styles?.disabled) return
+    if (disabled) return
     setInternalValue((prev: string) => {
       const num = parseInt(prev, 10)
-      const newValue = Math.max(0, isNaN(num) ? 0 : num - 1).toString()
-      onChange?.()
-      return newValue
+      const nextNum = Math.max(0, isNaN(num) ? 0 : num - 1)
+      onChange?.(nextNum)
+      return nextNum.toString()
     })
-  }, [onChange, styles?.disabled])
+  }, [onChange, disabled])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const numValue = event.target.value.replace(/[^0-9]/g, '')
       const newValue = numValue === '' ? '0' : numValue
       setInternalValue(newValue)
-      onChange?.()
+      const parsed = parseInt(newValue, 10)
+      onChange?.(isNaN(parsed) ? 0 : parsed)
     },
     [onChange]
   )
 
-  const handleFocus = useCallback(() => setIsFocused(true), [])
-  const handleBlur = useCallback(() => setIsFocused(false), [])
+  // Inline-style chrome. The container is flex-row so the +/- buttons
+  // sit on either side of the input wrapper.
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  }
 
-  const computedStyles = getStyles(styles, isFocused, helperText)
+  const buttonStyle: React.CSSProperties = {
+    padding: '4px 12px',
+    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
+    borderRadius: '6px',
+    backgroundColor: 'var(--field-bg, transparent)',
+    color: 'var(--field-text, inherit)',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    fontSize: '14px',
+    fontWeight: 500,
+    minWidth: '32px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '64px',
+    height: '40px',
+    textAlign: 'center',
+    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
+    borderRadius: '8px',
+    outline: 'none',
+    backgroundColor: 'var(--field-bg, transparent)',
+    color: 'var(--field-text, inherit)',
+    opacity: disabled ? 0.5 : 1,
+    fontSize: '16px',
+    padding: '8px',
+    boxSizing: 'border-box',
+  }
 
   return (
-    <div style={computedStyles.container}>
-      <button
-        type="button"
-        onClick={handleDecrement}
-        disabled={styles?.disabled}
-        style={computedStyles.button}
-      >
-        -
-      </button>
-      <div style={computedStyles.inputWrapper}>
-        {label && (
-          <label style={computedStyles.label}>
-            {label}
-            {styles?.required && (
-              <span style={getRequiredIndicatorStyle(styles)}>
-                {styles?.requiredIndicatorText || ' *'}
-              </span>
-            )}
-          </label>
-        )}
-        <input
-          ref={inputRef}
-          type="text"
-          value={internalValue}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          {...getRequiredProps(styles?.required)}
-          style={computedStyles.input}
-          {...rest}
-        />
-        {helperText && (
-          <div style={computedStyles.footerText}>{helperText}</div>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={handleIncrement}
-        disabled={styles?.disabled}
-        style={computedStyles.button}
-      >
-        +
-      </button>
-    </div>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={containerStyle}>
+          <button
+            type="button"
+            aria-label="Decrease value"
+            onClick={handleDecrement}
+            disabled={disabled}
+            style={buttonStyle}
+          >
+            −
+          </button>
+          <input
+            ref={inputRef}
+            type="text"
+            id={id ?? inputId}
+            name={name}
+            value={internalValue}
+            onChange={handleChange}
+            disabled={disabled}
+            placeholder={placeholder}
+            data-field-name={dataFieldName}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
+          <button
+            type="button"
+            aria-label="Increase value"
+            onClick={handleIncrement}
+            disabled={disabled}
+            style={buttonStyle}
+          >
+            +
+          </button>
+        </div>
+      )}
+    </FieldShell>
   )
 }
+
+ExternalIncrementNumberField.displayName = 'ExternalIncrementNumberField'
 
 export default ExternalIncrementNumberField

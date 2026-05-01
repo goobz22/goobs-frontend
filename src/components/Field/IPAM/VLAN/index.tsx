@@ -1,27 +1,83 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import InternalIncrementNumberField, {
-  InternalIncrementNumberFieldProps,
-} from '../../Number/InternalIncrement'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
+import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 // VLAN ID constraints
 const MIN_VLAN_ID = 1
 const MAX_VLAN_ID = 4094
 
-export interface VLANFieldProps extends Omit<
-  InternalIncrementNumberFieldProps,
-  'onChange' | 'value' | 'initialValue'
-> {
+export interface VLANFieldProps {
   initialValue?: string
   /**
-   * A standard ChangeEvent<HTMLInputElement> so parent can do
-   * e.g. (event) => getVLANValue(event.target.value) ...
+   * Emits the new VLAN ID as a number. Was previously polymorphic
+   * `(event | number) => void` — collapsed to `(value: number) => void`
+   * during the FieldShell migration.
    */
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange?: (value: number) => void
   label?: string
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  required?: boolean
   disabled?: boolean
+  styles?: FieldStyleOverrides
   /** Array of reserved VLAN IDs that can't be used */
   reservedVLANs?: number[]
+  initialDelay?: number
+  repeatInterval?: number
+  placeholder?: string
+  id?: string
+  name?: string
+  autoComplete?: string
+}
+
+// Inline button + input styles preserved from the legacy theme so the
+// chrome doesn't regress while the IPAM family migrates.
+const buttonContainerStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: '8px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  justifyContent: 'center',
+}
+
+const buttonStyle = (isDisabled: boolean): React.CSSProperties => ({
+  padding: 0,
+  width: '1rem',
+  height: '1rem',
+  minWidth: '1rem',
+  minHeight: '1rem',
+  borderRadius: '0.125rem',
+  border: 'none',
+  backgroundColor: 'transparent',
+  cursor: isDisabled ? 'not-allowed' : 'pointer',
+  color: 'currentColor',
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  opacity: isDisabled ? 0.5 : 1,
+})
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  height: '40px',
+  background: 'transparent',
+  outline: 'none',
+  border: '1px solid rgba(0,0,0,0.2)',
+  borderRadius: '8px',
+  padding: '8px 60px 8px 16px',
+  fontSize: '16px',
+  boxSizing: 'border-box',
 }
 
 /**
@@ -35,78 +91,56 @@ const VLANField: React.FC<VLANFieldProps> = ({
   initialValue = '',
   onChange,
   label = 'VLAN ID',
+  helperText,
+  error: errorProp,
+  dataField,
+  dataFieldName,
+  required,
   disabled,
+  styles,
   reservedVLANs = [],
-  ...rest
+  initialDelay = 500,
+  repeatInterval = 100,
+  placeholder = `${MIN_VLAN_ID}-${MAX_VLAN_ID}`,
+  id,
+  name,
+  autoComplete,
 }) => {
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
-  )
-  const [isValid, setIsValid] = useState(true)
   const [currentValue, setCurrentValue] = useState(initialValue)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Use ref to track the latest value without triggering renders
-  const valueRef = useRef(initialValue)
-  // Use ref to track pending events to pass up
-  const pendingEventRef = useRef<React.ChangeEvent<HTMLInputElement> | null>(
-    null
-  )
-
-  // Separate validation logic from state updates
-  // This only returns validation results without setting state
-  const getValidationResult = useCallback(
-    (vlanStr: string): { isValid: boolean; message?: string } => {
-      if (!vlanStr) {
-        return { isValid: true }
-      }
+  // Pure validation — returns the canonical error message for a given
+  // input string (or undefined if the input is empty / valid). Kept as
+  // a memoized callback so it doesn't churn on every keystroke.
+  const getValidationError = useCallback(
+    (vlanStr: string): string | undefined => {
+      if (!vlanStr) return undefined
 
       const vlanId = parseInt(vlanStr, 10)
-
-      if (isNaN(vlanId)) {
-        return { isValid: false, message: 'VLAN ID must be a number' }
-      }
-
-      if (vlanId < MIN_VLAN_ID) {
-        return {
-          isValid: false,
-          message: `VLAN ID must be at least ${MIN_VLAN_ID}`,
-        }
-      }
-
-      if (vlanId > MAX_VLAN_ID) {
-        return {
-          isValid: false,
-          message: `VLAN ID cannot exceed ${MAX_VLAN_ID}`,
-        }
-      }
-
+      if (isNaN(vlanId)) return 'VLAN ID must be a number'
+      if (vlanId < MIN_VLAN_ID) return `VLAN ID must be at least ${MIN_VLAN_ID}`
+      if (vlanId > MAX_VLAN_ID) return `VLAN ID cannot exceed ${MAX_VLAN_ID}`
       if (reservedVLANs.includes(vlanId)) {
-        return {
-          isValid: false,
-          message: `VLAN ID ${vlanId} is reserved and cannot be used`,
-        }
+        return `VLAN ID ${vlanId} is reserved and cannot be used`
       }
 
-      return { isValid: true }
+      return undefined
     },
     [reservedVLANs]
   )
 
-  // Compute validation result using useMemo (derived state)
-  const validationResult = useMemo(
-    () => getValidationResult(currentValue),
-    [currentValue, getValidationResult]
+  // Derived state — the validation error for the current input. Errors
+  // from the caller (`errorProp`) override local validation so server-
+  // side errors (duplicate VLAN, etc.) can surface.
+  const localError = useMemo(
+    () => getValidationError(currentValue),
+    [currentValue, getValidationError]
   )
+  const shellError = errorProp ?? localError
 
-  // Sync validation state using derived state pattern
-  if (validationResult.isValid !== isValid) {
-    setIsValid(validationResult.isValid)
-  }
-  if (validationResult.message !== errorMessage) {
-    setErrorMessage(validationResult.message)
-  }
-
-  // Track previous initialValue for derived state pattern
+  // Sync incoming initialValue → state (parent-controlled value flow).
   const [prevInitialValue, setPrevInitialValue] = useState(initialValue)
   if (initialValue !== prevInitialValue) {
     setPrevInitialValue(initialValue)
@@ -115,122 +149,164 @@ const VLANField: React.FC<VLANFieldProps> = ({
     }
   }
 
-  // Handle deferred value updates
-  useEffect(() => {
-    // Only update if the ref value is different from current state
-    if (valueRef.current !== currentValue) {
-      setCurrentValue(valueRef.current)
-    }
-
-    // Handle any pending onChange events
-    if (pendingEventRef.current && onChange) {
-      onChange(pendingEventRef.current)
-      pendingEventRef.current = null
-    }
-  }, [currentValue, onChange])
-
-  // Handle changes from the InternalIncrementNumberField
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement> | number) => {
-      // If we got a numeric value directly (from the increment/decrement buttons)
-      if (typeof event === 'number') {
-        const numValue = event
-
-        // Skip reservedVLANs when incrementing/decrementing
-        if (reservedVLANs.includes(numValue)) {
-          // Find the next available non-reserved value
-          let nextValue = numValue
-          const maxIterations = MAX_VLAN_ID - MIN_VLAN_ID
-          let iterations = 0
-
-          while (
-            reservedVLANs.includes(nextValue) &&
-            iterations < maxIterations
-          ) {
-            nextValue = nextValue >= MAX_VLAN_ID ? MIN_VLAN_ID : nextValue + 1
-            iterations++
-          }
-
-          // Update ref instead of state directly
-          const validValue = nextValue.toString()
-          valueRef.current = validValue
-
-          // Create synthetic event for parent
-          const syntheticEvent = {
-            target: { value: validValue },
-          } as React.ChangeEvent<HTMLInputElement>
-
-          // Store the event to be processed in useEffect
-          pendingEventRef.current = syntheticEvent
-          // Force an update to trigger the useEffect and controlled value sync
-          setCurrentValue(prev =>
-            prev === validValue ? prev + ' ' : validValue
-          )
-          return
-        }
-
-        // Handle normal numeric value
-        const stringValue = numValue.toString()
-        valueRef.current = stringValue
-
-        // Create synthetic event for parent
-        const syntheticEvent = {
-          target: { value: stringValue },
-        } as React.ChangeEvent<HTMLInputElement>
-
-        // Store the event to be processed in useEffect
-        pendingEventRef.current = syntheticEvent
-        // Force an update to trigger the useEffect and controlled value sync
-        setCurrentValue(prev =>
-          prev === stringValue ? prev + ' ' : stringValue
-        )
-        return
+  // Skip-reserved helper: when incrementing/decrementing past a reserved
+  // VLAN, walk forward (wrapping at MAX → MIN) until we find an unused
+  // ID. Matches the legacy behaviour from the pre-migration component.
+  const skipReserved = useCallback(
+    (start: number): number => {
+      if (!reservedVLANs.includes(start)) return start
+      let next = start
+      const maxIterations = MAX_VLAN_ID - MIN_VLAN_ID
+      let iterations = 0
+      while (reservedVLANs.includes(next) && iterations < maxIterations) {
+        next = next >= MAX_VLAN_ID ? MIN_VLAN_ID : next + 1
+        iterations++
       }
-
-      // Handle regular text input
-      const stringValue = event.target.value
-      valueRef.current = stringValue
-
-      // Store the original event to be processed in useEffect
-      pendingEventRef.current = event
-
-      // Force an update to trigger the useEffect
-      setCurrentValue(prev => (prev === stringValue ? prev + ' ' : stringValue))
+      return next
     },
     [reservedVLANs]
   )
 
-  const computedStyles = (() => {
-    const { disabled: stylesDisabled, ...stylesWithoutDisabled } =
-      rest.styles || {}
-    const merged = {
-      ...stylesWithoutDisabled,
-      helperTextType: !isValid ? 'error' : 'info',
-    } as Omit<NonNullable<typeof rest.styles>, 'disabled'> & {
-      helperTextType: 'error' | 'info'
+  const clearTimers = useCallback(() => {
+    if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
+    if (timerRef.current) clearInterval(timerRef.current)
+    initialTimerRef.current = null
+    timerRef.current = null
+  }, [])
+
+  const handleIncrement = useCallback(() => {
+    setCurrentValue(prev => {
+      const num = parseInt(prev, 10)
+      const next = Math.min(MAX_VLAN_ID, isNaN(num) ? MIN_VLAN_ID : num + 1)
+      const final = skipReserved(next)
+      onChange?.(final)
+      return final.toString()
+    })
+  }, [onChange, skipReserved])
+
+  const handleDecrement = useCallback(() => {
+    setCurrentValue(prev => {
+      const num = parseInt(prev, 10)
+      const next = Math.max(MIN_VLAN_ID, isNaN(num) ? MIN_VLAN_ID : num - 1)
+      const final = skipReserved(next)
+      onChange?.(final)
+      return final.toString()
+    })
+  }, [onChange, skipReserved])
+
+  const handleIncrementMouseDown = useCallback(() => {
+    handleIncrement()
+    initialTimerRef.current = setTimeout(() => {
+      timerRef.current = setInterval(handleIncrement, repeatInterval)
+    }, initialDelay)
+    document.addEventListener('mouseup', clearTimers)
+    document.addEventListener('mouseleave', clearTimers)
+  }, [handleIncrement, initialDelay, repeatInterval, clearTimers])
+
+  const handleDecrementMouseDown = useCallback(() => {
+    handleDecrement()
+    initialTimerRef.current = setTimeout(() => {
+      timerRef.current = setInterval(handleDecrement, repeatInterval)
+    }, initialDelay)
+    document.addEventListener('mouseup', clearTimers)
+    document.addEventListener('mouseleave', clearTimers)
+  }, [handleDecrement, initialDelay, repeatInterval, clearTimers])
+
+  useEffect(() => {
+    return () => {
+      clearTimers()
+      document.removeEventListener('mouseup', clearTimers)
+      document.removeEventListener('mouseleave', clearTimers)
     }
-    if (disabled !== undefined) return { ...merged, disabled }
-    if (stylesDisabled !== undefined)
-      return { ...merged, disabled: stylesDisabled }
-    return merged as unknown as typeof merged & { disabled?: never }
-  })()
+  }, [clearTimers])
 
-  const numberFieldProps: InternalIncrementNumberFieldProps = {
-    ...(rest as Omit<InternalIncrementNumberFieldProps, 'onChange' | 'value'>),
-    value: currentValue,
-    onChange: handleChange,
-    label,
-    min: MIN_VLAN_ID,
-    max: MAX_VLAN_ID,
-    placeholder: `${MIN_VLAN_ID}-${MAX_VLAN_ID}`,
-    styles: computedStyles as any,
-  }
+  const handleTextFieldChange = useCallback(
+    (val: string) => {
+      const stripped = val.replace(/[^0-9]/g, '')
+      setCurrentValue(stripped)
+      // Only emit when we have a complete-and-valid value so consumers
+      // don't see in-progress numbers like `1` (briefly < MIN) when the
+      // user is mid-typing `15`.
+      const parsed = parseInt(stripped, 10)
+      if (!isNaN(parsed) && getValidationError(stripped) === undefined) {
+        onChange?.(parsed)
+      }
+    },
+    [onChange, getValidationError]
+  )
 
-  if (errorMessage !== undefined) {
-    numberFieldProps.helperText = errorMessage
-  }
+  // Listen for native 'input' events from browser-automation tools that
+  // bypass React's synthetic-event system.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
 
-  return <InternalIncrementNumberField {...numberFieldProps} />
+    const handleNativeInput = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      if (target.value !== currentValue) {
+        handleTextFieldChange(target.value)
+      }
+    }
+
+    el.addEventListener('input', handleNativeInput)
+    return () => el.removeEventListener('input', handleNativeInput)
+  }, [currentValue, handleTextFieldChange])
+
+  return (
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={shellError}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={{ position: 'relative', width: '100%' }}>
+          <input
+            ref={inputRef}
+            id={id ?? inputId}
+            name={name}
+            data-field-name={dataFieldName}
+            autoComplete={autoComplete}
+            value={currentValue}
+            disabled={disabled}
+            required={required}
+            onChange={e => handleTextFieldChange(e.target.value)}
+            placeholder={placeholder}
+            type="text"
+            inputMode="numeric"
+            style={inputStyle}
+            {...inputAriaProps}
+          />
+          <div style={buttonContainerStyle}>
+            <button
+              type="button"
+              aria-label="Increase VLAN ID"
+              onMouseDown={handleIncrementMouseDown}
+              disabled={disabled}
+              style={buttonStyle(!!disabled)}
+            >
+              <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
+            </button>
+            <button
+              type="button"
+              aria-label="Decrease VLAN ID"
+              onMouseDown={handleDecrementMouseDown}
+              disabled={disabled}
+              style={buttonStyle(!!disabled)}
+            >
+              <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
+            </button>
+          </div>
+        </div>
+      )}
+    </FieldShell>
+  )
 }
+
+VLANField.displayName = 'VLANField'
 
 export default VLANField

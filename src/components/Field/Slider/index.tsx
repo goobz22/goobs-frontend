@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { getSharedFormFieldStyles, type FormFieldStyles } from '../../../theme'
+import React, { useCallback, useRef, useEffect } from 'react'
+import FieldShell, { type FieldStyleOverrides } from '../Shell'
 
 export interface SliderProps {
   value: number
@@ -10,7 +10,16 @@ export interface SliderProps {
   max?: number
   step?: number
   label?: string
-  styles?: FormFieldStyles
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
+  styles?: FieldStyleOverrides
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -20,13 +29,20 @@ const Slider: React.FC<SliderProps> = ({
   max = 100,
   step = 1,
   label,
+  helperText,
+  error,
+  dataField,
+  dataFieldName,
+  name,
   styles,
 }) => {
-  const [focused, setFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { themeConfig } = getSharedFormFieldStyles(styles, focused)
 
-  // Listen for native 'input' events to support browser automation tools
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
+
+  // Listen for native 'input' events to support browser automation
+  // tools that bypass React's synthetic event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -43,14 +59,6 @@ const Slider: React.FC<SliderProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
-  const handleFocus = useCallback(() => {
-    setFocused(true)
-  }, [])
-
-  const handleBlur = useCallback(() => {
-    setFocused(false)
-  }, [])
-
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(Number(event.target.value))
@@ -58,37 +66,44 @@ const Slider: React.FC<SliderProps> = ({
     [onChange]
   )
 
-  const componentStyles = {
-    container: {
-      width: '100%',
-    },
-    label: {
-      color: themeConfig.text,
-      fontFamily: themeConfig.fontFamily,
-      marginBottom: '8px',
-      display: 'block',
-    },
-    input: {
-      width: '100%',
-    },
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
   }
 
   return (
-    <div style={componentStyles.container}>
-      {label && <label style={componentStyles.label}>{label}</label>}
-      <input
-        ref={inputRef}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        style={componentStyles.input}
-      />
-    </div>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <input
+          ref={inputRef}
+          type="range"
+          id={inputId}
+          name={name}
+          data-field-name={dataFieldName}
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+          required={required}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-orientation="horizontal"
+          style={inputStyle}
+          {...inputAriaProps}
+        />
+      )}
+    </FieldShell>
   )
 }
 

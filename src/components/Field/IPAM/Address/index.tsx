@@ -1,23 +1,28 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type SharedFormFieldProps,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import Typography from '../../../../components/Typography'
 
-export interface IPAddressFieldProps extends Omit<
-  SharedFormFieldProps,
-  'onChange'
-> {
+export interface IPAddressFieldProps {
   initialValue?: string
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  /**
+   * Emits the formatted/validated IP string. Was previously a synthetic
+   * ChangeEvent — collapsed to the value alone during the FieldShell
+   * migration. Callers that want the input element should grab it from
+   * a ref / their own onBlur instead.
+   */
+  onChange?: (value: string) => void
   label?: string
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  required?: boolean
+  disabled?: boolean
+  styles?: FieldStyleOverrides
   allowIncomplete?: boolean
   autoInsertDots?: boolean
   defaultNetwork?: string
@@ -31,7 +36,11 @@ export interface IPAddressFieldProps extends Omit<
   endIPValue?: string
   startIPValue?: string
   renderAsRange?: boolean
-  onEndIPChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  /**
+   * Same value-only shape as `onChange`; emits the formatted end-IP
+   * string when `renderAsRange` is true.
+   */
+  onEndIPChange?: (value: string) => void
   onEndIPBlur?: () => void
   errorEnd?: boolean
   showAvailableRange?: boolean
@@ -39,31 +48,6 @@ export interface IPAddressFieldProps extends Omit<
   availableRangeMessage?: string
   placeholder?: string
 }
-
-const getStyles = (sacredtheme?: boolean) => ({
-  infoText: {
-    display: 'block',
-    marginTop: '-0.5rem',
-    marginBottom: '0.25rem',
-    fontStyle: 'italic',
-    color: sacredtheme ? 'rgba(255, 215, 0, 0.7)' : '#6B7280',
-  } as React.CSSProperties,
-  rangeContainer: {
-    width: '100%',
-  } as React.CSSProperties,
-  rangeInner: {
-    display: 'flex',
-    width: '100%',
-    gap: '0.5rem',
-    alignItems: 'center',
-  } as React.CSSProperties,
-  rangeDivider: {
-    marginTop: '1rem',
-  } as React.CSSProperties,
-  rangeSide: {
-    flex: 1,
-  } as React.CSSProperties,
-})
 
 const isValidSegment = (segment: string): boolean => {
   if (segment === '') return true
@@ -250,10 +234,32 @@ const numToIP = (num: number): string =>
     '.'
   )
 
+// Inline input style — preserved from the legacy theme so the input
+// chrome (height, padding, border) doesn't regress while CSS module
+// migration is incremental.
+const buildInputStyle = (): React.CSSProperties => ({
+  width: '100%',
+  height: '40px',
+  background: 'transparent',
+  outline: 'none',
+  border: '1px solid rgba(0,0,0,0.2)',
+  borderRadius: '8px',
+  padding: '8px 16px',
+  fontSize: '16px',
+  boxSizing: 'border-box',
+})
+
 const IPAddressField: React.FC<IPAddressFieldProps> = ({
   initialValue = '',
   onChange,
   label = 'IP Address',
+  helperText,
+  error: errorProp,
+  dataField,
+  dataFieldName,
+  required,
+  disabled,
+  styles,
   allowIncomplete = true,
   autoInsertDots = true,
   defaultNetwork,
@@ -272,7 +278,6 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   errorEnd = false,
   availableRangeMessage,
   placeholder = '192.168.0.1',
-  ...rest
 }) => {
   const [value, setValue] = useState(initialValue)
   const [isValid, setIsValid] = useState<boolean>(
@@ -283,7 +288,6 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   const [isValidRange, setIsValidRange] = useState<boolean>(true)
   const lastInputTypeWasDelete = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const styles = getStyles(rest.styles?.theme === 'sacred')
 
   const valueRef = useRef(value)
   const subnetAddressRef = useRef(subnetAddress)
@@ -535,7 +539,8 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     []
   )
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools
+  // that bypass React's synthetic-event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -550,14 +555,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
         const valid = validateIPAddress(formatted)
         setIsValid(valid)
         setValue(formatted)
-
-        if (onChange) {
-          const syntheticEvent = {
-            target: { value: formatted },
-            currentTarget: { value: formatted },
-          } as React.ChangeEvent<HTMLInputElement>
-          onChange(syntheticEvent)
-        }
+        onChange?.(formatted)
       }
     }
 
@@ -565,135 +563,89 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value, formatIPAddress, validateIPAddress])
 
+  // Combined error: invalid format / outside subnet / outside network /
+  // bad gateway / range-order. The explicit `error` prop wins so callers
+  // can surface server-side validation regardless of local state.
+  const localError =
+    !isValid || !isInNetwork || !isInSubnet
+      ? 'Please enter a valid IP address'
+      : undefined
+  const shellError = errorProp ?? localError
+
   if (renderAsRange) {
-    const handleStartIPChange = (value: string) => {
-      if (onChange) {
-        // Create a synthetic event to match the expected signature
-        const syntheticEvent = {
-          target: { value },
-          currentTarget: { value },
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange(syntheticEvent)
-      }
+    const handleStartIPChange = (val: string) => {
+      onChange?.(val)
     }
 
-    const handleEndIPChange = (value: string) => {
-      if (onEndIPChange) {
-        // Create a synthetic event to match the expected signature
-        const syntheticEvent = {
-          target: { value },
-          currentTarget: { value },
-        } as React.ChangeEvent<HTMLInputElement>
-        onEndIPChange(syntheticEvent)
-      }
+    const handleEndIPChange = (val: string) => {
+      onEndIPChange?.(val)
     }
 
-    const {
-      themeConfig: rangeThemeConfig,
-      borderColor: rangeBorderColor,
-      labelColor: rangeLabelColor,
-      footerTextColor: rangeFooterTextColor,
-      transition: rangeTransition,
-    } = getSharedFormFieldStyles(rest.styles, !!(!isValidRange || errorEnd))
-
-    const rangeComponentStyles: Record<string, React.CSSProperties> = {
-      container: getSharedContainerStyles(rest.styles),
-      inputWrapper: {
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        height: rest.styles?.height || '40px',
-        width: '100%',
-        border: `${rest.styles?.borderWidth || '1px'} solid ${rangeBorderColor}`,
-        borderRadius: rest.styles?.borderRadius || '8px',
-        backgroundColor: rangeThemeConfig.background,
-        color: rangeThemeConfig.text,
-        margin: 0,
-        padding: 0,
-        boxSizing: 'border-box',
-        transition: rangeTransition,
-      },
-      input: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'transparent',
-        outline: 'none',
-        border: 'none',
-        padding: rest.styles?.padding || '8px 16px',
-        fontSize: rest.styles?.fontSize || '16px',
-        fontWeight: rest.styles?.fontWeight,
-        lineHeight: rest.styles?.lineHeight,
-        fontFamily: rangeThemeConfig.fontFamily,
-        color: 'inherit',
-        boxSizing: 'border-box',
-      },
-      label: getSharedLabelStyles(rangeLabelColor, rangeThemeConfig),
-      footerText: getSharedFooterTextStyles(
-        rangeFooterTextColor,
-        rangeThemeConfig,
-        rest.styles
-      ),
-    }
-
-    const createRangeInput = (
-      inputLabel: string,
-      inputValue: string | undefined,
-      inputOnChange: (value: string) => void,
-      inputError: string | undefined
-    ) => (
-      <div style={styles.rangeSide}>
-        {inputLabel && (
-          <label style={rangeComponentStyles.label}>
-            {inputLabel}
-            {rest.required && (
-              <span style={getRequiredIndicatorStyle(rest.styles)}>
-                {rest.styles?.requiredIndicatorText || ' *'}
-              </span>
-            )}
-          </label>
-        )}
-
-        <div style={rangeComponentStyles.inputWrapper}>
-          <input
-            {...rest}
-            {...getRequiredProps(rest.required)}
-            value={inputValue || ''}
-            disabled={rest.disabled}
-            onChange={e => inputOnChange(e.target.value)}
-            onBlur={onEndIPBlur}
-            placeholder={
-              placeholder ||
-              (inputLabel.includes('Start') ? '192.168.0.1' : '192.168.0.255')
-            }
-            style={rangeComponentStyles.input}
-          />
-        </div>
-
-        {inputError && (
-          <div style={rangeComponentStyles.footerText}>{inputError}</div>
-        )}
-      </div>
-    )
+    const rangeError = !isValidRange ? 'Invalid IP range' : undefined
 
     return (
-      <div style={styles.rangeContainer}>
+      <div style={{ width: '100%' }} data-field={dataField}>
         {availableRangeMessage && (
           <Typography>{availableRangeMessage}</Typography>
         )}
-        <div style={styles.rangeInner}>
-          {createRangeInput(
-            startIPValue ? label : '',
-            startIPValue,
-            handleStartIPChange,
-            !isValidRange ? 'Invalid IP range' : undefined
-          )}
+        <div
+          style={{
+            display: 'flex',
+            width: '100%',
+            gap: '0.5rem',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <FieldShell
+              label={startIPValue ? label : ''}
+              error={rangeError}
+              disabled={disabled}
+              required={required}
+              styles={styles}
+            >
+              {({ inputId, inputAriaProps }) => (
+                <input
+                  id={inputId}
+                  data-field-name={dataFieldName}
+                  type="text"
+                  value={startIPValue || ''}
+                  disabled={disabled}
+                  required={required}
+                  onChange={e => handleStartIPChange(e.target.value)}
+                  onBlur={onEndIPBlur}
+                  placeholder={placeholder || '192.168.0.1'}
+                  style={buildInputStyle()}
+                  {...inputAriaProps}
+                />
+              )}
+            </FieldShell>
+          </div>
           <Typography>-</Typography>
-          {createRangeInput(
-            endIPValue ? label : '',
-            endIPValue,
-            handleEndIPChange,
-            errorEnd || !isValidRange ? 'Invalid IP range' : undefined
-          )}
+          <div style={{ flex: 1 }}>
+            <FieldShell
+              label={endIPValue ? label : ''}
+              error={errorEnd || !isValidRange ? 'Invalid IP range' : undefined}
+              disabled={disabled}
+              required={required}
+              styles={styles}
+            >
+              {({ inputId, inputAriaProps }) => (
+                <input
+                  id={inputId}
+                  type="text"
+                  value={endIPValue || ''}
+                  disabled={disabled}
+                  required={required}
+                  onChange={e => handleEndIPChange(e.target.value)}
+                  onBlur={onEndIPBlur}
+                  placeholder={placeholder || '192.168.0.255'}
+                  style={buildInputStyle()}
+                  {...inputAriaProps}
+                />
+              )}
+            </FieldShell>
+          </div>
         </div>
       </div>
     )
@@ -704,95 +656,40 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     const valid = validateIPAddress(formatted)
     setIsValid(valid)
     setValue(formatted)
-
-    if (onChange) {
-      // Create a synthetic event to match the expected signature
-      const syntheticEvent = {
-        target: { value: formatted },
-        currentTarget: { value: formatted },
-      } as React.ChangeEvent<HTMLInputElement>
-      onChange(syntheticEvent)
-    }
+    onChange?.(formatted)
   }
-
-  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
-    getSharedFormFieldStyles(
-      rest.styles,
-      !!(!isValid || !isInNetwork || !isInSubnet)
-    )
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(rest.styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: rest.styles?.height || '40px',
-      width: '100%',
-      border: `${rest.styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: rest.styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: rest.styles?.padding || '8px 16px',
-      fontSize: rest.styles?.fontSize || '16px',
-      fontWeight: rest.styles?.fontWeight,
-      lineHeight: rest.styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    footerText: getSharedFooterTextStyles(
-      footerTextColor,
-      themeConfig,
-      rest.styles
-    ),
-  }
-
-  const error =
-    !isValid || !isInNetwork || !isInSubnet ? 'Invalid IP address' : undefined
 
   return (
-    <div style={{ ...componentStyles.container, width: '100%' }}>
-      {label && (
-        <label style={componentStyles.label}>
-          {label}
-          {rest.required && (
-            <span style={getRequiredIndicatorStyle(rest.styles)}>
-              {rest.styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
-      )}
-
-      <div style={componentStyles.inputWrapper}>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={shellError}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
-          {...rest}
-          {...getRequiredProps(rest.required)}
+          id={inputId}
+          data-field-name={dataFieldName}
+          type="text"
           value={value}
-          disabled={rest.disabled}
+          disabled={disabled}
+          required={required}
           onChange={e => handleTextFieldChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          style={componentStyles.input}
+          style={buildInputStyle()}
+          {...inputAriaProps}
         />
-      </div>
-
-      {error && <div style={componentStyles.footerText}>{error}</div>}
-    </div>
+      )}
+    </FieldShell>
   )
 }
+
+IPAddressField.displayName = 'IPAddressField'
 
 export default IPAddressField

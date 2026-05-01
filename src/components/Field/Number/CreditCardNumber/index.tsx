@@ -1,15 +1,6 @@
 'use client'
 import React, { useCallback, useState, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export type CardType =
   | 'visa'
@@ -66,75 +57,42 @@ const cardPatterns: CardPattern[] = [
 ]
 
 export interface CreditCardNumberProps {
-  onChange?: (value: string, isValid: boolean, cardType: CardType) => void
+  /**
+   * Fires on every edit with the digits-only card-number string.
+   * Validation status flows via `onValidityChange`; detected card brand
+   * flows via `onCardTypeChange`.
+   */
+  onChange?: (value: string) => void
+  /** Optional side-channel for validity changes. */
+  onValidityChange?: (isValid: boolean) => void
+  /** Optional side-channel for card-brand detection. */
+  onCardTypeChange?: (cardType: CardType) => void
   useLuhnValidation?: boolean
   isDefaultValue?: boolean
   enableFormatting?: boolean
   value?: string
-  label?: string
+  label?: React.ReactNode
   placeholder?: string
   id?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
   disabled?: boolean
-  styles?: FormFieldStyles
-}
-
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px',
-      paddingLeft: styles?.paddingLeft || '48px', // Space for card icon
-      paddingRight: styles?.paddingRight || '16px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    adornment: getSharedAdornmentStyles(adornmentColor),
-    startAdornment: { left: '16px' },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
+  styles?: FieldStyleOverrides
 }
 
 const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   onChange,
+  onValidityChange,
+  onCardTypeChange,
   value = '',
   useLuhnValidation = true,
   isDefaultValue = false,
@@ -142,17 +100,24 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   label = 'Card Number',
   placeholder = '1234 5678 9012 3456',
   id,
+  name,
   onFocus,
   onBlur,
   helperText,
-  disabled,
+  error,
+  dataField,
+  dataFieldName,
+  disabled: disabledProp,
   styles,
-  ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value || '')
+  // Tracks focus for the masked default-value display flip only.
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const disabled = disabledProp ?? styles?.disabled ?? false
+  const required = styles?.required || false
 
   const detectCardType = useCallback((cardNumber: string): CardType => {
     const cleanNumber = cardNumber.replace(/\D/g, '')
@@ -252,13 +217,23 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
         setHasBeenEdited(true)
         const detectedType = detectCardType(formattedValue)
         const valid = validateCreditCard(formattedValue)
-        onChange?.(formattedValue.replace(/\D/g, ''), valid, detectedType)
+        onChange?.(formattedValue.replace(/\D/g, ''))
+        onValidityChange?.(valid)
+        onCardTypeChange?.(detectedType)
       }
     }
 
     el.addEventListener('input', handleNativeInput)
     return () => el.removeEventListener('input', handleNativeInput)
-  }, [onChange, internalValue, formatInput, detectCardType, validateCreditCard])
+  }, [
+    onChange,
+    onValidityChange,
+    onCardTypeChange,
+    internalValue,
+    formatInput,
+    detectCardType,
+    validateCreditCard,
+  ])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,9 +243,18 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       setHasBeenEdited(true)
       const detectedType = detectCardType(formattedValue)
       const valid = validateCreditCard(formattedValue)
-      onChange?.(formattedValue.replace(/\D/g, ''), valid, detectedType)
+      onChange?.(formattedValue.replace(/\D/g, ''))
+      onValidityChange?.(valid)
+      onCardTypeChange?.(detectedType)
     },
-    [onChange, validateCreditCard, formatInput, detectCardType]
+    [
+      onChange,
+      onValidityChange,
+      onCardTypeChange,
+      validateCreditCard,
+      formatInput,
+      detectCardType,
+    ]
   )
 
   const handleFocus = useCallback(
@@ -290,57 +274,87 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
 
   const getCardIcon = useCallback(() => '💳', [])
 
-  const computedStyles = getStyles(
-    { ...styles, ...(disabled !== undefined ? { disabled } : {}) },
-    isFocused
-  )
+  // Inline-style chrome — see AccountNumber for the same pattern.
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: '40px',
+    width: '100%',
+    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
+    borderRadius: '8px',
+    backgroundColor: 'var(--field-bg, transparent)',
+    color: 'var(--field-text, inherit)',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    padding: '8px 16px',
+    paddingLeft: '48px',
+    paddingRight: '16px',
+    fontSize: '16px',
+    color: 'inherit',
+    boxSizing: 'border-box',
+  }
+
+  const adornmentStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    left: '16px',
+    color: 'var(--field-text, inherit)',
+    pointerEvents: 'none',
+    fontSize: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+    marginTop: '-3px',
+  }
 
   return (
-    <div style={computedStyles.container}>
-      {label && (
-        <label style={computedStyles.label}>
-          {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
-      )}
-
-      <div style={computedStyles.inputWrapper}>
-        <div
-          style={{
-            ...computedStyles.adornment,
-            ...computedStyles.startAdornment,
-            display: 'flex',
-            alignItems: 'center',
-            height: '100%',
-            marginTop: '-3px',
-          }}
-        >
-          <span>{getCardIcon()}</span>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <div style={adornmentStyle}>
+            <span>{getCardIcon()}</span>
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            id={id ?? inputId}
+            name={name}
+            value={getDisplayValue()}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            placeholder={placeholder}
+            maxLength={23}
+            autoComplete="cc-number"
+            data-field-name={dataFieldName}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
         </div>
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="numeric"
-          id={id}
-          value={getDisplayValue()}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          {...getRequiredProps(styles?.required)}
-          placeholder={placeholder}
-          maxLength={23}
-          autoComplete="cc-number"
-          style={computedStyles.input}
-          {...props}
-        />
-      </div>
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
-    </div>
+      )}
+    </FieldShell>
   )
 }
 

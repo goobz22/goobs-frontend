@@ -1,85 +1,43 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface AccountNumberProps {
-  onChange?: (value: string, isValid: boolean) => void
+  /**
+   * Fires on every edit with the (possibly partial) account-number string.
+   * Validation status now flows through `onValidityChange` so consumers
+   * who don't care about validity can stay value-only.
+   */
+  onChange?: (value: string) => void
+  /**
+   * Optional side-channel for validity changes. Replaces the legacy
+   * tuple-position `(value, isValid)` shape.
+   */
+  onValidityChange?: (isValid: boolean) => void
   minLength?: number
   maxLength?: number
   isDefaultValue?: boolean
   value?: string
-  label?: string
+  label?: React.ReactNode
   placeholder?: string
   id?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
-  styles?: FormFieldStyles
-}
-
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px',
-      paddingLeft: styles?.paddingLeft || '40px', // Space for # adornment
-      paddingRight: styles?.paddingRight || '16px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    adornment: getSharedAdornmentStyles(adornmentColor),
-    startAdornment: { left: '16px' },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
 }
 
 const AccountNumber: React.FC<AccountNumberProps> = ({
   onChange,
+  onValidityChange,
   value = '',
   minLength = 8,
   maxLength = 17,
@@ -87,16 +45,26 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   label = 'Account Number',
   placeholder,
   id,
+  name,
   onFocus,
   onBlur,
   helperText,
+  error,
+  dataField,
+  dataFieldName,
   styles,
-  ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value)
+  // Tracks whether the input is focused so the masked default-value
+  // display flips to the raw value while the user is editing it. Pure
+  // display logic — not used for visual border state (CSS handles that
+  // via :focus-visible inside FieldShell).
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
   const validateAccountNumber = useCallback(
     (accountNumber: string): boolean => {
@@ -140,6 +108,10 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   }, [value])
 
   // Listen for native 'input' events to support browser automation tools
+  // (e.g. agent-browser's form_input) that set `input.value` directly
+  // and dispatch a native `input` event, bypassing React's synthetic
+  // event system. Without this listener the test-driven value gets
+  // out of sync with React state.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -151,13 +123,20 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
         setInternalValue(formattedValue)
         setHasBeenEdited(true)
         const valid = validateAccountNumber(formattedValue)
-        onChange?.(formattedValue, valid)
+        onChange?.(formattedValue)
+        onValidityChange?.(valid)
       }
     }
 
     el.addEventListener('input', handleNativeInput)
     return () => el.removeEventListener('input', handleNativeInput)
-  }, [onChange, internalValue, validateAccountNumber, formatInput])
+  }, [
+    onChange,
+    onValidityChange,
+    internalValue,
+    validateAccountNumber,
+    formatInput,
+  ])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,9 +145,10 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       setInternalValue(formattedValue)
       setHasBeenEdited(true)
       const valid = validateAccountNumber(formattedValue)
-      onChange?.(formattedValue, valid)
+      onChange?.(formattedValue)
+      onValidityChange?.(valid)
     },
-    [onChange, validateAccountNumber, formatInput]
+    [onChange, onValidityChange, validateAccountNumber, formatInput]
   )
 
   const handleFocus = useCallback(
@@ -186,55 +166,86 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
     [onBlur]
   )
 
-  const computedStyles = getStyles(styles, isFocused)
   const sacredTheme = styles?.theme === 'sacred'
-
   const finalPlaceholder = sacredTheme ? '1234567890' : placeholder
 
-  const AccountAdornment = () => (
-    <div
-      style={{
-        ...computedStyles.adornment,
-        ...computedStyles.startAdornment,
-      }}
-    >
-      <span>#</span>
-    </div>
-  )
+  // Inline-style chrome for the input wrapper / adornment / input. The
+  // theme/border colors come from the FieldShell CSS variables; only
+  // size + layout details are inline here.
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: '40px',
+    width: '100%',
+    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
+    borderRadius: '8px',
+    backgroundColor: 'var(--field-bg, transparent)',
+    color: 'var(--field-text, inherit)',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    padding: '8px 16px',
+    paddingLeft: '40px',
+    paddingRight: '16px',
+    fontSize: '16px',
+    color: 'inherit',
+    boxSizing: 'border-box',
+  }
+
+  const adornmentStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    left: '16px',
+    color: 'var(--field-text, inherit)',
+    pointerEvents: 'none',
+    fontSize: '16px',
+  }
 
   return (
-    <div style={computedStyles.container}>
-      {label && (
-        <label style={computedStyles.label}>
-          {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <div style={adornmentStyle}>
+            <span>#</span>
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            id={id ?? inputId}
+            name={name}
+            value={getDisplayValue()}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            placeholder={finalPlaceholder}
+            maxLength={maxLength + 5}
+            data-field-name={dataFieldName}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
+        </div>
       )}
-
-      <div style={computedStyles.inputWrapper}>
-        <AccountAdornment />
-        <input
-          ref={inputRef}
-          type="text"
-          id={id}
-          value={getDisplayValue()}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          {...getRequiredProps(styles?.required)}
-          placeholder={finalPlaceholder}
-          maxLength={maxLength + 5}
-          style={computedStyles.input}
-          {...props}
-        />
-      </div>
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
-    </div>
+    </FieldShell>
   )
 }
 

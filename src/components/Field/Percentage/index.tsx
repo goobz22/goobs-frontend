@@ -1,22 +1,18 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
 export interface PercentageFieldProps {
   initialValue?: string | number
   value?: string
-  onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
+  /**
+   * Canonical numeric onChange. Always called with the parsed numeric
+   * value — increment/decrement, typed input, and native input
+   * callbacks all funnel through this single shape.
+   */
+  onChange?: (value: number) => void
   label?: string
   min?: number
   max?: number
@@ -27,86 +23,16 @@ export interface PercentageFieldProps {
   placeholder?: string
   id?: string
   helperText?: string
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: FormFieldStyles
-}
-
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: 'auto',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 60px 8px 16px', // Right padding for increment/decrement buttons
-      paddingLeft: styles?.paddingLeft || '16px',
-      paddingRight: styles?.paddingRight || '60px',
-      paddingTop: styles?.paddingTop || '8px',
-      paddingBottom: styles?.paddingBottom || '8px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    adornmentContainer: {
-      ...getSharedAdornmentStyles(adornmentColor),
-      right: '8px',
-    },
-    buttonContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '32px',
-      justifyContent: 'center',
-    },
-    button: {
-      padding: 0,
-      width: '16px',
-      height: '16px',
-      minWidth: '16px',
-      minHeight: '16px',
-      borderRadius: '2px',
-      transition,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: adornmentColor,
-      backgroundColor: 'transparent',
-      border: 'none',
-      cursor: 'pointer',
-    },
-    icon: { fontSize: '18px' },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
+  /** Per-instance style overrides. */
+  styles?: FieldStyleOverrides
 }
 
 const PercentageField: React.FC<PercentageFieldProps> = ({
@@ -123,44 +49,48 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   placeholder,
   id,
   helperText,
+  error,
+  dataField,
+  dataFieldName,
+  name,
   styles,
-  ...rest
 }) => {
   const initialValueString =
     typeof initialValue === 'number' ? initialValue.toString() : initialValue
   const [internalValue, setInternalValue] = useState(
     value || initialValueString
   )
-  const [isFocused, setIsFocused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const computedStyles = getStyles(styles, isFocused)
-  const inputStyles = (computedStyles.input ?? {}) as React.CSSProperties
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
   const currentValue = value || internalValue
   const displayValue =
     showPercentSymbol && currentValue ? `${currentValue}%` : currentValue
 
-  // Calculate width based on character count using CSS ch units
-  // This avoids the need for DOM measurements and useLayoutEffect
+  // Calculate width based on character count using CSS ch units —
+  // avoids DOM measurement / useLayoutEffect for the auto-sized
+  // numeric input.
   const contentLength = Math.max(
     displayValue?.toString().length || 0,
     placeholder?.length || 0,
-    3 // minimum 3 characters
+    3
   )
-
-  const padLeft = parseFloat(String(inputStyles.paddingLeft || '0')) || 0
-  const padRight = parseFloat(String(inputStyles.paddingRight || '0')) || 0
-  // Use ch units for character-based width calculation
-  const calculatedWidth = `calc(${contentLength}ch + ${padLeft + padRight + 8}px)`
+  const inputPaddingLeft = parseFloat(styles?.paddingLeft || '16') || 16
+  const inputPaddingRight = parseFloat(styles?.paddingRight || '60') || 60
+  const calculatedWidth = `calc(${contentLength}ch + ${inputPaddingLeft + inputPaddingRight + 8}px)`
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
     if (timerRef.current) clearInterval(timerRef.current)
   }, [])
 
+  // formatValue takes a raw input string, strips non-numerics, clamps
+  // to [min, max], and returns a display string. Used for both typed
+  // input and native-input event handling.
   const formatValue = useCallback(
     (val: string): string => {
       const numericValue = val.replace(/[^0-9.]/g, '')
@@ -192,10 +122,8 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       if (rawValue !== currentDisplay) {
         const formattedValue = formatValue(numericInput)
         setInternalValue(formattedValue)
-        const syntheticEvent = {
-          target: { ...target, value: formattedValue },
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange?.(syntheticEvent)
+        const numericResult = parseFloat(formattedValue)
+        onChange?.(isNaN(numericResult) ? 0 : numericResult)
       }
     }
 
@@ -225,7 +153,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   }, [value, internalValue, onChange, min, step, formatValue])
 
   const handleMouseDown = (handler: () => void) => {
-    if (styles?.disabled) return
+    if (disabled) return
     handler()
     initialTimerRef.current = setTimeout(() => {
       timerRef.current = setInterval(handler, repeatInterval)
@@ -241,91 +169,153 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       const numericInput = rawValue.replace(/%/g, '')
       const formattedValue = formatValue(numericInput)
       setInternalValue(formattedValue)
-      const clonedEvent = {
-        ...event,
-        target: { ...event.target, value: formattedValue },
-      }
-      onChange?.(clonedEvent)
+      const numericResult = parseFloat(formattedValue)
+      onChange?.(isNaN(numericResult) ? 0 : numericResult)
     },
     [onChange, formatValue]
   )
 
-  const handleFocus = useCallback(() => setIsFocused(true), [])
-  const handleBlur = useCallback(() => setIsFocused(false), [])
+  // Inner-wrapper styling local to Percentage: the increment/decrement
+  // buttons are absolutely positioned over the inline-block input so
+  // the field auto-sizes to its content rather than stretching.
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: styles?.height || '40px',
+    width: 'auto',
+    border: '1px solid var(--field-border-default, rgba(255,215,0,0.3))',
+    borderRadius: styles?.borderRadius || '8px',
+    backgroundColor: 'var(--field-bg, rgba(0, 0, 0, 0.6))',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+    transition: 'all 0.3s ease',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    padding: styles?.padding || '8px 60px 8px 16px',
+    paddingLeft: styles?.paddingLeft || '16px',
+    paddingRight: styles?.paddingRight || '60px',
+    paddingTop: styles?.paddingTop || '8px',
+    paddingBottom: styles?.paddingBottom || '8px',
+    fontSize: styles?.fontSize || '16px',
+    fontWeight: styles?.fontWeight,
+    lineHeight: styles?.lineHeight,
+    fontFamily: styles?.fontFamily,
+    color: 'inherit',
+    boxSizing: 'border-box',
+    width: calculatedWidth,
+    minWidth: '60px',
+    ...(disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+  }
+
+  const adornmentContainerStyle: React.CSSProperties = {
+    position: 'absolute',
+    right: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const buttonContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '32px',
+    justifyContent: 'center',
+  }
+
+  const buttonStyle: React.CSSProperties = {
+    padding: 0,
+    width: '16px',
+    height: '16px',
+    minWidth: '16px',
+    minHeight: '16px',
+    borderRadius: '2px',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'rgba(255, 215, 0, 0.9)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+  }
+
+  const iconStyle: React.CSSProperties = { fontSize: '18px' }
+
+  // Percentage uses width: 'auto' on the FieldShell wrapper so the
+  // outer block hugs the (small) numeric input rather than stretching
+  // to its container.
+  const shellStylesWithAutoWidth: FieldStyleOverrides = {
+    ...styles,
+    width: styles?.width || 'auto',
+  }
 
   return (
-    <div
-      style={{
-        ...computedStyles.container,
-        display: 'inline-block',
-        width: styles?.width || 'auto',
-      }}
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={shellStylesWithAutoWidth}
     >
-      {label && (
-        <label style={computedStyles.label}>
-          {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
-      )}
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            id={id ?? inputId}
+            name={name}
+            data-field-name={dataFieldName}
+            value={displayValue}
+            onChange={handleChange}
+            disabled={disabled}
+            required={required}
+            placeholder={placeholder}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
 
-      <div style={{ ...computedStyles.inputWrapper, width: 'auto' }}>
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="numeric"
-          id={id}
-          value={displayValue}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          placeholder={placeholder}
-          style={{
-            ...inputStyles,
-            width: calculatedWidth,
-            minWidth: '60px',
-            ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),
-          }}
-          {...getRequiredProps(styles?.required)}
-          {...rest}
-        />
-
-        <div style={computedStyles.adornmentContainer}>
-          <div style={computedStyles.buttonContainer}>
-            <button
-              type="button"
-              onMouseDown={() => handleMouseDown(handleIncrement)}
-              aria-label="increment"
-              disabled={styles?.disabled}
-              style={computedStyles.button}
-            >
-              <ArrowDropUpIcon
-                styles={{ theme: styles?.theme || 'sacred' }}
-                style={computedStyles.icon}
-              />
-            </button>
-            <button
-              type="button"
-              onMouseDown={() => handleMouseDown(handleDecrement)}
-              aria-label="decrement"
-              disabled={styles?.disabled}
-              style={{ ...computedStyles.button, marginTop: '2px' }}
-            >
-              <ArrowDropDownIcon
-                styles={{ theme: styles?.theme || 'sacred' }}
-                style={computedStyles.icon}
-              />
-            </button>
+          <div style={adornmentContainerStyle}>
+            <div style={buttonContainerStyle}>
+              <button
+                type="button"
+                onMouseDown={() => handleMouseDown(handleIncrement)}
+                aria-label="increment"
+                disabled={disabled}
+                style={buttonStyle}
+              >
+                <ArrowDropUpIcon
+                  styles={{ theme: styles?.theme || 'sacred' }}
+                  style={iconStyle}
+                />
+              </button>
+              <button
+                type="button"
+                onMouseDown={() => handleMouseDown(handleDecrement)}
+                aria-label="decrement"
+                disabled={disabled}
+                style={{ ...buttonStyle, marginTop: '2px' }}
+              >
+                <ArrowDropDownIcon
+                  styles={{ theme: styles?.theme || 'sacred' }}
+                  style={iconStyle}
+                />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
-    </div>
+      )}
+    </FieldShell>
   )
 }
 

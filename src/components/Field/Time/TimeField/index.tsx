@@ -1,20 +1,20 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { alpha } from '../../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import React, { useRef, useEffect } from 'react'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface TimeFieldProps {
   onChange?: (time: Date | null) => void
   value?: Date | null
   label?: string
   helperText?: string
-  styles?: {
-    disabled?: boolean
-    required?: boolean
-    theme?: string
-  }
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
 }
 
 const formatTimeForInput = (date: Date | null): string => {
@@ -38,9 +38,11 @@ const TimeField: React.FC<TimeFieldProps> = ({
   value,
   label = 'Time',
   helperText,
+  error,
+  dataField,
+  dataFieldName,
   styles,
 }) => {
-  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
@@ -51,7 +53,9 @@ const TimeField: React.FC<TimeFieldProps> = ({
     onChange?.(newTime)
   }
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools
+  // (e.g. agent-browser's form_input) that bypass React's synthetic
+  // event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -68,68 +72,55 @@ const TimeField: React.FC<TimeFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
+  // Inline styles preserved for the input itself — the previous
+  // implementation drew the sacred-gold border + dark color scheme
+  // entirely from JS, and we want to keep the visual parity until
+  // someone moves the input chrome to a CSS module.
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '12px 16px',
     backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `1px solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    border: '1px solid rgba(255, 215, 0, 0.3)',
     borderRadius: '8px',
     color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
     fontFamily: '"Crimson Text", serif',
     fontSize: '16px',
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
     outline: 'none',
     boxSizing: 'border-box' as const,
     colorScheme: 'dark' as const,
   }
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
-  }
-
   return (
-    <div style={{ position: 'relative', width: '100%', marginBottom: '16px' }}>
-      <div style={{ flex: 1 }}>
-        <label style={labelStyle}>
-          {label}
-          {required && (
-            <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-          )}
-        </label>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
+          id={inputId}
+          data-field-name={dataFieldName}
           type="time"
           value={formatTimeForInput(value || null)}
           onChange={handleChange}
           disabled={disabled}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          required={required}
           style={inputStyle}
+          {...inputAriaProps}
         />
-      </div>
-
-      {/* Helper Text */}
-      {helperText && (
-        <div
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontFamily: '"Crimson Text", serif',
-          }}
-        >
-          {helperText}
-        </div>
       )}
-    </div>
+    </FieldShell>
   )
 }
+
+TimeField.displayName = 'TimeField'
 
 export default TimeField

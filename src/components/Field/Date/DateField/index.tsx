@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateField.module.css'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface DateFieldProps {
   label?: string
@@ -10,33 +11,36 @@ export interface DateFieldProps {
   variant?: string
   disableFutureDateValidation?: boolean
   placeholder?: string
-  styles?: {
-    disabled?: boolean
-    required?: boolean
-    theme?: 'sacred' | 'light' | 'dark'
-    helperTextType?: 'error' | 'info'
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides & {
+    // DateField-local layout overrides forwarded as inline styles on the
+    // input itself, since FieldShell only forwards layout props onto the
+    // outer wrapper.
     height?: string
     fontSize?: string
     borderRadius?: string
-    marginBottom?: string
-    marginTop?: string
-    width?: string
-    minHeight?: string
     padding?: string
   }
-  helperText?: string
 }
 
 const DateField: React.FC<DateFieldProps> = ({
   label,
   value,
   onChange,
-  styles,
   helperText,
+  error,
+  dataField,
+  dataFieldName,
+  styles,
 }) => {
   const disabled = styles?.disabled || false
   const required = styles?.required || false
-  const theme = styles?.theme || 'sacred'
   const inputRef = useRef<HTMLInputElement>(null)
 
   const formatDateForInput = (date: Date | null): string => {
@@ -58,7 +62,9 @@ const DateField: React.FC<DateFieldProps> = ({
     }
   }
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools that
+  // bypass React's synthetic-event system. Without this, agent-driven
+  // input doesn't sync into the controlled value.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -80,67 +86,53 @@ const DateField: React.FC<DateFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
-  // Build helper text class names
-  const helperTextClassNames = [
-    cssStyles.helperText,
-    styles?.helperTextType === 'error' && cssStyles.error,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  // Container style overrides
-  const containerStyleOverrides: React.CSSProperties = {}
-  if (styles?.width) containerStyleOverrides.width = styles.width
-  if (styles?.marginBottom)
-    containerStyleOverrides.marginBottom = styles.marginBottom
-  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
-  if (styles?.minHeight) containerStyleOverrides.minHeight = styles.minHeight
-
-  // Input style overrides
+  // DateField-local input style overrides. FieldShell handles layout
+  // overrides on the outer wrapper; per-input overrides (height,
+  // fontSize, padding, borderRadius) still need direct inline styles
+  // because the input is a sibling of the shell label/helper, not the
+  // wrapper itself.
   const inputStyleOverrides: React.CSSProperties = {}
   if (styles?.height) inputStyleOverrides.minHeight = styles.height
   if (styles?.fontSize) inputStyleOverrides.fontSize = styles.fontSize
   if (styles?.padding) inputStyleOverrides.padding = styles.padding
-  if (styles?.borderRadius)
+  if (styles?.borderRadius) {
     inputStyleOverrides.borderRadius = styles.borderRadius
+  }
 
   return (
-    <div
-      className={cssStyles.container}
-      data-theme={theme}
-      style={
-        Object.keys(containerStyleOverrides).length > 0
-          ? containerStyleOverrides
-          : undefined
-      }
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
     >
-      {/* Label */}
-      {label && (
-        <label className={cssStyles.label}>
-          {label}
-          {required && <span className={cssStyles.requiredIndicator}>*</span>}
-        </label>
+      {({ inputId, inputAriaProps }) => (
+        <input
+          ref={inputRef}
+          id={inputId}
+          data-field-name={dataFieldName}
+          type="date"
+          className={cssStyles.input}
+          value={formatDateForInput(value || null)}
+          onChange={handleDateChange}
+          disabled={disabled}
+          required={required}
+          style={
+            Object.keys(inputStyleOverrides).length > 0
+              ? inputStyleOverrides
+              : undefined
+          }
+          {...inputAriaProps}
+        />
       )}
-
-      {/* Date Input */}
-      <input
-        ref={inputRef}
-        type="date"
-        className={cssStyles.input}
-        value={formatDateForInput(value || null)}
-        onChange={handleDateChange}
-        disabled={disabled}
-        style={
-          Object.keys(inputStyleOverrides).length > 0
-            ? inputStyleOverrides
-            : undefined
-        }
-      />
-
-      {/* Helper Text */}
-      {helperText && <div className={helperTextClassNames}>{helperText}</div>}
-    </div>
+    </FieldShell>
   )
 }
+
+DateField.displayName = 'DateField'
 
 export default DateField

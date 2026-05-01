@@ -1,89 +1,32 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
 export interface PasswordFieldProps {
   label?: string
   placeholder?: string
   value?: string
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  /**
+   * Canonical value-shape onChange. Receives the raw input string —
+   * consumers wire this directly into setState without unwrapping a
+   * synthetic event.
+   */
+  onChange?: (value: string) => void
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
   id?: string
-  /** Comprehensive styling options including theme, custom colors, and layout properties. */
-  styles?: FormFieldStyles
-}
-
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 48px 8px 16px', // Right padding for eye icon
-      paddingLeft: styles?.paddingLeft || '16px',
-      paddingRight: styles?.paddingRight || '48px',
-      paddingTop: styles?.paddingTop || '8px',
-      paddingBottom: styles?.paddingBottom || '8px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    endAdornment: {
-      ...getSharedAdornmentStyles(adornmentColor),
-      right: '12px',
-      cursor: 'pointer',
-      background: 'transparent',
-      border: 'none',
-      outline: 'none',
-      padding: 0,
-    },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-  }
-
-  return componentStyles
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
+  /** Per-instance style overrides. */
+  styles?: FieldStyleOverrides
 }
 
 const PasswordField: React.FC<PasswordFieldProps> = ({
@@ -94,15 +37,22 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   onFocus,
   onBlur,
   helperText,
+  error,
   id,
+  dataField,
+  dataFieldName,
+  name,
   styles,
-  ...rest
 }) => {
   const [passwordVisible, setPasswordVisible] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Listen for native 'input' events to support browser automation tools
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
+
+  // Listen for native 'input' events to support browser automation
+  // tools that set `input.value` directly and dispatch a native input
+  // event, bypassing React's synthetic event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -110,11 +60,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
     const handleNativeInput = (e: Event) => {
       const target = e.target as HTMLInputElement
       if (target.value !== value) {
-        const syntheticEvent = {
-          target,
-          currentTarget: target,
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange?.(syntheticEvent)
+        onChange?.(target.value)
       }
     }
 
@@ -122,76 +68,105 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
-  const computedStyles = getStyles(styles, isFocused)
-
   const togglePasswordVisibility = useCallback(
     () => setPasswordVisible(prev => !prev),
     []
   )
 
-  const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(true)
-      onFocus?.(e)
-    },
-    [onFocus]
-  )
+  // Inner-wrapper styling kept local so the eye-toggle button can be
+  // absolutely positioned over the input. FieldShell handles the
+  // outer label / helper region.
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: styles?.height || '40px',
+    width: '100%',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+  }
 
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(false)
-      onBlur?.(e)
-    },
-    [onBlur]
-  )
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: '1px solid var(--field-border-default, rgba(255,215,0,0.3))',
+    borderRadius: styles?.borderRadius || '8px',
+    padding: styles?.padding || '8px 48px 8px 16px',
+    paddingLeft: styles?.paddingLeft || '16px',
+    paddingRight: styles?.paddingRight || '48px',
+    paddingTop: styles?.paddingTop || '8px',
+    paddingBottom: styles?.paddingBottom || '8px',
+    fontSize: styles?.fontSize || '16px',
+    fontWeight: styles?.fontWeight,
+    lineHeight: styles?.lineHeight,
+    fontFamily: styles?.fontFamily,
+    color: styles?.textColor || 'inherit',
+    boxSizing: 'border-box',
+    ...(disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+  }
+
+  const eyeButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    cursor: 'pointer',
+    background: 'transparent',
+    border: 'none',
+    outline: 'none',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+  }
 
   return (
-    <div style={computedStyles.container}>
-      {label && (
-        <label style={computedStyles.label}>
-          {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
-      )}
-
-      <div style={computedStyles.inputWrapper}>
-        <input
-          ref={inputRef}
-          type={passwordVisible ? 'text' : 'password'}
-          id={id}
-          value={value}
-          onChange={onChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          placeholder={placeholder}
-          style={{
-            ...computedStyles.input,
-            ...(styles?.disabled && { opacity: 0.5, cursor: 'not-allowed' }),
-          }}
-          {...getRequiredProps(styles?.required)}
-          {...rest}
-        />
-
-        <button
-          type="button"
-          onClick={togglePasswordVisibility}
-          style={computedStyles.endAdornment}
-          disabled={styles?.disabled}
-        >
-          <ShowHideEyeIcon
-            visible={passwordVisible}
-            styles={{ theme: styles?.theme || 'sacred' }}
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <input
+            ref={inputRef}
+            type={passwordVisible ? 'text' : 'password'}
+            id={id ?? inputId}
+            name={name}
+            data-field-name={dataFieldName}
+            value={value}
+            onChange={e => onChange?.(e.target.value)}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            disabled={disabled}
+            required={required}
+            placeholder={placeholder}
+            style={inputStyle}
+            {...inputAriaProps}
           />
-        </button>
-      </div>
 
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
-    </div>
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            style={eyeButtonStyle}
+            disabled={disabled}
+            aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+          >
+            <ShowHideEyeIcon
+              visible={passwordVisible}
+              styles={{ theme: styles?.theme || 'sacred' }}
+            />
+          </button>
+        </div>
+      )}
+    </FieldShell>
   )
 }
 

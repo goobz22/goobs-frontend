@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateRange.module.css'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface DateRange {
   start: Date | null
@@ -15,26 +16,30 @@ export interface DateRangeProps {
   onChange?: (dateRange: DateRange) => void
   disableFutureDateValidation?: boolean
   placeholder?: string
-  disabled?: boolean
-  required?: boolean
-  error?: string
+  helperText?: string
+  /**
+   * Error message rendered below the inputs; sets aria-invalid on the
+   * shell. Top-level `disabled`/`required`/`error` were dropped from
+   * this component during the FieldShell migration — pass `disabled`
+   * and `required` via `styles` instead. `error` stays top-level here
+   * because callers commonly compute it from cross-field validation
+   * (e.g. start > end), which doesn't belong in style overrides.
+   */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
   style?: React.CSSProperties
-  styles?: {
-    disabled?: boolean
-    required?: boolean
-    theme?: 'sacred' | 'light' | 'dark'
-    helperTextType?: 'error' | 'info'
+  styles?: FieldStyleOverrides & {
+    // DateRange-local layout overrides forwarded as inline styles
+    // on the input itself.
     height?: string
     fontSize?: string
     borderRadius?: string
-    marginBottom?: string
-    marginTop?: string
-    width?: string
-    minHeight?: string
     padding?: string
     gap?: string
   }
-  helperText?: string
 }
 
 const DateRange: React.FC<DateRangeProps> = ({
@@ -42,17 +47,20 @@ const DateRange: React.FC<DateRangeProps> = ({
   endLabel = 'End Date',
   value,
   onChange,
-  disabled: disabledProp,
-  required: requiredProp,
   error,
+  dataField,
+  dataFieldName,
   style,
   styles,
   helperText,
 }) => {
-  const disabled = disabledProp || styles?.disabled || false
-  const required = requiredProp || styles?.required || false
-  const theme = styles?.theme || 'sacred'
-  const displayHelperText = error || helperText
+  // Top-level `disabled`/`required` props were removed during the
+  // FieldShell migration — read both from styles only. This is a
+  // breaking change for callers that previously passed
+  // <DateRange disabled required …/> at the top level; migrate them
+  // to <DateRange styles={{ disabled: true, required: true }} …/>.
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
   const startInputRef = useRef<HTMLInputElement>(null)
   const endInputRef = useRef<HTMLInputElement>(null)
 
@@ -96,7 +104,10 @@ const DateRange: React.FC<DateRangeProps> = ({
     }
   }
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools that
+  // bypass React's synthetic-event system. Two listeners — one per
+  // input — keep both ends of the range in sync with agent-driven
+  // input.
   useEffect(() => {
     const startEl = startInputRef.current
     const endEl = endInputRef.current
@@ -139,104 +150,93 @@ const DateRange: React.FC<DateRangeProps> = ({
     }
   }, [onChange, value])
 
-  // Build helper text class names
-  const helperTextClassNames = [
-    cssStyles.helperText,
-    (error || styles?.helperTextType === 'error') && cssStyles.error,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  // Container style overrides
-  const containerStyleOverrides: React.CSSProperties = {
-    ...style,
-  }
-  if (styles?.width) containerStyleOverrides.width = styles.width
-  if (styles?.marginBottom)
-    containerStyleOverrides.marginBottom = styles.marginBottom
-  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
-  if (styles?.minHeight) containerStyleOverrides.minHeight = styles.minHeight
-
-  // Fields wrapper style overrides
-  const fieldsWrapperStyleOverrides: React.CSSProperties = {}
-  if (styles?.gap) fieldsWrapperStyleOverrides.gap = styles.gap
-
-  // Input style overrides
+  // Per-input style overrides. Layout overrides are handled by
+  // FieldShell on each shell wrapper; these apply to the inputs.
   const inputStyleOverrides: React.CSSProperties = {}
   if (styles?.height) inputStyleOverrides.minHeight = styles.height
   if (styles?.fontSize) inputStyleOverrides.fontSize = styles.fontSize
   if (styles?.padding) inputStyleOverrides.padding = styles.padding
-  if (styles?.borderRadius)
+  if (styles?.borderRadius) {
     inputStyleOverrides.borderRadius = styles.borderRadius
+  }
+
+  // Two FieldShells side-by-side share the start/end labels and helper
+  // wiring. Only the start shell carries `error` + `helperText` so the
+  // helper region renders once below the pair (the end shell skips
+  // both, leaving the wider error message anchored to the first input
+  // for screenreader announcement).
+  const fieldsWrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    gap: styles?.gap ?? '16px',
+    width: '100%',
+  }
 
   return (
-    <div
-      className={cssStyles.container}
-      data-theme={theme}
-      style={
-        Object.keys(containerStyleOverrides).length > 0
-          ? containerStyleOverrides
-          : undefined
-      }
-    >
-      <div
-        className={cssStyles.fieldsWrapper}
-        style={
-          Object.keys(fieldsWrapperStyleOverrides).length > 0
-            ? fieldsWrapperStyleOverrides
-            : undefined
-        }
-      >
-        {/* Start Date */}
-        <div className={cssStyles.fieldContainer}>
-          <label className={cssStyles.label}>
-            {startLabel}
-            {required && <span className={cssStyles.requiredIndicator}>*</span>}
-          </label>
-          <input
-            ref={startInputRef}
-            type="date"
-            className={cssStyles.input}
-            value={formatDateForInput(value?.start || null)}
-            onChange={handleStartDateChange}
+    <div style={style} data-field={dataField} data-field-name={dataFieldName}>
+      <div style={fieldsWrapperStyle} className={cssStyles.fieldsWrapper}>
+        <div style={{ flex: 1 }}>
+          <FieldShell
+            label={startLabel}
+            helperText={helperText}
+            error={error}
             disabled={disabled}
-            style={
-              Object.keys(inputStyleOverrides).length > 0
-                ? inputStyleOverrides
-                : undefined
-            }
-          />
+            required={required}
+            styles={styles}
+          >
+            {({ inputId, inputAriaProps }) => (
+              <input
+                ref={startInputRef}
+                id={inputId}
+                type="date"
+                className={cssStyles.input}
+                value={formatDateForInput(value?.start || null)}
+                onChange={handleStartDateChange}
+                disabled={disabled}
+                required={required}
+                style={
+                  Object.keys(inputStyleOverrides).length > 0
+                    ? inputStyleOverrides
+                    : undefined
+                }
+                {...inputAriaProps}
+              />
+            )}
+          </FieldShell>
         </div>
 
-        {/* End Date */}
-        <div className={cssStyles.fieldContainer}>
-          <label className={cssStyles.label}>
-            {endLabel}
-            {required && <span className={cssStyles.requiredIndicator}>*</span>}
-          </label>
-          <input
-            ref={endInputRef}
-            type="date"
-            className={cssStyles.input}
-            value={formatDateForInput(value?.end || null)}
-            onChange={handleEndDateChange}
+        <div style={{ flex: 1 }}>
+          <FieldShell
+            label={endLabel}
             disabled={disabled}
-            min={value?.start ? formatDateForInput(value.start) : undefined}
-            style={
-              Object.keys(inputStyleOverrides).length > 0
-                ? inputStyleOverrides
-                : undefined
-            }
-          />
+            required={required}
+            styles={styles}
+          >
+            {({ inputId, inputAriaProps }) => (
+              <input
+                ref={endInputRef}
+                id={inputId}
+                type="date"
+                className={cssStyles.input}
+                value={formatDateForInput(value?.end || null)}
+                onChange={handleEndDateChange}
+                disabled={disabled}
+                required={required}
+                min={value?.start ? formatDateForInput(value.start) : undefined}
+                style={
+                  Object.keys(inputStyleOverrides).length > 0
+                    ? inputStyleOverrides
+                    : undefined
+                }
+                {...inputAriaProps}
+              />
+            )}
+          </FieldShell>
         </div>
       </div>
-
-      {/* Helper Text / Error */}
-      {displayHelperText && (
-        <div className={helperTextClassNames}>{displayHelperText}</div>
-      )}
     </div>
   )
 }
+
+DateRange.displayName = 'DateRange'
 
 export default DateRange

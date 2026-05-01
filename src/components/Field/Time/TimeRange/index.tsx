@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { alpha } from '../../../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import React, { useRef, useEffect } from 'react'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface TimeRange {
   start: Date | null
@@ -16,11 +14,13 @@ export interface TimeRangeProps {
   startLabel?: string
   endLabel?: string
   helperText?: string
-  styles?: {
-    disabled?: boolean
-    required?: boolean
-    theme?: string
-  }
+  /** Error message rendered below the inputs; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
 }
 
 const formatTimeForInput = (date: Date | null): string => {
@@ -45,10 +45,11 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   startLabel = 'Start Time',
   endLabel = 'End Time',
   helperText,
+  error,
+  dataField,
+  dataFieldName,
   styles,
 }) => {
-  const [isStartFocused, setIsStartFocused] = useState(false)
-  const [isEndFocused, setIsEndFocused] = useState(false)
   const startInputRef = useRef<HTMLInputElement>(null)
   const endInputRef = useRef<HTMLInputElement>(null)
 
@@ -67,7 +68,10 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     onChange?.(newRange)
   }
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools that
+  // bypass React's synthetic-event system. Two listeners — one per
+  // input — keep both ends of the range in sync with agent-driven
+  // input.
   useEffect(() => {
     const startEl = startInputRef.current
     const endEl = endInputRef.current
@@ -98,91 +102,83 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     }
   }, [onChange, value])
 
-  const inputStyle = (isFocused: boolean): React.CSSProperties => ({
+  // Inline input styles preserved from the legacy sacred-gold theme
+  // until the inputs migrate to a CSS module. FieldShell still owns
+  // label/helper rendering.
+  const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '12px 16px',
     backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `1px solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    border: '1px solid rgba(255, 215, 0, 0.3)',
     borderRadius: '8px',
     color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
     fontFamily: '"Crimson Text", serif',
     fontSize: '16px',
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
     outline: 'none',
     boxSizing: 'border-box' as const,
     colorScheme: 'dark' as const,
-  })
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
   }
 
+  // Two FieldShells side-by-side share the start/end labels. Only the
+  // start shell carries `error` + `helperText` so the helper region
+  // renders once below the pair.
   return (
-    <div style={{ position: 'relative', width: '100%', marginBottom: '16px' }}>
+    <div data-field={dataField} data-field-name={dataFieldName}>
       <div style={{ display: 'flex', gap: '16px' }}>
-        {/* Start Time */}
         <div style={{ flex: 1 }}>
-          <label style={labelStyle}>
-            {startLabel}
-            {required && (
-              <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-            )}
-          </label>
-          <input
-            ref={startInputRef}
-            type="time"
-            value={formatTimeForInput(value?.start || null)}
-            onChange={handleStartChange}
+          <FieldShell
+            label={startLabel}
+            helperText={helperText}
+            error={error}
             disabled={disabled}
-            onFocus={() => setIsStartFocused(true)}
-            onBlur={() => setIsStartFocused(false)}
-            style={inputStyle(isStartFocused)}
-          />
+            required={required}
+            styles={styles}
+          >
+            {({ inputId, inputAriaProps }) => (
+              <input
+                ref={startInputRef}
+                id={inputId}
+                type="time"
+                value={formatTimeForInput(value?.start || null)}
+                onChange={handleStartChange}
+                disabled={disabled}
+                required={required}
+                style={inputStyle}
+                {...inputAriaProps}
+              />
+            )}
+          </FieldShell>
         </div>
 
-        {/* End Time */}
         <div style={{ flex: 1 }}>
-          <label style={labelStyle}>
-            {endLabel}
-            {required && (
-              <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>*</span>
-            )}
-          </label>
-          <input
-            ref={endInputRef}
-            type="time"
-            value={formatTimeForInput(value?.end || null)}
-            onChange={handleEndChange}
+          <FieldShell
+            label={endLabel}
             disabled={disabled}
-            onFocus={() => setIsEndFocused(true)}
-            onBlur={() => setIsEndFocused(false)}
-            style={inputStyle(isEndFocused)}
-          />
+            required={required}
+            styles={styles}
+          >
+            {({ inputId, inputAriaProps }) => (
+              <input
+                ref={endInputRef}
+                id={inputId}
+                type="time"
+                value={formatTimeForInput(value?.end || null)}
+                onChange={handleEndChange}
+                disabled={disabled}
+                required={required}
+                style={inputStyle}
+                {...inputAriaProps}
+              />
+            )}
+          </FieldShell>
         </div>
       </div>
-
-      {/* Helper Text */}
-      {helperText && (
-        <div
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontFamily: '"Crimson Text", serif',
-          }}
-        >
-          {helperText}
-        </div>
-      )}
     </div>
   )
 }
+
+TimeRangeComponent.displayName = 'TimeRange'
 
 export default TimeRangeComponent

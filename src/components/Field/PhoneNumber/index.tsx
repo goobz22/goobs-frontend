@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { alpha } from '../../../utils'
+import FieldShell, { type FieldStyleOverrides } from '../Shell'
 
 const SACRED_GOLD = '#FFD700'
 
@@ -37,36 +38,18 @@ export interface PhoneNumberFieldProps {
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
   label?: React.ReactNode
   helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
   placeholder?: string
   id?: string
   autoComplete?: string
-  styles?: {
-    disabled?: boolean
-    required?: boolean
-    theme?: string
-    width?: string
-    minWidth?: string
-    maxWidth?: string
-    height?: string
-    minHeight?: string
-    maxHeight?: string
-    marginTop?: string
-    marginBottom?: string
-    marginLeft?: string
-    marginRight?: string
-    padding?: string
-    fontSize?: string
-    fontWeight?: string | number
-    lineHeight?: string
-    borderWidth?: string
-    borderRadius?: string
-    helperTextType?: 'error' | 'info'
-    requiredIndicatorText?: string
-    backgroundColor?: string
-    borderColor?: string
-    color?: string
-    fontFamily?: string
-  }
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
+  styles?: FieldStyleOverrides
 }
 
 const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
@@ -76,18 +59,25 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   onBlur,
   label = 'Phone Number',
   helperText,
+  error,
   placeholder = '555-555-5555',
   id,
   autoComplete,
+  dataField,
+  dataFieldName,
+  name,
   styles,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState(() =>
     parseExistingPhoneNumber(String(value || ''))
   )
-  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Listen for native 'input' events to support browser automation tools
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
+
+  // Listen for native 'input' events to support browser automation
+  // tools that bypass React's synthetic event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -118,10 +108,9 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, phoneNumber])
 
-  const disabled = styles?.disabled || false
-  const required = styles?.required || false
-
-  // Track previous value prop for derived state pattern
+  // Track previous value prop for derived state pattern — when the
+  // controlled `value` prop changes externally, re-derive the
+  // internally formatted display string.
   const [prevValue, setPrevValue] = useState(value)
   if (value !== prevValue) {
     setPrevValue(value)
@@ -157,45 +146,8 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     [onChange]
   )
 
-  const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(true)
-      onFocus?.(e)
-    },
-    [onFocus]
-  )
-
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(false)
-      onBlur?.(e)
-    },
-    [onBlur]
-  )
-
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    width: styles?.width || '100%',
-    minWidth: styles?.minWidth,
-    maxWidth: styles?.maxWidth,
-    height: styles?.height || 'auto',
-    minHeight: styles?.minHeight,
-    maxHeight: styles?.maxHeight,
-    marginTop: styles?.marginTop || '0',
-    marginBottom: styles?.marginBottom || '16px',
-    marginLeft: styles?.marginLeft,
-    marginRight: styles?.marginRight,
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    color: SACRED_GOLD,
-    fontSize: '14px',
-    fontFamily: '"Cinzel", serif',
-    letterSpacing: '0.05em',
-  }
-
+  // Inner wrapper kept local — Phone has a `+1` prefix glued to the
+  // left of the input, so the visual frame is component-specific.
   const inputWrapperStyle: React.CSSProperties = {
     position: 'relative',
     display: 'flex',
@@ -203,10 +155,9 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     height: styles?.height || '40px',
     width: '100%',
     backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, isFocused ? 0.6 : 0.3)}`,
+    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
     borderRadius: styles?.borderRadius || '8px',
     transition: 'all 0.3s ease',
-    boxShadow: isFocused ? `0 0 15px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
     boxSizing: 'border-box',
   }
 
@@ -237,55 +188,40 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     boxSizing: 'border-box',
   }
 
-  const helperTextStyle: React.CSSProperties = {
-    marginTop: '4px',
-    fontSize: '12px',
-    color:
-      styles?.helperTextType === 'error'
-        ? '#ff6b6b'
-        : 'rgba(255, 255, 255, 0.6)',
-    fontFamily: '"Crimson Text", serif',
-  }
-
   return (
-    <div style={containerStyle}>
-      {label && (
-        <label style={labelStyle}>
-          {typeof label === 'string' ? (
-            <>
-              {label}
-              {required && (
-                <span style={{ color: SACRED_GOLD, marginLeft: '4px' }}>
-                  {styles?.requiredIndicatorText || '*'}
-                </span>
-              )}
-            </>
-          ) : (
-            label
-          )}
-        </label>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <div style={prefixStyle}>+1</div>
+          <input
+            ref={inputRef}
+            type="tel"
+            id={id ?? inputId}
+            name={name}
+            data-field-name={dataFieldName}
+            value={phoneNumber}
+            onChange={handleChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            disabled={disabled}
+            required={required}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
+        </div>
       )}
-
-      <div style={inputWrapperStyle}>
-        <div style={prefixStyle}>+1</div>
-        <input
-          ref={inputRef}
-          type="tel"
-          id={id}
-          value={phoneNumber}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          required={required}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          style={inputStyle}
-        />
-      </div>
-
-      {helperText && <div style={helperTextStyle}>{helperText}</div>}
-    </div>
+    </FieldShell>
   )
 }
 

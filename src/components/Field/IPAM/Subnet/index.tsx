@@ -1,32 +1,35 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type SharedFormFieldProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
-export interface InternalIncrementNumberFieldProps extends Omit<
-  SharedFormFieldProps,
-  'onChange'
-> {
+export interface InternalIncrementNumberFieldProps {
   initialValue?: string
-  onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
+  /**
+   * Emits the new mask CIDR as a number. Was previously polymorphic
+   * `(event | number) => void` — collapsed to `(value: number) => void`
+   * during the FieldShell migration.
+   */
+  onChange?: (value: number) => void
+  label?: string
+  required?: boolean
+  disabled?: boolean
   min?: number
   max?: number
   initialDelay?: number
   repeatInterval?: number
   maskType?: 'subnet' | 'supernet'
   style?: React.CSSProperties
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
   // Additional HTML input props
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
@@ -56,61 +59,47 @@ const calculateSubnetInfo = (cidr: number) => {
   }
 }
 
-const getStyles = (styles?: SharedFormFieldProps, adornmentColor?: string) => {
-  const isSacred = styles?.styles?.theme === 'sacred'
-  const isDark = styles?.styles?.theme === 'dark'
+// Inline button + input styles preserved from the legacy theme so the
+// chrome doesn't regress while the IPAM family migrates.
+const buttonContainerStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: '8px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  justifyContent: 'center',
+}
 
-  return {
-    buttonContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      justifyContent: 'center',
-      marginRight: '-0.25rem',
-    } as React.CSSProperties,
-    button: {
-      padding: 0,
-      width: '1rem',
-      height: '1rem',
-      minWidth: '1rem',
-      minHeight: '1rem',
-      borderRadius: '0.125rem',
-      border: 'none',
-      backgroundColor: 'transparent',
-      cursor: styles?.disabled ? 'not-allowed' : 'pointer',
-      color:
-        adornmentColor ||
-        (isSacred ? '#FFD700' : isDark ? '#E5E7EB' : '#4B5563'),
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      opacity: styles?.disabled ? 0.5 : 1,
-      '&:hover': {
-        backgroundColor: isSacred
-          ? 'rgba(255, 215, 0, 0.1)'
-          : isDark
-            ? 'rgba(229, 231, 235, 0.1)'
-            : 'rgba(229, 231, 235, 0.5)',
-      },
-      '&:active': {
-        transform: 'scale(0.95)',
-      },
-    } as React.CSSProperties,
-    infoContainer: {
-      marginTop: '0.5rem',
-      fontSize: '0.875rem',
-      color: isSacred ? '#FFD700' : isDark ? '#D1D5DB' : '#4B5563',
-    } as React.CSSProperties,
-    infoText: {
-      marginTop: '0.25rem',
-      fontStyle: 'italic',
-      color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
-    } as React.CSSProperties,
-    errorText: {
-      color: isSacred ? '#FF6B6B' : isDark ? '#F87171' : '#EF4444',
-    } as React.CSSProperties,
-  }
+const buttonStyle = (isDisabled: boolean): React.CSSProperties => ({
+  padding: 0,
+  width: '1rem',
+  height: '1rem',
+  minWidth: '1rem',
+  minHeight: '1rem',
+  borderRadius: '0.125rem',
+  border: 'none',
+  backgroundColor: 'transparent',
+  cursor: isDisabled ? 'not-allowed' : 'pointer',
+  color: 'currentColor',
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  opacity: isDisabled ? 0.5 : 1,
+})
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  height: '40px',
+  background: 'transparent',
+  outline: 'none',
+  border: '1px solid rgba(0,0,0,0.2)',
+  borderRadius: '8px',
+  padding: '8px 60px 8px 16px',
+  fontSize: '16px',
+  boxSizing: 'border-box',
 }
 
 const InternalIncrementNumberField: React.FC<
@@ -125,8 +114,21 @@ const InternalIncrementNumberField: React.FC<
   max,
   maskType = 'subnet',
   style,
-  styles: fieldStyles,
-  ...rest
+  helperText,
+  error,
+  dataField,
+  dataFieldName,
+  required,
+  disabled,
+  styles,
+  onFocus,
+  onBlur,
+  onKeyDown,
+  onClick,
+  placeholder,
+  id,
+  name,
+  autoComplete,
 }) => {
   const effectiveMin =
     typeof min === 'number' ? min : maskType === 'supernet' ? 8 : 16
@@ -143,58 +145,6 @@ const InternalIncrementNumberField: React.FC<
   const inputRef = useRef<HTMLInputElement>(null)
 
   const subnetInfo = calculateSubnetInfo(parseInt(currentValue) || effectiveMin)
-
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(fieldStyles, false)
-
-  const pickerStyles = getStyles(rest, adornmentColor)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(fieldStyles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: fieldStyles?.height || '40px',
-      width: '100%',
-      border: `${fieldStyles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: fieldStyles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: fieldStyles?.padding || '8px 16px',
-      paddingRight: '60px', // Space for increment/decrement buttons
-      fontSize: fieldStyles?.fontSize || '16px',
-      fontWeight: fieldStyles?.fontWeight,
-      lineHeight: fieldStyles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    endAdornment: getSharedAdornmentStyles(adornmentColor),
-    footerText: getSharedFooterTextStyles(
-      footerTextColor,
-      themeConfig,
-      fieldStyles
-    ),
-  }
 
   const clearTimers = useCallback(() => {
     if (initialTimerRef.current) clearTimeout(initialTimerRef.current)
@@ -258,38 +208,28 @@ const InternalIncrementNumberField: React.FC<
       const newValue = value.replace(/[^0-9]/g, '')
       if (newValue === '') {
         setCurrentValue(effectiveMin.toString())
-        if (onChange) {
-          const syntheticEvent = {
-            target: { value: effectiveMin.toString() },
-            currentTarget: { value: effectiveMin.toString() },
-          } as React.ChangeEvent<HTMLInputElement>
-          onChange(syntheticEvent)
-        }
+        onChange?.(effectiveMin)
         return
       }
       const numValue = parseInt(newValue, 10)
-      let finalValue = newValue
+      let finalNum: number
       if (isNaN(numValue) || numValue < effectiveMin) {
-        finalValue = effectiveMin.toString()
+        finalNum = effectiveMin
         setCurrentValue(effectiveMin.toString())
       } else if (numValue > effectiveMax) {
-        finalValue = effectiveMax.toString()
+        finalNum = effectiveMax
         setCurrentValue(effectiveMax.toString())
       } else {
+        finalNum = numValue
         setCurrentValue(newValue)
       }
-      if (onChange) {
-        const syntheticEvent = {
-          target: { value: finalValue },
-          currentTarget: { value: finalValue },
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange(syntheticEvent)
-      }
+      onChange?.(finalNum)
     },
     [onChange, effectiveMin, effectiveMax]
   )
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools
+  // that bypass React's synthetic-event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -306,59 +246,61 @@ const InternalIncrementNumberField: React.FC<
   }, [subnetInfo.mask, handleTextFieldChange])
 
   return (
-    <div style={style}>
-      <div style={componentStyles.container}>
-        {label && (
-          <label style={componentStyles.label}>
-            {label}
-            {rest.required && (
-              <span style={getRequiredIndicatorStyle(fieldStyles)}>
-                {fieldStyles?.requiredIndicatorText || ' *'}
-              </span>
-            )}
-          </label>
-        )}
-
-        <div style={componentStyles.inputWrapper}>
-          <input
-            ref={inputRef}
-            {...rest}
-            {...getRequiredProps(rest.required)}
-            value={subnetInfo.mask}
-            disabled={rest.disabled}
-            onChange={e => handleTextFieldChange(e.target.value)}
-            type="text"
-            inputMode="numeric"
-            style={componentStyles.input}
-          />
-
-          <div
-            style={{
-              ...componentStyles.endAdornment,
-              right: '16px',
-            }}
-          >
-            <div style={pickerStyles.buttonContainer}>
+    <div style={style} data-field={dataField}>
+      <FieldShell
+        label={label}
+        helperText={helperText}
+        error={error}
+        disabled={disabled}
+        required={required}
+        dataFieldName={dataFieldName}
+        styles={styles}
+      >
+        {({ inputId, inputAriaProps }) => (
+          <div style={{ position: 'relative', width: '100%' }}>
+            <input
+              ref={inputRef}
+              id={id ?? inputId}
+              name={name}
+              data-field-name={dataFieldName}
+              autoComplete={autoComplete}
+              value={subnetInfo.mask}
+              disabled={disabled}
+              required={required}
+              onChange={e => handleTextFieldChange(e.target.value)}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              onKeyDown={onKeyDown}
+              onClick={onClick}
+              placeholder={placeholder}
+              type="text"
+              inputMode="numeric"
+              style={inputStyle}
+              {...inputAriaProps}
+            />
+            <div style={buttonContainerStyle}>
               <button
                 type="button"
+                aria-label="Increase subnet mask"
                 onMouseDown={handleIncrementMouseDown}
-                disabled={rest.disabled}
-                style={pickerStyles.button}
+                disabled={disabled}
+                style={buttonStyle(!!disabled)}
               >
                 <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
               </button>
               <button
                 type="button"
+                aria-label="Decrease subnet mask"
                 onMouseDown={handleDecrementMouseDown}
-                disabled={rest.disabled}
-                style={pickerStyles.button}
+                disabled={disabled}
+                style={buttonStyle(!!disabled)}
               >
                 <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
               </button>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+      </FieldShell>
     </div>
   )
 }
@@ -369,6 +311,11 @@ export interface SubnetFieldValue {
 }
 
 export interface SubnetFieldProps {
+  /**
+   * Object payload — `{ address, mask }` is the value of a SubnetField.
+   * Kept structural rather than primitive because address + mask are
+   * jointly meaningful (a /24 with no address is meaningless, etc.).
+   */
   value: SubnetFieldValue
   onChange: (value: SubnetFieldValue) => void
   label?: string
@@ -380,7 +327,14 @@ export interface SubnetFieldProps {
   supernetAddress?: string
   supernetMask?: string
   disabled?: boolean
-  styles?: FormFieldStyles
+  helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
 }
 
 const cidrToMask = (cidr: number): string => {
@@ -459,6 +413,11 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   supernetAddress,
   supernetMask,
   disabled = false,
+  helperText,
+  error: errorProp,
+  dataField,
+  dataFieldName,
+  styles,
 }) => {
   const [address, setAddress] = useState<string>(value.address || '')
   const [mask, setMask] = useState<number>(
@@ -470,7 +429,6 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     cidr: number
   } | null>(null)
   const [isValidSubnet, setIsValidSubnet] = useState<boolean>(true)
-  const subnetStyles = getStyles()
 
   const cidrToMaskFn = useCallback((cidr: number): string => {
     const binary = '1'.repeat(cidr) + '0'.repeat(32 - cidr)
@@ -582,13 +540,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   ])
 
   const handleMaskChange = useCallback(
-    (eventOrNumber: React.ChangeEvent<HTMLInputElement> | number) => {
-      let newMask: number
-      if (typeof eventOrNumber === 'number') {
-        newMask = eventOrNumber
-      } else {
-        newMask = parseInt(eventOrNumber.target.value, 10)
-      }
+    (newMask: number) => {
       setMask(newMask)
       onChange({ address, mask: newMask })
     },
@@ -608,8 +560,15 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     }
   }
 
+  // Local out-of-range error wins unless caller passed an explicit
+  // `error` prop. The inner increment field surfaces this.
+  const localError = !isValidSubnet
+    ? 'Subnet is outside the supernet range'
+    : undefined
+  const shellError = errorProp ?? localError
+
   return (
-    <div style={style}>
+    <div style={style} data-field={dataField} data-field-name={dataFieldName}>
       <InternalIncrementNumberField
         initialValue={mask.toString()}
         onChange={handleMaskChange}
@@ -618,10 +577,18 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         max={max as number}
         maskType={maskType}
         required={required}
-        style={{ width: '100%' }}
         disabled={disabled}
+        style={{ width: '100%' }}
+        {...(helperText !== undefined ? { helperText } : {})}
+        {...(shellError !== undefined ? { error: shellError } : {})}
+        {...(styles !== undefined ? { styles } : {})}
       />
-      <div style={subnetStyles.infoContainer}>
+      <div
+        style={{
+          marginTop: '0.5rem',
+          fontSize: '0.875rem',
+        }}
+      >
         <div>Subnet CIDR: /{mask}</div>
         <div>
           Total Hosts: {subnetInfo.hosts} ({subnetInfo.usableHosts} usable)
@@ -637,8 +604,9 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
             </div>
             <div
               style={{
-                ...subnetStyles.infoText,
-                ...(!isValidSubnet && subnetStyles.errorText),
+                marginTop: '0.25rem',
+                fontStyle: 'italic',
+                color: !isValidSubnet ? '#EF4444' : undefined,
               }}
             >
               Available Range: {networkRange.start} - {networkRange.end}
@@ -649,5 +617,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     </div>
   )
 }
+
+SubnetField.displayName = 'SubnetField'
 
 export default SubnetField

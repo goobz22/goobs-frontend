@@ -1,26 +1,26 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface MACAddressFieldProps {
   initialValue?: string
   /**
-   * A standard ChangeEvent<HTMLInputElement> so parent can do
-   * e.g. (event) => getMacValue(event.target.value) ...
+   * Emits the formatted MAC string. Was previously a synthetic
+   * ChangeEvent — collapsed to the value alone during the FieldShell
+   * migration.
    */
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange?: (value: string) => void
   label?: React.ReactNode
   helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  required?: boolean
   disabled?: boolean
-  styles?: FormFieldStyles
+  styles?: FieldStyleOverrides
   // Additional HTML input props
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
@@ -50,6 +50,18 @@ const isValidMACAddress = (mac: string): boolean => {
   return segments.every(segment => isValidSegment(segment) && segment !== '')
 }
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  height: '40px',
+  background: 'transparent',
+  outline: 'none',
+  border: '1px solid rgba(0,0,0,0.2)',
+  borderRadius: '8px',
+  padding: '8px 16px',
+  fontSize: '16px',
+  boxSizing: 'border-box',
+}
+
 /**
  * A specialized text field for MAC address management
  * - Validates MAC addresses in proper format
@@ -63,15 +75,25 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   onChange,
   label = 'MAC Address',
   helperText,
+  error: errorProp,
+  dataField,
+  dataFieldName,
+  required,
   disabled,
   styles,
-  ...rest
+  onFocus,
+  onBlur,
+  onKeyDown,
+  onClick,
+  onPaste: onPasteProp,
+  placeholder,
+  id,
+  autoComplete,
 }) => {
   const [value, setValue] = useState(initialValue)
   const [isValid, setIsValid] = useState<boolean>(
     initialValue === '' || isValidMACAddress(initialValue)
   )
-  const [isFocused, setIsFocused] = useState(false)
   const lastInputTypeWasDelete = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -157,15 +179,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
 
       setValue(formattedValue)
       setIsValid(valid)
-
-      if (onChange) {
-        // Create a synthetic event to match the expected signature
-        const syntheticEvent = {
-          target: { value: formattedValue },
-          currentTarget: { value: formattedValue },
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange(syntheticEvent)
-      }
+      onChange?.(formattedValue)
     },
     [onChange, formatMACAddress, validateMACAddress, value]
   )
@@ -181,20 +195,15 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
 
       setValue(formattedValue)
       setIsValid(validateMACAddress(formattedValue))
+      onChange?.(formattedValue)
 
-      // Create a synthetic change event
-      const syntheticEvent = {
-        target: {
-          value: formattedValue,
-        },
-      } as React.ChangeEvent<HTMLInputElement>
-
-      onChange?.(syntheticEvent)
+      onPasteProp?.(event)
     },
-    [formatMACAddress, onChange, validateMACAddress]
+    [formatMACAddress, onChange, validateMACAddress, onPasteProp]
   )
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools
+  // that bypass React's synthetic-event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -210,102 +219,48 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [value, handleTextFieldChange])
 
-  const error = !isValid
+  // Local format error wins unless caller passed an explicit `error`
+  // prop (e.g. duplicate-MAC server-side validation).
+  const localError = !isValid
     ? 'Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)'
-    : helperText
-
-  // Merge disabled prop with styles
-  const mergedStyles: FormFieldStyles = {
-    ...styles,
-    ...(disabled !== undefined ? { disabled } : {}),
-  }
-
-  // Promote error state into the shared style system for proper colors
-  const computedStyles: FormFieldStyles = error
-    ? { ...mergedStyles, helperTextType: 'error' as const }
-    : mergedStyles
-
-  const { themeConfig, borderColor, labelColor, footerTextColor, transition } =
-    getSharedFormFieldStyles(computedStyles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(computedStyles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: mergedStyles?.height || '40px',
-      width: '100%',
-      border: `${mergedStyles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: mergedStyles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: mergedStyles?.padding || '8px 16px',
-      fontSize: mergedStyles?.fontSize || '16px',
-      fontWeight: mergedStyles?.fontWeight,
-      lineHeight: mergedStyles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    footerText: getSharedFooterTextStyles(
-      footerTextColor,
-      themeConfig,
-      computedStyles
-    ),
-  }
+    : undefined
+  const shellError = errorProp ?? localError
 
   return (
-    <div style={componentStyles.container}>
-      {label && (
-        <label htmlFor={rest.id} style={componentStyles.label}>
-          {label}
-          {computedStyles?.required && (
-            <span style={getRequiredIndicatorStyle(computedStyles)}>
-              {computedStyles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
-      )}
-
-      <div style={componentStyles.inputWrapper}>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={shellError}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
-          {...rest}
-          {...getRequiredProps(computedStyles?.required)}
+          id={id ?? inputId}
+          data-field-name={dataFieldName}
+          autoComplete={autoComplete}
           value={value}
-          disabled={computedStyles?.disabled}
+          disabled={disabled}
+          required={required}
           onChange={e => handleTextFieldChange(e.target.value)}
-          onFocus={e => {
-            setIsFocused(true)
-            rest.onFocus?.(e)
-          }}
-          onBlur={e => {
-            setIsFocused(false)
-            rest.onBlur?.(e)
-          }}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          onClick={onClick}
           onPaste={handlePaste}
-          placeholder={rest.placeholder ?? '00:1A:2B:3C:4D:5E'}
-          aria-invalid={!isValid}
-          style={componentStyles.input}
+          placeholder={placeholder ?? '00:1A:2B:3C:4D:5E'}
+          style={inputStyle}
+          {...inputAriaProps}
         />
-      </div>
-
-      {error && <div style={componentStyles.footerText}>{error}</div>}
-    </div>
+      )}
+    </FieldShell>
   )
 }
+
+MACAddressField.displayName = 'MACAddressField'
 
 export default MACAddressField

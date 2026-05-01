@@ -1,19 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getRequiredIndicatorStyle,
+  getFormFieldTheme,
   getRequiredProps,
   type FormFieldStyles,
 } from '../../../../theme'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 import SearchIcon from '../../../Icons/Search'
 import HistoryIcon from '../../../Icons/History'
+import { useEscape } from '../../Shell'
 
 export type NavigationItem = {
   id: string
@@ -34,6 +31,10 @@ export type SearchableHistoryProps = {
   helperText?: string
   styles?: FormFieldStyles
   maxHistoryItems?: number
+  /** Stable test selector — emitted as `data-field` on the container. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the container. */
+  dataFieldName?: string
 }
 
 const SearchableHistory: React.FC<SearchableHistoryProps> = ({
@@ -44,7 +45,14 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   helperText,
   styles,
   maxHistoryItems = 10,
+  dataField,
+  dataFieldName,
 }) => {
+  // Stable, SSR-safe ids for label↔input + listbox ARIA wiring.
+  const reactId = useId()
+  const inputId = `searchable-history-${reactId}`
+  const listboxId = `${inputId}-listbox`
+  const helperId = `${inputId}-helper`
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState<NavigationItem | null>(null)
@@ -130,23 +138,51 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   }, [isOpen])
 
   const getStyles = () => {
-    const {
-      themeConfig,
-      borderColor,
-      labelColor,
-      footerTextColor,
-      transition,
-    } = getSharedFormFieldStyles(styles, isOpen)
+    // Inlined from the deleted `getSharedFormFieldStyles` helper.
+    // Field components moved to CSS modules + FieldShell; this
+    // component still does extensive bespoke layout (search box +
+    // tabbed history panel + portalled dropdown) so it derives the
+    // colors from the theme map and keeps its own inline-style
+    // generators.
+    const themeConfig = getFormFieldTheme(styles)
+    const helperTextType = styles?.helperTextType || 'info'
+    const isError = helperTextType === 'error'
+    const borderColor = isError
+      ? themeConfig.border.error
+      : isOpen
+        ? themeConfig.border.focused
+        : themeConfig.border.default
+    const labelColor = isError
+      ? themeConfig.label.error
+      : themeConfig.label.default
+    const footerTextColor =
+      helperTextType === 'error'
+        ? themeConfig.footerText.error
+        : themeConfig.footerText.default
+    const transition = 'all 0.2s ease'
 
     const sacredTheme = styles?.theme === 'sacred'
 
     return {
       container: {
-        ...getSharedContainerStyles(styles),
+        // Inlined from the deleted `getSharedContainerStyles`.
+        width: styles?.width || '100%',
+        marginTop: styles?.marginTop,
+        marginBottom: styles?.marginBottom,
+        marginLeft: styles?.marginLeft,
+        marginRight: styles?.marginRight,
         overflow: 'visible',
         position: 'relative' as const,
-      },
-      label: getSharedLabelStyles(labelColor, themeConfig),
+      } as React.CSSProperties,
+      label: {
+        // Inlined from the deleted `getSharedLabelStyles`.
+        display: 'block',
+        marginBottom: '4px',
+        fontSize: styles?.fontSize || '14px',
+        fontFamily: themeConfig.fontFamily,
+        color: labelColor,
+        transition,
+      } as React.CSSProperties,
       searchBox: {
         display: 'flex',
         alignItems: 'center',
@@ -255,11 +291,14 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
         opacity: 0.5,
         fontSize: '14px',
       },
-      footerText: getSharedFooterTextStyles(
-        footerTextColor,
-        themeConfig,
-        styles
-      ),
+      footerText: {
+        // Inlined from the deleted `getSharedFooterTextStyles`.
+        marginTop: '4px',
+        fontSize: styles?.fontSize || '12px',
+        fontFamily: themeConfig.fontFamily,
+        color: footerTextColor,
+        minHeight: '1em',
+      } as React.CSSProperties,
     }
   }
 
@@ -365,16 +404,32 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     )
   }
 
+  // Escape closes the dropdown when focus is anywhere in this
+  // component's subtree (search input or the portalled menu).
+  useEscape(isOpen, () => {
+    setIsOpen(false)
+    inputRef.current?.focus()
+  })
+
   return (
     <div
       style={{ ...componentStyles.container, overflow: 'visible' }}
       ref={containerRef}
+      data-field={dataField}
+      data-field-name={dataFieldName}
+      data-state={isOpen ? 'open' : undefined}
     >
       {label && (
-        <label style={componentStyles.label}>
+        <label htmlFor={inputId} style={componentStyles.label}>
           {label}
           {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
+            <span
+              style={{
+                color: styles?.requiredIndicatorColor || 'rgba(239, 68, 68, 1)',
+                marginLeft: '2px',
+                fontWeight: 600,
+              }}
+            >
               {styles?.requiredIndicatorText || ' *'}
             </span>
           )}
@@ -389,6 +444,15 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
           />
           <input
             ref={inputRef}
+            id={inputId}
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-label={!label ? placeholder : undefined}
+            aria-describedby={helperText ? helperId : undefined}
+            data-action={isOpen ? 'close' : 'open'}
+            data-subject={dataField}
             type="text"
             value={searchTerm}
             onChange={handleInputChange}
@@ -433,12 +497,20 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
           ReactDOM.createPortal(
             <div
               ref={dropdownRef}
+              id={listboxId}
+              role="listbox"
+              aria-labelledby={inputId}
+              data-popover="searchable-history"
+              data-subject={dataField}
               style={{
                 position: 'fixed',
                 top: `${dropdownPosition.top}px`,
                 left: `${dropdownPosition.left}px`,
                 width: `${dropdownPosition.width}px`,
-                zIndex: 999999,
+                // Aligned with Dialog's z-index (9999) so the dropdown
+                // doesn't punch through modals. Was previously 999999
+                // — that was anchor-day debugging cruft.
+                zIndex: 9999,
                 backgroundColor:
                   styles?.theme === 'sacred'
                     ? 'rgba(0, 0, 0, 0.95)'
@@ -685,7 +757,11 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
           )}
       </div>
 
-      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
+      {helperText && (
+        <div id={helperId} style={componentStyles.footerText}>
+          {helperText}
+        </div>
+      )}
     </div>
   )
 }

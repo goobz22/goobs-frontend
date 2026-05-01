@@ -1,22 +1,18 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 export interface CIDRFieldProps {
   initialValue?: string
-  onChange?: (event: React.ChangeEvent<HTMLInputElement> | number) => void
+  /**
+   * Emits the new CIDR as a number. Was previously polymorphic
+   * `(event | number) => void` — collapsed to `(value: number) => void`
+   * during the FieldShell migration.
+   */
+  onChange?: (value: number) => void
   initialDelay?: number
   repeatInterval?: number
   minCidr?: number
@@ -24,8 +20,15 @@ export interface CIDRFieldProps {
   showSubnetInfo?: boolean
   label?: React.ReactNode
   helperText?: string
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  required?: boolean
   disabled?: boolean
-  styles?: FormFieldStyles
+  styles?: FieldStyleOverrides
   // Additional HTML input props
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
@@ -57,43 +60,48 @@ const calculateCIDRInfo = (cidr: number) => {
   }
 }
 
-const getStyles = (styles?: FormFieldStyles, adornmentColor?: string) => {
-  const isSacred = styles?.theme === 'sacred'
-  const isDark = styles?.theme === 'dark'
+// Inline button + input styles preserved from the legacy theme so the
+// chrome (height, increment buttons, padding) doesn't regress while
+// the IPAM family migrates.
+const buttonContainerStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: '8px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  justifyContent: 'center',
+}
 
-  return {
-    buttonContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      justifyContent: 'center',
-      marginRight: '-0.25rem',
-    } as React.CSSProperties,
-    button: {
-      padding: 0,
-      width: '1rem',
-      height: '1rem',
-      minWidth: '1rem',
-      minHeight: '1rem',
-      borderRadius: '0.125rem',
-      border: 'none',
-      backgroundColor: 'transparent',
-      cursor: styles?.disabled ? 'not-allowed' : 'pointer',
-      color:
-        adornmentColor ||
-        (isSacred ? '#FFD700' : isDark ? '#E5E7EB' : '#4B5563'),
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      opacity: styles?.disabled ? 0.5 : 1,
-    } as React.CSSProperties,
-    infoContainer: {
-      marginTop: '0.5rem',
-      fontSize: '0.875rem',
-      color: isSacred ? '#FFD700' : isDark ? '#D1D5DB' : '#4B5563',
-    } as React.CSSProperties,
-  }
+const buttonStyle = (isDisabled: boolean): React.CSSProperties => ({
+  padding: 0,
+  width: '1rem',
+  height: '1rem',
+  minWidth: '1rem',
+  minHeight: '1rem',
+  borderRadius: '0.125rem',
+  border: 'none',
+  backgroundColor: 'transparent',
+  cursor: isDisabled ? 'not-allowed' : 'pointer',
+  color: 'currentColor',
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  opacity: isDisabled ? 0.5 : 1,
+})
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  height: '40px',
+  background: 'transparent',
+  outline: 'none',
+  border: '1px solid rgba(0,0,0,0.2)',
+  borderRadius: '8px',
+  padding: '8px 60px 8px 16px',
+  fontSize: '16px',
+  boxSizing: 'border-box',
 }
 
 const CIDRField: React.FC<CIDRFieldProps> = ({
@@ -106,9 +114,19 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   maxCidr = 32,
   showSubnetInfo = true,
   helperText,
+  error,
+  dataField,
+  dataFieldName,
+  required,
   disabled,
   styles,
-  ...rest
+  onFocus,
+  onBlur,
+  onKeyDown,
+  onClick,
+  placeholder,
+  id,
+  autoComplete,
 }) => {
   const [currentValue, setCurrentValue] = useState(() => {
     const initialNum = parseInt(initialValue, 10)
@@ -121,64 +139,6 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const cidrInfo = calculateCIDRInfo(parseInt(currentValue, 10) || 24)
-
-  // Merge disabled prop with styles while preserving exact optional property types
-  const mergedStyles: FormFieldStyles = {
-    ...(styles || {}),
-    ...(disabled !== undefined ? { disabled } : {}),
-  }
-
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(mergedStyles, false)
-
-  const pickerStyles = getStyles(mergedStyles, adornmentColor)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(mergedStyles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: mergedStyles?.height || '40px',
-      width: '100%',
-      border: `${mergedStyles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: mergedStyles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: mergedStyles?.padding || '8px 16px',
-      paddingRight: '60px', // Space for increment/decrement buttons
-      fontSize: mergedStyles?.fontSize || '16px',
-      fontWeight: mergedStyles?.fontWeight,
-      lineHeight: mergedStyles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    endAdornment: getSharedAdornmentStyles(adornmentColor),
-    footerText: getSharedFooterTextStyles(
-      footerTextColor,
-      themeConfig,
-      mergedStyles
-    ),
-  }
 
   // Note: clearTimers can reference itself in useCallback because the function
   // is stable (empty deps) and uses closures over refs, not direct self-reference
@@ -241,38 +201,28 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
       const newValue = value.replace(/[^0-9/]/g, '').replace('/', '')
       if (newValue === '') {
         setCurrentValue(minCidr.toString())
-        if (onChange) {
-          const syntheticEvent = {
-            target: { value: `/${minCidr}` },
-            currentTarget: { value: `/${minCidr}` },
-          } as React.ChangeEvent<HTMLInputElement>
-          onChange(syntheticEvent)
-        }
+        onChange?.(minCidr)
         return
       }
       const numValue = parseInt(newValue, 10)
-      let finalValue = newValue
+      let finalNum: number
       if (isNaN(numValue) || numValue < minCidr) {
-        finalValue = minCidr.toString()
+        finalNum = minCidr
         setCurrentValue(minCidr.toString())
       } else if (numValue > maxCidr) {
-        finalValue = maxCidr.toString()
+        finalNum = maxCidr
         setCurrentValue(maxCidr.toString())
       } else {
+        finalNum = numValue
         setCurrentValue(newValue)
       }
-      if (onChange) {
-        const syntheticEvent = {
-          target: { value: `/${finalValue}` },
-          currentTarget: { value: `/${finalValue}` },
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange(syntheticEvent)
-      }
+      onChange?.(finalNum)
     },
     [onChange, minCidr, maxCidr]
   )
 
-  // Listen for native 'input' events to support browser automation tools
+  // Listen for native 'input' events from browser-automation tools
+  // that bypass React's synthetic-event system.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
@@ -288,67 +238,69 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [currentValue, handleTextFieldChange])
 
-  const EndAdornment = () => (
-    <div style={pickerStyles.buttonContainer}>
-      <button
-        type="button"
-        onMouseDown={handleIncrementMouseDown}
-        disabled={mergedStyles?.disabled}
-        style={pickerStyles.button}
-      >
-        <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
-      </button>
-      <button
-        type="button"
-        onMouseDown={handleDecrementMouseDown}
-        disabled={mergedStyles?.disabled}
-        style={pickerStyles.button}
-      >
-        <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
-      </button>
-    </div>
-  )
-
   return (
-    <div>
-      <div style={componentStyles.container}>
-        {label && (
-          <label style={componentStyles.label}>
-            {label}
-            {mergedStyles?.required && (
-              <span style={getRequiredIndicatorStyle(mergedStyles)}>
-                {mergedStyles?.requiredIndicatorText || ' *'}
-              </span>
-            )}
-          </label>
-        )}
-
-        <div style={componentStyles.inputWrapper}>
-          <input
-            ref={inputRef}
-            {...rest}
-            {...getRequiredProps(mergedStyles?.required)}
-            value={`/${currentValue}`}
-            disabled={mergedStyles?.disabled}
-            onChange={e => handleTextFieldChange(e.target.value)}
-            type="text"
-            inputMode="numeric"
-            style={componentStyles.input}
-          />
-
-          <div
-            style={{
-              ...componentStyles.endAdornment,
-              right: '16px',
-            }}
-          >
-            <EndAdornment />
+    <div data-field={dataField}>
+      <FieldShell
+        label={label}
+        helperText={helperText}
+        error={error}
+        disabled={disabled}
+        required={required}
+        dataFieldName={dataFieldName}
+        styles={styles}
+      >
+        {({ inputId, inputAriaProps }) => (
+          <div style={{ position: 'relative', width: '100%' }}>
+            <input
+              ref={inputRef}
+              id={id ?? inputId}
+              data-field-name={dataFieldName}
+              autoComplete={autoComplete}
+              value={`/${currentValue}`}
+              disabled={disabled}
+              required={required}
+              onChange={e => handleTextFieldChange(e.target.value)}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              onKeyDown={onKeyDown}
+              onClick={onClick}
+              placeholder={placeholder}
+              type="text"
+              inputMode="numeric"
+              style={inputStyle}
+              {...inputAriaProps}
+            />
+            <div style={buttonContainerStyle}>
+              <button
+                type="button"
+                aria-label="Increase CIDR"
+                onMouseDown={handleIncrementMouseDown}
+                disabled={disabled}
+                style={buttonStyle(!!disabled)}
+              >
+                <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
+              </button>
+              <button
+                type="button"
+                aria-label="Decrease CIDR"
+                onMouseDown={handleDecrementMouseDown}
+                disabled={disabled}
+                style={buttonStyle(!!disabled)}
+              >
+                <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+      </FieldShell>
 
       {showSubnetInfo && (
-        <div style={pickerStyles.infoContainer}>
+        <div
+          style={{
+            marginTop: '0.5rem',
+            fontSize: '0.875rem',
+          }}
+        >
           <div>Subnet Mask: {cidrInfo.mask}</div>
           <div>
             Total Hosts: {cidrInfo.totalHosts} ({cidrInfo.usableHosts} usable)
@@ -356,10 +308,10 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
           <div>Networks: {cidrInfo.networks}</div>
         </div>
       )}
-
-      {helperText && <div style={componentStyles.footerText}>{helperText}</div>}
     </div>
   )
 }
+
+CIDRField.displayName = 'CIDRField'
 
 export default CIDRField

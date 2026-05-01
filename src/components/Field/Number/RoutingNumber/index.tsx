@@ -1,106 +1,58 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
-import {
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredIndicatorStyle,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 
 export interface RoutingNumberProps {
-  onChange?: (value: string, isValid: boolean) => void
+  /** Fires on every edit with the digits-only routing-number string. */
+  onChange?: (value: string) => void
+  /** Optional side-channel for validity changes (ABA checksum + length). */
+  onValidityChange?: (isValid: boolean) => void
   useChecksum?: boolean
   isDefaultValue?: boolean
   value?: string
-  label?: string
+  label?: React.ReactNode
   placeholder?: string
   id?: string
+  /** Forwarded to the input as `name` for native form submission. */
+  name?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   helperText?: string
-  styles?: FormFieldStyles
-}
-
-const getStyles = (styles?: FormFieldStyles, isFocused?: boolean) => {
-  const {
-    themeConfig,
-    borderColor,
-    labelColor,
-    adornmentColor,
-    footerTextColor,
-    transition,
-  } = getSharedFormFieldStyles(styles, isFocused)
-
-  const componentStyles: Record<string, React.CSSProperties> = {
-    container: getSharedContainerStyles(styles),
-    inputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      height: styles?.height || '40px',
-      width: '100%',
-      border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-      borderRadius: styles?.borderRadius || '8px',
-      backgroundColor: themeConfig.background,
-      color: themeConfig.text,
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box',
-      transition,
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'transparent',
-      outline: 'none',
-      border: 'none',
-      padding: styles?.padding || '8px 16px',
-      paddingLeft: styles?.paddingLeft || '48px', // Space for routing icon
-      paddingRight: styles?.paddingRight || '16px',
-      fontSize: styles?.fontSize || '16px',
-      fontWeight: styles?.fontWeight,
-      lineHeight: styles?.lineHeight,
-      fontFamily: themeConfig.fontFamily,
-      color: 'inherit',
-      boxSizing: 'border-box',
-    },
-    label: getSharedLabelStyles(labelColor, themeConfig),
-    adornment: getSharedAdornmentStyles(adornmentColor),
-    startAdornment: { left: '16px' },
-    footerText: getSharedFooterTextStyles(footerTextColor, themeConfig, styles),
-    sacredGlyph: {
-      position: 'absolute' as const,
-      left: '-16px',
-      color: 'rgba(255,215,0,0.4)',
-      fontSize: '12px',
-    },
-  }
-
-  return componentStyles
+  /** Error message rendered below the input; sets aria-invalid. */
+  error?: string | boolean
+  /** Stable test selector — emitted as `data-field` on the wrapper. */
+  dataField?: string
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  styles?: FieldStyleOverrides
 }
 
 const RoutingNumber: React.FC<RoutingNumberProps> = ({
   onChange,
+  onValidityChange,
   value = '',
   useChecksum = true,
   isDefaultValue = false,
   label = 'Routing Number',
   placeholder,
   id,
+  name,
   onFocus,
   onBlur,
   helperText,
+  error,
+  dataField,
+  dataFieldName,
   styles,
-  ...props
 }) => {
   const [internalValue, setInternalValue] = useState<string>(value)
+  // Tracks focus for the masked default-value display flip only.
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const disabled = styles?.disabled || false
+  const required = styles?.required || false
 
   const validateRoutingChecksum = useCallback(
     (routingNumber: string): boolean => {
@@ -166,13 +118,20 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
         setInternalValue(formattedValue)
         setHasBeenEdited(true)
         const valid = validateRoutingNumber(formattedValue)
-        onChange?.(formattedValue, valid)
+        onChange?.(formattedValue)
+        onValidityChange?.(valid)
       }
     }
 
     el.addEventListener('input', handleNativeInput)
     return () => el.removeEventListener('input', handleNativeInput)
-  }, [onChange, internalValue, validateRoutingNumber, formatInput])
+  }, [
+    onChange,
+    onValidityChange,
+    internalValue,
+    validateRoutingNumber,
+    formatInput,
+  ])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,9 +140,10 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       setInternalValue(formattedValue)
       setHasBeenEdited(true)
       const valid = validateRoutingNumber(formattedValue)
-      onChange?.(formattedValue, valid)
+      onChange?.(formattedValue)
+      onValidityChange?.(valid)
     },
-    [onChange, validateRoutingNumber, formatInput]
+    [onChange, onValidityChange, validateRoutingNumber, formatInput]
   )
 
   const handleFocus = useCallback(
@@ -201,56 +161,85 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
     [onBlur]
   )
 
-  const computedStyles = getStyles(styles, isFocused)
   const sacredTheme = styles?.theme === 'sacred'
   const finalPlaceholder = sacredTheme ? '021000021' : placeholder
 
-  const RoutingAdornment = () => (
-    <div
-      style={{
-        ...computedStyles.adornment,
-        ...computedStyles.startAdornment,
-      }}
-    >
-      {sacredTheme && <span>⚡</span>}
-    </div>
-  )
+  // Inline-style chrome — see AccountNumber for the same pattern.
+  const inputWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    height: '40px',
+    width: '100%',
+    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
+    borderRadius: '8px',
+    backgroundColor: 'var(--field-bg, transparent)',
+    color: 'var(--field-text, inherit)',
+    margin: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    border: 'none',
+    padding: '8px 16px',
+    paddingLeft: '48px',
+    paddingRight: '16px',
+    fontSize: '16px',
+    color: 'inherit',
+    boxSizing: 'border-box',
+  }
+
+  const adornmentStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    left: '16px',
+    color: 'var(--field-text, inherit)',
+    pointerEvents: 'none',
+    fontSize: '16px',
+  }
 
   return (
-    <div style={computedStyles.container}>
-      {label && (
-        <label style={computedStyles.label}>
-          {label}
-          {styles?.required && (
-            <span style={getRequiredIndicatorStyle(styles)}>
-              {styles?.requiredIndicatorText || ' *'}
-            </span>
-          )}
-        </label>
+    <FieldShell
+      label={label}
+      helperText={helperText}
+      error={error}
+      disabled={disabled}
+      required={required}
+      dataField={dataField}
+      dataFieldName={dataFieldName}
+      styles={styles}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div style={inputWrapperStyle}>
+          <div style={adornmentStyle}>{sacredTheme && <span>⚡</span>}</div>
+          <input
+            ref={inputRef}
+            type="text"
+            id={id ?? inputId}
+            name={name}
+            value={getDisplayValue()}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            placeholder={finalPlaceholder}
+            maxLength={9}
+            data-field-name={dataFieldName}
+            style={inputStyle}
+            {...inputAriaProps}
+          />
+        </div>
       )}
-
-      <div style={computedStyles.inputWrapper}>
-        <RoutingAdornment />
-        <input
-          ref={inputRef}
-          type="text"
-          id={id}
-          value={getDisplayValue()}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={styles?.disabled}
-          {...getRequiredProps(styles?.required)}
-          placeholder={finalPlaceholder}
-          maxLength={9}
-          style={computedStyles.input}
-          {...props}
-        />
-      </div>
-      {helperText && <div style={computedStyles.footerText}>{helperText}</div>}
-    </div>
+    </FieldShell>
   )
 }
 
 RoutingNumber.displayName = 'RoutingNumber'
+
 export default RoutingNumber
