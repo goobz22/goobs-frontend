@@ -15,3 +15,22 @@ export function alpha(color: string, opacity: number): string {
 
   return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }
+
+// Shared format/parse/validate helpers for the formatted Field
+// components. See src/utils/formatters.ts for the full surface.
+export {
+  parsePhone,
+  formatPhone,
+  formatCurrency,
+  parseCurrency,
+  formatPercentage,
+  parsePercentage,
+  type CardType,
+  detectCardType,
+  formatCardNumber,
+  parseCardNumber,
+  luhnValidate,
+  validateRoutingNumber,
+  digitsOnly,
+  maskTail,
+} from './formatters'
