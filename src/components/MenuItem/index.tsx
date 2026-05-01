@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-  getSharedFormFieldStyles,
+  getFormFieldTheme,
   injectSacredKeyframes,
   type FormFieldStyles,
 } from '../../theme'
@@ -41,14 +41,17 @@ const MenuItem: React.FC<MenuItemProps> = ({
     }
   }, [styles?.theme])
 
-  // Compute styles based on theme and state
+  // Compute styles based on theme and state. Inlined the slim part of
+  // the deleted `getSharedFormFieldStyles` that this component
+  // actually used (themeConfig + transition).
   const computedStyles = useMemo(() => {
-    const fieldStyles = getSharedFormFieldStyles(styles, isHovered)
+    const themeConfig = getFormFieldTheme(styles)
     return {
-      ...fieldStyles,
+      themeConfig,
+      transition: 'all 0.2s ease',
       isSacredTheme: styles?.theme === 'sacred',
     }
-  }, [styles, isHovered])
+  }, [styles])
 
   const isSacredTheme = styles?.theme === 'sacred'
   const isDarkTheme = styles?.theme === 'dark'

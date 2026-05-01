@@ -4,7 +4,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import type { ColumnDef, RowData } from '../types'
 import Dropdown from '../../Field/Dropdown/Regular'
-import type { DataGridStyles, FormFieldStyles } from '../../../theme'
+import type { DataGridStyles } from '../../../theme'
+import type { FieldStyleOverrides } from '../../Field/Shell/types'
 
 // Settings cog icon
 const SettingsIcon: React.FC<{ color?: string }> = ({
@@ -151,24 +152,28 @@ export interface CustomFooterProps {
   styles?: DataGridStyles
 }
 
-// Create themed FormFieldStyles for dropdown based on DataGrid theme
+// Translate DataGrid theme to a FieldStyleOverrides for the inner
+// Dropdown. Color/border tokens previously expressed as
+// FormFieldStyles fields move to CSS-variable overrides — the new
+// FieldShell consumes `--field-bg`, `--field-border-default`, etc.
+// directly through the CSS module.
 const createDropdownStyles = (
   dataGridStyles?: DataGridStyles
-): FormFieldStyles => {
+): FieldStyleOverrides => {
   const theme = dataGridStyles?.theme || 'light'
 
   switch (theme) {
     case 'dark':
       return {
         theme: 'dark',
-        backgroundColor: '#1E293B',
-        borderColor: '#334155',
-        borderFocusedColor: '#475569',
-        textColor: '#E2E8F0',
-        labelColor: '#E2E8F0',
-        labelFocusedColor: '#F1F5F9',
-        adornmentColor: '#9CA3AF',
-        adornmentFocusedColor: '#E2E8F0',
+        '--field-bg': '#1E293B',
+        '--field-border-default': '#334155',
+        '--field-border-focus': '#475569',
+        '--field-text': '#E2E8F0',
+        '--field-label-default': '#E2E8F0',
+        '--field-label-focus': '#F1F5F9',
+        '--field-adornment-default': '#9CA3AF',
+        '--field-adornment-focus': '#E2E8F0',
         borderRadius: '6px',
         height: '32px',
         fontSize: '14px',
@@ -177,14 +182,14 @@ const createDropdownStyles = (
     case 'sacred':
       return {
         theme: 'sacred',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderColor: 'rgba(255, 215, 0, 0.5)',
-        borderFocusedColor: 'rgba(255, 215, 0, 0.8)',
-        textColor: '#FBBF24',
-        labelColor: '#FBBF24',
-        labelFocusedColor: '#FFD700',
-        adornmentColor: 'rgba(255, 215, 0, 0.6)',
-        adornmentFocusedColor: '#FFD700',
+        '--field-bg': 'rgba(0, 0, 0, 0.9)',
+        '--field-border-default': 'rgba(255, 215, 0, 0.5)',
+        '--field-border-focus': 'rgba(255, 215, 0, 0.8)',
+        '--field-text': '#FBBF24',
+        '--field-label-default': '#FBBF24',
+        '--field-label-focus': '#FFD700',
+        '--field-adornment-default': 'rgba(255, 215, 0, 0.6)',
+        '--field-adornment-focus': '#FFD700',
         borderRadius: '6px',
         height: '32px',
         fontSize: '14px',
@@ -193,14 +198,14 @@ const createDropdownStyles = (
     default: // light theme
       return {
         theme: 'light',
-        backgroundColor: '#FFFFFF',
-        borderColor: '#E2E8F0',
-        borderFocusedColor: '#94A3B8',
-        textColor: '#374151',
-        labelColor: '#374151',
-        labelFocusedColor: '#1F2937',
-        adornmentColor: '#6B7280',
-        adornmentFocusedColor: '#374151',
+        '--field-bg': '#FFFFFF',
+        '--field-border-default': '#E2E8F0',
+        '--field-border-focus': '#94A3B8',
+        '--field-text': '#374151',
+        '--field-label-default': '#374151',
+        '--field-label-focus': '#1F2937',
+        '--field-adornment-default': '#6B7280',
+        '--field-adornment-focus': '#374151',
         borderRadius: '6px',
         height: '32px',
         fontSize: '14px',
@@ -234,10 +239,8 @@ const PageSizeSelector: React.FC<{
     fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
   }
 
-  const handlePageSizeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newPageSize = parseInt(event.target.value, 10)
+  const handlePageSizeChange = (value: string) => {
+    const newPageSize = parseInt(value, 10)
     if (!isNaN(newPageSize)) {
       onPageSizeChange(newPageSize)
     }

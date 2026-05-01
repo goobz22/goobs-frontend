@@ -271,8 +271,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
    * Handle search input changes.
    * Filters rows and notifies parent via onSearchFilter callback.
    */
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearchTerm = e.target.value
+  const handleSearchChange = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm)
 
     if (onSearchFilter) {

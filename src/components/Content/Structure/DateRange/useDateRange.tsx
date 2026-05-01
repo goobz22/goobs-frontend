@@ -15,7 +15,6 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
   value,
   startLabel = 'Start Date',
   endLabel = 'End Date',
-  disabled = false,
   error,
   helperText,
   style,
@@ -29,7 +28,6 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
         {...(value !== undefined ? { value } : {})}
         startLabel={startLabel}
         endLabel={endLabel}
-        disabled={disabled}
         {...(error !== undefined ? { error } : {})}
         {...(helperText !== undefined ? { helperText } : {})}
         {...(styles !== undefined ? { styles } : {})}

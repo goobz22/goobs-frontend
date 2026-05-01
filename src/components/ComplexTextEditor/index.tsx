@@ -8,9 +8,7 @@ import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
 import {
   getComplexTextEditorStyles,
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedFooterTextStyles,
+  getFormFieldTheme,
   type ComplexTextEditorStyles,
 } from '../../theme/'
 
@@ -88,10 +86,16 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     stylesWithTransparentLabel,
     isFocused
   )
-  const { themeConfig, footerTextColor } = getSharedFormFieldStyles(
-    stylesWithTransparentLabel,
-    isFocused
-  )
+  // Inlined the slim slice of `getSharedFormFieldStyles` this
+  // component used: the resolved theme config + the footer text color
+  // (driven by `helperTextType`). Field components moved to CSS
+  // modules + FieldShell; this component still uses inline styles.
+  const themeConfig = getFormFieldTheme(stylesWithTransparentLabel)
+  const helperTextType = stylesWithTransparentLabel.helperTextType || 'info'
+  const footerTextColor =
+    helperTextType === 'error'
+      ? themeConfig.footerText.error
+      : themeConfig.footerText.default
 
   // Auto-save to localStorage with debounce
   useEffect(() => {
@@ -162,7 +166,13 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const labelElement = label && !accordion && (
     <label
       style={{
-        ...getSharedLabelStyles(themeConfig.label.default, themeConfig),
+        // Inlined from the deleted `getSharedLabelStyles` helper.
+        display: 'block',
+        marginBottom: '4px',
+        fontSize: '14px',
+        fontFamily: themeConfig.fontFamily,
+        color: themeConfig.label.default,
+        transition: 'all 0.2s ease',
         background: 'transparent',
         backgroundColor: 'transparent',
         backdropFilter: 'none',
@@ -184,10 +194,17 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     </label>
   )
 
-  // Render helper text if provided
+  // Render helper text if provided. Inlined from the deleted
+  // `getSharedFooterTextStyles` helper.
   const helperTextElement = helperText && (
     <div
-      style={getSharedFooterTextStyles(footerTextColor, themeConfig, styles)}
+      style={{
+        marginTop: '4px',
+        fontSize: styles?.fontSize || '12px',
+        fontFamily: themeConfig.fontFamily,
+        color: footerTextColor,
+        minHeight: '1em',
+      }}
     >
       {helperText}
     </div>

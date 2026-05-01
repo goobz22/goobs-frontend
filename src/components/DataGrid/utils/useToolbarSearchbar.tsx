@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 import type { ColumnDef, RowData } from '../types'
 import type { SearchbarProps } from '../../Field/Search'
 
@@ -73,13 +73,11 @@ export const useSearchbar = ({
     [searchValue]
   )
 
-  // Handler for the text input's onChange
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchValue(event.target.value)
-    },
-    []
-  )
+  // Handler for the text input's onChange — value-only signature
+  // matches the new Searchbar contract.
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value)
+  }, [])
 
   // Filter the rows based on the current tags
   const filteredRows = useMemo(() => {

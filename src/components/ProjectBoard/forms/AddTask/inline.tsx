@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, ChangeEvent } from 'react'
+import React, { useState, useMemo } from 'react'
 import type { ProjectBoardStyles } from '../../../../theme'
 import type {
   Task,
@@ -507,7 +507,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     label="Company"
                     options={companyOptions}
                     value={selectedCompanyId}
-                    onChange={e => setSelectedCompanyId(e.target.value)}
+                    onChange={value => setSelectedCompanyId(value)}
                     styles={{ theme: styles?.theme || 'light' }}
                   />
                 )}
@@ -518,7 +518,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     label="Customer"
                     options={customerOptions}
                     value={selectedCustomerId}
-                    onChange={e => setSelectedCustomerId(e.target.value)}
+                    onChange={value => setSelectedCustomerId(value)}
                     styles={{ theme: styles?.theme || 'light' }}
                   />
                 )}
@@ -532,10 +532,8 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                       { value: 'Service', _id: 'service' },
                     ]}
                     value={productOrService}
-                    onChange={e => {
-                      setProductOrService(
-                        e.target.value as 'product' | 'service'
-                      )
+                    onChange={value => {
+                      setProductOrService(value as 'product' | 'service')
                       setProductServiceId('') // Reset selection when type changes
                     }}
                     styles={{ theme: styles?.theme || 'light', required: true }}
@@ -570,14 +568,14 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                         : serviceOptions
                     }
                     value={productServiceId}
-                    onChange={e => {
-                      setProductServiceId(e.target.value)
+                    onChange={value => {
+                      setProductServiceId(value)
                       // Reset selection when switching between product/service
                       if (
                         (productOrService === 'product' &&
-                          !rawProducts.find(p => p._id === e.target.value)) ||
+                          !rawProducts.find(p => p._id === value)) ||
                         (productOrService === 'service' &&
-                          !rawServices.find(s => s._id === e.target.value))
+                          !rawServices.find(s => s._id === value))
                       ) {
                         setProductServiceId('')
                       }
@@ -591,7 +589,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   label="Severity"
                   options={severityOptions}
                   value={selectedSeverityId}
-                  onChange={e => setSelectedSeverityId(e.target.value)}
+                  onChange={value => setSelectedSeverityId(value)}
                   styles={{ theme: styles?.theme || 'light', required: true }}
                 />
 
@@ -600,8 +598,8 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   label="Status"
                   options={statusOptions}
                   value={selectedStatusId}
-                  onChange={e => {
-                    setSelectedStatusId(e.target.value)
+                  onChange={value => {
+                    setSelectedStatusId(value)
                     setSelectedSubStatusId('') // Reset substatus when status changes
                   }}
                   styles={{ theme: styles?.theme || 'light', required: true }}
@@ -613,7 +611,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     label="Sub Status"
                     options={subStatusOptions}
                     value={selectedSubStatusId}
-                    onChange={e => setSelectedSubStatusId(e.target.value)}
+                    onChange={value => setSelectedSubStatusId(value)}
                     styles={{
                       theme: styles?.theme || 'light',
                       disabled: !selectedStatusId,
@@ -627,7 +625,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     label="Region"
                     options={regionOptions}
                     value={selectedRegionId}
-                    onChange={e => setSelectedRegionId(e.target.value)}
+                    onChange={value => setSelectedRegionId(value)}
                     styles={{ theme: styles?.theme || 'light' }}
                   />
                 )}
@@ -922,9 +920,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                       label="Search Articles"
                       placeholder="Search by title, symptoms, resolution..."
                       value={articleSearchTerm}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setArticleSearchTerm(e.target.value)
-                      }
+                      onChange={value => setArticleSearchTerm(value)}
                       styles={{
                         theme: styles?.theme || 'light',
                       }}

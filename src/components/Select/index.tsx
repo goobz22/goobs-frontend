@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import {
-  getSharedFormFieldStyles,
+  getFormFieldTheme,
   injectSacredKeyframes,
   type FormFieldStyles,
 } from '../../theme'
@@ -47,11 +47,22 @@ const Select: React.FC<SelectProps> = ({
     }
   }, [styles?.theme])
 
-  // Compute styles based on theme and state
+  // Compute styles based on theme and state. Inlined the slim part of
+  // the deleted `getSharedFormFieldStyles` helper this component
+  // actually used (themeConfig + transition + hover-driven border color).
   const computedStyles = useMemo(() => {
-    const fieldStyles = getSharedFormFieldStyles(styles, isHovered)
+    const themeConfig = getFormFieldTheme(styles)
+    const helperTextType = styles?.helperTextType || 'info'
+    const isError = helperTextType === 'error'
+    const borderColor = isError
+      ? themeConfig.border.error
+      : isHovered
+        ? themeConfig.border.focused
+        : themeConfig.border.default
     return {
-      ...fieldStyles,
+      themeConfig,
+      borderColor,
+      transition: 'all 0.2s ease',
       isSacredTheme: styles?.theme === 'sacred',
     }
   }, [styles, isHovered])

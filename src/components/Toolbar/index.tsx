@@ -4,11 +4,8 @@ import React, { useMemo, type FC } from 'react'
 import CustomButton, { ButtonProps } from '../Button'
 import Searchbar, { SearchbarProps } from '../Field/Search'
 import Dropdown, { type DropdownOption } from '../Field/Dropdown/Regular'
-import {
-  getToolbarStyles,
-  type ToolbarStyles,
-  type FormFieldStyles,
-} from '../../theme'
+import { getToolbarStyles, type ToolbarStyles } from '../../theme'
+import type { FieldStyleOverrides } from '../Field/Shell/types'
 
 export interface CustomToolbarProps {
   buttons?: ButtonProps[]
@@ -17,15 +14,18 @@ export interface CustomToolbarProps {
     label?: string
     options: DropdownOption[]
     value: string
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+    onChange: (value: string) => void
   }
   styles?: ToolbarStyles
 }
 
-// Create themed FormFieldStyles based on toolbar theme
+// Translate the Toolbar theme into FieldStyleOverrides for the inner
+// Searchbar. Color/border tokens previously expressed as
+// FormFieldStyles fields go through FieldShell's CSS-variable
+// translation now.
 const createSearchbarStyles = (
   toolbarStyles?: ToolbarStyles
-): FormFieldStyles => {
+): FieldStyleOverrides => {
   const theme = toolbarStyles?.theme || 'light'
 
   switch (theme) {

@@ -37,7 +37,6 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   handleHeaderCheckboxChange,
   columns,
   getResizeHandleProps,
-  isResizing,
   resizingColumn,
   styles,
   onColumnSort,

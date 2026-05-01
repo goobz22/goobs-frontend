@@ -329,7 +329,7 @@ function MobileCardView({
           <div className={cssStyles.mobileHeader}>
             <Searchbar
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={value => setSearchQuery(value)}
               placeholder="Search..."
               styles={{
                 theme: theme,

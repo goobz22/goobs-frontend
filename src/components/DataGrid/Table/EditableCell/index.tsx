@@ -332,9 +332,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <IPAddressField
             label=""
             initialValue={editingValue}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onEditingValueChange(event.target.value)
-            }
+            onChange={value => onEditingValueChange(value)}
             styles={fieldStyles}
           />
         </div>
@@ -369,9 +367,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <VLANField
             label=""
             initialValue={editingValue}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onEditingValueChange(event.target.value)
-            }
+            onChange={vlanValue => onEditingValueChange(String(vlanValue))}
             styles={fieldStyles}
           />
         </div>
@@ -383,19 +379,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <CIDRField
             label=""
             initialValue={editingValue}
-            onChange={(
-              eventOrNumber: React.ChangeEvent<HTMLInputElement> | number
-            ) => {
-              let cidrValue: number
-              if (typeof eventOrNumber === 'number') {
-                cidrValue = eventOrNumber
-              } else {
-                cidrValue = parseInt(
-                  eventOrNumber.target.value.replace('/', ''),
-                  10
-                )
-              }
-              onEditingValueChange(isNaN(cidrValue) ? '24' : String(cidrValue))
+            onChange={cidrValue => {
+              onEditingValueChange(
+                Number.isNaN(cidrValue) ? '24' : String(cidrValue)
+              )
             }}
             styles={fieldStyles}
           />
@@ -431,9 +418,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           <MACAddressField
             label=""
             initialValue={editingValue}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onEditingValueChange(event.target.value)
-            }
+            onChange={value => onEditingValueChange(value)}
             styles={fieldStyles}
           />
         </div>

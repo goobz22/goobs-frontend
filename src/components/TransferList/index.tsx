@@ -436,7 +436,7 @@ const TransferList: React.FC<TransferListProps> = ({
           label={dropdownLabel || ''}
           options={dropdownOptions}
           value={selectedDropdownValue}
-          onChange={e => setSelectedDropdownValue(e.target.value)}
+          onChange={value => setSelectedDropdownValue(value)}
           styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
         {renderList(currentLeft)}

@@ -494,9 +494,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
             <IPAddressField
               label=""
               initialValue={String(value || '')}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange(fieldConfig.field, event.target.value)
-              }
+              onChange={value => handleFieldChange(fieldConfig.field, value)}
               styles={fieldStyles}
             />
           )
@@ -529,9 +527,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
             <VLANField
               label=""
               initialValue={String(value || '')}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange(fieldConfig.field, event.target.value)
-              }
+              onChange={value => handleFieldChange(fieldConfig.field, value)}
               styles={fieldStyles}
             />
           )
@@ -590,9 +586,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
             <MACAddressField
               label=""
               initialValue={String(value || '')}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange(fieldConfig.field, event.target.value)
-              }
+              onChange={value => handleFieldChange(fieldConfig.field, value)}
               styles={fieldStyles}
             />
           )

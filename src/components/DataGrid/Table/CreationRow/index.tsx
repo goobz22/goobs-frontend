@@ -446,8 +446,8 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <IPAddressField
             label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onCreationFieldChange?.(fieldConfig.field, event.target.value)
+            onChange={value =>
+              onCreationFieldChange?.(fieldConfig.field, value)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -526,11 +526,8 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <VLANField
             label="" // Explicitly pass empty label to override default
             initialValue={value?.toString() ?? ''}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onCreationFieldChange?.(
-                fieldConfig.field,
-                parseInt(event.target.value) || 0
-              )
+            onChange={vlanValue =>
+              onCreationFieldChange?.(fieldConfig.field, vlanValue)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
@@ -611,8 +608,8 @@ const CreationRow: React.FC<CreationRowProps> = ({
           <MACAddressField
             label="" // Explicitly pass empty label to override default
             initialValue={String(value ?? '')}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onCreationFieldChange?.(fieldConfig.field, event.target.value)
+            onChange={value =>
+              onCreationFieldChange?.(fieldConfig.field, value)
             }
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }

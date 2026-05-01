@@ -216,14 +216,12 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   // Display additional tool options based on toolbar type
   const showExtendedOptions = toolbarType === 'richtext' && !markdownMode
 
-  const handleAlignChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setAlignValue(event.target.value as AlignmentFormat)
+  const handleAlignChange = (value: string) => {
+    setAlignValue(value as AlignmentFormat)
   }
 
-  const handleTextTypeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newType = event.target.value as TextType
+  const handleTextTypeChange = (value: string) => {
+    const newType = value as TextType
     setTextType(newType)
     if (handleTextType) {
       handleTextType(newType)

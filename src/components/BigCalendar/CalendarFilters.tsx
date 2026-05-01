@@ -9,7 +9,7 @@ import Chip from '../Chip'
 import Typography from '../Typography'
 import DateRange from '../Field/Date/DateRange'
 import * as Icons from '../Icons'
-import { FormFieldStyles } from '../../theme'
+import type { FieldStyleOverrides } from '../Field/Shell/types'
 
 const { FilterListIcon, ClearIcon } = Icons
 
@@ -36,7 +36,7 @@ interface CalendarFiltersProps {
   priceRanges?: string[]
   // Remove external custom components; inline standardized dropdowns instead
   expanded?: boolean
-  styles?: FormFieldStyles
+  styles?: FieldStyleOverrides
 }
 
 export const CalendarFilters: React.FC<CalendarFiltersProps> = ({

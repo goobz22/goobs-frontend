@@ -152,20 +152,14 @@ function ProjectBoardContent({
   }, [])
 
   // Search handler
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value)
-    },
-    []
-  )
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value)
+  }, [])
 
   // Product/Service filter handler
-  const handleProductServiceFilterChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setProductServiceFilter(e.target.value)
-    },
-    []
-  )
+  const handleProductServiceFilterChange = useCallback((value: string) => {
+    setProductServiceFilter(value)
+  }, [])
 
   // Filter columns based on search and product/service filter
   const filteredColumnState = useMemo(() => {

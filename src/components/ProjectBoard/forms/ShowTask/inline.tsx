@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, ChangeEvent } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import type { ProjectBoardStyles } from '../../../../theme'
 import type {
   Comment,
@@ -938,7 +938,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 label="Queue"
                 options={queueDropdownOptions}
                 value={editedQueueId}
-                onChange={e => setEditedQueueId(e.target.value)}
+                onChange={value => setEditedQueueId(value)}
                 styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
@@ -956,7 +956,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 label="Region"
                 options={regionDropdownOptions}
                 value={editedRegionId}
-                onChange={e => setEditedRegionId(e.target.value)}
+                onChange={value => setEditedRegionId(value)}
                 styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
@@ -974,8 +974,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 label="Status"
                 options={statusDropdownOptions}
                 value={editedStatusId}
-                onChange={e => {
-                  setEditedStatusId(e.target.value)
+                onChange={value => {
+                  setEditedStatusId(value)
                   setEditedSubStatusId('') // Reset substatus when status changes
                 }}
                 styles={{ theme: styles?.theme || 'light' }}
@@ -996,7 +996,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     label="Substatus"
                     options={subStatusDropdownOptions}
                     value={editedSubStatusId}
-                    onChange={e => setEditedSubStatusId(e.target.value)}
+                    onChange={value => setEditedSubStatusId(value)}
                     styles={{
                       theme: styles?.theme || 'light',
                       disabled: !editedStatusId,
@@ -1018,7 +1018,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 label="Severity"
                 options={severityDropdownOptions}
                 value={editedSeverityId}
-                onChange={e => setEditedSeverityId(e.target.value)}
+                onChange={value => setEditedSeverityId(value)}
                 styles={{ theme: styles?.theme || 'light' }}
               />
             </div>
@@ -1040,10 +1040,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     m => `${m.firstName} ${m.lastName}` === editedTeamMember
                   )?._id || ''
                 }
-                onChange={e => {
-                  const member = teamMemberOptions.find(
-                    m => m._id === e.target.value
-                  )
+                onChange={value => {
+                  const member = teamMemberOptions.find(m => m._id === value)
                   setEditedTeamMember(
                     member ? `${member.firstName} ${member.lastName}` : ''
                   )
@@ -2829,7 +2827,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <Dropdown
               label="Duration"
               value={meetingDuration}
-              onChange={e => setMeetingDuration(e.target.value)}
+              onChange={value => setMeetingDuration(value)}
               options={[
                 { value: '15', _id: '15' },
                 { value: '30', _id: '30' },
@@ -3250,7 +3248,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               <Dropdown
                 label="Duration"
                 value={rescheduleDuration}
-                onChange={e => setRescheduleDuration(e.target.value)}
+                onChange={value => setRescheduleDuration(value)}
                 options={[
                   { value: '15', _id: '15' },
                   { value: '30', _id: '30' },
@@ -4086,9 +4084,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               label="Search Articles"
               placeholder="Search by title, symptoms, resolution..."
               value={kbSearchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setKbSearchTerm(e.target.value)
-              }
+              onChange={value => setKbSearchTerm(value)}
               styles={{
                 theme: styles?.theme || 'light',
               }}
@@ -4284,7 +4280,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <Dropdown
                     label="Reason for Case Being Opened"
                     value={resolutionReason}
-                    onChange={e => setResolutionReason(e.target.value)}
+                    onChange={value => setResolutionReason(value)}
                     options={[
                       { value: 'Technical Issue', _id: 'technical' },
                       { value: 'Billing Question', _id: 'billing' },
@@ -4307,7 +4303,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <Dropdown
                     label="Anything We Can Do to Prevent This?"
                     value={resolutionPrevention}
-                    onChange={e => setResolutionPrevention(e.target.value)}
+                    onChange={value => setResolutionPrevention(value)}
                     options={[
                       { value: 'Better Documentation', _id: 'docs' },
                       { value: 'Improved Training', _id: 'training' },
@@ -4329,7 +4325,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <Dropdown
                     label="Is This a Recurring Issue With This Customer?"
                     value={resolutionRecurring}
-                    onChange={e => setResolutionRecurring(e.target.value)}
+                    onChange={value => setResolutionRecurring(value)}
                     options={[
                       { value: 'No - First Time', _id: 'first-time' },
                       { value: 'Yes - Second Occurrence', _id: 'second' },
