@@ -1,0 +1,198 @@
+/**
+ * Canonical CSS contract for every Field component in goobs-frontend.
+ *
+ * Theme tokens live in CSS custom properties on `.shell`. Themes are
+ * switched via `[data-theme="<name>"]` selectors — no JS theme map.
+ * Pseudo-state (focus, hover, error, disabled) is driven by native
+ * CSS pseudo-classes and ARIA attribute selectors so components
+ * don't need `useState(isFocused)` plumbing.
+ *
+ * Color values are ports of the deleted `formFieldThemes` object.
+ * Visual output should match the old inline-style system 1:1 in light,
+ * dark, and sacred themes.
+ */
+
+/* ──────────────────────────────────────────────────────────────────
+ * Shell wrapper — container for label + input + helper region
+ * ─────────────────────────────────────────────────────────────── */
+
+.shell {
+  /* Default theme tokens (light). Overridden by [data-theme] blocks. */
+  --field-bg: rgba(255, 255, 255, 0.95);
+  --field-border-default: rgba(209, 213, 219, 1);
+  --field-border-focus: rgba(59, 130, 246, 1);
+  --field-border-error: rgba(239, 68, 68, 1);
+  --field-text: rgba(31, 41, 55, 1);
+  --field-label-default: rgba(107, 114, 128, 1);
+  --field-label-focus: rgba(59, 130, 246, 1);
+  --field-label-error: rgba(239, 68, 68, 1);
+  --field-label-shrunk-bg: rgba(255, 255, 255, 0.95);
+  --field-adornment-default: rgba(107, 114, 128, 1);
+  --field-adornment-focus: rgba(59, 130, 246, 1);
+  --field-helper-default: rgba(107, 114, 128, 1);
+  --field-helper-error: rgba(239, 68, 68, 1);
+  --field-helper-info: rgba(59, 130, 246, 1);
+  --field-font-family: 'Inter', sans-serif;
+  --field-transition:
+    border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+  --field-required-indicator: rgba(239, 68, 68, 1);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  font-family: var(--field-font-family);
+  color: var(--field-text);
+}
+
+.shell[data-theme='dark'] {
+  --field-bg: rgba(31, 41, 55, 0.95);
+  --field-border-default: rgba(75, 85, 99, 1);
+  --field-border-focus: rgba(96, 165, 250, 1);
+  --field-border-error: rgba(239, 68, 68, 1);
+  --field-text: rgba(255, 255, 255, 1);
+  --field-label-default: rgba(156, 163, 175, 1);
+  --field-label-focus: rgba(96, 165, 250, 1);
+  --field-label-error: rgba(239, 68, 68, 1);
+  --field-label-shrunk-bg: rgba(31, 41, 55, 0.95);
+  --field-adornment-default: rgba(156, 163, 175, 1);
+  --field-adornment-focus: rgba(96, 165, 250, 1);
+  --field-helper-default: rgba(156, 163, 175, 1);
+  --field-helper-info: rgba(96, 165, 250, 1);
+}
+
+.shell[data-theme='sacred'] {
+  --field-bg: rgba(0, 0, 0, 0.7);
+  --field-border-default: rgba(255, 215, 0, 0.3);
+  --field-border-focus: rgba(255, 215, 0, 0.7);
+  --field-border-error: rgba(239, 68, 68, 1);
+  --field-text: rgba(255, 255, 255, 0.9);
+  --field-label-default: rgba(255, 215, 0, 0.8);
+  --field-label-focus: rgba(255, 215, 0, 1);
+  --field-label-error: rgba(239, 68, 68, 1);
+  --field-label-shrunk-bg: rgba(0, 0, 0, 0.7);
+  --field-adornment-default: rgba(255, 215, 0, 0.6);
+  --field-adornment-focus: rgba(255, 215, 0, 1);
+  --field-helper-default: rgba(255, 255, 255, 0.6);
+  --field-helper-info: rgba(96, 165, 250, 1);
+  --field-font-family: '"Crimson Text", serif';
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Label — wraps htmlFor → input id automatically
+ * ─────────────────────────────────────────────────────────────── */
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--field-label-default);
+  transition: var(--field-transition);
+  margin-bottom: 4px;
+}
+
+.shell[data-state='focus'] .label {
+  color: var(--field-label-focus);
+}
+
+.shell[data-state='error'] .label,
+.shell[aria-invalid='true'] .label {
+  color: var(--field-label-error);
+}
+
+.requiredIndicator {
+  color: var(--field-required-indicator);
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Input slot — the consumer renders their <input>/<button> here.
+ * Generic styling: borders + focus ring driven by ARIA attributes.
+ * Components apply their own .module.css for layout-specific
+ * styling (heights, paddings); this just sets the visual state hooks.
+ * ─────────────────────────────────────────────────────────────── */
+
+.inputSlot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border-default);
+  border-radius: 8px;
+  transition: var(--field-transition);
+  box-sizing: border-box;
+}
+
+.inputSlot:focus-within {
+  border-color: var(--field-border-focus);
+}
+
+.shell[data-state='error'] .inputSlot,
+.shell[aria-invalid='true'] .inputSlot {
+  border-color: var(--field-border-error);
+}
+
+.shell[aria-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.shell[aria-disabled='true'] .inputSlot {
+  cursor: not-allowed;
+}
+
+/* Generic native-input reset for inputs rendered inside the slot.
+   Components can override per-property in their own module. The
+   `:where()` keeps specificity at 0 so consumers don't have to
+   `!important` their overrides. */
+.inputSlot :where(input, textarea, select) {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+/* Global text-transform reset (relocated from the deleted
+   `injectFormFieldGlobalResets`). Inputs across the library should
+   never inherit a parent text-transform — capitalization rules
+   ruin user-typed values. */
+:global(input),
+:global(textarea),
+:global([contenteditable='true']),
+:global([contenteditable='']) {
+  text-transform: none;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Helper / error region — single region under the input, uses
+ * role="alert" + aria-live when in error state so screenreaders
+ * announce validation messages. Linked to the input via
+ * aria-describedby.
+ * ─────────────────────────────────────────────────────────────── */
+
+.helper {
+  font-size: 0.75rem;
+  color: var(--field-helper-default);
+  line-height: 1.4;
+  margin-top: 2px;
+  min-height: 1em; /* reserve space so layout doesn't jump on error */
+}
+
+.helper[data-helper-type='info'] {
+  color: var(--field-helper-info);
+}
+
+.helper[data-helper-type='error'],
+.shell[data-state='error'] .helper,
+.shell[aria-invalid='true'] .helper {
+  color: var(--field-helper-error);
+}

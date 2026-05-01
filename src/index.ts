@@ -115,6 +115,23 @@ export { default as Checkbox, type CheckboxProps } from './components/Checkbox'
 export { default as Chip, type ChipProps } from './components/Chip'
 export { default as Switch, type SwitchProps } from './components/Switch'
 
+// Field Shell — canonical wrapper used by every Field component
+export {
+  default as FieldShell,
+  type FieldShellProps,
+  type FieldShellSlot,
+  type FieldStyleOverrides,
+  type FieldTheme,
+  type FieldChangeHandler,
+  type FieldValidityHandler,
+  type FieldValidator,
+  getRequiredProps,
+  validateRequired,
+  useEscape,
+  useArrowKeyNav,
+  type ArrowKeyNavOptions,
+} from './components/Field/Shell'
+
 // Field Components
 export {
   default as TextField,
