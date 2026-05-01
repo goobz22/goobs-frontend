@@ -1,20 +1,16 @@
 // Combined theme file - typography, colors, and sacred glyphs
 import { TypographyProps } from '../components/Typography'
 
-// Import shared form field theme system
+// Slim formField theme — the bulk of the helpers were deleted in the
+// 2026-05-01 Field overhaul (replaced by CSS modules + the FieldShell
+// primitive). The remaining symbols are still consumed by
+// `ComplexTextEditor` and `BigCalendar` themes, plus generic
+// required-field utilities.
 export {
   type FormFieldTheme,
   type FormFieldStyles,
-  type SharedFormFieldProps,
   formFieldThemes,
   getFormFieldTheme,
-  getSharedFormFieldStyles,
-  getSharedLabelStyles,
-  getSharedContainerStyles,
-  getSharedFooterTextStyles,
-  getSharedAdornmentStyles,
-  getRequiredLabelText,
-  getRequiredIndicatorStyle,
   getRequiredProps,
   validateRequired,
 } from './formField'
