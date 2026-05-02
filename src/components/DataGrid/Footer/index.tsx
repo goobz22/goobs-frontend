@@ -383,7 +383,20 @@ const TablePagination: React.FC<{
     disabled: boolean
     children: React.ReactNode
     'aria-label': string
-  }> = ({ onClick, disabled, children, 'aria-label': ariaLabel }) => {
+    /**
+     * Pagination action identifier emitted as `data-pagination` so
+     * Playwright tests can target the four nav buttons stably without
+     * matching aria-label or icon SVG. Each value is unique within
+     * the footer so `[data-pagination="next"]` is unambiguous.
+     */
+    'data-pagination': 'first' | 'prev' | 'next' | 'last'
+  }> = ({
+    onClick,
+    disabled,
+    children,
+    'aria-label': ariaLabel,
+    'data-pagination': dataPagination,
+  }) => {
     const [isHovered, setIsHovered] = React.useState(false)
     const buttonStyle = getButtonStyle(disabled)
 
@@ -392,6 +405,7 @@ const TablePagination: React.FC<{
         onClick={onClick}
         disabled={disabled}
         aria-label={ariaLabel}
+        data-pagination={dataPagination}
         style={{
           ...buttonStyle,
           ...(isHovered &&
@@ -436,6 +450,7 @@ const TablePagination: React.FC<{
         onClick={handleFirstPage}
         disabled={page === 0}
         aria-label="Go to first page"
+        data-pagination="first"
       >
         <ChevronFirstIcon color={getIconColor(page === 0)} />
       </PaginationButton>
@@ -444,11 +459,15 @@ const TablePagination: React.FC<{
         onClick={handlePreviousPage}
         disabled={page === 0}
         aria-label="Go to previous page"
+        data-pagination="prev"
       >
         <ChevronLeftIcon color={getIconColor(page === 0)} />
       </PaginationButton>
 
-      <div style={paginationTextStyle}>
+      <div
+        style={paginationTextStyle}
+        data-pagination-status={`${from}-${to}-of-${rowCount}`}
+      >
         {from}-{to} of {rowCount}
       </div>
 
@@ -456,6 +475,7 @@ const TablePagination: React.FC<{
         onClick={handleNextPage}
         disabled={page >= totalPages - 1}
         aria-label="Go to next page"
+        data-pagination="next"
       >
         <ChevronRightIcon color={getIconColor(page >= totalPages - 1)} />
       </PaginationButton>
@@ -464,6 +484,7 @@ const TablePagination: React.FC<{
         onClick={handleLastPage}
         disabled={page >= totalPages - 1}
         aria-label="Go to last page"
+        data-pagination="last"
       >
         <ChevronLastIcon color={getIconColor(page >= totalPages - 1)} />
       </PaginationButton>

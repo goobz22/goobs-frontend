@@ -210,6 +210,13 @@ const Tabs: React.FC<TabsProps> = ({
             tabId={tabId}
             panelId={panelId}
             count={tab.count}
+            // Forward the entity noun as data-tab-subject so the
+            // auto-CRUD test scaffolder can locate a tab by entity
+            // even when the tab label changes (e.g. "Categories" →
+            // "All Categories"): page.locator('[data-tab-subject="category"]').
+            // exactOptionalPropertyTypes requires omitting undefined
+            // values rather than passing `undefined` explicitly.
+            {...(tab.subject !== undefined && { subject: tab.subject })}
             buttonRef={el => {
               tabRefs.current[index] = el
             }}
@@ -252,6 +259,10 @@ export interface TabProps {
    *  hands it down so screenreader navigation lands on the right
    *  region. */
   panelId?: string
+  /** Singular entity noun for THIS tab — emitted as `data-tab-subject`
+   *  so tests can locate a tab by the entity it manages even when its
+   *  visible label changes. Forwarded from `TabsItem.subject`. */
+  subject?: string
   /** Optional count badge rendered after the label. */
   count?: number | null | undefined
   /** Forwarded ref to the underlying `<button>` so the parent can
@@ -278,6 +289,7 @@ export const Tab: React.FC<TabProps> = ({
   disabled = false,
   tabId,
   panelId,
+  subject,
   count,
   buttonRef,
   onKeyDown,
@@ -341,6 +353,7 @@ export const Tab: React.FC<TabProps> = ({
       role="tab"
       id={tabId ? `tab-${tabId}` : undefined}
       data-tab-id={tabId}
+      data-tab-subject={subject}
       data-tab-active={isActive ? 'true' : 'false'}
       aria-selected={isActive}
       aria-controls={panelId}

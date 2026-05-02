@@ -269,6 +269,7 @@ function DataGridContent({
   filtersDefaultExpanded = false,
   onExportPdf,
   styles,
+  dataGrid,
 }: DatagridProps) {
   // ═══════════════════════════════════════════════════════════════════════════
   // REFS AND THEME
@@ -1066,16 +1067,41 @@ function DataGridContent({
   // Error state - show error message instead of grid
   if (error) {
     return (
-      <div className={cssStyles.datagrid} data-theme={theme}>
-        <div className={cssStyles.error}>
+      <div
+        className={cssStyles.datagrid}
+        data-theme={theme}
+        // Top-level test marker: `data-grid-status="error"` so tests
+        // can wait for the error state and grab the message via
+        // `[data-datagrid="<id>"][data-grid-status="error"] .error`.
+        data-datagrid={dataGrid}
+        data-grid-status="error"
+      >
+        <div className={cssStyles.error} role="alert">
           <div style={{ color: 'inherit' }}>Error: {error.message}</div>
         </div>
       </div>
     )
   }
 
+  // Compute high-level grid status for the root data-grid-status
+  // attribute. Tests can wait for `data-grid-status="ready"` instead
+  // of polling for individual rows, which makes flake go down.
+  // - `loading` reserved for a future loading prop
+  // - `empty` when the grid mounted but has no rows after filtering
+  // - `ready` when at least one row is present
+  const gridStatus: 'empty' | 'ready' =
+    filteredRows.length === 0 ? 'empty' : 'ready'
+
   return (
-    <div className={cssStyles.datagrid} data-theme={theme} ref={containerRef}>
+    <div
+      className={cssStyles.datagrid}
+      data-theme={theme}
+      data-datagrid={dataGrid}
+      data-grid-status={gridStatus}
+      role="grid"
+      aria-rowcount={filteredRows.length}
+      ref={containerRef}
+    >
       {/* ─────────────────────────────────────────────────────────────────────
           MOBILE VIEW
           Card-based layout for screens < 768px.

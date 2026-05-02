@@ -136,6 +136,17 @@ function Card({
       data-selected={isSelected}
       data-pressed={isPressed}
       data-selection-mode={selectionMode}
+      // Mirrors the desktop <tr> contract so tests don't have to know
+      // whether the page rendered the table or the card view:
+      //   - data-row-id: stable row identifier (same source as <tr>)
+      //   - data-card="true": marks this as a DataGrid row card
+      //     specifically (vs. a generic Card component on the page)
+      //   - aria-selected: matches the visual selected state for AT
+      //   - role="row": keep the same semantics as the table row
+      data-row-id={rowId}
+      data-card="true"
+      aria-selected={isSelected || undefined}
+      role="row"
       onClick={handleClick}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

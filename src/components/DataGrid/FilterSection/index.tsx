@@ -454,7 +454,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   }
 
   const filterContent = (
-    <div style={filterSectionStyle}>
+    <div
+      style={filterSectionStyle}
+      // Marks this region as the DataGrid filter section so tests can
+      // wait for `[data-grid-filters="true"]` before clicking inside.
+      data-grid-filters="true"
+      role="search"
+    >
       <div style={gridStyle}>
         {/* Searchbar - always first */}
         <div
@@ -464,6 +470,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             boxSizing: 'border-box' as const,
             overflow: 'hidden',
           }}
+          // Marks the searchbar slot. Tests target the input via
+          // `[data-grid-search="true"] input`. Stable across label/
+          // placeholder copy changes.
+          data-grid-search="true"
         >
           <Searchbar
             label="Search"
@@ -478,6 +488,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         {filters?.map((filter, index) => (
           <div
             key={`${filter.label}-${index}`}
+            // Per-filter wrapper carries the filter's label as a stable
+            // selector key so tests can target a specific filter:
+            //   `[data-filter-name="Category"]`
+            // The kebab-cased version is also emitted to make selectors
+            // legible: `[data-filter-key="category"]`. Both survive
+            // label-text drift (one stays the original, the other is
+            // a normalized lookup key — the test can pick whichever
+            // shape is more convenient).
+            data-filter-name={filter.label}
+            data-filter-key={filter.label
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')}
+            data-filter-type={filter.type ?? 'dropdown'}
             style={{
               width: '100%',
               maxWidth: '100%',

@@ -407,18 +407,33 @@ function AddCard({
   }
 
   return (
-    <div style={cardStyles.card}>
+    <div
+      style={cardStyles.card}
+      // Mobile equivalent of the desktop CreationRow's `data-creation-row`.
+      // Tests can wait for `[data-creation-card="true"]` and then submit
+      // via `[data-action="save-creation"]` regardless of viewport.
+      data-creation-card="true"
+      role="form"
+      aria-label="Add new item"
+    >
       <div style={cardStyles.header}>Add New Item</div>
 
       {renderableFields.map(fieldDef => (
-        <div key={fieldDef.field} style={cardStyles.fieldContainer}>
+        <div
+          key={fieldDef.field}
+          style={cardStyles.fieldContainer}
+          // Per-field wrapper carries the field key so tests can
+          // target a specific input as
+          // `[data-creation-card] [data-field-name="email"] input`.
+          data-field-name={fieldDef.field}
+        >
           <label style={cardStyles.label}>
             {fieldDef.label}
             {fieldDef.required && <span style={cardStyles.required}>*</span>}
           </label>
           {renderField(fieldDef)}
           {creationRowErrors[fieldDef.field] && (
-            <div style={cardStyles.error}>
+            <div style={cardStyles.error} role="alert">
               {creationRowErrors[fieldDef.field]}
             </div>
           )}
@@ -430,6 +445,7 @@ function AddCard({
           text={isSubmitting ? 'Saving...' : 'Save'}
           onClick={handleSave}
           disabled={isSubmitting}
+          action="save-creation"
           styles={{
             theme: theme,
             width: '48%',
@@ -440,6 +456,7 @@ function AddCard({
           text="Cancel"
           onClick={onCancel}
           disabled={isSubmitting}
+          action="cancel-creation"
           styles={{
             theme: theme,
             width: '48%',

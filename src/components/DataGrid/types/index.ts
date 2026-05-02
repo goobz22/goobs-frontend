@@ -657,6 +657,23 @@ export interface DatagridProps {
   rows: RowData[]
 
   /**
+   * TEST SELECTOR — emitted as `data-datagrid="<value>"` on the root
+   * element of the grid. Lets Playwright tests target a specific
+   * grid on a page that has multiple (e.g. "products" + "categories"
+   * tabs each with their own grid):
+   *
+   *   page.locator('[data-datagrid="products"] [data-row-id="…"]')
+   *
+   * Optional. When omitted no `data-datagrid` attribute is rendered.
+   * Pair with the row/cell/action attributes the grid emits
+   * automatically (see Rows, EditableCell, ManageRow, CreationRow,
+   * ColumnHeaderRow, Footer, FilterSection, CompositeFieldEditModal,
+   * MobileCardView/Card + AddCard) to build deterministic CRUD tests
+   * without depending on icon SVGs or label text.
+   */
+  dataGrid?: string
+
+  /**
    * Access control for the grid.
    * - 'no-access': Hides the entire grid
    * - 'read': View-only mode, editing disabled

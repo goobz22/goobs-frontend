@@ -187,7 +187,17 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
 
       // Field container with label and error
       const fieldContainer = (fieldElement: React.ReactNode) => (
-        <div key={fieldConfig.field} style={{ marginBottom: '20px' }}>
+        <div
+          key={fieldConfig.field}
+          // Per-composite-field wrapper carries the field key so tests
+          // can target a specific control inside the composite modal:
+          //   `[data-composite-modal] [data-field-name="address1"] input`
+          // Same selector shape as the desktop CreationRow cells, so a
+          // single helper can drive both forms.
+          data-field-name={fieldConfig.field}
+          data-field-required={fieldConfig.required ? 'true' : undefined}
+          style={{ marginBottom: '20px' }}
+        >
           <div style={{ marginBottom: '8px' }}>
             <Typography
               text={fieldConfig.label + (fieldConfig.required ? ' *' : '')}
@@ -614,7 +624,18 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
       onClose={handleCancel}
       styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
     >
-      <div>
+      <div
+        // Marks this Dialog as the composite-field editor so tests can
+        // distinguish it from any other Dialog open on the page (e.g.
+        // a confirm dialog or app-level modal).
+        // - data-composite-modal: presence flag
+        // - data-composite-row-id: the row being edited (when known)
+        data-composite-modal="true"
+        data-composite-row-id={(rowData?._id ?? rowData?.id) || undefined}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Edit fields"
+      >
         {/* Header */}
         <div
           style={{
@@ -660,6 +681,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           <CustomButton
             text="Cancel"
             onClick={handleCancel}
+            action="cancel-composite"
             styles={{
               theme: isSacredTheme ? 'sacred' : 'light',
             }}
@@ -667,6 +689,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           <CustomButton
             text="Save Changes"
             onClick={handleSave}
+            action="save-composite"
             styles={{
               theme: isSacredTheme ? 'sacred' : 'light',
             }}

@@ -154,11 +154,20 @@ function ManageRow({
     onClick,
     icon,
     title,
+    action,
     isDelete = false,
   }: {
     onClick: () => void
     icon: React.ReactNode
     title: string
+    /**
+     * The kebab-cased verb identifier this button triggers — emitted as
+     * `data-action` so Playwright tests can target the row-level CRUD
+     * verb without depending on icon SVGs or visual hover state. Each
+     * verb is unique within a ManageRow so `[data-action="delete"]`
+     * locates a specific button deterministically.
+     */
+    action: 'manage' | 'show' | 'duplicate' | 'delete'
     isDelete?: boolean
   }) => {
     const [isHovered, setIsHovered] = React.useState(false)
@@ -193,6 +202,8 @@ function ManageRow({
         style={buttonStyle}
         title={title}
         type="button"
+        data-action={action}
+        aria-label={title}
       >
         {icon}
       </button>
@@ -243,6 +254,8 @@ function ManageRow({
         style={buttonStyle}
         title="Add"
         type="button"
+        data-action="add"
+        aria-label="Add"
       >
         <Add
           styles={{ theme: styles?.theme || 'light' }}
@@ -255,7 +268,16 @@ function ManageRow({
   }
 
   return (
-    <div style={containerStyle}>
+    <div
+      style={containerStyle}
+      // Outer marker so tests can assert "the row-level toolbar exists"
+      // and read the current selection count from a stable attribute
+      // rather than parsing the .countBadge text.
+      data-grid-managerow="true"
+      data-selected-count={selectedRows.length}
+      role="toolbar"
+      aria-label="Row actions"
+    >
       {/* Add button - always visible when onAdd is provided */}
       {onAdd && (
         <>
@@ -275,6 +297,7 @@ function ManageRow({
             <>
               {onManage && (
                 <ActionButton
+                  action="manage"
                   onClick={() => handleActionSelection('manage')}
                   icon={
                     <Edit
@@ -288,6 +311,7 @@ function ManageRow({
               )}
               {onShow && (
                 <ActionButton
+                  action="show"
                   onClick={() => handleActionSelection('show')}
                   icon={
                     <Visibility
@@ -301,6 +325,7 @@ function ManageRow({
               )}
               {onDuplicate && (
                 <ActionButton
+                  action="duplicate"
                   onClick={() => handleActionSelection('duplicate')}
                   icon={
                     <ContentCopy
@@ -317,6 +342,7 @@ function ManageRow({
 
           {onDelete && (
             <ActionButton
+              action="delete"
               onClick={() => handleActionSelection('delete')}
               icon={
                 <Delete

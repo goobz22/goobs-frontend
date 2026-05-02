@@ -105,7 +105,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
     case 'currency':
     case 'usd':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <USDField
             label=""
             initialValue={editingValue}
@@ -117,7 +133,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'text':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <TextField
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
@@ -193,7 +225,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
     case 'dropdown': {
       const options = fieldConfig?.options || column.dropdownOptions || []
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <SearchableSimple
             label=""
             options={options}
@@ -219,7 +267,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
       }
 
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <MultiSelectChip
             label=""
             defaultSelected={currentValues}
@@ -242,7 +306,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'internalIncrement':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <InternalIncrementNumberField
             initialValue={editingValue}
             onChange={(
@@ -263,7 +343,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'phoneNumber':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <PhoneNumberField
             label=""
             value={editingValue}
@@ -276,7 +372,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'cvv':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <CVV
             label=""
             value={editingValue}
@@ -289,7 +401,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'creditCardNumber':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <CreditCardNumber
             label=""
             value={editingValue}
@@ -302,7 +430,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'accountNumber':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <AccountNumber
             label=""
             value={editingValue}
@@ -315,7 +459,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'routingNumber':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <RoutingNumber
             label=""
             value={editingValue}
@@ -328,7 +488,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'ipAddress':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <IPAddressField
             label=""
             initialValue={editingValue}
@@ -348,7 +524,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
       })() as SubnetFieldValue
 
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <SubnetField
             label=""
             value={subnetValue}
@@ -363,7 +555,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'vlan':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <VLANField
             label=""
             initialValue={editingValue}
@@ -375,7 +583,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'cidr':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <CIDRField
             label=""
             initialValue={editingValue}
@@ -399,7 +623,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
       })() as SubnetFieldValue
 
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <SupernetField
             label=""
             value={supernetValue}
@@ -414,7 +654,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
     case 'macAddress':
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <MACAddressField
             label=""
             initialValue={editingValue}
@@ -427,7 +683,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
     default:
       // Default to TextField for any unknown types
       return (
-        <div ref={cellRef} style={{ width: '100%' }}>
+        <div
+          ref={cellRef}
+          // Test-friendly inline-editor attributes:
+          //   - data-cell-editor: marks this wrapper as the live inline
+          //     editor so Playwright can find it as
+          //     `[data-row-id="X"] [data-cell-editor="true"]` after a
+          //     cell click triggered edit mode.
+          //   - data-editor-field: the column's `field` key so tests can
+          //     filter by field when multiple cells are editing
+          //     simultaneously (rare but possible).
+          //   - data-editor-type: the resolved fieldType so tests know
+          //     what kind of input control to interact with.
+          data-cell-editor="true"
+          data-editor-field={column.field}
+          data-editor-type={fieldType}
+          style={{ width: '100%' }}
+        >
           <TextField
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}

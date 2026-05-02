@@ -1056,12 +1056,43 @@ const Rows: React.FC<RowsProps> = ({
           .filter(Boolean)
           .join(' ')
 
+        // Row-level editing state for the data-row-state attribute.
+        // True when ANY cell in this row is currently in inline-edit mode.
+        // Cheaper than the hasEditingMultiselect scan above — just a key check.
+        const isRowEditing = editingCell?.rowId === rowId
+
         return (
           <tr
             key={rowId}
             onClick={() => onRowClick?.(row)}
             className={rowClassName}
             data-theme={theme}
+            // Test-friendly row attributes:
+            //   - data-row-id: stable identifier so Playwright can target
+            //     `[data-row-id="${id}"]` instead of fragile cell-text
+            //     matching. Tests that read `row._id` from the test seed
+            //     get a deterministic locator for that row.
+            //   - data-row-index: sequential index in the visible rows,
+            //     useful when the test only knows position.
+            //   - data-row-state: one of 'idle' | 'editing' | 'selected'
+            //     so tests can wait for state transitions without
+            //     inspecting className tokens.
+            //   - aria-selected: real ARIA so screenreaders + accessibility
+            //     tools see the same state the test does.
+            //   - role="row": explicit semantics (most browsers infer this
+            //     from <tr> but the explicit attribute survives any
+            //     refactor that swaps in a non-table row primitive).
+            data-row-id={rowId}
+            data-row-index={rows.indexOf(row)}
+            data-row-state={
+              isRowEditing
+                ? 'editing'
+                : selectedRowIds.includes(rowId)
+                  ? 'selected'
+                  : 'idle'
+            }
+            aria-selected={selectedRowIds.includes(rowId) || undefined}
+            role="row"
             style={
               hasEditingMultiselect
                 ? { height: 'auto', minHeight: '120px' }
@@ -1069,7 +1100,11 @@ const Rows: React.FC<RowsProps> = ({
             }
           >
             {/* Empty column to align with header checkbox */}
-            <td className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}></td>
+            <td
+              className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}
+              data-cell="checkbox"
+              role="gridcell"
+            ></td>
 
             {/* ─────────────────────────────────────────────────────────────
                 CELL RENDERING
@@ -1307,6 +1342,23 @@ const Rows: React.FC<RowsProps> = ({
                 <td
                   key={col.field}
                   className={cssStyles.cell}
+                  // Test-friendly cell attributes:
+                  //   - data-field-name: the column's `field` key, lets
+                  //     tests address a specific cell as
+                  //     `[data-row-id="X"] [data-field-name="email"]`
+                  //     without counting columns. Survives column
+                  //     reordering and renames.
+                  //   - data-cell-state: 'idle' | 'editing' | 'editable'
+                  //     — tests can wait for `data-cell-state="editing"`
+                  //     to know an inline editor mounted, vs. polling
+                  //     for an input element.
+                  //   - role="gridcell": standard ARIA semantics for a
+                  //     screen reader / accessibility tool.
+                  data-field-name={col.field}
+                  data-cell-state={
+                    isEditing ? 'editing' : canEdit ? 'editable' : 'idle'
+                  }
+                  role="gridcell"
                   style={
                     isEditingMultiselect
                       ? {

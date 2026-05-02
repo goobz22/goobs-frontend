@@ -710,13 +710,27 @@ const CreationRow: React.FC<CreationRowProps> = ({
 
   return (
     <>
-      <tr className={cssStyles.creationRow} data-theme={theme}>
+      <tr
+        className={cssStyles.creationRow}
+        data-theme={theme}
+        // Marks this <tr> as the inline creation form so tests can
+        // distinguish it from regular data rows. Pair with
+        // `[data-action="save-creation"]` on the Save button below to
+        // submit the new row deterministically.
+        data-creation-row="true"
+        role="row"
+      >
         {/* Checkbox column */}
-        <td className={cssStyles.creationCell}>
+        <td
+          className={cssStyles.creationCell}
+          data-cell="creation-actions"
+          role="gridcell"
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Button
               text="Save"
               onClick={onCreateRowSave}
+              action="save-creation"
               styles={{
                 theme: isSacredTheme ? 'sacred' : 'light',
                 fontSize: '12px',
@@ -733,6 +747,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             <Button
               text="Cancel"
               onClick={onCreateRowCancel}
+              action="cancel-creation"
               styles={{
                 theme: isSacredTheme ? 'sacred' : 'light',
                 fontSize: '12px',
@@ -758,6 +773,12 @@ const CreationRow: React.FC<CreationRowProps> = ({
             <td
               key={column.field}
               className={cssStyles.creationCell}
+              // Mirrors data-row cells: the creation form's per-column
+              // cell carries `data-field-name` so tests can target a
+              // specific creation input as
+              // `[data-creation-row] [data-field-name="email"] input`.
+              data-field-name={column.field}
+              role="gridcell"
               style={{
                 verticalAlign: isComposite ? 'top' : 'middle',
                 height: isComposite ? 'auto' : '53px',
