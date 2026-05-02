@@ -99,6 +99,51 @@ export interface ButtonStyles {
   opacity?: number | string
   cursor?: string
   size?: string
+  // Layout / typography passthrough — added 2026-05-02 to support
+  // workspace conversions from native `<button>` (where these
+  // properties are common in inline `style={...}` blocks). The goobs
+  // Button rendering passes these through to the underlying button
+  // element via CSS; consumers that don't set them get the default.
+  display?: React.CSSProperties['display']
+  position?: React.CSSProperties['position']
+  textAlign?: React.CSSProperties['textAlign']
+  verticalAlign?: React.CSSProperties['verticalAlign']
+  alignSelf?: React.CSSProperties['alignSelf']
+  alignItems?: React.CSSProperties['alignItems']
+  justifyContent?: React.CSSProperties['justifyContent']
+  flexDirection?: React.CSSProperties['flexDirection']
+  flexShrink?: React.CSSProperties['flexShrink']
+  flexGrow?: React.CSSProperties['flexGrow']
+  flexBasis?: React.CSSProperties['flexBasis']
+  flexWrap?: React.CSSProperties['flexWrap']
+  gap?: React.CSSProperties['gap']
+  rowGap?: React.CSSProperties['rowGap']
+  columnGap?: React.CSSProperties['columnGap']
+  transition?: string
+  transform?: string
+  zIndex?: React.CSSProperties['zIndex']
+  top?: React.CSSProperties['top']
+  right?: React.CSSProperties['right']
+  bottom?: React.CSSProperties['bottom']
+  left?: React.CSSProperties['left']
+  overflow?: React.CSSProperties['overflow']
+  overflowX?: React.CSSProperties['overflowX']
+  overflowY?: React.CSSProperties['overflowY']
+  textOverflow?: React.CSSProperties['textOverflow']
+  lineHeight?: React.CSSProperties['lineHeight']
+  borderStyle?: React.CSSProperties['borderStyle']
+  borderTop?: React.CSSProperties['borderTop']
+  borderBottom?: React.CSSProperties['borderBottom']
+  borderLeft?: React.CSSProperties['borderLeft']
+  borderRight?: React.CSSProperties['borderRight']
+  pointerEvents?: React.CSSProperties['pointerEvents']
+  userSelect?: React.CSSProperties['userSelect']
+  visibility?: React.CSSProperties['visibility']
+  textDecoration?: React.CSSProperties['textDecoration']
+  textIndent?: React.CSSProperties['textIndent']
+  wordBreak?: React.CSSProperties['wordBreak']
+  wordSpacing?: React.CSSProperties['wordSpacing']
+  fontStyle?: React.CSSProperties['fontStyle']
 }
 
 /**
@@ -300,6 +345,58 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     if (styles?.flex) dynamicStyle.flex = styles.flex
     if (styles?.opacity !== undefined) dynamicStyle.opacity = styles.opacity
     if (styles?.cursor) dynamicStyle.cursor = styles.cursor
+
+    // Layout / positioning passthrough — added 2026-05-02 to support
+    // workspace conversions from native `<button>` (where these
+    // properties are common in inline `style={...}` blocks).
+    if (styles?.display) dynamicStyle.display = styles.display
+    if (styles?.position) dynamicStyle.position = styles.position
+    if (styles?.textAlign) dynamicStyle.textAlign = styles.textAlign
+    if (styles?.verticalAlign) dynamicStyle.verticalAlign = styles.verticalAlign
+    if (styles?.alignSelf) dynamicStyle.alignSelf = styles.alignSelf
+    if (styles?.alignItems) dynamicStyle.alignItems = styles.alignItems
+    if (styles?.justifyContent)
+      dynamicStyle.justifyContent = styles.justifyContent
+    if (styles?.flexDirection) dynamicStyle.flexDirection = styles.flexDirection
+    if (styles?.flexShrink !== undefined)
+      dynamicStyle.flexShrink = styles.flexShrink
+    if (styles?.flexGrow !== undefined) dynamicStyle.flexGrow = styles.flexGrow
+    if (styles?.flexBasis !== undefined)
+      dynamicStyle.flexBasis = styles.flexBasis
+    if (styles?.flexWrap) dynamicStyle.flexWrap = styles.flexWrap
+    if (styles?.gap !== undefined) dynamicStyle.gap = styles.gap
+    if (styles?.rowGap !== undefined) dynamicStyle.rowGap = styles.rowGap
+    if (styles?.columnGap !== undefined)
+      dynamicStyle.columnGap = styles.columnGap
+    if (styles?.transition) dynamicStyle.transition = styles.transition
+    if (styles?.transform) dynamicStyle.transform = styles.transform
+    if (styles?.zIndex !== undefined) dynamicStyle.zIndex = styles.zIndex
+    if (styles?.top !== undefined) dynamicStyle.top = styles.top
+    if (styles?.right !== undefined) dynamicStyle.right = styles.right
+    if (styles?.bottom !== undefined) dynamicStyle.bottom = styles.bottom
+    if (styles?.left !== undefined) dynamicStyle.left = styles.left
+    if (styles?.overflow) dynamicStyle.overflow = styles.overflow
+    if (styles?.overflowX) dynamicStyle.overflowX = styles.overflowX
+    if (styles?.overflowY) dynamicStyle.overflowY = styles.overflowY
+    if (styles?.textOverflow) dynamicStyle.textOverflow = styles.textOverflow
+    if (styles?.lineHeight !== undefined)
+      dynamicStyle.lineHeight = styles.lineHeight
+    if (styles?.borderStyle) dynamicStyle.borderStyle = styles.borderStyle
+    if (styles?.borderTop) dynamicStyle.borderTop = styles.borderTop
+    if (styles?.borderBottom) dynamicStyle.borderBottom = styles.borderBottom
+    if (styles?.borderLeft) dynamicStyle.borderLeft = styles.borderLeft
+    if (styles?.borderRight) dynamicStyle.borderRight = styles.borderRight
+    if (styles?.pointerEvents) dynamicStyle.pointerEvents = styles.pointerEvents
+    if (styles?.userSelect) dynamicStyle.userSelect = styles.userSelect
+    if (styles?.visibility) dynamicStyle.visibility = styles.visibility
+    if (styles?.textDecoration)
+      dynamicStyle.textDecoration = styles.textDecoration
+    if (styles?.textIndent !== undefined)
+      dynamicStyle.textIndent = styles.textIndent
+    if (styles?.wordBreak) dynamicStyle.wordBreak = styles.wordBreak
+    if (styles?.wordSpacing !== undefined)
+      dynamicStyle.wordSpacing = styles.wordSpacing
+    if (styles?.fontStyle) dynamicStyle.fontStyle = styles.fontStyle
 
     // Build className
     const classNames = [cssStyles.button]
