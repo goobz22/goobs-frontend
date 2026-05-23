@@ -309,7 +309,12 @@ const FieldShell: React.FC<FieldShellProps> = ({
       aria-invalid={hasError || undefined}
       style={styleOverridesToCss(styles)}
     >
-      {label !== undefined && label !== null && (
+      {label !== undefined && label !== null && label !== '' && (
+        // Empty-string labels render no <label> element — historically
+        // the shell allocated a ~25px label slot (font-size 14px + 4px
+        // gap + 4px margin) even with `label=""`, dropping bare inputs
+        // (e.g. DataGrid footer's page-size selector) visibly below
+        // their sibling controls. Fixed 2026-05-22.
         <label htmlFor={inputId} className={cssStyles.label}>
           {label}
           {required && (

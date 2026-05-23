@@ -1,0 +1,176 @@
+/* ==========================================================================
+   FILTER SECTION - CSS MODULE
+   Mirrors MetricsAccordion's structure (collapsible shell + light/sacred
+   themes via CSS variables). Filter callsites typically want the accordion
+   default-OPEN (filters are primary UI), so the default state differs from
+   the metric accordion.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light theme (default)
+   -------------------------------------------------------------------------- */
+.root {
+  --fs-accent: #1976d2;
+  --fs-toggle-bg: rgba(0, 0, 0, 0.04);
+  --fs-toggle-color: rgba(0, 0, 0, 0.75);
+  --fs-toggle-font: inherit;
+  --fs-panel-bg: rgba(255, 255, 255, 0.6);
+
+  /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
+     accordion in a `padding: 0.25rem` shell that already provides
+     inter-element spacing; stacking accordion-margin on top of wrapper
+     padding produced a cavernous gap below Search & Filters before the
+     Toolbar. The wrapper alone is the source of vertical rhythm now. */
+  margin-bottom: 0;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Sacred theme (dark + gold)
+   -------------------------------------------------------------------------- */
+.root.sacred {
+  --fs-accent: #d4af37;
+  --fs-toggle-bg: rgba(0, 0, 0, 0.3);
+  --fs-toggle-color: rgba(255, 255, 255, 0.8);
+  --fs-toggle-font: 'Cinzel', serif;
+  --fs-panel-bg: rgba(0, 0, 0, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   Toggle button (only rendered when collapsible)
+   -------------------------------------------------------------------------- */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--fs-toggle-bg);
+  border: 1px solid color-mix(in srgb, var(--fs-accent) 30%, transparent);
+  cursor: pointer;
+  padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 18px);
+  margin-bottom: 0;
+  width: 100%;
+  text-align: left;
+  font-family: var(--fs-toggle-font);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  color: var(--fs-toggle-color);
+  border-radius: clamp(8px, 2vw, 12px);
+}
+
+.toggle[data-state='open'] {
+  border-radius: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px) 0 0;
+}
+
+.chevron {
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  color: color-mix(in srgb, var(--fs-accent) 70%, transparent);
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   Panel (collapsible-mode wrapper around the filter row)
+   -------------------------------------------------------------------------- */
+.panel {
+  border: 1px solid color-mix(in srgb, var(--fs-accent) 30%, transparent);
+  border-top: none;
+  border-radius: 0 0 clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
+  padding: clamp(10px, 2.5vw, 16px) clamp(12px, 3vw, 18px);
+  background-color: var(--fs-panel-bg);
+}
+
+/* --------------------------------------------------------------------------
+   Filter row (the actual content — search + dropdowns + chips + buttons)
+   When NOT collapsible, the row is rendered directly. When collapsible,
+   the row is rendered inside .panel.
+   -------------------------------------------------------------------------- */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  width: 100%;
+}
+
+/* First sub-row holds the search box + any single-line controls + the
+   action buttons (anchored right via margin-left: auto). */
+.searchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 16px);
+  align-items: center;
+  width: 100%;
+}
+
+.searchRow > .searchCell {
+  flex: 1 1 min(320px, 100%);
+  min-width: min(220px, 100%);
+}
+
+.searchRow > .buttonsCell {
+  display: flex;
+  gap: clamp(6px, 1.5vw, 10px);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* Second sub-row holds dropdowns + dateRanges + toggles in a responsive
+   grid. Each cell sizes to content; rows wrap on narrow viewports. */
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 14px);
+  align-items: flex-end;
+  width: 100%;
+}
+
+.controlsRow > .controlCell {
+  flex: 1 1 min(220px, 100%);
+  min-width: min(180px, 100%);
+}
+
+/* Third sub-row(s) — chip clusters, one per cluster. Each cluster gets its
+   own label + wrapping chip-row. Spacing between clusters is generous so
+   the dimensions don't visually merge. */
+.chipClusters {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  width: 100%;
+}
+
+.chipCluster {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 6px);
+}
+
+.chipClusterLabel {
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--fs-toggle-font);
+}
+
+.root:not(.sacred) .chipClusterLabel {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(4px, 1vw, 8px);
+  align-items: center;
+}
+
+/* Toggle (switch) row — sits at the bottom in its own line. */
+.togglesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 16px);
+  align-items: center;
+}

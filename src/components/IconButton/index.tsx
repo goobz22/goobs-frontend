@@ -12,8 +12,12 @@ import CustomButton, { ButtonProps } from '../Button'
 // --------------------------------------------------------------------------
 
 export interface IconButtonProps extends Omit<ButtonProps, 'text'> {
-  /** Size of the icon button */
-  size?: 'small' | 'medium' | 'large'
+  /**
+   * Size of the icon button. `'xsmall'` (20px) is used for inline micro
+   * actions like the per-row delete button on a draggable PDF field —
+   * smaller than `'small'` (32px) which is the default control-row size.
+   */
+  size?: 'xsmall' | 'small' | 'medium' | 'large'
   /** Color scheme for the button */
   color?:
     | 'primary'
@@ -41,6 +45,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   ) => {
     // Map size to button dimensions
     const sizeMap = {
+      xsmall: { width: '20px', height: '20px', padding: '2px' },
       small: { width: '32px', height: '32px', padding: '4px' },
       medium: { width: '40px', height: '40px', padding: '8px' },
       large: { width: '48px', height: '48px', padding: '12px' },

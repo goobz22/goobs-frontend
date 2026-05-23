@@ -27,6 +27,7 @@ export {
 } from './components/RadioGroup'
 export { default as Dialog, type DialogProps } from './components/Dialog'
 export { default as CodeCopy, type CodeCopyProps } from './components/CodeCopy'
+export { default as Markdown, type MarkdownProps } from './components/Markdown'
 export {
   default as PricingTable,
   type PricingProps,
@@ -112,7 +113,12 @@ export {
   type ToggleButtonGroupProps,
 } from './components/ToggleButton'
 export { default as Checkbox, type CheckboxProps } from './components/Checkbox'
-export { default as Chip, type ChipProps } from './components/Chip'
+export {
+  default as Chip,
+  type ChipProps,
+  type ChipStyles,
+  type ChipVariant,
+} from './components/Chip'
 export { default as Switch, type SwitchProps } from './components/Switch'
 
 // Field Shell — canonical wrapper used by every Field component
@@ -227,18 +233,43 @@ export {
   default as FormDataGrid,
   type FormDataGridProps,
 } from './components/Form/DataGrid'
+// Metric primitives. Relocated 2026-05-22 from DataGrid-scoped folders to
+// `components/Metric/` — the audience is broader than DataGrid (workspaces,
+// dashboards, dialogs all show metric cards). MetricSection has been fully
+// folded into MetricsAccordion (no separate export; DataGrid passes its
+// `metrics` array directly to MetricsAccordion now).
 export {
   default as MetricCard,
   type MetricCardProps,
-} from './components/DataGrid/MetricCard'
-export { default as MetricSection } from './components/DataGrid/MetricSection'
+} from './components/Metric/Card'
+export {
+  default as MetricsAccordion,
+  type MetricsAccordionProps,
+  type MetricsGroup,
+} from './components/Metric/Accordion'
+export type { MetricCardData } from './components/Metric/types'
+
+// Filter Section — unified search / dropdown / chip-cluster / date-range /
+// toggle / button row. Replaces DataGrid's old FilterSection (now removed
+// from there) and the ~10 ad-hoc filter rows hand-rolled across ThothOS
+// workspaces. Optional accordion shell mirrors MetricsAccordion but
+// defaults to `initiallyOpen={true}` because filters are primary UI.
+export {
+  default as FilterSection,
+  type FilterSectionProps,
+  type FilterDropdownDef,
+  type FilterChipOption,
+  type FilterChipClusterDef,
+  type FilterDateRangeDef,
+  type FilterToggleDef,
+  type FilterButtonDef,
+} from './components/Filter/Section'
 export type {
   ColumnDef,
   CompositeFieldConfig,
   RowData,
   DatagridProps,
   DataGridFilter,
-  MetricCardData,
 } from './components/DataGrid/types'
 export {
   List,
@@ -251,15 +282,67 @@ export {
   type ListItemTextProps,
 } from './components/List'
 export { default as Avatar } from './components/Avatar'
+// Card — compositional surface primitive. Replaced the legacy MUI-style
+// CardHeader/CardContent/CardActions trio on 2026-05-22 with a slot-
+// based compound family (`Card.Header`, `Card.Body`, etc.). The static
+// subcomponents are reachable off `Card.*` AND as named exports so test
+// utilities / scaffolders can import them directly.
 export {
-  Card,
-  CardContent,
-  CardActions,
+  default as Card,
   CardHeader,
+  CardHeaderIcon,
+  CardHeaderMeta,
+  CardTitle,
+  CardSubtitle,
+  CardHeaderBadges,
+  CardHeaderActions,
+  CardSelectionCheckbox,
+  CardBody,
+  CardDescription,
+  CardSection,
+  CardBanner,
+  CardMetrics,
+  CardMetric,
+  CardBigValue,
+  CardStats,
+  CardStatCell,
+  CardProgress,
+  CardFooter,
+  CardFooterActions,
+  CardFooterMeta,
+  CardConfirmDelete,
+  CardDragHandle,
+  CardGrid,
+  CardEmptyState,
   type CardProps,
-  type CardContentProps,
-  type CardActionsProps,
+  type CardTheme,
   type CardHeaderProps,
+  type CardHeaderIconProps,
+  type CardHeaderMetaProps,
+  type CardTitleProps,
+  type CardSubtitleProps,
+  type CardHeaderBadgesProps,
+  type CardHeaderActionsProps,
+  type CardSelectionCheckboxProps,
+  type CardBodyProps,
+  type CardDescriptionProps,
+  type CardSectionProps,
+  type CardBannerProps,
+  type CardBannerTone,
+  type CardMetricsProps,
+  type CardMetricProps,
+  type CardBigValueProps,
+  type CardBigValueTone,
+  type CardStatsProps,
+  type CardStatCellProps,
+  type CardProgressProps,
+  type CardFooterProps,
+  type CardFooterActionsProps,
+  type CardFooterMetaProps,
+  type CardConfirmDeleteProps,
+  type CardDragHandleProps,
+  type CardGridProps,
+  type CardEmptyStateProps,
 } from './components/Card'
 
 // Feedback Components

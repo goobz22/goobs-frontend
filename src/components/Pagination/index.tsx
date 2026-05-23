@@ -20,6 +20,20 @@ export interface PaginationProps {
   showFirstButton?: boolean
   showLastButton?: boolean
   color?: 'primary' | 'secondary' | 'standard'
+  /**
+   * Stable test selector — emitted as `data-pagination-field` on the
+   * <nav> root. Use when the page has multiple pagination instances (e.g.
+   * a contracts grid + a categories grid on the same workspace tab) so
+   * tests / the harvest can locate the right one without relying on
+   * positional traversal.
+   */
+  dataField?: string
+  /**
+   * ARIA label for the navigation landmark. Defaults to "pagination navigation".
+   * Override per-instance when several paginations live on the same page so
+   * screen reader users can disambiguate.
+   */
+  ariaLabel?: string
   styles?: {
     disabled?: boolean
     theme?: string
@@ -254,6 +268,8 @@ const PaginationItem: FC<{
       onMouseLeave={() => setIsHovered(false)}
       aria-current={isSelected ? 'page' : undefined}
       aria-label={`Go to page ${item}`}
+      data-pagination-page={item}
+      data-pagination-selected={isSelected ? 'true' : 'false'}
     >
       {item}
     </button>
@@ -270,6 +286,8 @@ const Pagination: FC<PaginationProps> = ({
   hideNextButton = false,
   showFirstButton = false,
   showLastButton = false,
+  dataField,
+  ariaLabel,
   styles,
   renderItem,
   ...rest
@@ -341,7 +359,11 @@ const Pagination: FC<PaginationProps> = ({
     <nav
       style={containerStyle}
       role="navigation"
-      aria-label="pagination navigation"
+      aria-label={ariaLabel ?? 'pagination navigation'}
+      data-pagination-root="true"
+      data-pagination-current-page={page}
+      data-pagination-count={count}
+      {...(dataField !== undefined && { 'data-pagination-field': dataField })}
       {...rest}
     >
       <div style={buttonContainerStyle}>

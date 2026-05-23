@@ -88,9 +88,9 @@ export { dropdownThemes, getDropdownTheme, getDropdownStyles } from './dropdown'
 export type { NavTheme, NavStyles } from './nav'
 export { navThemes, getNavTheme, getNavStyles } from './nav'
 
-// Export chip theme system
-export type { ChipTheme, ChipStyles } from './chip'
-export { chipThemes, getChipTheme, getChipStyles } from './chip'
+// Chip theme system was removed 2026-05-22 — Chip migrated to
+// `components/Chip/Chip.module.css` (matching the redesigned component
+// family). `ChipStyles` is now re-exported from the component itself.
 
 // Export checkbox theme system
 export type { CheckboxTheme, CheckboxStyles } from './checkbox'
@@ -537,7 +537,6 @@ export const grey = {
 export * from './button'
 export * from './card'
 export * from './checkbox'
-export * from './chip'
 export * from './dialog'
 export * from './divider'
 export * from './drawer'

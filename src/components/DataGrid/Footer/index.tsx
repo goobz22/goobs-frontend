@@ -176,6 +176,9 @@ const createDropdownStyles = (
         '--field-adornment-focus': '#E2E8F0',
         borderRadius: '6px',
         height: '32px',
+        // Shrink the dropdown trigger from its 40px default to match
+        // the 32px pagination chevron buttons in the footer row.
+        '--field-button-min-height': '32px',
         fontSize: '14px',
         fontFamily: 'Inter, sans-serif',
       }
@@ -192,6 +195,9 @@ const createDropdownStyles = (
         '--field-adornment-focus': '#FFD700',
         borderRadius: '6px',
         height: '32px',
+        // Shrink the dropdown trigger from its 40px default to match
+        // the 32px pagination chevron buttons in the footer row.
+        '--field-button-min-height': '32px',
         fontSize: '14px',
         fontFamily: 'Cinzel, serif',
       }
@@ -208,6 +214,9 @@ const createDropdownStyles = (
         '--field-adornment-focus': '#374151',
         borderRadius: '6px',
         height: '32px',
+        // Shrink the dropdown trigger from its 40px default to match
+        // the 32px pagination chevron buttons in the footer row.
+        '--field-button-min-height': '32px',
         fontSize: '14px',
         fontFamily: 'Inter, sans-serif',
       }
@@ -250,9 +259,7 @@ const PageSizeSelector: React.FC<{
 
   return (
     <div style={containerStyle}>
-      <span style={{ whiteSpace: 'nowrap' }}>
-        {isSacredTheme ? 'Show:' : 'Show:'}
-      </span>
+      <span style={{ whiteSpace: 'nowrap' }}>Show:</span>
       <div style={{ minWidth: '60px' }}>
         <Dropdown
           label=""

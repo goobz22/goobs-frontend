@@ -1,0 +1,308 @@
+/* ==========================================================================
+   CHIP - CSS MODULE
+   Migrated from the legacy `theme/chip.ts` system to a CSS-module-driven
+   design on 2026-05-22, matching the rest of the redesigned component
+   family (DataGrid, Filter/Section, Metric/{Card,Accordion}, Button).
+
+   Two variants:
+     - `.chip`   — the default. Interactive filter token / tag. 32px tall,
+                   border-radius 6px (matches Button's family), tighter
+                   spacing than the old design.
+     - `.pill`   — read-only status indicator. Compact (~24px tall),
+                   full radius (999px), bolder font weight for status
+                   emphasis. Used by status badges that used to be
+                   hand-rolled per workspace.
+
+   Themed via CSS custom properties on the root; `.sacred` swaps the
+   gold-on-black palette, `.light` and `.dark` swap the blue palette
+   matching the rest of the field family. Callers can still override any
+   single property (color / backgroundColor / borderColor) by passing
+   inline `style` from the React layer.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light theme (default)
+   -------------------------------------------------------------------------- */
+.root {
+  --chip-bg: rgba(59, 130, 246, 0.1);
+  --chip-border: rgba(59, 130, 246, 0.25);
+  --chip-text: rgb(59, 130, 246);
+  --chip-hover-bg: rgba(59, 130, 246, 0.15);
+  --chip-hover-border: rgba(59, 130, 246, 0.4);
+  --chip-active-bg: rgba(59, 130, 246, 0.18);
+  --chip-active-border: rgba(59, 130, 246, 0.5);
+  --chip-font: 'Inter', system-ui, sans-serif;
+  --chip-shadow: none;
+  --chip-hover-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
+
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  background-color: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  color: var(--chip-text);
+  font-family: var(--chip-font);
+  letter-spacing: 0;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: var(--chip-shadow);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.root[data-chip-clickable='true'] {
+  cursor: pointer;
+}
+
+.root[data-chip-clickable='true']:hover:not([data-chip-disabled='true']) {
+  background-color: var(--chip-hover-bg);
+  border-color: var(--chip-hover-border);
+  box-shadow: var(--chip-hover-shadow);
+}
+
+.root[data-chip-active='true'] {
+  background-color: var(--chip-active-bg);
+  border-color: var(--chip-active-border);
+}
+
+.root[data-chip-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Sacred theme (dark + gold)
+   -------------------------------------------------------------------------- */
+.root.sacred {
+  --chip-bg: rgba(0, 0, 0, 0.4);
+  --chip-border: rgba(255, 215, 0, 0.3);
+  --chip-text: #ffd700;
+  --chip-hover-bg: rgba(255, 215, 0, 0.12);
+  --chip-hover-border: rgba(255, 215, 0, 0.55);
+  --chip-active-bg: rgba(255, 215, 0, 0.2);
+  --chip-active-border: rgba(255, 215, 0, 0.6);
+  --chip-font: 'Cinzel', serif;
+  --chip-shadow: none;
+  --chip-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.18);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme
+   -------------------------------------------------------------------------- */
+.root.dark {
+  --chip-bg: rgba(59, 130, 246, 0.18);
+  --chip-border: rgba(59, 130, 246, 0.4);
+  --chip-text: rgb(147, 197, 253);
+  --chip-hover-bg: rgba(59, 130, 246, 0.25);
+  --chip-hover-border: rgba(59, 130, 246, 0.55);
+  --chip-active-bg: rgba(59, 130, 246, 0.3);
+  --chip-active-border: rgba(59, 130, 246, 0.6);
+  --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --chip-hover-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   SEMANTIC TONE PALETTE — `<Chip tone="success">` etc.
+   Each tone sets the chip's CSS vars to a translucent bg + matching
+   border + solid text/dot, so callers stop hand-tuning alpha values.
+   The tone wins over the theme default but loses to explicit
+   `styles.backgroundColor` / `styles.color` / `styles.borderColor`
+   because those still cascade as inline CSS-var overrides on the root.
+   -------------------------------------------------------------------------- */
+.root[data-chip-tone='success'] {
+  --chip-bg: rgba(34, 197, 94, 0.15);
+  --chip-border: rgba(34, 197, 94, 0.4);
+  --chip-text: #22c55e;
+  --chip-hover-bg: rgba(34, 197, 94, 0.22);
+  --chip-hover-border: rgba(34, 197, 94, 0.55);
+  --chip-active-bg: rgba(34, 197, 94, 0.28);
+  --chip-active-border: rgba(34, 197, 94, 0.6);
+}
+
+.root[data-chip-tone='info'] {
+  --chip-bg: rgba(59, 130, 246, 0.15);
+  --chip-border: rgba(59, 130, 246, 0.4);
+  --chip-text: #3b82f6;
+  --chip-hover-bg: rgba(59, 130, 246, 0.22);
+  --chip-hover-border: rgba(59, 130, 246, 0.55);
+  --chip-active-bg: rgba(59, 130, 246, 0.28);
+  --chip-active-border: rgba(59, 130, 246, 0.6);
+}
+
+.root[data-chip-tone='warn'] {
+  --chip-bg: rgba(245, 158, 11, 0.15);
+  --chip-border: rgba(245, 158, 11, 0.4);
+  --chip-text: #f59e0b;
+  --chip-hover-bg: rgba(245, 158, 11, 0.22);
+  --chip-hover-border: rgba(245, 158, 11, 0.55);
+  --chip-active-bg: rgba(245, 158, 11, 0.28);
+  --chip-active-border: rgba(245, 158, 11, 0.6);
+}
+
+.root[data-chip-tone='danger'] {
+  --chip-bg: rgba(239, 68, 68, 0.15);
+  --chip-border: rgba(239, 68, 68, 0.4);
+  --chip-text: #ef4444;
+  --chip-hover-bg: rgba(239, 68, 68, 0.22);
+  --chip-hover-border: rgba(239, 68, 68, 0.55);
+  --chip-active-bg: rgba(239, 68, 68, 0.28);
+  --chip-active-border: rgba(239, 68, 68, 0.6);
+}
+
+.root[data-chip-tone='neutral'] {
+  --chip-bg: rgba(156, 163, 175, 0.18);
+  --chip-border: rgba(156, 163, 175, 0.4);
+  --chip-text: #9ca3af;
+  --chip-hover-bg: rgba(156, 163, 175, 0.25);
+  --chip-hover-border: rgba(156, 163, 175, 0.55);
+  --chip-active-bg: rgba(156, 163, 175, 0.32);
+  --chip-active-border: rgba(156, 163, 175, 0.6);
+}
+
+.root[data-chip-tone='gold'] {
+  --chip-bg: rgba(255, 215, 0, 0.15);
+  --chip-border: rgba(255, 215, 0, 0.4);
+  --chip-text: #ffd700;
+  --chip-hover-bg: rgba(255, 215, 0, 0.22);
+  --chip-hover-border: rgba(255, 215, 0, 0.55);
+  --chip-active-bg: rgba(255, 215, 0, 0.28);
+  --chip-active-border: rgba(255, 215, 0, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Variant: chip (default) — interactive token, comfortable padding
+   -------------------------------------------------------------------------- */
+.chip {
+  padding: 5px 12px;
+  gap: 6px;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Variant: pill — read-only status indicator, compact + fully rounded
+   -------------------------------------------------------------------------- */
+.pill {
+  padding: 2px 10px;
+  gap: 6px;
+  min-height: 22px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+}
+
+.pill .icon {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+/* --------------------------------------------------------------------------
+   Status dot — when `dot` prop is set. Color defaults to currentColor,
+   override via inline style from the component.
+   -------------------------------------------------------------------------- */
+.dot {
+  flex-shrink: 0;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 999px;
+  background-color: currentColor;
+  display: inline-block;
+}
+
+.pill .dot {
+  width: 0.7em;
+  height: 0.7em;
+}
+
+/* --------------------------------------------------------------------------
+   Icon slot — sized via em so it scales with the variant's font-size.
+   Matches the Button icon pattern (descendant svg constrained to slot).
+   -------------------------------------------------------------------------- */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.1em;
+  height: 1.1em;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.icon > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon svg,
+.icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Label slot — positioned above the optional background overlay so it
+   stays visible when active.
+   -------------------------------------------------------------------------- */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  position: relative;
+  z-index: 1;
+  line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   Delete button (X)
+   -------------------------------------------------------------------------- */
+.closeButton {
+  margin-left: 2px;
+  margin-right: -2px;
+  padding: 2px;
+  border-radius: 999px;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition:
+    background-color 180ms ease,
+    opacity 180ms ease;
+  position: relative;
+  z-index: 1;
+}
+
+.closeButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.root.sacred .closeButton:hover:not(:disabled) {
+  background-color: rgba(255, 215, 0, 0.16);
+}
+
+.closeButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.closeButton svg {
+  width: 0.9em;
+  height: 0.9em;
+}

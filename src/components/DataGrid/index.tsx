@@ -83,8 +83,13 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import DataGridToolbar from './Toolbar/index'
 import Table from './Table'
 import CustomFooter from './Footer'
-import FilterSection from './FilterSection'
-import MetricSection from './MetricSection'
+import FilterSection, {
+  type FilterDropdownDef,
+  type FilterDateRangeDef,
+} from '../Filter/Section'
+import { filterRowsBySearch } from './utils/searchFilter'
+import type { DropdownOption } from '../Field/Dropdown/SearchableSimple'
+import MetricsAccordion from '../Metric/Accordion'
 import ManageColumnsSimple from './ManageColumnsSimple'
 import MobileCardView from './MobileCardView'
 import Snackbar from '../Snackbar'
@@ -874,21 +879,78 @@ function DataGridContent({
   // SEARCH AND FILTER HANDLERS
   // ═══════════════════════════════════════════════════════════════════════════
 
+  /** Current search term (text input from the FilterSection searchbar). */
+  const [searchTerm, setSearchTerm] = useState('')
+
   /**
-   * Handle search results from FilterSection.
-   * Updates filteredRows with the search results and resets to first page.
+   * Re-filter rows whenever the search term, source rows, or visible columns
+   * change. Smart-search lives in `filterRowsBySearch` — column-header terms
+   * resolve to "show everything", content terms narrow to matching rows.
    *
-   * @param args - Tuple of [searchTerm, filteredRows, visibleColumns]
+   * Effect runs after layout but is read-only against rows/columns, so it
+   * doesn't race with the providedRows sync effect above.
    */
-  const handleSearchFilter = useCallback(
-    (...args: [string, RowData[], string[]]) => {
-      const nextFilteredRows = args[1]
-      setFilteredRows(nextFilteredRows)
-      // Note: column visibility is managed separately; search only filters rows
-      setPage(0)
-    },
-    []
-  )
+  React.useEffect(() => {
+    const nextFiltered = filterRowsBySearch(rows, visibleColumns, searchTerm)
+    setFilteredRows(nextFiltered)
+    setPage(0)
+  }, [searchTerm, rows, visibleColumns])
+
+  /** Map `DataGridFilter[]` to goobs FilterSection's prop shape. */
+  const filterDropdowns: FilterDropdownDef[] = useMemo(() => {
+    if (!filters) return []
+    return filters
+      .filter((f) => (f.type ?? 'dropdown') === 'dropdown')
+      .map((f) => {
+        const dropdownChange = f.onChange as (
+          value: DropdownOption | null
+        ) => void
+        const def: FilterDropdownDef = {
+          label: f.label,
+          value: typeof f.value === 'string' ? f.value : '',
+          options: f.options ?? [],
+          onChange: (resolvedValue: string) => {
+            // Goobs Dropdown emits the primitive value; reconstruct the
+            // option object the legacy `DataGridFilter.onChange` contract
+            // expects so existing consumers keep working unchanged.
+            const matched =
+              (f.options ?? []).find(
+                (opt) =>
+                  String(opt._id ?? '') === resolvedValue ||
+                  String(opt.value) === resolvedValue
+              ) ?? null
+            dropdownChange(matched)
+          },
+          variant: 'searchable',
+          ...(f.placeholder !== undefined && { placeholder: f.placeholder }),
+          ...(f.width !== undefined && { width: f.width }),
+        }
+        return def
+      })
+  }, [filters])
+
+  const filterDateRanges: FilterDateRangeDef[] = useMemo(() => {
+    if (!filters) return []
+    return filters
+      .filter((f) => f.type === 'daterange')
+      .map((f) => {
+        const rangeChange = f.onChange as (range: {
+          start: Date | null
+          end: Date | null
+        }) => void
+        const rangeValue =
+          typeof f.value === 'object' && f.value !== null
+            ? (f.value as { start: Date | null; end: Date | null })
+            : { start: null, end: null }
+        const def: FilterDateRangeDef = {
+          startLabel: 'From Date',
+          endLabel: 'To Date',
+          value: rangeValue,
+          onChange: rangeChange,
+        }
+        return def
+      })
+  }, [filters])
 
   /**
    * Hook for ManageRow component integration.
@@ -1143,28 +1205,78 @@ function DataGridContent({
             (captured on mount) so metrics don't change when data is filtered.
             ───────────────────────────────────────────────────────────────── */}
         {originalMetrics && originalMetrics.length > 0 && (
-          <MetricSection
-            metrics={originalMetrics}
-            collapsible={metricsCollapsible}
-            defaultExpanded={metricsDefaultExpanded}
-            {...(styles !== undefined ? { styles } : {})}
-          />
+          // DataGrid defaults the metric strip to COLLAPSED — `collapsible`
+          // forces the accordion shell regardless of viewport, and
+          // `initiallyOpen` defaults to false. Callers that explicitly set
+          // `metricsDefaultExpanded` opt into starting open. The old
+          // tablet-only auto-collapse heuristic is preserved via
+          // `responsiveCollapseOnTablet` so the desktop UX still gets the
+          // expanded layout when the host doesn't ask for collapsible.
+          //
+          // Wrapper padding matches the sibling FilterSection's so both
+          // accordion edges line up. Vertical was halved 0.5rem → 0.25rem
+          // on 2026-05-22 (paired with the accordion's margin-bottom: 0
+          // change) to tighten the inter-accordion gap. Horizontal stays
+          // at 0.5rem so the accordion edges keep their original inset
+          // from the DataGrid frame.
+          <div
+            style={{
+              padding: '0.25rem 0.5rem',
+              boxSizing: 'border-box',
+            }}
+          >
+            <MetricsAccordion
+              metrics={originalMetrics}
+              collapsible={metricsCollapsible ?? true}
+              initiallyOpen={metricsDefaultExpanded ?? false}
+              responsiveCollapseOnTablet
+              title="Metrics"
+              {...(styles !== undefined ? { styles } : {})}
+            />
+          </div>
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
             FILTER SECTION
-            Always rendered to show the search bar. Additional dropdown/date
-            filters are optional based on the filters prop.
+            Now uses the unified goobs <FilterSection>. DataGrid keeps the
+            smart cross-column search internally (`filterRowsBySearch`)
+            because that needs column metadata; the FilterSection itself
+            is presentation-only and just owns the search input + filter
+            dropdowns + date-range UI.
+
+            Wrapped in the same `padding: 0.25rem 0.5rem` shell as
+            MetricsAccordion above (tight vertical, original 0.5rem
+            horizontal inset) so the two accordion edges line up exactly.
+            The accordion's own margin-bottom is 0 — the wrapper is the
+            single source of inter-element vertical rhythm.
             ───────────────────────────────────────────────────────────────── */}
-        <FilterSection
-          {...(filters !== undefined ? { filters } : {})}
-          columns={visibleColumns}
-          rows={rows}
-          onSearchFilter={handleSearchFilter}
-          {...(styles !== undefined ? { styles } : {})}
-          collapsible={filtersCollapsible}
-          defaultExpanded={filtersDefaultExpanded}
-        />
+        <div
+          style={{
+            padding: '0.25rem 0.5rem',
+            boxSizing: 'border-box',
+          }}
+        >
+          <FilterSection
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Search data..."
+            dropdowns={filterDropdowns}
+            dateRanges={filterDateRanges}
+            // DataGrid defaults Search & Filters to an OPEN accordion
+            // shell — filters are primary UI but the collapsed handle
+            // gives the user a way to reclaim vertical space when
+            // they're done filtering. Callers can override either
+            // axis via the `filtersCollapsible` / `filtersDefaultExpanded`
+            // props (both default to true here on 2026-05-22 — they
+            // used to default to a bare row with no toggle).
+            collapsible={filtersCollapsible ?? true}
+            initiallyOpen={filtersDefaultExpanded ?? true}
+            title="Search & Filters"
+            {...(styles?.theme === 'sacred' && {
+              styles: { theme: 'sacred' as const },
+            })}
+          />
+        </div>
 
         {/* ─────────────────────────────────────────────────────────────────
             TOOLBAR

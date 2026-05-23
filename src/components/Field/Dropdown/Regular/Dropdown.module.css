@@ -37,7 +37,11 @@
 
 .button {
   width: 100%;
-  min-height: 40px;
+  /* Min-height is a CSS variable so callers (e.g. the DataGrid footer's
+     page-size dropdown that sits beside 32px chevron buttons) can shrink
+     the trigger to match siblings. Defaults to 40px to preserve the
+     original sizing for every other call-site. */
+  min-height: var(--field-button-min-height, 40px);
   padding: 0 12px;
   background-color: rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 215, 0, 0.3);
@@ -339,7 +343,9 @@
   }
 
   .button {
-    min-height: 36px;
+    /* Same var as desktop — mobile default 36 (vs 40) but caller
+       overrides still take effect. */
+    min-height: var(--field-button-min-height, 36px);
     font-size: 14px;
     padding: 0 10px;
   }

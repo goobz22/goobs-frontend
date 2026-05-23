@@ -407,7 +407,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     <div style={containerStyle}>
       {/* Sidebar - Quick Info */}
       <div style={sidebarStyle}>
-        <div style={sectionTitleStyle}>New Ticket</div>
+        <div style={sectionTitleStyle}>New Task</div>
         <p
           style={{
             fontSize: '0.875rem',
@@ -415,7 +415,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             lineHeight: '1.6',
           }}
         >
-          Fill in the details to create a new ticket. All required fields are
+          Fill in the details to create a new task. All required fields are
           marked.
         </p>
 
@@ -446,7 +446,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             style={tabStyle(activeTab === 'details')}
             onClick={() => setActiveTab('details')}
           >
-            Ticket Details
+            Task Details
           </div>
           <div
             style={tabStyle(activeTab === 'knowledgeBase')}
@@ -474,7 +474,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   }),
                 }}
               >
-                Create New Ticket
+                Create New Task
               </h2>
 
               {/* Title & Description */}
@@ -483,7 +483,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   label="Title"
                   value={title}
                   onChange={setTitle}
-                  placeholder="Enter ticket title"
+                  placeholder="Enter task title"
                   styles={{ theme: styles?.theme || 'light', required: true }}
                 />
               </div>
@@ -910,7 +910,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                       marginBottom: '1.5rem',
                     }}
                   >
-                    Search and select articles to link to this ticket. Click an
+                    Search and select articles to link to this task. Click an
                     article to view details.
                   </p>
 
@@ -1189,7 +1189,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     : '#3B82F6'
               }}
             >
-              Create Ticket
+              Create Task
             </button>
             {onCancel && (
               <button

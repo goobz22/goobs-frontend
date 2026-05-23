@@ -1,0 +1,504 @@
+'use client'
+
+/**
+ * =============================================================================
+ * FILTER SECTION
+ * =============================================================================
+ *
+ * Unified filter / search row used by both DataGrid and standalone workspace
+ * pages. Replaces:
+ *   - goobs `DataGrid/FilterSection` (search + dropdown/date filters,
+ *     DataGrid-specific column-search logic now lives in DataGrid itself)
+ *   - The ad-hoc filter rows hand-rolled across ~10 ThothOS workspaces
+ *     (search input + chip clusters + sometimes a Create button)
+ *
+ * The shape is fully prop-driven — every section is optional and renders
+ * only when its prop is provided. Layout follows a stable visual ordering:
+ *
+ *   1. Search + action buttons row (search left, buttons right)
+ *   2. Dropdowns + date ranges + (single-row) controls
+ *   3. Chip clusters (one labelled row per dimension)
+ *   4. Boolean toggles
+ *
+ * ACCORDION SHELL
+ *
+ * Mirrors `MetricsAccordion`'s collapsible shell, but defaults to
+ * `initiallyOpen={true}` because filters are primary UI (users immediately
+ * need the search/filter affordances), whereas the metric strip is
+ * read-only KPI data that's safe to collapse.
+ *
+ * TEST CONTRACT
+ *   - `[data-filter-section="true"]` on the wrapper
+ *   - `[data-state="open" | "closed"]` when collapsible
+ *   - `[data-testid="filter-section-toggle"]` on the toggle (collapsible only)
+ *   - `[data-testid="filter-section-panel"]` on the open panel (collapsible only)
+ *   - SearchBar emits `data-field` per `dataField` prop or "search"
+ *   - Each dropdown emits `data-field` from its `label`
+ *   - Each chip cluster emits `data-chip-field` from its `label`
+ *   - Each button emits `data-action` from the button's `action` prop (when provided)
+ *
+ * USAGE
+ * ```tsx
+ * <FilterSection
+ *   searchValue={query}
+ *   onSearchChange={setQuery}
+ *   searchPlaceholder="Search courses..."
+ *   dropdowns={[
+ *     { label: 'Category', value: cat, options: catOpts, onChange: setCat },
+ *     { label: 'Level',    value: lvl, options: lvlOpts, onChange: setLvl, variant: 'simple' },
+ *   ]}
+ *   chipClusters={[
+ *     { label: 'Status', selectedValues: [status],
+ *       options: STATUS_OPTS, onChange: ([v]) => setStatus(v),
+ *       exclusive: true },
+ *   ]}
+ *   buttons={[
+ *     { text: '+ Create Course', onClick: openCreate, permission: canWrite },
+ *   ]}
+ * />
+ * ```
+ *
+ * =============================================================================
+ */
+
+import React, { useId, useState } from 'react'
+import Searchbar from '../../Field/Search'
+import Dropdown from '../../Field/Dropdown/Regular'
+import SearchableSimple, {
+  type DropdownOption,
+} from '../../Field/Dropdown/SearchableSimple'
+import DateRange from '../../Field/Date/DateRange'
+import Switch from '../../Switch'
+import Chip from '../../Chip'
+import CustomButton from '../../Button'
+import styles from './Section.module.css'
+
+// ─── Sub-prop shapes ────────────────────────────────────────────────────────
+
+export interface FilterDropdownDef {
+  label: string
+  value: string
+  options: DropdownOption[]
+  onChange: (value: string) => void
+  /**
+   * Render variant. Defaults to `'auto'` which picks based on options.length —
+   * `searchable` when ≥ 8 options, `simple` otherwise. Callers with strong
+   * UX opinions pass `'simple'` or `'searchable'` explicitly to override.
+   *   - `'simple'`     → goobs `<Dropdown>` (compact, no type-ahead)
+   *   - `'searchable'` → goobs `<SearchableSimple>` (type-to-filter, better
+   *                      for long option lists like customers / categories)
+   */
+  variant?: 'simple' | 'searchable' | 'auto'
+  placeholder?: string
+  width?: string
+  /** Stable test selector; defaults to kebab-case of `label`. */
+  dataField?: string
+}
+
+export interface FilterChipOption {
+  label: string
+  value: string
+  /**
+   * Optional accent color for this chip when active. Forwarded as
+   * `styles.backgroundColor: alpha(color, 0.2)` / `styles.color: color`
+   * — used by callsites with semantic per-option theming (e.g.
+   * learning's level chips: beginner=green / intermediate=orange /
+   * advanced=red). Inactive chips fall back to the theme default.
+   */
+  color?: string
+}
+
+export interface FilterChipClusterDef {
+  /** Dimension label (e.g. "Status", "Type", "Category"). Rendered as the
+   *  row label above the chip row. Also surfaced as `data-chip-field` on
+   *  each chip in the cluster. */
+  label?: string
+  options: FilterChipOption[]
+  selectedValues: string[]
+  onChange: (selected: string[]) => void
+  /** When true (default), only one value at a time — clicking a chip
+   *  REPLACES the selection. When false, multi-select — clicking toggles
+   *  membership in `selectedValues`. */
+  exclusive?: boolean
+  /** Stable test selector; defaults to kebab-case of `label`. */
+  dataField?: string
+}
+
+export interface FilterDateRangeDef {
+  startLabel?: string
+  endLabel?: string
+  value?: { start: Date | null; end: Date | null }
+  onChange: (range: { start: Date | null; end: Date | null }) => void
+  /** Stable test selector; defaults to kebab-case of `startLabel` (or "range"). */
+  dataField?: string
+}
+
+export interface FilterToggleDef {
+  label: string
+  value: boolean
+  onChange: (value: boolean) => void
+  dataField?: string
+}
+
+export interface FilterButtonDef {
+  text: string
+  onClick: () => void
+  icon?: React.ReactNode
+  disabled?: boolean
+  /**
+   * Permission gate. When explicitly `false`, the button is omitted from
+   * the row (matches the common ThothOS `{canWrite && <button>}` pattern).
+   * Undefined / `true` → button renders. To render disabled, use the
+   * `disabled` prop.
+   */
+  permission?: boolean
+  /** goobs-frontend convention — emitted as `data-action` on the button. */
+  action?: string
+  /** goobs-frontend convention — emitted as `data-subject` on the button. */
+  subject?: string
+}
+
+// ─── Component ──────────────────────────────────────────────────────────────
+
+export interface FilterSectionProps {
+  // Search box ----------------------------------------------------
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  searchPlaceholder?: string
+  searchDataField?: string
+
+  // Filter controls -----------------------------------------------
+  dropdowns?: FilterDropdownDef[]
+  chipClusters?: FilterChipClusterDef[]
+  dateRanges?: FilterDateRangeDef[]
+  toggles?: FilterToggleDef[]
+
+  // Action buttons (right-aligned in the search row) --------------
+  buttons?: FilterButtonDef[]
+
+  // Collapsible accordion shell -----------------------------------
+  /**
+   * Wrap the filter row in an accordion shell. Defaults to false (the row
+   * renders bare). When true, the row sits inside a toggleable panel with
+   * `initiallyOpen` controlling the starting state.
+   */
+  collapsible?: boolean
+  /** When `collapsible`, defaults to TRUE — filters are primary UI and
+   *  shouldn't be hidden on first paint. (Contrast: `MetricsAccordion`
+   *  defaults to false because the metric strip is read-only KPI data.) */
+  initiallyOpen?: boolean
+  /** Accordion title when `collapsible`. Default `"Filters"`. */
+  title?: string
+
+  // Misc ----------------------------------------------------------
+  styles?: { theme?: 'sacred' | 'light' }
+  /** Stable test selector for the whole section. Surfaced as
+   *  `data-filter-section-field` on the wrapper. */
+  dataField?: string
+}
+
+function kebab(input: string): string {
+  return input
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+const AUTO_SEARCHABLE_THRESHOLD = 8
+
+export const FilterSection: React.FC<FilterSectionProps> = ({
+  searchValue,
+  onSearchChange,
+  searchPlaceholder = 'Search...',
+  searchDataField,
+  dropdowns,
+  chipClusters,
+  dateRanges,
+  toggles,
+  buttons,
+  collapsible = false,
+  initiallyOpen = true,
+  title = 'Filters',
+  styles: propStyles,
+  dataField,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(initiallyOpen)
+  const reactId = useId()
+  const panelId = `filter-section-panel-${reactId}`
+  const state = isExpanded ? 'open' : 'closed'
+  const isSacredTheme = propStyles?.theme === 'sacred'
+
+  // Only render the search/buttons row if any of those props were provided.
+  const hasSearch = onSearchChange !== undefined
+  const visibleButtons = (buttons ?? []).filter(
+    (b) => b.permission === undefined || b.permission === true
+  )
+  const hasSearchRow = hasSearch || visibleButtons.length > 0
+
+  // Same for the controls row (dropdowns + dateRanges + toggles together).
+  const hasControlsRow =
+    (dropdowns && dropdowns.length > 0) ||
+    (dateRanges && dateRanges.length > 0) ||
+    (toggles && toggles.length > 0)
+
+  const hasChipClusters = chipClusters && chipClusters.length > 0
+
+  const renderDropdown = (d: FilterDropdownDef, i: number) => {
+    const variantResolved: 'simple' | 'searchable' =
+      d.variant === 'simple'
+        ? 'simple'
+        : d.variant === 'searchable'
+          ? 'searchable'
+          : d.options.length >= AUTO_SEARCHABLE_THRESHOLD
+            ? 'searchable'
+            : 'simple'
+    const computedField = d.dataField ?? kebab(d.label)
+    const commonProps = {
+      label: d.label,
+      value: d.value,
+      options: d.options,
+      ...(d.placeholder !== undefined && { placeholder: d.placeholder }),
+      dataField: computedField,
+      ...(isSacredTheme && { styles: { theme: 'sacred' as const } }),
+    }
+    if (variantResolved === 'searchable') {
+      return (
+        <div
+          key={`dropdown-${i}-${computedField}`}
+          className={styles.controlCell}
+          {...(d.width !== undefined && {
+            style: { flex: `0 0 ${d.width}` },
+          })}
+        >
+          <SearchableSimple
+            {...commonProps}
+            onChange={(opt) => d.onChange((opt?._id as string) ?? '')}
+          />
+        </div>
+      )
+    }
+    return (
+      <div
+        key={`dropdown-${i}-${computedField}`}
+        className={styles.controlCell}
+        {...(d.width !== undefined && {
+          style: { flex: `0 0 ${d.width}` },
+        })}
+      >
+        <Dropdown {...commonProps} onChange={d.onChange} />
+      </div>
+    )
+  }
+
+  const renderChip = (
+    cluster: FilterChipClusterDef,
+    opt: FilterChipOption,
+    isActive: boolean
+  ) => {
+    // Per-option color theming. When `opt.color` is set, the active
+    // state uses a translucent fill + the color text. Inactive chips
+    // stay on the default Chip palette so the cluster doesn't visually
+    // explode when nothing is selected. alpha-blend approximated via
+    // color-mix in CSS through the inline style.
+    const chipStyles = opt.color
+      ? isActive
+        ? {
+            backgroundColor: `color-mix(in srgb, ${opt.color} 20%, transparent)`,
+            borderColor: `color-mix(in srgb, ${opt.color} 55%, transparent)`,
+            color: opt.color,
+          }
+        : undefined
+      : undefined
+    return (
+      <Chip
+        key={opt.value}
+        label={opt.label}
+        active={isActive}
+        dataField={cluster.dataField ?? (cluster.label ? kebab(cluster.label) : 'filter')}
+        dataValue={opt.value}
+        {...(chipStyles !== undefined && { styles: chipStyles })}
+        onClick={() => {
+          if (cluster.exclusive !== false) {
+            // Default: exclusive (radio-like). Toggling the active one off
+            // would leave the cluster with nothing selected, which is fine
+            // when the cluster's option list includes an "All" entry.
+            cluster.onChange(isActive ? [] : [opt.value])
+          } else {
+            // Multi-select.
+            const next = isActive
+              ? cluster.selectedValues.filter((v) => v !== opt.value)
+              : [...cluster.selectedValues, opt.value]
+            cluster.onChange(next)
+          }
+        }}
+      />
+    )
+  }
+
+  const filterContent = (
+    <div className={styles.row}>
+      {hasSearchRow && (
+        <div className={styles.searchRow}>
+          {hasSearch && (
+            <div className={styles.searchCell}>
+              <Searchbar
+                value={searchValue ?? ''}
+                onChange={onSearchChange!}
+                placeholder={searchPlaceholder}
+                dataField={searchDataField ?? 'search'}
+                {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+              />
+            </div>
+          )}
+          {visibleButtons.length > 0 && (
+            <div className={styles.buttonsCell}>
+              {visibleButtons.map((b, i) => (
+                <CustomButton
+                  key={`btn-${i}-${b.text}`}
+                  text={b.text}
+                  onClick={b.onClick}
+                  {...(b.disabled !== undefined && { disabled: b.disabled })}
+                  {...(b.action !== undefined && { action: b.action })}
+                  {...(b.subject !== undefined && { subject: b.subject })}
+                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasControlsRow && (
+        <div className={styles.controlsRow}>
+          {dropdowns?.map((d, i) => renderDropdown(d, i))}
+          {dateRanges?.map((dr, i) => {
+            const startLabel = dr.startLabel ?? 'Start Date'
+            const endLabel = dr.endLabel ?? 'End Date'
+            const computedField =
+              dr.dataField ?? kebab(dr.startLabel ?? 'range')
+            return (
+              <div
+                key={`daterange-${i}-${computedField}`}
+                className={styles.controlCell}
+              >
+                <DateRange
+                  startLabel={startLabel}
+                  endLabel={endLabel}
+                  {...(dr.value !== undefined && { value: dr.value })}
+                  onChange={(range) => dr.onChange(range)}
+                  dataField={computedField}
+                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                />
+              </div>
+            )
+          })}
+          {toggles && toggles.length > 0 && (
+            <div className={styles.togglesRow}>
+              {toggles.map((t, i) => (
+                <Switch
+                  key={`toggle-${i}-${t.label}`}
+                  checked={t.value}
+                  onChange={(e) => t.onChange(e.target.checked)}
+                  rightLabel={t.label}
+                  data-field={t.dataField ?? kebab(t.label)}
+                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasChipClusters && (
+        <div className={styles.chipClusters}>
+          {chipClusters!.map((cluster, ci) => (
+            <div
+              key={`cluster-${ci}-${cluster.label ?? 'unlabelled'}`}
+              className={styles.chipCluster}
+              data-chip-cluster={
+                cluster.dataField ?? (cluster.label ? kebab(cluster.label) : undefined)
+              }
+            >
+              {cluster.label && (
+                <span className={styles.chipClusterLabel}>{cluster.label}:</span>
+              )}
+              <div className={styles.chipRow}>
+                {cluster.options.map((opt) =>
+                  renderChip(
+                    cluster,
+                    opt,
+                    cluster.selectedValues.includes(opt.value)
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  const rootClassName = isSacredTheme
+    ? `${styles.root} ${styles.sacred}`
+    : styles.root
+
+  if (!collapsible) {
+    return (
+      <div
+        className={rootClassName}
+        data-filter-section="true"
+        {...(dataField !== undefined && {
+          'data-filter-section-field': dataField,
+        })}
+      >
+        {filterContent}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={rootClassName}
+      data-filter-section="true"
+      data-state={state}
+      {...(dataField !== undefined && {
+        'data-filter-section-field': dataField,
+      })}
+    >
+      <button
+        type="button"
+        onClick={() => setIsExpanded((p) => !p)}
+        aria-expanded={isExpanded}
+        aria-controls={panelId}
+        data-testid="filter-section-toggle"
+        data-state={state}
+        className={styles.toggle}
+      >
+        <span>{title}</span>
+        <span
+          aria-hidden="true"
+          className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+        >
+          ▼
+        </span>
+      </button>
+      {isExpanded && (
+        <div
+          id={panelId}
+          role="region"
+          aria-label={title}
+          data-testid="filter-section-panel"
+          className={styles.panel}
+        >
+          {filterContent}
+        </div>
+      )}
+    </div>
+  )
+}
+
+FilterSection.displayName = 'FilterSection'
+
+export default FilterSection

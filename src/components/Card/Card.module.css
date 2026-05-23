@@ -1,0 +1,800 @@
+/* ==========================================================================
+   CARD - CSS MODULE
+   Compositional surface primitive built for the ThothOS workspaces' ~50
+   item-card variants. Block-link pattern (link-on-title + ::after overlay)
+   handles the "whole card clickable + inner buttons" problem without
+   nesting <a> inside <a>. Container queries let a card narrow when its
+   column narrows, not when the viewport does.
+
+   The accordion family (Metric/Accordion, Filter/Section) defines visual
+   language for the rest of goobs; Card reuses the same CSS-variable
+   conventions (--card-bg / --card-border / --card-accent) so the three
+   themes (sacred / light / dark) read consistently across all surfaces.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (default)
+   -------------------------------------------------------------------------- */
+.root {
+  /* Density tokens — workspaces can override via wrapper CSS vars to
+     compact a whole region without touching every <Card>. */
+  --card-padding-x: clamp(12px, 3vw, 16px);
+  --card-padding-y: clamp(12px, 2.5vw, 16px);
+  --card-gap: clamp(8px, 2vw, 12px);
+  --card-radius: 8px;
+
+  /* Palette */
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(25, 118, 210, 0.2);
+  --card-accent: #1976d2;
+  --card-title: #1f2937;
+  --card-subtitle: #6b7280;
+  --card-text: #374151;
+  --card-meta: #9ca3af;
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --card-selected-ring: rgba(25, 118, 210, 0.5);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  color: var(--card-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  box-sizing: border-box;
+  container-type: inline-size;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME
+   -------------------------------------------------------------------------- */
+.root.sacred {
+  --card-bg: rgba(0, 0, 0, 0.7);
+  --card-border: rgba(255, 215, 0, 0.25);
+  --card-accent: #ffd700;
+  --card-title: #ffd700;
+  --card-subtitle: rgba(255, 215, 0, 0.7);
+  --card-text: rgba(255, 255, 255, 0.85);
+  --card-meta: rgba(255, 255, 255, 0.45);
+  --card-hover-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
+  --card-selected-ring: rgba(255, 215, 0, 0.6);
+
+  font-family: 'Cinzel', serif;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME
+   -------------------------------------------------------------------------- */
+.root.dark {
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --card-accent: #60a5fa;
+  --card-title: #e2e8f0;
+  --card-subtitle: #94a3b8;
+  --card-text: #cbd5e1;
+  --card-meta: #64748b;
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --card-selected-ring: rgba(96, 165, 250, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   VARIANTS — density scale
+   -------------------------------------------------------------------------- */
+.compact {
+  --card-padding-x: clamp(8px, 2vw, 12px);
+  --card-padding-y: clamp(8px, 2vw, 10px);
+  --card-gap: 6px;
+  --card-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   BORDER ACCENT (optional left or full border in the accent color)
+   -------------------------------------------------------------------------- */
+.root[data-card-accent-side='left'] {
+  border-left-width: 4px;
+  border-left-color: var(--card-accent-override, var(--card-accent));
+}
+
+.root[data-card-accent-side='full'] {
+  border-color: var(--card-accent-override, var(--card-accent));
+}
+
+/* --------------------------------------------------------------------------
+   STATES — driven by `data-card-state` for test consolidation
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .root[data-card-state='hover']:not([data-card-disabled='true']),
+  .root[data-card-interactive='true']:hover:not([data-card-disabled='true']) {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+  }
+}
+
+.root[data-card-state='selected'],
+.root[data-card-selected='true'] {
+  box-shadow: 0 0 0 2px var(--card-selected-ring);
+}
+
+.root[data-card-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.root[data-card-interactive='true']:not([data-card-disabled='true']) {
+  cursor: pointer;
+}
+
+.root[data-card-state='dragging'] {
+  opacity: 0.6;
+  cursor: grabbing;
+}
+
+/* Focus-within highlights the whole card when the inner title link gains
+   keyboard focus (block-link pattern). */
+.root:focus-within {
+  box-shadow: 0 0 0 2px var(--card-selected-ring);
+}
+
+/* --------------------------------------------------------------------------
+   HEADER
+   -------------------------------------------------------------------------- */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.headerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5em;
+  height: 1.5em;
+  font-size: 1rem;
+  color: var(--card-accent);
+}
+
+.headerIcon > svg,
+.headerIcon > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.headerTextCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+  font-weight: 600;
+  color: var(--card-title);
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.title a {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+.title a:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Block-link overlay: when title has a clickable link/button, stretch its
+   click target across the whole card root so the entire card is reachable
+   with a single click. Inner interactive elements raise themselves via
+   z-index in their own classes below. */
+.title a.blockLink::after,
+.title button.blockLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  cursor: pointer;
+}
+
+.title button.blockLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.subtitle {
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  color: var(--card-subtitle);
+  line-height: 1.4;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.headerBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-left: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   SELECTION CHECKBOX (top-right of the card)
+   -------------------------------------------------------------------------- */
+.selectionCheckbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   BODY
+   -------------------------------------------------------------------------- */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  min-width: 0;
+}
+
+.description {
+  margin: 0;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  color: var(--card-text);
+  line-height: 1.5;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Metric badge row — flex-wrap of small key+value chips. */
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background-color: color-mix(in srgb, var(--card-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 20%, transparent);
+  border-radius: 4px;
+  font-size: clamp(0.7rem, 1.8vw, 0.78rem);
+  color: var(--card-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.metricIcon {
+  font-size: 0.9em;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.metricLabel {
+  color: var(--card-subtitle);
+}
+
+.metricValue {
+  font-weight: 600;
+  color: var(--card-text);
+}
+
+/* Stats grid — key/value rows used by finance / detail cards. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(var(--card-stats-cols, 2), minmax(0, 1fr));
+  gap: 8px;
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: clamp(0.65rem, 1.5vw, 0.72rem);
+  color: var(--card-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.statValue {
+  font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+  font-weight: 600;
+  color: var(--card-title);
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+/* Progress bar (optional, used by learning cards). */
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(0.7rem, 1.8vw, 0.78rem);
+  color: var(--card-subtitle);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.progressTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--card-accent) 15%, transparent);
+  overflow: hidden;
+}
+
+.progressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background-color: var(--card-progress-color, var(--card-accent));
+  border-radius: inherit;
+  transition: width 240ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER
+   -------------------------------------------------------------------------- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: auto;
+  border-top: 1px solid color-mix(in srgb, var(--card-border) 60%, transparent);
+  padding-top: clamp(8px, 2vw, 10px);
+  position: relative;
+  z-index: 1;
+}
+
+.footer.split > [data-card-footer-side='left'] {
+  margin-right: auto;
+}
+
+.footerActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.footerMeta {
+  font-size: clamp(0.65rem, 1.5vw, 0.72rem);
+  color: var(--card-meta);
+  margin-left: auto;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   CARD.SECTION — titled sub-region inside Card.Body. Replaces the
+   hand-rolled `<div style={{ padding, backgroundColor, borderRadius,
+   border, label-row }}>` pattern that ~10 cards used (IPAM hierarchy,
+   customer billing "Unpaid invoices", contracts category children,
+   knowledgebase preview, automations step details, etc.).
+   -------------------------------------------------------------------------- */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background-color: color-mix(in srgb, var(--card-accent) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 18%, transparent);
+  border-radius: 6px;
+}
+
+.sectionLabel {
+  font-size: clamp(0.65rem, 1.5vw, 0.72rem);
+  color: var(--card-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+}
+
+.section.muted {
+  background-color: color-mix(in srgb, var(--card-meta) 8%, transparent);
+  border-color: color-mix(in srgb, var(--card-meta) 18%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   CARD.BANNER — tinted inline note rendered inside Card.Body for warnings,
+   pending-review notices, info messages. Replaces the per-card
+   `<div style={{ backgroundColor: alpha(severityColor, 0.15), border, ... }}>`
+   pattern. Tones map to the same palette as Chip's `tone` tokens.
+   -------------------------------------------------------------------------- */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(0.78rem, 1.9vw, 0.85rem);
+  line-height: 1.4;
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.bannerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bannerTitle {
+  font-weight: 600;
+  margin: 0;
+}
+
+.bannerMessage {
+  margin: 0;
+}
+
+.banner[data-banner-tone='info'] {
+  background-color: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #3b82f6;
+}
+
+.banner[data-banner-tone='success'] {
+  background-color: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #22c55e;
+}
+
+.banner[data-banner-tone='warn'] {
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.banner[data-banner-tone='danger'] {
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.banner[data-banner-tone='neutral'] {
+  background-color: rgba(156, 163, 175, 0.14);
+  border: 1px solid rgba(156, 163, 175, 0.35);
+  color: var(--card-text);
+}
+
+/* --------------------------------------------------------------------------
+   CARD.HEADERMETA — right-aligned text in the header (mirror of
+   Card.FooterMeta). For timestamps / "5m ago" / counts that aren't
+   chips. Used by notification cards, wishlist, message cards.
+   -------------------------------------------------------------------------- */
+.headerMeta {
+  font-size: clamp(0.65rem, 1.5vw, 0.72rem);
+  color: var(--card-meta);
+  margin-left: auto;
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   CARD.BIGVALUE — stat-display tile, between Card.Metric (chip-size)
+   and Card.Stats (multi-cell grid). Single 1.6rem/700-weight value with
+   optional swatch + tone-driven color. Used by dashboard widget StatCards.
+   -------------------------------------------------------------------------- */
+.bigValue {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bigValueLabel {
+  font-size: clamp(0.7rem, 1.7vw, 0.78rem);
+  color: var(--card-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: 'Inter', system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bigValueSwatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.bigValueNumber {
+  font-size: clamp(1.4rem, 4vw, 1.6rem);
+  font-weight: 700;
+  color: var(--card-title);
+  font-family: inherit;
+  line-height: 1.1;
+}
+
+.bigValueNumber[data-tone='success'] {
+  color: #22c55e;
+}
+.bigValueNumber[data-tone='warn'] {
+  color: #f59e0b;
+}
+.bigValueNumber[data-tone='danger'] {
+  color: #ef4444;
+}
+.bigValueNumber[data-tone='info'] {
+  color: #3b82f6;
+}
+.bigValueNumber[data-tone='neutral'] {
+  color: var(--card-meta);
+}
+.bigValueNumber[data-tone='gold'] {
+  color: #ffd700;
+}
+
+.bigValueCaption {
+  font-size: clamp(0.7rem, 1.7vw, 0.78rem);
+  color: var(--card-subtitle);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Monospace value rendering — Card.Metric / Card.StatCell with `mono`
+   prop. Replaces `<code>...</code>` literals scattered through IPAM /
+   SNMP / OID cards.
+   -------------------------------------------------------------------------- */
+.monoValue {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.95em;
+  letter-spacing: 0;
+}
+
+/* --------------------------------------------------------------------------
+   CONFIRM DELETE SLOT (used by ~15 CategoryCards' inline confirmation)
+   -------------------------------------------------------------------------- */
+.confirmDelete {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+}
+
+.confirmDeleteMessage {
+  font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  color: #ef4444;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+}
+
+.confirmDeleteActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Default (no renderActions) confirm/cancel buttons — goobs-themed so
+   callers can omit `renderActions` and get reasonable styling for free.
+   Matches the destructive / cancel variants used across the workspaces. */
+.confirmDeleteActions > button[data-card-confirm-yes='true'] {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.8);
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.confirmDeleteActions > button[data-card-confirm-yes='true']:hover {
+  background-color: rgba(239, 68, 68, 0.95);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+
+.confirmDeleteActions > button[data-card-confirm-no='true'] {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 40%, transparent);
+  background-color: transparent;
+  color: var(--card-accent);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.confirmDeleteActions > button[data-card-confirm-no='true']:hover {
+  background-color: color-mix(in srgb, var(--card-accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--card-accent) 60%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   DRAG HANDLE (absorbs AutomationStepCard's reorder UI)
+   -------------------------------------------------------------------------- */
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.dragHandleGrip {
+  cursor: grab;
+  padding: 4px;
+  color: var(--card-meta);
+  user-select: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.dragHandleGrip:active {
+  cursor: grabbing;
+}
+
+.dragHandleGrip:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   GRID LAYOUT (the wrapper that holds multiple cards as a list)
+   -------------------------------------------------------------------------- */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--card-grid-min, 280px), 1fr)
+  );
+  gap: var(--card-grid-gap, 12px);
+  width: 100%;
+}
+
+.gridItem {
+  display: flex;
+  min-width: 0;
+}
+
+.gridItem > * {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   EMPTY STATE (rendered inside <Card.Grid> when no children)
+   -------------------------------------------------------------------------- */
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(28px, 6vw, 48px) clamp(20px, 4vw, 32px);
+  text-align: center;
+  background-color: color-mix(in srgb, var(--card-bg, transparent) 60%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--card-accent) 30%, transparent);
+  border-radius: var(--card-radius, 8px);
+  color: var(--card-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.emptyState.sacred {
+  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-accent: #ffd700;
+  --card-text: rgba(255, 255, 255, 0.7);
+  --card-title: #ffd700;
+  font-family: 'Cinzel', serif;
+}
+
+.emptyStateIcon {
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  margin-bottom: 4px;
+  color: var(--card-accent);
+}
+
+.emptyStateTitle {
+  font-size: clamp(1rem, 2.6vw, 1.15rem);
+  font-weight: 600;
+  color: var(--card-title);
+  margin: 0;
+  font-family: inherit;
+}
+
+.emptyStateDescription {
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  color: var(--card-text);
+  margin: 0;
+  max-width: 420px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.emptyStateActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   CONTAINER QUERIES — card adapts to ITS column, not the viewport
+   -------------------------------------------------------------------------- */
+@container (max-width: 320px) {
+  .root {
+    --card-padding-x: 10px;
+    --card-padding-y: 10px;
+    --card-gap: 6px;
+  }
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  .headerBadges {
+    margin-left: 0;
+  }
+}

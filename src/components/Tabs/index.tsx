@@ -24,8 +24,15 @@ export interface TabsItemCapabilities {
 }
 
 export interface TabsItem {
-  title?: string
-  label?: string
+  /**
+   * Title / label may be a ReactNode (allows status dots or other
+   * inline glyphs alongside the text — see account-information tabs).
+   * When a non-string is supplied the auto-CRUD scaffolder can no
+   * longer fall back to kebabing it for a `data-tab-id`; pass the
+   * stable `id` field explicitly in that case.
+   */
+  title?: string | React.ReactNode
+  label?: string | React.ReactNode
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
@@ -62,6 +69,14 @@ export interface TabsItem {
    *  pattern most workspaces hand-rolled before adopting the shared
    *  shell). Hidden when undefined or null. */
   count?: number | null
+  /**
+   * Optional leading glyph / icon node rendered before the label. Use
+   * for hand-rolled tab strips migrating to goobs that previously
+   * embedded an icon character in their label text (e.g. `"☰ Inbox"`).
+   * Pass either a string glyph (rendered with `aria-hidden`) or a
+   * ReactNode for full control.
+   */
+  icon?: React.ReactNode
 }
 
 export interface TabsProps {
@@ -198,8 +213,11 @@ const Tabs: React.FC<TabsProps> = ({
       {items.map((tab, index) => {
         const isActive = activeTab === index
         const isHovered = hoveredTab === index
-        const label = tab.label || tab.title || ''
-        const tabId = tab.id ?? kebabFallback(label) ?? String(index)
+        const label: React.ReactNode = tab.label ?? tab.title ?? ''
+        // Only the string form can be kebabed for a fallback tab-id;
+        // when the label is a ReactNode the caller must pass `id`.
+        const labelString = typeof label === 'string' ? label : undefined
+        const tabId = tab.id ?? kebabFallback(labelString) ?? String(index)
         const panelId = `tabpanel-${reactId}-${tabId}`
         return (
           <Tab
@@ -217,6 +235,7 @@ const Tabs: React.FC<TabsProps> = ({
             // exactOptionalPropertyTypes requires omitting undefined
             // values rather than passing `undefined` explicitly.
             {...(tab.subject !== undefined && { subject: tab.subject })}
+            {...(tab.icon !== undefined && tab.icon !== null && { icon: tab.icon })}
             buttonRef={el => {
               tabRefs.current[index] = el
             }}
@@ -244,7 +263,15 @@ export function tabPanelId(reactId: string, tabId: string): string {
 }
 
 export interface TabProps {
-  label: string
+  /**
+   * Tab content. String when the caller passed plain text; ReactNode
+   * when they need inline status glyphs / icons alongside the text.
+   * The rendered `<button>` includes the node directly. Tests should
+   * locate tabs by `data-tab-id` / `data-tab-subject` rather than
+   * label text, since rich-node labels can't be matched with a
+   * simple text selector.
+   */
+  label: string | React.ReactNode
   isActive: boolean
   isHovered?: boolean
   onClick: () => void
@@ -265,6 +292,8 @@ export interface TabProps {
   subject?: string
   /** Optional count badge rendered after the label. */
   count?: number | null | undefined
+  /** Optional leading glyph / icon — see TabsItem.icon. */
+  icon?: React.ReactNode
   /** Forwarded ref to the underlying `<button>` so the parent can
    *  programmatically focus a tab on keyboard nav. */
   buttonRef?: (el: HTMLButtonElement | null) => void
@@ -291,6 +320,7 @@ export const Tab: React.FC<TabProps> = ({
   panelId,
   subject,
   count,
+  icon,
   buttonRef,
   onKeyDown,
 }) => {
@@ -365,6 +395,23 @@ export const Tab: React.FC<TabProps> = ({
       onMouseLeave={onMouseLeave}
       disabled={disabled}
     >
+      {icon != null ? (
+        <span
+          aria-hidden={typeof icon === 'string' ? 'true' : undefined}
+          data-tab-icon="true"
+          style={{
+            marginRight: '6px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            // Slight size bump so single-glyph icons (☰, ⚙) sit visually
+            // balanced next to label text on the sacred-gold strip.
+            fontSize: '1.05em',
+            lineHeight: 1,
+          }}
+        >
+          {icon}
+        </span>
+      ) : null}
       {label}
       {count != null ? (
         <span

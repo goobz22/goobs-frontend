@@ -14,61 +14,74 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   box-sizing: border-box;
 
-  /* Sizing */
+  /* Sizing — matches the 32px control row vocabulary used by
+     <Dropdown> trigger, pagination chevrons, and chip rows so a
+     button can sit beside any of them and share a baseline. */
   width: auto;
   min-width: fit-content;
   height: auto;
-  min-height: 40px;
-  padding: 8px 16px;
+  min-height: 32px;
+  padding: 5px 12px;
 
   /* Typography - Sacred theme uses Cinzel */
   font-family: 'Cinzel', serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-transform: none;
   white-space: nowrap;
   user-select: none;
+  line-height: 1.2;
 
-  /* Sacred theme colors (hardcoded default) */
+  /* Sacred theme colors (hardcoded default) — subtle border-bg blend
+     in the same family as Filter/Metric accordions. Was a heavier
+     gold-on-black plate; redesigned 2026-05-22 to read as a control
+     not an action affordance card. */
   color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 6px;
   box-shadow: none;
   outline: none;
 
-  /* Transitions */
-  transition: all 0.3s ease;
+  /* Transitions — faster than the old 300ms; matches accordion +
+     chevron timing for a coherent feel. */
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
   cursor: pointer;
 }
 
-/* Hover state - Sacred theme */
+/* Hover state - Sacred theme — softer glow than before
+   (was 0 0 15px / 0.3 opacity, now half that). */
 .button:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.2);
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  background-color: rgba(255, 215, 0, 0.14);
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.18);
 }
 
 /* Active/Pressed state - Sacred theme */
 .button:active:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.3);
+  background-color: rgba(255, 215, 0, 0.22);
 }
 
 /* Selected state - Sacred theme */
 .button.selected {
-  background-color: rgba(255, 215, 0, 0.3);
+  background-color: rgba(255, 215, 0, 0.22);
+  border-color: rgba(255, 215, 0, 0.55);
 }
 
 /* Disabled state - Sacred theme */
 .button:disabled {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.25);
   color: rgba(255, 255, 255, 0.4);
   cursor: not-allowed;
-  border-color: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.12);
 }
 
 /* --------------------------------------------------------------------------
@@ -80,9 +93,46 @@
   gap: 4px;
 }
 
+/* Icon slot — sized to the button's compact typography. Targets the
+   wrapper AND any DESCENDANT svg/img (goobs icon components wrap their
+   <svg> in an extra <div style="display:inline-block">, so a direct-
+   child selector would miss them) so callers don't need to pass
+   `width`/`height` manually. The scale tracks button font-size (1.15em)
+   so the mobile breakpoint shrinks icon + text proportionally. */
 .iconWrapper {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.15em;
+  height: 1.15em;
+  font-size: inherit;
+  line-height: 1;
+}
+
+/* Collapse any intermediate wrapper divs (e.g. the goobs icon
+   component's `<div style="position:relative; display:inline-block">`
+   container) so the inner svg snaps to .iconWrapper's box. */
+.iconWrapper > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.iconWrapper svg,
+.iconWrapper img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* iconAbove layout — slightly larger glyph since the text-vs-icon
+   ratio shifts when stacked vertically. */
+.button.iconAbove .iconWrapper {
+  width: 1.4em;
+  height: 1.4em;
 }
 
 /* --------------------------------------------------------------------------
@@ -95,12 +145,13 @@
   color: #374151;
   background-color: #ffffff;
   border-color: #e2e8f0;
+  letter-spacing: 0;
 }
 
 .button[data-theme='light']:hover:not(:disabled) {
   background-color: #f8fafc;
   border-color: #cbd5e1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .button[data-theme='light']:active:not(:disabled) {
@@ -108,7 +159,7 @@
 }
 
 .button[data-theme='light'].selected {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(59, 130, 246, 0.08);
   border-color: #3b82f6;
 }
 
@@ -128,12 +179,13 @@
   color: #e2e8f0;
   background-color: #1e293b;
   border-color: #334155;
+  letter-spacing: 0;
 }
 
 .button[data-theme='dark']:hover:not(:disabled) {
   background-color: #273746;
   border-color: #475569;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
 .button[data-theme='dark']:active:not(:disabled) {
@@ -141,7 +193,7 @@
 }
 
 .button[data-theme='dark'].selected {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: rgba(59, 130, 246, 0.18);
   border-color: #3b82f6;
 }
 
@@ -157,9 +209,10 @@
 
 @media (max-width: 768px) {
   .button {
-    min-height: 36px;
-    padding: 6px 12px;
+    min-height: 28px;
+    padding: 4px 10px;
     font-size: 12px;
+    gap: 5px;
   }
 }
 
@@ -169,11 +222,11 @@
 
 .buttonGroup {
   display: flex;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   background: transparent;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.25);
   padding: 0;
 }
 
@@ -193,16 +246,16 @@
   border-width: 0;
   box-shadow: none;
   margin: 0;
-  padding: 8px 16px;
+  padding: 5px 12px;
   border-radius: 0;
 }
 
 .buttonGroup .button:first-child {
-  border-radius: 8px 0 0 8px;
+  border-radius: 6px 0 0 6px;
 }
 
 .buttonGroup .button:last-child {
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 6px 6px 0;
 }
 
 .buttonGroup .button:not(:last-child) {

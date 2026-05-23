@@ -1,0 +1,91 @@
+/* ==========================================================================
+   METRIC CARD - CSS MODULE
+   Theme via CSS custom properties (light vs sacred). Avoids inline-style
+   churn and lets Storybook / dev-tools tweak vars without React re-renders.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light theme (default)
+   -------------------------------------------------------------------------- */
+.card {
+  --mc-bg: rgba(255, 255, 255, 0.9);
+  --mc-border: rgba(25, 118, 210, 0.25);
+  --mc-accent: #1976d2;
+  --mc-label: #6b7280;
+  --mc-value-family: 'Inter', sans-serif;
+  --mc-value-size: 1.25rem;
+  --mc-padding: 12px 16px;
+  --mc-radius: 8px;
+  --mc-min-width: 80px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mc-padding);
+  background-color: var(--mc-bg);
+  border: 1px solid var(--mc-border);
+  border-radius: var(--mc-radius);
+  min-width: var(--mc-min-width);
+  flex: 1 1 auto;
+  transition: border-color 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Sacred theme (dark + gold)
+   -------------------------------------------------------------------------- */
+.card.sacred {
+  --mc-bg: rgba(0, 0, 0, 0.4);
+  --mc-border: rgba(212, 175, 55, 0.25);
+  --mc-accent: #d4af37;
+  --mc-label: rgba(255, 255, 255, 0.7);
+  --mc-value-family: 'Cinzel', serif;
+}
+
+/* --------------------------------------------------------------------------
+   Inner parts
+   -------------------------------------------------------------------------- */
+.icon {
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: var(--mc-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.value {
+  font-size: var(--mc-value-size);
+  font-family: var(--mc-value-family);
+  font-weight: bold;
+  color: var(--mc-accent);
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.65rem;
+  color: var(--mc-label);
+  font-family: 'Inter', sans-serif;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Trend pill (optional)
+   -------------------------------------------------------------------------- */
+.trend {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+
+.trend.positive {
+  color: #10b981;
+}
+
+.trend.negative {
+  color: #ef4444;
+}

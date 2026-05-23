@@ -549,7 +549,7 @@ export interface DataGridFilter {
   label: string
   /**
    * Current filter value:
-   * - string for dropdown/date (selected value or date string)
+   * - string for dropdown (selected value)
    * - { start, end } for daterange
    */
   value: string | { start: Date | null; end: Date | null }
@@ -559,18 +559,21 @@ export interface DataGridFilter {
    * Change handler - signature varies by filter type:
    * - dropdown: receives DropdownOption | null
    * - daterange: receives { start: Date | null, end: Date | null }
-   * - date: receives Date | null
    */
   onChange:
     | ((value: DropdownOption | null) => void)
     | ((value: { start: Date | null; end: Date | null }) => void)
-    | ((date: Date | null) => void)
   /** Placeholder text when no value selected */
   placeholder?: string
   /** CSS width value (e.g., '200px', '100%') */
   width?: string
-  /** Filter input type. Default: 'dropdown' */
-  type?: 'dropdown' | 'date' | 'daterange'
+  /**
+   * Filter input type. Default: 'dropdown'. The previous singular
+   * `'date'` was dropped 2026-05-22 (no callsite used it; consumers
+   * needing a singular date filter should pass a `'daterange'` with
+   * `end === null` instead).
+   */
+  type?: 'dropdown' | 'daterange'
 }
 
 /**
@@ -587,25 +590,11 @@ export interface DataGridFilter {
  *   trend: { value: 12.5, isPositive: true }
  * }
  */
-export interface MetricCardData {
-  /** Main title of the metric */
-  title: string
-  /** The metric value (can be formatted string or number) */
-  value: string | number
-  /** Optional subtitle/context below the value */
-  subtitle?: string
-  /** Optional icon React element displayed in the card */
-  icon?: React.ReactNode
-  /** Optional trend indicator showing change direction and percentage */
-  trend?: {
-    /** Percentage change value */
-    value: number
-    /** True for upward trend (green), false for downward (red) */
-    isPositive: boolean
-  }
-  /** Sacred theme glyph character (used in sacred theme mode) */
-  glyph?: string
-}
+// MetricCardData was relocated to `components/Metric/types.ts` on 2026-05-22
+// since the audience is broader than DataGrid. Re-exported here for callers
+// that imported from DataGrid/types historically.
+import type { MetricCardData } from '../../Metric/types'
+export type { MetricCardData } from '../../Metric/types'
 
 /**
  * =============================================================================
