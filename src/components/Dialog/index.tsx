@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { alpha } from '../../utils'
+import { emitDiag } from '../../utils/diag'
 
 const SACRED_GOLD = '#FFD700'
 
@@ -129,6 +130,24 @@ const Dialog: React.FC<DialogProps> = ({
       document.removeEventListener('keydown', handleKeydown)
     }
   }, [open, onClose])
+
+  // Diagnostic bus — emit modal open/close transitions so outcome tests (and
+  // the dev diagnostics stream) can assert dialog lifecycle without scraping
+  // the DOM. Edge-triggered off `open` so it fires once per transition, not
+  // on every render. The dialog only knows about backdrop/Escape closes here
+  // (action: 'dismiss'); a caller that closes via a confirm/cancel button is
+  // responsible for emitting its own outcome. No-op when no bus is present.
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    const id = dataDialog || dataSubject || 'dialog'
+    if (open && !wasOpenRef.current) {
+      wasOpenRef.current = true
+      emitDiag({ type: 'dialog.opened', id })
+    } else if (!open && wasOpenRef.current) {
+      wasOpenRef.current = false
+      emitDiag({ type: 'dialog.closed', id, action: 'dismiss' })
+    }
+  }, [open, dataDialog, dataSubject])
 
   useEffect(() => {
     if (open) {

@@ -4,12 +4,13 @@
  */
 'use client'
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import ErrorIcon from '../Icons/Error'
 import WarningIcon from '../Icons/Warning'
 import { getAlertStyles, type AlertStyles } from '../../theme'
+import { emitDiag } from '../../utils/diag'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -82,6 +83,21 @@ const Alert: React.FC<AlertProps> = ({
   }, [severity])
 
   const isSacredTheme = styles?.theme === 'sacred'
+
+  // Diagnostic bus — emit a toast.shown event whenever a message surfaces.
+  // This is the single feedback chokepoint: the FormDataGrid success/error
+  // Alert AND the Snackbar's inner Alert both flow through here, so wiring it
+  // once covers every toast the app shows. Keyed on [severity, message] so a
+  // changed message re-emits. 'warning' → 'warn' to match the host bus's
+  // toast level vocabulary. No-op when no bus is present.
+  useEffect(() => {
+    if (!message) return
+    emitDiag({
+      type: 'toast.shown',
+      level: severity === 'warning' ? 'warn' : severity,
+      message,
+    })
+  }, [severity, message])
 
   return (
     <div
