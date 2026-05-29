@@ -33,9 +33,10 @@
  * focus/blur re-renders.
  */
 
-import React, { useId, type CSSProperties, type ReactNode } from 'react'
+import React, { useEffect, useId, type CSSProperties, type ReactNode } from 'react'
 import cssStyles from './FieldShell.module.css'
 import type { FieldStyleOverrides, FieldTheme } from './types'
+import { emitDiag } from '../../../utils/diag'
 
 export interface FieldShellSlot {
   /**
@@ -297,6 +298,31 @@ const FieldShell: React.FC<FieldShellProps> = ({
   if (disabled) inputAriaProps['aria-disabled'] = true
   if (hasError) inputAriaProps['aria-invalid'] = true
   if (showHelper) inputAriaProps['aria-describedby'] = helperId
+
+  // Diagnostic bus — every Field flows through this shell, so emitting here
+  // wires form.validation.failed for ALL field types (Text, Dropdown, Date,
+  // …) in one place. Edge-triggered on `error` so it fires when validation
+  // fails, not on every render. `rule` is a coarse best-effort derived from
+  // the error message (the precise zod rule lives in the host's validation
+  // layer); the field id is dataFieldName (the form-input name tests target).
+  // Deps are `error` + the two STABLE string ids only — never the ReactNode
+  // label, whose ref churns per render. No-op when no host bus is present.
+  useEffect(() => {
+    if (!error) return
+    const message = typeof error === 'string' ? error : ''
+    const rule = /required/i.test(message)
+      ? 'required'
+      : /invalid|not a valid|format|match|must be|@/i.test(message)
+        ? 'format'
+        : 'invalid'
+    emitDiag({
+      type: 'form.validation.failed',
+      formId: dataField ?? '',
+      field: dataFieldName ?? dataField ?? '',
+      rule,
+      value: message || true,
+    })
+  }, [error, dataField, dataFieldName])
 
   return (
     <div
