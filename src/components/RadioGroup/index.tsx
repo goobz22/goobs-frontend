@@ -1,10 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  getRadioGroupStyles,
-  type RadioGroupStyles,
-} from '../../theme/radiogroup'
+import cssStyles from './RadioGroup.module.css'
 
 /**
  * Interface representing a single radio option
@@ -12,6 +9,49 @@ import {
 export interface RadioOption {
   label: string
   color?: string
+}
+
+/**
+ * Custom style overrides for the RadioGroup. Theme selects the palette
+ * (sacred default; light/dark are CSS [data-theme] overrides); the remaining
+ * keys are caller-supplied overrides applied as CSS custom properties on the
+ * root so the selectors stay in CSS while runtime values remain dynamic.
+ */
+export interface RadioGroupStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Label styling
+  labelColor?: string
+  labelFontSize?: string
+  labelFontWeight?: string | number
+  labelFontFamily?: string
+
+  // Radio button styling
+  radioSize?: string
+  radioOuterBorderColor?: string
+  radioOuterBorderWidth?: string
+  radioInnerColor?: string
+  radioHoverBorderColor?: string
+  radioHoverBackgroundColor?: string
+
+  // Text styling
+  textColor?: string
+  textFontSize?: string
+  textFontFamily?: string
+  textHoverColor?: string
+
+  // Layout and spacing
+  padding?: string
+  marginBottom?: string
+  gap?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  showGlyph?: boolean
 }
 
 /**
@@ -35,6 +75,66 @@ export interface RadioGroupProps {
 }
 
 /**
+ * Build the inline CSS custom properties for caller-supplied style overrides.
+ * Only keys the caller set are emitted; everything else falls back to the
+ * theme token defaults defined in RadioGroup.module.css.
+ */
+const buildOverrideVars = (
+  styles?: RadioGroupStyles
+): React.CSSProperties => {
+  if (!styles) return {}
+
+  const overrideVars: Record<string, string> = {}
+
+  if (styles.labelColor) overrideVars['--rg-label-color-override'] = styles.labelColor
+  if (styles.labelFontSize)
+    overrideVars['--rg-label-font-size-override'] = styles.labelFontSize
+  if (styles.labelFontWeight !== undefined)
+    overrideVars['--rg-label-font-weight-override'] = String(
+      styles.labelFontWeight
+    )
+  if (styles.labelFontFamily)
+    overrideVars['--rg-label-font-family-override'] = styles.labelFontFamily
+  if (styles.marginBottom)
+    overrideVars['--rg-label-margin-bottom'] = styles.marginBottom
+
+  if (styles.padding) overrideVars['--rg-option-padding-override'] = styles.padding
+
+  if (styles.radioSize) overrideVars['--rg-radio-size-override'] = styles.radioSize
+  if (styles.radioOuterBorderWidth)
+    overrideVars['--rg-radio-border-width-override'] =
+      styles.radioOuterBorderWidth
+  if (styles.radioOuterBorderColor)
+    overrideVars['--rg-radio-border-color-override'] =
+      styles.radioOuterBorderColor
+  if (styles.radioHoverBorderColor)
+    overrideVars['--rg-radio-hover-border-color-override'] =
+      styles.radioHoverBorderColor
+  if (styles.radioHoverBackgroundColor)
+    overrideVars['--rg-radio-hover-bg-override'] =
+      styles.radioHoverBackgroundColor
+  if (styles.radioInnerColor)
+    overrideVars['--rg-radio-inner-color-override'] = styles.radioInnerColor
+
+  if (styles.textColor) overrideVars['--rg-text-color-override'] = styles.textColor
+  if (styles.textFontSize)
+    overrideVars['--rg-text-font-size-override'] = styles.textFontSize
+  if (styles.textFontFamily)
+    overrideVars['--rg-text-font-family-override'] = styles.textFontFamily
+  if (styles.textHoverColor)
+    overrideVars['--rg-text-hover-color-override'] = styles.textHoverColor
+
+  // Custom transition (transitionDuration/easing) — mirrors the old
+  // getRadioGroupTheme `all <dur> <easing>` string.
+  if (styles.transitionDuration) {
+    overrideVars['--rg-transition'] =
+      `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+  }
+
+  return overrideVars as React.CSSProperties
+}
+
+/**
  * RadioGroup component renders a group of radio buttons with customizable options.
  * It allows selecting a single value from a list of options.
  * @param props The props for the RadioGroup component.
@@ -50,9 +150,9 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   styles,
 }) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue)
-  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null)
 
-  const computedStyles = getRadioGroupStyles(styles, hoveredLabel)
+  const theme = styles?.theme || 'light'
+  const overrideVars = buildOverrideVars(styles)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedValue(e.target.value)
@@ -62,42 +162,42 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   }
 
   return (
-    <div style={computedStyles.formControl}>
-      <label id={`${name}-label`} style={computedStyles.formLabel}>
+    <div
+      className={cssStyles.formControl}
+      data-theme={theme}
+      style={overrideVars}
+    >
+      <label id={`${name}-label`} className={cssStyles.formLabel}>
         {labelText || label}
       </label>
       <div role="radiogroup" aria-labelledby={`${name}-label`}>
         {options.map((option, index) => {
           const isChecked = selectedValue === option.label
-          const optionStyles = computedStyles.getOptionStyles(
-            option.label,
-            isChecked
-          )
 
           return (
-            <label
-              key={index}
-              style={optionStyles.label}
-              onMouseEnter={() => setHoveredLabel(option.label)}
-              onMouseLeave={() => setHoveredLabel(null)}
-            >
+            <label key={index} className={cssStyles.optionLabel}>
               <input
                 type="radio"
                 name={name}
                 value={option.label}
                 checked={isChecked}
-                style={computedStyles.input}
+                className={cssStyles.input}
                 onChange={handleChange}
               />
-              <span style={computedStyles.radioSpan}>
-                <span style={optionStyles.radioOuter} />
-                <span style={optionStyles.radioInner} />
+              <span className={cssStyles.radioSpan}>
+                <span className={cssStyles.radioOuter} />
+                <span className={cssStyles.radioInner} />
               </span>
               <span
-                style={{
-                  ...optionStyles.text,
-                  color: option.color || optionStyles.text.color,
-                }}
+                className={cssStyles.text}
+                data-has-color={option.color ? 'true' : undefined}
+                style={
+                  option.color
+                    ? ({
+                        ['--rg-option-color']: option.color,
+                      } as React.CSSProperties)
+                    : undefined
+                }
               >
                 {option.label}
               </span>

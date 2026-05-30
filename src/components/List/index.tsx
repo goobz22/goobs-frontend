@@ -3,8 +3,28 @@
  */
 'use client'
 
-import React, { useMemo } from 'react'
-import { getListStyles, type ListStyles } from '../../theme'
+import React from 'react'
+import cssStyles from './List.module.css'
+
+// --------------------------------------------------------------------------
+// STYLES TYPE
+// --------------------------------------------------------------------------
+// Migrated off theme/list.ts onto the CSS module. The public shape is kept
+// identical to the old `ListStyles` (theme / dense / customStyles) so callers
+// passing `styles` are unaffected. `customStyles` are caller-supplied inline
+// overrides and legitimately stay in JS (recipe step 3).
+
+export interface ListStyles {
+  theme?: 'light' | 'dark' | 'sacred'
+  dense?: boolean
+  customStyles?: {
+    container?: React.CSSProperties
+    listItem?: React.CSSProperties
+    listItemIcon?: React.CSSProperties
+    listItemTextPrimary?: React.CSSProperties
+    listItemTextSecondary?: React.CSSProperties
+  }
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACES
@@ -36,21 +56,52 @@ export interface ListItemTextProps {
 // --------------------------------------------------------------------------
 
 export const List: React.FC<ListProps> = ({ children, styles }) => {
-  const computedStyles = useMemo(() => getListStyles(styles), [styles])
-  return <ul style={computedStyles.container}>{children}</ul>
+  const theme = styles?.theme ?? 'light'
+  return (
+    <ul
+      className={cssStyles.container}
+      data-theme={theme}
+      {...(styles?.dense && { 'data-dense': 'true' })}
+      {...(styles?.customStyles?.container && {
+        style: styles.customStyles.container,
+      })}
+    >
+      {children}
+    </ul>
+  )
 }
 
 export const ListItem: React.FC<ListItemProps> = ({ children, styles }) => {
-  const computedStyles = useMemo(() => getListStyles(styles), [styles])
-  return <li style={computedStyles.listItem}>{children}</li>
+  const theme = styles?.theme ?? 'light'
+  return (
+    <li
+      className={cssStyles.listItem}
+      data-theme={theme}
+      {...(styles?.customStyles?.listItem && {
+        style: styles.customStyles.listItem,
+      })}
+    >
+      {children}
+    </li>
+  )
 }
 
 export const ListItemIcon: React.FC<ListItemIconProps> = ({
   children,
   styles,
 }) => {
-  const computedStyles = useMemo(() => getListStyles(styles), [styles])
-  return <div style={computedStyles.listItemIcon}>{children}</div>
+  const theme = styles?.theme ?? 'light'
+  return (
+    <div
+      className={cssStyles.listItemIcon}
+      data-theme={theme}
+      {...(styles?.customStyles?.listItemIcon && {
+        style: styles.customStyles.listItemIcon,
+      })}
+    >
+      {children}
+    </div>
+  )
 }
 
 export const ListItemText: React.FC<ListItemTextProps> = ({
@@ -58,14 +109,30 @@ export const ListItemText: React.FC<ListItemTextProps> = ({
   secondary,
   styles,
 }) => {
-  const computedStyles = useMemo(() => getListStyles(styles), [styles])
+  const theme = styles?.theme ?? 'light'
   return (
     <div>
       {primary && (
-        <span style={computedStyles.listItemTextPrimary}>{primary}</span>
+        <span
+          className={cssStyles.listItemTextPrimary}
+          data-theme={theme}
+          {...(styles?.customStyles?.listItemTextPrimary && {
+            style: styles.customStyles.listItemTextPrimary,
+          })}
+        >
+          {primary}
+        </span>
       )}
       {secondary && (
-        <span style={computedStyles.listItemTextSecondary}>{secondary}</span>
+        <span
+          className={cssStyles.listItemTextSecondary}
+          data-theme={theme}
+          {...(styles?.customStyles?.listItemTextSecondary && {
+            style: styles.customStyles.listItemTextSecondary,
+          })}
+        >
+          {secondary}
+        </span>
       )}
     </div>
   )

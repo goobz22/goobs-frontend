@@ -138,6 +138,23 @@ export {
   type ArrowKeyNavOptions,
 } from './components/Field/Shell'
 
+// Form — goobs-owned, zod-native controlled form engine (8-method FormEngine
+// seam). Fields auto-bind by `name` inside a <Form>; explicit-prop callsites
+// outside a form are untouched. See components/Form/context.ts.
+export {
+  default as Form,
+  useFormContext,
+  useOptionalFormContext,
+  useFormField,
+  type FormProps,
+  type FormEngine,
+  type FormContextValue,
+} from './components/Form'
+export {
+  useFieldBinding,
+  type FieldBindingAdapter,
+} from './components/Field/Shell/useFieldBinding'
+
 // Field Components
 export {
   default as TextField,

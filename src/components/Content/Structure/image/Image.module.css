@@ -1,0 +1,12 @@
+/* ==========================================================================
+   CONTENT / IMAGE - CSS MODULE
+   Static layout for the next/image rendered inside a ContentSection grid.
+   The image fills its container width and preserves aspect ratio. These
+   values are theme-independent and carry no runtime measurement, so they
+   live as a plain class instead of an inline style object.
+   ========================================================================== */
+
+.image {
+  width: 100%;
+  height: auto;
+}

@@ -1,0 +1,90 @@
+/* ==========================================================================
+   AVATAR - CSS MODULE
+   Circular container for icons, images, or text. Three themes
+   (light / dark / sacred) expressed via [data-theme]; light is the
+   historical default (matching the old getAvatarTheme default). Size
+   presets (small / medium / large / xl) are [data-size] overrides.
+
+   Caller-supplied scalar overrides (width / height / colors / radius /
+   font / border / shadow / margin) stay in JS as inline styles since they
+   are arbitrary runtime strings — they layer on top of these defaults.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BASE — LIGHT THEME (default)
+   -------------------------------------------------------------------------- */
+.root {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   SIZE PRESETS — override width / height / font-size for every theme.
+   Sacred's base width/height (48px) is intentionally overridden by an
+   explicit size preset, matching the old sizeMap precedence
+   (styles.width ?? size.width ?? baseTheme.width).
+   -------------------------------------------------------------------------- */
+.root[data-size='small'] {
+  width: 32px;
+  height: 32px;
+  font-size: 0.875rem;
+}
+
+.root[data-size='medium'] {
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+}
+
+.root[data-size='large'] {
+  width: 56px;
+  height: 56px;
+  font-size: 1.25rem;
+}
+
+.root[data-size='xl'] {
+  width: 72px;
+  height: 72px;
+  font-size: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   DISABLED STATE
+   -------------------------------------------------------------------------- */
+.root[data-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}

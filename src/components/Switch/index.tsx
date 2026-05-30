@@ -1,7 +1,64 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
-import { getSwitchStyles, type SwitchStyles } from '../../theme'
+import React, { type CSSProperties } from 'react'
+import cssStyles from './Switch.module.css'
+
+// --------------------------------------------------------------------------
+// STYLES INTERFACE
+// Public styling contract for the `styles` prop. Migrated inline off
+// theme/switch.ts as part of the CSS-module migration — the JS theme switch
+// (getSwitchStyles) is gone; theme variants are now [data-theme] overrides in
+// Switch.module.css and caller overrides ride in as CSS custom properties.
+// --------------------------------------------------------------------------
+
+export interface SwitchStyles {
+  /** Theme selection: light, dark, or sacred (default). */
+  theme?: 'light' | 'dark' | 'sacred'
+  /** Whether to show outline. */
+  outline?: boolean
+  /** Whether the switch is disabled. */
+  disabled?: boolean
+  /** Whether the switch is checked. */
+  checked?: boolean
+  /** Custom track width. */
+  trackWidth?: string
+  /** Custom track height. */
+  trackHeight?: string
+  /** Custom track background color. */
+  trackBackground?: string
+  /** Custom track border color. */
+  trackBorderColor?: string
+  /** Custom track border radius. */
+  trackBorderRadius?: string
+  /** Custom thumb size. */
+  thumbSize?: string
+  /** Custom thumb background color. */
+  thumbBackground?: string
+  /** Custom thumb border color. */
+  thumbBorderColor?: string
+  /** Custom label color. */
+  labelColor?: string
+  /** Custom label font family. */
+  labelFontFamily?: string
+  /** Custom label font size. */
+  labelFontSize?: string
+  /** Custom label font weight. */
+  labelFontWeight?: string | number
+  /** Custom transition duration (e.g. '250ms'). */
+  transitionDuration?: string
+  /** Custom checked track color. */
+  checkedTrackColor?: string
+  /** Custom checked thumb color. */
+  checkedThumbColor?: string
+  /** Custom hover effects. */
+  hoverEffects?: boolean
+  /** Custom focus effects. */
+  focusEffects?: boolean
+  /** Custom sacred glyph left. */
+  sacredGlyphLeft?: string
+  /** Custom sacred glyph right. */
+  sacredGlyphRight?: string
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -29,43 +86,51 @@ const Switch: React.FC<SwitchProps> = ({
   rightLabel,
   ...props
 }) => {
-  const [isFocused, setIsFocused] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const theme = styles?.theme ?? 'dark'
+  const isSacredTheme = theme === 'sacred'
 
-  const isSacredTheme = styles?.theme === 'sacred'
-
-  const computedStyles = useMemo(
-    () => getSwitchStyles(styles, isFocused, isHovered, checked, disabled),
-    [styles, isFocused, isHovered, checked, disabled]
-  )
-
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (isSacredTheme) {
-      const styleSheet =
-        typeof document !== 'undefined' && document.styleSheets?.length
-          ? document.styleSheets[0]
-          : undefined
-      const keyframes = `
-        @keyframes sacredSwitchFloat {
-          0%, 100% { transform: translateY(-50%) scale(1); opacity: 0.3; }
-          50% { transform: translateY(-50%) scale(1.1); opacity: 0.6; }
-        }
-        @keyframes sacredSwitchShimmer {
-          0% { left: '-100%'; }
-          50% { left: '100%'; }
-          100% { left: '100%'; }
-        }
-      `
-      if (styleSheet) {
-        try {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        } catch {
-          // Keyframes might already exist
-        }
-      }
-    }
-  }, [isSacredTheme])
+  // Caller-supplied overrides become CSS custom properties consumed by
+  // Switch.module.css. Only set a var when the caller actually provided the
+  // value, so the per-theme defaults in the CSS keep applying otherwise.
+  const dynamicStyle: CSSProperties & Record<string, string> = {}
+  if (styles?.trackWidth !== undefined)
+    dynamicStyle['--switch-track-width'] = styles.trackWidth
+  if (styles?.trackHeight !== undefined)
+    dynamicStyle['--switch-track-height'] = styles.trackHeight
+  if (styles?.trackBackground !== undefined)
+    dynamicStyle['--switch-track-bg'] = styles.trackBackground
+  if (styles?.trackBorderColor !== undefined)
+    dynamicStyle['--switch-track-border-color'] =
+      styles.trackBorderColor
+  if (styles?.trackBorderRadius !== undefined)
+    dynamicStyle['--switch-track-radius'] = styles.trackBorderRadius
+  if (styles?.checkedTrackColor !== undefined)
+    dynamicStyle['--switch-track-checked-bg'] =
+      styles.checkedTrackColor
+  if (styles?.thumbSize !== undefined)
+    dynamicStyle['--switch-thumb-size'] = styles.thumbSize
+  if (styles?.thumbBackground !== undefined)
+    dynamicStyle['--switch-thumb-bg'] = styles.thumbBackground
+  if (styles?.thumbBorderColor !== undefined)
+    dynamicStyle['--switch-thumb-border-color'] =
+      styles.thumbBorderColor
+  if (styles?.checkedThumbColor !== undefined)
+    dynamicStyle['--switch-thumb-checked-bg'] =
+      styles.checkedThumbColor
+  if (styles?.labelColor !== undefined)
+    dynamicStyle['--switch-label-color'] = styles.labelColor
+  if (styles?.labelFontFamily !== undefined)
+    dynamicStyle['--switch-label-font-family'] =
+      styles.labelFontFamily
+  if (styles?.labelFontSize !== undefined)
+    dynamicStyle['--switch-label-font-size'] = styles.labelFontSize
+  if (styles?.labelFontWeight !== undefined)
+    dynamicStyle['--switch-label-font-weight'] = String(
+      styles.labelFontWeight
+    )
+  if (styles?.transitionDuration !== undefined)
+    dynamicStyle['--switch-transition'] =
+      `all ${styles.transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
@@ -82,35 +147,36 @@ const Switch: React.FC<SwitchProps> = ({
 
   return (
     <label
-      style={computedStyles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={cssStyles.container}
+      data-theme={theme}
+      {...(disabled && { 'data-disabled': 'true' })}
+      {...(checked && { 'data-checked': 'true' })}
+      {...(styles?.outline === false && { 'data-outline': 'false' })}
+      {...(styles?.focusEffects === false && { 'data-focus-effects': 'false' })}
+      style={dynamicStyle}
     >
-      {leftLabel && <span style={computedStyles.leftLabel}>{leftLabel}</span>}
+      {leftLabel && <span className={cssStyles.leftLabel}>{leftLabel}</span>}
 
-      <div style={computedStyles.track}>
+      <div className={cssStyles.track}>
         <input
           type="checkbox"
-          style={computedStyles.input}
+          className={cssStyles.input}
           checked={checked}
           disabled={disabled}
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           data-field-name={(props as React.InputHTMLAttributes<HTMLInputElement>).name}
           {...props}
         />
 
-        {/* Sacred shimmer effect */}
-        {isSacredTheme && checked && isHovered && (
-          <div style={computedStyles.shimmer} />
-        )}
+        {/* Sacred shimmer effect — visibility/animation handled purely in CSS
+            (sacred theme + :checked + :hover). */}
+        {isSacredTheme && <div className={cssStyles.shimmer} />}
 
-        <div style={computedStyles.thumb}>{getThumbContent()}</div>
+        <div className={cssStyles.thumb}>{getThumbContent()}</div>
       </div>
 
       {rightLabel && (
-        <span style={computedStyles.rightLabel}>{rightLabel}</span>
+        <span className={cssStyles.rightLabel}>{rightLabel}</span>
       )}
     </label>
   )

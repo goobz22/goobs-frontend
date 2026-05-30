@@ -1,9 +1,7 @@
 'use client'
 
 import React, { forwardRef } from 'react'
-import { alpha } from '../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './Divider.module.css'
 
 export interface DividerProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -26,92 +24,85 @@ export interface DividerProps extends Omit<
   }
 }
 
+function mergeClassNames(
+  ...names: Array<string | false | undefined>
+): string {
+  return names.filter(Boolean).join(' ')
+}
+
 const Divider = forwardRef<HTMLDivElement, DividerProps>(
   ({ children, styles, ...restProps }, ref) => {
     const orientation = styles?.orientation || 'horizontal'
     const disabled = styles?.disabled || false
+    const theme = styles?.theme || 'sacred'
 
-    // Determine background - use backgroundColor if provided, otherwise gradient
-    const getBackground = () => {
-      if (styles?.backgroundColor) return styles.backgroundColor
-      const gradientColor = alpha(SACRED_GOLD, disabled ? 0.15 : 0.3)
-      return orientation === 'horizontal'
-        ? `linear-gradient(90deg, transparent, ${gradientColor}, transparent)`
-        : `linear-gradient(180deg, transparent, ${gradientColor}, transparent)`
-    }
+    const rootClassName = mergeClassNames(
+      cssStyles.root,
+      orientation === 'vertical' ? cssStyles.vertical : cssStyles.horizontal,
+      disabled && cssStyles.disabled,
+      styles?.backgroundColor && cssStyles.hasBackground
+    )
 
-    // Build margin styles without mixing shorthand and longhand
-    const getHorizontalMargins = () => {
-      // If any individual margin is specified, use individual properties only
-      if (
-        styles?.marginTop !== undefined ||
-        styles?.marginBottom !== undefined ||
-        styles?.marginLeft !== undefined ||
-        styles?.marginRight !== undefined
-      ) {
-        return {
-          marginTop: styles?.marginTop ?? '24px',
-          marginBottom: styles?.marginBottom ?? '24px',
-          marginLeft: styles?.marginLeft ?? '0',
-          marginRight: styles?.marginRight ?? '0',
-        }
+    // Caller-supplied scalar overrides flow in as CSS custom properties so
+    // the selector logic (orientation defaults, disabled alpha) stays in CSS.
+    // Margin shorthand vs longhand: the old component picked one or the other
+    // to avoid mixing; here the CSS owns per-side longhand fallbacks, so we
+    // translate `margin` shorthand into the individual sides only when no
+    // explicit per-side override was given (preserving prior precedence).
+    const hasIndividualHorizontalMargin =
+      styles?.marginTop !== undefined ||
+      styles?.marginBottom !== undefined ||
+      styles?.marginLeft !== undefined ||
+      styles?.marginRight !== undefined
+    const hasIndividualVerticalMargin =
+      styles?.marginLeft !== undefined || styles?.marginRight !== undefined
+
+    const dynamicStyle: React.CSSProperties = {
+      ...(styles?.width !== undefined && {
+        ['--divider-width']: styles.width,
+      }),
+      ...(styles?.height !== undefined && {
+        ['--divider-height']: styles.height,
+      }),
+      ...(styles?.backgroundColor !== undefined && {
+        ['--divider-background']: styles.backgroundColor,
+      }),
+      ...(styles?.color !== undefined && {
+        ['--divider-content-color']: styles.color,
+      }),
+      ...(styles?.marginTop !== undefined && {
+        ['--divider-margin-top']: styles.marginTop,
+      }),
+      ...(styles?.marginBottom !== undefined && {
+        ['--divider-margin-bottom']: styles.marginBottom,
+      }),
+      ...(styles?.marginLeft !== undefined && {
+        ['--divider-margin-left']: styles.marginLeft,
+      }),
+      ...(styles?.marginRight !== undefined && {
+        ['--divider-margin-right']: styles.marginRight,
+      }),
+    } as React.CSSProperties
+
+    // `margin` shorthand only takes effect when no per-side override exists,
+    // matching the old getHorizontal/getVerticalMargins() precedence.
+    if (styles?.margin !== undefined) {
+      if (orientation === 'horizontal' && !hasIndividualHorizontalMargin) {
+        ;(dynamicStyle as Record<string, string>).margin = styles.margin
+      } else if (orientation === 'vertical' && !hasIndividualVerticalMargin) {
+        ;(dynamicStyle as Record<string, string>).margin = styles.margin
       }
-      // Otherwise use the shorthand
-      return { margin: styles?.margin || '24px 0' }
-    }
-
-    const getVerticalMargins = () => {
-      // If any individual margin is specified, use individual properties only
-      if (
-        styles?.marginLeft !== undefined ||
-        styles?.marginRight !== undefined
-      ) {
-        return {
-          marginTop: styles?.marginTop ?? '0',
-          marginBottom: styles?.marginBottom ?? '0',
-          marginLeft: styles?.marginLeft ?? '24px',
-          marginRight: styles?.marginRight ?? '24px',
-        }
-      }
-      // Otherwise use the shorthand
-      return { margin: styles?.margin || '0 24px' }
-    }
-
-    const containerStyle: React.CSSProperties =
-      orientation === 'horizontal'
-        ? {
-            width: styles?.width || '100%',
-            height: styles?.height || '2px',
-            background: getBackground(),
-            ...getHorizontalMargins(),
-            position: 'relative',
-            opacity: disabled ? 0.5 : 1,
-          }
-        : {
-            width: styles?.width || '2px',
-            height: styles?.height || '100%',
-            background: getBackground(),
-            ...getVerticalMargins(),
-            position: 'relative',
-            opacity: disabled ? 0.5 : 1,
-          }
-
-    const contentStyle: React.CSSProperties = {
-      position: 'absolute',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'rgba(0, 0, 0, 0.6)',
-      padding: '0 16px',
-      color: styles?.color || SACRED_GOLD,
-      fontSize: '14px',
-      fontFamily: '"Cinzel", serif',
-      whiteSpace: 'nowrap',
     }
 
     return (
-      <div ref={ref} style={containerStyle} {...restProps}>
-        {children && <div style={contentStyle}>{children}</div>}
+      <div
+        ref={ref}
+        className={rootClassName}
+        data-theme={theme}
+        style={dynamicStyle}
+        {...restProps}
+      >
+        {children && <div className={cssStyles.content}>{children}</div>}
       </div>
     )
   }

@@ -1,0 +1,258 @@
+/* ==========================================================================
+   RADIOGROUP COMPONENT - CSS MODULE
+   Migrated off theme/radiogroup.ts (getRadioGroupStyles). Light theme is the
+   bare-.formControl default (matching the old getRadioGroupTheme 'light'
+   default); sacred and dark are [data-theme] overrides. State (hover /
+   checked) is expressed with native CSS — :hover on the option <label> and the
+   :checked sibling selector on the hidden <input> — replacing the old
+   hoveredLabel useState.
+
+   Caller-supplied overrides (radioSize, custom colors, padding, fonts, etc.)
+   arrive as CSS custom properties set inline on the root, so the selectors
+   stay in CSS while runtime/user values remain dynamic.
+
+   shared.ts TRANSITIONS transcribed literally:
+     medium  = all 200ms cubic-bezier(0.4, 0, 0.2, 1)   (light / dark)
+     premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1)   (sacred)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT (formControl) — LIGHT THEME DEFAULT (matches old getRadioGroupTheme
+   default of 'light'). Tokens default to light values; [data-theme='sacred']
+   and [data-theme='dark'] blocks below re-point the palette/typography/
+   transition tokens. Caller overrides come in as the --rg-* override custom
+   properties (var(--rg-x-override, <token>)).
+   -------------------------------------------------------------------------- */
+.formControl {
+  /* Transition token — light/dark use medium (200ms) */
+  --rg-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Label (group heading) palette/typography — light */
+  --rg-label-color: rgb(17, 24, 39);
+  --rg-label-font-family: 'Inter', sans-serif;
+  --rg-label-font-size: 0.875rem;
+  --rg-label-font-weight: 500;
+  --rg-label-letter-spacing: normal;
+  --rg-label-text-shadow: none;
+  --rg-label-margin-bottom: 0.5rem;
+
+  /* Option <label> — light */
+  --rg-option-padding: 0.5rem 0;
+  --rg-option-hover-transform: none;
+
+  /* Radio outer ring — light */
+  --rg-radio-size: 20px;
+  --rg-radio-border-width: 2px;
+  --rg-radio-border-color: #d1d5db;
+  --rg-radio-hover-border-color: #3b82f6;
+  --rg-radio-hover-bg: rgba(59, 130, 246, 0.04);
+  --rg-radio-checked-border-color: #3b82f6;
+  --rg-radio-checked-bg: #3b82f6;
+
+  /* Radio inner dot — light (kept for parity but hidden, see .radioInner) */
+  --rg-radio-inner-color: #3b82f6;
+
+  /* Option text — light */
+  --rg-text-color: rgb(55, 65, 81);
+  --rg-text-hover-color: rgb(55, 65, 81);
+  --rg-text-hover-shadow: none;
+  --rg-text-font-family: 'Inter', sans-serif;
+  --rg-text-font-size: 0.875rem;
+
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME OVERRIDES
+   -------------------------------------------------------------------------- */
+.formControl[data-theme='sacred'] {
+  /* sacred uses premium (400ms) */
+  --rg-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --rg-label-color: #ffd700;
+  --rg-label-font-family: 'Cinzel', serif;
+  --rg-label-font-size: 0.875rem;
+  --rg-label-font-weight: 600;
+  --rg-label-letter-spacing: 0.025em;
+  --rg-label-text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+
+  --rg-option-hover-transform: translateX(4px);
+
+  --rg-radio-border-color: #ffd700;
+  --rg-radio-hover-border-color: #ffd700;
+  --rg-radio-hover-bg: rgba(255, 215, 0, 0.1);
+  --rg-radio-checked-border-color: #ffd700;
+  --rg-radio-checked-bg: #ffd700;
+
+  --rg-radio-inner-color: #ffd700;
+
+  --rg-text-color: rgba(255, 215, 0, 0.9);
+  --rg-text-hover-color: #ffd700;
+  --rg-text-hover-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+  --rg-text-font-family: 'Cinzel', serif;
+  --rg-text-font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME OVERRIDES
+   -------------------------------------------------------------------------- */
+.formControl[data-theme='dark'] {
+  --rg-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --rg-label-color: rgb(243, 244, 246);
+  --rg-label-font-family: 'Inter', sans-serif;
+  --rg-label-font-size: 0.875rem;
+  --rg-label-font-weight: 500;
+  --rg-label-letter-spacing: normal;
+  --rg-label-text-shadow: none;
+
+  --rg-option-hover-transform: none;
+
+  --rg-radio-border-color: #6b7280;
+  --rg-radio-hover-border-color: #60a5fa;
+  --rg-radio-hover-bg: rgba(96, 165, 250, 0.1);
+  --rg-radio-checked-border-color: #60a5fa;
+  --rg-radio-checked-bg: #60a5fa;
+
+  --rg-radio-inner-color: #60a5fa;
+
+  --rg-text-color: rgb(209, 213, 219);
+  --rg-text-hover-color: rgb(209, 213, 219);
+  --rg-text-hover-shadow: none;
+  --rg-text-font-family: 'Inter', sans-serif;
+  --rg-text-font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------------------------
+   GROUP LABEL (formLabel)
+   -------------------------------------------------------------------------- */
+.formLabel {
+  display: block;
+  margin-bottom: var(--rg-label-margin-bottom, 0.5rem);
+  color: var(--rg-label-color-override, var(--rg-label-color));
+  font-family: var(--rg-label-font-family-override, var(--rg-label-font-family));
+  font-size: var(--rg-label-font-size-override, var(--rg-label-font-size));
+  font-weight: var(--rg-label-font-weight-override, var(--rg-label-font-weight));
+  letter-spacing: var(--rg-label-letter-spacing);
+  text-shadow: var(--rg-label-text-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   OPTION ROW (label) — flex row, whole row is the click target
+   The hover transform (sacred translateX) is applied on :hover, replacing the
+   old hoveredLabel useState.
+   -------------------------------------------------------------------------- */
+.optionLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--rg-option-padding-override, var(--rg-option-padding));
+  transition: var(--rg-transition);
+}
+
+.optionLabel:hover {
+  transform: var(--rg-option-hover-transform);
+}
+
+/* --------------------------------------------------------------------------
+   HIDDEN NATIVE INPUT — display:none, but its :checked state drives the
+   sibling radioOuter/inner styling below.
+   -------------------------------------------------------------------------- */
+.input {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   RADIO SPAN — positioning context for the outer/inner circles
+   -------------------------------------------------------------------------- */
+.radioSpan {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   RADIO OUTER RING
+   radioSize override drives width/height; the inner dot offset/size derive
+   from it via calc() (old getRadioGroupTheme used radioDimension - 6 for the
+   inner size and a 3px offset).
+   -------------------------------------------------------------------------- */
+.radioOuter {
+  width: var(--rg-radio-size-override, var(--rg-radio-size));
+  height: var(--rg-radio-size-override, var(--rg-radio-size));
+  border: var(--rg-radio-border-width-override, var(--rg-radio-border-width))
+    solid var(--rg-radio-border-color-override, var(--rg-radio-border-color));
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  transition: var(--rg-transition);
+}
+
+/* Hover (replaces hoveredLabel useState): hover the row -> ring reacts,
+   unless this option is already checked (checked styling wins). */
+.optionLabel:hover .input:not(:checked) ~ .radioSpan .radioOuter {
+  border-color: var(
+    --rg-radio-hover-border-color-override,
+    var(--rg-radio-hover-border-color)
+  );
+  background-color: var(
+    --rg-radio-hover-bg-override,
+    var(--rg-radio-hover-bg)
+  );
+}
+
+/* Checked (replaces isChecked branch): the native radio's :checked state
+   styles its sibling ring. */
+.input:checked ~ .radioSpan .radioOuter {
+  border-color: var(
+    --rg-radio-checked-border-color-override,
+    var(--rg-radio-checked-border-color)
+  );
+  background-color: var(
+    --rg-radio-checked-bg-override,
+    var(--rg-radio-checked-bg)
+  );
+}
+
+/* --------------------------------------------------------------------------
+   RADIO INNER DOT
+   The old render forced display:none on the inner dot ("Hide the inner circle
+   completely", getRadioGroupStyles line ~400). Kept hidden for exact parity;
+   the checked fill is the solid outer ring. Sizing/position transcribed from
+   getRadioGroupTheme (innerSize = radioSize - 6, 3px offset) via calc so a
+   future un-hide stays correct.
+   -------------------------------------------------------------------------- */
+.radioInner {
+  display: none;
+  position: absolute;
+  width: calc(var(--rg-radio-size-override, var(--rg-radio-size)) - 6px);
+  height: calc(var(--rg-radio-size-override, var(--rg-radio-size)) - 6px);
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background-color: var(--rg-radio-inner-color-override, var(--rg-radio-inner-color));
+  transform: scale(0);
+  transition: var(--rg-transition);
+}
+
+.input:checked ~ .radioSpan .radioInner {
+  transform: scale(1);
+}
+
+/* --------------------------------------------------------------------------
+   OPTION TEXT
+   Per-option custom color (option.color) arrives as --rg-option-color set
+   inline on the text span; falls back to the theme text color token.
+   Hover color/shadow (sacred only — light/dark map hover back to base) replace
+   the old textHover useState branch.
+   -------------------------------------------------------------------------- */
+.text {
+  color: var(--rg-option-color, var(--rg-text-color-override, var(--rg-text-color)));
+  font-family: var(--rg-text-font-family-override, var(--rg-text-font-family));
+  font-size: var(--rg-text-font-size-override, var(--rg-text-font-size));
+  transition: var(--rg-transition);
+}
+
+.optionLabel:hover .text:not([data-has-color='true']) {
+  color: var(--rg-text-hover-color-override, var(--rg-text-hover-color));
+  text-shadow: var(--rg-text-hover-shadow);
+}

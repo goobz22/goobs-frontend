@@ -1,11 +1,67 @@
 'use client'
 
-import React, { useMemo, type FC } from 'react'
+import React, { type FC } from 'react'
 import CustomButton, { ButtonProps } from '../Button'
 import Searchbar, { SearchbarProps } from '../Field/Search'
 import Dropdown, { type DropdownOption } from '../Field/Dropdown/Regular'
-import { getToolbarStyles, type ToolbarStyles } from '../../theme'
 import type { FieldStyleOverrides } from '../Field/Shell/types'
+import cssStyles from './Toolbar.module.css'
+
+/**
+ * Public styling surface for the Toolbar. Migrated off
+ * `theme/toolbar.ts:ToolbarStyles` — the theme variant (light / dark /
+ * sacred) now drives a `data-theme` attribute on the root and all
+ * container / glyph / divider styling lives in `Toolbar.module.css`.
+ *
+ * The interface is preserved verbatim so existing consumer call-sites and
+ * generated typings keep compiling; the component itself only reads
+ * `styles.theme` today (the remaining fields are reserved passthrough
+ * tokens documented on the original theme type).
+ */
+export interface ToolbarStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  boxShadow?: string
+  backdropFilter?: string
+  backgroundImage?: string
+  padding?: string
+  containerAnimation?: string
+
+  // Glyph styling
+  glyphColor?: string
+  glyphFontSize?: string
+  glyphAnimation?: string
+
+  // Layout and spacing
+  gap?: string
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  outline?: boolean
+
+  // Dimensions
+  width?: string
+  maxWidth?: string
+  minWidth?: string
+  height?: string
+  maxHeight?: string
+  minHeight?: string
+}
 
 export interface CustomToolbarProps {
   buttons?: ButtonProps[]
@@ -22,7 +78,8 @@ export interface CustomToolbarProps {
 // Translate the Toolbar theme into FieldStyleOverrides for the inner
 // Searchbar. Color/border tokens previously expressed as
 // FormFieldStyles fields go through FieldShell's CSS-variable
-// translation now.
+// translation now. This stays in JS: it is data-driven child-component
+// configuration, not Toolbar container styling.
 const createSearchbarStyles = (
   toolbarStyles?: ToolbarStyles
 ): FieldStyleOverrides => {
@@ -83,54 +140,22 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   filterDropdown,
   styles,
 }) => {
-  const computedStyles = useMemo(() => getToolbarStyles(styles), [styles])
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
+  // Theme variant drives a data-attribute on the root; light is the parity
+  // default the old getToolbarStyles used (styles?.theme || 'light').
+  const theme = styles?.theme || 'light'
+  const isSacredTheme = theme === 'sacred'
 
-  // Create proper FormFieldStyles based on the toolbar theme
+  // Create proper FieldStyleOverrides based on the toolbar theme
   const searchbarStyles = createSearchbarStyles(styles)
 
-  // Vertical divider styles
-  const dividerStyle: React.CSSProperties = {
-    height: '20px',
-    borderLeft: isSacredTheme
-      ? '2px solid rgba(255, 215, 0, 0.6)'
-      : isDarkTheme
-        ? '2px solid rgba(156, 163, 175, 0.6)'
-        : '2px solid rgba(0, 0, 0, 0.6)',
-    ...(isSacredTheme && {
-      filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.5))',
-    }),
-  }
-
-  // Content container styles - all left aligned
-  const contentStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    width: '100%',
-    flexWrap: 'wrap',
-  }
-
   return (
-    <div
-      style={{
-        ...computedStyles.container,
-        width: '100%',
-        maxWidth: '100%',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-      }}
-    >
-      {isSacredTheme && <span style={computedStyles.glyph}>𓊗</span>}
+    <div className={cssStyles.root} data-theme={theme}>
+      {isSacredTheme && <span className={cssStyles.glyph}>𓊗</span>}
 
-      <div style={contentStyle}>
+      <div className={cssStyles.content}>
         {/* Vertical Divider */}
-        <div style={{ padding: '0 8px' }}>
-          <div style={dividerStyle} />
+        <div className={cssStyles.dividerWrap}>
+          <div className={cssStyles.divider} />
         </div>
 
         {/* Buttons */}
@@ -146,32 +171,20 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
 
         {/* Filter Dropdown */}
         {filterDropdown && (
-          <div
-            style={{
-              minWidth: '180px',
-              maxWidth: '200px',
-            }}
-          >
+          <div className={cssStyles.filterWrap}>
             <Dropdown
               label={filterDropdown.label || 'Filter'}
               options={filterDropdown.options}
               value={filterDropdown.value}
               onChange={filterDropdown.onChange}
-              styles={{ theme: styles?.theme || 'light' }}
+              styles={{ theme }}
             />
           </div>
         )}
 
         {/* Searchbar */}
         {searchbarProps && (
-          <div
-            style={{
-              flex: '1 1 auto',
-              maxWidth: '24rem',
-              minWidth: '200px',
-              marginBottom: '15px',
-            }}
-          >
+          <div className={cssStyles.searchWrap}>
             <Searchbar
               value={searchbarProps.value}
               onChange={searchbarProps.onChange}

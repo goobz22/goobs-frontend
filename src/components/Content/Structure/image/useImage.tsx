@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
+import cssStyles from './Image.module.css'
 
 export interface ImageProps {
   url: string
@@ -29,7 +30,7 @@ const useImage = (props: {
         key={`image-${index}`}
         src={url}
         alt={alt || 'image'}
-        style={{ width: '100%', height: 'auto' }}
+        className={cssStyles.image}
         fill
         {...restProps}
       />

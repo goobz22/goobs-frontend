@@ -1,0 +1,120 @@
+/* ==========================================================================
+   CONTENT / ANIMATIONS - CSS MODULE
+   Scroll/entrance animation variants for AnimatedElement + StuckElement.
+   Previously these were static React.CSSProperties objects keyed by
+   `animationtype`, referencing global @keyframes that were never defined in
+   this library. Moving the variants to className-driven CSS and defining the
+   @keyframes locally makes the animations self-contained and resolvable.
+
+   Exact parity with the old animationStyles map:
+     - slide* / fadeIn start at opacity:0, animate to opacity:1
+     - fadeOut starts at opacity:1, animates to opacity:0
+     - none / stuck hold opacity:1
+     - all timed 0.6s ease-out forwards
+   Caller-supplied `style` overrides are still merged in JS (dynamic prop).
+   ========================================================================== */
+
+.none {
+  opacity: 1;
+}
+
+.slideIn,
+.slideInLeft {
+  opacity: 0;
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.slideInUp {
+  opacity: 0;
+  animation: slideInUp 0.6s ease-out forwards;
+}
+
+.slideInDown {
+  opacity: 0;
+  animation: slideInDown 0.6s ease-out forwards;
+}
+
+.slideInRight {
+  opacity: 0;
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+.fadeOut {
+  opacity: 1;
+  animation: fadeOut 0.6s ease-out forwards;
+}
+
+.fadeIn {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.stuckOnScroll,
+.stuck {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  opacity: 1;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

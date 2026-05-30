@@ -1,0 +1,92 @@
+/* =============================================================================
+ * BADGE — CSS module
+ * Migrated from src/theme/badge.ts. Visual parity is mandatory.
+ *
+ * Theme variant is expressed via [data-theme] on the badge element.
+ * Sacred is the bare-.badge default; light (the JS default) and dark are
+ * explicit [data-theme] override blocks.
+ *
+ * Caller-supplied overrides arrive as CSS custom properties set inline in JS
+ * (only when provided). Position is driven by [data-position] + --badge-offset.
+ * ===========================================================================*/
+
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+.badge {
+  /* offset for absolute positioning, overridable via inline --badge-offset */
+  --badge-offset: 8px;
+
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* sacred defaults (theme === 'sacred' is the base).
+   * Each property reads a caller-override CSS var with the sacred value as
+   * fallback; the var is only set inline in JS when the caller provides it,
+   * exactly replicating the old `...(value && { value })` spread. */
+  background-color: var(--badge-background-color, rgba(220, 38, 38, 0.9));
+  color: var(--badge-color, #ffd700);
+  border-radius: var(--badge-border-radius, 50%);
+  width: var(--badge-width, 20px);
+  height: var(--badge-height, 20px);
+  font-size: var(--badge-font-size, 12px);
+  font-weight: var(--badge-font-weight, bold);
+  box-shadow: var(
+    --badge-box-shadow,
+    0px 2px 8px rgba(255, 215, 0, 0.3),
+    0px 0px 12px rgba(255, 215, 0, 0.2)
+  );
+  backdrop-filter: var(--badge-backdrop-filter, blur(8px));
+  border: var(--badge-border, 1px solid rgba(255, 215, 0, 0.3));
+  text-shadow: var(--badge-text-shadow, 0px 0px 4px rgba(255, 215, 0, 0.5));
+}
+
+/* ---- theme overrides --------------------------------------------------- */
+
+.badge[data-theme='light'] {
+  background-color: var(--badge-background-color, #f44336);
+  color: var(--badge-color, white);
+  box-shadow: var(
+    --badge-box-shadow,
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24)
+  );
+  backdrop-filter: var(--badge-backdrop-filter, none);
+  border: var(--badge-border, none);
+  text-shadow: var(--badge-text-shadow, none);
+}
+
+.badge[data-theme='dark'] {
+  background-color: var(--badge-background-color, #ef4444);
+  color: var(--badge-color, white);
+  box-shadow: var(--badge-box-shadow, 0px 2px 8px rgba(0, 0, 0, 0.4));
+  backdrop-filter: var(--badge-backdrop-filter, blur(4px));
+  border: var(--badge-border, none);
+  text-shadow: var(--badge-text-shadow, none);
+}
+
+/* ---- position ---------------------------------------------------------- */
+
+.badge[data-position='top-right'] {
+  top: calc(-1 * var(--badge-offset));
+  right: calc(-1 * var(--badge-offset));
+}
+
+.badge[data-position='top-left'] {
+  top: calc(-1 * var(--badge-offset));
+  left: calc(-1 * var(--badge-offset));
+}
+
+.badge[data-position='bottom-right'] {
+  bottom: calc(-1 * var(--badge-offset));
+  right: calc(-1 * var(--badge-offset));
+}
+
+.badge[data-position='bottom-left'] {
+  bottom: calc(-1 * var(--badge-offset));
+  left: calc(-1 * var(--badge-offset));
+}

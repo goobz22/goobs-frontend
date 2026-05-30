@@ -1,0 +1,367 @@
+/* ==========================================================================
+   CHECKBOX - CSS MODULE
+   Migrated from the legacy `theme/checkbox.ts` JS theme system. Visual parity
+   is exact: the base class carries the LIGHT theme values (the old
+   getCheckboxTheme fallback was `light`), and [data-theme='dark'] /
+   [data-theme='sacred'] override them. State that the old code computed in JS
+   (isHovered / isChecked / isIndeterminate / isDisabled) is expressed here as
+   native pseudo-classes + data attributes:
+     :hover            -> old boxHover
+     [data-checked]    -> old boxChecked + iconVisible
+     [data-indeterminate] -> old boxIndeterminate + iconVisible
+     [data-disabled]   -> old boxDisabled + iconDisabled
+     [data-no-outline] -> old `styles.outline === false` override
+
+   Transition values come from theme/shared.ts TRANSITIONS:
+     medium  = all 200ms cubic-bezier(0.4, 0, 0.2, 1)   (light / dark)
+     premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1)   (sacred)
+
+   Caller-supplied overrides (width/height/colors/shadows/margins/outline) are
+   passed from JS as CSS custom properties (--cb-*) and consumed below via
+   var(--cb-foo, <theme default>). This keeps parity with the old per-style
+   override merge while moving every static value into CSS.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   WRAPPER (the <label>) — LIGHT theme defaults
+   -------------------------------------------------------------------------- */
+.wrapper {
+  /* container size */
+  --cb-container-size: 24px;
+  /* transition */
+  --cb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--cb-wrapper-transition, var(--cb-transition));
+  margin: var(--cb-margin);
+  margin-top: var(--cb-margin-top);
+  margin-bottom: var(--cb-margin-bottom);
+  margin-left: var(--cb-margin-left);
+  margin-right: var(--cb-margin-right);
+}
+
+.wrapper[data-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDES — sacred / dark differ in container size + transition speed
+   -------------------------------------------------------------------------- */
+.wrapper[data-theme='sacred'] {
+  --cb-container-size: 28px;
+  --cb-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wrapper[data-theme='dark'] {
+  --cb-container-size: 24px;
+  --cb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   PREMIUM ACCENT (non-sacred themes, checked/indeterminate, outline on)
+   The old <PremiumAccent> JSX rendered an absolutely-positioned gradient div
+   behind the box. Reproduced here as a ::before pseudo-element on the wrapper
+   so no extra DOM node / JS branch is needed.
+   -------------------------------------------------------------------------- */
+.wrapper[data-premium-accent='true']::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 6px;
+  background: linear-gradient(45deg, rgb(59, 130, 246), rgb(147, 197, 253));
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+/* --------------------------------------------------------------------------
+   CONTAINER
+   -------------------------------------------------------------------------- */
+.container {
+  position: relative;
+  width: var(--cb-width, var(--cb-container-size));
+  height: var(--cb-height, var(--cb-container-size));
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   NATIVE INPUT (visually hidden, sits on top to receive clicks)
+   -------------------------------------------------------------------------- */
+.input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  z-index: 3;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   BOX — LIGHT theme defaults (old checkboxThemes.light.box)
+   -------------------------------------------------------------------------- */
+.box {
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  border-width: var(--cb-border-width, 2px);
+  border-style: solid;
+  border-color: var(--cb-border-color, rgb(59, 130, 246));
+  border-radius: var(--cb-border-radius, 4px);
+  background-color: var(--cb-bg, rgba(249, 250, 251, 0.9));
+  backdrop-filter: var(--cb-backdrop-filter, blur(4px));
+  box-shadow: var(
+    --cb-box-shadow,
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24)
+  );
+  background-image: var(--cb-bg-image, none);
+  transition: var(--cb-transition);
+}
+
+/* DARK theme box (old checkboxThemes.dark.box) */
+.wrapper[data-theme='dark'] .box {
+  border-color: var(--cb-border-color, rgb(96, 165, 250));
+  background-color: var(--cb-bg, rgba(31, 41, 55, 0.9));
+  box-shadow: var(
+    --cb-box-shadow,
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4)
+  );
+}
+
+/* SACRED theme box (old checkboxThemes.sacred.box) */
+.wrapper[data-theme='sacred'] .box {
+  border-color: var(--cb-border-color, rgba(255, 215, 0, 0.4));
+  border-radius: var(--cb-border-radius, 6px);
+  background-color: var(--cb-bg, rgba(10, 10, 10, 0.9));
+  backdrop-filter: var(--cb-backdrop-filter, blur(8px));
+  box-shadow: var(
+    --cb-box-shadow,
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1)
+  );
+  background-image: var(
+    --cb-bg-image,
+    radial-gradient(
+      circle at center,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    )
+  );
+}
+
+/* --------------------------------------------------------------------------
+   BOX HOVER — only when not disabled (old boxHover, applied via isHovered)
+   -------------------------------------------------------------------------- */
+.wrapper:hover .box:not([data-disabled='true']) {
+  background-color: var(--cb-hover-bg, rgba(239, 246, 255, 0.8));
+  border-color: var(--cb-hover-border-color, rgb(37, 99, 235));
+  transform: var(--cb-hover-transform, scale(1.05));
+  box-shadow: var(
+    --cb-hover-box-shadow,
+    0 4px 12px rgba(59, 130, 246, 0.2),
+    0 2px 6px rgba(59, 130, 246, 0.1)
+  );
+}
+
+.wrapper[data-theme='dark']:hover .box:not([data-disabled='true']) {
+  background-color: var(--cb-hover-bg, rgba(30, 58, 138, 0.3));
+  border-color: var(--cb-hover-border-color, rgb(59, 130, 246));
+  box-shadow: var(
+    --cb-hover-box-shadow,
+    0 4px 12px rgba(96, 165, 250, 0.3),
+    0 2px 6px rgba(96, 165, 250, 0.2)
+  );
+}
+
+.wrapper[data-theme='sacred']:hover .box:not([data-disabled='true']) {
+  background-color: var(--cb-hover-bg, rgba(10, 10, 10, 0.9));
+  border-color: var(--cb-hover-border-color, rgba(255, 215, 0, 0.8));
+  transform: var(--cb-hover-transform, scale(1.1));
+  box-shadow: var(
+    --cb-hover-box-shadow,
+    0 0 30px rgba(255, 215, 0, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.2)
+  );
+  background-image: var(
+    --cb-hover-bg-image,
+    radial-gradient(circle at center, rgba(255, 215, 0, 0.1) 0%, transparent 50%)
+  );
+}
+
+/* --------------------------------------------------------------------------
+   BOX CHECKED / INDETERMINATE — identical look in every theme
+   (old boxChecked === boxIndeterminate per theme). Applied via data attrs
+   on the box. These come AFTER hover so checked state wins, matching the old
+   JS spread order (isChecked / isIndeterminate spread after isHovered).
+   -------------------------------------------------------------------------- */
+.box[data-checked='true'],
+.box[data-indeterminate='true'] {
+  background-color: var(--cb-checked-bg, rgb(59, 130, 246));
+  border-color: var(--cb-checked-border-color, transparent);
+  box-shadow: var(
+    --cb-checked-box-shadow,
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    0 2px 6px rgba(59, 130, 246, 0.2)
+  );
+}
+
+.wrapper[data-theme='dark'] .box[data-checked='true'],
+.wrapper[data-theme='dark'] .box[data-indeterminate='true'] {
+  background-color: var(--cb-checked-bg, rgb(96, 165, 250));
+  box-shadow: var(
+    --cb-checked-box-shadow,
+    0 4px 12px rgba(96, 165, 250, 0.4),
+    0 2px 6px rgba(96, 165, 250, 0.3)
+  );
+}
+
+.wrapper[data-theme='sacred'] .box[data-checked='true'],
+.wrapper[data-theme='sacred'] .box[data-indeterminate='true'] {
+  background-color: var(--cb-checked-bg, rgba(10, 10, 10, 0.9));
+  border-color: var(--cb-checked-border-color, #ffd700);
+  box-shadow: var(
+    --cb-checked-box-shadow,
+    0 0 40px rgba(255, 215, 0, 0.6),
+    0 0 80px rgba(255, 215, 0, 0.3)
+  );
+  background-image: var(
+    --cb-checked-bg-image,
+    linear-gradient(
+      135deg,
+      rgba(255, 215, 0, 0.1) 0%,
+      rgba(10, 10, 10, 0.9) 50%,
+      rgba(255, 215, 0, 0.1) 100%
+    ),
+    radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, transparent 50%)
+  );
+}
+
+/* --------------------------------------------------------------------------
+   BOX DISABLED — wins over everything (old isDisabled spread is last)
+   -------------------------------------------------------------------------- */
+.box[data-disabled='true'] {
+  background-color: var(--cb-disabled-bg, rgba(249, 250, 251, 0.5));
+  border-color: var(--cb-disabled-border-color, rgb(156, 163, 175));
+  transform: var(--cb-disabled-transform, none);
+  box-shadow: var(--cb-disabled-box-shadow, none);
+  background-image: none;
+}
+
+.wrapper[data-theme='dark'] .box[data-disabled='true'] {
+  background-color: var(--cb-disabled-bg, rgba(17, 24, 39, 0.5));
+  border-color: var(--cb-disabled-border-color, rgb(75, 85, 99));
+}
+
+.wrapper[data-theme='sacred'] .box[data-disabled='true'] {
+  background-color: var(--cb-disabled-bg, rgba(10, 10, 10, 0.6));
+  border-color: var(--cb-disabled-border-color, rgba(255, 215, 0, 0.2));
+}
+
+/* --------------------------------------------------------------------------
+   OUTLINE OVERRIDE (old `styles.outline === false`): strip border + shadow.
+   Applied last so it overrides the state rules above, exactly like the old JS
+   spread which placed the outline override at the end of boxStyle.
+   -------------------------------------------------------------------------- */
+.box[data-no-outline='true'],
+.wrapper[data-theme='dark'] .box[data-no-outline='true'],
+.wrapper[data-theme='sacred'] .box[data-no-outline='true'] {
+  border-width: 0;
+  border-style: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   ICON WRAP — LIGHT theme defaults (old checkboxThemes.light.icon).
+   The inner Check / IndeterminateCheckBox SVG inherits color via currentColor.
+   opacity 0 by default; opacity 1 when checked/indeterminate (old iconVisible
+   opacity). Disabled greys it out (old iconDisabled).
+
+   PARITY NOTE on transform: the old JSX spread an inline `transform` AFTER
+   `...computedStyles.icon`, so the theme's icon transform was always
+   overridden by a hardcoded value driven solely by `indeterminate`:
+       indeterminate -> translateY(1px) translateX(2px)
+       otherwise     -> translateY(5px) translateX(3px)
+   The theme scale/rotate transforms were dead code. We reproduce the real
+   (overriding) values via [data-indeterminate]; theme makes no difference to
+   the wrapper transform. Color/filter still vary by theme below.
+   -------------------------------------------------------------------------- */
+.icon {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: var(--cb-transition);
+  transform: translateY(5px) translateX(3px);
+}
+
+.icon[data-indeterminate='true'] {
+  transform: translateY(1px) translateX(2px);
+}
+
+.wrapper[data-theme='sacred'] .icon {
+  color: #ffd700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* icon VISIBLE (checked or indeterminate) — opacity + sacred filter bump */
+.icon[data-checked='true'],
+.icon[data-indeterminate='true'] {
+  opacity: 1;
+}
+
+.wrapper[data-theme='sacred'] .icon[data-checked='true'],
+.wrapper[data-theme='sacred'] .icon[data-indeterminate='true'] {
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+}
+
+/* icon DISABLED */
+.icon[data-disabled='true'] {
+  color: rgb(156, 163, 175);
+}
+
+.wrapper[data-theme='dark'] .icon[data-disabled='true'] {
+  color: rgb(75, 85, 99);
+}
+
+.wrapper[data-theme='sacred'] .icon[data-disabled='true'] {
+  color: rgba(255, 215, 0, 0.3);
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapper,
+  .box,
+  .icon,
+  .wrapper[data-premium-accent='true']::before {
+    transition: none;
+  }
+}

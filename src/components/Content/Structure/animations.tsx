@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
+import cssStyles from './animations.module.css'
 
 export type Animation =
   | 'none'
@@ -19,43 +20,22 @@ interface AnimationProps {
   style?: React.CSSProperties
 }
 
-// Animation styles mapping
-const animationStyles: Record<Animation, React.CSSProperties> = {
-  none: { opacity: 1 },
-  slideIn: {
-    opacity: 0,
-    animation: 'slideInLeft 0.6s ease-out forwards',
-  },
-  slideInUp: {
-    opacity: 0,
-    animation: 'slideInUp 0.6s ease-out forwards',
-  },
-  slideInDown: {
-    opacity: 0,
-    animation: 'slideInDown 0.6s ease-out forwards',
-  },
-  slideInLeft: {
-    opacity: 0,
-    animation: 'slideInLeft 0.6s ease-out forwards',
-  },
-  slideInRight: {
-    opacity: 0,
-    animation: 'slideInRight 0.6s ease-out forwards',
-  },
-  fadeOut: {
-    opacity: 1,
-    animation: 'fadeOut 0.6s ease-out forwards',
-  },
-  fadeIn: {
-    opacity: 0,
-    animation: 'fadeIn 0.6s ease-out forwards',
-  },
-  stuckOnScroll: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 10,
-    opacity: 1,
-  },
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
+
+// Animation variant -> CSS-module class mapping. The visual definitions
+// (initial opacity + @keyframes timing) live in animations.module.css.
+const animationClassNames: Record<Animation, string> = {
+  none: cssStyles.none ?? '',
+  slideIn: cssStyles.slideIn ?? '',
+  slideInUp: cssStyles.slideInUp ?? '',
+  slideInDown: cssStyles.slideInDown ?? '',
+  slideInLeft: cssStyles.slideInLeft ?? '',
+  slideInRight: cssStyles.slideInRight ?? '',
+  fadeOut: cssStyles.fadeOut ?? '',
+  fadeIn: cssStyles.fadeIn ?? '',
+  stuckOnScroll: cssStyles.stuckOnScroll ?? '',
 }
 
 export const AnimatedElement: React.FC<AnimationProps> = ({
@@ -65,15 +45,17 @@ export const AnimatedElement: React.FC<AnimationProps> = ({
   style,
   ...props
 }) => {
-  const animationStyle = animationStyles[animationtype]
-
-  const finalStyle = {
-    ...animationStyle,
-    ...style,
-  }
+  const mergedClassName = mergeClassNames(
+    animationClassNames[animationtype],
+    className
+  )
 
   return (
-    <div className={className} style={finalStyle} {...props}>
+    <div
+      className={mergedClassName}
+      {...(style !== undefined ? { style } : {})}
+      {...props}
+    >
       {children}
     </div>
   )
@@ -84,15 +66,14 @@ export const StuckElement: React.FC<{
   className?: string
   style?: React.CSSProperties
 }> = ({ children, className, style, ...props }) => {
-  const stuckStyle = {
-    position: 'sticky',
-    top: 0,
-    zIndex: 10,
-    ...style,
-  } as React.CSSProperties
+  const mergedClassName = mergeClassNames(cssStyles.stuck, className)
 
   return (
-    <div className={className} style={stuckStyle} {...props}>
+    <div
+      className={mergedClassName}
+      {...(style !== undefined ? { style } : {})}
+      {...props}
+    >
       {children}
     </div>
   )

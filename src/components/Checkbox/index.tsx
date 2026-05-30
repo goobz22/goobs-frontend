@@ -1,32 +1,88 @@
 /**
  * @fileoverview Defines the Checkbox component, a custom checkbox with theming.
  * It supports light, dark, and sacred themes with extensive customization options.
+ *
+ * Migrated from the legacy `theme/checkbox.ts` JS theme system to a
+ * `Checkbox.module.css` CSS module. Theme is now a `data-theme` attribute on the
+ * wrapper; hover/checked/indeterminate/disabled visual states are expressed as
+ * CSS `:hover` + `[data-*]` selectors rather than JS-computed style objects.
+ * Caller-supplied style overrides are forwarded as CSS custom properties.
  */
 'use client'
 
 import React, {
-  useState,
   useEffect,
   forwardRef,
   useImperativeHandle,
   useRef,
-  useMemo,
   useCallback,
   useId,
   type ChangeEvent,
+  type CSSProperties,
   type InputHTMLAttributes,
 } from 'react'
-import { getCheckboxStyles, type CheckboxStyles } from '../../theme'
+import cssStyles from './Checkbox.module.css'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
 
 // --------------------------------------------------------------------------
-// STABLE ID GENERATOR - Removed in favor of React.useId()
-// --------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
+
+/**
+ * Comprehensive styling options. Theme selects the palette (data-theme);
+ * every other field is an optional caller override forwarded to CSS as a
+ * custom property (consumed via `var(--cb-foo, <theme default>)`).
+ */
+export interface CheckboxStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling
+  width?: string
+  height?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  backgroundColor?: string
+  backdropFilter?: string
+  boxShadow?: string
+  backgroundImage?: string
+
+  // Hover states
+  hoverBackgroundColor?: string
+  hoverBorderColor?: string
+  hoverBoxShadow?: string
+  hoverTransform?: string
+  hoverBackgroundImage?: string
+
+  // Checked states (checked === indeterminate visually in every theme)
+  checkedBackgroundColor?: string
+  checkedBorderColor?: string
+  checkedBoxShadow?: string
+  checkedBackgroundImage?: string
+
+  // Disabled states
+  disabledBackgroundColor?: string
+  disabledBorderColor?: string
+  disabledBoxShadow?: string
+  disabledTransform?: string
+
+  // Layout and spacing
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  outline?: boolean
+}
 
 export interface CheckboxProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -48,45 +104,82 @@ export interface CheckboxProps extends Omit<
   styles?: CheckboxStyles
 }
 
-// --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
-// --------------------------------------------------------------------------
+/**
+ * Builds the CSS-custom-property style object from caller-supplied overrides.
+ * Only keys the caller actually set are emitted; everything unset falls back to
+ * the theme default baked into Checkbox.module.css via `var(--cb-foo, default)`.
+ * State is NOT computed here — it lives in CSS selectors. Returns undefined when
+ * the caller passed no overridable styling, so we don't attach an empty style.
+ */
+function buildDynamicStyle(styles?: CheckboxStyles): CSSProperties | undefined {
+  if (!styles) return undefined
 
-const SacredGlyphs: React.FC<{
-  isHovered: boolean
-}> = () => {
-  return null
-}
+  const dynamicStyle: Record<string, string> = {}
 
-const PremiumAccent: React.FC<{
-  isChecked: boolean
-  isIndeterminate: boolean
-  outline: boolean
-}> = ({ isChecked, isIndeterminate, outline }) => {
-  const accentStyles = useMemo(
-    () => ({
-      accent: {
-        position: 'absolute' as const,
-        left: '-2px',
-        top: '-2px',
-        right: '-2px',
-        bottom: '-2px',
-        borderRadius: '6px',
-        background:
-          'linear-gradient(45deg, rgb(59, 130, 246), rgb(147, 197, 253))',
-        opacity: 0.3,
-        transition: 'opacity 0.3s ease',
-        zIndex: -1,
-      },
-    }),
-    []
-  )
-
-  if (!outline || (!isChecked && !isIndeterminate)) {
-    return null
+  // Wrapper transition override (old getCheckboxTheme wrapper.transition)
+  if (styles.transitionDuration) {
+    dynamicStyle['--cb-wrapper-transition'] =
+      `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
   }
 
-  return <div style={accentStyles.accent} />
+  // Container size
+  if (styles.width) dynamicStyle['--cb-width'] = styles.width
+  if (styles.height) dynamicStyle['--cb-height'] = styles.height
+
+  // Box base
+  if (styles.borderWidth) dynamicStyle['--cb-border-width'] = styles.borderWidth
+  if (styles.borderColor) dynamicStyle['--cb-border-color'] = styles.borderColor
+  if (styles.borderRadius)
+    dynamicStyle['--cb-border-radius'] = styles.borderRadius
+  if (styles.backgroundColor) dynamicStyle['--cb-bg'] = styles.backgroundColor
+  if (styles.backdropFilter)
+    dynamicStyle['--cb-backdrop-filter'] = styles.backdropFilter
+  if (styles.boxShadow) dynamicStyle['--cb-box-shadow'] = styles.boxShadow
+  if (styles.backgroundImage)
+    dynamicStyle['--cb-bg-image'] = styles.backgroundImage
+
+  // Hover
+  if (styles.hoverBackgroundColor)
+    dynamicStyle['--cb-hover-bg'] = styles.hoverBackgroundColor
+  if (styles.hoverBorderColor)
+    dynamicStyle['--cb-hover-border-color'] = styles.hoverBorderColor
+  if (styles.hoverBoxShadow)
+    dynamicStyle['--cb-hover-box-shadow'] = styles.hoverBoxShadow
+  if (styles.hoverTransform)
+    dynamicStyle['--cb-hover-transform'] = styles.hoverTransform
+  if (styles.hoverBackgroundImage)
+    dynamicStyle['--cb-hover-bg-image'] = styles.hoverBackgroundImage
+
+  // Checked / indeterminate (shared)
+  if (styles.checkedBackgroundColor)
+    dynamicStyle['--cb-checked-bg'] = styles.checkedBackgroundColor
+  if (styles.checkedBorderColor)
+    dynamicStyle['--cb-checked-border-color'] = styles.checkedBorderColor
+  if (styles.checkedBoxShadow)
+    dynamicStyle['--cb-checked-box-shadow'] = styles.checkedBoxShadow
+  if (styles.checkedBackgroundImage)
+    dynamicStyle['--cb-checked-bg-image'] = styles.checkedBackgroundImage
+
+  // Disabled
+  if (styles.disabledBackgroundColor)
+    dynamicStyle['--cb-disabled-bg'] = styles.disabledBackgroundColor
+  if (styles.disabledBorderColor)
+    dynamicStyle['--cb-disabled-border-color'] = styles.disabledBorderColor
+  if (styles.disabledBoxShadow)
+    dynamicStyle['--cb-disabled-box-shadow'] = styles.disabledBoxShadow
+  if (styles.disabledTransform)
+    dynamicStyle['--cb-disabled-transform'] = styles.disabledTransform
+
+  // Margins
+  if (styles.margin) dynamicStyle['--cb-margin'] = styles.margin
+  if (styles.marginTop) dynamicStyle['--cb-margin-top'] = styles.marginTop
+  if (styles.marginBottom)
+    dynamicStyle['--cb-margin-bottom'] = styles.marginBottom
+  if (styles.marginLeft) dynamicStyle['--cb-margin-left'] = styles.marginLeft
+  if (styles.marginRight) dynamicStyle['--cb-margin-right'] = styles.marginRight
+
+  if (Object.keys(dynamicStyle).length === 0) return undefined
+  return dynamicStyle as CSSProperties
 }
 
 // --------------------------------------------------------------------------
@@ -110,31 +203,23 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   const generatedId = useId()
   const stableId = providedId || generatedId
   const internalRef = useRef<HTMLInputElement>(null)
-  const [isHovered, setIsHovered] = useState(false)
 
   // State management for controlled/uncontrolled component
-  const [uncontrolledChecked, setUncontrolledChecked] = useState(
+  const [uncontrolledChecked, setUncontrolledChecked] = React.useState(
     defaultChecked || false
   )
   const isControlled = controlledChecked !== undefined
   const checked = isControlled ? controlledChecked : uncontrolledChecked
   const isDisabled = !!(styles?.disabled || rest.disabled)
-  const isSacredTheme = styles?.theme === 'sacred'
 
+  const theme = styles?.theme || 'light'
   const isChecked = checked
   const isIndeterminate = indeterminate && !isChecked
+  const hasOutline = styles?.outline !== false
+  const showPremiumAccent =
+    theme !== 'sacred' && hasOutline && (isChecked || !!isIndeterminate)
 
-  const computedStyles = useMemo(
-    () =>
-      getCheckboxStyles(
-        styles,
-        isHovered,
-        isChecked,
-        isIndeterminate,
-        isDisabled
-      ),
-    [styles, isHovered, isChecked, isIndeterminate, isDisabled]
-  )
+  const dynamicStyle = buildDynamicStyle(styles)
 
   const handleFocus = useCallback(
     (event: React.FocusEvent<HTMLInputElement>) => {
@@ -163,14 +248,6 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     [isControlled, onChange]
   )
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
-
   useImperativeHandle(ref, () => internalRef.current!)
 
   useEffect(() => {
@@ -179,29 +256,28 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     }
   }, [indeterminate])
 
+  // Data-attribute flags shared by box + icon for CSS state selectors.
+  // `true`/undefined so absent attributes don't match `[data-x='true']`.
+  const checkedAttr = isChecked ? 'true' : undefined
+  const indeterminateAttr = isIndeterminate ? 'true' : undefined
+  const disabledAttr = isDisabled ? 'true' : undefined
+  const noOutlineAttr = hasOutline ? undefined : 'true'
+
   return (
     <label
       htmlFor={stableId}
-      style={computedStyles.wrapper}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={cssStyles.wrapper}
+      data-theme={theme}
+      {...(showPremiumAccent && { 'data-premium-accent': 'true' })}
+      {...(disabledAttr && { 'data-disabled': disabledAttr })}
+      {...(dynamicStyle && { style: dynamicStyle })}
     >
-      {isSacredTheme && <SacredGlyphs isHovered={isHovered} />}
-
-      {!isSacredTheme && (
-        <PremiumAccent
-          isChecked={isChecked}
-          isIndeterminate={!!isIndeterminate}
-          outline={styles?.outline !== false}
-        />
-      )}
-
-      <div style={computedStyles.container}>
+      <div className={cssStyles.container}>
         <input
           type="checkbox"
           id={stableId}
           ref={internalRef}
-          style={computedStyles.input}
+          className={cssStyles.input}
           aria-checked={indeterminate ? 'mixed' : undefined}
           disabled={isDisabled}
           checked={!!isChecked}
@@ -211,14 +287,19 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           data-field-name={rest.name}
           {...rest}
         />
-        <div style={computedStyles.box}></div>
         <div
-          style={{
-            ...computedStyles.icon,
-            transform: indeterminate
-              ? 'translateY(1px) translateX(2px)'
-              : 'translateY(5px) translateX(3px)',
-          }}
+          className={cssStyles.box}
+          {...(checkedAttr && { 'data-checked': checkedAttr })}
+          {...(indeterminateAttr && { 'data-indeterminate': indeterminateAttr })}
+          {...(disabledAttr && { 'data-disabled': disabledAttr })}
+          {...(noOutlineAttr && { 'data-no-outline': noOutlineAttr })}
+        ></div>
+        <div
+          className={cssStyles.icon}
+          {...(checkedAttr && { 'data-checked': checkedAttr })}
+          {...(indeterminateAttr && { 'data-indeterminate': indeterminateAttr })}
+          {...(disabledAttr && { 'data-disabled': disabledAttr })}
+          {...(noOutlineAttr && { 'data-no-outline': noOutlineAttr })}
         >
           {indeterminate ? (
             <IndeterminateCheckBoxIcon

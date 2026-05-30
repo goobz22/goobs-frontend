@@ -1,0 +1,400 @@
+/* ==========================================================================
+   SWITCH - CSS MODULE
+   Migrated off theme/switch.ts. Sacred is the hardcoded default; light and
+   dark are [data-theme] overrides on the root <label>. State (checked /
+   disabled / focus / hover) is expressed with native CSS — the underlying
+   checkbox <input> is a preceding sibling of the track contents, so
+   `input:checked ~ .thumb` / `input:disabled` drive the visuals without any
+   JS state. Caller-supplied overrides (track size, colors, label font, custom
+   transition) arrive as CSS custom properties set inline on the root.
+
+   Transition tokens transcribed from theme/shared.ts:
+     medium  = all 200ms cubic-bezier(0.4, 0, 0.2, 1)   (light / dark)
+     premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1)   (sacred)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT (container <label>) — SACRED DEFAULTS
+   -------------------------------------------------------------------------- */
+.container {
+  /* Caller-overridable tokens (set inline as CSS vars when a styles?.x prop
+     is supplied). The fallbacks below ARE the per-theme defaults. */
+  --switch-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --switch-gap: 12px;
+
+  --switch-track-width: 56px;
+  --switch-track-height: 28px;
+  --switch-track-radius: 14px;
+  --switch-track-bg: rgba(10, 10, 10, 0.9);
+  --switch-track-border-color: rgba(255, 215, 0, 0.3);
+  --switch-track-border-width: 2px;
+  --switch-track-backdrop: blur(8px);
+  --switch-track-image:
+    radial-gradient(
+      circle at 25% 50%,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 50%,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    );
+
+  --switch-track-checked-bg: rgba(10, 10, 10, 0.9);
+  --switch-track-checked-border: #ffd700;
+  --switch-track-checked-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+  --switch-track-checked-image:
+    radial-gradient(
+      circle at 25% 50%,
+      rgba(255, 215, 0, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 50%,
+      rgba(255, 215, 0, 0.1) 0%,
+      transparent 50%
+    );
+
+  --switch-track-focus-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
+
+  --switch-track-disabled-bg: rgba(10, 10, 10, 0.6);
+  --switch-track-disabled-border: rgba(255, 215, 0, 0.1);
+
+  --switch-thumb-size: 24px;
+  --switch-thumb-bg: rgba(10, 10, 10, 0.9);
+  --switch-thumb-border-color: rgba(255, 215, 0, 0.4);
+  --switch-thumb-border-width: 1px;
+  --switch-thumb-radius: 50%;
+  --switch-thumb-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  --switch-thumb-color: #ffd700;
+  --switch-thumb-font-size: 12px;
+  --switch-thumb-offset: 2px;
+  --switch-thumb-image: radial-gradient(
+    circle at center,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 70%
+  );
+
+  --switch-thumb-checked-offset: 28px;
+  --switch-thumb-checked-border: #ffd700;
+  --switch-thumb-checked-shadow:
+    0 0 25px rgba(255, 215, 0, 0.6), 0 0 50px rgba(255, 215, 0, 0.3);
+  --switch-thumb-checked-image: radial-gradient(
+    circle at center,
+    rgba(255, 215, 0, 0.2) 0%,
+    transparent 70%
+  );
+
+  --switch-thumb-disabled-bg: rgba(10, 10, 10, 0.6);
+  --switch-thumb-disabled-border: rgba(255, 215, 0, 0.2);
+  --switch-thumb-disabled-color: rgba(255, 215, 0, 0.3);
+
+  --switch-label-color: #ffd700;
+  --switch-label-font-family: 'Cinzel', serif;
+  --switch-label-font-size: 14px;
+  --switch-label-font-weight: 500;
+  --switch-label-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: var(--switch-gap);
+  transition: var(--switch-transition);
+}
+
+.container[data-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME OVERRIDES
+   -------------------------------------------------------------------------- */
+.container[data-theme='light'] {
+  --switch-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --switch-gap: 8px;
+
+  --switch-track-width: 48px;
+  --switch-track-height: 24px;
+  --switch-track-radius: 12px;
+  --switch-track-bg: rgba(156, 163, 175, 0.3);
+  --switch-track-border-color: rgba(156, 163, 175, 0.2);
+  --switch-track-border-width: 1px;
+  --switch-track-backdrop: blur(4px);
+  --switch-track-image: none;
+
+  --switch-track-checked-bg: rgb(59, 130, 246);
+  --switch-track-checked-border: transparent;
+  --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --switch-track-checked-image: none;
+
+  --switch-track-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+
+  --switch-track-disabled-bg: rgba(156, 163, 175, 0.2);
+  --switch-track-disabled-border: rgba(156, 163, 175, 0.1);
+
+  --switch-thumb-size: 20px;
+  --switch-thumb-bg: white;
+  --switch-thumb-border-color: transparent;
+  --switch-thumb-border-width: 0px;
+  --switch-thumb-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --switch-thumb-color: #6b7280;
+  --switch-thumb-font-size: 10px;
+  --switch-thumb-image: none;
+
+  --switch-thumb-checked-offset: 24px;
+  --switch-thumb-checked-border: transparent;
+  --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --switch-thumb-checked-color: #3b82f6;
+  --switch-thumb-checked-image: none;
+
+  --switch-thumb-disabled-bg: rgba(249, 250, 251, 0.8);
+  --switch-thumb-disabled-border: transparent;
+  --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --switch-thumb-disabled-color: #9ca3af;
+
+  --switch-label-color: rgb(55, 65, 81);
+  --switch-label-font-family: 'Inter', system-ui, sans-serif;
+  --switch-label-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME OVERRIDES
+   -------------------------------------------------------------------------- */
+.container[data-theme='dark'] {
+  --switch-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --switch-gap: 8px;
+
+  --switch-track-width: 48px;
+  --switch-track-height: 24px;
+  --switch-track-radius: 12px;
+  --switch-track-bg: rgba(75, 85, 99, 0.4);
+  --switch-track-border-color: rgba(75, 85, 99, 0.3);
+  --switch-track-border-width: 1px;
+  --switch-track-backdrop: blur(4px);
+  --switch-track-image: none;
+
+  --switch-track-checked-bg: rgb(59, 130, 246);
+  --switch-track-checked-border: transparent;
+  --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  --switch-track-checked-image: none;
+
+  --switch-track-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+
+  --switch-track-disabled-bg: rgba(75, 85, 99, 0.2);
+  --switch-track-disabled-border: rgba(75, 85, 99, 0.1);
+
+  --switch-thumb-size: 20px;
+  --switch-thumb-bg: #f3f4f6;
+  --switch-thumb-border-color: transparent;
+  --switch-thumb-border-width: 0px;
+  --switch-thumb-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --switch-thumb-color: #4b5563;
+  --switch-thumb-font-size: 10px;
+  --switch-thumb-image: none;
+
+  --switch-thumb-checked-offset: 24px;
+  --switch-thumb-checked-border: transparent;
+  --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --switch-thumb-checked-color: #3b82f6;
+  --switch-thumb-checked-image: none;
+
+  --switch-thumb-disabled-bg: rgba(107, 114, 128, 0.8);
+  --switch-thumb-disabled-border: transparent;
+  --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --switch-thumb-disabled-color: #6b7280;
+
+  --switch-label-color: rgb(209, 213, 219);
+  --switch-label-font-family: 'Inter', system-ui, sans-serif;
+  --switch-label-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   TRACK
+   -------------------------------------------------------------------------- */
+.track {
+  position: relative;
+  width: var(--switch-track-width);
+  height: var(--switch-track-height);
+  background-color: var(--switch-track-bg);
+  border-radius: var(--switch-track-radius);
+  transition: var(--switch-transition);
+  border: var(--switch-track-border-width) solid
+    var(--switch-track-border-color);
+  backdrop-filter: var(--switch-track-backdrop);
+  -webkit-backdrop-filter: var(--switch-track-backdrop);
+  background-image: var(--switch-track-image);
+  overflow: hidden;
+}
+
+/* outline=false → remove the border (and sacred box-shadow) */
+.container[data-outline='false'] .track {
+  border: none;
+  box-shadow: none;
+}
+
+/* checked — the input is a child of the track, so :has() (not the sibling
+   combinator) reaches the track. data-checked covers the controlled case. */
+.track:has(.input:checked),
+.container[data-checked='true'] .track {
+  background-color: var(--switch-track-checked-bg);
+  border-color: var(--switch-track-checked-border);
+  box-shadow: var(--switch-track-checked-shadow);
+  background-image: var(--switch-track-checked-image);
+}
+
+/* focus — only when focusEffects !== false (runtime-only, so :has() it is) */
+.container:not([data-focus-effects='false']) .track:has(.input:focus-visible) {
+  box-shadow: var(--switch-track-focus-shadow);
+}
+
+/* disabled */
+.track:has(.input:disabled),
+.container[data-disabled='true'] .track {
+  background-color: var(--switch-track-disabled-bg);
+  border-color: var(--switch-track-disabled-border);
+  /* old trackDisabled cleared the checked glow on disable (sacred set none);
+     reset here so disabled+checked does not retain the checked box-shadow. */
+  box-shadow: var(--switch-track-disabled-shadow, none);
+}
+
+/* --------------------------------------------------------------------------
+   HIDDEN NATIVE INPUT (the real checkbox, fills the track)
+   -------------------------------------------------------------------------- */
+.input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   THUMB
+   -------------------------------------------------------------------------- */
+.thumb {
+  position: absolute;
+  top: var(--switch-thumb-offset);
+  left: var(--switch-thumb-offset);
+  width: var(--switch-thumb-size);
+  height: var(--switch-thumb-size);
+  background-color: var(--switch-thumb-bg);
+  border: var(--switch-thumb-border-width) solid
+    var(--switch-thumb-border-color);
+  border-radius: var(--switch-thumb-radius);
+  transition: var(--switch-transition);
+  box-shadow: var(--switch-thumb-shadow);
+  background-image: var(--switch-thumb-image);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--switch-thumb-font-size);
+  color: var(--switch-thumb-color);
+  pointer-events: none;
+}
+
+/* checked */
+.input:checked ~ .thumb,
+.container[data-checked='true'] .thumb {
+  transform: translateX(var(--switch-thumb-checked-offset));
+  border-color: var(--switch-thumb-checked-border);
+  box-shadow: var(--switch-thumb-checked-shadow);
+  background-image: var(--switch-thumb-checked-image);
+  color: var(--switch-thumb-checked-color, var(--switch-thumb-color));
+}
+
+/* disabled */
+.input:disabled ~ .thumb,
+.container[data-disabled='true'] .thumb {
+  background-color: var(--switch-thumb-disabled-bg);
+  border-color: var(--switch-thumb-disabled-border);
+  box-shadow: var(--switch-thumb-disabled-shadow, none);
+  color: var(--switch-thumb-disabled-color);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED SHIMMER — only visible on the sacred theme when checked + hovered.
+   Old code rendered this conditionally in JS on hover; now it's pure CSS.
+   -------------------------------------------------------------------------- */
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.2),
+    transparent
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Sacred + checked + hover → reveal + animate the shimmer sweep. The shimmer
+   element is rendered only on the sacred theme (see TSX), so guarding on
+   [data-theme] is belt-and-suspenders. The old JS gated this on
+   `isSacredTheme && checked && isHovered`; here :hover + :has(:checked)
+   reproduce it natively. */
+.container:not([data-theme='light']):not([data-theme='dark']):hover
+  .track:has(.input:checked)
+  .shimmer {
+  opacity: 1;
+  animation: sacredSwitchShimmer 1.5s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   LABELS
+   -------------------------------------------------------------------------- */
+.leftLabel,
+.rightLabel {
+  font-size: var(--switch-label-font-size);
+  font-weight: var(--switch-label-font-weight);
+  color: var(--switch-label-color);
+  font-family: var(--switch-label-font-family);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: var(--switch-transition);
+  text-shadow: var(--switch-label-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES (moved off the runtime styleSheet.insertRule call in index.tsx)
+   -------------------------------------------------------------------------- */
+@keyframes sacredSwitchFloat {
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes sacredSwitchShimmer {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

@@ -37,6 +37,8 @@ import React, { useEffect, useId, type CSSProperties, type ReactNode } from 'rea
 import cssStyles from './FieldShell.module.css'
 import type { FieldStyleOverrides, FieldTheme } from './types'
 import { emitDiag } from '../../../utils/diag'
+import { useOptionalFormContext } from '../../Form/context'
+import { deriveRequiredFromSchema } from '../../Form/schema'
 
 export interface FieldShellSlot {
   /**
@@ -122,6 +124,23 @@ export interface FieldShellProps {
    * locators.
    */
   dataFieldName?: string | undefined
+
+  /**
+   * Form-engine binding key. When the shell is rendered inside a `<Form>` and
+   * `name` is set, the shell auto-derives its `error` (from the engine) and
+   * `required` (from the schema) for this field — unless the consumer passes
+   * an explicit `error`/`required`, which always win. Also emitted as
+   * `data-field-name` when `dataFieldName` is not set. Outside a `<Form>` this
+   * prop is inert and the shell behaves byte-for-byte as before.
+   */
+  name?: string | undefined
+
+  /**
+   * Marks the field as visually "filled" (has a value) — emitted as
+   * `data-filled` on the wrapper for CSS float-label / styling hooks. Purely
+   * presentational; defaults to undefined (attribute omitted).
+   */
+  filled?: boolean | undefined
 
   /**
    * Visual state for the data-state attribute. Drives focus/error CSS
@@ -251,6 +270,8 @@ const FieldShell: React.FC<FieldShellProps> = ({
   helperText,
   dataField,
   dataFieldName,
+  name,
+  filled,
   state,
   styles,
   children,
@@ -262,10 +283,26 @@ const FieldShell: React.FC<FieldShellProps> = ({
   const inputId = `field-${reactId}`
   const helperId = `field-helper-${reactId}`
 
-  // Top-level props win over styles-nested. Most consumers will pass
-  // exactly one or the other, but if both are set the explicit
-  // top-level prop is the documented winner.
-  const required = requiredProp ?? styles?.required ?? false
+  // Optional form-engine context. `null` outside any <Form> — which is the
+  // back-compat path every existing explicit-prop callsite takes. When present
+  // AND a `name` is set, the shell can derive `error`/`required` for this
+  // field; explicit props always override.
+  const ctx = useOptionalFormContext()
+
+  // Bound error: an explicit `error` prop always wins (even `false`/`''`).
+  // Only when `error` is undefined do we fall back to the engine's error for
+  // this field. Outside a form, or without a name, this is always `error`.
+  const boundError =
+    error !== undefined ? error : ctx && name ? ctx.engine.getError(name) : undefined
+
+  // Top-level props win over styles-nested, which win over schema-derived.
+  // Most consumers pass exactly one of these; if several are set the explicit
+  // top-level prop is the documented winner. The schema-derived fallback only
+  // applies inside a <Form> with a `name`.
+  const required =
+    requiredProp ??
+    styles?.required ??
+    (ctx && name ? deriveRequiredFromSchema(ctx.schema, name) : false)
   const disabled = disabledProp ?? styles?.disabled ?? false
   const theme: FieldTheme = styles?.theme ?? 'sacred'
   const requiredIndicator = styles?.requiredIndicatorText ?? ' *'
@@ -274,8 +311,8 @@ const FieldShell: React.FC<FieldShellProps> = ({
   // string in the helper region. Boolean true sets aria-invalid AND
   // keeps the helperText (consumer can render their own bespoke
   // error elsewhere). Falsy = no error.
-  const hasError = Boolean(error)
-  const errorMessage = typeof error === 'string' ? error : null
+  const hasError = Boolean(boundError)
+  const errorMessage = typeof boundError === 'string' ? boundError : null
 
   // Decide which message to show in the helper region. Error takes
   // precedence; otherwise fall back to helperText.
@@ -308,8 +345,8 @@ const FieldShell: React.FC<FieldShellProps> = ({
   // Deps are `error` + the two STABLE string ids only — never the ReactNode
   // label, whose ref churns per render. No-op when no host bus is present.
   useEffect(() => {
-    if (!error) return
-    const message = typeof error === 'string' ? error : ''
+    if (!boundError) return
+    const message = typeof boundError === 'string' ? boundError : ''
     const rule = /required/i.test(message)
       ? 'required'
       : /invalid|not a valid|format|match|must be|@/i.test(message)
@@ -318,19 +355,21 @@ const FieldShell: React.FC<FieldShellProps> = ({
     emitDiag({
       type: 'form.validation.failed',
       formId: dataField ?? '',
-      field: dataFieldName ?? dataField ?? '',
+      field: dataFieldName ?? name ?? dataField ?? '',
       rule,
       value: message || true,
     })
-  }, [error, dataField, dataFieldName])
+  }, [boundError, dataField, dataFieldName, name])
 
   return (
     <div
       className={cssStyles.shell}
+      data-component="FieldShell"
       data-theme={theme}
       data-state={resolvedState}
       data-field={dataField}
-      data-field-name={dataFieldName}
+      data-field-name={dataFieldName ?? name}
+      data-filled={filled}
       aria-disabled={disabled || undefined}
       aria-invalid={hasError || undefined}
       style={styleOverridesToCss(styles)}

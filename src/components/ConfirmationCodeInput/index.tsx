@@ -5,16 +5,14 @@ import React, {
   useState,
   useEffect,
   useRef,
-  useMemo,
   useCallback,
+  type CSSProperties,
   type FC,
 } from 'react'
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
 import CustomButton, { type ButtonProps } from '../Button'
-import {
-  getConfirmationCodeInputStyles,
-  type ConfirmationCodeInputStyles,
-} from '../../theme'
+import { type ConfirmationCodeInputStyles } from '../../theme'
+import cssStyles from './ConfirmationCodeInput.module.css'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -53,29 +51,10 @@ const SacredGlyphs: React.FC = () => {
 }
 
 const SacredBottomDecorations: React.FC = () => {
-  const decorativeStyles = useMemo(
-    () => ({
-      bottomGlyphContainer: {
-        position: 'absolute' as const,
-        bottom: '0.25rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: '0.25rem',
-      } as React.CSSProperties,
-      bottomGlyph: {
-        color: 'rgba(255,215,0,0.3)',
-        fontSize: '0.75rem',
-        animation: 'sacred-pulse 2s infinite alternate',
-      } as React.CSSProperties,
-    }),
-    []
-  )
-
   return (
-    <div style={decorativeStyles.bottomGlyphContainer}>
+    <div className={cssStyles.bottomGlyphContainer}>
       {Array.from({ length: 3 }).map((_, i) => (
-        <span key={i} style={decorativeStyles.bottomGlyph}>
+        <span key={i} className={cssStyles.bottomGlyph}>
           .
         </span>
       ))}
@@ -110,8 +89,6 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
 }) => {
   // For uncontrolled mode - parent doesn't provide onChange
   const [uncontrolledValue, setUncontrolledValue] = useState(valueProp)
-  const [isHovered, setIsHovered] = useState(false)
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>(
     Array.from({ length: codeLength }, () => null)
   )
@@ -121,22 +98,53 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   const isControlled = onChange !== undefined
   const currentValue = isControlled ? valueProp : uncontrolledValue
 
-  const isSacredTheme = styles?.theme === 'sacred'
+  const theme = styles?.theme ?? 'light'
+  const isSacredTheme = theme === 'sacred'
   const isDisabled = styles?.disabled
 
-  const computedStyles = useMemo(
-    () =>
-      getConfirmationCodeInputStyles(styles, isHovered, isValid, isDisabled),
-    [styles, isHovered, isValid, isDisabled]
-  )
-
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
+  // Caller-supplied scalar overrides kept in JS (recipe step 3). Theme defaults
+  // live in CSS; this only carries explicit per-instance overrides + scalar
+  // values forwarded as CSS custom properties (gap / inputGap).
+  const containerOverrideStyle: CSSProperties = {
+    ...(styles?.width !== undefined && { width: styles.width }),
+    ...(styles?.maxWidth !== undefined && { maxWidth: styles.maxWidth }),
+    ...(styles?.minWidth !== undefined && { minWidth: styles.minWidth }),
+    ...(styles?.height !== undefined && { height: styles.height }),
+    ...(styles?.maxHeight !== undefined && { maxHeight: styles.maxHeight }),
+    ...(styles?.minHeight !== undefined && { minHeight: styles.minHeight }),
+    ...(styles?.margin !== undefined && { margin: styles.margin }),
+    ...(styles?.marginTop !== undefined && { marginTop: styles.marginTop }),
+    ...(styles?.marginBottom !== undefined && {
+      marginBottom: styles.marginBottom,
+    }),
+    ...(styles?.marginLeft !== undefined && { marginLeft: styles.marginLeft }),
+    ...(styles?.marginRight !== undefined && {
+      marginRight: styles.marginRight,
+    }),
+    ...(styles?.padding !== undefined && { padding: styles.padding }),
+    ...(styles?.backgroundColor !== undefined && {
+      background: styles.backgroundColor,
+    }),
+    ...(styles?.backgroundImage !== undefined && {
+      backgroundImage: styles.backgroundImage,
+    }),
+    ...(styles?.borderColor !== undefined && {
+      borderColor: styles.borderColor,
+    }),
+    ...(styles?.borderWidth !== undefined && {
+      borderWidth: styles.borderWidth,
+    }),
+    ...(styles?.borderRadius !== undefined && {
+      borderRadius: styles.borderRadius,
+    }),
+    ...(styles?.boxShadow !== undefined && { boxShadow: styles.boxShadow }),
+    ...(styles?.gap !== undefined && {
+      ['--cci-gap' as string]: styles.gap,
+    }),
+    ...(styles?.inputGap !== undefined && {
+      ['--cci-input-gap' as string]: styles.inputGap,
+    }),
+  }
 
   // Auto-focus first input on mount (only once)
   useEffect(() => {
@@ -264,23 +272,25 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     [currentValue, codeLength, updateValue]
   )
 
-  const handleFocus = useCallback((index: number) => {
-    setFocusedIndex(index)
-  }, [])
-
-  const handleBlur = useCallback(() => {
-    setFocusedIndex(null)
-  }, [])
-
   const digits = currentValue.padEnd(codeLength, '').split('')
   const allFieldsFilled = currentValue.length >= codeLength
 
   if (showSuccessState) {
     return (
-      <div style={computedStyles.successContainer}>
-        <CheckCircleOutline style={computedStyles.successIcon} />
-        <h3 style={computedStyles.successMessage}>{successMessage}</h3>
-        <div style={computedStyles.buttonContainer}>
+      <div className={cssStyles.successContainer} data-theme={theme}>
+        {/* CheckCircleOutline applies its own inline style to the <svg>, which
+            beats a className. Source the three theme-driven properties from
+            CSS custom properties (defined on .successContainer[data-theme])
+            so the values still live in CSS as a single source of truth. */}
+        <CheckCircleOutline
+          style={{
+            fontSize: 'var(--cci-success-icon-size)',
+            color: 'var(--cci-success-icon-color)',
+            filter: 'var(--cci-success-icon-filter)',
+          }}
+        />
+        <h3 className={cssStyles.successMessage}>{successMessage}</h3>
+        <div className={cssStyles.buttonContainer}>
           <CustomButton
             text="Disable Verification"
             styles={{
@@ -300,16 +310,17 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
 
   return (
     <div
-      style={computedStyles.container}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={cssStyles.root}
+      data-theme={theme}
+      {...(isDisabled && { 'data-disabled': 'true' })}
+      style={containerOverrideStyle}
       role="group"
       aria-label={ariaLabel || 'Confirmation Code'}
     >
       {isSacredTheme && <SacredGlyphs />}
-      <div style={computedStyles.mainContent}>
-        <div style={computedStyles.inputsRow}>
-          <div style={computedStyles.inputGroup}>
+      <div className={cssStyles.mainContent}>
+        <div className={cssStyles.inputsRow}>
+          <div className={cssStyles.inputGroup}>
             {Array.from({ length: codeLength }).map((_, index) => (
               <input
                 key={index}
@@ -324,27 +335,23 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 onChange={e => handleInputChange(e, index)}
                 onKeyDown={e => handleKeyDown(e, index)}
                 onPaste={e => handlePaste(e, index)}
-                onFocus={() => handleFocus(index)}
-                onBlur={handleBlur}
                 aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
                 aria-required={ariaRequired}
                 aria-invalid={ariaInvalid}
                 disabled={isDisabled}
-                style={{
-                  ...computedStyles.input,
-                  ...(focusedIndex === index && computedStyles.inputFocus),
-                }}
+                className={cssStyles.input}
               />
             ))}
           </div>
           <div
-            style={computedStyles.statusIndicator}
+            className={cssStyles.statusIndicator}
+            data-valid={isValid ? 'true' : 'false'}
             role="status"
             aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
           />
         </div>
         {showActionButtons && (
-          <div style={computedStyles.buttonContainer}>
+          <div className={cssStyles.buttonContainer}>
             {showSendResendButton && (
               <CustomButton
                 text={codeSent ? 'Resend Code' : 'Send Code'}

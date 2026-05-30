@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { getBreadcrumbStyles, type BreadcrumbStyles } from '../../theme'
+import React from 'react'
+import cssStyles from './Breadcrumb.module.css'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -18,6 +18,27 @@ export interface BreadcrumbItem {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void
 }
 
+/**
+ * Breadcrumb styles configuration. Theme selects the [data-theme] variant on
+ * the root; the remaining fields are caller-supplied CSS overrides layered on
+ * top of the CSS-module classes (parity with the old getBreadcrumbStyles
+ * merge).
+ */
+export interface BreadcrumbStyles {
+  /** Theme variant */
+  theme?: 'light' | 'dark' | 'sacred'
+  /** Custom container styles */
+  container?: React.CSSProperties
+  /** Custom item styles */
+  item?: React.CSSProperties
+  /** Custom separator styles */
+  separator?: React.CSSProperties
+  /** Custom active item styles */
+  activeItem?: React.CSSProperties
+  /** Custom hover styles */
+  itemHover?: React.CSSProperties
+}
+
 export interface BreadcrumbProps {
   /** Array of breadcrumb items */
   items: BreadcrumbItem[]
@@ -32,16 +53,6 @@ export interface BreadcrumbProps {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
-// --------------------------------------------------------------------------
-
-const SacredGlyph: React.FC<{
-  isHovered: boolean
-}> = () => {
-  return null
-}
-
-// --------------------------------------------------------------------------
 // MAIN BREADCRUMB COMPONENT
 // --------------------------------------------------------------------------
 
@@ -52,10 +63,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   styles,
   'aria-label': ariaLabel = 'breadcrumb',
 }) => {
-  const [hoveredItem, setHoveredItem] = useState<number | null>(null)
-
-  const computedStyles = getBreadcrumbStyles(styles)
-  const isSacredTheme = styles?.theme === 'sacred'
+  const theme = styles?.theme || 'sacred'
 
   // Handle max items display
   const displayItems =
@@ -88,36 +96,27 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     item: BreadcrumbItem & { isEllipsis?: boolean },
     index: number
   ) => {
-    const isHovered = hoveredItem === index
-
     if ('isEllipsis' in item && item.isEllipsis) {
       return (
-        <span key={index} style={computedStyles.ellipsis}>
+        <span key={index} className={cssStyles.ellipsis}>
           {item.label}
         </span>
       )
     }
 
-    const itemStyles = {
-      ...computedStyles.item,
-      ...(item.isActive && computedStyles.activeItem),
-      ...(isHovered && !item.isActive && computedStyles.itemHover),
-    }
+    const itemClassName = item.isActive
+      ? `${cssStyles.item} ${cssStyles.activeItem}`
+      : cssStyles.item
+
+    // Caller-supplied overrides layered on top of the CSS-module classes
+    // (parity with the old getBreadcrumbStyles merge of styles.item /
+    // styles.activeItem).
+    const itemOverride: React.CSSProperties | undefined = item.isActive
+      ? { ...styles?.item, ...styles?.activeItem }
+      : styles?.item
 
     const content = (
-      <span
-        style={{
-          position: 'relative',
-          display: 'inline-block',
-        }}
-        onMouseEnter={() => setHoveredItem(index)}
-        onMouseLeave={() => setHoveredItem(null)}
-      >
-        {item.label}
-        {isSacredTheme && !item.isActive && (
-          <SacredGlyph isHovered={isHovered} />
-        )}
-      </span>
+      <span className={cssStyles.itemContent}>{item.label}</span>
     )
 
     if (item.href && !item.isActive) {
@@ -125,7 +124,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         <a
           key={index}
           href={item.href}
-          style={itemStyles}
+          className={itemClassName}
+          style={itemOverride}
           onClick={event => handleItemClick(item, event)}
         >
           {content}
@@ -136,7 +136,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     return (
       <span
         key={index}
-        style={itemStyles}
+        className={itemClassName}
+        style={itemOverride}
         onClick={event => handleItemClick(item, event)}
         role={item.onClick ? 'button' : undefined}
         tabIndex={item.onClick ? 0 : undefined}
@@ -159,23 +160,32 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
 
   const renderSeparator = (index: number) => {
     return (
-      <span key={`separator-${index}`} style={computedStyles.separator}>
+      <span
+        key={`separator-${index}`}
+        className={cssStyles.separator}
+        style={styles?.separator}
+      >
         {defaultSeparator}
       </span>
     )
   }
 
   return (
-    <nav aria-label={ariaLabel} style={computedStyles.container}>
-      <ol style={computedStyles.list}>
+    <nav
+      aria-label={ariaLabel}
+      className={cssStyles.container}
+      data-theme={theme}
+      style={styles?.container}
+    >
+      <ol className={cssStyles.list}>
         {displayItems.map((item, index) => (
-          <li key={index} style={computedStyles.listItem}>
+          <li key={index} className={cssStyles.listItem}>
             {renderItem(item, index)}
             {index < displayItems.length - 1 && renderSeparator(index)}
           </li>
         ))}
       </ol>
-      {isSacredTheme && <div style={computedStyles.sacred?.shimmer} />}
+      {theme === 'sacred' && <div className={cssStyles.shimmer} />}
     </nav>
   )
 }

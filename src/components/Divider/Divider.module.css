@@ -1,0 +1,99 @@
+/* ==========================================================================
+   DIVIDER - CSS MODULE
+   A thin gradient rule (horizontal or vertical) with an optional centered
+   label. The sacred-gold gradient is the rendered default; caller-supplied
+   overrides (width / height / margins / color / explicit backgroundColor)
+   come in as CSS custom properties set inline on the root, so the selector
+   logic stays in CSS while the dynamic scalar values stay in JS.
+
+   The gradient is built from the SACRED_GOLD token at 0.3 alpha (enabled)
+   and 0.15 alpha (disabled), matching the prior inline implementation
+   exactly:
+     enabled  -> rgba(255, 215, 0, 0.3)
+     disabled -> rgba(255, 215, 0, 0.15)
+   ========================================================================== */
+
+.root {
+  /* Tokens — overridable per-instance via inline CSS vars (caller props). */
+  --divider-gradient-color: rgba(255, 215, 0, 0.3);
+  --divider-content-color: #ffd700;
+
+  position: relative;
+  box-sizing: border-box;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   ORIENTATION
+   Horizontal: full-width 2px rule, 24px top/bottom margin by default.
+   Vertical:   2px wide, 100% tall rule, 24px left/right margin by default.
+   Caller props feed --divider-width / --divider-height / --divider-margin-*
+   with the same fallbacks the JS used.
+   -------------------------------------------------------------------------- */
+.horizontal {
+  width: var(--divider-width, 100%);
+  height: var(--divider-height, 2px);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--divider-gradient-color),
+    transparent
+  );
+  margin-top: var(--divider-margin-top, 24px);
+  margin-bottom: var(--divider-margin-bottom, 24px);
+  margin-left: var(--divider-margin-left, 0);
+  margin-right: var(--divider-margin-right, 0);
+}
+
+.vertical {
+  width: var(--divider-width, 2px);
+  height: var(--divider-height, 100%);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--divider-gradient-color),
+    transparent
+  );
+  margin-top: var(--divider-margin-top, 0);
+  margin-bottom: var(--divider-margin-bottom, 0);
+  margin-left: var(--divider-margin-left, 24px);
+  margin-right: var(--divider-margin-right, 24px);
+}
+
+/* --------------------------------------------------------------------------
+   STATE — disabled. Dims the rule and weakens the gradient alpha to match
+   the prior `alpha(SACRED_GOLD, 0.15)` + `opacity: 0.5` behavior. When an
+   explicit backgroundColor is supplied the gradient var is replaced (see
+   .hasBackground) so disabled only changes opacity, as before.
+   -------------------------------------------------------------------------- */
+.disabled {
+  --divider-gradient-color: rgba(255, 215, 0, 0.15);
+  opacity: 0.5;
+}
+
+/* --------------------------------------------------------------------------
+   EXPLICIT BACKGROUND — caller passed styles.backgroundColor. The whole
+   gradient is replaced by the solid color (matching getBackground()'s
+   early return), so the disabled gradient-alpha tweak no longer applies;
+   only the opacity dim remains.
+   -------------------------------------------------------------------------- */
+.hasBackground {
+  background: var(--divider-background);
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT — centered label overlay. Sacred defaults transcribed exactly
+   from the prior contentStyle inline block.
+   -------------------------------------------------------------------------- */
+.content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0 16px;
+  color: var(--divider-content-color);
+  font-size: 14px;
+  font-family: 'Cinzel', serif;
+  white-space: nowrap;
+}

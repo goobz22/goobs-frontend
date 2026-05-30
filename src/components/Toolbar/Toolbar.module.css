@@ -1,0 +1,148 @@
+/* ==========================================================================
+   TOOLBAR - CSS MODULE
+   Migrated off theme/toolbar.ts (getToolbarStyles / getToolbarTheme). Theme
+   variant (light / dark / sacred) is expressed as data-theme on the root.
+   Sacred is the HARDCODED default; light/dark are [data-theme] overrides.
+   Exact color / spacing / animation values transcribed from theme/toolbar.ts.
+
+   NOTE on parity: the old theme set the same transparent container for all
+   three themes; only sacred added a faint dual radial-gradient backgroundImage
+   and a slower transition (TRANSITIONS.slow = 300ms vs medium = 200ms). The
+   glyph (𓊗) is rendered only for the sacred theme by the component.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER
+   The old getToolbarStyles built a flex-column container, but the component's
+   outer <div> then overrode it to a left-aligned flex-row. Both are folded
+   into this single class so the rendered box matches 1:1.
+   -------------------------------------------------------------------------- */
+.root {
+  /* sacred defaults (theme variant overrides below) */
+  --toolbar-divider-color: rgba(255, 215, 0, 0.6);
+  --toolbar-divider-filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+  --toolbar-glyph-color: rgba(255, 215, 0, 0.2);
+  --toolbar-transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --toolbar-bg-image: radial-gradient(
+      circle at top right,
+      rgba(255, 215, 0, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(255, 215, 0, 0.02) 0%,
+      transparent 50%
+    );
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  gap: 1rem;
+  padding: 1rem;
+  background: transparent;
+  background-image: var(--toolbar-bg-image);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  transition: var(--toolbar-transition);
+}
+
+/* light theme overrides */
+.root[data-theme='light'] {
+  --toolbar-divider-color: rgba(0, 0, 0, 0.6);
+  --toolbar-divider-filter: none;
+  --toolbar-glyph-color: rgba(107, 114, 128, 0.3);
+  --toolbar-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --toolbar-bg-image: none;
+}
+
+/* dark theme overrides */
+.root[data-theme='dark'] {
+  --toolbar-divider-color: rgba(156, 163, 175, 0.6);
+  --toolbar-divider-filter: none;
+  --toolbar-glyph-color: rgba(156, 163, 175, 0.3);
+  --toolbar-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --toolbar-bg-image: none;
+}
+
+/* --------------------------------------------------------------------------
+   GLYPH — sacred-only decorative mark, absolutely positioned top-right.
+   The old theme referenced an undefined `glyphRotate` keyframe, so nothing
+   actually animated. The keyframe is now defined below so the intended slow
+   rotation renders; color/size/position are exact from theme/toolbar.ts.
+   -------------------------------------------------------------------------- */
+.glyph {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  color: var(--toolbar-glyph-color);
+  font-size: 0.875rem;
+  animation: glyphRotate 10s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph {
+    animation: none;
+  }
+}
+
+@keyframes glyphRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT — left-aligned flex row holding divider + buttons + dropdown +
+   search. Matches the old inline contentStyle.
+   -------------------------------------------------------------------------- */
+.content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   DIVIDER — vertical rule. Wrapper supplies the 0 8px horizontal padding,
+   the rule itself is a 2px left border colored per theme. Sacred adds a gold
+   drop-shadow filter; light/dark have no filter (var resolves to `none`).
+   -------------------------------------------------------------------------- */
+.dividerWrap {
+  padding: 0 8px;
+}
+
+.divider {
+  height: 20px;
+  border-left: 2px solid var(--toolbar-divider-color);
+  filter: var(--toolbar-divider-filter);
+}
+
+/* --------------------------------------------------------------------------
+   FILTER DROPDOWN WRAPPER — min/max width box around the inner Dropdown.
+   -------------------------------------------------------------------------- */
+.filterWrap {
+  min-width: 180px;
+  max-width: 200px;
+}
+
+/* --------------------------------------------------------------------------
+   SEARCHBAR WRAPPER — grows to fill, capped width, slight bottom margin to
+   match the old inline style.
+   -------------------------------------------------------------------------- */
+.searchWrap {
+  flex: 1 1 auto;
+  max-width: 24rem;
+  min-width: 200px;
+  margin-bottom: 15px;
+}

@@ -1,0 +1,277 @@
+/* ==========================================================================
+   CODECOPY - CSS MODULE
+   Code-snippet display + copy block. Three themes expressed via
+   [data-theme] on the root container. The JS default (when no theme is
+   supplied) is `dark`, matching the old getCodeCopyStyles() fall-through,
+   so the base .container class carries the dark values and light/sacred
+   are [data-theme] overrides. Values transcribed verbatim from the old
+   src/theme/codecopy.ts (light/dark/sacred) for visual parity.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CONTAINER — base = DARK theme defaults
+   -------------------------------------------------------------------------- */
+.container {
+  position: relative;
+  border-radius: 8px;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  /* TRANSITIONS.medium */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.container[data-theme='light'] {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+}
+
+.container[data-theme='sacred'] {
+  border-radius: 0px;
+  background-color: #1c1917;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  /* SHADOWS.sacred.medium */
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.2);
+  /* sacred container has no transition in the old theme */
+  transition: none;
+}
+
+/* Disabled — old getCodeCopyStyles applied this to the container when
+   isDisabled is truthy (styles?.disabled). */
+.container[data-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+/* --------------------------------------------------------------------------
+   HEADER — base = DARK
+   -------------------------------------------------------------------------- */
+.header {
+  height: 2.5rem;
+  width: 100%;
+  max-width: 100%;
+  background-color: #111827;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  border-bottom: 1px solid #374151;
+  position: relative;
+  z-index: 20;
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.container[data-theme='light'] .header {
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.container[data-theme='sacred'] .header {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  background-image: linear-gradient(
+    to right,
+    rgba(255, 215, 0, 0.1),
+    transparent
+  );
+}
+
+/* --------------------------------------------------------------------------
+   LANGUAGE INDICATOR + TEXT
+   langIndicator is theme-agnostic in the old theme; the inline overrides
+   (flexShrink/minWidth/overflow) from the TSX are folded in here.
+   -------------------------------------------------------------------------- */
+.langIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* langText — base = DARK */
+.langText {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #d1d5db;
+  font-family: monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  /* inline overrides from the old TSX */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.container[data-theme='light'] .langText {
+  color: #374151;
+}
+
+.container[data-theme='sacred'] .langText {
+  color: rgba(255, 215, 0, 0.8);
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   COPY-BUTTON SLOT (the right-side wrapper around <Button>)
+   -------------------------------------------------------------------------- */
+.copyButtonSlot {
+  flex-shrink: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 30%;
+  justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   CODE BLOCK — base = DARK
+   -------------------------------------------------------------------------- */
+.codeBlock {
+  background-color: #000000;
+  color: #f9fafb;
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  position: relative;
+  z-index: 20;
+}
+
+.container[data-theme='light'] .codeBlock {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.container[data-theme='sacred'] .codeBlock {
+  background-color: transparent;
+  color: rgba(255, 215, 0, 0.9);
+}
+
+/* --------------------------------------------------------------------------
+   LINE NUMBERS — base = DARK
+   -------------------------------------------------------------------------- */
+.lineNumbers {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-right: 1px solid #374151;
+  padding: 1rem 0.5rem;
+  user-select: none;
+  position: relative;
+}
+
+.container[data-theme='light'] .lineNumbers {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-right: 1px solid #d1d5db;
+}
+
+.container[data-theme='sacred'] .lineNumbers {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-right: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* lineNumber — base = DARK */
+.lineNumber {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  font-family: monospace;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.container[data-theme='light'] .lineNumber {
+  color: #6b7280;
+}
+
+.container[data-theme='sacred'] .lineNumber {
+  color: rgba(255, 215, 0, 0.4);
+}
+
+/* NOTE: the old sacred-theme TSX set
+     animation: line-number-glow ${3 + (num % 3)}s ease-in-out infinite
+   per line number, but the `line-number-glow` keyframe was NEVER defined
+   anywhere (not in shared.ts KEYFRAMES, not injected, not in any global
+   stylesheet). An animation referencing an undefined keyframe is a no-op,
+   so this rendered with NO animation. To preserve exact visual parity we
+   intentionally do not animate here. The per-line duration/delay values
+   were therefore dead runtime computation and have been dropped. */
+
+/* --------------------------------------------------------------------------
+   PRE — base = DARK
+   -------------------------------------------------------------------------- */
+.pre {
+  background-color: transparent;
+  margin: 0;
+  flex-grow: 1;
+  padding: 1rem;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: #f9fafb;
+}
+
+.container[data-theme='light'] .pre {
+  color: #1f2937;
+}
+
+.container[data-theme='sacred'] .pre {
+  color: rgba(255, 215, 0, 0.9);
+  text-shadow: 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED SHIMMER (only rendered for the sacred theme)
+   -------------------------------------------------------------------------- */
+.shimmer {
+  position: absolute;
+  inset: 0px;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent,
+    rgba(255, 215, 0, 0.05),
+    transparent
+  );
+  background-size: 200% 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED SYNTAX HIGHLIGHT OVERRIDES
+   The old TSX imperatively walked the hljs tokens after highlightElement()
+   and set inline color/text-shadow on .hljs-keyword/.hljs-string/etc. for
+   the sacred theme only. That is pure visual styling driven by the theme,
+   so it belongs in CSS, scoped under [data-theme='sacred'].
+   -------------------------------------------------------------------------- */
+.container[data-theme='sacred'] .pre :global(.hljs-keyword) {
+  color: #ffd700;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+}
+
+.container[data-theme='sacred'] .pre :global(.hljs-string) {
+  color: rgba(255, 215, 0, 0.8);
+}
+
+.container[data-theme='sacred'] .pre :global(.hljs-comment) {
+  color: rgba(255, 215, 0, 0.5);
+  font-style: italic;
+}
+
+.container[data-theme='sacred'] .pre :global(.hljs-function),
+.container[data-theme='sacred'] .pre :global(.hljs-title) {
+  color: rgba(255, 215, 0, 0.9);
+}

@@ -45,6 +45,14 @@ export type GoobsDiagEvent =
       value: unknown
     }
   | { type: 'form.validation.passed'; formId: string }
+  | { type: 'action.invoke'; action: string; subject?: string }
+  | { type: 'nav.change'; component: string; to: string }
+  | {
+      type: 'component.state'
+      component: string
+      subject?: string
+      state: string
+    }
 
 /** Minimal shape of the host bus we depend on. Intentionally structural. */
 interface DiagSink {

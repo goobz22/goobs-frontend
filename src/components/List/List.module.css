@@ -1,0 +1,102 @@
+/* ==========================================================================
+   LIST — CSS MODULE
+   Migrated from theme/list.ts. The old getListStyles default theme was
+   'light', so light is the HARDCODED base here and sacred / dark are
+   [data-theme] overrides. Values are transcribed 1:1 from theme/list.ts —
+   no approximations.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   LIST CONTAINER (<ul>) — LIGHT THEME (default)
+   -------------------------------------------------------------------------- */
+.container {
+  /* layout invariants from getListStyles (applied for every theme) */
+  list-style: none;
+  margin: 0;
+  display: block;
+
+  /* light-theme base palette + padding */
+  background-color: transparent;
+  color: inherit;
+  padding: 8px 0;
+}
+
+.container[data-theme='dark'] {
+  color: rgb(243, 244, 246);
+}
+
+.container[data-theme='sacred'] {
+  color: rgba(255, 215, 0, 0.9);
+}
+
+/* dense overrides the vertical padding (4px 0 vs 8px 0) regardless of theme */
+.container[data-dense='true'] {
+  padding: 4px 0;
+}
+
+/* --------------------------------------------------------------------------
+   LIST ITEM (<li>)
+   padding + flex layout are theme-independent in the old theme.
+   -------------------------------------------------------------------------- */
+.listItem {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   LIST ITEM ICON (<div>)
+   marginRight + flex layout theme-independent; color is themed.
+   -------------------------------------------------------------------------- */
+.listItemIcon {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  color: inherit;
+}
+
+.listItemIcon[data-theme='dark'] {
+  color: rgb(243, 244, 246);
+}
+
+.listItemIcon[data-theme='sacred'] {
+  color: rgba(255, 215, 0, 0.9);
+}
+
+/* --------------------------------------------------------------------------
+   LIST ITEM TEXT — PRIMARY (<span>)
+   -------------------------------------------------------------------------- */
+.listItemTextPrimary {
+  font-size: 1rem;
+  color: inherit;
+  font-family: inherit;
+}
+
+.listItemTextPrimary[data-theme='dark'] {
+  color: rgb(243, 244, 246);
+  font-family: inherit;
+}
+
+.listItemTextPrimary[data-theme='sacred'] {
+  color: rgba(255, 215, 0, 0.9);
+  font-family: 'Cinzel', serif;
+}
+
+/* --------------------------------------------------------------------------
+   LIST ITEM TEXT — SECONDARY (<span>)
+   -------------------------------------------------------------------------- */
+.listItemTextSecondary {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.54);
+  font-family: inherit;
+}
+
+.listItemTextSecondary[data-theme='dark'] {
+  color: rgb(156, 163, 175);
+  font-family: inherit;
+}
+
+.listItemTextSecondary[data-theme='sacred'] {
+  color: rgba(255, 215, 0, 0.7);
+  font-family: 'Cinzel', serif;
+}

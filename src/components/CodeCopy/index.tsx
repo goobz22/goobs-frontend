@@ -9,11 +9,45 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  type CSSProperties,
   type FC,
 } from 'react'
 import Button from '../../components/Button'
 import hljs from 'highlight.js'
-import { getCodeCopyStyles, type CodeCopyStyles } from '../../theme'
+import cssStyles from './CodeCopy.module.css'
+
+// --------------------------------------------------------------------------
+// PUBLIC STYLE OPTIONS
+// --------------------------------------------------------------------------
+
+export interface CodeCopyStyles {
+  /** Theme selection: light, dark, or sacred */
+  theme?: 'light' | 'dark' | 'sacred'
+  /** Whether the component is disabled */
+  disabled?: boolean
+  /** Custom container background color */
+  containerBackground?: string
+  /** Custom header background color */
+  headerBackground?: string
+  /** Custom code block background color */
+  codeBackground?: string
+  /** Custom text color */
+  textColor?: string
+  /** Custom border color */
+  borderColor?: string
+  /** Custom border radius */
+  borderRadius?: string
+  /** Custom font family for code */
+  fontFamily?: string
+  /** Custom font size for code */
+  fontSize?: string
+  /** Custom line height for code */
+  lineHeight?: string
+  /** Whether to show line numbers */
+  showLineNumbers?: boolean
+  /** Custom animation duration for sacred theme */
+  animationDuration?: string
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -29,36 +63,6 @@ export interface CodeCopyProps {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
-// --------------------------------------------------------------------------
-
-const SacredGlyphs: FC = () => {
-  return null
-}
-
-const SacredLineNumbers: FC<{
-  lineNumbers: number[]
-  computedStyles: ReturnType<typeof getCodeCopyStyles>
-}> = ({ lineNumbers, computedStyles }) => {
-  return (
-    <div style={computedStyles.lineNumbers}>
-      {lineNumbers.map(num => (
-        <div
-          key={num}
-          style={{
-            ...computedStyles.lineNumber,
-            animation: `line-number-glow ${3 + (num % 3)}s ease-in-out infinite`,
-            animationDelay: `${num * 0.1}s`,
-          }}
-        >
-          {num}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// --------------------------------------------------------------------------
 // MAIN CODE COPY COMPONENT
 // --------------------------------------------------------------------------
 
@@ -71,15 +75,49 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   const codeRef = useRef<HTMLElement>(null)
   const [copied, setCopied] = useState(false)
 
-  const computedStyles = useMemo(
-    () => getCodeCopyStyles(styles, styles?.disabled),
-    [styles]
-  )
+  const theme = styles?.theme || 'dark'
+  const isSacredTheme = theme === 'sacred'
+  const shouldShowLineNumbers = styles?.showLineNumbers !== false
 
   const lineNumbers = useMemo(
     () => Array.from({ length: code.split('\n').length }, (_, i) => i + 1),
     [code]
   )
+
+  // Caller-supplied overrides stay in JS — only applied when provided so
+  // the CSS-module defaults win otherwise. Each maps to the exact property
+  // the old getCodeCopyStyles() spread onto its respective element. These
+  // are plain derived consts; the React Compiler memoizes them automatically
+  // (manual useMemo here trips react-hooks/preserve-manual-memoization since
+  // the inferred dep is the whole `styles` object).
+  const containerOverrides: CSSProperties = {}
+  if (styles?.containerBackground)
+    containerOverrides.backgroundColor = styles.containerBackground
+  if (styles?.borderColor) containerOverrides.borderColor = styles.borderColor
+  if (styles?.borderRadius)
+    containerOverrides.borderRadius = styles.borderRadius
+  const containerStyle = Object.keys(containerOverrides).length
+    ? containerOverrides
+    : undefined
+
+  const headerStyle: CSSProperties | undefined = styles?.headerBackground
+    ? { backgroundColor: styles.headerBackground }
+    : undefined
+
+  const langTextStyle: CSSProperties | undefined = styles?.textColor
+    ? { color: styles.textColor }
+    : undefined
+
+  const codeBlockStyle: CSSProperties | undefined = styles?.codeBackground
+    ? { backgroundColor: styles.codeBackground }
+    : undefined
+
+  const preOverrides: CSSProperties = {}
+  if (styles?.fontFamily) preOverrides.fontFamily = styles.fontFamily
+  if (styles?.fontSize) preOverrides.fontSize = styles.fontSize
+  if (styles?.lineHeight) preOverrides.lineHeight = styles.lineHeight
+  if (styles?.textColor) preOverrides.color = styles.textColor
+  const preStyle = Object.keys(preOverrides).length ? preOverrides : undefined
 
   const handleCopy = useCallback(() => {
     if (styles?.disabled) return
@@ -97,79 +135,33 @@ const CodeCopy: FC<CodeCopyProps> = props => {
     }
   }, [styles?.disabled])
 
-  // Apply syntax highlighting
+  // Apply syntax highlighting. The sacred-theme token recoloring that used
+  // to run imperatively here now lives in CodeCopy.module.css under
+  // [data-theme='sacred'] .pre :global(.hljs-*), so this effect only needs
+  // to invoke highlight.js.
   useEffect(() => {
     if (codeRef.current) {
       hljs.highlightElement(codeRef.current)
-
-      // Sacred theme specific highlighting
-      if (styles?.theme === 'sacred' && codeRef.current) {
-        const keywords = codeRef.current.querySelectorAll('.hljs-keyword')
-        keywords.forEach(el => {
-          ;(el as HTMLElement).style.color = '#FFD700'
-          ;(el as HTMLElement).style.textShadow =
-            '0 0 4px rgba(255, 215, 0, 0.5)'
-        })
-
-        const strings = codeRef.current.querySelectorAll('.hljs-string')
-        strings.forEach(el => {
-          ;(el as HTMLElement).style.color = 'rgba(255, 215, 0, 0.8)'
-        })
-
-        const comments = codeRef.current.querySelectorAll('.hljs-comment')
-        comments.forEach(el => {
-          ;(el as HTMLElement).style.color = 'rgba(255, 215, 0, 0.5)'
-          ;(el as HTMLElement).style.fontStyle = 'italic'
-        })
-
-        const functions = codeRef.current.querySelectorAll(
-          '.hljs-function, .hljs-title'
-        )
-        functions.forEach(el => {
-          ;(el as HTMLElement).style.color = 'rgba(255, 215, 0, 0.9)'
-        })
-      }
     }
-  }, [code, language, styles?.theme])
-
-  const isSacredTheme = styles?.theme === 'sacred'
-  const shouldShowLineNumbers = styles?.showLineNumbers !== false
+  }, [code, language])
 
   return (
-    <div style={computedStyles.container} {...rest}>
-      {isSacredTheme && <div style={computedStyles.shimmer} />}
-      {isSacredTheme && <SacredGlyphs />}
+    <div
+      className={cssStyles.container}
+      data-theme={theme}
+      data-disabled={styles?.disabled ? 'true' : undefined}
+      style={containerStyle}
+      {...rest}
+    >
+      {isSacredTheme && <div className={cssStyles.shimmer} />}
 
-      <div style={computedStyles.header}>
-        <div
-          style={{
-            ...computedStyles.langIndicator,
-            flexShrink: 1,
-            minWidth: 0,
-            overflow: 'hidden',
-          }}
-        >
-          <span
-            style={{
-              ...computedStyles.langText,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+      <div className={cssStyles.header} style={headerStyle}>
+        <div className={cssStyles.langIndicator}>
+          <span className={cssStyles.langText} style={langTextStyle}>
             {language}
           </span>
         </div>
-        <div
-          style={{
-            flexShrink: 1,
-            display: 'flex',
-            alignItems: 'center',
-            minWidth: 0,
-            maxWidth: '30%',
-            justifyContent: 'flex-end',
-          }}
-        >
+        <div className={cssStyles.copyButtonSlot}>
           <Button
             text={copied ? '✓' : '⧉'}
             onClick={handleCopy}
@@ -201,23 +193,17 @@ const CodeCopy: FC<CodeCopyProps> = props => {
         </div>
       </div>
 
-      <div style={computedStyles.codeBlock}>
-        {isSacredTheme && shouldShowLineNumbers && (
-          <SacredLineNumbers
-            lineNumbers={lineNumbers}
-            computedStyles={computedStyles}
-          />
-        )}
-        {!isSacredTheme && shouldShowLineNumbers && (
-          <div style={computedStyles.lineNumbers}>
+      <div className={cssStyles.codeBlock} style={codeBlockStyle}>
+        {shouldShowLineNumbers && (
+          <div className={cssStyles.lineNumbers}>
             {lineNumbers.map(num => (
-              <div key={num} style={computedStyles.lineNumber}>
+              <div key={num} className={cssStyles.lineNumber}>
                 {num}
               </div>
             ))}
           </div>
         )}
-        <pre style={computedStyles.pre}>
+        <pre className={cssStyles.pre} style={preStyle}>
           <code ref={codeRef} className={`language-${language}`}>
             {code}
           </code>
