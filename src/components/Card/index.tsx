@@ -86,7 +86,6 @@
  */
 
 import React, {
-  cloneElement,
   forwardRef,
   isValidElement,
   useId,
@@ -138,18 +137,33 @@ function mergeStyles(
   return { ...(a ?? {}), ...(b ?? {}) }
 }
 
-/**
- * Forwards props (className, style, refs, data-*, aria-*) into a single
- * child element. Identical contract to Radix's <Slot>. Use when you want
- * a component to render its child as-is with the parent's props attached.
- */
-function renderAsChild(
-  child: ReactNode,
-  parentProps: AnyProps,
+interface AsChildSlotProps {
+  /** The single child element the parent renders "as". */
+  child: ReactNode
+  /** Props the parent merges onto the child (className, style, data/aria attrs). */
+  parentProps: AnyProps
+  /** Parent className, merged ahead of the child's own className. */
   parentClassName?: string
-): ReactNode {
-  if (!isValidElement(child)) return child
-  const childProps = (child as ReactElement<AnyProps>).props ?? {}
+  /** Ref forwarded onto the child's underlying node (React 19 ref-as-prop). */
+  ref?: React.Ref<unknown> | undefined
+}
+
+/**
+ * Radix-style <Slot>: renders `child` as-is with the parent's props merged in
+ * and `ref` forwarded onto the child's underlying node. The child is
+ * reconstructed via JSX (using its own element type) rather than
+ * `cloneElement`, so the forwarded ref is attached through a JSX `ref={}`
+ * attribute — the only ref-attachment site the `react-hooks/refs` rule permits.
+ */
+function AsChildSlot({
+  child,
+  parentProps,
+  parentClassName,
+  ref,
+}: AsChildSlotProps): ReactElement | null {
+  if (!isValidElement(child)) return <>{child}</>
+  const childElement = child as ReactElement<AnyProps>
+  const childProps = childElement.props ?? {}
   const mergedClassName = mergeClassNames(
     parentClassName,
     childProps['className'] as string | undefined
@@ -158,10 +172,16 @@ function renderAsChild(
     parentProps['style'] as CSSProperties | undefined,
     childProps['style'] as CSSProperties | undefined
   )
-  const next: AnyProps = { ...parentProps, ...childProps }
-  if (mergedClassName) next['className'] = mergedClassName
-  if (mergedStyle) next['style'] = mergedStyle
-  return cloneElement(child as ReactElement<AnyProps>, next)
+  const mergedProps: AnyProps = { ...parentProps, ...childProps }
+  if (mergedClassName) mergedProps['className'] = mergedClassName
+  if (mergedStyle) mergedProps['style'] = mergedStyle
+  // The parent's ref wins; fall back to any ref the child declared itself so
+  // `asChild` never silently drops an existing child ref.
+  const childOwnRef = childProps['ref'] as React.Ref<unknown> | undefined
+  const forwardedRef = ref ?? childOwnRef
+  delete mergedProps['ref']
+  const ChildType = childElement.type as ElementType
+  return <ChildType {...mergedProps} ref={forwardedRef} />
 }
 
 // -----------------------------------------------------------------------------
@@ -207,10 +227,9 @@ export interface CardProps
   children: ReactNode
 }
 
-interface CardComponent
-  extends React.ForwardRefExoticComponent<
-    CardProps & React.RefAttributes<HTMLElement>
-  > {
+interface CardComponent {
+  (props: CardProps & React.RefAttributes<HTMLElement>): ReactElement | null
+  displayName?: string
   Header: typeof CardHeader
   HeaderIcon: typeof CardHeaderIcon
   HeaderMeta: typeof CardHeaderMeta
@@ -238,25 +257,28 @@ interface CardComponent
   EmptyState: typeof CardEmptyState
 }
 
-const CardInner = forwardRef<HTMLElement, CardProps>(function CardInner(
-  {
-    variant = 'standard',
-    selected = false,
-    interactive = false,
-    disabled = false,
-    dragging = false,
-    borderAccent,
-    cardType,
-    cardId,
-    styles,
-    asChild = false,
-    className,
-    style,
-    children,
-    ...restProps
-  },
-  ref
-) {
+// React 19 ref-as-prop (not forwardRef): the `asChild` slot has to forward the
+// caller's ref onto a cloned child via `renderAsChild`, and the React-Compiler
+// `react-hooks/refs` rule forbids passing a forwardRef ref-param into a function
+// during render. Receiving `ref` as an ordinary prop is the supported way to do
+// this — forwardRef is deprecated in React 19.
+function CardInner({
+  variant = 'standard',
+  selected = false,
+  interactive = false,
+  disabled = false,
+  dragging = false,
+  borderAccent,
+  cardType,
+  cardId,
+  styles,
+  asChild = false,
+  className,
+  style,
+  children,
+  ref,
+  ...restProps
+}: CardProps & React.RefAttributes<HTMLElement>): ReactElement | null {
   const theme = styles?.theme ?? 'sacred'
   const titleId = useId()
   const contextValue = useMemo<CardContextValue>(
@@ -302,7 +324,6 @@ const CardInner = forwardRef<HTMLElement, CardProps>(function CardInner(
     ...(borderAccent?.side && {
       'data-card-accent-side': borderAccent.side,
     }),
-    ref,
     ...restProps,
   }
 
@@ -311,11 +332,22 @@ const CardInner = forwardRef<HTMLElement, CardProps>(function CardInner(
   )
 
   if (asChild) {
-    return renderAsChild(children, sharedProps, rootClassName) as ReactElement
+    return (
+      <AsChildSlot
+        ref={ref}
+        child={children}
+        parentProps={sharedProps}
+        parentClassName={rootClassName}
+      />
+    )
   }
 
-  return React.createElement('article', sharedProps, content)
-}) as unknown as CardComponent
+  return (
+    <article ref={ref} {...sharedProps}>
+      {content}
+    </article>
+  )
+}
 
 // -----------------------------------------------------------------------------
 // CARD.HEADER
@@ -389,19 +421,20 @@ export interface CardTitleProps
   asChild?: boolean
 }
 
-const CardTitle = forwardRef<HTMLElement, CardTitleProps>(function CardTitle(
-  {
-    as = 'h3',
-    href,
-    onClick,
-    ariaLabel,
-    asChild = false,
-    className,
-    children,
-    ...restProps
-  },
-  ref
-) {
+// Ref-as-prop (see CardInner) — the `asChild` slot forwards `ref` into
+// `renderAsChild`, which the `react-hooks/refs` rule forbids for a forwardRef
+// ref-param.
+function CardTitle({
+  as = 'h3',
+  href,
+  onClick,
+  ariaLabel,
+  asChild = false,
+  className,
+  children,
+  ref,
+  ...restProps
+}: CardTitleProps & React.RefAttributes<HTMLElement>): ReactElement | null {
   const { titleId } = useCardContext()
 
   const headingClassName = mergeClassNames(cssStyles.title, className)
@@ -436,16 +469,27 @@ const CardTitle = forwardRef<HTMLElement, CardTitleProps>(function CardTitle(
     id: titleId,
     className: headingClassName,
     'data-card-title': 'true',
-    ref,
     ...restProps,
   }
 
   if (asChild) {
-    return renderAsChild(children, sharedProps, headingClassName) as ReactElement
+    return (
+      <AsChildSlot
+        ref={ref}
+        child={children}
+        parentProps={sharedProps}
+        parentClassName={headingClassName}
+      />
+    )
   }
 
-  return React.createElement(as as ElementType, sharedProps, body)
-})
+  const HeadingTag = as as ElementType
+  return (
+    <HeadingTag ref={ref} {...sharedProps}>
+      {body}
+    </HeadingTag>
+  )
+}
 
 // -----------------------------------------------------------------------------
 // CARD.SUBTITLE
@@ -1312,7 +1356,7 @@ const CardEmptyState = forwardRef<HTMLDivElement, CardEmptyStateProps>(
 // COMPOUND-COMPONENT ASSEMBLY
 // -----------------------------------------------------------------------------
 
-const Card = CardInner
+const Card = CardInner as unknown as CardComponent
 Card.Header = CardHeader
 Card.HeaderIcon = CardHeaderIcon
 Card.HeaderMeta = CardHeaderMeta
