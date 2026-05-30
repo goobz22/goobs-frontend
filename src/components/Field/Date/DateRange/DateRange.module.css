@@ -11,7 +11,7 @@
 .container {
   position: relative;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: var(--goobs-space-md);
   box-sizing: border-box;
 }
 
@@ -23,7 +23,7 @@
   display: flex;
   /* Caller may override via the --date-range-gap custom property
      (styles.gap); defaults to 16px. */
-  gap: var(--date-range-gap, 16px);
+  gap: var(--date-range-gap, var(--goobs-space-md));
   width: 100%;
   align-items: flex-start;
   flex-wrap: wrap;
@@ -44,16 +44,16 @@
 
 .label {
   display: block;
-  margin-bottom: 8px;
-  color: #ffd700;
-  font-size: 14px;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--goobs-space-xs);
+  color: var(--goobs-gold);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-sacred);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
 }
 
 .requiredIndicator {
-  color: #ffd700;
-  margin-left: 4px;
+  color: var(--goobs-gold);
+  margin-left: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -62,13 +62,13 @@
 
 .input {
   width: 100%;
-  padding: 12px 16px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
+  background-color: var(--goobs-sacred-control-bg);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-lg);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
-  font-size: 16px;
+  font-size: var(--goobs-text-xl);
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
@@ -77,17 +77,17 @@
 }
 
 .input:focus {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  border-color: var(--goobs-gold-a60);
+  box-shadow: var(--goobs-shadow-sacred-sm);
 }
 
 .input:hover:not(:disabled):not(:focus) {
-  border-color: rgba(255, 215, 0, 0.5);
+  border-color: var(--goobs-gold-a50);
 }
 
 .input:disabled {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: rgba(255, 255, 255, 0.4);
+  background-color: var(--goobs-sacred-control-bg);
+  color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
 }
 
@@ -96,9 +96,9 @@
    -------------------------------------------------------------------------- */
 
 .helperText {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-xs);
+  color: var(--goobs-sacred-text-secondary);
   font-family: 'Crimson Text', serif;
 }
 
@@ -111,40 +111,38 @@
    -------------------------------------------------------------------------- */
 
 .container[data-theme='light'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
 }
 
 .container[data-theme='light'] .requiredIndicator {
-  color: #ef4444;
+  color: var(--goobs-danger);
 }
 
 .container[data-theme='light'] .input {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
   color-scheme: light;
 }
 
 .container[data-theme='light'] .input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--goobs-light-primary);
+  box-shadow: var(--goobs-focus-light);
 }
 
 .container[data-theme='light'] .input:hover:not(:disabled):not(:focus) {
-  border-color: #cbd5e1;
+  border-color: var(--goobs-light-border-strong);
 }
 
 .container[data-theme='light'] .input:disabled {
   background-color: #f3f4f6;
-  color: #9ca3af;
+  color: var(--goobs-light-text-disabled);
 }
 
 .container[data-theme='light'] .helperText {
-  color: #6b7280;
+  color: var(--goobs-light-text-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -152,36 +150,34 @@
    -------------------------------------------------------------------------- */
 
 .container[data-theme='dark'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
 }
 
 .container[data-theme='dark'] .requiredIndicator {
-  color: #ef4444;
+  color: var(--goobs-danger);
 }
 
 .container[data-theme='dark'] .input {
-  background-color: #1e293b;
-  border-color: #334155;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
   color-scheme: dark;
 }
 
 .container[data-theme='dark'] .input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--goobs-dark-primary-strong);
+  box-shadow: var(--goobs-focus-dark);
 }
 
 .container[data-theme='dark'] .input:hover:not(:disabled):not(:focus) {
-  border-color: #475569;
+  border-color: var(--goobs-dark-border-strong);
 }
 
 .container[data-theme='dark'] .input:disabled {
   background-color: #0f172a;
-  color: #64748b;
+  color: var(--goobs-dark-text-muted);
 }
 
 .container[data-theme='dark'] .helperText {
@@ -206,13 +202,13 @@
   }
 
   .label {
-    font-size: 13px;
+    font-size: var(--goobs-text-sm);
     margin-bottom: 7px;
   }
 
   .input {
     padding: 11px 15px;
-    font-size: 15px;
+    font-size: var(--goobs-text-lg);
   }
 
   .helperText {
@@ -226,11 +222,11 @@
 
 @media (max-width: 768px) {
   .container {
-    margin-bottom: 12px;
+    margin-bottom: var(--goobs-space-sm);
   }
 
   .fieldsWrapper {
-    gap: var(--date-range-gap, 12px);
+    gap: var(--date-range-gap, var(--goobs-space-sm));
   }
 
   .fieldContainer {
@@ -239,13 +235,13 @@
   }
 
   .label {
-    font-size: 12px;
+    font-size: var(--goobs-text-xs);
     margin-bottom: 6px;
   }
 
   .input {
     padding: 10px 14px;
-    font-size: 14px;
+    font-size: var(--goobs-text-md);
     min-height: 44px;
   }
 

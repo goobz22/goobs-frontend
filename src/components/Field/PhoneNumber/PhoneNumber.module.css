@@ -12,30 +12,30 @@
   align-items: center;
   height: var(--phone-height, 40px);
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: var(--phone-border-width, 1px) solid rgba(255, 215, 0, 0.3);
-  border-radius: var(--phone-radius, 8px);
-  transition: all 0.3s ease;
+  background-color: var(--goobs-sacred-control-bg);
+  border: var(--phone-border-width, 1px) solid var(--goobs-gold-a30);
+  border-radius: var(--phone-radius, var(--goobs-radius-lg));
+  transition: var(--goobs-transition-slow);
   box-sizing: border-box;
 }
 
 .inputWrapper.disabled {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-sacred-control-bg);
 }
 
 .prefix {
   display: flex;
   align-items: center;
   padding-left: 16px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--goobs-sacred-text);
   font-size: var(--phone-font-size, 16px);
-  font-family: 'Crimson Text', serif;
+  font-family: var(--goobs-font-sacred);
   font-weight: var(--phone-font-weight);
   user-select: none;
 }
 
 .inputWrapper.disabled .prefix {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--goobs-sacred-text-muted);
 }
 
 .input {
@@ -49,11 +49,11 @@
   font-size: var(--phone-font-size, 16px);
   font-weight: var(--phone-font-weight);
   line-height: var(--phone-line-height);
-  font-family: var(--phone-font-family, 'Crimson Text', serif);
-  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--phone-font-family, var(--goobs-font-sacred));
+  color: var(--goobs-sacred-text);
   box-sizing: border-box;
 }
 
 .input:disabled {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--goobs-sacred-text-muted);
 }

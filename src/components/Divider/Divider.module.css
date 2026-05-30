@@ -15,8 +15,8 @@
 
 .root {
   /* Tokens — overridable per-instance via inline CSS vars (caller props). */
-  --divider-gradient-color: rgba(255, 215, 0, 0.3);
-  --divider-content-color: #ffd700;
+  --divider-gradient-color: var(--goobs-gold-a30);
+  --divider-content-color: var(--goobs-gold);
 
   position: relative;
   box-sizing: border-box;
@@ -39,8 +39,8 @@
     var(--divider-gradient-color),
     transparent
   );
-  margin-top: var(--divider-margin-top, 24px);
-  margin-bottom: var(--divider-margin-bottom, 24px);
+  margin-top: var(--divider-margin-top, var(--goobs-space-lg));
+  margin-bottom: var(--divider-margin-bottom, var(--goobs-space-lg));
   margin-left: var(--divider-margin-left, 0);
   margin-right: var(--divider-margin-right, 0);
 }
@@ -56,8 +56,8 @@
   );
   margin-top: var(--divider-margin-top, 0);
   margin-bottom: var(--divider-margin-bottom, 0);
-  margin-left: var(--divider-margin-left, 24px);
-  margin-right: var(--divider-margin-right, 24px);
+  margin-left: var(--divider-margin-left, var(--goobs-space-lg));
+  margin-right: var(--divider-margin-right, var(--goobs-space-lg));
 }
 
 /* --------------------------------------------------------------------------
@@ -67,7 +67,7 @@
    .hasBackground) so disabled only changes opacity, as before.
    -------------------------------------------------------------------------- */
 .disabled {
-  --divider-gradient-color: rgba(255, 215, 0, 0.15);
+  --divider-gradient-color: var(--goobs-gold-a15);
   opacity: 0.5;
 }
 
@@ -91,9 +91,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
   background: rgba(0, 0, 0, 0.6);
-  padding: 0 16px;
+  padding: 0 var(--goobs-space-md);
   color: var(--divider-content-color);
-  font-size: 14px;
-  font-family: 'Cinzel', serif;
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-sacred);
   white-space: nowrap;
 }

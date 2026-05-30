@@ -16,9 +16,9 @@
   background: transparent;
   outline: none;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  padding: 8px 60px 8px 16px;
-  font-size: 16px;
+  border-radius: var(--goobs-radius-lg);
+  padding: var(--goobs-space-xs) 60px var(--goobs-space-xs) var(--goobs-space-md);
+  font-size: var(--goobs-text-xl);
   box-sizing: border-box;
 }
 
@@ -58,6 +58,6 @@
 
 /* Subnet-info readout rendered below the field. */
 .subnetInfo {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: var(--goobs-space-xs);
+  font-size: var(--goobs-text-md);
 }

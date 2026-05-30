@@ -9,13 +9,13 @@
 .container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--goobs-space-xs);
 }
 
 .button {
   padding: 4px 12px;
   border: 1px solid var(--field-border-default, hsl(0, 0%, 20%));
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   background-color: var(--field-bg, transparent);
   color: var(--field-text, inherit);
   cursor: pointer;
@@ -39,7 +39,7 @@
   height: 40px;
   text-align: center;
   border: 1px solid var(--field-border-default, hsl(0, 0%, 20%));
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   outline: none;
   background-color: var(--field-bg, transparent);
   color: var(--field-text, inherit);

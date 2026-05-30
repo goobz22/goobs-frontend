@@ -12,15 +12,15 @@
   align-items: center;
   height: var(--search-height, 40px);
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: var(--search-border-width, 1px) solid rgba(255, 215, 0, 0.3);
-  border-radius: var(--search-radius, 8px);
-  transition: all 0.3s ease;
+  background-color: var(--goobs-sacred-control-bg);
+  border: var(--search-border-width, 1px) solid var(--goobs-gold-a30);
+  border-radius: var(--search-radius, var(--goobs-radius-lg));
+  transition: var(--goobs-transition-slow);
   box-sizing: border-box;
 }
 
 .inputWrapper.disabled {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-sacred-control-bg);
 }
 
 .searchIcon {
@@ -30,7 +30,7 @@
   align-items: center;
   /* Defaults to sacred gold; caller may override via --search-adornment-color.
      The inline SVG uses fill: currentColor so it inherits this color. */
-  color: var(--search-adornment-color, #ffd700);
+  color: var(--search-adornment-color, var(--goobs-gold));
   pointer-events: none;
 }
 
@@ -47,11 +47,11 @@
   font-size: var(--search-font-size, 16px);
   font-weight: var(--search-font-weight);
   line-height: var(--search-line-height);
-  font-family: var(--search-font-family, 'Crimson Text', serif);
-  color: var(--search-text-color, rgba(255, 255, 255, 0.9));
+  font-family: var(--search-font-family, var(--goobs-font-sacred));
+  color: var(--search-text-color, var(--goobs-sacred-text));
   box-sizing: border-box;
 }
 
 .inputWrapper.disabled .input {
-  color: var(--search-text-color, rgba(255, 255, 255, 0.4));
+  color: var(--search-text-color, var(--goobs-sacred-text-muted));
 }

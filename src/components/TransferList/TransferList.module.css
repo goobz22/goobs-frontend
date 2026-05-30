@@ -19,21 +19,21 @@
 @keyframes transferListSacredGlowPulse {
   0% {
     box-shadow:
-      0 0 20px rgba(255, 215, 0, 0.3),
-      0 0 40px rgba(255, 215, 0, 0.2);
-    border-color: rgba(255, 215, 0, 0.5);
+      0 0 20px var(--goobs-gold-a30),
+      0 0 40px var(--goobs-gold-a20);
+    border-color: var(--goobs-gold-a50);
   }
   50% {
     box-shadow:
-      0 0 30px rgba(255, 215, 0, 0.5),
-      0 0 60px rgba(255, 215, 0, 0.3);
-    border-color: rgba(255, 215, 0, 0.8);
+      0 0 30px var(--goobs-gold-a50),
+      0 0 60px var(--goobs-gold-a30);
+    border-color: var(--goobs-gold-a80);
   }
   100% {
     box-shadow:
-      0 0 20px rgba(255, 215, 0, 0.3),
-      0 0 40px rgba(255, 215, 0, 0.2);
-    border-color: rgba(255, 215, 0, 0.5);
+      0 0 20px var(--goobs-gold-a30),
+      0 0 40px var(--goobs-gold-a20);
+    border-color: var(--goobs-gold-a50);
   }
 }
 
@@ -67,13 +67,13 @@
    -------------------------------------------------------------------------- */
 .container {
   display: flex;
-  gap: 16px;
+  gap: var(--goobs-space-md);
   align-items: flex-start;
   /* sacred defaults */
-  padding: 16px;
-  background-color: rgba(10, 10, 10, 0.6);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: var(--goobs-space-md);
+  background-color: var(--goobs-sacred-surface);
+  border-radius: var(--goobs-radius-lg);
+  border: 1px solid var(--goobs-gold-a30);
   position: relative;
 }
 
@@ -98,18 +98,18 @@
    TITLE
    -------------------------------------------------------------------------- */
 .title {
-  margin-bottom: 8px;
-  font-weight: 600;
+  margin-bottom: var(--goobs-space-xs);
+  font-weight: var(--goobs-weight-semibold);
   /* sacred defaults */
-  color: #ffd700;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  color: var(--goobs-gold);
+  font-family: var(--goobs-font-sacred);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
+  text-shadow: 0 0 10px var(--goobs-gold-a50);
 }
 
 .container[data-theme='light'] .title {
-  color: rgb(17, 24, 39);
-  font-family: 'Inter', sans-serif;
+  color: var(--goobs-light-text);
+  font-family: var(--goobs-font-standard);
   letter-spacing: normal;
   text-shadow: none;
 }
@@ -121,19 +121,19 @@
   width: 100%;
   height: 232px;
   overflow: auto;
-  margin-top: 8px;
-  border-radius: 4px;
+  margin-top: var(--goobs-space-xs);
+  border-radius: var(--goobs-radius-sm);
   /* sacred defaults */
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--goobs-gold-a30);
+  background-color: var(--goobs-sacred-control-bg);
   animation: transferListSacredGlowPulse 2s infinite alternate;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.3);
+  scrollbar-color: var(--goobs-gold-a50) rgba(0, 0, 0, 0.3);
 }
 
 .container[data-theme='light'] .list {
-  border: 1px solid rgb(209, 213, 219);
-  background-color: white;
+  border: 1px solid var(--goobs-light-border);
+  background-color: var(--goobs-light-surface);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
   animation: none;
   scrollbar-width: auto;
@@ -152,27 +152,27 @@
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: var(--goobs-space-sm);
   text-align: left;
   transition: all 0.3s ease;
   cursor: pointer;
   /* sacred defaults */
-  color: #ffd700;
-  border-top: 1px solid rgba(255, 215, 0, 0.1);
-  border-right: 1px solid rgba(255, 215, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-  border-left: 1px solid rgba(255, 215, 0, 0.1);
-  background-color: rgba(0, 0, 0, 0.9);
-  border-radius: 4px;
-  margin: 4px 0;
-  box-shadow: 0 0 5px rgba(255, 215, 0, 0.1);
+  color: var(--goobs-gold);
+  border-top: 1px solid var(--goobs-gold-a10);
+  border-right: 1px solid var(--goobs-gold-a10);
+  border-bottom: 1px solid var(--goobs-gold-a20);
+  border-left: 1px solid var(--goobs-gold-a10);
+  background-color: var(--goobs-sacred-surface);
+  border-radius: var(--goobs-radius-sm);
+  margin: var(--goobs-space-2xs) 0;
+  box-shadow: 0 0 5px var(--goobs-gold-a10);
 }
 
 .container[data-theme='light'] .listItem {
   color: inherit;
   border-top: none;
   border-right: none;
-  border-bottom: 1px solid rgb(229, 231, 235);
+  border-bottom: 1px solid var(--goobs-light-border);
   border-left: none;
   background-color: transparent;
   border-radius: 0;
@@ -182,27 +182,27 @@
 
 /* hover (sacred default) */
 .listItem:hover {
-  background-color: rgba(255, 215, 0, 0.1);
+  background-color: var(--goobs-gold-a10);
   transform: translateX(4px);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px var(--goobs-gold-a30);
 }
 
 .container[data-theme='light'] .listItem:hover {
-  background-color: rgb(249, 250, 251);
+  background-color: var(--goobs-light-surface-raised);
   transform: none;
   box-shadow: none;
 }
 
 /* checked (sacred default) — overrides hover, hence after :hover */
 .listItem[data-checked='true'] {
-  background-color: rgba(255, 215, 0, 0.2);
-  border-left: 4px solid #ffd700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+  background-color: var(--goobs-gold-a20);
+  border-left: 4px solid var(--goobs-gold);
+  box-shadow: 0 0 15px var(--goobs-gold-a40);
 }
 
 .container[data-theme='light'] .listItem[data-checked='true'] {
   background-color: rgb(239, 246, 255);
-  border-left: 4px solid rgb(59, 130, 246);
+  border-left: 4px solid var(--goobs-light-primary);
   box-shadow: none;
 }
 
@@ -212,7 +212,7 @@
 .checkboxContainer {
   display: flex;
   align-items: center;
-  margin-right: 12px;
+  margin-right: var(--goobs-space-sm);
 }
 
 /* --------------------------------------------------------------------------
@@ -220,17 +220,17 @@
    -------------------------------------------------------------------------- */
 .label {
   flex: 1;
-  font-weight: 500;
+  font-weight: var(--goobs-weight-medium);
   /* sacred defaults */
-  color: #ffd700;
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+  color: var(--goobs-gold);
+  text-shadow: 0 0 5px var(--goobs-gold-a30);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .container[data-theme='light'] .label {
-  color: rgb(17, 24, 39);
+  color: var(--goobs-light-text);
   text-shadow: none;
   white-space: normal;
   overflow: visible;
@@ -245,29 +245,29 @@
   flex-direction: column;
   align-items: center;
   margin-top: 64px;
-  gap: 4px;
+  gap: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
    TRANSFER BUTTON — state via :hover:not(:disabled) and :disabled
    -------------------------------------------------------------------------- */
 .button {
-  padding: 4px 12px;
-  font-size: 14px;
-  border-radius: 4px;
+  padding: var(--goobs-space-2xs) var(--goobs-space-sm);
+  font-size: var(--goobs-text-md);
+  border-radius: var(--goobs-radius-sm);
   transition: all 0.3s ease;
   cursor: pointer;
   /* sacred defaults */
-  border: 1px solid #ffd700;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #ffd700;
+  border: 1px solid var(--goobs-gold);
+  background-color: var(--goobs-sacred-control-bg);
+  color: var(--goobs-gold);
   animation: transferListSacredFloat 3s infinite ease-in-out;
 }
 
 .container[data-theme='light'] .button {
-  border: 1px solid rgb(209, 213, 219);
-  background-color: white;
-  color: rgb(55, 65, 81);
+  border: 1px solid var(--goobs-light-border);
+  background-color: var(--goobs-light-surface);
+  color: var(--goobs-light-text-secondary);
   animation: none;
 }
 
@@ -279,13 +279,13 @@
 
 /* hover (sacred default) */
 .button:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.2);
+  background-color: var(--goobs-gold-a20);
   transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 10px var(--goobs-gold-a60);
 }
 
 .container[data-theme='light'] .button:hover:not(:disabled) {
-  background-color: rgb(249, 250, 251);
+  background-color: var(--goobs-light-surface-raised);
   transform: none;
   box-shadow: none;
 }
@@ -295,13 +295,13 @@
   opacity: 0.5;
   cursor: not-allowed;
   /* sacred keeps gold border/color while disabled */
-  color: #ffd700;
-  border-color: #ffd700;
+  color: var(--goobs-gold);
+  border-color: var(--goobs-gold);
 }
 
 .container[data-theme='light'] .button:disabled {
-  color: rgb(55, 65, 81);
-  border-color: rgb(209, 213, 219);
+  color: var(--goobs-light-text-secondary);
+  border-color: var(--goobs-light-border);
 }
 
 /* --------------------------------------------------------------------------
@@ -309,9 +309,9 @@
    -------------------------------------------------------------------------- */
 .glyph {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 20px;
-  color: rgba(255, 215, 0, 0.2);
+  top: var(--goobs-space-xs);
+  right: var(--goobs-space-xs);
+  font-size: var(--goobs-text-2xl);
+  color: var(--goobs-gold-a20);
   animation: transferListGlyphRotate 20s linear infinite;
 }

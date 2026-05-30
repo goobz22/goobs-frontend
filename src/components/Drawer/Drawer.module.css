@@ -24,8 +24,7 @@
   --drawer-background: rgba(255, 255, 255, 0.95);
   --drawer-border-color: rgba(226, 232, 240, 0.8);
   --drawer-border-width: 1px;
-  --drawer-box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+  --drawer-box-shadow: var(--goobs-shadow-light-lg);
   --drawer-backdrop-filter: blur(8px);
   --drawer-background-image: none;
   --drawer-transition-duration: 200ms;
@@ -69,7 +68,7 @@
      property/easing semantics match exactly. */
   transition: var(
     --drawer-transition,
-    all var(--drawer-transition-duration) cubic-bezier(0.4, 0, 0.2, 1)
+    all var(--drawer-transition-duration) var(--goobs-ease)
   );
   transform: translateX(-100%);
 }
@@ -81,29 +80,27 @@
   --drawer-background: rgba(31, 41, 55, 0.95);
   --drawer-border-color: rgba(75, 85, 99, 0.8);
   --drawer-border-width: 1px;
-  --drawer-box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --drawer-box-shadow: var(--goobs-shadow-dark-lg);
   --drawer-background-image: none;
 }
 
 .paper[data-theme='sacred'] {
-  --drawer-background: rgba(10, 10, 10, 0.95);
-  --drawer-border-color: rgba(255, 215, 0, 0.6);
+  --drawer-background: var(--goobs-sacred-surface);
+  --drawer-border-color: var(--goobs-gold-a60);
   --drawer-border-width: 2px;
-  --drawer-box-shadow:
-    0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+  --drawer-box-shadow: var(--goobs-shadow-sacred-glow);
   --drawer-background-image:
     radial-gradient(
       circle at top right,
-      rgba(255, 215, 0, 0.08) 0%,
+      var(--goobs-gold-a08) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at bottom left,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%
     ),
-    linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+    linear-gradient(135deg, var(--goobs-gold-a02) 0%, transparent 50%);
   /* sacred uses TRANSITIONS.slow = 300ms */
   --drawer-transition-duration: 300ms;
 }
@@ -233,7 +230,7 @@
    -------------------------------------------------------------------------- */
 .content {
   --drawer-scrollbar-track: #f1f5f9;
-  --drawer-scrollbar-thumb: #cbd5e1;
+  --drawer-scrollbar-thumb: var(--goobs-light-border-strong);
   --drawer-scrollbar-thumb-hover: #94a3b8;
 
   position: relative;
@@ -246,14 +243,14 @@
   scrollbar-color: var(--drawer-scrollbar-thumb) var(--drawer-scrollbar-track);
 }
 .content[data-theme='dark'] {
-  --drawer-scrollbar-track: #1e293b;
-  --drawer-scrollbar-thumb: #475569;
-  --drawer-scrollbar-thumb-hover: #64748b;
+  --drawer-scrollbar-track: var(--goobs-dark-surface);
+  --drawer-scrollbar-thumb: var(--goobs-dark-border-strong);
+  --drawer-scrollbar-thumb-hover: var(--goobs-dark-text-muted);
 }
 .content[data-theme='sacred'] {
   --drawer-scrollbar-track: rgba(0, 0, 0, 0.3);
-  --drawer-scrollbar-thumb: rgba(255, 215, 0, 0.4);
-  --drawer-scrollbar-thumb-hover: rgba(255, 215, 0, 0.6);
+  --drawer-scrollbar-thumb: var(--goobs-gold-a40);
+  --drawer-scrollbar-thumb-hover: var(--goobs-gold-a60);
 }
 .content::-webkit-scrollbar {
   width: 8px;
@@ -261,11 +258,11 @@
 }
 .content::-webkit-scrollbar-track {
   background: var(--drawer-scrollbar-track);
-  border-radius: 4px;
+  border-radius: var(--goobs-radius-sm);
 }
 .content::-webkit-scrollbar-thumb {
   background: var(--drawer-scrollbar-thumb);
-  border-radius: 4px;
+  border-radius: var(--goobs-radius-sm);
   transition: background-color 0.2s ease;
 }
 .content::-webkit-scrollbar-thumb:hover {

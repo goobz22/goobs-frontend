@@ -18,12 +18,12 @@
 
 .container {
   /* sacred (default) */
-  --sh-bg: rgba(0, 0, 0, 0.7);
-  --sh-border: rgba(255, 215, 0, 0.3);
-  --sh-border-focus: rgba(255, 215, 0, 0.7);
-  --sh-text: rgba(255, 255, 255, 0.9);
-  --sh-label: rgba(255, 215, 0, 0.8);
-  --sh-footer: rgba(255, 255, 255, 0.6);
+  --sh-bg: var(--goobs-sacred-control-bg);
+  --sh-border: var(--goobs-gold-a30);
+  --sh-border-focus: var(--goobs-gold-a70);
+  --sh-text: var(--goobs-sacred-text);
+  --sh-label: var(--goobs-gold-a80);
+  --sh-footer: var(--goobs-sacred-text-secondary);
   --sh-font: 'Crimson Text', serif;
 
   position: relative;
@@ -32,23 +32,23 @@
 }
 
 .container[data-theme='light'] {
-  --sh-bg: rgba(255, 255, 255, 0.95);
-  --sh-border: rgba(209, 213, 219, 1);
-  --sh-border-focus: rgba(59, 130, 246, 1);
-  --sh-text: rgba(31, 41, 55, 1);
-  --sh-label: rgba(107, 114, 128, 1);
-  --sh-footer: rgba(107, 114, 128, 1);
-  --sh-font: 'Inter', sans-serif;
+  --sh-bg: var(--goobs-light-surface);
+  --sh-border: var(--goobs-light-border);
+  --sh-border-focus: var(--goobs-light-primary);
+  --sh-text: var(--goobs-light-text);
+  --sh-label: var(--goobs-light-text-muted);
+  --sh-footer: var(--goobs-light-text-muted);
+  --sh-font: var(--goobs-font-standard);
 }
 
 .container[data-theme='dark'] {
-  --sh-bg: rgba(31, 41, 55, 0.95);
-  --sh-border: rgba(75, 85, 99, 1);
-  --sh-border-focus: rgba(96, 165, 250, 1);
-  --sh-text: rgba(255, 255, 255, 1);
-  --sh-label: rgba(156, 163, 175, 1);
-  --sh-footer: rgba(156, 163, 175, 1);
-  --sh-font: 'Inter', sans-serif;
+  --sh-bg: var(--goobs-dark-surface);
+  --sh-border: var(--goobs-dark-border);
+  --sh-border-focus: var(--goobs-dark-primary);
+  --sh-text: var(--goobs-dark-text);
+  --sh-label: var(--goobs-dark-text-muted);
+  --sh-footer: var(--goobs-dark-text-muted);
+  --sh-font: var(--goobs-font-standard);
 }
 
 /* Error state (helperTextType === 'error') — reddens label, footer and the
@@ -56,25 +56,25 @@
    isError branch (border.error / label.error / footerText.error all
    rgba(239, 68, 68, 1) across every theme). Applied regardless of theme. */
 .container[data-error='true'] {
-  --sh-label: rgba(239, 68, 68, 1);
-  --sh-footer: rgba(239, 68, 68, 1);
-  --sh-border: rgba(239, 68, 68, 1);
-  --sh-border-focus: rgba(239, 68, 68, 1);
+  --sh-label: var(--goobs-danger);
+  --sh-footer: var(--goobs-danger);
+  --sh-border: var(--goobs-danger);
+  --sh-border-focus: var(--goobs-danger);
 }
 
 .label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 14px;
+  margin-bottom: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-md);
   font-family: var(--sh-font);
   color: var(--sh-label);
   transition: all 0.2s ease;
 }
 
 .requiredIndicator {
-  color: rgba(239, 68, 68, 1);
+  color: var(--goobs-danger);
   margin-left: 2px;
-  font-weight: 600;
+  font-weight: var(--goobs-weight-semibold);
 }
 
 .searchAnchor {
@@ -87,13 +87,13 @@
   align-items: center;
   width: 100%;
   height: 40px;
-  padding: 0 12px;
-  border-radius: 8px;
+  padding: 0 var(--goobs-space-sm);
+  border-radius: var(--goobs-radius-lg);
   border: 1px solid var(--sh-border);
   transition: all 0.2s ease;
   background-color: var(--sh-bg);
   cursor: text;
-  gap: 8px;
+  gap: var(--goobs-space-xs);
   box-sizing: border-box;
 }
 
@@ -109,7 +109,7 @@
   background: transparent;
   color: var(--sh-text);
   font-family: var(--sh-font);
-  font-size: 14px;
+  font-size: var(--goobs-text-md);
   padding: 0;
 }
 
@@ -117,15 +117,15 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: var(--goobs-space-2xs);
   display: flex;
   align-items: center;
   color: inherit;
 }
 
 .footerText {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-xs);
   font-family: var(--sh-font);
   color: var(--sh-footer);
   min-height: 1em;
@@ -139,27 +139,27 @@
 
 .dropdown {
   /* sacred (default) */
-  --sh-menu-bg: rgba(0, 0, 0, 0.95);
-  --sh-menu-border: 2px solid rgba(255, 215, 0, 0.5);
+  --sh-menu-bg: var(--goobs-sacred-surface);
+  --sh-menu-border: 2px solid var(--goobs-gold-a50);
   --sh-menu-shadow:
-    0 10px 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
-  --sh-tab-divider: rgba(255, 215, 0, 0.3);
-  --sh-tabs-bg: rgba(0, 0, 0, 0.3);
-  --sh-tab-active-bg: rgba(255, 215, 0, 0.15);
-  --sh-tab-active-text: #ffd700;
-  --sh-tab-inactive-text: rgba(255, 215, 0, 0.6);
-  --sh-menu-font: 'Cinzel', serif;
-  --sh-category-text: #ffd700;
-  --sh-category-divider: rgba(255, 215, 0, 0.1);
-  --sh-empty-text: #ffd700;
-  --sh-history-divider: rgba(255, 215, 0, 0.2);
-  --sh-clear-text: #ffd700;
+    0 10px 30px var(--goobs-gold-a30), inset 0 0 20px var(--goobs-gold-a10);
+  --sh-tab-divider: var(--goobs-gold-a30);
+  --sh-tabs-bg: var(--goobs-sacred-control-bg);
+  --sh-tab-active-bg: var(--goobs-gold-a15);
+  --sh-tab-active-text: var(--goobs-gold);
+  --sh-tab-inactive-text: var(--goobs-gold-a60);
+  --sh-menu-font: var(--goobs-font-sacred);
+  --sh-category-text: var(--goobs-gold);
+  --sh-category-divider: var(--goobs-gold-a10);
+  --sh-empty-text: var(--goobs-gold);
+  --sh-history-divider: var(--goobs-gold-a20);
+  --sh-clear-text: var(--goobs-gold);
 
   position: fixed;
   z-index: 9999;
   background-color: var(--sh-menu-bg);
   border: var(--sh-menu-border);
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   max-height: 400px;
   overflow: hidden;
   box-shadow: var(--sh-menu-shadow);
@@ -167,26 +167,26 @@
 
 .dropdown[data-theme='light'],
 .dropdown[data-theme='dark'] {
-  --sh-menu-bg: #ffffff;
-  --sh-menu-border: 1px solid #e5e7eb;
-  --sh-menu-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --sh-tab-divider: #e5e7eb;
+  --sh-menu-bg: var(--goobs-light-surface);
+  --sh-menu-border: 1px solid var(--goobs-light-border);
+  --sh-menu-shadow: var(--goobs-shadow-light-md);
+  --sh-tab-divider: var(--goobs-light-border);
   --sh-tabs-bg: rgba(0, 0, 0, 0.02);
-  --sh-tab-active-bg: #ffffff;
-  --sh-tab-active-text: #000000;
-  --sh-tab-inactive-text: #6b7280;
+  --sh-tab-active-bg: var(--goobs-light-surface);
+  --sh-tab-active-text: var(--goobs-light-text);
+  --sh-tab-inactive-text: var(--goobs-light-text-muted);
   --sh-menu-font: inherit;
-  --sh-category-text: #6b7280;
+  --sh-category-text: var(--goobs-light-text-muted);
   --sh-category-divider: rgba(0, 0, 0, 0.05);
-  --sh-empty-text: #6b7280;
+  --sh-empty-text: var(--goobs-light-text-muted);
   --sh-history-divider: rgba(0, 0, 0, 0.1);
-  --sh-clear-text: #3b82f6;
+  --sh-clear-text: var(--goobs-light-primary);
 }
 
 /* Error border on the portalled menu (it lives under document.body so it
    cannot inherit the container's error vars). Matches the old isError border. */
 .dropdown[data-error='true'] {
-  --sh-menu-border: 1px solid rgba(239, 68, 68, 1);
+  --sh-menu-border: 1px solid var(--goobs-danger);
 }
 
 .tabs {
@@ -203,8 +203,8 @@
   color: var(--sh-tab-inactive-text);
   cursor: pointer;
   font-family: var(--sh-menu-font);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--goobs-text-sm);
+  font-weight: var(--goobs-weight-regular);
   transition: all 0.2s;
   text-align: center;
 }
@@ -219,25 +219,25 @@
 .tab.active {
   background: var(--sh-tab-active-bg);
   color: var(--sh-tab-active-text);
-  font-weight: 600;
+  font-weight: var(--goobs-weight-semibold);
 }
 
 .content {
   max-height: 350px;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--goobs-space-xs);
 }
 
 .categoryHeader {
-  padding: 8px 12px 4px;
+  padding: var(--goobs-space-xs) var(--goobs-space-sm) var(--goobs-space-2xs);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--goobs-weight-semibold);
   opacity: 0.5;
   text-transform: uppercase;
   color: var(--sh-category-text);
   font-family: var(--sh-menu-font);
   border-bottom: 1px solid var(--sh-category-divider);
-  margin-bottom: 4px;
+  margin-bottom: var(--goobs-space-2xs);
 }
 
 .emptyState {
@@ -249,8 +249,8 @@
 }
 
 .historyFooter {
-  padding: 8px 12px;
-  margin-top: 8px;
+  padding: var(--goobs-space-xs) var(--goobs-space-sm);
+  margin-top: var(--goobs-space-xs);
   border-top: 1px solid var(--sh-history-divider);
 }
 
@@ -259,8 +259,8 @@
   border: none;
   color: var(--sh-clear-text);
   cursor: pointer;
-  font-size: 12px;
-  padding: 4px 0;
+  font-size: var(--goobs-text-xs);
+  padding: var(--goobs-space-2xs) 0;
   opacity: 0.8;
   font-family: var(--sh-menu-font);
 }
@@ -272,25 +272,25 @@
    -------------------------------------------------------------------------- */
 
 .item {
-  --sh-item-text: #ffd700;
-  --sh-item-font: 'Cinzel', serif;
-  --sh-item-selected-bg: rgba(255, 215, 0, 0.2);
-  --sh-item-hover-bg: rgba(255, 215, 0, 0.1);
-  --sh-item-hover-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  --sh-item-text: var(--goobs-gold);
+  --sh-item-font: var(--goobs-font-sacred);
+  --sh-item-selected-bg: var(--goobs-gold-a20);
+  --sh-item-hover-bg: var(--goobs-gold-a10);
+  --sh-item-hover-shadow: 0 0 10px var(--goobs-gold-a20);
 
   padding: 10px 12px;
   cursor: pointer;
   background-color: transparent;
   color: var(--sh-item-text);
   transition: all 0.2s;
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   margin: 2px 0;
   font-family: var(--sh-item-font);
 }
 
 .dropdown[data-theme='light'] .item,
 .dropdown[data-theme='dark'] .item {
-  --sh-item-text: #1f2937;
+  --sh-item-text: var(--goobs-light-text);
   --sh-item-font: inherit;
   --sh-item-selected-bg: rgba(59, 130, 246, 0.1);
   --sh-item-hover-bg: rgba(229, 231, 235, 0.5);
@@ -307,13 +307,13 @@
 }
 
 .itemLabel {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--goobs-text-md);
+  font-weight: var(--goobs-weight-medium);
 }
 
 .itemDescription {
   font-size: 11px;
   opacity: 0.6;
-  margin-top: 4px;
+  margin-top: var(--goobs-space-2xs);
   font-family: var(--sh-item-font);
 }

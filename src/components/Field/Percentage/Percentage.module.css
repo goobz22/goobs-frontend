@@ -13,13 +13,13 @@
   align-items: center;
   height: var(--percentage-height, 40px);
   width: auto;
-  border: 1px solid var(--field-border-default, rgba(255, 215, 0, 0.3));
-  border-radius: var(--percentage-radius, 8px);
-  background-color: var(--field-bg, rgba(0, 0, 0, 0.6));
+  border: 1px solid var(--field-border-default, var(--goobs-gold-a30));
+  border-radius: var(--percentage-radius, var(--goobs-radius-lg));
+  background-color: var(--field-bg, var(--goobs-sacred-control-bg));
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: all 0.3s ease;
+  transition: var(--goobs-transition-slow);
 }
 
 .input {
@@ -69,11 +69,11 @@
   min-width: 16px;
   min-height: 16px;
   border-radius: 2px;
-  transition: all 0.3s ease;
+  transition: var(--goobs-transition-slow);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 215, 0, 0.9);
+  color: var(--goobs-gold-a90);
   background-color: transparent;
   border: none;
   cursor: pointer;

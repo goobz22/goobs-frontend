@@ -12,12 +12,12 @@
    Root — sacred theme (dark + gold) is the base default
    -------------------------------------------------------------------------- */
 .root {
-  --ma-accent: #d4af37;
-  --ma-toggle-bg: rgba(0, 0, 0, 0.3);
-  --ma-toggle-color: rgba(255, 255, 255, 0.8);
-  --ma-toggle-font: 'Cinzel', serif;
-  --ma-panel-bg: rgba(0, 0, 0, 0.15);
-  --ma-group-label-color: rgba(255, 255, 255, 0.5);
+  --ma-accent: var(--goobs-sacred-primary);
+  --ma-toggle-bg: var(--goobs-sacred-control-bg);
+  --ma-toggle-color: var(--goobs-sacred-text);
+  --ma-toggle-font: var(--goobs-font-sacred);
+  --ma-panel-bg: var(--goobs-sacred-control-bg);
+  --ma-group-label-color: var(--goobs-sacred-text-muted);
 
   /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
      accordion in a `padding: 0.25rem` shell that already provides
@@ -32,14 +32,14 @@
    Light theme (default for undefined / light / dark — non-sacred branch)
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
-  --ma-accent: #1976d2;
+  --ma-accent: var(--goobs-light-primary);
   --ma-toggle-bg: rgba(0, 0, 0, 0.04);
-  --ma-toggle-color: rgba(0, 0, 0, 0.75);
+  --ma-toggle-color: var(--goobs-light-text);
   --ma-toggle-font: inherit;
-  --ma-panel-bg: rgba(255, 255, 255, 0.6);
+  --ma-panel-bg: var(--goobs-light-surface);
   /* In the light theme the dim-on-dark color isn't readable on a light
      panel — invert to a dim-on-light grey. */
-  --ma-group-label-color: rgba(0, 0, 0, 0.55);
+  --ma-group-label-color: var(--goobs-light-text-muted);
 }
 
 /* --------------------------------------------------------------------------

@@ -29,20 +29,20 @@
    * fallback; the var is only set inline in JS when the caller provides it,
    * exactly replicating the old `...(value && { value })` spread. */
   background-color: var(--badge-background-color, rgba(220, 38, 38, 0.9));
-  color: var(--badge-color, #ffd700);
+  color: var(--badge-color, var(--goobs-gold));
   border-radius: var(--badge-border-radius, 50%);
   width: var(--badge-width, 20px);
   height: var(--badge-height, 20px);
-  font-size: var(--badge-font-size, 12px);
+  font-size: var(--badge-font-size, var(--goobs-text-xs));
   font-weight: var(--badge-font-weight, bold);
   box-shadow: var(
     --badge-box-shadow,
-    0px 2px 8px rgba(255, 215, 0, 0.3),
-    0px 0px 12px rgba(255, 215, 0, 0.2)
+    0px 2px 8px var(--goobs-gold-a30),
+    0px 0px 12px var(--goobs-gold-a20)
   );
   backdrop-filter: var(--badge-backdrop-filter, blur(8px));
-  border: var(--badge-border, 1px solid rgba(255, 215, 0, 0.3));
-  text-shadow: var(--badge-text-shadow, 0px 0px 4px rgba(255, 215, 0, 0.5));
+  border: var(--badge-border, 1px solid var(--goobs-gold-a30));
+  text-shadow: var(--badge-text-shadow, 0px 0px 4px var(--goobs-gold-a50));
 }
 
 /* ---- theme overrides --------------------------------------------------- */
@@ -61,7 +61,7 @@
 }
 
 .badge[data-theme='dark'] {
-  background-color: var(--badge-background-color, #ef4444);
+  background-color: var(--badge-background-color, var(--goobs-danger));
   color: var(--badge-color, white);
   box-shadow: var(--badge-box-shadow, 0px 2px 8px rgba(0, 0, 0, 0.4));
   backdrop-filter: var(--badge-backdrop-filter, blur(4px));

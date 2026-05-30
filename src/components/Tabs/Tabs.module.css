@@ -17,11 +17,11 @@
 .root {
   /* Caller-supplied overrides flow in via these custom properties; the
      fallback is the original inline default. */
-  --tabs-gap: 8px;
+  --tabs-gap: var(--goobs-space-xs);
   --tabs-padding: 0;
   --tabs-height: auto;
   --tabs-justify: center;
-  --tabs-border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  --tabs-border-bottom: 1px solid var(--goobs-gold-a20);
   --tabs-border-left: none;
   --tabs-border-right: none;
   --tabs-background-color: transparent;
@@ -33,7 +33,7 @@
   gap: var(--tabs-gap);
   padding: var(--tabs-padding);
   height: var(--tabs-height);
-  margin-bottom: 16px;
+  margin-bottom: var(--goobs-space-md);
   border-bottom: var(--tabs-border-bottom);
   border-left: var(--tabs-border-left);
   border-right: var(--tabs-border-right);
@@ -46,17 +46,17 @@
    -------------------------------------------------------------------------- */
 .tab {
   position: relative;
-  padding: 12px 24px;
+  padding: var(--goobs-space-sm) var(--goobs-space-lg);
   background: transparent;
   border-top: none;
   border-right: none;
   border-bottom: 2px solid transparent;
   border-left: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Cinzel', serif;
-  font-size: 14px;
+  color: var(--goobs-sacred-text-secondary);
+  font-family: var(--goobs-font-sacred);
+  font-size: var(--goobs-text-md);
   font-weight: 400;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--goobs-tracking-sacred-wide);
   cursor: pointer;
   transition: all 0.3s ease;
   text-shadow: none;
@@ -70,25 +70,25 @@
 .tab:hover:not(:disabled):not([data-tab-active='true']) {
   background: linear-gradient(
     135deg,
-    rgba(255, 215, 0, 0.1),
-    rgba(255, 215, 0, 0.05)
+    var(--goobs-gold-a10),
+    var(--goobs-gold-a05)
   );
-  border-bottom-color: rgba(255, 215, 0, 0.5);
-  color: rgba(255, 215, 0, 0.9);
+  border-bottom-color: var(--goobs-gold-a50);
+  color: var(--goobs-gold-a90);
 }
 
 /* Active — replaces the isActive branch. */
 .tab[data-tab-active='true'] {
   background: linear-gradient(
     135deg,
-    rgba(255, 215, 0, 0.2),
-    rgba(255, 215, 0, 0.1)
+    var(--goobs-gold-a20),
+    var(--goobs-gold-a10)
   );
-  border-bottom-color: #ffd700;
-  color: #ffd700;
+  border-bottom-color: var(--goobs-gold);
+  color: var(--goobs-gold);
   font-weight: 600;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 10px var(--goobs-gold-a50);
+  box-shadow: 0 0 20px var(--goobs-gold-a30);
 }
 
 /* Disabled — replaces the disabled branch (transparent bg/border, dimmed
@@ -96,7 +96,7 @@
 .tab:disabled {
   background: transparent;
   border-bottom-color: transparent;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
   text-shadow: none;
   box-shadow: none;
@@ -120,17 +120,17 @@
    COUNT badge
    -------------------------------------------------------------------------- */
 .count {
-  margin-left: 8px;
+  margin-left: var(--goobs-space-xs);
   padding: 2px 8px;
-  border-radius: 999px;
-  background-color: rgba(255, 215, 0, 0.12);
+  border-radius: var(--goobs-radius-pill);
+  background-color: var(--goobs-gold-a12);
   font-size: 0.75em;
   font-weight: 600;
 }
 
 /* Active tab's count badge gets a stronger fill. */
 .tab[data-tab-active='true'] .count {
-  background-color: rgba(255, 215, 0, 0.25);
+  background-color: var(--goobs-gold-a25);
 }
 
 /* ==========================================================================
@@ -138,27 +138,27 @@
    Transcribed from theme/tabs.ts `tabsThemes.light`.
    ========================================================================== */
 .root[data-theme='light'] {
-  --tabs-border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  --tabs-border-bottom: 1px solid var(--goobs-light-border);
 }
 
 .tab[data-theme='light'] {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--goobs-font-standard);
   font-weight: 500;
   letter-spacing: -0.025em;
-  color: rgb(55, 65, 81);
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--goobs-light-text-secondary);
+  transition: var(--goobs-transition-medium);
 }
 
 .tab[data-theme='light']:hover:not(:disabled):not([data-tab-active='true']) {
   background: rgba(59, 130, 246, 0.1);
-  border-bottom-color: rgb(59, 130, 246);
+  border-bottom-color: var(--goobs-light-primary);
   color: rgb(29, 78, 216);
   text-shadow: none;
 }
 
 .tab[data-theme='light'][data-tab-active='true'] {
   background: rgba(59, 130, 246, 0.15);
-  border-bottom-color: rgb(59, 130, 246);
+  border-bottom-color: var(--goobs-light-primary);
   color: rgb(29, 78, 216);
   font-weight: 600;
   text-shadow: none;
@@ -182,28 +182,28 @@
    Transcribed from theme/tabs.ts `tabsThemes.dark`.
    ========================================================================== */
 .root[data-theme='dark'] {
-  --tabs-border-bottom: 1px solid rgba(75, 85, 99, 0.8);
+  --tabs-border-bottom: 1px solid var(--goobs-dark-border);
 }
 
 .tab[data-theme='dark'] {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--goobs-font-standard);
   font-weight: 500;
   letter-spacing: -0.025em;
-  color: rgb(243, 244, 246);
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--goobs-dark-text);
+  transition: var(--goobs-transition-medium);
 }
 
 .tab[data-theme='dark']:hover:not(:disabled):not([data-tab-active='true']) {
   background: rgba(96, 165, 250, 0.15);
-  border-bottom-color: rgb(96, 165, 250);
-  color: rgb(96, 165, 250);
+  border-bottom-color: var(--goobs-dark-primary);
+  color: var(--goobs-dark-primary);
   text-shadow: none;
 }
 
 .tab[data-theme='dark'][data-tab-active='true'] {
   background: rgba(96, 165, 250, 0.2);
-  border-bottom-color: rgb(96, 165, 250);
-  color: rgb(96, 165, 250);
+  border-bottom-color: var(--goobs-dark-primary);
+  color: var(--goobs-dark-primary);
   font-weight: 600;
   text-shadow: none;
   box-shadow: 0 2px 4px rgba(96, 165, 250, 0.3);

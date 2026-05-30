@@ -24,11 +24,11 @@
    -------------------------------------------------------------------------- */
 .root {
   --fs-accent: #d4af37;
-  --fs-toggle-bg: rgba(0, 0, 0, 0.3);
-  --fs-toggle-color: rgba(255, 255, 255, 0.8);
-  --fs-toggle-font: 'Cinzel', serif;
+  --fs-toggle-bg: var(--goobs-sacred-control-bg);
+  --fs-toggle-color: var(--goobs-sacred-text);
+  --fs-toggle-font: var(--goobs-font-sacred);
   --fs-panel-bg: rgba(0, 0, 0, 0.15);
-  --fs-chip-label-color: rgba(255, 255, 255, 0.5);
+  --fs-chip-label-color: var(--goobs-sacred-text-secondary);
 
   /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
      accordion in a `padding: 0.25rem` shell that already provides
@@ -43,7 +43,7 @@
    ROOT — light theme (default for undefined / light; non-sacred branch)
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
-  --fs-accent: #1976d2;
+  --fs-accent: var(--goobs-light-primary);
   --fs-toggle-bg: rgba(0, 0, 0, 0.04);
   --fs-toggle-color: rgba(0, 0, 0, 0.75);
   --fs-toggle-font: inherit;
@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--goobs-space-xs);
   background: var(--fs-toggle-bg);
   border: 1px solid color-mix(in srgb, var(--fs-accent) 30%, transparent);
   cursor: pointer;

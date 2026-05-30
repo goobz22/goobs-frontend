@@ -15,15 +15,15 @@
 
 .root {
   /* Sacred theme tokens (default) — ports of formFieldThemes.sacred */
-  --select-bg: rgba(0, 0, 0, 0.7);
-  --select-border-default: rgba(255, 215, 0, 0.3);
-  --select-border-focused: rgba(255, 215, 0, 0.7);
-  --select-text: rgba(255, 255, 255, 0.9);
+  --select-bg: var(--goobs-sacred-control-bg);
+  --select-border-default: var(--goobs-gold-a30);
+  --select-border-focused: var(--goobs-gold-a70);
+  --select-text: var(--goobs-sacred-text);
   --select-font-family: '"Crimson Text", serif';
-  --select-filled-bg: rgba(255, 215, 0, 0.06);
-  --select-disabled-text: rgba(255, 215, 0, 0.38);
-  --select-arrow-color: rgba(255, 215, 0, 0.54);
-  --select-arrow-disabled-color: rgba(255, 215, 0, 0.26);
+  --select-filled-bg: var(--goobs-gold-a05);
+  --select-disabled-text: var(--goobs-gold-a40);
+  --select-arrow-color: var(--goobs-gold-a50);
+  --select-arrow-disabled-color: var(--goobs-gold-a25);
 
   position: relative;
   display: inline-block;
@@ -31,11 +31,11 @@
 }
 
 .root[data-theme='light'] {
-  --select-bg: rgba(255, 255, 255, 0.95);
-  --select-border-default: rgba(209, 213, 219, 1);
-  --select-border-focused: rgba(59, 130, 246, 1);
-  --select-text: rgba(31, 41, 55, 1);
-  --select-font-family: '"Inter", sans-serif';
+  --select-bg: var(--goobs-light-surface);
+  --select-border-default: var(--goobs-light-border-strong);
+  --select-border-focused: var(--goobs-light-primary);
+  --select-text: var(--goobs-light-text);
+  --select-font-family: var(--goobs-font-standard);
   --select-filled-bg: rgba(0, 0, 0, 0.06);
   --select-disabled-text: rgba(0, 0, 0, 0.38);
   --select-arrow-color: rgba(0, 0, 0, 0.54);
@@ -43,11 +43,11 @@
 }
 
 .root[data-theme='dark'] {
-  --select-bg: rgba(31, 41, 55, 0.95);
-  --select-border-default: rgba(75, 85, 99, 1);
-  --select-border-focused: rgba(96, 165, 250, 1);
-  --select-text: rgba(255, 255, 255, 1);
-  --select-font-family: '"Inter", sans-serif';
+  --select-bg: var(--goobs-dark-surface);
+  --select-border-default: var(--goobs-dark-border-strong);
+  --select-border-focused: var(--goobs-dark-primary);
+  --select-text: var(--goobs-dark-text);
+  --select-font-family: var(--goobs-font-standard);
   --select-filled-bg: rgba(255, 255, 255, 0.06);
   --select-disabled-text: rgba(255, 255, 255, 0.38);
   --select-arrow-color: rgba(255, 255, 255, 0.54);
@@ -105,7 +105,7 @@
   border-right: 1px solid var(--select-border-default);
   border-bottom: 1px solid var(--select-border-default);
   border-left: 1px solid var(--select-border-default);
-  border-radius: var(--select-radius, 4px);
+  border-radius: var(--select-radius, var(--goobs-radius-sm));
 }
 
 /* --- Variant: standard — bottom border only, no radius --- */
@@ -144,15 +144,15 @@
 
 .root[data-helper-error='true'] .outlined,
 .root[data-helper-error='true'] .outlined:hover:not(:disabled) {
-  border-top-color: rgba(239, 68, 68, 1);
-  border-right-color: rgba(239, 68, 68, 1);
-  border-bottom-color: rgba(239, 68, 68, 1);
-  border-left-color: rgba(239, 68, 68, 1);
+  border-top-color: var(--goobs-danger);
+  border-right-color: var(--goobs-danger);
+  border-bottom-color: var(--goobs-danger);
+  border-left-color: var(--goobs-danger);
 }
 
 .root[data-helper-error='true'] .standard,
 .root[data-helper-error='true'] .standard:hover:not(:disabled) {
-  border-bottom-color: rgba(239, 68, 68, 1);
+  border-bottom-color: var(--goobs-danger);
 }
 
 /* --------------------------------------------------------------------------

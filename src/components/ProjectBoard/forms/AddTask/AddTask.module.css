@@ -25,11 +25,11 @@
    --at-sidebar-bg    ← sidebarBg
    -------------------------------------------------------------------------- */
 .root {
-  --at-bg: rgba(0, 0, 0, 0.95);
-  --at-border: rgba(255, 215, 0, 0.3);
-  --at-text: #ffd700;
-  --at-secondary: rgba(255, 215, 0, 0.7);
-  --at-sidebar-bg: rgba(0, 0, 0, 0.8);
+  --at-bg: var(--goobs-sacred-surface);
+  --at-border: var(--goobs-gold-a30);
+  --at-text: var(--goobs-gold);
+  --at-secondary: var(--goobs-gold-a70);
+  --at-sidebar-bg: var(--goobs-sacred-surface-raised);
 
   display: flex;
   height: 100vh;
@@ -40,18 +40,18 @@
 }
 
 .root[data-theme='light'] {
-  --at-bg: #ffffff;
-  --at-border: #e5e7eb;
-  --at-text: #1f2937;
-  --at-secondary: #6b7280;
-  --at-sidebar-bg: #f9fafb;
+  --at-bg: var(--goobs-light-surface);
+  --at-border: var(--goobs-light-border);
+  --at-text: var(--goobs-light-text);
+  --at-secondary: var(--goobs-light-text-muted);
+  --at-sidebar-bg: var(--goobs-light-surface-raised);
 }
 
 .root[data-theme='dark'] {
-  --at-bg: #1f2937;
-  --at-border: #374151;
-  --at-text: #f9fafb;
-  --at-secondary: #d1d5db;
+  --at-bg: var(--goobs-dark-surface);
+  --at-border: var(--goobs-dark-border);
+  --at-text: var(--goobs-dark-text);
+  --at-secondary: var(--goobs-dark-text-secondary);
   --at-sidebar-bg: #111827;
 }
 
@@ -91,13 +91,13 @@
   font-weight: 700;
   color: var(--at-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--goobs-tracking-sacred-wide);
   margin-bottom: 1rem;
 }
 
 .root[data-theme='sacred'] .sectionTitle {
-  color: rgba(255, 215, 0, 0.6);
-  font-family: Cinzel, serif;
+  color: var(--goobs-gold-a60);
+  font-family: var(--goobs-font-sacred);
 }
 
 /* --------------------------------------------------------------------------
@@ -123,10 +123,10 @@
 
 .tab {
   padding: 0.75rem 1.5rem;
-  background-color: rgba(255, 215, 0, 0.05);
+  background-color: var(--goobs-gold-a05);
   border: 1px solid var(--at-border);
   border-bottom: 1px solid var(--at-border);
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--goobs-radius-lg) var(--goobs-radius-lg) 0 0;
   cursor: pointer;
   font-weight: 400;
   color: var(--at-secondary);
@@ -139,11 +139,11 @@
 }
 
 .root[data-theme='dark'] .tab {
-  background-color: #1f2937;
+  background-color: var(--goobs-dark-surface);
 }
 
 .tab[data-active='true'] {
-  background-color: rgba(255, 215, 0, 0.2);
+  background-color: var(--goobs-gold-a20);
   border-bottom: none;
   font-weight: 600;
   color: var(--at-text);
@@ -151,7 +151,7 @@
 }
 
 .root[data-theme='light'] .tab[data-active='true'] {
-  background-color: #ffffff;
+  background-color: var(--goobs-light-surface);
 }
 
 .root[data-theme='dark'] .tab[data-active='true'] {
@@ -178,9 +178,9 @@
 }
 
 .root[data-theme='sacred'] .heading {
-  font-family: Cinzel, serif;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  font-family: var(--goobs-font-sacred);
+  color: var(--goobs-gold);
+  text-shadow: 0 0 10px var(--goobs-gold-a50);
 }
 
 /* Article-detail-view heading (1rem bottom margin instead of 2rem) */
@@ -192,8 +192,8 @@
 }
 
 .root[data-theme='sacred'] .articleHeading {
-  font-family: Cinzel, serif;
-  color: #ffd700;
+  font-family: var(--goobs-font-sacred);
+  color: var(--goobs-gold);
 }
 
 /* Knowledgebase list-view heading (1rem bottom margin) */
@@ -205,9 +205,9 @@
 }
 
 .root[data-theme='sacred'] .kbHeading {
-  font-family: Cinzel, serif;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  font-family: var(--goobs-font-sacred);
+  color: var(--goobs-gold);
+  text-shadow: 0 0 10px var(--goobs-gold-a50);
 }
 
 /* --------------------------------------------------------------------------
@@ -237,7 +237,7 @@
 .backButton {
   background: none;
   border: 1px solid var(--at-border);
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   padding: 0.5rem 1rem;
   cursor: pointer;
   color: var(--at-text);
@@ -251,59 +251,59 @@
 /* Linked state — red "click to unlink" button (sacred default) */
 .unlinkButton {
   padding: 0.75rem 1.5rem;
-  background-color: rgba(239, 68, 68, 0.2);
+  background-color: var(--goobs-danger-bg);
   color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  border-radius: 6px;
+  border: 1px solid var(--goobs-danger-border);
+  border-radius: var(--goobs-radius-md);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .root[data-theme='light'] .unlinkButton {
-  background-color: #ef4444;
+  background-color: var(--goobs-danger);
   color: #ffffff;
-  border-color: #ef4444;
+  border-color: var(--goobs-danger);
 }
 
 .root[data-theme='dark'] .unlinkButton {
   background-color: #7f1d1d;
   color: #ffffff;
-  border-color: #ef4444;
+  border-color: var(--goobs-danger);
 }
 
 /* Unlinked state — "link to this case" button (sacred default) */
 .linkButton {
   padding: 0.75rem 1.5rem;
-  background-color: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.5);
-  border-radius: 6px;
+  background-color: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
+  border: 1px solid var(--goobs-gold-a50);
+  border-radius: var(--goobs-radius-md);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .root[data-theme='light'] .linkButton {
-  background-color: #3b82f6;
+  background-color: var(--goobs-light-primary);
   color: #ffffff;
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
 }
 
 .root[data-theme='dark'] .linkButton {
   background-color: #1e40af;
   color: #ffffff;
-  border-color: #3b82f6;
+  border-color: var(--goobs-dark-primary-strong);
 }
 
 /* Category chip (sacred default) */
 .categoryChip {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background-color: rgba(255, 215, 0, 0.15);
+  background-color: var(--goobs-gold-a15);
   border-radius: 20px;
   font-size: 0.75rem;
-  color: #ffd700;
+  color: var(--goobs-gold);
   margin-bottom: 1.5rem;
 }
 
@@ -365,7 +365,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: rgba(255, 215, 0, 0.2);
+  background-color: var(--goobs-gold-a20);
   border-radius: 20px;
   font-size: 0.875rem;
   color: var(--at-text);
@@ -413,24 +413,24 @@
   padding: 1rem;
   background-color: var(--at-sidebar-bg);
   border: 2px solid var(--at-border);
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .articleCard[data-selected='true'] {
-  background-color: rgba(255, 215, 0, 0.15);
-  border-color: #ffd700;
+  background-color: var(--goobs-gold-a15);
+  border-color: var(--goobs-gold);
 }
 
 .root[data-theme='light'] .articleCard[data-selected='true'] {
   background-color: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
 }
 
 .root[data-theme='dark'] .articleCard[data-selected='true'] {
   background-color: rgba(59, 130, 246, 0.2);
-  border-color: #3b82f6;
+  border-color: var(--goobs-dark-primary-strong);
 }
 
 .articleCardHeader {
@@ -450,29 +450,29 @@
 
 /* Selected checkmark (sacred default) */
 .articleCardCheck {
-  color: #ffd700;
+  color: var(--goobs-gold);
   font-size: 1.25rem;
   margin-left: 0.5rem;
 }
 
 .root[data-theme='light'] .articleCardCheck,
 .root[data-theme='dark'] .articleCardCheck {
-  color: #3b82f6;
+  color: var(--goobs-light-primary);
 }
 
 /* Article category line (sacred default) */
 .articleCardCategory {
   font-size: 0.75rem;
-  color: rgba(255, 215, 0, 0.7);
+  color: var(--goobs-gold-a70);
   margin-bottom: 0.5rem;
 }
 
 .root[data-theme='light'] .articleCardCategory {
-  color: #3b82f6;
+  color: var(--goobs-light-primary);
 }
 
 .root[data-theme='dark'] .articleCardCategory {
-  color: #60a5fa;
+  color: var(--goobs-dark-primary);
 }
 
 .articleCardPurpose {
@@ -501,9 +501,9 @@
 .validationError {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background-color: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  border-radius: 6px;
+  background-color: var(--goobs-danger-bg);
+  border: 1px solid var(--goobs-danger-border);
+  border-radius: var(--goobs-radius-md);
   color: #fca5a5;
   font-size: 0.875rem;
 }
@@ -515,8 +515,8 @@
 }
 
 .root[data-theme='dark'] .validationError {
-  background-color: rgba(220, 38, 38, 0.2);
-  border-color: rgba(220, 38, 38, 0.4);
+  background-color: var(--goobs-danger-bg);
+  border-color: var(--goobs-danger-border);
   color: #fca5a5;
 }
 
@@ -532,7 +532,7 @@
 /* Shared button base — buttonStyle in the old JS */
 .button {
   padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   border: 1px solid var(--at-border);
   font-size: 0.875rem;
   font-weight: 600;
@@ -542,25 +542,25 @@
 
 /* Primary "Create Task" button (sacred default) — hover handled in CSS */
 .submitButton {
-  background-color: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
-  border-color: rgba(255, 215, 0, 0.5);
+  background-color: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
+  border-color: var(--goobs-gold-a50);
 }
 
 .submitButton:hover {
-  background-color: rgba(255, 215, 0, 0.3);
+  background-color: var(--goobs-gold-a30);
 }
 
 .root[data-theme='light'] .submitButton,
 .root[data-theme='dark'] .submitButton {
-  background-color: #3b82f6;
+  background-color: var(--goobs-light-primary);
   color: #ffffff;
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
 }
 
 .root[data-theme='light'] .submitButton:hover,
 .root[data-theme='dark'] .submitButton:hover {
-  background-color: #2563eb;
+  background-color: var(--goobs-light-primary-strong);
 }
 
 /* Secondary "Cancel" button (transparent; theme text color) */
@@ -570,7 +570,7 @@
 }
 
 .cancelButton:hover {
-  background-color: rgba(255, 215, 0, 0.1);
+  background-color: var(--goobs-gold-a10);
 }
 
 .root[data-theme='light'] .cancelButton:hover {

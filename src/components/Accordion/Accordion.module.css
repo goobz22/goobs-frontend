@@ -30,30 +30,30 @@
 .container {
   /* runtime / caller-driven values (set inline as CSS vars when provided) */
   --accordion-level-indent: 20px;
-  --accordion-margin-bottom: 4px;
-  --accordion-border-radius: 8px;
+  --accordion-margin-bottom: var(--goobs-space-2xs);
+  --accordion-border-radius: var(--goobs-radius-lg);
   --accordion-border-width: 1px;
-  --accordion-padding: 12px;
+  --accordion-padding: var(--goobs-space-sm);
 
   /* sacred palette defaults */
-  --accordion-bg: rgba(0, 0, 0, 0.4);
-  --accordion-border-color: rgba(255, 215, 0, 0.3);
-  --accordion-summary-color: rgba(255, 255, 255, 0.9);
-  --accordion-summary-active-bg: rgba(255, 215, 0, 0.15);
-  --accordion-summary-active-color: #ffd700;
-  --accordion-summary-hover-bg: rgba(255, 215, 0, 0.1);
-  --accordion-summary-font-family: 'Cinzel', serif;
-  --accordion-icon-color: #ffd700;
-  --accordion-details-color: rgba(255, 255, 255, 0.8);
+  --accordion-bg: var(--goobs-sacred-control-bg);
+  --accordion-border-color: var(--goobs-gold-a30);
+  --accordion-summary-color: var(--goobs-sacred-text);
+  --accordion-summary-active-bg: var(--goobs-gold-a15);
+  --accordion-summary-active-color: var(--goobs-gold);
+  --accordion-summary-hover-bg: var(--goobs-gold-a10);
+  --accordion-summary-font-family: var(--goobs-font-sacred);
+  --accordion-icon-color: var(--goobs-gold);
+  --accordion-details-color: var(--goobs-sacred-text);
   --accordion-details-font-family: 'Crimson Text', serif;
-  --accordion-details-border-top-color: rgba(255, 215, 0, 0.2);
+  --accordion-details-border-top-color: var(--goobs-gold-a20);
 
   position: relative;
   margin-bottom: var(--accordion-margin-bottom);
   border-radius: var(--accordion-border-radius);
   background-color: var(--accordion-bg);
   border: var(--accordion-border-width) solid var(--accordion-border-color);
-  transition: all 0.3s ease;
+  transition: var(--goobs-transition-slow);
   overflow: hidden;
 }
 
@@ -61,17 +61,17 @@
    CONTAINER — light (default for undefined / light / dark; non-sacred branch)
    -------------------------------------------------------------------------- */
 .container[data-theme='light'] {
-  --accordion-bg: #fff;
-  --accordion-border-color: #e5e7eb;
-  --accordion-summary-color: #111827;
-  --accordion-summary-active-bg: rgba(59, 130, 246, 0.1);
-  --accordion-summary-active-color: #3b82f6;
-  --accordion-summary-hover-bg: #f9fafb;
+  --accordion-bg: var(--goobs-light-surface);
+  --accordion-border-color: var(--goobs-light-border);
+  --accordion-summary-color: var(--goobs-light-text);
+  --accordion-summary-active-bg: var(--goobs-info-bg);
+  --accordion-summary-active-color: var(--goobs-light-primary);
+  --accordion-summary-hover-bg: var(--goobs-light-surface-raised);
   --accordion-summary-font-family: inherit;
-  --accordion-icon-color: #6b7280;
-  --accordion-details-color: #374151;
+  --accordion-icon-color: var(--goobs-light-text-muted);
+  --accordion-details-color: var(--goobs-light-text-secondary);
   --accordion-details-font-family: inherit;
-  --accordion-details-border-top-color: #e5e7eb;
+  --accordion-details-border-top-color: var(--goobs-light-border);
 }
 
 /* --------------------------------------------------------------------------
@@ -90,16 +90,16 @@
   padding: var(--accordion-padding);
   /* accordion type: 40px base; overridden to 16px base for menu type */
   padding-left: calc(40px + var(--accordion-level-indent));
-  padding-right: 24px;
+  padding-right: var(--goobs-space-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
   background-color: var(--accordion-summary-bg, transparent);
   color: var(--accordion-summary-color);
-  font-weight: 400;
+  font-weight: var(--goobs-weight-regular);
   font-family: var(--accordion-summary-font-family);
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: var(--goobs-text-md);
+  transition: var(--goobs-transition-slow);
   white-space: nowrap;
   min-width: fit-content;
 }
@@ -120,7 +120,7 @@
 .summary[data-active='true'][data-menu='true'] {
   background-color: var(--accordion-summary-active-bg);
   color: var(--accordion-summary-active-color);
-  font-weight: 600;
+  font-weight: var(--goobs-weight-semibold);
 }
 
 .summary[data-disabled='true'] {
@@ -153,6 +153,6 @@
   padding-left: calc(24px + var(--accordion-level-indent));
   color: var(--accordion-details-color);
   font-family: var(--accordion-details-font-family);
-  font-size: 14px;
+  font-size: var(--goobs-text-md);
   border-top: 1px solid var(--accordion-details-border-top-color);
 }

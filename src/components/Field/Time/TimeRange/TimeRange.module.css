@@ -10,7 +10,7 @@
 
 .fieldsWrapper {
   display: flex;
-  gap: 16px;
+  gap: var(--goobs-space-md);
 }
 
 .fieldContainer {
@@ -23,11 +23,11 @@
 
 .input {
   width: 100%;
-  padding: 12px 16px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
+  background-color: var(--goobs-sacred-control-bg);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-lg);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
   font-size: 16px;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 .input:disabled {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: rgba(255, 255, 255, 0.4);
+  background-color: var(--goobs-sacred-control-bg);
+  color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
 }

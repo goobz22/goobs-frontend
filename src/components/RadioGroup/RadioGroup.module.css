@@ -25,11 +25,11 @@
    -------------------------------------------------------------------------- */
 .formControl {
   /* Transition token — light/dark use medium (200ms) */
-  --rg-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --rg-transition: var(--goobs-transition-medium);
 
   /* Label (group heading) palette/typography — light */
-  --rg-label-color: rgb(17, 24, 39);
-  --rg-label-font-family: 'Inter', sans-serif;
+  --rg-label-color: var(--goobs-light-text);
+  --rg-label-font-family: var(--goobs-font-standard);
   --rg-label-font-size: 0.875rem;
   --rg-label-font-weight: 500;
   --rg-label-letter-spacing: normal;
@@ -43,20 +43,20 @@
   /* Radio outer ring — light */
   --rg-radio-size: 20px;
   --rg-radio-border-width: 2px;
-  --rg-radio-border-color: #d1d5db;
-  --rg-radio-hover-border-color: #3b82f6;
+  --rg-radio-border-color: var(--goobs-light-border-strong);
+  --rg-radio-hover-border-color: var(--goobs-light-primary);
   --rg-radio-hover-bg: rgba(59, 130, 246, 0.04);
-  --rg-radio-checked-border-color: #3b82f6;
-  --rg-radio-checked-bg: #3b82f6;
+  --rg-radio-checked-border-color: var(--goobs-light-primary);
+  --rg-radio-checked-bg: var(--goobs-light-primary);
 
   /* Radio inner dot — light (kept for parity but hidden, see .radioInner) */
-  --rg-radio-inner-color: #3b82f6;
+  --rg-radio-inner-color: var(--goobs-light-primary);
 
   /* Option text — light */
-  --rg-text-color: rgb(55, 65, 81);
-  --rg-text-hover-color: rgb(55, 65, 81);
+  --rg-text-color: var(--goobs-light-text-secondary);
+  --rg-text-hover-color: var(--goobs-light-text-secondary);
   --rg-text-hover-shadow: none;
-  --rg-text-font-family: 'Inter', sans-serif;
+  --rg-text-font-family: var(--goobs-font-standard);
   --rg-text-font-size: 0.875rem;
 
   position: relative;
@@ -67,29 +67,29 @@
    -------------------------------------------------------------------------- */
 .formControl[data-theme='sacred'] {
   /* sacred uses premium (400ms) */
-  --rg-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --rg-transition: var(--goobs-transition-premium);
 
-  --rg-label-color: #ffd700;
-  --rg-label-font-family: 'Cinzel', serif;
+  --rg-label-color: var(--goobs-gold);
+  --rg-label-font-family: var(--goobs-font-sacred);
   --rg-label-font-size: 0.875rem;
   --rg-label-font-weight: 600;
   --rg-label-letter-spacing: 0.025em;
-  --rg-label-text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  --rg-label-text-shadow: 0 0 5px var(--goobs-gold-a50);
 
   --rg-option-hover-transform: translateX(4px);
 
-  --rg-radio-border-color: #ffd700;
-  --rg-radio-hover-border-color: #ffd700;
-  --rg-radio-hover-bg: rgba(255, 215, 0, 0.1);
-  --rg-radio-checked-border-color: #ffd700;
-  --rg-radio-checked-bg: #ffd700;
+  --rg-radio-border-color: var(--goobs-gold);
+  --rg-radio-hover-border-color: var(--goobs-gold);
+  --rg-radio-hover-bg: var(--goobs-gold-a10);
+  --rg-radio-checked-border-color: var(--goobs-gold);
+  --rg-radio-checked-bg: var(--goobs-gold);
 
-  --rg-radio-inner-color: #ffd700;
+  --rg-radio-inner-color: var(--goobs-gold);
 
-  --rg-text-color: rgba(255, 215, 0, 0.9);
-  --rg-text-hover-color: #ffd700;
-  --rg-text-hover-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
-  --rg-text-font-family: 'Cinzel', serif;
+  --rg-text-color: var(--goobs-gold-a90);
+  --rg-text-hover-color: var(--goobs-gold);
+  --rg-text-hover-shadow: 0 0 3px var(--goobs-gold-a50);
+  --rg-text-font-family: var(--goobs-font-sacred);
   --rg-text-font-size: 0.875rem;
 }
 
@@ -97,10 +97,10 @@
    DARK THEME OVERRIDES
    -------------------------------------------------------------------------- */
 .formControl[data-theme='dark'] {
-  --rg-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --rg-transition: var(--goobs-transition-medium);
 
-  --rg-label-color: rgb(243, 244, 246);
-  --rg-label-font-family: 'Inter', sans-serif;
+  --rg-label-color: var(--goobs-dark-text);
+  --rg-label-font-family: var(--goobs-font-standard);
   --rg-label-font-size: 0.875rem;
   --rg-label-font-weight: 500;
   --rg-label-letter-spacing: normal;
@@ -108,18 +108,18 @@
 
   --rg-option-hover-transform: none;
 
-  --rg-radio-border-color: #6b7280;
-  --rg-radio-hover-border-color: #60a5fa;
+  --rg-radio-border-color: var(--goobs-dark-text-muted);
+  --rg-radio-hover-border-color: var(--goobs-dark-primary);
   --rg-radio-hover-bg: rgba(96, 165, 250, 0.1);
-  --rg-radio-checked-border-color: #60a5fa;
-  --rg-radio-checked-bg: #60a5fa;
+  --rg-radio-checked-border-color: var(--goobs-dark-primary);
+  --rg-radio-checked-bg: var(--goobs-dark-primary);
 
-  --rg-radio-inner-color: #60a5fa;
+  --rg-radio-inner-color: var(--goobs-dark-primary);
 
-  --rg-text-color: rgb(209, 213, 219);
-  --rg-text-hover-color: rgb(209, 213, 219);
+  --rg-text-color: var(--goobs-dark-text-secondary);
+  --rg-text-hover-color: var(--goobs-dark-text-secondary);
   --rg-text-hover-shadow: none;
-  --rg-text-font-family: 'Inter', sans-serif;
+  --rg-text-font-family: var(--goobs-font-standard);
   --rg-text-font-size: 0.875rem;
 }
 

@@ -19,9 +19,9 @@
    table.ts sacredTheme.container
    -------------------------------------------------------------------------- */
 .container {
-  background-color: var(--table-container-bg, rgba(0, 0, 0, 0.8));
-  border-color: var(--table-container-border, rgba(255, 215, 0, 0.3));
-  border-radius: var(--table-container-radius, 8px);
+  background-color: var(--table-container-bg, var(--goobs-sacred-surface));
+  border-color: var(--table-container-border, var(--goobs-gold-a30));
+  border-radius: var(--table-container-radius, var(--goobs-radius-lg));
   border-style: solid;
   border-width: 1px;
   overflow-x: auto;
@@ -32,16 +32,16 @@
 
 /* table.ts lightTheme.container */
 .container[data-theme='light'] {
-  background-color: var(--table-container-bg, #ffffff);
-  border-color: var(--table-container-border, #e0e0e0);
-  border-radius: var(--table-container-radius, 4px);
+  background-color: var(--table-container-bg, var(--goobs-light-surface));
+  border-color: var(--table-container-border, var(--goobs-light-border));
+  border-radius: var(--table-container-radius, var(--goobs-radius-sm));
 }
 
 /* table.ts darkTheme.container */
 .container[data-theme='dark'] {
-  background-color: var(--table-container-bg, #1a1a1a);
-  border-color: var(--table-container-border, #333333);
-  border-radius: var(--table-container-radius, 4px);
+  background-color: var(--table-container-bg, var(--goobs-dark-surface));
+  border-color: var(--table-container-border, var(--goobs-dark-border));
+  border-radius: var(--table-container-radius, var(--goobs-radius-sm));
 }
 
 /* --------------------------------------------------------------------------
@@ -60,20 +60,20 @@
    table.ts sacredTheme.header
    -------------------------------------------------------------------------- */
 .head {
-  background-color: var(--table-header-bg, rgba(255, 215, 0, 0.1));
-  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-  color: var(--table-header-color, #ffd700);
-  font-family: var(--table-font-family, 'Cinzel', serif);
+  background-color: var(--table-header-bg, var(--goobs-gold-a10));
+  border-bottom: 1px solid var(--goobs-gold-a30);
+  color: var(--table-header-color, var(--goobs-gold));
+  font-family: var(--table-font-family, var(--goobs-font-sacred));
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--goobs-tracking-sacred-wide);
 }
 
 /* table.ts lightTheme.header */
 .head[data-theme='light'] {
-  background-color: var(--table-header-bg, #f5f5f5);
-  border-bottom: 1px solid #e0e0e0;
-  color: var(--table-header-color, #333333);
+  background-color: var(--table-header-bg, var(--goobs-light-surface-raised));
+  border-bottom: 1px solid var(--goobs-light-border);
+  color: var(--table-header-color, var(--goobs-light-text));
   font-family: var(--table-font-family, inherit);
   font-weight: 600;
   text-transform: none;
@@ -82,9 +82,9 @@
 
 /* table.ts darkTheme.header */
 .head[data-theme='dark'] {
-  background-color: var(--table-header-bg, #2a2a2a);
-  border-bottom: 1px solid #444444;
-  color: var(--table-header-color, #ffffff);
+  background-color: var(--table-header-bg, var(--goobs-dark-surface-raised));
+  border-bottom: 1px solid var(--goobs-dark-border);
+  color: var(--table-header-color, var(--goobs-dark-text));
   font-family: var(--table-font-family, inherit);
   font-weight: 600;
   text-transform: none;
@@ -101,7 +101,7 @@
 }
 
 .row[data-hover='true']:hover {
-  background-color: rgba(255, 215, 0, 0.05);
+  background-color: var(--goobs-gold-a05);
 }
 
 .row[data-hover='true'][data-theme='light']:hover {
@@ -118,26 +118,26 @@
    borderBottom: `1px solid ${cell.borderColor}` from index.tsx
    -------------------------------------------------------------------------- */
 .cell {
-  color: var(--table-cell-color, rgba(255, 215, 0, 0.9));
+  color: var(--table-cell-color, var(--goobs-gold-a90));
   font-family: var(--table-font-family, 'Merriweather', serif);
-  padding: 12px 16px;
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
   vertical-align: middle;
   text-align: left;
-  border-bottom: 1px solid var(--table-cell-border, rgba(255, 215, 0, 0.2));
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-gold-a20));
 }
 
 /* table.ts lightTheme.cell */
 .cell[data-theme='light'] {
-  color: var(--table-cell-color, #333333);
+  color: var(--table-cell-color, var(--goobs-light-text));
   font-family: var(--table-font-family, inherit);
-  border-bottom: 1px solid var(--table-cell-border, #e0e0e0);
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-light-border));
 }
 
 /* table.ts darkTheme.cell */
 .cell[data-theme='dark'] {
-  color: var(--table-cell-color, #ffffff);
+  color: var(--table-cell-color, var(--goobs-dark-text));
   font-family: var(--table-font-family, inherit);
-  border-bottom: 1px solid var(--table-cell-border, #333333);
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-dark-border));
 }
 
 /* --------------------------------------------------------------------------
@@ -146,31 +146,31 @@
    header palette wins (background + header color + header font weight).
    -------------------------------------------------------------------------- */
 .cell[data-header-cell='true'] {
-  background-color: var(--table-header-bg, rgba(255, 215, 0, 0.1));
-  color: var(--table-header-color, #ffd700);
-  font-family: var(--table-font-family, 'Cinzel', serif);
+  background-color: var(--table-header-bg, var(--goobs-gold-a10));
+  color: var(--table-header-color, var(--goobs-gold));
+  font-family: var(--table-font-family, var(--goobs-font-sacred));
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--table-cell-border, rgba(255, 215, 0, 0.3));
+  letter-spacing: var(--goobs-tracking-sacred-wide);
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-gold-a30));
 }
 
 .cell[data-header-cell='true'][data-theme='light'] {
-  background-color: var(--table-header-bg, #f5f5f5);
-  color: var(--table-header-color, #333333);
+  background-color: var(--table-header-bg, var(--goobs-light-surface-raised));
+  color: var(--table-header-color, var(--goobs-light-text));
   font-family: var(--table-font-family, inherit);
   font-weight: 600;
   text-transform: none;
   letter-spacing: normal;
-  border-bottom: 1px solid var(--table-cell-border, #e0e0e0);
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-light-border));
 }
 
 .cell[data-header-cell='true'][data-theme='dark'] {
-  background-color: var(--table-header-bg, #2a2a2a);
-  color: var(--table-header-color, #ffffff);
+  background-color: var(--table-header-bg, var(--goobs-dark-surface-raised));
+  color: var(--table-header-color, var(--goobs-dark-text));
   font-family: var(--table-font-family, inherit);
   font-weight: 600;
   text-transform: none;
   letter-spacing: normal;
-  border-bottom: 1px solid var(--table-cell-border, #444444);
+  border-bottom: 1px solid var(--table-cell-border, var(--goobs-dark-border));
 }

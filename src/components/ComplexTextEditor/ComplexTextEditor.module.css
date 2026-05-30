@@ -19,53 +19,53 @@
    -------------------------------------------------------------------------- */
 .container {
   /* Sacred tokens (hardcoded default) */
-  --ct-container-bg: rgba(10, 10, 10, 0.9);
-  --ct-container-radius: 12px;
-  --ct-font-family: 'Cinzel', serif;
+  --ct-container-bg: var(--goobs-sacred-surface);
+  --ct-container-radius: var(--goobs-radius-xl);
+  --ct-font-family: var(--goobs-font-sacred);
   /* premium transition (TRANSITIONS.premium) */
-  --ct-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ct-transition: var(--goobs-transition-premium);
   /* Sacred container effects (sacred.backgroundImage + sacred.borderGlow) */
   --ct-bg-image:
     linear-gradient(
       135deg,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%,
-      rgba(255, 215, 0, 0.05) 100%
+      var(--goobs-gold-a05) 100%
     ),
     radial-gradient(
       circle at top right,
-      rgba(255, 215, 0, 0.03) 0%,
+      var(--goobs-gold-a02) 0%,
       transparent 50%
     );
-  --ct-border-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+  --ct-border-glow: 0 0 20px var(--goobs-gold-a30);
 
   /* Editor-area tokens (sacred.editorArea) */
   --ct-editor-bg: rgba(0, 0, 0, 0.8);
-  --ct-editor-border: rgba(255, 215, 0, 0.3);
-  --ct-editor-border-focused: rgba(255, 215, 0, 0.7);
-  --ct-editor-border-error: rgba(239, 68, 68, 1);
-  --ct-editor-color: rgba(255, 215, 0, 0.9);
-  --ct-editor-color-error: rgba(255, 255, 255, 0.6);
-  --ct-editor-font-family: 'Cinzel', serif;
-  --ct-editor-font-size: 16px;
+  --ct-editor-border: var(--goobs-gold-a30);
+  --ct-editor-border-focused: var(--goobs-gold-a70);
+  --ct-editor-border-error: var(--goobs-danger);
+  --ct-editor-color: var(--goobs-gold-a90);
+  --ct-editor-color-error: var(--goobs-sacred-text-secondary);
+  --ct-editor-font-family: var(--goobs-font-sacred);
+  --ct-editor-font-size: var(--goobs-text-xl);
   --ct-editor-line-height: 1.6;
-  --ct-editor-padding: 24px;
+  --ct-editor-padding: var(--goobs-space-lg);
   --ct-editor-min-height: 150px;
-  --ct-editor-radius: 0 0 12px 12px;
+  --ct-editor-radius: 0 0 var(--goobs-radius-xl) var(--goobs-radius-xl);
   /* SHADOWS.sacred.small */
   --ct-editor-shadow:
-    0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-  --ct-editor-text-glow: 0 0 3px rgba(255, 215, 0, 0.3);
+    0 0 20px var(--goobs-gold-a30), 0 0 40px var(--goobs-gold-a10);
+  --ct-editor-text-glow: 0 0 3px var(--goobs-gold-a30);
 
   /* Toolbar tokens (sacred.toolbar) */
   --ct-toolbar-bg: transparent;
-  --ct-toolbar-radius: 12px 12px 0 0;
-  --ct-toolbar-padding: 16px 24px;
-  --ct-toolbar-gap: 12px;
+  --ct-toolbar-radius: var(--goobs-radius-xl) var(--goobs-radius-xl) 0 0;
+  --ct-toolbar-padding: var(--goobs-space-md) var(--goobs-space-lg);
+  --ct-toolbar-gap: var(--goobs-space-sm);
 
   /* Sacred glyph (sacred.sacred.glyph) */
-  --ct-glyph-color: rgba(255, 215, 0, 0.2);
-  --ct-glyph-filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+  --ct-glyph-color: var(--goobs-gold-a20);
+  --ct-glyph-filter: drop-shadow(0 0 8px var(--goobs-gold-a40));
 
   position: relative;
   display: flex;
@@ -85,32 +85,31 @@
 /* LIGHT theme override (theme/complextexteditor.ts light + TRANSITIONS.medium) */
 .container[data-theme='light'] {
   --ct-container-bg: rgba(255, 255, 255, 0.95);
-  --ct-container-radius: 8px;
-  --ct-font-family: 'Inter', sans-serif;
-  --ct-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ct-container-radius: var(--goobs-radius-lg);
+  --ct-font-family: var(--goobs-font-standard);
+  --ct-transition: var(--goobs-transition-medium);
   --ct-bg-image: none;
   --ct-border-glow: none;
 
-  --ct-editor-bg: rgba(255, 255, 255, 1);
-  --ct-editor-border: rgba(209, 213, 219, 1);
-  --ct-editor-border-focused: rgba(59, 130, 246, 1);
-  --ct-editor-border-error: rgba(239, 68, 68, 1);
-  --ct-editor-color: rgba(31, 41, 55, 1);
-  --ct-editor-color-error: rgba(239, 68, 68, 1);
-  --ct-editor-font-family: 'Inter', sans-serif;
-  --ct-editor-font-size: 14px;
+  --ct-editor-bg: var(--goobs-light-surface);
+  --ct-editor-border: var(--goobs-light-border-strong);
+  --ct-editor-border-focused: var(--goobs-light-primary);
+  --ct-editor-border-error: var(--goobs-danger);
+  --ct-editor-color: var(--goobs-light-text);
+  --ct-editor-color-error: var(--goobs-danger);
+  --ct-editor-font-family: var(--goobs-font-standard);
+  --ct-editor-font-size: var(--goobs-text-md);
   --ct-editor-line-height: 1.5;
-  --ct-editor-padding: 16px;
+  --ct-editor-padding: var(--goobs-space-md);
   --ct-editor-min-height: 120px;
-  --ct-editor-radius: 0 0 8px 8px;
+  --ct-editor-radius: 0 0 var(--goobs-radius-lg) var(--goobs-radius-lg);
   /* SHADOWS.light.small */
-  --ct-editor-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --ct-editor-shadow: var(--goobs-shadow-light-sm);
   --ct-editor-text-glow: none;
 
-  --ct-toolbar-radius: 8px 8px 0 0;
-  --ct-toolbar-padding: 12px 16px;
-  --ct-toolbar-gap: 8px;
+  --ct-toolbar-radius: var(--goobs-radius-lg) var(--goobs-radius-lg) 0 0;
+  --ct-toolbar-padding: var(--goobs-space-sm) var(--goobs-space-md);
+  --ct-toolbar-gap: var(--goobs-space-xs);
 
   --ct-glyph-filter: none;
 }
@@ -118,39 +117,38 @@
 /* DARK theme override (theme/complextexteditor.ts dark + TRANSITIONS.medium) */
 .container[data-theme='dark'] {
   --ct-container-bg: rgba(31, 41, 55, 0.95);
-  --ct-container-radius: 8px;
-  --ct-font-family: 'Inter', sans-serif;
-  --ct-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ct-container-radius: var(--goobs-radius-lg);
+  --ct-font-family: var(--goobs-font-standard);
+  --ct-transition: var(--goobs-transition-medium);
   --ct-bg-image: none;
   --ct-border-glow: none;
 
   --ct-editor-bg: rgba(17, 24, 39, 1);
-  --ct-editor-border: rgba(75, 85, 99, 1);
-  --ct-editor-border-focused: rgba(96, 165, 250, 1);
-  --ct-editor-border-error: rgba(239, 68, 68, 1);
-  --ct-editor-color: rgba(243, 244, 246, 1);
-  --ct-editor-color-error: rgba(239, 68, 68, 1);
-  --ct-editor-font-family: 'Inter', sans-serif;
-  --ct-editor-font-size: 14px;
+  --ct-editor-border: var(--goobs-dark-border-strong);
+  --ct-editor-border-focused: var(--goobs-dark-primary);
+  --ct-editor-border-error: var(--goobs-danger);
+  --ct-editor-color: var(--goobs-dark-text);
+  --ct-editor-color-error: var(--goobs-danger);
+  --ct-editor-font-family: var(--goobs-font-standard);
+  --ct-editor-font-size: var(--goobs-text-md);
   --ct-editor-line-height: 1.5;
-  --ct-editor-padding: 16px;
+  --ct-editor-padding: var(--goobs-space-md);
   --ct-editor-min-height: 120px;
-  --ct-editor-radius: 0 0 8px 8px;
+  --ct-editor-radius: 0 0 var(--goobs-radius-lg) var(--goobs-radius-lg);
   /* dark editorArea boxShadow (literal from theme/complextexteditor.ts) */
-  --ct-editor-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --ct-editor-shadow: var(--goobs-shadow-dark-sm);
   --ct-editor-text-glow: none;
 
-  --ct-toolbar-radius: 8px 8px 0 0;
-  --ct-toolbar-padding: 12px 16px;
-  --ct-toolbar-gap: 8px;
+  --ct-toolbar-radius: var(--goobs-radius-lg) var(--goobs-radius-lg) 0 0;
+  --ct-toolbar-padding: var(--goobs-space-sm) var(--goobs-space-md);
+  --ct-toolbar-gap: var(--goobs-space-xs);
 
   --ct-glyph-filter: none;
 }
 
 /* Accordion-mode root padding (containerStyle: padding when accordionMode) */
 .container[data-accordion='true'] {
-  padding: 16px;
+  padding: var(--goobs-space-md);
 }
 
 /* Disabled root (containerStyle disabled branch) */
@@ -173,10 +171,10 @@
    -------------------------------------------------------------------------- */
 .label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 14px;
+  margin-bottom: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-md);
   font-family: var(--ct-label-font-family, 'Crimson Text', serif);
-  color: rgba(255, 215, 0, 0.8); /* formField sacred label.default (default) */
+  color: var(--goobs-gold-a80); /* formField sacred label.default (default) */
   transition: all 0.2s ease;
   background: transparent;
   background-color: transparent;
@@ -188,28 +186,28 @@
 
 .label[data-theme='light'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: rgba(107, 114, 128, 1); /* formField light label.default */
+  color: var(--goobs-light-text-muted); /* formField light label.default */
 }
 
 .label[data-theme='dark'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: rgba(156, 163, 175, 1); /* formField dark label.default */
+  color: var(--goobs-dark-text-muted); /* formField dark label.default */
 }
 
 .label[data-theme='sacred'] {
   --ct-label-font-family: 'Crimson Text', serif;
-  color: rgba(255, 215, 0, 0.8); /* formField sacred label.default */
+  color: var(--goobs-gold-a80); /* formField sacred label.default */
 }
 
 /* Sacred decorative branch — only when styles.theme === 'sacred'
    (index.tsx isSacredTheme block). Overrides colour + font with the gold
    glow treatment. */
 .label[data-sacred='true'] {
-  color: rgba(255, 215, 0, 0.9); /* Sacred gold */
-  font-family: 'Cinzel', serif;
-  text-shadow: 0 0 3px rgba(255, 215, 0, 0.3);
-  letter-spacing: 0.05em;
-  font-weight: 700;
+  color: var(--goobs-gold-a90); /* Sacred gold */
+  font-family: var(--goobs-font-sacred);
+  text-shadow: 0 0 3px var(--goobs-gold-a30);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
+  font-weight: var(--goobs-weight-bold);
   text-transform: uppercase;
 }
 
@@ -219,23 +217,23 @@
    font-size overridable via --ct-helper-font-size (styles?.fontSize).
    -------------------------------------------------------------------------- */
 .helperText {
-  margin-top: 4px;
-  font-size: var(--ct-helper-font-size, 12px);
+  margin-top: var(--goobs-space-2xs);
+  font-size: var(--ct-helper-font-size, var(--goobs-text-xs));
   /* getFormFieldTheme default font (sacred → serif) */
   font-family: var(--ct-label-font-family, 'Crimson Text', serif);
   /* sacred footerText.default (getFormFieldTheme default) */
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--goobs-sacred-text-secondary);
   min-height: 1em;
 }
 
 .helperText[data-theme='light'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: rgba(107, 114, 128, 1); /* light footerText.default */
+  color: var(--goobs-light-text-muted); /* light footerText.default */
 }
 
 .helperText[data-theme='dark'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: rgba(156, 163, 175, 1); /* dark footerText.default */
+  color: var(--goobs-dark-text-muted); /* dark footerText.default */
 }
 
 .helperText[data-theme='sacred'] {
@@ -244,7 +242,7 @@
 
 /* error footerText is the same across themes (rgba(239,68,68,1)) */
 .helperText[data-helper-type='error'] {
-  color: rgba(239, 68, 68, 1);
+  color: var(--goobs-danger);
 }
 
 /* --------------------------------------------------------------------------
@@ -272,7 +270,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--goobs-space-md);
 }
 
 .toggleRow[data-hidden='true'] {
@@ -338,14 +336,14 @@
    -------------------------------------------------------------------------- */
 .simpleTextarea {
   /* light defaults */
-  --ct-simple-bg: #ffffff;
-  --ct-simple-border: #e5e7eb;
-  --ct-simple-color: #1f2937;
+  --ct-simple-bg: var(--goobs-light-surface);
+  --ct-simple-border: var(--goobs-light-border);
+  --ct-simple-color: var(--goobs-light-text);
   --ct-simple-shadow: none;
 
   width: 100%;
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   border: 1px solid var(--ct-simple-border);
   background-color: var(--ct-simple-bg);
   color: var(--ct-simple-color);
@@ -360,23 +358,23 @@
 }
 
 .simpleTextarea[data-theme='dark'] {
-  --ct-simple-bg: #1f2937;
-  --ct-simple-border: #374151;
-  --ct-simple-color: #f9fafb;
+  --ct-simple-bg: var(--goobs-dark-surface);
+  --ct-simple-border: var(--goobs-dark-border);
+  --ct-simple-color: var(--goobs-dark-text);
 }
 
 .simpleTextarea[data-theme='sacred'] {
   --ct-simple-bg: rgba(0, 0, 0, 0.95);
-  --ct-simple-border: rgba(255, 215, 0, 0.3);
-  --ct-simple-color: #ffd700;
+  --ct-simple-border: var(--goobs-gold-a30);
+  --ct-simple-color: var(--goobs-gold);
   /* unfocused sacred shadow */
-  --ct-simple-shadow: 0 0 8px rgba(255, 215, 0, 0.1);
+  --ct-simple-shadow: 0 0 8px var(--goobs-gold-a10);
 }
 
 /* Sacred focus state (was isFocused branch): brighter border + stronger glow */
 .simpleTextarea[data-theme='sacred']:focus {
-  --ct-simple-border: rgba(255, 215, 0, 0.5);
-  --ct-simple-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  --ct-simple-border: var(--goobs-gold-a50);
+  --ct-simple-shadow: 0 0 20px var(--goobs-gold-a30);
 }
 
 /* --------------------------------------------------------------------------
@@ -389,7 +387,7 @@
 
 .markdownTextarea {
   composes: editorArea;
-  font-family: monospace;
+  font-family: var(--goobs-font-mono);
   border: none;
   outline: none;
   resize: vertical;
@@ -493,30 +491,30 @@
 @keyframes richTextEditorBorderPulse {
   0%,
   100% {
-    border-color: rgba(255, 215, 0, 0.3);
+    border-color: var(--goobs-gold-a30);
   }
   50% {
-    border-color: rgba(255, 215, 0, 0.6);
+    border-color: var(--goobs-gold-a60);
   }
 }
 
 @keyframes richTextEditorTextGlow {
   0%,
   100% {
-    text-shadow: 0 0 3px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 3px var(--goobs-gold-a30);
   }
   50% {
-    text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 6px var(--goobs-gold-a50);
   }
 }
 
 @keyframes markdownEditorCodeGlow {
   0%,
   100% {
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 5px var(--goobs-gold-a30);
   }
   50% {
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 10px var(--goobs-gold-a50);
   }
 }
 
@@ -532,9 +530,9 @@
 @keyframes toolbarIconGlow {
   0%,
   100% {
-    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+    filter: drop-shadow(0 0 2px var(--goobs-gold-a50));
   }
   50% {
-    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
+    filter: drop-shadow(0 0 4px var(--goobs-gold-a80));
   }
 }

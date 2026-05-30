@@ -18,7 +18,7 @@
   /* light-theme base palette + padding */
   background-color: transparent;
   color: inherit;
-  padding: 8px 0;
+  padding: var(--goobs-space-xs) 0;
 }
 
 .container[data-theme='dark'] {
@@ -26,12 +26,12 @@
 }
 
 .container[data-theme='sacred'] {
-  color: rgba(255, 215, 0, 0.9);
+  color: var(--goobs-gold-a90);
 }
 
 /* dense overrides the vertical padding (4px 0 vs 8px 0) regardless of theme */
 .container[data-dense='true'] {
-  padding: 4px 0;
+  padding: var(--goobs-space-2xs) 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -39,7 +39,7 @@
    padding + flex layout are theme-independent in the old theme.
    -------------------------------------------------------------------------- */
 .listItem {
-  padding: 8px 16px;
+  padding: var(--goobs-space-xs) var(--goobs-space-md);
   display: flex;
   align-items: center;
 }
@@ -51,7 +51,7 @@
 .listItemIcon {
   display: flex;
   align-items: center;
-  margin-right: 16px;
+  margin-right: var(--goobs-space-md);
   color: inherit;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .listItemIcon[data-theme='sacred'] {
-  color: rgba(255, 215, 0, 0.9);
+  color: var(--goobs-gold-a90);
 }
 
 /* --------------------------------------------------------------------------
@@ -78,8 +78,8 @@
 }
 
 .listItemTextPrimary[data-theme='sacred'] {
-  color: rgba(255, 215, 0, 0.9);
-  font-family: 'Cinzel', serif;
+  color: var(--goobs-gold-a90);
+  font-family: var(--goobs-font-sacred);
 }
 
 /* --------------------------------------------------------------------------
@@ -97,6 +97,6 @@
 }
 
 .listItemTextSecondary[data-theme='sacred'] {
-  color: rgba(255, 215, 0, 0.7);
-  font-family: 'Cinzel', serif;
+  color: var(--goobs-gold-a70);
+  font-family: var(--goobs-font-sacred);
 }

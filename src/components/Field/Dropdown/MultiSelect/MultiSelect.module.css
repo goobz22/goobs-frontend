@@ -11,7 +11,7 @@
 .container {
   position: relative;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: var(--goobs-space-md);
 }
 
 /* --------------------------------------------------------------------------
@@ -20,16 +20,16 @@
 
 .label {
   display: block;
-  margin-bottom: 8px;
-  color: #ffd700;
-  font-size: 14px;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--goobs-space-xs);
+  color: var(--goobs-gold);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-sacred);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
 }
 
 .requiredIndicator {
-  color: #ffd700;
-  margin-left: 4px;
+  color: var(--goobs-gold);
+  margin-left: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -48,27 +48,27 @@
   gap: 6px;
   min-height: 40px;
   height: auto;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-lg);
+  background-color: var(--goobs-sacred-control-bg);
   padding: 12px 40px 12px 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--goobs-transition-slow);
   box-sizing: border-box;
 }
 
 .chipContainer:hover:not(.disabled) {
-  border-color: rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  border-color: var(--goobs-gold-a50);
+  box-shadow: 0 0 10px var(--goobs-gold-a20);
 }
 
 .chipContainer.focused {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  border-color: var(--goobs-gold-a60);
+  box-shadow: 0 0 15px var(--goobs-gold-a30);
 }
 
 .chipContainer.disabled {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-sacred-control-bg);
   cursor: not-allowed;
 }
 
@@ -77,9 +77,9 @@
    -------------------------------------------------------------------------- */
 
 .placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--goobs-sacred-text-secondary);
   font-family: 'Crimson Text', serif;
-  font-size: 16px;
+  font-size: var(--goobs-text-xl);
   padding: 2px 0;
 }
 
@@ -102,7 +102,7 @@
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 5px solid #ffd700;
+  border-top: 5px solid var(--goobs-gold);
   transition: transform 0.3s ease;
 }
 
@@ -120,10 +120,10 @@
   max-height: 200px;
   overflow-y: auto;
   overflow-x: hidden;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.9);
-  box-shadow: 0 4px 6px rgba(255, 215, 0, 0.2);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-lg);
+  background-color: var(--goobs-sacred-surface);
+  box-shadow: 0 4px 6px var(--goobs-gold-a20);
 }
 
 /* --------------------------------------------------------------------------
@@ -133,25 +133,25 @@
 .option {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: var(--goobs-space-xs) var(--goobs-space-sm);
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.9);
+  transition: var(--goobs-transition-slow);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
   background-color: transparent;
 }
 
 .option:hover {
-  background-color: rgba(255, 215, 0, 0.1);
+  background-color: var(--goobs-gold-a10);
 }
 
 .option.selected {
-  background-color: rgba(255, 215, 0, 0.2);
+  background-color: var(--goobs-gold-a20);
 }
 
 .option input[type='checkbox'] {
-  margin-right: 8px;
-  accent-color: #ffd700;
+  margin-right: var(--goobs-space-xs);
+  accent-color: var(--goobs-gold);
 }
 
 /* --------------------------------------------------------------------------
@@ -159,9 +159,9 @@
    -------------------------------------------------------------------------- */
 
 .helperText {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-xs);
+  color: var(--goobs-sacred-text-secondary);
   font-family: 'Crimson Text', serif;
 }
 
@@ -174,23 +174,22 @@
    -------------------------------------------------------------------------- */
 
 .container[data-theme='light'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
 }
 
 .container[data-theme='light'] .chipContainer {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
 }
 
 .container[data-theme='light'] .chipContainer:hover:not(.disabled) {
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .container[data-theme='light'] .chipContainer.focused {
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -199,36 +198,32 @@
 }
 
 .container[data-theme='light'] .placeholder {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #9ca3af;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-disabled);
 }
 
 .container[data-theme='light'] .arrow {
-  border-top-color: #6b7280;
+  border-top-color: var(--goobs-light-text-muted);
 }
 
 .container[data-theme='light'] .requiredIndicator {
-  color: #ef4444;
+  color: var(--goobs-danger);
 }
 
 .container[data-theme='light'] .helperText {
-  color: #6b7280;
+  color: var(--goobs-light-text-muted);
 }
 
 /* Light Theme Menu */
 .menu[data-theme='light'] {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
+  box-shadow: var(--goobs-shadow-light-md);
 }
 
 .menu[data-theme='light'] .option {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
 }
 
 .menu[data-theme='light'] .option:hover {
@@ -240,7 +235,7 @@
 }
 
 .menu[data-theme='light'] .option input[type='checkbox'] {
-  accent-color: #3b82f6;
+  accent-color: var(--goobs-light-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -248,23 +243,22 @@
    -------------------------------------------------------------------------- */
 
 .container[data-theme='dark'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
 }
 
 .container[data-theme='dark'] .chipContainer {
-  background-color: #1e293b;
-  border-color: #334155;
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
 }
 
 .container[data-theme='dark'] .chipContainer:hover:not(.disabled) {
-  border-color: #3b82f6;
+  border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .container[data-theme='dark'] .chipContainer.focused {
-  border-color: #3b82f6;
+  border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
@@ -273,9 +267,8 @@
 }
 
 .container[data-theme='dark'] .placeholder {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #64748b;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text-muted);
 }
 
 .container[data-theme='dark'] .arrow {
@@ -283,7 +276,7 @@
 }
 
 .container[data-theme='dark'] .requiredIndicator {
-  color: #ef4444;
+  color: var(--goobs-danger);
 }
 
 .container[data-theme='dark'] .helperText {
@@ -292,29 +285,26 @@
 
 /* Dark Theme Menu */
 .menu[data-theme='dark'] {
-  background-color: #1e293b;
-  border-color: #334155;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
+  box-shadow: var(--goobs-shadow-dark-md);
 }
 
 .menu[data-theme='dark'] .option {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
 }
 
 .menu[data-theme='dark'] .option:hover {
-  background-color: #334155;
+  background-color: var(--goobs-dark-border);
 }
 
 .menu[data-theme='dark'] .option.selected {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-info-bg);
 }
 
 .menu[data-theme='dark'] .option input[type='checkbox'] {
-  accent-color: #60a5fa;
+  accent-color: var(--goobs-dark-primary);
 }
 
 /* --------------------------------------------------------------------------

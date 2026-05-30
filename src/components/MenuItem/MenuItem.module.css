@@ -25,16 +25,16 @@
   /* Theme tokens — overridable by [data-theme] below and by the caller via
      inline style custom properties (--menuitem-bg / --menuitem-text /
      --menuitem-font-family). */
-  --menuitem-bg: rgba(0, 0, 0, 0.7);
-  --menuitem-text: rgba(255, 255, 255, 0.9);
-  --menuitem-font-family: 'Crimson Text', serif;
+  --menuitem-bg: var(--goobs-sacred-control-bg);
+  --menuitem-text: var(--goobs-sacred-text);
+  --menuitem-font-family: var(--goobs-font-sacred);
 
   /* State tokens — sacred values */
-  --menuitem-selected-bg: rgba(255, 215, 0, 0.15);
-  --menuitem-selected-text: #ffd700;
-  --menuitem-disabled-text: rgba(255, 215, 0, 0.4);
-  --menuitem-divider-color: rgba(255, 215, 0, 0.2);
-  --menuitem-hover-bg: rgba(255, 215, 0, 0.1);
+  --menuitem-selected-bg: var(--goobs-gold-a15);
+  --menuitem-selected-text: var(--goobs-gold);
+  --menuitem-disabled-text: var(--goobs-gold-a40);
+  --menuitem-divider-color: var(--goobs-gold-a20);
+  --menuitem-hover-bg: var(--goobs-gold-a10);
 
   display: flex;
   justify-content: flex-start;
@@ -42,17 +42,17 @@
   position: relative;
   text-decoration: none;
   min-height: 48px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-top: var(--goobs-space-xs);
+  padding-bottom: var(--goobs-space-xs);
+  padding-left: var(--goobs-space-md);
+  padding-right: var(--goobs-space-md);
   box-sizing: border-box;
   white-space: nowrap;
   background-color: var(--menuitem-bg);
   color: var(--menuitem-text);
   font-family: var(--menuitem-font-family);
   /* Exact transition from the old computedStyles.transition */
-  transition: all 0.2s ease;
+  transition: var(--goobs-transition-medium);
   cursor: pointer;
 }
 
@@ -60,12 +60,12 @@
    LIGHT THEME (formFieldThemes.light)
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
-  --menuitem-bg: rgba(255, 255, 255, 0.95);
-  --menuitem-text: rgba(31, 41, 55, 1);
-  --menuitem-font-family: 'Inter', sans-serif;
+  --menuitem-bg: var(--goobs-light-surface);
+  --menuitem-text: var(--goobs-light-text);
+  --menuitem-font-family: var(--goobs-font-standard);
 
   --menuitem-selected-bg: rgba(25, 118, 210, 0.08);
-  --menuitem-selected-text: #1976d2;
+  --menuitem-selected-text: var(--goobs-light-primary);
   --menuitem-disabled-text: rgba(0, 0, 0, 0.38);
   --menuitem-divider-color: rgba(0, 0, 0, 0.12);
   --menuitem-hover-bg: rgba(0, 0, 0, 0.04);
@@ -75,12 +75,12 @@
    DARK THEME (formFieldThemes.dark)
    -------------------------------------------------------------------------- */
 .root[data-theme='dark'] {
-  --menuitem-bg: rgba(31, 41, 55, 0.95);
-  --menuitem-text: rgba(255, 255, 255, 1);
-  --menuitem-font-family: 'Inter', sans-serif;
+  --menuitem-bg: var(--goobs-dark-surface);
+  --menuitem-text: var(--goobs-dark-text);
+  --menuitem-font-family: var(--goobs-font-standard);
 
   --menuitem-selected-bg: rgba(59, 130, 246, 0.2);
-  --menuitem-selected-text: #60a5fa;
+  --menuitem-selected-text: var(--goobs-dark-primary);
   --menuitem-disabled-text: rgba(255, 255, 255, 0.3);
   --menuitem-divider-color: rgba(255, 255, 255, 0.12);
   --menuitem-hover-bg: rgba(255, 255, 255, 0.05);
@@ -91,7 +91,7 @@
    (old: dense ? '32px' : '48px', dense ? '6px' : '8px')
    -------------------------------------------------------------------------- */
 .root[data-dense='true'] {
-  min-height: 32px;
+  min-height: var(--goobs-control-height);
   padding-top: 6px;
   padding-bottom: 6px;
 }

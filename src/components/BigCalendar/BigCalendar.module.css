@@ -23,59 +23,59 @@
    -------------------------------------------------------------------------- */
 .root {
   /* Theme tokens (sacred defaults) */
-  --bc-container-radius: 12px;
-  --bc-container-font: 'Cinzel', serif;
-  --bc-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --bc-container-radius: var(--goobs-radius-xl);
+  --bc-container-font: var(--goobs-font-sacred);
+  --bc-transition: var(--goobs-transition-premium);
 
-  --bc-toolbar-radius: 12px;
+  --bc-toolbar-radius: var(--goobs-radius-xl);
 
-  --bc-calendar-radius: 12px;
+  --bc-calendar-radius: var(--goobs-radius-xl);
 
   --bc-header-min-height: 56px;
-  --bc-header-bg: rgba(10, 10, 10, 0.9);
+  --bc-header-bg: var(--goobs-sacred-surface);
 
-  --bc-cell-border: rgba(255, 215, 0, 0.2);
+  --bc-cell-border: var(--goobs-gold-a20);
   --bc-cell-bg: rgba(0, 0, 0, 0.6);
-  --bc-cell-hover-bg: rgba(255, 215, 0, 0.1);
-  --bc-cell-today-bg: rgba(255, 215, 0, 0.2);
+  --bc-cell-hover-bg: var(--goobs-gold-a10);
+  --bc-cell-today-bg: var(--goobs-gold-a20);
   --bc-cell-other-month-bg: rgba(10, 10, 10, 0.4);
-  --bc-cell-other-month-color: rgba(255, 215, 0, 0.4);
-  --bc-cell-padding: 12px;
+  --bc-cell-other-month-color: var(--goobs-gold-a40);
+  --bc-cell-padding: var(--goobs-space-sm);
   --bc-cell-min-height: 100px;
 
-  --bc-event-radius: 6px;
-  --bc-event-padding: 4px 8px;
+  --bc-event-radius: var(--goobs-radius-md);
+  --bc-event-padding: var(--goobs-space-2xs) var(--goobs-space-xs);
   --bc-event-font-size: 0.8rem;
 
   --bc-time-col-width: 80px;
-  --bc-time-col-bg: rgba(10, 10, 10, 0.9);
-  --bc-time-col-border: rgba(255, 215, 0, 0.3);
-  --bc-time-cell-color: rgba(255, 215, 0, 0.7);
+  --bc-time-col-bg: var(--goobs-sacred-surface);
+  --bc-time-col-border: var(--goobs-gold-a30);
+  --bc-time-cell-color: var(--goobs-gold-a70);
 
   /* Sacred-only effect tokens */
-  --bc-sacred-glow: 0 0 20px rgba(255, 215, 0, 0.3);
-  --bc-sacred-border-glow: 0 0 30px rgba(255, 215, 0, 0.4);
-  --bc-sacred-text-glow: 0 0 3px rgba(255, 215, 0, 0.3);
+  --bc-sacred-glow: 0 0 20px var(--goobs-gold-a30);
+  --bc-sacred-border-glow: 0 0 30px var(--goobs-gold-a40);
+  --bc-sacred-text-glow: 0 0 3px var(--goobs-gold-a30);
   --bc-calendar-bg-image:
     linear-gradient(
       135deg,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%,
-      rgba(255, 215, 0, 0.05) 100%
+      var(--goobs-gold-a05) 100%
     ),
     radial-gradient(
       circle at top right,
-      rgba(255, 215, 0, 0.03) 0%,
+      var(--goobs-gold-a02) 0%,
       transparent 50%
     );
 
   /* Selection backgrounds (sacred defaults) */
-  --bc-cell-selected-bg: rgba(255, 215, 0, 0.12);
-  --bc-hour-selected-bg: rgba(255, 215, 0, 0.1);
-  --bc-hour-selected-outline: 1px solid rgba(255, 215, 0, 0.4);
-  --bc-week-col-selected-bg: rgba(255, 215, 0, 0.06);
-  --bc-current-hour-bg: rgba(255, 215, 0, 0.1);
-  --bc-today-date-color: rgba(255, 215, 0, 1);
+  --bc-cell-selected-bg: var(--goobs-gold-a12);
+  --bc-hour-selected-bg: var(--goobs-gold-a10);
+  --bc-hour-selected-outline: 1px solid var(--goobs-gold-a40);
+  --bc-week-col-selected-bg: var(--goobs-gold-a05);
+  --bc-current-hour-bg: var(--goobs-gold-a10);
+  --bc-today-date-color: var(--goobs-gold);
 
   display: flex;
   flex-direction: column;
@@ -92,32 +92,32 @@
 }
 
 .root[data-theme='light'] {
-  --bc-container-radius: 8px;
-  --bc-container-font: 'Inter', sans-serif;
-  --bc-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --bc-container-radius: var(--goobs-radius-lg);
+  --bc-container-font: var(--goobs-font-standard);
+  --bc-transition: var(--goobs-transition-medium);
 
-  --bc-toolbar-radius: 8px;
-  --bc-calendar-radius: 8px;
+  --bc-toolbar-radius: var(--goobs-radius-lg);
+  --bc-calendar-radius: var(--goobs-radius-lg);
 
   --bc-header-min-height: 48px;
-  --bc-header-bg: rgba(249, 250, 251, 1);
+  --bc-header-bg: var(--goobs-light-surface-raised);
 
-  --bc-cell-border: rgba(229, 231, 235, 1);
-  --bc-cell-bg: rgba(255, 255, 255, 1);
-  --bc-cell-hover-bg: rgba(249, 250, 251, 1);
+  --bc-cell-border: var(--goobs-light-border);
+  --bc-cell-bg: var(--goobs-light-surface);
+  --bc-cell-hover-bg: var(--goobs-light-surface-raised);
   --bc-cell-today-bg: rgba(219, 234, 254, 0.5);
   --bc-cell-other-month-bg: rgba(249, 250, 251, 0.5);
-  --bc-cell-other-month-color: rgba(156, 163, 175, 1);
-  --bc-cell-padding: 8px;
+  --bc-cell-other-month-color: var(--goobs-light-text-disabled);
+  --bc-cell-padding: var(--goobs-space-xs);
   --bc-cell-min-height: 80px;
 
-  --bc-event-radius: 4px;
+  --bc-event-radius: var(--goobs-radius-sm);
   --bc-event-padding: 2px 6px;
   --bc-event-font-size: 0.75rem;
 
   --bc-time-col-width: 60px;
-  --bc-time-col-bg: rgba(249, 250, 251, 1);
-  --bc-time-col-border: rgba(209, 213, 219, 1);
+  --bc-time-col-bg: var(--goobs-light-surface-raised);
+  --bc-time-col-border: var(--goobs-light-border-strong);
   --bc-time-cell-color: inherit;
 
   /* No sacred effects in light theme */
@@ -135,32 +135,32 @@
 }
 
 .root[data-theme='dark'] {
-  --bc-container-radius: 8px;
-  --bc-container-font: 'Inter', sans-serif;
-  --bc-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --bc-container-radius: var(--goobs-radius-lg);
+  --bc-container-font: var(--goobs-font-standard);
+  --bc-transition: var(--goobs-transition-medium);
 
-  --bc-toolbar-radius: 8px;
-  --bc-calendar-radius: 8px;
+  --bc-toolbar-radius: var(--goobs-radius-lg);
+  --bc-calendar-radius: var(--goobs-radius-lg);
 
   --bc-header-min-height: 48px;
-  --bc-header-bg: rgba(31, 41, 55, 1);
+  --bc-header-bg: var(--goobs-dark-surface);
 
-  --bc-cell-border: rgba(55, 65, 81, 1);
+  --bc-cell-border: var(--goobs-dark-border);
   --bc-cell-bg: rgba(17, 24, 39, 1);
-  --bc-cell-hover-bg: rgba(31, 41, 55, 1);
+  --bc-cell-hover-bg: var(--goobs-dark-surface);
   --bc-cell-today-bg: rgba(59, 130, 246, 0.2);
   --bc-cell-other-month-bg: rgba(31, 41, 55, 0.3);
-  --bc-cell-other-month-color: rgba(107, 114, 128, 1);
-  --bc-cell-padding: 8px;
+  --bc-cell-other-month-color: var(--goobs-dark-text-muted);
+  --bc-cell-padding: var(--goobs-space-xs);
   --bc-cell-min-height: 80px;
 
-  --bc-event-radius: 4px;
+  --bc-event-radius: var(--goobs-radius-sm);
   --bc-event-padding: 2px 6px;
   --bc-event-font-size: 0.75rem;
 
   --bc-time-col-width: 60px;
-  --bc-time-col-bg: rgba(31, 41, 55, 1);
-  --bc-time-col-border: rgba(75, 85, 99, 1);
+  --bc-time-col-bg: var(--goobs-dark-surface);
+  --bc-time-col-border: var(--goobs-dark-border-strong);
   --bc-time-cell-color: inherit;
 
   /* No sacred effects in dark theme */
@@ -192,7 +192,7 @@
 .toolbarSection {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--goobs-space-xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -206,14 +206,14 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   padding: 0;
-  background-color: rgba(255, 215, 0, 0.06);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  color: #ffd700;
+  background-color: var(--goobs-gold-a05);
+  border: 1px solid var(--goobs-gold-a40);
+  color: var(--goobs-gold);
   box-shadow:
-    0 0 12px rgba(255, 215, 0, 0.25),
-    inset 0 0 6px rgba(255, 215, 0, 0.12);
+    0 0 12px var(--goobs-gold-a25),
+    inset 0 0 6px var(--goobs-gold-a12);
 }
 
 .root[data-theme='light'] .navButton {
@@ -276,7 +276,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: var(--goobs-space-xs);
   border-right: 1px solid var(--bc-cell-border);
   box-sizing: border-box;
 }
@@ -362,7 +362,7 @@
 }
 
 .cellEventContainer {
-  margin-top: 24px;
+  margin-top: var(--goobs-space-lg);
   display: flex;
   flex-direction: column;
   gap: 2px;
