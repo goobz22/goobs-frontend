@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
+import React from 'react'
+import { IconStyles } from '../../theme'
+import cssStyles from './icon.module.css'
 
 interface RouterIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -12,34 +13,49 @@ const RouterIcon: React.FC<RouterIconProps> = ({
   style = {},
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  // Inject CSS keyframes for sacred animations
-  if (styles?.theme === 'sacred') {
-    injectSacredKeyframes()
+  const theme = styles?.theme || 'light'
+
+  // Caller-supplied overrides (size / color / filter / transform / etc.) and
+  // the native `style` prop stay in JS; theme + hover + transition live in CSS.
+  const wrapperStyle: React.CSSProperties = {
+    ...(styles?.padding && { padding: styles.padding }),
+    ...(styles?.margin && { margin: styles.margin }),
   }
 
-  // Compute styles based on theme and state
-  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
+  const svgStyle: React.CSSProperties = {
+    ...(styles?.color && { color: styles.color }),
+    ...(styles?.backgroundColor && {
+      backgroundColor: styles.backgroundColor,
+    }),
+    ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
+    ...(styles?.filter && { filter: styles.filter }),
+    ...(styles?.transform && { transform: styles.transform }),
+    ...(styles?.boxShadow && { boxShadow: styles.boxShadow }),
+    ...(styles?.size && { width: styles.size, height: styles.size }),
+    ...style,
+  }
 
   return (
     <div
-      style={computedStyles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={cssStyles.wrapper}
+      data-theme={theme}
+      data-disabled={styles?.disabled ? 'true' : undefined}
+      style={wrapperStyle}
     >
       <svg
+        className={cssStyles.svg}
         xmlns="http://www.w3.org/2000/svg"
         height="24"
         viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
-        style={{ ...computedStyles.icon, ...style }}
+        style={svgStyle}
         {...props}
       >
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M20.2 5.9l.8-.8C19.6 3.7 17.8 3 16 3s-3.6.7-5 2.1l.8.8C13 4.8 14.5 4.2 16 4.2s3 .6 4.2 1.7zm-.9.8c-.9-.9-2.1-1.4-3.3-1.4s-2.4.5-3.3 1.4l.8.8c.7-.7 1.6-1 2.5-1 .9 0 1.8.3 2.5 1l.8-.8zM19 13h-2V9h-2v4H5c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2zM8 18H6v-2h2v2zm3.5 0h-2v-2h2v2zm3.5 0h-2v-2h2v2z" />
       </svg>
-      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
+      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

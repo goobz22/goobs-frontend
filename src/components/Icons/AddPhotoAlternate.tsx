@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
+import React from 'react'
+import { IconStyles } from '../../theme'
+import cssStyles from './icon.module.css'
 
 interface AddPhotoAlternateIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -12,33 +13,43 @@ const AddPhotoAlternateIcon: React.FC<AddPhotoAlternateIconProps> = ({
   style = {},
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  // Inject CSS keyframes for sacred animations
-  if (styles?.theme === 'sacred') {
-    injectSacredKeyframes()
+  const theme = styles?.theme || 'light'
+
+  // Caller-supplied overrides (size / color / filter / transform / etc.) and
+  // the native `style` prop stay in JS; theme + hover + transition live in CSS.
+  const wrapperStyle: React.CSSProperties = {
+    ...(styles?.padding && { padding: styles.padding }),
+    ...(styles?.margin && { margin: styles.margin }),
   }
 
-  // Compute styles based on theme and state
-  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
-
-  const iconStyle = {
-    ...computedStyles.icon,
+  const svgStyle: React.CSSProperties = {
+    ...(styles?.color && { color: styles.color }),
+    ...(styles?.backgroundColor && {
+      backgroundColor: styles.backgroundColor,
+    }),
+    ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
+    ...(styles?.filter && { filter: styles.filter }),
+    ...(styles?.transform && { transform: styles.transform }),
+    ...(styles?.boxShadow && { boxShadow: styles.boxShadow }),
+    ...(styles?.size && { width: styles.size, height: styles.size }),
     ...style,
   }
 
   return (
     <div
-      style={computedStyles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={cssStyles.wrapper}
+      data-theme={theme}
+      data-disabled={styles?.disabled ? 'true' : undefined}
+      style={wrapperStyle}
     >
       <svg
+        className={cssStyles.svg}
         xmlns="http://www.w3.org/2000/svg"
         height="24"
         viewBox="0 0 24 24"
         width="24"
         fill="currentColor"
-        style={iconStyle}
+        style={svgStyle}
         {...props}
       >
         <path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V9h-3V7h-3v2.4L12.6 11H16zm-5 0v2h3v2.99s-1.99.01-2 0V13H9v-2h2zm-2 4H7v-2H5v2H2v2h3v3h2v-3h2v-2z" />
@@ -48,7 +59,7 @@ const AddPhotoAlternateIcon: React.FC<AddPhotoAlternateIconProps> = ({
           opacity="0.3"
         />
       </svg>
-      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
+      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

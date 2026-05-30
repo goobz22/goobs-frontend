@@ -1,0 +1,130 @@
+/* ==========================================================================
+   ICONS - SHARED CSS MODULE
+   One module shared by all ~247 SVG icon components in this directory. Each
+   icon renders the SAME wrapper <div> + <svg> + (sacred-only) glyph <div>
+   shape, so the styling is identical across icons and lives here once.
+
+   THEME MODEL (matches Card/Dialog/Tabs house pattern):
+   light is the hardcoded base default (the old theme/icon.ts getIconTheme
+   defaulted to 'light' — parity is mandatory, so light is the base here, NOT
+   sacred). dark / sacred are [data-theme] attribute-selector overrides.
+
+   Values transcribed verbatim from:
+     src/theme/icon.ts      (lightTheme / darkTheme / sacredTheme + glyph)
+     src/theme/shared.ts    (TRANSITIONS.medium / TRANSITIONS.premium)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   WRAPPER — old IconTheme.container (light base default)
+   light/dark container === { position: relative; display: inline-block }.
+   The disabled state (old getIconStyles isDisabled branch) is the
+   [data-disabled='true'] override.
+   -------------------------------------------------------------------------- */
+.wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.wrapper[data-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   SVG — old IconTheme.icon (light base) + :hover === old iconHover.
+   TRANSITIONS.medium = all 200ms cubic-bezier(0.4, 0, 0.2, 1)  (light/dark)
+   light has no hover styling (lightTheme.iconHover === {}), so .svg:hover
+   under the light base is intentionally empty.
+   -------------------------------------------------------------------------- */
+.svg {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: currentColor;
+  cursor: pointer;
+}
+
+/* DARK theme override — darkTheme.icon + darkTheme.iconHover */
+.wrapper[data-theme='dark'] .svg {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  color: currentColor;
+  cursor: pointer;
+}
+
+.wrapper[data-theme='dark'] .svg:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  color: rgba(243, 244, 246, 0.9);
+}
+
+/* SACRED theme override — sacredTheme.icon + sacredTheme.iconHover.
+   TRANSITIONS.premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1) */
+.wrapper[data-theme='sacred'] .svg {
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  color: rgba(255, 215, 0, 0.9);
+  cursor: pointer;
+}
+
+.wrapper[data-theme='sacred'] .svg:hover {
+  transform: scale(1.1) rotate(2deg);
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1));
+  color: #ffd700;
+}
+
+/* When disabled, the wrapper kills pointer-events so :hover never fires;
+   the old getIconStyles also gated iconHover behind !isDisabled. Belt and
+   suspenders: suppress the dark/sacred hover transform when disabled. */
+.wrapper[data-disabled='true'] .svg:hover {
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED GLYPH — old IconTheme.glyph (sacred theme only).
+   In light/dark the old theme set glyph { display: none }; icons only render
+   the glyph <div> when isSacredTheme, so under light/dark this rule is unused,
+   but we keep it hidden defensively. The glyph is hidden (opacity 0) by
+   default and revealed on wrapper :hover === old glyphVisible { opacity: 1 }.
+   -------------------------------------------------------------------------- */
+.glyph {
+  display: none;
+}
+
+.wrapper[data-theme='sacred'] .glyph {
+  display: block;
+  position: absolute;
+  color: rgba(255, 215, 0, 0.4);
+  font-size: 12px;
+  z-index: 10;
+  opacity: 0;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  top: -8px;
+  right: -8px;
+  pointer-events: none;
+}
+
+/* Reveal on hover === old glyphVisible { opacity: 1 }. The old theme only
+   toggled opacity here — it did NOT apply the sacredGlyphRotate animation to
+   the glyph (injectSacredKeyframes only registered the @keyframes; no rule
+   ever referenced it). Parity: opacity only, no animation. */
+.wrapper[data-theme='sacred']:hover .glyph {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED GLYPH KEYFRAMES — was runtime-injected by injectSacredKeyframes()
+   in theme/icon.ts (it registered this @keyframes via styleSheet.insertRule).
+   Transcribed here as static module CSS so the runtime injection can be
+   deleted from every icon. Currently no selector references it (matching the
+   old behaviour, where the registered keyframes were never actually applied
+   to the glyph); kept verbatim so any consumer relying on its presence — or a
+   future glyph animation — still resolves the name.
+   -------------------------------------------------------------------------- */
+@keyframes sacredGlyphRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

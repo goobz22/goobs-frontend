@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { IconStyles, getIconStyles, injectSacredKeyframes } from '../../theme'
+import React from 'react'
+import { IconStyles } from '../../theme'
+import cssStyles from './icon.module.css'
 
 interface ShowHideEyeIconProps extends React.SVGProps<SVGSVGElement> {
   visible?: boolean
@@ -14,33 +15,46 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
   style = {},
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  // Inject CSS keyframes for sacred animations
-  if (styles?.theme === 'sacred') {
-    injectSacredKeyframes()
+  const theme = styles?.theme || 'light'
+  const isSacredTheme = theme === 'sacred'
+
+  // Caller-supplied overrides (size / color / filter / transform / etc.) and
+  // the native `style` prop stay in JS; theme + hover + transition live in CSS.
+  const wrapperStyle: React.CSSProperties = {
+    ...(styles?.padding && { padding: styles.padding }),
+    ...(styles?.margin && { margin: styles.margin }),
   }
 
-  // Compute styles based on theme and state
-  const computedStyles = getIconStyles(styles, isHovered, styles?.disabled)
-
-  const iconStyle = {
-    ...computedStyles.icon,
+  // ShowHideEye hardcodes a 16px square (legitimate JS-stayer per recipe);
+  // caller `size` may still override it, and the native `style` wins last.
+  const svgStyle: React.CSSProperties = {
+    ...(styles?.color && { color: styles.color }),
+    ...(styles?.backgroundColor && {
+      backgroundColor: styles.backgroundColor,
+    }),
+    ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
+    ...(styles?.filter && { filter: styles.filter }),
+    ...(styles?.transform && { transform: styles.transform }),
+    ...(styles?.boxShadow && { boxShadow: styles.boxShadow }),
     width: '16px',
     height: '16px',
+    ...(styles?.size && { width: styles.size, height: styles.size }),
     ...style,
   }
 
   return (
     <div
-      style={computedStyles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={cssStyles.wrapper}
+      data-theme={theme}
+      data-disabled={styles?.disabled ? 'true' : undefined}
+      style={wrapperStyle}
     >
       {visible ? (
-        computedStyles.isSacredTheme ? (
+        isSacredTheme ? (
           <div
+            className={cssStyles.svg}
             style={{
-              ...iconStyle,
+              ...svgStyle,
               fontSize: '20px',
               display: 'flex',
               alignItems: 'center',
@@ -53,7 +67,8 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
           </div>
         ) : (
           <svg
-            style={iconStyle}
+            className={cssStyles.svg}
+            style={svgStyle}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -67,10 +82,11 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
             <circle cx="12" cy="12" r="3" />
           </svg>
         )
-      ) : computedStyles.isSacredTheme ? (
+      ) : isSacredTheme ? (
         <div
+          className={cssStyles.svg}
           style={{
-            ...iconStyle,
+            ...svgStyle,
             fontSize: '20px',
             display: 'flex',
             alignItems: 'center',
@@ -95,7 +111,8 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
         </div>
       ) : (
         <svg
-          style={iconStyle}
+          className={cssStyles.svg}
+          style={svgStyle}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -109,7 +126,7 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
           <path d="M1 1l22 22" />
         </svg>
       )}
-      {computedStyles.isSacredTheme && <div style={computedStyles.glyph}></div>}
+      {isSacredTheme && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }
