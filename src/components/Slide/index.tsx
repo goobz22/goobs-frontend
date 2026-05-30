@@ -5,8 +5,37 @@
 'use client'
 
 import React, { forwardRef, type CSSProperties } from 'react'
-import type { SlideStyles } from '../../theme'
 import cssStyles from './Slide.module.css'
+
+// --------------------------------------------------------------------------
+// STYLES TYPE — relocated from the old src/theme/slide.ts (removed in the
+// css-modules-theme-removal teardown). Slide is fully CSS-module driven; only
+// this caller-facing override type survives. Shape preserved verbatim.
+// --------------------------------------------------------------------------
+
+export interface SlideStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Animation properties
+  in?: boolean
+  timeout?: number
+  appear?: boolean
+  enter?: boolean
+  exit?: boolean
+
+  // Slide direction
+  direction?: 'up' | 'down' | 'left' | 'right'
+
+  // Custom transition
+  transition?: string
+  transitionDuration?: string
+  transitionDelay?: string
+  transitionTimingFunction?: string
+
+  // States
+  disabled?: boolean
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE

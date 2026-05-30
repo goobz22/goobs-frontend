@@ -109,6 +109,98 @@ export interface FieldStyleOverrides {
 }
 
 /**
+ * Legacy field-styling override contract. Relocated verbatim from the old
+ * `src/theme/formField.ts` (removed in the css-modules-theme-removal teardown).
+ *
+ * Field/Shell itself uses the slimmer `FieldStyleOverrides` above. This larger
+ * shape only survives because `MenuItem` and `Select` still `extends` it for
+ * their `MenuItemStyles` / `SelectStyles` props — those two select-family
+ * components haven't been migrated onto `FieldStyleOverrides` yet. Kept here so
+ * the field-styling types live in one place rather than re-introducing a theme
+ * module just for a type.
+ */
+export interface FormFieldStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Custom colors (all must be rgba format)
+  backgroundColor?: string
+  borderColor?: string
+  borderFocusedColor?: string
+  borderErrorColor?: string
+  textColor?: string
+  labelColor?: string
+  labelFocusedColor?: string
+  labelErrorColor?: string
+  labelShrunkBackgroundColor?: string
+  adornmentColor?: string
+  adornmentFocusedColor?: string
+  footerTextColor?: string
+  footerTextErrorColor?: string
+  footerTextInfoColor?: string
+  fontFamily?: string
+
+  // Required field styling
+  requiredIndicatorColor?: string
+  requiredIndicatorText?: string
+
+  // Field state
+  disabled?: boolean
+  required?: boolean
+  helperTextType?: 'error' | 'info'
+
+  // Layout and spacing
+  padding?: string
+  paddingLeft?: string
+  paddingRight?: string
+  paddingTop?: string
+  paddingBottom?: string
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Border and shape
+  borderRadius?: string
+  borderWidth?: string
+
+  // Typography
+  fontSize?: string
+  fontWeight?: string | number
+  lineHeight?: string
+
+  // Dimensions
+  width?: string
+  height?: string
+  minWidth?: string
+  maxWidth?: string
+  minHeight?: string
+  maxHeight?: string
+
+  // Adornment positioning (inherited by ComplexTextEditor + dropdown styles)
+  startAdornmentOffset?: string
+  endAdornmentOffset?: string
+  arrowTop?: string
+  arrowRight?: string
+  arrowBottom?: string
+  arrowLeft?: string
+  arrowPadding?: string
+
+  // Label positioning
+  labelOffset?: string
+  labelShrunkOffset?: string
+
+  // Footer spacing
+  footerMarginTop?: string
+  footerFontSize?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+}
+
+/**
  * Canonical onChange shape for primitive-value fields. T is `string`
  * for text/dropdown/IPAM, `number` for slider/percentage/increment.
  *

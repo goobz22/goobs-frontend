@@ -1,3 +1,8 @@
+// Global stylesheet — static @keyframes + shadow/transition design tokens
+// that replaced the old runtime-injected JS theme system (src/theme). Bundled
+// into dist/goobs-frontend.css via the package's "*.css" sideEffects entry.
+import './styles/global.css'
+
 // Optimized barrel export using re-exports for better tree-shaking
 // This allows Vite/Rollup to only bundle what's actually used
 // With sideEffects: false in package.json, unused exports will be eliminated
@@ -20,6 +25,7 @@ export {
   default as ConfirmationCodeInput,
   type ConfirmationCodeInputsProps,
 } from './components/ConfirmationCodeInput'
+export type { ConfirmationCodeInputStyles } from './components/ConfirmationCodeInput/types'
 export {
   default as RadioGroup,
   type RadioOption,
@@ -122,6 +128,7 @@ export {
 export { default as Switch, type SwitchProps } from './components/Switch'
 
 // Field Shell — canonical wrapper used by every Field component
+export type { FormFieldStyles } from './components/Field/Shell/types'
 export {
   default as FieldShell,
   type FieldShellProps,
@@ -229,7 +236,7 @@ export { default as Divider } from './components/Divider'
 // Animation Components
 export { default as Fade } from './components/Fade'
 export { default as Zoom } from './components/Zoom'
-export { default as Slide } from './components/Slide'
+export { default as Slide, type SlideStyles } from './components/Slide'
 
 // Data Display
 export { default as DataGrid } from './components/DataGrid'
@@ -379,6 +386,9 @@ export { default as Slider, type SliderProps } from './components/Field/Slider'
 
 // Icons - Re-export all as namespace
 export * as Icons from './components/Icons'
+// Per-icon styling contract, also surfaced at top level (was previously
+// re-exported via the now-removed `export * from './theme'`).
+export type { IconStyles } from './components/Icons/types'
 
 // Utils
 export { alpha } from './utils/alpha'

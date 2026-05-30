@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import type { FormFieldStyles } from '../../theme'
+import type { FormFieldStyles } from '../Field/Shell/types'
 import cssStyles from './MenuItem.module.css'
 import { emitDiag } from '../../utils/diag'
 

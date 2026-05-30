@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { IconStyles } from '../../theme'
+import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
 
 interface ClearIconProps extends React.SVGProps<SVGSVGElement> {

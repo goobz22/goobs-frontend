@@ -1,0 +1,102 @@
+/* ==========================================================================
+   GOOBS-FRONTEND — GLOBAL STYLESHEET
+   --------------------------------------------------------------------------
+   Static replacement for the old JS theme system (src/theme, removed in the
+   css-modules-theme-removal teardown). What used to be injected at runtime by
+   theme/shared.ts (KEYFRAMES + injectKeyframes) and exposed as the SHADOWS /
+   TRANSITIONS JS objects now lives here as static CSS that ships in the
+   library's single bundled stylesheet (dist/goobs-frontend.css, exported as
+   "goobs-frontend/styles").
+
+   Imported once from the library entry (src/index.ts) so it is part of the
+   module graph and gets bundled (vite cssCodeSplit:false collapses all CSS
+   into one file).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   SHADOW + TRANSITION DESIGN TOKENS
+   Verbatim values from the old theme/shared.ts SHADOWS and TRANSITIONS
+   objects, exposed as :root CSS custom properties so any consumer (or future
+   CSS module) can read them as var(--goobs-shadow-* / --goobs-transition-*).
+   -------------------------------------------------------------------------- */
+:root {
+  /* TRANSITIONS (old theme/shared.ts TRANSITIONS) */
+  --goobs-transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --goobs-transition-medium: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --goobs-transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --goobs-transition-premium: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* SHADOWS.light (old theme/shared.ts SHADOWS.light) */
+  --goobs-shadow-light-small: 0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  --goobs-shadow-light-medium: 0 4px 6px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+  --goobs-shadow-light-large: 0 8px 25px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+
+  /* SHADOWS.dark (old theme/shared.ts SHADOWS.dark) */
+  --goobs-shadow-dark-small: 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  --goobs-shadow-dark-medium: 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  --goobs-shadow-dark-large: 0 8px 32px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+
+  /* SHADOWS.sacred (old theme/shared.ts SHADOWS.sacred) */
+  --goobs-shadow-sacred-small: 0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1);
+  --goobs-shadow-sacred-medium: 0 0 30px rgba(255, 215, 0, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.2);
+  --goobs-shadow-sacred-large: 0 0 40px rgba(255, 215, 0, 0.6),
+    0 0 80px rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   SHARED KEYFRAMES
+   Verbatim copy of the four @keyframes from theme/shared.ts KEYFRAMES, which
+   were previously injected at runtime via injectKeyframes(). Now static and
+   globally available so any component animation referencing them resolves
+   without runtime injection. (ProgressBar.module.css also defines its own
+   local copies of progressIndeterminate / progressStripes / progressPulse;
+   the global definitions here keep the historical global names available for
+   external consumers that referenced them.)
+   -------------------------------------------------------------------------- */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes progressIndeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes progressStripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes progressPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}

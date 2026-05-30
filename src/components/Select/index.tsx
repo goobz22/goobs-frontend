@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import type { FormFieldStyles } from '../../theme'
+import type { FormFieldStyles } from '../Field/Shell/types'
 import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 import { useOptionalFormContext } from '../Form/context'
 import cssStyles from './Select.module.css'

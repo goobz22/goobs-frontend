@@ -11,7 +11,7 @@ import React, {
 } from 'react'
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
 import CustomButton, { type ButtonProps } from '../Button'
-import { type ConfirmationCodeInputStyles } from '../../theme'
+import { type ConfirmationCodeInputStyles } from './types'
 import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 import { useOptionalFormContext } from '../Form/context'
 import cssStyles from './ConfirmationCodeInput.module.css'

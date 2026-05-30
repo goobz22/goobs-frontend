@@ -269,3 +269,6 @@ export { default as WifiIcon } from './Wifi'
 export { default as WifiOffIcon } from './WifiOff'
 export { default as WorkIcon } from './Work'
 export { default as WorkspacePremiumIcon } from './WorkspacePremium'
+
+// Shared per-icon styling contract (relocated from the removed src/theme/icon.ts)
+export type { IconStyles } from './types'
