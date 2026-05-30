@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { alpha } from '../../../utils'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 
 const SACRED_GOLD = '#FFD700'
 
@@ -53,8 +54,8 @@ export interface PhoneNumberFieldProps {
 }
 
 const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
-  value = '',
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   onFocus,
   onBlur,
   label = 'Phone Number',
@@ -68,6 +69,34 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. The engine stores the formatted phone string, so bind
+  // with T = string. We stringify the incoming prop for the hook only when it
+  // is actually present — passing `undefined` through preserves the
+  // binding gate (`value === undefined`) so a controlled caller stays in the
+  // pass-through path. The engine stores a string; we coerce on read below.
+  const {
+    value: boundValue,
+    onChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp === undefined ? undefined : String(valueProp),
+    onChange: onChangeProp,
+    onBlur: undefined,
+  })
+  // Restore the original default-empty-string behavior for the display value.
+  const value: string | number = boundValue ?? ''
+
+  // Chain the engine touched-mark (no-op outside a <Form>) before the caller's
+  // FocusEvent onBlur, preserving its original signature.
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      bindingOnBlur?.()
+      onBlur?.(e)
+    },
+    [bindingOnBlur, onBlur]
+  )
+
   const [phoneNumber, setPhoneNumber] = useState(() =>
     parseExistingPhoneNumber(String(value || ''))
   )
@@ -197,6 +226,8 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && String(value).length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -211,7 +242,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
             value={phoneNumber}
             onChange={handleChange}
             onFocus={onFocus}
-            onBlur={onBlur}
+            onBlur={handleBlur}
             disabled={disabled}
             required={required}
             placeholder={placeholder}

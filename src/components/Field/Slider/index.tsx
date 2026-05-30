@@ -2,10 +2,16 @@
 
 import React, { useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 
 export interface SliderProps {
-  value: number
-  onChange: (value: number) => void
+  /**
+   * The slider value. Optional so the field can auto-bind to the surrounding
+   * `<Form>` via `name` when no explicit value is supplied; existing callsites
+   * that pass an explicit value take the unchanged back-compat path.
+   */
+  value?: number
+  onChange?: (value: number) => void
   min?: number
   max?: number
   step?: number
@@ -17,14 +23,18 @@ export interface SliderProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
-  /** Forwarded to the input as `name` for native form submission. */
+  /**
+   * Form-engine binding key. Forwarded to the input as `name` for native form
+   * submission and used by `useFieldBinding`/`FieldShell` to auto-bind value,
+   * error, and required to the surrounding `<Form>`.
+   */
   name?: string
   styles?: FieldStyleOverrides
 }
 
 const Slider: React.FC<SliderProps> = ({
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   min = 0,
   max = 100,
   step = 1,
@@ -36,6 +46,19 @@ const Slider: React.FC<SliderProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. When inside a <Form> with a `name` and no explicit
+  // value, `value`/`onChange`/`onBlur` come from the form engine; otherwise the
+  // caller's explicit value/onChange pass through unchanged (back-compat).
+  const { value, onChange, onBlur } = useFieldBinding<number>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  // The range input always needs a concrete numeric value. When neither a
+  // caller value nor an engine value is present, fall back to `min` (the
+  // historical native default for a value-less range input).
+  const currentValue = value ?? min
+
   const inputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
@@ -50,18 +73,18 @@ const Slider: React.FC<SliderProps> = ({
     const handleNativeInput = (e: Event) => {
       const target = e.target as HTMLInputElement
       const numValue = Number(target.value)
-      if (numValue !== value) {
-        onChange(numValue)
+      if (numValue !== currentValue) {
+        onChange?.(numValue)
       }
     }
 
     el.addEventListener('input', handleNativeInput)
     return () => el.removeEventListener('input', handleNativeInput)
-  }, [onChange, value])
+  }, [onChange, currentValue])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(Number(event.target.value))
+      onChange?.(Number(event.target.value))
     },
     [onChange]
   )
@@ -79,6 +102,8 @@ const Slider: React.FC<SliderProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={value !== undefined && value !== null && !Number.isNaN(value)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -91,13 +116,14 @@ const Slider: React.FC<SliderProps> = ({
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={currentValue}
           onChange={handleChange}
+          onBlur={onBlur}
           disabled={disabled}
           required={required}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={value}
+          aria-valuenow={currentValue}
           aria-orientation="horizontal"
           style={inputStyle}
           {...inputAriaProps}

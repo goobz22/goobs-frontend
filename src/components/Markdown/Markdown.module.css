@@ -1,0 +1,46 @@
+/* ==========================================================================
+   MARKDOWN - CSS MODULE
+   Read-only markdown renderer. Pure presentation wrapper around mdToHtml
+   output. The previous implementation set the same five properties via an
+   inline style object; they live here now as a base class plus a couple of
+   data-/custom-property hooks for the caller-supplied layout props.
+
+   Dynamic, caller-supplied values stay in JS but are passed in as CSS custom
+   properties (recipe rule 3):
+     --md-max-width : maxWidth in px, or 'none' for full-width (maxWidth = 0)
+   Alignment is a small enum, so it rides on a data-attribute (data-align)
+   rather than a custom property.
+   ========================================================================== */
+
+.root {
+  /* Caller override; falls back to the historical 720px default. The TSX sets
+     this to 'none' when maxWidth is 0 (full-width). */
+  --md-max-width: 720px;
+
+  max-width: var(--md-max-width);
+  text-align: left;
+  color: inherit;
+  line-height: 1.65;
+  font-size: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   ALIGNMENT
+   Old behaviour: textAlign followed `align`; the block was horizontally
+   centered (margin: 0 auto) ONLY when it had a bounded width (maxWidth > 0)
+   AND align was not 'left'. Full-width blocks (--md-max-width: none) are never
+   auto-centered because there is no slack to center within.
+   -------------------------------------------------------------------------- */
+.root[data-align='center'] {
+  text-align: center;
+}
+
+.root[data-align='right'] {
+  text-align: right;
+}
+
+.root[data-align='center']:not([data-full-width='true']),
+.root[data-align='right']:not([data-full-width='true']) {
+  margin-left: auto;
+  margin-right: auto;
+}

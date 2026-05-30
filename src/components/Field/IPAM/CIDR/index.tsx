@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
@@ -36,6 +37,13 @@ export interface CIDRFieldProps {
   onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
   placeholder?: string
   id?: string
+  /**
+   * Form-engine binding key. Inside a `<Form>` with `name` set, the numeric
+   * CIDR is written into the engine on change and the field is marked touched
+   * on blur; the shell auto-derives error/required for this name. Outside a
+   * form this is inert and the field behaves byte-for-byte as before.
+   */
+  name?: string
   autoComplete?: string
 }
 
@@ -106,7 +114,7 @@ const inputStyle: React.CSSProperties = {
 
 const CIDRField: React.FC<CIDRFieldProps> = ({
   initialValue = '24',
-  onChange,
+  onChange: onChangeProp,
   label = 'CIDR',
   initialDelay = 500,
   repeatInterval = 100,
@@ -126,8 +134,18 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   onClick,
   placeholder,
   id,
+  name,
   autoComplete,
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name`, the numeric CIDR is
+  // written into the engine on change (the original onChange still fires) and
+  // the field is marked touched via boundOnBlur. No controlled `value` prop
+  // exists — this field renders from internal state — so the hook's
+  // value-from-store is unused; only onChange/onBlur are taken over when bound.
+  const { onChange, onBlur: boundOnBlur } = useFieldBinding<number>({
+    name,
+    onChange: onChangeProp,
+  })
   const [currentValue, setCurrentValue] = useState(() => {
     const initialNum = parseInt(initialValue, 10)
     if (isNaN(initialNum)) return '24'
@@ -238,6 +256,10 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [currentValue, handleTextFieldChange])
 
+  // Filled whenever a (always-present) numeric CIDR value is set.
+  const hasValue =
+    currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
+
   return (
     <div data-field={dataField}>
       <FieldShell
@@ -247,6 +269,8 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
         disabled={disabled}
         required={required}
         dataFieldName={dataFieldName}
+        name={name}
+        filled={hasValue}
         styles={styles}
       >
         {({ inputId, inputAriaProps }) => (
@@ -254,14 +278,17 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
             <input
               ref={inputRef}
               id={id ?? inputId}
-              data-field-name={dataFieldName}
+              data-field-name={dataFieldName ?? name}
               autoComplete={autoComplete}
               value={`/${currentValue}`}
               disabled={disabled}
               required={required}
               onChange={e => handleTextFieldChange(e.target.value)}
               onFocus={onFocus}
-              onBlur={onBlur}
+              onBlur={event => {
+                onBlur?.(event)
+                boundOnBlur?.()
+              }}
               onKeyDown={onKeyDown}
               onClick={onClick}
               placeholder={placeholder}

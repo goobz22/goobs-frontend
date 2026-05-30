@@ -1,19 +1,114 @@
-/* QR Code Component - Mobile-Friendly Styles */
+/* ==========================================================================
+   QR CODE — CSS MODULE
+   Migrated off theme/qrcode.ts. Theme variant is a data-attribute on each
+   themed element: data-theme={'light' | 'dark' | 'sacred'}. Per the goobs
+   house pattern, the SACRED palette is the hardcoded base on each class and
+   light/dark are [data-theme] overrides. Visual values are transcribed
+   verbatim from the old qrcodeThemes record + theme/shared.ts tokens.
 
-.container {
-  max-width: 100%;
-  width: auto;
-  /* Remove outer border to avoid double outline */
-  border: none !important;
+   Caller-supplied overrides (styles.backgroundColor, styles.titleColor, the
+   measured responsive size, etc.) stay in JS and arrive as CSS custom
+   properties / inline style — see index.tsx dynamicStyle.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TITLE
+   sacred defaults; light/dark overrides below
+   -------------------------------------------------------------------------- */
+.title {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: var(--qr-title-font-size, 1.35rem);
+  color: var(--qr-title-color, #ffd700);
+  font-weight: var(--qr-title-font-weight, 700);
+  letter-spacing: 0.1em;
+  text-shadow:
+    0 0 20px rgba(255, 215, 0, 0.8),
+    0 0 40px rgba(255, 215, 0, 0.4);
+  text-transform: uppercase;
 }
 
+.title[data-theme='light'] {
+  margin-bottom: 1rem;
+  font-family: 'Merriweather', serif;
+  font-size: var(--qr-title-font-size, 1.25rem);
+  color: var(--qr-title-color, rgb(17, 24, 39));
+  font-weight: var(--qr-title-font-weight, 600);
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+}
+
+.title[data-theme='dark'] {
+  margin-bottom: 1rem;
+  font-family: 'Merriweather', serif;
+  font-size: var(--qr-title-font-size, 1.25rem);
+  color: var(--qr-title-color, rgb(243, 244, 246));
+  font-weight: var(--qr-title-font-weight, 600);
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   QR CODE CONTAINER (white framed box around the canvas)
+   The width/height are the measured responsive size, passed as --qr-size.
+   sacred defaults; light/dark overrides below
+   -------------------------------------------------------------------------- */
 .qrCodeContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto;
+  width: var(--qr-size);
+  height: var(--qr-size);
+  padding: 24px;
+  background-color: var(--qr-bg-color, rgba(18, 18, 18, 0.95));
+  background: linear-gradient(
+    145deg,
+    rgba(30, 25, 15, 0.98) 0%,
+    rgba(10, 10, 10, 0.95) 100%
+  );
+  border-radius: 20px;
+  border: var(--qr-border, 2px solid rgba(255, 215, 0, 0.6));
+  box-shadow: var(
+    --qr-box-shadow,
+    0 0 50px rgba(255, 215, 0, 0.5),
+    0 10px 40px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(255, 215, 0, 0.15)
+  );
+  position: relative;
+  backdrop-filter: blur(10px);
 }
 
+.qrCodeContainer[data-theme='light'] {
+  padding: 1rem;
+  background-color: var(--qr-bg-color, white);
+  background: var(--qr-bg-color, white);
+  border-radius: 12px;
+  border: var(--qr-border, 1px solid rgba(226, 232, 240, 0.5));
+  box-shadow: var(
+    --qr-box-shadow,
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24)
+  );
+  backdrop-filter: none;
+}
+
+.qrCodeContainer[data-theme='dark'] {
+  padding: 1rem;
+  background-color: var(--qr-bg-color, white);
+  background: var(--qr-bg-color, white);
+  border-radius: 12px;
+  border: var(--qr-border, 1px solid rgba(75, 85, 99, 0.5));
+  box-shadow: var(--qr-box-shadow, 0 4px 6px rgba(0, 0, 0, 0.3));
+  backdrop-filter: none;
+}
+
+/* --------------------------------------------------------------------------
+   CANVAS — generated QR bitmap. Mobile-friendly fluid sizing.
+   -------------------------------------------------------------------------- */
 .canvas {
   display: block;
   height: auto;
@@ -21,18 +116,117 @@
   width: 100%;
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem !important;
-  }
+/* --------------------------------------------------------------------------
+   SUCCESS STATE
+   (no theme-specific layout differences; sacred adds position: relative)
+   -------------------------------------------------------------------------- */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  position: relative;
+}
 
+.successContainer[data-theme='light'],
+.successContainer[data-theme='dark'] {
+  position: static;
+}
+
+.successIcon {
+  width: 60px;
+  height: 60px;
+  color: var(--qr-success-icon-color, #ffd700);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+.successIcon[data-theme='light'],
+.successIcon[data-theme='dark'] {
+  color: var(--qr-success-icon-color, #22c55e);
+  filter: none;
+}
+
+.successMessage {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: var(--qr-success-message-color, #ffd700);
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.successMessage[data-theme='light'] {
+  font-family: 'Merriweather', serif;
+  color: var(--qr-success-message-color, rgb(17, 24, 39));
+  text-shadow: none;
+}
+
+.successMessage[data-theme='dark'] {
+  font-family: 'Merriweather', serif;
+  color: var(--qr-success-message-color, rgb(243, 244, 246));
+  text-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED GLYPH (𓊹) — only rendered in the sacred success state
+   -------------------------------------------------------------------------- */
+.glyph {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.25rem;
+  color: rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   BUTTON / CONFIRMATION CONTAINERS (theme-agnostic)
+   -------------------------------------------------------------------------- */
+.buttonContainer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.confirmationContainer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   ERROR STATE
+   -------------------------------------------------------------------------- */
+.errorContainer {
+  padding: 1rem;
+}
+
+.errorText {
+  font-family: 'Cinzel', serif;
+  color: var(--qr-error-text-color, #ffd700);
+}
+
+.errorText[data-theme='light'] {
+  font-family: 'Merriweather', serif;
+  color: var(--qr-error-text-color, #dc2626);
+}
+
+.errorText[data-theme='dark'] {
+  font-family: 'Merriweather', serif;
+  color: var(--qr-error-text-color, #f87171);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile optimizations (preserved from the original module)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
   .qrCodeContainer {
-    padding: 12px !important;
-    /* Remove border on mobile to avoid double outline */
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
+    padding: 12px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
   }
 
   .canvas {

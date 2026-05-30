@@ -12,6 +12,8 @@ import React, {
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
 import CustomButton, { type ButtonProps } from '../Button'
 import { type ConfirmationCodeInputStyles } from '../../theme'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
+import { useOptionalFormContext } from '../Form/context'
 import cssStyles from './ConfirmationCodeInput.module.css'
 
 // --------------------------------------------------------------------------
@@ -27,6 +29,14 @@ export interface ConfirmationCodeInputsProps {
   'aria-invalid'?: boolean
   onChange?: (value: string) => void
   value?: string
+  /**
+   * Form-engine binding key. When inside a `<Form>` with no explicit `value`,
+   * `useFieldBinding` pulls the code value/onChange from the form engine;
+   * otherwise the caller's explicit value/onChange pass through unchanged.
+   */
+  name?: string
+  /** Stable test selector — emitted as `data-field-name`; defaults to `name`. */
+  dataFieldName?: string
   codeSent?: boolean
   onVerify?: () => void | Promise<void>
   onSendResend?: () => void | Promise<void>
@@ -70,7 +80,9 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   codeLength = 6,
   isValid,
   onChange,
-  value: valueProp = '',
+  value: valuePropRaw,
+  name,
+  dataFieldName,
   'aria-label': ariaLabel,
   'aria-required': ariaRequired,
   'aria-invalid': ariaInvalid,
@@ -87,6 +99,26 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSuccessState = false,
   styles,
 }) => {
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit `value`,
+  // the code string + its setter come from the form engine; otherwise the
+  // caller's explicit value/onChange pass through unchanged (back-compat). The
+  // raw (un-defaulted) value is passed so the binding's `value === undefined`
+  // gate still fires when the caller omitted `value`.
+  const formContext = useOptionalFormContext()
+  const {
+    value: boundValue,
+    onChange: boundOnChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valuePropRaw,
+    onChange,
+  })
+  const isBound = boundOnChange !== undefined && boundValue !== undefined
+
+  // The caller's explicit value (when bound, this is the engine value).
+  const valueProp = boundValue ?? ''
+
   // For uncontrolled mode - parent doesn't provide onChange
   const [uncontrolledValue, setUncontrolledValue] = useState(valueProp)
   const inputRefs = useRef<(HTMLInputElement | null)[]>(
@@ -94,8 +126,9 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   )
   const hasAutoFocused = useRef(false)
 
-  // Use controlled value if onChange is provided, otherwise use internal state
-  const isControlled = onChange !== undefined
+  // Use the engine value when bound, the controlled value when the caller wired
+  // onChange, otherwise the internal uncontrolled state.
+  const isControlled = isBound || onChange !== undefined
   const currentValue = isControlled ? valueProp : uncontrolledValue
 
   const theme = styles?.theme ?? 'light'
@@ -160,15 +193,21 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     }
   }, []) // Empty deps - only run on mount
 
-  // Helper to update value
+  // Helper to update value. When bound to the form engine the change is written
+  // through `boundOnChange` (which also chains the caller's original onChange);
+  // otherwise the legacy controlled/uncontrolled path is preserved exactly.
   const updateValue = useCallback(
     (newValue: string) => {
+      if (isBound) {
+        boundOnChange?.(newValue)
+        return
+      }
       if (!isControlled) {
         setUncontrolledValue(newValue)
       }
       onChange?.(newValue)
     },
-    [isControlled, onChange]
+    [isBound, boundOnChange, isControlled, onChange]
   )
 
   const handleInputChange = useCallback(
@@ -275,9 +314,27 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   const digits = currentValue.padEnd(codeLength, '').split('')
   const allFieldsFilled = currentValue.length >= codeLength
 
+  // Tier-1 root data attributes shared by both render branches. `data-filled`
+  // reflects any entered digits; `data-error` surfaces the engine error when
+  // bound (the component renders no error UI of its own, per the contract).
+  const resolvedFieldName = dataFieldName ?? name
+  const hasValue = currentValue.length > 0
+  const engineError =
+    formContext && name ? formContext.engine.getError(name) : undefined
+  const rootDataProps = {
+    'data-component': 'ConfirmationCodeInput',
+    ...(resolvedFieldName && { 'data-field-name': resolvedFieldName }),
+    'data-filled': hasValue ? 'true' : undefined,
+    ...(engineError && { 'data-error': 'true' }),
+  }
+
   if (showSuccessState) {
     return (
-      <div className={cssStyles.successContainer} data-theme={theme}>
+      <div
+        className={cssStyles.successContainer}
+        data-theme={theme}
+        {...rootDataProps}
+      >
         {/* CheckCircleOutline applies its own inline style to the <svg>, which
             beats a className. Source the three theme-driven properties from
             CSS custom properties (defined on .successContainer[data-theme])
@@ -313,6 +370,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       className={cssStyles.root}
       data-theme={theme}
       {...(isDisabled && { 'data-disabled': 'true' })}
+      {...rootDataProps}
       style={containerOverrideStyle}
       role="group"
       aria-label={ariaLabel || 'Confirmation Code'}
@@ -335,6 +393,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 onChange={e => handleInputChange(e, index)}
                 onKeyDown={e => handleKeyDown(e, index)}
                 onPaste={e => handlePaste(e, index)}
+                onBlur={() => boundOnBlur?.()}
                 aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
                 aria-required={ariaRequired}
                 aria-invalid={ariaInvalid}

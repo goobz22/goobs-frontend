@@ -13,27 +13,28 @@
                    emphasis. Used by status badges that used to be
                    hand-rolled per workspace.
 
-   Themed via CSS custom properties on the root; `.sacred` swaps the
-   gold-on-black palette, `.light` and `.dark` swap the blue palette
-   matching the rest of the field family. Callers can still override any
-   single property (color / backgroundColor / borderColor) by passing
-   inline `style` from the React layer.
+   Themed via CSS custom properties on the root; SACRED is the hardcoded
+   base default (matches Button/Card/Dialog/Tabs) and `[data-theme='light']`
+   / `[data-theme='dark']` are attribute-selector overrides that swap the
+   blue palette matching the rest of the field family. Callers can still
+   override any single property (color / backgroundColor / borderColor) by
+   passing inline `style` from the React layer.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Light theme (default)
+   Sacred theme (dark + gold) — hardcoded default
    -------------------------------------------------------------------------- */
 .root {
-  --chip-bg: rgba(59, 130, 246, 0.1);
-  --chip-border: rgba(59, 130, 246, 0.25);
-  --chip-text: rgb(59, 130, 246);
-  --chip-hover-bg: rgba(59, 130, 246, 0.15);
-  --chip-hover-border: rgba(59, 130, 246, 0.4);
-  --chip-active-bg: rgba(59, 130, 246, 0.18);
-  --chip-active-border: rgba(59, 130, 246, 0.5);
-  --chip-font: 'Inter', system-ui, sans-serif;
+  --chip-bg: rgba(0, 0, 0, 0.4);
+  --chip-border: rgba(255, 215, 0, 0.3);
+  --chip-text: #ffd700;
+  --chip-hover-bg: rgba(255, 215, 0, 0.12);
+  --chip-hover-border: rgba(255, 215, 0, 0.55);
+  --chip-active-bg: rgba(255, 215, 0, 0.2);
+  --chip-active-border: rgba(255, 215, 0, 0.6);
+  --chip-font: 'Cinzel', serif;
   --chip-shadow: none;
-  --chip-hover-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
+  --chip-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.18);
 
   display: inline-flex;
   align-items: center;
@@ -76,25 +77,25 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sacred theme (dark + gold)
+   Light theme override
    -------------------------------------------------------------------------- */
-.root.sacred {
-  --chip-bg: rgba(0, 0, 0, 0.4);
-  --chip-border: rgba(255, 215, 0, 0.3);
-  --chip-text: #ffd700;
-  --chip-hover-bg: rgba(255, 215, 0, 0.12);
-  --chip-hover-border: rgba(255, 215, 0, 0.55);
-  --chip-active-bg: rgba(255, 215, 0, 0.2);
-  --chip-active-border: rgba(255, 215, 0, 0.6);
-  --chip-font: 'Cinzel', serif;
+.root[data-theme='light'] {
+  --chip-bg: rgba(59, 130, 246, 0.1);
+  --chip-border: rgba(59, 130, 246, 0.25);
+  --chip-text: rgb(59, 130, 246);
+  --chip-hover-bg: rgba(59, 130, 246, 0.15);
+  --chip-hover-border: rgba(59, 130, 246, 0.4);
+  --chip-active-bg: rgba(59, 130, 246, 0.18);
+  --chip-active-border: rgba(59, 130, 246, 0.5);
+  --chip-font: 'Inter', system-ui, sans-serif;
   --chip-shadow: none;
-  --chip-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.18);
+  --chip-hover-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
 }
 
 /* --------------------------------------------------------------------------
-   Dark theme
+   Dark theme override
    -------------------------------------------------------------------------- */
-.root.dark {
+.root[data-theme='dark'] {
   --chip-bg: rgba(59, 130, 246, 0.18);
   --chip-border: rgba(59, 130, 246, 0.4);
   --chip-text: rgb(147, 197, 253);
@@ -288,13 +289,16 @@
   z-index: 1;
 }
 
+/* Sacred is the bare default, so the gold close-button hover is the base
+   rule; light/dark override it below. */
 .closeButton:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 215, 0, 0.16);
   opacity: 1;
 }
 
-.root.sacred .closeButton:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.16);
+.root[data-theme='light'] .closeButton:hover:not(:disabled),
+.root[data-theme='dark'] .closeButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .closeButton:disabled {

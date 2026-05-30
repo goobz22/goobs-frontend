@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
 export interface PasswordFieldProps {
@@ -32,8 +33,8 @@ export interface PasswordFieldProps {
 const PasswordField: React.FC<PasswordFieldProps> = ({
   label = 'Password',
   placeholder,
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   onFocus,
   onBlur,
   helperText,
@@ -44,8 +45,34 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
+  // the engine drives value/onChange; touched is marked via bindingOnBlur
+  // (chained into handleBlur below). Outside a form / with an explicit value
+  // this is a byte-for-byte pass-through. The destructured value/onChange
+  // SHADOW the incoming props so downstream code is unchanged.
+  const {
+    value,
+    onChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+    onBlur: undefined,
+  })
+
   const [passwordVisible, setPasswordVisible] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Chain the engine touched-mark (no-op outside a <Form>) before the caller's
+  // FocusEvent onBlur, which keeps its original signature unchanged.
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      bindingOnBlur?.()
+      onBlur?.(e)
+    },
+    [bindingOnBlur, onBlur]
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -131,6 +158,8 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -144,7 +173,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             value={value}
             onChange={e => onChange?.(e.target.value)}
             onFocus={onFocus}
-            onBlur={onBlur}
+            onBlur={handleBlur}
             disabled={disabled}
             required={required}
             placeholder={placeholder}

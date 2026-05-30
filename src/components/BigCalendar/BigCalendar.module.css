@@ -1,0 +1,474 @@
+/* ==========================================================================
+   BIGCALENDAR - CSS MODULE
+   Migrated off theme/bigcalendar.ts (getBigCalendarStyles). Three themes are
+   expressed as data-theme on the root: sacred is the HARDCODED DEFAULT on the
+   base classes; light/dark are [data-theme] overrides. Values transcribed
+   verbatim from bigCalendarThemes in theme/bigcalendar.ts for visual parity.
+
+   Tokens are CSS custom properties declared on .root so every nested element
+   (cells, headers, time column, events) reads the active theme without a JS
+   switch. Runtime-supplied numbers (minCellHeight, hourHeight, grid widths)
+   arrive as inline CSS variables and are consumed via var() here.
+
+   Transition tokens (theme/shared.ts TRANSITIONS):
+     medium  = all 200ms cubic-bezier(0.4, 0, 0.2, 1)   (light / dark)
+     premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1)   (sacred)
+   Sacred shadows (theme/shared.ts SHADOWS.sacred):
+     small  = 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,215,0,0.1)
+     medium = 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT / CONTAINER — sacred defaults
+   -------------------------------------------------------------------------- */
+.root {
+  /* Theme tokens (sacred defaults) */
+  --bc-container-radius: 12px;
+  --bc-container-font: 'Cinzel', serif;
+  --bc-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --bc-toolbar-radius: 12px;
+
+  --bc-calendar-radius: 12px;
+
+  --bc-header-min-height: 56px;
+  --bc-header-bg: rgba(10, 10, 10, 0.9);
+
+  --bc-cell-border: rgba(255, 215, 0, 0.2);
+  --bc-cell-bg: rgba(0, 0, 0, 0.6);
+  --bc-cell-hover-bg: rgba(255, 215, 0, 0.1);
+  --bc-cell-today-bg: rgba(255, 215, 0, 0.2);
+  --bc-cell-other-month-bg: rgba(10, 10, 10, 0.4);
+  --bc-cell-other-month-color: rgba(255, 215, 0, 0.4);
+  --bc-cell-padding: 12px;
+  --bc-cell-min-height: 100px;
+
+  --bc-event-radius: 6px;
+  --bc-event-padding: 4px 8px;
+  --bc-event-font-size: 0.8rem;
+
+  --bc-time-col-width: 80px;
+  --bc-time-col-bg: rgba(10, 10, 10, 0.9);
+  --bc-time-col-border: rgba(255, 215, 0, 0.3);
+  --bc-time-cell-color: rgba(255, 215, 0, 0.7);
+
+  /* Sacred-only effect tokens */
+  --bc-sacred-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+  --bc-sacred-border-glow: 0 0 30px rgba(255, 215, 0, 0.4);
+  --bc-sacred-text-glow: 0 0 3px rgba(255, 215, 0, 0.3);
+  --bc-calendar-bg-image:
+    linear-gradient(
+      135deg,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%,
+      rgba(255, 215, 0, 0.05) 100%
+    ),
+    radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+
+  /* Selection backgrounds (sacred defaults) */
+  --bc-cell-selected-bg: rgba(255, 215, 0, 0.12);
+  --bc-hour-selected-bg: rgba(255, 215, 0, 0.1);
+  --bc-hour-selected-outline: 1px solid rgba(255, 215, 0, 0.4);
+  --bc-week-col-selected-bg: rgba(255, 215, 0, 0.06);
+  --bc-current-hour-bg: rgba(255, 215, 0, 0.1);
+  --bc-today-date-color: rgba(255, 215, 0, 1);
+
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  border-radius: var(--bc-container-radius);
+  font-family: var(--bc-container-font);
+  transition: var(--bc-transition);
+  width: 100%;
+  height: max-content;
+  position: relative;
+  overflow: visible;
+  /* Sacred theme outer effect: sacred.borderGlow */
+  box-shadow: var(--bc-sacred-border-glow);
+}
+
+.root[data-theme='light'] {
+  --bc-container-radius: 8px;
+  --bc-container-font: 'Inter', sans-serif;
+  --bc-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --bc-toolbar-radius: 8px;
+  --bc-calendar-radius: 8px;
+
+  --bc-header-min-height: 48px;
+  --bc-header-bg: rgba(249, 250, 251, 1);
+
+  --bc-cell-border: rgba(229, 231, 235, 1);
+  --bc-cell-bg: rgba(255, 255, 255, 1);
+  --bc-cell-hover-bg: rgba(249, 250, 251, 1);
+  --bc-cell-today-bg: rgba(219, 234, 254, 0.5);
+  --bc-cell-other-month-bg: rgba(249, 250, 251, 0.5);
+  --bc-cell-other-month-color: rgba(156, 163, 175, 1);
+  --bc-cell-padding: 8px;
+  --bc-cell-min-height: 80px;
+
+  --bc-event-radius: 4px;
+  --bc-event-padding: 2px 6px;
+  --bc-event-font-size: 0.75rem;
+
+  --bc-time-col-width: 60px;
+  --bc-time-col-bg: rgba(249, 250, 251, 1);
+  --bc-time-col-border: rgba(209, 213, 219, 1);
+  --bc-time-cell-color: inherit;
+
+  /* No sacred effects in light theme */
+  --bc-sacred-border-glow: none;
+  --bc-calendar-bg-image: none;
+
+  --bc-cell-selected-bg: rgba(59, 130, 246, 0.08);
+  --bc-hour-selected-bg: rgba(59, 130, 246, 0.06);
+  --bc-hour-selected-outline: 1px solid rgba(59, 130, 246, 0.3);
+  --bc-week-col-selected-bg: rgba(59, 130, 246, 0.04);
+  --bc-current-hour-bg: rgba(59, 130, 246, 0.1);
+  --bc-today-date-color: inherit;
+
+  box-shadow: none;
+}
+
+.root[data-theme='dark'] {
+  --bc-container-radius: 8px;
+  --bc-container-font: 'Inter', sans-serif;
+  --bc-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --bc-toolbar-radius: 8px;
+  --bc-calendar-radius: 8px;
+
+  --bc-header-min-height: 48px;
+  --bc-header-bg: rgba(31, 41, 55, 1);
+
+  --bc-cell-border: rgba(55, 65, 81, 1);
+  --bc-cell-bg: rgba(17, 24, 39, 1);
+  --bc-cell-hover-bg: rgba(31, 41, 55, 1);
+  --bc-cell-today-bg: rgba(59, 130, 246, 0.2);
+  --bc-cell-other-month-bg: rgba(31, 41, 55, 0.3);
+  --bc-cell-other-month-color: rgba(107, 114, 128, 1);
+  --bc-cell-padding: 8px;
+  --bc-cell-min-height: 80px;
+
+  --bc-event-radius: 4px;
+  --bc-event-padding: 2px 6px;
+  --bc-event-font-size: 0.75rem;
+
+  --bc-time-col-width: 60px;
+  --bc-time-col-bg: rgba(31, 41, 55, 1);
+  --bc-time-col-border: rgba(75, 85, 99, 1);
+  --bc-time-cell-color: inherit;
+
+  /* No sacred effects in dark theme */
+  --bc-sacred-border-glow: none;
+  --bc-calendar-bg-image: none;
+
+  --bc-cell-selected-bg: rgba(59, 130, 246, 0.12);
+  --bc-hour-selected-bg: rgba(59, 130, 246, 0.1);
+  --bc-hour-selected-outline: 1px solid rgba(59, 130, 246, 0.3);
+  --bc-week-col-selected-bg: rgba(59, 130, 246, 0.06);
+  --bc-current-hour-bg: rgba(59, 130, 246, 0.1);
+  --bc-today-date-color: inherit;
+
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   TOOLBAR (rendered inside <Paper>; Paper paints its own surface). These
+   classes cover the toolbar content layout that used to live in
+   computedStyles.toolbarContent / toolbarSection.
+   -------------------------------------------------------------------------- */
+.toolbarContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.toolbarSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   NAV BUTTONS (previous / today / next) — sacred defaults.
+   Was navButtonStyle in index.tsx (isSacredTheme branch).
+   -------------------------------------------------------------------------- */
+.navButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0;
+  background-color: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #ffd700;
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.25),
+    inset 0 0 6px rgba(255, 215, 0, 0.12);
+}
+
+.root[data-theme='light'] .navButton {
+  background-color: transparent;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  color: #334155;
+  box-shadow: none;
+}
+
+.root[data-theme='dark'] .navButton {
+  background-color: transparent;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  color: #e5e7eb;
+  box-shadow: none;
+}
+
+/* The "today" button carried inline marginLeft/marginRight: 6 */
+.navButtonToday {
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
+/* View-switch ToggleButton labels (was inline marginLeft: 4 on each span) */
+.viewLabel {
+  margin-left: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   CALENDAR GRID (inside the calendar <Paper>)
+   -------------------------------------------------------------------------- */
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER ROW
+   -------------------------------------------------------------------------- */
+.headerContainer {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  width: 100%;
+  background-color: var(--bc-header-bg);
+  border-bottom: 1px solid var(--bc-cell-border);
+  border-left: 1px solid var(--bc-cell-border);
+  height: auto;
+  min-height: var(--bc-header-min-height);
+}
+
+/* Week/Day views override the template columns to include the time column.
+   The time-column width is supplied at runtime via --bc-grid-template-columns. */
+.headerContainerTimed {
+  grid-template-columns: var(--bc-grid-template-columns);
+}
+
+.headerCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-right: 1px solid var(--bc-cell-border);
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   MONTH GRID
+   minCellHeight arrives at runtime as --bc-min-cell-height; gridAutoRows used
+   the theme cell.minHeight. We keep gridAutoRows on the theme token, and each
+   cell enforces its own min-height from the runtime value.
+   -------------------------------------------------------------------------- */
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  width: 100%;
+  border-left: 1px solid var(--bc-cell-border);
+  grid-auto-rows: var(--bc-cell-min-height);
+}
+
+/* --------------------------------------------------------------------------
+   WEEK / DAY GRIDS
+   -------------------------------------------------------------------------- */
+.weekGrid,
+.dayGrid {
+  display: flex;
+  flex: 1;
+  overflow: auto;
+}
+
+/* --------------------------------------------------------------------------
+   MONTH CELLS
+   -------------------------------------------------------------------------- */
+.cell {
+  border-right: 1px solid var(--bc-cell-border);
+  border-bottom: 1px solid var(--bc-cell-border);
+  padding: var(--bc-cell-padding);
+  position: relative;
+  background-color: var(--bc-cell-bg);
+  transition: var(--bc-transition);
+  cursor: pointer;
+  box-sizing: border-box;
+  /* runtime minCellHeight (minHeight: `${minCellHeight}px`) */
+  min-height: var(--bc-min-cell-height);
+}
+
+/* Precedence mirrors the old JS spread order in renderMonthView:
+   base < otherMonth < today < hover < selected.
+   In the old code hover was applied via React state and sat AFTER today/
+   otherMonth but BEFORE selected, so: hover beats today/otherMonth, selected
+   beats hover. We reproduce that with CSS specificity + source order:
+     .cellOtherMonth / .cellToday  -> (0,1,0)
+     .cell:hover                   -> (0,2,0)  beats otherMonth/today
+     .cell.cellSelected            -> (0,2,0)  equal to hover, declared LAST
+                                       in source order so it wins. */
+.cellOtherMonth {
+  background-color: var(--bc-cell-other-month-bg);
+  color: var(--bc-cell-other-month-color);
+}
+
+.cellToday {
+  background-color: var(--bc-cell-today-bg);
+}
+
+.root[data-theme='sacred'] .cellToday {
+  box-shadow: inset var(--bc-sacred-glow);
+}
+
+.cell:hover {
+  background-color: var(--bc-cell-hover-bg);
+}
+
+.cell.cellSelected {
+  background-color: var(--bc-cell-selected-bg);
+}
+
+.cellDateNumber {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+}
+
+.root[data-theme='sacred'] .cellDateNumber {
+  text-shadow: var(--bc-sacred-text-glow);
+}
+
+.cellEventContainer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   EVENTS
+   The event background color is event.color || theme defaultColor, supplied
+   per-event at runtime as --bc-event-bg. cursor depends on onEventClick.
+   -------------------------------------------------------------------------- */
+.event {
+  border-radius: var(--bc-event-radius);
+  padding: var(--bc-event-padding);
+  font-size: var(--bc-event-font-size);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: var(--bc-transition);
+  background-color: var(--bc-event-bg);
+}
+
+.eventClickable {
+  cursor: pointer;
+}
+
+.eventStatic {
+  cursor: default;
+}
+
+.eventCompact {
+  padding: 1px 4px;
+  font-size: 0.7rem;
+}
+
+/* --------------------------------------------------------------------------
+   TIME COLUMN (week / day)
+   -------------------------------------------------------------------------- */
+.timeColumn {
+  width: var(--bc-time-col-width);
+  min-width: var(--bc-time-col-width);
+  background-color: var(--bc-time-col-bg);
+  border-right: 1px solid var(--bc-time-col-border);
+}
+
+.timeCell {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 4px;
+  border-bottom: 1px solid var(--bc-cell-border);
+  color: var(--bc-time-cell-color);
+  font-size: 0.7rem;
+  padding-right: 8px;
+  /* runtime hourHeight (height: `${hourHeight}px`) */
+  height: var(--bc-hour-height);
+}
+
+/* --------------------------------------------------------------------------
+   WEEK DAY COLUMNS
+   -------------------------------------------------------------------------- */
+.weekDaysContainer {
+  display: flex;
+  flex: 1;
+}
+
+.weekDayColumn {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--bc-cell-border);
+  /* runtime cellWidth (width: `${100 / 7}%`) */
+  width: var(--bc-week-col-width);
+}
+
+.weekDayColumnSelected {
+  background-color: var(--bc-week-col-selected-bg);
+}
+
+/* --------------------------------------------------------------------------
+   DAY VIEW CONTENT COLUMN
+   -------------------------------------------------------------------------- */
+.dayContentColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Day view selected state reused cell.hover backgroundColor */
+.dayContentColumnSelected {
+  background-color: var(--bc-cell-hover-bg);
+}
+
+/* --------------------------------------------------------------------------
+   HOUR CELLS (week / day)
+   -------------------------------------------------------------------------- */
+.hourCell {
+  border-bottom: 1px solid var(--bc-cell-border);
+  padding: 4px 6px;
+  position: relative;
+  background-color: var(--bc-cell-bg);
+  transition: var(--bc-transition);
+  /* runtime hourHeight */
+  height: var(--bc-hour-height);
+}
+
+.hourCellCurrent {
+  background-color: var(--bc-current-hour-bg);
+}
+
+.hourCellSelected {
+  background-color: var(--bc-hour-selected-bg);
+  outline: var(--bc-hour-selected-outline);
+}

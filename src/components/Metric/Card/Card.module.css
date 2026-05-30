@@ -1,18 +1,22 @@
 /* ==========================================================================
    METRIC CARD - CSS MODULE
-   Theme via CSS custom properties (light vs sacred). Avoids inline-style
-   churn and lets Storybook / dev-tools tweak vars without React re-renders.
+   Theme via [data-theme] on the card root. Sacred is the hardcoded base
+   default; [data-theme='light'] is the explicit override block. The TSX
+   resolves the attribute to 'sacred' only when styles.theme === 'sacred',
+   otherwise 'light' (matching the prior two-branch isSacredTheme behaviour).
+   Caller knobs (color, width, padding, radius) arrive as CSS custom
+   properties set inline so they don't grow the bundle's class surface.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Light theme (default)
+   Card root — sacred theme (dark + gold) is the base default
    -------------------------------------------------------------------------- */
 .card {
-  --mc-bg: rgba(255, 255, 255, 0.9);
-  --mc-border: rgba(25, 118, 210, 0.25);
-  --mc-accent: #1976d2;
-  --mc-label: #6b7280;
-  --mc-value-family: 'Inter', sans-serif;
+  --mc-bg: rgba(0, 0, 0, 0.4);
+  --mc-border: rgba(212, 175, 55, 0.25);
+  --mc-accent: #d4af37;
+  --mc-label: rgba(255, 255, 255, 0.7);
+  --mc-value-family: 'Cinzel', serif;
   --mc-value-size: 1.25rem;
   --mc-padding: 12px 16px;
   --mc-radius: 8px;
@@ -32,14 +36,14 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sacred theme (dark + gold)
+   Light theme (default for undefined / light / dark — non-sacred branch)
    -------------------------------------------------------------------------- */
-.card.sacred {
-  --mc-bg: rgba(0, 0, 0, 0.4);
-  --mc-border: rgba(212, 175, 55, 0.25);
-  --mc-accent: #d4af37;
-  --mc-label: rgba(255, 255, 255, 0.7);
-  --mc-value-family: 'Cinzel', serif;
+.card[data-theme='light'] {
+  --mc-bg: rgba(255, 255, 255, 0.9);
+  --mc-border: rgba(25, 118, 210, 0.25);
+  --mc-accent: #1976d2;
+  --mc-label: #6b7280;
+  --mc-value-family: 'Inter', sans-serif;
 }
 
 /* --------------------------------------------------------------------------

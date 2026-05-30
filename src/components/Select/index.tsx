@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
-import {
-  getFormFieldTheme,
-  injectSacredKeyframes,
-  type FormFieldStyles,
-} from '../../theme'
+import React from 'react'
+import type { FormFieldStyles } from '../../theme'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
+import { useOptionalFormContext } from '../Form/context'
+import cssStyles from './Select.module.css'
 
 export interface SelectStyles extends FormFieldStyles {
   variant?: 'standard' | 'outlined' | 'filled'
@@ -24,6 +23,19 @@ export interface SelectProps extends Omit<
   fullWidth?: boolean
   error?: boolean
   displayEmpty?: boolean
+  /**
+   * Form-engine binding key (also forwarded to the native `<select name>`).
+   * When inside a `<Form>` with no explicit `value`, `useFieldBinding` pulls the
+   * value/onChange from the form engine; otherwise the caller's explicit
+   * value/onChange pass through unchanged (back-compat).
+   */
+  name?: string
+  /** Stable test selector — emitted as `data-field-name`; defaults to `name`. */
+  dataFieldName?: string
+}
+
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -36,129 +48,132 @@ const Select: React.FC<SelectProps> = ({
   disabled = false,
   displayEmpty = false,
   style = {},
+  name,
+  dataFieldName,
+  value: valueProp,
+  onChange: onChangeProp,
+  onBlur: onBlurProp,
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
+  // value/onChange/onBlur come from the form engine; otherwise the caller's
+  // explicit value passes through unchanged (back-compat). The caller's native
+  // onChange/onBlur take DOM events, not the string the binding forwards, so
+  // they are NOT chained inside useFieldBinding (whose originalOnChange is
+  // string-typed) — they are invoked from the native handlers below, where the
+  // real event is available, preserving behavior.
+  const formContext = useOptionalFormContext()
+  const { value: boundValue, onChange: boundOnChange, onBlur: boundOnBlur } =
+    useFieldBinding<string>({
+      name,
+      value: valueProp as string | undefined,
+    })
 
-  // Inject CSS keyframes for sacred animations
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      injectSacredKeyframes()
-    }
-  }, [styles?.theme])
+  const handleNativeChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>): void => {
+      // Drive the form-engine binding from the selected string value, then run
+      // the caller's native onChange with the real event (preserved behavior).
+      boundOnChange?.(event.target.value)
+      onChangeProp?.(event)
+    },
+    [boundOnChange, onChangeProp]
+  )
 
-  // Compute styles based on theme and state. Inlined the slim part of
-  // the deleted `getSharedFormFieldStyles` helper this component
-  // actually used (themeConfig + transition + hover-driven border color).
-  const computedStyles = useMemo(() => {
-    const themeConfig = getFormFieldTheme(styles)
-    const helperTextType = styles?.helperTextType || 'info'
-    const isError = helperTextType === 'error'
-    const borderColor = isError
-      ? themeConfig.border.error
-      : isHovered
-        ? themeConfig.border.focused
-        : themeConfig.border.default
-    return {
-      themeConfig,
-      borderColor,
-      transition: 'all 0.2s ease',
-      isSacredTheme: styles?.theme === 'sacred',
-    }
-  }, [styles, isHovered])
+  const handleNativeBlur = React.useCallback(
+    (event: React.FocusEvent<HTMLSelectElement>): void => {
+      boundOnBlur?.()
+      onBlurProp?.(event)
+    },
+    [boundOnBlur, onBlurProp]
+  )
 
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
-  const { themeConfig, borderColor, transition } = computedStyles
+  // When bound to the engine, surface the engine's error presence on the root
+  // (the `error` prop still wins when the caller passed it explicitly).
+  const engineError =
+    formContext && name ? formContext.engine.getError(name) : undefined
+  const hasError = error || Boolean(engineError)
 
-  const selectStyle: React.CSSProperties = {
-    font: 'inherit',
-    fontFamily: themeConfig.fontFamily,
-    color: error ? '#d32f2f' : themeConfig.text,
-    width: fullWidth ? '100%' : 'auto',
-    // Set all border properties consistently
-    borderTopWidth: variant === 'outlined' ? '1px' : '0',
-    borderRightWidth: variant === 'outlined' ? '1px' : '0',
-    borderBottomWidth:
-      variant === 'outlined' || variant === 'standard' ? '1px' : '0',
-    borderLeftWidth: variant === 'outlined' ? '1px' : '0',
-    borderTopStyle: variant === 'outlined' ? 'solid' : 'none',
-    borderRightStyle: variant === 'outlined' ? 'solid' : 'none',
-    borderBottomStyle:
-      variant === 'outlined' || variant === 'standard' ? 'solid' : 'none',
-    borderLeftStyle: variant === 'outlined' ? 'solid' : 'none',
-    borderTopColor:
-      variant === 'outlined'
-        ? error
-          ? '#d32f2f'
-          : borderColor
-        : 'transparent',
-    borderRightColor:
-      variant === 'outlined'
-        ? error
-          ? '#d32f2f'
-          : borderColor
-        : 'transparent',
-    borderBottomColor:
-      variant === 'outlined' || variant === 'standard'
-        ? error
-          ? '#d32f2f'
-          : borderColor
-        : 'transparent',
-    borderLeftColor:
-      variant === 'outlined'
-        ? error
-          ? '#d32f2f'
-          : borderColor
-        : 'transparent',
-    borderRadius: variant === 'outlined' ? styles?.borderRadius || '4px' : '0',
-    backgroundColor:
-      variant === 'filled'
-        ? isSacredTheme
-          ? 'rgba(255, 215, 0, 0.06)'
-          : isDarkTheme
-            ? 'rgba(255, 255, 255, 0.06)'
-            : 'rgba(0, 0, 0, 0.06)'
-        : themeConfig.background,
-    padding:
-      size === 'small' ? '8.5px 32px 8.5px 14px' : '16.5px 32px 16.5px 14px',
-    paddingRight: '32px', // Space for dropdown arrow
-    fontSize: size === 'small' ? '0.875rem' : styles?.fontSize || '1rem',
-    lineHeight: '1.4375em',
-    minHeight: '1.4375em',
-    boxSizing: 'border-box',
-    position: 'relative',
-    cursor: disabled ? 'default' : 'pointer',
-    outline: 'none',
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    MozAppearance: 'none',
-    transition,
-    ...(disabled && {
-      cursor: 'default',
-      color: isSacredTheme
-        ? 'rgba(255, 215, 0, 0.38)'
-        : isDarkTheme
-          ? 'rgba(255, 255, 255, 0.38)'
-          : 'rgba(0, 0, 0, 0.38)',
-      opacity: 0.7,
-    }),
-    ...style,
+  // The value actually rendered by the <select>: the engine/caller-bound value
+  // when present, otherwise undefined so the native uncontrolled path is kept.
+  const resolvedValue = boundValue
+
+  const theme = styles?.theme || 'sacred'
+
+  const rootClassName = mergeClassNames(
+    cssStyles.root,
+    fullWidth ? cssStyles.fullWidth : undefined
+  )
+
+  const selectClassName = mergeClassNames(
+    cssStyles.select,
+    cssStyles[variant],
+    size === 'small' ? cssStyles.small : undefined
+  )
+
+  // Caller-supplied scalar overrides passed through as CSS custom properties.
+  // borderRadius only applies to the outlined variant (the only variant with
+  // a radius in the old inline logic); fontSize only applies to the medium
+  // size (small forces 0.875rem in the .small class). The caller-supplied
+  // `style` prop is spread last so it keeps its old override precedence.
+  const selectStyle: React.CSSProperties & Record<string, string | number> = {}
+  if (variant === 'outlined' && styles?.borderRadius) {
+    selectStyle['--select-radius'] = styles.borderRadius
   }
+  if (size === 'medium' && styles?.fontSize) {
+    selectStyle['--select-font-size'] = styles.fontSize
+  }
+  // Caller color/font overrides that getFormFieldTheme honored before the
+  // CSS-module migration. These feed the same custom properties the theme
+  // tokens set, so a caller value overrides the theme default per-key — exactly
+  // as `styles.backgroundColor || baseTheme.background` did in the old theme fn.
+  if (styles?.backgroundColor) {
+    selectStyle['--select-bg'] = styles.backgroundColor
+  }
+  if (styles?.borderColor) {
+    selectStyle['--select-border-default'] = styles.borderColor
+  }
+  if (styles?.borderFocusedColor) {
+    selectStyle['--select-border-focused'] = styles.borderFocusedColor
+  }
+  if (styles?.textColor) {
+    selectStyle['--select-text'] = styles.textColor
+  }
+  if (styles?.fontFamily) {
+    selectStyle['--select-font-family'] = styles.fontFamily
+  }
+  Object.assign(selectStyle, style)
+
+  // `helperTextType: 'error'` rendered the error border in the old
+  // getFormFieldTheme path even when the boolean `error` prop wasn't set.
+  // Surface it as a separate data attribute so the CSS can color the border
+  // without conflating it with the boolean-error red (#d32f2f) used above.
+  const hasHelperError = styles?.helperTextType === 'error'
+
+  // `data-filled` reflects a non-empty current selection (engine/caller value).
+  const hasValue =
+    typeof resolvedValue === 'string'
+      ? resolvedValue.length > 0
+      : resolvedValue != null
 
   return (
     <div
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        width: fullWidth ? '100%' : 'auto',
-      }}
+      className={rootClassName}
+      data-theme={theme}
+      data-component="Select"
+      data-field-name={dataFieldName ?? name}
+      data-filled={hasValue ? 'true' : undefined}
+      data-error={hasError ? 'true' : undefined}
+      data-helper-error={hasHelperError ? 'true' : undefined}
+      data-disabled={disabled ? 'true' : undefined}
     >
       <select
+        className={selectClassName}
         style={selectStyle}
         disabled={disabled}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        name={name}
+        value={resolvedValue}
+        onChange={handleNativeChange}
+        onBlur={handleNativeBlur}
         {...props}
       >
         {displayEmpty && (
@@ -169,27 +184,7 @@ const Select: React.FC<SelectProps> = ({
         {children}
       </select>
       {/* Custom dropdown arrow */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          right: '14px',
-          transform: 'translateY(-50%)',
-          pointerEvents: 'none',
-          color: disabled
-            ? isSacredTheme
-              ? 'rgba(255, 215, 0, 0.26)'
-              : isDarkTheme
-                ? 'rgba(255, 255, 255, 0.26)'
-                : 'rgba(0, 0, 0, 0.26)'
-            : isSacredTheme
-              ? 'rgba(255, 215, 0, 0.54)'
-              : isDarkTheme
-                ? 'rgba(255, 255, 255, 0.54)'
-                : 'rgba(0, 0, 0, 0.54)',
-          fontSize: '0.75rem',
-        }}
-      >
+      <div className={cssStyles.arrow} aria-hidden="true">
         ▼
       </div>
     </div>

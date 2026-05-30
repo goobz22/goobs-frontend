@@ -7,6 +7,7 @@ import FieldShell, {
   useEscape,
   useArrowKeyNav,
 } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DropdownOption {
   value: string | number
@@ -51,10 +52,10 @@ const Dropdown: React.FC<DropdownProps> = ({
   label,
   options,
   defaultValue,
-  onChange,
+  onChange: onChangeProp,
   onBlur,
   onFocus,
-  value: externalValue,
+  value: externalValueProp,
   showIdColumns = false,
   helperText,
   error,
@@ -63,6 +64,28 @@ const Dropdown: React.FC<DropdownProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. When this Dropdown is rendered inside a <Form>
+  // with a `name` and no explicit `value`, the binding takes over: `value`
+  // comes from the form engine and `onChange` writes back to it (chaining
+  // any original onChange). Outside a form, or with an explicit value, the
+  // binding is a pass-through and behaves byte-for-byte as before.
+  // `boundOnBlur` marks the field touched; it's chained into the button's
+  // focus-event onBlur below (which keeps its own FocusEventHandler shape).
+  // The canonical Dropdown onChange emits a string, so the original handler
+  // is forwarded through a string-narrowing wrapper to satisfy the binding's
+  // `(next: string | number) => void` contract.
+  const {
+    value: externalValue,
+    onChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string | number>({
+    name,
+    value: externalValueProp,
+    onChange: onChangeProp
+      ? (next: string | number): void => onChangeProp(String(next))
+      : undefined,
+  })
+
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -178,6 +201,8 @@ const Dropdown: React.FC<DropdownProps> = ({
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
       dataFieldName={dataFieldName ?? name}
+      name={name}
+      filled={value !== undefined && value !== null && value !== ''}
       styles={styleOverridesForShell}
     >
       {({ inputId, inputAriaProps }) => {
@@ -197,7 +222,10 @@ const Dropdown: React.FC<DropdownProps> = ({
               data-subject={dataField}
               className={buttonClassNames}
               onClick={() => !disabled && setIsOpen(!isOpen)}
-              onBlur={onBlur}
+              onBlur={event => {
+                onBlur?.(event)
+                boundOnBlur?.()
+              }}
               onFocus={onFocus}
               onKeyDown={event => {
                 if (

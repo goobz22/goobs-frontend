@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
@@ -33,6 +34,12 @@ export interface VLANFieldProps {
   repeatInterval?: number
   placeholder?: string
   id?: string
+  /**
+   * Form-engine binding key. Forwarded to the native input for submission and,
+   * inside a `<Form>`, used to write the numeric VLAN ID into the engine on
+   * change and mark the field touched on blur; the shell auto-derives
+   * error/required for this name. Outside a form this is inert.
+   */
   name?: string
   autoComplete?: string
 }
@@ -89,7 +96,7 @@ const inputStyle: React.CSSProperties = {
  */
 const VLANField: React.FC<VLANFieldProps> = ({
   initialValue = '',
-  onChange,
+  onChange: onChangeProp,
   label = 'VLAN ID',
   helperText,
   error: errorProp,
@@ -106,6 +113,15 @@ const VLANField: React.FC<VLANFieldProps> = ({
   name,
   autoComplete,
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name`, the numeric VLAN ID is
+  // written into the engine on change (original onChange still fires) and the
+  // field is marked touched via boundOnBlur. No controlled `value` prop exists
+  // — this field renders from internal state — so the hook's value-from-store
+  // is unused; only onChange/onBlur are taken over when bound.
+  const { onChange, onBlur: boundOnBlur } = useFieldBinding<number>({
+    name,
+    onChange: onChangeProp,
+  })
   const [currentValue, setCurrentValue] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -252,6 +268,10 @@ const VLANField: React.FC<VLANFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [currentValue, handleTextFieldChange])
 
+  // Filled when a numeric VLAN ID is present in the input.
+  const hasValue =
+    currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
+
   return (
     <FieldShell
       label={label}
@@ -261,6 +281,8 @@ const VLANField: React.FC<VLANFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={hasValue}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -269,12 +291,13 @@ const VLANField: React.FC<VLANFieldProps> = ({
             ref={inputRef}
             id={id ?? inputId}
             name={name}
-            data-field-name={dataFieldName}
+            data-field-name={dataFieldName ?? name}
             autoComplete={autoComplete}
             value={currentValue}
             disabled={disabled}
             required={required}
             onChange={e => handleTextFieldChange(e.target.value)}
+            onBlur={() => boundOnBlur?.()}
             placeholder={placeholder}
             type="text"
             inputMode="numeric"

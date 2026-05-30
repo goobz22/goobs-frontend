@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface MACAddressFieldProps {
   initialValue?: string
@@ -29,6 +30,13 @@ export interface MACAddressFieldProps {
   onPaste?: (event: React.ClipboardEvent<HTMLInputElement>) => void
   placeholder?: string
   id?: string
+  /**
+   * Form-engine binding key. Inside a `<Form>` with `name` set, the formatted
+   * MAC string is written into the engine on change and the field is marked
+   * touched on blur; the shell auto-derives error/required for this name.
+   * Outside a form this is inert and behaviour is byte-for-byte unchanged.
+   */
+  name?: string
   autoComplete?: string
 }
 
@@ -72,7 +80,7 @@ const inputStyle: React.CSSProperties = {
  */
 const MACAddressField: React.FC<MACAddressFieldProps> = ({
   initialValue = '',
-  onChange,
+  onChange: onChangeProp,
   label = 'MAC Address',
   helperText,
   error: errorProp,
@@ -88,8 +96,18 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
   onPaste: onPasteProp,
   placeholder,
   id,
+  name,
   autoComplete,
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name`, the formatted MAC string
+  // is written into the engine on change (original onChange still fires) and
+  // the field is marked touched via boundOnBlur. No controlled `value` prop
+  // exists — this field renders from internal state — so the hook's
+  // value-from-store is unused; only onChange/onBlur are taken over when bound.
+  const { onChange, onBlur: boundOnBlur } = useFieldBinding<string>({
+    name,
+    onChange: onChangeProp,
+  })
   const [value, setValue] = useState(initialValue)
   const [isValid, setIsValid] = useState<boolean>(
     initialValue === '' || isValidMACAddress(initialValue)
@@ -226,6 +244,9 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
     : undefined
   const shellError = errorProp ?? localError
 
+  // Filled when the MAC string holds at least one character.
+  const hasValue = Boolean(value && value.length > 0)
+
   return (
     <FieldShell
       label={label}
@@ -235,20 +256,25 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={hasValue}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
           id={id ?? inputId}
-          data-field-name={dataFieldName}
+          data-field-name={dataFieldName ?? name}
           autoComplete={autoComplete}
           value={value}
           disabled={disabled}
           required={required}
           onChange={e => handleTextFieldChange(e.target.value)}
           onFocus={onFocus}
-          onBlur={onBlur}
+          onBlur={event => {
+            onBlur?.(event)
+            boundOnBlur?.()
+          }}
           onKeyDown={onKeyDown}
           onClick={onClick}
           onPaste={handlePaste}

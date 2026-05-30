@@ -24,6 +24,7 @@ import React, {
 import cssStyles from './Checkbox.module.css'
 import CheckIcon from '../Icons/Check'
 import IndeterminateCheckBoxIcon from '../Icons/IndeterminateCheckBox'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -100,6 +101,13 @@ export interface CheckboxProps extends Omit<
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
   /** Whether the checkbox is in indeterminate state */
   indeterminate?: boolean
+  /**
+   * Stable test selector. Emitted as `data-field-name` on the root wrapper —
+   * falls back to the input `name` when not provided. Lets Playwright
+   * `[data-field-name="…"]` locators target the whole control, not just the
+   * hidden input.
+   */
+  dataFieldName?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: CheckboxStyles
 }
@@ -196,8 +204,24 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     onBlur,
     styles,
     id: providedId,
+    dataFieldName,
     ...rest
   } = props
+
+  // Tier-1 form binding. When this checkbox is rendered inside a <Form> with a
+  // `name` and NO explicit `checked`, the boolean value + change handler are
+  // taken over by the form engine. Outside a form, or with an explicit
+  // `checked`, this is a pass-through and the control behaves byte-for-byte as
+  // before (the gate lives in useFieldBinding).
+  const fieldName = typeof rest.name === 'string' ? rest.name : undefined
+  const {
+    value: boundChecked,
+    onChange: boundOnChange,
+  } = useFieldBinding<boolean>({
+    name: fieldName,
+    value: controlledChecked,
+    onChange,
+  })
 
   // Use React's useId for stable IDs across server and client
   const generatedId = useId()
@@ -208,8 +232,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   const [uncontrolledChecked, setUncontrolledChecked] = React.useState(
     defaultChecked || false
   )
-  const isControlled = controlledChecked !== undefined
-  const checked = isControlled ? controlledChecked : uncontrolledChecked
+  const isControlled = boundChecked !== undefined
+  const checked = isControlled ? boundChecked : uncontrolledChecked
   const isDisabled = !!(styles?.disabled || rest.disabled)
 
   const theme = styles?.theme || 'light'
@@ -243,9 +267,9 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         setUncontrolledChecked(newChecked)
       }
 
-      onChange?.(newChecked)
+      boundOnChange?.(newChecked)
     },
-    [isControlled, onChange]
+    [isControlled, boundOnChange]
   )
 
   useImperativeHandle(ref, () => internalRef.current!)
@@ -267,7 +291,10 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     <label
       htmlFor={stableId}
       className={cssStyles.wrapper}
+      data-component="Checkbox"
       data-theme={theme}
+      data-field-name={dataFieldName ?? fieldName}
+      data-filled={!!isChecked}
       {...(showPremiumAccent && { 'data-premium-accent': 'true' })}
       {...(disabledAttr && { 'data-disabled': disabledAttr })}
       {...(dynamicStyle && { style: dynamicStyle })}

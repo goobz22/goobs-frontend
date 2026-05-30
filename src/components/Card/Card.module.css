@@ -13,7 +13,8 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   LIGHT THEME (default)
+   ROOT — SACRED THEME is the hardcoded base default (matches Dialog/Tabs).
+   light / dark are [data-theme] attribute-selector overrides below.
    -------------------------------------------------------------------------- */
 .root {
   /* Density tokens — workspaces can override via wrapper CSS vars to
@@ -23,40 +24,7 @@
   --card-gap: clamp(8px, 2vw, 12px);
   --card-radius: 8px;
 
-  /* Palette */
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --card-border: rgba(25, 118, 210, 0.2);
-  --card-accent: #1976d2;
-  --card-title: #1f2937;
-  --card-subtitle: #6b7280;
-  --card-text: #374151;
-  --card-meta: #9ca3af;
-  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --card-selected-ring: rgba(25, 118, 210, 0.5);
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--card-gap);
-  padding: var(--card-padding-y) var(--card-padding-x);
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
-  color: var(--card-text);
-  font-family: 'Inter', system-ui, sans-serif;
-  box-sizing: border-box;
-  container-type: inline-size;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
-}
-
-/* --------------------------------------------------------------------------
-   SACRED THEME
-   -------------------------------------------------------------------------- */
-.root.sacred {
+  /* Sacred palette (hardcoded default) */
   --card-bg: rgba(0, 0, 0, 0.7);
   --card-border: rgba(255, 215, 0, 0.25);
   --card-accent: #ffd700;
@@ -67,13 +35,46 @@
   --card-hover-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
   --card-selected-ring: rgba(255, 215, 0, 0.6);
 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  color: var(--card-text);
   font-family: 'Cinzel', serif;
+  box-sizing: border-box;
+  container-type: inline-size;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 /* --------------------------------------------------------------------------
-   DARK THEME
+   LIGHT THEME OVERRIDE
    -------------------------------------------------------------------------- */
-.root.dark {
+.root[data-theme='light'] {
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(25, 118, 210, 0.2);
+  --card-accent: #1976d2;
+  --card-title: #1f2937;
+  --card-subtitle: #6b7280;
+  --card-text: #374151;
+  --card-meta: #9ca3af;
+  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --card-selected-ring: rgba(25, 118, 210, 0.5);
+
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME OVERRIDE
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
   --card-bg: #1e293b;
   --card-border: #334155;
   --card-accent: #60a5fa;
@@ -83,6 +84,8 @@
   --card-meta: #64748b;
   --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   --card-selected-ring: rgba(96, 165, 250, 0.6);
+
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* --------------------------------------------------------------------------
@@ -169,14 +172,6 @@
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.headerTextCol {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1 1 auto;
 }
 
 .title {
@@ -731,6 +726,13 @@
    EMPTY STATE (rendered inside <Card.Grid> when no children)
    -------------------------------------------------------------------------- */
 .emptyState {
+  /* SACRED is the hardcoded default (matches the card root recipe);
+     light / dark are [data-theme] overrides below. */
+  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-accent: #ffd700;
+  --card-text: rgba(255, 255, 255, 0.7);
+  --card-title: #ffd700;
+
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
@@ -743,15 +745,23 @@
   border: 1px dashed color-mix(in srgb, var(--card-accent) 30%, transparent);
   border-radius: var(--card-radius, 8px);
   color: var(--card-text);
+  font-family: 'Cinzel', serif;
+}
+
+.emptyState[data-theme='light'] {
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-accent: #1976d2;
+  --card-text: #374151;
+  --card-title: #1f2937;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-.emptyState.sacred {
-  --card-bg: rgba(0, 0, 0, 0.4);
-  --card-accent: #ffd700;
-  --card-text: rgba(255, 255, 255, 0.7);
-  --card-title: #ffd700;
-  font-family: 'Cinzel', serif;
+.emptyState[data-theme='dark'] {
+  --card-bg: #1e293b;
+  --card-accent: #60a5fa;
+  --card-text: #cbd5e1;
+  --card-title: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .emptyStateIcon {

@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface TimeFieldProps {
   onChange?: (time: Date | null) => void
@@ -14,6 +15,12 @@ export interface TimeFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. When set inside a `<Form>` and no explicit
+   * `value` is passed, value/onChange come from the form engine; the shell
+   * also derives error/required for this field. Inert outside a `<Form>`.
+   */
+  name?: string
   styles?: FieldStyleOverrides
 }
 
@@ -34,15 +41,31 @@ const parseTimeInput = (timeString: string): Date | null => {
 }
 
 const TimeField: React.FC<TimeFieldProps> = ({
-  onChange,
-  value,
+  onChange: onChangeProp,
+  value: valueProp,
   label = 'Time',
   helperText,
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
+  // Tier-1 form binding: when rendered inside a <Form> with a `name` and no
+  // explicit `value`, value/onChange/onBlur come from the form engine. Outside
+  // a form (or with an explicit value) this is a byte-for-byte pass-through.
+  // The bound results take the bare value/onChange/bindingOnBlur names so all
+  // downstream code is unchanged; onChange stays optional (`onChange?.`).
+  const {
+    value,
+    onChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<Date | null>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+
   const inputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
@@ -101,16 +124,19 @@ const TimeField: React.FC<TimeFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={value != null}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
           id={inputId}
-          data-field-name={dataFieldName}
+          data-field-name={dataFieldName ?? name}
           type="time"
           value={formatTimeForInput(value || null)}
           onChange={handleChange}
+          onBlur={bindingOnBlur}
           disabled={disabled}
           required={required}
           style={inputStyle}

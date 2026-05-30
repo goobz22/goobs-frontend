@@ -291,8 +291,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? undefined
           : styles?.outline || undefined
 
-    // Build dynamic inline styles for customizations that override CSS
-    const dynamicStyle: React.CSSProperties = {}
+    // Build dynamic inline styles for customizations that override CSS.
+    // Hover intent travels via CSS custom properties consumed in
+    // Button.module.css `.button:hover:not(:disabled)` so variant-driven
+    // (and caller-driven) hover backgrounds/borders/box-shadows actually
+    // render instead of being silently dropped.
+    const dynamicStyle: React.CSSProperties & Record<string, string> = {}
 
     // Apply custom sizing
     if (styles?.width) dynamicStyle.width = styles.width
@@ -340,6 +344,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     if (styles?.boxShadow) dynamicStyle.boxShadow = styles.boxShadow
     if (styles?.textShadow) dynamicStyle.textShadow = styles.textShadow
     if (outlineValue) dynamicStyle.outline = outlineValue
+
+    // Apply hover intent via CSS custom properties. Consumed in
+    // Button.module.css `.button:hover:not(:disabled)` with
+    // var(--btn-hover-*, <existing default>) so unset values fall back to
+    // the sacred-theme defaults.
+    if (styles?.hoverBackgroundColor)
+      dynamicStyle['--btn-hover-bg'] = styles.hoverBackgroundColor
+    if (styles?.hoverBorderColor)
+      dynamicStyle['--btn-hover-border'] = styles.hoverBorderColor
+    if (styles?.hoverBoxShadow)
+      dynamicStyle['--btn-hover-shadow'] = styles.hoverBoxShadow
+    if (styles?.hoverTransform)
+      dynamicStyle['--btn-hover-transform'] = styles.hoverTransform
 
     // Apply custom flex and other
     if (styles?.flex) dynamicStyle.flex = styles.flex

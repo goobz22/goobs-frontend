@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateField.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DateFieldProps {
   label?: string
@@ -33,8 +34,8 @@ export interface DateFieldProps {
 
 const DateField: React.FC<DateFieldProps> = ({
   label,
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   helperText,
   error,
   dataField,
@@ -42,6 +43,25 @@ const DateField: React.FC<DateFieldProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding: when rendered inside a <Form> with a `name` and no
+  // explicit `value`, value/onChange/onBlur come from the form engine.
+  // Outside a form (or with an explicit value) this is a byte-for-byte
+  // pass-through of the caller's props. The bound results take the bare
+  // value/onChange/bindingOnBlur names so all downstream code is unchanged.
+  const {
+    value: rebindValue,
+    onChange: rebindOnChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<Date | null>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  const value = rebindValue
+  // onChange is required on DateFieldProps, so it is always defined when
+  // unbound; the binding hook supplies a bound handler when bound.
+  const onChange = rebindOnChange ?? onChangeProp
+
   const disabled = styles?.disabled || false
   const required = styles?.required || false
   const inputRef = useRef<HTMLInputElement>(null)
@@ -111,6 +131,8 @@ const DateField: React.FC<DateFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={value != null}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -122,6 +144,7 @@ const DateField: React.FC<DateFieldProps> = ({
           className={cssStyles.input}
           value={formatDateForInput(value || null)}
           onChange={handleDateChange}
+          onBlur={bindingOnBlur}
           disabled={disabled}
           required={required}
           style={

@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface RoutingNumberProps {
   /** Fires on every edit with the digits-only routing-number string. */
@@ -28,9 +29,9 @@ export interface RoutingNumberProps {
 }
 
 const RoutingNumber: React.FC<RoutingNumberProps> = ({
-  onChange,
+  onChange: onChangeProp,
   onValidityChange,
-  value = '',
+  value: valueProp,
   useChecksum = true,
   isDefaultValue = false,
   label = 'Routing Number',
@@ -45,6 +46,23 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   dataFieldName,
   styles,
 }) => {
+  // Tier-1 form binding: inside a <Form> with a `name` and no explicit
+  // `value`, value/onChange come from the form engine and `markTouched`
+  // marks the field touched on blur. Outside a form (or with an explicit
+  // value) this is a byte-for-byte pass-through of the caller's props.
+  // The component contract keeps a string `value`, so the bound value is
+  // coalesced to '' exactly as the old `value = ''` param default did.
+  const {
+    value: boundValue,
+    onChange,
+    onBlur: markTouched,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  const value = boundValue ?? ''
+
   const [internalValue, setInternalValue] = useState<string>(value)
   // Tracks focus for the masked default-value display flip only.
   const [isFocused, setIsFocused] = useState<boolean>(false)
@@ -156,9 +174,10 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
+      markTouched?.()
       onBlur?.(e)
     },
-    [onBlur]
+    [markTouched, onBlur]
   )
 
   const sacredTheme = styles?.theme === 'sacred'
@@ -213,6 +232,8 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (

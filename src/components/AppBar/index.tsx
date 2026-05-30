@@ -4,15 +4,72 @@
  */
 'use client'
 
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  type FC,
-  type ReactNode,
-} from 'react'
-import { getAppBarStyles, type AppBarStyles } from '../../theme'
+import React, { useCallback, type CSSProperties, type FC, type ReactNode } from 'react'
+import cssStyles from './AppBar.module.css'
+
+// --------------------------------------------------------------------------
+// STYLES INTERFACE
+// --------------------------------------------------------------------------
+// Inlined (no theme import) so the AppBar component owns its public styling
+// contract directly, matching the Button/Chip/Card convention. Field set
+// kept in lockstep with theme/appbar.ts AppBarStyles.
+
+export interface AppBarStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling
+  backgroundColor?: string
+  backgroundImage?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  boxShadow?: string
+  backdropFilter?: string
+  containerAnimation?: string
+
+  // Toolbar styling
+  toolbarPadding?: string
+  toolbarMinHeight?: string
+  toolbarGap?: string
+
+  // Layout and spacing
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Position and dimensions
+  position?: 'static' | 'fixed' | 'absolute' | 'sticky' | 'relative'
+  top?: string
+  left?: string
+  right?: string
+  width?: string
+  maxWidth?: string
+  minWidth?: string
+  height?: string
+  maxHeight?: string
+  minHeight?: string
+  zIndex?: number
+
+  // Glyph styling
+  glyphColor?: string
+  glyphFontSize?: string
+  glyphAnimation?: string
+
+  // Shimmer effect (sacred theme)
+  shimmerBackground?: string
+  shimmerAnimation?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  elevated?: boolean
+}
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -34,34 +91,11 @@ export interface AppBarProps {
 }
 
 // --------------------------------------------------------------------------
-// SACRED THEME COMPONENTS
+// CLASSNAME COMPOSITION (no clsx dependency in this repo — see Card)
 // --------------------------------------------------------------------------
 
-const SacredGlyphs: FC<{
-  isHovered: boolean
-  isDisabled: boolean
-}> = () => {
-  return null
-}
-
-const SacredShimmer: FC = () => {
-  const shimmerStyle = useMemo(
-    () => ({
-      position: 'absolute' as const,
-      top: '0',
-      left: '0',
-      right: '0',
-      height: '1px',
-      background:
-        'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent)',
-      backgroundSize: '200% 100%',
-      animation: 'sacredShimmer 3s linear infinite',
-      zIndex: 3,
-    }),
-    []
-  )
-
-  return <div style={shimmerStyle} />
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
 }
 
 // --------------------------------------------------------------------------
@@ -72,38 +106,14 @@ const SacredShimmer: FC = () => {
  * A top navigation bar component with comprehensive theming support.
  */
 const AppBar: FC<AppBarProps> = props => {
-  const {
-    children,
-    position = 'static',
-    elevated = true,
-    styles,
-    className,
-    onClick,
-    ...rest
-  } = props
+  const { children, position = 'static', elevated = true, styles, className, onClick, ...rest } = props
 
-  const [isHovered, setIsHovered] = useState(false)
+  // The legacy theme system defaulted to 'light' when no theme was provided.
+  const theme = styles?.theme || 'light'
+  const isDisabled = !!styles?.disabled
+  const isSacredTheme = theme === 'sacred'
 
-  const isDisabled = styles?.disabled
-  const isSacredTheme = styles?.theme === 'sacred'
-
-  const computedStyles = useMemo(() => {
-    const finalStyles = {
-      ...styles,
-      // Only use default position if not provided in styles
-      position: styles?.position || position,
-      elevated,
-    }
-    return getAppBarStyles(finalStyles, isDisabled)
-  }, [styles, position, elevated, isDisabled])
-
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
+  const resolvedPosition = styles?.position || position
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -114,71 +124,81 @@ const AppBar: FC<AppBarProps> = props => {
     [isDisabled, onClick]
   )
 
-  // Inject keyframes for sacred theme animations
-  useEffect(() => {
-    if (isSacredTheme && typeof document !== 'undefined') {
-      const styleElement = document.createElement('style')
-      styleElement.textContent = `
-        @keyframes sacredFloat {
-          0%, 100% { transform: translateY(0px); opacity: 0.3; }
-          33% { transform: translateY(-3px); opacity: 0.5; }
-          66% { transform: translateY(1px); opacity: 0.4; }
-          100% { transform: translateY(0px); opacity: 0.3; }
-        }
-
-        @keyframes sacredGlow {
-          0% { 
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.5);
-          }
-          50% { 
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-            border-color: rgba(255, 215, 0, 0.8);
-          }
-          100% { 
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.5);
-          }
-        }
-
-        @keyframes sacredShimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-      `
-
-      if (!document.head.querySelector('style[data-appbar-keyframes="true"]')) {
-        styleElement.setAttribute('data-appbar-keyframes', 'true')
-        document.head.appendChild(styleElement)
-      }
-
-      return () => {
-        if (document.head.contains(styleElement)) {
-          document.head.removeChild(styleElement)
-        }
-      }
+  // Caller-supplied / runtime values are passed as CSS custom properties; the
+  // selectors live in AppBar.module.css. Theme + state defaults are resolved
+  // in CSS. We only set a var when the caller actually provided a value
+  // (or, for fixed positioning, when the auto-pin to 0 should apply) — exactly
+  // mirroring the old getAppBarStyles `styles?.x || fallback` chain.
+  const dynamicStyle: CSSProperties = {}
+  const setVar = (name: string, value: string | number | undefined): void => {
+    if (value !== undefined) {
+      ;(dynamicStyle as Record<string, string>)[name] = String(value)
     }
-  }, [isSacredTheme])
+  }
+
+  // Position + fixed-position auto-pin (top/left/right default to '0' when fixed).
+  setVar('--appbar-position', resolvedPosition)
+  setVar('--appbar-top', styles?.top ?? (resolvedPosition === 'fixed' ? '0' : undefined))
+  setVar('--appbar-left', styles?.left ?? (resolvedPosition === 'fixed' ? '0' : undefined))
+  setVar('--appbar-right', styles?.right ?? (resolvedPosition === 'fixed' ? '0' : undefined))
+
+  // Dimensions
+  setVar('--appbar-width', styles?.width)
+  setVar('--appbar-max-width', styles?.maxWidth)
+  setVar('--appbar-min-width', styles?.minWidth)
+  setVar('--appbar-height', styles?.height)
+  setVar('--appbar-max-height', styles?.maxHeight)
+  setVar('--appbar-min-height', styles?.minHeight)
+  setVar('--appbar-z-index', styles?.zIndex)
+
+  // Margins
+  setVar('--appbar-margin', styles?.margin)
+  setVar('--appbar-margin-top', styles?.marginTop)
+  setVar('--appbar-margin-bottom', styles?.marginBottom)
+  setVar('--appbar-margin-left', styles?.marginLeft)
+  setVar('--appbar-margin-right', styles?.marginRight)
+
+  // Container surface overrides (theme defaults live in CSS).
+  setVar('--appbar-bg', styles?.backgroundColor)
+  setVar('--appbar-bg-image', styles?.backgroundImage)
+  if (styles?.borderColor) {
+    setVar('--appbar-border', `${styles.borderWidth || '1px'} solid ${styles.borderColor}`)
+  }
+  setVar('--appbar-radius', styles?.borderRadius)
+  const hasExplicitShadow = styles?.boxShadow !== undefined
+  setVar('--appbar-shadow', styles?.boxShadow)
+  setVar('--appbar-backdrop', styles?.backdropFilter)
+  setVar('--appbar-container-animation', styles?.containerAnimation)
+
+  // Toolbar overrides
+  setVar('--appbar-toolbar-padding', styles?.toolbarPadding)
+  setVar('--appbar-toolbar-min-height', styles?.toolbarMinHeight)
+  setVar('--appbar-toolbar-gap', styles?.toolbarGap)
+
+  // Transition override (old: `all <duration> <easing>`).
+  if (styles?.transitionDuration) {
+    setVar(
+      '--appbar-transition',
+      `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+    )
+  }
 
   return (
     <div
-      style={computedStyles.container}
-      className={className}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={mergeClassNames(cssStyles.container, className)}
+      data-theme={theme}
+      data-elevated={elevated ? 'true' : 'false'}
+      data-has-shadow={hasExplicitShadow ? 'true' : undefined}
+      data-disabled={isDisabled ? 'true' : undefined}
+      style={dynamicStyle}
       onClick={handleClick}
       role="banner"
       data-testid="app-bar"
       {...rest}
     >
-      {isSacredTheme && (
-        <>
-          <SacredShimmer />
-          <SacredGlyphs isHovered={isHovered} isDisabled={!!isDisabled} />
-        </>
-      )}
+      {isSacredTheme && <div className={cssStyles.shimmer} aria-hidden="true" />}
 
-      <div style={computedStyles.toolbar}>{children}</div>
+      <div className={cssStyles.toolbar}>{children}</div>
     </div>
   )
 }

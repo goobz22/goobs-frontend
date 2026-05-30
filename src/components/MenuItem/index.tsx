@@ -1,11 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
-import {
-  getFormFieldTheme,
-  injectSacredKeyframes,
-  type FormFieldStyles,
-} from '../../theme'
+import React from 'react'
+import type { FormFieldStyles } from '../../theme'
+import cssStyles from './MenuItem.module.css'
 
 export interface MenuItemStyles extends FormFieldStyles {
   dense?: boolean
@@ -22,6 +19,10 @@ export interface MenuItemProps extends React.OptionHTMLAttributes<HTMLOptionElem
   selected?: boolean
 }
 
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
+
 const MenuItem: React.FC<MenuItemProps> = ({
   children,
   styles,
@@ -30,93 +31,38 @@ const MenuItem: React.FC<MenuItemProps> = ({
   disabled = false,
   selected = false,
   style = {},
+  className,
   ...props
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
+  const theme = styles?.theme || 'sacred'
 
-  // Inject CSS keyframes for sacred animations
-  useEffect(() => {
-    if (styles?.theme === 'sacred') {
-      injectSacredKeyframes()
-    }
-  }, [styles?.theme])
-
-  // Compute styles based on theme and state. Inlined the slim part of
-  // the deleted `getSharedFormFieldStyles` that this component
-  // actually used (themeConfig + transition).
-  const computedStyles = useMemo(() => {
-    const themeConfig = getFormFieldTheme(styles)
-    return {
-      themeConfig,
-      transition: 'all 0.2s ease',
-      isSacredTheme: styles?.theme === 'sacred',
-    }
-  }, [styles])
-
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
-
-  const optionStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    position: 'relative',
-    textDecoration: 'none',
-    minHeight: dense ? '32px' : '48px',
-    paddingTop: dense ? '6px' : '8px',
-    paddingBottom: dense ? '6px' : '8px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    boxSizing: 'border-box',
-    whiteSpace: 'nowrap',
-    backgroundColor: computedStyles.themeConfig.background,
-    color: computedStyles.themeConfig.text,
-    fontFamily: computedStyles.themeConfig.fontFamily,
-    transition: computedStyles.transition,
-    cursor: disabled ? 'default' : 'pointer',
-    ...(selected && {
-      backgroundColor: isSacredTheme
-        ? 'rgba(255, 215, 0, 0.15)'
-        : isDarkTheme
-          ? 'rgba(59, 130, 246, 0.2)'
-          : 'rgba(25, 118, 210, 0.08)',
-      color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#60a5fa' : '#1976d2',
-    }),
-    ...(disabled && {
-      opacity: 0.5,
-      pointerEvents: 'none',
-      color: isSacredTheme
-        ? 'rgba(255, 215, 0, 0.4)'
-        : isDarkTheme
-          ? 'rgba(255, 255, 255, 0.3)'
-          : 'rgba(0, 0, 0, 0.38)',
-    }),
-    ...(divider && {
-      borderBottom: `1px solid ${
-        isSacredTheme
-          ? 'rgba(255, 215, 0, 0.2)'
-          : isDarkTheme
-            ? 'rgba(255, 255, 255, 0.12)'
-            : 'rgba(0, 0, 0, 0.12)'
-      }`,
-    }),
-    ...(isHovered &&
-      !disabled && {
-        backgroundColor: isSacredTheme
-          ? 'rgba(255, 215, 0, 0.1)'
-          : isDarkTheme
-            ? 'rgba(255, 255, 255, 0.05)'
-            : 'rgba(0, 0, 0, 0.04)',
-      }),
+  // Caller-supplied color/font overrides flow through CSS custom properties
+  // so getFormFieldTheme's per-style override behaviour is preserved without
+  // a JS theme computation. Only set a var when the caller actually provided
+  // a value, so the theme default in the CSS module otherwise wins.
+  const dynamicStyle: React.CSSProperties = {
     ...style,
+    ...(styles?.backgroundColor && {
+      ['--menuitem-bg' as string]: styles.backgroundColor,
+    }),
+    ...(styles?.textColor && {
+      ['--menuitem-text' as string]: styles.textColor,
+    }),
+    ...(styles?.fontFamily && {
+      ['--menuitem-font-family' as string]: styles.fontFamily,
+    }),
   }
 
   return (
     <option
-      style={optionStyle}
+      className={mergeClassNames(cssStyles.root, className)}
+      data-theme={theme}
+      data-dense={dense ? 'true' : undefined}
+      data-divider={divider ? 'true' : undefined}
+      data-selected={selected ? 'true' : undefined}
+      data-disabled={disabled ? 'true' : undefined}
+      style={dynamicStyle}
       disabled={disabled}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       {...props}
     >
       {children}

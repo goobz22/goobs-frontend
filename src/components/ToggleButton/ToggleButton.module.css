@@ -1,0 +1,234 @@
+/* ==========================================================================
+   TOGGLEBUTTON / TOGGLEBUTTONGROUP — CSS MODULE
+   --------------------------------------------------------------------------
+   Migrated off the JS theme system (theme/button.ts getButtonStyles). The
+   old component cross-imported the Button theme but only consumed a handful
+   of survivor properties from `baseStyles.container` (overflow / letter-
+   spacing / minHeight / gap / backdrop-filter / text-align / white-space) —
+   everything else (background, color, borders, padding, font-size) was
+   hand-written per theme/size/selected inside the component's useMemo.
+
+   This module mirrors those exact values so ToggleButton owns its own CSS
+   and no longer reaches into the shared Button theme. Visual parity with the
+   pre-migration JS is mandatory; every literal below is transcribed 1:1.
+
+   THEME default is LIGHT (old `styles?.theme || 'light'`), so the base
+   .button class carries the light-theme values and [data-theme='sacred'] /
+   [data-theme='dark'] are overrides. Selected state, hover, and active are
+   native CSS (data-selected attribute + :hover / :active pseudo-classes).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BUTTON — base (LIGHT theme defaults, not-selected, medium size)
+   -------------------------------------------------------------------------- */
+.button {
+  /* Survivors carried over from the old getButtonStyles baseStyles.container
+     (light theme) that the component never overrode. */
+  overflow: hidden;
+  letter-spacing: -0.025em;
+  min-height: 44px;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  text-align: center;
+  white-space: nowrap;
+
+  /* Layout — identical to the final returned object. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+  outline: none;
+  text-decoration: none;
+  box-sizing: border-box;
+
+  border-radius: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Light/dark container fontFamily survivor from the old
+     baseStyles.container ('"Inter", sans-serif'). The sacred override
+     below re-sets font-family to var(--font-cinzel),serif so it wins
+     for the sacred theme. */
+  font-family: 'Inter', sans-serif;
+
+  /* Light theme, not-selected palette. */
+  background-color: rgba(241, 245, 249, 0.8);
+  color: #475569;
+
+  /* Size: medium default (sizeConfig.medium). */
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   SIZE — sizeConfig overrides (medium lives on the base class above)
+   -------------------------------------------------------------------------- */
+.button[data-size='small'] {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.button[data-size='large'] {
+  padding: 12px 24px;
+  font-size: 18px;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME — selected + hover (base class = light, not-selected)
+   -------------------------------------------------------------------------- */
+.button[data-selected='true'] {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-color: #2563eb;
+  font-weight: 600;
+}
+
+.button:hover:not(:disabled) {
+  background-color: rgba(226, 232, 240, 1);
+}
+
+.button[data-selected='true']:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME
+   -------------------------------------------------------------------------- */
+.button[data-theme='dark'] {
+  background-color: rgba(75, 85, 99, 0.3);
+  color: #d1d5db;
+  border-color: rgba(75, 85, 99, 0.8);
+}
+
+.button[data-theme='dark'][data-selected='true'] {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+.button[data-theme='dark']:hover:not(:disabled) {
+  background-color: rgba(75, 85, 99, 0.5);
+}
+
+.button[data-theme='dark'][data-selected='true']:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME — full glow / gold treatment
+   -------------------------------------------------------------------------- */
+.button[data-theme='sacred'] {
+  background-color: rgba(255, 215, 0, 0.05);
+  color: rgba(255, 215, 0, 0.8);
+  border-color: rgba(255, 215, 0, 0.3);
+  font-family: var(--font-cinzel), serif;
+  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 4px rgba(255, 215, 0, 0.1);
+
+  /* Sacred container survivor metrics from the old baseStyles.container
+     (sacred theme) that the base .button class — keyed to the light
+     defaults — doesn't carry. Transcribed 1:1 from theme/button.ts:
+     minHeight 52px / gap 12px / letterSpacing 0.05em / uppercase. */
+  min-height: 52px;
+  gap: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.button[data-theme='sacred'][data-selected='true'] {
+  background-color: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.8);
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.3),
+    inset 0 0 8px rgba(255, 215, 0, 0.1);
+}
+
+.button[data-theme='sacred']:hover:not(:disabled) {
+  background-color: rgba(255, 215, 0, 0.1);
+  box-shadow:
+    0 0 16px rgba(255, 215, 0, 0.4),
+    inset 0 0 8px rgba(255, 215, 0, 0.1);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+}
+
+.button[data-theme='sacred'][data-selected='true']:hover:not(:disabled) {
+  background-color: rgba(255, 215, 0, 0.3);
+  box-shadow:
+    0 0 16px rgba(255, 215, 0, 0.4),
+    inset 0 0 8px rgba(255, 215, 0, 0.1);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+}
+
+/* Sacred pressed (old isPressed branch — only sacred had transform/extra bg). */
+.button[data-theme='sacred']:active:not(:disabled) {
+  background-color: rgba(255, 215, 0, 0.4);
+  transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------
+   DISABLED — opacity 0.5, not-allowed cursor (old: opacity/cursor in final
+   return object, applied regardless of theme).
+   -------------------------------------------------------------------------- */
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   GROUP MEMBERSHIP — first / middle / last item border-radius + border
+   collapse. Mirrors the old `groupStyles` branch:
+     isFirst -> '7px 0 0 7px', isLast -> '0 7px 7px 0', else '0'
+     !isLast -> borderRight: none
+   These selectors win over the 6px base radius for grouped buttons.
+   -------------------------------------------------------------------------- */
+.button[data-first='true'] {
+  border-radius: 7px 0 0 7px;
+  margin: 0;
+}
+
+.button[data-last='true'] {
+  border-radius: 0 7px 7px 0;
+  margin: 0;
+}
+
+/* A grouped button that is not the last item drops its right border so the
+   neighbouring button's left border isn't doubled. The old code set
+   borderRight: none for any first-or-last item that wasn't last — i.e. the
+   first item (and, in a 2-item group, only the first). Middle items in the
+   old code were NOT flagged isFirst/isLast at all, so they kept their right
+   border; we preserve that exact behaviour by scoping to [data-first]. */
+.button[data-first='true']:not([data-last='true']) {
+  border-right: none;
+}
+
+/* --------------------------------------------------------------------------
+   GROUP WRAPPER — old ToggleButtonGroup groupStyles.
+   border color is theme-driven; borderRadius came from
+   baseStyles.container.borderRadius (light=10px / dark=10px / sacred=12px),
+   defaulted to 8px only if absent (it is never absent), so the effective
+   radius is the per-theme container radius.
+   -------------------------------------------------------------------------- */
+.group {
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+  /* Light theme defaults. */
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 10px;
+}
+
+.group[data-theme='dark'] {
+  border-color: rgba(75, 85, 99, 0.8);
+  border-radius: 10px;
+}
+
+.group[data-theme='sacred'] {
+  border-color: rgba(255, 215, 0, 0.4);
+  border-radius: 12px;
+}

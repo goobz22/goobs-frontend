@@ -35,6 +35,14 @@ export type SearchableHistoryProps = {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the container. */
   dataFieldName?: string
+  /**
+   * Entity field key. Emitted as `data-field-name` (unless `dataFieldName`
+   * is set explicitly). NOTE: this is a navigation/search widget — selecting
+   * an item fires `onSelect` to navigate, it does NOT hold a persisted form
+   * value. There is therefore intentionally NO Tier-1 `useFieldBinding` value
+   * wiring here; `name` only supplies the stable test anchor.
+   */
+  name?: string
 }
 
 const SearchableHistory: React.FC<SearchableHistoryProps> = ({
@@ -47,6 +55,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   maxHistoryItems = 10,
   dataField,
   dataFieldName,
+  name,
 }) => {
   // Stable, SSR-safe ids for label↔input + listbox ARIA wiring.
   const reactId = useId()
@@ -415,8 +424,9 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     <div
       style={{ ...componentStyles.container, overflow: 'visible' }}
       ref={containerRef}
+      data-component="SearchableHistory"
       data-field={dataField}
-      data-field-name={dataFieldName}
+      data-field-name={dataFieldName ?? name}
       data-state={isOpen ? 'open' : undefined}
     >
       {label && (

@@ -6,6 +6,8 @@ import React, { useState, useCallback, useEffect } from 'react'
 import ComplexToolbar, { type EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
+import { useOptionalFormContext } from '../Form/context'
 import {
   getComplexTextEditorStyles,
   getFormFieldTheme,
@@ -54,6 +56,21 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   autoSave,
   autoSaveKey,
 }) => {
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit `value`,
+  // the editor's string value + onChange come from the form engine; otherwise
+  // the caller's explicit value/onChange pass through unchanged (back-compat).
+  const formContext = useOptionalFormContext()
+  const {
+    value: boundValue,
+    onChange: boundOnChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange,
+  })
+  const isBound = boundOnChange !== undefined && boundValue !== undefined
+
   // Extract settings from styles
   const accordion = styles?.accordionMode || false
   const accordionSummary = styles?.accordionSummary || label || 'Text Editor'
@@ -77,7 +94,13 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     }
     return initialValue
   })
-  const value = valueProp !== undefined ? valueProp : valueState
+  // When bound, the engine value drives the editor; otherwise the legacy
+  // controlled (valueProp) / uncontrolled (valueState) resolution is kept.
+  const value = isBound
+    ? (boundValue ?? '')
+    : valueProp !== undefined
+      ? valueProp
+      : valueState
   const [mode, setMode] = useState<EditorMode>(startMode)
   const [isFocused] = useState(false)
   const [accordionExpanded, setAccordionExpanded] =
@@ -116,10 +139,17 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
 
   const handleChange = useCallback(
     (newValue: string) => {
+      // When bound to the form engine, write through boundOnChange (which also
+      // chains the caller's original onChange). Otherwise preserve the legacy
+      // controlled/uncontrolled behavior exactly.
+      if (isBound) {
+        boundOnChange?.(newValue)
+        return
+      }
       if (valueProp === undefined) setValueState(newValue)
       if (onChange) onChange(newValue)
     },
-    [onChange, valueProp]
+    [isBound, boundOnChange, onChange, valueProp]
   )
 
   const createEditorContent = () => {
@@ -216,6 +246,13 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     </div>
   )
 
+  // Tier-1 root data flags. `data-filled` reflects any editor content;
+  // `data-error` surfaces the engine error when bound (this component renders
+  // no error UI of its own beyond caller-supplied helperText, per the contract).
+  const hasValue = value.length > 0
+  const engineError =
+    formContext && name ? formContext.engine.getError(name) : undefined
+
   if (accordion) {
     const summaryText = accordionSummary || label || 'Text Editor'
 
@@ -227,7 +264,14 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     }
 
     return (
-      <div style={computedStyles.container} data-field-name={dataFieldName ?? name}>
+      <div
+        style={computedStyles.container}
+        data-component="ComplexTextEditor"
+        data-field-name={dataFieldName ?? name}
+        data-filled={hasValue ? 'true' : undefined}
+        {...(engineError && { 'data-error': 'true' })}
+        onBlur={() => boundOnBlur?.()}
+      >
         <Accordion
           summary={summaryText}
           details={createEditorContent()}
@@ -240,7 +284,13 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   }
 
   return (
-    <div data-field-name={dataFieldName ?? name}>
+    <div
+      data-component="ComplexTextEditor"
+      data-field-name={dataFieldName ?? name}
+      data-filled={hasValue ? 'true' : undefined}
+      {...(engineError && { 'data-error': 'true' })}
+      onBlur={() => boundOnBlur?.()}
+    >
       {labelElement}
       <div style={computedStyles.container}>
         {createEditorContent()}

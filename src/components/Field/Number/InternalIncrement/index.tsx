@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
@@ -40,13 +41,13 @@ const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
 > = ({
   initialValue = '0',
-  onChange,
+  onChange: onChangeProp,
   label,
   min = 0,
   max,
   initialDelay = 500,
   repeatInterval = 100,
-  value,
+  value: valueProp,
   placeholder,
   id,
   name,
@@ -58,6 +59,30 @@ const InternalIncrementNumberField: React.FC<
   dataFieldName,
   styles,
 }) => {
+  // Tier-1 form binding. The component's display path works in strings; the
+  // canonical value is numeric (onChange emits a number), so the engine
+  // stores/returns a number. The prop's numeric form feeds the gate so
+  // `value === undefined` decides bind-vs-passthrough; the numeric onChange
+  // passes straight through. When NOT bound, the original string `valueProp`
+  // drives the display verbatim (no string→number→string round-trip),
+  // preserving byte-for-byte back-compat for explicit-value callsites.
+  const {
+    value: boundNumericValue,
+    onChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<number>({
+    name,
+    value:
+      valueProp !== undefined && valueProp !== '' ? Number(valueProp) : undefined,
+    onChange: onChangeProp,
+  })
+  const value =
+    valueProp !== undefined
+      ? valueProp
+      : boundNumericValue !== undefined && boundNumericValue !== null
+        ? String(boundNumericValue)
+        : undefined
+
   const [internalValue, setInternalValue] = useState(value || initialValue)
   // Refs for the press-and-hold auto-repeat timers — initial debounce
   // (initialTimerRef) waits ~500ms before kicking off the repeat
@@ -230,6 +255,8 @@ const InternalIncrementNumberField: React.FC<
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(internalValue && internalValue.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -243,7 +270,12 @@ const InternalIncrementNumberField: React.FC<
             value={internalValue}
             onChange={handleChange}
             onFocus={onFocus}
-            onBlur={onBlur}
+            onBlur={event => {
+              // Mark the field touched in the form engine (when bound), then
+              // run the caller's own blur handler with the native event.
+              boundOnBlur?.()
+              onBlur?.(event)
+            }}
             disabled={disabled}
             placeholder={placeholder}
             data-field-name={dataFieldName}

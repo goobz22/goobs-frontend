@@ -9,6 +9,7 @@ import FieldShell, {
   useEscape,
   useArrowKeyNav,
 } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface SelectOption {
   value: string
@@ -51,9 +52,9 @@ export interface MultiSelectChipProps {
 const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   label = '',
   options = [],
-  value: valueProp,
+  value: valuePropRaw,
   defaultSelected = [],
-  onChange,
+  onChange: onChangeProp,
   onFocus,
   helperText,
   error,
@@ -62,6 +63,22 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. Value type is `string[]` (selected ids/values),
+  // which matches both the `value` prop and the `onChange` payload exactly —
+  // so no adapter is needed. When bound (inside a <Form> with a `name` and no
+  // explicit `value`), `valueProp` is the engine's array and `onChange` writes
+  // back to it; otherwise it's a pass-through and behaves byte-for-byte as
+  // before. `boundOnBlur` marks the field touched on trigger blur.
+  const {
+    value: valueProp,
+    onChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string[]>({
+    name,
+    value: valuePropRaw,
+    onChange: onChangeProp,
+  })
+
   const isControlled = valueProp !== undefined
   const [internalSelected, setInternalSelected] =
     useState<string[]>(defaultSelected)
@@ -187,6 +204,8 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
       dataFieldName={dataFieldName ?? name}
+      name={name}
+      filled={Boolean(selectedValues && selectedValues.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => {
@@ -207,6 +226,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               className={cssStyles.chipContainer}
               onClick={() => !disabled && setIsOpen(!isOpen)}
               onFocus={onFocus}
+              onBlur={() => boundOnBlur?.()}
               onKeyDown={handleTriggerKeyDown}
               {...inputAriaProps}
             >

@@ -266,12 +266,7 @@ const Chip: React.FC<ChipProps> = ({
   const isClickable = Boolean(onClick) && !isDisabled
   const theme = resolvedStyles?.theme ?? 'sacred'
 
-  const rootClassName = [
-    cssStyles.root,
-    cssStyles[variant],
-    theme === 'sacred' ? cssStyles.sacred : '',
-    theme === 'dark' ? cssStyles.dark : '',
-  ]
+  const rootClassName = [cssStyles.root, cssStyles[variant]]
     .filter(Boolean)
     .join(' ')
 
@@ -302,6 +297,7 @@ const Chip: React.FC<ChipProps> = ({
     <div
       className={rootClassName}
       style={cssVarStyle}
+      data-theme={theme}
       data-chip="true"
       data-chip-variant={variant}
       {...(tone !== undefined && { 'data-chip-tone': tone })}

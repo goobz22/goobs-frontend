@@ -97,34 +97,35 @@ const MetricCard = memo(function MetricCard({
   dataField,
   styles: propStyles,
 }: MetricCardProps) {
-  const isSacredTheme = propStyles?.theme === 'sacred'
+  // Sacred is the CSS base default; every other value (undefined / 'light' /
+  // 'dark') resolves to the [data-theme='light'] override block — exactly the
+  // prior two-branch isSacredTheme behaviour.
+  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
   const label = subtitle || title
 
   // CSS custom-property overrides — only emit the ones the caller actually
-  // provided so the default CSS values stay authoritative.
-  const cssVars: React.CSSProperties = {}
+  // provided so the default CSS values stay authoritative. Runtime / caller-
+  // supplied values legitimately stay in JS and ride in as CSS vars.
+  const dynamicStyle: React.CSSProperties & Record<string, string> = {}
   if (propStyles?.color) {
-    ;(cssVars as Record<string, string>)['--mc-accent'] = propStyles.color
-    ;(cssVars as Record<string, string>)['--mc-border'] = propStyles.color
+    dynamicStyle['--mc-accent'] = propStyles.color
+    dynamicStyle['--mc-border'] = propStyles.color
   }
   if (propStyles?.width) {
-    ;(cssVars as Record<string, string>)['--mc-min-width'] = propStyles.width
+    dynamicStyle['--mc-min-width'] = propStyles.width
   }
   if (propStyles?.padding) {
-    ;(cssVars as Record<string, string>)['--mc-padding'] = propStyles.padding
+    dynamicStyle['--mc-padding'] = propStyles.padding
   }
   if (propStyles?.borderRadius) {
-    ;(cssVars as Record<string, string>)['--mc-radius'] = propStyles.borderRadius
+    dynamicStyle['--mc-radius'] = propStyles.borderRadius
   }
-
-  const cardClassName = isSacredTheme
-    ? `${styles.card} ${styles.sacred}`
-    : styles.card
 
   return (
     <div
-      className={cardClassName}
-      style={cssVars}
+      className={styles.card}
+      data-theme={theme}
+      style={dynamicStyle}
       role="group"
       aria-label={`${label}: ${value}`}
       data-metric-card="true"
@@ -142,7 +143,10 @@ const MetricCard = memo(function MetricCard({
       <span className={styles.label}>{label}</span>
       {trend && (
         <div
-          className={`${styles.trend} ${trend.isPositive ? styles.positive : styles.negative}`}
+          className={[
+            styles.trend,
+            trend.isPositive ? styles.positive : styles.negative,
+          ].join(' ')}
           data-metric-trend={trend.isPositive ? 'positive' : 'negative'}
           aria-label={`${trend.isPositive ? 'Up' : 'Down'} ${Math.abs(trend.value)} percent`}
         >

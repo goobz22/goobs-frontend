@@ -1,0 +1,224 @@
+/* ==========================================================================
+   SELECT COMPONENT - CSS MODULE
+   Ported from the deleted inline-style system (theme/formField.ts +
+   theme/shared.ts). Sacred theme is the hardcoded default; light/dark are
+   [data-theme] overrides on the root wrapper. State (hover/focus/disabled)
+   is driven by native CSS pseudo-classes; error is driven by the
+   [data-error='true'] attribute on the root. Visual parity with the old
+   inline styles is mandatory.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Root wrapper — replaces the inline-styled outer <div>
+   Sacred defaults live on the base class; light/dark override the tokens.
+   -------------------------------------------------------------------------- */
+
+.root {
+  /* Sacred theme tokens (default) — ports of formFieldThemes.sacred */
+  --select-bg: rgba(0, 0, 0, 0.7);
+  --select-border-default: rgba(255, 215, 0, 0.3);
+  --select-border-focused: rgba(255, 215, 0, 0.7);
+  --select-text: rgba(255, 255, 255, 0.9);
+  --select-font-family: '"Crimson Text", serif';
+  --select-filled-bg: rgba(255, 215, 0, 0.06);
+  --select-disabled-text: rgba(255, 215, 0, 0.38);
+  --select-arrow-color: rgba(255, 215, 0, 0.54);
+  --select-arrow-disabled-color: rgba(255, 215, 0, 0.26);
+
+  position: relative;
+  display: inline-block;
+  width: auto;
+}
+
+.root[data-theme='light'] {
+  --select-bg: rgba(255, 255, 255, 0.95);
+  --select-border-default: rgba(209, 213, 219, 1);
+  --select-border-focused: rgba(59, 130, 246, 1);
+  --select-text: rgba(31, 41, 55, 1);
+  --select-font-family: '"Inter", sans-serif';
+  --select-filled-bg: rgba(0, 0, 0, 0.06);
+  --select-disabled-text: rgba(0, 0, 0, 0.38);
+  --select-arrow-color: rgba(0, 0, 0, 0.54);
+  --select-arrow-disabled-color: rgba(0, 0, 0, 0.26);
+}
+
+.root[data-theme='dark'] {
+  --select-bg: rgba(31, 41, 55, 0.95);
+  --select-border-default: rgba(75, 85, 99, 1);
+  --select-border-focused: rgba(96, 165, 250, 1);
+  --select-text: rgba(255, 255, 255, 1);
+  --select-font-family: '"Inter", sans-serif';
+  --select-filled-bg: rgba(255, 255, 255, 0.06);
+  --select-disabled-text: rgba(255, 255, 255, 0.38);
+  --select-arrow-color: rgba(255, 255, 255, 0.54);
+  --select-arrow-disabled-color: rgba(255, 255, 255, 0.26);
+}
+
+.root.fullWidth {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Native <select> — replaces the inline `selectStyle` object.
+   `--select-radius` and `--select-font-size` are caller-supplied overrides
+   (styles?.borderRadius / styles?.fontSize) passed in via the style prop.
+   -------------------------------------------------------------------------- */
+
+.select {
+  font: inherit;
+  font-family: var(--select-font-family);
+  color: var(--select-text);
+  width: auto;
+  background-color: var(--select-bg);
+  /* default (medium) padding; .small overrides */
+  padding: 16.5px 32px 16.5px 14px;
+  /* paddingRight overrides the shorthand's right value for arrow space */
+  padding-right: 32px;
+  font-size: var(--select-font-size, 1rem);
+  line-height: 1.4375em;
+  min-height: 1.4375em;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.2s ease;
+
+  /* All borders default to "no border / transparent"; variants turn the
+     relevant edges on. Matches the old per-edge inline border logic. */
+  border-top: 0 none transparent;
+  border-right: 0 none transparent;
+  border-bottom: 0 none transparent;
+  border-left: 0 none transparent;
+  border-radius: 0;
+}
+
+.fullWidth .select {
+  width: 100%;
+}
+
+/* --- Variant: outlined (default) — full 1px solid border, radius applies --- */
+.outlined {
+  border-top: 1px solid var(--select-border-default);
+  border-right: 1px solid var(--select-border-default);
+  border-bottom: 1px solid var(--select-border-default);
+  border-left: 1px solid var(--select-border-default);
+  border-radius: var(--select-radius, 4px);
+}
+
+/* --- Variant: standard — bottom border only, no radius --- */
+.standard {
+  border-bottom: 1px solid var(--select-border-default);
+}
+
+/* --- Variant: filled — no border, tinted background, no radius --- */
+.filled {
+  background-color: var(--select-filled-bg);
+}
+
+/* --------------------------------------------------------------------------
+   State: hover. The old code set the *focused* border color on hover for
+   outlined + standard variants (the only variants with a visible border).
+   -------------------------------------------------------------------------- */
+
+.outlined:hover:not(:disabled) {
+  border-top-color: var(--select-border-focused);
+  border-right-color: var(--select-border-focused);
+  border-bottom-color: var(--select-border-focused);
+  border-left-color: var(--select-border-focused);
+}
+
+.standard:hover:not(:disabled) {
+  border-bottom-color: var(--select-border-focused);
+}
+
+/* --------------------------------------------------------------------------
+   State: helperTextType='error'. The old getFormFieldTheme path colored the
+   border with the rgba(239, 68, 68, 1) error token when the caller set
+   `helperTextType: 'error'`, even without the boolean `error` prop. Declared
+   BEFORE the boolean-error block below so the stronger boolean signal (and
+   its literal #d32f2f) wins on cascade source order when both are present.
+   -------------------------------------------------------------------------- */
+
+.root[data-helper-error='true'] .outlined,
+.root[data-helper-error='true'] .outlined:hover:not(:disabled) {
+  border-top-color: rgba(239, 68, 68, 1);
+  border-right-color: rgba(239, 68, 68, 1);
+  border-bottom-color: rgba(239, 68, 68, 1);
+  border-left-color: rgba(239, 68, 68, 1);
+}
+
+.root[data-helper-error='true'] .standard,
+.root[data-helper-error='true'] .standard:hover:not(:disabled) {
+  border-bottom-color: rgba(239, 68, 68, 1);
+}
+
+/* --------------------------------------------------------------------------
+   State: error. Error text + border color is the literal #d32f2f the old
+   inline style used (NOT the theme's rgba error token). Only the visible
+   border edges per variant get colored; hover does not override error.
+   -------------------------------------------------------------------------- */
+
+.root[data-error='true'] .select {
+  color: #d32f2f;
+}
+
+.root[data-error='true'] .outlined,
+.root[data-error='true'] .outlined:hover:not(:disabled) {
+  border-top-color: #d32f2f;
+  border-right-color: #d32f2f;
+  border-bottom-color: #d32f2f;
+  border-left-color: #d32f2f;
+}
+
+.root[data-error='true'] .standard,
+.root[data-error='true'] .standard:hover:not(:disabled) {
+  border-bottom-color: #d32f2f;
+}
+
+/* --------------------------------------------------------------------------
+   State: disabled. cursor default, theme-specific muted text, opacity 0.7.
+   -------------------------------------------------------------------------- */
+
+.select:disabled {
+  cursor: default;
+  color: var(--select-disabled-text);
+  opacity: 0.7;
+}
+
+/* Error color still wins over disabled muting only for text? In the old code
+   `error` set color before the disabled spread, and the disabled spread
+   overrode it. Preserve that: disabled text wins. */
+.root[data-error='true'] .select:disabled {
+  color: var(--select-disabled-text);
+}
+
+/* --------------------------------------------------------------------------
+   Size: small — overrides the medium padding + font-size.
+   -------------------------------------------------------------------------- */
+
+.small {
+  padding: 8.5px 32px 8.5px 14px;
+  padding-right: 32px;
+  font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------------------------
+   Custom dropdown arrow — replaces the inline-styled absolute <div>.
+   -------------------------------------------------------------------------- */
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--select-arrow-color);
+  font-size: 0.75rem;
+}
+
+.root[data-disabled='true'] .arrow {
+  color: var(--select-arrow-disabled-color);
+}

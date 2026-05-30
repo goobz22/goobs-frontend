@@ -1,13 +1,15 @@
 'use client'
 
-import React, { useState, useCallback, type FC, type ReactNode } from 'react'
-import { alpha } from '../../utils'
+import React, { useCallback, type FC, type ReactNode } from 'react'
+import cssStyles from './Pagination.module.css'
 import FirstPageIcon from '../Icons/FirstPage'
 import LastPageIcon from '../Icons/LastPage'
 import KeyboardArrowLeftIcon from '../Icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '../Icons/KeyboardArrowRight'
 
-const SACRED_GOLD = '#FFD700'
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
 
 export interface PaginationProps {
   page: number
@@ -113,55 +115,14 @@ const PaginationButton: FC<{
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
   disabled: boolean
   children: ReactNode
-  isSacredTheme: boolean
   'aria-label'?: string
-}> = ({
-  onClick,
-  disabled,
-  children,
-  isSacredTheme,
-  'aria-label': ariaLabel,
-}) => {
-  const [isHovered, setIsHovered] = useState(false)
-
-  const buttonStyle: React.CSSProperties = {
-    minWidth: '32px',
-    height: '32px',
-    padding: '4px 8px',
-    border: isSacredTheme
-      ? `1px solid ${alpha(SACRED_GOLD, disabled ? 0.2 : isHovered ? 0.6 : 0.3)}`
-      : '1px solid rgba(0, 0, 0, 0.23)',
-    borderRadius: '4px',
-    backgroundColor: disabled
-      ? 'rgba(0, 0, 0, 0.2)'
-      : isHovered
-        ? isSacredTheme
-          ? alpha(SACRED_GOLD, 0.1)
-          : 'rgba(0, 0, 0, 0.04)'
-        : 'transparent',
-    color: disabled
-      ? 'rgba(255, 255, 255, 0.3)'
-      : isSacredTheme
-        ? SACRED_GOLD
-        : 'rgba(0, 0, 0, 0.87)',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.3s ease',
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
-    fontSize: '14px',
-    opacity: disabled ? 0.5 : 1,
-  }
-
+}> = ({ onClick, disabled, children, 'aria-label': ariaLabel }) => {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      style={buttonStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={mergeClassNames(cssStyles.button, cssStyles.navButton)}
     >
       {children}
     </button>
@@ -173,11 +134,8 @@ const PaginationItem: FC<{
   page: number
   count: number
   onChange: (event: React.MouseEvent<HTMLButtonElement>, page: number) => void
-  isSacredTheme: boolean
   renderItem?: (item: PaginationRenderItemParams) => ReactNode
-}> = ({ item, page, onChange, isSacredTheme, renderItem }) => {
-  const [isHovered, setIsHovered] = useState(false)
-
+}> = ({ item, page, onChange, renderItem }) => {
   if (item === 'start-ellipsis' || item === 'end-ellipsis') {
     const ellipsisItem: PaginationRenderItemParams = {
       page: null,
@@ -191,18 +149,7 @@ const PaginationItem: FC<{
       return <>{renderItem(ellipsisItem)}</>
     }
 
-    const ellipsisStyle: React.CSSProperties = {
-      minWidth: '32px',
-      height: '32px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: isSacredTheme ? 'rgba(255, 215, 0, 0.6)' : 'rgba(0, 0, 0, 0.38)',
-      fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
-      fontSize: '14px',
-    }
-
-    return <div style={ellipsisStyle}>…</div>
+    return <div className={cssStyles.ellipsis}>…</div>
   }
 
   const isSelected = item === page
@@ -222,50 +169,10 @@ const PaginationItem: FC<{
     return <>{renderItem(renderItemParams)}</>
   }
 
-  const buttonStyle: React.CSSProperties = {
-    minWidth: '32px',
-    height: '32px',
-    padding: '4px 8px',
-    border: isSacredTheme
-      ? `1px solid ${alpha(SACRED_GOLD, isSelected ? 0.6 : isHovered ? 0.4 : 0.3)}`
-      : '1px solid rgba(0, 0, 0, 0.23)',
-    borderRadius: '4px',
-    backgroundColor: isSelected
-      ? isSacredTheme
-        ? alpha(SACRED_GOLD, 0.2)
-        : 'rgba(25, 118, 210, 0.12)'
-      : isHovered
-        ? isSacredTheme
-          ? alpha(SACRED_GOLD, 0.1)
-          : 'rgba(0, 0, 0, 0.04)'
-        : 'transparent',
-    color: isSelected
-      ? isSacredTheme
-        ? SACRED_GOLD
-        : '#1976d2'
-      : isSacredTheme
-        ? 'rgba(255, 215, 0, 0.8)'
-        : 'rgba(0, 0, 0, 0.87)',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.3s ease',
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
-    fontSize: '14px',
-    fontWeight: isSelected ? 600 : 400,
-    boxShadow:
-      isSelected && isSacredTheme
-        ? `0 0 10px ${alpha(SACRED_GOLD, 0.3)}`
-        : 'none',
-  }
-
   return (
     <button
       onClick={handleClick}
-      style={buttonStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={mergeClassNames(cssStyles.button, cssStyles.pageButton)}
       aria-current={isSelected ? 'page' : undefined}
       aria-label={`Go to page ${item}`}
       data-pagination-page={item}
@@ -293,7 +200,14 @@ const Pagination: FC<PaginationProps> = ({
   ...rest
 }) => {
   const isDisabled = styles?.disabled
-  const isSacredTheme = styles?.theme === 'sacred'
+  // Preserve the pre-migration default: only an explicit `theme: 'sacred'`
+  // rendered the gold palette (old `isSacredTheme = styles?.theme === 'sacred'`).
+  // Every other value — including no theme at all — rendered the MUI palette,
+  // which is the bare `.root` default in Pagination.module.css and
+  // `[data-theme='sacred']` carries the gold. Emitting the raw theme (no
+  // sacred fallback) keeps a no-theme callsite on the MUI palette so the
+  // rendered output matches HEAD exactly.
+  const theme = styles?.theme
 
   const items = usePagination({
     count,
@@ -342,22 +256,10 @@ const Pagination: FC<PaginationProps> = ({
     return null
   }
 
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '8px',
-  }
-
-  const buttonContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  }
-
   return (
     <nav
-      style={containerStyle}
+      className={cssStyles.root}
+      data-theme={theme}
       role="navigation"
       aria-label={ariaLabel ?? 'pagination navigation'}
       data-pagination-root="true"
@@ -366,12 +268,11 @@ const Pagination: FC<PaginationProps> = ({
       {...(dataField !== undefined && { 'data-pagination-field': dataField })}
       {...rest}
     >
-      <div style={buttonContainerStyle}>
+      <div className={cssStyles.buttonContainer}>
         {showFirstButton && (
           <PaginationButton
             onClick={handleFirstPage}
             disabled={page <= 1 || !!isDisabled}
-            isSacredTheme={isSacredTheme}
             aria-label="Go to first page"
           >
             <FirstPageIcon
@@ -388,7 +289,6 @@ const Pagination: FC<PaginationProps> = ({
           <PaginationButton
             onClick={handlePreviousPage}
             disabled={page <= 1 || !!isDisabled}
-            isSacredTheme={isSacredTheme}
             aria-label="Go to previous page"
           >
             <KeyboardArrowLeftIcon
@@ -408,7 +308,6 @@ const Pagination: FC<PaginationProps> = ({
             page={page}
             count={count}
             onChange={onChange}
-            isSacredTheme={isSacredTheme}
             {...(renderItem ? { renderItem } : {})}
           />
         ))}
@@ -417,7 +316,6 @@ const Pagination: FC<PaginationProps> = ({
           <PaginationButton
             onClick={handleNextPage}
             disabled={page >= count || !!isDisabled}
-            isSacredTheme={isSacredTheme}
             aria-label="Go to next page"
           >
             <KeyboardArrowRightIcon
@@ -434,7 +332,6 @@ const Pagination: FC<PaginationProps> = ({
           <PaginationButton
             onClick={handleLastPage}
             disabled={page >= count || !!isDisabled}
-            isSacredTheme={isSacredTheme}
             aria-label="Go to last page"
           >
             <LastPageIcon

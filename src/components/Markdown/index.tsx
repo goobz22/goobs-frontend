@@ -7,8 +7,14 @@
 
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, type CSSProperties } from 'react'
 import { mdToHtml } from '../ComplexTextEditor/utils/conversion'
+import cssStyles from './Markdown.module.css'
+
+/** Local class joiner — repo has no clsx/classnames dependency. */
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
 
 export interface MarkdownProps {
   /** Markdown source. Empty / nullish renders nothing. */
@@ -41,21 +47,21 @@ export const Markdown: React.FC<MarkdownProps> = ({
   const html = useMemo(() => mdToHtml(children), [children])
   if (!html) return null
 
-  const wrapperStyle: React.CSSProperties = {
-    maxWidth: maxWidth > 0 ? maxWidth : undefined,
-    margin: maxWidth > 0 && align !== 'left' ? '0 auto' : undefined,
-    textAlign: align,
-    color: 'inherit',
-    lineHeight: 1.65,
-    fontSize: 16,
+  const fullWidth = maxWidth <= 0
+
+  // Caller-supplied runtime value rides in as a CSS custom property (recipe
+  // rule 3); the selector that consumes it lives in the module's .root class.
+  const dynamicStyle: CSSProperties = {
+    ['--md-max-width' as string]: fullWidth ? 'none' : `${maxWidth}px`,
   }
 
   return (
     <div
-      className={className}
+      className={mergeClassNames(cssStyles.root, className)}
       data-testid={rest['data-testid'] ?? 'goobs-markdown'}
-      style={wrapperStyle}
-       
+      data-align={align}
+      data-full-width={fullWidth ? 'true' : undefined}
+      style={dynamicStyle}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )

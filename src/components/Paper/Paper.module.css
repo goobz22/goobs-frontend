@@ -1,0 +1,55 @@
+/* ==========================================================================
+   PAPER - CSS MODULE
+   Elevated surface primitive. The component recognises exactly two visual
+   themes: the historical DEFAULT (the old non-sacred branch — white surface,
+   subtle drop shadow) and SACRED (translucent black surface, gold border +
+   glow). Theme is expressed via [data-theme]; the default is the base class
+   so any non-'sacred' theme value renders the historical default look.
+
+   Elevation drives the box-shadow, which is computed per-render in JS (it is a
+   scalar function of the `elevation` prop) and handed to CSS through the
+   --paper-shadow custom property — the selector stays here, only the value is
+   dynamic. Caller-supplied scalar overrides (width / colors / padding / margin
+   / radius / border / backdrop-filter / opacity / background-image) stay in JS
+   as inline styles since they are arbitrary runtime strings; they layer on top
+   of these defaults.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BASE — DEFAULT THEME (old non-sacred branch)
+   -------------------------------------------------------------------------- */
+.root {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: var(--paper-shadow, 0 1px 4px rgba(0, 0, 0, 0.1));
+  color: rgba(0, 0, 0, 0.87);
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME — translucent black surface, gold border + glow.
+   Mirrors the old isSacredTheme branch:
+     padding   24px
+     bg        rgba(0, 0, 0, 0.7)
+     border    2px solid rgba(255, 215, 0, 0.3)   (alpha(SACRED_GOLD, 0.3))
+     color     rgba(255, 255, 255, 0.9)
+     font      "Crimson Text", serif
+     backdrop  blur(20px)
+   The glow box-shadow is elevation-driven and supplied via --paper-shadow.
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] {
+  padding: 24px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+  backdrop-filter: blur(20px);
+}

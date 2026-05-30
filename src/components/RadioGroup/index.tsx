@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import cssStyles from './RadioGroup.module.css'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 
 /**
  * Interface representing a single radio option
@@ -62,12 +63,24 @@ export interface RadioGroupProps {
   label?: string
   /** Array of radio options */
   options: RadioOption[]
+  /**
+   * Controlled selected value. When provided, the group is controlled by the
+   * caller (back-compat / explicit control). When omitted, the group manages
+   * its own selection via `defaultValue` — OR, inside a `<Form>`, the form
+   * engine owns the value (Tier-1 binding).
+   */
+  value?: string
   /** Default selected value */
   defaultValue?: string
   /** Name for the radio group */
   name: string
   /** Label text to display */
   labelText?: string
+  /**
+   * Stable test selector. Emitted as `data-field-name` on the root — falls
+   * back to `name` when not provided.
+   */
+  dataFieldName?: string
   /** Change handler */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   /** Custom styles to apply using the theme system */
@@ -143,19 +156,40 @@ const buildOverrideVars = (
 const RadioGroup: React.FC<RadioGroupProps> = ({
   label,
   options,
+  value: controlledValue,
   defaultValue,
   name,
   labelText,
+  dataFieldName,
   onChange,
   styles,
 }) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue)
 
+  // Tier-1 form binding. Inside a <Form> with a `name` and NO explicit
+  // `value`, the selected string + change are owned by the form engine. Outside
+  // a form, the caller's controlled `value` (or, absent that, the internal
+  // `selectedValue` state) drives the group — byte-for-byte back-compat via the
+  // shouldBind gate in useFieldBinding.
+  const { value: boundValue, onChange: writeBoundValue } =
+    useFieldBinding<string>({
+      name,
+      value: controlledValue,
+    })
+  // Precedence: caller-controlled value > form-engine bound value > internal
+  // uncontrolled state. `boundValue` is only defined when actually bound.
+  const effectiveValue =
+    controlledValue ?? (boundValue !== undefined ? boundValue : selectedValue)
+
   const theme = styles?.theme || 'light'
   const overrideVars = buildOverrideVars(styles)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Keep internal state in sync for the uncontrolled path; harmless when
+    // controlled/bound (the effectiveValue precedence ignores it).
     setSelectedValue(e.target.value)
+    // When bound to the form engine, push the new selection upstream.
+    writeBoundValue?.(e.target.value)
     if (onChange) {
       onChange(e)
     }
@@ -164,6 +198,11 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   return (
     <div
       className={cssStyles.formControl}
+      data-component="RadioGroup"
+      data-field-name={dataFieldName ?? name}
+      data-filled={
+        effectiveValue !== undefined && effectiveValue !== ''
+      }
       data-theme={theme}
       style={overrideVars}
     >
@@ -172,7 +211,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       </label>
       <div role="radiogroup" aria-labelledby={`${name}-label`}>
         {options.map((option, index) => {
-          const isChecked = selectedValue === option.label
+          const isChecked = effectiveValue === option.label
 
           return (
             <label key={index} className={cssStyles.optionLabel}>

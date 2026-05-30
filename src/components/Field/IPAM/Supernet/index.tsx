@@ -26,11 +26,20 @@ export interface SupernetFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. Forwarded to the underlying SubnetField, which
+   * owns the Tier-1 `{ address, mask }` binding. Inside a `<Form>` with `name`
+   * and no explicit `value`, the object is read from / written to the engine;
+   * outside a form (every existing callsite passes a `value`) it is inert.
+   */
+  name?: string
   styles?: FieldStyleOverrides
 }
 
 // SupernetField now uses SubnetField for both address and mask, with
-// the mask range narrowed to the supernet bracket (/8 - /23).
+// the mask range narrowed to the supernet bracket (/8 - /23). The Tier-1
+// form binding is owned by SubnetField; SupernetField simply forwards `name`
+// so the engine binds the supernet object under that key.
 const SupernetField: React.FC<SupernetFieldProps> = ({
   value,
   onChange,
@@ -41,6 +50,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   return (
@@ -53,6 +63,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
       min={8}
       max={23}
       maskType="supernet"
+      {...(name !== undefined ? { name } : {})}
       {...(helperText !== undefined ? { helperText } : {})}
       {...(error !== undefined ? { error } : {})}
       {...(dataField !== undefined ? { dataField } : {})}

@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface TimeRange {
   start: Date | null
@@ -42,8 +43,8 @@ const parseTimeInput = (timeString: string): Date | null => {
 }
 
 const TimeRangeComponent: React.FC<TimeRangeProps> = ({
-  onChange,
-  value,
+  onChange: onChangeProp,
+  value: valueProp,
   startLabel = 'Start Time',
   endLabel = 'End Time',
   helperText,
@@ -53,6 +54,18 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding: when rendered inside a <Form> with a `name` and no
+  // explicit `value`, the {start,end} range is read/written through the form
+  // engine (stored as the object directly — no adapter). Outside a form, or
+  // with an explicit value, this is a byte-for-byte pass-through. The bound
+  // results take the bare value/onChange names so all downstream code is
+  // unchanged; onChange stays optional (callsites already use `onChange?.`).
+  const { value, onChange } = useFieldBinding<TimeRange>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+
   const startInputRef = useRef<HTMLInputElement>(null)
   const endInputRef = useRef<HTMLInputElement>(null)
 
@@ -137,6 +150,8 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
             error={error}
             disabled={disabled}
             required={required}
+            name={name}
+            filled={value != null && (value.start != null || value.end != null)}
             styles={styles}
           >
             {({ inputId, inputAriaProps }) => (

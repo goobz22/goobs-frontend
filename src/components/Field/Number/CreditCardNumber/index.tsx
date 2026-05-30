@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useState, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export type CardType =
   | 'visa'
@@ -90,10 +91,10 @@ export interface CreditCardNumberProps {
 }
 
 const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
-  onChange,
+  onChange: onChangeProp,
   onValidityChange,
   onCardTypeChange,
-  value = '',
+  value: valueProp,
   useLuhnValidation = true,
   isDefaultValue = false,
   enableFormatting = true,
@@ -110,6 +111,25 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   disabled: disabledProp,
   styles,
 }) => {
+  // Tier-1 form binding: inside a <Form> with a `name` and no explicit
+  // `value`, value/onChange come from the form engine and `markTouched`
+  // marks the field touched on blur. Outside a form (or with an explicit
+  // value) this is a byte-for-byte pass-through of the caller's props. The
+  // engine stores the digits-only card string this field's onChange emits;
+  // the derived-state block below reformats it for display. The component
+  // contract keeps a string `value`, so the bound value is coalesced to ''
+  // exactly as the old `value = ''` param default did.
+  const {
+    value: boundValue,
+    onChange,
+    onBlur: markTouched,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  const value = boundValue ?? ''
+
   const [internalValue, setInternalValue] = useState<string>(value || '')
   // Tracks focus for the masked default-value display flip only.
   const [isFocused, setIsFocused] = useState<boolean>(false)
@@ -267,9 +287,10 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
+      markTouched?.()
       onBlur?.(e)
     },
-    [onBlur]
+    [markTouched, onBlur]
   )
 
   const getCardIcon = useCallback(() => '💳', [])
@@ -327,6 +348,8 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (

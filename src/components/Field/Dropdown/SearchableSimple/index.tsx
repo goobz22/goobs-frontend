@@ -8,6 +8,7 @@ import FieldShell, {
   useEscape,
   useArrowKeyNav,
 } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DropdownOption {
   value: string | number
@@ -43,9 +44,9 @@ export interface SearchableSimpleProps {
 const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   label,
   options,
-  value: valueProp,
+  value: valuePropRaw,
   defaultValue,
-  onChange,
+  onChange: onChangeProp,
   placeholder = 'Select...',
   helperText,
   error,
@@ -54,6 +55,31 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. This field reads an id (`string | number`) via its
+  // `value` prop but emits the full option object via `onChange`. The binding
+  // hook carries a single type `T`, so we bind on the *id* channel
+  // (`string | number | null`) with an identity adapter — that is the value
+  // the store should hold and the value the `value` prop consumes. The
+  // option-shaped original `onChange` is preserved and still fired from
+  // `handleSelect` below, and the resolved id (`option._id ?? option.value`)
+  // — exactly the value the spec's `payloadToStore` produces — is what the
+  // bound id-writer persists to the engine. Outside a <Form> (or with an
+  // explicit `value`), the binding is a pass-through: `valuePropRaw` flows
+  // through unchanged and behavior is byte-for-byte as before.
+  const {
+    value: valueProp,
+    onChange: bindingWriteId,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string | number | null>({
+    name,
+    value: valuePropRaw,
+    adapter: {
+      payloadToStore: (storedId: string | number | null): unknown => storedId,
+      valueFromStore: (stored: unknown): string | number | null =>
+        stored == null ? null : (stored as string | number),
+    },
+  })
+
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -69,8 +95,11 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   })
 
   const disabled = styles?.disabled || false
+  // When bound, the hook always returns a defined value (the engine's stored
+  // id, or `null` when empty), so `!== undefined` keeps the engine in control
+  // even when the field is empty. Unbound back-compat is unchanged.
   const isControlled = valueProp !== undefined
-  const value = isControlled ? valueProp : internalValue
+  const value = isControlled ? (valueProp ?? '') : internalValue
 
   const filteredOptions = useMemo(() => {
     const filtered = searchTerm
@@ -148,7 +177,12 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
 
   const handleSelect = (option: DropdownOption) => {
     if (!isControlled) setInternalValue(option.value)
-    onChange?.(option)
+    // Preserve the original option-shaped onChange contract.
+    onChangeProp?.(option)
+    // Persist the resolved id to the form engine when bound (no-op otherwise).
+    // `option._id ?? option.value` is exactly what the spec's payloadToStore
+    // resolves to.
+    bindingWriteId?.(option._id ?? option.value)
     setIsOpen(false)
     setSearchTerm('')
     buttonRef.current?.focus()
@@ -191,6 +225,8 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
       dataFieldName={dataFieldName ?? name}
+      name={name}
+      filled={hasValue}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => {
@@ -210,6 +246,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
               data-subject={dataField}
               className={buttonClassNames}
               onClick={() => !disabled && setIsOpen(!isOpen)}
+              onBlur={() => boundOnBlur?.()}
               onKeyDown={event => {
                 // Open on Down/Up if currently closed (combobox 1.2)
                 if (

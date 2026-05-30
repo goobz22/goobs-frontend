@@ -1,0 +1,147 @@
+/* ==========================================================================
+   MENUITEM - CSS MODULE
+   Migrated off the legacy JS theme system (theme/formField.ts +
+   theme/shared.ts + theme/icon.ts). Renders an <option> element styled
+   for use inside a native <select>.
+
+   Theme is expressed as data-theme on the root <option>. Sacred is the
+   HARDCODED DEFAULT (the old getFormFieldTheme defaulted theme to 'sacred'
+   when none was supplied); light/dark are [data-theme] overrides.
+
+   Color / spacing / font values are transcribed exactly from:
+     - theme/formField.ts  formFieldThemes (background, text, fontFamily)
+     - the inline selected/disabled/divider/hover branches of the old
+       MenuItem index.tsx (these were hardcoded per-theme in JS)
+
+   Caller-supplied overrides (styles.backgroundColor / styles.textColor /
+   styles.fontFamily, and the spread `style` prop) flow through CSS custom
+   properties + the inline style prop so getFormFieldTheme parity is kept.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT — sacred defaults (formFieldThemes.sacred)
+   -------------------------------------------------------------------------- */
+.root {
+  /* Theme tokens — overridable by [data-theme] below and by the caller via
+     inline style custom properties (--menuitem-bg / --menuitem-text /
+     --menuitem-font-family). */
+  --menuitem-bg: rgba(0, 0, 0, 0.7);
+  --menuitem-text: rgba(255, 255, 255, 0.9);
+  --menuitem-font-family: 'Crimson Text', serif;
+
+  /* State tokens — sacred values */
+  --menuitem-selected-bg: rgba(255, 215, 0, 0.15);
+  --menuitem-selected-text: #ffd700;
+  --menuitem-disabled-text: rgba(255, 215, 0, 0.4);
+  --menuitem-divider-color: rgba(255, 215, 0, 0.2);
+  --menuitem-hover-bg: rgba(255, 215, 0, 0.1);
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  text-decoration: none;
+  min-height: 48px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  background-color: var(--menuitem-bg);
+  color: var(--menuitem-text);
+  font-family: var(--menuitem-font-family);
+  /* Exact transition from the old computedStyles.transition */
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (formFieldThemes.light)
+   -------------------------------------------------------------------------- */
+.root[data-theme='light'] {
+  --menuitem-bg: rgba(255, 255, 255, 0.95);
+  --menuitem-text: rgba(31, 41, 55, 1);
+  --menuitem-font-family: 'Inter', sans-serif;
+
+  --menuitem-selected-bg: rgba(25, 118, 210, 0.08);
+  --menuitem-selected-text: #1976d2;
+  --menuitem-disabled-text: rgba(0, 0, 0, 0.38);
+  --menuitem-divider-color: rgba(0, 0, 0, 0.12);
+  --menuitem-hover-bg: rgba(0, 0, 0, 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME (formFieldThemes.dark)
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  --menuitem-bg: rgba(31, 41, 55, 0.95);
+  --menuitem-text: rgba(255, 255, 255, 1);
+  --menuitem-font-family: 'Inter', sans-serif;
+
+  --menuitem-selected-bg: rgba(59, 130, 246, 0.2);
+  --menuitem-selected-text: #60a5fa;
+  --menuitem-disabled-text: rgba(255, 255, 255, 0.3);
+  --menuitem-divider-color: rgba(255, 255, 255, 0.12);
+  --menuitem-hover-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   DENSITY — dense reduces min-height + vertical padding
+   (old: dense ? '32px' : '48px', dense ? '6px' : '8px')
+   -------------------------------------------------------------------------- */
+.root[data-dense='true'] {
+  min-height: 32px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   SELECTED — tinted background + accent text
+   -------------------------------------------------------------------------- */
+.root[data-selected='true'] {
+  background-color: var(--menuitem-selected-bg);
+  color: var(--menuitem-selected-text);
+}
+
+/* --------------------------------------------------------------------------
+   DIVIDER — bottom border between items
+   -------------------------------------------------------------------------- */
+.root[data-divider='true'] {
+  border-bottom: 1px solid var(--menuitem-divider-color);
+}
+
+/* --------------------------------------------------------------------------
+   HOVER — only when not disabled (old: isHovered && !disabled)
+   -------------------------------------------------------------------------- */
+.root:hover:not([data-disabled='true']) {
+  background-color: var(--menuitem-hover-bg);
+}
+
+/* --------------------------------------------------------------------------
+   DISABLED — dimmed, non-interactive. Placed last so it wins over the
+   selected/hover branches, matching the JS spread order where the
+   `disabled` block came after `selected` (and hover only applied when
+   !disabled).
+   -------------------------------------------------------------------------- */
+.root[data-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
+  color: var(--menuitem-disabled-text);
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES — migrated from theme/icon.ts injectSacredKeyframes() which
+   previously inserted this rule at runtime. Kept as a static module
+   keyframe so no runtime stylesheet injection is needed. (No element in
+   MenuItem currently animates with it; preserved for parity.)
+   -------------------------------------------------------------------------- */
+@keyframes sacredGlyphRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

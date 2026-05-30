@@ -4,8 +4,37 @@
  */
 'use client'
 
-import React, { useState, useMemo, ReactNode } from 'react'
-import { getButtonStyles, type ButtonStyles } from '../../theme'
+import React, { ReactNode } from 'react'
+import cssStyles from './ToggleButton.module.css'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
+
+// --------------------------------------------------------------------------
+// STYLE CONTRACT — ToggleButton now owns its own CSS module. The legacy
+// `ButtonStyles` shape from the shared Button theme is replaced by a small
+// local prop type covering exactly what these components consumed: a theme
+// selector plus the caller-supplied layout/dimension overrides that the old
+// getButtonStyles passed straight through to the inline style object.
+// --------------------------------------------------------------------------
+
+export type ToggleButtonTheme = 'light' | 'dark' | 'sacred'
+
+export interface ToggleButtonStyles {
+  /** Theme selection. Default `'light'` (matches the pre-migration default). */
+  theme?: ToggleButtonTheme
+
+  // Caller-supplied layout / spacing / dimension overrides — applied as inline
+  // style on the button, exactly as the old getButtonStyles forwarded them.
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+  width?: string
+  maxWidth?: string
+  minWidth?: string
+  height?: string
+  maxHeight?: string
+}
 
 // --------------------------------------------------------------------------
 // TOGGLE BUTTON PROPS INTERFACE
@@ -18,7 +47,7 @@ export interface ToggleButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
   disabled?: boolean
   size?: 'small' | 'medium' | 'large'
-  styles?: ButtonStyles
+  styles?: ToggleButtonStyles
   isFirst?: boolean
   isLast?: boolean
   'aria-label'?: string
@@ -29,7 +58,14 @@ export interface ToggleButtonProps {
 // --------------------------------------------------------------------------
 
 export interface ToggleButtonGroupProps {
-  value: string | null
+  /**
+   * Currently-selected button value. Optional so the group can be driven by a
+   * surrounding `<Form>` (Tier-1 binding) when a `name` is supplied and no
+   * explicit `value` is passed. When provided (including `null` for "no
+   * selection") the group is caller-controlled — the byte-for-byte back-compat
+   * path for the existing callsites.
+   */
+  value?: string | null
   exclusive?: boolean
   onChange: (
     event: React.MouseEvent<HTMLElement>,
@@ -37,7 +73,17 @@ export interface ToggleButtonGroupProps {
   ) => void
   children: React.ReactNode
   size?: 'small' | 'medium' | 'large'
-  styles?: ButtonStyles
+  styles?: ToggleButtonStyles
+  /**
+   * Form-engine binding key. Inside a `<Form>` with `name` set and no explicit
+   * `value`, the selected value is owned by the form engine.
+   */
+  name?: string
+  /**
+   * Stable test selector. Emitted as `data-field-name` on the group root —
+   * falls back to `name` when not provided.
+   */
+  dataFieldName?: string
 }
 
 // --------------------------------------------------------------------------
@@ -56,151 +102,24 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   isLast = false,
   'aria-label': ariaLabel,
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isPressed, setIsPressed] = useState(false)
+  const theme: ToggleButtonTheme = styles?.theme || 'light'
 
-  const buttonStyles = useMemo(() => {
-    const baseStyles = getButtonStyles(styles)
-    const theme = styles?.theme || 'light'
-
-    // Size configurations
-    const sizeConfig = {
-      small: { padding: '6px 12px', fontSize: '14px' },
-      medium: { padding: '8px 16px', fontSize: '16px' },
-      large: { padding: '12px 24px', fontSize: '18px' },
-    }
-
-    // Theme-specific styling
-    let themeStyles = {}
-    if (theme === 'sacred') {
-      themeStyles = {
-        backgroundColor: selected
-          ? 'rgba(255, 215, 0, 0.2)'
-          : 'rgba(255, 215, 0, 0.05)',
-        color: selected ? '#FFD700' : 'rgba(255, 215, 0, 0.8)',
-        borderTop: selected
-          ? '1px solid rgba(255, 215, 0, 0.8)'
-          : '1px solid rgba(255, 215, 0, 0.3)',
-        borderBottom: selected
-          ? '1px solid rgba(255, 215, 0, 0.8)'
-          : '1px solid rgba(255, 215, 0, 0.3)',
-        borderLeft: selected
-          ? '1px solid rgba(255, 215, 0, 0.8)'
-          : '1px solid rgba(255, 215, 0, 0.3)',
-        borderRight: selected
-          ? '1px solid rgba(255, 215, 0, 0.8)'
-          : '1px solid rgba(255, 215, 0, 0.3)',
-        fontFamily: 'var(--font-cinzel), serif',
-        textShadow: selected
-          ? '0 0 4px rgba(255, 215, 0, 0.6)'
-          : '0 0 2px rgba(255, 215, 0, 0.3)',
-        boxShadow: selected
-          ? '0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(255, 215, 0, 0.1)'
-          : '0 0 4px rgba(255, 215, 0, 0.1)',
-        backdropFilter: 'blur(8px)',
-        ...(isHovered &&
-          !disabled && {
-            backgroundColor: selected
-              ? 'rgba(255, 215, 0, 0.3)'
-              : 'rgba(255, 215, 0, 0.1)',
-            boxShadow:
-              '0 0 16px rgba(255, 215, 0, 0.4), inset 0 0 8px rgba(255, 215, 0, 0.1)',
-            textShadow: '0 0 6px rgba(255, 215, 0, 0.8)',
-          }),
-        ...(isPressed &&
-          !disabled && {
-            backgroundColor: 'rgba(255, 215, 0, 0.4)',
-            transform: 'translateY(1px)',
-          }),
-      }
-    } else if (theme === 'dark') {
-      themeStyles = {
-        backgroundColor: selected
-          ? 'rgba(59, 130, 246, 0.3)'
-          : 'rgba(75, 85, 99, 0.3)',
-        color: selected ? '#60a5fa' : '#d1d5db',
-        borderTop: selected
-          ? '1px solid #60a5fa'
-          : '1px solid rgba(75, 85, 99, 0.8)',
-        borderBottom: selected
-          ? '1px solid #60a5fa'
-          : '1px solid rgba(75, 85, 99, 0.8)',
-        borderLeft: selected
-          ? '1px solid #60a5fa'
-          : '1px solid rgba(75, 85, 99, 0.8)',
-        borderRight: selected
-          ? '1px solid #60a5fa'
-          : '1px solid rgba(75, 85, 99, 0.8)',
-        ...(isHovered &&
-          !disabled && {
-            backgroundColor: selected
-              ? 'rgba(59, 130, 246, 0.4)'
-              : 'rgba(75, 85, 99, 0.5)',
-          }),
-      }
-    } else {
-      // Light theme
-      themeStyles = {
-        backgroundColor: selected
-          ? 'rgba(59, 130, 246, 0.1)'
-          : 'rgba(241, 245, 249, 0.8)',
-        color: selected ? '#2563eb' : '#475569',
-        borderTop: selected
-          ? '1px solid #2563eb'
-          : '1px solid rgba(226, 232, 240, 0.8)',
-        borderBottom: selected
-          ? '1px solid #2563eb'
-          : '1px solid rgba(226, 232, 240, 0.8)',
-        borderLeft: selected
-          ? '1px solid #2563eb'
-          : '1px solid rgba(226, 232, 240, 0.8)',
-        borderRight: selected
-          ? '1px solid #2563eb'
-          : '1px solid rgba(226, 232, 240, 0.8)',
-        ...(isHovered &&
-          !disabled && {
-            backgroundColor: selected
-              ? 'rgba(59, 130, 246, 0.2)'
-              : 'rgba(226, 232, 240, 1)',
-          }),
-      }
-    }
-
-    // Group styling overrides
-    let groupStyles = {}
-    if (isFirst || isLast) {
-      groupStyles = {
-        borderRadius: isFirst ? '7px 0 0 7px' : isLast ? '0 7px 7px 0' : '0',
-        margin: 0,
-      }
-      // Remove right border for non-last items in group
-      if (!isLast) {
-        groupStyles = {
-          ...groupStyles,
-          borderRight: 'none',
-        }
-      }
-    }
-
-    return {
-      ...baseStyles.container,
-      ...sizeConfig[size],
-      ...themeStyles,
-      borderRadius: '6px',
-      fontWeight: selected ? '600' : '500',
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      opacity: disabled ? 0.5 : 1,
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative' as const,
-      userSelect: 'none' as const,
-      outline: 'none',
-      textDecoration: 'none',
-      ...groupStyles,
-    } as React.CSSProperties
-  }, [styles, selected, isHovered, isPressed, disabled, size, isFirst, isLast])
+  // Only caller-supplied layout/dimension overrides stay in JS — every visual
+  // (theme / selected / size / hover / active / disabled) is now CSS.
+  const dynamicStyle: React.CSSProperties = {}
+  if (styles?.margin !== undefined) dynamicStyle.margin = styles.margin
+  if (styles?.marginTop !== undefined) dynamicStyle.marginTop = styles.marginTop
+  if (styles?.marginBottom !== undefined)
+    dynamicStyle.marginBottom = styles.marginBottom
+  if (styles?.marginLeft !== undefined)
+    dynamicStyle.marginLeft = styles.marginLeft
+  if (styles?.marginRight !== undefined)
+    dynamicStyle.marginRight = styles.marginRight
+  if (styles?.width !== undefined) dynamicStyle.width = styles.width
+  if (styles?.maxWidth !== undefined) dynamicStyle.maxWidth = styles.maxWidth
+  if (styles?.minWidth !== undefined) dynamicStyle.minWidth = styles.minWidth
+  if (styles?.height !== undefined) dynamicStyle.height = styles.height
+  if (styles?.maxHeight !== undefined) dynamicStyle.maxHeight = styles.maxHeight
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!disabled && onClick) {
@@ -210,12 +129,14 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
 
   return (
     <button
-      style={buttonStyles}
+      className={cssStyles.button}
+      {...(Object.keys(dynamicStyle).length > 0 && { style: dynamicStyle })}
+      data-theme={theme}
+      data-size={size}
+      {...(selected && { 'data-selected': 'true' })}
+      {...(isFirst && { 'data-first': 'true' })}
+      {...(isLast && { 'data-last': 'true' })}
       onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
       disabled={disabled}
       aria-label={ariaLabel}
       aria-pressed={selected}
@@ -237,35 +158,31 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
   children,
   size = 'medium',
   styles,
+  name,
+  dataFieldName,
 }) => {
   const childrenArray = React.Children.toArray(children)
   const totalChildren = childrenArray.length
+  const theme: ToggleButtonTheme = styles?.theme || 'light'
 
-  const groupStyles = useMemo(() => {
-    const baseStyles = getButtonStyles(styles)
-    const theme = styles?.theme || 'light'
-
-    let borderColor = 'rgba(226, 232, 240, 0.8)'
-    if (theme === 'sacred') {
-      borderColor = 'rgba(255, 215, 0, 0.4)'
-    } else if (theme === 'dark') {
-      borderColor = 'rgba(75, 85, 99, 0.8)'
-    }
-
-    return {
-      display: 'inline-flex',
-      position: 'relative' as const,
-      border: `1px solid ${borderColor}`,
-      borderRadius: baseStyles.container.borderRadius || '8px',
-      overflow: 'hidden',
-    } as React.CSSProperties
-  }, [styles])
+  // Tier-1 form binding. Inside a <Form> with a `name` and NO explicit `value`,
+  // the selected string is owned by the form engine. Outside a form, the
+  // caller's controlled `value` drives the group — byte-for-byte back-compat
+  // via the shouldBind gate in useFieldBinding. `null` (explicit "no
+  // selection") counts as a caller-supplied value, so it never auto-binds.
+  const { value: boundValue, onChange: writeBoundValue } = useFieldBinding<
+    string | null
+  >({
+    name,
+    value,
+  })
+  const effectiveValue = boundValue ?? null
 
   const enhancedChildren = React.Children.map(children, (child, index) => {
     if (React.isValidElement<ToggleButtonProps>(child)) {
       const isFirst = index === 0
       const isLast = index === totalChildren - 1
-      const isSelected = child.props.value === value
+      const isSelected = child.props.value === effectiveValue
 
       return React.cloneElement(child, {
         ...child.props,
@@ -278,8 +195,10 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
         onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
           if (exclusive) {
             const newValue = isSelected ? null : child.props.value
+            writeBoundValue?.(newValue)
             onChange(e, newValue)
           } else {
+            writeBoundValue?.(child.props.value)
             onChange(e, child.props.value)
           }
 
@@ -294,7 +213,17 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
     return child
   })
 
-  return <div style={groupStyles}>{enhancedChildren}</div>
+  return (
+    <div
+      className={cssStyles.group}
+      data-component="ToggleButtonGroup"
+      data-field-name={dataFieldName ?? name}
+      data-filled={effectiveValue !== null && effectiveValue !== ''}
+      data-theme={theme}
+    >
+      {enhancedChildren}
+    </div>
+  )
 }
 
 export default ToggleButton

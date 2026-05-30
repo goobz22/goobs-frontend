@@ -2,6 +2,8 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
+import { useOptionalFormContext } from '../../Form/context'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
@@ -58,7 +60,7 @@ const formatCurrency = (value: string): string => {
 
 const USDField: React.FC<USDFieldProps> = ({
   initialValue = '',
-  onChange,
+  onChange: onChangeProp,
   label = 'Amount',
   min,
   max,
@@ -67,7 +69,7 @@ const USDField: React.FC<USDFieldProps> = ({
   incrementStep = 1,
   initialDelay = 500,
   repeatInterval = 100,
-  value,
+  value: valueProp,
   placeholder,
   id,
   onFocus,
@@ -80,10 +82,52 @@ const USDField: React.FC<USDFieldProps> = ({
   styles,
   ...rest
 }) => {
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
+  // the engine drives value/onChange; touched is marked via bindingOnBlur
+  // (chained into handleBlur below). Outside a form / with an explicit value
+  // this is a byte-for-byte pass-through. The destructured value/onChange
+  // SHADOW the incoming props so downstream code uses the bound versions.
+  const {
+    value,
+    onChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+    onBlur: undefined,
+  })
+
+  // Is this instance actually bound to the form engine? Mirrors the hook's
+  // gate. Used to drive `internalValue` from the engine value while leaving the
+  // legacy uncontrolled-after-mount behavior untouched when NOT bound.
+  const formCtx = useOptionalFormContext()
+  const isBound = Boolean(formCtx && name && valueProp === undefined)
+
   const [internalValue, setInternalValue] = useState(value || initialValue)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // When bound, the engine is the source of truth: mirror its value into the
+  // local display state whenever it changes externally (e.g. form reset /
+  // sibling-field-driven update). Derived-state pattern, same shape as
+  // PhoneNumber. No-op (and untouched legacy behavior) when not bound.
+  const [prevBoundValue, setPrevBoundValue] = useState(value)
+  if (isBound && value !== prevBoundValue) {
+    setPrevBoundValue(value)
+    setInternalValue(value || '')
+  }
+
+  // Chain the engine touched-mark (no-op outside a <Form>) before the caller's
+  // FocusEvent onBlur, preserving its original signature.
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      bindingOnBlur?.()
+      onBlur?.(e)
+    },
+    [bindingOnBlur, onBlur]
+  )
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
@@ -283,6 +327,8 @@ const USDField: React.FC<USDFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(internalValue && internalValue.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -301,7 +347,7 @@ const USDField: React.FC<USDFieldProps> = ({
             value={internalValue}
             onChange={handleChange}
             onFocus={onFocus}
-            onBlur={onBlur}
+            onBlur={handleBlur}
             disabled={disabled}
             required={required}
             placeholder={resolvedPlaceholder}

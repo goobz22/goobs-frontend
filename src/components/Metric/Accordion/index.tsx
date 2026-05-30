@@ -184,14 +184,17 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   const reactId = useId()
   const panelId = `metrics-accordion-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
-  const isSacredTheme = propStyles?.theme === 'sacred'
+  // Sacred is the CSS base default; every other value (undefined / 'light' /
+  // 'dark') resolves to the [data-theme='light'] override block — exactly the
+  // prior two-branch isSacredTheme behaviour.
+  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
   const screenSize = useScreenSize()
 
   // Accent override via CSS custom property — only emit when the caller
   // provided one so the theme default stays authoritative.
-  const cssVars: React.CSSProperties = {}
+  const dynamicStyle: React.CSSProperties & Record<string, string> = {}
   if (propStyles?.color) {
-    ;(cssVars as Record<string, string>)['--ma-accent'] = propStyles.color
+    dynamicStyle['--ma-accent'] = propStyles.color
   }
 
   const renderedMetrics = useMemo(() => {
@@ -269,14 +272,12 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   }
 
   const content = children ?? renderedMetrics
-  const rootClassName = isSacredTheme
-    ? `${styles.root} ${styles.sacred}`
-    : styles.root
 
   return (
     <div
-      className={rootClassName}
-      style={cssVars}
+      className={styles.root}
+      data-theme={theme}
+      style={dynamicStyle}
       data-metrics-accordion="true"
       data-state={state}
       {...(dataField !== undefined && {
@@ -295,7 +296,9 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
         <span>{title}</span>
         <span
           aria-hidden="true"
-          className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+          className={[styles.chevron, isExpanded ? styles.open : '']
+            .filter(Boolean)
+            .join(' ')}
         >
           ▼
         </span>

@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface AccountNumberProps {
   /**
@@ -36,9 +37,9 @@ export interface AccountNumberProps {
 }
 
 const AccountNumber: React.FC<AccountNumberProps> = ({
-  onChange,
+  onChange: onChangeProp,
   onValidityChange,
-  value = '',
+  value: valueProp,
   minLength = 8,
   maxLength = 17,
   isDefaultValue = false,
@@ -54,6 +55,23 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   dataFieldName,
   styles,
 }) => {
+  // Tier-1 form binding: inside a <Form> with a `name` and no explicit
+  // `value`, value/onChange come from the form engine and `markTouched`
+  // marks the field touched on blur. Outside a form (or with an explicit
+  // value) this is a byte-for-byte pass-through of the caller's props.
+  // The component contract keeps a string `value`, so the bound value is
+  // coalesced to '' exactly as the old `value = ''` param default did.
+  const {
+    value: boundValue,
+    onChange,
+    onBlur: markTouched,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  const value = boundValue ?? ''
+
   const [internalValue, setInternalValue] = useState<string>(value)
   // Tracks whether the input is focused so the masked default-value
   // display flips to the raw value while the user is editing it. Pure
@@ -161,9 +179,10 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false)
+      markTouched?.()
       onBlur?.(e)
     },
-    [onBlur]
+    [markTouched, onBlur]
   )
 
   const sacredTheme = styles?.theme === 'sacred'
@@ -220,6 +239,8 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (

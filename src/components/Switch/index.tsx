@@ -2,6 +2,7 @@
 
 import React, { type CSSProperties } from 'react'
 import cssStyles from './Switch.module.css'
+import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 
 // --------------------------------------------------------------------------
 // STYLES INTERFACE
@@ -89,6 +90,23 @@ const Switch: React.FC<SwitchProps> = ({
   const theme = styles?.theme ?? 'dark'
   const isSacredTheme = theme === 'sacred'
 
+  // Tier-1 form binding. Inside a <Form> with a `name` and NO explicit
+  // `checked`, the boolean value + change are owned by the form engine; the
+  // caller's `onChange` (ChangeEvent-based) still fires. Outside a form, or
+  // with an explicit `checked`, this is a byte-for-byte pass-through — the
+  // shouldBind gate in useFieldBinding guarantees it.
+  const fieldName =
+    typeof (props as React.InputHTMLAttributes<HTMLInputElement>).name ===
+    'string'
+      ? (props as React.InputHTMLAttributes<HTMLInputElement>).name
+      : undefined
+  const { value: boundChecked, onChange: writeBoundValue } =
+    useFieldBinding<boolean>({
+      name: fieldName,
+      value: checked,
+    })
+  const effectiveChecked = boundChecked
+
   // Caller-supplied overrides become CSS custom properties consumed by
   // Switch.module.css. Only set a var when the caller actually provided the
   // value, so the per-theme defaults in the CSS keep applying otherwise.
@@ -133,6 +151,8 @@ const Switch: React.FC<SwitchProps> = ({
       `all ${styles.transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // When bound to the form engine, push the new boolean upstream first.
+    writeBoundValue?.(event.target.checked)
     if (onChange) {
       onChange(event)
     }
@@ -140,17 +160,20 @@ const Switch: React.FC<SwitchProps> = ({
 
   const getThumbContent = () => {
     if (isSacredTheme) {
-      return checked ? '𓊹' : '𓊨'
+      return effectiveChecked ? '𓊹' : '𓊨'
     }
-    return checked ? '✓' : ''
+    return effectiveChecked ? '✓' : ''
   }
 
   return (
     <label
       className={cssStyles.container}
+      data-component="Switch"
       data-theme={theme}
+      data-field-name={fieldName}
+      data-filled={!!effectiveChecked}
       {...(disabled && { 'data-disabled': 'true' })}
-      {...(checked && { 'data-checked': 'true' })}
+      {...(effectiveChecked && { 'data-checked': 'true' })}
       {...(styles?.outline === false && { 'data-outline': 'false' })}
       {...(styles?.focusEffects === false && { 'data-focus-effects': 'false' })}
       style={dynamicStyle}
@@ -161,11 +184,11 @@ const Switch: React.FC<SwitchProps> = ({
         <input
           type="checkbox"
           className={cssStyles.input}
-          checked={checked}
           disabled={disabled}
           onChange={handleChange}
           data-field-name={(props as React.InputHTMLAttributes<HTMLInputElement>).name}
           {...props}
+          checked={effectiveChecked}
         />
 
         {/* Sacred shimmer effect — visibility/animation handled purely in CSS

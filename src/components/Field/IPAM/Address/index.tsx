@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 import Typography from '../../../../components/Typography'
 
 export interface IPAddressFieldProps {
@@ -20,6 +21,14 @@ export interface IPAddressFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. Inside a `<Form>` with `name` set, the formatted
+   * IP string is written into the engine on change and the field is marked
+   * touched on blur; the shell auto-derives error/required for this name.
+   * Binds the primary IP value (the range start/end inputs stay parent-driven).
+   * Outside a form this is inert and behaviour is byte-for-byte unchanged.
+   */
+  name?: string
   required?: boolean
   disabled?: boolean
   styles?: FieldStyleOverrides
@@ -251,12 +260,13 @@ const buildInputStyle = (): React.CSSProperties => ({
 
 const IPAddressField: React.FC<IPAddressFieldProps> = ({
   initialValue = '',
-  onChange,
+  onChange: onChangeProp,
   label = 'IP Address',
   helperText,
   error: errorProp,
   dataField,
   dataFieldName,
+  name,
   required,
   disabled,
   styles,
@@ -279,6 +289,15 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   availableRangeMessage,
   placeholder = '192.168.0.1',
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name`, the formatted primary IP
+  // string is written into the engine on change (original onChange still fires)
+  // and the field is marked touched via boundOnBlur. No controlled `value` prop
+  // exists — this field renders from internal state — so the hook's
+  // value-from-store is unused; only onChange/onBlur are taken over when bound.
+  const { onChange, onBlur: boundOnBlur } = useFieldBinding<string>({
+    name,
+    onChange: onChangeProp,
+  })
   const [value, setValue] = useState(initialValue)
   const [isValid, setIsValid] = useState<boolean>(
     initialValue === '' || isValidIPAddress(initialValue)
@@ -602,18 +621,23 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
               error={rangeError}
               disabled={disabled}
               required={required}
+              name={name}
+              filled={Boolean(startIPValue && startIPValue.length > 0)}
               styles={styles}
             >
               {({ inputId, inputAriaProps }) => (
                 <input
                   id={inputId}
-                  data-field-name={dataFieldName}
+                  data-field-name={dataFieldName ?? name}
                   type="text"
                   value={startIPValue || ''}
                   disabled={disabled}
                   required={required}
                   onChange={e => handleStartIPChange(e.target.value)}
-                  onBlur={onEndIPBlur}
+                  onBlur={() => {
+                    onEndIPBlur?.()
+                    boundOnBlur?.()
+                  }}
                   placeholder={placeholder || '192.168.0.1'}
                   style={buildInputStyle()}
                   {...inputAriaProps}
@@ -659,6 +683,9 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     onChange?.(formatted)
   }
 
+  // Filled when the IP string holds at least one character.
+  const hasValue = Boolean(value && value.length > 0)
+
   return (
     <FieldShell
       label={label}
@@ -668,19 +695,22 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={hasValue}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
           id={inputId}
-          data-field-name={dataFieldName}
+          data-field-name={dataFieldName ?? name}
           type="text"
           value={value}
           disabled={disabled}
           required={required}
           onChange={e => handleTextFieldChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onBlur={() => boundOnBlur?.()}
           placeholder={placeholder}
           style={buildInputStyle()}
           {...inputAriaProps}

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import cssStyles from './TextField.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 
 export interface TextFieldProps {
   value: string
@@ -50,8 +51,8 @@ export interface TextFieldProps {
 }
 
 const TextField: React.FC<TextFieldProps> = ({
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   onFocus,
   onBlur,
   onKeyDown,
@@ -69,6 +70,26 @@ const TextField: React.FC<TextFieldProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. When this field is rendered inside a <Form> with a
+  // `name` and no explicit `value`, the engine drives value/onChange; touched
+  // is marked via the returned bindingOnBlur (chained into handleBlur below).
+  // Outside a form, or with an explicit value, this is a byte-for-byte
+  // pass-through. The returned value/onChange SHADOW the incoming props so all
+  // downstream code uses the bound versions unchanged.
+  const {
+    value,
+    onChange: rebindOnChange,
+    onBlur: bindingOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+    onBlur: undefined,
+  })
+  // onChange is required on TextFieldProps, so it is always defined when
+  // unbound; the binding hook supplies a bound handler when bound.
+  const onChange = rebindOnChange ?? onChangeProp
+
   // Focus state still tracked for the multiline textarea wrapper because
   // CSS modules drive its border styling via a class. Inputs use
   // `:focus-visible` selectors and don't need this state.
@@ -97,9 +118,12 @@ const TextField: React.FC<TextFieldProps> = ({
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setIsFocused(false)
+      // Mark the form field touched when bound (no-op outside a <Form>),
+      // then run the caller's FocusEvent onBlur unchanged.
+      bindingOnBlur?.()
       onBlur?.(e)
     },
-    [onBlur]
+    [bindingOnBlur, onBlur]
   )
 
   const handleContainerClick = () => {
@@ -207,6 +231,8 @@ const TextField: React.FC<TextFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (

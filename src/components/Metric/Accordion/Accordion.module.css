@@ -1,18 +1,23 @@
 /* ==========================================================================
    METRICS ACCORDION - CSS MODULE
-   Light + sacred themes via CSS variables. Renders either a bare cards row
-   (no shell) or a full collapsible accordion depending on props.
+   Theme via [data-theme] on the root. Sacred (dark + gold) is the hardcoded
+   base default; [data-theme='light'] is the explicit override block. The TSX
+   resolves the attribute to 'sacred' only when styles.theme === 'sacred',
+   otherwise 'light' (matching the prior two-branch isSacredTheme behaviour).
+   Renders either a bare cards row (no shell) or a full collapsible accordion
+   depending on props. The accent override rides in as the --ma-accent CSS var.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Light theme (default)
+   Root — sacred theme (dark + gold) is the base default
    -------------------------------------------------------------------------- */
 .root {
-  --ma-accent: #1976d2;
-  --ma-toggle-bg: rgba(0, 0, 0, 0.04);
-  --ma-toggle-color: rgba(0, 0, 0, 0.75);
-  --ma-toggle-font: inherit;
-  --ma-panel-bg: rgba(255, 255, 255, 0.6);
+  --ma-accent: #d4af37;
+  --ma-toggle-bg: rgba(0, 0, 0, 0.3);
+  --ma-toggle-color: rgba(255, 255, 255, 0.8);
+  --ma-toggle-font: 'Cinzel', serif;
+  --ma-panel-bg: rgba(0, 0, 0, 0.15);
+  --ma-group-label-color: rgba(255, 255, 255, 0.5);
 
   /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
      accordion in a `padding: 0.25rem` shell that already provides
@@ -24,14 +29,17 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sacred theme (dark + gold)
+   Light theme (default for undefined / light / dark — non-sacred branch)
    -------------------------------------------------------------------------- */
-.root.sacred {
-  --ma-accent: #d4af37;
-  --ma-toggle-bg: rgba(0, 0, 0, 0.3);
-  --ma-toggle-color: rgba(255, 255, 255, 0.8);
-  --ma-toggle-font: 'Cinzel', serif;
-  --ma-panel-bg: rgba(0, 0, 0, 0.15);
+.root[data-theme='light'] {
+  --ma-accent: #1976d2;
+  --ma-toggle-bg: rgba(0, 0, 0, 0.04);
+  --ma-toggle-color: rgba(0, 0, 0, 0.75);
+  --ma-toggle-font: inherit;
+  --ma-panel-bg: rgba(255, 255, 255, 0.6);
+  /* In the light theme the dim-on-dark color isn't readable on a light
+     panel — invert to a dim-on-light grey. */
+  --ma-group-label-color: rgba(0, 0, 0, 0.55);
 }
 
 /* --------------------------------------------------------------------------
@@ -117,17 +125,11 @@
 
 .groupLabel {
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--ma-group-label-color);
   margin-bottom: clamp(6px, 1.5vw, 8px);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: var(--ma-toggle-font);
-}
-
-/* In the light theme the dim-on-dark color isn't readable on a light
-   panel — invert to a dim-on-light grey. */
-.root:not(.sacred) .groupLabel {
-  color: rgba(0, 0, 0, 0.55);
 }
 
 .metricsGroup .metricsRow {

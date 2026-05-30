@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
@@ -37,8 +38,8 @@ export interface PercentageFieldProps {
 
 const PercentageField: React.FC<PercentageFieldProps> = ({
   initialValue = '0',
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   label,
   min = 0,
   max = 100,
@@ -55,6 +56,35 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   name,
   styles,
 }) => {
+  // Tier-1 form binding. The canonical value is numeric (onChange emits a
+  // number); the engine therefore stores/returns a number, while the display
+  // path below works in strings. We pass the prop's numeric form into the gate
+  // (so `value === undefined` correctly decides bind-vs-passthrough) and the
+  // numeric onChange straight through. When NOT bound, the original string
+  // `valueProp` drives the display verbatim — no string→number→string
+  // round-trip — preserving byte-for-byte back-compat for explicit-value
+  // callsites.
+  const {
+    value: boundNumericValue,
+    onChange,
+    onBlur,
+  } = useFieldBinding<number>({
+    name,
+    value:
+      valueProp !== undefined && valueProp !== '' ? Number(valueProp) : undefined,
+    onChange: onChangeProp,
+  })
+  // The display value: when the caller controls the field, use the original
+  // string verbatim; when the engine controls it, stringify the engine's
+  // number. Both collapse to the same `string | undefined` the rest of the
+  // component already expects.
+  const value =
+    valueProp !== undefined
+      ? valueProp
+      : boundNumericValue !== undefined && boundNumericValue !== null
+        ? String(boundNumericValue)
+        : undefined
+
   const initialValueString =
     typeof initialValue === 'number' ? initialValue.toString() : initialValue
   const [internalValue, setInternalValue] = useState(
@@ -265,6 +295,8 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(currentValue && currentValue.toString().length > 0)}
       styles={shellStylesWithAutoWidth}
     >
       {({ inputId, inputAriaProps }) => (
@@ -278,6 +310,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
             data-field-name={dataFieldName}
             value={displayValue}
             onChange={handleChange}
+            onBlur={onBlur}
             disabled={disabled}
             required={required}
             placeholder={placeholder}

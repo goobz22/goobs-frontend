@@ -1,20 +1,34 @@
-/* ==========================================================================
-   FILTER SECTION - CSS MODULE
-   Mirrors MetricsAccordion's structure (collapsible shell + light/sacred
-   themes via CSS variables). Filter callsites typically want the accordion
-   default-OPEN (filters are primary UI), so the default state differs from
-   the metric accordion.
-   ========================================================================== */
+/* =============================================================================
+ * FILTER SECTION — CSS MODULE
+ *
+ * Mirrors MetricsAccordion's structure (collapsible shell + sacred/light
+ * themes). Filter callsites typically want the accordion default-OPEN
+ * (filters are primary UI), so the default state differs from the metric
+ * accordion.
+ *
+ * THEME — expressed via [data-theme] on the root, matching the canonical
+ * house pattern (see Accordion.module.css). The component only ever branched
+ * on `theme === 'sacred'` vs everything-else, so sacred is the base default
+ * here and [data-theme='light'] is the explicit override block. The TSX
+ * resolves the attribute to 'sacred' only when styles.theme === 'sacred',
+ * otherwise 'light' — preserving the original undefined → light behaviour.
+ *
+ * DYNAMIC — caller-supplied control widths arrive as the --fs-control-flex
+ * custom property set inline in the TSX. Per-option chip colours stay as a
+ * runtime inline style on the Chip itself (color-mix from a user-supplied
+ * colour prop — genuinely dynamic, kept in JS per the house recipe).
+ * ===========================================================================*/
 
 /* --------------------------------------------------------------------------
-   Light theme (default)
+   ROOT — sacred theme (dark + gold) is the base default
    -------------------------------------------------------------------------- */
 .root {
-  --fs-accent: #1976d2;
-  --fs-toggle-bg: rgba(0, 0, 0, 0.04);
-  --fs-toggle-color: rgba(0, 0, 0, 0.75);
-  --fs-toggle-font: inherit;
-  --fs-panel-bg: rgba(255, 255, 255, 0.6);
+  --fs-accent: #d4af37;
+  --fs-toggle-bg: rgba(0, 0, 0, 0.3);
+  --fs-toggle-color: rgba(255, 255, 255, 0.8);
+  --fs-toggle-font: 'Cinzel', serif;
+  --fs-panel-bg: rgba(0, 0, 0, 0.15);
+  --fs-chip-label-color: rgba(255, 255, 255, 0.5);
 
   /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
      accordion in a `padding: 0.25rem` shell that already provides
@@ -26,14 +40,15 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sacred theme (dark + gold)
+   ROOT — light theme (default for undefined / light; non-sacred branch)
    -------------------------------------------------------------------------- */
-.root.sacred {
-  --fs-accent: #d4af37;
-  --fs-toggle-bg: rgba(0, 0, 0, 0.3);
-  --fs-toggle-color: rgba(255, 255, 255, 0.8);
-  --fs-toggle-font: 'Cinzel', serif;
-  --fs-panel-bg: rgba(0, 0, 0, 0.15);
+.root[data-theme='light'] {
+  --fs-accent: #1976d2;
+  --fs-toggle-bg: rgba(0, 0, 0, 0.04);
+  --fs-toggle-color: rgba(0, 0, 0, 0.75);
+  --fs-toggle-font: inherit;
+  --fs-panel-bg: rgba(255, 255, 255, 0.6);
+  --fs-chip-label-color: rgba(0, 0, 0, 0.55);
 }
 
 /* --------------------------------------------------------------------------
@@ -128,7 +143,9 @@
 }
 
 .controlsRow > .controlCell {
-  flex: 1 1 min(220px, 100%);
+  /* Default responsive sizing; a caller-supplied width overrides via the
+     --fs-control-flex custom property set inline on the cell. */
+  flex: var(--fs-control-flex, 1 1 min(220px, 100%));
   min-width: min(180px, 100%);
 }
 
@@ -150,14 +167,10 @@
 
 .chipClusterLabel {
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--fs-chip-label-color);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: var(--fs-toggle-font);
-}
-
-.root:not(.sacred) .chipClusterLabel {
-  color: rgba(0, 0, 0, 0.55);
 }
 
 .chipRow {

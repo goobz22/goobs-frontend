@@ -297,8 +297,6 @@ function CardInner({
   const rootClassName = mergeClassNames(
     cssStyles.root,
     cssStyles[variant],
-    theme === 'sacred' ? cssStyles.sacred : '',
-    theme === 'dark' ? cssStyles.dark : '',
     className
   )
 
@@ -314,6 +312,7 @@ function CardInner({
     style: mergedStyle,
     role: 'article',
     'aria-labelledby': titleId,
+    'data-theme': theme,
     'data-card': 'true',
     'data-card-state': resolvedState,
     ...(cardType !== undefined && { 'data-card-type': cardType }),
@@ -1328,10 +1327,8 @@ const CardEmptyState = forwardRef<HTMLDivElement, CardEmptyStateProps>(
     return (
       <div
         ref={ref}
-        className={mergeClassNames(
-          cssStyles.emptyState,
-          theme === 'sacred' ? cssStyles.sacred : ''
-        )}
+        className={cssStyles.emptyState}
+        data-theme={theme}
         role="status"
         data-card-empty-state="true"
       >

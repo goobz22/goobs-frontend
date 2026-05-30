@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from 'react'
 import { alpha } from '../../../utils'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
+import { useFieldBinding } from '../Shell/useFieldBinding'
 
 const SACRED_GOLD = '#FFD700'
 
@@ -24,6 +25,12 @@ export interface SearchbarProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. When set inside a `<Form>`, the field auto-binds
+   * value/onChange to the engine and FieldShell derives error/required and
+   * emits `data-field-name`. Inert outside a `<Form>`.
+   */
+  name?: string
   styles?: FieldStyleOverrides & {
     // Search-specific overrides that don't fit the FieldShell
     // CSS-variable contract (color-of-icon, padding-of-inner-input,
@@ -37,14 +44,30 @@ export interface SearchbarProps {
 const Searchbar: React.FC<SearchbarProps> = ({
   label,
   placeholder = 'Search...',
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   helperText,
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
+  // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
+  // the engine drives value/onChange; this is a byte-for-byte pass-through
+  // otherwise. The destructured value/onChange SHADOW the incoming props so
+  // all downstream code uses the bound versions unchanged. Search has no blur
+  // concept (no onBlur prop), so no touched-mark is wired.
+  const { value: boundValue, onChange: boundOnChange } =
+    useFieldBinding<string>({
+      name,
+      value: valueProp,
+      onChange: onChangeProp,
+    })
+  const value = boundValue ?? ''
+  // onChange is required on SearchbarProps, so it is defined when unbound.
+  const onChange = boundOnChange ?? onChangeProp
+
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Listen for native 'input' events to support browser automation
@@ -124,6 +147,8 @@ const Searchbar: React.FC<SearchbarProps> = ({
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(value && value.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (

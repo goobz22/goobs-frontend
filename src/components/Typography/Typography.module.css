@@ -1,0 +1,159 @@
+/* ==========================================================================
+   TYPOGRAPHY - CSS MODULE
+   --------------------------------------------------------------------------
+   Migrated off the inline-style + getVariantStyles() JS branch tree.
+
+   This component never imported the JS theme module; instead it carried its
+   own hardcoded tokens (SACRED_GOLD, font sizes, font families). Those values
+   are transcribed here verbatim — visual parity with the previous inline
+   styles is mandatory.
+
+   WHAT MOVED TO CSS
+   - display:block layout (the <span style="display:block"> hydration fix).
+   - The per-variant font-SIZE defaults that getVariantStyles() produced
+     (cinzel h1..h6 / standard h1..h6 / merri helper / body2 / body1).
+   - The non-sacred-vs-sacred default text color.
+
+   WHAT STAYS IN JS (passed in as CSS custom properties — recipe rule 3)
+   - font-weight, font-family and color RESOLUTION. The original JS resolved
+     these with caller-precedence rules that differ per branch:
+       * fontWeight:  caller fontWeight ALWAYS wins over the variant weight
+                      (`finalFontWeight || variantStyles.fontWeight`).
+       * fontFamily:  variant family wins for cinzel/merri/headings; body
+                      variants fall back to the caller family or Crimson Text
+                      (`variantStyles.fontFamily || (isHeading ? Cinzel : caller)`).
+       * color:       merri helper/footer color wins over caller color; every
+                      other variant uses the caller/theme color
+                      (`variantStyles.color || finalColor`).
+     Reproducing those exact precedence branches in pure CSS would mean
+     duplicating the branch tree across selectors; instead the TSX computes
+     the single resolved scalar and feeds it through a custom property, so the
+     selector stays in CSS and the value stays in JS.
+   - All caller-supplied geometry overrides (margins, padding, width, etc.).
+
+   THEME MODEL (parity note)
+   The previous JS only ever distinguished `sacred` (gold) from everything
+   else (white). When no theme was passed the component rendered the NON-sacred
+   white text, so the base class carries the non-sacred default and
+   `[data-theme='sacred']` is the override — preserving the exact runtime
+   default rather than forcing sacred-by-default.
+   ========================================================================== */
+
+.root {
+  /* Layout parity: previously <span style="display:block">. */
+  display: block;
+
+  /* Resolved-in-JS values (recipe rule 3). Fallbacks = parity defaults for
+     the un-themed / un-overridden case. */
+  color: var(--typography-color, rgba(255, 255, 255, 0.9));
+  font-weight: var(--typography-font-weight, 400);
+  font-family: var(--typography-font-family, 'Crimson Text', serif);
+
+  /* body1 / default font size; variant classes override via source order. */
+  font-size: var(--typography-font-size, 1rem);
+
+  /* Caller-supplied geometry overrides. Unset properties resolve to `initial`
+     (no value) exactly as the previous `undefined` inline entries did.
+
+     NOTE: margin & padding are intentionally NOT here. The previous JS gave
+     the margin/padding SHORTHAND precedence by nulling the longhands when a
+     shorthand was supplied; a multi-value shorthand ('10px 20px') cannot be
+     decomposed into identical longhand vars, and declaring both shorthand and
+     longhand in one rule lets the longhand always clobber the shorthand. To
+     keep exact parity, margin/padding/gutterBottom resolution stays in a small
+     JS dynamicStyle object (recipe rule 3 — caller-supplied geometry). */
+  text-align: var(--typography-text-align, left);
+
+  line-height: var(--typography-line-height);
+  letter-spacing: var(--typography-letter-spacing);
+  text-shadow: var(--typography-text-shadow);
+  font-style: var(--typography-font-style);
+  text-transform: var(--typography-text-transform);
+  white-space: var(--typography-white-space);
+  opacity: var(--typography-opacity);
+  max-width: var(--typography-max-width);
+  min-width: var(--typography-min-width);
+  background-color: var(--typography-background-color);
+  border-left: var(--typography-border-left);
+  flex: var(--typography-flex);
+  align-self: var(--typography-align-self);
+  width: var(--typography-width);
+  outline: var(--typography-outline);
+  border-radius: var(--typography-border-radius);
+  overflow: var(--typography-overflow);
+  text-overflow: var(--typography-text-overflow);
+}
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDE — sacred (gold text)
+   parity: finalColor default = isSacred ? '#FFD700' : 'rgba(255,255,255,0.9)'.
+   Only changes the FALLBACK; an explicit caller/merri color (the var value)
+   still wins because it's the var's first argument.
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] {
+  color: var(--typography-color, #ffd700);
+}
+
+/* ==========================================================================
+   VARIANT FONT-SIZE DEFAULTS
+   Each variant supplies only its default font-size, gated behind
+   --typography-font-size so a caller-supplied fontSize wins
+   (parity: `finalFontSize || '<default>'`). font-weight & font-family for
+   these variants are resolved in JS and arrive via the .root custom props.
+   ========================================================================== */
+
+/* --- Cinzel sacred headings (v.includes('cinzel')) --- */
+.cinzelH1 {
+  font-size: var(--typography-font-size, 2.5rem);
+}
+.cinzelH2 {
+  font-size: var(--typography-font-size, 2rem);
+}
+.cinzelH3 {
+  font-size: var(--typography-font-size, 1.75rem);
+}
+.cinzelH4 {
+  font-size: var(--typography-font-size, 1.5rem);
+}
+.cinzelH5 {
+  font-size: var(--typography-font-size, 1.25rem);
+}
+.cinzelH6 {
+  font-size: var(--typography-font-size, 1.1rem);
+}
+.cinzelBase {
+  font-size: var(--typography-font-size, 1rem);
+}
+
+/* --- Merriweather helper / footer text --- */
+.merriHelper {
+  font-size: var(--typography-font-size, 0.85rem);
+}
+
+/* --- Standard heading variants --- */
+.h1 {
+  font-size: var(--typography-font-size, 2.5rem);
+}
+.h2 {
+  font-size: var(--typography-font-size, 2rem);
+}
+.h3 {
+  font-size: var(--typography-font-size, 1.75rem);
+}
+.h4 {
+  font-size: var(--typography-font-size, 1.5rem);
+}
+.h5 {
+  font-size: var(--typography-font-size, 1.25rem);
+}
+.h6 {
+  font-size: var(--typography-font-size, 1rem);
+}
+
+/* --- body2 / small --- */
+.body2 {
+  font-size: var(--typography-font-size, 0.875rem);
+}
+
+/* --- body1 / default --- */
+/* (size already on .root: 1rem — no separate class needed) */

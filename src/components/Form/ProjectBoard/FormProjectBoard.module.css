@@ -1,0 +1,162 @@
+/* ==========================================================================
+   FORM PROJECTBOARD - CSS MODULE
+   Styled wrapper that frames a ProjectBoard with a title/description header.
+   Theme variant is driven by the `sacredtheme` boolean, mapped to
+   data-theme='sacred' | 'light' on the root, matching the goobs house pattern
+   (Card / DataGrid / FormDataGrid).
+
+   The old component carried two full style objects (sacredStyles / premiumStyles)
+   and switched between them in JS. Here the shared box/layout lives on the base
+   class and the per-theme deltas are [data-theme] overrides. Values are
+   transcribed verbatim from those objects — 'sacred' from sacredStyles, 'light'
+   from premiumStyles — so visual parity holds exactly.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CONTAINER
+   light  ← premiumStyles.container
+   sacred ← sacredStyles.container
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.container[data-theme='sacred'] {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(32px);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   TITLE CONTAINER (identical in both themes)
+   -------------------------------------------------------------------------- */
+.titleContainer {
+  margin-top: 4px;
+  margin-bottom: 12px;
+  width: 100%;
+  position: relative;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   TITLE
+   light  ← premiumStyles.title
+   sacred ← sacredStyles.title
+   -------------------------------------------------------------------------- */
+.title {
+  margin-bottom: 2px;
+  width: 100%;
+  text-align: left;
+  font-family: Merriweather, serif;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  font-weight: normal;
+  color: rgba(0, 0, 0, 1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.title[data-theme='sacred'] {
+  margin-bottom: 4px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.5rem, 5vw, 1.875rem);
+  font-weight: 600;
+  color: rgba(255, 215, 0, 1);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
+/* --------------------------------------------------------------------------
+   DESCRIPTION
+   light  ← premiumStyles.description
+   sacred ← sacredStyles.description
+   -------------------------------------------------------------------------- */
+.description {
+  width: 100%;
+  text-align: left;
+  font-family: Merriweather, serif;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: normal;
+  color: rgba(0, 0, 0, 1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.description[data-theme='sacred'] {
+  text-align: center;
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(1rem, 3vw, 1.125rem);
+  font-weight: normal;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.025em;
+  margin-bottom: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   PROJECT BOARD CONTAINER
+   light  ← premiumStyles.projectBoardContainer
+   sacred ← sacredStyles.projectBoardContainer
+   -------------------------------------------------------------------------- */
+.projectBoardContainer {
+  position: relative;
+}
+
+.projectBoardContainer[data-theme='sacred'] {
+  border-radius: 8px;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED-ONLY DECORATION — top/bottom shimmer lines + title underline
+   ← sacredStyles.topShimmer / bottomShimmer / underline
+   -------------------------------------------------------------------------- */
+.topShimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 215, 0, 0.5);
+}
+
+.bottomShimmer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 215, 0, 0.5);
+}
+
+.underline {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 215, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES — the old decorativeGlyph referenced formProjectBoardFloat by name,
+   but no keyframes were ever injected and no glyph element rendered. Kept here
+   statically for any future float decoration; harmless and zero-cost unused.
+   -------------------------------------------------------------------------- */
+@keyframes formProjectBoardFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

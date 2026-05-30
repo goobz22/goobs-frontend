@@ -1,0 +1,163 @@
+/* ==========================================================================
+   FORM DATAGRID - CSS MODULE
+   Styled wrapper that frames a DataGrid with a title/description header and an
+   optional Alert. Theme variant is driven by the `sacredtheme` boolean on the
+   component, mapped to data-theme='sacred' | 'light' on the root, exactly like
+   the rest of goobs (Card / DataGrid).
+
+   Layout/box values shared by both themes live on the base classes. The sacred
+   theme (the component default) layers its dark/gold treatment via
+   [data-theme='sacred']; the light theme is the plain-paper variant. Values are
+   transcribed verbatim from the old getStyles(sacredtheme) generator — visual
+   parity is mandatory.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CONTAINER
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.container[data-theme='sacred'] {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  animation: formDatagridGlowPulse 2s infinite alternate;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER / TITLE
+   -------------------------------------------------------------------------- */
+.titleContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+.titleContainer[data-theme='sacred'] {
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  padding-bottom: 0.75rem;
+}
+
+.title {
+  width: 100%;
+  text-align: left;
+  font-family: Merriweather, serif;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 700;
+  color: black;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.title[data-theme='sacred'] {
+  font-family: Cinzel, serif;
+  color: #ffd700;
+  text-align: center;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  width: 100%;
+  text-align: left;
+  font-family: Merriweather, serif;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 400;
+  color: black;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.description[data-theme='sacred'] {
+  font-family: 'Crimson Text', serif;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  font-size: clamp(0.95rem, 3vw, 1.125rem);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   SHIMMER (sacred only) — the old style used a '::after' object key that
+   React inline styles silently dropped, so the gradient never rendered. The
+   real ::after pseudo-element here restores the intended flowing-gold effect.
+   -------------------------------------------------------------------------- */
+.shimmer {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to right, transparent, #ffd700, transparent);
+  animation: formDatagridDataFlow 3s infinite;
+}
+
+/* --------------------------------------------------------------------------
+   ALERT + DATAGRID WRAPPERS
+   -------------------------------------------------------------------------- */
+.alertContainer {
+  margin-bottom: 0.75rem;
+}
+
+.dataGridContainer[data-theme='sacred'] {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES — previously referenced by name in JS but never injected, so the
+   animations were dead. Defined here statically so they actually run.
+   -------------------------------------------------------------------------- */
+@keyframes formDatagridGlowPulse {
+  from {
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+  }
+  to {
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.45);
+  }
+}
+
+@keyframes formDatagridDataFlow {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes formDatagridFloat {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}

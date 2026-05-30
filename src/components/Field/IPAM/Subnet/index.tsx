@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
@@ -106,7 +107,7 @@ const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
 > = ({
   initialValue = '16',
-  onChange,
+  onChange: onChangeProp,
   label = 'Subnet Mask',
   initialDelay = 500,
   repeatInterval = 100,
@@ -130,6 +131,15 @@ const InternalIncrementNumberField: React.FC<
   name,
   autoComplete,
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name` (and no controlled value —
+  // this field is initialValue/internal-state based), the numeric mask is
+  // written into the form engine on change. Outside a form, onChange passes
+  // through unchanged (back-compat path). No `value` prop exists, so the hook's
+  // value-from-store is unused here; the field renders from internal state.
+  const { onChange } = useFieldBinding<number>({
+    name,
+    onChange: onChangeProp,
+  })
   const effectiveMin =
     typeof min === 'number' ? min : maskType === 'supernet' ? 8 : 16
   const effectiveMax =
@@ -245,6 +255,9 @@ const InternalIncrementNumberField: React.FC<
     return () => el.removeEventListener('input', handleNativeInput)
   }, [subnetInfo.mask, handleTextFieldChange])
 
+  // Filled whenever a (always-present) numeric mask value is set.
+  const hasValue = currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
+
   return (
     <div style={style} data-field={dataField}>
       <FieldShell
@@ -254,6 +267,8 @@ const InternalIncrementNumberField: React.FC<
         disabled={disabled}
         required={required}
         dataFieldName={dataFieldName}
+        name={name}
+        filled={hasValue}
         styles={styles}
       >
         {({ inputId, inputAriaProps }) => (
@@ -262,7 +277,7 @@ const InternalIncrementNumberField: React.FC<
               ref={inputRef}
               id={id ?? inputId}
               name={name}
-              data-field-name={dataFieldName}
+              data-field-name={dataFieldName ?? name}
               autoComplete={autoComplete}
               value={subnetInfo.mask}
               disabled={disabled}
@@ -334,6 +349,13 @@ export interface SubnetFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. Inside a `<Form>` with `name` set and no explicit
+   * `value`, the `{ address, mask }` object is read from / written to the form
+   * engine. Outside a form (every existing callsite passes an explicit
+   * `value`) this is inert and behaviour is byte-for-byte unchanged.
+   */
+  name?: string
   styles?: FieldStyleOverrides
 }
 
@@ -402,8 +424,8 @@ const calculateNetworkRange = (
 }
 
 const SubnetField: React.FC<SubnetFieldProps> = ({
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   label = 'Subnet',
   required = false,
   min,
@@ -417,8 +439,21 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   error: errorProp,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
+  // Tier-1 form binding: inside a <Form> with `name` and no explicit `value`,
+  // the { address, mask } object is read from / written to the form engine.
+  // Outside a form (every existing callsite passes an explicit object value),
+  // this returns value/onChange unchanged (back-compat path).
+  const { value: boundValue, onChange } = useFieldBinding<SubnetFieldValue>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+  const value: SubnetFieldValue =
+    boundValue ?? valueProp ?? { address: '', mask: maskType === 'supernet' ? 8 : 16 }
+
   const [address, setAddress] = useState<string>(value.address || '')
   const [mask, setMask] = useState<number>(
     value.mask || (maskType === 'supernet' ? 8 : 16)
@@ -542,7 +577,10 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   const handleMaskChange = useCallback(
     (newMask: number) => {
       setMask(newMask)
-      onChange({ address, mask: newMask })
+      // onChange is the (possibly form-bound) writer; it is always defined at
+      // runtime (bound writer, or the required onChange prop) — the optional
+      // call only satisfies the hook's optional return type.
+      onChange?.({ address, mask: newMask })
     },
     [onChange, address]
   )
@@ -567,8 +605,16 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     : undefined
   const shellError = errorProp ?? localError
 
+  // Filled when the subnet object carries a meaningful address.
+  const hasValue = Boolean(value.address && value.address.length > 0)
+
   return (
-    <div style={style} data-field={dataField} data-field-name={dataFieldName}>
+    <div
+      style={style}
+      data-field={dataField}
+      data-field-name={dataFieldName ?? name}
+      data-filled={hasValue || undefined}
+    >
       <InternalIncrementNumberField
         initialValue={mask.toString()}
         onChange={handleMaskChange}

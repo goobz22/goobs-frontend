@@ -228,7 +228,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const reactId = useId()
   const panelId = `filter-section-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
-  const isSacredTheme = propStyles?.theme === 'sacred'
+  // Theme attribute resolves to 'sacred' only when explicitly requested;
+  // every other value (undefined / 'light') falls through to the light
+  // override block in the CSS module — preserving the original behaviour
+  // where an unset theme rendered light. (Mirrors Accordion's pattern.)
+  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
+  const isSacredTheme = theme === 'sacred'
 
   // Only render the search/buttons row if any of those props were provided.
   const hasSearch = onSearchChange !== undefined
@@ -263,14 +268,18 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       dataField: computedField,
       ...(isSacredTheme && { styles: { theme: 'sacred' as const } }),
     }
+    // Caller-supplied width is a runtime value → passed as a CSS custom
+    // property that overrides the cell's default responsive flex.
+    const cellStyle =
+      d.width !== undefined
+        ? ({ ['--fs-control-flex']: `0 0 ${d.width}` } as React.CSSProperties)
+        : undefined
     if (variantResolved === 'searchable') {
       return (
         <div
           key={`dropdown-${i}-${computedField}`}
           className={styles.controlCell}
-          {...(d.width !== undefined && {
-            style: { flex: `0 0 ${d.width}` },
-          })}
+          {...(cellStyle !== undefined && { style: cellStyle })}
         >
           <SearchableSimple
             {...commonProps}
@@ -283,9 +292,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       <div
         key={`dropdown-${i}-${computedField}`}
         className={styles.controlCell}
-        {...(d.width !== undefined && {
-          style: { flex: `0 0 ${d.width}` },
-        })}
+        {...(cellStyle !== undefined && { style: cellStyle })}
       >
         <Dropdown {...commonProps} onChange={d.onChange} />
       </div>
@@ -440,14 +447,11 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
     </div>
   )
 
-  const rootClassName = isSacredTheme
-    ? `${styles.root} ${styles.sacred}`
-    : styles.root
-
   if (!collapsible) {
     return (
       <div
-        className={rootClassName}
+        className={styles.root}
+        data-theme={theme}
         data-filter-section="true"
         {...(dataField !== undefined && {
           'data-filter-section-field': dataField,
@@ -460,7 +464,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
   return (
     <div
-      className={rootClassName}
+      className={styles.root}
+      data-theme={theme}
       data-filter-section="true"
       data-state={state}
       {...(dataField !== undefined && {

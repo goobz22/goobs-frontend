@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateRange.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DateRange {
   start: Date | null
@@ -30,6 +31,13 @@ export interface DateRangeProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Form-engine binding key. When set inside a `<Form>` and no explicit
+   * `value` is passed, the {start,end} range is read/written through the form
+   * engine; the engine's error/required for this field also attach to the
+   * start shell. Inert outside a `<Form>`.
+   */
+  name?: string
   style?: React.CSSProperties
   styles?: FieldStyleOverrides & {
     // DateRange-local layout overrides forwarded as inline styles
@@ -45,15 +53,28 @@ export interface DateRangeProps {
 const DateRange: React.FC<DateRangeProps> = ({
   startLabel = 'Start Date',
   endLabel = 'End Date',
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   error,
   dataField,
   dataFieldName,
+  name,
   style,
   styles,
   helperText,
 }) => {
+  // Tier-1 form binding: when rendered inside a <Form> with a `name` and no
+  // explicit `value`, the {start,end} range is read/written through the form
+  // engine (stored as the object directly — no adapter). Outside a form, or
+  // with an explicit value, this is a byte-for-byte pass-through. The bound
+  // results take the bare value/onChange names so all downstream code is
+  // unchanged; onChange stays optional (callsites already use `onChange?.`).
+  const { value, onChange } = useFieldBinding<DateRange>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+
   // Top-level `disabled`/`required` props were removed during the
   // FieldShell migration — read both from styles only. This is a
   // breaking change for callers that previously passed
@@ -172,7 +193,7 @@ const DateRange: React.FC<DateRangeProps> = ({
   }
 
   return (
-    <div style={style} data-field={dataField} data-field-name={dataFieldName}>
+    <div style={style} data-field={dataField} data-field-name={dataFieldName ?? name}>
       <div style={fieldsWrapperStyle} className={cssStyles.fieldsWrapper}>
         <div style={{ flex: 1 }}>
           <FieldShell
@@ -181,6 +202,8 @@ const DateRange: React.FC<DateRangeProps> = ({
             error={error}
             disabled={disabled}
             required={required}
+            name={name}
+            filled={value != null && (value.start != null || value.end != null)}
             styles={styles}
           >
             {({ inputId, inputAriaProps }) => (

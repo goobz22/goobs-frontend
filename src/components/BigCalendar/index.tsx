@@ -24,16 +24,15 @@ import {
   setMinutes,
   getHours,
 } from 'date-fns'
-import Paper from '../Paper'
+import Paper, { type PaperProps } from '../Paper'
 import Typography from '../Typography'
-import StyledTooltip from '../Tooltip'
-import ToggleButton, { ToggleButtonGroup } from '../ToggleButton'
-import {
-  getBigCalendarStyles,
-  type BigCalendarStyles,
-} from '../../theme/bigcalendar'
-import type { ButtonStyles, PaperStyles, TooltipStyles } from '../../theme'
+import StyledTooltip, { type TooltipProps } from '../Tooltip'
+import ToggleButton, {
+  ToggleButtonGroup,
+  type ToggleButtonProps,
+} from '../ToggleButton'
 import { CalendarFilters, CalendarFilterOptions } from './CalendarFilters'
+import cssStyles from './BigCalendar.module.css'
 
 import * as Icons from '../Icons'
 const {
@@ -47,6 +46,57 @@ const {
 export type CalendarView = 'month' | 'week' | 'day'
 
 export type { CalendarFilterOptions } from './CalendarFilters'
+
+/**
+ * Caller-supplied style overrides for BigCalendar. Theme variant + visual
+ * tokens now live in BigCalendar.module.css (data-theme on the root); this
+ * type preserves the public `styles` prop surface so callers keep their
+ * existing overrides. `theme` selects the data-theme variant; the remaining
+ * fields are passed through to child components (Paper / Typography) or used
+ * as layout overrides on the root.
+ */
+export interface BigCalendarStyles {
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container / typography passthrough
+  backgroundColor?: string
+  borderRadius?: string
+  fontFamily?: string
+  fontSize?: string
+  fontWeight?: string | number
+  lineHeight?: string
+  color?: string
+
+  // Layout overrides applied to the root container
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+  maxWidth?: string
+  minWidth?: string
+  maxHeight?: string
+  minHeight?: string
+  width?: string
+  height?: string
+
+  // Toolbar overrides (passed to the toolbar Paper)
+  toolbarPadding?: string
+  toolbarHeight?: string
+  toolbarBackground?: string
+  toolbarBorderColor?: string
+
+  // Calendar surface overrides (passed to the calendar Paper)
+  calendarBackground?: string
+  calendarBorderRadius?: string
+
+  // Sacred surface override
+  sacredBackgroundImage?: string
+
+  // Transition overrides (reserved for caller parity)
+  transitionDuration?: string
+  transitionEasing?: string
+}
 
 export type CalendarEvent = {
   id: string
@@ -93,6 +143,10 @@ export interface BigCalendarProps {
 
 const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+function mergeClassNames(...names: Array<string | false | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
+
 export default function BigCalendar({
   events = [],
   currentDate = new Date(),
@@ -123,14 +177,17 @@ export default function BigCalendar({
 }: BigCalendarProps) {
   const [view, setView] = useState<CalendarView>(propView)
   const [selectedDate, setSelectedDate] = useState(currentDate)
-  const [hoveredCell, setHoveredCell] = useState<string | null>(null)
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set())
   const [selectedSpans, setSelectedSpans] = useState<
     Array<{ date: string; startHour: number; endHour: number }>
   >([])
   const [internalFilters, setInternalFilters] =
     useState<CalendarFilterOptions>(filters)
-  const computedStyles = useMemo(() => getBigCalendarStyles(styles), [styles])
+
+  // Old getBigCalendarStyles defaulted to 'light' when no theme was supplied;
+  // data-theme is always emitted explicitly so the base-class sacred defaults
+  // only apply when theme === 'sacred'. Parity preserved.
+  const theme: 'light' | 'dark' | 'sacred' = styles?.theme || 'light'
 
   // Handle filter changes
   const handleFiltersChange = (newFilters: CalendarFilterOptions) => {
@@ -214,71 +271,72 @@ export default function BigCalendar({
     return filtered
   }, [events, internalFilters])
 
-  const buttonThemeStyles: ButtonStyles | undefined = styles?.theme
-    ? { theme: styles.theme }
-    : undefined
+  // Theme-resolved values that flow through to child components (Paper) which
+  // paint their own surfaces. Transcribed from theme/bigcalendar.ts so the
+  // toolbar/calendar Paper surfaces keep the exact spacing + radius per theme.
+  const isSacredTheme = theme === 'sacred'
+  const toolbarPaddingByTheme = isSacredTheme
+    ? '20px'
+    : '16px' /* light + dark */
+  const toolbarHeightByTheme = isSacredTheme ? '72px' : '64px'
+  const calendarRadiusByTheme = isSacredTheme ? '12px' : '8px'
+  // Sacred calendar surface background image (theme/bigcalendar.ts sacred.backgroundImage)
+  const sacredCalendarBackgroundImage = `
+        linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%, rgba(255, 215, 0, 0.05) 100%),
+        radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+      `
 
-  const toolbarPadding = computedStyles.toolbar.padding as string | undefined
-  const calendarBorderRadius = computedStyles.calendarContainer.borderRadius as
-    | string
-    | undefined
-  const calendarBackgroundImage = (computedStyles.calendarContainer as any)
-    .backgroundImage as string | undefined
+  // Theme passthrough for child components — typed against each child's own
+  // prop type, no theme-module import.
+  const childThemeStyle = { theme }
 
-  const paperToolbarStyles: PaperStyles = {
-    ...(styles?.theme ? { theme: styles.theme } : {}),
-    ...(toolbarPadding ? { padding: toolbarPadding } : {}),
-    // Preserve spacing between toolbar and calendar
-    marginBottom: (computedStyles.toolbar.marginBottom as string) || '16px',
-    ...(computedStyles.toolbar.height
+  // Per-theme default event color (theme/bigcalendar.ts event.defaultColor).
+  const defaultEventColor = isSacredTheme ? 'rgba(255, 215, 0, 0.8)' : '#2196f3'
+
+  // Caller-supplied layout/style overrides stay in JS (recipe step 3). These
+  // mirror the old containerStyle override fields; theme defaults live in CSS.
+  const dynamicRootStyle: React.CSSProperties = {
+    ...(styles?.backgroundColor
+      ? { backgroundColor: styles.backgroundColor }
+      : {}),
+    ...(styles?.borderRadius ? { borderRadius: styles.borderRadius } : {}),
+    ...(styles?.fontFamily ? { fontFamily: styles.fontFamily } : {}),
+    margin: styles?.margin,
+    marginTop: styles?.marginTop,
+    marginBottom: styles?.marginBottom,
+    marginLeft: styles?.marginLeft,
+    marginRight: styles?.marginRight,
+    maxWidth: styles?.maxWidth,
+    minWidth: styles?.minWidth,
+    maxHeight: styles?.maxHeight,
+    minHeight: styles?.minHeight,
+  }
+
+  const paperToolbarStyles: PaperProps['styles'] = {
+    theme,
+    padding: styles?.toolbarPadding || toolbarPaddingByTheme,
+    // Preserve spacing between toolbar and calendar (toolbarStyle always used 16px)
+    marginBottom: '16px',
+    height: styles?.toolbarHeight || toolbarHeightByTheme,
+    minHeight: styles?.toolbarHeight || toolbarHeightByTheme,
+  }
+
+  const paperCalendarStyles: PaperProps['styles'] = {
+    theme,
+    borderRadius: styles?.calendarBorderRadius || calendarRadiusByTheme,
+    ...(isSacredTheme
       ? {
-          height: computedStyles.toolbar.height as string,
-          minHeight: computedStyles.toolbar.height as string,
+          backgroundImage:
+            styles?.sacredBackgroundImage || sacredCalendarBackgroundImage,
         }
       : {}),
   }
 
-  const paperCalendarStyles: PaperStyles = {
-    ...(styles?.theme ? { theme: styles.theme } : {}),
-    ...(calendarBorderRadius ? { borderRadius: calendarBorderRadius } : {}),
-    ...(calendarBackgroundImage
-      ? { backgroundImage: calendarBackgroundImage }
-      : {}),
+  const buttonStylesProp: { styles?: ToggleButtonProps['styles'] } = {
+    styles: childThemeStyle,
   }
-
-  const buttonStylesProp = buttonThemeStyles
-    ? { styles: buttonThemeStyles }
-    : {}
-  const tooltipStylesProp: TooltipStyles | undefined = styles?.theme
-    ? { theme: styles.theme }
-    : undefined
-  const tooltipStylesSpread = tooltipStylesProp
-    ? { styles: tooltipStylesProp }
-    : {}
-
-  // Sacred-themed nav button styling
-  const isSacredTheme = styles?.theme === 'sacred'
-  const navButtonStyle: React.CSSProperties = {
-    width: 36,
-    height: 36,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    backgroundColor: isSacredTheme ? 'rgba(255, 215, 0, 0.06)' : 'transparent',
-    border: isSacredTheme
-      ? '1px solid rgba(255, 215, 0, 0.4)'
-      : '1px solid rgba(226, 232, 240, 0.6)',
-    color: isSacredTheme
-      ? '#FFD700'
-      : styles?.theme === 'dark'
-        ? '#e5e7eb'
-        : '#334155',
-    boxShadow: isSacredTheme
-      ? '0 0 12px rgba(255, 215, 0, 0.25), inset 0 0 6px rgba(255, 215, 0, 0.12)'
-      : 'none',
-    borderRadius: 8,
-    padding: 0,
+  const tooltipStylesSpread: { styles?: TooltipProps['styles'] } = {
+    styles: childThemeStyle,
   }
 
   // No runtime size dependency; removed unused resize handler
@@ -415,7 +473,7 @@ export default function BigCalendar({
       return eventRenderer(event)
     }
 
-    const eventColor = event.color || computedStyles.event.defaultColor
+    const eventColor = event.color || defaultEventColor
     const label = isCompact
       ? event.title
       : `${event.title}${event.resource ? ` - ${event.resource}` : ''}`
@@ -428,12 +486,12 @@ export default function BigCalendar({
       >
         <div
           onClick={() => onEventClick?.(event)}
-          style={{
-            ...computedStyles.event.base,
-            backgroundColor: eventColor,
-            cursor: onEventClick ? 'pointer' : 'default',
-            ...(isCompact && computedStyles.event.compact),
-          }}
+          className={mergeClassNames(
+            cssStyles.event,
+            onEventClick ? cssStyles.eventClickable : cssStyles.eventStatic,
+            isCompact ? cssStyles.eventCompact : undefined
+          )}
+          style={{ ['--bc-event-bg' as string]: eventColor }}
         >
           <Typography
             styles={{
@@ -453,11 +511,11 @@ export default function BigCalendar({
 
   const renderMonthView = () => {
     return (
-      <div style={computedStyles.calendarGrid}>
+      <div className={cssStyles.calendarGrid}>
         {/* Day headers */}
-        <div style={computedStyles.header.container}>
+        <div className={cssStyles.headerContainer}>
           {dayHeaders.map(day => (
-            <div key={day} style={computedStyles.header.cell}>
+            <div key={day} className={cssStyles.headerCell}>
               <Typography
                 styles={{ ...styles, fontSize: '0.75rem', fontWeight: 700 }}
               >
@@ -468,48 +526,44 @@ export default function BigCalendar({
         </div>
 
         {/* Calendar cells */}
-        <div style={computedStyles.monthGrid}>
+        <div className={cssStyles.monthGrid}>
           {viewDates.map(day => {
             const dayEvents = getEventsForDate(day)
             const isToday = isSameDay(day, new Date())
             const isCurrentMonth = isSameMonth(day, selectedDate)
             const cellKey = format(day, 'yyyy-MM-dd')
-            const isHovered = hoveredCell === cellKey
             const isSelected = selectedDates.has(cellKey)
 
             return (
               <div
                 key={cellKey}
-                style={{
-                  ...computedStyles.cell.base,
-                  ...(!isCurrentMonth && computedStyles.cell.otherMonth),
-                  ...(isToday && computedStyles.cell.today),
-                  ...(isHovered && computedStyles.cell.hover),
-                  ...(isSelected && (computedStyles.cell as any).selected),
-                  minHeight: `${minCellHeight}px`,
-                }}
+                className={mergeClassNames(
+                  cssStyles.cell,
+                  !isCurrentMonth ? cssStyles.cellOtherMonth : undefined,
+                  isToday ? cssStyles.cellToday : undefined,
+                  isSelected ? cssStyles.cellSelected : undefined
+                )}
+                style={{ ['--bc-min-cell-height' as string]: `${minCellHeight}px` }}
                 onClick={() => {
                   toggleDateSelection(day)
                   onCellClick?.(day)
                 }}
-                onMouseEnter={() => setHoveredCell(cellKey)}
-                onMouseLeave={() => setHoveredCell(null)}
               >
-                <div style={computedStyles.cell.dateNumber}>
+                <div className={cssStyles.cellDateNumber}>
                   <Typography
                     styles={{
                       ...styles,
                       fontSize: '0.8rem',
                       fontWeight: isToday ? 700 : 400,
-                      ...(isToday && {
-                        color: computedStyles.cell.todayDateColor as string,
-                      }),
+                      ...(isToday && isSacredTheme
+                        ? { color: 'rgba(255, 215, 0, 1)' }
+                        : {}),
                     }}
                   >
                     {format(day, 'd')}
                   </Typography>
                 </div>
-                <div style={computedStyles.cell.eventContainer}>
+                <div className={cssStyles.cellEventContainer}>
                   {dayEvents.slice(0, 3).map(event => renderEvent(event, true))}
                   {dayEvents.length > 3 && (
                     <Typography
@@ -533,24 +587,28 @@ export default function BigCalendar({
 
   const renderWeekView = () => {
     const cellWidth = `${100 / 7}%`
-    const timeColWidth = computedStyles.timeColumn.width as string
+    // Time column width is theme-driven (60px light/dark, 80px sacred); the
+    // header grid template references it via --bc-time-col-width.
+    const timeColWidth = isSacredTheme ? '80px' : '60px'
 
     return (
-      <div style={computedStyles.calendarGrid}>
+      <div className={cssStyles.calendarGrid}>
         {/* Day headers */}
         <div
+          className={mergeClassNames(
+            cssStyles.headerContainer,
+            cssStyles.headerContainerTimed
+          )}
           style={{
-            ...computedStyles.header.container,
-            display: 'grid',
-            gridTemplateColumns: `${timeColWidth} repeat(7, 1fr)`,
+            ['--bc-grid-template-columns' as string]: `${timeColWidth} repeat(7, 1fr)`,
           }}
         >
           {/* Blank header cell to align with time column */}
-          <div style={computedStyles.header.cell} />
+          <div className={cssStyles.headerCell} />
           {viewDates.map(day => (
             <div
               key={format(day, 'yyyy-MM-dd')}
-              style={computedStyles.header.cell}
+              className={cssStyles.headerCell}
             >
               <Typography
                 styles={{ ...styles, fontSize: '0.75rem', fontWeight: 700 }}
@@ -567,15 +625,13 @@ export default function BigCalendar({
         </div>
 
         {/* Time grid */}
-        <div style={computedStyles.weekGrid}>
-          <div style={computedStyles.timeColumn}>
+        <div className={cssStyles.weekGrid}>
+          <div className={cssStyles.timeColumn}>
             {hours.map(hour => (
               <div
                 key={hour}
-                style={{
-                  ...computedStyles.timeCell,
-                  height: `${hourHeight}px`,
-                }}
+                className={cssStyles.timeCell}
+                style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
               >
                 <Typography styles={{ ...styles, fontSize: '0.7rem' }}>
                   {format(setHours(new Date(), hour), 'ha')}
@@ -584,7 +640,7 @@ export default function BigCalendar({
             ))}
           </div>
 
-          <div style={computedStyles.weekDaysContainer}>
+          <div className={cssStyles.weekDaysContainer}>
             {viewDates.map(day => {
               const dayKey = format(day, 'yyyy-MM-dd')
               const isSelected =
@@ -593,12 +649,11 @@ export default function BigCalendar({
               return (
                 <div
                   key={dayKey}
-                  style={{
-                    ...computedStyles.weekDayColumn,
-                    ...(isSelected &&
-                      (computedStyles.weekDayColumn as any).selected),
-                    width: cellWidth,
-                  }}
+                  className={mergeClassNames(
+                    cssStyles.weekDayColumn,
+                    isSelected ? cssStyles.weekDayColumnSelected : undefined
+                  )}
+                  style={{ ['--bc-week-col-width' as string]: cellWidth }}
                 >
                   {hours.map(hour => {
                     const hourEvents = getEventsForDate(day, hour)
@@ -615,12 +670,13 @@ export default function BigCalendar({
                     return (
                       <div
                         key={`${dayKey}-${hour}`}
+                        className={mergeClassNames(
+                          cssStyles.hourCell,
+                          isCurrentHour ? cssStyles.hourCellCurrent : undefined,
+                          spanSelected ? cssStyles.hourCellSelected : undefined
+                        )}
                         style={{
-                          ...computedStyles.hourCell,
-                          ...(isCurrentHour && computedStyles.cell.currentHour),
-                          ...(spanSelected &&
-                            (computedStyles.cell as any).hourSelected),
-                          height: `${hourHeight}px`,
+                          ['--bc-hour-height' as string]: `${hourHeight}px`,
                         }}
                         onClick={() => {
                           toggleHourSpan(day, hour)
@@ -645,20 +701,23 @@ export default function BigCalendar({
     const isSelected =
       selectedDates.has(selectedKey) ||
       selectedSpans.some(s => s.date === selectedKey)
-    const timeColWidth = computedStyles.timeColumn.width as string
+    // Time column width is theme-driven (60px light/dark, 80px sacred).
+    const timeColWidth = isSacredTheme ? '80px' : '60px'
     return (
-      <div style={computedStyles.calendarGrid}>
+      <div className={cssStyles.calendarGrid}>
         {/* Day header aligned with time column */}
         <div
+          className={mergeClassNames(
+            cssStyles.headerContainer,
+            cssStyles.headerContainerTimed
+          )}
           style={{
-            ...computedStyles.header.container,
-            display: 'grid',
-            gridTemplateColumns: `${timeColWidth} 1fr`,
+            ['--bc-grid-template-columns' as string]: `${timeColWidth} 1fr`,
           }}
         >
           {/* Blank header cell to align with time column */}
-          <div style={computedStyles.header.cell} />
-          <div style={computedStyles.header.cell}>
+          <div className={cssStyles.headerCell} />
+          <div className={cssStyles.headerCell}>
             <Typography
               styles={{ ...styles, fontSize: '0.95rem', fontWeight: 700 }}
             >
@@ -673,15 +732,13 @@ export default function BigCalendar({
         </div>
 
         {/* Time grid */}
-        <div style={computedStyles.dayGrid}>
-          <div style={computedStyles.timeColumn}>
+        <div className={cssStyles.dayGrid}>
+          <div className={cssStyles.timeColumn}>
             {hours.map(hour => (
               <div
                 key={hour}
-                style={{
-                  ...computedStyles.timeCell,
-                  height: `${hourHeight}px`,
-                }}
+                className={cssStyles.timeCell}
+                style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
               >
                 <Typography styles={{ ...styles, fontSize: '0.7rem' }}>
                   {format(setHours(new Date(), hour), 'ha')}
@@ -691,14 +748,10 @@ export default function BigCalendar({
           </div>
 
           <div
-            style={{
-              ...computedStyles.dayContentColumn,
-              ...(isSelected && {
-                backgroundColor:
-                  (computedStyles.cell.hover as any)?.backgroundColor ||
-                  'rgba(59,130,246,0.05)',
-              }),
-            }}
+            className={mergeClassNames(
+              cssStyles.dayContentColumn,
+              isSelected ? cssStyles.dayContentColumnSelected : undefined
+            )}
           >
             {hours.map(hour => {
               const hourEvents = getEventsForDate(selectedDate, hour)
@@ -716,13 +769,12 @@ export default function BigCalendar({
               return (
                 <div
                   key={hour}
-                  style={{
-                    ...computedStyles.hourCell,
-                    ...(isCurrentHour && computedStyles.cell.currentHour),
-                    ...(spanSelected &&
-                      (computedStyles.cell as any).hourSelected),
-                    height: `${hourHeight}px`,
-                  }}
+                  className={mergeClassNames(
+                    cssStyles.hourCell,
+                    isCurrentHour ? cssStyles.hourCellCurrent : undefined,
+                    spanSelected ? cssStyles.hourCellSelected : undefined
+                  )}
+                  style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
                   onClick={() => {
                     toggleHourSpan(selectedDate, hour)
                     onCellClick?.(setHours(selectedDate, hour), hour)
@@ -801,35 +853,38 @@ export default function BigCalendar({
   }
 
   return (
-    <div style={{ ...computedStyles.container }}>
+    <div
+      className={cssStyles.root}
+      data-theme={theme}
+      style={dynamicRootStyle}
+    >
       {showToolbar && (
         <Paper styles={paperToolbarStyles}>
-          <div style={computedStyles.toolbarContent}>
-            <div style={computedStyles.toolbarSection}>
+          <div className={cssStyles.toolbarContent}>
+            <div className={cssStyles.toolbarSection}>
               <button
                 onClick={handlePrevious}
-                style={navButtonStyle}
+                className={cssStyles.navButton}
                 aria-label="Previous"
               >
-                <ChevronLeftIcon styles={{ theme: styles?.theme || 'light' }} />
+                <ChevronLeftIcon styles={{ theme }} />
               </button>
               <button
                 onClick={handleToday}
-                style={{ ...navButtonStyle, marginLeft: 6, marginRight: 6 }}
+                className={mergeClassNames(
+                  cssStyles.navButton,
+                  cssStyles.navButtonToday
+                )}
                 aria-label="Today"
               >
-                <CalendarTodayIcon
-                  styles={{ theme: styles?.theme || 'light' }}
-                />
+                <CalendarTodayIcon styles={{ theme }} />
               </button>
               <button
                 onClick={handleNext}
-                style={navButtonStyle}
+                className={cssStyles.navButton}
                 aria-label="Next"
               >
-                <ChevronRightIcon
-                  styles={{ theme: styles?.theme || 'light' }}
-                />
+                <ChevronRightIcon styles={{ theme }} />
               </button>
 
               <Typography
@@ -860,15 +915,15 @@ export default function BigCalendar({
               {...buttonStylesProp}
             >
               <ToggleButton value="day" {...buttonStylesProp}>
-                <span style={{ marginLeft: 4 }}>Day</span>
+                <span className={cssStyles.viewLabel}>Day</span>
               </ToggleButton>
               <ToggleButton value="week" {...buttonStylesProp}>
                 <DateRangeIcon />
-                <span style={{ marginLeft: 4 }}>Week</span>
+                <span className={cssStyles.viewLabel}>Week</span>
               </ToggleButton>
               <ToggleButton value="month" {...buttonStylesProp}>
                 <CalendarMonthIcon />
-                <span style={{ marginLeft: 4 }}>Month</span>
+                <span className={cssStyles.viewLabel}>Month</span>
               </ToggleButton>
             </ToggleButtonGroup>
           </div>

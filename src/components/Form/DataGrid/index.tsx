@@ -70,10 +70,11 @@
 
 'use client'
 
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import type { DatagridProps } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 import Alert, { AlertProps } from '../../Alert'
+import cssStyles from './FormDataGrid.module.css'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -114,206 +115,6 @@ export interface FormDataGridProps {
    */
   alert?: AlertProps
 }
-
-// =============================================================================
-// STYLE GENERATOR
-// =============================================================================
-
-/**
- * Generates all styles for the FormDataGrid component.
- * Styles are theme-aware and change based on sacredtheme parameter.
- *
- * SACRED THEME FEATURES:
- * - Dark translucent background with blur
- * - Gold (#FFD700) accent colors
- * - Animated glow pulse on container
- * - Cinzel font for titles, Crimson Text for body
- * - Decorative shimmer effect under title
- *
- * LIGHT THEME FEATURES:
- * - Clean white/light backgrounds
- * - Standard Merriweather font
- * - No animations
- *
- * @param sacredtheme - Whether to use sacred (dark/gold) theme
- * @returns Object containing all component styles
- */
-const getStyles = (sacredtheme?: boolean) => ({
-  /**
-   * Main container style.
-   * Sacred theme adds: dark background, blur, gold border, glow animation
-   */
-  container: {
-    width: '100%',
-    height: 'auto',
-    overflow: 'hidden',
-    boxSizing: 'border-box' as const,
-    ...(sacredtheme && {
-      position: 'relative',
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      backdropFilter: 'blur(16px)',
-      border: '2px solid rgba(255, 215, 0, 0.5)',
-      borderRadius: '0.75rem',
-      padding: '1.5rem',
-      animation: 'form-datagrid-glow-pulse 2s infinite alternate',
-    }),
-  } as React.CSSProperties,
-
-  /**
-   * Floating glyph style for decorative elements.
-   * Only used in sacred theme for mystical aesthetic.
-   */
-  glyph: {
-    position: 'absolute',
-    color: 'rgba(255, 215, 0, 0.3)',
-    fontSize: '1.125rem',
-    zIndex: 10,
-    animation: 'form-datagrid-float 8s infinite alternate',
-  } as React.CSSProperties,
-
-  /**
-   * Header glyph container for decorative symbols.
-   */
-  headerGlyphs: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.375rem',
-    marginBottom: '0.25rem',
-  } as React.CSSProperties,
-
-  /**
-   * Title container with centered layout.
-   * Sacred theme adds: centered text, gold bottom border
-   */
-  titleContainer: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: '0.75rem',
-    padding: '0 0.5rem',
-    boxSizing: 'border-box',
-    ...(sacredtheme && {
-      textAlign: 'center',
-      borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
-      paddingBottom: '0.75rem',
-    }),
-  } as React.CSSProperties,
-
-  /**
-   * Main title style with responsive font sizing.
-   * Sacred theme: Cinzel font, gold color, text shadow
-   * Light theme: Merriweather font, black color
-   */
-  title: {
-    width: '100%',
-    textAlign: 'left',
-    fontFamily: 'Merriweather, serif',
-    fontSize: 'clamp(1.25rem, 4vw, 1.75rem)',
-    fontWeight: 700,
-    color: 'black',
-    wordWrap: 'break-word',
-    overflowWrap: 'break-word',
-    ...(sacredtheme && {
-      fontFamily: 'Cinzel, serif',
-      color: '#FFD700',
-      textAlign: 'center',
-      fontSize: 'clamp(1.5rem, 5vw, 2rem)',
-      letterSpacing: '0.05em',
-      textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-      marginBottom: '0.5rem',
-    }),
-  } as React.CSSProperties,
-
-  /**
-   * Description/subtitle style with responsive sizing.
-   * Sacred theme: Crimson Text font, white color, centered
-   * Light theme: Merriweather font, black color, left-aligned
-   */
-  description: {
-    width: '100%',
-    textAlign: 'left',
-    fontFamily: 'Merriweather, serif',
-    fontSize: 'clamp(1rem, 3vw, 1.25rem)',
-    fontWeight: 400,
-    color: 'black',
-    wordWrap: 'break-word',
-    overflowWrap: 'break-word',
-    ...(sacredtheme && {
-      fontFamily: 'Crimson Text, serif',
-      color: 'rgba(255,255,255,0.9)',
-      textAlign: 'center',
-      fontSize: 'clamp(0.95rem, 3vw, 1.125rem)',
-      letterSpacing: '0.05em',
-      marginBottom: '0.5rem',
-    }),
-  } as React.CSSProperties,
-
-  /**
-   * Animated shimmer line under the title (sacred theme only).
-   * Creates a flowing gold light effect.
-   */
-  shimmer: {
-    position: 'absolute',
-    bottom: '-10px',
-    left: 0,
-    right: 0,
-    height: '2px',
-    overflow: 'hidden',
-    '::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundImage:
-        'linear-gradient(to right, transparent, #FFD700, transparent)',
-      animation: 'form-datagrid-data-flow 3s infinite',
-    },
-  } as React.CSSProperties,
-
-  /**
-   * Container for alert messages.
-   * Provides consistent spacing above the DataGrid.
-   */
-  alertContainer: {
-    marginBottom: '0.75rem',
-  } as React.CSSProperties,
-
-  /**
-   * Container wrapping the DataGrid component.
-   * Sacred theme adds dark semi-transparent background.
-   */
-  dataGridContainer: {
-    ...(sacredtheme && {
-      position: 'relative',
-      overflow: 'hidden',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      boxSizing: 'border-box',
-    }),
-  } as React.CSSProperties,
-
-  /**
-   * Footer glyph container for decorative elements.
-   */
-  footerGlyphs: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.125rem',
-    marginTop: '0.5rem',
-    opacity: 0.5,
-  } as React.CSSProperties,
-
-  /**
-   * Individual footer glyph style.
-   */
-  footerGlyph: {
-    color: '#FFD700',
-    fontSize: '0.75rem',
-    animation: 'form-datagrid-float 3s infinite alternate',
-  } as React.CSSProperties,
-})
 
 // =============================================================================
 // MAIN COMPONENT
@@ -360,40 +161,35 @@ function FormDataGrid({
   sacredtheme = true,
   alert,
 }: FormDataGridProps) {
-  // Generate theme-aware styles
-  const styles = getStyles(sacredtheme)
+  // Theme variant as a data-attribute, mirroring the goobs Card/DataGrid house
+  // pattern. The boolean `sacredtheme` maps to the canonical 'sacred' | 'light'.
+  const theme: 'sacred' | 'light' = sacredtheme ? 'sacred' : 'light'
 
   /**
    * Memoized DataGrid styles to prevent unnecessary re-renders.
    * Converts boolean sacredtheme to DataGrid's theme string format.
    */
-  const dataGridStyles = useMemo(
-    () => ({
-      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
-    }),
-    [sacredtheme]
-  )
+  const dataGridStyles = useMemo(() => ({ theme }), [theme])
 
   /**
    * Memoized Alert styles for theme consistency.
    */
-  const alertStyles = useMemo(
-    () => ({
-      theme: sacredtheme ? 'sacred' : ('light' as 'sacred' | 'light'),
-    }),
-    [sacredtheme]
-  )
+  const alertStyles = useMemo(() => ({ theme }), [theme])
 
   return (
-    <div style={styles.container}>
+    <div className={cssStyles.container} data-theme={theme}>
       {/* ─────────────────────────────────────────────────────────────────────
           HEADER SECTION
           Contains title, description, and optional shimmer effect (sacred theme)
           ───────────────────────────────────────────────────────────────────── */}
-      <div style={{ ...styles.titleContainer, position: 'relative' }}>
-        <div style={styles.title}>{title}</div>
-        <div style={styles.description}>{description}</div>
-        {sacredtheme && <div style={styles.shimmer} />}
+      <div className={cssStyles.titleContainer} data-theme={theme}>
+        <div className={cssStyles.title} data-theme={theme}>
+          {title}
+        </div>
+        <div className={cssStyles.description} data-theme={theme}>
+          {description}
+        </div>
+        {sacredtheme && <div className={cssStyles.shimmer} />}
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────
@@ -401,7 +197,7 @@ function FormDataGrid({
           Displays error/warning/info/success messages between header and grid
           ───────────────────────────────────────────────────────────────────── */}
       {alert && (
-        <div style={styles.alertContainer}>
+        <div className={cssStyles.alertContainer}>
           {(() => {
             // Build alert props, conditionally including onClose if provided
             const baseProps: AlertProps = {
@@ -423,7 +219,7 @@ function FormDataGrid({
           Full-featured data table with all configuration passed through
           See DatagridProps for complete documentation of available options
           ───────────────────────────────────────────────────────────────────── */}
-      <div style={styles.dataGridContainer}>
+      <div className={cssStyles.dataGridContainer} data-theme={theme}>
         <DataGrid {...datagrid} styles={dataGridStyles} />
       </div>
     </div>

@@ -1,9 +1,17 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface ExternalIncrementNumberFieldProps {
   initialValue?: string
+  /**
+   * Controlled numeric value. Optional and additive: when omitted (the
+   * historical default) the field is uncontrolled and seeds from
+   * `initialValue`. When supplied — or auto-bound via `name` inside a
+   * `<Form>` — it drives the displayed value.
+   */
+  value?: number
   /**
    * Fires whenever the value changes (typed input or +/- button).
    *
@@ -23,7 +31,11 @@ export interface ExternalIncrementNumberFieldProps {
   dataFieldName?: string
   placeholder?: string
   id?: string
-  /** Forwarded to the input as `name` for native form submission. */
+  /**
+   * Form-engine binding key. Forwarded to the input as `name` for native form
+   * submission and used by `useFieldBinding`/`FieldShell` to auto-bind value,
+   * error, and required to the surrounding `<Form>`.
+   */
   name?: string
   styles?: FieldStyleOverrides
 }
@@ -32,7 +44,8 @@ const ExternalIncrementNumberField: React.FC<
   ExternalIncrementNumberFieldProps
 > = ({
   initialValue = '0',
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   label,
   helperText,
   error,
@@ -43,7 +56,33 @@ const ExternalIncrementNumberField: React.FC<
   name,
   styles,
 }) => {
+  // Tier-1 form binding. The canonical value is numeric (onChange emits a
+  // number). When inside a <Form> with a `name` and no explicit value, the
+  // value/onChange/onBlur come from the engine; otherwise the field stays
+  // uncontrolled and seeds from `initialValue` exactly as before.
+  const {
+    value: boundNumericValue,
+    onChange,
+    onBlur,
+  } = useFieldBinding<number>({
+    name,
+    value: valueProp,
+    onChange: onChangeProp,
+  })
+
   const [internalValue, setInternalValue] = useState(initialValue)
+
+  // Sync the displayed string when a controlled/bound numeric value changes
+  // (derived-state pattern). No-op for the uncontrolled back-compat path where
+  // `boundNumericValue` is always undefined.
+  const [prevBoundValue, setPrevBoundValue] = useState(boundNumericValue)
+  if (boundNumericValue !== prevBoundValue) {
+    setPrevBoundValue(boundNumericValue)
+    if (boundNumericValue !== undefined && boundNumericValue !== null) {
+      setInternalValue(String(boundNumericValue))
+    }
+  }
+
   const inputRef = useRef<HTMLInputElement>(null)
 
   const disabled = styles?.disabled || false
@@ -149,6 +188,8 @@ const ExternalIncrementNumberField: React.FC<
       required={required}
       dataField={dataField}
       dataFieldName={dataFieldName}
+      name={name}
+      filled={Boolean(internalValue && internalValue.length > 0)}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
@@ -169,6 +210,7 @@ const ExternalIncrementNumberField: React.FC<
             name={name}
             value={internalValue}
             onChange={handleChange}
+            onBlur={onBlur}
             disabled={disabled}
             placeholder={placeholder}
             data-field-name={dataFieldName}
