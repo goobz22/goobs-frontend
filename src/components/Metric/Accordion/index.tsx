@@ -75,6 +75,7 @@
  */
 
 import React, { useEffect, useId, useMemo, useState } from 'react'
+import { emitDiag } from '../../../utils/diag'
 import MetricCard from '../Card'
 import type { MetricCardData } from '../types'
 import styles from './Accordion.module.css'
@@ -184,6 +185,22 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   const reactId = useId()
   const panelId = `metrics-accordion-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
+
+  // Additive diagnostics: on a collapse/expand transition, surface the new
+  // open/closed state to the host diagnostics bus (no-op when none present).
+  // Preserves the existing toggle behaviour exactly — only adds the emit.
+  const handleToggle = () => {
+    setIsExpanded((prev) => {
+      const next = !prev
+      emitDiag({
+        type: 'component.state',
+        component: 'MetricsAccordion',
+        ...(dataField !== undefined && { subject: dataField }),
+        state: next ? 'open' : 'closed',
+      })
+      return next
+    })
+  }
   // Sacred is the CSS base default; every other value (undefined / 'light' /
   // 'dark') resolves to the [data-theme='light'] override block — exactly the
   // prior two-branch isSacredTheme behaviour.
@@ -278,15 +295,17 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       className={styles.root}
       data-theme={theme}
       style={dynamicStyle}
+      data-component="MetricsAccordion"
       data-metrics-accordion="true"
       data-state={state}
       {...(dataField !== undefined && {
+        'data-subject': dataField,
         'data-metrics-accordion-field': dataField,
       })}
     >
       <button
         type="button"
-        onClick={() => setIsExpanded((prev) => !prev)}
+        onClick={handleToggle}
         aria-expanded={isExpanded}
         aria-controls={panelId}
         data-testid="metrics-accordion-toggle"

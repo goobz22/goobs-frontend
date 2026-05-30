@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './Subnet.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
@@ -60,48 +61,8 @@ const calculateSubnetInfo = (cidr: number) => {
   }
 }
 
-// Inline button + input styles preserved from the legacy theme so the
-// chrome doesn't regress while the IPAM family migrates.
-const buttonContainerStyle: React.CSSProperties = {
-  position: 'absolute',
-  right: '8px',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  justifyContent: 'center',
-}
-
-const buttonStyle = (isDisabled: boolean): React.CSSProperties => ({
-  padding: 0,
-  width: '1rem',
-  height: '1rem',
-  minWidth: '1rem',
-  minHeight: '1rem',
-  borderRadius: '0.125rem',
-  border: 'none',
-  backgroundColor: 'transparent',
-  cursor: isDisabled ? 'not-allowed' : 'pointer',
-  color: 'currentColor',
-  transition: 'all 0.3s ease',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  opacity: isDisabled ? 0.5 : 1,
-})
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  height: '40px',
-  background: 'transparent',
-  outline: 'none',
-  border: '1px solid rgba(0,0,0,0.2)',
-  borderRadius: '8px',
-  padding: '8px 60px 8px 16px',
-  fontSize: '16px',
-  boxSizing: 'border-box',
-}
+// Button + input chrome lives in Subnet.module.css. Disabled state is
+// driven by the native :disabled pseudo-class.
 
 const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
@@ -272,7 +233,7 @@ const InternalIncrementNumberField: React.FC<
         styles={styles}
       >
         {({ inputId, inputAriaProps }) => (
-          <div style={{ position: 'relative', width: '100%' }}>
+          <div className={cssStyles.inputContainer}>
             <input
               ref={inputRef}
               id={id ?? inputId}
@@ -290,16 +251,16 @@ const InternalIncrementNumberField: React.FC<
               placeholder={placeholder}
               type="text"
               inputMode="numeric"
-              style={inputStyle}
+              className={cssStyles.input}
               {...inputAriaProps}
             />
-            <div style={buttonContainerStyle}>
+            <div className={cssStyles.buttonContainer}>
               <button
                 type="button"
                 aria-label="Increase subnet mask"
                 onMouseDown={handleIncrementMouseDown}
                 disabled={disabled}
-                style={buttonStyle(!!disabled)}
+                className={cssStyles.button}
               >
                 <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
               </button>
@@ -308,7 +269,7 @@ const InternalIncrementNumberField: React.FC<
                 aria-label="Decrease subnet mask"
                 onMouseDown={handleDecrementMouseDown}
                 disabled={disabled}
-                style={buttonStyle(!!disabled)}
+                className={cssStyles.button}
               >
                 <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
               </button>
@@ -629,19 +590,14 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         {...(shellError !== undefined ? { error: shellError } : {})}
         {...(styles !== undefined ? { styles } : {})}
       />
-      <div
-        style={{
-          marginTop: '0.5rem',
-          fontSize: '0.875rem',
-        }}
-      >
+      <div className={cssStyles.subnetInfo}>
         <div>Subnet CIDR: /{mask}</div>
         <div>
           Total Hosts: {subnetInfo.hosts} ({subnetInfo.usableHosts} usable)
         </div>
         {networkRange && (
           <>
-            <div style={{ marginTop: '0.5rem' }}>
+            <div className={cssStyles.supernetCidr}>
               Supernet CIDR: /{networkRange.cidr}
             </div>
             <div>
@@ -649,11 +605,11 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
               {calculateSupernetHosts(networkRange.cidr).usableHosts} usable)
             </div>
             <div
-              style={{
-                marginTop: '0.25rem',
-                fontStyle: 'italic',
-                color: !isValidSubnet ? '#EF4444' : undefined,
-              }}
+              className={
+                isValidSubnet
+                  ? cssStyles.availableRange
+                  : `${cssStyles.availableRange} ${cssStyles.outOfRange}`
+              }
             >
               Available Range: {networkRange.start} - {networkRange.end}
             </div>

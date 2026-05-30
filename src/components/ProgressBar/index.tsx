@@ -260,7 +260,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   }, [label, isIndeterminate, progressValue])
 
   return (
-    <div>
+    <div data-component="ProgressBar">
       <div
         className={cssStyles.container}
         data-theme={theme}

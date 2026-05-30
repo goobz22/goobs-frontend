@@ -297,6 +297,7 @@ const Chip: React.FC<ChipProps> = ({
     <div
       className={rootClassName}
       style={cssVarStyle}
+      data-component="Chip"
       data-theme={theme}
       data-chip="true"
       data-chip-variant={variant}

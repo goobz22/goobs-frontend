@@ -109,6 +109,7 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       <div
         ref={ref}
         className={cssStyles.root}
+        data-component="Avatar"
         data-theme={theme}
         {...(styles?.size !== undefined && { 'data-size': styles.size })}
         {...(isDisabled && { 'data-disabled': 'true' })}

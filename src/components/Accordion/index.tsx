@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, type FC, type ReactNode } from 'react'
 import Link from 'next/link'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Accordion.module.css'
 
 export interface AccordionProps {
@@ -58,6 +59,16 @@ const useAccordionState = ({
       if (!isControlled) {
         setInternalExpanded(newExpanded)
       }
+      // Diagnostic bus — emit the expanded/collapsed transition so outcome
+      // tests can assert the accordion toggled without scraping the DOM. Fired
+      // on the toggle (the single expansion transition point; menu-type
+      // accordions navigate via onClick and never reach here). No-op when no
+      // bus is present.
+      emitDiag({
+        type: 'component.state',
+        component: 'Accordion',
+        state: newExpanded ? 'expanded' : 'collapsed',
+      })
       onChange?.(event, newExpanded)
     },
     [styles?.disabled, expanded, isControlled, onChange]
@@ -196,7 +207,21 @@ const Accordion: FC<AccordionProps> = props => {
   )
 
   return (
-    <div className={cssStyles.container} data-theme={theme} style={dynamicStyle}>
+    <div
+      className={cssStyles.container}
+      data-component="Accordion"
+      data-state={
+        isMenuType
+          ? isActive
+            ? 'active'
+            : 'inactive'
+          : expanded
+            ? 'expanded'
+            : 'collapsed'
+      }
+      data-theme={theme}
+      style={dynamicStyle}
+    >
       {isMenuType && href ? (
         <Link href={href} className={cssStyles.link}>
           {summaryContent}

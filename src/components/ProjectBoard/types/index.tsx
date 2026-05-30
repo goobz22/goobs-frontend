@@ -1,7 +1,60 @@
-import type { ProjectBoardStyles } from '../../../theme'
+/**
+ * Caller-supplied styling options for the ProjectBoard component.
+ * Transcribed locally from the (now-retired) theme/projectboard.ts so the
+ * component no longer depends on the JS theme module — visual styling lives in
+ * ProjectBoard.module.css, and this type only describes the public `styles`
+ * prop surface (theme selection + caller overrides + layout).
+ */
+export interface ProjectBoardStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
 
-// Re-export ProjectBoardStyles for convenience
-export type { ProjectBoardStyles }
+  // Container styling
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  boxShadow?: string
+  backdropFilter?: string
+  backgroundImage?: string
+  containerAnimation?: string
+
+  // Glyph styling
+  glyphColor?: string
+  glyphFontSize?: string
+  glyphZIndex?: number
+  glyphAnimation?: string
+
+  // Toolbar container styling
+  toolbarBackground?: string
+  toolbarPadding?: string
+  toolbarMargin?: string
+  toolbarBorderRadius?: string
+
+  // Layout and spacing
+  padding?: string
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  outline?: boolean
+
+  // Dimensions
+  width?: string
+  maxWidth?: string
+  minWidth?: string
+  height?: string
+  maxHeight?: string
+  minHeight?: string
+}
 
 /** A minimal typed comment for any type of task. */
 export type Comment = {

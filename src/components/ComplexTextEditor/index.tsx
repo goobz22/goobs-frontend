@@ -8,11 +8,8 @@ import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
 import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 import { useOptionalFormContext } from '../Form/context'
-import {
-  getComplexTextEditorStyles,
-  getFormFieldTheme,
-  type ComplexTextEditorStyles,
-} from '../../theme/'
+import type { ComplexTextEditorStyles } from './theme'
+import cssStyles from './ComplexTextEditor.module.css'
 
 export interface ComplexTextEditorProps {
   /** The current value of the editor (for controlled usage). */
@@ -102,29 +99,57 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
       ? valueProp
       : valueState
   const [mode, setMode] = useState<EditorMode>(startMode)
-  const [isFocused] = useState(false)
   const [accordionExpanded, setAccordionExpanded] =
     useState<boolean>(defaultExpanded)
 
-  // Get computed styles with transparent label background override
-  const stylesWithTransparentLabel = {
-    ...styles,
-    labelShrunkBackgroundColor: 'transparent',
+  // Container theme follows getComplexTextEditorStyles' old default ('light'
+  // when unset); label/helper follow getFormFieldTheme's default ('sacred'
+  // when unset) via the CSS base class, so their data-theme is the raw value.
+  const containerTheme = styles?.theme || 'light'
+  const helperTextType = styles?.helperTextType || 'info'
+
+  // Caller-supplied layout overrides + runtime CSS vars stay in JS. These are
+  // the FormFieldStyles passthroughs the old containerStyle applied inline;
+  // visual theming now lives in the CSS module.
+  const containerDynamicStyle: React.CSSProperties = {
+    margin: styles?.margin,
+    marginTop: styles?.marginTop,
+    marginBottom: styles?.marginBottom,
+    marginLeft: styles?.marginLeft,
+    marginRight: styles?.marginRight,
+    width: styles?.width,
+    maxWidth: styles?.maxWidth,
+    minWidth: styles?.minWidth,
+    height: styles?.height,
+    maxHeight: styles?.maxHeight,
+    minHeight: styles?.minHeight,
+    ...(styles?.backgroundColor && { background: styles.backgroundColor }),
+    ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
+    ...(styles?.fontFamily && { fontFamily: styles.fontFamily }),
   }
-  const computedStyles = getComplexTextEditorStyles(
-    stylesWithTransparentLabel,
-    isFocused
-  )
-  // Inlined the slim slice of `getSharedFormFieldStyles` this
-  // component used: the resolved theme config + the footer text color
-  // (driven by `helperTextType`). Field components moved to CSS
-  // modules + FieldShell; this component still uses inline styles.
-  const themeConfig = getFormFieldTheme(stylesWithTransparentLabel)
-  const helperTextType = stylesWithTransparentLabel.helperTextType || 'info'
-  const footerTextColor =
-    helperTextType === 'error'
-      ? themeConfig.footerText.error
-      : themeConfig.footerText.default
+
+  // Label caller-font override (was getSharedLabelStyles' fontFamily, which
+  // the old getFormFieldTheme derived from styles.fontFamily). Surfaced as
+  // --ct-label-font-family so it wins over the CSS-module default.
+  const labelStyle: React.CSSProperties | undefined = styles?.fontFamily
+    ? ({
+        ['--ct-label-font-family']: styles.fontFamily,
+      } as React.CSSProperties)
+    : undefined
+
+  // Helper text overrides: font-size (was styles?.fontSize || '12px'),
+  // caller font-family (--ct-label-font-family), and the footerTextColor
+  // caller override (old getSharedFormFieldStyles footerTextColor branch).
+  const helperTextStyle: React.CSSProperties | undefined = (() => {
+    const overrides: Record<string, string> = {}
+    if (styles?.fontSize) overrides['--ct-helper-font-size'] = styles.fontSize
+    if (styles?.fontFamily)
+      overrides['--ct-label-font-family'] = styles.fontFamily
+    if (styles?.footerTextColor) overrides.color = styles.footerTextColor
+    return Object.keys(overrides).length > 0
+      ? (overrides as React.CSSProperties)
+      : undefined
+  })()
 
   // Auto-save to localStorage with debounce
   useEffect(() => {
@@ -201,46 +226,22 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // Render label if provided and not in accordion mode
   const labelElement = label && !accordion && (
     <label
-      style={{
-        // Inlined from the deleted `getSharedLabelStyles` helper.
-        display: 'block',
-        marginBottom: '4px',
-        fontSize: '14px',
-        fontFamily: themeConfig.fontFamily,
-        color: themeConfig.label.default,
-        transition: 'all 0.2s ease',
-        background: 'transparent',
-        backgroundColor: 'transparent',
-        backdropFilter: 'none',
-        padding: '0',
-        borderRadius: '0',
-        boxShadow: 'none',
-        // Sacred theme styling
-        ...(isSacredTheme && {
-          color: 'rgba(255, 215, 0, 0.9)', // Sacred gold color
-          fontFamily: '"Cinzel", serif', // Sacred font
-          textShadow: '0 0 3px rgba(255, 215, 0, 0.3)', // Sacred glow
-          letterSpacing: '0.05em',
-          fontWeight: 700,
-          textTransform: 'uppercase' as const,
-        }),
-      }}
+      className={cssStyles.label}
+      {...(styles?.theme && { 'data-theme': styles.theme })}
+      {...(isSacredTheme && { 'data-sacred': 'true' })}
+      {...(labelStyle && { style: labelStyle })}
     >
       {label}
     </label>
   )
 
-  // Render helper text if provided. Inlined from the deleted
-  // `getSharedFooterTextStyles` helper.
+  // Render helper text if provided.
   const helperTextElement = helperText && (
     <div
-      style={{
-        marginTop: '4px',
-        fontSize: styles?.fontSize || '12px',
-        fontFamily: themeConfig.fontFamily,
-        color: footerTextColor,
-        minHeight: '1em',
-      }}
+      className={cssStyles.helperText}
+      {...(styles?.theme && { 'data-theme': styles.theme })}
+      data-helper-type={helperTextType}
+      {...(helperTextStyle && { style: helperTextStyle })}
     >
       {helperText}
     </div>
@@ -265,7 +266,11 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
 
     return (
       <div
-        style={computedStyles.container}
+        className={cssStyles.container}
+        data-theme={containerTheme}
+        data-accordion="true"
+        {...(styles?.disabled && { 'data-disabled': 'true' })}
+        style={containerDynamicStyle}
         data-component="ComplexTextEditor"
         data-field-name={dataFieldName ?? name}
         data-filled={hasValue ? 'true' : undefined}
@@ -292,7 +297,12 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
       onBlur={() => boundOnBlur?.()}
     >
       {labelElement}
-      <div style={computedStyles.container}>
+      <div
+        className={cssStyles.container}
+        data-theme={containerTheme}
+        {...(styles?.disabled && { 'data-disabled': 'true' })}
+        style={containerDynamicStyle}
+      >
         {createEditorContent()}
         {helperTextElement}
       </div>

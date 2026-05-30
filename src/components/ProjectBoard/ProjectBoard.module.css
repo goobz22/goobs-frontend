@@ -1,0 +1,758 @@
+/* ==========================================================================
+   PROJECT BOARD - CSS MODULE
+   Migrated off theme/projectboard.ts (getProjectBoardStyles / getProjectBoardTheme).
+   SACRED theme is the hardcoded base default; light / dark are [data-theme]
+   attribute-selector overrides. Values transcribed verbatim from
+   theme/projectboard.ts + theme/shared.ts (SHADOWS, TRANSITIONS).
+
+   Runtime / caller-supplied values (width, height, padding, margins, custom
+   colors, drag offsets, getBoundingClientRect transforms) stay in JS and are
+   passed in as CSS custom properties — see the component .tsx files.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER — SACRED defaults (matches theme/projectboard.ts `sacred`)
+   -------------------------------------------------------------------------- */
+.container {
+  /* Caller-overridable dimensions / spacing (default to the old JS defaults). */
+  --pb-width: 100%;
+  --pb-height: 100%;
+  --pb-max-width: none;
+  --pb-min-width: 0;
+  --pb-max-height: none;
+  --pb-min-height: 0;
+  --pb-padding: 0;
+  --pb-margin: 0;
+  --pb-margin-top: 0;
+  --pb-margin-bottom: 0;
+  --pb-margin-left: 0;
+  --pb-margin-right: 0;
+
+  /* Sacred container palette (hardcoded default). */
+  --pb-bg: rgba(0, 0, 0, 0.8);
+  --pb-border: 2px solid rgba(255, 215, 0, 0.5);
+  --pb-radius: 0.5rem;
+  /* SHADOWS.sacred.large */
+  --pb-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+  --pb-backdrop: blur(8px);
+  --pb-bg-image:
+    radial-gradient(circle at top left, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+  --pb-container-animation: projectBoardGlowPulse 3s infinite alternate;
+  /* TRANSITIONS.slow for sacred */
+  --pb-transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Toolbar container (sacred). */
+  --pb-toolbar-bg: rgba(255, 215, 0, 0.05);
+  --pb-toolbar-padding: 0.25rem 1rem;
+  --pb-toolbar-margin: 0.25rem 0;
+  --pb-toolbar-radius: 8px;
+
+  /* Glyph (sacred). */
+  --pb-glyph-color: rgba(255, 215, 0, 0.3);
+  --pb-glyph-font-size: 1.5rem;
+  --pb-glyph-z: 10;
+  --pb-glyph-animation: projectBoardFloat 10s infinite alternate;
+
+  box-sizing: border-box;
+  position: relative;
+  width: var(--pb-width);
+  height: var(--pb-height);
+  max-width: var(--pb-max-width);
+  min-width: var(--pb-min-width);
+  max-height: var(--pb-max-height);
+  min-height: var(--pb-min-height);
+  padding: var(--pb-padding);
+  margin: var(--pb-margin);
+  margin-top: var(--pb-margin-top);
+  margin-bottom: var(--pb-margin-bottom);
+  margin-left: var(--pb-margin-left);
+  margin-right: var(--pb-margin-right);
+  background: var(--pb-bg);
+  background-image: var(--pb-bg-image);
+  border: var(--pb-border);
+  border-radius: var(--pb-radius);
+  box-shadow: var(--pb-shadow);
+  backdrop-filter: var(--pb-backdrop);
+  animation: var(--pb-container-animation);
+  overflow: hidden;
+  transition: var(--pb-transition);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* LIGHT theme override (matches theme/projectboard.ts `light`). */
+.container[data-theme='light'] {
+  --pb-bg: rgba(255, 255, 255, 0.95);
+  --pb-border: 1px solid rgba(226, 232, 240, 0.8);
+  --pb-radius: 12px;
+  /* SHADOWS.light.medium */
+  --pb-shadow: 0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+  --pb-backdrop: blur(8px);
+  --pb-bg-image: none;
+  --pb-container-animation: none;
+  /* TRANSITIONS.medium */
+  --pb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --pb-toolbar-bg: transparent;
+
+  --pb-glyph-color: rgba(107, 114, 128, 0.3);
+  --pb-glyph-animation: none;
+}
+
+/* DARK theme override (matches theme/projectboard.ts `dark`). */
+.container[data-theme='dark'] {
+  --pb-bg: rgba(31, 41, 55, 0.95);
+  --pb-border: 1px solid rgba(75, 85, 99, 0.8);
+  --pb-radius: 12px;
+  --pb-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --pb-backdrop: blur(8px);
+  --pb-bg-image: none;
+  --pb-container-animation: none;
+  /* TRANSITIONS.medium */
+  --pb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --pb-toolbar-bg: transparent;
+
+  --pb-glyph-color: rgba(156, 163, 175, 0.3);
+  --pb-glyph-animation: none;
+}
+
+/* Disabled state — replaces the JS `isDisabled ? 0.5 : 1` opacity branch. */
+.container[data-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   TOOLBAR CONTAINER (the wrapper around <Board>)
+   -------------------------------------------------------------------------- */
+.toolbarContainer {
+  background: var(--pb-toolbar-bg);
+  padding: var(--pb-toolbar-padding);
+  margin: var(--pb-toolbar-margin);
+  border-radius: var(--pb-toolbar-radius);
+}
+
+/* --------------------------------------------------------------------------
+   GLYPH — absolutely-positioned decorative corner glyphs (sacred theme)
+   -------------------------------------------------------------------------- */
+.glyph {
+  position: absolute;
+  color: var(--pb-glyph-color);
+  z-index: var(--pb-glyph-z);
+  animation: var(--pb-glyph-animation);
+}
+
+/* --------------------------------------------------------------------------
+   BREADCRUMB (migrated from Breadcrumb.tsx inline styles)
+   SACRED defaults; light / dark overrides below.
+   -------------------------------------------------------------------------- */
+.breadcrumb {
+  --pb-bc-text: rgba(255, 215, 0, 0.9);
+  --pb-bc-text-hover: rgba(255, 215, 0, 1);
+  --pb-bc-separator: rgba(255, 215, 0, 0.5);
+  --pb-bc-border: rgba(255, 215, 0, 0.2);
+  --pb-bc-button-hover-bg: rgba(255, 215, 0, 0.1);
+  --pb-bc-bg: var(--pb-toolbar-bg, rgba(255, 215, 0, 0.05));
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--pb-bc-bg);
+  border-bottom: 1px solid var(--pb-bc-border);
+  transition: var(--pb-transition, all 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.breadcrumb[data-theme='light'] {
+  --pb-bc-text: rgba(31, 41, 55, 0.9);
+  --pb-bc-text-hover: rgba(31, 41, 55, 1);
+  --pb-bc-separator: rgba(107, 114, 128, 0.6);
+  --pb-bc-border: rgba(226, 232, 240, 0.8);
+  --pb-bc-button-hover-bg: rgba(243, 244, 246, 1);
+  --pb-bc-bg: transparent;
+  --pb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.breadcrumb[data-theme='dark'] {
+  --pb-bc-text: rgba(255, 255, 255, 0.9);
+  --pb-bc-text-hover: rgba(255, 255, 255, 1);
+  --pb-bc-separator: rgba(156, 163, 175, 0.6);
+  --pb-bc-border: rgba(75, 85, 99, 0.5);
+  --pb-bc-button-hover-bg: rgba(75, 85, 99, 0.5);
+  --pb-bc-bg: transparent;
+  --pb-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.breadcrumbButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--pb-bc-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--pb-transition, all 300ms cubic-bezier(0.4, 0, 0.2, 1));
+  outline: none;
+}
+
+/* Hover state — replaces onMouseEnter/onMouseLeave inline background/color swaps. */
+.breadcrumbButton:hover {
+  background: var(--pb-bc-button-hover-bg);
+  color: var(--pb-bc-text-hover);
+}
+
+.breadcrumbIcon {
+  flex-shrink: 0;
+}
+
+.breadcrumbSeparator {
+  color: var(--pb-bc-separator);
+  font-size: 0.875rem;
+  user-select: none;
+}
+
+.breadcrumbCurrent {
+  color: var(--pb-bc-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   ANIMATION WRAPPER (migrated from AnimationWrapper.tsx inline styles)
+   The transform/scale is measured at runtime (viewport + origin rect) and
+   passed in via the --pb-aw-transform / --pb-aw-opacity custom properties.
+   -------------------------------------------------------------------------- */
+.animationOverlay {
+  /* Background matches the container's per-theme background (sacred default). */
+  --pb-aw-bg: rgba(0, 0, 0, 0.8);
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  overflow: hidden;
+  background: var(--pb-aw-bg);
+  transform: var(--pb-aw-transform, scale(1) translate(0, 0));
+  opacity: var(--pb-aw-opacity, 1);
+  transition: var(--pb-aw-transition, none);
+}
+
+.animationOverlay[data-theme='light'] {
+  --pb-aw-bg: rgba(255, 255, 255, 0.95);
+}
+
+.animationOverlay[data-theme='dark'] {
+  --pb-aw-bg: rgba(31, 41, 55, 0.95);
+}
+
+.animationContent {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  opacity: var(--pb-aw-content-opacity, 1);
+  transition: var(--pb-aw-content-transition, opacity 200ms ease-out);
+}
+
+/* --------------------------------------------------------------------------
+   BOARD (migrated from board/index.tsx getStyles + TaskCard)
+   SACRED defaults; light / dark overrides below.
+   -------------------------------------------------------------------------- */
+.board {
+  /* Sacred column palette. */
+  --pb-col-bg: rgba(0, 0, 0, 0.95);
+  --pb-col-border: 2px solid rgba(255, 215, 0, 0.4);
+  --pb-col-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);
+  --pb-col-dragover-border: 2px solid rgba(255, 215, 0, 0.8);
+  --pb-col-dragover-shadow: 0 6px 25px rgba(255, 215, 0, 0.2);
+  --pb-col-header-border: rgba(255, 215, 0, 0.3);
+  --pb-col-header-bg: rgba(255, 215, 0, 0.05);
+  --pb-col-title: #ffd700;
+  --pb-col-desc: rgba(255, 215, 0, 0.7);
+  --pb-placeholder-border: rgba(255, 215, 0, 0.5);
+  --pb-placeholder-bg: rgba(255, 215, 0, 0.1);
+  --pb-placeholder-text: rgba(255, 215, 0, 0.7);
+  --pb-notasks-text: rgba(255, 215, 0, 0.5);
+
+  /* Sacred task-card palette. */
+  --pb-card-bg: rgba(0, 0, 0, 0.9);
+  --pb-card-bg-image: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.95) 100%);
+  --pb-card-border: 1px solid rgba(255, 215, 0, 0.3);
+  --pb-card-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+  --pb-card-shadow-hover: 0 8px 25px rgba(255, 215, 0, 0.2);
+  --pb-card-accent: #ffd700;
+  --pb-card-title: #ffd700;
+  --pb-card-desc: rgba(255, 215, 0, 0.8);
+  --pb-card-input-border: 1px solid rgba(255, 215, 0, 0.3);
+  --pb-card-input-bg: rgba(0, 0, 0, 0.5);
+  --pb-card-input-text: #ffd700;
+  --pb-card-edit-bg: rgba(255, 215, 0, 0.2);
+  --pb-card-edit-text: #ffd700;
+  --pb-card-delete-bg: rgba(220, 38, 38, 0.2);
+  --pb-card-delete-text: #ff6b6b;
+  --pb-card-save-bg: rgba(34, 197, 94, 0.2);
+  --pb-card-save-text: #4ade80;
+  --pb-card-cancel-bg: rgba(107, 114, 128, 0.2);
+  --pb-card-cancel-text: #9ca3af;
+
+  /* Sacred-only typography accents (no-op on light/dark). */
+  --pb-sacred-title-font: 'Cinzel', serif;
+  --pb-sacred-body-font: 'Crimson Text', serif;
+  --pb-sacred-title-letter-spacing: 0.02em;
+  --pb-sacred-column-letter-spacing: 0.05em;
+  --pb-sacred-title-text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+  --pb-sacred-column-title-text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  --pb-sacred-body-style: italic;
+
+  /* Responsive column sizing — overridden by the @media blocks below
+     (was the JS useResponsiveLayout window-width branching). */
+  --pb-column-width: 320px;
+  --pb-column-height: 70vh;
+
+  /* Sacred scrollbar palette (hardcoded default). */
+  --pb-sb-track: rgba(0, 0, 0, 0.3);
+  --pb-sb-thumb: linear-gradient(45deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.7));
+  --pb-sb-thumb-hover: linear-gradient(45deg, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.9));
+  --pb-sb-thumb-border: 1px solid rgba(255, 215, 0, 0.3);
+  --pb-sb-thumb-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  --pb-sb-col-track: rgba(0, 0, 0, 0.2);
+  --pb-sb-col-thumb: linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.6));
+  --pb-sb-col-thumb-hover: linear-gradient(180deg, rgba(255, 215, 0, 0.5), rgba(255, 215, 0, 0.8));
+  --pb-sb-col-thumb-border: 1px solid rgba(255, 215, 0, 0.2);
+  --pb-sb-col-thumb-hover-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  padding: 1rem;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+.board[data-theme='light'] {
+  --pb-col-bg: #ffffff;
+  --pb-col-border: 1px solid #e5e7eb;
+  --pb-col-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --pb-col-dragover-border: 2px solid #3b82f6;
+  --pb-col-dragover-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  --pb-col-header-border: #e5e7eb;
+  --pb-col-header-bg: transparent;
+  --pb-col-title: #1f2937;
+  --pb-col-desc: #6b7280;
+  --pb-placeholder-border: #3b82f6;
+  --pb-placeholder-bg: rgba(59, 130, 246, 0.1);
+  --pb-placeholder-text: #6b7280;
+  --pb-notasks-text: #9ca3af;
+
+  --pb-card-bg: #ffffff;
+  --pb-card-bg-image: none;
+  --pb-card-border: 1px solid #e5e7eb;
+  --pb-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --pb-card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --pb-card-accent: #3b82f6;
+  --pb-card-title: #1f2937;
+  --pb-card-desc: #6b7280;
+  --pb-card-input-border: 1px solid #d1d5db;
+  --pb-card-input-bg: #ffffff;
+  --pb-card-input-text: #1f2937;
+  --pb-card-edit-bg: #f3f4f6;
+  --pb-card-edit-text: #374151;
+  --pb-card-delete-bg: #fef2f2;
+  --pb-card-delete-text: #dc2626;
+  --pb-card-save-bg: #f0fdf4;
+  --pb-card-save-text: #16a34a;
+  --pb-card-cancel-bg: #f9fafb;
+  --pb-card-cancel-text: #6b7280;
+
+  --pb-sacred-title-font: inherit;
+  --pb-sacred-body-font: inherit;
+  --pb-sacred-title-letter-spacing: normal;
+  --pb-sacred-column-letter-spacing: normal;
+  --pb-sacred-title-text-shadow: none;
+  --pb-sacred-column-title-text-shadow: none;
+  --pb-sacred-body-style: normal;
+
+  --pb-sb-track: #f3f4f6;
+  --pb-sb-thumb: linear-gradient(45deg, #d1d5db, #9ca3af);
+  --pb-sb-thumb-hover: linear-gradient(45deg, #9ca3af, #6b7280);
+  --pb-sb-thumb-border: 1px solid #e5e7eb;
+  --pb-sb-thumb-hover-shadow: none;
+  --pb-sb-col-track: #f9fafb;
+  --pb-sb-col-thumb: linear-gradient(180deg, #e5e7eb, #d1d5db);
+  --pb-sb-col-thumb-hover: linear-gradient(180deg, #d1d5db, #9ca3af);
+  --pb-sb-col-thumb-border: 1px solid #d1d5db;
+  --pb-sb-col-thumb-hover-shadow: none;
+}
+
+.board[data-theme='dark'] {
+  --pb-col-bg: #1f2937;
+  --pb-col-border: 1px solid #374151;
+  --pb-col-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --pb-col-dragover-border: 2px solid #60a5fa;
+  --pb-col-dragover-shadow: 0 6px 20px rgba(96, 165, 250, 0.2);
+  --pb-col-header-border: #374151;
+  --pb-col-header-bg: transparent;
+  --pb-col-title: #f9fafb;
+  --pb-col-desc: #9ca3af;
+  --pb-placeholder-border: #60a5fa;
+  --pb-placeholder-bg: rgba(96, 165, 250, 0.1);
+  --pb-placeholder-text: #9ca3af;
+  --pb-notasks-text: #6b7280;
+
+  --pb-card-bg: #374151;
+  --pb-card-bg-image: none;
+  --pb-card-border: 1px solid #4b5563;
+  --pb-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --pb-card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --pb-card-accent: #60a5fa;
+  --pb-card-title: #f9fafb;
+  --pb-card-desc: #d1d5db;
+  --pb-card-input-border: 1px solid #4b5563;
+  --pb-card-input-bg: #1f2937;
+  --pb-card-input-text: #f9fafb;
+  --pb-card-edit-bg: #4b5563;
+  --pb-card-edit-text: #f9fafb;
+  --pb-card-delete-bg: #7f1d1d;
+  --pb-card-delete-text: #fca5a5;
+  --pb-card-save-bg: #065f46;
+  --pb-card-save-text: #6ee7b7;
+  --pb-card-cancel-bg: #374151;
+  --pb-card-cancel-text: #d1d5db;
+
+  --pb-sacred-title-font: inherit;
+  --pb-sacred-body-font: inherit;
+  --pb-sacred-title-letter-spacing: normal;
+  --pb-sacred-column-letter-spacing: normal;
+  --pb-sacred-title-text-shadow: none;
+  --pb-sacred-column-title-text-shadow: none;
+  --pb-sacred-body-style: normal;
+
+  --pb-sb-track: #374151;
+  --pb-sb-thumb: linear-gradient(45deg, #60a5fa, #3b82f6);
+  --pb-sb-thumb-hover: linear-gradient(45deg, #93c5fd, #60a5fa);
+  --pb-sb-thumb-border: 1px solid #1f2937;
+  --pb-sb-thumb-hover-shadow: none;
+  --pb-sb-col-track: #1f2937;
+  --pb-sb-col-thumb: linear-gradient(180deg, #4b5563, #6b7280);
+  --pb-sb-col-thumb-hover: linear-gradient(180deg, #6b7280, #9ca3af);
+  --pb-sb-col-thumb-border: 1px solid #374151;
+  --pb-sb-col-thumb-hover-shadow: none;
+}
+
+/* COLUMN -------------------------------------------------------------------- */
+.column {
+  box-sizing: border-box;
+  width: var(--pb-column-width);
+  height: var(--pb-column-height);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  background-color: var(--pb-col-bg);
+  border: var(--pb-col-border);
+  box-shadow: var(--pb-col-shadow);
+}
+
+.columnDragOver {
+  transform: scale(1.02);
+  border: var(--pb-col-dragover-border);
+  box-shadow: var(--pb-col-dragover-shadow);
+}
+
+.columnHeader {
+  padding: 1rem;
+  border-bottom: 1px solid var(--pb-col-header-border);
+  background-color: var(--pb-col-header-bg);
+  cursor: grab;
+  user-select: none;
+}
+
+.columnHeader:active {
+  cursor: grabbing;
+}
+
+.columnTitle {
+  margin: 0;
+  color: var(--pb-col-title);
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: var(--pb-sacred-title-font);
+  letter-spacing: var(--pb-sacred-column-letter-spacing);
+  text-shadow: var(--pb-sacred-column-title-text-shadow);
+}
+
+.columnDescription {
+  margin: 0.25rem 0 0 0;
+  color: var(--pb-col-desc);
+  font-size: 0.875rem;
+  font-family: var(--pb-sacred-body-font);
+  font-style: var(--pb-sacred-body-style);
+}
+
+.tasksContainer {
+  padding: 0.75rem;
+  flex: 1;
+}
+
+.tasksList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.taskDragPlaceholder {
+  height: 80px;
+  border-radius: 0.375rem;
+  border: 2px dashed var(--pb-placeholder-border);
+  background-color: var(--pb-placeholder-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pb-placeholder-text);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.noTasks {
+  text-align: center;
+  color: var(--pb-notasks-text);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: 2rem 1rem;
+}
+
+/* Responsive column sizing — replaces the JS useResponsiveLayout window-width
+   branching (280px mobile / 300px tablet / 320px desktop + auto height). */
+@media (max-width: 767px) {
+  .board {
+    --pb-column-width: 280px;
+    --pb-column-height: auto;
+  }
+  .tasksContainer {
+    min-height: 200px;
+  }
+  .columnTitle {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .board {
+    --pb-column-width: 300px;
+  }
+}
+
+/* TASK CARD ----------------------------------------------------------------- */
+.taskWrapper {
+  /* opacity:0.5 while dragging is driven by --pb-task-opacity (set in JS). */
+  opacity: var(--pb-task-opacity, 1);
+}
+
+.taskCard {
+  position: relative;
+  background-color: var(--pb-card-bg);
+  background-image: var(--pb-card-bg-image);
+  border: var(--pb-card-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  cursor: var(--pb-task-cursor, default);
+  transition: all 0.2s ease;
+  box-shadow: var(--pb-card-shadow);
+  transform: translateY(0);
+}
+
+.taskCardDraggable {
+  --pb-task-cursor: grab;
+}
+
+/* Hover lift — replaces useState isHovered + onMouseEnter/onMouseLeave. */
+.taskCard:hover {
+  box-shadow: var(--pb-card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.taskCheckbox {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: var(--pb-card-accent);
+}
+
+.taskTitle {
+  margin: 0 1.5rem 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--pb-card-title);
+  font-family: var(--pb-sacred-title-font);
+  letter-spacing: var(--pb-sacred-title-letter-spacing);
+  text-shadow: var(--pb-sacred-title-text-shadow);
+}
+
+.taskDescription {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--pb-card-desc);
+  line-height: 1.4;
+  font-family: var(--pb-sacred-body-font);
+  font-style: var(--pb-sacred-body-style);
+}
+
+.taskActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.taskButton {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.taskEditButton {
+  background-color: var(--pb-card-edit-bg);
+  color: var(--pb-card-edit-text);
+}
+
+.taskDeleteButton {
+  background-color: var(--pb-card-delete-bg);
+  color: var(--pb-card-delete-text);
+}
+
+.taskSaveButton {
+  background-color: var(--pb-card-save-bg);
+  color: var(--pb-card-save-text);
+}
+
+.taskCancelButton {
+  background-color: var(--pb-card-cancel-bg);
+  color: var(--pb-card-cancel-text);
+}
+
+.taskInput,
+.taskTextarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.25rem 0;
+  border-radius: 0.25rem;
+  border: var(--pb-card-input-border);
+  background-color: var(--pb-card-input-bg);
+  color: var(--pb-card-input-text);
+  font-size: 0.875rem;
+  font-family: var(--pb-sacred-body-font);
+}
+
+.taskTextarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME KEYFRAMES
+   These animation names (projectBoardGlowPulse / projectBoardFloat) were
+   referenced by theme/projectboard.ts but never had @keyframes definitions in
+   the old JS theme system (no injectKeyframes for them existed), so they were
+   inert. Defined here, matching the AppBar sacredGlow/sacredFloat house style,
+   so the sacred theme now renders the glow/float it was always wired for.
+   -------------------------------------------------------------------------- */
+@keyframes projectBoardGlowPulse {
+  0% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6),
+      0 0 80px rgba(255, 215, 0, 0.3);
+    border-color: rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.8),
+      0 0 100px rgba(255, 215, 0, 0.4);
+    border-color: rgba(255, 215, 0, 0.7);
+  }
+}
+
+@keyframes projectBoardFloat {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-4px);
+    opacity: 0.5;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   CUSTOM SCROLLBARS
+   Previously a per-theme CSS string injected into <head> at runtime via
+   document.createElement in board/index.tsx. Transcribed here as static,
+   theme-variable-driven rules scoped to .board (horizontal) and .column
+   (vertical) so no runtime style injection is needed.
+   -------------------------------------------------------------------------- */
+.board::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: var(--pb-sb-track);
+  border-radius: 6px;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: var(--pb-sb-thumb);
+  border-radius: 6px;
+  border: var(--pb-sb-thumb-border);
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+  background: var(--pb-sb-thumb-hover);
+  box-shadow: var(--pb-sb-thumb-hover-shadow);
+}
+
+.board::-webkit-scrollbar-corner {
+  background: var(--pb-sb-track);
+}
+
+.column::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.column::-webkit-scrollbar-track {
+  background: var(--pb-sb-col-track);
+  border-radius: 4px;
+}
+
+.column::-webkit-scrollbar-thumb {
+  background: var(--pb-sb-col-thumb);
+  border-radius: 4px;
+  border: var(--pb-sb-col-thumb-border);
+}
+
+.column::-webkit-scrollbar-thumb:hover {
+  background: var(--pb-sb-col-thumb-hover);
+  box-shadow: var(--pb-sb-col-thumb-hover-shadow);
+}
+
+.column::-webkit-scrollbar-corner {
+  background: var(--pb-sb-col-track);
+}

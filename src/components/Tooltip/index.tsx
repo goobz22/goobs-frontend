@@ -4,6 +4,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tooltip.module.css'
 
 /**
@@ -195,6 +196,19 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     }
   }, [])
 
+  // Diagnostic bus — emit an open/closed state transition whenever the
+  // tooltip's resolved visibility flips. Keying on `showTooltip` captures both
+  // the controlled (`open` prop) and uncontrolled (hover) paths through a
+  // single chokepoint. Additive: observes the existing visibility state without
+  // changing any show/hide behavior. No-op when no host bus is present.
+  useEffect(() => {
+    emitDiag({
+      type: 'component.state',
+      component: 'Tooltip',
+      state: showTooltip ? 'open' : 'closed',
+    })
+  }, [showTooltip])
+
   // Runtime + caller-supplied values flow into the CSS module as custom
   // properties; each override is set ONLY when the caller provided it, so the
   // CSS fallback (the theme value) applies otherwise — mirroring the old
@@ -256,8 +270,10 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     <div
       ref={tooltipRef}
       className={tooltipClassName}
+      data-component="Tooltip"
       data-theme={theme}
       data-placement={tooltipplacement}
+      data-state="open"
       style={tooltipVars}
     >
       <div className={cssStyles.content}>

@@ -1,0 +1,44 @@
+/* ==========================================================================
+   TIME RANGE COMPONENT - CSS MODULE
+   Sacred theme is the default (hardcoded); FieldShell owns label/helper.
+   State (focus, hover, disabled) is driven by native CSS pseudo-classes.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fields Wrapper - Flex container for the two time fields
+   -------------------------------------------------------------------------- */
+
+.fieldsWrapper {
+  display: flex;
+  gap: 16px;
+}
+
+.fieldContainer {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Time Input - Sacred Theme Default
+   -------------------------------------------------------------------------- */
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  color-scheme: dark;
+}
+
+.input:disabled {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}

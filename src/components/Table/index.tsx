@@ -51,7 +51,11 @@ export const TableContainer: React.FC<TableContainerProps> = ({
 
 export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
   const themeConfig = getTableStyles(styles)
-  return <table style={themeConfig.table}>{children}</table>
+  return (
+    <table style={themeConfig.table} data-component="Table">
+      {children}
+    </table>
+  )
 }
 
 export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {

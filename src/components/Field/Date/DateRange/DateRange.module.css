@@ -21,7 +21,10 @@
 
 .fieldsWrapper {
   display: flex;
-  gap: 16px;
+  /* Caller may override via the --date-range-gap custom property
+     (styles.gap); defaults to 16px. */
+  gap: var(--date-range-gap, 16px);
+  width: 100%;
   align-items: flex-start;
   flex-wrap: wrap;
 }
@@ -195,7 +198,7 @@
   }
 
   .fieldsWrapper {
-    gap: 14px;
+    gap: var(--date-range-gap, 14px);
   }
 
   .fieldContainer {
@@ -227,7 +230,7 @@
   }
 
   .fieldsWrapper {
-    gap: 12px;
+    gap: var(--date-range-gap, 12px);
   }
 
   .fieldContainer {

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './MACAddress.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -58,17 +59,7 @@ const isValidMACAddress = (mac: string): boolean => {
   return segments.every(segment => isValidSegment(segment) && segment !== '')
 }
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  height: '40px',
-  background: 'transparent',
-  outline: 'none',
-  border: '1px solid rgba(0,0,0,0.2)',
-  borderRadius: '8px',
-  padding: '8px 16px',
-  fontSize: '16px',
-  boxSizing: 'border-box',
-}
+// Input chrome (height, padding, border) lives in MACAddress.module.css.
 
 /**
  * A specialized text field for MAC address management
@@ -279,7 +270,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
           onClick={onClick}
           onPaste={handlePaste}
           placeholder={placeholder ?? '00:1A:2B:3C:4D:5E'}
-          style={inputStyle}
+          className={cssStyles.input}
           {...inputAriaProps}
         />
       )}

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import cssStyles from './Address.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 import Typography from '../../../../components/Typography'
@@ -243,20 +244,7 @@ const numToIP = (num: number): string =>
     '.'
   )
 
-// Inline input style — preserved from the legacy theme so the input
-// chrome (height, padding, border) doesn't regress while CSS module
-// migration is incremental.
-const buildInputStyle = (): React.CSSProperties => ({
-  width: '100%',
-  height: '40px',
-  background: 'transparent',
-  outline: 'none',
-  border: '1px solid rgba(0,0,0,0.2)',
-  borderRadius: '8px',
-  padding: '8px 16px',
-  fontSize: '16px',
-  boxSizing: 'border-box',
-})
+// Input chrome (height, padding, border) lives in Address.module.css.
 
 const IPAddressField: React.FC<IPAddressFieldProps> = ({
   initialValue = '',
@@ -603,19 +591,12 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     const rangeError = !isValidRange ? 'Invalid IP range' : undefined
 
     return (
-      <div style={{ width: '100%' }} data-field={dataField}>
+      <div className={cssStyles.rangeRoot} data-field={dataField}>
         {availableRangeMessage && (
           <Typography>{availableRangeMessage}</Typography>
         )}
-        <div
-          style={{
-            display: 'flex',
-            width: '100%',
-            gap: '0.5rem',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ flex: 1 }}>
+        <div className={cssStyles.rangeFields}>
+          <div className={cssStyles.rangeField}>
             <FieldShell
               label={startIPValue ? label : ''}
               error={rangeError}
@@ -639,14 +620,14 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
                     boundOnBlur?.()
                   }}
                   placeholder={placeholder || '192.168.0.1'}
-                  style={buildInputStyle()}
+                  className={cssStyles.input}
                   {...inputAriaProps}
                 />
               )}
             </FieldShell>
           </div>
           <Typography>-</Typography>
-          <div style={{ flex: 1 }}>
+          <div className={cssStyles.rangeField}>
             <FieldShell
               label={endIPValue ? label : ''}
               error={errorEnd || !isValidRange ? 'Invalid IP range' : undefined}
@@ -664,7 +645,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
                   onChange={e => handleEndIPChange(e.target.value)}
                   onBlur={onEndIPBlur}
                   placeholder={placeholder || '192.168.0.255'}
-                  style={buildInputStyle()}
+                  className={cssStyles.input}
                   {...inputAriaProps}
                 />
               )}
@@ -712,7 +693,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
           onKeyDown={handleKeyDown}
           onBlur={() => boundOnBlur?.()}
           placeholder={placeholder}
-          style={buildInputStyle()}
+          className={cssStyles.input}
           {...inputAriaProps}
         />
       )}

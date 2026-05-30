@@ -80,24 +80,24 @@ function resolveVariant(variant: string): VariantResolution {
   // Sacred Cinzel variants
   if (v.includes('cinzel')) {
     if (v.includes('h1'))
-      return { className: cssStyles.cinzelH1, fontWeight: 700, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH1 ?? '', fontWeight: 700, fontFamily: '"Cinzel", serif' }
     if (v.includes('h2'))
-      return { className: cssStyles.cinzelH2, fontWeight: 700, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH2 ?? '', fontWeight: 700, fontFamily: '"Cinzel", serif' }
     if (v.includes('h3'))
-      return { className: cssStyles.cinzelH3, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH3 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
     if (v.includes('h4'))
-      return { className: cssStyles.cinzelH4, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH4 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
     if (v.includes('h5'))
-      return { className: cssStyles.cinzelH5, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH5 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
     if (v.includes('h6'))
-      return { className: cssStyles.cinzelH6, fontWeight: 600, fontFamily: '"Cinzel", serif' }
-    return { className: cssStyles.cinzelBase, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return { className: cssStyles.cinzelH6 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.cinzelBase ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   }
 
   // Merriweather helper/footer text
   if (v.includes('merri') && (v.includes('helper') || v.includes('footer'))) {
     return {
-      className: cssStyles.merriHelper,
+      className: cssStyles.merriHelper ?? '',
       fontWeight: 400,
       fontFamily: '"Merriweather", serif',
       merriColorNonSacred: 'rgba(255, 255, 255, 0.6)',
@@ -107,20 +107,20 @@ function resolveVariant(variant: string): VariantResolution {
 
   // Standard heading variants
   if (v.includes('h1'))
-    return { className: cssStyles.h1, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h1 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   if (v.includes('h2'))
-    return { className: cssStyles.h2, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h2 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   if (v.includes('h3'))
-    return { className: cssStyles.h3, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h3 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   if (v.includes('h4'))
-    return { className: cssStyles.h4, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h4 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   if (v.includes('h5'))
-    return { className: cssStyles.h5, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h5 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
   if (v.includes('h6'))
-    return { className: cssStyles.h6, fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return { className: cssStyles.h6 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
 
   if (v.includes('body2') || v.includes('small'))
-    return { className: cssStyles.body2, fontWeight: 400 }
+    return { className: cssStyles.body2 ?? '', fontWeight: 400 }
 
   // body1 and default (font-size comes from .root)
   return { className: '', fontWeight: 400 }
@@ -274,6 +274,7 @@ const Typography: React.FC<TypographyProps> = ({
   return (
     <span
       className={className}
+      data-component="Typography"
       data-theme={styles?.theme}
       style={dynamicStyle}
     >

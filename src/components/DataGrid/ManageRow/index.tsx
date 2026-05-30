@@ -6,7 +6,8 @@ import ContentCopy from '../../Icons/ContentCopy'
 import Delete from '../../Icons/Delete'
 import Edit from '../../Icons/Edit'
 import Visibility from '../../Icons/Visibility'
-import type { DataGridStyles } from '../../../theme'
+import type { DataGridStyles } from '../types'
+import cssStyles from '../DataGrid.module.css'
 
 type ModalType = 'duplicate' | 'delete' | 'manage' | 'show'
 
@@ -31,8 +32,9 @@ function ManageRow({
   onShow,
   styles,
 }: ManageRowProps) {
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
+  // Theme drives only the data-theme attribute now; all color/spacing tokens
+  // live in DataGrid.module.css as CSS custom properties keyed off it.
+  const theme = styles?.theme || 'sacred'
   const hasSelection = selectedRows.length > 0
   const isSingleSelection = selectedRows.length === 1
 
@@ -63,94 +65,12 @@ function ManageRow({
     }
   }
 
-  // Theme colors
-  const colors = {
-    bg: isSacredTheme
-      ? 'rgba(0, 0, 0, 0.95)'
-      : isDarkTheme
-        ? '#1E293B'
-        : '#FFFFFF',
-    border: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.3)'
-      : isDarkTheme
-        ? '#334155'
-        : '#E2E8F0',
-    text: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151',
-    textMuted: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.5)'
-      : isDarkTheme
-        ? '#64748B'
-        : '#9CA3AF',
-    icon: isSacredTheme ? '#FFD700' : isDarkTheme ? '#94A3B8' : '#6B7280',
-    buttonHoverBg: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.12)'
-      : isDarkTheme
-        ? 'rgba(255, 255, 255, 0.08)'
-        : 'rgba(0, 0, 0, 0.04)',
-    deleteIcon: isSacredTheme ? '#FFD700' : '#EF4444',
-    deleteHoverBg: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.12)'
-      : 'rgba(239, 68, 68, 0.08)',
-    divider: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.2)'
-      : isDarkTheme
-        ? '#475569'
-        : '#E5E7EB',
-  }
-
-  const containerStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2px',
-    height: '37px',
-    padding: '0 6px',
-    backgroundColor: colors.bg,
-    border: `1px solid ${colors.border}`,
-    borderRadius: '6px',
-    transition: 'all 0.15s ease',
-  }
-
-  const countStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: '18px',
-    height: '18px',
-    padding: '0 4px',
-    backgroundColor: hasSelection
-      ? isSacredTheme
-        ? 'rgba(255, 215, 0, 0.15)'
-        : isDarkTheme
-          ? 'rgba(59, 130, 246, 0.15)'
-          : 'rgba(59, 130, 246, 0.1)'
-      : 'transparent',
-    borderRadius: '9px',
-    fontSize: '11px',
-    fontWeight: 600,
-    color: hasSelection
-      ? isSacredTheme
-        ? '#FFD700'
-        : '#3B82F6'
-      : colors.textMuted,
-  }
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: '12px',
-    fontWeight: 500,
-    color: hasSelection ? colors.text : colors.textMuted,
-    marginLeft: '4px',
-    marginRight: '4px',
-    whiteSpace: 'nowrap',
-  }
-
-  const dividerStyle: React.CSSProperties = {
-    width: '1px',
-    height: '16px',
-    backgroundColor: colors.divider,
-    margin: '0 2px',
-  }
-
-  const ActionButton = ({
+  // Render helpers (plain functions, NOT components — they hold no state now
+  // that hover styling moved to CSS, so they're invoked directly rather than
+  // mounted as <ActionButton />. This avoids the react-hooks/static-components
+  // "component created during render" rule that capitalized inline components
+  // trip, while keeping closure access to handlers/styles.)
+  const renderActionButton = ({
     onClick,
     icon,
     title,
@@ -169,111 +89,52 @@ function ManageRow({
      */
     action: 'manage' | 'show' | 'duplicate' | 'delete'
     isDelete?: boolean
-  }) => {
-    const [isHovered, setIsHovered] = React.useState(false)
-
-    const buttonStyle: React.CSSProperties = {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '26px',
-      height: '26px',
-      padding: 0,
-      backgroundColor: isHovered
-        ? isDelete
-          ? colors.deleteHoverBg
-          : colors.buttonHoverBg
-        : 'transparent',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      transition: 'background-color 0.12s ease',
-      color: isDelete ? colors.deleteIcon : colors.icon,
-    }
-
-    return (
-      <button
-        onClick={e => {
-          e.stopPropagation()
-          onClick()
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={buttonStyle}
-        title={title}
-        type="button"
-        data-action={action}
-        aria-label={title}
-      >
-        {icon}
-      </button>
-    )
-  }
+  }) => (
+    <button
+      onClick={e => {
+        e.stopPropagation()
+        onClick()
+      }}
+      className={`${cssStyles.manageRowActionBtn} ${isDelete ? cssStyles.manageRowActionBtnDelete : ''}`}
+      title={title}
+      type="button"
+      data-action={action}
+      aria-label={title}
+    >
+      {icon}
+    </button>
+  )
 
   const hasAnyAction = onManage || onShow || onDuplicate || onDelete
   const hasSingleRowActions = onManage || onShow || onDuplicate
 
-  // Add button color (green/primary)
-  const addColor = isSacredTheme ? '#FFD700' : '#22C55E'
-  const addHoverBg = isSacredTheme
-    ? 'rgba(255, 215, 0, 0.12)'
-    : 'rgba(34, 197, 94, 0.08)'
-
-  const AddButton = () => {
-    const [isHovered, setIsHovered] = React.useState(false)
-
-    const buttonStyle: React.CSSProperties = {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '1px',
-      padding: '4px 8px',
-      backgroundColor: isHovered ? addHoverBg : 'transparent',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      transition: 'background-color 0.12s ease',
-      color: addColor,
-    }
-
-    const labelStyle: React.CSSProperties = {
-      fontSize: '9px',
-      fontWeight: 500,
-      lineHeight: 1,
-    }
-
-    return (
-      <button
-        onClick={e => {
-          e.stopPropagation()
-          onAdd?.()
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={buttonStyle}
-        title="Add"
-        type="button"
-        data-action="add"
-        aria-label="Add"
-      >
-        <Add
-          styles={{ theme: styles?.theme || 'light' }}
-          width="14"
-          height="14"
-        />
-        <span style={labelStyle}>Add</span>
-      </button>
-    )
-  }
+  const renderAddButton = () => (
+    <button
+      onClick={e => {
+        e.stopPropagation()
+        onAdd?.()
+      }}
+      className={cssStyles.manageRowAddBtn}
+      title="Add"
+      type="button"
+      data-action="add"
+      aria-label="Add"
+    >
+      <Add styles={{ theme: styles?.theme || 'light' }} width="14" height="14" />
+      <span className={cssStyles.manageRowAddLabel}>Add</span>
+    </button>
+  )
 
   return (
     <div
-      style={containerStyle}
+      className={cssStyles.manageRow}
+      data-theme={theme}
       // Outer marker so tests can assert "the row-level toolbar exists"
       // and read the current selection count from a stable attribute
-      // rather than parsing the .countBadge text.
+      // rather than parsing the .countBadge text. data-has-selection drives
+      // the count badge + label color via CSS.
       data-grid-managerow="true"
+      data-has-selection={hasSelection ? 'true' : 'false'}
       data-selected-count={selectedRows.length}
       role="toolbar"
       aria-label="Row actions"
@@ -281,80 +142,80 @@ function ManageRow({
       {/* Add button - always visible when onAdd is provided */}
       {onAdd && (
         <>
-          <AddButton />
-          <div style={dividerStyle} />
+          {renderAddButton()}
+          <div className={cssStyles.manageRowDivider} />
         </>
       )}
 
-      <div style={countStyle}>{selectedRows.length}</div>
-      <span style={labelStyle}>{hasSelection ? 'selected' : 'select'}</span>
+      <div className={cssStyles.manageRowCount} data-has-selection={hasSelection ? 'true' : 'false'}>
+        {selectedRows.length}
+      </div>
+      <span className={cssStyles.manageRowLabel}>
+        {hasSelection ? 'selected' : 'select'}
+      </span>
 
       {hasSelection && hasAnyAction && (
         <>
-          <div style={dividerStyle} />
+          <div className={cssStyles.manageRowDivider} />
 
           {isSingleSelection && hasSingleRowActions && (
             <>
-              {onManage && (
-                <ActionButton
-                  action="manage"
-                  onClick={() => handleActionSelection('manage')}
-                  icon={
+              {onManage &&
+                renderActionButton({
+                  action: 'manage',
+                  onClick: () => handleActionSelection('manage'),
+                  icon: (
                     <Edit
                       styles={{ theme: styles?.theme || 'light' }}
                       width="14"
                       height="14"
                     />
-                  }
-                  title="Edit"
-                />
-              )}
-              {onShow && (
-                <ActionButton
-                  action="show"
-                  onClick={() => handleActionSelection('show')}
-                  icon={
+                  ),
+                  title: 'Edit',
+                })}
+              {onShow &&
+                renderActionButton({
+                  action: 'show',
+                  onClick: () => handleActionSelection('show'),
+                  icon: (
                     <Visibility
                       styles={{ theme: styles?.theme || 'light' }}
                       width="14"
                       height="14"
                     />
-                  }
-                  title="View"
-                />
-              )}
-              {onDuplicate && (
-                <ActionButton
-                  action="duplicate"
-                  onClick={() => handleActionSelection('duplicate')}
-                  icon={
+                  ),
+                  title: 'View',
+                })}
+              {onDuplicate &&
+                renderActionButton({
+                  action: 'duplicate',
+                  onClick: () => handleActionSelection('duplicate'),
+                  icon: (
                     <ContentCopy
                       styles={{ theme: styles?.theme || 'light' }}
                       width="14"
                       height="14"
                     />
-                  }
-                  title="Duplicate"
-                />
-              )}
+                  ),
+                  title: 'Duplicate',
+                })}
             </>
           )}
 
-          {onDelete && (
-            <ActionButton
-              action="delete"
-              onClick={() => handleActionSelection('delete')}
-              icon={
+          {onDelete &&
+            renderActionButton({
+              action: 'delete',
+              onClick: () => handleActionSelection('delete'),
+              icon: (
                 <Delete
                   styles={{ theme: styles?.theme || 'light' }}
                   width="14"
                   height="14"
                 />
-              }
-              title="Delete"
-              isDelete
-            />
-          )}
+              ),
+              title: 'Delete',
+              isDelete: true,
+            })}
         </>
       )}
     </div>

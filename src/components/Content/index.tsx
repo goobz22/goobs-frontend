@@ -313,7 +313,7 @@ const RenderContent: React.FC<
   const mergedStyle = { ...(boxProps?.style || {}), ...style }
 
   return (
-    <div {...boxProps} style={mergedStyle}>
+    <div {...boxProps} data-component="Content" style={mergedStyle}>
       {elements.map((element, index) => (
         <div key={index}>{element}</div>
       ))}

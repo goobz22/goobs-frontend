@@ -1,8 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ColumnDef } from '../../types'
-import type { DataGridStyles } from '../../../../theme'
+import { ColumnDef, type DataGridStyles } from '../../types'
 // Field component imports
 import TextField from '../../../Field/Text'
 import DateField from '../../../Field/Date/DateField'

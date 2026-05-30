@@ -1,0 +1,79 @@
+/* ==========================================================================
+   INTERNAL INCREMENT NUMBER FIELD - CSS MODULE
+   Input wrapper border + adornment box with the +/- buttons stacked
+   vertically inside the end adornment. FieldShell owns label/helper/theme;
+   the field/bg/text colors fall back to FieldShell's CSS custom properties.
+   Disabled state is driven by the native :disabled pseudo-class.
+   ========================================================================== */
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 100%;
+  border: 1px solid var(--field-border-default, hsl(0, 0%, 20%));
+  border-radius: 8px;
+  background-color: var(--field-bg, transparent);
+  color: var(--field-text, inherit);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  padding: 8px 16px;
+  padding-left: 16px;
+  padding-right: 48px;
+  font-size: 16px;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+.adornment {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 12px;
+  color: var(--field-text, inherit);
+  pointer-events: auto;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  height: 32px;
+  justify-content: center;
+}
+
+.button {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 2px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 1;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The decrement button sits 2px below the increment button. */
+.buttonDecrement {
+  margin-top: 2px;
+}

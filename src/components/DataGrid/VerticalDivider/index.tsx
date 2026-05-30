@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
-import type { DataGridStyles } from '../../../theme'
+import type { DataGridStyles } from '../types'
+import cssStyles from '../DataGrid.module.css'
 
 interface VerticalDividerProps {
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
@@ -8,18 +9,9 @@ interface VerticalDividerProps {
 }
 
 export const VerticalDivider: React.FC<VerticalDividerProps> = ({ styles }) => {
-  const isSacredTheme = styles?.theme === 'sacred'
-
-  const dividerStyle = {
-    borderLeft: isSacredTheme
-      ? '2px solid rgba(255, 215, 0, 0.4)'
-      : '2px solid rgba(0, 0, 0, 1)',
-    height: '20px',
-    ...(isSacredTheme && {
-      boxShadow:
-        '0 4px 6px -1px rgba(255, 215, 0, 0.6), 0 2px 4px -1px rgba(255, 215, 0, 0.4)',
-    }),
-  }
-
-  return <div style={dividerStyle} />
+  // The base class renders the black/shadowless divider; only an explicit
+  // `sacred` theme gets the gold border + glow. Passing the raw theme value
+  // (which may be undefined) preserves the original `theme === 'sacred'`
+  // branch exactly — undefined/light/dark all fall through to the base.
+  return <div className={cssStyles.verticalDivider} data-theme={styles?.theme} />
 }

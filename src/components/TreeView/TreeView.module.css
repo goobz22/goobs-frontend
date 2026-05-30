@@ -1,0 +1,453 @@
+/* ==========================================================================
+   TREEVIEW - CSS MODULE
+   Hierarchical data display (MUI X TreeView analogue). Migrated off the
+   JS theme system (theme/treeview.ts getTreeViewStyles + getTreeItemStyles).
+
+   Theme variant is expressed as data-theme on the root and on each tree item.
+   SACRED is NOT the hardcoded base here — the old getTreeViewStyles defaulted
+   to LIGHT (treeViewThemes[styles.theme || 'light']), so LIGHT is the base
+   default on the bare class and dark / sacred are [data-theme] overrides. This
+   preserves exact visual parity with the pre-migration default.
+
+   Per-item state (hover / selected / expanded / focused / disabled) is driven
+   by native CSS pseudo-classes (:hover) and data-attributes
+   (data-selected / data-expanded / data-focused / data-disabled) so the
+   JS useState(isHovered) + onMouseEnter/onMouseLeave style-only handlers are
+   gone. Level-based indentation is passed as the --tree-item-indent custom
+   property (computed in JS as baseIndent + level*increment).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER — LIGHT theme is the hardcoded base default.
+   Mirrors getTreeViewStyles(): longhand background/border/etc.
+   -------------------------------------------------------------------------- */
+.root {
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.95);
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  background-origin: padding-box;
+  background-clip: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(229, 231, 235, 0.8);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  color: rgb(17, 24, 39);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px;
+  width: 100%;
+  min-width: 200px;
+  height: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME OVERRIDE (treeViewThemes.dark.container)
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  background-color: rgba(31, 41, 55, 0.95);
+  border-color: rgba(75, 85, 99, 0.6);
+  border-radius: 12px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+  color: rgb(243, 244, 246);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px;
+  min-width: 200px;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME OVERRIDE (treeViewThemes.sacred.container)
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] {
+  background-color: transparent;
+  background-image:
+    radial-gradient(
+      ellipse at top,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.95) 100%
+    ),
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(255, 215, 0, 0.08) 0%,
+      transparent 50%
+    );
+  border-width: 2px;
+  border-color: rgba(255, 215, 0, 0.4);
+  border-radius: 16px;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(255, 215, 0, 0.2),
+    inset 0 2px 4px rgba(255, 215, 0, 0.1);
+  backdrop-filter: blur(20px);
+  color: rgba(255, 215, 0, 0.95);
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px;
+  min-width: 220px;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED BACKGROUND CANVAS (decorative particle overlay, sacred theme only).
+   The canvas pixel dimensions are still set at runtime in JS (measured via
+   ResizeObserver); only the static positioning lives here.
+   -------------------------------------------------------------------------- */
+.sacredBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --------------------------------------------------------------------------
+   INNER CONTENT WRAPPER (was an inline style object on the content div)
+   -------------------------------------------------------------------------- */
+.content {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   CHILDREN GROUP (was the inline style on the recursive children wrapper).
+   paddingLeft is the caller-supplied itemChildrenIndentation, passed as the
+   --tree-children-indent custom property. borderLeft + marginLeft differ
+   between sacred and the light/dark default.
+   -------------------------------------------------------------------------- */
+.childrenGroup {
+  padding-left: var(--tree-children-indent, 24px);
+  border-left: 1px solid rgba(229, 231, 235, 0.5);
+  margin-left: 12px;
+  position: relative;
+  overflow: visible;
+}
+
+.childrenGroup[data-theme='sacred'] {
+  border-left: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   TREE ITEM — LIGHT base default (treeViewThemes.light.item).
+   Level-based indentation via --tree-item-indent (JS-computed scalar).
+   -------------------------------------------------------------------------- */
+.item {
+  background-color: transparent;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: initial;
+  background-attachment: initial;
+  background-origin: initial;
+  background-clip: initial;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 8px;
+  color: rgb(55, 65, 81);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 8px 12px;
+  padding-left: var(--tree-item-indent, 16px);
+  min-height: 36px;
+  margin: 1px 0;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  white-space: normal;
+  text-overflow: clip;
+  overflow: visible;
+}
+
+/* Light hover (only when not disabled/selected/expanded — those win in JS
+   order: disabled > selected > expanded > hover). Mirror that cascade with
+   :not() guards so hover never paints over a selected/expanded/disabled row. */
+.item:hover:not([data-disabled='true']):not([data-selected='true']):not(
+    [data-expanded='true']
+  ) {
+  background-color: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: rgb(59, 130, 246);
+  transform: translateX(2px);
+}
+
+.item[data-expanded='true']:not([data-disabled='true']):not(
+    [data-selected='true']
+  ) {
+  background-color: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: rgb(16, 185, 129);
+  font-weight: 600;
+}
+
+.item[data-selected='true']:not([data-disabled='true']) {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: rgb(59, 130, 246);
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+}
+
+.item[data-disabled='true'] {
+  background-color: rgba(243, 244, 246, 0.5);
+  color: rgb(156, 163, 175);
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: rgba(209, 213, 219, 0.3);
+}
+
+/* Focus state layers on top of the above (JS applied it unconditionally
+   after the state cascade). data-focused mirrors the JS isFocused branch. */
+.item[data-focused='true'] {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ---- DARK item ---- */
+.item[data-theme='dark'] {
+  color: rgb(209, 213, 219);
+}
+
+.item[data-theme='dark']:hover:not([data-disabled='true']):not(
+    [data-selected='true']
+  ):not([data-expanded='true']) {
+  background-color: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: rgb(96, 165, 250);
+  transform: translateX(2px);
+}
+
+.item[data-theme='dark'][data-expanded='true']:not(
+    [data-disabled='true']
+  ):not([data-selected='true']) {
+  background-color: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: rgb(52, 211, 153);
+  font-weight: 600;
+}
+
+.item[data-theme='dark'][data-selected='true']:not([data-disabled='true']) {
+  background-color: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.5);
+  color: rgb(96, 165, 250);
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
+}
+
+.item[data-theme='dark'][data-disabled='true'] {
+  background-color: rgba(55, 65, 81, 0.5);
+  color: rgb(107, 114, 128);
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+.item[data-theme='dark'][data-focused='true'] {
+  outline: 2px solid rgba(96, 165, 250, 0.6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+/* ---- SACRED item ---- */
+.item[data-theme='sacred'] {
+  border-radius: 10px;
+  color: rgba(255, 215, 0, 0.9);
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  padding: 6px 16px;
+  padding-left: var(--tree-item-indent, 16px);
+  min-height: 32px;
+  margin: 2px 0;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: center;
+}
+
+.item[data-theme='sacred']:hover:not([data-disabled='true']):not(
+    [data-selected='true']
+  ):not([data-expanded='true']) {
+  background-color: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.4);
+  color: rgba(255, 215, 0, 1);
+  transform: translateX(4px) scale(1.02);
+  text-shadow:
+    0 2px 8px rgba(255, 215, 0, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+}
+
+.item[data-theme='sacred'][data-expanded='true']:not(
+    [data-disabled='true']
+  ):not([data-selected='true']) {
+  background-color: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.6);
+  color: rgba(255, 215, 0, 1);
+  font-weight: 600;
+  text-shadow:
+    0 2px 6px rgba(255, 215, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.item[data-theme='sacred'][data-selected='true']:not([data-disabled='true']) {
+  background-color: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.8);
+  color: rgba(255, 215, 0, 1);
+  font-weight: 600;
+  text-shadow:
+    0 2px 8px rgba(255, 215, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+  box-shadow:
+    0 4px 20px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 215, 0, 0.2);
+  background-image: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.item[data-theme='sacred'][data-disabled='true'] {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 215, 0, 0.3);
+  opacity: 0.5;
+  border-color: rgba(255, 215, 0, 0.1);
+}
+
+.item[data-theme='sacred'][data-focused='true'] {
+  outline: 2px solid rgba(255, 215, 0, 0.8);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px rgba(255, 215, 0, 0.2),
+    0 4px 20px rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   ICON CONTAINER (treeViewThemes.*.iconContainer) — base = light/dark (20x20),
+   sacred is 20x24. alignSelf:center was appended in getTreeItemStyles.
+   -------------------------------------------------------------------------- */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin-right: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  align-self: center;
+}
+
+.iconContainer[data-theme='sacred'] {
+  height: 24px;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expand-icon HOVER flourish (treeViewThemes.*.expandIconHover).
+   The chevron's color/filter are set inline by <ExpandMore> (inline wins),
+   so only the transform — absent from the collapsed base inline style — can
+   be driven from CSS here. Applies only when the row is NOT expanded
+   (data-expanded handled by the parent .item state) and NOT disabled. The
+   svg lives inside <ExpandMore>'s own wrapper div, hence the descendant svg
+   selector. light/dark = scale(1.1); sacred = scale(1.2) rotate(10deg). */
+.iconContainer:hover svg {
+  transform: scale(1.1);
+}
+
+.iconContainer[data-theme='sacred']:hover svg {
+  transform: scale(1.2) rotate(10deg);
+}
+
+/* When expanded, the icon carries an inline transform (rotate(90deg)…) from
+   <ExpandMore>; that inline value wins over the hover rule above, so no
+   special expanded-hover rule is needed for visual parity. */
+
+/* --------------------------------------------------------------------------
+   CHECKBOX (treeViewThemes.*.checkbox). Light/dark are identical (16x16);
+   sacred is 18x18 with a border + dark fill. getTreeItemStyles only kept the
+   sacred backgroundColor when it equaled rgba(0,0,0,0.5), else transparent —
+   so light/dark stay transparent.
+   -------------------------------------------------------------------------- */
+.checkbox {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  accent-color: rgb(59, 130, 246);
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: initial;
+  background-attachment: initial;
+  background-origin: initial;
+  background-clip: initial;
+}
+
+.checkbox[data-theme='dark'] {
+  accent-color: rgb(96, 165, 250);
+}
+
+.checkbox[data-theme='sacred'] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  accent-color: rgba(255, 215, 0, 1);
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 3px;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   LABEL (treeViewThemes.*.label) — identical across themes except font via
+   inheritance; transition differs for sacred.
+   -------------------------------------------------------------------------- */
+.label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+  user-select: none;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: normal;
+  text-overflow: clip;
+  overflow: visible;
+}
+
+.label[data-theme='sacred'] {
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}

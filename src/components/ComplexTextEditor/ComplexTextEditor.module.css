@@ -1,0 +1,535 @@
+/* ==========================================================================
+   COMPLEX TEXT EDITOR — CSS MODULE
+   Migrated off the JS theme system (theme/complextexteditor.ts +
+   theme/shared.ts TRANSITIONS/SHADOWS + theme/formField.ts getFormFieldTheme).
+
+   House pattern: SACRED is the hardcoded base default; light / dark are
+   [data-theme] attribute-selector overrides. Every colour / shadow / spacing
+   value below is transcribed verbatim from the old theme modules — visual
+   parity with getComplexTextEditorStyles is exact.
+
+   Runtime-measured / caller-supplied values still come from JS via CSS custom
+   properties (--ct-min-rows-textarea, --ct-rich-min-height, etc.) and inline
+   dynamicStyle objects on the elements.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER — SACRED defaults (theme/complextexteditor.ts sacred.container
+   + getComplexTextEditorStyles containerStyle). light / dark override below.
+   -------------------------------------------------------------------------- */
+.container {
+  /* Sacred tokens (hardcoded default) */
+  --ct-container-bg: rgba(10, 10, 10, 0.9);
+  --ct-container-radius: 12px;
+  --ct-font-family: 'Cinzel', serif;
+  /* premium transition (TRANSITIONS.premium) */
+  --ct-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Sacred container effects (sacred.backgroundImage + sacred.borderGlow) */
+  --ct-bg-image: linear-gradient(
+      135deg,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%,
+      rgba(255, 215, 0, 0.05) 100%
+    ),
+    radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+  --ct-border-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+
+  /* Editor-area tokens (sacred.editorArea) */
+  --ct-editor-bg: rgba(0, 0, 0, 0.8);
+  --ct-editor-border: rgba(255, 215, 0, 0.3);
+  --ct-editor-border-focused: rgba(255, 215, 0, 0.7);
+  --ct-editor-border-error: rgba(239, 68, 68, 1);
+  --ct-editor-color: rgba(255, 215, 0, 0.9);
+  --ct-editor-color-error: rgba(255, 255, 255, 0.6);
+  --ct-editor-font-family: 'Cinzel', serif;
+  --ct-editor-font-size: 16px;
+  --ct-editor-line-height: 1.6;
+  --ct-editor-padding: 24px;
+  --ct-editor-min-height: 150px;
+  --ct-editor-radius: 0 0 12px 12px;
+  /* SHADOWS.sacred.small */
+  --ct-editor-shadow: 0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1);
+  --ct-editor-text-glow: 0 0 3px rgba(255, 215, 0, 0.3);
+
+  /* Toolbar tokens (sacred.toolbar) */
+  --ct-toolbar-bg: transparent;
+  --ct-toolbar-radius: 12px 12px 0 0;
+  --ct-toolbar-padding: 16px 24px;
+  --ct-toolbar-gap: 12px;
+
+  /* Sacred glyph (sacred.sacred.glyph) */
+  --ct-glyph-color: rgba(255, 215, 0, 0.2);
+  --ct-glyph-filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--ct-container-bg);
+  background-image: var(--ct-bg-image);
+  box-shadow: var(--ct-border-glow);
+  border-radius: var(--ct-container-radius);
+  font-family: var(--ct-font-family);
+  transition: var(--ct-transition);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* LIGHT theme override (theme/complextexteditor.ts light + TRANSITIONS.medium) */
+.container[data-theme='light'] {
+  --ct-container-bg: rgba(255, 255, 255, 0.95);
+  --ct-container-radius: 8px;
+  --ct-font-family: 'Inter', sans-serif;
+  --ct-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ct-bg-image: none;
+  --ct-border-glow: none;
+
+  --ct-editor-bg: rgba(255, 255, 255, 1);
+  --ct-editor-border: rgba(209, 213, 219, 1);
+  --ct-editor-border-focused: rgba(59, 130, 246, 1);
+  --ct-editor-border-error: rgba(239, 68, 68, 1);
+  --ct-editor-color: rgba(31, 41, 55, 1);
+  --ct-editor-color-error: rgba(239, 68, 68, 1);
+  --ct-editor-font-family: 'Inter', sans-serif;
+  --ct-editor-font-size: 14px;
+  --ct-editor-line-height: 1.5;
+  --ct-editor-padding: 16px;
+  --ct-editor-min-height: 120px;
+  --ct-editor-radius: 0 0 8px 8px;
+  /* SHADOWS.light.small */
+  --ct-editor-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  --ct-editor-text-glow: none;
+
+  --ct-toolbar-radius: 8px 8px 0 0;
+  --ct-toolbar-padding: 12px 16px;
+  --ct-toolbar-gap: 8px;
+
+  --ct-glyph-filter: none;
+}
+
+/* DARK theme override (theme/complextexteditor.ts dark + TRANSITIONS.medium) */
+.container[data-theme='dark'] {
+  --ct-container-bg: rgba(31, 41, 55, 0.95);
+  --ct-container-radius: 8px;
+  --ct-font-family: 'Inter', sans-serif;
+  --ct-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ct-bg-image: none;
+  --ct-border-glow: none;
+
+  --ct-editor-bg: rgba(17, 24, 39, 1);
+  --ct-editor-border: rgba(75, 85, 99, 1);
+  --ct-editor-border-focused: rgba(96, 165, 250, 1);
+  --ct-editor-border-error: rgba(239, 68, 68, 1);
+  --ct-editor-color: rgba(243, 244, 246, 1);
+  --ct-editor-color-error: rgba(239, 68, 68, 1);
+  --ct-editor-font-family: 'Inter', sans-serif;
+  --ct-editor-font-size: 14px;
+  --ct-editor-line-height: 1.5;
+  --ct-editor-padding: 16px;
+  --ct-editor-min-height: 120px;
+  --ct-editor-radius: 0 0 8px 8px;
+  /* dark editorArea boxShadow (literal from theme/complextexteditor.ts) */
+  --ct-editor-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  --ct-editor-text-glow: none;
+
+  --ct-toolbar-radius: 8px 8px 0 0;
+  --ct-toolbar-padding: 12px 16px;
+  --ct-toolbar-gap: 8px;
+
+  --ct-glyph-filter: none;
+}
+
+/* Accordion-mode root padding (containerStyle: padding when accordionMode) */
+.container[data-accordion='true'] {
+  padding: 16px;
+}
+
+/* Disabled root (containerStyle disabled branch) */
+.container[data-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   LABEL (index.tsx labelElement — inlined getSharedLabelStyles).
+
+   PARITY NOTE: the old code derived the base label colour from
+   getFormFieldTheme(styles), which defaults an UNDEFINED theme to 'sacred'
+   (gold), while the sacred font/glow branch only fired when
+   styles?.theme === 'sacred'. So the base colour here is the sacred-gold
+   label.default; light / dark are [data-theme] overrides; the glow/uppercase
+   treatment is a separate [data-sacred='true'] flag the TSX only sets on
+   explicit sacred theme. font-family follows the same getFormFieldTheme
+   default (sacred → serif), surfaced via --ct-label-font-family.
+   -------------------------------------------------------------------------- */
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-family: var(--ct-label-font-family, 'Crimson Text', serif);
+  color: rgba(255, 215, 0, 0.8); /* formField sacred label.default (default) */
+  transition: all 0.2s ease;
+  background: transparent;
+  background-color: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.label[data-theme='light'] {
+  --ct-label-font-family: 'Inter', sans-serif;
+  color: rgba(107, 114, 128, 1); /* formField light label.default */
+}
+
+.label[data-theme='dark'] {
+  --ct-label-font-family: 'Inter', sans-serif;
+  color: rgba(156, 163, 175, 1); /* formField dark label.default */
+}
+
+.label[data-theme='sacred'] {
+  --ct-label-font-family: 'Crimson Text', serif;
+  color: rgba(255, 215, 0, 0.8); /* formField sacred label.default */
+}
+
+/* Sacred decorative branch — only when styles.theme === 'sacred'
+   (index.tsx isSacredTheme block). Overrides colour + font with the gold
+   glow treatment. */
+.label[data-sacred='true'] {
+  color: rgba(255, 215, 0, 0.9); /* Sacred gold */
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.3);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   HELPER / FOOTER TEXT (index.tsx helperTextElement)
+   color comes from footerTextColor; default vs error via [data-helper-type].
+   font-size overridable via --ct-helper-font-size (styles?.fontSize).
+   -------------------------------------------------------------------------- */
+.helperText {
+  margin-top: 4px;
+  font-size: var(--ct-helper-font-size, 12px);
+  /* getFormFieldTheme default font (sacred → serif) */
+  font-family: var(--ct-label-font-family, 'Crimson Text', serif);
+  /* sacred footerText.default (getFormFieldTheme default) */
+  color: rgba(255, 255, 255, 0.6);
+  min-height: 1em;
+}
+
+.helperText[data-theme='light'] {
+  --ct-label-font-family: 'Inter', sans-serif;
+  color: rgba(107, 114, 128, 1); /* light footerText.default */
+}
+
+.helperText[data-theme='dark'] {
+  --ct-label-font-family: 'Inter', sans-serif;
+  color: rgba(156, 163, 175, 1); /* dark footerText.default */
+}
+
+.helperText[data-theme='sacred'] {
+  --ct-label-font-family: 'Crimson Text', serif;
+}
+
+/* error footerText is the same across themes (rgba(239,68,68,1)) */
+.helperText[data-helper-type='error'] {
+  color: rgba(239, 68, 68, 1);
+}
+
+/* --------------------------------------------------------------------------
+   TOOLBAR (getComplexTextEditorStyles toolbarStyle) — used by ComplexToolbar's
+   wrapper. display:none when showToolbar === false (data-hidden).
+   -------------------------------------------------------------------------- */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  background: var(--ct-toolbar-bg);
+  border-radius: var(--ct-toolbar-radius);
+  padding: var(--ct-toolbar-padding);
+  gap: var(--ct-toolbar-gap);
+}
+
+.toolbar[data-hidden='true'] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   TOGGLE ROW (getComplexTextEditorStyles toggleRowStyle) — mode switch row.
+   display:none when showModeToggle === false (data-hidden).
+   -------------------------------------------------------------------------- */
+.toggleRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.toggleRow[data-hidden='true'] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   EDITOR AREA (getComplexTextEditorStyles editorAreaStyle) — the bordered
+   surface that wraps the rich-text toolbar + contentEditable, and the
+   markdown textarea. Focus border via :focus-within; error via
+   [data-state='error'].
+   -------------------------------------------------------------------------- */
+.editorArea {
+  background: var(--ct-editor-bg);
+  border: 1px solid var(--ct-editor-border);
+  border-radius: var(--ct-editor-radius);
+  color: var(--ct-editor-color);
+  font-family: var(--ct-editor-font-family);
+  font-size: var(--ct-editor-font-size);
+  line-height: var(--ct-editor-line-height);
+  padding: var(--ct-editor-padding);
+  min-height: var(--ct-editor-min-height);
+  box-shadow: var(--ct-editor-shadow);
+  text-shadow: var(--ct-editor-text-glow);
+  transition: var(--ct-transition);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.editorArea:focus-within {
+  border-color: var(--ct-editor-border-focused);
+}
+
+.editorArea[data-state='error'] {
+  border-color: var(--ct-editor-border-error);
+  color: var(--ct-editor-color-error);
+}
+
+/* The contentEditable surface inside RichEditor's editorArea.
+   min-height is measured (minRows * 20px) → passed as --ct-rich-min-height. */
+.richSurface {
+  min-height: var(--ct-rich-min-height);
+  outline: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.richSurfaceWrap {
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   SIMPLE EDITOR TEXTAREA (SimpleEditor/index.tsx textareaStyle)
+   NOTE: SimpleEditor used its OWN hardcoded colour set distinct from the
+   theme module — transcribed verbatim. min-height is measured
+   (minRows * 1.5rem) → passed as --ct-simple-min-height.
+   -------------------------------------------------------------------------- */
+.simpleTextarea {
+  /* light defaults */
+  --ct-simple-bg: #ffffff;
+  --ct-simple-border: #e5e7eb;
+  --ct-simple-color: #1f2937;
+  --ct-simple-shadow: none;
+
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--ct-simple-border);
+  background-color: var(--ct-simple-bg);
+  color: var(--ct-simple-color);
+  font-size: 0.875rem;
+  font-family: inherit;
+  min-height: var(--ct-simple-min-height);
+  resize: vertical;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: var(--ct-simple-shadow);
+}
+
+.simpleTextarea[data-theme='dark'] {
+  --ct-simple-bg: #1f2937;
+  --ct-simple-border: #374151;
+  --ct-simple-color: #f9fafb;
+}
+
+.simpleTextarea[data-theme='sacred'] {
+  --ct-simple-bg: rgba(0, 0, 0, 0.95);
+  --ct-simple-border: rgba(255, 215, 0, 0.3);
+  --ct-simple-color: #ffd700;
+  /* unfocused sacred shadow */
+  --ct-simple-shadow: 0 0 8px rgba(255, 215, 0, 0.1);
+}
+
+/* Sacred focus state (was isFocused branch): brighter border + stronger glow */
+.simpleTextarea[data-theme='sacred']:focus {
+  --ct-simple-border: rgba(255, 215, 0, 0.5);
+  --ct-simple-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   MARKDOWN EDITOR (MarkdownEditor/index.tsx textareaStyle) — the editorArea
+   base, overridden to monospace / borderless. Split preview halves width.
+   -------------------------------------------------------------------------- */
+.markdownRow {
+  display: flex;
+}
+
+.markdownTextarea {
+  composes: editorArea;
+  font-family: monospace;
+  border: none;
+  outline: none;
+  resize: vertical;
+  width: 100%;
+}
+
+.markdownTextarea[data-preview='true'] {
+  width: 50%;
+}
+
+/* Sacred markdown code-glow animation (was injected at runtime) */
+.markdownTextarea[data-theme='sacred'] {
+  animation: markdownEditorCodeGlow 4s ease-in-out infinite;
+}
+
+.markdownPreview {
+  width: 50%;
+  border-left: 1px solid;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED GLYPH (getComplexTextEditorStyles sacredGlyphStyle) — decorative,
+   absolutely positioned. animation only on sacred theme.
+   -------------------------------------------------------------------------- */
+.sacredGlyph {
+  position: absolute;
+  bottom: -20px;
+  right: 20px;
+  font-size: 48px;
+  color: var(--ct-glyph-color);
+  filter: var(--ct-glyph-filter);
+  pointer-events: none;
+  z-index: 0;
+  transition: var(--ct-transition);
+}
+
+/* NOTE: the old theme referenced `complexTextEditorGlyphFloat` but that
+   keyframe was never defined anywhere, so the glyph animation was inert in
+   production. The `.sacredGlyph` element is also never rendered by any editor
+   (no JSX consumed computedStyles.sacredGlyph). Kept here for parity only;
+   no animation is applied so behaviour is unchanged. */
+
+/* ==========================================================================
+   EDITOR TOOLBAR (Toolbars/Editor/index.tsx premiumStyles / sacredStyles)
+   Static layout containers. Sacred adds a translucent backdrop.
+   ========================================================================== */
+.toolbarContainer {
+  /* Reset the toolbar tokens to this element's own static layout defaults so
+     the .container-level --ct-toolbar-* values (editor-area chrome) do NOT
+     leak in via inheritance. A caller override arrives as an INLINE
+     --ct-toolbar-* on this same element (RichEditor wrapperStyle), which wins
+     over these rule-level declarations — restoring the old
+     getComplexTextEditorTheme toolbar branch without disturbing the default. */
+  --ct-toolbar-padding: 8px;
+  --ct-toolbar-gap: 8px;
+  --ct-toolbar-bg: transparent;
+
+  padding: var(--ct-toolbar-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ct-toolbar-gap);
+  background-color: var(--ct-toolbar-bg);
+}
+
+.toolbarContainer[data-theme='sacred'] {
+  --ct-toolbar-bg: rgba(0, 0, 0, 0.5);
+}
+
+.toolbarRow,
+.primaryRow,
+.dropdownRow {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.buttonsContainer {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbarDropdown {
+  min-width: 120px;
+  max-width: 160px;
+  flex: 1 1 120px;
+}
+
+/* ==========================================================================
+   KEYFRAMES — moved out of runtime styleSheet.insertRule into static CSS.
+   ========================================================================== */
+@keyframes richTextEditorBorderPulse {
+  0%,
+  100% {
+    border-color: rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 215, 0, 0.6);
+  }
+}
+
+@keyframes richTextEditorTextGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 3px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes markdownEditorCodeGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes markdownEditorGlyphRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toolbarIconGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
+  }
+}

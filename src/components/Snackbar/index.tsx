@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Alert, { AlertProps } from '../Alert'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Snackbar.module.css'
 
 export interface SnackbarProps {
@@ -34,6 +35,27 @@ const Snackbar: React.FC<SnackbarProps> = ({
     setIsOpen(open)
   }, [open])
 
+  // Diagnostic bus — emit the snackbar open/closed lifecycle as a
+  // `component.state` transition so outcome tests can assert the snackbar
+  // appeared/dismissed without scraping the DOM. Edge-triggered off `isOpen`
+  // so it fires once per transition, not on every render. The inner Alert
+  // emits its own `toast.shown`; this beacon is the container-level open/closed
+  // state, which is additive. No-op when no bus is present.
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      wasOpenRef.current = true
+      emitDiag({ type: 'component.state', component: 'Snackbar', state: 'open' })
+    } else if (!isOpen && wasOpenRef.current) {
+      wasOpenRef.current = false
+      emitDiag({
+        type: 'component.state',
+        component: 'Snackbar',
+        state: 'closed',
+      })
+    }
+  }, [isOpen])
+
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -50,7 +72,11 @@ const Snackbar: React.FC<SnackbarProps> = ({
   }
 
   return (
-    <div className={cssStyles.root}>
+    <div
+      className={cssStyles.root}
+      data-component="Snackbar"
+      data-state={isOpen ? 'open' : 'closed'}
+    >
       <Alert
         message={message}
         severity={severity}

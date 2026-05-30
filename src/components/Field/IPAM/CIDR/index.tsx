@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './CIDR.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
@@ -68,49 +69,8 @@ const calculateCIDRInfo = (cidr: number) => {
   }
 }
 
-// Inline button + input styles preserved from the legacy theme so the
-// chrome (height, increment buttons, padding) doesn't regress while
-// the IPAM family migrates.
-const buttonContainerStyle: React.CSSProperties = {
-  position: 'absolute',
-  right: '8px',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  justifyContent: 'center',
-}
-
-const buttonStyle = (isDisabled: boolean): React.CSSProperties => ({
-  padding: 0,
-  width: '1rem',
-  height: '1rem',
-  minWidth: '1rem',
-  minHeight: '1rem',
-  borderRadius: '0.125rem',
-  border: 'none',
-  backgroundColor: 'transparent',
-  cursor: isDisabled ? 'not-allowed' : 'pointer',
-  color: 'currentColor',
-  transition: 'all 0.3s ease',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  opacity: isDisabled ? 0.5 : 1,
-})
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  height: '40px',
-  background: 'transparent',
-  outline: 'none',
-  border: '1px solid rgba(0,0,0,0.2)',
-  borderRadius: '8px',
-  padding: '8px 60px 8px 16px',
-  fontSize: '16px',
-  boxSizing: 'border-box',
-}
+// Button + input chrome lives in CIDR.module.css. Disabled state is
+// driven by the native :disabled pseudo-class.
 
 const CIDRField: React.FC<CIDRFieldProps> = ({
   initialValue = '24',
@@ -274,7 +234,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
         styles={styles}
       >
         {({ inputId, inputAriaProps }) => (
-          <div style={{ position: 'relative', width: '100%' }}>
+          <div className={cssStyles.inputContainer}>
             <input
               ref={inputRef}
               id={id ?? inputId}
@@ -294,16 +254,16 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
               placeholder={placeholder}
               type="text"
               inputMode="numeric"
-              style={inputStyle}
+              className={cssStyles.input}
               {...inputAriaProps}
             />
-            <div style={buttonContainerStyle}>
+            <div className={cssStyles.buttonContainer}>
               <button
                 type="button"
                 aria-label="Increase CIDR"
                 onMouseDown={handleIncrementMouseDown}
                 disabled={disabled}
-                style={buttonStyle(!!disabled)}
+                className={cssStyles.button}
               >
                 <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
               </button>
@@ -312,7 +272,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
                 aria-label="Decrease CIDR"
                 onMouseDown={handleDecrementMouseDown}
                 disabled={disabled}
-                style={buttonStyle(!!disabled)}
+                className={cssStyles.button}
               >
                 <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
               </button>
@@ -322,12 +282,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
       </FieldShell>
 
       {showSubnetInfo && (
-        <div
-          style={{
-            marginTop: '0.5rem',
-            fontSize: '0.875rem',
-          }}
-        >
+        <div className={cssStyles.subnetInfo}>
           <div>Subnet Mask: {cidrInfo.mask}</div>
           <div>
             Total Hosts: {cidrInfo.totalHosts} ({cidrInfo.usableHosts} usable)

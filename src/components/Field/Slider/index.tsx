@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
+import cssStyles from './Slider.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 
@@ -89,10 +90,6 @@ const Slider: React.FC<SliderProps> = ({
     [onChange]
   )
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-  }
-
   return (
     <FieldShell
       label={label}
@@ -125,7 +122,7 @@ const Slider: React.FC<SliderProps> = ({
           aria-valuemax={max}
           aria-valuenow={currentValue}
           aria-orientation="horizontal"
-          style={inputStyle}
+          className={cssStyles.input}
           {...inputAriaProps}
         />
       )}

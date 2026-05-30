@@ -12,6 +12,7 @@ import React, {
   type FC,
   type CSSProperties,
 } from 'react'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Drawer.module.css'
 
 // --------------------------------------------------------------------------
@@ -229,6 +230,24 @@ const Drawer: FC<DrawerProps> = ({
     }
   }, [open, isVisible])
 
+  // Diagnostic bus — emit the drawer open/closed lifecycle as a
+  // `component.state` transition so outcome tests can assert the drawer
+  // slid in/out without scraping the DOM. Edge-triggered off `open` so it
+  // fires once per transition, not on every render. Permanent drawers are
+  // always open and never transition, so they emit no beacon. No-op when no
+  // bus is present.
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    if (variant === 'permanent') return
+    if (open && !wasOpenRef.current) {
+      wasOpenRef.current = true
+      emitDiag({ type: 'component.state', component: 'Drawer', state: 'open' })
+    } else if (!open && wasOpenRef.current) {
+      wasOpenRef.current = false
+      emitDiag({ type: 'component.state', component: 'Drawer', state: 'closed' })
+    }
+  }, [open, variant])
+
   // Track container size for sacred background — runtime measurement, stays in JS
   useEffect(() => {
     const drawer = drawerRef.current
@@ -385,10 +404,12 @@ const Drawer: FC<DrawerProps> = ({
     <div
       ref={drawerRef}
       className={cssStyles.paper}
+      data-component="Drawer"
       data-theme={theme}
       data-variant={variant}
       data-anchor={effectiveAnchor}
       data-open={safeOpen ? 'true' : 'false'}
+      data-state={safeOpen ? 'open' : 'closed'}
       style={paperVars}
       role="dialog"
       aria-modal={variant === 'temporary' ? open : undefined}

@@ -13,10 +13,11 @@ import React, {
   useImperativeHandle,
   createContext,
   useContext,
+  type CSSProperties,
   type ReactNode,
   type FC,
 } from 'react'
-import { getTreeViewStyles, type TreeViewStyles } from '../../theme'
+import cssStyles from './TreeView.module.css'
 import ExpandMoreIcon from '../Icons/ExpandMore'
 
 // --------------------------------------------------------------------------
@@ -24,6 +25,154 @@ import ExpandMoreIcon from '../Icons/ExpandMore'
 // --------------------------------------------------------------------------
 
 export type TreeViewItemId = string
+
+/**
+ * Public styling contract for TreeView. Transcribed from the old
+ * theme/treeview.ts `TreeViewStyles` so caller-supplied overrides keep the
+ * exact same prop surface after the CSS-module migration. The `theme` field
+ * selects the variant (rendered as data-theme); the remaining fields are
+ * caller-supplied overrides applied via the small JS dynamicStyle object.
+ */
+export interface TreeViewStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  boxShadow?: string
+  backdropFilter?: string
+  backgroundImage?: string
+  color?: string
+  fontFamily?: string
+  fontSize?: string
+  lineHeight?: string | number
+  padding?: string
+  width?: string
+  minWidth?: string
+  maxWidth?: string
+  height?: string
+  minHeight?: string
+  maxHeight?: string
+
+  // Item styling
+  itemBackgroundColor?: string
+  itemBorderColor?: string
+  itemBorderRadius?: string
+  itemColor?: string
+  itemFontFamily?: string
+  itemFontSize?: string
+  itemFontWeight?: string | number
+  itemLetterSpacing?: string
+  itemTextShadow?: string
+  itemPadding?: string
+  itemMinHeight?: string
+  itemMargin?: string
+
+  // Item hover states
+  itemHoverBackgroundColor?: string
+  itemHoverBorderColor?: string
+  itemHoverColor?: string
+  itemHoverTransform?: string
+  itemHoverTextShadow?: string
+  itemHoverBoxShadow?: string
+
+  // Item selected states
+  itemSelectedBackgroundColor?: string
+  itemSelectedBorderColor?: string
+  itemSelectedColor?: string
+  itemSelectedFontWeight?: string | number
+  itemSelectedTextShadow?: string
+  itemSelectedBoxShadow?: string
+  itemSelectedBackgroundImage?: string
+
+  // Item expanded states
+  itemExpandedBackgroundColor?: string
+  itemExpandedBorderColor?: string
+  itemExpandedColor?: string
+  itemExpandedFontWeight?: string | number
+  itemExpandedTextShadow?: string
+
+  // Item disabled states
+  itemDisabledBackgroundColor?: string
+  itemDisabledColor?: string
+  itemDisabledOpacity?: number
+  itemDisabledBorderColor?: string
+
+  // Item focus states
+  itemFocusedOutline?: string
+  itemFocusedOutlineOffset?: string
+  itemFocusedBoxShadow?: string
+  itemFocusedBackgroundColor?: string
+
+  // Icon styling
+  iconContainerWidth?: string
+  iconContainerHeight?: string
+  iconContainerMarginRight?: string
+  expandIconColor?: string
+  expandIconFontSize?: string
+  expandIconHoverColor?: string
+  expandIconHoverTransform?: string
+  expandIconExpandedTransform?: string
+  expandIconExpandedColor?: string
+
+  // Checkbox styling
+  checkboxWidth?: string
+  checkboxHeight?: string
+  checkboxMarginRight?: string
+  checkboxAccentColor?: string
+  checkboxBorderRadius?: string
+  checkboxBorder?: string
+  checkboxBackground?: string
+
+  // Content area styling
+  contentPaddingLeft?: string
+  contentBorderLeft?: string
+  contentMarginLeft?: string
+
+  // Label styling
+  labelFontSize?: string
+  labelFontWeight?: string | number
+  labelColor?: string
+  labelTextShadow?: string
+
+  // Indentation
+  itemChildrenIndentation?: string | number
+  levelIndentBase?: number
+  levelIndentIncrement?: number
+
+  // Sacred theme styling
+  sacredGlyphColor?: string
+  sacredGlyphFontSize?: string
+  sacredGlyphAnimation?: string
+  sacredShimmerBackground?: string
+  sacredShimmerAnimation?: string
+  sacredBackgroundGlyphColor?: string
+  sacredBackgroundGlyphAnimation?: string
+
+  // Layout and spacing
+  margin?: string
+  marginTop?: string
+  marginBottom?: string
+  marginLeft?: string
+  marginRight?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  outline?: boolean
+
+  // Behavior
+  multiSelect?: boolean
+  checkboxSelection?: boolean
+  disableSelection?: boolean
+  expandOnClick?: boolean
+}
 
 export interface TreeViewItem {
   id: TreeViewItemId
@@ -435,6 +584,207 @@ const useTreeViewExpansion = (
 }
 
 // --------------------------------------------------------------------------
+// DYNAMIC (CALLER-OVERRIDE) STYLE HELPERS
+// Visual parity for the theme variants now lives in TreeView.module.css via
+// data-theme. These helpers carry ONLY the genuinely-dynamic, caller-supplied
+// overrides (styles?.width, custom colors, margins) plus runtime-scalar values
+// passed as CSS custom properties — exactly the recipe's kept-in-JS surface.
+// --------------------------------------------------------------------------
+
+/** Caller-supplied container overrides → inline style object (root <div>). */
+const buildContainerOverrideStyle = (
+  styles: TreeViewStyles
+): CSSProperties => {
+  const overrides: CSSProperties = {}
+  if (styles.backgroundColor) overrides.backgroundColor = styles.backgroundColor
+  if (styles.borderColor) overrides.borderColor = styles.borderColor
+  if (styles.borderRadius) overrides.borderRadius = styles.borderRadius
+  if (styles.borderWidth) overrides.borderWidth = styles.borderWidth
+  if (styles.boxShadow) overrides.boxShadow = styles.boxShadow
+  if (styles.backdropFilter) overrides.backdropFilter = styles.backdropFilter
+  if (styles.backgroundImage) overrides.backgroundImage = styles.backgroundImage
+  if (styles.color) overrides.color = styles.color
+  if (styles.fontFamily) overrides.fontFamily = styles.fontFamily
+  if (styles.fontSize) overrides.fontSize = styles.fontSize
+  if (styles.lineHeight !== undefined) overrides.lineHeight = styles.lineHeight
+  if (styles.padding) overrides.padding = styles.padding
+  if (styles.width) overrides.width = styles.width
+  if (styles.minWidth) overrides.minWidth = styles.minWidth
+  if (styles.maxWidth) overrides.maxWidth = styles.maxWidth
+  if (styles.height) overrides.height = styles.height
+  if (styles.minHeight) overrides.minHeight = styles.minHeight
+  if (styles.maxHeight) overrides.maxHeight = styles.maxHeight
+  if (styles.margin) overrides.margin = styles.margin
+  if (styles.marginTop) overrides.marginTop = styles.marginTop
+  if (styles.marginBottom) overrides.marginBottom = styles.marginBottom
+  if (styles.marginLeft) overrides.marginLeft = styles.marginLeft
+  if (styles.marginRight) overrides.marginRight = styles.marginRight
+  if (styles.transitionDuration)
+    overrides.transitionDuration = styles.transitionDuration
+  if (styles.transitionEasing)
+    overrides.transitionTimingFunction = styles.transitionEasing
+  if (styles.disabled) {
+    overrides.opacity = 0.6
+    overrides.pointerEvents = 'none'
+  }
+  return overrides
+}
+
+/** Caller-supplied item overrides → inline style object (tree item <div>). */
+const buildItemOverrideStyle = (
+  styles: TreeViewStyles,
+  totalIndent: number
+): CSSProperties => {
+  // The level-based indent is a runtime-measured scalar → CSS custom property.
+  const overrides: CSSProperties = {
+    ['--tree-item-indent' as string]: `${totalIndent}px`,
+  }
+  if (styles.itemBackgroundColor)
+    overrides.backgroundColor = styles.itemBackgroundColor
+  if (styles.itemBorderColor) overrides.borderColor = styles.itemBorderColor
+  if (styles.itemBorderRadius) overrides.borderRadius = styles.itemBorderRadius
+  if (styles.itemColor) overrides.color = styles.itemColor
+  if (styles.itemFontFamily) overrides.fontFamily = styles.itemFontFamily
+  if (styles.itemFontSize) overrides.fontSize = styles.itemFontSize
+  if (styles.itemFontWeight) overrides.fontWeight = styles.itemFontWeight
+  if (styles.itemLetterSpacing)
+    overrides.letterSpacing = styles.itemLetterSpacing
+  if (styles.itemTextShadow) overrides.textShadow = styles.itemTextShadow
+  if (styles.itemPadding) overrides.padding = styles.itemPadding
+  if (styles.itemMinHeight) overrides.minHeight = styles.itemMinHeight
+  if (styles.itemMargin) overrides.margin = styles.itemMargin
+  return overrides
+}
+
+/** Caller-supplied icon-container overrides → inline style object. */
+const buildIconContainerOverrideStyle = (
+  styles: TreeViewStyles
+): CSSProperties => {
+  const overrides: CSSProperties = {}
+  if (styles.iconContainerWidth) overrides.width = styles.iconContainerWidth
+  if (styles.iconContainerHeight) overrides.height = styles.iconContainerHeight
+  if (styles.iconContainerMarginRight)
+    overrides.marginRight = styles.iconContainerMarginRight
+  return overrides
+}
+
+/** Caller-supplied checkbox overrides → inline style object. */
+const buildCheckboxOverrideStyle = (styles: TreeViewStyles): CSSProperties => {
+  const overrides: CSSProperties = {}
+  if (styles.checkboxWidth) overrides.width = styles.checkboxWidth
+  if (styles.checkboxHeight) overrides.height = styles.checkboxHeight
+  if (styles.checkboxMarginRight)
+    overrides.marginRight = styles.checkboxMarginRight
+  if (styles.checkboxAccentColor)
+    overrides.accentColor = styles.checkboxAccentColor
+  if (styles.checkboxBorderRadius)
+    overrides.borderRadius = styles.checkboxBorderRadius
+  if (styles.checkboxBorder) overrides.border = styles.checkboxBorder
+  if (styles.checkboxBackground)
+    overrides.backgroundColor = styles.checkboxBackground
+  return overrides
+}
+
+/** Caller-supplied label overrides → inline style object. */
+const buildLabelOverrideStyle = (styles: TreeViewStyles): CSSProperties => {
+  const overrides: CSSProperties = {}
+  if (styles.labelFontSize) overrides.fontSize = styles.labelFontSize
+  if (styles.labelFontWeight) overrides.fontWeight = styles.labelFontWeight
+  if (styles.labelColor) overrides.color = styles.labelColor
+  if (styles.labelTextShadow) overrides.textShadow = styles.labelTextShadow
+  return overrides
+}
+
+/**
+ * Expand/collapse icon style — STAYS IN JS.
+ * The icon is the <ExpandMore> component, which applies the `style` prop
+ * inline on its inner <svg>; inline styles win over any CSS-module class, so
+ * the rotation / color / filter for the expanded vs collapsed states must be
+ * computed here and passed through `style`. Values transcribed exactly from
+ * treeViewThemes[*].{expandIcon,expandIconExpanded,itemDisabled}.
+ */
+const buildExpandIconStyle = (
+  theme: 'light' | 'dark' | 'sacred',
+  isExpanded: boolean,
+  isDisabled: boolean,
+  isHovered: boolean,
+  styles: TreeViewStyles
+): CSSProperties => {
+  // Base expandIcon per theme
+  const base: CSSProperties =
+    theme === 'sacred'
+      ? {
+          color: 'rgba(255, 215, 0, 0.7)',
+          fontSize: '16px',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))',
+          opacity: 1,
+        }
+      : theme === 'dark'
+        ? {
+            color: 'rgb(156, 163, 175)',
+            fontSize: '16px',
+            transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+            opacity: 1,
+          }
+        : {
+            color: 'rgb(107, 114, 128)',
+            fontSize: '16px',
+            transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+            opacity: 1,
+          }
+
+  let resolved: CSSProperties = { ...base }
+
+  if (isDisabled) {
+    // theme.itemDisabled.color + opacity 0.5
+    resolved.color =
+      theme === 'sacred'
+        ? 'rgba(255, 215, 0, 0.3)'
+        : theme === 'dark'
+          ? 'rgb(107, 114, 128)'
+          : 'rgb(156, 163, 175)'
+    resolved.opacity = 0.5
+  } else if (isExpanded) {
+    if (theme === 'sacred') {
+      resolved = {
+        ...resolved,
+        transform: 'rotate(90deg) scale(1.1) translateX(2px)',
+        color: 'rgba(255, 215, 0, 1)',
+        filter:
+          'drop-shadow(0 2px 6px rgba(255, 215, 0, 0.7)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))',
+      }
+    } else if (theme === 'dark') {
+      resolved.transform = 'rotate(90deg)'
+      resolved.color = 'rgb(52, 211, 153)'
+    } else {
+      resolved.transform = 'rotate(90deg)'
+      resolved.color = 'rgb(16, 185, 129)'
+    }
+  } else if (isHovered) {
+    // theme.expandIconHover — only the color/filter flourish is re-applied in
+    // JS because <ExpandMore> writes these inline on its <svg> (so a CSS :hover
+    // rule can never win). The hover transform is left to CSS. Values are the
+    // exact treeViewThemes[*].expandIconHover color/filter.
+    if (theme === 'sacred') {
+      resolved.color = 'rgba(255, 215, 0, 1)'
+      resolved.filter =
+        'drop-shadow(0 2px 4px rgba(255, 215, 0, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))'
+    } else if (theme === 'dark') {
+      resolved.color = 'rgb(96, 165, 250)'
+    } else {
+      resolved.color = 'rgb(59, 130, 246)'
+    }
+  }
+
+  // Caller overrides
+  if (styles.expandIconColor) resolved.color = styles.expandIconColor
+  if (styles.expandIconFontSize) resolved.fontSize = styles.expandIconFontSize
+
+  return resolved
+}
+
+// --------------------------------------------------------------------------
 // SACRED DECORATIONS
 // --------------------------------------------------------------------------
 
@@ -514,16 +864,7 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        opacity: 0.3,
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
+      className={cssStyles.sacredBackground}
     />
   )
 }
@@ -549,25 +890,49 @@ const TreeItem: FC<TreeItemProps> = ({
   disabledItemsFocusable = false,
 }) => {
   const context = useTreeViewContext()
-  const [isHovered, setIsHovered] = useState(false)
   const itemRef = useRef<HTMLDivElement>(null)
+
+  // Whole-row hover state. The expand-icon's hover color/filter must be
+  // computed in JS (ExpandMore writes its style inline on the <svg>, so a CSS
+  // :hover rule cannot win) — this restores the old TreeItem isHovered → chevron
+  // flourish triggered across the entire row.
+  const [isHovered, setIsHovered] = useState(false)
 
   const itemId = context.getItemId(item)
   const label = context.getItemLabel(item)
   const isDisabled = context.isItemDisabled(item)
+  const theme = styles.theme || 'light'
 
-  // Get computed styles
-  const itemStyles = useMemo(() => {
-    return getTreeItemStyles(
-      styles,
-      isHovered,
-      isSelected,
-      isExpanded,
-      isFocused,
-      isDisabled,
-      level
-    )
-  }, [styles, isHovered, isSelected, isExpanded, isFocused, isDisabled, level])
+  // Level-based indentation is a runtime-derived scalar → CSS custom property.
+  // Mirrors getTreeItemStyles(): baseIndent + level * incrementIndent.
+  const baseIndent = styles.levelIndentBase || 16
+  const incrementIndent = styles.levelIndentIncrement || 12
+  const totalIndent = baseIndent + level * incrementIndent
+
+  // Caller-supplied (genuinely dynamic) style overrides per slot. Variant +
+  // state styling now lives in TreeView.module.css; these carry only the
+  // styles?.itemX overrides plus the --tree-item-indent custom property.
+  const itemOverrideStyle = useMemo(
+    () => buildItemOverrideStyle(styles, totalIndent),
+    [styles, totalIndent]
+  )
+  const iconContainerOverrideStyle = useMemo(
+    () => buildIconContainerOverrideStyle(styles),
+    [styles]
+  )
+  const checkboxOverrideStyle = useMemo(
+    () => buildCheckboxOverrideStyle(styles),
+    [styles]
+  )
+  const labelOverrideStyle = useMemo(
+    () => buildLabelOverrideStyle(styles),
+    [styles]
+  )
+  // Expand-icon style stays in JS (inline on <ExpandMore>'s svg).
+  const expandIconStyle = useMemo(
+    () => buildExpandIconStyle(theme, isExpanded, isDisabled, isHovered, styles),
+    [theme, isExpanded, isDisabled, isHovered, styles]
+  )
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -683,13 +1048,16 @@ const TreeItem: FC<TreeItemProps> = ({
     ]
   )
 
-  // Sacred theme decorations
-  const sacredDecorations = null
-
   return (
     <div
       ref={itemRef}
-      style={itemStyles.item}
+      className={cssStyles.item}
+      data-theme={theme}
+      data-selected={isSelected ? 'true' : undefined}
+      data-expanded={isExpanded ? 'true' : undefined}
+      data-focused={isFocused ? 'true' : undefined}
+      data-disabled={isDisabled ? 'true' : undefined}
+      style={itemOverrideStyle}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
@@ -702,8 +1070,6 @@ const TreeItem: FC<TreeItemProps> = ({
       aria-level={level + 1}
       data-testid={`tree-item-${itemId}`}
     >
-      {sacredDecorations}
-
       {/* Checkbox */}
       {checkboxSelection && (
         <input
@@ -711,7 +1077,9 @@ const TreeItem: FC<TreeItemProps> = ({
           checked={isSelected}
           onChange={handleCheckboxChange}
           disabled={isDisabled}
-          style={itemStyles.checkbox}
+          className={cssStyles.checkbox}
+          data-theme={theme}
+          style={checkboxOverrideStyle}
           tabIndex={-1}
           aria-hidden="true"
         />
@@ -720,20 +1088,24 @@ const TreeItem: FC<TreeItemProps> = ({
       {/* Expand/Collapse Icon */}
       {hasChildren && (
         <div
-          style={itemStyles.iconContainer}
+          className={cssStyles.iconContainer}
+          data-theme={theme}
+          style={iconContainerOverrideStyle}
           onClick={handleIconClick}
           role="button"
           aria-label={isExpanded ? 'Collapse' : 'Expand'}
         >
           <ExpandMoreIcon
             styles={{ theme: styles.theme || 'sacred' }}
-            style={itemStyles.expandIcon}
+            style={expandIconStyle}
           />
         </div>
       )}
 
       {/* Label */}
-      <div style={itemStyles.label}>{label}</div>
+      <div className={cssStyles.label} data-theme={theme} style={labelOverrideStyle}>
+        {label}
+      </div>
     </div>
   )
 }
@@ -1002,15 +1374,15 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
               />
               {hasChildren && isItemExpanded && (
                 <div
+                  className={cssStyles.childrenGroup}
+                  data-theme={styles.theme || 'light'}
                   style={{
-                    paddingLeft: itemChildrenIndentation,
-                    borderLeft:
-                      styles.theme === 'sacred'
-                        ? '2px solid rgba(255, 215, 0, 0.3)'
-                        : '1px solid rgba(229, 231, 235, 0.5)',
-                    marginLeft: '12px',
-                    position: 'relative',
-                    overflow: 'visible',
+                    // Caller-supplied indentation is a dynamic scalar → CSS var.
+                    // Match React's number→px coercion for the bare-number case.
+                    ['--tree-children-indent' as string]:
+                      typeof itemChildrenIndentation === 'number'
+                        ? `${itemChildrenIndentation}px`
+                        : itemChildrenIndentation,
                   }}
                 >
                   {renderTree(children, level + 1)}
@@ -1098,7 +1470,9 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
       <TreeViewContext.Provider value={contextValue}>
         <div
           ref={ref || containerRef}
-          style={getTreeViewStyles(styles)}
+          className={cssStyles.root}
+          data-theme={styles.theme || 'light'}
+          style={buildContainerOverrideStyle(styles)}
           role="tree"
           aria-multiselectable={multiSelect}
           tabIndex={0}
@@ -1114,14 +1488,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
           )}
 
           {/* Tree content */}
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 1,
-              boxSizing: 'border-box',
-              width: '100%',
-            }}
-          >
+          <div className={cssStyles.content}>
             {children || renderTree(items)}
           </div>
         </div>
@@ -1136,14 +1503,5 @@ TreeView.displayName = 'TreeView'
 // EXPORTS
 // --------------------------------------------------------------------------
 
-// Helper function to get tree item styles (referenced in theme file)
-import { getTreeItemStyles } from '../../theme/treeview'
-
 export default TreeView
-export {
-  TreeView,
-  TreeItem,
-  useTreeViewContext,
-  useTreeViewApiRef,
-  getTreeItemStyles,
-}
+export { TreeView, TreeItem, useTreeViewContext, useTreeViewApiRef }

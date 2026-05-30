@@ -8,6 +8,7 @@ import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
+import { emitDiag } from '../../utils/diag'
 // Remove Switch import
 // import Switch from '../Switch';
 // Remove clsx import
@@ -327,12 +328,22 @@ const PricingTable: FC<PricingProps> = props => {
 
   const handleButtonClick = (index: number) => {
     if (router && buttoncolumns?.buttonlinks?.[index]) {
+      emitDiag({
+        type: 'nav.change',
+        component: 'PricingTable',
+        to: buttoncolumns.buttonlinks[index],
+      })
       router.push(buttoncolumns.buttonlinks[index])
     }
   }
 
   return (
-    <div style={styles.container}>
+    <div
+      style={styles.container}
+      data-component="PricingTable"
+      data-subject={tabletitle?.text}
+      data-state={disabled ? 'disabled' : 'enabled'}
+    >
       {isSacredTheme && <div style={styles.glyph}>✦</div>}
 
       {tabletitle && <h5 style={styles.header}>{tabletitle.text}</h5>}

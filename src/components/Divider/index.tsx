@@ -98,6 +98,7 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
       <div
         ref={ref}
         className={rootClassName}
+        data-component="Divider"
         data-theme={theme}
         style={dynamicStyle}
         {...restProps}

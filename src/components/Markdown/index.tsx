@@ -58,6 +58,7 @@ export const Markdown: React.FC<MarkdownProps> = ({
   return (
     <div
       className={mergeClassNames(cssStyles.root, className)}
+      data-component="Markdown"
       data-testid={rest['data-testid'] ?? 'goobs-markdown'}
       data-align={align}
       data-full-width={fullWidth ? 'true' : undefined}

@@ -98,6 +98,7 @@ const Fade = forwardRef<HTMLDivElement, FadeProps>(
       <div
         ref={ref}
         className={cssStyles.container}
+        data-component="Fade"
         data-theme={theme}
         data-state={isVisible ? 'visible' : 'hidden'}
         data-disabled={isDisabled ? 'true' : undefined}

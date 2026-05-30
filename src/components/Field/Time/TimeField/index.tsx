@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
+import cssStyles from './TimeField.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -95,25 +96,8 @@ const TimeField: React.FC<TimeFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
-  // Inline styles preserved for the input itself — the previous
-  // implementation drew the sacred-gold border + dark color scheme
-  // entirely from JS, and we want to keep the visual parity until
-  // someone moves the input chrome to a CSS module.
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '12px 16px',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: '1px solid rgba(255, 215, 0, 0.3)',
-    borderRadius: '8px',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
-    fontFamily: '"Crimson Text", serif',
-    fontSize: '16px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-    colorScheme: 'dark' as const,
-  }
+  // Input chrome (sacred-gold border + dark color scheme) lives in
+  // TimeField.module.css; the disabled state is driven by :disabled.
 
   return (
     <FieldShell
@@ -139,7 +123,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
           onBlur={bindingOnBlur}
           disabled={disabled}
           required={required}
-          style={inputStyle}
+          className={cssStyles.input}
           {...inputAriaProps}
         />
       )}

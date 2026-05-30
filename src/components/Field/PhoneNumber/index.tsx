@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { alpha } from '../../../utils'
+import cssStyles from './PhoneNumber.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
-
-const SACRED_GOLD = '#FFD700'
 
 const formatPhoneNumber = (inputValue: string): string => {
   const digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
@@ -175,47 +173,34 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     [onChange]
   )
 
-  // Inner wrapper kept local — Phone has a `+1` prefix glued to the
-  // left of the input, so the visual frame is component-specific.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: styles?.height || '40px',
-    width: '100%',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
-    borderRadius: styles?.borderRadius || '8px',
-    transition: 'all 0.3s ease',
-    boxSizing: 'border-box',
+  // Inner frame lives in PhoneNumber.module.css — Phone has a `+1` prefix
+  // glued to the left of the input. The sacred-gold theme is the hardcoded
+  // default; caller-supplied layout overrides (height/borderWidth/radius/
+  // font) are forwarded as CSS custom properties, and the disabled chrome
+  // is driven by the .disabled modifier on the wrapper + native :disabled
+  // on the input.
+  const wrapperCssVars: Record<string, string> = {}
+  if (styles?.height) wrapperCssVars['--phone-height'] = styles.height
+  if (styles?.borderWidth) {
+    wrapperCssVars['--phone-border-width'] = styles.borderWidth
+  }
+  if (styles?.borderRadius) {
+    wrapperCssVars['--phone-radius'] = styles.borderRadius
+  }
+  if (styles?.fontSize) wrapperCssVars['--phone-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined) {
+    wrapperCssVars['--phone-font-weight'] = String(styles.fontWeight)
+  }
+  if (styles?.lineHeight) {
+    wrapperCssVars['--phone-line-height'] = styles.lineHeight
+  }
+  if (styles?.fontFamily) {
+    wrapperCssVars['--phone-font-family'] = styles.fontFamily
   }
 
-  const prefixStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    paddingLeft: '16px',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
-    fontSize: styles?.fontSize || '16px',
-    fontFamily: '"Crimson Text", serif',
-    fontWeight: styles?.fontWeight,
-    userSelect: 'none',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    flex: 1,
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    paddingLeft: '8px',
-    paddingRight: '16px',
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily || '"Crimson Text", serif',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
-    boxSizing: 'border-box',
-  }
+  const wrapperClassNames = [cssStyles.inputWrapper, disabled && cssStyles.disabled]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <FieldShell
@@ -231,8 +216,11 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
-          <div style={prefixStyle}>+1</div>
+        <div
+          className={wrapperClassNames}
+          style={wrapperCssVars as React.CSSProperties}
+        >
+          <div className={cssStyles.prefix}>+1</div>
           <input
             ref={inputRef}
             type="tel"
@@ -247,7 +235,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
             required={required}
             placeholder={placeholder}
             autoComplete={autoComplete}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
         </div>

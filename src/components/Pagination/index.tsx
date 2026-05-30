@@ -2,6 +2,7 @@
 
 import React, { useCallback, type FC, type ReactNode } from 'react'
 import cssStyles from './Pagination.module.css'
+import { emitDiag } from '../../utils/diag'
 import FirstPageIcon from '../Icons/FirstPage'
 import LastPageIcon from '../Icons/LastPage'
 import KeyboardArrowLeftIcon from '../Icons/KeyboardArrowLeft'
@@ -216,40 +217,55 @@ const Pagination: FC<PaginationProps> = ({
     boundaryCount,
   })
 
+  // Additive diagnostics: emit a single nav.change for every page change
+  // (nav buttons AND numbered page items route through this), then fire the
+  // caller's own onChange. emitDiag is a no-op without a host bus.
+  const handleChange = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>, nextPage: number) => {
+      emitDiag({
+        type: 'nav.change',
+        component: 'Pagination',
+        to: String(nextPage),
+      })
+      onChange(event, nextPage)
+    },
+    [onChange]
+  )
+
   const handleFirstPage = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       if (!isDisabled) {
-        onChange(event, 1)
+        handleChange(event, 1)
       }
     },
-    [onChange, isDisabled]
+    [handleChange, isDisabled]
   )
 
   const handlePreviousPage = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       if (!isDisabled) {
-        onChange(event, page - 1)
+        handleChange(event, page - 1)
       }
     },
-    [onChange, page, isDisabled]
+    [handleChange, page, isDisabled]
   )
 
   const handleNextPage = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       if (!isDisabled) {
-        onChange(event, page + 1)
+        handleChange(event, page + 1)
       }
     },
-    [onChange, page, isDisabled]
+    [handleChange, page, isDisabled]
   )
 
   const handleLastPage = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       if (!isDisabled) {
-        onChange(event, count)
+        handleChange(event, count)
       }
     },
-    [onChange, count, isDisabled]
+    [handleChange, count, isDisabled]
   )
 
   if (count <= 1) {
@@ -259,6 +275,7 @@ const Pagination: FC<PaginationProps> = ({
   return (
     <nav
       className={cssStyles.root}
+      data-component="Pagination"
       data-theme={theme}
       role="navigation"
       aria-label={ariaLabel ?? 'pagination navigation'}
@@ -307,7 +324,7 @@ const Pagination: FC<PaginationProps> = ({
             item={item}
             page={page}
             count={count}
-            onChange={onChange}
+            onChange={handleChange}
             {...(renderItem ? { renderItem } : {})}
           />
         ))}

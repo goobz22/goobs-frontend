@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import type { ColumnDef } from '../../types'
-import type { DataGridStyles } from '../../../../theme'
+import type { ColumnDef, DataGridStyles } from '../../types'
 import Checkbox from '../../../Checkbox'
 import MoreVertIcon from '../../../Icons/MoreVert'
 import Popover from '../../../Popover'
@@ -80,13 +79,16 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
 
       {/* All columns with horizontal scrolling */}
       {columns.map(col => {
-        const widthStyle = col.computedWidth
-          ? {
-              width: `${col.computedWidth}px`,
-              minWidth: `${col.computedWidth}px`,
-              maxWidth: `${col.computedWidth}px`,
-            }
-          : {}
+        const isDragging = draggedColumn === col.field
+        // Runtime-measured column width (from resize ops) is passed as a CSS
+        // custom property; the .headerCell[style*='--dg-col-width'] selector in
+        // the module pins width/min/max to it. Drag-source opacity moves to a
+        // CSS class. Both are kept in JS only because the value is data-driven.
+        const headerCellStyle = col.computedWidth
+          ? ({
+              ['--dg-col-width']: `${col.computedWidth}px`,
+            } as React.CSSProperties)
+          : undefined
 
         return (
           <th
@@ -94,7 +96,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             ref={el => {
               headerRefs.current[col.field] = el
             }}
-            className={cssStyles.headerCell}
+            className={`${cssStyles.headerCell} ${isDragging ? cssStyles.headerCellDragging : ''}`}
             // Test-friendly column header attributes:
             //   - data-column-header: the column field key, lets tests
             //     target a specific column header without relying on
@@ -108,12 +110,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             // the parent. Consumers that want aria-sort should expose
             // sort direction via a future prop.)
             data-column-header={col.field}
-            data-dragging={draggedColumn === col.field ? 'true' : undefined}
+            data-dragging={isDragging ? 'true' : undefined}
             role="columnheader"
-            style={{
-              ...widthStyle,
-              opacity: draggedColumn === col.field ? 0.5 : 1,
-            }}
+            style={headerCellStyle}
             draggable
             onDragStart={() => onColumnDragStart?.(col.field)}
             onDragOver={onColumnDragOver}

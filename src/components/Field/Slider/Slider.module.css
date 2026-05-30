@@ -1,0 +1,9 @@
+/* ==========================================================================
+   SLIDER FIELD COMPONENT - CSS MODULE
+   FieldShell owns label/helper/theme; the range input simply spans the
+   field width.
+   ========================================================================== */
+
+.input {
+  width: 100%;
+}

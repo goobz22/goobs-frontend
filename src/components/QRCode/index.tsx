@@ -198,7 +198,11 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
 
     if (!qrValue) {
       return (
-        <div className={cssStyles.errorContainer} role="alert">
+        <div
+          className={cssStyles.errorContainer}
+          role="alert"
+          data-component="QRCode"
+        >
           <span
             className={cssStyles.errorText}
             data-theme={theme}
@@ -212,7 +216,11 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
 
     if (showSuccessState) {
       return (
-        <div className={cssStyles.successContainer} data-theme={theme}>
+        <div
+          className={cssStyles.successContainer}
+          data-component="QRCode"
+          data-theme={theme}
+        >
           {theme === 'sacred' && <span className={cssStyles.glyph}>𓊹</span>}
           <CheckCircle style={successIconStyle} />
           <h5
@@ -255,6 +263,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
         )}
         <div
           className={cssStyles.qrCodeContainer}
+          data-component="QRCode"
           data-theme={theme}
           style={qrContainerStyle}
         >

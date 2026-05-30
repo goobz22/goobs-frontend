@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './InternalIncrement.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
@@ -179,71 +180,9 @@ const InternalIncrementNumberField: React.FC<
     [onChange, min, max]
   )
 
-  // Inline-style chrome. Same shape as the other Number fields — input
-  // wrapper border + adornment box, with the +/- buttons stacked
-  // vertically inside the end adornment.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: '40px',
-    width: '100%',
-    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
-    borderRadius: '8px',
-    backgroundColor: 'var(--field-bg, transparent)',
-    color: 'var(--field-text, inherit)',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: '8px 16px',
-    paddingLeft: '16px',
-    paddingRight: '48px',
-    fontSize: '16px',
-    color: 'inherit',
-    boxSizing: 'border-box',
-  }
-
-  const adornmentStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    right: '12px',
-    color: 'var(--field-text, inherit)',
-    pointerEvents: 'auto',
-  }
-
-  const buttonContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '32px',
-    justifyContent: 'center',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: 0,
-    width: '16px',
-    height: '16px',
-    minWidth: '16px',
-    minHeight: '16px',
-    borderRadius: '2px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'inherit',
-    opacity: disabled ? 0.5 : 1,
-  }
-
+  // Inner input chrome (wrapper border + adornment box with stacked +/-
+  // buttons) lives in InternalIncrement.module.css. Disabled state is
+  // driven by the native :disabled pseudo-class.
   const iconStyle: React.CSSProperties = { fontSize: '18px' }
 
   return (
@@ -260,7 +199,7 @@ const InternalIncrementNumberField: React.FC<
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
+        <div className={cssStyles.inputWrapper}>
           <input
             ref={inputRef}
             type="text"
@@ -279,17 +218,17 @@ const InternalIncrementNumberField: React.FC<
             disabled={disabled}
             placeholder={placeholder}
             data-field-name={dataFieldName}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
-          <div style={adornmentStyle}>
-            <div style={buttonContainerStyle}>
+          <div className={cssStyles.adornment}>
+            <div className={cssStyles.buttonContainer}>
               <button
                 type="button"
                 onMouseDown={() => handleMouseDown(handleIncrement)}
                 aria-label="Increase value"
                 disabled={disabled}
-                style={buttonStyle}
+                className={cssStyles.button}
               >
                 <ArrowDropUpIcon style={iconStyle} />
               </button>
@@ -298,7 +237,7 @@ const InternalIncrementNumberField: React.FC<
                 onMouseDown={() => handleMouseDown(handleDecrement)}
                 aria-label="Decrease value"
                 disabled={disabled}
-                style={{ ...buttonStyle, marginTop: '2px' }}
+                className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
               >
                 <ArrowDropDownIcon style={iconStyle} />
               </button>

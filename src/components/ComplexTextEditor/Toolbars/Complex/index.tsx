@@ -6,10 +6,8 @@ import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
 import Button, { ButtonGroup } from '../../../Button'
-import {
-  getComplexTextEditorStyles,
-  type ComplexTextEditorStyles,
-} from '../../../../theme/'
+import type { ComplexTextEditorStyles } from '../../theme'
+import cssStyles from '../../ComplexTextEditor.module.css'
 import { convertValue } from '../../utils/conversion'
 
 export type EditorMode = 'rich' | 'markdown' | 'simple'
@@ -31,8 +29,6 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   minRows = 5,
   styles,
 }) => {
-  // Get computed styles
-  const computedStyles = getComplexTextEditorStyles(styles, false)
   const handleModeChange = (newMode: EditorMode) => {
     const converted = convertValue(value, mode, newMode)
     onChange(converted)
@@ -47,9 +43,9 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   }
 
   return (
-    <div style={computedStyles.container}>
+    <div className={cssStyles.container} data-theme={styles?.theme || 'light'}>
       {styles?.showModeToggle !== false && (
-        <div style={computedStyles.toggleRow}>
+        <div className={cssStyles.toggleRow}>
           <ButtonGroup
             value={mode}
             exclusive

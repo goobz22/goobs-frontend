@@ -2,15 +2,11 @@
 
 import React, { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
-import {
-  getFormFieldTheme,
-  getRequiredProps,
-  type FormFieldStyles,
-} from '../../../../theme'
+import cssStyles from './SearchableHistory.module.css'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 import SearchIcon from '../../../Icons/Search'
 import HistoryIcon from '../../../Icons/History'
-import { useEscape } from '../../Shell'
+import { useEscape, getRequiredProps, type FieldStyleOverrides } from '../../Shell'
 
 export type NavigationItem = {
   id: string
@@ -29,7 +25,7 @@ export type SearchableHistoryProps = {
   onSelect?: (item: NavigationItem) => void
   placeholder?: string
   helperText?: string
-  styles?: FormFieldStyles
+  styles?: FieldStyleOverrides
   maxHistoryItems?: number
   /** Stable test selector — emitted as `data-field` on the container. */
   dataField?: string
@@ -89,6 +85,29 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     width: 0,
   })
 
+  // The active theme drives the [data-theme] attribute on the container +
+  // portalled menu; CSS switches all colors off of it. Defaults to sacred —
+  // matching the deleted getFormFieldTheme default.
+  const theme = styles?.theme ?? 'sacred'
+
+  // Error state — was the deleted getSharedFormFieldStyles isError branch.
+  // When set, the container + portalled menu redden their label / footer /
+  // borders via the [data-error] CSS overrides.
+  const isError = styles?.helperTextType === 'error'
+
+  // Caller-supplied layout overrides (width / margins) are the only inline
+  // styles left on the container — everything else moved to CSS.
+  const containerStyleOverrides: React.CSSProperties = {}
+  if (styles?.width) containerStyleOverrides.width = styles.width
+  if (styles?.marginTop) containerStyleOverrides.marginTop = styles.marginTop
+  if (styles?.marginBottom) {
+    containerStyleOverrides.marginBottom = styles.marginBottom
+  }
+  if (styles?.marginLeft) containerStyleOverrides.marginLeft = styles.marginLeft
+  if (styles?.marginRight) {
+    containerStyleOverrides.marginRight = styles.marginRight
+  }
+
   // Save history to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined' && history.length > 0) {
@@ -146,173 +165,6 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     }
   }, [isOpen])
 
-  const getStyles = () => {
-    // Inlined from the deleted `getSharedFormFieldStyles` helper.
-    // Field components moved to CSS modules + FieldShell; this
-    // component still does extensive bespoke layout (search box +
-    // tabbed history panel + portalled dropdown) so it derives the
-    // colors from the theme map and keeps its own inline-style
-    // generators.
-    const themeConfig = getFormFieldTheme(styles)
-    const helperTextType = styles?.helperTextType || 'info'
-    const isError = helperTextType === 'error'
-    const borderColor = isError
-      ? themeConfig.border.error
-      : isOpen
-        ? themeConfig.border.focused
-        : themeConfig.border.default
-    const labelColor = isError
-      ? themeConfig.label.error
-      : themeConfig.label.default
-    const footerTextColor =
-      helperTextType === 'error'
-        ? themeConfig.footerText.error
-        : themeConfig.footerText.default
-    const transition = 'all 0.2s ease'
-
-    const sacredTheme = styles?.theme === 'sacred'
-
-    return {
-      container: {
-        // Inlined from the deleted `getSharedContainerStyles`.
-        width: styles?.width || '100%',
-        marginTop: styles?.marginTop,
-        marginBottom: styles?.marginBottom,
-        marginLeft: styles?.marginLeft,
-        marginRight: styles?.marginRight,
-        overflow: 'visible',
-        position: 'relative' as const,
-      } as React.CSSProperties,
-      label: {
-        // Inlined from the deleted `getSharedLabelStyles`.
-        display: 'block',
-        marginBottom: '4px',
-        fontSize: styles?.fontSize || '14px',
-        fontFamily: themeConfig.fontFamily,
-        color: labelColor,
-        transition,
-      } as React.CSSProperties,
-      searchBox: {
-        display: 'flex',
-        alignItems: 'center',
-        width: '100%',
-        height: '40px',
-        padding: '0 12px',
-        borderRadius: styles?.borderRadius || '8px',
-        border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-        transition,
-        backgroundColor: themeConfig.background,
-        cursor: 'text',
-        gap: '8px',
-        boxSizing: 'border-box',
-      } as React.CSSProperties,
-      input: {
-        flex: 1,
-        border: 'none',
-        outline: 'none',
-        background: 'transparent',
-        color: themeConfig.text,
-        fontFamily: themeConfig.fontFamily,
-        fontSize: styles?.fontSize || '14px',
-        padding: 0,
-      } as React.CSSProperties,
-      dropdown: {
-        position: 'absolute' as const,
-        top: 'calc(100% + 4px)',
-        left: '0',
-        right: '0',
-        zIndex: 99999,
-        maxHeight: '400px',
-        overflowY: 'auto' as const,
-        overflowX: 'hidden' as const,
-        border: `${styles?.borderWidth || '1px'} solid ${borderColor}`,
-        borderRadius: styles?.borderRadius || '8px',
-        backgroundColor: themeConfig.background,
-        boxShadow:
-          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      },
-      tabs: {
-        display: 'flex',
-        borderBottom: `1px solid ${borderColor}`,
-        backgroundColor: sacredTheme
-          ? 'rgba(0, 0, 0, 0.3)'
-          : 'rgba(0, 0, 0, 0.02)',
-      } as React.CSSProperties,
-      tab: (isActive: boolean) =>
-        ({
-          flex: 1,
-          padding: '10px',
-          border: 'none',
-          background: isActive
-            ? sacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : themeConfig.background
-            : 'transparent',
-          color: isActive
-            ? sacredTheme
-              ? '#FFD700'
-              : themeConfig.text
-            : themeConfig.text,
-          cursor: 'pointer',
-          fontFamily: themeConfig.fontFamily,
-          fontSize: '13px',
-          fontWeight: isActive ? 600 : 400,
-          transition,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-        }) as React.CSSProperties,
-      itemsList: {
-        overflowY: 'auto' as const,
-        padding: '8px',
-        minHeight: '200px',
-        maxHeight: '350px',
-      },
-      item: {
-        padding: '10px 12px',
-        cursor: 'pointer',
-        borderRadius: '6px',
-        transition,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        marginBottom: '4px',
-      } as React.CSSProperties,
-      itemLabel: {
-        flex: 1,
-        fontSize: '14px',
-        fontWeight: 500,
-      } as React.CSSProperties,
-      itemCategory: {
-        fontSize: '11px',
-        opacity: 0.6,
-        marginTop: '2px',
-      } as React.CSSProperties,
-      itemDescription: {
-        fontSize: '12px',
-        opacity: 0.7,
-        marginTop: '2px',
-      } as React.CSSProperties,
-      emptyState: {
-        padding: '20px',
-        textAlign: 'center' as const,
-        opacity: 0.5,
-        fontSize: '14px',
-      },
-      footerText: {
-        // Inlined from the deleted `getSharedFooterTextStyles`.
-        marginTop: '4px',
-        fontSize: styles?.fontSize || '12px',
-        fontFamily: themeConfig.fontFamily,
-        color: footerTextColor,
-        minHeight: '1em',
-      } as React.CSSProperties,
-    }
-  }
-
-  const componentStyles = getStyles()
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
     if (!isOpen) {
@@ -358,56 +210,19 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
   const renderItem = (item: NavigationItem) => {
     const isSelected = selectedItem?.id === item.id
-    const sacredTheme = styles?.theme === 'sacred'
+    const itemClassNames = [cssStyles.item, isSelected && cssStyles.selected]
+      .filter(Boolean)
+      .join(' ')
 
     return (
       <div
         key={item.id}
-        style={{
-          padding: '10px 12px',
-          cursor: 'pointer',
-          backgroundColor: isSelected
-            ? sacredTheme
-              ? 'rgba(255, 215, 0, 0.2)'
-              : 'rgba(59, 130, 246, 0.1)'
-            : 'transparent',
-          color: sacredTheme ? '#FFD700' : '#1f2937',
-          transition: 'all 0.2s',
-          borderRadius: '6px',
-          margin: '2px 0',
-          fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
-        }}
+        className={itemClassNames}
         onClick={() => handleItemSelect(item)}
-        onMouseEnter={e => {
-          if (!isSelected) {
-            e.currentTarget.style.backgroundColor = sacredTheme
-              ? 'rgba(255, 215, 0, 0.1)'
-              : 'rgba(229, 231, 235, 0.5)'
-            if (sacredTheme) {
-              e.currentTarget.style.boxShadow =
-                '0 0 10px rgba(255, 215, 0, 0.2)'
-            }
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isSelected) {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.boxShadow = 'none'
-          }
-        }}
       >
-        <div style={{ fontSize: '14px', fontWeight: 500 }}>{item.label}</div>
+        <div className={cssStyles.itemLabel}>{item.label}</div>
         {item.description && (
-          <div
-            style={{
-              fontSize: '11px',
-              opacity: 0.6,
-              marginTop: '4px',
-              fontFamily: sacredTheme ? '"Cinzel", serif' : 'inherit',
-            }}
-          >
-            {item.description}
-          </div>
+          <div className={cssStyles.itemDescription}>{item.description}</div>
         )}
       </div>
     )
@@ -422,34 +237,39 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
   return (
     <div
-      style={{ ...componentStyles.container, overflow: 'visible' }}
+      className={cssStyles.container}
+      data-theme={theme}
+      style={
+        Object.keys(containerStyleOverrides).length > 0
+          ? containerStyleOverrides
+          : undefined
+      }
       ref={containerRef}
       data-component="SearchableHistory"
       data-field={dataField}
       data-field-name={dataFieldName ?? name}
       data-state={isOpen ? 'open' : undefined}
+      {...(isError && { 'data-error': 'true' })}
     >
       {label && (
-        <label htmlFor={inputId} style={componentStyles.label}>
+        <label htmlFor={inputId} className={cssStyles.label}>
           {label}
           {styles?.required && (
-            <span
-              style={{
-                color: styles?.requiredIndicatorColor || 'rgba(239, 68, 68, 1)',
-                marginLeft: '2px',
-                fontWeight: 600,
-              }}
-            >
+            <span className={cssStyles.requiredIndicator}>
               {styles?.requiredIndicatorText || ' *'}
             </span>
           )}
         </label>
       )}
 
-      <div style={{ position: 'relative', width: '100%' }}>
-        <div ref={searchBoxRef} style={componentStyles.searchBox}>
+      <div className={cssStyles.searchAnchor}>
+        <div
+          ref={searchBoxRef}
+          className={cssStyles.searchBox}
+          {...(isOpen && { 'data-state': 'open' })}
+        >
           <SearchIcon
-            styles={{ theme: styles?.theme || 'sacred', size: 18 }}
+            styles={{ theme, size: 18 }}
             style={{ marginTop: '5px' }}
           />
           <input
@@ -468,7 +288,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             placeholder={placeholder}
-            style={componentStyles.input}
+            className={cssStyles.input}
             disabled={styles?.disabled}
             {...getRequiredProps(styles?.required)}
           />
@@ -481,20 +301,12 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                 inputRef.current?.focus()
               }
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              color: 'inherit',
-            }}
+            className={cssStyles.toggleButton}
             type="button"
             disabled={styles?.disabled}
           >
             <ArrowDropDownIcon
-              styles={{ theme: styles?.theme || 'sacred' }}
+              styles={{ theme }}
               style={{
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.3s',
@@ -512,75 +324,25 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
               aria-labelledby={inputId}
               data-popover="searchable-history"
               data-subject={dataField}
+              className={cssStyles.dropdown}
+              data-theme={theme}
+              {...(isError && { 'data-error': 'true' })}
               style={{
-                position: 'fixed',
+                // Runtime position from getBoundingClientRect — cannot be
+                // expressed statically, stays inline per the CSS-module recipe.
                 top: `${dropdownPosition.top}px`,
                 left: `${dropdownPosition.left}px`,
                 width: `${dropdownPosition.width}px`,
-                // Aligned with Dialog's z-index (9999) so the dropdown
-                // doesn't punch through modals. Was previously 999999
-                // — that was anchor-day debugging cruft.
-                zIndex: 9999,
-                backgroundColor:
-                  styles?.theme === 'sacred'
-                    ? 'rgba(0, 0, 0, 0.95)'
-                    : '#ffffff',
-                border:
-                  styles?.theme === 'sacred'
-                    ? '2px solid rgba(255, 215, 0, 0.5)'
-                    : '1px solid #e5e7eb',
-                borderRadius: '8px',
-                maxHeight: '400px',
-                overflow: 'hidden',
-                boxShadow:
-                  styles?.theme === 'sacred'
-                    ? '0 10px 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1)'
-                    : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
               }}
             >
               {/* Tabs for Overview, Search and History */}
-              <div
-                style={{
-                  display: 'flex',
-                  borderBottom:
-                    styles?.theme === 'sacred'
-                      ? '1px solid rgba(255, 215, 0, 0.3)'
-                      : '1px solid #e5e7eb',
-                  backgroundColor:
-                    styles?.theme === 'sacred'
-                      ? 'rgba(0, 0, 0, 0.3)'
-                      : 'rgba(0, 0, 0, 0.02)',
-                }}
-              >
+              <div className={cssStyles.tabs}>
                 <button
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    border: 'none',
-                    background:
-                      activeTab === 'overview'
-                        ? styles?.theme === 'sacred'
-                          ? 'rgba(255, 215, 0, 0.15)'
-                          : '#ffffff'
-                        : 'transparent',
-                    color:
-                      activeTab === 'overview'
-                        ? styles?.theme === 'sacred'
-                          ? '#FFD700'
-                          : '#000000'
-                        : styles?.theme === 'sacred'
-                          ? 'rgba(255, 215, 0, 0.6)'
-                          : '#6b7280',
-                    cursor: 'pointer',
-                    fontFamily:
-                      styles?.theme === 'sacred'
-                        ? '"Cinzel", serif'
-                        : 'inherit',
-                    fontSize: '13px',
-                    fontWeight: activeTab === 'overview' ? 600 : 400,
-                    transition: 'all 0.2s',
-                    textAlign: 'center',
-                  }}
+                  className={
+                    activeTab === 'overview'
+                      ? `${cssStyles.tab} ${cssStyles.active}`
+                      : cssStyles.tab
+                  }
                   onClick={e => {
                     e.stopPropagation()
                     e.preventDefault()
@@ -591,37 +353,11 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                   Overview
                 </button>
                 <button
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    border: 'none',
-                    background:
-                      activeTab === 'history'
-                        ? styles?.theme === 'sacred'
-                          ? 'rgba(255, 215, 0, 0.15)'
-                          : '#ffffff'
-                        : 'transparent',
-                    color:
-                      activeTab === 'history'
-                        ? styles?.theme === 'sacred'
-                          ? '#FFD700'
-                          : '#000000'
-                        : styles?.theme === 'sacred'
-                          ? 'rgba(255, 215, 0, 0.6)'
-                          : '#6b7280',
-                    cursor: 'pointer',
-                    fontFamily:
-                      styles?.theme === 'sacred'
-                        ? '"Cinzel", serif'
-                        : 'inherit',
-                    fontSize: '13px',
-                    fontWeight: activeTab === 'history' ? 600 : 400,
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                  }}
+                  className={
+                    activeTab === 'history'
+                      ? `${cssStyles.tab} ${cssStyles.tabHistory} ${cssStyles.active}`
+                      : `${cssStyles.tab} ${cssStyles.tabHistory}`
+                  }
                   onClick={e => {
                     e.stopPropagation()
                     e.preventDefault()
@@ -629,21 +365,13 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                   }}
                   type="button"
                 >
-                  <HistoryIcon
-                    styles={{ theme: styles?.theme || 'sacred', size: 14 }}
-                  />
+                  <HistoryIcon styles={{ theme, size: 14 }} />
                   History
                 </button>
               </div>
 
               {/* Content Area */}
-              <div
-                style={{
-                  maxHeight: '350px',
-                  overflowY: 'auto',
-                  padding: '8px',
-                }}
-              >
+              <div className={cssStyles.content}>
                 {activeTab === 'overview' ? (
                   // Overview tab - show filtered items organized by category
                   <>
@@ -655,28 +383,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
                       return (
                         <div key={category}>
-                          <div
-                            style={{
-                              padding: '8px 12px 4px',
-                              fontSize: '11px',
-                              fontWeight: 600,
-                              opacity: 0.5,
-                              textTransform: 'uppercase',
-                              color:
-                                styles?.theme === 'sacred'
-                                  ? '#FFD700'
-                                  : '#6b7280',
-                              fontFamily:
-                                styles?.theme === 'sacred'
-                                  ? '"Cinzel", serif'
-                                  : 'inherit',
-                              borderBottom:
-                                styles?.theme === 'sacred'
-                                  ? '1px solid rgba(255, 215, 0, 0.1)'
-                                  : '1px solid rgba(0, 0, 0, 0.05)',
-                              marginBottom: '4px',
-                            }}
-                          >
+                          <div className={cssStyles.categoryHeader}>
                             {category}s
                           </div>
                           {categoryItems.map(item => renderItem(item))}
@@ -684,19 +391,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                       )
                     })}
                     {filteredItems.length === 0 && (
-                      <div
-                        style={{
-                          padding: '20px',
-                          textAlign: 'center',
-                          opacity: 0.5,
-                          color:
-                            styles?.theme === 'sacred' ? '#FFD700' : '#6b7280',
-                          fontFamily:
-                            styles?.theme === 'sacred'
-                              ? '"Cinzel", serif'
-                              : 'inherit',
-                        }}
-                      >
+                      <div className={cssStyles.emptyState}>
                         {searchTerm
                           ? `No results for "${searchTerm}"`
                           : 'No navigation items available'}
@@ -708,34 +403,10 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     {history.length > 0 ? (
                       <>
                         {history.map(item => renderItem(item))}
-                        <div
-                          style={{
-                            padding: '8px 12px',
-                            marginTop: '8px',
-                            borderTop:
-                              styles?.theme === 'sacred'
-                                ? '1px solid rgba(255, 215, 0, 0.2)'
-                                : '1px solid rgba(0, 0, 0, 0.1)',
-                          }}
-                        >
+                        <div className={cssStyles.historyFooter}>
                           <button
                             onClick={clearHistory}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color:
-                                styles?.theme === 'sacred'
-                                  ? '#FFD700'
-                                  : '#3B82F6',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              padding: '4px 0',
-                              opacity: 0.8,
-                              fontFamily:
-                                styles?.theme === 'sacred'
-                                  ? '"Cinzel", serif'
-                                  : 'inherit',
-                            }}
+                            className={cssStyles.clearButton}
                             type="button"
                           >
                             Clear History
@@ -743,19 +414,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                         </div>
                       </>
                     ) : (
-                      <div
-                        style={{
-                          padding: '20px',
-                          textAlign: 'center',
-                          opacity: 0.5,
-                          color:
-                            styles?.theme === 'sacred' ? '#FFD700' : '#6b7280',
-                          fontFamily:
-                            styles?.theme === 'sacred'
-                              ? '"Cinzel", serif'
-                              : 'inherit',
-                        }}
-                      >
+                      <div className={cssStyles.emptyState}>
                         No recent searches
                       </div>
                     )}
@@ -768,7 +427,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       </div>
 
       {helperText && (
-        <div id={helperId} style={componentStyles.footerText}>
+        <div id={helperId} className={cssStyles.footerText}>
           {helperText}
         </div>
       )}

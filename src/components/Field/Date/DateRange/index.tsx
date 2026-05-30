@@ -185,17 +185,18 @@ const DateRange: React.FC<DateRangeProps> = ({
   // wiring. Only the start shell carries `error` + `helperText` so the
   // helper region renders once below the pair (the end shell skips
   // both, leaving the wider error message anchored to the first input
-  // for screenreader announcement).
-  const fieldsWrapperStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: styles?.gap ?? '16px',
-    width: '100%',
-  }
+  // for screenreader announcement). The flex layout lives in
+  // DateRange.module.css; the caller-supplied `gap` override is passed
+  // through as the `--date-range-gap` CSS custom property.
+  const fieldsWrapperStyle: React.CSSProperties | undefined =
+    styles?.gap !== undefined
+      ? ({ ['--date-range-gap']: styles.gap } as React.CSSProperties)
+      : undefined
 
   return (
     <div style={style} data-field={dataField} data-field-name={dataFieldName ?? name}>
       <div style={fieldsWrapperStyle} className={cssStyles.fieldsWrapper}>
-        <div style={{ flex: 1 }}>
+        <div className={cssStyles.fieldContainer}>
           <FieldShell
             label={startLabel}
             helperText={helperText}
@@ -227,7 +228,7 @@ const DateRange: React.FC<DateRangeProps> = ({
           </FieldShell>
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div className={cssStyles.fieldContainer}>
           <FieldShell
             label={endLabel}
             disabled={disabled}

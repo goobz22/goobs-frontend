@@ -7,6 +7,7 @@ import Lock from '../Icons/Lock'
 import Error from '../Icons/Error'
 import CustomButton from '../Button'
 import cssStyles from './Stepper.module.css'
+import { emitDiag } from '../../utils/diag'
 
 export interface StepperProps {
   mode?: 'navigation' | 'wizard'
@@ -118,6 +119,16 @@ const Stepper: React.FC<StepperProps> = ({
   }
 
   const handleStepClick = (step: StepperProps['steps'][0], index: number) => {
+    // Additive diagnostics: a clickable step click is a nav.change to that
+    // step index. Non-clickable (locked / future) steps emit nothing.
+    // emitDiag is a no-op without a host bus.
+    if (isStepClickable(step, index)) {
+      emitDiag({
+        type: 'nav.change',
+        component: 'Stepper',
+        to: String(index),
+      })
+    }
     if (isWizardMode) {
       if (isStepClickable(step, index) && onNext && onBack) {
         return
@@ -183,7 +194,7 @@ const Stepper: React.FC<StepperProps> = ({
   }
 
   return (
-    <div className={cssStyles.root} data-theme={theme}>
+    <div className={cssStyles.root} data-component="Stepper" data-theme={theme}>
       <div
         className={cssStyles.stepperContainer}
         data-orientation={orientation}

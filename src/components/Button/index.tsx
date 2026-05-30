@@ -2,6 +2,7 @@
 
 import React, { useMemo, useCallback, forwardRef, type ReactNode } from 'react'
 import cssStyles from './Button.module.css'
+import { emitDiag } from '../../utils/diag'
 
 export interface ButtonGroupProps {
   value: string
@@ -276,11 +277,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (!isDisabled && onClick) {
-          onClick(event)
+        if (!isDisabled) {
+          emitDiag({
+            type: 'action.invoke',
+            action: action ?? 'click',
+            ...(subject !== undefined && { subject }),
+          })
+          if (onClick) {
+            onClick(event)
+          }
         }
       },
-      [isDisabled, onClick]
+      [isDisabled, onClick, action, subject]
     )
 
     // Handle outline prop - convert boolean to string
@@ -428,6 +436,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={classNames.join(' ')}
+        data-component="Button"
         data-theme={theme}
         data-action={action}
         data-subject={subject}

@@ -149,7 +149,7 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   const searchbarStyles = createSearchbarStyles(styles)
 
   return (
-    <div className={cssStyles.root} data-theme={theme}>
+    <div className={cssStyles.root} data-component="Toolbar" data-theme={theme}>
       {isSacredTheme && <span className={cssStyles.glyph}>𓊗</span>}
 
       <div className={cssStyles.content}>

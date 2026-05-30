@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './USD.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 import { useOptionalFormContext } from '../../Form/context'
@@ -216,104 +217,31 @@ const USDField: React.FC<USDFieldProps> = ({
     [onChange, precision, min, max, disabled]
   )
 
-  // Inner wrapper styling kept local — USD has dollar-sign start
-  // adornment + optional increment buttons, so the visual frame is
-  // component-specific. FieldShell handles outer label / helper region.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: styles?.height || '40px',
-    width: '100%',
-    border: '1px solid var(--field-border-default, rgba(255,215,0,0.3))',
-    borderRadius: styles?.borderRadius || '8px',
-    backgroundColor: 'var(--field-bg, rgba(0, 0, 0, 0.6))',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-    transition: 'all 0.3s ease',
+  // Inner chrome lives in USD.module.css. The dollar-sign start adornment +
+  // optional stacked +/- buttons are component-specific; FieldShell handles
+  // the outer label / helper region. Caller-supplied layout overrides
+  // (height/radius/padding/font) are forwarded as CSS custom properties, the
+  // sacred-theme dollar glow is a [data-theme='sacred'] selector, and the
+  // padding-right that reserves room for the buttons is switched by the
+  // [data-increment] attribute.
+  const wrapperCssVars: Record<string, string> = {}
+  if (styles?.height) wrapperCssVars['--usd-height'] = styles.height
+  if (styles?.borderRadius) wrapperCssVars['--usd-radius'] = styles.borderRadius
+  if (styles?.padding) wrapperCssVars['--usd-padding'] = styles.padding
+  if (styles?.paddingLeft) {
+    wrapperCssVars['--usd-padding-left'] = styles.paddingLeft
   }
-
-  const adornmentStyle: React.CSSProperties = {
-    position: 'absolute',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'rgba(255, 215, 0, 0.9)',
-    pointerEvents: 'none',
+  if (styles?.paddingRight) {
+    wrapperCssVars['--usd-padding-right'] = styles.paddingRight
   }
-
-  const startAdornmentStyle: React.CSSProperties = {
-    ...adornmentStyle,
-    left: '16px',
+  if (styles?.fontSize) wrapperCssVars['--usd-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined) {
+    wrapperCssVars['--usd-font-weight'] = String(styles.fontWeight)
   }
-
-  const endAdornmentStyle: React.CSSProperties = {
-    ...adornmentStyle,
-    right: '16px',
-    pointerEvents: 'auto',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: styles?.padding || '8px 16px',
-    paddingLeft: styles?.paddingLeft || '40px',
-    paddingRight: styles?.paddingRight || (enableIncrement ? '48px' : '16px'),
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily,
-    color: 'inherit',
-    boxSizing: 'border-box',
-  }
-
-  const buttonContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: '32px',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: 0,
-    width: '16px',
-    height: '16px',
-    minWidth: '16px',
-    minHeight: '16px',
-    borderRadius: '2px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'rgba(255, 215, 0, 0.9)',
-    transition: 'all 0.3s ease',
-  }
+  if (styles?.lineHeight) wrapperCssVars['--usd-line-height'] = styles.lineHeight
+  if (styles?.fontFamily) wrapperCssVars['--usd-font-family'] = styles.fontFamily
 
   const iconStyle: React.CSSProperties = { fontSize: '18px' }
-
-  const dollarSignFontStyle: React.CSSProperties = {
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight || 500,
-    fontFamily: styles?.fontFamily,
-    color: 'rgba(255, 215, 0, 0.9)',
-    ...(sacredTheme && {
-      textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
-      filter: 'drop-shadow(0 0 3px rgba(255, 215, 0, 0.3))',
-    }),
-  }
-
-  const sacredGlyphStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '-16px',
-    color: 'rgba(255,215,0,0.4)',
-    fontSize: '12px',
-  }
 
   const resolvedLabel = sacredTheme ? 'Sacred Treasury' : label
   const resolvedPlaceholder = sacredTheme ? 'Divine wealth...' : placeholder
@@ -332,10 +260,15 @@ const USDField: React.FC<USDFieldProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
-          <div style={startAdornmentStyle}>
-            {sacredTheme && <span style={sacredGlyphStyle}>𓊹</span>}
-            <span style={dollarSignFontStyle}>$</span>
+        <div
+          className={cssStyles.inputWrapper}
+          data-theme={sacredTheme ? 'sacred' : undefined}
+          data-increment={enableIncrement || undefined}
+          style={wrapperCssVars as React.CSSProperties}
+        >
+          <div className={`${cssStyles.adornment} ${cssStyles.startAdornment}`}>
+            {sacredTheme && <span className={cssStyles.sacredGlyph}>𓊹</span>}
+            <span className={cssStyles.dollarSign}>$</span>
           </div>
           <input
             ref={inputRef}
@@ -351,19 +284,19 @@ const USDField: React.FC<USDFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={resolvedPlaceholder}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
             {...rest}
           />
           {enableIncrement && (
-            <div style={endAdornmentStyle}>
-              <div style={buttonContainerStyle}>
+            <div className={`${cssStyles.adornment} ${cssStyles.endAdornment}`}>
+              <div className={cssStyles.buttonContainer}>
                 <button
                   type="button"
                   onMouseDown={() => handleMouseDown(handleIncrement)}
                   aria-label="increment"
                   disabled={disabled}
-                  style={buttonStyle}
+                  className={cssStyles.button}
                 >
                   <ArrowDropUpIcon
                     style={iconStyle}
@@ -377,7 +310,7 @@ const USDField: React.FC<USDFieldProps> = ({
                   onMouseDown={() => handleMouseDown(handleDecrement)}
                   aria-label="decrement"
                   disabled={disabled}
-                  style={{ ...buttonStyle, marginTop: '2px' }}
+                  className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
                 >
                   <ArrowDropDownIcon
                     style={iconStyle}

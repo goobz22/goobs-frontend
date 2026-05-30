@@ -107,6 +107,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         icon={children}
         styles={buttonStyles}
         {...restProps}
+        data-component="IconButton"
       />
     )
   }

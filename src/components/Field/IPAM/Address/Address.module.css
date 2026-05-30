@@ -1,0 +1,34 @@
+/* ==========================================================================
+   IP ADDRESS FIELD COMPONENT - CSS MODULE
+   Input chrome for single + range (start/end) layouts. FieldShell owns the
+   label/helper/theme tokens; this module styles the inner input frame and the
+   range flex layout.
+   ========================================================================== */
+
+.input {
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  outline: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Range mode (renderAsRange): two inputs side-by-side with a dash between. */
+.rangeRoot {
+  width: 100%;
+}
+
+.rangeFields {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rangeField {
+  flex: 1;
+}

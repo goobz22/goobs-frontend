@@ -2,6 +2,7 @@
 
 import React, { useId, useRef } from 'react'
 import { alpha } from '../../utils'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tabs.module.css'
 
 const SACRED_GOLD = '#FFD700'
@@ -131,6 +132,21 @@ const Tabs: React.FC<TabsProps> = ({
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const handleTabClick = (index: number, tab: TabsItem) => {
+    // Diagnostic bus — emit a nav.change whenever the active tab changes.
+    // Resolve the stable tab identifier the same way the render does
+    // (explicit id → kebab-cased label/title → index) so the emitted `to`
+    // matches the `data-tab-id` selector tests target. Additive: fired
+    // alongside the existing onChange/route/onClick handling without altering
+    // it. No-op when no host bus is present.
+    const navLabel = tab.label ?? tab.title ?? ''
+    const navLabelString = typeof navLabel === 'string' ? navLabel : undefined
+    const navTabId = tab.id ?? kebabFallback(navLabelString) ?? String(index)
+    emitDiag({
+      type: 'nav.change',
+      component: 'Tabs',
+      to: String(navTabId || index),
+    })
+
     if (onChange) {
       onChange(index)
     }
@@ -222,7 +238,9 @@ const Tabs: React.FC<TabsProps> = ({
   return (
     <div
       className={cssStyles.root}
+      data-component="Tabs"
       data-theme={theme}
+      data-state={String(activeTab)}
       style={containerStyle}
       role="tablist"
       aria-label={ariaLabel}

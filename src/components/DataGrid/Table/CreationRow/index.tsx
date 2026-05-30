@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ColumnDef } from '../../types'
-import type { DataGridStyles } from '../../../../theme'
+import { ColumnDef, type DataGridStyles } from '../../types'
 import cssStyles from '../../DataGrid.module.css'
 import TextField from '../../../Field/Text'
 import DateField from '../../../Field/Date/DateField'

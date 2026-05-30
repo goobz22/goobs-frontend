@@ -295,6 +295,8 @@ const Dialog: React.FC<DialogProps> = ({
       <div
         ref={dialogRef}
         className={cssStyles.dialog}
+        data-component="Dialog"
+        data-state="open"
         data-theme={theme}
         style={dialogStyle}
         onClick={e => e.stopPropagation()}

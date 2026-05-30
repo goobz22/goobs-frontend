@@ -1,0 +1,57 @@
+/* ==========================================================================
+   SEARCHBAR FIELD - CSS MODULE
+   Sacred-gold input frame with a leading search icon. FieldShell owns
+   label/helper/theme. Caller-supplied layout overrides (height/borderWidth/
+   radius/padding/font/colors) come in as CSS custom properties; the disabled
+   chrome is driven by the .disabled modifier on the wrapper.
+   ========================================================================== */
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--search-height, 40px);
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: var(--search-border-width, 1px) solid rgba(255, 215, 0, 0.3);
+  border-radius: var(--search-radius, 8px);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.inputWrapper.disabled {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  /* Defaults to sacred gold; caller may override via --search-adornment-color.
+     The inline SVG uses fill: currentColor so it inherits this color. */
+  color: var(--search-adornment-color, #ffd700);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  padding-left: var(--search-padding-left, 48px);
+  padding-right: var(--search-padding-right, 16px);
+  padding-top: var(--search-padding-top, 8px);
+  padding-bottom: var(--search-padding-bottom, 8px);
+  font-size: var(--search-font-size, 16px);
+  font-weight: var(--search-font-weight);
+  line-height: var(--search-line-height);
+  font-family: var(--search-font-family, 'Crimson Text', serif);
+  color: var(--search-text-color, rgba(255, 255, 255, 0.9));
+  box-sizing: border-box;
+}
+
+.inputWrapper.disabled .input {
+  color: var(--search-text-color, rgba(255, 255, 255, 0.4));
+}

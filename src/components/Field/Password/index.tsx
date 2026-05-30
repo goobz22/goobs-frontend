@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './Password.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
@@ -100,53 +101,42 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
     []
   )
 
-  // Inner-wrapper styling kept local so the eye-toggle button can be
-  // absolutely positioned over the input. FieldShell handles the
-  // outer label / helper region.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: styles?.height || '40px',
-    width: '100%',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
+  // Inner frame lives in Password.module.css so the eye-toggle button can be
+  // absolutely positioned over the input. FieldShell handles the outer label
+  // / helper region; the border falls back to FieldShell's CSS variables.
+  // Caller-supplied layout overrides (height/radius/padding/font/color) are
+  // forwarded as CSS custom properties, and the disabled chrome is driven by
+  // the native :disabled pseudo-class.
+  const wrapperCssVars: Record<string, string> = {}
+  if (styles?.height) wrapperCssVars['--password-height'] = styles.height
+  if (styles?.borderRadius) {
+    wrapperCssVars['--password-radius'] = styles.borderRadius
   }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: '1px solid var(--field-border-default, rgba(255,215,0,0.3))',
-    borderRadius: styles?.borderRadius || '8px',
-    padding: styles?.padding || '8px 48px 8px 16px',
-    paddingLeft: styles?.paddingLeft || '16px',
-    paddingRight: styles?.paddingRight || '48px',
-    paddingTop: styles?.paddingTop || '8px',
-    paddingBottom: styles?.paddingBottom || '8px',
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily,
-    color: styles?.textColor || 'inherit',
-    boxSizing: 'border-box',
-    ...(disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+  if (styles?.padding) wrapperCssVars['--password-padding'] = styles.padding
+  if (styles?.paddingLeft) {
+    wrapperCssVars['--password-padding-left'] = styles.paddingLeft
   }
-
-  const eyeButtonStyle: React.CSSProperties = {
-    position: 'absolute',
-    right: '12px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    cursor: 'pointer',
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
+  if (styles?.paddingRight) {
+    wrapperCssVars['--password-padding-right'] = styles.paddingRight
+  }
+  if (styles?.paddingTop) {
+    wrapperCssVars['--password-padding-top'] = styles.paddingTop
+  }
+  if (styles?.paddingBottom) {
+    wrapperCssVars['--password-padding-bottom'] = styles.paddingBottom
+  }
+  if (styles?.fontSize) wrapperCssVars['--password-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined) {
+    wrapperCssVars['--password-font-weight'] = String(styles.fontWeight)
+  }
+  if (styles?.lineHeight) {
+    wrapperCssVars['--password-line-height'] = styles.lineHeight
+  }
+  if (styles?.fontFamily) {
+    wrapperCssVars['--password-font-family'] = styles.fontFamily
+  }
+  if (styles?.textColor) {
+    wrapperCssVars['--password-text-color'] = styles.textColor
   }
 
   return (
@@ -163,7 +153,10 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
+        <div
+          className={cssStyles.inputWrapper}
+          style={wrapperCssVars as React.CSSProperties}
+        >
           <input
             ref={inputRef}
             type={passwordVisible ? 'text' : 'password'}
@@ -177,14 +170,14 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
 
           <button
             type="button"
             onClick={togglePasswordVisibility}
-            style={eyeButtonStyle}
+            className={cssStyles.eyeButton}
             disabled={disabled}
             aria-label={passwordVisible ? 'Hide password' : 'Show password'}
           >

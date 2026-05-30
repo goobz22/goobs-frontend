@@ -1,0 +1,84 @@
+/* ==========================================================================
+   PERCENTAGE FIELD COMPONENT - CSS MODULE
+   Auto-sizing numeric input with stacked +/- buttons absolutely positioned
+   over the input. FieldShell owns label/helper/theme. Caller-supplied layout
+   overrides (height, padding, radius, font) come in as CSS custom properties;
+   the runtime ch-based width comes in as --percentage-input-width.
+   Disabled state is driven by the native :disabled pseudo-class.
+   ========================================================================== */
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--percentage-height, 40px);
+  width: auto;
+  border: 1px solid var(--field-border-default, rgba(255, 215, 0, 0.3));
+  border-radius: var(--percentage-radius, 8px);
+  background-color: var(--field-bg, rgba(0, 0, 0, 0.6));
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.input {
+  height: 100%;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  padding: var(--percentage-padding, 8px 60px 8px 16px);
+  padding-left: var(--percentage-padding-left, 16px);
+  padding-right: var(--percentage-padding-right, 60px);
+  padding-top: var(--percentage-padding-top, 8px);
+  padding-bottom: var(--percentage-padding-bottom, 8px);
+  font-size: var(--percentage-font-size, 16px);
+  font-weight: var(--percentage-font-weight);
+  line-height: var(--percentage-line-height);
+  font-family: var(--percentage-font-family);
+  color: inherit;
+  box-sizing: border-box;
+  width: var(--percentage-input-width);
+  min-width: 60px;
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adornmentContainer {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  height: 32px;
+  justify-content: center;
+}
+
+.button {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 215, 0, 0.9);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.buttonDecrement {
+  margin-top: 2px;
+}

@@ -141,6 +141,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
       <div
         ref={ref}
         className={[cssStyles.root, className].filter(Boolean).join(' ')}
+        data-component="Paper"
         data-theme={isSacredTheme ? 'sacred' : 'default'}
         style={dynamicStyle}
         data-form={dataForm}

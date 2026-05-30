@@ -62,6 +62,7 @@
  */
 
 import React, { useId, useState } from 'react'
+import { emitDiag } from '../../../utils/diag'
 import Searchbar from '../../Field/Search'
 import Dropdown from '../../Field/Dropdown/Regular'
 import SearchableSimple, {
@@ -228,6 +229,22 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const reactId = useId()
   const panelId = `filter-section-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
+
+  // Additive diagnostics: on a collapse/expand transition, surface the new
+  // open/closed state to the host diagnostics bus (no-op when none present).
+  // Preserves the existing toggle behaviour exactly — only adds the emit.
+  const handleToggle = () => {
+    setIsExpanded((prev) => {
+      const next = !prev
+      emitDiag({
+        type: 'component.state',
+        component: 'FilterSection',
+        ...(dataField !== undefined && { subject: dataField }),
+        state: next ? 'open' : 'closed',
+      })
+      return next
+    })
+  }
   // Theme attribute resolves to 'sacred' only when explicitly requested;
   // every other value (undefined / 'light') falls through to the light
   // override block in the CSS module — preserving the original behaviour
@@ -452,8 +469,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       <div
         className={styles.root}
         data-theme={theme}
+        data-component="FilterSection"
         data-filter-section="true"
         {...(dataField !== undefined && {
+          'data-subject': dataField,
           'data-filter-section-field': dataField,
         })}
       >
@@ -466,15 +485,17 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
     <div
       className={styles.root}
       data-theme={theme}
+      data-component="FilterSection"
       data-filter-section="true"
       data-state={state}
       {...(dataField !== undefined && {
+        'data-subject': dataField,
         'data-filter-section-field': dataField,
       })}
     >
       <button
         type="button"
-        onClick={() => setIsExpanded((p) => !p)}
+        onClick={handleToggle}
         aria-expanded={isExpanded}
         aria-controls={panelId}
         data-testid="filter-section-toggle"

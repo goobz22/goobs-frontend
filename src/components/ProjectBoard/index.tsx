@@ -25,9 +25,9 @@ import {
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from './utils/useDragandDrop/tasks'
 import Board from './board'
-import { getProjectBoardStyles } from '../../theme'
 import { Breadcrumb } from './Breadcrumb'
 import { AnimationWrapper } from './AnimationWrapper'
+import cssStyles from './ProjectBoard.module.css'
 
 // --------------------------------------------------------------------------
 // HELPER FUNCTIONS
@@ -126,11 +126,62 @@ function ProjectBoardContent({
   )
 
   const isDisabled = styles?.disabled
+  // The old getProjectBoardTheme defaulted to 'light' when no theme was given;
+  // preserve that exact runtime default (the CSS base values are sacred, so a
+  // light data-theme activates the light overrides — identical to before).
+  const theme = styles?.theme ?? 'light'
 
-  const computedStyles = useMemo(
-    () => getProjectBoardStyles(styles, isDisabled),
-    [styles, isDisabled]
-  )
+  // Caller-supplied overrides (dimensions, spacing, custom colors, animation)
+  // are mapped to the CSS custom properties the .container class consumes.
+  // Only set a var when the caller actually provided a value so the CSS
+  // theme defaults remain in effect otherwise.
+  const containerStyle = useMemo<React.CSSProperties>(() => {
+    const vars: Record<string, string> = {}
+    const set = (name: string, value: string | undefined) => {
+      if (value !== undefined) vars[name] = value
+    }
+    set('--pb-width', styles?.width)
+    set('--pb-height', styles?.height)
+    set('--pb-max-width', styles?.maxWidth)
+    set('--pb-min-width', styles?.minWidth)
+    set('--pb-max-height', styles?.maxHeight)
+    set('--pb-min-height', styles?.minHeight)
+    set('--pb-padding', styles?.padding)
+    set('--pb-margin', styles?.margin)
+    set('--pb-margin-top', styles?.marginTop)
+    set('--pb-margin-bottom', styles?.marginBottom)
+    set('--pb-margin-left', styles?.marginLeft)
+    set('--pb-margin-right', styles?.marginRight)
+    set('--pb-bg', styles?.backgroundColor)
+    set('--pb-radius', styles?.borderRadius)
+    set('--pb-shadow', styles?.boxShadow)
+    set('--pb-backdrop', styles?.backdropFilter)
+    set('--pb-bg-image', styles?.backgroundImage)
+    set('--pb-container-animation', styles?.containerAnimation)
+    set('--pb-glyph-color', styles?.glyphColor)
+    set('--pb-glyph-font-size', styles?.glyphFontSize)
+    set(
+      '--pb-glyph-z',
+      styles?.glyphZIndex !== undefined ? String(styles.glyphZIndex) : undefined
+    )
+    set('--pb-glyph-animation', styles?.glyphAnimation)
+    set('--pb-toolbar-bg', styles?.toolbarBackground)
+    set('--pb-toolbar-padding', styles?.toolbarPadding)
+    set('--pb-toolbar-margin', styles?.toolbarMargin)
+    set('--pb-toolbar-radius', styles?.toolbarBorderRadius)
+    // Caller border override (borderColor + optional borderWidth).
+    if (styles?.borderColor) {
+      set('--pb-border', `${styles.borderWidth || '1px'} solid ${styles.borderColor}`)
+    }
+    // Caller transition override.
+    if (styles?.transitionDuration) {
+      set(
+        '--pb-transition',
+        `all ${styles.transitionDuration} ${styles.transitionEasing || 'cubic-bezier(0.4, 0, 0.2, 1)'}`
+      )
+    }
+    return vars as React.CSSProperties
+  }, [styles])
 
   useEffect(() => {
     setColumnState(mergedColumns)
@@ -488,7 +539,12 @@ function ProjectBoardContent({
   }
 
   return (
-    <div style={computedStyles.container}>
+    <div
+      className={cssStyles.container}
+      data-theme={theme}
+      {...(isDisabled && { 'data-disabled': 'true' })}
+      style={containerStyle}
+    >
       {/* Show breadcrumb when not on board view */}
       {viewState !== 'board' && (
         <Breadcrumb
@@ -522,7 +578,7 @@ function ProjectBoardContent({
             styles={{ theme: styles?.theme || 'light' }}
           />
 
-          <div style={computedStyles.toolbarContainer}>
+          <div className={cssStyles.toolbarContainer}>
             <Board
               columns={filteredColumnState}
               selectedTaskId={selectedTaskId}

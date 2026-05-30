@@ -148,6 +148,7 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   return (
     <div
       className={cssStyles.container}
+      data-component="CodeCopy"
       data-theme={theme}
       data-disabled={styles?.disabled ? 'true' : undefined}
       style={containerStyle}

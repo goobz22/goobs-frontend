@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import type { ProjectBoardStyles } from '../../../../theme'
 import type {
+  ProjectBoardStyles,
   Task,
   RawTopic,
   RawSeverityLevel,

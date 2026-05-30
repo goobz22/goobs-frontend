@@ -186,10 +186,12 @@ const AppBar: FC<AppBarProps> = props => {
   return (
     <div
       className={mergeClassNames(cssStyles.container, className)}
+      data-component="AppBar"
       data-theme={theme}
       data-elevated={elevated ? 'true' : 'false'}
       data-has-shadow={hasExplicitShadow ? 'true' : undefined}
       data-disabled={isDisabled ? 'true' : undefined}
+      data-state={isDisabled ? 'disabled' : 'enabled'}
       style={dynamicStyle}
       onClick={handleClick}
       role="banner"

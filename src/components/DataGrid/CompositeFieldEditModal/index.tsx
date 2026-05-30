@@ -4,8 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react'
 import Dialog from '../../Dialog'
 import Typography from '../../Typography'
 import CustomButton from '../../Button'
-import type { CompositeFieldConfig, RowData } from '../types'
-import type { DataGridStyles } from '../../../theme'
+import type { CompositeFieldConfig, RowData, DataGridStyles } from '../types'
 
 // Field component imports - same as EditableCell
 import TextField from '../../Field/Text'

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './ExternalIncrement.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -139,45 +140,10 @@ const ExternalIncrementNumberField: React.FC<
     [onChange]
   )
 
-  // Inline-style chrome. The container is flex-row so the +/- buttons
-  // sit on either side of the input wrapper.
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: '4px 12px',
-    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
-    borderRadius: '6px',
-    backgroundColor: 'var(--field-bg, transparent)',
-    color: 'var(--field-text, inherit)',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.5 : 1,
-    fontSize: '14px',
-    fontWeight: 500,
-    minWidth: '32px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '64px',
-    height: '40px',
-    textAlign: 'center',
-    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
-    borderRadius: '8px',
-    outline: 'none',
-    backgroundColor: 'var(--field-bg, transparent)',
-    color: 'var(--field-text, inherit)',
-    opacity: disabled ? 0.5 : 1,
-    fontSize: '16px',
-    padding: '8px',
-    boxSizing: 'border-box',
-  }
+  // Chrome lives in ExternalIncrement.module.css: a flex row so the +/-
+  // buttons sit on either side of the centered numeric input. Colors fall
+  // back to the FieldShell CSS variables; the disabled state is driven by
+  // the native :disabled pseudo-class.
 
   return (
     <FieldShell
@@ -193,13 +159,13 @@ const ExternalIncrementNumberField: React.FC<
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={containerStyle}>
+        <div className={cssStyles.container}>
           <button
             type="button"
             aria-label="Decrease value"
             onClick={handleDecrement}
             disabled={disabled}
-            style={buttonStyle}
+            className={cssStyles.button}
           >
             −
           </button>
@@ -214,7 +180,7 @@ const ExternalIncrementNumberField: React.FC<
             disabled={disabled}
             placeholder={placeholder}
             data-field-name={dataFieldName}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
           <button
@@ -222,7 +188,7 @@ const ExternalIncrementNumberField: React.FC<
             aria-label="Increase value"
             onClick={handleIncrement}
             disabled={disabled}
-            style={buttonStyle}
+            className={cssStyles.button}
           >
             +
           </button>

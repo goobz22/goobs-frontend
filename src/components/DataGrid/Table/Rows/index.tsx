@@ -48,11 +48,10 @@
 'use client'
 
 import React from 'react'
-import { ColumnDef, type RowData } from '../../types'
+import { ColumnDef, type RowData, type DataGridStyles } from '../../types'
 import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
 import { getRowId } from '../index'
-import type { DataGridStyles } from '../../../../theme'
 import cssStyles from '../../DataGrid.module.css'
 
 // =============================================================================

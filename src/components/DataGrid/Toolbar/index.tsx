@@ -39,7 +39,8 @@
 import React, { useMemo, type FC } from 'react'
 import Button, { type ButtonProps } from '../../Button'
 import ManageRow from '../ManageRow'
-import type { DataGridStyles } from '../../../theme'
+import type { DataGridStyles } from '../types'
+import cssStyles from '../DataGrid.module.css'
 
 /**
  * Props for the DataGridToolbar component.
@@ -123,45 +124,6 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
   permissions,
 }) => {
   // ═══════════════════════════════════════════════════════════════════════════
-  // STYLES
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /** Container: flexbox row with space-between for left/right sections */
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '0.5rem',
-    width: '100%',
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-    padding: '0.5rem 0.5rem',
-    flexWrap: 'wrap',
-  }
-
-  /** Left section: custom buttons (flexible width, wraps on small screens) */
-  const leftStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    flex: '1 1 auto',
-    minWidth: 0,
-    flexWrap: 'wrap',
-  }
-
-  /** Right section: ManageRow actions (aligned right) */
-  const rightStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '0.5rem',
-    flex: '1 1 auto',
-    minWidth: 0,
-    flexWrap: 'wrap',
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
   // PERMISSION-BASED BUTTON FILTERING
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -197,13 +159,13 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
   // ═══════════════════════════════════════════════════════════════════════════
 
   return (
-    <div style={containerStyle}>
+    <div className={cssStyles.toolbar}>
       {/* ─────────────────────────────────────────────────────────────────────
           LEFT SECTION: Custom Buttons
           These are passed from the DataGrid parent via the buttons prop.
           Filtered based on permissions in read-only mode.
           ───────────────────────────────────────────────────────────────────── */}
-      <div style={leftStyle}>
+      <div className={cssStyles.toolbarLeft}>
         {filteredButtons?.map((btn, idx) => {
           // Explicit action wins; otherwise derive from the button text so
           // every workspace's toolbar buttons expose [data-action] for tests.
@@ -230,7 +192,7 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
           Provides CRUD operations for selected rows.
           The ManageRow component handles permission-based visibility internally.
           ───────────────────────────────────────────────────────────────────── */}
-      <div style={rightStyle}>
+      <div className={cssStyles.toolbarRight}>
         <ManageRow
           selectedRows={manageRowProps?.selectedRows || []}
           {...(manageRowProps?.onAdd ? { onAdd: manageRowProps.onAdd } : {})}

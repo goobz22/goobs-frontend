@@ -8,6 +8,7 @@ import React, {
   type CSSProperties,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Popover.module.css'
 
 /**
@@ -158,6 +159,19 @@ const Popover: React.FC<PopoverProps> = ({
     }
   }, [open, handleClickOutside, handleEscape])
 
+  // Diagnostic bus — emit an open/closed state transition whenever the
+  // popover's `open` prop flips. Additive: observes the existing controlled
+  // `open` state without altering any open/close behavior. No-op when no host
+  // bus is present.
+  useEffect(() => {
+    emitDiag({
+      type: 'component.state',
+      component: 'Popover',
+      ...(dataSubject !== undefined && { subject: dataSubject }),
+      state: open ? 'open' : 'closed',
+    })
+  }, [open, dataSubject])
+
   if (!open || !anchorEl || !mounted) {
     return null
   }
@@ -225,7 +239,9 @@ const Popover: React.FC<PopoverProps> = ({
     <div
       ref={popoverRef}
       className={cssStyles.popover}
+      data-component="Popover"
       data-theme={theme}
+      data-state="open"
       style={dynamicStyle}
       onMouseDown={handleMouseDownInside}
       role={role}

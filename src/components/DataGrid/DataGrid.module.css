@@ -167,6 +167,19 @@
   border-color: var(--dg-error-border);
 }
 
+/* Error message text inherits the .error color (was inline color:'inherit'). */
+.errorMessage {
+  color: inherit;
+}
+
+/* Wrapper around the Metrics + Filters accordions. Tight vertical (0.25rem),
+   original 0.5rem horizontal inset so both accordion edges line up with the
+   DataGrid frame. Was an inline { padding, boxSizing } object on two divs. */
+.accordionWrapper {
+  padding: 0.25rem 0.5rem;
+  box-sizing: border-box;
+}
+
 /* --------------------------------------------------------------------------
    Section Divider
    -------------------------------------------------------------------------- */
@@ -176,6 +189,25 @@
   width: 100%;
   background-color: var(--dg-divider-color);
   opacity: var(--dg-divider-opacity);
+}
+
+/* --------------------------------------------------------------------------
+   Vertical Divider (theme-driven; sacred default, light/dark overrides)
+   -------------------------------------------------------------------------- */
+
+/* Original component only branched on `theme === 'sacred'`: any other
+   value (including undefined) rendered the black, shadowless divider.
+   Black is therefore the base default; sacred is the override. */
+.verticalDivider {
+  height: 20px;
+  border-left: 2px solid rgba(0, 0, 0, 1);
+}
+
+.verticalDivider[data-theme='sacred'] {
+  border-left: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow:
+    0 4px 6px -1px rgba(255, 215, 0, 0.6),
+    0 2px 4px -1px rgba(255, 215, 0, 0.4);
 }
 
 /* --------------------------------------------------------------------------
@@ -261,6 +293,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+}
+
+/* Runtime-measured column width is fed in via the --dg-col-width custom
+   property (set inline from col.computedWidth). When unset the cell sizes
+   itself naturally. */
+.headerCell[style*='--dg-col-width'] {
+  width: var(--dg-col-width);
+  min-width: var(--dg-col-width);
+  max-width: var(--dg-col-width);
+}
+
+/* Active drag source fades to half opacity (was inline opacity:0.5). */
+.headerCellDragging {
+  opacity: 0.5;
 }
 
 .headerCellCheckbox {
@@ -432,6 +478,476 @@
 }
 
 /* --------------------------------------------------------------------------
+   Toolbar (custom buttons left / ManageRow right) — static layout, no theme.
+   -------------------------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   ManageRow (row-level CRUD toolbar) — sacred default, light/dark overrides.
+   Replaces the old JS `colors` ternary object + per-button hover useState.
+   -------------------------------------------------------------------------- */
+
+.manageRow {
+  --mr-bg: rgba(0, 0, 0, 0.95);
+  --mr-border: rgba(255, 215, 0, 0.3);
+  --mr-text: #ffd700;
+  --mr-text-muted: rgba(255, 215, 0, 0.5);
+  --mr-icon: #ffd700;
+  --mr-button-hover-bg: rgba(255, 215, 0, 0.12);
+  --mr-delete-icon: #ffd700;
+  --mr-delete-hover-bg: rgba(255, 215, 0, 0.12);
+  --mr-divider: rgba(255, 215, 0, 0.2);
+  --mr-count-active-bg: rgba(255, 215, 0, 0.15);
+  --mr-count-active-text: #ffd700;
+  --mr-add-color: #ffd700;
+  --mr-add-hover-bg: rgba(255, 215, 0, 0.12);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 37px;
+  padding: 0 6px;
+  background-color: var(--mr-bg);
+  border: 1px solid var(--mr-border);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.manageRow[data-theme='light'] {
+  --mr-bg: #ffffff;
+  --mr-border: #e2e8f0;
+  --mr-text: #374151;
+  --mr-text-muted: #9ca3af;
+  --mr-icon: #6b7280;
+  --mr-button-hover-bg: rgba(0, 0, 0, 0.04);
+  --mr-delete-icon: #ef4444;
+  --mr-delete-hover-bg: rgba(239, 68, 68, 0.08);
+  --mr-divider: #e5e7eb;
+  --mr-count-active-bg: rgba(59, 130, 246, 0.1);
+  --mr-count-active-text: #3b82f6;
+  --mr-add-color: #22c55e;
+  --mr-add-hover-bg: rgba(34, 197, 94, 0.08);
+}
+
+.manageRow[data-theme='dark'] {
+  --mr-bg: #1e293b;
+  --mr-border: #334155;
+  --mr-text: #e2e8f0;
+  --mr-text-muted: #64748b;
+  --mr-icon: #94a3b8;
+  --mr-button-hover-bg: rgba(255, 255, 255, 0.08);
+  --mr-delete-icon: #ef4444;
+  --mr-delete-hover-bg: rgba(239, 68, 68, 0.08);
+  --mr-divider: #475569;
+  --mr-count-active-bg: rgba(59, 130, 246, 0.15);
+  --mr-count-active-text: #3b82f6;
+  --mr-add-color: #22c55e;
+  --mr-add-hover-bg: rgba(34, 197, 94, 0.08);
+}
+
+.manageRowCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background-color: transparent;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mr-text-muted);
+}
+
+.manageRowCount[data-has-selection='true'] {
+  background-color: var(--mr-count-active-bg);
+  color: var(--mr-count-active-text);
+}
+
+.manageRowLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mr-text-muted);
+  margin-left: 4px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.manageRow[data-has-selection='true'] .manageRowLabel {
+  color: var(--mr-text);
+}
+
+.manageRowDivider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--mr-divider);
+  margin: 0 2px;
+}
+
+.manageRowActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  color: var(--mr-icon);
+}
+
+.manageRowActionBtn:hover {
+  background-color: var(--mr-button-hover-bg);
+}
+
+.manageRowActionBtnDelete {
+  color: var(--mr-delete-icon);
+}
+
+.manageRowActionBtnDelete:hover {
+  background-color: var(--mr-delete-hover-bg);
+}
+
+.manageRowAddBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 8px;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  color: var(--mr-add-color);
+}
+
+.manageRowAddBtn:hover {
+  background-color: var(--mr-add-hover-bg);
+}
+
+.manageRowAddLabel {
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Footer (pagination + export) — sacred default, light/dark overrides.
+   Replaces JS theme ternaries + per-button hover useState in Footer/index.tsx.
+   -------------------------------------------------------------------------- */
+
+.footerBar {
+  --ft-text: rgba(255, 215, 0, 0.9);
+  --ft-text-font: 'Cinzel', serif;
+  --ft-btn-bg: rgba(255, 215, 0, 0.1);
+  --ft-btn-color: #ffd700;
+  --ft-btn-border: 1px solid rgba(255, 215, 0, 0.3);
+  --ft-btn-hover-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+  --ft-btn-disabled-color: rgba(255, 215, 0, 0.3);
+  --ft-cog-bg: rgba(255, 215, 0, 0.15);
+  --ft-cog-bg-hover: rgba(255, 215, 0, 0.25);
+  --ft-cog-border: 1px solid rgba(255, 215, 0, 0.4);
+  --ft-menu-bg: rgba(0, 0, 0, 0.95);
+  --ft-menu-border: 1px solid rgba(255, 215, 0, 0.5);
+  --ft-menu-shadow: 0 -4px 12px rgba(255, 215, 0, 0.2);
+  --ft-menu-item-color: #ffd700;
+  --ft-menu-item-font: 'Cinzel', serif;
+  --ft-menu-item-hover-bg: rgba(255, 215, 0, 0.15);
+  /* Cog icon color — full-opacity gold, matching old getIconColor(). */
+  --ft-icon: #ffd700;
+
+  width: 100%;
+  min-width: 100%;
+  height: 56px;
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-top: 2px solid rgba(255, 215, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+/* Non-sacred themes drop the sacred container chrome entirely (the original
+   only applied bg/border/blur when isSacredTheme). */
+.footerBar[data-theme='light'],
+.footerBar[data-theme='dark'] {
+  background-color: transparent;
+  border-top: none;
+  backdrop-filter: none;
+}
+
+.footerBar[data-theme='light'] {
+  --ft-text: rgba(55, 65, 81, 1);
+  --ft-text-font: inherit;
+  --ft-btn-bg: #f8fafc;
+  --ft-btn-color: #374151;
+  --ft-btn-border: 1px solid #e2e8f0;
+  --ft-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --ft-btn-disabled-color: rgba(107, 114, 128, 0.3);
+  --ft-cog-bg: #f1f5f9;
+  --ft-cog-bg-hover: #e2e8f0;
+  --ft-cog-border: 1px solid #e2e8f0;
+  --ft-menu-bg: #ffffff;
+  --ft-menu-border: 1px solid #e2e8f0;
+  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-item-color: #374151;
+  --ft-menu-item-font: 'Inter', sans-serif;
+  --ft-menu-item-hover-bg: #f3f4f6;
+  --ft-icon: #374151;
+}
+
+.footerBar[data-theme='dark'] {
+  --ft-text: #e2e8f0;
+  --ft-text-font: 'Inter', sans-serif;
+  --ft-btn-bg: #334155;
+  --ft-btn-color: #e2e8f0;
+  --ft-btn-border: 1px solid #475569;
+  --ft-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --ft-btn-disabled-color: rgba(156, 163, 175, 0.3);
+  --ft-cog-bg: #334155;
+  --ft-cog-bg-hover: #475569;
+  --ft-cog-border: 1px solid #475569;
+  --ft-menu-bg: #1e293b;
+  --ft-menu-border: 1px solid #475569;
+  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-item-color: #e2e8f0;
+  --ft-menu-item-font: 'Inter', sans-serif;
+  --ft-menu-item-hover-bg: #334155;
+  --ft-icon: #e2e8f0;
+}
+
+.footerInner {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 1rem;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.footerCenter {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+  flex: 1;
+  max-width: 300px;
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: auto;
+  overflow: visible;
+  padding-right: 1rem;
+  flex-shrink: 0;
+}
+
+/* Page-size selector ("Show: [n]") */
+.pageSizeSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ft-text);
+  font-family: var(--ft-text-font);
+}
+
+.pageSizeSelectorLabel {
+  white-space: nowrap;
+}
+
+.pageSizeSelectorDropdown {
+  min-width: 60px;
+}
+
+/* Pagination block */
+.paginationBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+.paginationText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ft-text);
+  font-family: var(--ft-text-font);
+  min-width: 80px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.paginationBtn {
+  padding: 8px;
+  border-radius: 6px;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
+  border: var(--ft-btn-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  background-color: var(--ft-btn-bg);
+  color: var(--ft-btn-color);
+}
+
+.footerBar[data-theme='sacred'] .paginationBtn {
+  backdrop-filter: blur(4px);
+}
+
+.paginationBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--ft-btn-hover-shadow);
+}
+
+.paginationBtn:disabled {
+  background-color: transparent;
+  border: none;
+  color: var(--ft-btn-disabled-color);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Export menu cog button */
+.exportMenuWrapper {
+  position: relative;
+}
+
+.exportCogBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  background-color: var(--ft-cog-bg);
+  border: var(--ft-cog-border);
+  /* SettingsIcon inherits this via currentColor — matches the old
+     getIconColor() exactly (sacred #ffd700 / dark #e2e8f0 / light #374151). */
+  color: var(--ft-icon);
+}
+
+.exportCogBtn:hover,
+.exportCogBtn[data-open='true'] {
+  background-color: var(--ft-cog-bg-hover);
+}
+
+/* Export dropdown (portaled to body — pulls tokens from a data-theme on
+   itself rather than a parent, since it lives outside .footerBar). */
+.exportMenu {
+  --ft-menu-bg: rgba(0, 0, 0, 0.95);
+  --ft-menu-border: 1px solid rgba(255, 215, 0, 0.5);
+  --ft-menu-shadow: 0 -4px 12px rgba(255, 215, 0, 0.2);
+  --ft-menu-item-color: #ffd700;
+  --ft-menu-item-font: 'Cinzel', serif;
+  --ft-menu-item-hover-bg: rgba(255, 215, 0, 0.15);
+
+  position: fixed;
+  transform: translateY(-100%);
+  min-width: 160px;
+  background-color: var(--ft-menu-bg);
+  border: var(--ft-menu-border);
+  border-radius: 6px;
+  box-shadow: var(--ft-menu-shadow);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.exportMenu[data-theme='light'] {
+  --ft-menu-bg: #ffffff;
+  --ft-menu-border: 1px solid #e2e8f0;
+  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-item-color: #374151;
+  --ft-menu-item-font: 'Inter', sans-serif;
+  --ft-menu-item-hover-bg: #f3f4f6;
+}
+
+.exportMenu[data-theme='dark'] {
+  --ft-menu-bg: #1e293b;
+  --ft-menu-border: 1px solid #475569;
+  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-item-color: #e2e8f0;
+  --ft-menu-item-font: 'Inter', sans-serif;
+  --ft-menu-item-hover-bg: #334155;
+}
+
+.exportMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ft-menu-item-color);
+  font-family: var(--ft-menu-item-font);
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.exportMenuItem:hover {
+  background-color: var(--ft-menu-item-hover-bg);
+}
+
+/* --------------------------------------------------------------------------
    Creation Row
    -------------------------------------------------------------------------- */
 
@@ -519,6 +1035,112 @@
 
 .datagrid[data-theme='sacred'] .dropdownDivider {
   border-top-color: rgba(255, 215, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Manage Columns modal — sacred default, light override (no dark in original).
+   Replaces JS theme ternaries + the Done-button mouseEnter/Leave bg swap.
+   -------------------------------------------------------------------------- */
+
+.manageColumnsOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.manageColumnsModal {
+  --mc-modal-bg: rgba(0, 0, 0, 0.95);
+  --mc-modal-border: 2px solid #ffd700;
+  --mc-modal-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+  --mc-title-color: #ffd700;
+  --mc-title-font: 'Cinzel', serif;
+  --mc-item-border: rgba(255, 215, 0, 0.2);
+  --mc-name-color: #fbbf24;
+  --mc-name-font: 'Cinzel', serif;
+  --mc-required-color: rgba(255, 215, 0, 0.5);
+  --mc-btn-bg: rgba(255, 215, 0, 0.1);
+  --mc-btn-bg-hover: rgba(255, 215, 0, 0.2);
+  --mc-btn-color: #ffd700;
+
+  background-color: var(--mc-modal-bg);
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: auto;
+  border: var(--mc-modal-border);
+  box-shadow: var(--mc-modal-shadow);
+}
+
+.manageColumnsModal[data-theme='light'],
+.manageColumnsModal[data-theme='dark'] {
+  --mc-modal-bg: white;
+  --mc-modal-border: 1px solid #e5e7eb;
+  --mc-modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --mc-title-color: #1f2937;
+  --mc-title-font: inherit;
+  --mc-item-border: #f3f4f6;
+  --mc-name-color: #374151;
+  --mc-name-font: inherit;
+  --mc-required-color: #9ca3af;
+  --mc-btn-bg: #f3f4f6;
+  --mc-btn-bg-hover: #e5e7eb;
+  --mc-btn-color: #374151;
+}
+
+.manageColumnsTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--mc-title-color);
+  text-align: center;
+  font-family: var(--mc-title-font);
+}
+
+.manageColumnsItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mc-item-border);
+}
+
+.manageColumnsName {
+  font-size: 14px;
+  color: var(--mc-name-color);
+  font-family: var(--mc-name-font);
+}
+
+.manageColumnsName[data-last-visible='true'] {
+  opacity: 0.6;
+}
+
+.manageColumnsRequired {
+  font-size: 11px;
+  margin-left: 8px;
+  color: var(--mc-required-color);
+}
+
+.manageColumnsDoneBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: var(--mc-btn-bg);
+  color: var(--mc-btn-color);
+  margin-top: 20px;
+  width: 100%;
+}
+
+.manageColumnsDoneBtn:hover {
+  background-color: var(--mc-btn-bg-hover);
 }
 
 /* --------------------------------------------------------------------------

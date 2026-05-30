@@ -4,10 +4,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
+import type { ComplexTextEditorStyles } from '../theme'
 import {
-  getComplexTextEditorStyles,
-  type ComplexTextEditorStyles,
-} from '../../../theme/'
+  buildEditorAreaOverrideStyle,
+  buildToolbarOverrideStyle,
+  buildTransitionOverride,
+} from '../theme'
+import cssStyles from '../ComplexTextEditor.module.css'
 import { mdToHtml } from '../utils/conversion'
 
 type MarkdownEditorProps = {
@@ -27,9 +30,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   // Use value prop directly - this is a controlled component
   // No internal state needed for the value itself
   const [selectedText, setSelectedText] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
-  const hasInsertedKeyframes = useRef(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Listen for native input events from browser automation tools
@@ -49,35 +50,17 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   }, [onChange, value])
 
   const isSacredTheme = styles?.theme === 'sacred'
+  const theme = styles?.theme || 'light'
 
-  // Get computed styles
-  const computedStyles = getComplexTextEditorStyles(styles, isFocused)
-
-  // CSS keyframes for sacred animations - only insert once
-  useEffect(() => {
-    if (isSacredTheme && !hasInsertedKeyframes.current) {
-      const styleSheet = document.styleSheets?.[0]
-      const keyframes = `
-        @keyframes markdownEditorCodeGlow {
-          0%, 100% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-          50% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        }
-        @keyframes markdownEditorGlyphRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `
-      try {
-        if (styleSheet) {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-          hasInsertedKeyframes.current = true
-        }
-      } catch {
-        // Keyframes might already exist
-        hasInsertedKeyframes.current = true
-      }
-    }
-  }, [isSacredTheme])
+  // Caller overrides re-wired as CSS custom properties (was the old
+  // getComplexTextEditorTheme editorArea / toolbar / transition branches).
+  const editorAreaOverrideStyle = buildEditorAreaOverrideStyle(styles)
+  const toolbarOverrideStyle = buildToolbarOverrideStyle(styles)
+  const transitionOverride = buildTransitionOverride(styles)
+  const containerOverrideStyle: React.CSSProperties | undefined =
+    transitionOverride
+      ? ({ ['--ct-transition']: transitionOverride } as React.CSSProperties)
+      : undefined
 
   const handleLocalMarkdownChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -92,44 +75,19 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     )
   }
 
-  const handleFocus = () => {
-    setIsFocused(true)
-  }
-
-  const handleBlur = () => {
-    setIsFocused(false)
-  }
-
   const handleBold = () => handleBoldClick(selectedText, value, onChange)
   const handleItalic = () => handleItalicClick(selectedText, value, onChange)
-
-  // Get textarea style
-  const textareaStyle: React.CSSProperties = {
-    ...computedStyles.editorArea,
-    boxSizing: 'border-box',
-    width: showPreview ? '50%' : '100%',
-    maxWidth: '100%',
-    minWidth: '0',
-    fontFamily: 'monospace',
-    border: 'none',
-    outline: 'none',
-    resize: 'vertical' as const,
-    ...(isSacredTheme && {
-      animation: 'markdownEditorCodeGlow 4s ease-in-out infinite',
-    }),
-  }
 
   // Label is now handled by parent component
 
   return (
     <div
-      style={{
-        ...computedStyles.container,
-        maxWidth: '100%',
-        boxSizing: 'border-box',
-      }}
+      className={cssStyles.container}
+      data-theme={theme}
+      {...(containerOverrideStyle && { style: containerOverrideStyle })}
     >
       <Toolbar
+        {...(toolbarOverrideStyle && { wrapperStyle: toolbarOverrideStyle })}
         handleBoldClick={handleBold}
         handleItalicClick={handleItalic}
         markdownMode={true}
@@ -140,25 +98,29 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       <button onClick={() => setShowPreview(!showPreview)}>
         Toggle Preview
       </button>
-      <div style={{ display: 'flex' }}>
+      <div className={cssStyles.markdownRow}>
         <textarea
           ref={textareaRef}
           value={value}
           onChange={handleLocalMarkdownChange}
           onSelect={handleSelect}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           placeholder={
             isSacredTheme
               ? 'Compose your markdown scripture...'
               : 'Enter markdown...'
           }
-          style={textareaStyle}
+          className={cssStyles.markdownTextarea}
+          data-theme={theme}
+          {...(editorAreaOverrideStyle && { style: editorAreaOverrideStyle })}
+          {...(showPreview && { 'data-preview': 'true' })}
+          {...(styles?.helperTextType === 'error' && {
+            'data-state': 'error',
+          })}
           rows={minRows || 10}
         />
         {showPreview && (
           <div
-            style={{ width: '50%', borderLeft: '1px solid' }}
+            className={cssStyles.markdownPreview}
             dangerouslySetInnerHTML={{ __html: mdToHtml(value) }}
           />
         )}

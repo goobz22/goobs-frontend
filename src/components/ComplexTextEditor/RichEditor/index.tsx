@@ -5,10 +5,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import Toolbar from '../Toolbars/Editor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
+import type { ComplexTextEditorStyles } from '../theme'
 import {
-  getComplexTextEditorStyles,
-  type ComplexTextEditorStyles,
-} from '../../../theme/'
+  buildEditorAreaOverrideStyle,
+  buildToolbarOverrideStyle,
+  buildTransitionOverride,
+} from '../theme'
+import cssStyles from '../ComplexTextEditor.module.css'
 
 export interface RichTextEditorProps {
   value: string
@@ -27,9 +30,8 @@ export function RichTextEditor({
   const accordion = editorStyles?.accordionMode || false
   const accordionSummary = editorStyles?.accordionSummary || 'Rich Text Editor'
   const defaultExpanded = editorStyles?.accordionDefaultExpanded || false
-  const isSacredTheme = editorStyles?.theme === 'sacred'
+  const theme = editorStyles?.theme || 'light'
 
-  const [isFocused, setIsFocused] = useState(false)
   const [expanded, setExpanded] = useState(defaultExpanded)
 
   const editorRef = useRef<HTMLDivElement>(null)
@@ -63,54 +65,36 @@ export function RichTextEditor({
   const handleBulletedList = () => execCmd('insertUnorderedList')
   const handleNumberedList = () => execCmd('insertOrderedList')
 
-  // Get computed styles
-  const computedStyles = getComplexTextEditorStyles(editorStyles, isFocused)
-
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (isSacredTheme) {
-      const styleSheet = document.styleSheets?.[0]
-      const keyframes = `
-        @keyframes richTextEditorBorderPulse {
-          0%, 100% { border-color: rgba(255, 215, 0, 0.3); }
-          50% { border-color: rgba(255, 215, 0, 0.6); }
-        }
-        @keyframes richTextEditorTextGlow {
-          0%, 100% { text-shadow: 0 0 3px rgba(255, 215, 0, 0.3); }
-          50% { text-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
-        }
-      `
-      try {
-        if (styleSheet) {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        }
-      } catch {
-        // Keyframes might already exist
-      }
-    }
-  }, [isSacredTheme])
-
   const handleAccordionChange = () => {
     setExpanded(!expanded)
   }
 
-  const handleFocus = () => {
-    setIsFocused(true)
-  }
+  // Measured min-height (minRows * 20px) stays in JS as a CSS custom prop.
+  const surfaceStyle = {
+    ['--ct-rich-min-height']: `${minRows * 20}px`,
+  } as React.CSSProperties
 
-  const handleBlur = () => {
-    setIsFocused(false)
-  }
+  // Caller overrides re-wired as CSS custom properties (was the old
+  // getComplexTextEditorTheme editorArea / toolbar / transition branches).
+  const editorAreaOverrideStyle = buildEditorAreaOverrideStyle(editorStyles)
+  const toolbarOverrideStyle = buildToolbarOverrideStyle(editorStyles)
+  const transitionOverride = buildTransitionOverride(editorStyles)
+  const containerOverrideStyle: React.CSSProperties | undefined =
+    transitionOverride
+      ? ({ ['--ct-transition']: transitionOverride } as React.CSSProperties)
+      : undefined
 
   const editorContent = (
     <div
-      style={{
-        ...computedStyles.editorArea,
-        maxWidth: '100%',
-        boxSizing: 'border-box',
-      }}
+      className={cssStyles.editorArea}
+      data-theme={theme}
+      {...(editorAreaOverrideStyle && { style: editorAreaOverrideStyle })}
+      {...(editorStyles?.helperTextType === 'error' && {
+        'data-state': 'error',
+      })}
     >
       <Toolbar
+        {...(toolbarOverrideStyle && { wrapperStyle: toolbarOverrideStyle })}
         handleBoldClick={handleBoldClick}
         handleItalicClick={handleItalicClick}
         handleUnderlineClick={handleUnderlineClick}
@@ -128,21 +112,13 @@ export function RichTextEditor({
         toolbarType="richtext"
         styles={editorStyles as ComplexTextEditorStyles}
       />
-      <div style={{ position: 'relative' }}>
+      <div className={cssStyles.richSurfaceWrap}>
         <div
           ref={editorRef}
           contentEditable
           onInput={handleInput}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          style={{
-            minHeight: `${minRows * 20}px`,
-            outline: 'none',
-            width: '100%',
-            maxWidth: '100%',
-            minWidth: '0',
-            boxSizing: 'border-box',
-          }}
+          className={cssStyles.richSurface}
+          style={surfaceStyle}
           dangerouslySetInnerHTML={{ __html: value }}
         />
       </div>
@@ -152,7 +128,11 @@ export function RichTextEditor({
   // Label is now handled by parent component
 
   return (
-    <div style={computedStyles.container}>
+    <div
+      className={cssStyles.container}
+      data-theme={theme}
+      {...(containerOverrideStyle && { style: containerOverrideStyle })}
+    >
       {accordion ? (
         <Accordion
           expanded={expanded}

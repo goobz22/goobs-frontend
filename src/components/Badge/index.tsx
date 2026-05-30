@@ -60,7 +60,7 @@ const Badge: React.FC<BadgeProps> = ({ content, children, styles }) => {
     dynamicStyle['--badge-text-shadow'] = styles.textShadow
 
   return (
-    <div className={cssStyles.container}>
+    <div className={cssStyles.container} data-component="Badge">
       {children}
       <span
         className={cssStyles.badge}

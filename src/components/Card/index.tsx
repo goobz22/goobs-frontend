@@ -88,13 +88,16 @@
 import React, {
   forwardRef,
   isValidElement,
+  useEffect,
   useId,
   useMemo,
+  useRef,
   type CSSProperties,
   type ElementType,
   type ReactElement,
   type ReactNode,
 } from 'react'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './Card.module.css'
 
 // -----------------------------------------------------------------------------
@@ -294,6 +297,28 @@ function CardInner({
         ? 'selected'
         : 'default'
 
+  // Additive diagnostics: surface the card's primary state on transition to
+  // the host diagnostics bus (no-op when none present). `selected`/`disabled`/
+  // `dragging` are controlled props with no internal handler, so the only
+  // additive transition hook is an effect watching the resolved state. The
+  // initial render is skipped so we only report genuine state changes.
+  const previousResolvedState = useRef<string | null>(null)
+  useEffect(() => {
+    if (previousResolvedState.current === null) {
+      previousResolvedState.current = resolvedState
+      return
+    }
+    if (previousResolvedState.current !== resolvedState) {
+      previousResolvedState.current = resolvedState
+      emitDiag({
+        type: 'component.state',
+        component: 'Card',
+        ...(cardType !== undefined && { subject: cardType }),
+        state: resolvedState,
+      })
+    }
+  }, [resolvedState, cardType])
+
   const rootClassName = mergeClassNames(
     cssStyles.root,
     cssStyles[variant],
@@ -313,9 +338,14 @@ function CardInner({
     role: 'article',
     'aria-labelledby': titleId,
     'data-theme': theme,
+    'data-component': 'Card',
     'data-card': 'true',
+    'data-state': resolvedState,
     'data-card-state': resolvedState,
-    ...(cardType !== undefined && { 'data-card-type': cardType }),
+    ...(cardType !== undefined && {
+      'data-subject': cardType,
+      'data-card-type': cardType,
+    }),
     ...(cardId !== undefined && { 'data-card-id': cardId }),
     ...(interactive && { 'data-card-interactive': 'true' }),
     ...(disabled && { 'data-card-disabled': 'true' }),

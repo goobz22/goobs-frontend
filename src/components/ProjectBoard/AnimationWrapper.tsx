@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import type { AnimationOrigin, ProjectBoardStyles } from './types'
-import { getProjectBoardTheme } from '../../theme/projectboard'
+import cssStyles from './ProjectBoard.module.css'
 
 interface AnimationWrapperProps {
   children: React.ReactNode
@@ -18,8 +18,10 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
   styles,
 }) => {
   const [isAnimating, setIsAnimating] = useState(false)
-  const theme = getProjectBoardTheme(styles)
   const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Old getProjectBoardTheme defaulted to 'light' (overlay background was the
+  // light container background); preserve that exact default.
+  const theme = styles?.theme ?? 'light'
 
   // Track previous isVisible to detect when it becomes true
   const [prevIsVisible, setPrevIsVisible] = useState(isVisible)
@@ -49,12 +51,14 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
     return null
   }
 
-  // Calculate the transform origin and initial scale/position
-  const getTransformStyles = (): React.CSSProperties => {
+  // Calculate the transform origin and initial scale/position. These depend on
+  // runtime viewport + origin-rect measurements, so they legitimately stay in
+  // JS and are passed to CSS via custom properties.
+  const getTransformValues = (): { transform: string; opacity: string } => {
     if (!origin || !isAnimating) {
       return {
         transform: 'scale(1) translate(0, 0)',
-        opacity: 1,
+        opacity: '1',
       }
     }
 
@@ -77,38 +81,32 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
 
     return {
       transform: `scale(${initialScale}) translate(${translateX / initialScale}px, ${translateY / initialScale}px)`,
-      opacity: 0.8,
+      opacity: '0.8',
     }
   }
 
-  const containerStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: 1000,
-    overflow: 'hidden',
-    background: theme.container.background,
-    ...getTransformStyles(),
-    transition: isAnimating
-      ? `transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)`
-      : 'none',
-  }
+  const { transform, opacity } = getTransformValues()
 
-  const contentWrapperStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    overflow: 'auto',
-    opacity: isAnimating ? 0 : 1,
-    transition: isAnimating
+  const overlayStyle: React.CSSProperties = {
+    ['--pb-aw-transform']: transform,
+    ['--pb-aw-opacity']: opacity,
+    ['--pb-aw-transition']: isAnimating
+      ? 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)'
+      : 'none',
+  } as React.CSSProperties
+
+  const contentStyle: React.CSSProperties = {
+    ['--pb-aw-content-opacity']: isAnimating ? '0' : '1',
+    ['--pb-aw-content-transition']: isAnimating
       ? 'opacity 200ms ease-in 200ms'
       : 'opacity 200ms ease-out',
-  }
+  } as React.CSSProperties
 
   return (
-    <div style={containerStyle}>
-      <div style={contentWrapperStyle}>{children}</div>
+    <div className={cssStyles.animationOverlay} data-theme={theme} style={overlayStyle}>
+      <div className={cssStyles.animationContent} style={contentStyle}>
+        {children}
+      </div>
     </div>
   )
 }

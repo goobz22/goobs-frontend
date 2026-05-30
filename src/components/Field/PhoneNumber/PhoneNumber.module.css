@@ -1,0 +1,59 @@
+/* ==========================================================================
+   PHONE NUMBER FIELD - CSS MODULE
+   Sacred-gold input frame with a glued "+1" prefix. FieldShell owns
+   label/helper/theme. Caller-supplied layout overrides (height/borderWidth/
+   borderRadius/font) come in as CSS custom properties; the disabled chrome
+   is driven by the .disabled modifier on the wrapper.
+   ========================================================================== */
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--phone-height, 40px);
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: var(--phone-border-width, 1px) solid rgba(255, 215, 0, 0.3);
+  border-radius: var(--phone-radius, 8px);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.inputWrapper.disabled {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--phone-font-size, 16px);
+  font-family: 'Crimson Text', serif;
+  font-weight: var(--phone-font-weight);
+  user-select: none;
+}
+
+.inputWrapper.disabled .prefix {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input {
+  flex: 1;
+  height: 100%;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  padding-left: 8px;
+  padding-right: 16px;
+  font-size: var(--phone-font-size, 16px);
+  font-weight: var(--phone-font-weight);
+  line-height: var(--phone-line-height);
+  font-family: var(--phone-font-family, 'Crimson Text', serif);
+  color: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+}
+
+.input:disabled {
+  color: rgba(255, 255, 255, 0.4);
+}

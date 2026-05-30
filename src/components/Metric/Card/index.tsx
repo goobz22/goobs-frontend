@@ -128,8 +128,12 @@ const MetricCard = memo(function MetricCard({
       style={dynamicStyle}
       role="group"
       aria-label={`${label}: ${value}`}
+      data-component="MetricCard"
       data-metric-card="true"
-      {...(dataField !== undefined && { 'data-metric-field': dataField })}
+      {...(dataField !== undefined && {
+        'data-subject': dataField,
+        'data-metric-field': dataField,
+      })}
       data-metric-label={label}
     >
       {icon && (

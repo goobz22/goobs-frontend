@@ -339,9 +339,11 @@ const Alert: React.FC<AlertProps> = ({ severity, message, onClose, styles }) => 
   return (
     <div
       className={cssStyles.root}
+      data-component="Alert"
       data-theme={containerTheme}
       data-severity={severity}
       data-closing={isClosing || undefined}
+      data-state={isClosing ? 'closing' : 'open'}
       data-outline={styles?.outline === false ? 'false' : undefined}
       style={dynamicStyle}
       role="alert"

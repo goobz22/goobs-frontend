@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import cssStyles from './Percentage.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
@@ -205,75 +206,43 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     [onChange, formatValue]
   )
 
-  // Inner-wrapper styling local to Percentage: the increment/decrement
-  // buttons are absolutely positioned over the inline-block input so
-  // the field auto-sizes to its content rather than stretching.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: styles?.height || '40px',
-    width: 'auto',
-    border: '1px solid var(--field-border-default, rgba(255,215,0,0.3))',
-    borderRadius: styles?.borderRadius || '8px',
-    backgroundColor: 'var(--field-bg, rgba(0, 0, 0, 0.6))',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-    transition: 'all 0.3s ease',
+  // Inner chrome lives in Percentage.module.css: the increment/decrement
+  // buttons are absolutely positioned over the auto-sized input so the
+  // field hugs its content. The runtime ch-based width and any
+  // caller-supplied layout overrides (height/radius/padding/font) are
+  // forwarded as CSS custom properties; the CSS holds the static defaults
+  // and the :disabled pseudo-class drives the disabled chrome.
+  const wrapperCssVars: Record<string, string> = {}
+  if (styles?.height) wrapperCssVars['--percentage-height'] = styles.height
+  if (styles?.borderRadius) {
+    wrapperCssVars['--percentage-radius'] = styles.borderRadius
   }
 
-  const inputStyle: React.CSSProperties = {
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: styles?.padding || '8px 60px 8px 16px',
-    paddingLeft: styles?.paddingLeft || '16px',
-    paddingRight: styles?.paddingRight || '60px',
-    paddingTop: styles?.paddingTop || '8px',
-    paddingBottom: styles?.paddingBottom || '8px',
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily,
-    color: 'inherit',
-    boxSizing: 'border-box',
-    width: calculatedWidth,
-    minWidth: '60px',
-    ...(disabled && { opacity: 0.5, cursor: 'not-allowed' }),
+  const inputCssVars: Record<string, string> = {
+    '--percentage-input-width': calculatedWidth,
   }
-
-  const adornmentContainerStyle: React.CSSProperties = {
-    position: 'absolute',
-    right: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+  if (styles?.padding) inputCssVars['--percentage-padding'] = styles.padding
+  if (styles?.paddingLeft) {
+    inputCssVars['--percentage-padding-left'] = styles.paddingLeft
   }
-
-  const buttonContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '32px',
-    justifyContent: 'center',
+  if (styles?.paddingRight) {
+    inputCssVars['--percentage-padding-right'] = styles.paddingRight
   }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: 0,
-    width: '16px',
-    height: '16px',
-    minWidth: '16px',
-    minHeight: '16px',
-    borderRadius: '2px',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'rgba(255, 215, 0, 0.9)',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
+  if (styles?.paddingTop) {
+    inputCssVars['--percentage-padding-top'] = styles.paddingTop
+  }
+  if (styles?.paddingBottom) {
+    inputCssVars['--percentage-padding-bottom'] = styles.paddingBottom
+  }
+  if (styles?.fontSize) inputCssVars['--percentage-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined) {
+    inputCssVars['--percentage-font-weight'] = String(styles.fontWeight)
+  }
+  if (styles?.lineHeight) {
+    inputCssVars['--percentage-line-height'] = styles.lineHeight
+  }
+  if (styles?.fontFamily) {
+    inputCssVars['--percentage-font-family'] = styles.fontFamily
   }
 
   const iconStyle: React.CSSProperties = { fontSize: '18px' }
@@ -300,7 +269,10 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       styles={shellStylesWithAutoWidth}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
+        <div
+          className={cssStyles.inputWrapper}
+          style={wrapperCssVars as React.CSSProperties}
+        >
           <input
             ref={inputRef}
             type="text"
@@ -314,18 +286,19 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            style={inputStyle}
+            className={cssStyles.input}
+            style={inputCssVars as React.CSSProperties}
             {...inputAriaProps}
           />
 
-          <div style={adornmentContainerStyle}>
-            <div style={buttonContainerStyle}>
+          <div className={cssStyles.adornmentContainer}>
+            <div className={cssStyles.buttonContainer}>
               <button
                 type="button"
                 onMouseDown={() => handleMouseDown(handleIncrement)}
                 aria-label="increment"
                 disabled={disabled}
-                style={buttonStyle}
+                className={cssStyles.button}
               >
                 <ArrowDropUpIcon
                   styles={{ theme: styles?.theme || 'sacred' }}
@@ -337,7 +310,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
                 onMouseDown={() => handleMouseDown(handleDecrement)}
                 aria-label="decrement"
                 disabled={disabled}
-                style={{ ...buttonStyle, marginTop: '2px' }}
+                className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
               >
                 <ArrowDropDownIcon
                   styles={{ theme: styles?.theme || 'sacred' }}

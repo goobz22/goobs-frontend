@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within, expect } from 'storybook/test'
 import Dropdown, { type DropdownOption } from './index'
-import type { FormFieldStyles } from '../../../../theme'
+import type { FieldStyleOverrides } from '../../Shell'
 
 /**
  * Reusable mock options using the unified DropdownOption interface
@@ -33,7 +33,7 @@ interface DropdownWithStateProps {
   initialValue?: string
   label: string
   options: DropdownOption[]
-  styles?: FormFieldStyles
+  styles?: FieldStyleOverrides
   error?: string
   disabled?: boolean
   required?: boolean

@@ -32,6 +32,7 @@ import ToggleButton, {
   type ToggleButtonProps,
 } from '../ToggleButton'
 import { CalendarFilters, CalendarFilterOptions } from './CalendarFilters'
+import { emitDiag } from '../../utils/diag'
 import cssStyles from './BigCalendar.module.css'
 
 import * as Icons from '../Icons'
@@ -332,10 +333,10 @@ export default function BigCalendar({
       : {}),
   }
 
-  const buttonStylesProp: { styles?: ToggleButtonProps['styles'] } = {
+  const buttonStylesProp: { styles: NonNullable<ToggleButtonProps['styles']> } = {
     styles: childThemeStyle,
   }
-  const tooltipStylesSpread: { styles?: TooltipProps['styles'] } = {
+  const tooltipStylesSpread: { styles: NonNullable<TooltipProps['styles']> } = {
     styles: childThemeStyle,
   }
 
@@ -347,6 +348,11 @@ export default function BigCalendar({
   ) => {
     if (newView !== null) {
       setView(newView)
+      emitDiag({
+        type: 'component.state',
+        component: 'BigCalendar',
+        state: newView,
+      })
       onViewChange?.(newView)
     }
   }
@@ -855,7 +861,9 @@ export default function BigCalendar({
   return (
     <div
       className={cssStyles.root}
+      data-component="BigCalendar"
       data-theme={theme}
+      data-state={view}
       style={dynamicRootStyle}
     >
       {showToolbar && (

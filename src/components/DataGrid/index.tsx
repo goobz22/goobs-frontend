@@ -1139,7 +1139,7 @@ function DataGridContent({
         data-grid-status="error"
       >
         <div className={cssStyles.error} role="alert">
-          <div style={{ color: 'inherit' }}>Error: {error.message}</div>
+          <div className={cssStyles.errorMessage}>Error: {error.message}</div>
         </div>
       </div>
     )
@@ -1219,12 +1219,7 @@ function DataGridContent({
           // change) to tighten the inter-accordion gap. Horizontal stays
           // at 0.5rem so the accordion edges keep their original inset
           // from the DataGrid frame.
-          <div
-            style={{
-              padding: '0.25rem 0.5rem',
-              boxSizing: 'border-box',
-            }}
-          >
+          <div className={cssStyles.accordionWrapper}>
             <MetricsAccordion
               metrics={originalMetrics}
               collapsible={metricsCollapsible ?? true}
@@ -1250,12 +1245,7 @@ function DataGridContent({
             The accordion's own margin-bottom is 0 — the wrapper is the
             single source of inter-element vertical rhythm.
             ───────────────────────────────────────────────────────────────── */}
-        <div
-          style={{
-            padding: '0.25rem 0.5rem',
-            boxSizing: 'border-box',
-          }}
-        >
+        <div className={cssStyles.accordionWrapper}>
           <FilterSection
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}

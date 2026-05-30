@@ -2,6 +2,7 @@
 
 import React from 'react'
 import cssStyles from './Breadcrumb.module.css'
+import { emitDiag } from '../../utils/diag'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -81,6 +82,14 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     item: BreadcrumbItem,
     event: React.MouseEvent<HTMLElement>
   ) => {
+    // Additive diagnostics: every crumb click emits a nav.change keyed by the
+    // crumb's destination (href when present, else its label). Ellipsis items
+    // never reach this handler. emitDiag is a no-op without a host bus.
+    emitDiag({
+      type: 'nav.change',
+      component: 'Breadcrumb',
+      to: item.href ?? item.label,
+    })
     if (item.onClick) {
       event.preventDefault()
       item.onClick(event)
@@ -174,6 +183,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     <nav
       aria-label={ariaLabel}
       className={cssStyles.container}
+      data-component="Breadcrumb"
       data-theme={theme}
       style={styles?.container}
     >

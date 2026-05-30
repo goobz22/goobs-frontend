@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import type { ColumnDef, RowData } from '../types'
+import type { ColumnDef, RowData, DataGridStyles } from '../types'
 import Dropdown from '../../Field/Dropdown/Regular'
-import type { DataGridStyles } from '../../../theme'
 import type { FieldStyleOverrides } from '../../Field/Shell/types'
+import cssStyles from '../DataGrid.module.css'
 
 // Settings cog icon
 const SettingsIcon: React.FC<{ color?: string }> = ({
@@ -228,7 +228,9 @@ const PageSizeSelector: React.FC<{
   onPageSizeChange: (newPageSize: number) => void
   styles?: DataGridStyles
 }> = ({ pageSize, onPageSizeChange, styles }) => {
-  const isSacredTheme = styles?.theme === 'sacred'
+  // Container color/font now come from the .pageSizeSelector CSS class (keyed
+  // off the footer's data-theme). The dropdown styles object still feeds the
+  // goobs Dropdown's own CSS-variable overrides — legitimately kept in JS.
   const dropdownStyles = createDropdownStyles(styles)
 
   const pageSizeOptions = [
@@ -238,15 +240,6 @@ const PageSizeSelector: React.FC<{
     { value: 50, label: '50' },
     { value: 100, label: '100' },
   ]
-
-  const containerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    color: isSacredTheme ? 'rgba(255, 215, 0, 0.9)' : 'rgba(55, 65, 81, 1)',
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
-  }
 
   const handlePageSizeChange = (value: string) => {
     const newPageSize = parseInt(value, 10)
@@ -258,9 +251,9 @@ const PageSizeSelector: React.FC<{
   const selectedValue = String(pageSize)
 
   return (
-    <div style={containerStyle}>
-      <span style={{ whiteSpace: 'nowrap' }}>Show:</span>
-      <div style={{ minWidth: '60px' }}>
+    <div className={cssStyles.pageSizeSelector}>
+      <span className={cssStyles.pageSizeSelectorLabel}>Show:</span>
+      <div className={cssStyles.pageSizeSelectorDropdown}>
         <Dropdown
           label=""
           value={selectedValue}
@@ -284,217 +277,96 @@ const TablePagination: React.FC<{
   const totalPages = Math.ceil(rowCount / pageSize)
   const from = rowCount === 0 ? 0 : page * pageSize + 1
   const to = Math.min(rowCount, (page + 1) * pageSize)
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
 
   const handleFirstPage = () => onPageChange(0)
   const handlePreviousPage = () => onPageChange(page - 1)
   const handleNextPage = () => onPageChange(page + 1)
   const handleLastPage = () => onPageChange(totalPages - 1)
 
-  // Enhanced theming for pagination buttons
-  const getButtonStyle = (disabled: boolean) => {
-    const baseStyle = {
-      padding: '8px',
-      borderRadius: '6px',
-      transition: 'all 0.2s ease-in-out',
-      border: 'none',
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '32px',
-      height: '32px',
-      fontSize: '16px',
-    }
-
-    if (disabled) {
-      return {
-        ...baseStyle,
-        backgroundColor: 'transparent',
-        color: isSacredTheme
-          ? 'rgba(255, 215, 0, 0.3)'
-          : isDarkTheme
-            ? 'rgba(156, 163, 175, 0.3)'
-            : 'rgba(107, 114, 128, 0.3)',
-        opacity: 0.5,
-      }
-    }
-
-    if (isSacredTheme) {
-      return {
-        ...baseStyle,
-        backgroundColor: 'rgba(255, 215, 0, 0.1)',
-        color: '#FFD700',
-        border: '1px solid rgba(255, 215, 0, 0.3)',
-        backdropFilter: 'blur(4px)',
-        '&:hover': {
-          backgroundColor: 'rgba(255, 215, 0, 0.2)',
-          borderColor: 'rgba(255, 215, 0, 0.6)',
-          transform: 'translateY(-1px)',
-          boxShadow: '0 4px 8px rgba(255, 215, 0, 0.2)',
-        },
-      }
-    } else if (isDarkTheme) {
-      return {
-        ...baseStyle,
-        backgroundColor: '#334155',
-        color: '#E2E8F0',
-        border: '1px solid #475569',
-        '&:hover': {
-          backgroundColor: '#475569',
-          borderColor: '#64748B',
-          transform: 'translateY(-1px)',
-        },
-      }
-    } else {
-      return {
-        ...baseStyle,
-        backgroundColor: '#F8FAFC',
-        color: '#374151',
-        border: '1px solid #E2E8F0',
-        '&:hover': {
-          backgroundColor: '#F1F5F9',
-          borderColor: '#CBD5E1',
-          transform: 'translateY(-1px)',
-        },
-      }
-    }
-  }
-
-  const paginationContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    flexShrink: 0,
-    flexWrap: 'nowrap' as const,
-  }
-
-  const paginationTextStyle = {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: isSacredTheme
-      ? 'rgba(255, 215, 0, 0.9)'
-      : isDarkTheme
-        ? '#E2E8F0'
-        : '#374151',
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : '"Inter", sans-serif',
-    minWidth: '80px',
-    textAlign: 'center' as const,
-    padding: '0 8px',
-  }
-
-  // Enhanced button component with hover effects
-  const PaginationButton: React.FC<{
+  // Button background/border/color (per theme + disabled) and the hover
+  // lift now live entirely in CSS (.paginationBtn + :hover:not(:disabled)
+  // + :disabled). The hover useState and getButtonStyle/getIconColor
+  // ternaries are gone. Icons inherit the button's color via currentColor.
+  //
+  // Plain render helper (not a component) — stateless now, so invoked directly.
+  // This sidesteps the react-hooks/static-components rule that a capitalized
+  // inline component trips.
+  const renderPaginationButton = ({
+    onClick,
+    disabled,
+    icon,
+    ariaLabel,
+    dataPagination,
+  }: {
     onClick: () => void
     disabled: boolean
-    children: React.ReactNode
-    'aria-label': string
+    icon: React.ReactNode
+    ariaLabel: string
     /**
      * Pagination action identifier emitted as `data-pagination` so
      * Playwright tests can target the four nav buttons stably without
      * matching aria-label or icon SVG. Each value is unique within
      * the footer so `[data-pagination="next"]` is unambiguous.
      */
-    'data-pagination': 'first' | 'prev' | 'next' | 'last'
-  }> = ({
-    onClick,
-    disabled,
-    children,
-    'aria-label': ariaLabel,
-    'data-pagination': dataPagination,
-  }) => {
-    const [isHovered, setIsHovered] = React.useState(false)
-    const buttonStyle = getButtonStyle(disabled)
-
-    return (
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        aria-label={ariaLabel}
-        data-pagination={dataPagination}
-        style={{
-          ...buttonStyle,
-          ...(isHovered &&
-            !disabled && {
-              transform: 'translateY(-1px)',
-              boxShadow: isSacredTheme
-                ? '0 4px 8px rgba(255, 215, 0, 0.2)'
-                : isDarkTheme
-                  ? '0 4px 8px rgba(0, 0, 0, 0.3)'
-                  : '0 4px 8px rgba(0, 0, 0, 0.1)',
-            }),
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {children}
-      </button>
-    )
-  }
-
-  // Get icon color based on theme and disabled state
-  const getIconColor = (disabled: boolean) => {
-    if (disabled) {
-      return isSacredTheme
-        ? 'rgba(255, 215, 0, 0.3)'
-        : isDarkTheme
-          ? 'rgba(156, 163, 175, 0.3)'
-          : 'rgba(107, 114, 128, 0.3)'
-    }
-    return isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151'
-  }
+    dataPagination: 'first' | 'prev' | 'next' | 'last'
+  }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      data-pagination={dataPagination}
+      className={cssStyles.paginationBtn}
+    >
+      {icon}
+    </button>
+  )
 
   return (
-    <div style={paginationContainerStyle}>
+    <div className={cssStyles.paginationBar}>
       <PageSizeSelector
         pageSize={pageSize}
         onPageSizeChange={onPageSizeChange}
         {...(styles && { styles })}
       />
 
-      <PaginationButton
-        onClick={handleFirstPage}
-        disabled={page === 0}
-        aria-label="Go to first page"
-        data-pagination="first"
-      >
-        <ChevronFirstIcon color={getIconColor(page === 0)} />
-      </PaginationButton>
+      {renderPaginationButton({
+        onClick: handleFirstPage,
+        disabled: page === 0,
+        ariaLabel: 'Go to first page',
+        dataPagination: 'first',
+        icon: <ChevronFirstIcon color="currentColor" />,
+      })}
 
-      <PaginationButton
-        onClick={handlePreviousPage}
-        disabled={page === 0}
-        aria-label="Go to previous page"
-        data-pagination="prev"
-      >
-        <ChevronLeftIcon color={getIconColor(page === 0)} />
-      </PaginationButton>
+      {renderPaginationButton({
+        onClick: handlePreviousPage,
+        disabled: page === 0,
+        ariaLabel: 'Go to previous page',
+        dataPagination: 'prev',
+        icon: <ChevronLeftIcon color="currentColor" />,
+      })}
 
       <div
-        style={paginationTextStyle}
+        className={cssStyles.paginationText}
         data-pagination-status={`${from}-${to}-of-${rowCount}`}
       >
         {from}-{to} of {rowCount}
       </div>
 
-      <PaginationButton
-        onClick={handleNextPage}
-        disabled={page >= totalPages - 1}
-        aria-label="Go to next page"
-        data-pagination="next"
-      >
-        <ChevronRightIcon color={getIconColor(page >= totalPages - 1)} />
-      </PaginationButton>
+      {renderPaginationButton({
+        onClick: handleNextPage,
+        disabled: page >= totalPages - 1,
+        ariaLabel: 'Go to next page',
+        dataPagination: 'next',
+        icon: <ChevronRightIcon color="currentColor" />,
+      })}
 
-      <PaginationButton
-        onClick={handleLastPage}
-        disabled={page >= totalPages - 1}
-        aria-label="Go to last page"
-        data-pagination="last"
-      >
-        <ChevronLastIcon color={getIconColor(page >= totalPages - 1)} />
-      </PaginationButton>
+      {renderPaginationButton({
+        onClick: handleLastPage,
+        disabled: page >= totalPages - 1,
+        ariaLabel: 'Go to last page',
+        dataPagination: 'last',
+        icon: <ChevronLastIcon color="currentColor" />,
+      })}
     </div>
   )
 }
@@ -611,8 +483,9 @@ const ExportMenu: React.FC<{
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
   const buttonRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const isSacredTheme = styles?.theme === 'sacred'
-  const isDarkTheme = styles?.theme === 'dark'
+  // The portaled menu lives outside .footerBar, so it carries its own
+  // data-theme to pull the matching CSS custom-property set.
+  const theme = styles?.theme || 'sacred'
 
   // Update menu position when opening
   useEffect(() => {
@@ -649,77 +522,6 @@ const ExportMenu: React.FC<{
     }
   }, [isOpen])
 
-  const getIconColor = () => {
-    return isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151'
-  }
-
-  const cogButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '8px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease-in-out',
-    backgroundColor: isOpen
-      ? isSacredTheme
-        ? 'rgba(255, 215, 0, 0.25)'
-        : isDarkTheme
-          ? '#475569'
-          : '#E2E8F0'
-      : isSacredTheme
-        ? 'rgba(255, 215, 0, 0.15)'
-        : isDarkTheme
-          ? '#334155'
-          : '#F1F5F9',
-    border: isSacredTheme
-      ? '1px solid rgba(255, 215, 0, 0.4)'
-      : isDarkTheme
-        ? '1px solid #475569'
-        : '1px solid #E2E8F0',
-  }
-
-  const dropdownStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: menuPosition.top,
-    left: menuPosition.left,
-    transform: 'translateY(-100%)',
-    minWidth: '160px',
-    backgroundColor: isSacredTheme
-      ? 'rgba(0, 0, 0, 0.95)'
-      : isDarkTheme
-        ? '#1E293B'
-        : '#FFFFFF',
-    border: isSacredTheme
-      ? '1px solid rgba(255, 215, 0, 0.5)'
-      : isDarkTheme
-        ? '1px solid #475569'
-        : '1px solid #E2E8F0',
-    borderRadius: '6px',
-    boxShadow: isSacredTheme
-      ? '0 -4px 12px rgba(255, 215, 0, 0.2)'
-      : '0 -4px 12px rgba(0, 0, 0, 0.15)',
-    zIndex: 9999,
-    overflow: 'hidden',
-  }
-
-  const menuItemStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 14px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '500',
-    color: isSacredTheme ? '#FFD700' : isDarkTheme ? '#E2E8F0' : '#374151',
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : '"Inter", sans-serif',
-    backgroundColor: 'transparent',
-    border: 'none',
-    width: '100%',
-    textAlign: 'left' as const,
-    transition: 'background-color 0.15s ease',
-  }
-
   const handleExportCSV = () => {
     exportToCSV(columns, rows, 'datagrid-export')
     setIsOpen(false)
@@ -730,44 +532,26 @@ const ExportMenu: React.FC<{
     setIsOpen(false)
   }
 
-  // Render dropdown menu via portal
+  // Render dropdown menu via portal. Cog/menu colors, fonts, hover states all
+  // come from CSS (.exportCogBtn, .exportMenu, .exportMenuItem) — the only
+  // genuinely-dynamic JS left is the getBoundingClientRect position, passed as
+  // top/left inline. Icons inherit color via currentColor.
   const renderDropdown = () => {
     if (!isOpen || typeof document === 'undefined') return null
 
     return createPortal(
-      <div ref={menuRef} style={dropdownStyle}>
-        <button
-          onClick={handleExportCSV}
-          style={menuItemStyle}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : isDarkTheme
-                ? '#334155'
-                : '#F3F4F6'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-          }}
-        >
-          <DownloadIcon color={getIconColor()} />
+      <div
+        ref={menuRef}
+        className={cssStyles.exportMenu}
+        data-theme={theme}
+        style={{ top: menuPosition.top, left: menuPosition.left }}
+      >
+        <button onClick={handleExportCSV} className={cssStyles.exportMenuItem}>
+          <DownloadIcon color="currentColor" />
           Export CSV
         </button>
-        <button
-          onClick={handleExportPdf}
-          style={menuItemStyle}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : isDarkTheme
-                ? '#334155'
-                : '#F3F4F6'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-          }}
-        >
-          <PdfIcon color={getIconColor()} />
+        <button onClick={handleExportPdf} className={cssStyles.exportMenuItem}>
+          <PdfIcon color="currentColor" />
           Export PDF
         </button>
       </div>,
@@ -776,33 +560,16 @@ const ExportMenu: React.FC<{
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className={cssStyles.exportMenuWrapper}>
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        style={cogButtonStyle}
+        className={cssStyles.exportCogBtn}
+        data-open={isOpen ? 'true' : 'false'}
         aria-label="Export options"
         title="Export options"
-        onMouseEnter={e => {
-          if (!isOpen) {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.25)'
-              : isDarkTheme
-                ? '#475569'
-                : '#E2E8F0'
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isOpen) {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : isDarkTheme
-                ? '#334155'
-                : '#F1F5F9'
-          }
-        }}
       >
-        <SettingsIcon color={getIconColor()} />
+        <SettingsIcon color="currentColor" />
       </button>
 
       {renderDropdown()}
@@ -821,64 +588,16 @@ function CustomFooter({
   onExportPdf,
   styles,
 }: CustomFooterProps) {
-  const isSacredTheme = styles?.theme === 'sacred'
-
-  const containerStyle = {
-    width: '100%',
-    minWidth: '100%',
-    height: '56px',
-    position: 'sticky' as const,
-    left: 0,
-    boxSizing: 'border-box' as const,
-    ...(isSacredTheme && {
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      borderTop: '2px solid rgba(255, 215, 0, 0.3)',
-      backdropFilter: 'blur(8px)',
-    }),
-  }
-
-  const innerContainerStyle = {
-    display: 'flex',
-    flexWrap: 'nowrap' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-    padding: '0 1rem',
-    overflow: 'hidden',
-    boxSizing: 'border-box' as const,
-  }
-
-  const leftSectionStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-  }
-
-  const centerSectionStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-    justifyContent: 'center',
-    flex: '1',
-    maxWidth: '300px',
-  }
-
-  const rightSectionStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-    marginLeft: 'auto',
-    overflow: 'visible',
-    paddingRight: '1rem',
-    flexShrink: 0,
-  }
+  // Container chrome (sacred bg/border/blur) + section layout are CSS now,
+  // keyed off data-theme. The sacred-only chrome is the base in CSS; light/dark
+  // strip it via [data-theme] overrides — matching the old isSacredTheme spread.
+  const theme = styles?.theme || 'sacred'
 
   return (
-    <div style={containerStyle}>
-      <div style={innerContainerStyle}>
+    <div className={cssStyles.footerBar} data-theme={theme}>
+      <div className={cssStyles.footerInner}>
         {/* Left Section: Export Menu with Settings Cog */}
-        <div style={leftSectionStyle}>
+        <div className={cssStyles.footerLeft}>
           <ExportMenu
             columns={columns}
             rows={rows}
@@ -888,10 +607,10 @@ function CustomFooter({
         </div>
 
         {/* Center Section: Empty */}
-        <div style={centerSectionStyle}></div>
+        <div className={cssStyles.footerCenter}></div>
 
         {/* Right Section: Pagination with Page Size Selector */}
-        <div style={rightSectionStyle}>
+        <div className={cssStyles.footerRight}>
           <TablePagination
             page={page}
             pageSize={pageSize}

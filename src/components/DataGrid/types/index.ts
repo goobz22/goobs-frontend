@@ -51,7 +51,212 @@ import type { ButtonProps } from '../../Button'
 import type { DropdownProps } from '../../Field/Dropdown/Regular'
 import type { SearchbarProps } from '../../Field/Search'
 import type { DropdownOption } from '../../Field/Dropdown/SearchableSimple'
-import type { DataGridStyles } from '../../../theme'
+
+/**
+ * =============================================================================
+ * DATAGRID STYLE TYPES (relocated from the old JS theme system)
+ * =============================================================================
+ *
+ * These interfaces used to live in `src/theme/datagrid.ts` alongside the
+ * `getDataGridStyles()` / `getDataGridTheme()` JS style generators. Visual
+ * styling now lives entirely in `DataGrid.module.css` (data-theme attribute +
+ * CSS custom properties), so the JS generators are gone — only the prop-shape
+ * contract callers rely on (`DataGridStyles`) remains. It now lives here, next
+ * to the component that owns it, so no DataGrid source has to reach back into
+ * `theme/`. The theme file keeps its own copies until the teardown phase
+ * verifies zero remaining importers and deletes them.
+ */
+
+/**
+ * Internal theme shape describing every styleable region of the grid. Retained
+ * as a type for any consumer that historically imported it; the actual values
+ * are now expressed as CSS custom properties in `DataGrid.module.css`.
+ */
+export interface DataGridTheme {
+  container: {
+    position: string
+    display: string
+    flexDirection: string
+    width: string
+    backgroundColor: string
+    backdropFilter?: string
+    border?: string
+    borderRadius?: string
+    animation?: string
+    padding?: string
+  }
+  contentWrapper: {
+    display: string
+    flexDirection: string
+    width: string
+    backgroundColor: string
+    borderRadius: string
+    border: string
+    overflow: string
+    boxShadow: string
+  }
+  error: {
+    marginBottom: string
+    padding: string
+    borderWidth: string
+    borderRadius: string
+    backgroundColor: string
+    color: string
+    borderColor: string
+  }
+  tableContainer: {
+    width: string
+    display: string
+    flexDirection: string
+    alignItems: string
+    position: string
+    margin: string
+    padding: string
+  }
+  table: {
+    tableContainer: {
+      width: string
+      overflowX: string
+      minWidth?: string
+      borderRadius?: string
+      overflow?: string
+      border?: string
+      backgroundColor?: string
+    }
+    tableWrapper: {
+      overflowX: string
+      width: string
+      minWidth?: string
+    }
+    table: {
+      width: string
+      minWidth: string
+      tableLayout: string
+      backgroundColor?: string
+      border?: string
+      borderCollapse?: string
+    }
+    tableHeader: {
+      backgroundColor: string
+      borderBottom: string
+      color: string
+      fontWeight: string
+    }
+    tableRow: {
+      borderBottom: string
+      backgroundColor?: string
+    }
+    tableRowAlternate: {
+      backgroundColor: string
+    }
+    tableRowHover: {
+      backgroundColor: string
+    }
+    tableCell: {
+      padding: string
+      borderRight?: string
+      borderBottom?: string
+      verticalAlign: string
+      color: string
+    }
+    tableHeaderCell: {
+      padding: string
+      borderRight?: string
+      borderBottom?: string
+      verticalAlign: string
+      fontWeight: string
+      textAlign: string
+      color: string
+    }
+  }
+  scrollbar: {
+    height: string
+    width: string
+    track: {
+      backgroundColor: string
+      borderRadius: string
+    }
+    thumb: {
+      backgroundColor: string
+      borderRadius: string
+      border?: string
+    }
+    thumbHover: {
+      backgroundColor: string
+    }
+  }
+  sectionDivider: {
+    height: string
+    backgroundColor: string
+    opacity: number
+  }
+  footerContainer: {
+    display: string
+    justifyContent: string
+    gap: string
+    marginTop: string
+    opacity: number
+  }
+  footerGlyph: {
+    color: string
+    fontSize: string
+    animation: string
+  }
+  glyph: {
+    position: string
+    fontSize: string
+    color: string
+    zIndex: number
+    animation: string
+  }
+  transition: string
+}
+
+/**
+ * Caller-supplied styling options for the DataGrid. The only field the CSS
+ * module consumes directly is `theme` (mapped onto the root `data-theme`
+ * attribute); the remaining fields are caller overrides applied as inline
+ * dynamic styles / CSS custom properties where still wired.
+ */
+export interface DataGridStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  backdropFilter?: string
+  animation?: string
+
+  // Content wrapper styling
+  contentBackgroundColor?: string
+  contentBorderColor?: string
+  contentBorderRadius?: string
+  contentBoxShadow?: string
+
+  // Error states
+  errorBackgroundColor?: string
+  errorColor?: string
+  errorBorderColor?: string
+
+  // Layout
+  width?: string
+  height?: string
+  maxWidth?: string
+  minWidth?: string
+  maxHeight?: string
+  minHeight?: string
+
+  // Spacing
+  padding?: string
+  margin?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+}
 
 /**
  * FIELD TYPES

@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/Toolbars/Editor/index.tsx
 
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Dropdown from '../../../Field/Dropdown/Regular'
 import CustomButton from '../../../Button'
 import {
@@ -9,7 +9,8 @@ import {
   handleItalicClick as markdownItalicClick,
   replaceSelectedText,
 } from '../../utils/useMarkdownEditor'
-import { black, grey, type ComplexTextEditorStyles } from '../../../../theme/'
+import type { ComplexTextEditorStyles } from '../../theme'
+import cssStyles from '../../ComplexTextEditor.module.css'
 
 import LinkIcon from '../../../Icons/Link'
 import UndoIcon from '../../../Icons/Undo'
@@ -24,6 +25,13 @@ import StrikethroughSIcon from '../../../Icons/StrikethroughS'
 import CodeIcon from '../../../Icons/Code'
 import FormatListNumberedIcon from '../../../Icons/FormatListNumbered'
 import FormatListBulletedIcon from '../../../Icons/FormatListBulleted'
+
+// Inlined from the goobs palette (theme/index.ts) so this toolbar no longer
+// imports from src/theme. These drive the active-button `styles` prop fed to
+// the goobs Button component — a runtime value computed from
+// document.queryCommandState, so it legitimately stays in JS.
+const BLACK_MAIN = '#000000' // black.main
+const GREY_DARK = '#BDBDBD' // grey.dark
 
 // --------------------------------------------------------------------------
 // TOOLBAR COMPONENT INTERFACE
@@ -52,118 +60,21 @@ interface ToolbarMarkdownProps {
   setMarkdown: (value: string) => void
   toolbarType?: 'markdown' | 'richtext' | 'rich'
   styles?: ComplexTextEditorStyles
+  /**
+   * Caller-override CSS-variable object (--ct-toolbar-bg / --ct-toolbar-padding
+   * / --ct-toolbar-gap) applied inline on the toolbar wrapper so
+   * toolbarBackground / toolbarPadding / toolbarGap are honored as in the old
+   * getComplexTextEditorTheme toolbar branch.
+   */
+  wrapperStyle?: React.CSSProperties
 }
 
 // --------------------------------------------------------------------------
-// STYLE CONFIGURATIONS
+// STYLE CONFIGURATIONS — layout containers migrated to ComplexTextEditor.module.css
+// (.toolbarContainer / .toolbarRow / .primaryRow / .dropdownRow / .buttonGroup /
+// .toolbarDropdown). The sacred translucent backdrop is the
+// .toolbarContainer[data-theme='sacred'] override.
 // --------------------------------------------------------------------------
-
-// Premium theme styles (when theme is light/dark)
-const premiumStyles = {
-  container: {
-    padding: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  } as React.CSSProperties,
-
-  toolbarRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  primaryRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  dropdownRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  buttonGroup: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-  } as React.CSSProperties,
-
-  buttonsContainer: {
-    display: 'flex',
-    gap: '2px',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  } as React.CSSProperties,
-
-  dropdown: {
-    minWidth: '120px',
-    maxWidth: '160px',
-    flex: '1 1 120px',
-  } as React.CSSProperties,
-}
-
-// Sacred theme styles (when theme is sacred)
-const sacredStyles = {
-  container: {
-    padding: '8px',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  } as React.CSSProperties,
-
-  toolbarRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  primaryRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  dropdownRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  } as React.CSSProperties,
-
-  buttonGroup: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-  } as React.CSSProperties,
-
-  buttonsContainer: {
-    display: 'flex',
-    gap: '2px',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  } as React.CSSProperties,
-
-  dropdown: {
-    minWidth: '120px',
-    maxWidth: '160px',
-    flex: '1 1 120px',
-  } as React.CSSProperties,
-}
 
 const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   editor,
@@ -184,34 +95,12 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   setMarkdown,
   toolbarType = 'richtext',
   styles,
+  wrapperStyle,
 }) => {
   const [alignValue, setAlignValue] = useState<AlignmentFormat>('left')
   const [textType, setTextType] = useState<TextType>('paragraph')
 
   const isSacredTheme = styles?.theme === 'sacred'
-
-  // CSS keyframes for sacred animations
-  useEffect(() => {
-    if (isSacredTheme) {
-      const styleSheet =
-        typeof document !== 'undefined' && document.styleSheets?.length
-          ? document.styleSheets[0]
-          : undefined
-      const keyframes = `
-        @keyframes toolbarIconGlow {
-          0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); }
-          50% { filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8)); }
-        }
-      `
-      if (styleSheet) {
-        try {
-          styleSheet.insertRule(keyframes, styleSheet.cssRules.length)
-        } catch {
-          // Keyframes might already exist
-        }
-      }
-    }
-  }, [isSacredTheme])
 
   // Display additional tool options based on toolbar type
   const showExtendedOptions = toolbarType === 'richtext' && !markdownMode
@@ -475,7 +364,9 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     }
   }
 
-  const containerStyles = isSacredTheme ? sacredStyles : premiumStyles
+  // Layout containers are CSS classes; the sacred backdrop is a
+  // [data-theme='sacred'] override on .toolbarContainer.
+  const toolbarTheme = styles?.theme || 'light'
 
   // Create button styles for the unified theme system
   const getButtonStyles = (format: string) => {
@@ -491,10 +382,10 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
       color: isActive
         ? isSacredTheme
           ? '#FFD700'
-          : grey.dark
+          : GREY_DARK
         : isSacredTheme
           ? 'rgba(255, 215, 0, 0.8)'
-          : black.main,
+          : BLACK_MAIN,
       borderRadius: '2px',
       minWidth: '36px',
       width: '36px',
@@ -505,11 +396,15 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   }
 
   return (
-    <div style={containerStyles.container}>
+    <div
+      className={cssStyles.toolbarContainer}
+      data-theme={toolbarTheme}
+      {...(wrapperStyle && { style: wrapperStyle })}
+    >
       {/* Row 1: Primary Actions - Undo/Redo + Essential Formatting */}
-      <div style={containerStyles.primaryRow}>
+      <div className={cssStyles.primaryRow}>
         {/* undo / redo */}
-        <div style={containerStyles.buttonGroup}>
+        <div className={cssStyles.buttonGroup}>
           <CustomButton
             icon={
               <UndoIcon
@@ -533,7 +428,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
         </div>
 
         {/* Essential formatting buttons */}
-        <div style={containerStyles.buttonGroup}>
+        <div className={cssStyles.buttonGroup}>
           <CustomButton
             icon={
               <FormatBoldIcon
@@ -567,8 +462,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
 
       {/* Row 2: Dropdowns - Text Type & Alignment (only in rich text mode) */}
       {showExtendedOptions && (
-        <div style={containerStyles.dropdownRow}>
-          <div style={containerStyles.dropdown}>
+        <div className={cssStyles.dropdownRow}>
+          <div className={cssStyles.toolbarDropdown}>
             <Dropdown
               label="Text Type"
               options={textTypeOptions}
@@ -577,7 +472,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
               styles={{ theme: styles?.theme || 'light' }}
             />
           </div>
-          <div style={containerStyles.dropdown}>
+          <div className={cssStyles.toolbarDropdown}>
             <Dropdown
               label="Alignment"
               options={alignmentOptions}
@@ -590,8 +485,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
       )}
 
       {/* Row 3: Secondary Formatting & Structure */}
-      <div style={containerStyles.toolbarRow}>
-        <div style={containerStyles.buttonGroup}>
+      <div className={cssStyles.toolbarRow}>
+        <div className={cssStyles.buttonGroup}>
           <CustomButton
             icon={
               <StrikethroughSIcon
@@ -621,7 +516,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           />
         </div>
 
-        <div style={containerStyles.buttonGroup}>
+        <div className={cssStyles.buttonGroup}>
           <CustomButton
             icon={
               <FormatListNumberedIcon

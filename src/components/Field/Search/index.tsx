@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
-import { alpha } from '../../../utils'
+import cssStyles from './Search.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
-
-const SACRED_GOLD = '#FFD700'
 
 export interface SearchbarProps {
   label?: string
@@ -91,52 +89,57 @@ const Searchbar: React.FC<SearchbarProps> = ({
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  // Inner-wrapper visual styling (icon + input border) is local to
-  // Searchbar — FieldShell handles the outer wrapper, label, and
-  // helper region. We still keep the gold-bordered look here so
-  // existing consumers don't see a visual diff.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: styles?.height || '40px',
-    width: '100%',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`,
-    borderRadius: styles?.borderRadius || '8px',
-    transition: 'all 0.3s ease',
-    boxSizing: 'border-box',
+  // Inner frame (icon + input border) lives in Search.module.css — the
+  // sacred-gold border is the hardcoded default. Caller-supplied overrides
+  // (height/borderWidth/radius/padding/font/colors) are forwarded as CSS
+  // custom properties; the disabled chrome is driven by the .disabled
+  // modifier on the wrapper. The leading SVG uses fill: currentColor so it
+  // inherits the icon container's color.
+  const adornmentColor = styles?.adornmentColor
+  const wrapperCssVars: Record<string, string> = {}
+  if (styles?.height) wrapperCssVars['--search-height'] = styles.height
+  if (styles?.borderWidth) {
+    wrapperCssVars['--search-border-width'] = styles.borderWidth
+  }
+  if (styles?.borderRadius) {
+    wrapperCssVars['--search-radius'] = styles.borderRadius
+  }
+  if (adornmentColor) {
+    wrapperCssVars['--search-adornment-color'] = adornmentColor
+  }
+  if (styles?.paddingLeft) {
+    wrapperCssVars['--search-padding-left'] = styles.paddingLeft
+  }
+  if (styles?.paddingRight) {
+    wrapperCssVars['--search-padding-right'] = styles.paddingRight
+  }
+  if (styles?.paddingTop) {
+    wrapperCssVars['--search-padding-top'] = styles.paddingTop
+  }
+  if (styles?.paddingBottom) {
+    wrapperCssVars['--search-padding-bottom'] = styles.paddingBottom
+  }
+  if (styles?.fontSize) wrapperCssVars['--search-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined) {
+    wrapperCssVars['--search-font-weight'] = String(styles.fontWeight)
+  }
+  if (styles?.lineHeight) {
+    wrapperCssVars['--search-line-height'] = styles.lineHeight
+  }
+  if (styles?.fontFamily) {
+    wrapperCssVars['--search-font-family'] = styles.fontFamily
+  }
+  const textColorOverride = styles?.textColor || styles?.color
+  if (textColorOverride) {
+    wrapperCssVars['--search-text-color'] = textColorOverride
   }
 
-  const searchIconStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    color: styles?.adornmentColor || SACRED_GOLD,
-    pointerEvents: 'none',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    paddingLeft: styles?.paddingLeft || '48px',
-    paddingRight: styles?.paddingRight || '16px',
-    paddingTop: styles?.paddingTop || '8px',
-    paddingBottom: styles?.paddingBottom || '8px',
-    fontSize: styles?.fontSize || '16px',
-    fontWeight: styles?.fontWeight,
-    lineHeight: styles?.lineHeight,
-    fontFamily: styles?.fontFamily || '"Crimson Text", serif',
-    color:
-      styles?.textColor ||
-      styles?.color ||
-      (disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)'),
-    boxSizing: 'border-box',
-  }
+  const wrapperClassNames = [
+    cssStyles.inputWrapper,
+    disabled && cssStyles.disabled,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <FieldShell
@@ -152,14 +155,17 @@ const Searchbar: React.FC<SearchbarProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
-          <div style={searchIconStyle}>
+        <div
+          className={wrapperClassNames}
+          style={wrapperCssVars as React.CSSProperties}
+        >
+          <div className={cssStyles.searchIcon}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="20"
               viewBox="0 0 24 24"
               width="20"
-              fill={styles?.adornmentColor || SACRED_GOLD}
+              fill="currentColor"
             >
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
@@ -178,7 +184,7 @@ const Searchbar: React.FC<SearchbarProps> = ({
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
         </div>

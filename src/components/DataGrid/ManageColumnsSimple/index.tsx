@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import type { ColumnDef } from '../types'
-import type { DataGridStyles } from '../../../theme'
+import type { ColumnDef, DataGridStyles } from '../types'
 import Checkbox from '../../Checkbox'
+import cssStyles from '../DataGrid.module.css'
 
 interface ManageColumnsSimpleProps {
   open: boolean
@@ -25,6 +25,10 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
   styles,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
+  // Modal chrome / colors / fonts are CSS now, keyed off data-theme; the
+  // original only branched on sacred vs. not, so any non-sacred theme maps to
+  // the light look. isSacredTheme is still used for the Checkbox theme prop.
+  const theme = styles?.theme || 'light'
 
   if (!open) return null
 
@@ -52,73 +56,14 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
     return !isVisible || visibleColumnCount > 1
   }
 
-  const overlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  }
-
-  const modalStyle: React.CSSProperties = {
-    backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.95)' : 'white',
-    borderRadius: '12px',
-    padding: '24px',
-    minWidth: '400px',
-    maxWidth: '500px',
-    maxHeight: '80vh',
-    overflow: 'auto',
-    border: isSacredTheme ? '2px solid #FFD700' : '1px solid #E5E7EB',
-    boxShadow: isSacredTheme
-      ? '0 20px 40px rgba(255, 215, 0, 0.3)'
-      : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-  }
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    color: isSacredTheme ? '#FFD700' : '#1F2937',
-    textAlign: 'center',
-    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'inherit',
-  }
-
-  const columnItemStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 0',
-    borderBottom: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.2)' : '#F3F4F6'}`,
-  }
-
-  const columnNameStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: isSacredTheme ? '#FBBF24' : '#374151',
-    fontFamily: isSacredTheme ? 'Cinzel, serif' : 'inherit',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: '8px 16px',
-    borderRadius: '6px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    backgroundColor: isSacredTheme ? 'rgba(255, 215, 0, 0.1)' : '#F3F4F6',
-    color: isSacredTheme ? '#FFD700' : '#374151',
-    marginTop: '20px',
-    width: '100%',
-  }
-
   return (
-    <div style={overlayStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={e => e.stopPropagation()}>
-        <h3 style={titleStyle}>{'Manage Columns'}</h3>
+    <div className={cssStyles.manageColumnsOverlay} onClick={onClose}>
+      <div
+        className={cssStyles.manageColumnsModal}
+        data-theme={theme}
+        onClick={e => e.stopPropagation()}
+      >
+        <h3 className={cssStyles.manageColumnsTitle}>{'Manage Columns'}</h3>
 
         <div>
           {columns.map(column => {
@@ -126,24 +71,14 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
             const canHide = canHideColumn(column.field)
             const isLastVisible = isVisible && visibleColumnCount === 1
             return (
-              <div key={column.field} style={columnItemStyle}>
+              <div key={column.field} className={cssStyles.manageColumnsItem}>
                 <span
-                  style={{
-                    ...columnNameStyle,
-                    ...(isLastVisible && { opacity: 0.6 }),
-                  }}
+                  className={cssStyles.manageColumnsName}
+                  data-last-visible={isLastVisible ? 'true' : undefined}
                 >
                   {column.headerName || column.field}
                   {isLastVisible && (
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        marginLeft: '8px',
-                        color: isSacredTheme
-                          ? 'rgba(255, 215, 0, 0.5)'
-                          : '#9CA3AF',
-                      }}
-                    >
+                    <span className={cssStyles.manageColumnsRequired}>
                       (required)
                     </span>
                   )}
@@ -163,20 +98,7 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
           })}
         </div>
 
-        <button
-          onClick={onClose}
-          style={buttonStyle}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.2)'
-              : '#E5E7EB'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = isSacredTheme
-              ? 'rgba(255, 215, 0, 0.1)'
-              : '#F3F4F6'
-          }}
-        >
+        <button onClick={onClose} className={cssStyles.manageColumnsDoneBtn}>
           Done
         </button>
       </div>

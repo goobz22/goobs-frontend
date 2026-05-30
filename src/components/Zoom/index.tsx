@@ -118,6 +118,7 @@ const Zoom = forwardRef<HTMLDivElement, ZoomProps>(
       <div
         ref={ref}
         className={cssStyles.zoomRoot}
+        data-component="Zoom"
         data-theme={theme}
         data-state={isVisible ? 'visible' : 'hidden'}
         data-disabled={isDisabled ? 'true' : undefined}

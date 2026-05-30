@@ -61,6 +61,7 @@ export const List: React.FC<ListProps> = ({ children, styles }) => {
     <ul
       className={cssStyles.container}
       data-theme={theme}
+      data-component="List"
       {...(styles?.dense && { 'data-dense': 'true' })}
       {...(styles?.customStyles?.container && {
         style: styles.customStyles.container,

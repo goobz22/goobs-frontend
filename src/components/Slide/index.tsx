@@ -92,6 +92,7 @@ const Slide = forwardRef<HTMLDivElement, SlideProps>(
         ref={ref}
         {...restProps}
         className={className}
+        data-component="Slide"
         data-theme={theme}
         data-direction={direction}
         {...(isDisabled && { 'data-disabled': 'true' })}

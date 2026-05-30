@@ -1,5 +1,6 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
+import cssStyles from './AccountNumber.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -188,47 +189,9 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   const sacredTheme = styles?.theme === 'sacred'
   const finalPlaceholder = sacredTheme ? '1234567890' : placeholder
 
-  // Inline-style chrome for the input wrapper / adornment / input. The
-  // theme/border colors come from the FieldShell CSS variables; only
-  // size + layout details are inline here.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: '40px',
-    width: '100%',
-    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
-    borderRadius: '8px',
-    backgroundColor: 'var(--field-bg, transparent)',
-    color: 'var(--field-text, inherit)',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: '8px 16px',
-    paddingLeft: '40px',
-    paddingRight: '16px',
-    fontSize: '16px',
-    color: 'inherit',
-    boxSizing: 'border-box',
-  }
-
-  const adornmentStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    left: '16px',
-    color: 'var(--field-text, inherit)',
-    pointerEvents: 'none',
-    fontSize: '16px',
-  }
+  // Input wrapper / adornment / input chrome lives in
+  // AccountNumber.module.css. The theme/border/text colors fall back to the
+  // FieldShell CSS variables.
 
   return (
     <FieldShell
@@ -244,8 +207,8 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
-          <div style={adornmentStyle}>
+        <div className={cssStyles.inputWrapper}>
+          <div className={cssStyles.adornment}>
             <span>#</span>
           </div>
           <input
@@ -261,7 +224,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
             placeholder={finalPlaceholder}
             maxLength={maxLength + 5}
             data-field-name={dataFieldName}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
         </div>

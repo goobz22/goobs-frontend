@@ -1,5 +1,6 @@
 'use client'
 import React, { useCallback, useState, useEffect, useRef } from 'react'
+import cssStyles from './RoutingNumber.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -183,45 +184,9 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   const sacredTheme = styles?.theme === 'sacred'
   const finalPlaceholder = sacredTheme ? '021000021' : placeholder
 
-  // Inline-style chrome — see AccountNumber for the same pattern.
-  const inputWrapperStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: '40px',
-    width: '100%',
-    border: '1px solid var(--field-border-default, hsl(0,0%,20%))',
-    borderRadius: '8px',
-    backgroundColor: 'var(--field-bg, transparent)',
-    color: 'var(--field-text, inherit)',
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    outline: 'none',
-    border: 'none',
-    padding: '8px 16px',
-    paddingLeft: '48px',
-    paddingRight: '16px',
-    fontSize: '16px',
-    color: 'inherit',
-    boxSizing: 'border-box',
-  }
-
-  const adornmentStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    left: '16px',
-    color: 'var(--field-text, inherit)',
-    pointerEvents: 'none',
-    fontSize: '16px',
-  }
+  // Input wrapper / adornment / input chrome lives in
+  // RoutingNumber.module.css (same shape as AccountNumber). Colors fall
+  // back to FieldShell vars.
 
   return (
     <FieldShell
@@ -237,8 +202,10 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => (
-        <div style={inputWrapperStyle}>
-          <div style={adornmentStyle}>{sacredTheme && <span>⚡</span>}</div>
+        <div className={cssStyles.inputWrapper}>
+          <div className={cssStyles.adornment}>
+            {sacredTheme && <span>⚡</span>}
+          </div>
           <input
             ref={inputRef}
             type="text"
@@ -252,7 +219,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
             placeholder={finalPlaceholder}
             maxLength={9}
             data-field-name={dataFieldName}
-            style={inputStyle}
+            className={cssStyles.input}
             {...inputAriaProps}
           />
         </div>

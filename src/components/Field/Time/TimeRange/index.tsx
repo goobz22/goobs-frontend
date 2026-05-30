@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
+import cssStyles from './TimeRange.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -118,32 +119,18 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
     }
   }, [onChange, value])
 
-  // Inline input styles preserved from the legacy sacred-gold theme
-  // until the inputs migrate to a CSS module. FieldShell still owns
-  // label/helper rendering.
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '12px 16px',
-    backgroundColor: disabled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.6)',
-    border: '1px solid rgba(255, 215, 0, 0.3)',
-    borderRadius: '8px',
-    color: disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
-    fontFamily: '"Crimson Text", serif',
-    fontSize: '16px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-    colorScheme: 'dark' as const,
-  }
+  // Inner input styling lives in TimeRange.module.css. The sacred-gold
+  // theme is the hardcoded default; the disabled chrome is driven by the
+  // native `:disabled` pseudo-class (no JS `disabled ? … : …` ternaries).
+  // FieldShell still owns label/helper rendering.
 
   // Two FieldShells side-by-side share the start/end labels. Only the
   // start shell carries `error` + `helperText` so the helper region
   // renders once below the pair.
   return (
     <div data-field={dataField} data-field-name={dataFieldName ?? name}>
-      <div style={{ display: 'flex', gap: '16px' }}>
-        <div style={{ flex: 1 }}>
+      <div className={cssStyles.fieldsWrapper}>
+        <div className={cssStyles.fieldContainer}>
           <FieldShell
             label={startLabel}
             helperText={helperText}
@@ -159,18 +146,18 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
                 ref={startInputRef}
                 id={inputId}
                 type="time"
+                className={cssStyles.input}
                 value={formatTimeForInput(value?.start || null)}
                 onChange={handleStartChange}
                 disabled={disabled}
                 required={required}
-                style={inputStyle}
                 {...inputAriaProps}
               />
             )}
           </FieldShell>
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div className={cssStyles.fieldContainer}>
           <FieldShell
             label={endLabel}
             disabled={disabled}
@@ -182,11 +169,11 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
                 ref={endInputRef}
                 id={inputId}
                 type="time"
+                className={cssStyles.input}
                 value={formatTimeForInput(value?.end || null)}
                 onChange={handleEndChange}
                 disabled={disabled}
                 required={required}
-                style={inputStyle}
                 {...inputAriaProps}
               />
             )}
