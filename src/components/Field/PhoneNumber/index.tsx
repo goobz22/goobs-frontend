@@ -198,7 +198,10 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     wrapperCssVars['--phone-font-family'] = styles.fontFamily
   }
 
-  const wrapperClassNames = [cssStyles.inputWrapper, disabled && cssStyles.disabled]
+  const wrapperClassNames = [
+    cssStyles.inputWrapper,
+    disabled && cssStyles.disabled,
+  ]
     .filter(Boolean)
     .join(' ')
 

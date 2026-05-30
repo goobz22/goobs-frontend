@@ -256,7 +256,9 @@ const Dialog: React.FC<DialogProps> = ({
   }
 
   const dialogStyle: CSSProperties = {
-    ['--dialog-max-width' as string]: styles?.fullWidth ? '100%' : getMaxWidth(),
+    ['--dialog-max-width' as string]: styles?.fullWidth
+      ? '100%'
+      : getMaxWidth(),
     ['--dialog-width' as string]: styles?.fullWidth
       ? '100%'
       : styles?.width || '100%',

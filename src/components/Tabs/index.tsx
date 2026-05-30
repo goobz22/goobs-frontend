@@ -270,7 +270,8 @@ const Tabs: React.FC<TabsProps> = ({
             // exactOptionalPropertyTypes requires omitting undefined
             // values rather than passing `undefined` explicitly.
             {...(tab.subject !== undefined && { subject: tab.subject })}
-            {...(tab.icon !== undefined && tab.icon !== null && { icon: tab.icon })}
+            {...(tab.icon !== undefined &&
+              tab.icon !== null && { icon: tab.icon })}
             buttonRef={el => {
               tabRefs.current[index] = el
             }}

@@ -71,7 +71,10 @@ function getFieldSchema(schema: unknown, name: string): unknown {
  *   2. `safeParse(undefined).success` as an optional-detection fallback —
  *      a schema that accepts `undefined` is treated as not-required.
  */
-export function deriveRequiredFromSchema(schema: unknown, name: string): boolean {
+export function deriveRequiredFromSchema(
+  schema: unknown,
+  name: string
+): boolean {
   try {
     const fieldSchema = getFieldSchema(schema, name) as ZodFieldLike | undefined
     if (!fieldSchema) return false
@@ -126,7 +129,7 @@ export function humanize(key: string): string {
     .trim()
   return withSpaces
     .split(/\s+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }
 

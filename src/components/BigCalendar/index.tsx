@@ -333,9 +333,10 @@ export default function BigCalendar({
       : {}),
   }
 
-  const buttonStylesProp: { styles: NonNullable<ToggleButtonProps['styles']> } = {
-    styles: childThemeStyle,
-  }
+  const buttonStylesProp: { styles: NonNullable<ToggleButtonProps['styles']> } =
+    {
+      styles: childThemeStyle,
+    }
   const tooltipStylesSpread: { styles: NonNullable<TooltipProps['styles']> } = {
     styles: childThemeStyle,
   }
@@ -549,7 +550,9 @@ export default function BigCalendar({
                   isToday ? cssStyles.cellToday : undefined,
                   isSelected ? cssStyles.cellSelected : undefined
                 )}
-                style={{ ['--bc-min-cell-height' as string]: `${minCellHeight}px` }}
+                style={{
+                  ['--bc-min-cell-height' as string]: `${minCellHeight}px`,
+                }}
                 onClick={() => {
                   toggleDateSelection(day)
                   onCellClick?.(day)

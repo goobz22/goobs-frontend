@@ -210,10 +210,7 @@ const Stepper: React.FC<StepperProps> = ({
               data-orientation={orientation}
             >
               <div className={cssStyles.stepContent}>
-                <div
-                  className={cssStyles.iconContainer}
-                  data-status={status}
-                >
+                <div className={cssStyles.iconContainer} data-status={status}>
                   {getStepIcon(status, step)}
                 </div>
 

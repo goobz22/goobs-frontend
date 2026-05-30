@@ -36,7 +36,12 @@ interface ZodSchemaLike {
 
 interface ZodSafeParseResult {
   success: boolean
-  error?: { issues?: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }> }
+  error?: {
+    issues?: ReadonlyArray<{
+      path: ReadonlyArray<PropertyKey>
+      message: string
+    }>
+  }
 }
 
 export interface UseZodFormEngineArgs<TValues extends Record<string, unknown>> {
@@ -59,7 +64,7 @@ function flattenIssues(result: ZodSafeParseResult): Record<string, string> {
   const issues = result.error?.issues
   if (!issues) return errors
   for (const issue of issues) {
-    const path = issue.path.map((segment) => String(segment)).join('.')
+    const path = issue.path.map(segment => String(segment)).join('.')
     // First message per path wins — later issues for the same path are ignored.
     if (errors[path] === undefined) {
       errors[path] = issue.message
@@ -103,7 +108,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
 
   const setValue = useCallback(
     (name: string, value: unknown): void => {
-      setValues((previous) => {
+      setValues(previous => {
         const next = cloneDeep(previous)
         set(next as Record<string, unknown>, name, value)
         // Re-validate the whole form so cross-field rules update too.
@@ -126,7 +131,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
   )
 
   const setTouched = useCallback((name: string, isTouched: boolean): void => {
-    setTouchedState((previous) => ({ ...previous, [name]: isTouched }))
+    setTouchedState(previous => ({ ...previous, [name]: isTouched }))
   }, [])
 
   const handleSubmit = useCallback(
@@ -137,7 +142,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
       // Mark every schema field touched so errors surface on submit even for
       // fields the user never focused.
       const keys = schemaKeys(schema)
-      setTouchedState((previous) => {
+      setTouchedState(previous => {
         const next = { ...previous }
         for (const key of keys) next[key] = true
         return next

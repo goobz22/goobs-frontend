@@ -63,11 +63,14 @@ const Select: React.FC<SelectProps> = ({
   // string-typed) — they are invoked from the native handlers below, where the
   // real event is available, preserving behavior.
   const formContext = useOptionalFormContext()
-  const { value: boundValue, onChange: boundOnChange, onBlur: boundOnBlur } =
-    useFieldBinding<string>({
-      name,
-      value: valueProp as string | undefined,
-    })
+  const {
+    value: boundValue,
+    onChange: boundOnChange,
+    onBlur: boundOnBlur,
+  } = useFieldBinding<string>({
+    name,
+    value: valueProp as string | undefined,
+  })
 
   const handleNativeChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {

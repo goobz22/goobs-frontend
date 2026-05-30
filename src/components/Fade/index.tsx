@@ -83,7 +83,8 @@ const Fade = forwardRef<HTMLDivElement, FadeProps>(
       customProperties['--fade-duration'] = duration
     }
     if (styles?.transitionTimingFunction !== undefined) {
-      customProperties['--fade-timing-function'] = styles.transitionTimingFunction
+      customProperties['--fade-timing-function'] =
+        styles.transitionTimingFunction
     }
     if (styles?.transitionDelay !== undefined) {
       customProperties['--fade-delay'] = styles.transitionDelay

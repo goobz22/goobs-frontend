@@ -741,7 +741,11 @@
   gap: 8px;
   padding: clamp(28px, 6vw, 48px) clamp(20px, 4vw, 32px);
   text-align: center;
-  background-color: color-mix(in srgb, var(--card-bg, transparent) 60%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--card-bg, transparent) 60%,
+    transparent
+  );
   border: 1px dashed color-mix(in srgb, var(--card-accent) 30%, transparent);
   border-radius: var(--card-radius, 8px);
   color: var(--card-text);

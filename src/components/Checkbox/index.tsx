@@ -214,14 +214,12 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   // `checked`, this is a pass-through and the control behaves byte-for-byte as
   // before (the gate lives in useFieldBinding).
   const fieldName = typeof rest.name === 'string' ? rest.name : undefined
-  const {
-    value: boundChecked,
-    onChange: boundOnChange,
-  } = useFieldBinding<boolean>({
-    name: fieldName,
-    value: controlledChecked,
-    onChange,
-  })
+  const { value: boundChecked, onChange: boundOnChange } =
+    useFieldBinding<boolean>({
+      name: fieldName,
+      value: controlledChecked,
+      onChange,
+    })
 
   // Use React's useId for stable IDs across server and client
   const generatedId = useId()
@@ -317,14 +315,18 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         <div
           className={cssStyles.box}
           {...(checkedAttr && { 'data-checked': checkedAttr })}
-          {...(indeterminateAttr && { 'data-indeterminate': indeterminateAttr })}
+          {...(indeterminateAttr && {
+            'data-indeterminate': indeterminateAttr,
+          })}
           {...(disabledAttr && { 'data-disabled': disabledAttr })}
           {...(noOutlineAttr && { 'data-no-outline': noOutlineAttr })}
         ></div>
         <div
           className={cssStyles.icon}
           {...(checkedAttr && { 'data-checked': checkedAttr })}
-          {...(indeterminateAttr && { 'data-indeterminate': indeterminateAttr })}
+          {...(indeterminateAttr && {
+            'data-indeterminate': indeterminateAttr,
+          })}
           {...(disabledAttr && { 'data-disabled': disabledAttr })}
           {...(noOutlineAttr && { 'data-no-outline': noOutlineAttr })}
         >

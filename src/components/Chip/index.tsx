@@ -51,7 +51,13 @@ export type ChipVariant = 'chip' | 'pill'
  *   - `neutral`  — grey  (inactive / disabled)
  *   - `gold`     — sacred-gold (default / featured / starred)
  */
-export type ChipTone = 'success' | 'info' | 'warn' | 'danger' | 'neutral' | 'gold'
+export type ChipTone =
+  | 'success'
+  | 'info'
+  | 'warn'
+  | 'danger'
+  | 'neutral'
+  | 'gold'
 
 export interface ChipStyles {
   /** Theme palette. Defaults to `'sacred'` (matches goobs-frontend overall). */
@@ -316,9 +322,7 @@ const Chip: React.FC<ChipProps> = ({
       {...(resolvedRole === 'status' &&
         ariaLive !== undefined && { 'aria-live': ariaLive })}
       tabIndex={isClickable ? 0 : undefined}
-      aria-pressed={
-        isClickable && active !== undefined ? active : undefined
-      }
+      aria-pressed={isClickable && active !== undefined ? active : undefined}
       aria-disabled={isDisabled || undefined}
       onClick={isClickable ? handleClick : undefined}
       onKeyDown={isClickable ? handleKeyDown : undefined}
@@ -345,7 +349,7 @@ const Chip: React.FC<ChipProps> = ({
         <button
           type="button"
           className={cssStyles.closeButton}
-          onClick={(event) => {
+          onClick={event => {
             event.stopPropagation()
             if (!isDisabled) onDelete()
           }}

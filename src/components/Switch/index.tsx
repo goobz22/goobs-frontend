@@ -118,34 +118,27 @@ const Switch: React.FC<SwitchProps> = ({
   if (styles?.trackBackground !== undefined)
     dynamicStyle['--switch-track-bg'] = styles.trackBackground
   if (styles?.trackBorderColor !== undefined)
-    dynamicStyle['--switch-track-border-color'] =
-      styles.trackBorderColor
+    dynamicStyle['--switch-track-border-color'] = styles.trackBorderColor
   if (styles?.trackBorderRadius !== undefined)
     dynamicStyle['--switch-track-radius'] = styles.trackBorderRadius
   if (styles?.checkedTrackColor !== undefined)
-    dynamicStyle['--switch-track-checked-bg'] =
-      styles.checkedTrackColor
+    dynamicStyle['--switch-track-checked-bg'] = styles.checkedTrackColor
   if (styles?.thumbSize !== undefined)
     dynamicStyle['--switch-thumb-size'] = styles.thumbSize
   if (styles?.thumbBackground !== undefined)
     dynamicStyle['--switch-thumb-bg'] = styles.thumbBackground
   if (styles?.thumbBorderColor !== undefined)
-    dynamicStyle['--switch-thumb-border-color'] =
-      styles.thumbBorderColor
+    dynamicStyle['--switch-thumb-border-color'] = styles.thumbBorderColor
   if (styles?.checkedThumbColor !== undefined)
-    dynamicStyle['--switch-thumb-checked-bg'] =
-      styles.checkedThumbColor
+    dynamicStyle['--switch-thumb-checked-bg'] = styles.checkedThumbColor
   if (styles?.labelColor !== undefined)
     dynamicStyle['--switch-label-color'] = styles.labelColor
   if (styles?.labelFontFamily !== undefined)
-    dynamicStyle['--switch-label-font-family'] =
-      styles.labelFontFamily
+    dynamicStyle['--switch-label-font-family'] = styles.labelFontFamily
   if (styles?.labelFontSize !== undefined)
     dynamicStyle['--switch-label-font-size'] = styles.labelFontSize
   if (styles?.labelFontWeight !== undefined)
-    dynamicStyle['--switch-label-font-weight'] = String(
-      styles.labelFontWeight
-    )
+    dynamicStyle['--switch-label-font-weight'] = String(styles.labelFontWeight)
   if (styles?.transitionDuration !== undefined)
     dynamicStyle['--switch-transition'] =
       `all ${styles.transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`
@@ -186,7 +179,9 @@ const Switch: React.FC<SwitchProps> = ({
           className={cssStyles.input}
           disabled={disabled}
           onChange={handleChange}
-          data-field-name={(props as React.InputHTMLAttributes<HTMLInputElement>).name}
+          data-field-name={
+            (props as React.InputHTMLAttributes<HTMLInputElement>).name
+          }
           {...props}
           checked={effectiveChecked}
         />
@@ -198,9 +193,7 @@ const Switch: React.FC<SwitchProps> = ({
         <div className={cssStyles.thumb}>{getThumbContent()}</div>
       </div>
 
-      {rightLabel && (
-        <span className={cssStyles.rightLabel}>{rightLabel}</span>
-      )}
+      {rightLabel && <span className={cssStyles.rightLabel}>{rightLabel}</span>}
     </label>
   )
 }

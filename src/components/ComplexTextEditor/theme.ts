@@ -116,7 +116,8 @@ export const buildEditorAreaOverrideStyle = (
 ): React.CSSProperties | undefined => {
   if (!styles) return undefined
   const overrides: Record<string, string> = {}
-  if (styles.editorBackground) overrides['--ct-editor-bg'] = styles.editorBackground
+  if (styles.editorBackground)
+    overrides['--ct-editor-bg'] = styles.editorBackground
   if (styles.editorBorderColor)
     overrides['--ct-editor-border'] = styles.editorBorderColor
   if (styles.textColor) overrides['--ct-editor-color'] = styles.textColor
@@ -172,8 +173,7 @@ export const buildTransitionOverride = (
   return `all ${styles.transitionDuration} ${easing}`
 }
 
-export interface ComplexTextEditorStyles
-  extends ComplexTextEditorFormFieldStyles {
+export interface ComplexTextEditorStyles extends ComplexTextEditorFormFieldStyles {
   // Editor-specific styling
   toolbarBackground?: string
   toolbarBorderColor?: string

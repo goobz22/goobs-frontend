@@ -37,9 +37,11 @@ const resolveTheme = (styles?: TableStyles): 'sacred' | 'light' | 'dark' =>
  */
 const containerVars = (styles?: TableStyles): CSSVarStyle | undefined => {
   const vars: CSSVarStyle = {}
-  if (styles?.backgroundColor) vars['--table-container-bg'] = styles.backgroundColor
+  if (styles?.backgroundColor)
+    vars['--table-container-bg'] = styles.backgroundColor
   if (styles?.borderColor) vars['--table-container-border'] = styles.borderColor
-  if (styles?.borderRadius) vars['--table-container-radius'] = styles.borderRadius
+  if (styles?.borderRadius)
+    vars['--table-container-radius'] = styles.borderRadius
   if (styles?.width) vars['--table-container-width'] = styles.width
   if (styles?.maxWidth) vars['--table-container-max-width'] = styles.maxWidth
   return Object.keys(vars).length > 0 ? vars : undefined
@@ -58,7 +60,8 @@ const cellVars = (styles?: TableStyles): CSSVarStyle | undefined => {
   const vars: CSSVarStyle = {}
   if (styles?.color) vars['--table-cell-color'] = styles.color
   if (styles?.fontFamily) vars['--table-font-family'] = styles.fontFamily
-  if (styles?.cellBorderColor) vars['--table-cell-border'] = styles.cellBorderColor
+  if (styles?.cellBorderColor)
+    vars['--table-cell-border'] = styles.cellBorderColor
   // Header-cell overrides (legacy spread `header` over the cell when isHeader).
   if (styles?.headerBackgroundColor)
     vars['--table-header-bg'] = styles.headerBackgroundColor

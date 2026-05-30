@@ -45,7 +45,11 @@ const Snackbar: React.FC<SnackbarProps> = ({
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
       wasOpenRef.current = true
-      emitDiag({ type: 'component.state', component: 'Snackbar', state: 'open' })
+      emitDiag({
+        type: 'component.state',
+        component: 'Snackbar',
+        state: 'open',
+      })
     } else if (!isOpen && wasOpenRef.current) {
       wasOpenRef.current = false
       emitDiag({

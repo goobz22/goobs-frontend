@@ -24,9 +24,7 @@ export interface DividerProps extends Omit<
   }
 }
 
-function mergeClassNames(
-  ...names: Array<string | false | undefined>
-): string {
+function mergeClassNames(...names: Array<string | false | undefined>): string {
   return names.filter(Boolean).join(' ')
 }
 

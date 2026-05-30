@@ -703,7 +703,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       ) : (
         <>
           <div
-            className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleSidebar)}
+            className={cx(
+              cssStyles.sectionTitle,
+              cssStyles.sectionTitleSidebar
+            )}
           >
             Ticket Summary
           </div>
@@ -718,7 +721,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <div className={cssStyles.fieldLabel}>
               {productServiceInfo.label}
             </div>
-            <div className={cssStyles.fieldValue}>{productServiceInfo.name}</div>
+            <div className={cssStyles.fieldValue}>
+              {productServiceInfo.name}
+            </div>
           </div>
 
           {/* Queue - Editable in edit mode */}
@@ -1021,7 +1026,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Left Column - User Info */}
           <div className={cssStyles.card}>
             <div
-              className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleTopReset)}
+              className={cx(
+                cssStyles.sectionTitle,
+                cssStyles.sectionTitleTopReset
+              )}
             >
               User
             </div>
@@ -1040,7 +1048,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Right Column - Details */}
           <div className={cssStyles.card}>
             <div
-              className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleTopReset)}
+              className={cx(
+                cssStyles.sectionTitle,
+                cssStyles.sectionTitleTopReset
+              )}
             >
               Details
             </div>
@@ -1078,7 +1089,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
             <div className={cssStyles.notesHeaderRow}>
               <div
-                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
+                className={cx(
+                  cssStyles.sectionTitle,
+                  cssStyles.notesHeaderTitle
+                )}
               >
                 Internal Company Notes
                 {associatedCompanyName && (
@@ -1159,7 +1173,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
             <div className={cssStyles.notesHeaderRow}>
               <div
-                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
+                className={cx(
+                  cssStyles.sectionTitle,
+                  cssStyles.notesHeaderTitle
+                )}
               >
                 Internal Customer Notes
                 {associatedCustomerName && (
@@ -1544,7 +1561,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                                     ? 'Original'
                                     : `Edited by ${revision.editedBy || 'Unknown'}`}
                                   {revision.editedAt && (
-                                    <span className={cssStyles.revisionMetaTime}>
+                                    <span
+                                      className={cssStyles.revisionMetaTime}
+                                    >
                                       {new Date(
                                         revision.editedAt
                                       ).toLocaleString()}
@@ -1899,7 +1918,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       return (
         <div className={cssStyles.card}>
           <div
-            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
+            className={cx(
+              cssStyles.sectionTitle,
+              cssStyles.cardSectionTitleFlex
+            )}
           >
             <span>Schedule New Meeting</span>
             <button
@@ -1997,10 +2019,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Date & Time */}
           <div
-            className={cx(
-              cssStyles.threeColForm,
-              cssStyles.threeColFormSpaced
-            )}
+            className={cx(cssStyles.threeColForm, cssStyles.threeColFormSpaced)}
           >
             <DateField
               label="Date *"
@@ -2088,7 +2107,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       return (
         <div className={cssStyles.card}>
           <div
-            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
+            className={cx(
+              cssStyles.sectionTitle,
+              cssStyles.cardSectionTitleFlex
+            )}
           >
             <span>Meeting Details</span>
             <button
@@ -2215,7 +2237,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       return (
         <div className={cssStyles.card}>
           <div
-            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
+            className={cx(
+              cssStyles.sectionTitle,
+              cssStyles.cardSectionTitleFlex
+            )}
           >
             <span>Reschedule Meeting</span>
             <button
@@ -2260,7 +2285,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* New Date & Time */}
           <div className={cssStyles.rescheduleSection}>
             <div
-              className={cx(cssStyles.meetingLabel, cssStyles.meetingLabelBlock)}
+              className={cx(
+                cssStyles.meetingLabel,
+                cssStyles.meetingLabelBlock
+              )}
             >
               Select New Date & Time
             </div>
@@ -2843,7 +2871,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cssStyles.card}>
             <div className={cssStyles.resolutionHeaderRow}>
               <div
-                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
+                className={cx(
+                  cssStyles.sectionTitle,
+                  cssStyles.notesHeaderTitle
+                )}
               >
                 Resolution Information
               </div>

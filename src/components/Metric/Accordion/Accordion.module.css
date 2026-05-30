@@ -67,8 +67,7 @@
 /* When the accordion is open, square off the bottom corners so the toggle
    meets the panel cleanly. */
 .toggle[data-state='open'] {
-  border-radius:
-    clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px) 0 0;
+  border-radius: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px) 0 0;
 }
 
 .chevron {

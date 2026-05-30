@@ -148,7 +148,7 @@ function useScreenSize() {
       const w = window.innerWidth
       const next: 'mobile' | 'tablet' | 'desktop' =
         w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop'
-      setSize((prev) => (prev !== next ? next : prev))
+      setSize(prev => (prev !== next ? next : prev))
     }
     check()
     let timeoutId: ReturnType<typeof setTimeout>
@@ -190,7 +190,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   // open/closed state to the host diagnostics bus (no-op when none present).
   // Preserves the existing toggle behaviour exactly — only adds the emit.
   const handleToggle = () => {
-    setIsExpanded((prev) => {
+    setIsExpanded(prev => {
       const next = !prev
       emitDiag({
         type: 'component.state',
@@ -241,7 +241,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
         .replace(/[^a-z0-9-]/g, '')
       return (
         <div key={`${m.title}-${i}`} className={styles.metricsCell}>
-          { }
+          {}
           <MetricCard {...(cardProps as any)} />
         </div>
       )

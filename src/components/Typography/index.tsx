@@ -80,18 +80,46 @@ function resolveVariant(variant: string): VariantResolution {
   // Sacred Cinzel variants
   if (v.includes('cinzel')) {
     if (v.includes('h1'))
-      return { className: cssStyles.cinzelH1 ?? '', fontWeight: 700, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH1 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Cinzel", serif',
+      }
     if (v.includes('h2'))
-      return { className: cssStyles.cinzelH2 ?? '', fontWeight: 700, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH2 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Cinzel", serif',
+      }
     if (v.includes('h3'))
-      return { className: cssStyles.cinzelH3 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH3 ?? '',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
     if (v.includes('h4'))
-      return { className: cssStyles.cinzelH4 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH4 ?? '',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
     if (v.includes('h5'))
-      return { className: cssStyles.cinzelH5 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH5 ?? '',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
     if (v.includes('h6'))
-      return { className: cssStyles.cinzelH6 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
-    return { className: cssStyles.cinzelBase ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+      return {
+        className: cssStyles.cinzelH6 ?? '',
+        fontWeight: 600,
+        fontFamily: '"Cinzel", serif',
+      }
+    return {
+      className: cssStyles.cinzelBase ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   }
 
   // Merriweather helper/footer text
@@ -107,17 +135,41 @@ function resolveVariant(variant: string): VariantResolution {
 
   // Standard heading variants
   if (v.includes('h1'))
-    return { className: cssStyles.h1 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h1 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   if (v.includes('h2'))
-    return { className: cssStyles.h2 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h2 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   if (v.includes('h3'))
-    return { className: cssStyles.h3 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h3 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   if (v.includes('h4'))
-    return { className: cssStyles.h4 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h4 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   if (v.includes('h5'))
-    return { className: cssStyles.h5 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h5 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
   if (v.includes('h6'))
-    return { className: cssStyles.h6 ?? '', fontWeight: 600, fontFamily: '"Cinzel", serif' }
+    return {
+      className: cssStyles.h6 ?? '',
+      fontWeight: 600,
+      fontFamily: '"Cinzel", serif',
+    }
 
   if (v.includes('body2') || v.includes('small'))
     return { className: cssStyles.body2 ?? '', fontWeight: 400 }
@@ -180,8 +232,7 @@ const Typography: React.FC<TypographyProps> = ({
 
   // ── font-family (parity: variantStyles.fontFamily || (isHeading ? Cinzel : finalFontFamily)) ──
   const resolvedFontFamily =
-    resolved.fontFamily ||
-    (isHeading ? '"Cinzel", serif' : finalFontFamily)
+    resolved.fontFamily || (isHeading ? '"Cinzel", serif' : finalFontFamily)
 
   // ── font-weight (parity: finalFontWeight || variantStyles.fontWeight) ────
   const resolvedFontWeight = finalFontWeight || resolved.fontWeight
@@ -234,10 +285,14 @@ const Typography: React.FC<TypographyProps> = ({
   if (finalPadding) {
     dynamicStyle.padding = finalPadding
   } else {
-    if (styles?.paddingLeft !== undefined) dynamicStyle.paddingLeft = styles.paddingLeft
-    if (styles?.paddingRight !== undefined) dynamicStyle.paddingRight = styles.paddingRight
-    if (styles?.paddingTop !== undefined) dynamicStyle.paddingTop = styles.paddingTop
-    if (styles?.paddingBottom !== undefined) dynamicStyle.paddingBottom = styles.paddingBottom
+    if (styles?.paddingLeft !== undefined)
+      dynamicStyle.paddingLeft = styles.paddingLeft
+    if (styles?.paddingRight !== undefined)
+      dynamicStyle.paddingRight = styles.paddingRight
+    if (styles?.paddingTop !== undefined)
+      dynamicStyle.paddingTop = styles.paddingTop
+    if (styles?.paddingBottom !== undefined)
+      dynamicStyle.paddingBottom = styles.paddingBottom
   }
 
   const className = resolved.className

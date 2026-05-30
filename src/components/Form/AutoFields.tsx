@@ -27,11 +27,7 @@
 import React, { type ReactElement, type ReactNode } from 'react'
 import { useFormContext } from './context'
 import { useFormField } from './useFormField'
-import {
-  humanize,
-  zodTypeToFieldKind,
-  type FieldKind,
-} from './schema'
+import { humanize, zodTypeToFieldKind, type FieldKind } from './schema'
 import TextField from '../Field/Text'
 import DateField from '../Field/Date/DateField'
 import InternalIncrementNumberField from '../Field/Number/InternalIncrement'
@@ -84,7 +80,7 @@ function deriveEnumOptions(fieldSchema: unknown): DropdownOption[] {
   for (let depth = 0; depth < 10 && current; depth += 1) {
     const def = current._zod?.def
     if (def?.type === 'enum' && def.entries) {
-      return Object.values(def.entries).map((value) => ({ value }))
+      return Object.values(def.entries).map(value => ({ value }))
     }
     const innerType = (def as { innerType?: unknown } | undefined)?.innerType
     if (innerType === undefined) break
@@ -121,7 +117,12 @@ interface AutoFieldProps {
  * instance — legal) and renders the goobs component for the kind with the
  * engine's value / handlers / error / required wired in explicitly.
  */
-const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => {
+const AutoField: React.FC<AutoFieldProps> = ({
+  name,
+  label,
+  kind,
+  options,
+}) => {
   const { value, onChange, onBlur, error, required } = useFormField(name)
   const errorProp = error ?? false
 
@@ -133,7 +134,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           label={label}
           options={options}
           value={asString(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
           styles={{ required }}
@@ -145,7 +146,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           name={name}
           label={label}
           value={asString(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
           styles={{ required }}
@@ -157,7 +158,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           name={name}
           label={label}
           value={asDate(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           error={errorProp}
           styles={{ required }}
         />
@@ -169,7 +170,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           name={name}
           aria-label={label}
           checked={Boolean(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           onBlur={onBlur}
         >
           {label}
@@ -182,7 +183,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           label={label}
           type="email"
           value={asString(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
           styles={{ required }}
@@ -196,7 +197,7 @@ const AutoField: React.FC<AutoFieldProps> = ({ name, label, kind, options }) => 
           name={name}
           label={label}
           value={asString(value)}
-          onChange={(next) => onChange(next)}
+          onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
           styles={{ required }}
@@ -221,7 +222,7 @@ const AutoFields: React.FC<AutoFieldsProps> = ({
   const allKeys = Object.keys(shape)
   const omitSet = new Set(omit ?? [])
   const keys = (only ?? allKeys).filter(
-    (key) => allKeys.includes(key) && !omitSet.has(key)
+    key => allKeys.includes(key) && !omitSet.has(key)
   )
 
   const rendered: ReactElement[] = []

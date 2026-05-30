@@ -6,7 +6,11 @@ import cssStyles from './SearchableHistory.module.css'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 import SearchIcon from '../../../Icons/Search'
 import HistoryIcon from '../../../Icons/History'
-import { useEscape, getRequiredProps, type FieldStyleOverrides } from '../../Shell'
+import {
+  useEscape,
+  getRequiredProps,
+  type FieldStyleOverrides,
+} from '../../Shell'
 
 export type NavigationItem = {
   id: string

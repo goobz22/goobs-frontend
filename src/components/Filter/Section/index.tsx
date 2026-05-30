@@ -234,7 +234,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   // open/closed state to the host diagnostics bus (no-op when none present).
   // Preserves the existing toggle behaviour exactly — only adds the emit.
   const handleToggle = () => {
-    setIsExpanded((prev) => {
+    setIsExpanded(prev => {
       const next = !prev
       emitDiag({
         type: 'component.state',
@@ -255,7 +255,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   // Only render the search/buttons row if any of those props were provided.
   const hasSearch = onSearchChange !== undefined
   const visibleButtons = (buttons ?? []).filter(
-    (b) => b.permission === undefined || b.permission === true
+    b => b.permission === undefined || b.permission === true
   )
   const hasSearchRow = hasSearch || visibleButtons.length > 0
 
@@ -300,7 +300,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         >
           <SearchableSimple
             {...commonProps}
-            onChange={(opt) => d.onChange((opt?._id as string) ?? '')}
+            onChange={opt => d.onChange((opt?._id as string) ?? '')}
           />
         </div>
       )
@@ -340,7 +340,9 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         key={opt.value}
         label={opt.label}
         active={isActive}
-        dataField={cluster.dataField ?? (cluster.label ? kebab(cluster.label) : 'filter')}
+        dataField={
+          cluster.dataField ?? (cluster.label ? kebab(cluster.label) : 'filter')
+        }
         dataValue={opt.value}
         {...(chipStyles !== undefined && { styles: chipStyles })}
         onClick={() => {
@@ -352,7 +354,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           } else {
             // Multi-select.
             const next = isActive
-              ? cluster.selectedValues.filter((v) => v !== opt.value)
+              ? cluster.selectedValues.filter(v => v !== opt.value)
               : [...cluster.selectedValues, opt.value]
             cluster.onChange(next)
           }
@@ -411,7 +413,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   startLabel={startLabel}
                   endLabel={endLabel}
                   {...(dr.value !== undefined && { value: dr.value })}
-                  onChange={(range) => dr.onChange(range)}
+                  onChange={range => dr.onChange(range)}
                   dataField={computedField}
                   {...(isSacredTheme && { styles: { theme: 'sacred' } })}
                 />
@@ -424,7 +426,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <Switch
                   key={`toggle-${i}-${t.label}`}
                   checked={t.value}
-                  onChange={(e) => t.onChange(e.target.checked)}
+                  onChange={e => t.onChange(e.target.checked)}
                   rightLabel={t.label}
                   data-field={t.dataField ?? kebab(t.label)}
                   {...(isSacredTheme && { styles: { theme: 'sacred' } })}
@@ -442,14 +444,17 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               key={`cluster-${ci}-${cluster.label ?? 'unlabelled'}`}
               className={styles.chipCluster}
               data-chip-cluster={
-                cluster.dataField ?? (cluster.label ? kebab(cluster.label) : undefined)
+                cluster.dataField ??
+                (cluster.label ? kebab(cluster.label) : undefined)
               }
             >
               {cluster.label && (
-                <span className={styles.chipClusterLabel}>{cluster.label}:</span>
+                <span className={styles.chipClusterLabel}>
+                  {cluster.label}:
+                </span>
               )}
               <div className={styles.chipRow}>
-                {cluster.options.map((opt) =>
+                {cluster.options.map(opt =>
                   renderChip(
                     cluster,
                     opt,

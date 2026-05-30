@@ -24,7 +24,8 @@
   --drawer-background: rgba(255, 255, 255, 0.95);
   --drawer-border-color: rgba(226, 232, 240, 0.8);
   --drawer-border-width: 1px;
-  --drawer-box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+  --drawer-box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
   --drawer-backdrop-filter: blur(8px);
   --drawer-background-image: none;
   --drawer-transition-duration: 200ms;
@@ -80,7 +81,8 @@
   --drawer-background: rgba(31, 41, 55, 0.95);
   --drawer-border-color: rgba(75, 85, 99, 0.8);
   --drawer-border-width: 1px;
-  --drawer-box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --drawer-box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
   --drawer-background-image: none;
 }
 
@@ -88,10 +90,19 @@
   --drawer-background: rgba(10, 10, 10, 0.95);
   --drawer-border-color: rgba(255, 215, 0, 0.6);
   --drawer-border-width: 2px;
-  --drawer-box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+  --drawer-box-shadow:
+    0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
   --drawer-background-image:
-    radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 215, 0, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
   /* sacred uses TRANSITIONS.slow = 300ms */
   --drawer-transition-duration: 300ms;

@@ -217,7 +217,8 @@ const InternalIncrementNumberField: React.FC<
   }, [subnetInfo.mask, handleTextFieldChange])
 
   // Filled whenever a (always-present) numeric mask value is set.
-  const hasValue = currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
+  const hasValue =
+    currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
 
   return (
     <div style={style} data-field={dataField}>
@@ -412,8 +413,8 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     value: valueProp,
     onChange: onChangeProp,
   })
-  const value: SubnetFieldValue =
-    boundValue ?? valueProp ?? { address: '', mask: maskType === 'supernet' ? 8 : 16 }
+  const value: SubnetFieldValue = boundValue ??
+    valueProp ?? { address: '', mask: maskType === 'supernet' ? 8 : 16 }
 
   const [address, setAddress] = useState<string>(value.address || '')
   const [mask, setMask] = useState<number>(

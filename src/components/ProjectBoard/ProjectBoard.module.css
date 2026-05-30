@@ -36,8 +36,16 @@
   --pb-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
   --pb-backdrop: blur(8px);
   --pb-bg-image:
-    radial-gradient(circle at top left, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at bottom right, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(
+      circle at top left,
+      rgba(255, 215, 0, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
   --pb-container-animation: projectBoardGlowPulse 3s infinite alternate;
   /* TRANSITIONS.slow for sacred */
@@ -284,7 +292,11 @@
 
   /* Sacred task-card palette. */
   --pb-card-bg: rgba(0, 0, 0, 0.9);
-  --pb-card-bg-image: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.95) 100%);
+  --pb-card-bg-image: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
   --pb-card-border: 1px solid rgba(255, 215, 0, 0.3);
   --pb-card-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
   --pb-card-shadow-hover: 0 8px 25px rgba(255, 215, 0, 0.2);
@@ -319,13 +331,29 @@
 
   /* Sacred scrollbar palette (hardcoded default). */
   --pb-sb-track: rgba(0, 0, 0, 0.3);
-  --pb-sb-thumb: linear-gradient(45deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.7));
-  --pb-sb-thumb-hover: linear-gradient(45deg, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.9));
+  --pb-sb-thumb: linear-gradient(
+    45deg,
+    rgba(255, 215, 0, 0.4),
+    rgba(255, 215, 0, 0.7)
+  );
+  --pb-sb-thumb-hover: linear-gradient(
+    45deg,
+    rgba(255, 215, 0, 0.6),
+    rgba(255, 215, 0, 0.9)
+  );
   --pb-sb-thumb-border: 1px solid rgba(255, 215, 0, 0.3);
   --pb-sb-thumb-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
   --pb-sb-col-track: rgba(0, 0, 0, 0.2);
-  --pb-sb-col-thumb: linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.6));
-  --pb-sb-col-thumb-hover: linear-gradient(180deg, rgba(255, 215, 0, 0.5), rgba(255, 215, 0, 0.8));
+  --pb-sb-col-thumb: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.3),
+    rgba(255, 215, 0, 0.6)
+  );
+  --pb-sb-col-thumb-hover: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.5),
+    rgba(255, 215, 0, 0.8)
+  );
   --pb-sb-col-thumb-border: 1px solid rgba(255, 215, 0, 0.2);
   --pb-sb-col-thumb-hover-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
 
@@ -678,12 +706,14 @@
    -------------------------------------------------------------------------- */
 @keyframes projectBoardGlowPulse {
   0% {
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6),
+    box-shadow:
+      0 0 40px rgba(255, 215, 0, 0.6),
       0 0 80px rgba(255, 215, 0, 0.3);
     border-color: rgba(255, 215, 0, 0.5);
   }
   100% {
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.8),
+    box-shadow:
+      0 0 50px rgba(255, 215, 0, 0.8),
       0 0 100px rgba(255, 215, 0, 0.4);
     border-color: rgba(255, 215, 0, 0.7);
   }

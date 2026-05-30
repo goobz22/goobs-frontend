@@ -74,7 +74,9 @@ const InternalIncrementNumberField: React.FC<
   } = useFieldBinding<number>({
     name,
     value:
-      valueProp !== undefined && valueProp !== '' ? Number(valueProp) : undefined,
+      valueProp !== undefined && valueProp !== ''
+        ? Number(valueProp)
+        : undefined,
     onChange: onChangeProp,
   })
   const value =

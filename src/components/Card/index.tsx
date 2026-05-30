@@ -193,8 +193,10 @@ function AsChildSlot({
 
 export type CardTheme = 'sacred' | 'light' | 'dark'
 
-export interface CardProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+export interface CardProps extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  'title'
+> {
   /** Visual density / padding scale. Default `'standard'`. */
   variant?: 'standard' | 'compact'
   /** Selection state — emits `data-card-state="selected"` + ring. */
@@ -406,8 +408,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 // CARD.HEADERICON — leading emoji / SVG glyph
 // -----------------------------------------------------------------------------
 
-export interface CardHeaderIconProps
-  extends React.HTMLAttributes<HTMLSpanElement> {
+export interface CardHeaderIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: ReactNode
 }
 
@@ -432,8 +433,10 @@ const CardHeaderIcon = forwardRef<HTMLSpanElement, CardHeaderIconProps>(
 
 type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 
-export interface CardTitleProps
-  extends Omit<React.HTMLAttributes<HTMLHeadingElement>, 'onClick'> {
+export interface CardTitleProps extends Omit<
+  React.HTMLAttributes<HTMLHeadingElement>,
+  'onClick'
+> {
   children: ReactNode
   /** Heading level. Default `'h3'`. */
   as?: HeadingLevel
@@ -524,8 +527,7 @@ function CardTitle({
 // CARD.SUBTITLE
 // -----------------------------------------------------------------------------
 
-export interface CardSubtitleProps
-  extends React.HTMLAttributes<HTMLSpanElement> {
+export interface CardSubtitleProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: ReactNode
 }
 
@@ -548,8 +550,7 @@ const CardSubtitle = forwardRef<HTMLSpanElement, CardSubtitleProps>(
 // CARD.HEADERBADGES — right-aligned status / type chips
 // -----------------------------------------------------------------------------
 
-export interface CardHeaderBadgesProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardHeaderBadgesProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode
 }
 
@@ -572,8 +573,7 @@ const CardHeaderBadges = forwardRef<HTMLDivElement, CardHeaderBadgesProps>(
 // CARD.HEADERACTIONS — trailing icon-button row
 // -----------------------------------------------------------------------------
 
-export interface CardHeaderActionsProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardHeaderActionsProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode
 }
 
@@ -604,10 +604,7 @@ export interface CardSelectionCheckboxProps {
    * click handler can `event.stopPropagation()` to keep clicks scoped
    * to the checkbox.
    */
-  onChange: (
-    next: boolean,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => void
+  onChange: (next: boolean, event: React.ChangeEvent<HTMLInputElement>) => void
   /** Accessible label (e.g. "Select this contract"). */
   ariaLabel: string
   disabled?: boolean
@@ -624,14 +621,14 @@ const CardSelectionCheckbox = forwardRef<
     <label
       className={cssStyles.selectionCheckbox}
       data-card-selection="true"
-      onClick={(event) => event.stopPropagation()}
+      onClick={event => event.stopPropagation()}
     >
       <input
         ref={ref}
         type="checkbox"
         checked={checked}
         disabled={disabled}
-        onChange={(event) => onChange(event.target.checked, event)}
+        onChange={event => onChange(event.target.checked, event)}
         aria-label={ariaLabel}
       />
     </label>
@@ -666,8 +663,7 @@ const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardBody(
 // CARD.DESCRIPTION
 // -----------------------------------------------------------------------------
 
-export interface CardDescriptionProps
-  extends React.HTMLAttributes<HTMLParagraphElement> {
+export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children: ReactNode
 }
 
@@ -709,8 +705,10 @@ const CardMetrics = forwardRef<HTMLDivElement, CardMetricsProps>(
   }
 )
 
-export interface CardMetricProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
+export interface CardMetricProps extends Omit<
+  React.HTMLAttributes<HTMLSpanElement>,
+  'children'
+> {
   /** Optional icon glyph or SVG node. */
   icon?: ReactNode
   /** Small uppercase-ish label rendered before the value. */
@@ -889,7 +887,10 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
-  function CardFooter({ split = false, className, children, ...restProps }, ref) {
+  function CardFooter(
+    { split = false, className, children, ...restProps },
+    ref
+  ) {
     return (
       <div
         ref={ref}
@@ -911,8 +912,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
 // CARD.FOOTERACTIONS — wraps a group of action buttons in the footer
 // -----------------------------------------------------------------------------
 
-export interface CardFooterActionsProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardFooterActionsProps extends React.HTMLAttributes<HTMLDivElement> {
   side?: 'left' | 'right'
   children: ReactNode
 }
@@ -936,8 +936,7 @@ const CardFooterActions = forwardRef<HTMLDivElement, CardFooterActionsProps>(
 // CARD.FOOTERMETA — small grey "Created: ..." footer line
 // -----------------------------------------------------------------------------
 
-export interface CardFooterMetaProps
-  extends React.HTMLAttributes<HTMLSpanElement> {
+export interface CardFooterMetaProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: ReactNode
 }
 
@@ -969,7 +968,10 @@ export interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const CardSection = forwardRef<HTMLDivElement, CardSectionProps>(
-  function CardSection({ label, muted = false, className, children, ...restProps }, ref) {
+  function CardSection(
+    { label, muted = false, className, children, ...restProps },
+    ref
+  ) {
     return (
       <div
         ref={ref}
@@ -994,12 +996,7 @@ const CardSection = forwardRef<HTMLDivElement, CardSectionProps>(
 // CARD.BANNER — tinted inline note for warnings / info / pending-review
 // -----------------------------------------------------------------------------
 
-export type CardBannerTone =
-  | 'info'
-  | 'success'
-  | 'warn'
-  | 'danger'
-  | 'neutral'
+export type CardBannerTone = 'info' | 'success' | 'warn' | 'danger' | 'neutral'
 
 export interface CardBannerProps {
   /** Severity palette — drives background, border, text color. */
@@ -1016,10 +1013,7 @@ export interface CardBannerProps {
 }
 
 const CardBanner = forwardRef<HTMLDivElement, CardBannerProps>(
-  function CardBanner(
-    { tone = 'info', icon, title, message, children },
-    ref
-  ) {
+  function CardBanner({ tone = 'info', icon, title, message, children }, ref) {
     return (
       <div
         ref={ref}
@@ -1051,8 +1045,7 @@ const CardBanner = forwardRef<HTMLDivElement, CardBannerProps>(
 // CARD.HEADERMETA — right-aligned text (timestamps, counts) in the header
 // -----------------------------------------------------------------------------
 
-export interface CardHeaderMetaProps
-  extends React.HTMLAttributes<HTMLSpanElement> {
+export interface CardHeaderMetaProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: ReactNode
 }
 
@@ -1182,28 +1175,28 @@ const CardConfirmDelete = forwardRef<HTMLDivElement, CardConfirmDeleteProps>(
       >
         <p className={cssStyles.confirmDeleteMessage}>{message}</p>
         <div className={cssStyles.confirmDeleteActions}>
-          {renderActions
-            ? renderActions({ onConfirm, onCancel, confirmLabel, cancelLabel })
-            : (
-              <>
-                <button
-                  type="button"
-                  onClick={onConfirm}
-                  data-action="confirm"
-                  data-card-confirm-yes="true"
-                >
-                  {confirmLabel}
-                </button>
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  data-action="cancel"
-                  data-card-confirm-no="true"
-                >
-                  {cancelLabel}
-                </button>
-              </>
-            )}
+          {renderActions ? (
+            renderActions({ onConfirm, onCancel, confirmLabel, cancelLabel })
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onConfirm}
+                data-action="confirm"
+                data-card-confirm-yes="true"
+              >
+                {confirmLabel}
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                data-action="cancel"
+                data-card-confirm-no="true"
+              >
+                {cancelLabel}
+              </button>
+            </>
+          )}
         </div>
       </div>
     )
@@ -1226,7 +1219,10 @@ export interface CardDragHandleProps {
 }
 
 const CardDragHandle = forwardRef<HTMLDivElement, CardDragHandleProps>(
-  function CardDragHandle({ ariaLabel, onMoveUp, onMoveDown, grip = '⋮⋮' }, ref) {
+  function CardDragHandle(
+    { ariaLabel, onMoveUp, onMoveDown, grip = '⋮⋮' },
+    ref
+  ) {
     return (
       <div
         ref={ref}
@@ -1271,8 +1267,10 @@ const CardDragHandle = forwardRef<HTMLDivElement, CardDragHandleProps>(
 // CARD.GRID — list-semantics layout container
 // -----------------------------------------------------------------------------
 
-export interface CardGridProps
-  extends Omit<React.HTMLAttributes<HTMLUListElement>, 'children'> {
+export interface CardGridProps extends Omit<
+  React.HTMLAttributes<HTMLUListElement>,
+  'children'
+> {
   /** Minimum column width passed to `repeat(auto-fill, minmax(...))`. */
   minWidth?: string
   /** CSS gap between cards. */
@@ -1283,7 +1281,15 @@ export interface CardGridProps
 }
 
 const CardGrid = forwardRef<HTMLUListElement, CardGridProps>(function CardGrid(
-  { minWidth = '280px', gap = '12px', empty, className, style, children, ...restProps },
+  {
+    minWidth = '280px',
+    gap = '12px',
+    empty,
+    className,
+    style,
+    children,
+    ...restProps
+  },
   ref
 ) {
   // React.Children.toArray already strips null/undefined/false; we just

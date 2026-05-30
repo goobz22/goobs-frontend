@@ -103,7 +103,11 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
   } as React.CSSProperties
 
   return (
-    <div className={cssStyles.animationOverlay} data-theme={theme} style={overlayStyle}>
+    <div
+      className={cssStyles.animationOverlay}
+      data-theme={theme}
+      style={overlayStyle}
+    >
       <div className={cssStyles.animationContent} style={contentStyle}>
         {children}
       </div>

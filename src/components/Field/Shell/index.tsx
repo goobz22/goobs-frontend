@@ -33,7 +33,12 @@
  * focus/blur re-renders.
  */
 
-import React, { useEffect, useId, type CSSProperties, type ReactNode } from 'react'
+import React, {
+  useEffect,
+  useId,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import cssStyles from './FieldShell.module.css'
 import type { FieldStyleOverrides, FieldTheme } from './types'
 import { emitDiag } from '../../../utils/diag'
@@ -293,7 +298,11 @@ const FieldShell: React.FC<FieldShellProps> = ({
   // Only when `error` is undefined do we fall back to the engine's error for
   // this field. Outside a form, or without a name, this is always `error`.
   const boundError =
-    error !== undefined ? error : ctx && name ? ctx.engine.getError(name) : undefined
+    error !== undefined
+      ? error
+      : ctx && name
+        ? ctx.engine.getError(name)
+        : undefined
 
   // Top-level props win over styles-nested, which win over schema-derived.
   // Most consumers pass exactly one of these; if several are set the explicit

@@ -107,7 +107,7 @@ const Zoom = forwardRef<HTMLDivElement, ZoomProps>(
         const duration =
           styles.timeout !== undefined
             ? `${styles.timeout}ms`
-            : styles.transitionDuration ?? '0.3s'
+            : (styles.transitionDuration ?? '0.3s')
         const timingFunction = styles.transitionTimingFunction ?? 'ease'
         dynamicStyle['--zoom-transition'] =
           `transform ${duration} ${timingFunction}, opacity ${duration} ${timingFunction}`

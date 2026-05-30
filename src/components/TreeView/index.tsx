@@ -592,9 +592,7 @@ const useTreeViewExpansion = (
 // --------------------------------------------------------------------------
 
 /** Caller-supplied container overrides → inline style object (root <div>). */
-const buildContainerOverrideStyle = (
-  styles: TreeViewStyles
-): CSSProperties => {
+const buildContainerOverrideStyle = (styles: TreeViewStyles): CSSProperties => {
   const overrides: CSSProperties = {}
   if (styles.backgroundColor) overrides.backgroundColor = styles.backgroundColor
   if (styles.borderColor) overrides.borderColor = styles.borderColor
@@ -861,12 +859,7 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
     return () => cancelAnimationFrame(animationId)
   }, [width, height])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className={cssStyles.sacredBackground}
-    />
-  )
+  return <canvas ref={canvasRef} className={cssStyles.sacredBackground} />
 }
 
 // --------------------------------------------------------------------------
@@ -930,7 +923,8 @@ const TreeItem: FC<TreeItemProps> = ({
   )
   // Expand-icon style stays in JS (inline on <ExpandMore>'s svg).
   const expandIconStyle = useMemo(
-    () => buildExpandIconStyle(theme, isExpanded, isDisabled, isHovered, styles),
+    () =>
+      buildExpandIconStyle(theme, isExpanded, isDisabled, isHovered, styles),
     [theme, isExpanded, isDisabled, isHovered, styles]
   )
 
@@ -1103,7 +1097,11 @@ const TreeItem: FC<TreeItemProps> = ({
       )}
 
       {/* Label */}
-      <div className={cssStyles.label} data-theme={theme} style={labelOverrideStyle}>
+      <div
+        className={cssStyles.label}
+        data-theme={theme}
+        style={labelOverrideStyle}
+      >
         {label}
       </div>
     </div>

@@ -194,7 +194,11 @@ const DateRange: React.FC<DateRangeProps> = ({
       : undefined
 
   return (
-    <div style={style} data-field={dataField} data-field-name={dataFieldName ?? name}>
+    <div
+      style={style}
+      data-field={dataField}
+      data-field-name={dataFieldName ?? name}
+    >
       <div style={fieldsWrapperStyle} className={cssStyles.fieldsWrapper}>
         <div className={cssStyles.fieldContainer}>
           <FieldShell

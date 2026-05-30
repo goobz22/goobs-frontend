@@ -4,7 +4,12 @@
  */
 'use client'
 
-import React, { useCallback, type CSSProperties, type FC, type ReactNode } from 'react'
+import React, {
+  useCallback,
+  type CSSProperties,
+  type FC,
+  type ReactNode,
+} from 'react'
 import cssStyles from './AppBar.module.css'
 
 // --------------------------------------------------------------------------
@@ -106,7 +111,15 @@ function mergeClassNames(...names: Array<string | undefined>): string {
  * A top navigation bar component with comprehensive theming support.
  */
 const AppBar: FC<AppBarProps> = props => {
-  const { children, position = 'static', elevated = true, styles, className, onClick, ...rest } = props
+  const {
+    children,
+    position = 'static',
+    elevated = true,
+    styles,
+    className,
+    onClick,
+    ...rest
+  } = props
 
   // The legacy theme system defaulted to 'light' when no theme was provided.
   const theme = styles?.theme || 'light'
@@ -138,9 +151,18 @@ const AppBar: FC<AppBarProps> = props => {
 
   // Position + fixed-position auto-pin (top/left/right default to '0' when fixed).
   setVar('--appbar-position', resolvedPosition)
-  setVar('--appbar-top', styles?.top ?? (resolvedPosition === 'fixed' ? '0' : undefined))
-  setVar('--appbar-left', styles?.left ?? (resolvedPosition === 'fixed' ? '0' : undefined))
-  setVar('--appbar-right', styles?.right ?? (resolvedPosition === 'fixed' ? '0' : undefined))
+  setVar(
+    '--appbar-top',
+    styles?.top ?? (resolvedPosition === 'fixed' ? '0' : undefined)
+  )
+  setVar(
+    '--appbar-left',
+    styles?.left ?? (resolvedPosition === 'fixed' ? '0' : undefined)
+  )
+  setVar(
+    '--appbar-right',
+    styles?.right ?? (resolvedPosition === 'fixed' ? '0' : undefined)
+  )
 
   // Dimensions
   setVar('--appbar-width', styles?.width)
@@ -162,7 +184,10 @@ const AppBar: FC<AppBarProps> = props => {
   setVar('--appbar-bg', styles?.backgroundColor)
   setVar('--appbar-bg-image', styles?.backgroundImage)
   if (styles?.borderColor) {
-    setVar('--appbar-border', `${styles.borderWidth || '1px'} solid ${styles.borderColor}`)
+    setVar(
+      '--appbar-border',
+      `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+    )
   }
   setVar('--appbar-radius', styles?.borderRadius)
   const hasExplicitShadow = styles?.boxShadow !== undefined
@@ -198,7 +223,9 @@ const AppBar: FC<AppBarProps> = props => {
       data-testid="app-bar"
       {...rest}
     >
-      {isSacredTheme && <div className={cssStyles.shimmer} aria-hidden="true" />}
+      {isSacredTheme && (
+        <div className={cssStyles.shimmer} aria-hidden="true" />
+      )}
 
       <div className={cssStyles.toolbar}>{children}</div>
     </div>

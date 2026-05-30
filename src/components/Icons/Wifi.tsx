@@ -8,7 +8,11 @@ interface WifiIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
 }
 
-const WifiIcon: React.FC<WifiIconProps> = ({ styles, style = {}, ...props }) => {
+const WifiIcon: React.FC<WifiIconProps> = ({
+  styles,
+  style = {},
+  ...props
+}) => {
   const theme = styles?.theme || 'light'
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and

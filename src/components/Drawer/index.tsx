@@ -244,7 +244,11 @@ const Drawer: FC<DrawerProps> = ({
       emitDiag({ type: 'component.state', component: 'Drawer', state: 'open' })
     } else if (!open && wasOpenRef.current) {
       wasOpenRef.current = false
-      emitDiag({ type: 'component.state', component: 'Drawer', state: 'closed' })
+      emitDiag({
+        type: 'component.state',
+        component: 'Drawer',
+        state: 'closed',
+      })
     }
   }, [open, variant])
 
@@ -389,7 +393,8 @@ const Drawer: FC<DrawerProps> = ({
     backdropVars['--drawer-backdrop-z-index'] = styles.backdropZIndex
   }
   if (styles.backdropBackgroundColor) {
-    backdropVars['--drawer-backdrop-background'] = styles.backdropBackgroundColor
+    backdropVars['--drawer-backdrop-background'] =
+      styles.backdropBackgroundColor
   }
   if (styles.backdropBackdropFilter) {
     backdropVars['--drawer-backdrop-filter'] = styles.backdropBackdropFilter

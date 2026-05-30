@@ -171,7 +171,10 @@ function ProjectBoardContent({
     set('--pb-toolbar-radius', styles?.toolbarBorderRadius)
     // Caller border override (borderColor + optional borderWidth).
     if (styles?.borderColor) {
-      set('--pb-border', `${styles.borderWidth || '1px'} solid ${styles.borderColor}`)
+      set(
+        '--pb-border',
+        `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+      )
     }
     // Caller transition override.
     if (styles?.transitionDuration) {

@@ -238,8 +238,10 @@ const USDField: React.FC<USDFieldProps> = ({
   if (styles?.fontWeight !== undefined) {
     wrapperCssVars['--usd-font-weight'] = String(styles.fontWeight)
   }
-  if (styles?.lineHeight) wrapperCssVars['--usd-line-height'] = styles.lineHeight
-  if (styles?.fontFamily) wrapperCssVars['--usd-font-family'] = styles.fontFamily
+  if (styles?.lineHeight)
+    wrapperCssVars['--usd-line-height'] = styles.lineHeight
+  if (styles?.fontFamily)
+    wrapperCssVars['--usd-font-family'] = styles.fontFamily
 
   const iconStyle: React.CSSProperties = { fontSize: '18px' }
 

@@ -130,9 +130,15 @@
   display: block;
   margin-bottom: var(--rg-label-margin-bottom, 0.5rem);
   color: var(--rg-label-color-override, var(--rg-label-color));
-  font-family: var(--rg-label-font-family-override, var(--rg-label-font-family));
+  font-family: var(
+    --rg-label-font-family-override,
+    var(--rg-label-font-family)
+  );
   font-size: var(--rg-label-font-size-override, var(--rg-label-font-size));
-  font-weight: var(--rg-label-font-weight-override, var(--rg-label-font-weight));
+  font-weight: var(
+    --rg-label-font-weight-override,
+    var(--rg-label-font-weight)
+  );
   letter-spacing: var(--rg-label-letter-spacing);
   text-shadow: var(--rg-label-text-shadow);
 }
@@ -194,10 +200,7 @@
     --rg-radio-hover-border-color-override,
     var(--rg-radio-hover-border-color)
   );
-  background-color: var(
-    --rg-radio-hover-bg-override,
-    var(--rg-radio-hover-bg)
-  );
+  background-color: var(--rg-radio-hover-bg-override, var(--rg-radio-hover-bg));
 }
 
 /* Checked (replaces isChecked branch): the native radio's :checked state
@@ -229,7 +232,10 @@
   left: 3px;
   top: 3px;
   border-radius: 50%;
-  background-color: var(--rg-radio-inner-color-override, var(--rg-radio-inner-color));
+  background-color: var(
+    --rg-radio-inner-color-override,
+    var(--rg-radio-inner-color)
+  );
   transform: scale(0);
   transition: var(--rg-transition);
 }
@@ -246,7 +252,10 @@
    the old textHover useState branch.
    -------------------------------------------------------------------------- */
 .text {
-  color: var(--rg-option-color, var(--rg-text-color-override, var(--rg-text-color)));
+  color: var(
+    --rg-option-color,
+    var(--rg-text-color-override, var(--rg-text-color))
+  );
   font-family: var(--rg-text-font-family-override, var(--rg-text-font-family));
   font-size: var(--rg-text-font-size-override, var(--rg-text-font-size));
   transition: var(--rg-transition);

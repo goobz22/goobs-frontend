@@ -900,8 +900,8 @@ function DataGridContent({
   const filterDropdowns: FilterDropdownDef[] = useMemo(() => {
     if (!filters) return []
     return filters
-      .filter((f) => (f.type ?? 'dropdown') === 'dropdown')
-      .map((f) => {
+      .filter(f => (f.type ?? 'dropdown') === 'dropdown')
+      .map(f => {
         const dropdownChange = f.onChange as (
           value: DropdownOption | null
         ) => void
@@ -915,7 +915,7 @@ function DataGridContent({
             // expects so existing consumers keep working unchanged.
             const matched =
               (f.options ?? []).find(
-                (opt) =>
+                opt =>
                   String(opt._id ?? '') === resolvedValue ||
                   String(opt.value) === resolvedValue
               ) ?? null
@@ -932,8 +932,8 @@ function DataGridContent({
   const filterDateRanges: FilterDateRangeDef[] = useMemo(() => {
     if (!filters) return []
     return filters
-      .filter((f) => f.type === 'daterange')
-      .map((f) => {
+      .filter(f => f.type === 'daterange')
+      .map(f => {
         const rangeChange = f.onChange as (range: {
           start: Date | null
           end: Date | null

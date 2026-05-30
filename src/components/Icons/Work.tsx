@@ -8,7 +8,11 @@ interface WorkIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
 }
 
-const WorkIcon: React.FC<WorkIconProps> = ({ styles, style = {}, ...props }) => {
+const WorkIcon: React.FC<WorkIconProps> = ({
+  styles,
+  style = {},
+  ...props
+}) => {
   const theme = styles?.theme || 'light'
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and

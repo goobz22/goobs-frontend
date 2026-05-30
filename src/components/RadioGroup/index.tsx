@@ -92,14 +92,13 @@ export interface RadioGroupProps {
  * Only keys the caller set are emitted; everything else falls back to the
  * theme token defaults defined in RadioGroup.module.css.
  */
-const buildOverrideVars = (
-  styles?: RadioGroupStyles
-): React.CSSProperties => {
+const buildOverrideVars = (styles?: RadioGroupStyles): React.CSSProperties => {
   if (!styles) return {}
 
   const overrideVars: Record<string, string> = {}
 
-  if (styles.labelColor) overrideVars['--rg-label-color-override'] = styles.labelColor
+  if (styles.labelColor)
+    overrideVars['--rg-label-color-override'] = styles.labelColor
   if (styles.labelFontSize)
     overrideVars['--rg-label-font-size-override'] = styles.labelFontSize
   if (styles.labelFontWeight !== undefined)
@@ -111,9 +110,11 @@ const buildOverrideVars = (
   if (styles.marginBottom)
     overrideVars['--rg-label-margin-bottom'] = styles.marginBottom
 
-  if (styles.padding) overrideVars['--rg-option-padding-override'] = styles.padding
+  if (styles.padding)
+    overrideVars['--rg-option-padding-override'] = styles.padding
 
-  if (styles.radioSize) overrideVars['--rg-radio-size-override'] = styles.radioSize
+  if (styles.radioSize)
+    overrideVars['--rg-radio-size-override'] = styles.radioSize
   if (styles.radioOuterBorderWidth)
     overrideVars['--rg-radio-border-width-override'] =
       styles.radioOuterBorderWidth
@@ -129,7 +130,8 @@ const buildOverrideVars = (
   if (styles.radioInnerColor)
     overrideVars['--rg-radio-inner-color-override'] = styles.radioInnerColor
 
-  if (styles.textColor) overrideVars['--rg-text-color-override'] = styles.textColor
+  if (styles.textColor)
+    overrideVars['--rg-text-color-override'] = styles.textColor
   if (styles.textFontSize)
     overrideVars['--rg-text-font-size-override'] = styles.textFontSize
   if (styles.textFontFamily)
@@ -200,9 +202,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       className={cssStyles.formControl}
       data-component="RadioGroup"
       data-field-name={dataFieldName ?? name}
-      data-filled={
-        effectiveValue !== undefined && effectiveValue !== ''
-      }
+      data-filled={effectiveValue !== undefined && effectiveValue !== ''}
       data-theme={theme}
       style={overrideVars}
     >

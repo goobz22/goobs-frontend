@@ -124,9 +124,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
       ? { ...styles?.item, ...styles?.activeItem }
       : styles?.item
 
-    const content = (
-      <span className={cssStyles.itemContent}>{item.label}</span>
-    )
+    const content = <span className={cssStyles.itemContent}>{item.label}</span>
 
     if (item.href && !item.isActive) {
       return (

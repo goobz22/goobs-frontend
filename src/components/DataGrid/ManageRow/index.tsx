@@ -120,7 +120,11 @@ function ManageRow({
       data-action="add"
       aria-label="Add"
     >
-      <Add styles={{ theme: styles?.theme || 'light' }} width="14" height="14" />
+      <Add
+        styles={{ theme: styles?.theme || 'light' }}
+        width="14"
+        height="14"
+      />
       <span className={cssStyles.manageRowAddLabel}>Add</span>
     </button>
   )
@@ -147,7 +151,10 @@ function ManageRow({
         </>
       )}
 
-      <div className={cssStyles.manageRowCount} data-has-selection={hasSelection ? 'true' : 'false'}>
+      <div
+        className={cssStyles.manageRowCount}
+        data-has-selection={hasSelection ? 'true' : 'false'}
+      >
         {selectedRows.length}
       </div>
       <span className={cssStyles.manageRowLabel}>

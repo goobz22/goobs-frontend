@@ -72,7 +72,9 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   } = useFieldBinding<number>({
     name,
     value:
-      valueProp !== undefined && valueProp !== '' ? Number(valueProp) : undefined,
+      valueProp !== undefined && valueProp !== ''
+        ? Number(valueProp)
+        : undefined,
     onChange: onChangeProp,
   })
   // The display value: when the caller controls the field, use the original

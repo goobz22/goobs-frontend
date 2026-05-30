@@ -53,7 +53,7 @@ export function filterRowsBySearch(
   const contentTerms: string[] = []
 
   for (const term of searchTerms) {
-    const matchesColumn = columns.some((col) => {
+    const matchesColumn = columns.some(col => {
       const headerMatch = col.headerName?.toLowerCase().includes(term) ?? false
       const fieldMatch = col.field.toLowerCase().includes(term)
       return headerMatch || fieldMatch
@@ -67,9 +67,9 @@ export function filterRowsBySearch(
   }
 
   if (contentTerms.length > 0) {
-    return rows.filter((row) =>
-      contentTerms.some((term) =>
-        columns.some((col) => {
+    return rows.filter(row =>
+      contentTerms.some(term =>
+        columns.some(col => {
           const cellValue = toLowerCaseString(row[col.field])
           return cellValue.includes(term)
         })

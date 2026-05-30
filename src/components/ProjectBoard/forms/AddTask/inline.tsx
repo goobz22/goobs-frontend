@@ -577,7 +577,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                           .trim()
                         return (
                           <div key={key} className={cssStyles.articleField}>
-                            <div className={cssStyles.sectionTitle}>{label}</div>
+                            <div className={cssStyles.sectionTitle}>
+                              {label}
+                            </div>
                             <div
                               className={cssStyles.articleFieldTextPreWrap}
                               dangerouslySetInnerHTML={{ __html: value }}

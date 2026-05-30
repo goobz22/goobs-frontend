@@ -41,7 +41,8 @@
 /* Sacred theme — slower premium easing and a deeper hidden scale. */
 .zoomRoot[data-theme='sacred'] {
   --zoom-scale-exit: 0.7;
-  --zoom-transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+  --zoom-transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

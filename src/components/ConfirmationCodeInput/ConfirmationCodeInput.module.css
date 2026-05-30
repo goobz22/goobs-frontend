@@ -24,9 +24,10 @@
   --cci-container-border-width: 2px;
   --cci-container-border-color: rgba(255, 215, 0, 0.4);
   --cci-container-radius: 12px;
-  --cci-container-shadow: 0 0 20px rgba(255, 215, 0, 0.3),
-    0 0 40px rgba(255, 215, 0, 0.1);
-  --cci-container-bg-image: radial-gradient(
+  --cci-container-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+  --cci-container-bg-image:
+    radial-gradient(
       circle at top right,
       rgba(255, 215, 0, 0.05) 0%,
       transparent 50%
@@ -39,8 +40,8 @@
 
   /* sacred hover */
   --cci-hover-transform: translateY(-2px);
-  --cci-hover-shadow: 0 0 30px rgba(255, 215, 0, 0.5),
-    0 0 60px rgba(255, 215, 0, 0.2);
+  --cci-hover-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
   --cci-hover-border-color: rgba(255, 215, 0, 0.6);
 
   /* transitions: sacred=slow(300ms) */
@@ -58,8 +59,8 @@
   /* sacred input focus */
   --cci-input-focus-border-color: #ffd700;
   --cci-input-focus-transform: scale(1.05);
-  --cci-input-focus-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
-    inset 0 0 15px rgba(255, 215, 0, 0.3);
+  --cci-input-focus-shadow:
+    0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3);
 
   /* sacred status indicator */
   --cci-status-bg: rgba(255, 215, 0, 0.3);
@@ -69,9 +70,10 @@
   --cci-success-bg: rgba(10, 10, 10, 0.95);
   --cci-success-border-width: 2px;
   --cci-success-border-color: rgba(255, 215, 0, 0.6);
-  --cci-success-shadow: 0 0 30px rgba(255, 215, 0, 0.5),
-    0 0 60px rgba(255, 215, 0, 0.2);
-  --cci-success-bg-image: radial-gradient(
+  --cci-success-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+  --cci-success-bg-image:
+    radial-gradient(
       circle at center,
       rgba(255, 215, 0, 0.1) 0%,
       transparent 50%
@@ -114,13 +116,13 @@
   --cci-container-bg: rgba(255, 255, 255, 0.95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(226, 232, 240, 0.8);
-  --cci-container-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
+  --cci-container-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   --cci-container-bg-image: none;
 
   --cci-hover-transform: translateY(-1px);
-  --cci-hover-shadow: 0 4px 6px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.12);
+  --cci-hover-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
   --cci-hover-border-color: rgba(59, 130, 246, 0.3);
 
   --cci-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -143,8 +145,8 @@
   --cci-success-bg: rgba(240, 253, 244, 0.95);
   --cci-success-border-width: 1px;
   --cci-success-border-color: rgba(74, 222, 128, 0.4);
-  --cci-success-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
+  --cci-success-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   --cci-success-bg-image: none;
 
   --cci-success-icon-color: rgb(34, 197, 94);
@@ -161,13 +163,13 @@
   --cci-container-bg: rgba(31, 41, 55, 0.95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(75, 85, 99, 0.8);
-  --cci-container-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
-    0 1px 4px rgba(0, 0, 0, 0.2);
+  --cci-container-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
   --cci-container-bg-image: none;
 
   --cci-hover-transform: translateY(-1px);
-  --cci-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.3);
+  --cci-hover-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   --cci-hover-border-color: rgba(96, 165, 250, 0.4);
 
   --cci-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -190,8 +192,8 @@
   --cci-success-bg: rgba(20, 83, 45, 0.3);
   --cci-success-border-width: 1px;
   --cci-success-border-color: rgba(74, 222, 128, 0.4);
-  --cci-success-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
-    0 1px 4px rgba(0, 0, 0, 0.2);
+  --cci-success-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
   --cci-success-bg-image: none;
 
   --cci-success-icon-color: rgb(187, 247, 208);

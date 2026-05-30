@@ -128,11 +128,7 @@ const TransferList: React.FC<TransferListProps> = ({
   // Emit a transfer result to BOTH the form engine (when bound) and the caller's
   // onChange, preserving the original three-argument signature.
   const emitChange = React.useCallback(
-    (
-      nextLeft: string[],
-      nextRight: string[],
-      dropdownValue?: string
-    ): void => {
+    (nextLeft: string[], nextRight: string[], dropdownValue?: string): void => {
       if (isBound) boundOnChange?.(nextRight)
       onChange(nextLeft, nextRight, dropdownValue)
     },

@@ -63,7 +63,11 @@
       transparent 50%,
       rgba(255, 215, 0, 0.05) 100%
     ),
-    radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+    radial-gradient(
+      circle at top right,
+      rgba(255, 215, 0, 0.03) 0%,
+      transparent 50%
+    );
 
   /* Selection backgrounds (sacred defaults) */
   --bc-cell-selected-bg: rgba(255, 215, 0, 0.12);

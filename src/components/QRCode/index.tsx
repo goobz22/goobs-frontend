@@ -230,10 +230,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
           >
             {successMessage}
           </h5>
-          <div
-            className={cssStyles.buttonContainer}
-            style={{ width: '100%' }}
-          >
+          <div className={cssStyles.buttonContainer} style={{ width: '100%' }}>
             <CustomButton
               text="Disable Verification"
               styles={{

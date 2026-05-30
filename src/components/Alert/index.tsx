@@ -152,7 +152,12 @@ type DynamicStyle = React.CSSProperties & Record<string, string | undefined>
 /**
  * A component for displaying important messages with different severity levels and themes.
  */
-const Alert: React.FC<AlertProps> = ({ severity, message, onClose, styles }) => {
+const Alert: React.FC<AlertProps> = ({
+  severity,
+  message,
+  onClose,
+  styles,
+}) => {
   const [isClosing, setIsClosing] = useState(false)
 
   const handleClose = useCallback(() => {
@@ -250,7 +255,8 @@ const Alert: React.FC<AlertProps> = ({ severity, message, onClose, styles }) => 
     dynamicStyle['--alert-error-bg'] = styles.errorBackgroundColor
   if (styles?.errorBorderColor)
     dynamicStyle['--alert-error-border'] = styles.errorBorderColor
-  if (styles?.errorColor) dynamicStyle['--alert-error-color'] = styles.errorColor
+  if (styles?.errorColor)
+    dynamicStyle['--alert-error-color'] = styles.errorColor
   if (styles?.errorTextShadow)
     dynamicStyle['--alert-error-text-shadow'] = styles.errorTextShadow
   if (styles?.warningBackgroundColor)
