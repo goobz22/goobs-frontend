@@ -23,6 +23,14 @@ import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
 import SearchBar from '../../../Field/Search'
 import DateField from '../../../Field/Date/DateField'
 import TimeField from '../../../Field/Time/TimeField'
+import cssStyles from './ShowTask.module.css'
+
+/**
+ * Local class-composition helper. This repo has no clsx/classnames — compose
+ * conditional classes with a filter+join exactly like Card/Button do.
+ */
+const cx = (...names: Array<string | false | null | undefined>): string =>
+  names.filter(Boolean).join(' ')
 
 interface InlineShowTaskProps {
   taskId: string
@@ -390,6 +398,11 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const isSacred = styles?.theme === 'sacred'
   const isDark = styles?.theme === 'dark'
+  // Theme value for the [data-theme] attribute on the styled root (sacred is
+  // the hardcoded default class; light / dark are attribute overrides).
+  const theme = styles?.theme || 'sacred'
+  // Booleans surfaced as data-* attribute strings.
+  const mobileAttr = isMobile ? 'true' : undefined
 
   // Determine product/service info dynamically based on IDs
   const productServiceInfo = useMemo(() => {
@@ -494,213 +507,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     ],
     [teamMemberOptions]
   )
-
-  // Base colors
-  const bgColor = isSacred
-    ? 'rgba(0, 0, 0, 0.95)'
-    : isDark
-      ? '#1F2937'
-      : '#FFFFFF'
-
-  const borderColor = isSacred
-    ? 'rgba(255, 215, 0, 0.3)'
-    : isDark
-      ? '#374151'
-      : '#E5E7EB'
-
-  const textColor = isSacred ? '#FFD700' : isDark ? '#F9FAFB' : '#1F2937'
-  const secondaryTextColor = isSacred
-    ? 'rgba(255, 215, 0, 0.7)'
-    : isDark
-      ? '#D1D5DB'
-      : '#6B7280'
-
-  const sidebarBg = isSacred
-    ? 'rgba(0, 0, 0, 0.8)'
-    : isDark
-      ? '#111827'
-      : '#F9FAFB'
-
-  const tabActiveBg = isSacred
-    ? 'rgba(255, 215, 0, 0.2)'
-    : isDark
-      ? '#374151'
-      : '#FFFFFF'
-
-  const tabInactiveBg = isSacred
-    ? 'rgba(255, 215, 0, 0.05)'
-    : isDark
-      ? '#1F2937'
-      : '#F3F4F6'
-
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    height: isMobile ? 'auto' : '100vh',
-    minHeight: '100vh',
-    width: '100%',
-    backgroundColor: bgColor,
-    color: textColor,
-    overflow: isMobile ? 'visible' : 'hidden',
-    paddingRight: isMobile ? '0.5rem' : undefined,
-    boxSizing: 'border-box',
-  }
-
-  const sidebarStyle: React.CSSProperties = {
-    width: isMobile ? '100%' : isSidebarCollapsed ? '48px' : '280px',
-    backgroundColor: sidebarBg,
-    borderRight: isMobile ? 'none' : `1px solid ${borderColor}`,
-    borderBottom: isMobile ? `1px solid ${borderColor}` : 'none',
-    padding: isMobile
-      ? '1rem 1.5rem 1rem 1rem'
-      : isSidebarCollapsed
-        ? '0.5rem'
-        : '1.5rem',
-    overflowY: isMobile ? 'visible' : 'auto',
-    overflowX: 'hidden',
-    flexShrink: 0,
-    transition: 'width 0.3s ease, padding 0.3s ease',
-    position: 'relative',
-    boxSizing: 'border-box',
-  }
-
-  const collapseButtonStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '0.75rem',
-    right: isSidebarCollapsed ? '50%' : '0.75rem',
-    transform: isSidebarCollapsed ? 'translateX(50%)' : 'none',
-    width: '28px',
-    height: '28px',
-    borderRadius: '6px',
-    border: `1px solid ${borderColor}`,
-    backgroundColor: isSacred
-      ? 'rgba(255, 215, 0, 0.1)'
-      : isDark
-        ? '#374151'
-        : '#F3F4F6',
-    color: textColor,
-    cursor: 'pointer',
-    display: isMobile ? 'none' : 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.875rem',
-    transition: 'all 0.2s ease',
-    zIndex: 10,
-  }
-
-  const mainContentStyle: React.CSSProperties = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: isMobile ? 'visible' : 'hidden',
-  }
-
-  const tabsContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: isMobile ? '0.4rem' : '0.5rem',
-    padding: isMobile ? '0.75rem 1rem 0' : '1rem 1.5rem 0',
-    borderBottom: `1px solid ${borderColor}`,
-    backgroundColor: bgColor,
-    flexWrap: isMobile ? 'wrap' : 'nowrap',
-  }
-
-  const tabStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: isMobile ? '0.5rem 0.85rem' : '0.75rem 1.5rem',
-    backgroundColor: isActive ? tabActiveBg : tabInactiveBg,
-    border: `1px solid ${borderColor}`,
-    borderBottom: isActive ? 'none' : `1px solid ${borderColor}`,
-    borderRadius: '8px 8px 0 0',
-    cursor: 'pointer',
-    fontWeight: isActive ? 600 : 400,
-    color: isActive ? textColor : secondaryTextColor,
-    transition: 'all 0.2s',
-    fontSize: isMobile ? '0.75rem' : '0.875rem',
-    ...(isActive && {
-      transform: 'translateY(1px)',
-    }),
-  })
-
-  const contentAreaStyle: React.CSSProperties = {
-    flex: 1,
-    overflowY: isMobile ? 'visible' : 'auto',
-    padding: isMobile ? '1rem' : '1.5rem',
-  }
-
-  const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
-    fontWeight: 700,
-    color: secondaryTextColor,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '1rem',
-    ...(isSacred && {
-      color: 'rgba(255, 215, 0, 0.6)',
-      fontFamily: 'Cinzel, serif',
-    }),
-  }
-
-  const fieldRowStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    justifyContent: 'space-between',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    gap: isMobile ? '0.35rem' : '0',
-    padding: '0.75rem 0',
-    paddingRight: isMobile ? '0.5rem' : undefined,
-    borderBottom: `1px solid ${borderColor}`,
-  }
-
-  const fieldLabelStyle: React.CSSProperties = {
-    fontSize: '0.875rem',
-    color: secondaryTextColor,
-    fontWeight: 500,
-  }
-
-  const fieldValueStyle: React.CSSProperties = {
-    fontSize: '0.875rem',
-    color: textColor,
-    fontWeight: 500,
-    textAlign: isMobile ? 'left' : 'right',
-    maxWidth: isMobile ? '100%' : '60%',
-    width: isMobile ? '100%' : 'auto',
-    wordWrap: 'break-word',
-  }
-
-  const twoColumnGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-    gap: isMobile ? '1rem' : '2rem',
-  }
-
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: sidebarBg,
-    border: `1px solid ${borderColor}`,
-    borderRadius: '8px',
-    padding: isMobile ? '1rem' : '1.5rem',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: '0.5rem 1rem',
-    borderRadius: '6px',
-    border: `1px solid ${borderColor}`,
-    backgroundColor: 'transparent',
-    color: textColor,
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontWeight: 500,
-    width: isMobile ? '100%' : 'auto',
-    maxWidth: isMobile ? 'calc(100% - 0.5rem)' : undefined,
-    boxSizing: 'border-box',
-  }
-
-  const actionButtonsStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    gap: '0.5rem',
-    marginTop: '1.5rem',
-    paddingRight: isMobile ? '0.5rem' : undefined,
-  }
 
   const handleEditClick = () => {
     setIsEditMode(true)
@@ -873,11 +679,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   }
 
   const renderSidebar = () => (
-    <div style={sidebarStyle}>
+    <div
+      className={cssStyles.sidebar}
+      data-collapsed={isSidebarCollapsed ? 'true' : undefined}
+      data-mobile={mobileAttr}
+    >
       {/* Collapse/Expand Button */}
       <button
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        style={collapseButtonStyle}
+        className={cssStyles.collapseButton}
         title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {isSidebarCollapsed ? '»' : '«'}
@@ -885,55 +695,35 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
       {/* Collapsed State - Show icon only */}
       {isSidebarCollapsed ? (
-        <div
-          style={{
-            marginTop: '48px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1rem',
-          }}
-        >
-          <div
-            title="Ticket Summary"
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: isSacred
-                ? 'rgba(255, 215, 0, 0.1)'
-                : isDark
-                  ? '#374151'
-                  : '#E5E7EB',
-              borderRadius: '6px',
-              fontSize: '1rem',
-            }}
-          >
+        <div className={cssStyles.collapsedIcons}>
+          <div title="Ticket Summary" className={cssStyles.collapsedIcon}>
             📋
           </div>
         </div>
       ) : (
         <>
-          <div style={{ ...sectionTitleStyle, marginTop: '2rem' }}>
+          <div
+            className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleSidebar)}
+          >
             Ticket Summary
           </div>
 
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>Ticket #</div>
-            <div style={fieldValueStyle}>{taskId.substring(0, 8)}</div>
+          <div className={cssStyles.fieldRow}>
+            <div className={cssStyles.fieldLabel}>Ticket #</div>
+            <div className={cssStyles.fieldValue}>{taskId.substring(0, 8)}</div>
           </div>
 
           {/* Product or Service - Dynamically determined */}
-          <div style={fieldRowStyle}>
-            <div style={fieldLabelStyle}>{productServiceInfo.label}</div>
-            <div style={fieldValueStyle}>{productServiceInfo.name}</div>
+          <div className={cssStyles.fieldRow}>
+            <div className={cssStyles.fieldLabel}>
+              {productServiceInfo.label}
+            </div>
+            <div className={cssStyles.fieldValue}>{productServiceInfo.name}</div>
           </div>
 
           {/* Queue - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Queue"
                 options={queueDropdownOptions}
@@ -943,15 +733,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               />
             </div>
           ) : (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Queue</div>
-              <div style={fieldValueStyle}>{schedulingQueue}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Queue</div>
+              <div className={cssStyles.fieldValue}>{schedulingQueue}</div>
             </div>
           )}
 
           {/* Region - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Region"
                 options={regionDropdownOptions}
@@ -961,15 +751,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               />
             </div>
           ) : (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Region</div>
-              <div style={fieldValueStyle}>{region || 'Not set'}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Region</div>
+              <div className={cssStyles.fieldValue}>{region || 'Not set'}</div>
             </div>
           )}
 
           {/* Status - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Status"
                 options={statusDropdownOptions}
@@ -982,16 +772,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               />
             </div>
           ) : (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Status</div>
-              <div style={fieldValueStyle}>{status}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Status</div>
+              <div className={cssStyles.fieldValue}>{status}</div>
             </div>
           )}
 
           {/* Substatus - Editable in edit mode */}
           {isEditMode
             ? filteredSubStatusOptions.length > 0 && (
-                <div style={{ marginBottom: '1rem' }}>
+                <div className={cssStyles.editFieldWrap}>
                   <Dropdown
                     label="Substatus"
                     options={subStatusDropdownOptions}
@@ -1005,15 +795,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 </div>
               )
             : subStatus && (
-                <div style={fieldRowStyle}>
-                  <div style={fieldLabelStyle}>Substatus</div>
-                  <div style={fieldValueStyle}>{subStatus}</div>
+                <div className={cssStyles.fieldRow}>
+                  <div className={cssStyles.fieldLabel}>Substatus</div>
+                  <div className={cssStyles.fieldValue}>{subStatus}</div>
                 </div>
               )}
 
           {/* Severity - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Severity"
                 options={severityDropdownOptions}
@@ -1023,15 +813,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               />
             </div>
           ) : (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Severity</div>
-              <div style={fieldValueStyle}>{severity}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Severity</div>
+              <div className={cssStyles.fieldValue}>{severity}</div>
             </div>
           )}
 
           {/* Assigned To - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Assigned To"
                 options={teamMemberDropdownOptions}
@@ -1051,16 +841,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             </div>
           ) : (
             teamMemberAssigned && (
-              <div style={fieldRowStyle}>
-                <div style={fieldLabelStyle}>Assigned To</div>
-                <div style={fieldValueStyle}>{teamMemberAssigned}</div>
+              <div className={cssStyles.fieldRow}>
+                <div className={cssStyles.fieldLabel}>Assigned To</div>
+                <div className={cssStyles.fieldValue}>{teamMemberAssigned}</div>
               </div>
             )
           )}
 
           {/* Topics - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <MultiSelectChip
                 label="Topics"
                 defaultSelected={editedTopicIds}
@@ -1076,16 +866,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             </div>
           ) : (
             topics.length > 0 && (
-              <div style={fieldRowStyle}>
-                <div style={fieldLabelStyle}>Topics</div>
-                <div style={fieldValueStyle}>{topics.join(', ')}</div>
+              <div className={cssStyles.fieldRow}>
+                <div className={cssStyles.fieldLabel}>Topics</div>
+                <div className={cssStyles.fieldValue}>{topics.join(', ')}</div>
               </div>
             )
           )}
 
           {/* KB Articles - Editable in edit mode */}
           {isEditMode ? (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className={cssStyles.editFieldWrap}>
               <MultiSelectChip
                 label="KB Articles"
                 defaultSelected={editedArticleIds}
@@ -1101,9 +891,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             </div>
           ) : (
             knowledgebaseArticles.length > 0 && (
-              <div style={fieldRowStyle}>
-                <div style={fieldLabelStyle}>KB Articles</div>
-                <div style={fieldValueStyle}>
+              <div className={cssStyles.fieldRow}>
+                <div className={cssStyles.fieldLabel}>KB Articles</div>
+                <div className={cssStyles.fieldValue}>
                   {knowledgebaseArticles.join(', ')}
                 </div>
               </div>
@@ -1111,62 +901,32 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {nextActionDate && (
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Next Action</div>
-              <div style={fieldValueStyle}>{nextActionDate}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Next Action</div>
+              <div className={cssStyles.fieldValue}>{nextActionDate}</div>
             </div>
           )}
 
-          <div style={actionButtonsStyle}>
+          <div className={cssStyles.actionButtons} data-mobile={mobileAttr}>
             {isEditMode ? (
               <>
                 <button
-                  style={{
-                    ...buttonStyle,
-                    flex: 1,
-                    backgroundColor: isSacred
-                      ? 'rgba(34, 197, 94, 0.2)'
-                      : isDark
-                        ? '#065f46'
-                        : '#10b981',
-                    color: isSacred ? '#4ade80' : '#FFFFFF',
-                  }}
+                  className={cx(
+                    cssStyles.button,
+                    cssStyles.flexButton,
+                    cssStyles.saveButton
+                  )}
                   onClick={handleSaveEdit}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(34, 197, 94, 0.3)'
-                      : isDark
-                        ? '#047857'
-                        : '#059669'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(34, 197, 94, 0.2)'
-                      : isDark
-                        ? '#065f46'
-                        : '#10b981'
-                  }}
                 >
                   Save
                 </button>
                 <button
-                  style={{
-                    ...buttonStyle,
-                    flex: 1,
-                    backgroundColor: 'transparent',
-                    color: textColor,
-                  }}
+                  className={cx(
+                    cssStyles.button,
+                    cssStyles.flexButton,
+                    cssStyles.ghostButton
+                  )}
                   onClick={handleCancelEdit}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
                 >
                   Cancel
                 </button>
@@ -1174,62 +934,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             ) : (
               <>
                 <button
-                  style={{
-                    ...buttonStyle,
-                    flex: 1,
-                    backgroundColor: isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6',
-                  }}
+                  className={cx(
+                    cssStyles.button,
+                    cssStyles.flexButton,
+                    cssStyles.editButton
+                  )}
                   onClick={handleEditClick}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(255, 215, 0, 0.2)'
-                      : isDark
-                        ? '#4B5563'
-                        : '#E5E7EB'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6'
-                  }}
                 >
                   Edit
                 </button>
                 <button
-                  style={{
-                    ...buttonStyle,
-                    backgroundColor: isSacred
-                      ? 'rgba(220, 38, 38, 0.1)'
-                      : isDark
-                        ? '#7F1D1D'
-                        : '#FEF2F2',
-                    color: isSacred
-                      ? '#ff6b6b'
-                      : isDark
-                        ? '#FCA5A5'
-                        : '#DC2626',
-                  }}
+                  className={cx(cssStyles.button, cssStyles.deleteButton)}
                   onClick={onDelete}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(220, 38, 38, 0.2)'
-                      : isDark
-                        ? '#991B1B'
-                        : '#FEE2E2'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = isSacred
-                      ? 'rgba(220, 38, 38, 0.1)'
-                      : isDark
-                        ? '#7F1D1D'
-                        : '#FEF2F2'
-                  }}
                 >
                   Delete
                 </button>
@@ -1237,25 +953,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             )}
           </div>
 
-          <div style={{ ...actionButtonsStyle, marginTop: '1rem' }}>
+          <div
+            className={cx(
+              cssStyles.actionButtons,
+              cssStyles.actionButtonsSpacedTop
+            )}
+            data-mobile={mobileAttr}
+          >
             <button
-              style={{
-                ...buttonStyle,
-                width: '100%',
-                backgroundColor: 'transparent',
-                color: textColor,
-              }}
+              className={cx(
+                cssStyles.button,
+                cssStyles.fullWidthButton,
+                cssStyles.ghostButton
+              )}
               onClick={onBack}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : isDark
-                    ? '#374151'
-                    : '#F3F4F6'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
             >
               Back to Board
             </button>
@@ -1306,47 +1017,55 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
     return (
       <>
-        <div style={twoColumnGridStyle}>
+        <div className={cssStyles.twoColumnGrid}>
           {/* Left Column - User Info */}
-          <div style={cardStyle}>
-            <div style={{ ...sectionTitleStyle, marginTop: 0 }}>User</div>
-
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Requestor</div>
-              <div style={fieldValueStyle}>{createdBy}</div>
+          <div className={cssStyles.card}>
+            <div
+              className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleTopReset)}
+            >
+              User
             </div>
 
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Customer</div>
-              <div style={fieldValueStyle}>{customerAssigned}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Requestor</div>
+              <div className={cssStyles.fieldValue}>{createdBy}</div>
+            </div>
+
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Customer</div>
+              <div className={cssStyles.fieldValue}>{customerAssigned}</div>
             </div>
           </div>
 
           {/* Right Column - Details */}
-          <div style={cardStyle}>
-            <div style={{ ...sectionTitleStyle, marginTop: 0 }}>Details</div>
-
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Title</div>
-              <div style={fieldValueStyle}>{taskTitle}</div>
+          <div className={cssStyles.card}>
+            <div
+              className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleTopReset)}
+            >
+              Details
             </div>
 
-            <div style={fieldRowStyle}>
-              <div style={fieldLabelStyle}>Description</div>
-              <div style={fieldValueStyle}>{description}</div>
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Title</div>
+              <div className={cssStyles.fieldValue}>{taskTitle}</div>
+            </div>
+
+            <div className={cssStyles.fieldRow}>
+              <div className={cssStyles.fieldLabel}>Description</div>
+              <div className={cssStyles.fieldValue}>{description}</div>
             </div>
 
             {topics.length > 0 && (
-              <div style={fieldRowStyle}>
-                <div style={fieldLabelStyle}>Topics</div>
-                <div style={fieldValueStyle}>{topics.join(', ')}</div>
+              <div className={cssStyles.fieldRow}>
+                <div className={cssStyles.fieldLabel}>Topics</div>
+                <div className={cssStyles.fieldValue}>{topics.join(', ')}</div>
               </div>
             )}
 
             {knowledgebaseArticles.length > 0 && (
-              <div style={fieldRowStyle}>
-                <div style={fieldLabelStyle}>KB Articles</div>
-                <div style={fieldValueStyle}>
+              <div className={cssStyles.fieldRow}>
+                <div className={cssStyles.fieldLabel}>KB Articles</div>
+                <div className={cssStyles.fieldValue}>
                   {knowledgebaseArticles.join(', ')}
                 </div>
               </div>
@@ -1356,21 +1075,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
         {/* Internal Company Notes Section - Shown when associatedCompanyId is provided */}
         {associatedCompanyId && (
-          <div style={{ ...cardStyle, marginTop: '2rem' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1rem',
-              }}
-            >
+          <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
+            <div className={cssStyles.notesHeaderRow}>
               <div
-                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
               >
                 Internal Company Notes
                 {associatedCompanyName && (
-                  <span style={{ fontWeight: 400, marginLeft: '0.5rem' }}>
+                  <span className={cssStyles.notesHeaderSuffix}>
                     ({associatedCompanyName})
                   </span>
                 )}
@@ -1381,41 +1093,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     setEditedCompanyNotes(companyInternalNotes || '')
                     setIsEditingCompanyNotes(true)
                   }}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '6px',
-                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
-                    backgroundColor: isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6',
-                    color: isSacred ? '#FFD700' : textColor,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className={cssStyles.notesEditButton}
                 >
                   {companyInternalNotes ? 'Edit Note' : '+ Add Note'}
                 </button>
               )}
             </div>
 
-            <p
-              style={{
-                fontSize: '0.8rem',
-                color: secondaryTextColor,
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                backgroundColor: isSacred
-                  ? 'rgba(255, 152, 0, 0.05)'
-                  : isDark
-                    ? '#111827'
-                    : '#FEF3C7',
-                borderRadius: '6px',
-                borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
-              }}
-            >
+            <p className={cssStyles.notesHelpText}>
               These notes are attached to the company record and will appear on
               all tasks for this company. For task-specific internal comments,
               use the Comments tab.
@@ -1423,59 +1108,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
             {/* Edit Company Notes Form */}
             {isEditingCompanyNotes ? (
-              <div
-                style={{
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 152, 0, 0.05)'
-                    : isDark
-                      ? '#1F2937'
-                      : '#F9FAFB',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
-                }}
-              >
+              <div className={cssStyles.notesEditForm}>
                 <textarea
                   value={editedCompanyNotes}
                   onChange={e => setEditedCompanyNotes(e.target.value)}
                   placeholder="Add internal notes about this company..."
-                  style={{
-                    width: '100%',
-                    minHeight: '100px',
-                    padding: '0.75rem',
-                    borderRadius: '6px',
-                    border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
-                    backgroundColor: bgColor,
-                    color: textColor,
-                    fontSize: '0.875rem',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box',
-                  }}
+                  className={cssStyles.notesTextarea}
                 />
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    marginTop: '0.75rem',
-                  }}
-                >
+                <div className={cssStyles.notesFormActions}>
                   <button
                     onClick={handleSaveCompanyNotes}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: 'none',
-                      backgroundColor: isSacred
-                        ? 'rgba(255, 152, 0, 0.2)'
-                        : isDark
-                          ? '#78350f'
-                          : '#F59E0B',
-                      color: isSacred ? '#FF9800' : '#FFFFFF',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
+                    className={cssStyles.notesSaveButton}
                   >
                     Save Note
                   </button>
@@ -1484,15 +1127,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       setIsEditingCompanyNotes(false)
                       setEditedCompanyNotes(companyInternalNotes || '')
                     }}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: 'transparent',
-                      color: textColor,
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                    }}
+                    className={cssStyles.smallCancelButton}
                   >
                     Cancel
                   </button>
@@ -1500,63 +1135,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
             ) : companyInternalNotes ? (
               /* Display Company Notes - from company record */
-              <div
-                style={{
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 193, 7, 0.1)'
-                    : isDark
-                      ? '#1F2937'
-                      : '#FEF9C3',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
-                  borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.5rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: isSacred ? '#FFD700' : '#92400E',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
+              <div className={cssStyles.notesDisplay}>
+                <div className={cssStyles.notesDisplayHeader}>
                   <span>🏢</span>
                   <span>Company Notes</span>
                 </div>
-                <div
-                  style={{
-                    fontSize: '0.875rem',
-                    color: textColor,
-                    lineHeight: 1.6,
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
+                <div className={cssStyles.notesDisplayBody}>
                   {companyInternalNotes}
                 </div>
               </div>
             ) : (
               /* Empty State */
-              <div
-                style={{
-                  padding: '1.5rem',
-                  borderRadius: '6px',
-                  border: `1px dashed ${borderColor}`,
-                  backgroundColor: isSacred
-                    ? 'rgba(0, 0, 0, 0.2)'
-                    : isDark
-                      ? '#111827'
-                      : '#F9FAFB',
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  textAlign: 'center',
-                }}
-              >
+              <div className={cssStyles.emptyPlaceholder}>
                 No internal company notes yet. Click &quot;+ Add Note&quot; to
                 add one.
               </div>
@@ -1566,21 +1156,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
         {/* Internal Customer Notes Section - Shown when associatedCustomerId is provided */}
         {associatedCustomerId && (
-          <div style={{ ...cardStyle, marginTop: '2rem' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1rem',
-              }}
-            >
+          <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
+            <div className={cssStyles.notesHeaderRow}>
               <div
-                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
               >
                 Internal Customer Notes
                 {associatedCustomerName && (
-                  <span style={{ fontWeight: 400, marginLeft: '0.5rem' }}>
+                  <span className={cssStyles.notesHeaderSuffix}>
                     ({associatedCustomerName})
                   </span>
                 )}
@@ -1591,41 +1174,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     setEditedCustomerNotes(customerInternalNotes || '')
                     setIsEditingCustomerNotes(true)
                   }}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '6px',
-                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
-                    backgroundColor: isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6',
-                    color: isSacred ? '#FFD700' : textColor,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className={cssStyles.notesEditButton}
                 >
                   {customerInternalNotes ? 'Edit Note' : '+ Add Note'}
                 </button>
               )}
             </div>
 
-            <p
-              style={{
-                fontSize: '0.8rem',
-                color: secondaryTextColor,
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                backgroundColor: isSacred
-                  ? 'rgba(255, 152, 0, 0.05)'
-                  : isDark
-                    ? '#111827'
-                    : '#FEF3C7',
-                borderRadius: '6px',
-                borderLeft: `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`,
-              }}
-            >
+            <p className={cssStyles.notesHelpText}>
               These notes are attached to the customer record and will appear on
               all tasks for this customer. For task-specific internal comments,
               use the Comments tab.
@@ -1633,59 +1189,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
             {/* Edit Customer Notes Form */}
             {isEditingCustomerNotes ? (
-              <div
-                style={{
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 152, 0, 0.05)'
-                    : isDark
-                      ? '#1F2937'
-                      : '#F9FAFB',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.2)' : borderColor}`,
-                }}
-              >
+              <div className={cssStyles.notesEditForm}>
                 <textarea
                   value={editedCustomerNotes}
                   onChange={e => setEditedCustomerNotes(e.target.value)}
                   placeholder="Add internal notes about this customer..."
-                  style={{
-                    width: '100%',
-                    minHeight: '100px',
-                    padding: '0.75rem',
-                    borderRadius: '6px',
-                    border: `1px solid ${isSacred ? 'rgba(255, 152, 0, 0.3)' : borderColor}`,
-                    backgroundColor: bgColor,
-                    color: textColor,
-                    fontSize: '0.875rem',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box',
-                  }}
+                  className={cssStyles.notesTextarea}
                 ></textarea>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    marginTop: '0.75rem',
-                  }}
-                >
+                <div className={cssStyles.notesFormActions}>
                   <button
                     onClick={handleSaveCustomerNotes}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: 'none',
-                      backgroundColor: isSacred
-                        ? 'rgba(255, 152, 0, 0.2)'
-                        : isDark
-                          ? '#78350f'
-                          : '#F59E0B',
-                      color: isSacred ? '#FF9800' : '#FFFFFF',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
+                    className={cssStyles.notesSaveButton}
                   >
                     Save Note
                   </button>
@@ -1694,15 +1208,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       setIsEditingCustomerNotes(false)
                       setEditedCustomerNotes(customerInternalNotes || '')
                     }}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: 'transparent',
-                      color: textColor,
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                    }}
+                    className={cssStyles.smallCancelButton}
                   >
                     Cancel
                   </button>
@@ -1710,63 +1216,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
             ) : customerInternalNotes ? (
               /* Display Customer Notes - from customer record */
-              <div
-                style={{
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(255, 193, 7, 0.1)'
-                    : isDark
-                      ? '#1F2937'
-                      : '#FEF9C3',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSacred ? 'rgba(255, 193, 7, 0.3)' : '#FCD34D'}`,
-                  borderLeft: `4px solid ${isSacred ? '#FFC107' : '#F59E0B'}`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.5rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: isSacred ? '#FFD700' : '#92400E',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
+              <div className={cssStyles.notesDisplay}>
+                <div className={cssStyles.notesDisplayHeader}>
                   <span>📋</span>
                   <span>Customer Notes</span>
                 </div>
-                <div
-                  style={{
-                    fontSize: '0.875rem',
-                    color: textColor,
-                    lineHeight: 1.6,
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
+                <div className={cssStyles.notesDisplayBody}>
                   {customerInternalNotes}
                 </div>
               </div>
             ) : (
               /* Empty State */
-              <div
-                style={{
-                  padding: '1.5rem',
-                  borderRadius: '6px',
-                  border: `1px dashed ${borderColor}`,
-                  backgroundColor: isSacred
-                    ? 'rgba(0, 0, 0, 0.2)'
-                    : isDark
-                      ? '#111827'
-                      : '#F9FAFB',
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  textAlign: 'center',
-                }}
-              >
+              <div className={cssStyles.emptyPlaceholder}>
                 No internal customer notes yet. Click &quot;+ Add Note&quot; to
                 add one.
               </div>
@@ -1801,7 +1262,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       c => !c.text.startsWith('[INTERNAL]')
     )
     const internalNotes = comments.filter(c => c.text.startsWith('[INTERNAL]'))
-
     const currentComments =
       commentSection === 'external' ? publicComments : internalNotes
 
@@ -1833,54 +1293,61 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       }
     }
 
-    // Section toggle button style
-    const sectionButtonStyle = (isActive: boolean): React.CSSProperties => ({
-      flex: 1,
-      padding: '0.75rem 1rem',
-      backgroundColor: isActive
-        ? isSacred
-          ? 'rgba(255, 215, 0, 0.2)'
-          : isDark
-            ? '#374151'
-            : '#3B82F6'
-        : isSacred
-          ? 'rgba(255, 215, 0, 0.05)'
-          : isDark
-            ? '#1F2937'
-            : '#F3F4F6',
-      border: `1px solid ${
-        isActive
-          ? isSacred
-            ? 'rgba(255, 215, 0, 0.5)'
-            : '#3B82F6'
-          : borderColor
-      }`,
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontWeight: isActive ? 600 : 400,
-      fontSize: '0.875rem',
-      color: isActive ? (isSacred ? '#FFD700' : '#FFFFFF') : secondaryTextColor,
-      transition: 'all 0.2s',
-    })
+    // Runtime accent color for the section description left border + add button.
+    const isInternal = commentSection === 'internal'
+    // External accent: sacred gold else blue. Internal accent: sacred / amber.
+    const sectionAccent = isInternal
+      ? isSacred
+        ? '#FF9800'
+        : '#F59E0B'
+      : isSacred
+        ? '#FFD700'
+        : '#3B82F6'
+
+    // Add-comment textarea border (internal gets amber accent).
+    const commentInputBorderVars = isInternal
+      ? ({
+          ['--st-input-border']: isSacred
+            ? 'rgba(255, 152, 0, 0.3)'
+            : '#F59E0B',
+        } as React.CSSProperties)
+      : undefined
+
+    // Submit button colors (internal amber, external blue/gold).
+    const submitVars = (
+      isInternal
+        ? {
+            ['--st-submit-bg']: isSacred
+              ? 'rgba(255, 152, 0, 0.2)'
+              : isDark
+                ? '#78350f'
+                : '#F59E0B',
+            ['--st-submit-color']: isSacred ? '#FF9800' : '#FFFFFF',
+          }
+        : {
+            ['--st-submit-bg']: isSacred
+              ? 'rgba(255, 215, 0, 0.2)'
+              : isDark
+                ? '#374151'
+                : '#3B82F6',
+            ['--st-submit-color']: isSacred ? '#FFD700' : '#FFFFFF',
+          }
+    ) as React.CSSProperties
 
     return (
-      <div style={cardStyle}>
+      <div className={cssStyles.card}>
         {/* Section Toggle */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '0.5rem',
-            marginBottom: '1.5rem',
-          }}
-        >
+        <div className={cssStyles.commentToggleRow}>
           <button
-            style={sectionButtonStyle(commentSection === 'external')}
+            className={cssStyles.sectionToggle}
+            data-active={commentSection === 'external' ? 'true' : undefined}
             onClick={() => setCommentSection('external')}
           >
             External Comments ({publicComments.length})
           </button>
           <button
-            style={sectionButtonStyle(commentSection === 'internal')}
+            className={cssStyles.sectionToggle}
+            data-active={commentSection === 'internal' ? 'true' : undefined}
             onClick={() => setCommentSection('internal')}
           >
             Internal Comments ({internalNotes.length})
@@ -1889,27 +1356,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
         {/* Section Description */}
         <p
-          style={{
-            fontSize: '0.8rem',
-            color: secondaryTextColor,
-            marginBottom: '1rem',
-            padding: '0.75rem',
-            backgroundColor: isSacred
-              ? 'rgba(255, 215, 0, 0.05)'
-              : isDark
-                ? '#111827'
-                : '#F9FAFB',
-            borderRadius: '6px',
-            borderLeft: `3px solid ${
-              commentSection === 'external'
-                ? isSacred
-                  ? '#FFD700'
-                  : '#3B82F6'
-                : isSacred
-                  ? '#FF9800'
-                  : '#F59E0B'
-            }`,
-          }}
+          className={cssStyles.sectionDescription}
+          style={{ ['--st-accent']: sectionAccent } as React.CSSProperties}
         >
           {commentSection === 'external'
             ? 'External comments are visible to the customer and can be used for customer communication.'
@@ -1917,7 +1365,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         </p>
 
         {/* Add Comment */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className={cssStyles.commentInputWrap}>
           <textarea
             value={newCommentText}
             onChange={e => setNewCommentText(e.target.value)}
@@ -1926,51 +1374,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 ? 'Add a comment for the customer...'
                 : 'Add an internal note (only visible to employees)...'
             }
-            style={{
-              width: '100%',
-              minHeight: '80px',
-              padding: '0.75rem',
-              borderRadius: '6px',
-              border: `1px solid ${
-                commentSection === 'internal'
-                  ? isSacred
-                    ? 'rgba(255, 152, 0, 0.3)'
-                    : '#F59E0B'
-                  : borderColor
-              }`,
-              backgroundColor: bgColor,
-              color: textColor,
-              fontSize: '0.875rem',
-              resize: 'vertical',
-              fontFamily: 'inherit',
-              boxSizing: 'border-box',
-            }}
+            className={cssStyles.commentTextarea}
+            style={commentInputBorderVars}
           />
           <button
-            style={{
-              ...buttonStyle,
-              marginTop: '0.5rem',
-              backgroundColor:
-                commentSection === 'internal'
-                  ? isSacred
-                    ? 'rgba(255, 152, 0, 0.2)'
-                    : isDark
-                      ? '#78350f'
-                      : '#F59E0B'
-                  : isSacred
-                    ? 'rgba(255, 215, 0, 0.2)'
-                    : isDark
-                      ? '#374151'
-                      : '#3B82F6',
-              color:
-                commentSection === 'internal'
-                  ? isSacred
-                    ? '#FF9800'
-                    : '#FFFFFF'
-                  : isSacred
-                    ? '#FFD700'
-                    : '#FFFFFF',
-            }}
+            className={cx(cssStyles.button, cssStyles.commentSubmitButton)}
+            style={submitVars}
             onClick={handleAddComment}
           >
             {commentSection === 'external'
@@ -1980,15 +1389,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         </div>
 
         {/* Comments List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className={cssStyles.commentsList}>
           {currentComments.length === 0 ? (
-            <p
-              style={{
-                color: secondaryTextColor,
-                fontSize: '0.875rem',
-                textAlign: 'center',
-              }}
-            >
+            <p className={cssStyles.centeredMuted}>
               {commentSection === 'external'
                 ? 'No external comments yet. Be the first to communicate with the customer!'
                 : 'No internal notes yet. Add notes for your team!'}
@@ -2001,82 +1404,42 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   ? comment.text.replace(/^\[INTERNAL\]\s*/, '')
                   : comment.text
 
+              // Runtime border + left accent for the comment card.
+              const commentCardVars = (
+                commentSection === 'internal'
+                  ? {
+                      ['--st-comment-border']: isSacred
+                        ? 'rgba(255, 152, 0, 0.2)'
+                        : 'rgba(245, 158, 11, 0.3)',
+                      ['--st-comment-accent']: isSacred ? '#FF9800' : '#F59E0B',
+                    }
+                  : {}
+              ) as React.CSSProperties
+
               return (
                 <div
                   key={comment._id}
-                  style={{
-                    padding: '1rem',
-                    backgroundColor: bgColor,
-                    border: `1px solid ${
-                      commentSection === 'internal'
-                        ? isSacred
-                          ? 'rgba(255, 152, 0, 0.2)'
-                          : 'rgba(245, 158, 11, 0.3)'
-                        : borderColor
-                    }`,
-                    borderRadius: '6px',
-                    borderLeft:
-                      commentSection === 'internal'
-                        ? `3px solid ${isSacred ? '#FF9800' : '#F59E0B'}`
-                        : undefined,
-                  }}
+                  className={cssStyles.commentCard}
+                  data-internal={
+                    commentSection === 'internal' ? 'true' : undefined
+                  }
+                  style={commentCardVars}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          color: textColor,
-                        }}
-                      >
+                  <div className={cssStyles.commentCardHeader}>
+                    <div className={cssStyles.commentAuthorRow}>
+                      <div className={cssStyles.commentAuthorName}>
                         {resolveAuthorName(comment.createdBy)}
                       </div>
-                      <div
-                        style={{
-                          fontSize: '0.75rem',
-                          color: secondaryTextColor,
-                        }}
-                      >
+                      <div className={cssStyles.commentTimestamp}>
                         {new Date(comment.createdAt).toLocaleString()}
                       </div>
                       {commentSection === 'internal' && (
-                        <span
-                          style={{
-                            fontSize: '0.65rem',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            backgroundColor: isSacred
-                              ? 'rgba(255, 152, 0, 0.15)'
-                              : 'rgba(245, 158, 11, 0.15)',
-                            color: isSacred ? '#FF9800' : '#F59E0B',
-                            fontWeight: 600,
-                          }}
-                        >
+                        <span className={cssStyles.internalBadge}>
                           INTERNAL
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        alignItems: 'center',
-                      }}
-                    >
+                    <div className={cssStyles.commentActions}>
                       {comment.editHistory &&
                         comment.editHistory.length > 1 && (
                           <button
@@ -2087,16 +1450,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                                   : comment._id
                               )
                             }
-                            style={{
-                              fontSize: '0.7rem',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              backgroundColor: 'transparent',
-                              color: secondaryTextColor,
-                              border: 'none',
-                              cursor: 'pointer',
-                              textDecoration: 'underline',
-                            }}
+                            className={cssStyles.historyToggleButton}
                           >
                             {viewingRevisionHistoryId === comment._id
                               ? 'Hide History'
@@ -2107,19 +1461,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         editingCommentId !== comment._id && (
                           <button
                             onClick={() => handleEditCommentClick(comment)}
-                            style={{
-                              fontSize: '0.75rem',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              backgroundColor: 'transparent',
-                              color: isSacred
-                                ? '#FFD700'
-                                : isDark
-                                  ? '#60A5FA'
-                                  : '#3B82F6',
-                              border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : isDark ? '#60A5FA' : '#3B82F6'}`,
-                              cursor: 'pointer',
-                            }}
+                            className={cssStyles.commentEditButton}
                           >
                             Edit
                           </button>
@@ -2131,146 +1473,90 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       <textarea
                         value={editingCommentText}
                         onChange={e => setEditingCommentText(e.target.value)}
-                        style={{
-                          width: '100%',
-                          minHeight: '60px',
-                          padding: '0.5rem',
-                          borderRadius: '4px',
-                          border: `1px solid ${borderColor}`,
-                          backgroundColor: bgColor,
-                          color: textColor,
-                          fontSize: '0.875rem',
-                          resize: 'vertical',
-                          fontFamily: 'inherit',
-                          marginBottom: '0.5rem',
-                        }}
+                        className={cssStyles.commentEditTextarea}
                       />
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div className={cssStyles.inlineButtonRow}>
                         <button
                           onClick={() => handleSaveCommentEdit(comment._id)}
-                          style={{
-                            ...buttonStyle,
-                            fontSize: '0.75rem',
-                            padding: '4px 12px',
-                            backgroundColor: isSacred
-                              ? 'rgba(34, 197, 94, 0.2)'
-                              : isDark
-                                ? '#065f46'
-                                : '#10b981',
-                            color: isSacred ? '#4ade80' : '#FFFFFF',
-                          }}
+                          className={cx(
+                            cssStyles.button,
+                            cssStyles.tinyButton,
+                            cssStyles.saveButton
+                          )}
                         >
                           Save
                         </button>
                         <button
                           onClick={handleCancelCommentEdit}
-                          style={{
-                            ...buttonStyle,
-                            fontSize: '0.75rem',
-                            padding: '4px 12px',
-                            backgroundColor: 'transparent',
-                            color: textColor,
-                          }}
+                          className={cx(
+                            cssStyles.button,
+                            cssStyles.tinyButton,
+                            cssStyles.ghostButton
+                          )}
                         >
                           Cancel
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        fontSize: '0.875rem',
-                        lineHeight: '1.5',
-                        color: textColor,
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {displayText}
-                    </div>
+                    <div className={cssStyles.commentBody}>{displayText}</div>
                   )}
                   {/* Inline revision history display */}
                   {viewingRevisionHistoryId === comment._id &&
                     comment.editHistory &&
                     comment.editHistory.length > 1 && (
-                      <div
-                        style={{
-                          marginTop: '0.75rem',
-                          padding: '0.75rem',
-                          backgroundColor: isSacred
-                            ? 'rgba(255, 215, 0, 0.05)'
-                            : isDark
-                              ? 'rgba(0, 0, 0, 0.3)'
-                              : 'rgba(0, 0, 0, 0.03)',
-                          borderRadius: '6px',
-                          border: `1px solid ${borderColor}`,
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            color: secondaryTextColor,
-                            marginBottom: '0.5rem',
-                          }}
-                        >
+                      <div className={cssStyles.revisionHistory}>
+                        <div className={cssStyles.revisionHistoryTitle}>
                           Edit History ({comment.editHistory.length} revisions)
                         </div>
                         {comment.editHistory
                           .slice()
                           .reverse()
-                          .map((revision, idx) => (
-                            <div
-                              key={revision._id}
-                              style={{
-                                padding: '0.5rem',
-                                marginBottom:
-                                  idx < comment.editHistory.length - 1
-                                    ? '0.5rem'
-                                    : 0,
-                                backgroundColor: revision.isOriginal
-                                  ? isSacred
-                                    ? 'rgba(255, 215, 0, 0.1)'
-                                    : 'rgba(59, 130, 246, 0.1)'
-                                  : 'transparent',
-                                borderRadius: '4px',
-                                borderLeft: `3px solid ${
-                                  revision.isOriginal
-                                    ? isSacred
-                                      ? '#FFD700'
-                                      : '#3B82F6'
-                                    : borderColor
-                                }`,
-                              }}
-                            >
+                          .map((revision, idx) => {
+                            // Runtime bg + left accent: original revisions are
+                            // highlighted, others are transparent/border.
+                            const revisionVars = {
+                              ['--st-revision-bg']: revision.isOriginal
+                                ? isSacred
+                                  ? 'rgba(255, 215, 0, 0.1)'
+                                  : 'rgba(59, 130, 246, 0.1)'
+                                : 'transparent',
+                              ['--st-revision-accent']: revision.isOriginal
+                                ? isSacred
+                                  ? '#FFD700'
+                                  : '#3B82F6'
+                                : undefined,
+                            } as React.CSSProperties
+                            return (
                               <div
+                                key={revision._id}
+                                className={cssStyles.revisionItem}
                                 style={{
-                                  fontSize: '0.7rem',
-                                  color: secondaryTextColor,
-                                  marginBottom: '0.25rem',
+                                  ...revisionVars,
+                                  marginBottom:
+                                    idx < comment.editHistory.length - 1
+                                      ? '0.5rem'
+                                      : 0,
                                 }}
                               >
-                                {revision.isOriginal
-                                  ? 'Original'
-                                  : `Edited by ${revision.editedBy || 'Unknown'}`}
-                                {revision.editedAt && (
-                                  <span style={{ marginLeft: '0.5rem' }}>
-                                    {new Date(
-                                      revision.editedAt
-                                    ).toLocaleString()}
-                                  </span>
-                                )}
+                                <div className={cssStyles.revisionMeta}>
+                                  {revision.isOriginal
+                                    ? 'Original'
+                                    : `Edited by ${revision.editedBy || 'Unknown'}`}
+                                  {revision.editedAt && (
+                                    <span className={cssStyles.revisionMetaTime}>
+                                      {new Date(
+                                        revision.editedAt
+                                      ).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className={cssStyles.revisionText}>
+                                  {revision.text}
+                                </div>
                               </div>
-                              <div
-                                style={{
-                                  fontSize: '0.8rem',
-                                  color: textColor,
-                                  whiteSpace: 'pre-wrap',
-                                }}
-                              >
-                                {revision.text}
-                              </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                       </div>
                     )}
                 </div>
@@ -2292,21 +1578,21 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     }
 
     return (
-      <div style={cardStyle}>
-        <div style={{ ...sectionTitleStyle, marginTop: 0 }}>
+      <div className={cssStyles.card}>
+        <div
+          className={cx(cssStyles.sectionTitle, cssStyles.sectionTitleTopReset)}
+        >
           Case Updates ({caseUpdates.length})
         </div>
 
         {/* Activity Timeline */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className={cssStyles.commentsList}>
           {caseUpdates.length === 0 ? (
             <p
-              style={{
-                color: secondaryTextColor,
-                fontSize: '0.875rem',
-                textAlign: 'center',
-                marginTop: '1rem',
-              }}
+              className={cx(
+                cssStyles.centeredMuted,
+                cssStyles.centeredMutedSpacedTop
+              )}
             >
               No case updates yet. All task changes will appear here.
             </p>
@@ -2314,47 +1600,27 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             caseUpdates.map(update => (
               <div
                 key={update._id}
-                style={{
-                  padding: '1rem',
-                  backgroundColor: bgColor,
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: '6px',
-                  borderLeft: `4px solid ${updateTypeColors[update.updateType] || borderColor}`,
-                }}
+                className={cssStyles.caseUpdateCard}
+                style={
+                  {
+                    ['--st-update-accent']:
+                      updateTypeColors[update.updateType] || undefined,
+                  } as React.CSSProperties
+                }
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                <div className={cssStyles.caseUpdateHeader}>
+                  <div className={cssStyles.caseUpdateAuthor}>
                     {update.updatedBy}
                   </div>
-                  <div
-                    style={{ fontSize: '0.75rem', color: secondaryTextColor }}
-                  >
+                  <div className={cssStyles.caseUpdateTimestamp}>
                     {new Date(update.updatedAt).toLocaleString()}
                   </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: '0.875rem',
-                    lineHeight: '1.5',
-                    color: textColor,
-                  }}
-                >
+                <div className={cssStyles.caseUpdateBody}>
                   {update.description}
                 </div>
                 {update.fieldChanged && (
-                  <div
-                    style={{
-                      fontSize: '0.75rem',
-                      color: secondaryTextColor,
-                      marginTop: '0.5rem',
-                    }}
-                  >
+                  <div className={cssStyles.caseUpdateField}>
                     {update.fieldChanged}: {update.oldValue} → {update.newValue}
                   </div>
                 )}
@@ -2617,57 +1883,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     }
   }
 
-  // Scheduling tab input styles
-  const meetingInputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '12px',
-    fontSize: '0.875rem',
-    backgroundColor: bgColor,
-    color: textColor,
-    border: `1px solid ${borderColor}`,
-    borderRadius: '8px',
-    outline: 'none',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  }
-
-  const meetingLabelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '8px',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: isSacred ? 'rgba(255, 215, 0, 0.8)' : secondaryTextColor,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  }
-
-  const meetingRadioLabelStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    cursor: 'pointer',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    border: `1px solid ${borderColor}`,
-    backgroundColor: bgColor,
-    color: textColor,
-    fontSize: '0.875rem',
-    transition: 'all 0.2s ease',
-  }
+  // Helper: build the runtime status-color CSS variables for a meeting badge.
+  const statusColorVars = (statusColors: {
+    bg: string
+    color: string
+  }): React.CSSProperties =>
+    ({
+      ['--st-status-bg']: statusColors.bg,
+      ['--st-status-color']: statusColors.color,
+    }) as React.CSSProperties
 
   const renderSchedulingTab = () => {
     // Render meeting form view
     if (schedulingView === 'form') {
       return (
-        <div style={cardStyle}>
+        <div className={cssStyles.card}>
           <div
-            style={{
-              ...sectionTitleStyle,
-              marginTop: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
+            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
           >
             <span>Schedule New Meeting</span>
             <button
@@ -2675,70 +1907,37 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 resetMeetingForm()
                 setSchedulingView('list')
               }}
-              style={{
-                ...buttonStyle,
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-              }}
+              className={cx(cssStyles.button, cssStyles.tinyButtonPad)}
             >
               Cancel
             </button>
           </div>
 
           {meetingError && (
-            <div
-              style={{
-                padding: '12px 16px',
-                backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                border: '1px solid rgba(244, 67, 54, 0.5)',
-                borderRadius: '8px',
-                color: '#f44336',
-                marginBottom: '16px',
-                fontSize: '0.875rem',
-              }}
-            >
-              {meetingError}
-            </div>
+            <div className={cssStyles.errorBanner}>{meetingError}</div>
           )}
 
           {/* Meeting Title */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={meetingLabelStyle}>Meeting Title *</label>
+          <div className={cssStyles.fieldBlock}>
+            <label className={cssStyles.meetingLabel}>Meeting Title *</label>
             <input
               type="text"
               value={meetingTitle}
               onChange={e => setMeetingTitle(e.target.value)}
               placeholder="e.g., Project Discussion, Sprint Planning"
-              style={meetingInputStyle}
+              className={cssStyles.meetingInput}
             />
           </div>
 
           {/* Meeting Type */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={meetingLabelStyle}>Meeting Type *</label>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div className={cssStyles.fieldBlock}>
+            <label className={cssStyles.meetingLabel}>Meeting Type *</label>
+            <div className={cssStyles.radioGroup}>
               {(['video', 'phone', 'in-person'] as const).map(type => (
                 <label
                   key={type}
-                  style={{
-                    ...meetingRadioLabelStyle,
-                    backgroundColor:
-                      meetingType === type
-                        ? isSacred
-                          ? 'rgba(255, 215, 0, 0.2)'
-                          : isDark
-                            ? '#374151'
-                            : '#E5E7EB'
-                        : bgColor,
-                    borderColor:
-                      meetingType === type
-                        ? isSacred
-                          ? '#FFD700'
-                          : isDark
-                            ? '#60A5FA'
-                            : '#3B82F6'
-                        : borderColor,
-                  }}
+                  className={cssStyles.meetingRadioLabel}
+                  data-selected={meetingType === type ? 'true' : undefined}
                 >
                   <input
                     type="radio"
@@ -2760,57 +1959,48 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Location (for in-person) */}
           {meetingType === 'in-person' && (
-            <div style={{ marginBottom: '20px' }}>
-              <label style={meetingLabelStyle}>Location *</label>
+            <div className={cssStyles.fieldBlock}>
+              <label className={cssStyles.meetingLabel}>Location *</label>
               <input
                 type="text"
                 value={meetingLocation}
                 onChange={e => setMeetingLocation(e.target.value)}
                 placeholder="e.g., Conference Room A"
-                style={meetingInputStyle}
+                className={cssStyles.meetingInput}
               />
             </div>
           )}
 
           {/* Attendee Info */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '16px',
-              marginBottom: '20px',
-            }}
-          >
+          <div className={cssStyles.twoColForm}>
             <div>
-              <label style={meetingLabelStyle}>Attendee Name *</label>
+              <label className={cssStyles.meetingLabel}>Attendee Name *</label>
               <input
                 type="text"
                 value={meetingAttendeeName}
                 onChange={e => setMeetingAttendeeName(e.target.value)}
                 placeholder="Full name"
-                style={meetingInputStyle}
+                className={cssStyles.meetingInput}
               />
             </div>
             <div>
-              <label style={meetingLabelStyle}>Attendee Email *</label>
+              <label className={cssStyles.meetingLabel}>Attendee Email *</label>
               <input
                 type="email"
                 value={meetingAttendeeEmail}
                 onChange={e => setMeetingAttendeeEmail(e.target.value)}
                 placeholder="email@example.com"
-                style={meetingInputStyle}
+                className={cssStyles.meetingInput}
               />
             </div>
           </div>
 
           {/* Date & Time */}
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: '16px',
-              marginBottom: '20px',
-            }}
+            className={cx(
+              cssStyles.threeColForm,
+              cssStyles.threeColFormSpaced
+            )}
           >
             <DateField
               label="Date *"
@@ -2841,51 +2031,41 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {/* Notes */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={meetingLabelStyle}>Notes</label>
+          <div className={cssStyles.fieldBlock}>
+            <label className={cssStyles.meetingLabel}>Notes</label>
             <textarea
               value={meetingNotes}
               onChange={e => setMeetingNotes(e.target.value)}
               placeholder="Any additional information..."
               rows={3}
-              style={{
-                ...meetingInputStyle,
-                resize: 'vertical',
-                minHeight: '80px',
-              }}
+              className={cx(cssStyles.meetingInput, cssStyles.meetingTextarea)}
             />
           </div>
 
           {/* Submit Button */}
-          <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}
-          >
+          <div className={cssStyles.formActionsRight}>
             <button
               onClick={() => {
                 resetMeetingForm()
                 setSchedulingView('list')
               }}
               disabled={isSubmittingMeeting}
-              style={{
-                ...buttonStyle,
-                opacity: isSubmittingMeeting ? 0.5 : 1,
-              }}
+              className={cx(
+                cssStyles.button,
+                isSubmittingMeeting && cssStyles.buttonDisabled
+              )}
             >
               Cancel
             </button>
             <button
               onClick={handleScheduleMeeting}
               disabled={isSubmittingMeeting || !onScheduleMeeting}
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred
-                  ? '#FFD700'
-                  : isDark
-                    ? '#3B82F6'
-                    : '#3B82F6',
-                color: isSacred ? '#000000' : '#FFFFFF',
-                opacity: isSubmittingMeeting || !onScheduleMeeting ? 0.5 : 1,
-              }}
+              className={cx(
+                cssStyles.button,
+                cssStyles.primaryButton,
+                (isSubmittingMeeting || !onScheduleMeeting) &&
+                  cssStyles.buttonDisabled
+              )}
             >
               {isSubmittingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
             </button>
@@ -2906,15 +2086,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         selectedMeeting.status !== 'completed'
 
       return (
-        <div style={cardStyle}>
+        <div className={cssStyles.card}>
           <div
-            style={{
-              ...sectionTitleStyle,
-              marginTop: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
+            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
           >
             <span>Meeting Details</span>
             <button
@@ -2922,29 +2096,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 setSelectedMeeting(null)
                 setSchedulingView('list')
               }}
-              style={{
-                ...buttonStyle,
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-              }}
+              className={cx(cssStyles.button, cssStyles.tinyButtonPad)}
             >
               Back to List
             </button>
           </div>
 
           {/* Status Badge */}
-          <div style={{ marginBottom: '24px' }}>
+          <div className={cssStyles.statusBadgeWrap}>
             <span
-              style={{
-                display: 'inline-block',
-                padding: '6px 16px',
-                borderRadius: '16px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                backgroundColor: statusColors.bg,
-                color: statusColors.color,
-                border: `1px solid ${statusColors.color}`,
-              }}
+              className={cssStyles.statusBadge}
+              style={statusColorVars(statusColors)}
             >
               {selectedMeeting.status.charAt(0).toUpperCase() +
                 selectedMeeting.status.slice(1)}
@@ -2952,40 +2114,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {/* Meeting Title */}
-          <div style={{ marginBottom: '20px' }}>
-            <div
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                color: textColor,
-                marginBottom: '8px',
-              }}
-            >
+          <div className={cssStyles.meetingTitleWrap}>
+            <div className={cssStyles.meetingTitleLarge}>
               {selectedMeeting.eventTypeName}
             </div>
           </div>
 
           {/* Meeting Info Grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '20px',
-              marginBottom: '24px',
-            }}
-          >
+          <div className={cssStyles.meetingInfoGrid}>
             <div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '4px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Date
-              </div>
-              <div style={{ color: textColor }}>
+              <div className={cssStyles.meetingInfoLabel}>Date</div>
+              <div className={cssStyles.meetingInfoValue}>
                 {startTime.toLocaleDateString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
@@ -2995,17 +2134,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '4px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Time
-              </div>
-              <div style={{ color: textColor }}>
+              <div className={cssStyles.meetingInfoLabel}>Time</div>
+              <div className={cssStyles.meetingInfoValue}>
                 {startTime.toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -3018,35 +2148,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '4px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Attendee
-              </div>
-              <div style={{ color: textColor }}>
+              <div className={cssStyles.meetingInfoLabel}>Attendee</div>
+              <div className={cssStyles.meetingInfoValue}>
                 {selectedMeeting.attendeeName}
               </div>
-              <div style={{ fontSize: '0.85rem', color: secondaryTextColor }}>
+              <div className={cssStyles.meetingInfoSub}>
                 {selectedMeeting.attendeeEmail}
               </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '4px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Location
-              </div>
-              <div style={{ color: textColor }}>
+              <div className={cssStyles.meetingInfoLabel}>Location</div>
+              <div className={cssStyles.meetingInfoValue}>
                 {selectedMeeting.location || 'Not specified'}
               </div>
             </div>
@@ -3054,41 +2166,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Notes */}
           {selectedMeeting.notes && (
-            <div
-              style={{
-                marginBottom: '24px',
-                padding: '16px',
-                backgroundColor: sidebarBg,
-                borderRadius: '8px',
-                border: `1px solid ${borderColor}`,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '8px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Notes
-              </div>
-              <div style={{ color: textColor, whiteSpace: 'pre-wrap' }}>
+            <div className={cssStyles.meetingNotesBox}>
+              <div className={cssStyles.meetingInfoLabel}>Notes</div>
+              <div className={cssStyles.meetingNotesBody}>
                 {selectedMeeting.notes}
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div className={cssStyles.detailActions}>
             {isPending && (
               <button
                 onClick={() => handleConfirmMeetingAction(selectedMeeting._id)}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: '#4CAF50',
-                  color: '#FFFFFF',
-                }}
+                className={cx(cssStyles.button, cssStyles.confirmButton)}
               >
                 Confirm Meeting
               </button>
@@ -3099,11 +2190,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   initializeRescheduleForm(selectedMeeting)
                   setSchedulingView('reschedule')
                 }}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: isSacred ? '#FFD700' : '#FF9800',
-                  color: isSacred ? '#000000' : '#FFFFFF',
-                }}
+                className={cx(cssStyles.button, cssStyles.amberButton)}
               >
                 Reschedule
               </button>
@@ -3111,11 +2198,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             {isActive && isUpcoming && (
               <button
                 onClick={() => handleCancelMeetingAction(selectedMeeting._id)}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: '#F44336',
-                  color: '#FFFFFF',
-                }}
+                className={cx(cssStyles.button, cssStyles.dangerButton)}
               >
                 Cancel Meeting
               </button>
@@ -3130,15 +2213,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       const originalStart = new Date(selectedMeeting.startTime)
 
       return (
-        <div style={cardStyle}>
+        <div className={cssStyles.card}>
           <div
-            style={{
-              ...sectionTitleStyle,
-              marginTop: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
+            className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
           >
             <span>Reschedule Meeting</span>
             <button
@@ -3149,58 +2226,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 setMeetingError(null)
                 setSchedulingView('details')
               }}
-              style={{
-                ...buttonStyle,
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-              }}
+              className={cx(cssStyles.button, cssStyles.tinyButtonPad)}
             >
               Cancel
             </button>
           </div>
 
           {meetingError && (
-            <div
-              style={{
-                padding: '12px 16px',
-                backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                border: '1px solid rgba(244, 67, 54, 0.5)',
-                borderRadius: '8px',
-                color: '#f44336',
-                marginBottom: '16px',
-                fontSize: '0.875rem',
-              }}
-            >
-              {meetingError}
-            </div>
+            <div className={cssStyles.errorBanner}>{meetingError}</div>
           )}
 
           {/* Current Meeting Info */}
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: sidebarBg,
-              borderRadius: '8px',
-              border: `1px solid ${borderColor}`,
-              marginBottom: '24px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.75rem',
-                color: secondaryTextColor,
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Current Schedule
-            </div>
-            <div
-              style={{ fontWeight: 600, color: textColor, marginBottom: '4px' }}
-            >
+          <div className={cssStyles.currentScheduleBox}>
+            <div className={cssStyles.meetingInfoLabel}>Current Schedule</div>
+            <div className={cssStyles.currentScheduleTitle}>
               {selectedMeeting.eventTypeName}
             </div>
-            <div style={{ color: secondaryTextColor, fontSize: '0.875rem' }}>
+            <div className={cssStyles.currentScheduleSub}>
               {originalStart.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -3216,23 +2258,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {/* New Date & Time */}
-          <div style={{ marginBottom: '24px' }}>
+          <div className={cssStyles.rescheduleSection}>
             <div
-              style={{
-                ...meetingLabelStyle,
-                marginBottom: '16px',
-                fontSize: '0.85rem',
-              }}
+              className={cx(cssStyles.meetingLabel, cssStyles.meetingLabelBlock)}
             >
               Select New Date & Time
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '16px',
-              }}
-            >
+            <div className={cssStyles.threeColForm}>
               <DateField
                 label="New Date *"
                 value={rescheduleDate}
@@ -3264,35 +2296,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Preview New Time */}
           {rescheduleDate && rescheduleTime && (
-            <div
-              style={{
-                padding: '16px',
-                backgroundColor: isSacred
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : isDark
-                    ? 'rgba(59, 130, 246, 0.1)'
-                    : 'rgba(59, 130, 246, 0.05)',
-                borderRadius: '8px',
-                border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`,
-                marginBottom: '24px',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: secondaryTextColor,
-                  marginBottom: '8px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                New Schedule Preview
-              </div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
-                }}
-              >
+            <div className={cssStyles.previewBox}>
+              <div className={cssStyles.previewLabel}>New Schedule Preview</div>
+              <div className={cssStyles.previewValue}>
                 {(() => {
                   const previewDateTime = new Date(rescheduleDate)
                   previewDateTime.setHours(
@@ -3331,9 +2337,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Submit Button */}
-          <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}
-          >
+          <div className={cssStyles.formActionsRight}>
             <button
               onClick={() => {
                 setRescheduleDate(null)
@@ -3343,10 +2347,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 setSchedulingView('details')
               }}
               disabled={isSubmittingMeeting}
-              style={{
-                ...buttonStyle,
-                opacity: isSubmittingMeeting ? 0.5 : 1,
-              }}
+              className={cx(
+                cssStyles.button,
+                isSubmittingMeeting && cssStyles.buttonDisabled
+              )}
             >
               Cancel
             </button>
@@ -3355,15 +2359,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               disabled={
                 isSubmittingMeeting || !rescheduleDate || !rescheduleTime
               }
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred ? '#FFD700' : '#FF9800',
-                color: isSacred ? '#000000' : '#FFFFFF',
-                opacity:
-                  isSubmittingMeeting || !rescheduleDate || !rescheduleTime
-                    ? 0.5
-                    : 1,
-              }}
+              className={cx(
+                cssStyles.button,
+                cssStyles.amberButton,
+                (isSubmittingMeeting || !rescheduleDate || !rescheduleTime) &&
+                  cssStyles.buttonDisabled
+              )}
             >
               {isSubmittingMeeting ? 'Rescheduling...' : 'Confirm Reschedule'}
             </button>
@@ -3381,111 +2382,47 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     )
 
     return (
-      <div style={cardStyle}>
+      <div className={cssStyles.card}>
         <div
-          style={{
-            ...sectionTitleStyle,
-            marginTop: 0,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
+          className={cx(cssStyles.sectionTitle, cssStyles.cardSectionTitleFlex)}
         >
           <span>Meetings ({taskMeetings.length})</span>
         </div>
 
         {/* Booking Requests section — shown at top for employee variant when there are pending meetings */}
         {variant === 'employee' && bookingRequests.length > 0 && (
-          <div style={{ marginBottom: '20px' }}>
-            <div
-              style={{
-                fontSize: '0.68rem',
-                fontFamily: isSacred ? '"Cinzel", serif' : 'inherit',
-                letterSpacing: '0.07em',
-                textTransform: 'uppercase' as const,
-                color: isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6',
-                marginBottom: '10px',
-                paddingBottom: '6px',
-                borderBottom: `1px solid ${isSacred ? 'rgba(255,215,0,0.2)' : borderColor}`,
-              }}
-            >
+          <div className={cssStyles.bookingSection}>
+            <div className={cssStyles.bookingSectionTitle}>
               Booking Requests ({bookingRequests.length})
             </div>
             {bookingRequests.map(meeting => (
-              <div
-                key={meeting._id}
-                style={{
-                  padding: '14px 16px',
-                  backgroundColor: isSacred
-                    ? 'rgba(255,215,0,0.06)'
-                    : isDark
-                      ? 'rgba(96,165,250,0.06)'
-                      : 'rgba(59,130,246,0.04)',
-                  border: `1px solid ${isSacred ? 'rgba(255,215,0,0.35)' : isDark ? 'rgba(96,165,250,0.3)' : 'rgba(59,130,246,0.25)'}`,
-                  borderLeft: `3px solid ${isSacred ? '#FFD700' : isDark ? '#60A5FA' : '#3B82F6'}`,
-                  borderRadius: '8px',
-                  marginBottom: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        color: textColor,
-                        fontSize: '0.9rem',
-                        marginBottom: '4px',
-                      }}
-                    >
+              <div key={meeting._id} className={cssStyles.bookingCard}>
+                <div className={cssStyles.bookingCardRow}>
+                  <div className={cssStyles.bookingCardMain}>
+                    <div className={cssStyles.bookingCardTitle}>
                       {meeting.eventTypeName}
                     </div>
-                    <div
-                      style={{ fontSize: '0.8rem', color: secondaryTextColor }}
-                    >
+                    <div className={cssStyles.bookingCardAttendee}>
                       {meeting.attendeeName}
                       {meeting.attendeeEmail && (
-                        <span style={{ marginLeft: '6px', opacity: 0.75 }}>
+                        <span className={cssStyles.bookingCardAttendeeEmail}>
                           · {meeting.attendeeEmail}
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '0.78rem',
-                        color: secondaryTextColor,
-                        marginTop: '3px',
-                      }}
-                    >
+                    <div className={cssStyles.bookingCardTime}>
                       {formatMeetingTime(meeting.startTime, meeting.endTime)}
                     </div>
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '6px',
-                      flexWrap: 'wrap',
-                      flexShrink: 0,
-                      alignSelf: 'center',
-                    }}
-                  >
+                  <div className={cssStyles.bookingCardActions}>
                     {/* Accept */}
                     <button
                       onClick={() => handleConfirmMeetingAction(meeting._id)}
-                      style={{
-                        ...buttonStyle,
-                        padding: '6px 12px',
-                        fontSize: '0.72rem',
-                        backgroundColor: '#4CAF50',
-                        color: '#fff',
-                      }}
+                      className={cx(
+                        cssStyles.button,
+                        cssStyles.bookingActionButton,
+                        cssStyles.acceptButton
+                      )}
                     >
                       Accept
                     </button>
@@ -3495,30 +2432,22 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         setSelectedMeeting(meeting)
                         setSchedulingView('reschedule')
                       }}
-                      style={{
-                        ...buttonStyle,
-                        padding: '6px 12px',
-                        fontSize: '0.72rem',
-                        backgroundColor: isSacred
-                          ? 'rgba(255,152,0,0.2)'
-                          : 'rgba(255,152,0,0.15)',
-                        color: '#FF9800',
-                        border: '1px solid rgba(255,152,0,0.4)',
-                      }}
+                      className={cx(
+                        cssStyles.button,
+                        cssStyles.bookingActionButton,
+                        cssStyles.proposeButton
+                      )}
                     >
                       New Time
                     </button>
                     {/* Decline */}
                     <button
                       onClick={() => handleCancelMeetingAction(meeting._id)}
-                      style={{
-                        ...buttonStyle,
-                        padding: '6px 12px',
-                        fontSize: '0.72rem',
-                        backgroundColor: 'rgba(244,67,54,0.15)',
-                        color: '#F44336',
-                        border: '1px solid rgba(244,67,54,0.35)',
-                      }}
+                      className={cx(
+                        cssStyles.button,
+                        cssStyles.bookingActionButton,
+                        cssStyles.declineButton
+                      )}
                     >
                       Decline
                     </button>
@@ -3530,14 +2459,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         )}
 
         {taskMeetings.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p
-              style={{
-                color: secondaryTextColor,
-                fontSize: '0.875rem',
-                marginBottom: '16px',
-              }}
-            >
+          <div className={cssStyles.emptyMeetings}>
+            <p className={cssStyles.emptyMeetingsText}>
               No meetings scheduled for this task yet.
             </p>
             <button
@@ -3545,23 +2468,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 setMeetingTitle(`Meeting: ${taskTitle}`)
                 setSchedulingView('form')
               }}
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : isDark
-                    ? '#374151'
-                    : '#E5E7EB',
-                color: textColor,
-              }}
+              className={cx(cssStyles.button, cssStyles.scheduleMeetingButton)}
             >
               Schedule Meeting
             </button>
           </div>
         ) : (
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          >
+          <div className={cssStyles.meetingListColumn}>
             {scheduledMeetings.map(meeting => {
               const statusColors = getMeetingStatusColor(meeting.status)
               return (
@@ -3571,71 +2484,28 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     setSelectedMeeting(meeting)
                     setSchedulingView('details')
                   }}
-                  style={{
-                    padding: '16px',
-                    backgroundColor: bgColor,
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = isSacred
-                      ? '#FFD700'
-                      : isDark
-                        ? '#60A5FA'
-                        : '#3B82F6'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = borderColor
-                  }}
+                  className={cssStyles.meetingListCard}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, color: textColor }}>
+                  <div className={cssStyles.meetingListHeader}>
+                    <div className={cssStyles.meetingListTitle}>
                       {meeting.eventTypeName}
                     </div>
                     <span
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        backgroundColor: statusColors.bg,
-                        color: statusColors.color,
-                      }}
+                      className={cssStyles.statusPill}
+                      style={statusColorVars(statusColors)}
                     >
                       {meeting.status.charAt(0).toUpperCase() +
                         meeting.status.slice(1)}
                     </span>
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '16px',
-                      fontSize: '0.85rem',
-                      color: secondaryTextColor,
-                    }}
-                  >
+                  <div className={cssStyles.meetingListMeta}>
                     <span>
                       {formatMeetingTime(meeting.startTime, meeting.endTime)}
                     </span>
                     <span>·</span>
                     <span>{meeting.attendeeName}</span>
                   </div>
-                  <div
-                    style={{
-                      fontSize: '0.75rem',
-                      color: secondaryTextColor,
-                      marginTop: '8px',
-                    }}
-                  >
+                  <div className={cssStyles.meetingListRelative}>
                     {getRelativeTime(meeting.startTime)} from now
                   </div>
                 </div>
@@ -3740,171 +2610,73 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       }
 
       return (
-        <div style={cardStyle}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1.5rem',
-            }}
-          >
+        <div className={cssStyles.card}>
+          <div className={cssStyles.kbArticleHeader}>
             <button
               onClick={() => setSelectedArticleForView(null)}
-              style={{
-                background: 'none',
-                border: `1px solid ${borderColor}`,
-                borderRadius: '6px',
-                padding: '0.5rem 1rem',
-                cursor: 'pointer',
-                color: textColor,
-                fontSize: '0.875rem',
-              }}
+              className={cssStyles.kbBackButton}
             >
               ← Back to Articles
             </button>
             <button
               onClick={handleToggleLinkCase}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: isLinkedToCase
-                  ? isSacred
-                    ? 'rgba(239, 68, 68, 0.2)'
-                    : isDark
-                      ? '#7F1D1D'
-                      : '#FEE2E2'
-                  : isSacred
-                    ? 'rgba(34, 197, 94, 0.2)'
-                    : isDark
-                      ? '#065f46'
-                      : '#D1FAE5',
-                color: isLinkedToCase
-                  ? isSacred
-                    ? '#ff6b6b'
-                    : isDark
-                      ? '#FCA5A5'
-                      : '#DC2626'
-                  : isSacred
-                    ? '#4ade80'
-                    : isDark
-                      ? '#6EE7B7'
-                      : '#059669',
-                fontSize: '0.875rem',
-                cursor: 'pointer',
-                fontWeight: 600,
-              }}
+              className={cssStyles.kbLinkButton}
+              data-linked={isLinkedToCase ? 'true' : undefined}
             >
               {isLinkedToCase ? '✕ Unlink from Case' : '✓ Link to Case'}
             </button>
           </div>
 
-          <h2
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: textColor,
-              marginBottom: '1rem',
-              ...(isSacred && {
-                fontFamily: 'Cinzel, serif',
-                color: '#FFD700',
-              }),
-            }}
-          >
+          <h2 className={cssStyles.kbArticleTitle}>
             {selectedArticleForView.articleTitle}
           </h2>
 
           {selectedArticleForView.categoryName && (
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '0.25rem 0.75rem',
-                backgroundColor: isSacred
-                  ? 'rgba(255, 215, 0, 0.15)'
-                  : isDark
-                    ? '#374151'
-                    : '#E5E7EB',
-                borderRadius: '20px',
-                fontSize: '0.75rem',
-                color: isSacred ? '#FFD700' : textColor,
-                marginBottom: '1.5rem',
-              }}
-            >
+            <div className={cssStyles.kbCategoryChip}>
               {selectedArticleForView.categoryName}
             </div>
           )}
 
           {selectedArticleForView.purpose && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitleStyle}>Purpose</div>
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  lineHeight: '1.6',
-                }}
-              >
+            <div className={cssStyles.kbSection}>
+              <div className={cssStyles.sectionTitle}>Purpose</div>
+              <p className={cssStyles.kbSectionText}>
                 {selectedArticleForView.purpose}
               </p>
             </div>
           )}
 
           {selectedArticleForView.symptoms && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitleStyle}>Symptoms</div>
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  lineHeight: '1.6',
-                }}
-              >
+            <div className={cssStyles.kbSection}>
+              <div className={cssStyles.sectionTitle}>Symptoms</div>
+              <p className={cssStyles.kbSectionText}>
                 {selectedArticleForView.symptoms}
               </p>
             </div>
           )}
 
           {selectedArticleForView.cause && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitleStyle}>Cause</div>
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  lineHeight: '1.6',
-                }}
-              >
+            <div className={cssStyles.kbSection}>
+              <div className={cssStyles.sectionTitle}>Cause</div>
+              <p className={cssStyles.kbSectionText}>
                 {selectedArticleForView.cause}
               </p>
             </div>
           )}
 
           {selectedArticleForView.resolution && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitleStyle}>Resolution</div>
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  lineHeight: '1.6',
-                }}
-              >
+            <div className={cssStyles.kbSection}>
+              <div className={cssStyles.sectionTitle}>Resolution</div>
+              <p className={cssStyles.kbSectionText}>
                 {selectedArticleForView.resolution}
               </p>
             </div>
           )}
 
           {selectedArticleForView.workaround && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={sectionTitleStyle}>Workaround</div>
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  lineHeight: '1.6',
-                }}
-              >
+            <div className={cssStyles.kbSection}>
+              <div className={cssStyles.sectionTitle}>Workaround</div>
+              <p className={cssStyles.kbSectionText}>
                 {selectedArticleForView.workaround}
               </p>
             </div>
@@ -3913,50 +2685,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Other Linked Cases Section - Placeholder */}
           {selectedArticleForView.linkedTasks &&
             selectedArticleForView.linkedTasks.length > 0 && (
-              <div
-                style={{
-                  marginTop: '2rem',
-                  padding: '1rem',
-                  backgroundColor: isSacred
-                    ? 'rgba(139, 92, 246, 0.1)'
-                    : isDark
-                      ? 'rgba(139, 92, 246, 0.1)'
-                      : '#F3E8FF',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSacred ? 'rgba(139, 92, 246, 0.3)' : '#C4B5FD'}`,
-                }}
-              >
-                <div style={sectionTitleStyle}>
+              <div className={cssStyles.kbLinkedCases}>
+                <div className={cssStyles.sectionTitle}>
                   Other Cases Using This Article (
                   {selectedArticleForView.linkedTasks.length})
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem',
-                    marginTop: '0.5rem',
-                  }}
-                >
+                <div className={cssStyles.kbLinkedTagRow}>
                   {selectedArticleForView.linkedTasks.map(
                     (linkedTask: { _id: string; title: string }) => (
                       <span
                         key={linkedTask._id}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          backgroundColor: isSacred
-                            ? 'rgba(139, 92, 246, 0.15)'
-                            : isDark
-                              ? '#4C1D95'
-                              : '#DDD6FE',
-                          borderRadius: '20px',
-                          fontSize: '0.75rem',
-                          color: isSacred
-                            ? '#a78bfa'
-                            : isDark
-                              ? '#C4B5FD'
-                              : '#6D28D9',
-                        }}
+                        className={cssStyles.kbLinkedTag}
                       >
                         {linkedTask.title}
                       </span>
@@ -3973,91 +2712,30 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       <div>
         {/* Linked Articles Section */}
         {linkedArticles.length > 0 && (
-          <div style={{ ...cardStyle, marginBottom: '1.5rem' }}>
-            <div style={sectionTitleStyle}>
+          <div className={cx(cssStyles.card, cssStyles.cardSpacedBottom)}>
+            <div className={cssStyles.sectionTitle}>
               Linked Articles ({linkedArticles.length})
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-                marginTop: '1rem',
-              }}
-            >
+            <div className={cssStyles.kbGrid}>
               {linkedArticles.map(article => (
                 <div
                   key={article._id}
                   onClick={() => setSelectedArticleForView(article)}
-                  style={{
-                    padding: '1rem',
-                    backgroundColor: isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? 'rgba(59, 130, 246, 0.1)'
-                        : 'rgba(59, 130, 246, 0.05)',
-                    border: `2px solid ${isSacred ? '#FFD700' : '#3B82F6'}`,
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
+                  className={cssStyles.kbLinkedArticleCard}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <h3
-                      style={{
-                        fontSize: '0.95rem',
-                        fontWeight: 600,
-                        color: textColor,
-                        margin: 0,
-                      }}
-                    >
+                  <div className={cssStyles.kbCardHeader}>
+                    <h3 className={cssStyles.kbCardTitle}>
                       {article.articleTitle}
                     </h3>
-                    <span
-                      style={{
-                        color: isSacred ? '#FFD700' : '#3B82F6',
-                        fontSize: '1rem',
-                      }}
-                    >
-                      ✓
-                    </span>
+                    <span className={cssStyles.kbCardCheck}>✓</span>
                   </div>
                   {article.categoryName && (
-                    <div
-                      style={{
-                        fontSize: '0.7rem',
-                        color: isSacred
-                          ? 'rgba(255, 215, 0, 0.7)'
-                          : isDark
-                            ? '#60A5FA'
-                            : '#3B82F6',
-                        marginTop: '0.5rem',
-                      }}
-                    >
+                    <div className={cssStyles.kbCardCategory}>
                       {article.categoryName}
                     </div>
                   )}
                   {article.purpose && (
-                    <p
-                      style={{
-                        fontSize: '0.8rem',
-                        color: secondaryTextColor,
-                        margin: '0.5rem 0 0',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {article.purpose}
-                    </p>
+                    <p className={cssStyles.kbCardPurpose}>{article.purpose}</p>
                   )}
                 </div>
               ))}
@@ -4066,20 +2744,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         )}
 
         {/* Search & Browse Section */}
-        <div style={cardStyle}>
-          <div style={sectionTitleStyle}>Search Knowledge Base</div>
-          <p
-            style={{
-              fontSize: '0.875rem',
-              color: secondaryTextColor,
-              marginBottom: '1rem',
-            }}
-          >
+        <div className={cssStyles.card}>
+          <div className={cssStyles.sectionTitle}>Search Knowledge Base</div>
+          <p className={cssStyles.kbSearchHelp}>
             Find relevant articles for this ticket.
           </p>
 
           {/* Search Bar */}
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className={cssStyles.kbSearchWrap}>
             <SearchBar
               label="Search Articles"
               placeholder="Search by title, symptoms, resolution..."
@@ -4092,29 +2764,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {/* Results */}
-          <div style={sectionTitleStyle}>
+          <div className={cssStyles.sectionTitle}>
             {kbSearchTerm
               ? `Search Results (${filteredKbArticles.length})`
               : `All Articles (${knowledgebaseArticleOptions.length})`}
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1rem',
-              marginTop: '1rem',
-            }}
-          >
+          <div className={cssStyles.kbGrid}>
             {filteredKbArticles.length === 0 ? (
-              <p
-                style={{
-                  color: secondaryTextColor,
-                  fontSize: '0.875rem',
-                  textAlign: 'center',
-                  gridColumn: '1 / -1',
-                  padding: '2rem',
-                }}
-              >
+              <p className={cssStyles.kbEmptyResults}>
                 {kbSearchTerm
                   ? 'No articles match your search.'
                   : 'No knowledge base articles available.'}
@@ -4128,89 +2785,36 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <div
                     key={article._id}
                     onClick={() => setSelectedArticleForView(article)}
-                    style={{
-                      padding: '1rem',
-                      backgroundColor: isLinked
-                        ? isSacred
-                          ? 'rgba(255, 215, 0, 0.1)'
-                          : isDark
-                            ? 'rgba(59, 130, 246, 0.1)'
-                            : 'rgba(59, 130, 246, 0.05)'
-                        : isSacred
-                          ? 'rgba(0, 0, 0, 0.3)'
-                          : isDark
-                            ? '#111827'
-                            : '#F9FAFB',
-                      border: `1px solid ${
-                        isLinked
-                          ? isSacred
-                            ? '#FFD700'
-                            : '#3B82F6'
-                          : borderColor
-                      }`,
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
+                    className={cssStyles.kbArticleCard}
+                    data-linked={isLinked ? 'true' : undefined}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                      }}
-                    >
+                    <div className={cssStyles.kbCardHeader}>
                       <h3
-                        style={{
-                          fontSize: '0.95rem',
-                          fontWeight: 600,
-                          color: textColor,
-                          margin: 0,
-                          flex: 1,
-                        }}
+                        className={cx(
+                          cssStyles.kbCardTitle,
+                          cssStyles.kbCardTitleFlex
+                        )}
                       >
                         {article.articleTitle}
                       </h3>
                       {isLinked && (
                         <span
-                          style={{
-                            color: isSacred ? '#FFD700' : '#3B82F6',
-                            fontSize: '1rem',
-                            marginLeft: '0.5rem',
-                          }}
+                          className={cx(
+                            cssStyles.kbCardCheck,
+                            cssStyles.kbCardCheckSpaced
+                          )}
                         >
                           ✓
                         </span>
                       )}
                     </div>
                     {article.categoryName && (
-                      <div
-                        style={{
-                          fontSize: '0.7rem',
-                          color: isSacred
-                            ? 'rgba(255, 215, 0, 0.7)'
-                            : isDark
-                              ? '#60A5FA'
-                              : '#3B82F6',
-                          marginTop: '0.5rem',
-                        }}
-                      >
+                      <div className={cssStyles.kbCardCategory}>
                         {article.categoryName}
                       </div>
                     )}
                     {article.purpose && (
-                      <p
-                        style={{
-                          fontSize: '0.8rem',
-                          color: secondaryTextColor,
-                          margin: '0.5rem 0 0',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
+                      <p className={cssStyles.kbCardPurpose}>
                         {article.purpose}
                       </p>
                     )}
@@ -4236,37 +2840,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         return renderSchedulingTab()
       case 'resolution':
         return (
-          <div style={cardStyle}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.5rem',
-              }}
-            >
+          <div className={cssStyles.card}>
+            <div className={cssStyles.resolutionHeaderRow}>
               <div
-                style={{ ...sectionTitleStyle, marginTop: 0, marginBottom: 0 }}
+                className={cx(cssStyles.sectionTitle, cssStyles.notesHeaderTitle)}
               >
                 Resolution Information
               </div>
               {!isEditingResolution && (
                 <button
                   onClick={() => setIsEditingResolution(true)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '6px',
-                    border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
-                    backgroundColor: isSacred
-                      ? 'rgba(255, 215, 0, 0.1)'
-                      : isDark
-                        ? '#374151'
-                        : '#F3F4F6',
-                    color: isSacred ? '#FFD700' : textColor,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
+                  className={cssStyles.notesEditButton}
                 >
                   {resolutionWriteup ? 'Edit Resolution' : '+ Add Resolution'}
                 </button>
@@ -4276,7 +2860,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             {isEditingResolution ? (
               <>
                 {/* Reason for case being opened */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div className={cssStyles.kbSection}>
                   <Dropdown
                     label="Reason for Case Being Opened"
                     value={resolutionReason}
@@ -4299,7 +2883,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 </div>
 
                 {/* Anything we can do to prevent this */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div className={cssStyles.kbSection}>
                   <Dropdown
                     label="Anything We Can Do to Prevent This?"
                     value={resolutionPrevention}
@@ -4321,7 +2905,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 </div>
 
                 {/* Is this a recurring issue with this customer */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div className={cssStyles.kbSection}>
                   <Dropdown
                     label="Is This a Recurring Issue With This Customer?"
                     value={resolutionRecurring}
@@ -4339,57 +2923,23 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 </div>
 
                 {/* Resolution Writeup */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label
-                    style={{
-                      display: 'block',
-                      marginBottom: '8px',
-                      color: isSacred ? '#FFD700' : secondaryTextColor,
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                    }}
-                  >
+                <div className={cssStyles.kbSection}>
+                  <label className={cssStyles.resolutionLabel}>
                     Resolution Writeup
                   </label>
                   <textarea
                     value={resolutionWriteup}
                     onChange={e => setResolutionWriteup(e.target.value)}
                     placeholder="Describe how this case was resolved, what steps were taken, and any follow-up actions needed..."
-                    style={{
-                      width: '100%',
-                      minHeight: '150px',
-                      padding: '0.75rem',
-                      borderRadius: '6px',
-                      border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.3)' : borderColor}`,
-                      backgroundColor: bgColor,
-                      color: textColor,
-                      fontSize: '0.875rem',
-                      resize: 'vertical',
-                      fontFamily: 'inherit',
-                      boxSizing: 'border-box',
-                    }}
+                    className={cssStyles.resolutionTextarea}
                   />
                 </div>
 
                 {/* Save/Cancel Buttons */}
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    justifyContent: 'flex-end',
-                  }}
-                >
+                <div className={cssStyles.formActionsRight}>
                   <button
                     onClick={() => setIsEditingResolution(false)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: 'transparent',
-                      color: textColor,
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                    }}
+                    className={cssStyles.smallCancelButton}
                   >
                     Cancel
                   </button>
@@ -4414,20 +2964,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
                       setIsEditingResolution(false)
                     }}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      border: 'none',
-                      backgroundColor: isSacred
-                        ? 'rgba(255, 215, 0, 0.2)'
-                        : isDark
-                          ? '#059669'
-                          : '#10B981',
-                      color: isSacred ? '#FFD700' : '#FFFFFF',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
+                    className={cssStyles.resolutionSaveButton}
                   >
                     Save Resolution
                   </button>
@@ -4437,89 +2974,49 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               /* Display saved resolution */
               <>
                 {resolutionReason && (
-                  <div style={{ marginBottom: '1rem' }}>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: secondaryTextColor,
-                        marginBottom: '0.25rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
+                  <div className={cssStyles.resolutionFieldBlock}>
+                    <div className={cssStyles.resolutionFieldLabel}>
                       Reason for Case
                     </div>
-                    <div style={{ color: textColor }}>{resolutionReason}</div>
+                    <div className={cssStyles.resolutionFieldValue}>
+                      {resolutionReason}
+                    </div>
                   </div>
                 )}
 
                 {resolutionPrevention && (
-                  <div style={{ marginBottom: '1rem' }}>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: secondaryTextColor,
-                        marginBottom: '0.25rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
+                  <div className={cssStyles.resolutionFieldBlock}>
+                    <div className={cssStyles.resolutionFieldLabel}>
                       Prevention
                     </div>
-                    <div style={{ color: textColor }}>
+                    <div className={cssStyles.resolutionFieldValue}>
                       {resolutionPrevention}
                     </div>
                   </div>
                 )}
 
                 {resolutionRecurring && (
-                  <div style={{ marginBottom: '1rem' }}>
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: secondaryTextColor,
-                        marginBottom: '0.25rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
+                  <div className={cssStyles.resolutionFieldBlock}>
+                    <div className={cssStyles.resolutionFieldLabel}>
                       Recurring Issue
                     </div>
-                    <div style={{ color: textColor }}>
+                    <div className={cssStyles.resolutionFieldValue}>
                       {resolutionRecurring}
                     </div>
                   </div>
                 )}
 
                 {resolutionWriteup && (
-                  <div style={{ marginBottom: '1rem' }}>
+                  <div className={cssStyles.resolutionFieldBlock}>
                     <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: secondaryTextColor,
-                        marginBottom: '0.5rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
+                      className={cx(
+                        cssStyles.resolutionFieldLabel,
+                        cssStyles.resolutionDetailsLabel
+                      )}
                     >
                       Resolution Details
                     </div>
-                    <div
-                      style={{
-                        padding: '1rem',
-                        backgroundColor: isSacred
-                          ? 'rgba(255, 215, 0, 0.05)'
-                          : isDark
-                            ? '#1F2937'
-                            : '#F9FAFB',
-                        borderRadius: '8px',
-                        border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.2)' : borderColor}`,
-                        color: textColor,
-                        fontSize: '0.875rem',
-                        lineHeight: 1.6,
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
+                    <div className={cssStyles.resolutionDetailsBox}>
                       {resolutionWriteup}
                     </div>
                   </div>
@@ -4527,42 +3024,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </>
             ) : (
               /* Empty state */
-              <div
-                style={{
-                  padding: '2rem',
-                  borderRadius: '8px',
-                  border: `1px dashed ${borderColor}`,
-                  backgroundColor: isSacred
-                    ? 'rgba(0, 0, 0, 0.2)'
-                    : isDark
-                      ? '#111827'
-                      : '#F9FAFB',
-                  textAlign: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  📋
-                </div>
-                <div
-                  style={{
-                    color: secondaryTextColor,
-                    fontSize: '0.875rem',
-                    marginBottom: '0.5rem',
-                  }}
-                >
+              <div className={cssStyles.resolutionEmpty}>
+                <div className={cssStyles.resolutionEmptyIcon}>📋</div>
+                <div className={cssStyles.resolutionEmptyTitle}>
                   No resolution information yet
                 </div>
-                <div
-                  style={{
-                    color: secondaryTextColor,
-                    fontSize: '0.75rem',
-                  }}
-                >
+                <div className={cssStyles.resolutionEmptySub}>
                   Click &quot;+ Add Resolution&quot; to document how this case
                   was resolved
                 </div>
@@ -4578,32 +3045,40 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   }
 
   return (
-    <div style={containerStyle}>
+    <div className={cssStyles.root} data-theme={theme} data-mobile={mobileAttr}>
       {renderSidebar()}
 
-      <div style={mainContentStyle}>
+      <div className={cssStyles.mainContent}>
         {/* Tabs */}
-        <div style={tabsContainerStyle}>
+        <div className={cssStyles.tabsContainer} data-mobile={mobileAttr}>
           <div
-            style={tabStyle(activeTab === 'details')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'details' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('details')}
           >
             Details
           </div>
           <div
-            style={tabStyle(activeTab === 'comments')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'comments' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('comments')}
           >
             Comments
           </div>
           <div
-            style={tabStyle(activeTab === 'scheduling')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'scheduling' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('scheduling')}
           >
             Scheduling
           </div>
           <div
-            style={tabStyle(activeTab === 'knowledgeBase')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'knowledgeBase' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('knowledgeBase')}
           >
             Knowledgebase{' '}
@@ -4611,13 +3086,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               `(${knowledgebaseArticles.length})`}
           </div>
           <div
-            style={tabStyle(activeTab === 'resolution')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'resolution' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('resolution')}
           >
             Resolution
           </div>
           <div
-            style={tabStyle(activeTab === 'caseUpdates')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'caseUpdates' ? 'true' : undefined}
+            data-mobile={mobileAttr}
             onClick={() => setActiveTab('caseUpdates')}
           >
             Case History
@@ -4625,7 +3104,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         </div>
 
         {/* Content Area */}
-        <div style={contentAreaStyle}>{renderTabContent()}</div>
+        <div className={cssStyles.contentArea} data-mobile={mobileAttr}>
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   )

@@ -394,9 +394,6 @@ export type { IconStyles } from './components/Icons/types'
 export { alpha } from './utils/alpha'
 export * from './utils/keyframes'
 
-// Theme exports
-export * from './theme'
-
 // Types
 export type {
   RawCustomer,

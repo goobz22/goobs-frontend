@@ -33,8 +33,6 @@ import React, { type CSSProperties, type ReactElement, type ReactNode } from 're
 import { z } from 'zod'
 import {
   FormContext,
-  useFormContext,
-  useOptionalFormContext,
   type FormContextValue,
   type FormEngine,
 } from './context'

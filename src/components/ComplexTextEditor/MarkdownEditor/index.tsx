@@ -4,11 +4,11 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
-import type { ComplexTextEditorStyles } from '../theme'
 import {
   buildEditorAreaOverrideStyle,
   buildToolbarOverrideStyle,
   buildTransitionOverride,
+  type ComplexTextEditorStyles,
 } from '../theme'
 import cssStyles from '../ComplexTextEditor.module.css'
 import { mdToHtml } from '../utils/conversion'

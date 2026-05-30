@@ -1,0 +1,582 @@
+/* ==========================================================================
+   ADD TASK (ProjectBoard inline form) - CSS MODULE
+   Static layout + the sacred / light / dark theme palette for the inline
+   "Create New Task" form. Migrated verbatim from the ~46 inline style objects
+   in inline.tsx — every color / shadow / spacing / transition value is copied
+   exactly, so visual parity holds.
+
+   Theme variant is driven by `data-theme` on the styled `.root`, matching the
+   goobs house pattern (Card / FormProjectBoard / FormDataGrid):
+     sacred = hardcoded default (.root), light/dark are [data-theme] overrides.
+
+   The five theme colors that the old JS computed (bgColor / borderColor /
+   textColor / secondaryTextColor / sidebarBg) become CSS custom properties on
+   the root so child classes read them via var(). State that the old JS
+   branched on (active tab, selected/linked article, present-or-not) becomes
+   data-* / aria-* attribute selectors.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT / CONTAINER — sacred is the hardcoded default; light + dark below.
+   --at-bg            ← bgColor
+   --at-border        ← borderColor
+   --at-text          ← textColor
+   --at-secondary     ← secondaryTextColor
+   --at-sidebar-bg    ← sidebarBg
+   -------------------------------------------------------------------------- */
+.root {
+  --at-bg: rgba(0, 0, 0, 0.95);
+  --at-border: rgba(255, 215, 0, 0.3);
+  --at-text: #ffd700;
+  --at-secondary: rgba(255, 215, 0, 0.7);
+  --at-sidebar-bg: rgba(0, 0, 0, 0.8);
+
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--at-bg);
+  color: var(--at-text);
+  overflow: hidden;
+}
+
+.root[data-theme='light'] {
+  --at-bg: #ffffff;
+  --at-border: #e5e7eb;
+  --at-text: #1f2937;
+  --at-secondary: #6b7280;
+  --at-sidebar-bg: #f9fafb;
+}
+
+.root[data-theme='dark'] {
+  --at-bg: #1f2937;
+  --at-border: #374151;
+  --at-text: #f9fafb;
+  --at-secondary: #d1d5db;
+  --at-sidebar-bg: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   SIDEBAR — Quick Info
+   -------------------------------------------------------------------------- */
+.sidebar {
+  width: 280px;
+  background-color: var(--at-sidebar-bg);
+  border-right: 1px solid var(--at-border);
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebarParagraph {
+  font-size: 0.875rem;
+  color: var(--at-secondary);
+  line-height: 1.6;
+}
+
+.sidebarSection {
+  margin-top: 2rem;
+}
+
+.requiredList {
+  font-size: 0.875rem;
+  color: var(--at-secondary);
+  padding-left: 1.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION TITLE — small uppercase eyebrow label
+   -------------------------------------------------------------------------- */
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--at-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.root[data-theme='sacred'] .sectionTitle {
+  color: rgba(255, 215, 0, 0.6);
+  font-family: Cinzel, serif;
+}
+
+/* --------------------------------------------------------------------------
+   MAIN CONTENT
+   -------------------------------------------------------------------------- */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   TABS
+   -------------------------------------------------------------------------- */
+.tabsContainer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 0;
+  border-bottom: 1px solid var(--at-border);
+  background-color: var(--at-bg);
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(255, 215, 0, 0.05);
+  border: 1px solid var(--at-border);
+  border-bottom: 1px solid var(--at-border);
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-weight: 400;
+  color: var(--at-secondary);
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.root[data-theme='light'] .tab {
+  background-color: #f3f4f6;
+}
+
+.root[data-theme='dark'] .tab {
+  background-color: #1f2937;
+}
+
+.tab[data-active='true'] {
+  background-color: rgba(255, 215, 0, 0.2);
+  border-bottom: none;
+  font-weight: 600;
+  color: var(--at-text);
+  transform: translateY(1px);
+}
+
+.root[data-theme='light'] .tab[data-active='true'] {
+  background-color: #ffffff;
+}
+
+.root[data-theme='dark'] .tab[data-active='true'] {
+  background-color: #374151;
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT AREA
+   -------------------------------------------------------------------------- */
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   HEADINGS
+   -------------------------------------------------------------------------- */
+.heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--at-text);
+}
+
+.root[data-theme='sacred'] .heading {
+  font-family: Cinzel, serif;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Article-detail-view heading (1rem bottom margin instead of 2rem) */
+.articleHeading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--at-text);
+  margin-bottom: 1rem;
+}
+
+.root[data-theme='sacred'] .articleHeading {
+  font-family: Cinzel, serif;
+  color: #ffd700;
+}
+
+/* Knowledgebase list-view heading (1rem bottom margin) */
+.kbHeading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--at-text);
+}
+
+.root[data-theme='sacred'] .kbHeading {
+  font-family: Cinzel, serif;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   FIELD LAYOUT
+   -------------------------------------------------------------------------- */
+.fieldWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.twoColumnGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   KNOWLEDGEBASE — article detail view
+   -------------------------------------------------------------------------- */
+.articleDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.backButton {
+  background: none;
+  border: 1px solid var(--at-border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: var(--at-text);
+  font-size: 0.875rem;
+}
+
+.linkActionRow {
+  margin-bottom: 1.5rem;
+}
+
+/* Linked state — red "click to unlink" button (sacred default) */
+.unlinkButton {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.root[data-theme='light'] .unlinkButton {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.root[data-theme='dark'] .unlinkButton {
+  background-color: #7f1d1d;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+/* Unlinked state — "link to this case" button (sacred default) */
+.linkButton {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.root[data-theme='light'] .linkButton {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.root[data-theme='dark'] .linkButton {
+  background-color: #1e40af;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+/* Category chip (sacred default) */
+.categoryChip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(255, 215, 0, 0.15);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #ffd700;
+  margin-bottom: 1.5rem;
+}
+
+.root[data-theme='light'] .categoryChip {
+  background-color: #e5e7eb;
+  color: var(--at-text);
+}
+
+.root[data-theme='dark'] .categoryChip {
+  background-color: #374151;
+  color: var(--at-text);
+}
+
+/* Article detail field block (purpose / symptoms / cause / etc.) */
+.articleField {
+  margin-bottom: 1.5rem;
+}
+
+.articleFieldText {
+  color: var(--at-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Dynamic fieldValues block uses pre-wrap to preserve formatting */
+.articleFieldTextPreWrap {
+  color: var(--at-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* --------------------------------------------------------------------------
+   KNOWLEDGEBASE — list view
+   -------------------------------------------------------------------------- */
+.kbIntro {
+  font-size: 0.875rem;
+  color: var(--at-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.searchWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.selectedArticlesWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.selectedChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Selected-article chip (sacred default) */
+.selectedChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 215, 0, 0.2);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: var(--at-text);
+}
+
+.root[data-theme='light'] .selectedChip {
+  background-color: #e5e7eb;
+}
+
+.root[data-theme='dark'] .selectedChip {
+  background-color: #374151;
+}
+
+.selectedChipLabel {
+  cursor: pointer;
+}
+
+.selectedChipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--at-secondary);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.articlesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.emptyMessage {
+  color: var(--at-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2rem;
+}
+
+/* Article card (sacred default — background is the sidebar bg, border is
+   theme border; selected state overrides both via [data-selected]) */
+.articleCard {
+  padding: 1rem;
+  background-color: var(--at-sidebar-bg);
+  border: 2px solid var(--at-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.articleCard[data-selected='true'] {
+  background-color: rgba(255, 215, 0, 0.15);
+  border-color: #ffd700;
+}
+
+.root[data-theme='light'] .articleCard[data-selected='true'] {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.root[data-theme='dark'] .articleCard[data-selected='true'] {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+.articleCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.articleCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--at-text);
+  margin: 0;
+  flex: 1;
+}
+
+/* Selected checkmark (sacred default) */
+.articleCardCheck {
+  color: #ffd700;
+  font-size: 1.25rem;
+  margin-left: 0.5rem;
+}
+
+.root[data-theme='light'] .articleCardCheck,
+.root[data-theme='dark'] .articleCardCheck {
+  color: #3b82f6;
+}
+
+/* Article category line (sacred default) */
+.articleCardCategory {
+  font-size: 0.75rem;
+  color: rgba(255, 215, 0, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.root[data-theme='light'] .articleCardCategory {
+  color: #3b82f6;
+}
+
+.root[data-theme='dark'] .articleCardCategory {
+  color: #60a5fa;
+}
+
+.articleCardPurpose {
+  font-size: 0.85rem;
+  color: var(--at-secondary);
+  margin: 0 0 0.5rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.articleCardSymptoms {
+  font-size: 0.8rem;
+  color: var(--at-secondary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   VALIDATION ERROR (sacred default)
+   -------------------------------------------------------------------------- */
+.validationError {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.root[data-theme='light'] .validationError {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.root[data-theme='dark'] .validationError {
+  background-color: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+}
+
+/* --------------------------------------------------------------------------
+   ACTION BUTTONS
+   -------------------------------------------------------------------------- */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Shared button base — buttonStyle in the old JS */
+.button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--at-border);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Primary "Create Task" button (sacred default) — hover handled in CSS */
+.submitButton {
+  background-color: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.submitButton:hover {
+  background-color: rgba(255, 215, 0, 0.3);
+}
+
+.root[data-theme='light'] .submitButton,
+.root[data-theme='dark'] .submitButton {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.root[data-theme='light'] .submitButton:hover,
+.root[data-theme='dark'] .submitButton:hover {
+  background-color: #2563eb;
+}
+
+/* Secondary "Cancel" button (transparent; theme text color) */
+.cancelButton {
+  background-color: transparent;
+  color: var(--at-text);
+}
+
+.cancelButton:hover {
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.root[data-theme='light'] .cancelButton:hover {
+  background-color: #f3f4f6;
+}
+
+.root[data-theme='dark'] .cancelButton:hover {
+  background-color: #374151;
+}

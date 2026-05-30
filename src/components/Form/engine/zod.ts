@@ -21,8 +21,7 @@
  * by `<FieldShell>`, which already owns that edge-trigger.
  */
 
-import { useCallback, useMemo, useState } from 'react'
-import type React from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'

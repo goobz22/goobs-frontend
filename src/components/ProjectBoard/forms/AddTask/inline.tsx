@@ -22,8 +22,14 @@ import MultiSelectChip, {
 import TextField from '../../../Field/Text'
 import ComplexTextEditor from '../../../ComplexTextEditor'
 import SearchBar from '../../../Field/Search'
+import cssStyles from './AddTask.module.css'
 
 type AddTaskTabType = 'details' | 'knowledgeBase'
+
+// Local class composer — filter falsy, join with spaces. Matches the
+// goobs house pattern (Card / Button) instead of pulling in a class lib.
+const cx = (...names: Array<string | false | undefined>): string =>
+  names.filter(Boolean).join(' ')
 
 interface InlineAddTaskProps {
   onAdd: (newTask: Omit<Task, '_id'>) => void
@@ -85,8 +91,11 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   const [viewingArticle, setViewingArticle] = useState<RawArticle | null>(null)
   const [validationError, setValidationError] = useState('')
 
-  const isSacred = styles?.theme === 'sacred'
-  const isDark = styles?.theme === 'dark'
+  // Theme drives the `data-theme` attribute on the styled root; sacred is the
+  // hardcoded CSS default, light/dark are attribute-selector overrides. The
+  // per-theme color values now live in AddTask.module.css as CSS custom
+  // properties (--at-bg / --at-border / --at-text / etc.).
+  const theme = styles?.theme || 'light'
 
   // Filter substatus options based on selected status
   const filteredSubStatuses = useMemo(() => {
@@ -205,130 +214,6 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     })
   }, [knowledgebaseArticles, articleSearchTerm])
 
-  const bgColor = isSacred
-    ? 'rgba(0, 0, 0, 0.95)'
-    : isDark
-      ? '#1F2937'
-      : '#FFFFFF'
-
-  const borderColor = isSacred
-    ? 'rgba(255, 215, 0, 0.3)'
-    : isDark
-      ? '#374151'
-      : '#E5E7EB'
-
-  const textColor = isSacred ? '#FFD700' : isDark ? '#F9FAFB' : '#1F2937'
-  const secondaryTextColor = isSacred
-    ? 'rgba(255, 215, 0, 0.7)'
-    : isDark
-      ? '#D1D5DB'
-      : '#6B7280'
-
-  const sidebarBg = isSacred
-    ? 'rgba(0, 0, 0, 0.8)'
-    : isDark
-      ? '#111827'
-      : '#F9FAFB'
-
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    height: '100vh',
-    width: '100%',
-    backgroundColor: bgColor,
-    color: textColor,
-    overflow: 'hidden',
-  }
-
-  const sidebarStyle: React.CSSProperties = {
-    width: '280px',
-    backgroundColor: sidebarBg,
-    borderRight: `1px solid ${borderColor}`,
-    padding: '1.5rem',
-    overflowY: 'auto',
-    flexShrink: 0,
-  }
-
-  const mainContentStyle: React.CSSProperties = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  }
-
-  const tabsContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '0.5rem',
-    padding: '1rem 1.5rem 0',
-    borderBottom: `1px solid ${borderColor}`,
-    backgroundColor: bgColor,
-  }
-
-  const tabStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: '0.75rem 1.5rem',
-    backgroundColor: isActive
-      ? isSacred
-        ? 'rgba(255, 215, 0, 0.2)'
-        : isDark
-          ? '#374151'
-          : '#FFFFFF'
-      : isSacred
-        ? 'rgba(255, 215, 0, 0.05)'
-        : isDark
-          ? '#1F2937'
-          : '#F3F4F6',
-    border: `1px solid ${borderColor}`,
-    borderBottom: isActive ? 'none' : `1px solid ${borderColor}`,
-    borderRadius: '8px 8px 0 0',
-    cursor: 'pointer',
-    fontWeight: isActive ? 600 : 400,
-    color: isActive ? textColor : secondaryTextColor,
-    transition: 'all 0.2s',
-    fontSize: '0.875rem',
-    ...(isActive && {
-      transform: 'translateY(1px)',
-    }),
-  })
-
-  const contentAreaStyle: React.CSSProperties = {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '2rem',
-  }
-
-  const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
-    fontWeight: 700,
-    color: secondaryTextColor,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '1rem',
-    ...(isSacred && {
-      color: 'rgba(255, 215, 0, 0.6)',
-      fontFamily: 'Cinzel, serif',
-    }),
-  }
-
-  const fieldWrapperStyle: React.CSSProperties = {
-    marginBottom: '1.5rem',
-  }
-
-  const twoColumnGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1.5rem',
-    marginBottom: '1.5rem',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    padding: '0.75rem 1.5rem',
-    borderRadius: '6px',
-    border: `1px solid ${borderColor}`,
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  }
-
   const handleSubmit = () => {
     const missing: string[] = []
     if (!title.trim()) missing.push('Title')
@@ -404,30 +289,18 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   }
 
   return (
-    <div style={containerStyle}>
+    <div className={cssStyles.root} data-theme={theme}>
       {/* Sidebar - Quick Info */}
-      <div style={sidebarStyle}>
-        <div style={sectionTitleStyle}>New Task</div>
-        <p
-          style={{
-            fontSize: '0.875rem',
-            color: secondaryTextColor,
-            lineHeight: '1.6',
-          }}
-        >
+      <div className={cssStyles.sidebar}>
+        <div className={cssStyles.sectionTitle}>New Task</div>
+        <p className={cssStyles.sidebarParagraph}>
           Fill in the details to create a new task. All required fields are
           marked.
         </p>
 
-        <div style={{ marginTop: '2rem' }}>
-          <div style={sectionTitleStyle}>Required Fields</div>
-          <ul
-            style={{
-              fontSize: '0.875rem',
-              color: secondaryTextColor,
-              paddingLeft: '1.25rem',
-            }}
-          >
+        <div className={cssStyles.sidebarSection}>
+          <div className={cssStyles.sectionTitle}>Required Fields</div>
+          <ul className={cssStyles.requiredList}>
             <li>Title</li>
             <li>Description</li>
             {(hasProducts || hasServices) && <li>Type</li>}
@@ -439,17 +312,19 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
       </div>
 
       {/* Main Content */}
-      <div style={mainContentStyle}>
+      <div className={cssStyles.mainContent}>
         {/* Tabs */}
-        <div style={tabsContainerStyle}>
+        <div className={cssStyles.tabsContainer}>
           <div
-            style={tabStyle(activeTab === 'details')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'details'}
             onClick={() => setActiveTab('details')}
           >
             Task Details
           </div>
           <div
-            style={tabStyle(activeTab === 'knowledgeBase')}
+            className={cssStyles.tab}
+            data-active={activeTab === 'knowledgeBase'}
             onClick={() => setActiveTab('knowledgeBase')}
           >
             Knowledgebase{' '}
@@ -458,27 +333,13 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
         </div>
 
         {/* Content Area */}
-        <div style={contentAreaStyle}>
+        <div className={cssStyles.contentArea}>
           {activeTab === 'details' ? (
             <>
-              <h2
-                style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  marginBottom: '2rem',
-                  color: textColor,
-                  ...(isSacred && {
-                    fontFamily: 'Cinzel, serif',
-                    color: '#FFD700',
-                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                  }),
-                }}
-              >
-                Create New Task
-              </h2>
+              <h2 className={cssStyles.heading}>Create New Task</h2>
 
               {/* Title & Description */}
-              <div style={fieldWrapperStyle}>
+              <div className={cssStyles.fieldWrapper}>
                 <TextField
                   label="Title"
                   value={title}
@@ -488,7 +349,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 />
               </div>
 
-              <div style={fieldWrapperStyle}>
+              <div className={cssStyles.fieldWrapper}>
                 <ComplexTextEditor
                   label="Description"
                   value={description}
@@ -500,7 +361,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               </div>
 
               {/* Two Column Layout */}
-              <div style={twoColumnGridStyle}>
+              <div className={cssStyles.twoColumnGrid}>
                 {/* Company Selection (if applicable) */}
                 {rawCompanies.length > 0 && (
                   <Dropdown
@@ -633,7 +494,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
 
               {/* Topics */}
               {topics.length > 0 && (
-                <div style={fieldWrapperStyle}>
+                <div className={cssStyles.fieldWrapper}>
                   <MultiSelectChip
                     label="Topics"
                     options={topicSelectOptions}
@@ -656,47 +517,21 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               {viewingArticle ? (
                 /* Article Detail View */
                 <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '1.5rem',
-                    }}
-                  >
+                  <div className={cssStyles.articleDetailHeader}>
                     <button
                       onClick={() => setViewingArticle(null)}
-                      style={{
-                        background: 'none',
-                        border: `1px solid ${borderColor}`,
-                        borderRadius: '6px',
-                        padding: '0.5rem 1rem',
-                        cursor: 'pointer',
-                        color: textColor,
-                        fontSize: '0.875rem',
-                      }}
+                      className={cssStyles.backButton}
                     >
                       ← Back to Articles
                     </button>
                   </div>
 
-                  <h2
-                    style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 700,
-                      color: textColor,
-                      marginBottom: '1rem',
-                      ...(isSacred && {
-                        fontFamily: 'Cinzel, serif',
-                        color: '#FFD700',
-                      }),
-                    }}
-                  >
+                  <h2 className={cssStyles.articleHeading}>
                     {viewingArticle.articleTitle}
                   </h2>
 
                   {/* Link/Unlink Button */}
-                  <div style={{ marginBottom: '1.5rem' }}>
+                  <div className={cssStyles.linkActionRow}>
                     {selectedArticleIds.includes(viewingArticle._id) ? (
                       <button
                         onClick={() =>
@@ -704,20 +539,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             prev.filter(id => id !== viewingArticle._id)
                           )
                         }
-                        style={{
-                          padding: '0.75rem 1.5rem',
-                          backgroundColor: isSacred
-                            ? 'rgba(239, 68, 68, 0.2)'
-                            : isDark
-                              ? '#7f1d1d'
-                              : '#EF4444',
-                          color: isSacred ? '#F87171' : '#FFFFFF',
-                          border: `1px solid ${isSacred ? 'rgba(239, 68, 68, 0.5)' : '#EF4444'}`,
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                        }}
+                        className={cssStyles.unlinkButton}
                       >
                         ✓ Linked - Click to Unlink
                       </button>
@@ -729,20 +551,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             viewingArticle._id,
                           ])
                         }
-                        style={{
-                          padding: '0.75rem 1.5rem',
-                          backgroundColor: isSacred
-                            ? 'rgba(255, 215, 0, 0.2)'
-                            : isDark
-                              ? '#1e40af'
-                              : '#3B82F6',
-                          color: isSacred ? '#FFD700' : '#FFFFFF',
-                          border: `1px solid ${isSacred ? 'rgba(255, 215, 0, 0.5)' : '#3B82F6'}`,
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                        }}
+                        className={cssStyles.linkButton}
                       >
                         Link to This Case
                       </button>
@@ -750,21 +559,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   </div>
 
                   {viewingArticle.categoryName && (
-                    <div
-                      style={{
-                        display: 'inline-block',
-                        padding: '0.25rem 0.75rem',
-                        backgroundColor: isSacred
-                          ? 'rgba(255, 215, 0, 0.15)'
-                          : isDark
-                            ? '#374151'
-                            : '#E5E7EB',
-                        borderRadius: '20px',
-                        fontSize: '0.75rem',
-                        color: isSacred ? '#FFD700' : textColor,
-                        marginBottom: '1.5rem',
-                      }}
-                    >
+                    <div className={cssStyles.categoryChip}>
                       {viewingArticle.categoryName}
                     </div>
                   )}
@@ -781,15 +576,10 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                           .replace(/^\w/, c => c.toUpperCase())
                           .trim()
                         return (
-                          <div key={key} style={{ marginBottom: '1.5rem' }}>
-                            <div style={sectionTitleStyle}>{label}</div>
+                          <div key={key} className={cssStyles.articleField}>
+                            <div className={cssStyles.sectionTitle}>{label}</div>
                             <div
-                              style={{
-                                color: secondaryTextColor,
-                                fontSize: '0.875rem',
-                                lineHeight: '1.6',
-                                whiteSpace: 'pre-wrap',
-                              }}
+                              className={cssStyles.articleFieldTextPreWrap}
                               dangerouslySetInnerHTML={{ __html: value }}
                             />
                           </div>
@@ -799,85 +589,53 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   ) : (
                     <>
                       {viewingArticle.purpose && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Purpose</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>Purpose</div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.purpose}
                           </p>
                         </div>
                       )}
                       {viewingArticle.symptoms && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Symptoms</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>Symptoms</div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.symptoms}
                           </p>
                         </div>
                       )}
                       {viewingArticle.cause && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Cause</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>Cause</div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.cause}
                           </p>
                         </div>
                       )}
                       {viewingArticle.resolution && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Resolution</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>
+                            Resolution
+                          </div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.resolution}
                           </p>
                         </div>
                       )}
                       {viewingArticle.workaround && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Workaround</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>
+                            Workaround
+                          </div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.workaround}
                           </p>
                         </div>
                       )}
                       {viewingArticle.impact && (
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={sectionTitleStyle}>Impact</div>
-                          <p
-                            style={{
-                              color: secondaryTextColor,
-                              fontSize: '0.875rem',
-                              lineHeight: '1.6',
-                            }}
-                          >
+                        <div className={cssStyles.articleField}>
+                          <div className={cssStyles.sectionTitle}>Impact</div>
+                          <p className={cssStyles.articleFieldText}>
                             {viewingArticle.impact}
                           </p>
                         </div>
@@ -888,34 +646,16 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               ) : (
                 /* Article List View */
                 <>
-                  <h2
-                    style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 700,
-                      marginBottom: '1rem',
-                      color: textColor,
-                      ...(isSacred && {
-                        fontFamily: 'Cinzel, serif',
-                        color: '#FFD700',
-                        textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-                      }),
-                    }}
-                  >
+                  <h2 className={cssStyles.kbHeading}>
                     Link Knowledgebase Articles
                   </h2>
-                  <p
-                    style={{
-                      fontSize: '0.875rem',
-                      color: secondaryTextColor,
-                      marginBottom: '1.5rem',
-                    }}
-                  >
+                  <p className={cssStyles.kbIntro}>
                     Search and select articles to link to this task. Click an
                     article to view details.
                   </p>
 
                   {/* Search Bar */}
-                  <div style={{ marginBottom: '1.5rem' }}>
+                  <div className={cssStyles.searchWrapper}>
                     <SearchBar
                       label="Search Articles"
                       placeholder="Search by title, symptoms, resolution..."
@@ -929,42 +669,20 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
 
                   {/* Selected Articles */}
                   {selectedArticleIds.length > 0 && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <div style={sectionTitleStyle}>
+                    <div className={cssStyles.selectedArticlesWrapper}>
+                      <div className={cssStyles.sectionTitle}>
                         Selected Articles ({selectedArticleIds.length})
                       </div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: '0.5rem',
-                        }}
-                      >
+                      <div className={cssStyles.selectedChipRow}>
                         {selectedArticleIds.map(id => {
                           const article = knowledgebaseArticles.find(
                             a => a._id === id
                           )
                           if (!article) return null
                           return (
-                            <div
-                              key={id}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: isSacred
-                                  ? 'rgba(255, 215, 0, 0.2)'
-                                  : isDark
-                                    ? '#374151'
-                                    : '#E5E7EB',
-                                borderRadius: '20px',
-                                fontSize: '0.875rem',
-                                color: textColor,
-                              }}
-                            >
+                            <div key={id} className={cssStyles.selectedChip}>
                               <span
-                                style={{ cursor: 'pointer' }}
+                                className={cssStyles.selectedChipLabel}
                                 onClick={() => setViewingArticle(article)}
                               >
                                 {article.articleTitle}
@@ -976,15 +694,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                                     prev.filter(aid => aid !== id)
                                   )
                                 }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '0',
-                                  color: secondaryTextColor,
-                                  fontSize: '1rem',
-                                  lineHeight: 1,
-                                }}
+                                className={cssStyles.selectedChipRemove}
                               >
                                 ×
                               </button>
@@ -996,29 +706,14 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   )}
 
                   {/* Articles Grid */}
-                  <div style={sectionTitleStyle}>
+                  <div className={cssStyles.sectionTitle}>
                     {articleSearchTerm
                       ? `Search Results (${filteredArticles.length})`
                       : `All Articles (${knowledgebaseArticles.length})`}
                   </div>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns:
-                        'repeat(auto-fill, minmax(320px, 1fr))',
-                      gap: '1rem',
-                    }}
-                  >
+                  <div className={cssStyles.articlesGrid}>
                     {filteredArticles.length === 0 ? (
-                      <p
-                        style={{
-                          color: secondaryTextColor,
-                          fontSize: '0.875rem',
-                          textAlign: 'center',
-                          gridColumn: '1 / -1',
-                          padding: '2rem',
-                        }}
-                      >
+                      <p className={cssStyles.emptyMessage}>
                         {articleSearchTerm
                           ? 'No articles match your search.'
                           : 'No knowledge base articles available.'}
@@ -1032,100 +727,31 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                           <div
                             key={article._id}
                             onClick={() => setViewingArticle(article)}
-                            style={{
-                              padding: '1rem',
-                              backgroundColor: isSelected
-                                ? isSacred
-                                  ? 'rgba(255, 215, 0, 0.15)'
-                                  : isDark
-                                    ? 'rgba(59, 130, 246, 0.2)'
-                                    : 'rgba(59, 130, 246, 0.1)'
-                                : sidebarBg,
-                              border: `2px solid ${
-                                isSelected
-                                  ? isSacred
-                                    ? '#FFD700'
-                                    : '#3B82F6'
-                                  : borderColor
-                              }`,
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s',
-                            }}
+                            className={cssStyles.articleCard}
+                            data-selected={isSelected}
                           >
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                marginBottom: '0.5rem',
-                              }}
-                            >
-                              <h3
-                                style={{
-                                  fontSize: '1rem',
-                                  fontWeight: 600,
-                                  color: textColor,
-                                  margin: 0,
-                                  flex: 1,
-                                }}
-                              >
+                            <div className={cssStyles.articleCardHeader}>
+                              <h3 className={cssStyles.articleCardTitle}>
                                 {article.articleTitle}
                               </h3>
                               {isSelected && (
-                                <span
-                                  style={{
-                                    color: isSacred ? '#FFD700' : '#3B82F6',
-                                    fontSize: '1.25rem',
-                                    marginLeft: '0.5rem',
-                                  }}
-                                >
+                                <span className={cssStyles.articleCardCheck}>
                                   ✓
                                 </span>
                               )}
                             </div>
                             {article.categoryName && (
-                              <div
-                                style={{
-                                  fontSize: '0.75rem',
-                                  color: isSacred
-                                    ? 'rgba(255, 215, 0, 0.7)'
-                                    : isDark
-                                      ? '#60A5FA'
-                                      : '#3B82F6',
-                                  marginBottom: '0.5rem',
-                                }}
-                              >
+                              <div className={cssStyles.articleCardCategory}>
                                 {article.categoryName}
                               </div>
                             )}
                             {article.purpose && (
-                              <p
-                                style={{
-                                  fontSize: '0.85rem',
-                                  color: secondaryTextColor,
-                                  margin: '0 0 0.5rem 0',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
-                                }}
-                              >
+                              <p className={cssStyles.articleCardPurpose}>
                                 {article.purpose}
                               </p>
                             )}
                             {article.symptoms && (
-                              <p
-                                style={{
-                                  fontSize: '0.8rem',
-                                  color: secondaryTextColor,
-                                  margin: 0,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
+                              <p className={cssStyles.articleCardSymptoms}>
                                 <strong>Symptoms:</strong> {article.symptoms}
                               </p>
                             )}
@@ -1141,74 +767,21 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
 
           {/* Validation Error */}
           {validationError && (
-            <div
-              style={{
-                marginTop: '1rem',
-                padding: '0.75rem 1rem',
-                backgroundColor: isSacred
-                  ? 'rgba(220, 38, 38, 0.15)'
-                  : isDark
-                    ? 'rgba(220, 38, 38, 0.2)'
-                    : '#FEF2F2',
-                border: `1px solid ${isSacred ? 'rgba(220, 38, 38, 0.4)' : isDark ? 'rgba(220, 38, 38, 0.4)' : '#FECACA'}`,
-                borderRadius: '6px',
-                color: isSacred ? '#FCA5A5' : isDark ? '#FCA5A5' : '#DC2626',
-                fontSize: '0.875rem',
-              }}
-            >
-              {validationError}
-            </div>
+            <div className={cssStyles.validationError}>{validationError}</div>
           )}
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+          <div className={cssStyles.actionButtons}>
             <button
               onClick={handleSubmit}
-              style={{
-                ...buttonStyle,
-                backgroundColor: isSacred
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : isDark
-                    ? '#3B82F6'
-                    : '#3B82F6',
-                color: isSacred ? '#FFD700' : '#FFFFFF',
-                borderColor: isSacred ? 'rgba(255, 215, 0, 0.5)' : '#3B82F6',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(255, 215, 0, 0.3)'
-                  : isDark
-                    ? '#2563EB'
-                    : '#2563EB'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = isSacred
-                  ? 'rgba(255, 215, 0, 0.2)'
-                  : isDark
-                    ? '#3B82F6'
-                    : '#3B82F6'
-              }}
+              className={cx(cssStyles.button, cssStyles.submitButton)}
             >
               Create Task
             </button>
             {onCancel && (
               <button
                 onClick={onCancel}
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: 'transparent',
-                  color: textColor,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = isSacred
-                    ? 'rgba(255, 215, 0, 0.1)'
-                    : isDark
-                      ? '#374151'
-                      : '#F3F4F6'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                className={cx(cssStyles.button, cssStyles.cancelButton)}
               >
                 Cancel
               </button>

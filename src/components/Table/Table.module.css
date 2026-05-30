@@ -1,0 +1,176 @@
+/* ==========================================================================
+   TABLE — CSS MODULE
+   Migrated verbatim from the legacy src/theme/table.ts runtime theme system
+   (the LAST consumer of the global theme). Every color / spacing / border /
+   transition value below is transcribed EXACTLY from table.ts —
+   sacred is the hardcoded default, light / dark are [data-theme] overrides.
+
+   The Table family renders separate DOM nodes via separate components
+   (TableContainer → div, Table → table, TableHead → thead, TableBody →
+   tbody, TableRow → tr, TableCell → td). `styles.theme` flows independently
+   to each subcomponent, so each styled element carries its own `data-theme`
+   attribute and resolves its own palette. Per-caller scalar overrides
+   (backgroundColor / borderColor / headerColor / fontFamily / etc.) arrive
+   as CSS custom properties on the element and win via var() fallbacks.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CONTAINER (TableContainer → div) — SACRED default
+   table.ts sacredTheme.container
+   -------------------------------------------------------------------------- */
+.container {
+  background-color: var(--table-container-bg, rgba(0, 0, 0, 0.8));
+  border-color: var(--table-container-border, rgba(255, 215, 0, 0.3));
+  border-radius: var(--table-container-radius, 8px);
+  border-style: solid;
+  border-width: 1px;
+  overflow-x: auto;
+  width: var(--table-container-width, 100%);
+  max-width: var(--table-container-max-width, 100%);
+  box-sizing: border-box;
+}
+
+/* table.ts lightTheme.container */
+.container[data-theme='light'] {
+  background-color: var(--table-container-bg, #ffffff);
+  border-color: var(--table-container-border, #e0e0e0);
+  border-radius: var(--table-container-radius, 4px);
+}
+
+/* table.ts darkTheme.container */
+.container[data-theme='dark'] {
+  background-color: var(--table-container-bg, #1a1a1a);
+  border-color: var(--table-container-border, #333333);
+  border-radius: var(--table-container-radius, 4px);
+}
+
+/* --------------------------------------------------------------------------
+   TABLE (Table → table) — identical across all three themes (table.ts *.table)
+   Also reused by TableBody → tbody (legacy code applied .table styles there).
+   -------------------------------------------------------------------------- */
+.table {
+  background-color: transparent;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER (TableHead → thead) — SACRED default
+   table.ts sacredTheme.header
+   -------------------------------------------------------------------------- */
+.head {
+  background-color: var(--table-header-bg, rgba(255, 215, 0, 0.1));
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  color: var(--table-header-color, #ffd700);
+  font-family: var(--table-font-family, 'Cinzel', serif);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* table.ts lightTheme.header */
+.head[data-theme='light'] {
+  background-color: var(--table-header-bg, #f5f5f5);
+  border-bottom: 1px solid #e0e0e0;
+  color: var(--table-header-color, #333333);
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* table.ts darkTheme.header */
+.head[data-theme='dark'] {
+  background-color: var(--table-header-bg, #2a2a2a);
+  border-bottom: 1px solid #444444;
+  color: var(--table-header-color, #ffffff);
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* --------------------------------------------------------------------------
+   ROW (TableRow → tr) — identical across all three themes (table.ts *.row)
+   Hover background is opt-in via the `hover` prop (data-hover="true").
+   Sacred hover: alpha(gold, 0.05); light: alpha(#000, 0.05); dark: alpha(#fff, 0.05).
+   -------------------------------------------------------------------------- */
+.row {
+  transition: background-color 0.2s ease;
+}
+
+.row[data-hover='true']:hover {
+  background-color: rgba(255, 215, 0, 0.05);
+}
+
+.row[data-hover='true'][data-theme='light']:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.row[data-hover='true'][data-theme='dark']:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   CELL (TableCell → td) — SACRED default
+   table.ts sacredTheme.cell + the runtime-composed
+   borderBottom: `1px solid ${cell.borderColor}` from index.tsx
+   -------------------------------------------------------------------------- */
+.cell {
+  color: var(--table-cell-color, rgba(255, 215, 0, 0.9));
+  font-family: var(--table-font-family, 'Merriweather', serif);
+  padding: 12px 16px;
+  vertical-align: middle;
+  text-align: left;
+  border-bottom: 1px solid var(--table-cell-border, rgba(255, 215, 0, 0.2));
+}
+
+/* table.ts lightTheme.cell */
+.cell[data-theme='light'] {
+  color: var(--table-cell-color, #333333);
+  font-family: var(--table-font-family, inherit);
+  border-bottom: 1px solid var(--table-cell-border, #e0e0e0);
+}
+
+/* table.ts darkTheme.cell */
+.cell[data-theme='dark'] {
+  color: var(--table-cell-color, #ffffff);
+  font-family: var(--table-font-family, inherit);
+  border-bottom: 1px solid var(--table-cell-border, #333333);
+}
+
+/* --------------------------------------------------------------------------
+   HEADER CELL — a TableCell whose child is a raw <th> element. The legacy
+   code spread `themeConfig.header` over the cell style in that case, so the
+   header palette wins (background + header color + header font weight).
+   -------------------------------------------------------------------------- */
+.cell[data-header-cell='true'] {
+  background-color: var(--table-header-bg, rgba(255, 215, 0, 0.1));
+  color: var(--table-header-color, #ffd700);
+  font-family: var(--table-font-family, 'Cinzel', serif);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--table-cell-border, rgba(255, 215, 0, 0.3));
+}
+
+.cell[data-header-cell='true'][data-theme='light'] {
+  background-color: var(--table-header-bg, #f5f5f5);
+  color: var(--table-header-color, #333333);
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  border-bottom: 1px solid var(--table-cell-border, #e0e0e0);
+}
+
+.cell[data-header-cell='true'][data-theme='dark'] {
+  background-color: var(--table-header-bg, #2a2a2a);
+  color: var(--table-header-color, #ffffff);
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  border-bottom: 1px solid var(--table-cell-border, #444444);
+}

@@ -5,11 +5,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import Toolbar from '../Toolbars/Editor'
 import Typography from '../../Typography'
 import Accordion from '../../Accordion'
-import type { ComplexTextEditorStyles } from '../theme'
 import {
   buildEditorAreaOverrideStyle,
   buildToolbarOverrideStyle,
   buildTransitionOverride,
+  type ComplexTextEditorStyles,
 } from '../theme'
 import cssStyles from '../ComplexTextEditor.module.css'
 
