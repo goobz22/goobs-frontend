@@ -208,6 +208,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          data-field-name={rest.name}
           {...rest}
         />
         <div style={computedStyles.box}></div>

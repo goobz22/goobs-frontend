@@ -97,6 +97,7 @@ const Switch: React.FC<SwitchProps> = ({
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          data-field-name={(props as React.InputHTMLAttributes<HTMLInputElement>).name}
           {...props}
         />
 

@@ -35,6 +35,8 @@ export interface SearchableSimpleProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /** HTML-style field name. Alias for dataFieldName so the test contract can target the field by either; data-field-name is emitted from dataFieldName ?? name. */
+  name?: string
   styles?: FieldStyleOverrides
 }
 
@@ -49,6 +51,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -187,7 +190,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
       required={styles?.required}
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
-      dataFieldName={dataFieldName}
+      dataFieldName={dataFieldName ?? name}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => {

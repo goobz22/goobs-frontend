@@ -221,7 +221,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
         .replace(/[^a-z0-9-]/g, '')
       return (
         <div key={`${m.title}-${i}`} className={styles.metricsCell}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          { }
           <MetricCard {...(cardProps as any)} />
         </div>
       )

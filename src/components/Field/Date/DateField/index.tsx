@@ -18,6 +18,8 @@ export interface DateFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /** HTML-style field name. Alias for dataFieldName so the test contract can target the field by either; data-field-name is emitted from dataFieldName ?? name. */
+  name?: string
   styles?: FieldStyleOverrides & {
     // DateField-local layout overrides forwarded as inline styles on the
     // input itself, since FieldShell only forwards layout props onto the
@@ -37,6 +39,7 @@ const DateField: React.FC<DateFieldProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   const disabled = styles?.disabled || false
@@ -114,7 +117,7 @@ const DateField: React.FC<DateFieldProps> = ({
         <input
           ref={inputRef}
           id={inputId}
-          data-field-name={dataFieldName}
+          data-field-name={dataFieldName ?? name}
           type="date"
           className={cssStyles.input}
           value={formatDateForInput(value || null)}

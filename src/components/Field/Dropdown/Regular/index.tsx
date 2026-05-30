@@ -38,6 +38,12 @@ export interface DropdownProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Entity field key. Emitted as `data-field-name` (unless `dataFieldName`
+   * is set explicitly) so a single `name="<entityFieldKey>"` gives the stable
+   * test anchor the recommender targets via `[data-field-name="<key>"]`.
+   */
+  name?: string
   styles?: FieldStyleOverrides & { fullWidth?: boolean }
 }
 
@@ -54,6 +60,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -170,7 +177,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       required={styles?.required}
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
-      dataFieldName={dataFieldName}
+      dataFieldName={dataFieldName ?? name}
       styles={styleOverridesForShell}
     >
       {({ inputId, inputAriaProps }) => {

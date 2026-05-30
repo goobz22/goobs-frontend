@@ -29,6 +29,10 @@ export interface ComplexTextEditorProps {
   onChange?: (value: string) => void
   /** Helper text to display below the editor. */
   helperText?: React.ReactNode
+  /** Stable test selector — emitted as `data-field-name` on the wrapper. */
+  dataFieldName?: string
+  /** HTML-style field name. Alias for dataFieldName so the test contract can target the field by either; data-field-name is emitted from dataFieldName ?? name. */
+  name?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ComplexTextEditorStyles
   autoSave?: boolean
@@ -44,6 +48,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   minRows = 5,
   onChange,
   helperText,
+  dataFieldName,
+  name,
   styles,
   autoSave,
   autoSaveKey,
@@ -221,7 +227,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     }
 
     return (
-      <div style={computedStyles.container}>
+      <div style={computedStyles.container} data-field-name={dataFieldName ?? name}>
         <Accordion
           summary={summaryText}
           details={createEditorContent()}
@@ -234,7 +240,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   }
 
   return (
-    <div>
+    <div data-field-name={dataFieldName ?? name}>
       {labelElement}
       <div style={computedStyles.container}>
         {createEditorContent()}

@@ -30,7 +30,12 @@ export interface TextFieldProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
-  /** Forwarded to the input as `name` for native form submission. */
+  /**
+   * Forwarded to the input as `name` for native form submission, and — unless
+   * `dataFieldName` is set explicitly — also emitted as `data-field-name` so a
+   * single `name="<entityFieldKey>"` gives both native binding and the stable
+   * test anchor the recommender targets via `[data-field-name="<key>"]`.
+   */
   name?: string
   styles?: FieldStyleOverrides & {
     // Layout/typography props specific to TextField that aren't on
@@ -236,7 +241,7 @@ const TextField: React.FC<TextFieldProps> = ({
               disabled={disabled}
               required={required}
               placeholder={placeholder}
-              data-field-name={dataFieldName}
+              data-field-name={dataFieldName ?? name}
               style={
                 Object.keys(inputStyleOverrides).length > 0
                   ? inputStyleOverrides
@@ -259,7 +264,7 @@ const TextField: React.FC<TextFieldProps> = ({
               disabled={disabled}
               required={required}
               placeholder={placeholder}
-              data-field-name={dataFieldName}
+              data-field-name={dataFieldName ?? name}
               style={
                 Object.keys(inputStyleOverrides).length > 0
                   ? inputStyleOverrides

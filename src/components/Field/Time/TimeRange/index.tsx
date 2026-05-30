@@ -20,6 +20,8 @@ export interface TimeRangeProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /** HTML-style field name. Alias for dataFieldName so the test contract can target the field by either; data-field-name is emitted from dataFieldName ?? name. */
+  name?: string
   styles?: FieldStyleOverrides
 }
 
@@ -48,6 +50,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   const startInputRef = useRef<HTMLInputElement>(null)
@@ -125,7 +128,7 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   // start shell carries `error` + `helperText` so the helper region
   // renders once below the pair.
   return (
-    <div data-field={dataField} data-field-name={dataFieldName}>
+    <div data-field={dataField} data-field-name={dataFieldName ?? name}>
       <div style={{ display: 'flex', gap: '16px' }}>
         <div style={{ flex: 1 }}>
           <FieldShell

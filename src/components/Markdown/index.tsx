@@ -55,7 +55,7 @@ export const Markdown: React.FC<MarkdownProps> = ({
       className={className}
       data-testid={rest['data-testid'] ?? 'goobs-markdown'}
       style={wrapperStyle}
-      // eslint-disable-next-line react/no-danger
+       
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )

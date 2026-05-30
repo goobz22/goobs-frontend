@@ -91,6 +91,27 @@ export interface DataGridToolbarProps {
 }
 
 /**
+ * Derive a canonical `data-action` verb from a custom toolbar button's visible
+ * text when the caller did not pass an explicit `action`. Goobs `Button` emits
+ * `action` as `data-action`, which is the stable hook the test suite targets
+ * (`[data-action="create"]` / `[data-action="manage"]` / `[data-action="delete"]`).
+ * Deriving from text means every existing workspace's "Create X" / "Manage X" /
+ * "Delete" toolbar button becomes targetable without editing each call site, and
+ * without coupling the test to a fragile, emoji-prefixed accessible-name regex
+ * (icons render into the name, e.g. "⚙️Manage Contact", defeating `/^Manage$/`).
+ * An explicit `action` passed by the caller always wins. The verb buckets mirror
+ * the write-keyword set used by the read-only permission filter above.
+ */
+function deriveButtonAction(text?: string): string | undefined {
+  const normalized = (text ?? '').toLowerCase()
+  if (/\b(create|add|new)\b/.test(normalized)) return 'create'
+  if (/\b(manage|edit|update)\b/.test(normalized)) return 'manage'
+  if (/\b(delete|remove)\b/.test(normalized)) return 'delete'
+  if (/\b(save|submit)\b/.test(normalized)) return 'save'
+  return undefined
+}
+
+/**
  * DATAGRID TOOLBAR COMPONENT
  * --------------------------
  * Renders the action toolbar above the data table.
@@ -183,16 +204,25 @@ const DataGridToolbar: FC<DataGridToolbarProps> = ({
           Filtered based on permissions in read-only mode.
           ───────────────────────────────────────────────────────────────────── */}
       <div style={leftStyle}>
-        {filteredButtons?.map((btn, idx) => (
-          <Button
-            key={idx}
-            {...btn}
-            styles={{
-              ...btn.styles,
-              theme: btn.styles?.theme || styles?.theme || 'light',
-            }}
-          />
-        ))}
+        {filteredButtons?.map((btn, idx) => {
+          // Explicit action wins; otherwise derive from the button text so
+          // every workspace's toolbar buttons expose [data-action] for tests.
+          // Conditional spread (not `action={…}`) because ButtonProps.action is
+          // a required-if-present string under exactOptionalPropertyTypes — we
+          // must omit the prop entirely rather than pass `undefined`.
+          const resolvedAction = btn.action ?? deriveButtonAction(btn.text)
+          return (
+            <Button
+              key={idx}
+              {...btn}
+              {...(resolvedAction ? { action: resolvedAction } : {})}
+              styles={{
+                ...btn.styles,
+                theme: btn.styles?.theme || styles?.theme || 'light',
+              }}
+            />
+          )
+        })}
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────

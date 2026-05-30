@@ -34,6 +34,12 @@ export interface MultiSelectChipProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /**
+   * Entity field key. Emitted as `data-field-name` (unless `dataFieldName`
+   * is set explicitly) so a single `name="<entityFieldKey>"` gives the stable
+   * test anchor the recommender targets via `[data-field-name="<key>"]`.
+   */
+  name?: string
   styles?: FieldStyleOverrides & {
     arrowRight?: string
     arrowTop?: string
@@ -53,6 +59,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   error,
   dataField,
   dataFieldName,
+  name,
   styles,
 }) => {
   const isControlled = valueProp !== undefined
@@ -179,7 +186,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       required={styles?.required}
       state={isOpen ? 'open' : undefined}
       dataField={dataField}
-      dataFieldName={dataFieldName}
+      dataFieldName={dataFieldName ?? name}
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => {
