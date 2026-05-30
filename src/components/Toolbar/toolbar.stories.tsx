@@ -42,7 +42,7 @@ type Story = StoryObj<typeof CustomToolbar>
 export const LightTheme: Story = {
   name: 'Light Theme',
   render: args => (
-    <div className="p-4 bg-gray-100">
+    <div style={{ padding: '16px', background: '#f3f4f6' }}>
       <CustomToolbar {...args} />
     </div>
   ),
@@ -59,7 +59,7 @@ export const LightTheme: Story = {
 export const DarkTheme: Story = {
   name: 'Dark Theme',
   render: args => (
-    <div className="p-4 bg-gray-900">
+    <div style={{ padding: '16px', background: '#111827' }}>
       <CustomToolbar {...args} />
     </div>
   ),
@@ -75,7 +75,7 @@ export const DarkTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <div className="p-4 bg-black">
+    <div style={{ padding: '16px', background: '#000000' }}>
       <CustomToolbar {...args} />
     </div>
   ),
@@ -90,26 +90,50 @@ const InteractiveDemoRenderer = () => {
   const [showButtons, setShowButtons] = React.useState(true)
   const [showSearch, setShowSearch] = React.useState(true)
 
-  const backgroundClass =
-    theme === 'sacred'
-      ? 'bg-black'
-      : theme === 'dark'
-        ? 'bg-gray-900'
-        : 'bg-gray-100'
+  const backgroundColor =
+    theme === 'sacred' ? '#000000' : theme === 'dark' ? '#111827' : '#f3f4f6'
 
   return (
-    <div className={`p-4 ${backgroundClass}`}>
-      <div className="fixed top-24 right-4 z-50 p-4 bg-white rounded-lg border shadow-lg">
-        <h3 className="text-lg font-bold mb-2">Controls</h3>
-        <div className="flex flex-col gap-2">
+    <div style={{ padding: '16px', background: backgroundColor }}>
+      <div
+        style={{
+          position: 'fixed',
+          top: '96px',
+          right: '16px',
+          zIndex: 50,
+          padding: '16px',
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #d1d5db',
+          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+        }}
+      >
+        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
+          Controls
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <label>
-            <span className="block text-sm font-medium mb-1">Theme:</span>
+            <span
+              style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: 500,
+                marginBottom: '4px',
+              }}
+            >
+              Theme:
+            </span>
             <select
               value={theme}
               onChange={e =>
                 setTheme(e.target.value as 'light' | 'dark' | 'sacred')
               }
-              className="w-full p-1 border rounded"
+              style={{
+                width: '100%',
+                padding: '4px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+              }}
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>

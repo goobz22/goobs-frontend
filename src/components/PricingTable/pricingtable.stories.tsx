@@ -75,7 +75,14 @@ type Story = StoryObj<typeof PricingTable>
 export const PremiumTheme: Story = {
   name: 'Premium Theme',
   render: args => (
-    <div className="w-[800px] p-6 bg-gray-50 rounded-lg">
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
       <PricingTable {...args} />
     </div>
   ),
@@ -89,7 +96,14 @@ export const PremiumTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <div className="w-[800px] p-6 bg-black rounded-lg">
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#000000',
+        borderRadius: '8px',
+      }}
+    >
       <PricingTable {...args} />
     </div>
   ),
@@ -104,9 +118,26 @@ const InteractiveDemoRenderer = () => {
   const [sacredtheme, setsacredtheme] = React.useState(false)
   return (
     <div
-      className={`w-[800px] p-6 rounded-lg ${sacredtheme ? 'bg-black' : 'bg-gray-50'}`}
+      style={{
+        width: '800px',
+        padding: '24px',
+        borderRadius: '8px',
+        background: sacredtheme ? '#000000' : '#f9fafb',
+      }}
     >
-      <div className="fixed top-4 right-4 z-50 p-4 bg-white rounded-lg border shadow-lg">
+      <div
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '16px',
+          zIndex: 50,
+          padding: '16px',
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #d1d5db',
+          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+        }}
+      >
         <label>
           <input
             type="checkbox"
@@ -133,7 +164,14 @@ export const InteractiveDemo: Story = {
 export const BothPrices: Story = {
   name: 'Both Monthly and Annual',
   render: args => (
-    <div className="w-[800px] p-6 bg-gray-50 rounded-lg">
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
       <PricingTable {...args} />
     </div>
   ),

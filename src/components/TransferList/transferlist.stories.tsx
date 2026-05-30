@@ -82,8 +82,23 @@ export const PremiumTheme: Story = {
         args.onChange?.(newLeft, newRight, dropdownValue)
       }
       return (
-        <div className="w-[700px] p-6 bg-gray-50 rounded-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 font-inter">
+        <div
+          style={{
+            width: '700px',
+            padding: '24px',
+            background: '#f9fafb',
+            borderRadius: '8px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#1f2937',
+              marginBottom: '16px',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             Premium TransferList
           </h3>
           {(() => {
@@ -170,8 +185,24 @@ export const SacredTheme: Story = {
         args.onChange?.(newLeft, newRight, dropdownValue)
       }
       return (
-        <div className="w-[700px] p-6 bg-black/90 rounded-lg border border-yellow-400/30">
-          <h3 className="text-xl font-bold text-yellow-400 mb-4 font-cinzel animate-sacred-glow">
+        <div
+          style={{
+            width: '700px',
+            padding: '24px',
+            background: 'rgba(0, 0, 0, 0.9)',
+            borderRadius: '8px',
+            border: '1px solid rgba(250, 204, 21, 0.3)',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#ffd700',
+              marginBottom: '16px',
+              fontFamily: "'Cinzel', Georgia, serif",
+            }}
+          >
             Sacred TransferList
           </h3>
           {(() => {
@@ -222,9 +253,23 @@ const InteractiveDemoRenderer = () => {
   }
 
   return (
-    <div className="w-[800px] space-y-4">
-      <div className="p-4 bg-white rounded-lg border">
-        <label className="flex items-center gap-2">
+    <div
+      style={{
+        width: '800px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+      }}
+    >
+      <div
+        style={{
+          padding: '16px',
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #d1d5db',
+        }}
+      >
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <input
             type="checkbox"
             checked={sacredtheme}
@@ -234,7 +279,16 @@ const InteractiveDemoRenderer = () => {
         </label>
       </div>
       <div
-        className={`p-6 rounded-lg ${sacredtheme ? 'bg-black/90 border border-yellow-400/30' : 'bg-gray-50'}`}
+        style={{
+          padding: '24px',
+          borderRadius: '8px',
+          ...(sacredtheme
+            ? {
+                background: 'rgba(0, 0, 0, 0.9)',
+                border: '1px solid rgba(250, 204, 21, 0.3)',
+              }
+            : { background: '#f9fafb' }),
+        }}
       >
         <TransferList
           leftItems={left}
