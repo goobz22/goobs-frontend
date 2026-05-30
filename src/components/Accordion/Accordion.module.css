@@ -1,0 +1,158 @@
+/* =============================================================================
+ * ACCORDION — CSS module
+ *
+ * This component never imported src/theme/accordion.ts; its visual language was
+ * a set of inline style objects with `isSacredTheme` / `isHovered` / `isActive`
+ * / `expanded` ternaries. Those are migrated 1:1 here. Visual parity with the
+ * old inline styles is mandatory — every color/shadow/spacing value below is
+ * transcribed exactly from the previous index.tsx.
+ *
+ * THEME — expressed via [data-theme] on the container. The component only ever
+ * branched on `theme === 'sacred'` vs everything-else (the white/light default
+ * the JS fell through to for undefined/light/dark). So sacred is the base
+ * default here and [data-theme='light'] is the explicit override block,
+ * matching the two-branch behaviour exactly. The TSX resolves the attribute to
+ * 'sacred' only when styles.theme === 'sacred', otherwise 'light'.
+ *
+ * STATE — :hover replaces the isHovered useState; [data-active] replaces the
+ * `isActive && isMenuType` branch; [data-expanded] drives the icon rotation;
+ * [data-disabled] replaces the disabled cursor/guard.
+ *
+ * DYNAMIC — caller-supplied overrides (backgroundColor, borderColor, padding,
+ * summaryColor, …) and the runtime-computed level indent arrive as CSS custom
+ * properties set inline in the TSX, each falling back to the theme value when
+ * the caller didn't provide it (mirrors the old `styles?.x || default`).
+ * ===========================================================================*/
+
+/* --------------------------------------------------------------------------
+   CONTAINER — sacred defaults (base)
+   -------------------------------------------------------------------------- */
+.container {
+  /* runtime / caller-driven values (set inline as CSS vars when provided) */
+  --accordion-level-indent: 20px;
+  --accordion-margin-bottom: 4px;
+  --accordion-border-radius: 8px;
+  --accordion-border-width: 1px;
+  --accordion-padding: 12px;
+
+  /* sacred palette defaults */
+  --accordion-bg: rgba(0, 0, 0, 0.4);
+  --accordion-border-color: rgba(255, 215, 0, 0.3);
+  --accordion-summary-color: rgba(255, 255, 255, 0.9);
+  --accordion-summary-active-bg: rgba(255, 215, 0, 0.15);
+  --accordion-summary-active-color: #ffd700;
+  --accordion-summary-hover-bg: rgba(255, 215, 0, 0.1);
+  --accordion-summary-font-family: 'Cinzel', serif;
+  --accordion-icon-color: #ffd700;
+  --accordion-details-color: rgba(255, 255, 255, 0.8);
+  --accordion-details-font-family: 'Crimson Text', serif;
+  --accordion-details-border-top-color: rgba(255, 215, 0, 0.2);
+
+  position: relative;
+  margin-bottom: var(--accordion-margin-bottom);
+  border-radius: var(--accordion-border-radius);
+  background-color: var(--accordion-bg);
+  border: var(--accordion-border-width) solid var(--accordion-border-color);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   CONTAINER — light (default for undefined / light / dark; non-sacred branch)
+   -------------------------------------------------------------------------- */
+.container[data-theme='light'] {
+  --accordion-bg: #fff;
+  --accordion-border-color: #e5e7eb;
+  --accordion-summary-color: #111827;
+  --accordion-summary-active-bg: rgba(59, 130, 246, 0.1);
+  --accordion-summary-active-color: #3b82f6;
+  --accordion-summary-hover-bg: #f9fafb;
+  --accordion-summary-font-family: inherit;
+  --accordion-icon-color: #6b7280;
+  --accordion-details-color: #374151;
+  --accordion-details-font-family: inherit;
+  --accordion-details-border-top-color: #e5e7eb;
+}
+
+/* --------------------------------------------------------------------------
+   LINK WRAPPER (menu type with href)
+   -------------------------------------------------------------------------- */
+.link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   SUMMARY (clickable header row)
+   -------------------------------------------------------------------------- */
+.summary {
+  position: relative;
+  padding: var(--accordion-padding);
+  /* accordion type: 40px base; overridden to 16px base for menu type */
+  padding-left: calc(40px + var(--accordion-level-indent));
+  padding-right: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background-color: var(--accordion-summary-bg, transparent);
+  color: var(--accordion-summary-color);
+  font-weight: 400;
+  font-family: var(--accordion-summary-font-family);
+  font-size: 14px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.summary[data-menu='true'] {
+  padding-left: calc(16px + var(--accordion-level-indent));
+}
+
+/* hover — only when not disabled. Mirrors getSummaryBackgroundColor's
+   `isHovered && !disabled` branch, which wins over a caller-supplied
+   summaryBackgroundColor (the explicit-color guard requires !isHovered). */
+.summary:hover:not([data-disabled='true']) {
+  background-color: var(--accordion-summary-hover-bg);
+}
+
+/* active menu item — declared after :hover so active wins, matching the JS
+   order where the isActive branch is evaluated before the isHovered branch. */
+.summary[data-active='true'][data-menu='true'] {
+  background-color: var(--accordion-summary-active-bg);
+  color: var(--accordion-summary-active-color);
+  font-weight: 600;
+}
+
+.summary[data-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   ICON (expand/collapse chevron)
+   -------------------------------------------------------------------------- */
+.icon {
+  position: absolute;
+  left: calc(8px + var(--accordion-level-indent));
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  color: var(--accordion-icon-color);
+  width: 20px;
+  height: 20px;
+}
+
+.icon[data-expanded='true'] {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   DETAILS (expanded body)
+   -------------------------------------------------------------------------- */
+.details {
+  padding: var(--accordion-padding);
+  padding-left: calc(24px + var(--accordion-level-indent));
+  color: var(--accordion-details-color);
+  font-family: var(--accordion-details-font-family);
+  font-size: 14px;
+  border-top: 1px solid var(--accordion-details-border-top-color);
+}

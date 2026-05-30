@@ -1,0 +1,144 @@
+/* ==========================================================================
+   DIALOG - CSS MODULE
+   Modal surface primitive. Theme is expressed via `data-theme` on the
+   backdrop/dialog root; SACRED is the hardcoded default and light/dark are
+   [data-theme] overrides. Values transcribed verbatim from the old inline-
+   style/isSacredTheme ternaries in index.tsx so visual parity is exact:
+
+     SACRED_GOLD = #FFD700  => rgb(255, 215, 0)
+       alpha(SACRED_GOLD, 0.3) = rgba(255, 215, 0, 0.3)
+       alpha(SACRED_GOLD, 0.5) = rgba(255, 215, 0, 0.5)
+       alpha(SACRED_GOLD, 0.7) = rgba(255, 215, 0, 0.7)
+
+   The custom scrollbar that was previously injected at runtime via
+   document.createElement('style') now lives here as scoped
+   ::-webkit-scrollbar rules on .content. Runtime-measured wheel scrolling
+   (scrollHeight / scrollTop) legitimately stays in JS.
+
+   Caller-supplied overrides and the responsive max-width / max-height /
+   top-offset values are passed in from JS as CSS custom properties:
+     --dialog-backdrop-bg, --dialog-align, --dialog-pad-top,
+     --dialog-backdrop-filter, --dialog-bg, --dialog-border,
+     --dialog-radius, --dialog-shadow, --dialog-max-width, --dialog-width,
+     --dialog-max-height, --dialog-min-height, --dialog-height,
+     --dialog-content-padding
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BACKDROP — fixed full-viewport overlay (SACRED defaults)
+   -------------------------------------------------------------------------- */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* sacred default backdrop; light overrides below. Caller override via var. */
+  background-color: var(--dialog-backdrop-bg, rgba(0, 0, 0, 0.85));
+  display: flex;
+  align-items: var(--dialog-align, center);
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  padding-top: var(--dialog-pad-top, 16px);
+  backdrop-filter: var(--dialog-backdrop-filter, none);
+}
+
+.backdrop[data-theme='light'] {
+  background-color: var(--dialog-backdrop-bg, rgba(0, 0, 0, 0.5));
+}
+
+.backdrop[data-theme='dark'] {
+  background-color: var(--dialog-backdrop-bg, rgba(0, 0, 0, 0.5));
+}
+
+/* --------------------------------------------------------------------------
+   DIALOG — the paper surface (SACRED defaults)
+   -------------------------------------------------------------------------- */
+.dialog {
+  position: relative;
+  /* sacred defaults */
+  background-color: var(--dialog-bg, rgba(0, 0, 0, 0.95));
+  border: var(--dialog-border, 2px solid rgba(255, 215, 0, 0.5));
+  border-radius: var(--dialog-radius, 12px);
+  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(255, 215, 0, 0.3));
+  max-width: var(--dialog-max-width, 600px);
+  width: var(--dialog-width, 100%);
+  max-height: var(--dialog-max-height, 80vh);
+  min-height: var(--dialog-min-height, none);
+  height: var(--dialog-height, auto);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog[data-theme='light'] {
+  background-color: var(--dialog-bg, #ffffff);
+  border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
+  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(0, 0, 0, 0.2));
+}
+
+.dialog[data-theme='dark'] {
+  background-color: var(--dialog-bg, #ffffff);
+  border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
+  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(0, 0, 0, 0.2));
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT — scrollable inner region (SACRED defaults)
+   -------------------------------------------------------------------------- */
+.content {
+  padding: var(--dialog-content-padding, 24px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* sacred defaults */
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Crimson Text', serif;
+}
+
+.content[data-theme='light'] {
+  color: rgba(0, 0, 0, 0.87);
+  font-family: inherit;
+}
+
+.content[data-theme='dark'] {
+  color: rgba(0, 0, 0, 0.87);
+  font-family: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   CUSTOM SCROLLBAR — formerly injected at runtime via createElement('style').
+   SACRED defaults (gold thumb); light/dark override below. Values verbatim.
+   -------------------------------------------------------------------------- */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.5);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.7);
+}
+
+.content[data-theme='light']::-webkit-scrollbar-track,
+.content[data-theme='dark']::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.content[data-theme='light']::-webkit-scrollbar-thumb,
+.content[data-theme='dark']::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.content[data-theme='light']::-webkit-scrollbar-thumb:hover,
+.content[data-theme='dark']::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

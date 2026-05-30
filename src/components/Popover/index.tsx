@@ -1,8 +1,61 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  type CSSProperties,
+} from 'react'
 import { createPortal } from 'react-dom'
-import { getPopoverStyles, type PopoverStyles } from '../../theme/popover'
+import cssStyles from './Popover.module.css'
+
+/**
+ * Caller-supplied styling + theme selection for the Popover surface.
+ *
+ * Theme palette / radius / shadow / border / blur / transition live in
+ * `Popover.module.css` keyed off `data-theme`. The fields below are
+ * OPTIONAL caller overrides — when set they win over the CSS defaults
+ * via inline style, preserving the old `getPopoverStyles` override
+ * semantics exactly. Anchor positioning is computed at runtime from
+ * `getBoundingClientRect()` and piped in via CSS custom properties.
+ */
+export interface PopoverStyles {
+  // Theme selection — drives `data-theme` on the surface. Default `light`.
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Container styling overrides
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  borderWidth?: string
+  boxShadow?: string
+  backdropFilter?: string
+  backgroundImage?: string
+
+  // Layout and sizing
+  maxWidth?: string
+  width?: string
+  minWidth?: string
+  height?: string
+  maxHeight?: string
+  minHeight?: string
+  padding?: string
+  margin?: string
+  marginTop?: string
+
+  // Positioning
+  zIndex?: number
+  position?: string
+  top?: string
+  left?: string
+  right?: string
+  bottom?: string
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+}
 
 export interface PopoverProps {
   /** Whether the popover is open */
@@ -109,13 +162,71 @@ const Popover: React.FC<PopoverProps> = ({
     return null
   }
 
+  // Theme palette / radius / shadow / border / blur / transition come from
+  // Popover.module.css keyed off this attribute. Default `light` matches the
+  // old getPopoverTheme default (`styles?.theme || 'light'`).
+  const theme = styles?.theme ?? 'light'
+
+  // Runtime anchor measurement stays in JS (cardinal: getBoundingClientRect
+  // positioning belongs in JS) and is piped to CSS via custom properties.
+  // The old generator set top = styles.top || anchorRect.bottom and
+  // left = styles.left || anchorRect.left.
   const rect = anchorEl.getBoundingClientRect()
-  const computedStyles = getPopoverStyles(styles, rect)
+  const resolvedTop = styles?.top ?? `${rect.bottom}px`
+  const resolvedLeft = styles?.left ?? `${rect.left}px`
+
+  // Caller-supplied overrides win over the CSS defaults via inline style —
+  // exactly the override branch of the old getPopoverStyles. Only set a
+  // property when the caller actually provided it, so the CSS theme value
+  // applies otherwise.
+  const dynamicStyle: CSSProperties = {
+    ['--popover-top' as string]: resolvedTop,
+    ['--popover-left' as string]: resolvedLeft,
+    ...(styles?.backgroundColor !== undefined && {
+      backgroundColor: styles.backgroundColor,
+    }),
+    // Old behavior: borderColor present → `${borderWidth || '1px'} solid <color>`
+    ...(styles?.borderColor !== undefined && {
+      border: `${styles.borderWidth ?? '1px'} solid ${styles.borderColor}`,
+    }),
+    ...(styles?.borderRadius !== undefined && {
+      borderRadius: styles.borderRadius,
+    }),
+    ...(styles?.boxShadow !== undefined && { boxShadow: styles.boxShadow }),
+    ...(styles?.backdropFilter !== undefined && {
+      backdropFilter: styles.backdropFilter,
+    }),
+    ...(styles?.backgroundImage !== undefined && {
+      backgroundImage: styles.backgroundImage,
+    }),
+    ...(styles?.marginTop !== undefined && { marginTop: styles.marginTop }),
+    ...(styles?.zIndex !== undefined && { zIndex: styles.zIndex }),
+    ...(styles?.position !== undefined && {
+      position: styles.position as CSSProperties['position'],
+    }),
+    ...(styles?.transitionDuration !== undefined && {
+      transition: `all ${styles.transitionDuration} ${styles.transitionEasing ?? 'cubic-bezier(0.4, 0, 0.2, 1)'}`,
+    }),
+    // Layout and sizing — caller-supplied only (unchanged from old generator).
+    ...(styles?.maxWidth !== undefined && { maxWidth: styles.maxWidth }),
+    ...(styles?.width !== undefined && { width: styles.width }),
+    ...(styles?.minWidth !== undefined && { minWidth: styles.minWidth }),
+    ...(styles?.height !== undefined && { height: styles.height }),
+    ...(styles?.maxHeight !== undefined && { maxHeight: styles.maxHeight }),
+    ...(styles?.minHeight !== undefined && { minHeight: styles.minHeight }),
+    ...(styles?.padding !== undefined && { padding: styles.padding }),
+    ...(styles?.margin !== undefined && { margin: styles.margin }),
+    // Positioning overrides for the remaining edges.
+    ...(styles?.right !== undefined && { right: styles.right }),
+    ...(styles?.bottom !== undefined && { bottom: styles.bottom }),
+  }
 
   const popoverContent = (
     <div
       ref={popoverRef}
-      style={computedStyles.popover}
+      className={cssStyles.popover}
+      data-theme={theme}
+      style={dynamicStyle}
       onMouseDown={handleMouseDownInside}
       role={role}
       aria-modal={role === 'dialog' ? true : undefined}

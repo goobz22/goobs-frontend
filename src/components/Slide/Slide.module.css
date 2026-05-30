@@ -1,0 +1,91 @@
+/* ==========================================================================
+   SLIDE — CSS MODULE
+   Transform-based transition wrapper. The component slides its children in
+   from / out to one of four edges (up / down / left / right).
+
+   Design (ported 1:1 from theme/slide.ts):
+   - Direction → hidden transform is expressed via [data-direction] selectors
+     on the hidden state. The "in" state toggles the `.in` class which resets
+     the transform to translate(0, 0).
+   - Theme (light / dark / sacred) only changes the DEFAULT transition timing:
+       light / dark → transform 0.3s ease
+       sacred       → transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)
+     These defaults are carried as the --slide-duration / --slide-timing
+     custom properties so caller overrides (timeout / transitionDuration /
+     transitionTimingFunction) can replace them from JS without restating the
+     whole transition shorthand.
+   - Disabled state kills the transition and drops opacity to 0.6.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT — light / dark theme default timing (transform 0.3s ease)
+   -------------------------------------------------------------------------- */
+.root {
+  /* Default transition timing tokens — overridable from JS via CSS vars when
+     the caller supplies timeout / transitionDuration / transitionTimingFunction. */
+  --slide-duration: 0.3s;
+  --slide-timing: ease;
+
+  /* Hidden by default; the .in class resets the transform to the resting
+     translate(0, 0). Per-direction hidden transforms come from the
+     [data-direction] selectors below. */
+  transform: translateY(-100%);
+  transition: transform var(--slide-duration) var(--slide-timing);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME — default timing (transform 0.5s cubic-bezier(0.4, 0, 0.2, 1))
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] {
+  --slide-duration: 0.5s;
+  --slide-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* light/dark share the root defaults; declared for parity + future divergence. */
+.root[data-theme='light'],
+.root[data-theme='dark'] {
+  --slide-duration: 0.3s;
+  --slide-timing: ease;
+}
+
+/* --------------------------------------------------------------------------
+   HIDDEN STATE — direction-driven exit transform
+   (applies when the `.in` class is absent)
+   -------------------------------------------------------------------------- */
+.root[data-direction='up'] {
+  transform: translateY(-100%);
+}
+
+.root[data-direction='down'] {
+  transform: translateY(100%);
+}
+
+.root[data-direction='left'] {
+  transform: translateX(-100%);
+}
+
+.root[data-direction='right'] {
+  transform: translateX(100%);
+}
+
+/* --------------------------------------------------------------------------
+   VISIBLE STATE — `in` toggles back to the resting position
+   (wins over the [data-direction] hidden transforms via specificity:
+    .root.in is two classes vs .root[data-direction] = class + attr, equal
+    specificity, so source order — this rule placed last — makes it win.)
+   -------------------------------------------------------------------------- */
+.root.in,
+.root.in[data-direction='up'],
+.root.in[data-direction='down'],
+.root.in[data-direction='left'],
+.root.in[data-direction='right'] {
+  transform: translate(0, 0);
+}
+
+/* --------------------------------------------------------------------------
+   DISABLED STATE — no transition, dimmed
+   -------------------------------------------------------------------------- */
+.root[data-disabled='true'] {
+  transition: none;
+  opacity: 0.6;
+}

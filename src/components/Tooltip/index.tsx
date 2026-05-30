@@ -4,7 +4,42 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { getTooltipStyles, type TooltipStyles } from '../../theme'
+import cssStyles from './Tooltip.module.css'
+
+/**
+ * Comprehensive styling options for the tooltip. Theme selects the base
+ * palette ('light' default); the rest are caller overrides applied as CSS
+ * custom properties, falling back to the theme value when omitted.
+ */
+export interface TooltipStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Content styling
+  backgroundColor?: string
+  borderColor?: string
+  borderRadius?: string
+  boxShadow?: string
+  backdropFilter?: string
+  fontFamily?: string
+  fontSize?: string
+  fontWeight?: string | number
+  letterSpacing?: string
+  color?: string
+  textShadow?: string
+  padding?: string
+  animation?: string
+
+  // Positioning
+  zIndex?: number
+  arrowSize?: number
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+  enterScale?: number
+  visibleScale?: number
+}
 
 export interface TooltipProps {
   children: React.ReactNode
@@ -27,6 +62,10 @@ export interface TooltipProps {
   /** Custom arrow positioning - percentage from left/top edge (0-100) */
   arrowPosition?: number
 }
+
+/** Default arrow border width per theme (px). Matches the old theme arrow border. */
+const getDefaultArrowSize = (theme: 'light' | 'dark' | 'sacred'): number =>
+  theme === 'sacred' ? 6 : 5
 
 const StyledTooltip: React.FC<TooltipProps> = ({
   children,
@@ -52,9 +91,12 @@ const StyledTooltip: React.FC<TooltipProps> = ({
   const enterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const theme = styles?.theme || 'light'
   const isControlled = controlledOpen !== undefined
   const showTooltip = isControlled ? controlledOpen : isVisible
-  const themeStyles = getTooltipStyles(styles)
+
+  // Arrow border width drives the JS positioning offset (arrowOffset below).
+  const arrowSize = styles?.arrowSize ?? getDefaultArrowSize(theme)
 
   const handleMouseEnter = () => {
     if (isControlled) {
@@ -97,15 +139,6 @@ const StyledTooltip: React.FC<TooltipProps> = ({
 
       let x = 0
       let y = 0
-      // Parse arrow size from border string (e.g., "5px solid transparent" -> 5)
-      const borderValue: string =
-        typeof (themeStyles.arrow.border as unknown) === 'string'
-          ? (themeStyles.arrow.border as string)
-          : '5px solid transparent'
-      const parts = borderValue.split('px')
-      const arrowSizeToken = parts[0] ?? '5'
-      const parsedArrowSize = parseInt(arrowSizeToken, 10)
-      const arrowSize = Number.isFinite(parsedArrowSize) ? parsedArrowSize : 5
       const arrowOffset = arrowSize + 3
 
       switch (tooltipplacement) {
@@ -153,13 +186,7 @@ const StyledTooltip: React.FC<TooltipProps> = ({
       window.removeEventListener('scroll', updatePosition, true)
       window.removeEventListener('resize', updatePosition)
     }
-  }, [
-    showTooltip,
-    tooltipplacement,
-    offsetX,
-    offsetY,
-    themeStyles.arrow.border,
-  ])
+  }, [showTooltip, tooltipplacement, offsetX, offsetY, arrowSize])
 
   useEffect(() => {
     return () => {
@@ -168,89 +195,74 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     }
   }, [])
 
-  const getArrowStyle = (): React.CSSProperties => {
-    const backgroundColor = themeStyles.content.backgroundColor
-    const borderString = themeStyles.content.border as string
-    const borderColor =
-      borderString &&
-      typeof borderString === 'string' &&
-      borderString.includes('rgba(255, 215, 0')
-        ? '#FFD700'
-        : backgroundColor
-
-    // Extract border size from theme arrow styles
-    const borderSizeMatch = (themeStyles.arrow.border as string)?.match(
-      /(\d+)px/
-    )
-    const borderSize = borderSizeMatch ? `${borderSizeMatch[1]}px` : '5px'
-
-    // Base arrow styles without the shorthand border property
-    const baseArrowStyle: React.CSSProperties = {
-      position: themeStyles.arrow.position,
-      width: themeStyles.arrow.width,
-      height: themeStyles.arrow.height,
-      // Use individual border properties instead of shorthand
-      borderWidth: borderSize,
-      borderStyle: 'solid',
-      borderColor: 'transparent',
-    }
-
-    // Use custom arrow position if provided, otherwise center (50%)
-    const arrowPos = arrowPosition !== undefined ? `${arrowPosition}%` : '50%'
-
-    switch (tooltipplacement) {
-      case 'top':
-        return {
-          ...baseArrowStyle,
-          top: '100%',
-          left: arrowPos,
-          transform: 'translateX(-50%)',
-          borderTopColor: borderColor,
-        }
-      case 'bottom':
-        return {
-          ...baseArrowStyle,
-          bottom: '100%',
-          left: arrowPos,
-          transform: 'translateX(-50%)',
-          borderBottomColor: borderColor,
-        }
-      case 'left':
-        return {
-          ...baseArrowStyle,
-          left: '100%',
-          top: arrowPos,
-          transform: 'translateY(-50%)',
-          borderLeftColor: borderColor,
-        }
-      case 'right':
-        return {
-          ...baseArrowStyle,
-          right: '100%',
-          top: arrowPos,
-          transform: 'translateY(-50%)',
-          borderRightColor: borderColor,
-        }
-      default:
-        return {}
-    }
+  // Runtime + caller-supplied values flow into the CSS module as custom
+  // properties; each override is set ONLY when the caller provided it, so the
+  // CSS fallback (the theme value) applies otherwise — mirroring the old
+  // `styles.x || baseTheme.x` resolution. Anchor x/y come from the measured
+  // getBoundingClientRect math above and must stay in JS.
+  const tooltipVars: React.CSSProperties & Record<string, string> = {
+    '--tooltip-x': `${position.x}px`,
+    '--tooltip-y': `${position.y}px`,
+    // Ensure tooltip appears above modals (old code: max(10000, theme zIndex)).
+    '--tooltip-z': String(Math.max(10000, styles?.zIndex || 9999)),
   }
+  if (styles?.transitionDuration && styles?.transitionEasing) {
+    tooltipVars['--tooltip-transition'] =
+      `opacity ${styles.transitionDuration} ${styles.transitionEasing}, transform ${styles.transitionDuration} ${styles.transitionEasing}`
+  }
+  if (styles?.enterScale !== undefined)
+    tooltipVars['--tooltip-enter-scale'] = String(styles.enterScale)
+  if (styles?.visibleScale !== undefined)
+    tooltipVars['--tooltip-visible-scale'] = String(styles.visibleScale)
+
+  // Content-level overrides.
+  if (styles?.backgroundColor) {
+    tooltipVars['--tooltip-bg'] = styles.backgroundColor
+    // A custom bubble background also colors the arrow, matching the old
+    // getArrowStyle() which derived the arrow color from the content bg.
+    tooltipVars['--tooltip-arrow-color'] = styles.backgroundColor
+  }
+  if (styles?.borderColor)
+    tooltipVars['--tooltip-border'] = `1px solid ${styles.borderColor}`
+  if (styles?.borderRadius)
+    tooltipVars['--tooltip-border-radius'] = styles.borderRadius
+  if (styles?.boxShadow) tooltipVars['--tooltip-box-shadow'] = styles.boxShadow
+  if (styles?.backdropFilter)
+    tooltipVars['--tooltip-backdrop-filter'] = styles.backdropFilter
+  if (styles?.fontFamily)
+    tooltipVars['--tooltip-font-family'] = styles.fontFamily
+  if (styles?.fontSize) tooltipVars['--tooltip-font-size'] = styles.fontSize
+  if (styles?.fontWeight !== undefined)
+    tooltipVars['--tooltip-font-weight'] = String(styles.fontWeight)
+  if (styles?.letterSpacing)
+    tooltipVars['--tooltip-letter-spacing'] = styles.letterSpacing
+  if (styles?.color) tooltipVars['--tooltip-color'] = styles.color
+  if (styles?.textShadow)
+    tooltipVars['--tooltip-text-shadow'] = styles.textShadow
+  if (styles?.padding) tooltipVars['--tooltip-padding'] = styles.padding
+  if (styles?.animation) tooltipVars['--tooltip-animation'] = styles.animation
+
+  // Arrow sizing + custom along-edge position.
+  if (styles?.arrowSize !== undefined)
+    tooltipVars['--tooltip-arrow-size'] = `${styles.arrowSize}px`
+  if (arrowPosition !== undefined)
+    tooltipVars['--tooltip-arrow-pos'] = `${arrowPosition}%`
+
+  const tooltipClassName = showTooltip
+    ? `${cssStyles.tooltip} ${cssStyles.visible}`
+    : cssStyles.tooltip
 
   const tooltipElement = title && showTooltip && (
     <div
       ref={tooltipRef}
-      style={{
-        ...themeStyles.tooltip,
-        ...themeStyles.tooltipVisible,
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        // Ensure tooltip appears above modals
-        zIndex: Math.max(10000, (themeStyles.tooltip.zIndex as number) || 9999),
-      }}
+      className={tooltipClassName}
+      data-theme={theme}
+      data-placement={tooltipplacement}
+      style={tooltipVars}
     >
-      <div style={themeStyles.content}>
+      <div className={cssStyles.content}>
         {title}
-        {arrow && <div style={getArrowStyle()} />}
+        {arrow && <div className={cssStyles.arrow} />}
       </div>
     </div>
   )
@@ -261,7 +273,7 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         ref={triggerRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={themeStyles.container}
+        className={cssStyles.container}
       >
         {children}
       </div>

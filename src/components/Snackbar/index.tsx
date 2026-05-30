@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Alert, { AlertProps } from '../Alert'
-import type { AlertStyles } from '../../theme'
+import cssStyles from './Snackbar.module.css'
 
 export interface SnackbarProps {
   open: boolean
@@ -10,7 +10,14 @@ export interface SnackbarProps {
   message: string
   severity: AlertProps['severity']
   autoHideDuration?: number
-  styles?: AlertStyles
+  /**
+   * Styling forwarded to the inner Alert (theme selection + container/
+   * severity/close-button overrides). Typed off AlertProps so Snackbar never
+   * has to import the Alert theme module directly — the inner Alert owns all
+   * visual theming; Snackbar owns only fixed positioning (see
+   * Snackbar.module.css).
+   */
+  styles?: AlertProps['styles']
 }
 
 const Snackbar: React.FC<SnackbarProps> = ({
@@ -43,20 +50,12 @@ const Snackbar: React.FC<SnackbarProps> = ({
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1400,
-      }}
-    >
+    <div className={cssStyles.root}>
       <Alert
         message={message}
         severity={severity}
         onClose={onClose}
-        styles={styles as AlertStyles}
+        {...(styles && { styles })}
       />
     </div>
   )

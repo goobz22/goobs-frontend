@@ -1,0 +1,252 @@
+/* ==========================================================================
+   STEPPER - CSS MODULE
+   Migrated off inline style={{}} blocks + hover useState onto CSS modules.
+
+   Theme is expressed as data-theme on the root: sacred is the HARDCODED
+   DEFAULT (verbatim transcription of the previous inline sacred-gold look),
+   light / dark are [data-theme] overrides drawn from theme/stepper.ts so the
+   styles.theme prop is functional. SACRED_GOLD = #FFD700 = rgb(255, 215, 0);
+   alpha(SACRED_GOLD, x) === rgba(255, 215, 0, x).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER — sacred defaults
+   -------------------------------------------------------------------------- */
+.root {
+  /* Tokens (sacred defaults) */
+  --stepper-gold: #ffd700;
+  --stepper-icon-bg-completed: rgba(255, 215, 0, 0.3);
+  --stepper-icon-bg-active: rgba(255, 215, 0, 0.5);
+  --stepper-icon-bg-error: rgba(255, 107, 107, 0.3);
+  --stepper-icon-bg-inactive: rgba(0, 0, 0, 0.6);
+  --stepper-icon-border: rgba(255, 215, 0, 0.3);
+  --stepper-icon-border-active: rgba(255, 215, 0, 0.6);
+  --stepper-connector: rgba(255, 215, 0, 0.3);
+  --stepper-label: rgba(255, 255, 255, 0.9);
+  --stepper-label-disabled: rgba(255, 255, 255, 0.4);
+  --stepper-label-hover-bg: rgba(255, 215, 0, 0.2);
+  --stepper-icon-color: #ffd700;
+  --stepper-icon-color-error: #ff6b6b;
+  --stepper-icon-color-inactive: rgba(255, 255, 255, 0.4);
+  --stepper-completed-box-bg: rgba(255, 215, 0, 0.1);
+  --stepper-completed-box-border: rgba(255, 215, 0, 0.3);
+  --stepper-completed-title: #ffd700;
+  --stepper-font-family: 'Cinzel', serif;
+
+  width: 100%;
+  position: relative;
+}
+
+/* LIGHT theme overrides (from theme/stepper.ts lightTheme) */
+.root[data-theme='light'] {
+  --stepper-icon-bg-completed: #f0f9ff;
+  --stepper-icon-bg-active: #eff6ff;
+  --stepper-icon-bg-error: transparent;
+  --stepper-icon-bg-inactive: #f9fafb;
+  --stepper-icon-border: #e5e7eb;
+  --stepper-icon-border-active: #2563eb;
+  --stepper-connector: #e5e7eb;
+  --stepper-label: #1f2937;
+  --stepper-label-disabled: #9ca3af;
+  --stepper-label-hover-bg: rgba(59, 130, 246, 0.1);
+  --stepper-icon-color: #2563eb;
+  --stepper-icon-color-error: #ef4444;
+  --stepper-icon-color-inactive: #9ca3af;
+  --stepper-completed-box-bg: rgba(37, 99, 235, 0.08);
+  --stepper-completed-box-border: rgba(37, 99, 235, 0.3);
+  --stepper-completed-title: #2563eb;
+  --stepper-font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* DARK theme overrides (from theme/stepper.ts darkTheme) */
+.root[data-theme='dark'] {
+  --stepper-icon-bg-completed: #1e3a8a;
+  --stepper-icon-bg-active: #1e40af;
+  --stepper-icon-bg-error: transparent;
+  --stepper-icon-bg-inactive: #1f2937;
+  --stepper-icon-border: #374151;
+  --stepper-icon-border-active: #60a5fa;
+  --stepper-connector: #374151;
+  --stepper-label: #f3f4f6;
+  --stepper-label-disabled: #6b7280;
+  --stepper-label-hover-bg: rgba(96, 165, 250, 0.15);
+  --stepper-icon-color: #60a5fa;
+  --stepper-icon-color-error: #ef4444;
+  --stepper-icon-color-inactive: #6b7280;
+  --stepper-completed-box-bg: rgba(96, 165, 250, 0.1);
+  --stepper-completed-box-border: rgba(96, 165, 250, 0.3);
+  --stepper-completed-title: #60a5fa;
+  --stepper-font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   STEPPER ROW / COLUMN
+   gap & flex-direction driven by the --stepper-direction / --stepper-gap /
+   --stepper-align custom properties set per-orientation below.
+   -------------------------------------------------------------------------- */
+.stepperContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+}
+
+.stepperContainer[data-orientation='vertical'] {
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   STEP CONTAINER
+   -------------------------------------------------------------------------- */
+.stepContainer {
+  flex: 1;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepContainer[data-orientation='vertical'] {
+  flex: none;
+  width: 100%;
+  flex-direction: column;
+}
+
+.stepContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   ICON CONTAINER — colour driven by data-status
+   -------------------------------------------------------------------------- */
+.iconContainer {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--stepper-icon-bg-inactive);
+  border: 2px solid var(--stepper-icon-border);
+  transition: all 0.3s ease;
+}
+
+.iconContainer[data-status='completed'] {
+  background-color: var(--stepper-icon-bg-completed);
+}
+
+.iconContainer[data-status='active'] {
+  background-color: var(--stepper-icon-bg-active);
+  border-color: var(--stepper-icon-border-active);
+}
+
+.iconContainer[data-status='error'] {
+  background-color: var(--stepper-icon-bg-error);
+}
+
+/* --------------------------------------------------------------------------
+   ICONS
+   The <svg> icon components (Check / Error / Lock / CircleOutline) receive
+   their size + colour via the `style` prop in JS (sourced from the
+   data-theme-aware CSS custom properties below) because they merge their own
+   inline `color: currentColor`, which would otherwise beat a className.
+   Caller-supplied custom icons render in a plain <div> with no such conflict,
+   so they can use a className.
+   -------------------------------------------------------------------------- */
+.customIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--stepper-icon-color);
+}
+
+/* --------------------------------------------------------------------------
+   STEP LABEL BUTTON
+   -------------------------------------------------------------------------- */
+.stepButton {
+  background: none;
+  border: none;
+  color: var(--stepper-label);
+  font-size: 14px;
+  font-family: var(--stepper-font-family);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.stepButton:hover:not(:disabled) {
+  background-color: var(--stepper-label-hover-bg);
+  text-decoration: underline;
+}
+
+.stepButton:disabled {
+  color: var(--stepper-label-disabled);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   CONNECTORS
+   -------------------------------------------------------------------------- */
+.connector {
+  flex: 1;
+  height: 2px;
+  background-color: var(--stepper-connector);
+  margin: 0 8px;
+}
+
+.verticalConnector {
+  width: 2px;
+  height: 30px;
+  background-color: var(--stepper-connector);
+  margin-left: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   WIZARD CONTENT + NAVIGATION
+   -------------------------------------------------------------------------- */
+.wizardContent {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.wizardCompleted {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: var(--stepper-completed-box-bg);
+  border: 1px solid var(--stepper-completed-box-border);
+}
+
+.wizardCompletedTitle {
+  color: var(--stepper-completed-title);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-family: var(--stepper-font-family);
+}
+
+.wizardCompletedActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.wizardNavigation {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wizardNavigationActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

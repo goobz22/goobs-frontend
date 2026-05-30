@@ -1,0 +1,68 @@
+/* ==========================================================================
+   ZOOM - CSS MODULE
+   Transition wrapper for scale-based enter/exit animations. The `in` prop
+   maps to data-state (visible | hidden); the theme maps to data-theme.
+
+   Theme controls the transition timing and the resting "hidden" scale:
+     - light / dark : transform 0.3s ease, opacity 0.3s ease ; hidden scale 0.8
+     - sacred       : 0.5s cubic-bezier(0.4,0,0.2,1)          ; hidden scale 0.7
+
+   Caller-supplied dynamic values (custom scale, transform-origin, transition,
+   delay, and timeout/timing overrides) arrive as CSS custom properties from
+   the TSX. The selectors live here; only the scalar values come from JS.
+   The base class carries the LIGHT values because the legacy theme system
+   defaulted to 'light' — visual parity is preserved exactly.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (default — matches legacy `theme || 'light'`)
+   -------------------------------------------------------------------------- */
+.zoomRoot {
+  /* Runtime/caller-driven tokens (TSX sets these via style when provided). */
+  --zoom-scale-enter: 1;
+  --zoom-scale-exit: 0.8;
+  --zoom-transform-origin: center center;
+  --zoom-transition: transform 0.3s ease, opacity 0.3s ease;
+  --zoom-transition-delay: 0s;
+
+  transform: scale(var(--zoom-scale-enter));
+  opacity: 1;
+  transition: var(--zoom-transition);
+  transition-delay: var(--zoom-transition-delay);
+  transform-origin: var(--zoom-transform-origin);
+}
+
+/* Dark theme — identical timing/scale to light in the legacy theme. */
+.zoomRoot[data-theme='dark'] {
+  --zoom-scale-exit: 0.8;
+  --zoom-transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Sacred theme — slower premium easing and a deeper hidden scale. */
+.zoomRoot[data-theme='sacred'] {
+  --zoom-scale-exit: 0.7;
+  --zoom-transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   STATE — driven by the `in` prop via data-state
+   -------------------------------------------------------------------------- */
+.zoomRoot[data-state='visible'] {
+  transform: scale(var(--zoom-scale-enter));
+  opacity: 1;
+}
+
+.zoomRoot[data-state='hidden'] {
+  transform: scale(var(--zoom-scale-exit));
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   DISABLED — overrides theme + state: no transition, full scale, dimmed.
+   -------------------------------------------------------------------------- */
+.zoomRoot[data-disabled='true'] {
+  transition: none;
+  transform: scale(1);
+  opacity: 0.6;
+}

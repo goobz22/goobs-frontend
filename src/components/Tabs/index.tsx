@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useId, useRef, useState } from 'react'
+import React, { useId, useRef } from 'react'
 import { alpha } from '../../utils'
+import cssStyles from './Tabs.module.css'
 
 const SACRED_GOLD = '#FFD700'
 
@@ -119,11 +120,14 @@ const Tabs: React.FC<TabsProps> = ({
   ariaLabel = 'Workspace sections',
   styles,
 }) => {
-  const [hoveredTab, setHoveredTab] = useState<number | null>(null)
   // Stable id base for `aria-controls` linkage to corresponding
   // `<TabPanel>`. Each tab button references `tabpanel-${reactId}-${id}`;
   // a sibling panel matching that id pairs the two.
   const reactId = useId()
+  // Sacred is the hardcoded CSS default (the component historically rendered
+  // sacred-gold inline regardless of theme); light/dark are [data-theme]
+  // overrides in Tabs.module.css.
+  const theme = styles?.theme || 'sacred'
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const handleTabClick = (index: number, tab: TabsItem) => {
@@ -180,31 +184,45 @@ const Tabs: React.FC<TabsProps> = ({
         ? undefined
         : styles?.tabRightBorder
 
+  const justifyContent =
+    alignment === 'left'
+      ? 'flex-start'
+      : alignment === 'right'
+        ? 'flex-end'
+        : alignment === 'justify'
+          ? 'space-between'
+          : 'center'
+
+  // Caller-supplied overrides flow into the CSS module via custom properties;
+  // undefined values are omitted so the module's sacred/light/dark defaults
+  // win (exactOptionalPropertyTypes-safe).
   const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent:
-      alignment === 'left'
-        ? 'flex-start'
-        : alignment === 'right'
-          ? 'flex-end'
-          : alignment === 'justify'
-            ? 'space-between'
-            : 'center',
-    alignItems: 'center',
-    gap: styles?.gap || '8px',
-    padding: styles?.padding,
-    height: styles?.height,
-    marginBottom: '16px',
-    borderBottom:
-      styles?.borderBottom || `1px solid ${alpha(SACRED_GOLD, 0.2)}`,
-    borderLeft: tabLeftBorderValue,
-    borderRight: tabRightBorderValue,
-    backgroundColor: styles?.backgroundColor,
-    flexWrap: 'wrap',
+    ['--tabs-justify' as string]: justifyContent,
+    ...(styles?.gap !== undefined && { ['--tabs-gap' as string]: styles.gap }),
+    ...(styles?.padding !== undefined && {
+      ['--tabs-padding' as string]: styles.padding,
+    }),
+    ...(styles?.height !== undefined && {
+      ['--tabs-height' as string]: styles.height,
+    }),
+    ...(styles?.borderBottom !== undefined && {
+      ['--tabs-border-bottom' as string]: styles.borderBottom,
+    }),
+    ...(tabLeftBorderValue !== undefined && {
+      ['--tabs-border-left' as string]: tabLeftBorderValue,
+    }),
+    ...(tabRightBorderValue !== undefined && {
+      ['--tabs-border-right' as string]: tabRightBorderValue,
+    }),
+    ...(styles?.backgroundColor !== undefined && {
+      ['--tabs-background-color' as string]: styles.backgroundColor,
+    }),
   }
 
   return (
     <div
+      className={cssStyles.root}
+      data-theme={theme}
       style={containerStyle}
       role="tablist"
       aria-label={ariaLabel}
@@ -212,7 +230,6 @@ const Tabs: React.FC<TabsProps> = ({
     >
       {items.map((tab, index) => {
         const isActive = activeTab === index
-        const isHovered = hoveredTab === index
         const label: React.ReactNode = tab.label ?? tab.title ?? ''
         // Only the string form can be kebabed for a fallback tab-id;
         // when the label is a ReactNode the caller must pass `id`.
@@ -224,7 +241,7 @@ const Tabs: React.FC<TabsProps> = ({
             key={index}
             label={label}
             isActive={isActive}
-            isHovered={isHovered}
+            theme={theme}
             tabId={tabId}
             panelId={panelId}
             count={tab.count}
@@ -241,8 +258,6 @@ const Tabs: React.FC<TabsProps> = ({
             }}
             onClick={() => handleTabClick(index, tab)}
             onKeyDown={event => handleTabKeyDown(event, index)}
-            onMouseEnter={() => setHoveredTab(index)}
-            onMouseLeave={() => setHoveredTab(null)}
           />
         )
       })}
@@ -273,11 +288,15 @@ export interface TabProps {
    */
   label: string | React.ReactNode
   isActive: boolean
-  isHovered?: boolean
   onClick: () => void
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
   disabled?: boolean
+  /**
+   * Visual theme — surfaced as `data-theme` on the rendered `<button>` so
+   * the CSS module's light/dark overrides apply. Defaults to `'sacred'`
+   * (the historical hardcoded sacred-gold look). Forwarded by `<Tabs>`
+   * from `styles.theme`.
+   */
+  theme?: string
   /** Stable identifier surfaced as `data-tab-id`. Forwarded by the
    *  parent `<Tabs>` from `TabsItem.id` (or its kebab-cased label). */
   tabId?: string
@@ -311,11 +330,9 @@ export interface TabProps {
 export const Tab: React.FC<TabProps> = ({
   label,
   isActive,
-  isHovered = false,
   onClick,
-  onMouseEnter,
-  onMouseLeave,
   disabled = false,
+  theme = 'sacred',
   tabId,
   panelId,
   subject,
@@ -332,50 +349,6 @@ export const Tab: React.FC<TabProps> = ({
     }
   }
 
-  const getBackgroundColor = () => {
-    if (disabled) return 'transparent'
-    if (isActive)
-      return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.2)}, ${alpha(SACRED_GOLD, 0.1)})`
-    if (isHovered)
-      return `linear-gradient(135deg, ${alpha(SACRED_GOLD, 0.1)}, ${alpha(SACRED_GOLD, 0.05)})`
-    return 'transparent'
-  }
-
-  const getBorderBottomColor = () => {
-    if (disabled) return 'transparent'
-    if (isActive) return SACRED_GOLD
-    if (isHovered) return alpha(SACRED_GOLD, 0.5)
-    return 'transparent'
-  }
-
-  const getColor = () => {
-    if (disabled) return 'rgba(255, 255, 255, 0.4)'
-    if (isActive) return SACRED_GOLD
-    if (isHovered) return 'rgba(255, 215, 0, 0.9)'
-    return 'rgba(255, 255, 255, 0.7)'
-  }
-
-  const tabStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: '12px 24px',
-    background: getBackgroundColor(),
-    borderTop: 'none',
-    borderRight: 'none',
-    borderBottom: `2px solid ${getBorderBottomColor()}`,
-    borderLeft: 'none',
-    color: getColor(),
-    fontFamily: '"Cinzel", serif',
-    fontSize: '14px',
-    fontWeight: isActive ? 600 : 400,
-    letterSpacing: '0.05em',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    textShadow: isActive ? `0 0 10px ${alpha(SACRED_GOLD, 0.5)}` : 'none',
-    boxShadow: isActive ? `0 0 20px ${alpha(SACRED_GOLD, 0.3)}` : 'none',
-    outline: 'none',
-    opacity: disabled ? 0.6 : 1,
-  }
-
   return (
     <button
       type="button"
@@ -385,29 +358,20 @@ export const Tab: React.FC<TabProps> = ({
       data-tab-id={tabId}
       data-tab-subject={subject}
       data-tab-active={isActive ? 'true' : 'false'}
+      data-theme={theme}
       aria-selected={isActive}
       aria-controls={panelId}
       tabIndex={isActive ? 0 : -1}
       onClick={handleClick}
       onKeyDown={onKeyDown}
-      style={tabStyle}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      className={cssStyles.tab}
       disabled={disabled}
     >
       {icon != null ? (
         <span
           aria-hidden={typeof icon === 'string' ? 'true' : undefined}
           data-tab-icon="true"
-          style={{
-            marginRight: '6px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            // Slight size bump so single-glyph icons (☰, ⚙) sit visually
-            // balanced next to label text on the sacred-gold strip.
-            fontSize: '1.05em',
-            lineHeight: 1,
-          }}
+          className={cssStyles.icon}
         >
           {icon}
         </span>
@@ -417,16 +381,7 @@ export const Tab: React.FC<TabProps> = ({
         <span
           aria-hidden="true"
           data-tab-count={count}
-          style={{
-            marginLeft: '8px',
-            padding: '2px 8px',
-            borderRadius: '999px',
-            backgroundColor: isActive
-              ? alpha(SACRED_GOLD, 0.25)
-              : alpha(SACRED_GOLD, 0.12),
-            fontSize: '0.75em',
-            fontWeight: 600,
-          }}
+          className={cssStyles.count}
         >
           {count}
         </span>

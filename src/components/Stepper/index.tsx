@@ -1,14 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
-import { alpha } from '../../utils'
+import React from 'react'
 import Check from '../Icons/Check'
 import CircleOutline from '../Icons/CircleOutline'
 import Lock from '../Icons/Lock'
 import Error from '../Icons/Error'
 import CustomButton from '../Button'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './Stepper.module.css'
 
 export interface StepperProps {
   mode?: 'navigation' | 'wizard'
@@ -48,9 +46,8 @@ const Stepper: React.FC<StepperProps> = ({
   stepActions,
   styles,
 }) => {
-  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
-
   const orientation = styles?.orientation || 'horizontal'
+  const theme = styles?.theme || 'sacred'
   const isWizardMode = mode === 'wizard'
 
   const getStepStatus = (
@@ -65,28 +62,43 @@ const Stepper: React.FC<StepperProps> = ({
     return 'inactive'
   }
 
+  // Icon size + colour are sourced from the data-theme-aware CSS custom
+  // properties declared on the .root element. We pass them through the icon's
+  // `style` prop (not className) because the underlying Icon components merge
+  // their own inline `color: currentColor` AFTER any className, so an inline
+  // style is the only reliable way to win the cascade on the <svg>.
+  const iconStyle: React.CSSProperties = {
+    width: '20px',
+    height: '20px',
+    color: 'var(--stepper-icon-color)',
+  }
+  const errorIconStyle: React.CSSProperties = {
+    width: '20px',
+    height: '20px',
+    color: 'var(--stepper-icon-color-error)',
+  }
+  const inactiveIconStyle: React.CSSProperties = {
+    width: '20px',
+    height: '20px',
+    color: 'var(--stepper-icon-color-inactive)',
+  }
+
   const getStepIcon = (
     status: 'completed' | 'active' | 'error' | 'inactive',
     step: StepperProps['steps'][0]
   ) => {
-    const iconStyle: React.CSSProperties = {
-      width: '20px',
-      height: '20px',
-      color: SACRED_GOLD,
-    }
-
     switch (status) {
       case 'completed':
         return <Check style={iconStyle} />
       case 'error':
-        return <Error style={{ ...iconStyle, color: '#ff6b6b' }} />
+        return <Error style={errorIconStyle} />
       case 'inactive':
-        if (step.icon) return <div style={iconStyle}>{step.icon}</div>
-        return (
-          <Lock style={{ ...iconStyle, color: 'rgba(255, 255, 255, 0.4)' }} />
-        )
+        if (step.icon)
+          return <div className={cssStyles.customIcon}>{step.icon}</div>
+        return <Lock style={inactiveIconStyle} />
       default:
-        if (step.icon) return <div style={iconStyle}>{step.icon}</div>
+        if (step.icon)
+          return <div className={cssStyles.customIcon}>{step.icon}</div>
         return <CircleOutline style={iconStyle} />
     }
   }
@@ -116,29 +128,12 @@ const Stepper: React.FC<StepperProps> = ({
     }
   }
 
-  const getIconContainerColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return alpha(SACRED_GOLD, 0.3)
-      case 'active':
-        return alpha(SACRED_GOLD, 0.5)
-      case 'error':
-        return 'rgba(255, 107, 107, 0.3)'
-      default:
-        return 'rgba(0, 0, 0, 0.6)'
-    }
-  }
-
   const renderWizardContent = () => {
     if (!isWizardMode) return null
     const currentStep = steps[activeStep]
     if (!currentStep) return null
 
-    return (
-      <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
-        {currentStep.content}
-      </div>
-    )
+    return <div className={cssStyles.wizardContent}>{currentStep.content}</div>
   }
 
   const renderWizardNavigation = () => {
@@ -150,27 +145,11 @@ const Stepper: React.FC<StepperProps> = ({
 
     if (isCompleted && finalActions) {
       return (
-        <div
-          style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            borderRadius: '8px',
-            backgroundColor: alpha(SACRED_GOLD, 0.1),
-            border: `1px solid ${alpha(SACRED_GOLD, 0.3)}`,
-          }}
-        >
-          <div
-            style={{
-              color: SACRED_GOLD,
-              fontWeight: 600,
-              marginBottom: '1rem',
-              fontSize: '1.1rem',
-              fontFamily: '"Cinzel", serif',
-            }}
-          >
+        <div className={cssStyles.wizardCompleted}>
+          <div className={cssStyles.wizardCompletedTitle}>
             All steps completed!
           </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div className={cssStyles.wizardCompletedActions}>
             {finalActions}
             {onReset && <CustomButton text="Start Over" onClick={onReset} />}
           </div>
@@ -179,23 +158,16 @@ const Stepper: React.FC<StepperProps> = ({
     }
 
     return (
-      <div
-        style={{
-          marginTop: '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <div className={cssStyles.wizardNavigation}>
         <div>
           {!isFirstStep && onBack && (
             <CustomButton text="← Back" onClick={onBack} />
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className={cssStyles.wizardNavigationActions}>
           {stepActions && (
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className={cssStyles.wizardNavigationActions}>
               {stepActions}
             </div>
           )}
@@ -210,110 +182,45 @@ const Stepper: React.FC<StepperProps> = ({
     )
   }
 
-  const containerStyle: React.CSSProperties = {
-    width: '100%',
-    position: 'relative',
-  }
-
-  const stepperContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: orientation === 'vertical' ? 'column' : 'row',
-    gap: orientation === 'vertical' ? '1rem' : '0',
-    alignItems: orientation === 'vertical' ? 'flex-start' : 'center',
-  }
-
   return (
-    <div style={containerStyle}>
-      <div style={stepperContainerStyle}>
+    <div className={cssStyles.root} data-theme={theme}>
+      <div
+        className={cssStyles.stepperContainer}
+        data-orientation={orientation}
+      >
         {steps.map((step, index) => {
           const status = getStepStatus(step, index)
           const isClickable = isStepClickable(step, index)
-          const isHovered = hoveredStep === step.stepNumber
-
-          const stepContainerStyle: React.CSSProperties = {
-            flex: orientation === 'horizontal' ? 1 : 'none',
-            width: orientation === 'vertical' ? '100%' : 'auto',
-            display: 'flex',
-            flexDirection: orientation === 'vertical' ? 'column' : 'row',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }
-
-          const stepContentStyle: React.CSSProperties = {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }
-
-          const iconContainerStyle: React.CSSProperties = {
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: getIconContainerColor(status),
-            border: `2px solid ${alpha(SACRED_GOLD, status === 'active' ? 0.6 : 0.3)}`,
-            transition: 'all 0.3s ease',
-          }
-
-          const stepButtonStyle: React.CSSProperties = {
-            background: 'none',
-            border: 'none',
-            color: isClickable
-              ? 'rgba(255, 255, 255, 0.9)'
-              : 'rgba(255, 255, 255, 0.4)',
-            fontSize: '14px',
-            fontFamily: '"Cinzel", serif',
-            cursor: isClickable ? 'pointer' : 'not-allowed',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            transition: 'all 0.3s ease',
-            backgroundColor:
-              isHovered && isClickable
-                ? alpha(SACRED_GOLD, 0.2)
-                : 'transparent',
-            textDecoration: isHovered && isClickable ? 'underline' : 'none',
-          }
-
-          const connectorStyle: React.CSSProperties = {
-            flex: 1,
-            height: '2px',
-            backgroundColor: alpha(SACRED_GOLD, 0.3),
-            margin: '0 8px',
-          }
-
-          const verticalConnectorStyle: React.CSSProperties = {
-            width: '2px',
-            height: '30px',
-            backgroundColor: alpha(SACRED_GOLD, 0.3),
-            marginLeft: '20px',
-          }
 
           return (
-            <div key={step.label} style={stepContainerStyle}>
-              <div style={stepContentStyle}>
-                <div style={iconContainerStyle}>
+            <div
+              key={step.label}
+              className={cssStyles.stepContainer}
+              data-orientation={orientation}
+            >
+              <div className={cssStyles.stepContent}>
+                <div
+                  className={cssStyles.iconContainer}
+                  data-status={status}
+                >
                   {getStepIcon(status, step)}
                 </div>
 
                 <button
                   onClick={() => handleStepClick(step, index)}
                   disabled={!isClickable}
-                  style={stepButtonStyle}
-                  onMouseEnter={() => setHoveredStep(step.stepNumber)}
-                  onMouseLeave={() => setHoveredStep(null)}
+                  className={cssStyles.stepButton}
                 >
                   {step.label}
                 </button>
               </div>
 
               {index < steps.length - 1 && orientation === 'horizontal' && (
-                <div style={connectorStyle} />
+                <div className={cssStyles.connector} />
               )}
 
               {index < steps.length - 1 && orientation === 'vertical' && (
-                <div style={verticalConnectorStyle} />
+                <div className={cssStyles.verticalConnector} />
               )}
             </div>
           )

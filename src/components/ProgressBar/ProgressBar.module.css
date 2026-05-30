@@ -1,0 +1,451 @@
+/* ==========================================================================
+   PROGRESS BAR - CSS MODULE
+   Migrated off the JS theme system (theme/progressbar.ts + theme/shared.ts).
+   Determinate + indeterminate progress with light / dark / sacred themes.
+
+   Theme is expressed as a [data-theme] attribute on the .container root.
+   The component resolves theme = styles?.theme || 'light', matching the old
+   getProgressBarTheme() default (which fell back to 'light', NOT sacred), so
+   unspecified-theme callers render identically to the pre-migration build.
+
+   The @keyframes below were previously injected at runtime via
+   injectKeyframes() (theme/shared.ts KEYFRAMES). They are now static here.
+   Determinate width is driven by the runtime --progress custom property:
+   the component sets style={{ '--progress': pct + '%' }} and the fill reads
+   width: var(--progress).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CONTAINER (track) — sizing defaults carried from getProgressBarStyles():
+   width 100%, height 16px, relative + overflow hidden. Caller width/height/
+   margin/padding/min-max overrides arrive via the JS dynamicStyle object.
+
+   Light theme is the hardcoded default on the base class (old default).
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  height: 16px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  /* light defaults */
+  background: rgba(229, 231, 235, 0.8);
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.container[data-theme='dark'] {
+  background: rgba(31, 41, 55, 0.9);
+  border: 1px solid rgba(75, 85, 99, 0.6);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.container[data-theme='sacred'] {
+  background: rgba(12, 12, 12, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  /* SHADOWS.sacred.small + inset highlight */
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1),
+    inset 0 1px 0 rgba(255, 215, 0, 0.1);
+  backdrop-filter: blur(12px);
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(255, 215, 0, 0.03) 0%,
+      transparent 50%
+    );
+}
+
+/* Disabled state — old getProgressBarStyles() set opacity 0.5 +
+   pointer-events none when styles.disabled was true. */
+.container[data-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   DETERMINATE FILL BAR
+   width comes from the runtime --progress custom property (value prop %).
+   transition matches the per-theme transition value (light/dark 0.3s,
+   sacred 0.4s) — overridden under [data-theme='sacred'] below.
+   -------------------------------------------------------------------------- */
+.bar {
+  height: 100%;
+  width: var(--progress, 0%);
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* light defaults */
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+}
+
+.bar[data-theme='dark'] {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%);
+  box-shadow:
+    0 4px 12px rgba(96, 165, 250, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3));
+}
+
+.bar[data-theme='sacred'] {
+  background: linear-gradient(
+    135deg,
+    #fbbf24 0%,
+    #f59e0b 25%,
+    #ffd700 50%,
+    #f59e0b 75%,
+    #fbbf24 100%
+  );
+  box-shadow:
+    0 0 16px rgba(255, 215, 0, 0.8),
+    0 4px 12px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   INDETERMINATE BAR — absolute, 60% wide, slides via progressIndeterminate.
+   Old barStyle (indeterminate branch) set top/left 0, height 100%, width 60%.
+   -------------------------------------------------------------------------- */
+.bar[data-variant='indeterminate'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 60%;
+  border-radius: 12px;
+  transition: none;
+  animation: progressIndeterminate 2s ease-in-out infinite;
+
+  /* light indeterminate defaults */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.3) 25%,
+    #3b82f6 50%,
+    rgba(59, 130, 246, 0.3) 75%,
+    transparent 100%
+  );
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4));
+}
+
+.bar[data-variant='indeterminate'][data-theme='dark'] {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(96, 165, 250, 0.3) 25%,
+    #60a5fa 50%,
+    rgba(96, 165, 250, 0.3) 75%,
+    transparent 100%
+  );
+  box-shadow:
+    0 4px 12px rgba(96, 165, 250, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.4));
+}
+
+.bar[data-variant='indeterminate'][data-theme='sacred'] {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.2) 20%,
+    rgba(255, 215, 0, 0.6) 40%,
+    #ffd700 50%,
+    rgba(255, 215, 0, 0.6) 60%,
+    rgba(255, 215, 0, 0.2) 80%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.9),
+    0 4px 12px rgba(255, 215, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1));
+}
+
+/* --------------------------------------------------------------------------
+   STRIPES — old code layered the stripe gradient ON TOP of the bar's own
+   background via a comma-joined backgroundImage, with backgroundSize from
+   the per-theme stripes config. Determinate stripes only animate when
+   `animated` is also set; indeterminate stripes always animate (the old
+   indeterminate branch joined the stripe animation unconditionally).
+
+   We reproduce the layered backgroundImage by repeating the bar background
+   after the stripe gradient. background-size only constrains the (first)
+   stripe layer; the gradient layer uses auto, matching the browser's
+   shorthand-vs-single-value expansion in the old inline style.
+   -------------------------------------------------------------------------- */
+.bar[data-striped='true'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
+  background-size: 20px 20px;
+}
+
+.bar[data-striped='true'][data-theme='dark'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%);
+  background-size: 20px 20px;
+}
+
+.bar[data-striped='true'][data-theme='sacred'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(
+      135deg,
+      #fbbf24 0%,
+      #f59e0b 25%,
+      #ffd700 50%,
+      #f59e0b 75%,
+      #fbbf24 100%
+    );
+  background-size: 16px 16px;
+}
+
+/* Striped indeterminate — stripe gradient layered over the indeterminate
+   background, sliding both the indeterminate translate animation AND the
+   stripe scroll (old: `${indeterminate.animation}, ${stripes.animation}`). */
+.bar[data-striped='true'][data-variant='indeterminate'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(59, 130, 246, 0.3) 25%,
+      #3b82f6 50%,
+      rgba(59, 130, 246, 0.3) 75%,
+      transparent 100%
+    );
+  background-size: 20px 20px;
+  animation:
+    progressIndeterminate 2s ease-in-out infinite,
+    progressStripes 1s linear infinite;
+}
+
+.bar[data-striped='true'][data-variant='indeterminate'][data-theme='dark'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.1) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(96, 165, 250, 0.3) 25%,
+      #60a5fa 50%,
+      rgba(96, 165, 250, 0.3) 75%,
+      transparent 100%
+    );
+  background-size: 20px 20px;
+}
+
+.bar[data-striped='true'][data-variant='indeterminate'][data-theme='sacred'] {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 215, 0, 0.2) 20%,
+      rgba(255, 215, 0, 0.6) 40%,
+      #ffd700 50%,
+      rgba(255, 215, 0, 0.6) 60%,
+      rgba(255, 215, 0, 0.2) 80%,
+      transparent 100%
+    );
+  background-size: 16px 16px;
+  /* sacred stripes ran at 0.8s (theme/progressbar.ts sacred.stripes.animation) */
+  animation:
+    progressIndeterminate 2s ease-in-out infinite,
+    progressStripes 0.8s linear infinite;
+}
+
+/* Determinate striped + animated — the stripe scroll only runs when the
+   caller also set `animated` (old: stripes.animation gated behind animated). */
+.bar[data-striped='true'][data-animated='true']:not(
+    [data-variant='indeterminate']
+  ) {
+  animation: progressStripes 1s linear infinite;
+}
+
+.bar[data-striped='true'][data-animated='true'][data-theme='sacred']:not(
+    [data-variant='indeterminate']
+  ) {
+  animation: progressStripes 0.8s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   PULSE — determinate only (old code applied pulse on the determinate
+   branch). When pulse + striped + animated were all set the old code joined
+   the stripe animation after the pulse animation; reproduced below.
+
+   light/dark pulse used the progressPulse keyframe (defined with blue rings);
+   sacred's pulse config had no `animation` key (only a static boxShadow), so
+   sacred determinate pulse does NOT animate — matching the old behavior where
+   `themeConfig.pulse.animation` was undefined for sacred and the joined
+   animation string began with `undefined`.
+   -------------------------------------------------------------------------- */
+.bar[data-pulse='true']:not([data-variant='indeterminate']):not(
+    [data-theme='sacred']
+  ) {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+.bar[data-pulse='true'][data-striped='true'][data-animated='true']:not(
+    [data-variant='indeterminate']
+  ):not([data-theme='sacred']) {
+  animation:
+    progressPulse 2s ease-in-out infinite,
+    progressStripes 1s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   LABEL — old labelStyle: marginTop 8px, textAlign center + per-theme color/
+   font. Light/dark share the Inter 14px/600 treatment; sacred uses Cinzel
+   700 gold with a glow text-shadow.
+   -------------------------------------------------------------------------- */
+.label {
+  margin-top: 8px;
+  text-align: center;
+
+  /* light defaults */
+  color: rgb(55, 65, 81);
+  font-size: 14px;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+}
+
+.label[data-theme='dark'] {
+  color: rgb(209, 213, 219);
+  font-size: 14px;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+}
+
+.label[data-theme='sacred'] {
+  color: #ffd700;
+  font-size: 14px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES — moved out of theme/shared.ts KEYFRAMES (was injected at runtime
+   via injectKeyframes()). Verbatim copy of the keyframe bodies.
+   -------------------------------------------------------------------------- */
+@keyframes progressIndeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes progressStripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes progressPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}

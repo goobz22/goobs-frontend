@@ -1,0 +1,85 @@
+/* ==========================================================================
+   POPOVER - CSS MODULE
+   Portal-rendered floating surface positioned against an anchor element.
+   Anchor positioning (getBoundingClientRect) stays in JS and is piped in
+   via the --popover-top / --popover-left custom properties; everything
+   static (palette, radius, shadow, border, blur, transition) lives here.
+
+   Theme parity: values transcribed verbatim from src/theme/popover.ts.
+   The OLD getPopoverTheme defaulted to `light` (styles?.theme || 'light'),
+   so LIGHT is the hardcoded base on .popover and dark / sacred are
+   [data-theme] overrides — preserving the existing default behavior.
+   SHADOWS.* and TRANSITIONS.* are transcribed from src/theme/shared.ts.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (default — matches old `light` popoverTheme)
+   -------------------------------------------------------------------------- */
+.popover {
+  /* Anchor-derived runtime values, supplied as CSS vars from JS. The old
+     theme set top = anchorRect.bottom and left = anchorRect.left (numbers,
+     which React serialized as px). marginTop: 0.5rem nudges the surface
+     below the anchor. */
+  --popover-top: 0px;
+  --popover-left: 0px;
+
+  position: fixed;
+  top: var(--popover-top);
+  left: var(--popover-left);
+  margin-top: 0.5rem;
+  z-index: 1300;
+
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  /* SHADOWS.light.medium */
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(8px);
+
+  /* TRANSITIONS.medium */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME
+   -------------------------------------------------------------------------- */
+.popover[data-theme='dark'] {
+  background-color: rgba(31, 41, 55, 0.95);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(75, 85, 99, 0.8);
+  backdrop-filter: blur(8px);
+  /* TRANSITIONS.medium */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED THEME
+   -------------------------------------------------------------------------- */
+.popover[data-theme='sacred'] {
+  background-color: rgba(10, 10, 10, 0.95);
+  border-radius: 8px;
+  /* SHADOWS.sacred.medium */
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.2);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  backdrop-filter: blur(4px);
+  background-image:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(255, 215, 0, 0.03) 0%,
+      transparent 50%
+    );
+  /* TRANSITIONS.premium */
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}

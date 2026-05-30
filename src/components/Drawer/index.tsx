@@ -10,12 +10,65 @@ import React, {
   useCallback,
   type ReactNode,
   type FC,
+  type CSSProperties,
 } from 'react'
-import { getDrawerStyles, type DrawerStyles } from '../../theme'
+import cssStyles from './Drawer.module.css'
 
 // --------------------------------------------------------------------------
 // TYPES AND INTERFACES
 // --------------------------------------------------------------------------
+
+export interface DrawerStyles {
+  // Theme selection
+  theme?: 'light' | 'dark' | 'sacred'
+
+  // Permanent drawer styling
+  permanentBackground?: string
+  permanentBorderRight?: string
+  permanentBorderLeft?: string
+  permanentBoxShadow?: string
+  permanentBackdropFilter?: string
+  permanentBackgroundImage?: string
+
+  // Temporary drawer styling
+  temporaryBackground?: string
+  temporaryBorderRight?: string
+  temporaryBorderLeft?: string
+  temporaryBoxShadow?: string
+  temporaryBackdropFilter?: string
+  temporaryBackgroundImage?: string
+
+  // Backdrop styling
+  backdropBackgroundColor?: string
+  backdropBackdropFilter?: string
+
+  // Layout and spacing
+  width?: string
+  height?: string
+  top?: string | number
+  padding?: string
+  margin?: string
+  zIndex?: number
+  backdropZIndex?: number
+
+  // Transitions
+  transitionDuration?: string
+  transitionEasing?: string
+
+  // States
+  disabled?: boolean
+  outline?: boolean
+
+  // Dimensions
+  maxWidth?: string
+  minWidth?: string
+  maxHeight?: string
+  minHeight?: string
+
+  // Force positioning
+  forceLeft?: boolean
+  forceRight?: boolean
+}
 
 export interface DrawerProps {
   /** Whether the drawer is open */
@@ -39,6 +92,13 @@ export interface DrawerProps {
   /** Additional props */
   [key: string]: any
 }
+
+/**
+ * A CSSProperties object that also permits arbitrary CSS custom properties
+ * (`--drawer-*`) so caller overrides and runtime values flow through `style`
+ * into the CSS module without `as any`.
+ */
+type DrawerCSSVars = CSSProperties & Record<`--${string}`, string | number>
 
 // --------------------------------------------------------------------------
 // SACRED BACKGROUND COMPONENT
@@ -119,21 +179,7 @@ const SacredBackground: FC<SacredBackgroundProps> = ({ width, height }) => {
     return () => cancelAnimationFrame(animationId)
   }, [width, height])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        opacity: 0.3,
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
-  )
+  return <canvas ref={canvasRef} className={cssStyles.sacredCanvas} />
 }
 
 // --------------------------------------------------------------------------
@@ -159,7 +205,8 @@ const Drawer: FC<DrawerProps> = ({
   const drawerRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
 
-  const isSacredTheme = styles.theme === 'sacred'
+  const theme = styles.theme || 'light'
+  const isSacredTheme = theme === 'sacred'
 
   // Track previous open state for derived state pattern
   const [prevOpen, setPrevOpen] = useState(open)
@@ -182,7 +229,7 @@ const Drawer: FC<DrawerProps> = ({
     }
   }, [open, isVisible])
 
-  // Track container size for sacred background
+  // Track container size for sacred background — runtime measurement, stays in JS
   useEffect(() => {
     const drawer = drawerRef.current
     if (!drawer || !isSacredTheme) return
@@ -200,72 +247,6 @@ const Drawer: FC<DrawerProps> = ({
 
     return () => resizeObserver.disconnect()
   }, [isSacredTheme])
-
-  // Inject scrollbar styles
-  useEffect(() => {
-    const theme = styles.theme || 'sacred'
-    const scrollbarId = 'drawer-scrollbar-styles'
-
-    // Remove existing styles
-    const existingStyles = document.getElementById(scrollbarId)
-    if (existingStyles) {
-      existingStyles.remove()
-    }
-
-    // Get scrollbar colors based on theme
-    const scrollbarColors = {
-      light: {
-        track: '#f1f5f9',
-        thumb: '#cbd5e1',
-        thumbHover: '#94a3b8',
-      },
-      dark: {
-        track: '#1e293b',
-        thumb: '#475569',
-        thumbHover: '#64748b',
-      },
-      sacred: {
-        track: 'rgba(0, 0, 0, 0.3)',
-        thumb: 'rgba(255, 215, 0, 0.4)',
-        thumbHover: 'rgba(255, 215, 0, 0.6)',
-      },
-    }
-    const colors = scrollbarColors[theme]
-
-    // Create and inject CSS
-    const styleElement = document.createElement('style')
-    styleElement.id = scrollbarId
-    styleElement.textContent = `
-      .drawer-content {
-        scrollbar-width: thin;
-        scrollbar-color: ${colors.thumb} ${colors.track};
-      }
-      .drawer-content::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      .drawer-content::-webkit-scrollbar-track {
-        background: ${colors.track};
-        border-radius: 4px;
-      }
-      .drawer-content::-webkit-scrollbar-thumb {
-        background: ${colors.thumb};
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-      }
-      .drawer-content::-webkit-scrollbar-thumb:hover {
-        background: ${colors.thumbHover};
-      }
-    `
-    document.head.appendChild(styleElement)
-
-    return () => {
-      const styleEl = document.getElementById(scrollbarId)
-      if (styleEl) {
-        styleEl.remove()
-      }
-    }
-  }, [styles.theme])
 
   // Handle backdrop clicks
   const handleBackdropClick = useCallback(
@@ -296,22 +277,103 @@ const Drawer: FC<DrawerProps> = ({
     }
   }, [open, onClose, variant])
 
-  // Get computed styles - map 'persistent' to 'temporary' for getDrawerStyles function
-  const styleVariant = variant === 'persistent' ? 'temporary' : variant
-  // Use a safe initial state for SSR - always closed initially to ensure hydration consistency
-  // Permanent drawers are always open, so we don't need to handle open state for them
+  // Persistent behaves like temporary for layout; permanent is always open.
+  // Use a safe initial state for SSR - always closed initially to ensure
+  // hydration consistency. Permanent drawers are always open.
   const safeOpen = variant === 'permanent' ? true : isMounted ? open : false
-  const computedStyles = getDrawerStyles(styles, safeOpen, anchor, styleVariant)
 
-  // For permanent variant, use relative positioning to let parent container control visibility
-  // This prevents hydration flash when parent CSS needs to hide the drawer
-  if (variant === 'permanent') {
-    delete computedStyles.paper.transform
-    delete computedStyles.paper.left
-    delete computedStyles.paper.right
-    delete computedStyles.paper.top
-    delete computedStyles.paper.bottom
-    computedStyles.paper.position = 'relative'
+  // Resolve effective anchor honoring force overrides (old getDrawerStyles).
+  const effectiveAnchor = styles.forceLeft
+    ? 'left'
+    : styles.forceRight
+      ? 'right'
+      : anchor
+
+  // Dynamic, caller-supplied + runtime values flow through as CSS custom
+  // properties so the selectors live in CSS while scalars stay in JS.
+  const paperVars: DrawerCSSVars = {}
+  if (styles.width !== undefined) {
+    paperVars['--drawer-width'] = styles.width
+    paperVars['--drawer-width-horizontal'] = styles.width
+  }
+  if (styles.height !== undefined) {
+    paperVars['--drawer-height'] = styles.height
+    paperVars['--drawer-height-horizontal'] = styles.height
+  }
+  if (styles.top !== undefined) {
+    paperVars['--drawer-top'] =
+      typeof styles.top === 'number' ? `${styles.top}px` : styles.top
+  }
+  if (styles.zIndex !== undefined) {
+    paperVars['--drawer-z-index'] = styles.zIndex
+  }
+  if (styles.disabled) {
+    paperVars['--drawer-opacity'] = 0.5
+    paperVars['--drawer-pointer-events'] = 'none'
+  }
+
+  // Caller theme-color overrides (mirror getDrawerTheme custom fields).
+  const customBackground =
+    variant === 'permanent'
+      ? styles.permanentBackground
+      : styles.temporaryBackground
+  if (customBackground) {
+    paperVars['--drawer-background'] = customBackground
+  }
+  const customBoxShadow =
+    variant === 'permanent'
+      ? styles.permanentBoxShadow
+      : styles.temporaryBoxShadow
+  if (customBoxShadow) {
+    paperVars['--drawer-box-shadow'] = customBoxShadow
+  }
+  const customBackdropFilter =
+    variant === 'permanent'
+      ? styles.permanentBackdropFilter
+      : styles.temporaryBackdropFilter
+  if (customBackdropFilter) {
+    paperVars['--drawer-backdrop-filter'] = customBackdropFilter
+  }
+  const customBackgroundImage =
+    variant === 'permanent'
+      ? styles.permanentBackgroundImage
+      : styles.temporaryBackgroundImage
+  if (customBackgroundImage !== undefined) {
+    paperVars['--drawer-background-image'] = customBackgroundImage
+  }
+  // Transition parity with old getDrawerTheme: when a caller supplies a custom
+  // transitionDuration, the old code built `transform ${duration} ${easing ||
+  // 'ease-in-out'}` (property 'transform', easing default 'ease-in-out') rather
+  // than the theme's default `all <duration> cubic-bezier(...)`. Feed the whole
+  // string into --drawer-transition so the CSS reproduces that branch exactly,
+  // including the transitionEasing override (otherwise transitionEasing would be
+  // a silently-ignored prop). With no custom duration, --drawer-transition is
+  // unset and the CSS var() fallback yields the theme default.
+  if (styles.transitionDuration) {
+    paperVars['--drawer-transition-duration'] = styles.transitionDuration
+    paperVars['--drawer-transition'] =
+      `transform ${styles.transitionDuration} ${styles.transitionEasing || 'ease-in-out'}`
+  }
+
+  // Box-model overrides have no token in CSS — keep them as plain inline
+  // properties (these were caller-only in the old generator).
+  if (styles.maxWidth !== undefined) paperVars.maxWidth = styles.maxWidth
+  if (styles.minWidth !== undefined) paperVars.minWidth = styles.minWidth
+  if (styles.maxHeight !== undefined) paperVars.maxHeight = styles.maxHeight
+  if (styles.minHeight !== undefined) paperVars.minHeight = styles.minHeight
+  if (styles.padding !== undefined) paperVars.padding = styles.padding
+  if (styles.margin !== undefined) paperVars.margin = styles.margin
+
+  // Backdrop dynamic vars
+  const backdropVars: DrawerCSSVars = {}
+  if (styles.backdropZIndex !== undefined) {
+    backdropVars['--drawer-backdrop-z-index'] = styles.backdropZIndex
+  }
+  if (styles.backdropBackgroundColor) {
+    backdropVars['--drawer-backdrop-background'] = styles.backdropBackgroundColor
+  }
+  if (styles.backdropBackdropFilter) {
+    backdropVars['--drawer-backdrop-filter'] = styles.backdropBackdropFilter
   }
 
   // Don't render if not visible and temporary
@@ -322,7 +384,12 @@ const Drawer: FC<DrawerProps> = ({
   const drawerContent = (
     <div
       ref={drawerRef}
-      style={computedStyles.paper}
+      className={cssStyles.paper}
+      data-theme={theme}
+      data-variant={variant}
+      data-anchor={effectiveAnchor}
+      data-open={safeOpen ? 'true' : 'false'}
+      style={paperVars}
       role="dialog"
       aria-modal={variant === 'temporary' ? open : undefined}
       {...other}
@@ -336,17 +403,7 @@ const Drawer: FC<DrawerProps> = ({
       )}
 
       {/* Content container */}
-      <div
-        className="drawer-content"
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '100%',
-          height: '100%',
-          overflow: 'auto',
-          boxSizing: 'border-box',
-        }}
-      >
+      <div className={cssStyles.content} data-theme={theme}>
         {children}
       </div>
     </div>
@@ -362,7 +419,9 @@ const Drawer: FC<DrawerProps> = ({
       {variant === 'temporary' && (
         <div
           ref={backdropRef}
-          style={computedStyles.backdrop}
+          className={cssStyles.backdrop}
+          data-theme={theme}
+          style={backdropVars}
           onClick={handleBackdropClick}
           aria-hidden="true"
         />

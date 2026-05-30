@@ -1,0 +1,277 @@
+/* ==========================================================================
+   DRAWER - CSS MODULE
+   Side navigation panel that slides in from any edge. Three themes
+   (light default / dark / sacred) expressed as [data-theme] overrides,
+   anchor side as [data-anchor], variant as [data-variant], and the
+   open/close slide as [data-open] driving the transform.
+
+   Values transcribed verbatim from the old theme/drawer.ts + theme/shared.ts
+   (TRANSITIONS.medium = 200ms, TRANSITIONS.slow = 300ms,
+   SHADOWS.light.large, SHADOWS.sacred.large) — visual parity is mandatory.
+
+   Caller overrides (styles.width / height / top / padding / margin / zIndex /
+   maxWidth / minWidth / maxHeight / minHeight / backdropZIndex) flow in as
+   CSS custom properties set from JS so the selectors stay in CSS while the
+   scalar runtime values stay dynamic.
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   PAPER (the sliding panel) — LIGHT THEME DEFAULT
+   Mirrors old getDrawerTheme(styles?.theme || 'light') => light base.
+   -------------------------------------------------------------------------- */
+.paper {
+  /* Theme tokens — light defaults (override per [data-theme]) */
+  --drawer-background: rgba(255, 255, 255, 0.95);
+  --drawer-border-color: rgba(226, 232, 240, 0.8);
+  --drawer-border-width: 1px;
+  --drawer-box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+  --drawer-backdrop-filter: blur(8px);
+  --drawer-background-image: none;
+  --drawer-transition-duration: 200ms;
+
+  /* Layout tokens — caller-overridable via inline CSS vars (fallback = old defaults) */
+  --drawer-width: 280px;
+  --drawer-height: 100%;
+  --drawer-top: 0;
+  --drawer-z-index: 50;
+  --drawer-opacity: 1;
+  --drawer-pointer-events: auto;
+
+  position: fixed;
+  top: var(--drawer-top);
+  bottom: auto;
+  left: 0;
+  right: auto;
+  height: var(--drawer-height);
+  width: var(--drawer-width);
+  box-sizing: border-box;
+  background: var(--drawer-background);
+  background-image: var(--drawer-background-image);
+  box-shadow: var(--drawer-box-shadow);
+  backdrop-filter: var(--drawer-backdrop-filter);
+  -webkit-backdrop-filter: var(--drawer-backdrop-filter);
+  z-index: var(--drawer-z-index);
+  opacity: var(--drawer-opacity);
+  pointer-events: var(--drawer-pointer-events);
+  overflow: auto;
+  /* Transition parity with the old getDrawerTheme, which had two branches:
+       - no caller transitionDuration  -> baseTheme.transition =
+         TRANSITIONS.medium ("all 200ms cubic-bezier(0.4,0,0.2,1)"), sacred =
+         TRANSITIONS.slow ("all 300ms cubic-bezier(0.4,0,0.2,1)"). Property is
+         'all', NOT 'transform'.
+       - caller transitionDuration set  -> `transform ${duration}
+         ${transitionEasing || 'ease-in-out'}`. Property is 'transform', easing
+         defaults to ease-in-out.
+     The default below reproduces the first branch ('all' + theme duration +
+     cubic-bezier). When a caller supplies transitionDuration, index.tsx sets
+     the whole `--drawer-transition` token to the second-branch string so the
+     property/easing semantics match exactly. */
+  transition: var(
+    --drawer-transition,
+    all var(--drawer-transition-duration) cubic-bezier(0.4, 0, 0.2, 1)
+  );
+  transform: translateX(-100%);
+}
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDES
+   -------------------------------------------------------------------------- */
+.paper[data-theme='dark'] {
+  --drawer-background: rgba(31, 41, 55, 0.95);
+  --drawer-border-color: rgba(75, 85, 99, 0.8);
+  --drawer-border-width: 1px;
+  --drawer-box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --drawer-background-image: none;
+}
+
+.paper[data-theme='sacred'] {
+  --drawer-background: rgba(10, 10, 10, 0.95);
+  --drawer-border-color: rgba(255, 215, 0, 0.6);
+  --drawer-border-width: 2px;
+  --drawer-box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+  --drawer-background-image:
+    radial-gradient(circle at top right, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+  /* sacred uses TRANSITIONS.slow = 300ms */
+  --drawer-transition-duration: 300ms;
+}
+
+/* --------------------------------------------------------------------------
+   ANCHOR — positioning + which edge border sits on (temporary/paper)
+   Default base class is the left anchor (above). Overrides per side.
+
+   Border parity with the old paperStyle: the old code only set a border on the
+   side that maps to `themeConfig.temporary.borderRight`, and left
+   `themeConfig.temporary.borderLeft` (= 'none') everywhere else:
+     left   -> borderRight  = temporary.borderRight  (BORDERED)
+     top    -> borderBottom = temporary.borderRight  (BORDERED)
+     right  -> borderLeft   = temporary.borderLeft   = 'none' (NO BORDER)
+     bottom -> borderTop    = temporary.borderLeft   = 'none' (NO BORDER)
+   So right and bottom drawers render with no border — do not add one here.
+   -------------------------------------------------------------------------- */
+.paper[data-anchor='left'] {
+  left: 0;
+  right: auto;
+  top: var(--drawer-top);
+  bottom: auto;
+  border-right: var(--drawer-border-width) solid var(--drawer-border-color);
+  transform: translateX(-100%);
+}
+
+.paper[data-anchor='right'] {
+  left: auto;
+  right: 0;
+  top: var(--drawer-top);
+  bottom: auto;
+  /* old temporary.borderLeft = 'none' -> right drawer has no border */
+  transform: translateX(100%);
+}
+
+.paper[data-anchor='top'] {
+  top: 0;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  /* horizontal anchors: width/height defaults flip (old isHorizontal branch) */
+  width: var(--drawer-width-horizontal);
+  height: var(--drawer-height-horizontal);
+  border-bottom: var(--drawer-border-width) solid var(--drawer-border-color);
+  transform: translateY(-100%);
+}
+
+.paper[data-anchor='bottom'] {
+  top: auto;
+  bottom: 0;
+  left: auto;
+  right: auto;
+  width: var(--drawer-width-horizontal);
+  height: var(--drawer-height-horizontal);
+  /* old temporary.borderLeft = 'none' -> bottom drawer has no border */
+  transform: translateY(100%);
+}
+
+/* Horizontal-anchor default dimensions (old: width 100% / height 240px when
+   top|bottom). Caller width/height still override via the same vars. */
+.paper {
+  --drawer-width-horizontal: 100%;
+  --drawer-height-horizontal: 240px;
+}
+
+/* --------------------------------------------------------------------------
+   OPEN STATE — the slide-in transform.
+   Closed (no data-open) keeps the off-screen transform set per anchor above.
+   -------------------------------------------------------------------------- */
+.paper[data-open='true'] {
+  transform: translateX(0);
+}
+.paper[data-anchor='top'][data-open='true'],
+.paper[data-anchor='bottom'][data-open='true'] {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   PERMANENT VARIANT — relative positioning, always-open, no transform.
+   Mirrors the old `if (variant === 'permanent')` paper mutation that ONLY
+   deleted transform/left/right/top/bottom and set position: relative — it did
+   NOT change shadow/border/background tokens. The old component rendered
+   `computedStyles.paper` for every variant, and that object was built from
+   `themeConfig.temporary.*` (boxShadow = SHADOWS.*.large, sacred border 0.6
+   alpha, the full 0.08/0.05/0.02 sacred backgroundImage). Permanent therefore
+   inherits the base (temporary) tier defined on `.paper` above — we only reset
+   positioning here. Re-introducing a permanent-specific medium shadow / 0.4
+   sacred border / reduced gradient would be an unflagged visual regression.
+   -------------------------------------------------------------------------- */
+.paper[data-variant='permanent'] {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   BACKDROP — fixed full-bleed scrim behind a temporary drawer.
+   -------------------------------------------------------------------------- */
+.backdrop {
+  --drawer-backdrop-background: rgba(0, 0, 0, 0.5);
+  --drawer-backdrop-filter: blur(2px);
+  --drawer-backdrop-z-index: 40;
+
+  position: fixed;
+  inset: 0;
+  background-color: var(--drawer-backdrop-background);
+  backdrop-filter: var(--drawer-backdrop-filter);
+  -webkit-backdrop-filter: var(--drawer-backdrop-filter);
+  z-index: var(--drawer-backdrop-z-index);
+}
+.backdrop[data-theme='dark'] {
+  --drawer-backdrop-background: rgba(0, 0, 0, 0.7);
+  --drawer-backdrop-filter: blur(2px);
+}
+.backdrop[data-theme='sacred'] {
+  --drawer-backdrop-background: rgba(0, 0, 0, 0.8);
+  --drawer-backdrop-filter: blur(4px);
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT — scrollable inner container. Replaces the runtime-injected
+   <style id="drawer-scrollbar-styles"> block; theme-scoped scrollbar colors
+   come straight from the old scrollbarColors map.
+   -------------------------------------------------------------------------- */
+.content {
+  --drawer-scrollbar-track: #f1f5f9;
+  --drawer-scrollbar-thumb: #cbd5e1;
+  --drawer-scrollbar-thumb-hover: #94a3b8;
+
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--drawer-scrollbar-thumb) var(--drawer-scrollbar-track);
+}
+.content[data-theme='dark'] {
+  --drawer-scrollbar-track: #1e293b;
+  --drawer-scrollbar-thumb: #475569;
+  --drawer-scrollbar-thumb-hover: #64748b;
+}
+.content[data-theme='sacred'] {
+  --drawer-scrollbar-track: rgba(0, 0, 0, 0.3);
+  --drawer-scrollbar-thumb: rgba(255, 215, 0, 0.4);
+  --drawer-scrollbar-thumb-hover: rgba(255, 215, 0, 0.6);
+}
+.content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.content::-webkit-scrollbar-track {
+  background: var(--drawer-scrollbar-track);
+  border-radius: 4px;
+}
+.content::-webkit-scrollbar-thumb {
+  background: var(--drawer-scrollbar-thumb);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--drawer-scrollbar-thumb-hover);
+}
+
+/* --------------------------------------------------------------------------
+   SACRED BACKGROUND CANVAS — absolutely-positioned glyph particle layer.
+   Replaces the inline style object on the <canvas>.
+   -------------------------------------------------------------------------- */
+.sacredCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}

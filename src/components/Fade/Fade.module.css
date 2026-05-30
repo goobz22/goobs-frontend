@@ -1,0 +1,65 @@
+/*
+ * Fade component styles — migrated from theme/fade.ts.
+ *
+ * Theme is expressed as a data-attribute on the root element (data-theme),
+ * with `sacred` as the hardcoded default and `light`/`dark` as overrides.
+ * Visibility (the old `in` boolean) is expressed via data-state, and the
+ * disabled state via data-disabled. Caller-supplied timing overrides
+ * (transition / duration / timing-function / delay) flow in as CSS custom
+ * properties so the selectors stay in CSS while the runtime values stay in JS.
+ */
+
+.container {
+  /*
+   * Sacred defaults (theme/fade.ts -> fadeThemes.sacred):
+   *   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)
+   * The duration / timing-function pieces are tokens so caller overrides
+   * (timeout / transitionDuration / transitionTimingFunction) can swap a
+   * single dimension without re-declaring the whole transition.
+   */
+  --fade-duration: 0.5s;
+  --fade-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --fade-delay: 0s;
+
+  opacity: 1;
+  transition: var(--fade-transition, opacity var(--fade-duration) var(--fade-timing-function));
+  transition-delay: var(--fade-delay);
+}
+
+/*
+ * Light theme override (fadeThemes.light): opacity 0.3s ease.
+ */
+.container[data-theme='light'] {
+  --fade-duration: 0.3s;
+  --fade-timing-function: ease;
+}
+
+/*
+ * Dark theme override (fadeThemes.dark): opacity 0.3s ease.
+ */
+.container[data-theme='dark'] {
+  --fade-duration: 0.3s;
+  --fade-timing-function: ease;
+}
+
+/*
+ * Visibility — the old `in` boolean. `in !== false` => visible (opacity 1),
+ * `in === false` => hidden (opacity 0). visible.opacity / hidden.opacity are
+ * identical across all three themes (1 and 0 respectively).
+ */
+.container[data-state='visible'] {
+  opacity: 1;
+}
+
+.container[data-state='hidden'] {
+  opacity: 0;
+}
+
+/*
+ * Disabled state (getFadeStyles: isDisabled -> { transition: 'none', opacity: 0.6 }).
+ * Wins over the state opacity and kills the transition entirely.
+ */
+.container[data-disabled='true'] {
+  opacity: 0.6;
+  transition: none;
+}

@@ -2,9 +2,7 @@
 
 import React, { useState, useCallback, type FC, type ReactNode } from 'react'
 import Link from 'next/link'
-import { alpha } from '../../utils'
-
-const SACRED_GOLD = '#FFD700'
+import cssStyles from './Accordion.module.css'
 
 export interface AccordionProps {
   summary: ReactNode
@@ -108,9 +106,11 @@ const Accordion: FC<AccordionProps> = props => {
   }
 
   const { expanded, handleToggle } = useAccordionState(stateConfig)
-  const [isHovered, setIsHovered] = useState(false)
 
-  const isSacredTheme = styles?.theme === 'sacred'
+  // Only `theme === 'sacred'` ever took the sacred branch; every other value
+  // (undefined / 'light' / 'dark') fell through to the light/white styling.
+  // Sacred is the CSS base default; 'light' is the explicit override block.
+  const theme = styles?.theme === 'sacred' ? 'sacred' : 'light'
   const isMenuType = type === 'menu'
   const disabled = styles?.disabled || false
 
@@ -126,7 +126,7 @@ const Accordion: FC<AccordionProps> = props => {
     [isMenuType, onClick, handleToggle, disabled]
   )
 
-  // Calculate indent based on level
+  // Calculate indent based on level (runtime value → CSS custom property)
   const levelIndentBase = styles?.levelIndentBase ?? 20
   const levelIndentIncrement = styles?.levelIndentIncrement ?? 20
   const levelIndent = levelIndentBase + level * levelIndentIncrement
@@ -139,94 +139,40 @@ const Accordion: FC<AccordionProps> = props => {
         ? undefined
         : styles?.outline
 
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    marginBottom: styles?.marginBottom || '4px',
-    borderRadius: styles?.borderRadius || '8px',
-    backgroundColor:
-      styles?.backgroundColor ||
-      (isSacredTheme ? 'rgba(0, 0, 0, 0.4)' : '#fff'),
-    border: styles?.borderColor
-      ? `${styles?.borderWidth || '1px'} solid ${styles.borderColor}`
-      : isSacredTheme
-        ? `${styles?.borderWidth || '1px'} solid ${alpha(SACRED_GOLD, 0.3)}`
-        : `${styles?.borderWidth || '1px'} solid #e5e7eb`,
-    transition: 'all 0.3s ease',
-    overflow: 'hidden',
-    outline: outlineValue,
+  // Caller-supplied overrides + the runtime level indent are passed as CSS
+  // custom properties. Each var is set ONLY when the caller provided the
+  // corresponding style, so the per-theme CSS fallback applies otherwise —
+  // exactly mirroring the old `styles?.x || default` ternaries.
+  const dynamicStyle: React.CSSProperties & Record<string, string> = {
+    '--accordion-level-indent': `${levelIndent}px`,
   }
-
-  // Determine summary background color
-  const getSummaryBackgroundColor = () => {
-    // Use explicit summaryBackgroundColor if provided
-    if (styles?.summaryBackgroundColor && !isHovered && !isActive) {
-      return styles.summaryBackgroundColor
-    }
-    if (isActive && isMenuType) {
-      return isSacredTheme
-        ? alpha(SACRED_GOLD, 0.15)
-        : 'rgba(59, 130, 246, 0.1)'
-    }
-    if (isHovered && !disabled) {
-      return isSacredTheme ? alpha(SACRED_GOLD, 0.1) : '#f9fafb'
-    }
-    return styles?.summaryBackgroundColor || 'transparent'
+  if (styles?.marginBottom)
+    dynamicStyle['--accordion-margin-bottom'] = styles.marginBottom
+  if (styles?.borderRadius)
+    dynamicStyle['--accordion-border-radius'] = styles.borderRadius
+  if (styles?.backgroundColor)
+    dynamicStyle['--accordion-bg'] = styles.backgroundColor
+  if (styles?.borderColor)
+    dynamicStyle['--accordion-border-color'] = styles.borderColor
+  if (styles?.borderWidth)
+    dynamicStyle['--accordion-border-width'] = styles.borderWidth
+  if (styles?.padding) dynamicStyle['--accordion-padding'] = styles.padding
+  if (styles?.summaryBackgroundColor)
+    dynamicStyle['--accordion-summary-bg'] = styles.summaryBackgroundColor
+  // summaryColor overrode BOTH the base and the active-menu summary color.
+  if (styles?.summaryColor) {
+    dynamicStyle['--accordion-summary-color'] = styles.summaryColor
+    dynamicStyle['--accordion-summary-active-color'] = styles.summaryColor
   }
-
-  const summaryStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: styles?.padding || '12px',
-    paddingLeft: isMenuType ? `${16 + levelIndent}px` : `${40 + levelIndent}px`,
-    paddingRight: '24px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: getSummaryBackgroundColor(),
-    color:
-      styles?.summaryColor ||
-      (isActive && isMenuType
-        ? isSacredTheme
-          ? SACRED_GOLD
-          : '#3B82F6'
-        : isSacredTheme
-          ? 'rgba(255, 255, 255, 0.9)'
-          : '#111827'),
-    fontWeight: isActive && isMenuType ? 600 : 400,
-    fontFamily: isSacredTheme ? '"Cinzel", serif' : 'inherit',
-    fontSize: '14px',
-    transition: 'all 0.3s ease',
-    whiteSpace: 'nowrap',
-    minWidth: 'fit-content',
-  }
-
-  const iconStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: `${8 + levelIndent}px`,
-    top: '50%',
-    transform: `translateY(-50%) ${expanded ? 'rotate(180deg)' : 'rotate(0deg)'}`,
-    transition: 'transform 0.3s ease',
-    color: isSacredTheme ? SACRED_GOLD : '#6b7280',
-    width: '20px',
-    height: '20px',
-  }
-
-  const detailsStyle: React.CSSProperties = {
-    padding: styles?.padding || '12px',
-    paddingLeft: `${24 + levelIndent}px`,
-    color: isSacredTheme ? 'rgba(255, 255, 255, 0.8)' : '#374151',
-    fontFamily: isSacredTheme ? '"Crimson Text", serif' : 'inherit',
-    fontSize: '14px',
-    borderTop: isSacredTheme
-      ? `1px solid ${alpha(SACRED_GOLD, 0.2)}`
-      : '1px solid #e5e7eb',
-  }
+  if (outlineValue !== undefined) dynamicStyle.outline = outlineValue
 
   const arrowIconSvg = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
-      style={iconStyle}
+      className={cssStyles.icon}
+      data-expanded={expanded ? 'true' : undefined}
     >
       <path d="M7 10l5 5 5-5z" />
     </svg>
@@ -234,10 +180,11 @@ const Accordion: FC<AccordionProps> = props => {
 
   const summaryContent = (
     <div
-      style={summaryStyle}
+      className={cssStyles.summary}
+      data-menu={isMenuType ? 'true' : undefined}
+      data-active={isActive ? 'true' : undefined}
+      data-disabled={disabled ? 'true' : undefined}
       onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={disabled ? -1 : 0}
       aria-expanded={isMenuType ? undefined : expanded}
@@ -249,9 +196,9 @@ const Accordion: FC<AccordionProps> = props => {
   )
 
   return (
-    <div style={containerStyle}>
+    <div className={cssStyles.container} data-theme={theme} style={dynamicStyle}>
       {isMenuType && href ? (
-        <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href={href} className={cssStyles.link}>
           {summaryContent}
         </Link>
       ) : (
@@ -259,7 +206,7 @@ const Accordion: FC<AccordionProps> = props => {
       )}
 
       {!isMenuType && expanded && details && (
-        <div style={detailsStyle}>{details}</div>
+        <div className={cssStyles.details}>{details}</div>
       )}
     </div>
   )

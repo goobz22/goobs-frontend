@@ -1,0 +1,222 @@
+/* ==========================================================================
+   TABS - CSS MODULE
+   Sacred-gold tablist primitive. The component historically rendered with
+   hardcoded SACRED_GOLD (#FFD700 -> rgb(255, 215, 0)) inline styles driven
+   by a `hoveredTab` useState; this module moves the static visuals + hover/
+   active/disabled state into native CSS, keeping only caller-supplied
+   overrides (padding / gap / height / borders / alignment) in JS as CSS
+   custom properties.
+
+   Sacred is the hardcoded default. light / dark are [data-theme] overrides.
+   Values transcribed exactly from the prior inline styles and theme/tabs.ts.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT (tablist) — sacred defaults
+   -------------------------------------------------------------------------- */
+.root {
+  /* Caller-supplied overrides flow in via these custom properties; the
+     fallback is the original inline default. */
+  --tabs-gap: 8px;
+  --tabs-padding: 0;
+  --tabs-height: auto;
+  --tabs-justify: center;
+  --tabs-border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  --tabs-border-left: none;
+  --tabs-border-right: none;
+  --tabs-background-color: transparent;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: var(--tabs-justify);
+  gap: var(--tabs-gap);
+  padding: var(--tabs-padding);
+  height: var(--tabs-height);
+  margin-bottom: 16px;
+  border-bottom: var(--tabs-border-bottom);
+  border-left: var(--tabs-border-left);
+  border-right: var(--tabs-border-right);
+  background-color: var(--tabs-background-color);
+}
+
+/* --------------------------------------------------------------------------
+   TAB (button) — sacred defaults
+   The prior inline style hardcoded sacred-gold; replicate exactly.
+   -------------------------------------------------------------------------- */
+.tab {
+  position: relative;
+  padding: 12px 24px;
+  background: transparent;
+  border-top: none;
+  border-right: none;
+  border-bottom: 2px solid transparent;
+  border-left: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: none;
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+}
+
+/* Hover (only when not active and not disabled) — replaces the
+   getBackgroundColor / getBorderBottomColor / getColor isHovered branch. */
+.tab:hover:not(:disabled):not([data-tab-active='true']) {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1),
+    rgba(255, 215, 0, 0.05)
+  );
+  border-bottom-color: rgba(255, 215, 0, 0.5);
+  color: rgba(255, 215, 0, 0.9);
+}
+
+/* Active — replaces the isActive branch. */
+.tab[data-tab-active='true'] {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.2),
+    rgba(255, 215, 0, 0.1)
+  );
+  border-bottom-color: #ffd700;
+  color: #ffd700;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* Disabled — replaces the disabled branch (transparent bg/border, dimmed
+   text, not-allowed cursor, 0.6 opacity). */
+.tab:disabled {
+  background: transparent;
+  border-bottom-color: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  text-shadow: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   LEADING ICON glyph
+   -------------------------------------------------------------------------- */
+.icon {
+  margin-right: 6px;
+  display: inline-flex;
+  align-items: center;
+  /* Slight size bump so single-glyph icons (☰, ⚙) sit visually balanced
+     next to label text on the sacred-gold strip. */
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   COUNT badge
+   -------------------------------------------------------------------------- */
+.count {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: rgba(255, 215, 0, 0.12);
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+/* Active tab's count badge gets a stronger fill. */
+.tab[data-tab-active='true'] .count {
+  background-color: rgba(255, 215, 0, 0.25);
+}
+
+/* ==========================================================================
+   LIGHT THEME OVERRIDES ([data-theme='light'])
+   Transcribed from theme/tabs.ts `tabsThemes.light`.
+   ========================================================================== */
+.root[data-theme='light'] {
+  --tabs-border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.tab[data-theme='light'] {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: rgb(55, 65, 81);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab[data-theme='light']:hover:not(:disabled):not([data-tab-active='true']) {
+  background: rgba(59, 130, 246, 0.1);
+  border-bottom-color: rgb(59, 130, 246);
+  color: rgb(29, 78, 216);
+  text-shadow: none;
+}
+
+.tab[data-theme='light'][data-tab-active='true'] {
+  background: rgba(59, 130, 246, 0.15);
+  border-bottom-color: rgb(59, 130, 246);
+  color: rgb(29, 78, 216);
+  font-weight: 600;
+  text-shadow: none;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.tab[data-theme='light']:disabled {
+  color: rgba(55, 65, 81, 0.4);
+}
+
+.tab[data-theme='light'] .count {
+  background-color: rgba(59, 130, 246, 0.12);
+}
+
+.tab[data-theme='light'][data-tab-active='true'] .count {
+  background-color: rgba(59, 130, 246, 0.25);
+}
+
+/* ==========================================================================
+   DARK THEME OVERRIDES ([data-theme='dark'])
+   Transcribed from theme/tabs.ts `tabsThemes.dark`.
+   ========================================================================== */
+.root[data-theme='dark'] {
+  --tabs-border-bottom: 1px solid rgba(75, 85, 99, 0.8);
+}
+
+.tab[data-theme='dark'] {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: rgb(243, 244, 246);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab[data-theme='dark']:hover:not(:disabled):not([data-tab-active='true']) {
+  background: rgba(96, 165, 250, 0.15);
+  border-bottom-color: rgb(96, 165, 250);
+  color: rgb(96, 165, 250);
+  text-shadow: none;
+}
+
+.tab[data-theme='dark'][data-tab-active='true'] {
+  background: rgba(96, 165, 250, 0.2);
+  border-bottom-color: rgb(96, 165, 250);
+  color: rgb(96, 165, 250);
+  font-weight: 600;
+  text-shadow: none;
+  box-shadow: 0 2px 4px rgba(96, 165, 250, 0.3);
+}
+
+.tab[data-theme='dark']:disabled {
+  color: rgba(243, 244, 246, 0.4);
+}
+
+.tab[data-theme='dark'] .count {
+  background-color: rgba(96, 165, 250, 0.12);
+}
+
+.tab[data-theme='dark'][data-tab-active='true'] .count {
+  background-color: rgba(96, 165, 250, 0.25);
+}

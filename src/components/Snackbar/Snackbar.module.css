@@ -1,0 +1,25 @@
+/*
+ * =============================================================================
+ * SNACKBAR — fixed-position container for a transient Alert toast
+ * =============================================================================
+ *
+ * Snackbar is a thin positioning wrapper around <Alert>. All of the visual
+ * theming (sacred / light / dark palettes, severity colors, hover, close
+ * button) lives in the Alert component itself and flows through the forwarded
+ * `styles` prop. Snackbar owns ONLY the fixed placement: pinned to the bottom
+ * center of the viewport above app chrome.
+ *
+ * These values are a 1:1 transcription of the inline style object that
+ * previously lived in index.tsx:
+ *   position: 'fixed', bottom: '20px', left: '50%',
+ *   transform: 'translateX(-50%)', zIndex: 1400
+ * =============================================================================
+ */
+
+.root {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1400;
+}

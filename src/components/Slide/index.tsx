@@ -4,8 +4,9 @@
  */
 'use client'
 
-import React, { useMemo, forwardRef } from 'react'
-import { getSlideStyles, type SlideStyles } from '../../theme'
+import React, { forwardRef, type CSSProperties } from 'react'
+import type { SlideStyles } from '../../theme'
+import cssStyles from './Slide.module.css'
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE
@@ -22,24 +23,80 @@ export interface SlideProps extends Omit<
 }
 
 // --------------------------------------------------------------------------
+// CLASSNAME COMPOSITION — local filter+join helper (no clsx dependency)
+// --------------------------------------------------------------------------
+
+function mergeClassNames(...names: Array<string | false | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
+
+// --------------------------------------------------------------------------
 // MAIN SLIDE COMPONENT
 // --------------------------------------------------------------------------
 
 /**
  * A slide transition component with theming support for smooth transform animations.
  * Supports sliding from different directions: up, down, left, right.
+ *
+ * Theme (light/dark/sacred) only changes the default transition timing and is
+ * expressed as `data-theme`. Direction is expressed as `data-direction` and the
+ * hidden→visible toggle is the `.in` class — all transform/timing lives in
+ * Slide.module.css. Caller-supplied timing overrides (timeout / transitionDuration
+ * / transitionTimingFunction / transition / transitionDelay) remain in JS and are
+ * forwarded as CSS custom properties (or inline transition for the full-shorthand
+ * `transition` override), preserving exact parity with the old getSlideStyles.
  */
 const Slide = forwardRef<HTMLDivElement, SlideProps>(
-  ({ children, styles, ...restProps }, ref) => {
+  ({ children, styles, className: callerClassName, ...restProps }, ref) => {
+    const theme = styles?.theme || 'light'
     const isDisabled = styles?.disabled || false
+    const isVisible = styles?.in !== false
+    const direction = styles?.direction || 'up'
 
-    const computedStyles = useMemo(
-      () => getSlideStyles(styles, isDisabled),
-      [styles, isDisabled]
+    // Caller-supplied timing overrides stay in JS (dynamic user props). When the
+    // caller passes a full `transition` shorthand it replaces the computed value
+    // verbatim; otherwise timeout / transitionDuration / transitionTimingFunction
+    // feed the --slide-duration / --slide-timing custom properties that the CSS
+    // transition shorthand reads. Disabled forces `transition: none` via the
+    // [data-disabled] CSS rule, so no inline timing is emitted in that case.
+    const dynamicStyle: CSSProperties = {}
+    if (!isDisabled) {
+      if (styles?.transition !== undefined) {
+        dynamicStyle.transition = styles.transition
+      } else {
+        if (styles?.timeout !== undefined) {
+          ;(dynamicStyle as Record<string, string>)['--slide-duration'] =
+            `${styles.timeout}ms`
+        } else if (styles?.transitionDuration !== undefined) {
+          ;(dynamicStyle as Record<string, string>)['--slide-duration'] =
+            styles.transitionDuration
+        }
+        if (styles?.transitionTimingFunction !== undefined) {
+          ;(dynamicStyle as Record<string, string>)['--slide-timing'] =
+            styles.transitionTimingFunction
+        }
+      }
+      if (styles?.transitionDelay !== undefined) {
+        dynamicStyle.transitionDelay = styles.transitionDelay
+      }
+    }
+
+    const className = mergeClassNames(
+      cssStyles.root,
+      isVisible && cssStyles.in,
+      callerClassName
     )
 
     return (
-      <div ref={ref} style={computedStyles.container} {...restProps}>
+      <div
+        ref={ref}
+        {...restProps}
+        className={className}
+        data-theme={theme}
+        data-direction={direction}
+        {...(isDisabled && { 'data-disabled': 'true' })}
+        style={dynamicStyle}
+      >
         {children}
       </div>
     )
