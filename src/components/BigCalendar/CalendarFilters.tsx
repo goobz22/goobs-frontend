@@ -11,7 +11,7 @@ import DateRange from '../Field/Date/DateRange'
 import * as Icons from '../Icons'
 import type { FieldStyleOverrides } from '../Field/Shell/types'
 
-const { FilterListIcon, ClearIcon } = Icons
+const { FilterListIcon, CloseIcon } = Icons
 
 export interface CalendarFilterOptions {
   searchText?: string
@@ -148,7 +148,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
               e.currentTarget.style.backgroundColor = 'transparent'
             }}
           >
-            <ClearIcon
+            <CloseIcon
               styles={{ theme: styles?.theme ?? 'sacred', size: 16 }}
             />
           </div>
