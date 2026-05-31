@@ -21,6 +21,17 @@ const meta: Meta<typeof Divider> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  // A horizontal divider is width:100% of its container; the bare `centered`
+  // layout gives it no width, collapsing the rule to 0. Wrap stories in a
+  // fixed-width block so the rule is actually visible (mirrors real usage,
+  // where a Divider sits inside a sized container).
+  decorators: [
+    (Story) => (
+      <div style={{ width: '360px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export default meta
