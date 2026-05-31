@@ -54,7 +54,6 @@ const LooksOneIcon: React.FC<LooksOneIconProps> = ({
       >
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-1.5v-8H10v-1.5h4V17z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

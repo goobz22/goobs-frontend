@@ -54,7 +54,6 @@ const ScheduleIcon: React.FC<ScheduleIconProps> = ({
       >
         <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17L11 15.5V8H13V16L16.25 18.25L15.5 19.5L13 17Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

@@ -55,7 +55,6 @@ const SkipNextIcon: React.FC<SkipNextIconProps> = ({
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M6 18l8.5-6L6 6v12zm8-12v12h2V6h-2z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

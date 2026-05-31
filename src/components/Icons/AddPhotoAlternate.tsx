@@ -59,7 +59,6 @@ const AddPhotoAlternateIcon: React.FC<AddPhotoAlternateIconProps> = ({
           opacity="0.3"
         />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

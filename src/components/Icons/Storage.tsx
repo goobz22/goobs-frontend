@@ -54,7 +54,6 @@ const StorageIcon: React.FC<StorageIconProps> = ({
       >
         <path d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zm-2-2h20v-4H2v4zm2-3h2v2H4v-2zm-2-2h20V6H2v4zm2-3h2v2H4V8z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

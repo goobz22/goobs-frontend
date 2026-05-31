@@ -55,7 +55,6 @@ const NavigationIcon: React.FC<NavigationIconProps> = ({
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

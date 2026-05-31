@@ -79,52 +79,8 @@
   transform: none;
 }
 
-/* --------------------------------------------------------------------------
-   SACRED GLYPH — old IconTheme.glyph (sacred theme only).
-   In light/dark the old theme set glyph { display: none }; icons only render
-   the glyph <div> when isSacredTheme, so under light/dark this rule is unused,
-   but we keep it hidden defensively. The glyph is hidden (opacity 0) by
-   default and revealed on wrapper :hover === old glyphVisible { opacity: 1 }.
-   -------------------------------------------------------------------------- */
-.glyph {
-  display: none;
-}
-
-.wrapper[data-theme='sacred'] .glyph {
-  display: block;
-  position: absolute;
-  color: var(--goobs-gold-a40);
-  font-size: var(--goobs-text-xs);
-  z-index: 10;
-  opacity: 0;
-  transition: var(--goobs-transition-premium);
-  top: -8px;
-  right: -8px;
-  pointer-events: none;
-}
-
-/* Reveal on hover === old glyphVisible { opacity: 1 }. The old theme only
-   toggled opacity here — it did NOT apply the sacredGlyphRotate animation to
-   the glyph (injectSacredKeyframes only registered the @keyframes; no rule
-   ever referenced it). Parity: opacity only, no animation. */
-.wrapper[data-theme='sacred']:hover .glyph {
-  opacity: 1;
-}
-
-/* --------------------------------------------------------------------------
-   SACRED GLYPH KEYFRAMES — was runtime-injected by injectSacredKeyframes()
-   in theme/icon.ts (it registered this @keyframes via styleSheet.insertRule).
-   Transcribed here as static module CSS so the runtime injection can be
-   deleted from every icon. Currently no selector references it (matching the
-   old behaviour, where the registered keyframes were never actually applied
-   to the glyph); kept verbatim so any consumer relying on its presence — or a
-   future glyph animation — still resolves the name.
-   -------------------------------------------------------------------------- */
-@keyframes sacredGlyphRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* Sacred-glyph residue removed: the empty glyph <div>, its CSS, and the
+   unused sacredGlyphRotate keyframes were leftovers from before the sacred
+   theme had its own gold coloring. The glyph characters live on as the
+   exported SACRED_GLYPHS constant (src/components/Icons/sacredGlyphs.ts),
+   no longer force-rendered onto icons. */

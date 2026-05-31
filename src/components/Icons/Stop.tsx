@@ -55,7 +55,6 @@ const StopIcon: React.FC<StopIconProps> = ({
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M6 6h12v12H6V6z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

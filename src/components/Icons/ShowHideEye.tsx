@@ -126,7 +126,6 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
           <path d="M1 1l22 22" />
         </svg>
       )}
-      {isSacredTheme && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

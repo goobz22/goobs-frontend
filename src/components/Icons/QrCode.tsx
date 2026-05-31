@@ -70,7 +70,6 @@ const QrCodeIcon: React.FC<QrCodeIconProps> = ({
         <rect x="16" y="19" width="2" height="2" fill="currentColor" />
         <rect x="19" y="19" width="2" height="2" fill="currentColor" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

@@ -54,7 +54,6 @@ const FeedbackIcon: React.FC<FeedbackIconProps> = ({
       >
         <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4C22,2.89 21.1,2 20,2M13,14H11V12H13V14M13,10H11V6H13V10Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

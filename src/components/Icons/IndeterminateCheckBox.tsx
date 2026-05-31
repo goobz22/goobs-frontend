@@ -55,7 +55,6 @@ const IndeterminateCheckBoxIcon: React.FC<IndeterminateCheckBoxIconProps> = ({
         {/* Shift the minus bar down by 5px to better center within the container */}
         <path d="M19 18H5v-2h14v2z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

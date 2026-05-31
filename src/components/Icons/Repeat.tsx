@@ -54,7 +54,6 @@ const RepeatIcon: React.FC<RepeatIconProps> = ({
       >
         <path d="M7,7H17V10L21,6L17,2V5H5V11H7V7M17,17H7V14L3,18L7,22V19H19V13H17V17Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

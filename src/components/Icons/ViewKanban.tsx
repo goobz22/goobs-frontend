@@ -54,7 +54,6 @@ const ViewKanbanIcon: React.FC<ViewKanbanIconProps> = ({
       >
         <path d="M3 3h6v9H3V3zm0 11h6v7H3v-7zm8-11h6v7h-6V3zm0 9h6v9h-6v-9zm8-9h2v18h-2V3z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

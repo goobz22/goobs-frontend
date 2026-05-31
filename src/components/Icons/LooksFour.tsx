@@ -54,7 +54,6 @@ const LooksFourIcon: React.FC<LooksFourIconProps> = ({
       >
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 14h-1.5v-2H11V8h1.5v5.5H15V15h1.5v2zm-1.5-4H12v-1.5h1.5V13z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

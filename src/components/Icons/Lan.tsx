@@ -52,7 +52,6 @@ const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
         <path d="M13 22h-2v-4H6v-6h5V8H9V2h6v6h-2v4h5v6h-5z" />
         <path d="M4 14h4v4H4zM16 14h4v4h-4z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

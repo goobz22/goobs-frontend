@@ -59,7 +59,6 @@ const FormatListBulletedIcon: React.FC<FormatListBulletedIconProps> = ({
         <path d="M8 11h12v2H8z" />
         <path d="M8 17h12v2H8z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

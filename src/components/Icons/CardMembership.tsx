@@ -54,7 +54,6 @@ const CardMembershipIcon: React.FC<CardMembershipIconProps> = ({
       >
         <path d="M20 4H4c-1.11 0-2 .89-2 2v7c0 1.11.89 2 2 2v2c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2v-2c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 9H4V6h16v7zm-10 2l2 3 2-3H10z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

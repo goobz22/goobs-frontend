@@ -55,7 +55,6 @@ const LowPriorityIcon: React.FC<LowPriorityIconProps> = ({
         <path d="M14 10H10V20H14V10ZM14 4H10V8H14V4Z" />
         <path d="M12 22L9.5 19.5L12 17L14.5 19.5L12 22Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

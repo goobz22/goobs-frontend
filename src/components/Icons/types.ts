@@ -39,10 +39,4 @@ export interface IconStyles {
   boxShadow?: string
   /** Custom hover box shadow */
   hoverBoxShadow?: string
-  /** Sacred glyph color override */
-  sacredGlyphColor?: string
-  /** Sacred glyph size override */
-  sacredGlyphSize?: string
-  /** Show sacred glyph on hover only */
-  sacredGlyphOnHoverOnly?: boolean
 }
