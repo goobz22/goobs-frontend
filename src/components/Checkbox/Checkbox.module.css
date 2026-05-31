@@ -321,7 +321,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--cb-icon-color, white);
   opacity: 0;
   transition: var(--cb-transition);
   transform: translateY(5px) translateX(3px);
@@ -332,7 +332,7 @@
 }
 
 .wrapper[data-theme='sacred'] .icon {
-  color: var(--goobs-gold);
+  color: var(--cb-icon-color, var(--goobs-gold));
   filter: drop-shadow(0 0 8px var(--goobs-gold-a60));
 }
 

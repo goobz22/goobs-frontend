@@ -63,6 +63,9 @@ export interface CheckboxStyles {
   checkedBoxShadow?: string
   checkedBackgroundImage?: string
 
+  // Checkmark icon
+  iconColor?: string
+
   // Disabled states
   disabledBackgroundColor?: string
   disabledBorderColor?: string
@@ -167,6 +170,9 @@ function buildDynamicStyle(styles?: CheckboxStyles): CSSProperties | undefined {
     dynamicStyle['--cb-checked-box-shadow'] = styles.checkedBoxShadow
   if (styles.checkedBackgroundImage)
     dynamicStyle['--cb-checked-bg-image'] = styles.checkedBackgroundImage
+
+  // Checkmark icon color (caller override; consumed by .icon { color: var(--cb-icon-color, ...) })
+  if (styles.iconColor) dynamicStyle['--cb-icon-color'] = styles.iconColor
 
   // Disabled
   if (styles.disabledBackgroundColor)
