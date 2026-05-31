@@ -85,18 +85,29 @@
 
 /* --------------------------------------------------------------------------
    Light Theme Override
+
+   The themed `data-theme` attribute is emitted by <FieldShell> on its
+   `.shell` wrapper (src/components/Field/Shell/index.tsx) — there is no
+   `.container` element in this component's rendered DOM (DateField renders
+   only a <FieldShell> whose root carries data-theme, with the .input as a
+   descendant). The old `.container[data-theme='light'] .input` selectors
+   therefore matched nothing, so light/dark fell through to the sacred base
+   (.input above), rendering a dark control-bg + white text in light theme.
+   Anchoring on the bare `[data-theme='light']` attribute selector — which
+   CSS-module scoping leaves untouched, unlike the hashed .input/.label
+   classes — targets the FieldShell ancestor correctly.
    -------------------------------------------------------------------------- */
 
-.container[data-theme='light'] .label {
+[data-theme='light'] .label {
   font-family: var(--goobs-font-standard);
   color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .requiredIndicator {
+[data-theme='light'] .requiredIndicator {
   color: var(--goobs-danger);
 }
 
-.container[data-theme='light'] .input {
+[data-theme='light'] .input {
   background-color: var(--goobs-light-surface);
   border-color: var(--goobs-light-border);
   font-family: var(--goobs-font-standard);
@@ -104,21 +115,21 @@
   color-scheme: light;
 }
 
-.container[data-theme='light'] .input:focus {
+[data-theme='light'] .input:focus {
   border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.container[data-theme='light'] .input:hover:not(:disabled):not(:focus) {
+[data-theme='light'] .input:hover:not(:disabled):not(:focus) {
   border-color: var(--goobs-light-border-strong);
 }
 
-.container[data-theme='light'] .input:disabled {
+[data-theme='light'] .input:disabled {
   background-color: #f3f4f6;
   color: var(--goobs-light-text-disabled);
 }
 
-.container[data-theme='light'] .helperText {
+[data-theme='light'] .helperText {
   color: var(--goobs-light-text-muted);
 }
 
@@ -126,16 +137,16 @@
    Dark Theme Override
    -------------------------------------------------------------------------- */
 
-.container[data-theme='dark'] .label {
+[data-theme='dark'] .label {
   font-family: var(--goobs-font-standard);
   color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .requiredIndicator {
+[data-theme='dark'] .requiredIndicator {
   color: var(--goobs-danger);
 }
 
-.container[data-theme='dark'] .input {
+[data-theme='dark'] .input {
   background-color: var(--goobs-dark-surface);
   border-color: var(--goobs-dark-border);
   font-family: var(--goobs-font-standard);
@@ -143,21 +154,21 @@
   color-scheme: dark;
 }
 
-.container[data-theme='dark'] .input:focus {
+[data-theme='dark'] .input:focus {
   border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.container[data-theme='dark'] .input:hover:not(:disabled):not(:focus) {
+[data-theme='dark'] .input:hover:not(:disabled):not(:focus) {
   border-color: var(--goobs-dark-border-strong);
 }
 
-.container[data-theme='dark'] .input:disabled {
+[data-theme='dark'] .input:disabled {
   background-color: #0f172a;
   color: var(--goobs-dark-text-muted);
 }
 
-.container[data-theme='dark'] .helperText {
+[data-theme='dark'] .helperText {
   color: #94a3b8;
 }
 

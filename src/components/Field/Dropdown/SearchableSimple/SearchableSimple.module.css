@@ -203,44 +203,54 @@
 
 /* --------------------------------------------------------------------------
    Light Theme Override
+
+   The trigger button/label/etc. live inside <FieldShell>, whose rendered
+   wrapper carries `data-component="FieldShell"` + `data-theme`. The dropdown's
+   own `.container` class is never applied to any element here, so the previous
+   `.container[data-theme='light'] .button` selectors never matched and the
+   trigger fell through to the sacred base (dark control-bg + light text) in
+   light mode. Anchor the overrides on the FieldShell wrapper attribute the TSX
+   actually emits so light/dark remap correctly. The portaled `.menu` keeps its
+   own `.menu[data-theme=…]` rules below (it carries its own data-theme and is
+   rendered outside the shell).
    -------------------------------------------------------------------------- */
 
-.container[data-theme='light'] .label {
+[data-component='FieldShell'][data-theme='light'] .label {
   font-family: var(--goobs-font-standard);
   color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .button {
+[data-component='FieldShell'][data-theme='light'] .button {
   background-color: var(--goobs-light-surface);
   border-color: var(--goobs-light-border);
   font-family: var(--goobs-font-standard);
   color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .button:hover:not(:disabled) {
+[data-component='FieldShell'][data-theme='light'] .button:hover:not(:disabled) {
   border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.container[data-theme='light'] .button.open {
+[data-component='FieldShell'][data-theme='light'] .button.open {
   border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.container[data-theme='light'] .button:disabled {
+[data-component='FieldShell'][data-theme='light'] .button:disabled {
   background-color: #f3f4f6;
   color: var(--goobs-light-text-disabled);
 }
 
-.container[data-theme='light'] .arrow {
+[data-component='FieldShell'][data-theme='light'] .arrow {
   border-top-color: var(--goobs-light-text-muted);
 }
 
-.container[data-theme='light'] .requiredIndicator {
+[data-component='FieldShell'][data-theme='light'] .requiredIndicator {
   color: var(--goobs-danger);
 }
 
-.container[data-theme='light'] .helperText {
+[data-component='FieldShell'][data-theme='light'] .helperText {
   color: var(--goobs-light-text-muted);
 }
 
@@ -296,42 +306,42 @@
    Dark Theme Override
    -------------------------------------------------------------------------- */
 
-.container[data-theme='dark'] .label {
+[data-component='FieldShell'][data-theme='dark'] .label {
   font-family: var(--goobs-font-standard);
   color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .button {
+[data-component='FieldShell'][data-theme='dark'] .button {
   background-color: var(--goobs-dark-surface);
   border-color: var(--goobs-dark-border);
   font-family: var(--goobs-font-standard);
   color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .button:hover:not(:disabled) {
+[data-component='FieldShell'][data-theme='dark'] .button:hover:not(:disabled) {
   border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.container[data-theme='dark'] .button.open {
+[data-component='FieldShell'][data-theme='dark'] .button.open {
   border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.container[data-theme='dark'] .button:disabled {
+[data-component='FieldShell'][data-theme='dark'] .button:disabled {
   background-color: #0f172a;
   color: var(--goobs-dark-text-muted);
 }
 
-.container[data-theme='dark'] .arrow {
+[data-component='FieldShell'][data-theme='dark'] .arrow {
   border-top-color: #94a3b8;
 }
 
-.container[data-theme='dark'] .requiredIndicator {
+[data-component='FieldShell'][data-theme='dark'] .requiredIndicator {
   color: var(--goobs-danger);
 }
 
-.container[data-theme='dark'] .helperText {
+[data-component='FieldShell'][data-theme='dark'] .helperText {
   color: #94a3b8;
 }
 

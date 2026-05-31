@@ -51,7 +51,22 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       large: { width: '48px', height: '48px', padding: '12px' },
     }
 
-    // Map color to theme colors (only apply if not sacred theme)
+    // Map color to theme colors (only apply if not sacred theme).
+    //
+    // The `default` color is the one the QA dark-theme story exercises
+    // (color defaults to 'default'). It must NOT hardcode light-mode
+    // assumptions: previously the non-sacred branch set
+    // `color: 'inherit'` for `default`, which — passed as an inline
+    // style to <Button> — overrode Button.module.css's
+    // `.button[data-theme='dark']` color token. The icon then inherited
+    // the page's near-black text on a dark-navy backdrop (the reported
+    // "pencil renders near-black, no visible surface/ring" defect). The
+    // dark icon CSS resolves to `currentColor`, so the icon color is
+    // entirely driven by the button's color. We therefore set an
+    // explicit, theme-appropriate `default` color (and surface/border
+    // below) so the control is visible on both light and dark backdrops.
+    const isDarkTheme = styles?.theme === 'dark'
+
     const colorMap =
       styles?.theme === 'sacred'
         ? {
@@ -70,17 +85,31 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
             error: { backgroundColor: '#d32f2f', color: 'white' },
             info: { backgroundColor: '#0288d1', color: 'white' },
             warning: { backgroundColor: '#ed6c02', color: 'white' },
-            default: { backgroundColor: 'transparent', color: 'inherit' },
+            // Dark theme: explicit light icon color so the glyph reads on
+            // the dark navy surface; light theme keeps `inherit` so it
+            // picks up the surrounding text color as before.
+            default: {
+              backgroundColor: 'transparent',
+              color: isDarkTheme ? 'var(--goobs-dark-text)' : 'inherit',
+            },
           }
 
-    // Don't apply border if sacred theme is being used
+    // Don't apply border if sacred theme is being used.
     const shouldApplyBorder = color === 'default' && styles?.theme !== 'sacred'
+
+    // The ring color must be visible on the active backdrop. The old
+    // hardcoded `rgba(0, 0, 0, 0.12)` is invisible on the dark-navy
+    // surface, leaving the dark-theme button with no perceptible
+    // border. Map to the theme border token instead.
+    const defaultBorderColor = isDarkTheme
+      ? 'var(--goobs-dark-border)'
+      : 'rgba(0, 0, 0, 0.12)'
 
     const buttonStyles = {
       ...sizeMap[size],
       ...colorMap[color],
       borderRadius: '50%',
-      border: shouldApplyBorder ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+      border: shouldApplyBorder ? `1px solid ${defaultBorderColor}` : 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

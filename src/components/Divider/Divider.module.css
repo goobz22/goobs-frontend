@@ -14,13 +14,49 @@
    ========================================================================== */
 
 .root {
-  /* Tokens — overridable per-instance via inline CSS vars (caller props). */
+  /* Tokens — overridable per-instance via inline CSS vars (caller props).
+     --divider-line-color is the solid fallback colour painted as
+     background-color so the rule is always visible even where a gradient's
+     transparent ends would otherwise read as no line; --divider-gradient-color
+     is the centre stop of the fade. Both are remapped per-theme below. */
   --divider-gradient-color: var(--goobs-gold-a30);
+  --divider-line-color: var(--goobs-gold-a30);
   --divider-content-color: var(--goobs-gold);
+  --divider-content-bg: rgba(0, 0, 0, 0.6);
 
+  /* A horizontal divider is a block-level rule; declaring display explicitly
+     (rather than relying on the UA default) plus align-self:stretch guarantees
+     it fills the cross axis when placed inside a flex/grid parent, so
+     width:100% can never collapse to the 0 content-width of an empty div. */
+  display: block;
+  align-self: stretch;
+  flex-shrink: 0;
   position: relative;
   box-sizing: border-box;
   opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   THEME
+   sacred is the base default above (gold gradient + gold line). The
+   [data-theme='light'] / [data-theme='dark'] blocks remap the rule colour to
+   the role border tokens so the divider is a visible neutral line on light and
+   dark surfaces instead of falling through to the faint sacred gold. The
+   content label background/colour are remapped too so the centered label reads
+   on each surface. data-theme is set on the styled root by index.tsx.
+   -------------------------------------------------------------------------- */
+.root[data-theme='light'] {
+  --divider-gradient-color: var(--goobs-light-border-strong);
+  --divider-line-color: var(--goobs-light-border);
+  --divider-content-color: var(--goobs-light-text-secondary);
+  --divider-content-bg: var(--goobs-light-surface);
+}
+
+.root[data-theme='dark'] {
+  --divider-gradient-color: var(--goobs-dark-border-strong);
+  --divider-line-color: var(--goobs-dark-border);
+  --divider-content-color: var(--goobs-dark-text-secondary);
+  --divider-content-bg: var(--goobs-dark-surface);
 }
 
 /* --------------------------------------------------------------------------
@@ -33,7 +69,11 @@
 .horizontal {
   width: var(--divider-width, 100%);
   height: var(--divider-height, 2px);
-  background: linear-gradient(
+  /* Solid line colour underneath the fade so the rule is always visible
+     (the gradient's transparent ends previously left the edges — and any
+     computed-style background-color probe — reading as no line). */
+  background-color: var(--divider-line-color);
+  background-image: linear-gradient(
     90deg,
     transparent,
     var(--divider-gradient-color),
@@ -48,7 +88,8 @@
 .vertical {
   width: var(--divider-width, 2px);
   height: var(--divider-height, 100%);
-  background: linear-gradient(
+  background-color: var(--divider-line-color);
+  background-image: linear-gradient(
     180deg,
     transparent,
     var(--divider-gradient-color),
@@ -68,6 +109,7 @@
    -------------------------------------------------------------------------- */
 .disabled {
   --divider-gradient-color: var(--goobs-gold-a15);
+  --divider-line-color: var(--goobs-gold-a15);
   opacity: 0.5;
 }
 
@@ -78,7 +120,11 @@
    only the opacity dim remains.
    -------------------------------------------------------------------------- */
 .hasBackground {
-  background: var(--divider-background);
+  /* Replace BOTH the solid fallback and the fade with the caller's explicit
+     colour (matching the old getBackground() early return), overriding the
+     background-color/background-image pair set on the orientation classes. */
+  background-color: var(--divider-background);
+  background-image: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -90,7 +136,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--divider-content-bg);
   padding: 0 var(--goobs-space-md);
   color: var(--divider-content-color);
   font-size: var(--goobs-text-md);

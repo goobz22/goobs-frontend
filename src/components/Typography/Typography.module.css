@@ -94,6 +94,27 @@
   color: var(--typography-color, var(--goobs-gold));
 }
 
+/* --------------------------------------------------------------------------
+   THEME OVERRIDE — light (dark text on light surface)
+   The base .root color falls back to --goobs-sacred-text (rgba(255,255,255,0.9),
+   near-white), which is invisible on a light surface. Remap the FALLBACK to the
+   light role token so un-themed/light text reads as dark-on-light. An explicit
+   caller color still wins (it's the var's first argument), exactly as the
+   sacred block above preserves caller precedence.
+   -------------------------------------------------------------------------- */
+.root[data-theme='light'] {
+  color: var(--typography-color, var(--goobs-light-text));
+}
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDE — dark (light text on dark surface)
+   Remap the FALLBACK to the dark role token. Visually similar to the sacred
+   base (light text), but anchored on the neutral dark palette rather than gold.
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  color: var(--typography-color, var(--goobs-dark-text));
+}
+
 /* ==========================================================================
    VARIANT FONT-SIZE DEFAULTS
    Each variant supplies only its default font-size, gated behind

@@ -49,6 +49,39 @@
 }
 
 /* --------------------------------------------------------------------------
+   LABEL TEXT — the checkbox's visible label, rendered beside the box when the
+   consumer passes `children`. Base = LIGHT theme (dark text on light surface),
+   matching the module's base-is-light convention; dark/sacred remap below.
+   -------------------------------------------------------------------------- */
+.labelText {
+  margin-left: 8px;
+  color: var(--goobs-light-text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.wrapper[data-theme='dark'] .labelText {
+  color: var(--goobs-dark-text);
+}
+
+.wrapper[data-theme='sacred'] .labelText {
+  color: var(--goobs-sacred-text);
+}
+
+.wrapper[data-disabled='true'] .labelText {
+  color: var(--goobs-light-text-disabled);
+}
+
+.wrapper[data-theme='dark'][data-disabled='true'] .labelText {
+  color: rgb(75, 85, 99);
+}
+
+.wrapper[data-theme='sacred'][data-disabled='true'] .labelText {
+  color: var(--goobs-gold-a30);
+}
+
+/* --------------------------------------------------------------------------
    THEME OVERRIDES — sacred / dark differ in container size + transition speed
    -------------------------------------------------------------------------- */
 .wrapper[data-theme='sacred'] {

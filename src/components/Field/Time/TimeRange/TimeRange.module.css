@@ -24,21 +24,58 @@
 .input {
   width: 100%;
   padding: var(--goobs-space-sm) var(--goobs-space-md);
-  background-color: var(--goobs-sacred-control-bg);
-  border: 1px solid var(--goobs-gold-a30);
+  /* Theme tokens come from FieldShell's [data-theme] block on the .shell
+     ancestor (--field-bg / --field-border-default / --field-text), falling
+     back to the sacred values when no shell theme is in play. The light/dark
+     override blocks below remap them per theme so the input never renders the
+     dark sacred base under [data-theme='light']/[data-theme='dark']. */
+  background-color: var(--field-bg, var(--goobs-sacred-control-bg));
+  border: 1px solid var(--field-border-default, var(--goobs-gold-a30));
   border-radius: var(--goobs-radius-lg);
-  color: var(--goobs-sacred-text);
+  color: var(--field-text, var(--goobs-sacred-text));
   font-family: 'Crimson Text', serif;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
   box-sizing: border-box;
+  /* Native time-picker chrome matches the surface; flipped to light below. */
   color-scheme: dark;
 }
 
 .input:disabled {
-  background-color: var(--goobs-sacred-control-bg);
+  background-color: var(--field-bg, var(--goobs-sacred-control-bg));
   color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDES — the data-theme attribute is emitted by FieldShell on the
+   .shell ancestor wrapper (Shell/index.tsx). Remap the input bg/border/text
+   to the light/dark role tokens so light = light surface + dark text, dark =
+   dark surface + light text. color-scheme flips to light so the native time
+   picker chrome reads correctly on a light surface. Sacred is the base above.
+   -------------------------------------------------------------------------- */
+:global([data-component='FieldShell'][data-theme='light']) .input {
+  background-color: var(--field-bg, var(--goobs-light-surface));
+  border-color: var(--field-border-default, var(--goobs-light-border));
+  color: var(--field-text, var(--goobs-light-text));
+  color-scheme: light;
+}
+
+:global([data-component='FieldShell'][data-theme='light']) .input:disabled {
+  background-color: var(--field-bg, var(--goobs-light-surface));
+  color: var(--goobs-light-text-muted);
+}
+
+:global([data-component='FieldShell'][data-theme='dark']) .input {
+  background-color: var(--field-bg, var(--goobs-dark-surface));
+  border-color: var(--field-border-default, var(--goobs-dark-border));
+  color: var(--field-text, var(--goobs-dark-text));
+  color-scheme: dark;
+}
+
+:global([data-component='FieldShell'][data-theme='dark']) .input:disabled {
+  background-color: var(--field-bg, var(--goobs-dark-surface));
+  color: var(--goobs-dark-text-muted);
 }

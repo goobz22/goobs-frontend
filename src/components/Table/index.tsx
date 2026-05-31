@@ -30,6 +30,20 @@ const resolveTheme = (styles?: TableStyles): 'sacred' | 'light' | 'dark' =>
   styles?.theme ?? 'sacred'
 
 /**
+ * `data-theme` for the SUBCOMPONENTS (head/row/cell). Unlike the container,
+ * these emit the attribute ONLY when the caller explicitly themed THIS element.
+ * When omitted, the attribute is absent so the element inherits the container's
+ * theme via the `.container[data-theme=…] .head/.cell/.row` cascade in the CSS
+ * module. The previous `?? 'sacred'` default stamped data-theme='sacred' on every
+ * unthemed leaf, pinning them to the gold sacred palette even inside a light
+ * container — that is why components-table--light showed gold text on cream when
+ * the Light story themed only the container + table, not each cell. */
+const subThemeAttr = (
+  styles?: TableStyles
+): { 'data-theme': 'sacred' | 'light' | 'dark' } | undefined =>
+  styles?.theme ? { 'data-theme': styles.theme } : undefined
+
+/**
  * Build the CSS-custom-property override object for a styled element. Each
  * scalar override (when supplied) maps to the `var(--…)` hook the CSS module
  * reads, so an override wins over the theme default without inline-styling the
@@ -130,7 +144,7 @@ export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
   return (
     <thead
       className={cssStyles.head}
-      data-theme={resolveTheme(styles)}
+      {...subThemeAttr(styles)}
       {...(overrides && { style: overrides })}
     >
       {children}
@@ -150,7 +164,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   return (
     <tr
       className={cssStyles.row}
-      data-theme={resolveTheme(styles)}
+      {...subThemeAttr(styles)}
       data-hover={hover ? 'true' : 'false'}
     >
       {children}
@@ -172,7 +186,7 @@ export const TableCell: React.FC<TableCellProps> = ({
   return (
     <td
       className={cssStyles.cell}
-      data-theme={resolveTheme(styles)}
+      {...subThemeAttr(styles)}
       {...(isHeader && { 'data-header-cell': 'true' })}
       style={{ textAlign: align, ...(overrides ?? {}) }}
     >

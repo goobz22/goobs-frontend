@@ -1,9 +1,9 @@
 /* ==========================================================================
    METRIC CARD - CSS MODULE
    Theme via [data-theme] on the card root. Sacred is the hardcoded base
-   default; [data-theme='light'] is the explicit override block. The TSX
-   resolves the attribute to 'sacred' only when styles.theme === 'sacred',
-   otherwise 'light' (matching the prior two-branch isSacredTheme behaviour).
+   default; [data-theme='light'] and [data-theme='dark'] are explicit
+   override blocks. The TSX emits the requested theme verbatim ('sacred' |
+   'dark' | 'light'), defaulting unrecognised values to 'light'.
    Caller knobs (color, width, padding, radius) arrive as CSS custom
    properties set inline so they don't grow the bundle's class surface.
    ========================================================================== */
@@ -36,13 +36,27 @@
 }
 
 /* --------------------------------------------------------------------------
-   Light theme (default for undefined / light / dark — non-sacred branch)
+   Light theme (default for undefined / unrecognised theme values)
    -------------------------------------------------------------------------- */
 .card[data-theme='light'] {
   --mc-bg: var(--goobs-light-surface);
   --mc-border: rgba(25, 118, 210, 0.25);
   --mc-accent: var(--goobs-light-primary);
   --mc-label: var(--goobs-light-text-muted);
+  --mc-value-family: var(--goobs-font-standard);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme — was previously MISSING, so theme:'dark' fell through to the
+   light block above and rendered a white card on the dark backdrop
+   (components-metric--dark-theme). Remap to the dark role tokens: dark
+   surface + border, light-on-dark primary accent, muted dark label.
+   -------------------------------------------------------------------------- */
+.card[data-theme='dark'] {
+  --mc-bg: var(--goobs-dark-surface);
+  --mc-border: var(--goobs-dark-border);
+  --mc-accent: var(--goobs-dark-primary);
+  --mc-label: var(--goobs-dark-text-muted);
   --mc-value-family: var(--goobs-font-standard);
 }
 
