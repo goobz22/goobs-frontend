@@ -75,6 +75,23 @@
 }
 
 /* --------------------------------------------------------------------------
+   CONTAINER — dark (explicit dark-slate override)
+   -------------------------------------------------------------------------- */
+.container[data-theme='dark'] {
+  --accordion-bg: var(--goobs-dark-surface);
+  --accordion-border-color: var(--goobs-dark-border);
+  --accordion-summary-color: var(--goobs-dark-text);
+  --accordion-summary-active-bg: var(--goobs-info-bg);
+  --accordion-summary-active-color: var(--goobs-dark-primary);
+  --accordion-summary-hover-bg: var(--goobs-dark-surface-raised);
+  --accordion-summary-font-family: inherit;
+  --accordion-icon-color: var(--goobs-dark-text-muted);
+  --accordion-details-color: var(--goobs-dark-text-secondary);
+  --accordion-details-font-family: inherit;
+  --accordion-details-border-top-color: var(--goobs-dark-border);
+}
+
+/* --------------------------------------------------------------------------
    LINK WRAPPER (menu type with href)
    -------------------------------------------------------------------------- */
 .link {

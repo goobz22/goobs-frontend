@@ -118,10 +118,15 @@ const Accordion: FC<AccordionProps> = props => {
 
   const { expanded, handleToggle } = useAccordionState(stateConfig)
 
-  // Only `theme === 'sacred'` ever took the sacred branch; every other value
-  // (undefined / 'light' / 'dark') fell through to the light/white styling.
-  // Sacred is the CSS base default; 'light' is the explicit override block.
-  const theme = styles?.theme === 'sacred' ? 'sacred' : 'light'
+  // Sacred is the CSS base default; 'light' and 'dark' are explicit override
+  // blocks. 'dark' now resolves to its own deep-slate theme (previously fell
+  // through to light). Any other/undefined value defaults to light.
+  const theme =
+    styles?.theme === 'sacred'
+      ? 'sacred'
+      : styles?.theme === 'dark'
+        ? 'dark'
+        : 'light'
   const isMenuType = type === 'menu'
   const disabled = styles?.disabled || false
 

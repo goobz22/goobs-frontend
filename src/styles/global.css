@@ -53,7 +53,7 @@
   --goobs-gold-a12: rgba(var(--goobs-gold-rgb), 0.12); /* disabled border */
   --goobs-gold-a15: rgba(var(--goobs-gold-rgb), 0.15);
   --goobs-gold-a20: rgba(var(--goobs-gold-rgb), 0.2); /* group shadow / shimmer */
-  --goobs-gold-a25: rgba(var(--goobs-gold-rgb), 0.25); /* resting control border */
+  --goobs-gold-a25: rgba(var(--goobs-gold-rgb), 0.25); /* resting control border (ladder-monotonic: a25 < a30) */
   --goobs-gold-a30: rgba(var(--goobs-gold-rgb), 0.3); /* default border / soft glow */
   --goobs-gold-a40: rgba(var(--goobs-gold-rgb), 0.4); /* strong border */
   --goobs-gold-a50: rgba(var(--goobs-gold-rgb), 0.5); /* hover border / mid glow */
@@ -96,9 +96,13 @@
      ======================================================================== */
 
   /* sacred — gold glow + ambient depth (the premium feel) */
+  /* resting micro-glow: the subtlest rung, for standalone sacred controls
+     (e.g. Button rest) so they read lit-from-within rather than flat. Sits
+     coherently below -sm (0 0 18px @ 0.22): half the spread, ~half the alpha. */
+  --goobs-shadow-sacred-rest: 0 0 10px rgba(var(--goobs-gold-rgb), 0.12);
   --goobs-shadow-sacred-sm:
-    0 0 16px rgba(var(--goobs-gold-rgb), 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.5);
+    0 0 18px rgba(var(--goobs-gold-rgb), 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.55);
   --goobs-shadow-sacred-md:
     0 0 28px rgba(var(--goobs-gold-rgb), 0.35),
     0 6px 18px rgba(0, 0, 0, 0.55);
@@ -218,7 +222,7 @@
      raised plate. */
   --goobs-sacred-surface: rgba(10, 10, 10, 0.9);
   --goobs-sacred-surface-raised: rgba(18, 18, 18, 0.92);
-  --goobs-sacred-border: var(--goobs-gold-a30);
+  --goobs-sacred-border: var(--goobs-gold-a40);
   --goobs-sacred-border-strong: var(--goobs-gold-a50);
   --goobs-sacred-text: rgba(255, 255, 255, 0.9);
   --goobs-sacred-text-secondary: rgba(255, 255, 255, 0.6);
@@ -226,7 +230,7 @@
   --goobs-sacred-primary: var(--goobs-gold); /* gold is the accent */
   --goobs-sacred-primary-contrast: rgba(10, 10, 10, 0.95);
   --goobs-sacred-control-bg: rgba(0, 0, 0, 0.4);
-  --goobs-sacred-control-border: var(--goobs-gold-a25);
+  --goobs-sacred-control-border: var(--goobs-gold-a40);
   --goobs-sacred-focus-ring: var(--goobs-gold-a60);
   /* Ambient gold radials that make sacred surfaces feel lit-from-within.
      Drop into background-image to add the signature inner glow. */
@@ -258,7 +262,7 @@
   --goobs-light-primary-strong: #2563eb;
   --goobs-light-primary-contrast: #ffffff;
   --goobs-light-control-bg: #ffffff;
-  --goobs-light-control-border: #e2e8f0;
+  --goobs-light-control-border: #cbd5e1;
   --goobs-light-focus-ring: rgba(59, 130, 246, 0.4);
 
   /* ---- DARK ------------------------------------------------------------ */
