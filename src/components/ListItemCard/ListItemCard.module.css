@@ -1,0 +1,175 @@
+/* ==========================================================================
+   LISTITEMCARD - CSS MODULE
+   Row primitive for ordered / editable / selectable lists. Renders as a flex
+   <li>: [drag handle] [order] [icon] [content (flex:1)] [actions] [remove].
+   Reuses the same sacred / light / dark CSS-variable convention as Card so
+   stacks of rows read consistently next to grids of cards.
+   ========================================================================== */
+
+.root {
+  /* Sacred palette (hardcoded default) — light / dark override below. */
+  --list-bg: rgba(0, 0, 0, 0.55);
+  --list-bg-hover: rgba(255, 215, 0, 0.06);
+  --list-border: rgba(255, 215, 0, 0.22);
+  --list-accent: #ffd700;
+  --list-title: #ffd700;
+  --list-subtitle: rgba(255, 215, 0, 0.65);
+  --list-text: rgba(255, 255, 255, 0.85);
+  --list-order-bg: rgba(255, 215, 0, 0.12);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 0;
+  list-style: none;
+  background-color: var(--list-bg);
+  border: 1px solid var(--list-border);
+  border-radius: 8px;
+  color: var(--list-text);
+  font-family: 'Cinzel', serif;
+  box-sizing: border-box;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.root[data-theme='light'] {
+  --list-bg: rgba(255, 255, 255, 0.95);
+  --list-bg-hover: rgba(25, 118, 210, 0.06);
+  --list-border: rgba(25, 118, 210, 0.2);
+  --list-accent: #1976d2;
+  --list-title: #1f2937;
+  --list-subtitle: #6b7280;
+  --list-text: #374151;
+  --list-order-bg: rgba(25, 118, 210, 0.12);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.root[data-theme='dark'] {
+  --list-bg: #1e293b;
+  --list-bg-hover: #243043;
+  --list-border: #334155;
+  --list-accent: #60a5fa;
+  --list-title: #e2e8f0;
+  --list-subtitle: #94a3b8;
+  --list-text: #cbd5e1;
+  --list-order-bg: rgba(96, 165, 250, 0.15);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Left accent bar when accentColor is supplied. */
+.root[data-accent='true'] {
+  border-left-width: 4px;
+  border-left-color: var(--list-item-accent, var(--list-accent));
+}
+
+/* Selectable rows show a pointer + hover background. */
+.root[data-selectable='true'] {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .root[data-selectable='true']:hover {
+    background-color: var(--list-bg-hover);
+  }
+}
+
+/* Selected state — accent ring (uses the accent override when present). */
+.root[data-selected='true'] {
+  border-color: var(--list-item-accent, var(--list-accent));
+  box-shadow: 0 0 0 1px var(--list-item-accent, var(--list-accent));
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--list-item-accent, var(--list-accent));
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   REORDER — wraps the composed <Card.DragHandle>
+   -------------------------------------------------------------------------- */
+.reorder {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   ORDER — numbered circle badge
+   -------------------------------------------------------------------------- */
+.order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--list-order-bg);
+  color: var(--list-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   ICON — leading glyph
+   -------------------------------------------------------------------------- */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  color: var(--list-accent);
+}
+
+/* --------------------------------------------------------------------------
+   CONTENT — title + subtitle, takes the remaining width
+   -------------------------------------------------------------------------- */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--list-title);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: var(--list-subtitle);
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   ACTIONS — trailing custom action slot
+   -------------------------------------------------------------------------- */
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   REMOVE — wraps the composed <IconButton>
+   -------------------------------------------------------------------------- */
+.remove {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}

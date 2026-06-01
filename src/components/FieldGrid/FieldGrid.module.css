@@ -1,0 +1,25 @@
+/* ==========================================================================
+   FIELDGRID - CSS MODULE
+   Responsive auto-fit field layout. Absorbs the ~134 hand-rolled
+   repeat(auto-fit, minmax(min(100%, …), 1fr)) re-rolls across ThothOS form
+   sections (reference: InlineManageContact:203).
+
+   The two custom properties (--fg-min / --fg-gap) are set inline by the
+   component from its minColWidth / gap props; the track template lives here so
+   callsites stop re-declaring it.
+   ========================================================================== */
+
+.grid {
+  /* Defaults mirror the dominant ThothOS field cluster; overridden inline. */
+  --fg-min: 250px;
+  --fg-gap: clamp(12px, 3vw, 24px);
+
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--fg-min)), 1fr)
+  );
+  gap: var(--fg-gap);
+  width: 100%;
+  box-sizing: border-box;
+}

@@ -1,0 +1,116 @@
+/* ==========================================================================
+   SACRED GLYPH FRAME - CSS MODULE
+   Wrapper that owns the duplicated injectKeyframes() + glyph decoration that
+   ThothOS forms (InlineShowEstimate, InlineShowServiceInvoice, the Inline*
+   billing/ledger forms) each re-implemented inline: an animated gold-glow
+   border (sacredGlowPulse) plus a row of floating decorative Egyptian glyph
+   corners (sacredFloat).
+
+   The @keyframes themselves are injected ONCE at module load via the existing
+   commonKeyframes helpers (src/utils/keyframes.ts) — NOT per-instance — so
+   this component does not re-inject `sacredGlowPulse` / `sacredFloat` on every
+   mount the way the hand-rolled callsites did. This module only references the
+   resulting animation NAMES by string.
+   ========================================================================== */
+
+.root {
+  --sgf-gold: #d4af37;
+  --sgf-radius: clamp(8px, 2vw, 12px);
+
+  position: relative;
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--sgf-gold) 40%, transparent);
+  border-radius: var(--sgf-radius);
+  background-color: rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+/* GLOW — the animated gold-glow border. The animation NAME (`sacredGlowPulse`)
+   is injected once at module load by commonKeyframes.sacredGlowPulse(); this
+   class only references it. Honour prefers-reduced-motion by freezing the
+   pulse to a static glow. */
+.glow {
+  animation: sacredGlowPulse 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow {
+    animation: none;
+    box-shadow:
+      0 0 20px rgba(255, 215, 0, 0.3),
+      0 0 40px rgba(255, 215, 0, 0.2);
+  }
+}
+
+/* GLYPHS — a top-centred row of floating decorative glyphs. Purely
+   decorative, so the container is aria-hidden at the JSX level. */
+.glyphRow {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(4px, 1vw, 8px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.glyph {
+  color: rgba(212, 175, 55, 0.6);
+  font-size: clamp(12px, 2vw, 16px);
+  line-height: 1;
+  /* The per-glyph float duration is supplied as the --sgf-float-duration
+     custom property so each glyph drifts on a slightly different cadence,
+     reproducing the staggered `3 + i * 0.5s` timing of the hand-rolled rows.
+     The animation NAME (`sacredFloat`) is injected once at module load. */
+  animation: sacredFloat var(--sgf-float-duration, 3s) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* CORNERS — optional decorative corner ornaments. Absolutely positioned in
+   the four corners, behind content, non-interactive. */
+.corners {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  color: rgba(212, 175, 55, 0.55);
+  font-size: clamp(12px, 2.2vw, 18px);
+  line-height: 1;
+}
+
+.cornerTopLeft {
+  top: 8px;
+  left: 8px;
+}
+
+.cornerTopRight {
+  top: 8px;
+  right: 8px;
+}
+
+.cornerBottomLeft {
+  bottom: 8px;
+  left: 8px;
+}
+
+.cornerBottomRight {
+  bottom: 8px;
+  right: 8px;
+}
+
+/* CONTENT — wraps children so they sit above the corner/glyph decoration. */
+.content {
+  position: relative;
+  z-index: 3;
+}

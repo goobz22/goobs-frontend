@@ -1,0 +1,327 @@
+'use client'
+
+/**
+ * =============================================================================
+ * PANEL — full-height shell surface primitive
+ * =============================================================================
+ *
+ * Built to absorb the hand-rolled inline-shell scaffolding across ThothOS
+ * workspaces — the `containerStyle` / `headerStyle` / `contentStyle` triad
+ * that every "inline manage / inline show" surface re-rolls by hand. Two
+ * reference shells motivated this primitive:
+ *
+ *   - `InlineShowServiceInvoice` (index.tsx:164) — the full-height flex
+ *     column with a dark backdrop, a bordered header bar, and a flex:1
+ *     scroll region.
+ *   - `InlineManageContact` (InlineManageContact.tsx:113) — the back-button +
+ *     title + Save-button header layout.
+ *
+ * Like `Card`, `Panel` is a compound component: `Panel` is the root and each
+ * region (Header / Body / Footer) is a subcomponent attached as a static
+ * property. Callers compose the regions their archetype needs.
+ *
+ *   <Panel variant="sacred">
+ *     <Panel.Header
+ *       onBack={() => close()}
+ *       title="Manage Contact"
+ *       subtitle="Edit the wholesale buyer's details"
+ *       actions={<SaveButton />}
+ *     />
+ *     <Panel.Body>
+ *       <FieldGrid> ...fields... </FieldGrid>
+ *     </Panel.Body>
+ *     <Panel.Footer>
+ *       <CustomButton text="Delete" variant="destructive" />
+ *     </Panel.Footer>
+ *   </Panel>
+ *
+ * The `actions` slot is intentionally a generic `ReactNode` — the consumer
+ * passes their own `<SaveButton/>` / `<CustomButton/>`; Panel never imports a
+ * Save button itself (keeps the dependency graph one-directional, mirrors the
+ * `Card.ConfirmDelete` `renderActions` contract).
+ *
+ * a11y: the root is a `<section role="region">` labelled by the header title
+ * (`aria-labelledby`), so screen readers announce the panel by its title.
+ *
+ * Panel is stateless by default (no open/collapse state), so no `component.state`
+ * diagnostics are emitted from the root — there is no internal transition to
+ * report.
+ *
+ * =============================================================================
+ */
+
+import React, {
+  forwardRef,
+  useId,
+  useMemo,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
+import IconButton from '../IconButton'
+import { ArrowBackIcon } from '../Icons'
+import Typography from '../Typography'
+import cssStyles from './Panel.module.css'
+
+// -----------------------------------------------------------------------------
+// SHARED CONTEXT — links Panel.Header's title id to Panel root's aria-labelledby
+// -----------------------------------------------------------------------------
+
+interface PanelContextValue {
+  titleId: string
+  variant: PanelVariant
+}
+
+const PanelContext = React.createContext<PanelContextValue | null>(null)
+
+function usePanelContext(): PanelContextValue {
+  const ctx = React.useContext(PanelContext)
+  if (!ctx) {
+    throw new Error(
+      'Panel subcomponents must be rendered inside <Panel>. ' +
+        'Wrap them in <Panel>...</Panel> at the top level.'
+    )
+  }
+  return ctx
+}
+
+function mergeClassNames(...names: Array<string | undefined>): string {
+  return names.filter(Boolean).join(' ')
+}
+
+// -----------------------------------------------------------------------------
+// PANEL ROOT
+// -----------------------------------------------------------------------------
+
+export type PanelVariant = 'sacred' | 'standard' | 'fullscreen'
+
+export interface PanelProps extends React.HTMLAttributes<HTMLElement> {
+  /**
+   * Visual archetype. `'sacred'` (default) is the dark/gold inline-shell
+   * backdrop. `'standard'` is a neutral surface. `'fullscreen'` pins the
+   * panel to the full viewport (fixed inset:0) for takeover surfaces.
+   */
+  variant?: PanelVariant
+  children: ReactNode
+}
+
+interface PanelComponent {
+  (props: PanelProps & React.RefAttributes<HTMLElement>): ReactElement | null
+  displayName?: string
+  Header: typeof PanelHeader
+  Body: typeof PanelBody
+  Footer: typeof PanelFooter
+}
+
+function PanelInner({
+  variant = 'sacred',
+  className,
+  children,
+  ref,
+  ...restProps
+}: PanelProps & React.RefAttributes<HTMLElement>): ReactElement | null {
+  const titleId = useId()
+  const contextValue = useMemo<PanelContextValue>(
+    () => ({ titleId, variant }),
+    [titleId, variant]
+  )
+
+  return (
+    <PanelContext.Provider value={contextValue}>
+      <section
+        ref={ref}
+        className={mergeClassNames(
+          cssStyles.root,
+          cssStyles[variant],
+          className
+        )}
+        role="region"
+        aria-labelledby={titleId}
+        data-component="Panel"
+        data-panel="true"
+        data-panel-variant={variant}
+        {...restProps}
+      >
+        {children}
+      </section>
+    </PanelContext.Provider>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// PANEL.HEADER — back button + title/subtitle + right-side actions slot
+// -----------------------------------------------------------------------------
+
+export interface PanelHeaderProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'title'
+> {
+  /**
+   * When set, a built-in BACK button (IconButton + ArrowBack icon) is
+   * rendered at the leading edge and invokes this handler on click.
+   */
+  onBack?: () => void
+  /** Accessible label for the back button. Default `'Back'`. */
+  backLabel?: string
+  /** Panel title — rendered as the `aria-labelledby` target of the root. */
+  title: ReactNode
+  /** Optional secondary line under the title. */
+  subtitle?: ReactNode
+  /**
+   * Right-aligned actions slot. Consumers pass their own `<SaveButton/>` /
+   * `<CustomButton/>` here — Panel keeps this a generic node and never
+   * imports a save button itself.
+   */
+  actions?: ReactNode
+}
+
+const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
+  function PanelHeader(
+    {
+      onBack,
+      backLabel = 'Back',
+      title,
+      subtitle,
+      actions,
+      className,
+      ...restProps
+    },
+    ref
+  ) {
+    const { titleId, variant } = usePanelContext()
+    const iconTheme = variant === 'sacred' ? 'sacred' : 'light'
+    return (
+      <div
+        ref={ref}
+        className={mergeClassNames(cssStyles.header, className)}
+        data-panel-header="true"
+        {...restProps}
+      >
+        {onBack !== undefined && (
+          <IconButton
+            size="small"
+            aria-label={backLabel}
+            onClick={onBack}
+            data-panel-back="true"
+            data-action="cancel"
+            styles={{ theme: iconTheme }}
+          >
+            <ArrowBackIcon styles={{ theme: iconTheme }} />
+          </IconButton>
+        )}
+        <div
+          id={titleId}
+          className={cssStyles.headerTitleBlock}
+          data-panel-title="true"
+        >
+          {typeof title === 'string' ? (
+            <Typography
+              text={title}
+              variant="cinzelh5"
+              styles={{ theme: variant === 'sacred' ? 'sacred' : 'light' }}
+            />
+          ) : (
+            <Typography
+              variant="cinzelh5"
+              styles={{ theme: variant === 'sacred' ? 'sacred' : 'light' }}
+            >
+              {title}
+            </Typography>
+          )}
+          {subtitle !== undefined && (
+            <span
+              className={cssStyles.headerSubtitle}
+              data-panel-subtitle="true"
+            >
+              {subtitle}
+            </span>
+          )}
+        </div>
+        {actions !== undefined && (
+          <div
+            className={cssStyles.headerActions}
+            data-panel-header-actions="true"
+          >
+            {actions}
+          </div>
+        )}
+      </div>
+    )
+  }
+)
+
+// -----------------------------------------------------------------------------
+// PANEL.BODY — the flex:1 scroll region (absorbs contentStyle)
+// -----------------------------------------------------------------------------
+
+export interface PanelBodyProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+}
+
+const PanelBody = forwardRef<HTMLDivElement, PanelBodyProps>(function PanelBody(
+  { className, children, ...restProps },
+  ref
+) {
+  return (
+    <div
+      ref={ref}
+      className={mergeClassNames(cssStyles.body, className)}
+      data-panel-body="true"
+      {...restProps}
+    >
+      {children}
+    </div>
+  )
+})
+
+// -----------------------------------------------------------------------------
+// PANEL.FOOTER — sticky action bar
+// -----------------------------------------------------------------------------
+
+export interface PanelFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * When true, the first child group is left-aligned and the remaining
+   * group is pushed to the right (margin-left:auto on the second child).
+   */
+  split?: boolean
+  children: ReactNode
+}
+
+const PanelFooter = forwardRef<HTMLDivElement, PanelFooterProps>(
+  function PanelFooter(
+    { split = false, className, children, ...restProps },
+    ref
+  ) {
+    return (
+      <div
+        ref={ref}
+        className={mergeClassNames(
+          cssStyles.footer,
+          split ? cssStyles.split : '',
+          className
+        )}
+        data-panel-footer="true"
+        {...restProps}
+      >
+        {children}
+      </div>
+    )
+  }
+)
+
+// -----------------------------------------------------------------------------
+// COMPOUND-COMPONENT ASSEMBLY
+// -----------------------------------------------------------------------------
+
+const Panel = PanelInner as unknown as PanelComponent
+Panel.Header = PanelHeader
+Panel.Body = PanelBody
+Panel.Footer = PanelFooter
+
+Panel.displayName = 'Panel'
+PanelHeader.displayName = 'Panel.Header'
+PanelBody.displayName = 'Panel.Body'
+PanelFooter.displayName = 'Panel.Footer'
+
+export { PanelHeader, PanelBody, PanelFooter }
+
+export default Panel

@@ -1,0 +1,146 @@
+/* ==========================================================================
+   PANEL - CSS MODULE
+   Full-height shell surface primitive. Absorbs the hand-rolled inline-shell
+   scaffolding (containerStyle / headerStyle / contentStyle) re-rolled by every
+   ThothOS "inline manage / inline show" surface. Reference shells:
+   InlineShowServiceInvoice:164, InlineManageContact:113.
+
+   Mirrors the Card CSS-variable conventions: sacred theme is the hardcoded
+   base default; standard / fullscreen are variant overrides. The accordion /
+   Card family defines the --panel-bg / --panel-border / --panel-accent token
+   names so the three surfaces read consistently.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   ROOT — full-height flex column, dark backdrop, clipped overflow.
+   SACRED is the hardcoded base default (matches Card/Dialog/Tabs).
+   -------------------------------------------------------------------------- */
+.root {
+  /* Sacred palette (hardcoded default) */
+  --panel-bg: rgba(0, 0, 0, 0.98);
+  --panel-border: rgba(255, 215, 0, 0.3);
+  --panel-accent: #ffd700;
+  --panel-title: #ffd700;
+  --panel-subtitle: rgba(255, 215, 0, 0.7);
+  --panel-text: rgba(255, 255, 255, 0.85);
+  --panel-header-bg: rgba(0, 0, 0, 0.5);
+  --panel-footer-bg: rgba(0, 0, 0, 0.5);
+
+  --panel-pad-x: clamp(16px, 4vw, 32px);
+  --panel-pad-y: clamp(12px, 3vw, 24px);
+  --panel-gap: clamp(8px, 2vw, 16px);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+  font-family: 'Cinzel', serif;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   STANDARD VARIANT — neutral bordered surface, no full-height pin.
+   -------------------------------------------------------------------------- */
+.standard {
+  --panel-bg: #ffffff;
+  --panel-border: rgba(15, 23, 42, 0.12);
+  --panel-accent: #1976d2;
+  --panel-title: #1f2937;
+  --panel-subtitle: #6b7280;
+  --panel-text: #374151;
+  --panel-header-bg: rgba(15, 23, 42, 0.02);
+  --panel-footer-bg: rgba(15, 23, 42, 0.02);
+
+  border: 1px solid var(--panel-border);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   FULLSCREEN VARIANT — fixed takeover surface pinned to the viewport.
+   -------------------------------------------------------------------------- */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER — back button + title block + right-side actions slot.
+   Absorbs headerStyle (InlineShowServiceInvoice:173, InlineManageContact:124).
+   -------------------------------------------------------------------------- */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--panel-gap);
+  padding: var(--panel-pad-y) var(--panel-pad-x);
+  border-bottom: 2px solid var(--panel-border);
+  background-color: var(--panel-header-bg);
+  flex: 0 0 auto;
+}
+
+.headerTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 0.5vw, 4px);
+  flex: 1 1 auto;
+  min-width: min(100%, 180px);
+}
+
+.headerSubtitle {
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+  color: var(--panel-subtitle);
+  font-family: 'Cinzel', serif;
+}
+
+.standard .headerSubtitle {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   BODY — flex:1 scroll region. Absorbs contentStyle
+   (InlineShowServiceInvoice:184).
+   -------------------------------------------------------------------------- */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--panel-pad-x);
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER — sticky action bar pinned to the bottom of the panel.
+   -------------------------------------------------------------------------- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  padding: var(--panel-pad-y) var(--panel-pad-x);
+  border-top: 1px solid var(--panel-border);
+  background-color: var(--panel-footer-bg);
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+}
+
+.footer.split > *:first-child {
+  margin-right: auto;
+}
