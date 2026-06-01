@@ -98,6 +98,10 @@ import React, {
   type ReactNode,
 } from 'react'
 import { emitDiag } from '../../utils/diag'
+import EmptyState, {
+  type EmptyStateProps,
+  type EmptyStateTheme,
+} from '../EmptyState'
 import cssStyles from './Card.module.css'
 
 // -----------------------------------------------------------------------------
@@ -1347,43 +1351,21 @@ const CardGrid = forwardRef<HTMLUListElement, CardGridProps>(function CardGrid(
 // CARD.EMPTYSTATE — typical empty UI; passed to <Card.Grid empty={...} />
 // -----------------------------------------------------------------------------
 
-export interface CardEmptyStateProps {
-  /** Optional leading icon / glyph. */
-  icon?: ReactNode
-  title: ReactNode
-  description?: ReactNode
-  /** One or more `<CustomButton>` action(s). */
-  actions?: ReactNode
-  styles?: { theme?: CardTheme }
-}
-
-const CardEmptyState = forwardRef<HTMLDivElement, CardEmptyStateProps>(
-  function CardEmptyState({ icon, title, description, actions, styles }, ref) {
-    const theme = styles?.theme ?? 'sacred'
-    return (
-      <div
-        ref={ref}
-        className={cssStyles.emptyState}
-        data-theme={theme}
-        role="status"
-        data-card-empty-state="true"
-      >
-        {icon !== undefined && (
-          <div className={cssStyles.emptyStateIcon} aria-hidden="true">
-            {icon}
-          </div>
-        )}
-        <p className={cssStyles.emptyStateTitle}>{title}</p>
-        {description !== undefined && (
-          <p className={cssStyles.emptyStateDescription}>{description}</p>
-        )}
-        {actions !== undefined && (
-          <div className={cssStyles.emptyStateActions}>{actions}</div>
-        )}
-      </div>
-    )
-  }
-)
+// `Card.EmptyState` is now a thin re-export of the standalone `<EmptyState>`
+// primitive (promoted to its own dir so it can be used outside `<Card.Grid>`).
+// The `CardTheme` union (`'sacred' | 'light' | 'dark'`) is structurally
+// identical to `EmptyStateTheme`, so the props type is reused verbatim and the
+// `<Card.Grid empty={<Card.EmptyState …>}>` callsites keep working unchanged.
+// The standalone emits `data-component="EmptyState"` + its own diag beacon.
+// `CardTheme` (`'sacred' | 'light' | 'dark'`) and `EmptyStateTheme` are the
+// same union; this annotation makes that dependency explicit so a future drift
+// in either union surfaces as a build error right here rather than silently.
+const emptyStateThemeParity: EmptyStateTheme = 'sacred' as CardTheme
+void emptyStateThemeParity
+export type CardEmptyStateProps = EmptyStateProps
+const CardEmptyState = EmptyState as React.ForwardRefExoticComponent<
+  EmptyStateProps & React.RefAttributes<HTMLDivElement>
+>
 
 // -----------------------------------------------------------------------------
 // COMPOUND-COMPONENT ASSEMBLY
@@ -1441,7 +1423,8 @@ CardFooterMeta.displayName = 'Card.FooterMeta'
 CardConfirmDelete.displayName = 'Card.ConfirmDelete'
 CardDragHandle.displayName = 'Card.DragHandle'
 CardGrid.displayName = 'Card.Grid'
-CardEmptyState.displayName = 'Card.EmptyState'
+// CardEmptyState is the shared <EmptyState> primitive (displayName 'EmptyState');
+// no displayName reassignment here so we don't mutate the standalone export.
 
 export {
   CardHeader,

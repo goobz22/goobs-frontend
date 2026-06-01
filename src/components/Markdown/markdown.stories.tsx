@@ -49,7 +49,8 @@ const meta: Meta<typeof Markdown> = {
     },
     maxWidth: {
       control: 'number',
-      description: 'Maximum content width in px. Defaults to 720. Pass 0 for full-width.',
+      description:
+        'Maximum content width in px. Defaults to 720. Pass 0 for full-width.',
     },
     align: {
       control: 'select',
@@ -143,7 +144,8 @@ export const SacredTheme: Story = {
 export const CenterAligned: Story = {
   name: 'Alignment/Center',
   args: {
-    children: '## Centered heading\n\nThis block is centered within its bounded width.',
+    children:
+      '## Centered heading\n\nThis block is centered within its bounded width.',
     align: 'center',
     maxWidth: 480,
   },
@@ -153,7 +155,8 @@ export const CenterAligned: Story = {
 export const RightAligned: Story = {
   name: 'Alignment/Right',
   args: {
-    children: '## Right-aligned heading\n\nThis block is aligned to the right edge.',
+    children:
+      '## Right-aligned heading\n\nThis block is aligned to the right edge.',
     align: 'right',
     maxWidth: 480,
   },

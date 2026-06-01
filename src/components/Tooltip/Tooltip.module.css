@@ -70,7 +70,10 @@
   font-size: var(--tooltip-font-size, var(--goobs-text-lg));
   font-family: var(--tooltip-font-family, var(--goobs-font-sacred));
   font-weight: var(--tooltip-font-weight, bold);
-  letter-spacing: var(--tooltip-letter-spacing, var(--goobs-tracking-sacred-wide));
+  letter-spacing: var(
+    --tooltip-letter-spacing,
+    var(--goobs-tracking-sacred-wide)
+  );
   border-radius: var(--tooltip-border-radius, var(--goobs-radius-xl));
   background-color: var(--tooltip-bg, var(--goobs-sacred-surface));
   color: var(--tooltip-color, var(--goobs-gold));

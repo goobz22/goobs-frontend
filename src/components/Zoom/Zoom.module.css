@@ -42,8 +42,7 @@
 .zoomRoot[data-theme='sacred'] {
   --zoom-scale-exit: 0.7;
   --zoom-transition:
-    transform 0.5s var(--goobs-ease),
-    opacity 0.5s var(--goobs-ease);
+    transform 0.5s var(--goobs-ease), opacity 0.5s var(--goobs-ease);
 }
 
 /* --------------------------------------------------------------------------

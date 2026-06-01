@@ -32,7 +32,7 @@
   /* light defaults */
   background: rgba(229, 231, 235, 0.8);
   border: 1px solid rgba(209, 213, 219, 0.6);
-  border-radius: 12px;
+  border-radius: var(--goobs-radius-xl);
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.05);
@@ -42,7 +42,7 @@
 .container[data-theme='dark'] {
   background: rgba(31, 41, 55, 0.9);
   border: 1px solid rgba(75, 85, 99, 0.6);
-  border-radius: 12px;
+  border-radius: var(--goobs-radius-xl);
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.3),
     0 1px 2px rgba(0, 0, 0, 0.2);
@@ -50,24 +50,24 @@
 }
 
 .container[data-theme='sacred'] {
-  background: rgba(12, 12, 12, 0.95);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 12px;
+  background: var(--goobs-sacred-surface);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-xl);
   /* SHADOWS.sacred.small + inset highlight */
   box-shadow:
-    0 0 20px rgba(255, 215, 0, 0.3),
-    0 0 40px rgba(255, 215, 0, 0.1),
-    inset 0 1px 0 rgba(255, 215, 0, 0.1);
+    0 0 20px var(--goobs-gold-a30),
+    0 0 40px var(--goobs-gold-a10),
+    inset 0 1px 0 var(--goobs-gold-a10);
   backdrop-filter: blur(12px);
   background-image:
     radial-gradient(
       circle at 25% 25%,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 75% 75%,
-      rgba(255, 215, 0, 0.03) 0%,
+      var(--goobs-gold-a02) 0%,
       transparent 50%
     );
 }
@@ -90,8 +90,8 @@
   width: var(--progress, 0%);
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--goobs-radius-xl);
+  transition: var(--goobs-transition-slow);
 
   /* light defaults */
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
@@ -114,16 +114,16 @@
     135deg,
     #fbbf24 0%,
     #f59e0b 25%,
-    #ffd700 50%,
+    var(--goobs-gold) 50%,
     #f59e0b 75%,
     #fbbf24 100%
   );
   box-shadow:
-    0 0 16px rgba(255, 215, 0, 0.8),
-    0 4px 12px rgba(255, 215, 0, 0.4),
+    0 0 16px var(--goobs-gold-a80),
+    0 4px 12px var(--goobs-gold-a40),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 8px var(--goobs-gold-a90));
+  transition: var(--goobs-transition-premium);
 }
 
 /* --------------------------------------------------------------------------
@@ -136,7 +136,7 @@
   left: 0;
   height: 100%;
   width: 60%;
-  border-radius: 12px;
+  border-radius: var(--goobs-radius-xl);
   transition: none;
   animation: progressIndeterminate 2s ease-in-out infinite;
 
@@ -174,18 +174,18 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 215, 0, 0.2) 20%,
-    rgba(255, 215, 0, 0.6) 40%,
-    #ffd700 50%,
-    rgba(255, 215, 0, 0.6) 60%,
-    rgba(255, 215, 0, 0.2) 80%,
+    var(--goobs-gold-a20) 20%,
+    var(--goobs-gold-a60) 40%,
+    var(--goobs-gold) 50%,
+    var(--goobs-gold-a60) 60%,
+    var(--goobs-gold-a20) 80%,
     transparent 100%
   );
   box-shadow:
-    0 0 20px rgba(255, 215, 0, 0.9),
-    0 4px 12px rgba(255, 215, 0, 0.5),
+    0 0 20px var(--goobs-gold-a90),
+    0 4px 12px var(--goobs-gold-a50),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1));
+  filter: drop-shadow(0 0 12px var(--goobs-gold));
 }
 
 /* --------------------------------------------------------------------------
@@ -248,7 +248,7 @@
       135deg,
       #fbbf24 0%,
       #f59e0b 25%,
-      #ffd700 50%,
+      var(--goobs-gold) 50%,
       #f59e0b 75%,
       #fbbf24 100%
     );
@@ -322,11 +322,11 @@
     linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 215, 0, 0.2) 20%,
-      rgba(255, 215, 0, 0.6) 40%,
-      #ffd700 50%,
-      rgba(255, 215, 0, 0.6) 60%,
-      rgba(255, 215, 0, 0.2) 80%,
+      var(--goobs-gold-a20) 20%,
+      var(--goobs-gold-a60) 40%,
+      var(--goobs-gold) 50%,
+      var(--goobs-gold-a60) 60%,
+      var(--goobs-gold-a20) 80%,
       transparent 100%
     );
   background-size: 16px 16px;
@@ -381,38 +381,30 @@
    700 gold with a glow text-shadow.
    -------------------------------------------------------------------------- */
 .label {
-  margin-top: 8px;
+  margin-top: var(--goobs-space-xs);
   text-align: center;
 
   /* light defaults */
-  color: rgb(55, 65, 81);
-  font-size: 14px;
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  font-weight: 600;
+  color: var(--goobs-light-text-secondary);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-standard);
+  font-weight: var(--goobs-weight-semibold);
 }
 
 .label[data-theme='dark'] {
-  color: rgb(209, 213, 219);
-  font-size: 14px;
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  font-weight: 600;
+  color: var(--goobs-dark-text-secondary);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-standard);
+  font-weight: var(--goobs-weight-semibold);
 }
 
 .label[data-theme='sacred'] {
-  color: #ffd700;
-  font-size: 14px;
-  font-family: 'Cinzel', Georgia, serif;
-  font-weight: 700;
+  color: var(--goobs-gold);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-sacred);
+  font-weight: var(--goobs-weight-bold);
   text-shadow:
-    0 0 8px rgba(255, 215, 0, 0.8),
+    0 0 8px var(--goobs-gold-a80),
     0 2px 4px rgba(0, 0, 0, 0.5);
 }
 

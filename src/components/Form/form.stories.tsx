@@ -159,7 +159,12 @@ export const AutoFieldsScaffold: Story = {
       onSubmit={() => undefined}
     >
       <Form.AutoFields />
-      <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
+      <Button
+        type="submit"
+        action="submit"
+        text="Save"
+        styles={{ theme: 'light' }}
+      />
     </Form>
   ),
   parameters: {
@@ -181,7 +186,12 @@ export const PartialFields: Story = {
       onSubmit={() => undefined}
     >
       <Form.AutoFields only={['fullName', 'email']} />
-      <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
+      <Button
+        type="submit"
+        action="submit"
+        text="Save"
+        styles={{ theme: 'light' }}
+      />
     </Form>
   ),
   parameters: {

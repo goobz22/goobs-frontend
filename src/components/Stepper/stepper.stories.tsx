@@ -270,9 +270,7 @@ export const AccountSetupWizard: Story = {
                 </div>
               </div>
 
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between' }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary">← Previous</Button>
                 <Button>Continue →</Button>
               </div>
@@ -392,9 +390,7 @@ export const CheckoutProcess: Story = {
                 </div>
               </div>
 
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between' }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary" theme="dark">
                   ← Back to Shipping
                 </Button>
@@ -564,9 +560,7 @@ export const DarkConfigurationSetup: Story = {
                 </div>
               </div>
 
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between' }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary" theme="dark">
                   Return to Initialization
                 </Button>
@@ -919,9 +913,7 @@ export const InteractiveDemo: Story = {
               gap: '32px',
             }}
           >
-            <div
-              style={{ borderRadius: '8px', padding: '24px', ...cardStyle }}
-            >
+            <div style={{ borderRadius: '8px', padding: '24px', ...cardStyle }}>
               <h2
                 style={{
                   fontSize: '24px',
@@ -999,9 +991,7 @@ export const InteractiveDemo: Story = {
               </div>
             </div>
 
-            <div
-              style={{ borderRadius: '8px', padding: '32px', ...cardStyle }}
-            >
+            <div style={{ borderRadius: '8px', padding: '32px', ...cardStyle }}>
               <Stepper
                 steps={demoSteps}
                 styles={{

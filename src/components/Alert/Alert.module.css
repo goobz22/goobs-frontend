@@ -338,5 +338,8 @@
   background: var(--alert-close-hover-bg, var(--goobs-gold-a20));
   border-color: var(--alert-close-hover-border-color, var(--goobs-gold-a60));
   transform: var(--alert-close-hover-transform, scale(1.1));
-  box-shadow: var(--alert-close-hover-box-shadow, 0 0 12px var(--goobs-gold-a40));
+  box-shadow: var(
+    --alert-close-hover-box-shadow,
+    0 0 12px var(--goobs-gold-a40)
+  );
 }

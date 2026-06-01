@@ -9,11 +9,9 @@
  * to show the array / grouped / children usage shapes.
  *
  * Themes follow the real prop API: `styles.theme === 'sacred'` selects the
- * dark/gold base palette; every other value (undefined / 'light' / 'dark')
- * resolves to the `[data-theme='light']` override block. The Dark Theme
- * story therefore renders the light palette on a dark canvas — matching the
- * three-theme story surface used across the house Storybook while staying
- * faithful to the `theme: string` prop.
+ * dark/gold base palette, `'dark'` selects the dark-slate palette, and every
+ * other value (undefined / 'light') resolves to the `[data-theme='light']`
+ * override block. Each theme has its own override block in Card.module.css.
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -105,9 +103,9 @@ export const LightTheme: Story = {
 }
 
 /**
- * A metric card on a dark canvas. `theme: 'dark'` resolves to the light
- * palette (the component has only `sacred` and `light` palettes); the dark
- * background demonstrates the card on a darker surface.
+ * A metric card with the dark-slate theme on a dark canvas. `theme: 'dark'`
+ * resolves to the `[data-theme='dark']` block — a dark surface card so it
+ * reads correctly against the dark background.
  */
 export const DarkTheme: Story = {
   name: 'Dark Theme',

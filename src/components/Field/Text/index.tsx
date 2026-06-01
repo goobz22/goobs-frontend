@@ -21,6 +21,14 @@ export interface TextFieldProps {
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
   error?: string | boolean
+  /**
+   * Marks the field required — renders the required indicator next to the label
+   * and sets `aria-required` on the input. Top-level ergonomic alias for
+   * `styles.required`; DEFAULTS from `styles?.required` when omitted, so every
+   * existing `styles={{ required: true }}` callsite renders identically. When
+   * both are set the top-level prop wins (same precedence FieldShell uses).
+   */
+  required?: boolean
   startAdornment?: React.ReactNode
   endAdornment?: React.ReactNode
   placeholder?: string | undefined
@@ -59,6 +67,7 @@ const TextField: React.FC<TextFieldProps> = ({
   label,
   helperText,
   error,
+  required: requiredProp,
   startAdornment,
   endAdornment,
   placeholder,
@@ -98,7 +107,11 @@ const TextField: React.FC<TextFieldProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const disabled = styles?.disabled || false
-  const required = styles?.required || false
+  // Top-level `required` prop wins; falls back to `styles.required` so existing
+  // `styles={{ required: true }}` callsites are unaffected (same precedence
+  // FieldShell applies). The `?? false` keeps the native input attribute a
+  // plain boolean.
+  const required = requiredProp ?? styles?.required ?? false
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

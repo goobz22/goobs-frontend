@@ -46,17 +46,32 @@
   --goobs-gold-rgb: 255, 215, 0;
   --goobs-gold: rgb(var(--goobs-gold-rgb)); /* #ffd700 */
 
-  --goobs-gold-a02: rgba(var(--goobs-gold-rgb), 0.02); /* faint wash / gradient tail */
+  --goobs-gold-a02: rgba(
+    var(--goobs-gold-rgb),
+    0.02
+  ); /* faint wash / gradient tail */
   --goobs-gold-a05: rgba(var(--goobs-gold-rgb), 0.05); /* ambient radial fill */
   --goobs-gold-a08: rgba(var(--goobs-gold-rgb), 0.08);
   --goobs-gold-a10: rgba(var(--goobs-gold-rgb), 0.1); /* soft glow tail */
   --goobs-gold-a12: rgba(var(--goobs-gold-rgb), 0.12); /* disabled border */
   --goobs-gold-a15: rgba(var(--goobs-gold-rgb), 0.15);
-  --goobs-gold-a20: rgba(var(--goobs-gold-rgb), 0.2); /* group shadow / shimmer */
-  --goobs-gold-a25: rgba(var(--goobs-gold-rgb), 0.25); /* resting control border (ladder-monotonic: a25 < a30) */
-  --goobs-gold-a30: rgba(var(--goobs-gold-rgb), 0.3); /* default border / soft glow */
+  --goobs-gold-a20: rgba(
+    var(--goobs-gold-rgb),
+    0.2
+  ); /* group shadow / shimmer */
+  --goobs-gold-a25: rgba(
+    var(--goobs-gold-rgb),
+    0.25
+  ); /* resting control border (ladder-monotonic: a25 < a30) */
+  --goobs-gold-a30: rgba(
+    var(--goobs-gold-rgb),
+    0.3
+  ); /* default border / soft glow */
   --goobs-gold-a40: rgba(var(--goobs-gold-rgb), 0.4); /* strong border */
-  --goobs-gold-a50: rgba(var(--goobs-gold-rgb), 0.5); /* hover border / mid glow */
+  --goobs-gold-a50: rgba(
+    var(--goobs-gold-rgb),
+    0.5
+  ); /* hover border / mid glow */
   --goobs-gold-a60: rgba(var(--goobs-gold-rgb), 0.6); /* active glow / focus */
   --goobs-gold-a70: rgba(var(--goobs-gold-rgb), 0.7); /* focused field border */
   --goobs-gold-a80: rgba(var(--goobs-gold-rgb), 0.8); /* intense hover border */
@@ -101,14 +116,11 @@
      coherently below -sm (0 0 18px @ 0.22): half the spread, ~half the alpha. */
   --goobs-shadow-sacred-rest: 0 0 10px rgba(var(--goobs-gold-rgb), 0.12);
   --goobs-shadow-sacred-sm:
-    0 0 18px rgba(var(--goobs-gold-rgb), 0.22),
-    0 2px 8px rgba(0, 0, 0, 0.55);
+    0 0 18px rgba(var(--goobs-gold-rgb), 0.22), 0 2px 8px rgba(0, 0, 0, 0.55);
   --goobs-shadow-sacred-md:
-    0 0 28px rgba(var(--goobs-gold-rgb), 0.35),
-    0 6px 18px rgba(0, 0, 0, 0.55);
+    0 0 28px rgba(var(--goobs-gold-rgb), 0.35), 0 6px 18px rgba(0, 0, 0, 0.55);
   --goobs-shadow-sacred-lg:
-    0 0 40px rgba(var(--goobs-gold-rgb), 0.45),
-    0 12px 32px rgba(0, 0, 0, 0.6);
+    0 0 40px rgba(var(--goobs-gold-rgb), 0.45), 0 12px 32px rgba(0, 0, 0, 0.6);
   --goobs-shadow-sacred-glow:
     0 0 30px rgba(var(--goobs-gold-rgb), 0.5),
     0 0 60px rgba(var(--goobs-gold-rgb), 0.2);
@@ -176,10 +188,12 @@
      positive letter-spacing (tracking) — captured as dedicated tokens.
      ======================================================================== */
   --goobs-font-sacred: 'Cinzel', Georgia, 'Times New Roman', serif;
-  --goobs-font-standard: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, system-ui, sans-serif;
-  --goobs-font-mono: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Menlo,
-    Consolas, 'Liberation Mono', monospace;
+  --goobs-font-standard:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui,
+    sans-serif;
+  --goobs-font-mono:
+    'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Menlo, Consolas,
+    'Liberation Mono', monospace;
 
   /* type scale */
   --goobs-text-xs: 12px;

@@ -154,11 +154,15 @@ export const MultipleGrids: Story = {
   args: {
     grids: [
       {
-        typography: [{ text: 'Section A', variant: 'h4', styles: { theme: 'light' } }],
+        typography: [
+          { text: 'Section A', variant: 'h4', styles: { theme: 'light' } },
+        ],
         button: [{ text: 'Action A', styles: { theme: 'light' } }],
       },
       {
-        typography: [{ text: 'Section B', variant: 'h4', styles: { theme: 'light' } }],
+        typography: [
+          { text: 'Section B', variant: 'h4', styles: { theme: 'light' } },
+        ],
         button: [{ text: 'Action B', styles: { theme: 'light' } }],
       },
     ],
@@ -175,7 +179,11 @@ export const CustomComponent: Story = {
     grids: [
       {
         typography: [
-          { text: 'With a custom node', variant: 'h5', styles: { theme: 'light' } },
+          {
+            text: 'With a custom node',
+            variant: 'h5',
+            styles: { theme: 'light' },
+          },
         ],
         customComponent: (
           <div

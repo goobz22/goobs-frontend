@@ -91,7 +91,11 @@ export const LightThemeVariants: Story = {
                 Basic States
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <div
                   style={{
@@ -180,7 +184,11 @@ export const LightThemeVariants: Story = {
                 With Labels
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <Switch
                   {...args}
@@ -226,9 +234,7 @@ export const LightThemeVariants: Story = {
             >
               Without Outline
             </h4>
-            <div
-              style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}
-            >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
               <Switch
                 {...args}
                 checked={noOutline1Checked}
@@ -335,7 +341,11 @@ export const DarkThemeVariants: Story = {
                 Basic States
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <div
                   style={{
@@ -424,7 +434,11 @@ export const DarkThemeVariants: Story = {
                 With Labels
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <Switch
                   {...args}
@@ -470,9 +484,7 @@ export const DarkThemeVariants: Story = {
             >
               Without Outline
             </h4>
-            <div
-              style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}
-            >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
               <Switch
                 {...args}
                 checked={noOutline1Checked}
@@ -576,7 +588,11 @@ export const SacredThemeVariants: Story = {
                 Divine States
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <div
                   style={{
@@ -665,7 +681,11 @@ export const SacredThemeVariants: Story = {
                 Sacred Powers
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <Switch
                   {...args}
@@ -870,7 +890,11 @@ export const ThemeComparison: Story = {
                 Dark Theme
               </h3>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <div
                   style={{
@@ -938,7 +962,11 @@ export const ThemeComparison: Story = {
                 Sacred Theme
               </h3>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
               >
                 <div
                   style={{
@@ -1054,7 +1082,11 @@ export const CustomColors: Story = {
                 Green Theme
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
               >
                 <Switch
                   {...args}
@@ -1092,7 +1124,11 @@ export const CustomColors: Story = {
                 Purple Theme
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
               >
                 <Switch
                   {...args}
@@ -1130,7 +1166,11 @@ export const CustomColors: Story = {
                 Custom Size
               </h4>
               <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
               >
                 <Switch
                   {...args}
@@ -1332,7 +1372,10 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
 
   const demoWrapperStyle: React.CSSProperties =
     theme === 'sacred'
-      ? { background: 'rgba(0, 0, 0, 0.9)', border: '1px solid rgba(250, 204, 21, 0.3)' }
+      ? {
+          background: 'rgba(0, 0, 0, 0.9)',
+          border: '1px solid rgba(250, 204, 21, 0.3)',
+        }
       : theme === 'dark'
         ? { background: '#111827' }
         : { background: '#f9fafb' }
@@ -1436,9 +1479,7 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
           Interactive Switch Demo
         </h3>
 
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Switch
             {...args}
             checked={switches.notifications}

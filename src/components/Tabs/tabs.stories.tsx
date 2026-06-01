@@ -139,19 +139,17 @@ const InteractiveDemoRenderer = () => {
           Controls
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <label
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <select
               value={theme}
               onChange={e =>
                 setTheme(e.target.value as 'light' | 'dark' | 'sacred')
               }
               style={{
-              padding: '4px',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-            }}
+                padding: '4px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+              }}
             >
               <option value="light">Light Theme</option>
               <option value="dark">Dark Theme</option>

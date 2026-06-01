@@ -17,7 +17,8 @@
   outline: none;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: var(--goobs-radius-lg);
-  padding: var(--goobs-space-xs) 60px var(--goobs-space-xs) var(--goobs-space-md);
+  padding: var(--goobs-space-xs) 60px var(--goobs-space-xs)
+    var(--goobs-space-md);
   font-size: var(--goobs-text-xl);
   box-sizing: border-box;
 }

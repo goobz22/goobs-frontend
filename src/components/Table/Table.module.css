@@ -74,7 +74,8 @@
    didn't re-thread `theme` to every subcomponent. Without the cascade the
    head fell back to its own sacred default → gold header on a cream surface. */
 .head[data-theme='light'],
-.container[data-theme='light'] .head:not([data-theme='dark']):not([data-theme='sacred']) {
+.container[data-theme='light']
+  .head:not([data-theme='dark']):not([data-theme='sacred']) {
   background-color: var(--table-header-bg, var(--goobs-light-surface-raised));
   border-bottom: 1px solid var(--goobs-light-border);
   color: var(--table-header-color, var(--goobs-light-text));
@@ -86,7 +87,8 @@
 
 /* table.ts darkTheme.header — own dark attr OR cascade from a dark container. */
 .head[data-theme='dark'],
-.container[data-theme='dark'] .head:not([data-theme='light']):not([data-theme='sacred']) {
+.container[data-theme='dark']
+  .head:not([data-theme='light']):not([data-theme='sacred']) {
   background-color: var(--table-header-bg, var(--goobs-dark-surface-raised));
   border-bottom: 1px solid var(--goobs-dark-border);
   color: var(--table-header-color, var(--goobs-dark-text));
@@ -111,13 +113,17 @@
 
 .row[data-hover='true'][data-theme='light']:hover,
 .container[data-theme='light']
-  .row[data-hover='true']:not([data-theme='dark']):not([data-theme='sacred']):hover {
+  .row[data-hover='true']:not([data-theme='dark']):not(
+    [data-theme='sacred']
+  ):hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
 .row[data-hover='true'][data-theme='dark']:hover,
 .container[data-theme='dark']
-  .row[data-hover='true']:not([data-theme='light']):not([data-theme='sacred']):hover {
+  .row[data-hover='true']:not([data-theme='light']):not(
+    [data-theme='sacred']
+  ):hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -140,7 +146,8 @@
    sacred gold-a90 body color (pale gold on cream = illegible) because the
    Light story themes only the container + table, not every TableCell. */
 .cell[data-theme='light'],
-.container[data-theme='light'] .cell:not([data-theme='dark']):not([data-theme='sacred']) {
+.container[data-theme='light']
+  .cell:not([data-theme='dark']):not([data-theme='sacred']) {
   color: var(--table-cell-color, var(--goobs-light-text));
   font-family: var(--table-font-family, inherit);
   border-bottom: 1px solid var(--table-cell-border, var(--goobs-light-border));
@@ -148,7 +155,8 @@
 
 /* table.ts darkTheme.cell — own dark attr OR cascade from a dark container. */
 .cell[data-theme='dark'],
-.container[data-theme='dark'] .cell:not([data-theme='light']):not([data-theme='sacred']) {
+.container[data-theme='dark']
+  .cell:not([data-theme='light']):not([data-theme='sacred']) {
   color: var(--table-cell-color, var(--goobs-dark-text));
   font-family: var(--table-font-family, inherit);
   border-bottom: 1px solid var(--table-cell-border, var(--goobs-dark-border));
@@ -171,7 +179,9 @@
 
 .cell[data-header-cell='true'][data-theme='light'],
 .container[data-theme='light']
-  .cell[data-header-cell='true']:not([data-theme='dark']):not([data-theme='sacred']) {
+  .cell[data-header-cell='true']:not([data-theme='dark']):not(
+    [data-theme='sacred']
+  ) {
   background-color: var(--table-header-bg, var(--goobs-light-surface-raised));
   color: var(--table-header-color, var(--goobs-light-text));
   font-family: var(--table-font-family, inherit);
@@ -183,7 +193,9 @@
 
 .cell[data-header-cell='true'][data-theme='dark'],
 .container[data-theme='dark']
-  .cell[data-header-cell='true']:not([data-theme='light']):not([data-theme='sacred']) {
+  .cell[data-header-cell='true']:not([data-theme='light']):not(
+    [data-theme='sacred']
+  ) {
   background-color: var(--table-header-bg, var(--goobs-dark-surface-raised));
   color: var(--table-header-color, var(--goobs-dark-text));
   font-family: var(--table-font-family, inherit);

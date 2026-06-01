@@ -26,7 +26,7 @@ const meta: Meta<typeof Divider> = {
   // fixed-width block so the rule is actually visible (mirrors real usage,
   // where a Divider sits inside a sized container).
   decorators: [
-    (Story) => (
+    Story => (
       <div style={{ width: '360px' }}>
         <Story />
       </div>
