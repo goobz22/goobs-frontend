@@ -18,7 +18,7 @@
    * single dimension without re-declaring the whole transition.
    */
   --fade-duration: 0.5s;
-  --fade-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --fade-timing-function: var(--goobs-ease);
   --fade-delay: 0s;
 
   opacity: 1;

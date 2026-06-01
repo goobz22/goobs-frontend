@@ -73,7 +73,6 @@ const InfoIcon: React.FC<InfoIconProps> = ({
           strokeLinecap="round"
         />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

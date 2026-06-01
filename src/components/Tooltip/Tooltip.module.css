@@ -67,50 +67,53 @@
 .content {
   position: relative;
   padding: var(--tooltip-padding, 10px 16px);
-  font-size: var(--tooltip-font-size, 15px);
-  font-family: var(--tooltip-font-family, 'Cinzel', serif);
+  font-size: var(--tooltip-font-size, var(--goobs-text-lg));
+  font-family: var(--tooltip-font-family, var(--goobs-font-sacred));
   font-weight: var(--tooltip-font-weight, bold);
-  letter-spacing: var(--tooltip-letter-spacing, 0.05em);
-  border-radius: var(--tooltip-border-radius, 10px);
-  background-color: var(--tooltip-bg, rgba(10, 10, 10, 0.9));
-  color: var(--tooltip-color, #ffd700);
-  border: var(--tooltip-border, 1px solid rgba(255, 215, 0, 0.4));
+  letter-spacing: var(
+    --tooltip-letter-spacing,
+    var(--goobs-tracking-sacred-wide)
+  );
+  border-radius: var(--tooltip-border-radius, var(--goobs-radius-xl));
+  background-color: var(--tooltip-bg, var(--goobs-sacred-surface));
+  color: var(--tooltip-color, var(--goobs-gold));
+  border: var(--tooltip-border, 1px solid var(--goobs-gold-a40));
   box-shadow: var(
     --tooltip-box-shadow,
-    0 0 20px rgba(255, 215, 0, 0.3),
-    0 0 40px rgba(255, 215, 0, 0.1)
+    0 0 20px var(--goobs-gold-a30),
+    0 0 40px var(--goobs-gold-a10)
   );
   backdrop-filter: var(--tooltip-backdrop-filter, blur(8px));
-  text-shadow: var(--tooltip-text-shadow, 0 0 10px rgba(255, 215, 0, 0.5));
+  text-shadow: var(--tooltip-text-shadow, 0 0 10px var(--goobs-gold-a50));
   animation: var(--tooltip-animation, none);
 }
 
 .tooltip[data-theme='light'] .content {
   padding: var(--tooltip-padding, 8px 12px);
-  font-size: var(--tooltip-font-size, 14px);
-  font-family: var(--tooltip-font-family, 'Inter', sans-serif);
+  font-size: var(--tooltip-font-size, var(--goobs-text-md));
+  font-family: var(--tooltip-font-family, var(--goobs-font-standard));
   font-weight: var(--tooltip-font-weight, normal);
   letter-spacing: var(--tooltip-letter-spacing, normal);
-  border-radius: var(--tooltip-border-radius, 8px);
-  background-color: var(--tooltip-bg, rgba(255, 255, 255, 0.9));
-  color: var(--tooltip-color, #333);
+  border-radius: var(--tooltip-border-radius, var(--goobs-radius-lg));
+  background-color: var(--tooltip-bg, var(--goobs-light-surface));
+  color: var(--tooltip-color, var(--goobs-light-text));
   border: var(--tooltip-border, 1px solid rgba(0, 0, 0, 0.1));
-  box-shadow: var(--tooltip-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  box-shadow: var(--tooltip-box-shadow, var(--goobs-shadow-light-md));
   backdrop-filter: var(--tooltip-backdrop-filter, blur(4px));
   text-shadow: var(--tooltip-text-shadow, none);
 }
 
 .tooltip[data-theme='dark'] .content {
   padding: var(--tooltip-padding, 8px 12px);
-  font-size: var(--tooltip-font-size, 14px);
-  font-family: var(--tooltip-font-family, 'Inter', sans-serif);
+  font-size: var(--tooltip-font-size, var(--goobs-text-md));
+  font-family: var(--tooltip-font-family, var(--goobs-font-standard));
   font-weight: var(--tooltip-font-weight, normal);
   letter-spacing: var(--tooltip-letter-spacing, normal);
-  border-radius: var(--tooltip-border-radius, 8px);
-  background-color: var(--tooltip-bg, rgba(23, 23, 23, 0.9));
-  color: var(--tooltip-color, white);
+  border-radius: var(--tooltip-border-radius, var(--goobs-radius-lg));
+  background-color: var(--tooltip-bg, var(--goobs-dark-surface));
+  color: var(--tooltip-color, var(--goobs-dark-text));
   border: var(--tooltip-border, 1px solid rgba(255, 255, 255, 0.1));
-  box-shadow: var(--tooltip-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  box-shadow: var(--tooltip-box-shadow, var(--goobs-shadow-dark-md));
   backdrop-filter: var(--tooltip-backdrop-filter, blur(4px));
   text-shadow: var(--tooltip-text-shadow, none);
 }
@@ -125,7 +128,7 @@
    inline so a custom bubble keeps a matching arrow.
    -------------------------------------------------------------------------- */
 .arrow {
-  --tooltip-arrow-color: #ffd700;
+  --tooltip-arrow-color: var(--goobs-gold);
 
   position: absolute;
   width: 0;
@@ -136,12 +139,12 @@
 }
 
 .tooltip[data-theme='light'] .arrow {
-  --tooltip-arrow-color: rgba(255, 255, 255, 0.9);
+  --tooltip-arrow-color: var(--goobs-light-surface);
   border-width: var(--tooltip-arrow-size, 5px);
 }
 
 .tooltip[data-theme='dark'] .arrow {
-  --tooltip-arrow-color: rgba(23, 23, 23, 0.9);
+  --tooltip-arrow-color: var(--goobs-dark-surface);
   border-width: var(--tooltip-arrow-size, 5px);
 }
 

@@ -63,6 +63,9 @@ export interface CheckboxStyles {
   checkedBoxShadow?: string
   checkedBackgroundImage?: string
 
+  // Checkmark icon
+  iconColor?: string
+
   // Disabled states
   disabledBackgroundColor?: string
   disabledBorderColor?: string
@@ -168,6 +171,9 @@ function buildDynamicStyle(styles?: CheckboxStyles): CSSProperties | undefined {
   if (styles.checkedBackgroundImage)
     dynamicStyle['--cb-checked-bg-image'] = styles.checkedBackgroundImage
 
+  // Checkmark icon color (caller override; consumed by .icon { color: var(--cb-icon-color, ...) })
+  if (styles.iconColor) dynamicStyle['--cb-icon-color'] = styles.iconColor
+
   // Disabled
   if (styles.disabledBackgroundColor)
     dynamicStyle['--cb-disabled-bg'] = styles.disabledBackgroundColor
@@ -205,6 +211,12 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     styles,
     id: providedId,
     dataFieldName,
+    // `children` is the checkbox's visible label text (the documented contract
+    // AutoFields relies on). It MUST be destructured out here so it never lands
+    // in `rest` — `rest` is spread onto the `<input type="checkbox">` below, and
+    // an <input> is a void element: giving it `children` throws React's
+    // "input is a void element tag and must neither have children…" error.
+    children,
     ...rest
   } = props
 
@@ -347,6 +359,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           )}
         </div>
       </div>
+      {/* Visible label text. The wrapper <label> is `inline-flex` with
+          `align-items: center`, so this renders beside the box. */}
+      {children !== undefined && children !== null && children !== '' && (
+        <span className={cssStyles.labelText}>{children}</span>
+      )}
     </label>
   )
 })

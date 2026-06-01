@@ -58,7 +58,6 @@ const WarningAmberIcon: React.FC<WarningAmberIconProps> = ({
         />
         <path d="M13 16H11V18H13V16ZM13 10H11V14H13V10Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

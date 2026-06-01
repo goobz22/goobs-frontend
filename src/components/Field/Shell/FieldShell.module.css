@@ -18,63 +18,63 @@
 
 .shell {
   /* Default theme tokens (light). Overridden by [data-theme] blocks. */
-  --field-bg: rgba(255, 255, 255, 0.95);
-  --field-border-default: rgba(209, 213, 219, 1);
-  --field-border-focus: rgba(59, 130, 246, 1);
-  --field-border-error: rgba(239, 68, 68, 1);
-  --field-text: rgba(31, 41, 55, 1);
-  --field-label-default: rgba(107, 114, 128, 1);
-  --field-label-focus: rgba(59, 130, 246, 1);
-  --field-label-error: rgba(239, 68, 68, 1);
-  --field-label-shrunk-bg: rgba(255, 255, 255, 0.95);
-  --field-adornment-default: rgba(107, 114, 128, 1);
-  --field-adornment-focus: rgba(59, 130, 246, 1);
-  --field-helper-default: rgba(107, 114, 128, 1);
-  --field-helper-error: rgba(239, 68, 68, 1);
-  --field-helper-info: rgba(59, 130, 246, 1);
-  --field-font-family: 'Inter', sans-serif;
+  --field-bg: var(--goobs-light-surface);
+  --field-border-default: var(--goobs-light-border);
+  --field-border-focus: var(--goobs-light-primary);
+  --field-border-error: var(--goobs-danger);
+  --field-text: var(--goobs-light-text);
+  --field-label-default: var(--goobs-light-text-muted);
+  --field-label-focus: var(--goobs-light-primary);
+  --field-label-error: var(--goobs-danger);
+  --field-label-shrunk-bg: var(--goobs-light-surface);
+  --field-adornment-default: var(--goobs-light-text-muted);
+  --field-adornment-focus: var(--goobs-light-primary);
+  --field-helper-default: var(--goobs-light-text-muted);
+  --field-helper-error: var(--goobs-danger);
+  --field-helper-info: var(--goobs-info);
+  --field-font-family: var(--goobs-font-standard);
   --field-transition:
     border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
-  --field-required-indicator: rgba(239, 68, 68, 1);
+  --field-required-indicator: var(--goobs-danger);
 
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--goobs-space-2xs);
   width: 100%;
   font-family: var(--field-font-family);
   color: var(--field-text);
 }
 
 .shell[data-theme='dark'] {
-  --field-bg: rgba(31, 41, 55, 0.95);
-  --field-border-default: rgba(75, 85, 99, 1);
-  --field-border-focus: rgba(96, 165, 250, 1);
-  --field-border-error: rgba(239, 68, 68, 1);
-  --field-text: rgba(255, 255, 255, 1);
-  --field-label-default: rgba(156, 163, 175, 1);
-  --field-label-focus: rgba(96, 165, 250, 1);
-  --field-label-error: rgba(239, 68, 68, 1);
-  --field-label-shrunk-bg: rgba(31, 41, 55, 0.95);
-  --field-adornment-default: rgba(156, 163, 175, 1);
-  --field-adornment-focus: rgba(96, 165, 250, 1);
-  --field-helper-default: rgba(156, 163, 175, 1);
-  --field-helper-info: rgba(96, 165, 250, 1);
+  --field-bg: var(--goobs-dark-surface);
+  --field-border-default: var(--goobs-dark-border);
+  --field-border-focus: var(--goobs-dark-primary);
+  --field-border-error: var(--goobs-danger);
+  --field-text: var(--goobs-dark-text);
+  --field-label-default: var(--goobs-dark-text-muted);
+  --field-label-focus: var(--goobs-dark-primary);
+  --field-label-error: var(--goobs-danger);
+  --field-label-shrunk-bg: var(--goobs-dark-surface);
+  --field-adornment-default: var(--goobs-dark-text-muted);
+  --field-adornment-focus: var(--goobs-dark-primary);
+  --field-helper-default: var(--goobs-dark-text-muted);
+  --field-helper-info: var(--goobs-dark-primary);
 }
 
 .shell[data-theme='sacred'] {
-  --field-bg: rgba(0, 0, 0, 0.7);
-  --field-border-default: rgba(255, 215, 0, 0.3);
-  --field-border-focus: rgba(255, 215, 0, 0.7);
-  --field-border-error: rgba(239, 68, 68, 1);
-  --field-text: rgba(255, 255, 255, 0.9);
-  --field-label-default: rgba(255, 215, 0, 0.8);
-  --field-label-focus: rgba(255, 215, 0, 1);
-  --field-label-error: rgba(239, 68, 68, 1);
-  --field-label-shrunk-bg: rgba(0, 0, 0, 0.7);
-  --field-adornment-default: rgba(255, 215, 0, 0.6);
-  --field-adornment-focus: rgba(255, 215, 0, 1);
-  --field-helper-default: rgba(255, 255, 255, 0.6);
-  --field-helper-info: rgba(96, 165, 250, 1);
+  --field-bg: var(--goobs-sacred-control-bg);
+  --field-border-default: var(--goobs-gold-a30);
+  --field-border-focus: var(--goobs-gold-a70);
+  --field-border-error: var(--goobs-danger);
+  --field-text: var(--goobs-sacred-text);
+  --field-label-default: var(--goobs-gold-a80);
+  --field-label-focus: var(--goobs-gold);
+  --field-label-error: var(--goobs-danger);
+  --field-label-shrunk-bg: var(--goobs-sacred-control-bg);
+  --field-adornment-default: var(--goobs-gold-a60);
+  --field-adornment-focus: var(--goobs-gold);
+  --field-helper-default: var(--goobs-sacred-text-secondary);
+  --field-helper-info: var(--goobs-info);
   --field-font-family: '"Crimson Text", serif';
 }
 
@@ -87,10 +87,10 @@
   align-items: center;
   gap: 2px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--goobs-weight-medium);
   color: var(--field-label-default);
   transition: var(--field-transition);
-  margin-bottom: 4px;
+  margin-bottom: var(--goobs-space-2xs);
 }
 
 .shell[data-state='focus'] .label {
@@ -104,7 +104,7 @@
 
 .requiredIndicator {
   color: var(--field-required-indicator);
-  font-weight: 600;
+  font-weight: var(--goobs-weight-semibold);
   margin-left: 2px;
 }
 
@@ -122,7 +122,7 @@
   width: 100%;
   background-color: var(--field-bg);
   border: 1px solid var(--field-border-default);
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   transition: var(--field-transition);
   box-sizing: border-box;
 }
@@ -157,7 +157,7 @@
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
-  padding: 8px 12px;
+  padding: var(--goobs-space-xs) var(--goobs-space-sm);
   box-sizing: border-box;
 }
 

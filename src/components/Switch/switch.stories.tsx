@@ -48,19 +48,65 @@ export const LightThemeVariants: Story = {
       const [noOutline3Checked, setNoOutline3Checked] = useState(true)
 
       return (
-        <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 font-inter">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            padding: '24px',
+            background: 'linear-gradient(to bottom right, #f9fafb, #eff6ff)',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#111827',
+              marginBottom: '24px',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             Light Switch Styles
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-gray-700 mb-3">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: '32px',
+            }}
+          >
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: '12px',
+                }}
+              >
                 Basic States
               </h4>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Off State</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#4b5563' }}>
+                    Off State
+                  </span>
                   <Switch
                     {...args}
                     checked={offChecked}
@@ -68,8 +114,16 @@ export const LightThemeVariants: Story = {
                     styles={{ theme: 'light', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">On State</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#4b5563' }}>
+                    On State
+                  </span>
                   <Switch
                     {...args}
                     checked={onChecked}
@@ -77,8 +131,16 @@ export const LightThemeVariants: Story = {
                     styles={{ theme: 'light', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Disabled Off</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#4b5563' }}>
+                    Disabled Off
+                  </span>
                   <Switch
                     {...args}
                     checked={disabledOffChecked}
@@ -87,8 +149,16 @@ export const LightThemeVariants: Story = {
                     styles={{ theme: 'light', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Disabled On</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#4b5563' }}>
+                    Disabled On
+                  </span>
                   <Switch
                     {...args}
                     checked={disabledOnChecked}
@@ -100,11 +170,26 @@ export const LightThemeVariants: Story = {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-gray-700 mb-3">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: '12px',
+                }}
+              >
                 With Labels
               </h4>
-              <div className="space-y-4">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={label1Checked}
@@ -138,11 +223,18 @@ export const LightThemeVariants: Story = {
             </div>
           </div>
 
-          <div className="mt-8">
-            <h4 className="text-md font-medium text-gray-700 mb-4">
+          <div style={{ marginTop: '32px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#374151',
+                marginBottom: '16px',
+              }}
+            >
               Without Outline
             </h4>
-            <div className="flex flex-wrap gap-6">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
               <Switch
                 {...args}
                 checked={noOutline1Checked}
@@ -206,19 +298,65 @@ export const DarkThemeVariants: Story = {
       const [noOutline3Checked, setNoOutline3Checked] = useState(true)
 
       return (
-        <div className="space-y-6 p-6 bg-gray-900 rounded-xl">
-          <h3 className="text-xl font-bold text-gray-200 mb-6 font-inter">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            padding: '24px',
+            background: '#111827',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#e5e7eb',
+              marginBottom: '24px',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             Dark Switch Styles
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-gray-300 mb-3">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: '32px',
+            }}
+          >
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#d1d5db',
+                  marginBottom: '12px',
+                }}
+              >
                 Basic States
               </h4>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Off State</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#9ca3af' }}>
+                    Off State
+                  </span>
                   <Switch
                     {...args}
                     checked={offChecked}
@@ -226,8 +364,16 @@ export const DarkThemeVariants: Story = {
                     styles={{ theme: 'dark', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">On State</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#9ca3af' }}>
+                    On State
+                  </span>
                   <Switch
                     {...args}
                     checked={onChecked}
@@ -235,8 +381,16 @@ export const DarkThemeVariants: Story = {
                     styles={{ theme: 'dark', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Disabled Off</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#9ca3af' }}>
+                    Disabled Off
+                  </span>
                   <Switch
                     {...args}
                     checked={disabledOffChecked}
@@ -245,8 +399,16 @@ export const DarkThemeVariants: Story = {
                     styles={{ theme: 'dark', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Disabled On</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#9ca3af' }}>
+                    Disabled On
+                  </span>
                   <Switch
                     {...args}
                     checked={disabledOnChecked}
@@ -258,11 +420,26 @@ export const DarkThemeVariants: Story = {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-gray-300 mb-3">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#d1d5db',
+                  marginBottom: '12px',
+                }}
+              >
                 With Labels
               </h4>
-              <div className="space-y-4">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={label1Checked}
@@ -296,11 +473,18 @@ export const DarkThemeVariants: Story = {
             </div>
           </div>
 
-          <div className="mt-8">
-            <h4 className="text-md font-medium text-gray-300 mb-4">
+          <div style={{ marginTop: '32px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#d1d5db',
+                marginBottom: '16px',
+              }}
+            >
               Without Outline
             </h4>
-            <div className="flex flex-wrap gap-6">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
               <Switch
                 {...args}
                 checked={noOutline1Checked}
@@ -364,19 +548,62 @@ export const SacredThemeVariants: Story = {
       const [essence3Checked, setEssence3Checked] = useState(true)
 
       return (
-        <div className="bg-black/90 p-8 rounded-xl">
-          <h3 className="text-xl font-bold text-yellow-400 mb-6 font-cinzel animate-sacred-glow">
+        <div
+          style={{
+            background: 'rgba(0, 0, 0, 0.9)',
+            padding: '32px',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#ffd700',
+              marginBottom: '24px',
+              fontFamily: "'Cinzel', Georgia, serif",
+            }}
+          >
             Sacred Mystical Switches
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-yellow-300 mb-3">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: '32px',
+            }}
+          >
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#fde047',
+                  marginBottom: '12px',
+                }}
+              >
                 Divine States
               </h4>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-yellow-200">Dormant</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#ffe680' }}>
+                    Dormant
+                  </span>
                   <Switch
                     {...args}
                     checked={dormantChecked}
@@ -384,8 +611,16 @@ export const SacredThemeVariants: Story = {
                     styles={{ theme: 'sacred', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-yellow-200">Awakened</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#ffe680' }}>
+                    Awakened
+                  </span>
                   <Switch
                     {...args}
                     checked={awakenedChecked}
@@ -393,8 +628,14 @@ export const SacredThemeVariants: Story = {
                     styles={{ theme: 'sacred', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-yellow-200">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#ffe680' }}>
                     Sealed Dormant
                   </span>
                   <Switch
@@ -405,8 +646,14 @@ export const SacredThemeVariants: Story = {
                     styles={{ theme: 'sacred', outline: true }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-yellow-200">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ fontSize: '14px', color: '#ffe680' }}>
                     Sealed Awakened
                   </span>
                   <Switch
@@ -420,11 +667,26 @@ export const SacredThemeVariants: Story = {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-yellow-300 mb-3">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#fde047',
+                  marginBottom: '12px',
+                }}
+              >
                 Sacred Powers
               </h4>
-              <div className="space-y-4">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={divine1Checked}
@@ -458,11 +720,18 @@ export const SacredThemeVariants: Story = {
             </div>
           </div>
 
-          <div className="mt-8">
-            <h4 className="text-md font-medium text-yellow-300 mb-4">
+          <div style={{ marginTop: '32px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#fde047',
+                marginBottom: '16px',
+              }}
+            >
               Pure Essence (No Outline)
             </h4>
-            <div className="flex flex-wrap gap-8">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px' }}>
               <Switch
                 {...args}
                 checked={essence1Checked}
@@ -524,18 +793,55 @@ export const ThemeComparison: Story = {
       const [sacredChecked3, setSacredChecked3] = useState(true)
 
       return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: '32px',
+          }}
+        >
           {/* Light Theme */}
-          <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 font-inter">
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              padding: '24px',
+              background: 'linear-gradient(to bottom right, #f9fafb, #eff6ff)',
+              borderRadius: '12px',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '18px',
+                fontWeight: 700,
+                color: '#111827',
+                marginBottom: '16px',
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
               Light Theme
             </h3>
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <p style={{ fontSize: '14px', color: '#4b5563' }}>
                   Clean professional design with subtle shadows
                 </p>
-                <div className="space-y-3">
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                  }}
+                >
                   <Switch
                     {...args}
                     checked={lightChecked1}
@@ -562,16 +868,51 @@ export const ThemeComparison: Story = {
             </div>
 
             {/* Dark Theme */}
-            <div className="bg-gray-900 p-6 rounded-xl space-y-6">
-              <h3 className="text-lg font-bold text-gray-200 mb-4 font-inter">
+            <div
+              style={{
+                background: '#111827',
+                padding: '24px',
+                borderRadius: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: '#e5e7eb',
+                  marginBottom: '16px',
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
                 Dark Theme
               </h3>
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-400">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                  }}
+                >
+                  <p style={{ fontSize: '14px', color: '#9ca3af' }}>
                     Modern dark interface with blue accents
                   </p>
-                  <div className="space-y-3">
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
                     <Switch
                       {...args}
                       checked={darkChecked1}
@@ -599,16 +940,51 @@ export const ThemeComparison: Story = {
             </div>
 
             {/* Sacred Theme */}
-            <div className="bg-black/90 p-6 rounded-xl space-y-6">
-              <h3 className="text-lg font-bold text-yellow-400 mb-4 font-cinzel animate-sacred-glow">
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, 0.9)',
+                padding: '24px',
+                borderRadius: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: '#ffd700',
+                  marginBottom: '16px',
+                  fontFamily: "'Cinzel', Georgia, serif",
+                }}
+              >
                 Sacred Theme
               </h3>
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <p className="text-sm text-yellow-200">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                  }}
+                >
+                  <p style={{ fontSize: '14px', color: '#ffe680' }}>
                     Mystical golden design with Egyptian elements
                   </p>
-                  <div className="space-y-3">
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
                     <Switch
                       {...args}
                       checked={sacredChecked1}
@@ -672,15 +1048,46 @@ export const CustomColors: Story = {
       const [customSizeChecked2, setCustomSizeChecked2] = useState(false)
 
       return (
-        <div className="space-y-6 p-6 bg-gray-50 rounded-xl">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 font-inter">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            padding: '24px',
+            background: '#f9fafb',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#111827',
+              marginBottom: '24px',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             Custom Color Switches
           </h3>
 
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <h4 className="text-md font-medium text-gray-700">Green Theme</h4>
-              <div className="space-y-3">
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          >
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+            >
+              <h4
+                style={{ fontSize: '16px', fontWeight: 500, color: '#374151' }}
+              >
+                Green Theme
+              </h4>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={greenChecked1}
@@ -708,11 +1115,21 @@ export const CustomColors: Story = {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="text-md font-medium text-gray-700">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+            >
+              <h4
+                style={{ fontSize: '16px', fontWeight: 500, color: '#374151' }}
+              >
                 Purple Theme
               </h4>
-              <div className="space-y-3">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={purpleChecked1}
@@ -740,9 +1157,21 @@ export const CustomColors: Story = {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="text-md font-medium text-gray-700">Custom Size</h4>
-              <div className="space-y-3">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+            >
+              <h4
+                style={{ fontSize: '16px', fontWeight: 500, color: '#374151' }}
+              >
+                Custom Size
+              </h4>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
                 <Switch
                   {...args}
                   checked={customSizeChecked1}
@@ -804,14 +1233,40 @@ export const DualLabelDemo: Story = {
       const [sacredChecked, setSacredChecked] = useState(false)
 
       return (
-        <div className="space-y-8 p-6 bg-gray-50 rounded-xl">
-          <h3 className="text-xl font-bold text-gray-900 mb-4 font-inter">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+            padding: '24px',
+            background: '#f9fafb',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#111827',
+              marginBottom: '16px',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             Switches with Left and Right Labels
           </h3>
 
-          <div className="space-y-6">
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          >
             <div>
-              <h4 className="text-md font-medium text-gray-700 mb-2">
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: '8px',
+                }}
+              >
                 Light Theme
               </h4>
               <Switch
@@ -825,10 +1280,23 @@ export const DualLabelDemo: Story = {
             </div>
 
             <div>
-              <h4 className="text-md font-medium text-gray-700 mb-2">
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: '8px',
+                }}
+              >
                 Dark Theme
               </h4>
-              <div className="p-4 bg-gray-900 rounded">
+              <div
+                style={{
+                  padding: '16px',
+                  background: '#111827',
+                  borderRadius: '4px',
+                }}
+              >
                 <Switch
                   {...args}
                   leftLabel="Pie"
@@ -841,10 +1309,23 @@ export const DualLabelDemo: Story = {
             </div>
 
             <div>
-              <h4 className="text-md font-medium text-gray-700 mb-2">
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#374151',
+                  marginBottom: '8px',
+                }}
+              >
                 Sacred Theme
               </h4>
-              <div className="p-4 bg-black/90 rounded">
+              <div
+                style={{
+                  padding: '16px',
+                  background: 'rgba(0, 0, 0, 0.9)',
+                  borderRadius: '4px',
+                }}
+              >
                 <Switch
                   {...args}
                   leftLabel="Pie"
@@ -889,18 +1370,68 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
       setSwitches(prev => ({ ...prev, [key]: e.target.checked }))
     }
 
+  const demoWrapperStyle: React.CSSProperties =
+    theme === 'sacred'
+      ? {
+          background: 'rgba(0, 0, 0, 0.9)',
+          border: '1px solid rgba(250, 204, 21, 0.3)',
+        }
+      : theme === 'dark'
+        ? { background: '#111827' }
+        : { background: '#f9fafb' }
+  const demoHeadingStyle: React.CSSProperties =
+    theme === 'sacred'
+      ? { color: '#ffd700', fontFamily: "'Cinzel', Georgia, serif" }
+      : theme === 'dark'
+        ? { color: '#e5e7eb', fontFamily: "'Inter', sans-serif" }
+        : { color: '#111827', fontFamily: "'Inter', sans-serif" }
+
   return (
-    <div className="w-[600px] space-y-6">
-      <div className="p-4 bg-white rounded-lg border">
-        <div className="grid grid-cols-2 gap-4">
+    <div
+      style={{
+        width: '600px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+      }}
+    >
+      <div
+        style={{
+          padding: '16px',
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #d1d5db',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: '16px',
+          }}
+        >
           <div>
-            <label className="block text-sm font-medium mb-1">Theme</label>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: 500,
+                marginBottom: '4px',
+              }}
+            >
+              Theme
+            </label>
             <select
               value={theme}
               onChange={e =>
                 setTheme(e.target.value as 'light' | 'dark' | 'sacred')
               }
-              className="w-full p-2 border rounded"
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+              }}
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>
@@ -908,7 +1439,14 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
             </select>
           </div>
           <div>
-            <label className="flex items-center gap-2 mt-6">
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '24px',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={outline}
@@ -921,27 +1459,27 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
       </div>
 
       <div
-        className={`p-6 rounded-lg space-y-4 ${
-          theme === 'sacred'
-            ? 'bg-black/90 border border-yellow-400/30'
-            : theme === 'dark'
-              ? 'bg-gray-900'
-              : 'bg-gray-50'
-        }`}
+        style={{
+          padding: '24px',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          ...demoWrapperStyle,
+        }}
       >
         <h3
-          className={`text-lg font-bold mb-4 ${
-            theme === 'sacred'
-              ? 'text-yellow-400 font-cinzel'
-              : theme === 'dark'
-                ? 'text-gray-200 font-inter'
-                : 'text-gray-900 font-inter'
-          }`}
+          style={{
+            fontSize: '18px',
+            fontWeight: 700,
+            marginBottom: '16px',
+            ...demoHeadingStyle,
+          }}
         >
           Interactive Switch Demo
         </h3>
 
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Switch
             {...args}
             checked={switches.notifications}

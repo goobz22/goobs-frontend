@@ -54,7 +54,6 @@ const ViewSidebarIcon: React.FC<ViewSidebarIconProps> = ({
       >
         <path d="M3 3h4v18H3V3zm6 0h12v18H9V3zm2 2v14h8V5h-8z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

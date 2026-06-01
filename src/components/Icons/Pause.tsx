@@ -55,7 +55,6 @@ const PauseIcon: React.FC<PauseIconProps> = ({
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

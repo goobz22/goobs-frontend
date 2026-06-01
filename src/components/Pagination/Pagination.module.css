@@ -44,7 +44,7 @@
   min-width: 32px;
   height: 32px;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--goobs-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,19 +88,19 @@
    bg:     transparent | hover rgba(255,215,0,0.1) | disabled rgba(0,0,0,0.2)
    color:  #FFD700 | disabled rgba(255,255,255,0.3) */
 .root[data-theme='sacred'] .navButton {
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid var(--goobs-gold-a30);
   background-color: transparent;
-  color: #ffd700;
-  font-family: 'Cinzel', serif;
+  color: var(--goobs-gold);
+  font-family: var(--goobs-font-sacred);
 }
 
 .root[data-theme='sacred'] .navButton:hover:not(:disabled) {
-  border-color: rgba(255, 215, 0, 0.6);
-  background-color: rgba(255, 215, 0, 0.1);
+  border-color: var(--goobs-gold-a60);
+  background-color: var(--goobs-gold-a10);
 }
 
 .root[data-theme='sacred'] .navButton:disabled {
-  border-color: rgba(255, 215, 0, 0.2);
+  border-color: var(--goobs-gold-a20);
   background-color: rgba(0, 0, 0, 0.2);
   color: rgba(255, 255, 255, 0.3);
 }
@@ -128,8 +128,8 @@
 
 .pageButton[data-pagination-selected='true'] {
   border-color: rgba(0, 0, 0, 0.23);
-  background-color: rgba(25, 118, 210, 0.12);
-  color: #1976d2;
+  background-color: var(--goobs-info-bg);
+  color: var(--goobs-light-primary);
   font-weight: 600;
   box-shadow: none;
 }
@@ -141,25 +141,25 @@
    weight:  selected 600 | else 400
    shadow:  selected -> 0 0 10px rgba(255,215,0,0.3) */
 .root[data-theme='sacred'] .pageButton {
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid var(--goobs-gold-a30);
   background-color: transparent;
-  color: rgba(255, 215, 0, 0.8);
-  font-family: 'Cinzel', serif;
+  color: var(--goobs-gold-a80);
+  font-family: var(--goobs-font-sacred);
   font-weight: 400;
   box-shadow: none;
 }
 
 .root[data-theme='sacred'] .pageButton:hover {
-  border-color: rgba(255, 215, 0, 0.4);
-  background-color: rgba(255, 215, 0, 0.1);
+  border-color: var(--goobs-gold-a40);
+  background-color: var(--goobs-gold-a10);
 }
 
 .root[data-theme='sacred'] .pageButton[data-pagination-selected='true'] {
-  border-color: rgba(255, 215, 0, 0.6);
-  background-color: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
+  border-color: var(--goobs-gold-a60);
+  background-color: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
   font-weight: 600;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px var(--goobs-gold-a30);
 }
 
 /* --------------------------------------------------------------------------
@@ -178,6 +178,6 @@
 
 /* ELLIPSIS — SACRED override (color rgba(255,215,0,0.6)). */
 .root[data-theme='sacred'] .ellipsis {
-  color: rgba(255, 215, 0, 0.6);
-  font-family: 'Cinzel', serif;
+  color: var(--goobs-gold-a60);
+  font-family: var(--goobs-font-sacred);
 }

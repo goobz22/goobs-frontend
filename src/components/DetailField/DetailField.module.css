@@ -1,0 +1,60 @@
+/* ==========================================================================
+   DETAILFIELD / DETAILGRID - CSS MODULE
+   Read-only label/value display primitives. Absorbs the ~125 hand-rolled
+   labelStyle / valueStyle pairs across ThothOS read-only surfaces
+   (reference: InlineShowServiceInvoice:514).
+
+   The labelStyle/valueStyle the reference shell re-rolls:
+     labelStyle: 0.7em bold, gold-60%, Cinzel, uppercase, letter-spacing 1px
+     valueStyle: 1rem, white, Cinzel
+   Mapped here onto <dt> / <dd> with the sacred palette as the hardcoded base.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   GRID — the <dl> wrapper rendered by DetailGrid via FieldGrid. FieldGrid
+   owns the grid track; this only resets the user-agent <dl> margin.
+   -------------------------------------------------------------------------- */
+.grid {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   FIELD — one <dt>/<dd> couplet wrapped in a <div> (valid <dl> grouping).
+   -------------------------------------------------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 0.5vw, 4px);
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   LABEL (<dt>) — uppercase gold eyebrow. Sacred is the hardcoded default.
+   -------------------------------------------------------------------------- */
+.label {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.65em, 1.5vw, 0.7em);
+  font-weight: 700;
+  color: rgba(255, 215, 0, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   VALUE (<dd>) — primary white value text. <dd> has a default margin-inline
+   in the UA stylesheet that must be reset.
+   -------------------------------------------------------------------------- */
+.value {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: 'Roboto Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}

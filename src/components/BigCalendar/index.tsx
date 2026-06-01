@@ -41,7 +41,7 @@ const {
   DateRangeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CalendarTodayIcon,
+  CalendarIcon,
 } = Icons
 
 export type CalendarView = 'month' | 'week' | 'day'
@@ -888,7 +888,7 @@ export default function BigCalendar({
                 )}
                 aria-label="Today"
               >
-                <CalendarTodayIcon styles={{ theme }} />
+                <CalendarIcon styles={{ theme }} />
               </button>
               <button
                 onClick={handleNext}

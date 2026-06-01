@@ -22,75 +22,73 @@
   /* sacred container */
   --cci-container-bg: rgba(10, 10, 10, 0.95);
   --cci-container-border-width: 2px;
-  --cci-container-border-color: rgba(255, 215, 0, 0.4);
-  --cci-container-radius: 12px;
+  --cci-container-border-color: var(--goobs-gold-a40);
+  --cci-container-radius: var(--goobs-radius-xl);
   --cci-container-shadow:
-    0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+    0 0 20px var(--goobs-gold-a30), 0 0 40px var(--goobs-gold-a10);
   --cci-container-bg-image:
     radial-gradient(
       circle at top right,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at bottom left,
-      rgba(255, 215, 0, 0.03) 0%,
+      var(--goobs-gold-a02) 0%,
       transparent 50%
     );
 
   /* sacred hover */
   --cci-hover-transform: translateY(-2px);
-  --cci-hover-shadow:
-    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-  --cci-hover-border-color: rgba(255, 215, 0, 0.6);
+  --cci-hover-shadow: var(--goobs-shadow-sacred-glow);
+  --cci-hover-border-color: var(--goobs-gold-a60);
 
   /* transitions: sacred=slow(300ms) */
-  --cci-transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --cci-transition: var(--goobs-transition-slow);
 
   /* sacred input */
-  --cci-input-color: #ffd700;
+  --cci-input-color: var(--goobs-gold);
   --cci-input-bg: rgba(26, 26, 26, 0.9);
-  --cci-input-border-color: rgba(255, 215, 0, 0.5);
-  --cci-input-font-family: monospace;
-  --cci-input-font-weight: 600;
+  --cci-input-border-color: var(--goobs-gold-a50);
+  --cci-input-font-family: var(--goobs-font-mono);
+  --cci-input-font-weight: var(--goobs-weight-semibold);
   --cci-input-letter-spacing: 0.1em;
-  --cci-input-text-shadow: 0 0 2px rgba(255, 215, 0, 0.5);
+  --cci-input-text-shadow: 0 0 2px var(--goobs-gold-a50);
 
   /* sacred input focus */
-  --cci-input-focus-border-color: #ffd700;
+  --cci-input-focus-border-color: var(--goobs-gold);
   --cci-input-focus-transform: scale(1.05);
   --cci-input-focus-shadow:
-    0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3);
+    0 0 20px var(--goobs-gold-a60), inset 0 0 15px var(--goobs-gold-a30);
 
   /* sacred status indicator */
-  --cci-status-bg: rgba(255, 215, 0, 0.3);
-  --cci-status-valid-bg: #ffd700;
+  --cci-status-bg: var(--goobs-gold-a30);
+  --cci-status-valid-bg: var(--goobs-gold);
 
   /* sacred success container */
   --cci-success-bg: rgba(10, 10, 10, 0.95);
   --cci-success-border-width: 2px;
-  --cci-success-border-color: rgba(255, 215, 0, 0.6);
-  --cci-success-shadow:
-    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+  --cci-success-border-color: var(--goobs-gold-a60);
+  --cci-success-shadow: var(--goobs-shadow-sacred-glow);
   --cci-success-bg-image:
     radial-gradient(
       circle at center,
-      rgba(255, 215, 0, 0.1) 0%,
+      var(--goobs-gold-a10) 0%,
       transparent 50%
     ),
-    linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+    linear-gradient(135deg, var(--goobs-gold-a05) 0%, transparent 50%);
 
   /* sacred success icon */
   --cci-success-icon-size: 3.75rem;
-  --cci-success-icon-color: #ffd700;
-  --cci-success-icon-filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+  --cci-success-icon-color: var(--goobs-gold);
+  --cci-success-icon-filter: drop-shadow(0 0 20px var(--goobs-gold-a80));
 
   /* sacred success message */
-  --cci-success-message-color: #ffd700;
-  --cci-success-message-font-family: 'Cinzel', serif;
+  --cci-success-message-color: var(--goobs-gold);
+  --cci-success-message-font-family: var(--goobs-font-sacred);
   --cci-success-message-letter-spacing: 0.1em;
   --cci-success-message-text-transform: uppercase;
-  --cci-success-message-text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  --cci-success-message-text-shadow: 0 0 10px var(--goobs-gold-a70);
 
   position: relative;
   display: flex;
@@ -116,8 +114,7 @@
   --cci-container-bg: rgba(255, 255, 255, 0.95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(226, 232, 240, 0.8);
-  --cci-container-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --cci-container-shadow: var(--goobs-shadow-light-sm);
   --cci-container-bg-image: none;
 
   --cci-hover-transform: translateY(-1px);
@@ -125,35 +122,34 @@
     0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
   --cci-hover-border-color: rgba(59, 130, 246, 0.3);
 
-  --cci-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --cci-transition: var(--goobs-transition-medium);
 
-  --cci-input-color: rgb(31, 41, 55);
-  --cci-input-bg: rgb(255, 255, 255);
-  --cci-input-border-color: rgb(209, 213, 219);
-  --cci-input-font-family: 'Inter', sans-serif;
-  --cci-input-font-weight: 500;
+  --cci-input-color: var(--goobs-light-text);
+  --cci-input-bg: var(--goobs-light-surface);
+  --cci-input-border-color: var(--goobs-light-border-strong);
+  --cci-input-font-family: var(--goobs-font-standard);
+  --cci-input-font-weight: var(--goobs-weight-medium);
   --cci-input-letter-spacing: 0.05em;
   --cci-input-text-shadow: none;
 
-  --cci-input-focus-border-color: rgb(59, 130, 246);
+  --cci-input-focus-border-color: var(--goobs-light-primary);
   --cci-input-focus-transform: scale(1.02);
   --cci-input-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 
-  --cci-status-bg: rgb(239, 68, 68);
-  --cci-status-valid-bg: rgb(34, 197, 94);
+  --cci-status-bg: var(--goobs-danger);
+  --cci-status-valid-bg: var(--goobs-success);
 
   --cci-success-bg: rgba(240, 253, 244, 0.95);
   --cci-success-border-width: 1px;
   --cci-success-border-color: rgba(74, 222, 128, 0.4);
-  --cci-success-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --cci-success-shadow: var(--goobs-shadow-light-sm);
   --cci-success-bg-image: none;
 
-  --cci-success-icon-color: rgb(34, 197, 94);
+  --cci-success-icon-color: var(--goobs-success);
   --cci-success-icon-filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));
 
   --cci-success-message-color: rgb(21, 128, 61);
-  --cci-success-message-font-family: 'Inter', sans-serif;
+  --cci-success-message-font-family: var(--goobs-font-standard);
   --cci-success-message-letter-spacing: -0.025em;
   --cci-success-message-text-transform: none;
   --cci-success-message-text-shadow: none;
@@ -163,8 +159,7 @@
   --cci-container-bg: rgba(31, 41, 55, 0.95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(75, 85, 99, 0.8);
-  --cci-container-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --cci-container-shadow: var(--goobs-shadow-dark-sm);
   --cci-container-bg-image: none;
 
   --cci-hover-transform: translateY(-1px);
@@ -172,17 +167,17 @@
     0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   --cci-hover-border-color: rgba(96, 165, 250, 0.4);
 
-  --cci-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --cci-transition: var(--goobs-transition-medium);
 
-  --cci-input-color: rgb(243, 244, 246);
+  --cci-input-color: var(--goobs-dark-text);
   --cci-input-bg: rgb(55, 65, 81);
   --cci-input-border-color: rgb(107, 114, 128);
-  --cci-input-font-family: 'Inter', sans-serif;
-  --cci-input-font-weight: 500;
+  --cci-input-font-family: var(--goobs-font-standard);
+  --cci-input-font-weight: var(--goobs-weight-medium);
   --cci-input-letter-spacing: 0.05em;
   --cci-input-text-shadow: none;
 
-  --cci-input-focus-border-color: rgb(96, 165, 250);
+  --cci-input-focus-border-color: var(--goobs-dark-primary);
   --cci-input-focus-transform: scale(1.02);
   --cci-input-focus-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
 
@@ -192,15 +187,14 @@
   --cci-success-bg: rgba(20, 83, 45, 0.3);
   --cci-success-border-width: 1px;
   --cci-success-border-color: rgba(74, 222, 128, 0.4);
-  --cci-success-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --cci-success-shadow: var(--goobs-shadow-dark-sm);
   --cci-success-bg-image: none;
 
   --cci-success-icon-color: rgb(187, 247, 208);
   --cci-success-icon-filter: drop-shadow(0 2px 4px rgba(187, 247, 208, 0.3));
 
   --cci-success-message-color: rgb(187, 247, 208);
-  --cci-success-message-font-family: 'Inter', sans-serif;
+  --cci-success-message-font-family: var(--goobs-font-standard);
   --cci-success-message-letter-spacing: -0.025em;
   --cci-success-message-text-transform: none;
   --cci-success-message-text-shadow: none;
@@ -257,7 +251,7 @@
   border-width: 1px;
   border-style: solid;
   border-color: var(--cci-input-border-color);
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   text-shadow: var(--cci-input-text-shadow);
   text-align: center;
   outline: none;
@@ -321,7 +315,7 @@
   border-width: var(--cci-success-border-width);
   border-style: solid;
   border-color: var(--cci-success-border-color);
-  border-radius: 12px;
+  border-radius: var(--goobs-radius-xl);
   box-shadow: var(--cci-success-shadow);
   backdrop-filter: blur(8px);
   padding: 1.5rem;
@@ -364,7 +358,7 @@
 }
 
 .bottomGlyph {
-  color: rgba(255, 215, 0, 0.3);
+  color: var(--goobs-gold-a30);
   font-size: 0.75rem;
   animation: cci-sacred-pulse 2s infinite alternate;
 }

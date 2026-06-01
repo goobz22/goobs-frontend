@@ -14,24 +14,24 @@
    -------------------------------------------------------------------------- */
 .root {
   /* Tokens (sacred defaults) */
-  --stepper-gold: #ffd700;
-  --stepper-icon-bg-completed: rgba(255, 215, 0, 0.3);
-  --stepper-icon-bg-active: rgba(255, 215, 0, 0.5);
+  --stepper-gold: var(--goobs-gold);
+  --stepper-icon-bg-completed: var(--goobs-gold-a30);
+  --stepper-icon-bg-active: var(--goobs-gold-a50);
   --stepper-icon-bg-error: rgba(255, 107, 107, 0.3);
-  --stepper-icon-bg-inactive: rgba(0, 0, 0, 0.6);
-  --stepper-icon-border: rgba(255, 215, 0, 0.3);
-  --stepper-icon-border-active: rgba(255, 215, 0, 0.6);
-  --stepper-connector: rgba(255, 215, 0, 0.3);
-  --stepper-label: rgba(255, 255, 255, 0.9);
-  --stepper-label-disabled: rgba(255, 255, 255, 0.4);
-  --stepper-label-hover-bg: rgba(255, 215, 0, 0.2);
-  --stepper-icon-color: #ffd700;
+  --stepper-icon-bg-inactive: var(--goobs-sacred-control-bg);
+  --stepper-icon-border: var(--goobs-gold-a30);
+  --stepper-icon-border-active: var(--goobs-gold-a60);
+  --stepper-connector: var(--goobs-gold-a30);
+  --stepper-label: var(--goobs-sacred-text);
+  --stepper-label-disabled: var(--goobs-sacred-text-muted);
+  --stepper-label-hover-bg: var(--goobs-gold-a20);
+  --stepper-icon-color: var(--goobs-gold);
   --stepper-icon-color-error: #ff6b6b;
-  --stepper-icon-color-inactive: rgba(255, 255, 255, 0.4);
-  --stepper-completed-box-bg: rgba(255, 215, 0, 0.1);
-  --stepper-completed-box-border: rgba(255, 215, 0, 0.3);
-  --stepper-completed-title: #ffd700;
-  --stepper-font-family: 'Cinzel', serif;
+  --stepper-icon-color-inactive: var(--goobs-sacred-text-muted);
+  --stepper-completed-box-bg: var(--goobs-gold-a10);
+  --stepper-completed-box-border: var(--goobs-gold-a30);
+  --stepper-completed-title: var(--goobs-gold);
+  --stepper-font-family: var(--goobs-font-sacred);
 
   width: 100%;
   position: relative;
@@ -42,20 +42,20 @@
   --stepper-icon-bg-completed: #f0f9ff;
   --stepper-icon-bg-active: #eff6ff;
   --stepper-icon-bg-error: transparent;
-  --stepper-icon-bg-inactive: #f9fafb;
-  --stepper-icon-border: #e5e7eb;
-  --stepper-icon-border-active: #2563eb;
-  --stepper-connector: #e5e7eb;
-  --stepper-label: #1f2937;
-  --stepper-label-disabled: #9ca3af;
+  --stepper-icon-bg-inactive: var(--goobs-light-surface-raised);
+  --stepper-icon-border: var(--goobs-light-border);
+  --stepper-icon-border-active: var(--goobs-light-primary-strong);
+  --stepper-connector: var(--goobs-light-border);
+  --stepper-label: var(--goobs-light-text);
+  --stepper-label-disabled: var(--goobs-light-text-disabled);
   --stepper-label-hover-bg: rgba(59, 130, 246, 0.1);
-  --stepper-icon-color: #2563eb;
-  --stepper-icon-color-error: #ef4444;
-  --stepper-icon-color-inactive: #9ca3af;
+  --stepper-icon-color: var(--goobs-light-primary-strong);
+  --stepper-icon-color-error: var(--goobs-danger);
+  --stepper-icon-color-inactive: var(--goobs-light-text-disabled);
   --stepper-completed-box-bg: rgba(37, 99, 235, 0.08);
   --stepper-completed-box-border: rgba(37, 99, 235, 0.3);
-  --stepper-completed-title: #2563eb;
-  --stepper-font-family: system-ui, -apple-system, sans-serif;
+  --stepper-completed-title: var(--goobs-light-primary-strong);
+  --stepper-font-family: var(--goobs-font-standard);
 }
 
 /* DARK theme overrides (from theme/stepper.ts darkTheme) */
@@ -63,20 +63,20 @@
   --stepper-icon-bg-completed: #1e3a8a;
   --stepper-icon-bg-active: #1e40af;
   --stepper-icon-bg-error: transparent;
-  --stepper-icon-bg-inactive: #1f2937;
-  --stepper-icon-border: #374151;
-  --stepper-icon-border-active: #60a5fa;
-  --stepper-connector: #374151;
-  --stepper-label: #f3f4f6;
-  --stepper-label-disabled: #6b7280;
+  --stepper-icon-bg-inactive: var(--goobs-dark-surface);
+  --stepper-icon-border: var(--goobs-dark-border);
+  --stepper-icon-border-active: var(--goobs-dark-primary);
+  --stepper-connector: var(--goobs-dark-border);
+  --stepper-label: var(--goobs-dark-text);
+  --stepper-label-disabled: var(--goobs-dark-text-muted);
   --stepper-label-hover-bg: rgba(96, 165, 250, 0.15);
-  --stepper-icon-color: #60a5fa;
-  --stepper-icon-color-error: #ef4444;
-  --stepper-icon-color-inactive: #6b7280;
+  --stepper-icon-color: var(--goobs-dark-primary);
+  --stepper-icon-color-error: var(--goobs-danger);
+  --stepper-icon-color-inactive: var(--goobs-dark-text-muted);
   --stepper-completed-box-bg: rgba(96, 165, 250, 0.1);
   --stepper-completed-box-border: rgba(96, 165, 250, 0.3);
-  --stepper-completed-title: #60a5fa;
-  --stepper-font-family: system-ui, -apple-system, sans-serif;
+  --stepper-completed-title: var(--goobs-dark-primary);
+  --stepper-font-family: var(--goobs-font-standard);
 }
 
 /* --------------------------------------------------------------------------
@@ -171,11 +171,11 @@
   background: none;
   border: none;
   color: var(--stepper-label);
-  font-size: 14px;
+  font-size: var(--goobs-text-md);
   font-family: var(--stepper-font-family);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: var(--goobs-space-2xs) var(--goobs-space-xs);
+  border-radius: var(--goobs-radius-sm);
   transition: all 0.3s ease;
   background-color: transparent;
   text-decoration: none;
@@ -219,7 +219,7 @@
 .wizardCompleted {
   margin-top: 2rem;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   background-color: var(--stepper-completed-box-bg);
   border: 1px solid var(--stepper-completed-box-border);
 }

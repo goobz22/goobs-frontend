@@ -29,57 +29,41 @@
   margin-top: 0.5rem;
   z-index: 1300;
 
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
+  background-color: var(--goobs-light-surface);
+  border-radius: var(--goobs-radius-xl);
   /* SHADOWS.light.medium */
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: var(--goobs-shadow-light-md);
+  border: 1px solid var(--goobs-light-border);
   backdrop-filter: blur(8px);
 
   /* TRANSITIONS.medium */
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--goobs-transition-medium);
 }
 
 /* --------------------------------------------------------------------------
    DARK THEME
    -------------------------------------------------------------------------- */
 .popover[data-theme='dark'] {
-  background-color: rgba(31, 41, 55, 0.95);
-  border-radius: 12px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(75, 85, 99, 0.8);
+  background-color: var(--goobs-dark-surface);
+  border-radius: var(--goobs-radius-xl);
+  box-shadow: var(--goobs-shadow-dark-md);
+  border: 1px solid var(--goobs-dark-border-strong);
   backdrop-filter: blur(8px);
   /* TRANSITIONS.medium */
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--goobs-transition-medium);
 }
 
 /* --------------------------------------------------------------------------
    SACRED THEME
    -------------------------------------------------------------------------- */
 .popover[data-theme='sacred'] {
-  background-color: rgba(10, 10, 10, 0.95);
-  border-radius: 8px;
+  background-color: var(--goobs-sacred-surface);
+  border-radius: var(--goobs-radius-lg);
   /* SHADOWS.sacred.medium */
-  box-shadow:
-    0 0 30px rgba(255, 215, 0, 0.5),
-    0 0 60px rgba(255, 215, 0, 0.2);
-  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: var(--goobs-shadow-sacred-glow);
+  border: 2px solid var(--goobs-gold-a40);
   backdrop-filter: blur(4px);
-  background-image:
-    radial-gradient(
-      circle at top right,
-      rgba(255, 215, 0, 0.05) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at bottom left,
-      rgba(255, 215, 0, 0.03) 0%,
-      transparent 50%
-    );
+  background-image: var(--goobs-sacred-ambient);
   /* TRANSITIONS.premium */
-  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--goobs-transition-premium);
 }

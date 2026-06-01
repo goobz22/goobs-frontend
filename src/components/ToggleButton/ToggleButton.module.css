@@ -27,7 +27,7 @@
   overflow: hidden;
   letter-spacing: -0.025em;
   min-height: 44px;
-  gap: 8px;
+  gap: var(--goobs-space-xs);
   backdrop-filter: blur(8px);
   text-align: center;
   white-space: nowrap;
@@ -42,26 +42,26 @@
   text-decoration: none;
   box-sizing: border-box;
 
-  border-radius: 6px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--goobs-radius-md);
+  border: 1px solid var(--goobs-light-border);
   font-weight: 500;
   cursor: pointer;
   opacity: 1;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--goobs-transition-medium);
 
   /* Light/dark container fontFamily survivor from the old
      baseStyles.container ('"Inter", sans-serif'). The sacred override
      below re-sets font-family to var(--font-cinzel),serif so it wins
      for the sacred theme. */
-  font-family: 'Inter', sans-serif;
+  font-family: var(--goobs-font-standard);
 
   /* Light theme, not-selected palette. */
-  background-color: rgba(241, 245, 249, 0.8);
-  color: #475569;
+  background-color: var(--goobs-light-surface-raised);
+  color: var(--goobs-light-text-secondary);
 
   /* Size: medium default (sizeConfig.medium). */
-  padding: 8px 16px;
-  font-size: 16px;
+  padding: var(--goobs-space-xs) var(--goobs-space-md);
+  font-size: var(--goobs-text-xl);
 }
 
 /* --------------------------------------------------------------------------
@@ -69,11 +69,11 @@
    -------------------------------------------------------------------------- */
 .button[data-size='small'] {
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: var(--goobs-text-md);
 }
 
 .button[data-size='large'] {
-  padding: 12px 24px;
+  padding: var(--goobs-space-sm) var(--goobs-space-lg);
   font-size: 18px;
 }
 
@@ -82,13 +82,13 @@
    -------------------------------------------------------------------------- */
 .button[data-selected='true'] {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
-  border-color: #2563eb;
+  color: var(--goobs-light-primary-strong);
+  border-color: var(--goobs-light-primary-strong);
   font-weight: 600;
 }
 
 .button:hover:not(:disabled) {
-  background-color: rgba(226, 232, 240, 1);
+  background-color: var(--goobs-light-border);
 }
 
 .button[data-selected='true']:hover:not(:disabled) {
@@ -100,14 +100,14 @@
    -------------------------------------------------------------------------- */
 .button[data-theme='dark'] {
   background-color: rgba(75, 85, 99, 0.3);
-  color: #d1d5db;
-  border-color: rgba(75, 85, 99, 0.8);
+  color: var(--goobs-dark-text-secondary);
+  border-color: var(--goobs-dark-border);
 }
 
 .button[data-theme='dark'][data-selected='true'] {
   background-color: rgba(59, 130, 246, 0.3);
-  color: #60a5fa;
-  border-color: #60a5fa;
+  color: var(--goobs-dark-primary);
+  border-color: var(--goobs-dark-primary);
 }
 
 .button[data-theme='dark']:hover:not(:disabled) {
@@ -122,52 +122,52 @@
    SACRED THEME — full glow / gold treatment
    -------------------------------------------------------------------------- */
 .button[data-theme='sacred'] {
-  background-color: rgba(255, 215, 0, 0.05);
-  color: rgba(255, 215, 0, 0.8);
-  border-color: rgba(255, 215, 0, 0.3);
+  background-color: var(--goobs-gold-a05);
+  color: var(--goobs-gold-a80);
+  border-color: var(--goobs-gold-a30);
   font-family: var(--font-cinzel), serif;
-  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
-  box-shadow: 0 0 4px rgba(255, 215, 0, 0.1);
+  text-shadow: 0 0 2px var(--goobs-gold-a30);
+  box-shadow: 0 0 4px var(--goobs-gold-a10);
 
   /* Sacred container survivor metrics from the old baseStyles.container
      (sacred theme) that the base .button class — keyed to the light
      defaults — doesn't carry. Transcribed 1:1 from theme/button.ts:
      minHeight 52px / gap 12px / letterSpacing 0.05em / uppercase. */
   min-height: 52px;
-  gap: 12px;
-  letter-spacing: 0.05em;
+  gap: var(--goobs-space-sm);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
   text-transform: uppercase;
 }
 
 .button[data-theme='sacred'][data-selected='true'] {
-  background-color: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
-  border-color: rgba(255, 215, 0, 0.8);
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+  background-color: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
+  border-color: var(--goobs-gold-a80);
+  text-shadow: 0 0 4px var(--goobs-gold-a60);
   box-shadow:
-    0 0 12px rgba(255, 215, 0, 0.3),
-    inset 0 0 8px rgba(255, 215, 0, 0.1);
+    0 0 12px var(--goobs-gold-a30),
+    inset 0 0 8px var(--goobs-gold-a10);
 }
 
 .button[data-theme='sacred']:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.1);
+  background-color: var(--goobs-gold-a10);
   box-shadow:
-    0 0 16px rgba(255, 215, 0, 0.4),
-    inset 0 0 8px rgba(255, 215, 0, 0.1);
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    0 0 16px var(--goobs-gold-a40),
+    inset 0 0 8px var(--goobs-gold-a10);
+  text-shadow: 0 0 6px var(--goobs-gold-a80);
 }
 
 .button[data-theme='sacred'][data-selected='true']:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.3);
+  background-color: var(--goobs-gold-a30);
   box-shadow:
-    0 0 16px rgba(255, 215, 0, 0.4),
-    inset 0 0 8px rgba(255, 215, 0, 0.1);
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+    0 0 16px var(--goobs-gold-a40),
+    inset 0 0 8px var(--goobs-gold-a10);
+  text-shadow: 0 0 6px var(--goobs-gold-a80);
 }
 
 /* Sacred pressed (old isPressed branch — only sacred had transform/extra bg). */
 .button[data-theme='sacred']:active:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.4);
+  background-color: var(--goobs-gold-a40);
   transform: translateY(1px);
 }
 
@@ -219,16 +219,16 @@
   position: relative;
   overflow: hidden;
   /* Light theme defaults. */
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--goobs-light-border);
   border-radius: 10px;
 }
 
 .group[data-theme='dark'] {
-  border-color: rgba(75, 85, 99, 0.8);
+  border-color: var(--goobs-dark-border);
   border-radius: 10px;
 }
 
 .group[data-theme='sacred'] {
-  border-color: rgba(255, 215, 0, 0.4);
-  border-radius: 12px;
+  border-color: var(--goobs-gold-a40);
+  border-radius: var(--goobs-radius-xl);
 }

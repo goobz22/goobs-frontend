@@ -97,10 +97,17 @@ const MetricCard = memo(function MetricCard({
   dataField,
   styles: propStyles,
 }: MetricCardProps) {
-  // Sacred is the CSS base default; every other value (undefined / 'light' /
-  // 'dark') resolves to the [data-theme='light'] override block — exactly the
-  // prior two-branch isSacredTheme behaviour.
-  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
+  // Sacred is the CSS base default. 'dark' and 'light' each have their own
+  // [data-theme] override block in Card.module.css, so emit the requested
+  // theme verbatim instead of collapsing 'dark' → 'light' (which previously
+  // rendered a white card on a dark backdrop — components-metric--dark-theme).
+  // Anything unrecognised (undefined / arbitrary string) defaults to light.
+  const theme =
+    propStyles?.theme === 'sacred'
+      ? 'sacred'
+      : propStyles?.theme === 'dark'
+        ? 'dark'
+        : 'light'
   const label = subtitle || title
 
   // CSS custom-property overrides — only emit the ones the caller actually

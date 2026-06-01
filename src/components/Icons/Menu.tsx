@@ -54,7 +54,6 @@ const MenuIcon: React.FC<MenuIconProps> = ({
       >
         <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

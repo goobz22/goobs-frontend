@@ -58,10 +58,10 @@
 .dialog {
   position: relative;
   /* sacred defaults */
-  background-color: var(--dialog-bg, rgba(0, 0, 0, 0.95));
-  border: var(--dialog-border, 2px solid rgba(255, 215, 0, 0.5));
-  border-radius: var(--dialog-radius, 12px);
-  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(255, 215, 0, 0.3));
+  background-color: var(--dialog-bg, var(--goobs-sacred-surface));
+  border: var(--dialog-border, 2px solid var(--goobs-gold-a50));
+  border-radius: var(--dialog-radius, var(--goobs-radius-xl));
+  box-shadow: var(--dialog-shadow, var(--goobs-shadow-sacred-md));
   max-width: var(--dialog-max-width, 600px);
   width: var(--dialog-width, 100%);
   max-height: var(--dialog-max-height, 80vh);
@@ -73,15 +73,15 @@
 }
 
 .dialog[data-theme='light'] {
-  background-color: var(--dialog-bg, #ffffff);
+  background-color: var(--dialog-bg, var(--goobs-light-surface));
   border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
-  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(0, 0, 0, 0.2));
+  box-shadow: var(--dialog-shadow, var(--goobs-shadow-light-lg));
 }
 
 .dialog[data-theme='dark'] {
-  background-color: var(--dialog-bg, #ffffff);
+  background-color: var(--dialog-bg, var(--goobs-light-surface));
   border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
-  box-shadow: var(--dialog-shadow, 0 8px 32px rgba(0, 0, 0, 0.2));
+  box-shadow: var(--dialog-shadow, var(--goobs-shadow-light-lg));
 }
 
 /* --------------------------------------------------------------------------
@@ -92,7 +92,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   /* sacred defaults */
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
 }
 
@@ -115,17 +115,17 @@
 }
 
 .content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
+  background: var(--goobs-sacred-control-bg);
+  border-radius: var(--goobs-radius-sm);
 }
 
 .content::-webkit-scrollbar-thumb {
-  background: rgba(255, 215, 0, 0.5);
-  border-radius: 4px;
+  background: var(--goobs-gold-a50);
+  border-radius: var(--goobs-radius-sm);
 }
 
 .content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 215, 0, 0.7);
+  background: var(--goobs-gold-a70);
 }
 
 .content[data-theme='light']::-webkit-scrollbar-track,

@@ -54,7 +54,6 @@ const BusinessCenterIcon: React.FC<BusinessCenterIconProps> = ({
       >
         <path d="M20 7H16V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 7.9 21.1 7 20 7ZM10 5H14V7H10V5ZM20 19H4V17H6V15H8V17H16V15H18V17H20V19ZM20 13H4V9H20V13Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

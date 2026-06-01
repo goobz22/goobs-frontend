@@ -55,7 +55,6 @@ const PriorityHighIcon: React.FC<PriorityHighIconProps> = ({
         <path d="M14 20H10V11H14V20ZM14 9H10V4H14V9Z" />
         <path d="M12 2L14.5 4.5L12 7L9.5 4.5L12 2Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

@@ -24,11 +24,11 @@
   width: 100%;
   max-width: 100%;
   height: auto;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: #ffffff;
+  padding: var(--goobs-space-md);
+  border-radius: var(--goobs-radius-lg);
+  background-color: var(--goobs-light-surface);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: var(--paper-shadow, 0 1px 4px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--paper-shadow, var(--goobs-shadow-light-sm));
   color: rgba(0, 0, 0, 0.87);
   font-family: inherit;
   transition: all 0.3s ease;
@@ -46,10 +46,10 @@
    The glow box-shadow is elevation-driven and supplied via --paper-shadow.
    -------------------------------------------------------------------------- */
 .root[data-theme='sacred'] {
-  padding: 24px;
-  background-color: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(255, 215, 0, 0.3);
-  color: rgba(255, 255, 255, 0.9);
+  padding: var(--goobs-space-lg);
+  background-color: var(--goobs-sacred-surface);
+  border: 2px solid var(--goobs-gold-a30);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
   backdrop-filter: blur(20px);
 }

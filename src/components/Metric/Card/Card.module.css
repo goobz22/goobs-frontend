@@ -1,9 +1,9 @@
 /* ==========================================================================
    METRIC CARD - CSS MODULE
    Theme via [data-theme] on the card root. Sacred is the hardcoded base
-   default; [data-theme='light'] is the explicit override block. The TSX
-   resolves the attribute to 'sacred' only when styles.theme === 'sacred',
-   otherwise 'light' (matching the prior two-branch isSacredTheme behaviour).
+   default; [data-theme='light'] and [data-theme='dark'] are explicit
+   override blocks. The TSX emits the requested theme verbatim ('sacred' |
+   'dark' | 'light'), defaulting unrecognised values to 'light'.
    Caller knobs (color, width, padding, radius) arrive as CSS custom
    properties set inline so they don't grow the bundle's class surface.
    ========================================================================== */
@@ -12,14 +12,14 @@
    Card root — sacred theme (dark + gold) is the base default
    -------------------------------------------------------------------------- */
 .card {
-  --mc-bg: rgba(0, 0, 0, 0.4);
-  --mc-border: rgba(212, 175, 55, 0.25);
-  --mc-accent: #d4af37;
-  --mc-label: rgba(255, 255, 255, 0.7);
-  --mc-value-family: 'Cinzel', serif;
+  --mc-bg: var(--goobs-sacred-control-bg);
+  --mc-border: var(--goobs-sacred-control-border);
+  --mc-accent: var(--goobs-sacred-primary);
+  --mc-label: var(--goobs-sacred-text-secondary);
+  --mc-value-family: var(--goobs-font-sacred);
   --mc-value-size: 1.25rem;
-  --mc-padding: 12px 16px;
-  --mc-radius: 8px;
+  --mc-padding: var(--goobs-space-sm) var(--goobs-space-md);
+  --mc-radius: var(--goobs-radius-lg);
   --mc-min-width: 80px;
 
   display: flex;
@@ -36,14 +36,28 @@
 }
 
 /* --------------------------------------------------------------------------
-   Light theme (default for undefined / light / dark — non-sacred branch)
+   Light theme (default for undefined / unrecognised theme values)
    -------------------------------------------------------------------------- */
 .card[data-theme='light'] {
-  --mc-bg: rgba(255, 255, 255, 0.9);
+  --mc-bg: var(--goobs-light-surface);
   --mc-border: rgba(25, 118, 210, 0.25);
-  --mc-accent: #1976d2;
-  --mc-label: #6b7280;
-  --mc-value-family: 'Inter', sans-serif;
+  --mc-accent: var(--goobs-light-primary);
+  --mc-label: var(--goobs-light-text-muted);
+  --mc-value-family: var(--goobs-font-standard);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme — was previously MISSING, so theme:'dark' fell through to the
+   light block above and rendered a white card on the dark backdrop
+   (components-metric--dark-theme). Remap to the dark role tokens: dark
+   surface + border, light-on-dark primary accent, muted dark label.
+   -------------------------------------------------------------------------- */
+.card[data-theme='dark'] {
+  --mc-bg: var(--goobs-dark-surface);
+  --mc-border: var(--goobs-dark-border);
+  --mc-accent: var(--goobs-dark-primary);
+  --mc-label: var(--goobs-dark-text-muted);
+  --mc-value-family: var(--goobs-font-standard);
 }
 
 /* --------------------------------------------------------------------------
@@ -51,7 +65,7 @@
    -------------------------------------------------------------------------- */
 .icon {
   font-size: 1rem;
-  margin-bottom: 4px;
+  margin-bottom: var(--goobs-space-2xs);
   color: var(--mc-accent);
   display: flex;
   align-items: center;
@@ -69,8 +83,8 @@
 .label {
   font-size: 0.65rem;
   color: var(--mc-label);
-  font-family: 'Inter', sans-serif;
-  margin-top: 4px;
+  font-family: var(--goobs-font-standard);
+  margin-top: var(--goobs-space-2xs);
   text-align: center;
 }
 
@@ -83,13 +97,13 @@
   align-items: center;
   gap: 2px;
   font-size: 0.7rem;
-  margin-top: 4px;
+  margin-top: var(--goobs-space-2xs);
 }
 
 .trend.positive {
-  color: #10b981;
+  color: var(--goobs-success);
 }
 
 .trend.negative {
-  color: #ef4444;
+  color: var(--goobs-danger);
 }

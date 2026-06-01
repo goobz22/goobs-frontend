@@ -54,7 +54,6 @@ const ChevronRightIcon: React.FC<ChevronRightIconProps> = ({
       >
         <path d="M8.59 16.59L10 18L16 12L10 6L8.59 7.41L13.17 12L8.59 16.59Z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

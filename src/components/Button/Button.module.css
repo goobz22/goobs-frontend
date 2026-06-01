@@ -23,14 +23,14 @@
   width: auto;
   min-width: fit-content;
   height: auto;
-  min-height: 32px;
+  min-height: var(--goobs-control-height);
   padding: 5px 12px;
 
   /* Typography - Sacred theme uses Cinzel */
-  font-family: 'Cinzel', serif;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-family: var(--goobs-font-sacred);
+  font-size: var(--goobs-text-sm);
+  font-weight: var(--goobs-weight-medium);
+  letter-spacing: var(--goobs-tracking-sacred);
   text-transform: none;
   white-space: nowrap;
   user-select: none;
@@ -40,10 +40,10 @@
      in the same family as Filter/Metric accordions. Was a heavier
      gold-on-black plate; redesigned 2026-05-22 to read as a control
      not an action affordance card. */
-  color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 6px;
+  color: var(--goobs-sacred-text);
+  background-color: var(--goobs-sacred-control-bg);
+  border: 1px solid var(--goobs-gold-a25);
+  border-radius: var(--goobs-radius-md);
   box-shadow: none;
   outline: none;
 
@@ -63,29 +63,29 @@
    properties (set on the inline style by index.tsx); when unset, the
    sacred defaults below win via the var() fallback. */
 .button:hover:not(:disabled) {
-  background-color: var(--btn-hover-bg, rgba(255, 215, 0, 0.14));
-  border-color: var(--btn-hover-border, rgba(255, 215, 0, 0.5));
-  box-shadow: var(--btn-hover-shadow, 0 0 8px rgba(255, 215, 0, 0.18));
+  background-color: var(--btn-hover-bg, var(--goobs-gold-a15));
+  border-color: var(--btn-hover-border, var(--goobs-gold-a50));
+  box-shadow: var(--btn-hover-shadow, 0 0 8px var(--goobs-gold-a20));
   transform: var(--btn-hover-transform, none);
 }
 
 /* Active/Pressed state - Sacred theme */
 .button:active:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.22);
+  background-color: var(--goobs-gold-a20);
 }
 
 /* Selected state - Sacred theme */
 .button.selected {
-  background-color: rgba(255, 215, 0, 0.22);
-  border-color: rgba(255, 215, 0, 0.55);
+  background-color: var(--goobs-gold-a20);
+  border-color: var(--goobs-gold-a50);
 }
 
 /* Disabled state - Sacred theme */
 .button:disabled {
   background-color: rgba(0, 0, 0, 0.25);
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
-  border-color: rgba(255, 215, 0, 0.12);
+  border-color: var(--goobs-gold-a12);
 }
 
 /* --------------------------------------------------------------------------
@@ -144,17 +144,16 @@
    -------------------------------------------------------------------------- */
 
 .button[data-theme='light'] {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  letter-spacing: 0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
+  letter-spacing: var(--goobs-tracking-tight);
 }
 
 .button[data-theme='light']:hover:not(:disabled) {
-  background-color: var(--btn-hover-bg, #f8fafc);
-  border-color: var(--btn-hover-border, #cbd5e1);
+  background-color: var(--btn-hover-bg, var(--goobs-light-surface-raised));
+  border-color: var(--btn-hover-border, var(--goobs-light-border-strong));
   box-shadow: var(--btn-hover-shadow, 0 1px 4px rgba(0, 0, 0, 0.06));
   transform: var(--btn-hover-transform, none);
 }
@@ -165,12 +164,12 @@
 
 .button[data-theme='light'].selected {
   background-color: rgba(59, 130, 246, 0.08);
-  border-color: #3b82f6;
+  border-color: var(--goobs-light-primary);
 }
 
 .button[data-theme='light']:disabled {
   background-color: #f3f4f6;
-  color: #9ca3af;
+  color: var(--goobs-light-text-disabled);
   border-color: #e5e7eb;
 }
 
@@ -179,17 +178,16 @@
    -------------------------------------------------------------------------- */
 
 .button[data-theme='dark'] {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
-  background-color: #1e293b;
-  border-color: #334155;
-  letter-spacing: 0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
+  letter-spacing: var(--goobs-tracking-tight);
 }
 
 .button[data-theme='dark']:hover:not(:disabled) {
-  background-color: var(--btn-hover-bg, #273746);
-  border-color: var(--btn-hover-border, #475569);
+  background-color: var(--btn-hover-bg, var(--goobs-dark-surface-raised));
+  border-color: var(--btn-hover-border, var(--goobs-dark-border-strong));
   box-shadow: var(--btn-hover-shadow, 0 1px 4px rgba(0, 0, 0, 0.18));
   transform: var(--btn-hover-transform, none);
 }
@@ -200,13 +198,13 @@
 
 .button[data-theme='dark'].selected {
   background-color: rgba(59, 130, 246, 0.18);
-  border-color: #3b82f6;
+  border-color: var(--goobs-dark-primary-strong);
 }
 
 .button[data-theme='dark']:disabled {
-  background-color: #1e293b;
-  color: #64748b;
-  border-color: #334155;
+  background-color: var(--goobs-dark-surface);
+  color: var(--goobs-dark-text-muted);
+  border-color: var(--goobs-dark-border);
 }
 
 /* --------------------------------------------------------------------------
@@ -215,9 +213,9 @@
 
 @media (max-width: 768px) {
   .button {
-    min-height: 28px;
+    min-height: var(--goobs-control-height-compact);
     padding: 4px 10px;
-    font-size: 12px;
+    font-size: var(--goobs-text-xs);
     gap: 5px;
   }
 }
@@ -228,22 +226,22 @@
 
 .buttonGroup {
   display: flex;
-  border-radius: 6px;
+  border-radius: var(--goobs-radius-md);
   overflow: hidden;
   background: transparent;
-  box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
-  border: 1px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 6px var(--goobs-gold-a20);
+  border: 1px solid var(--goobs-gold-a25);
   padding: 0;
 }
 
 .buttonGroup[data-theme='light'] {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border-color: #e2e8f0;
+  border-color: var(--goobs-light-border);
 }
 
 .buttonGroup[data-theme='dark'] {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border-color: #334155;
+  border-color: var(--goobs-dark-border);
 }
 
 /* Buttons inside ButtonGroup */
@@ -257,21 +255,21 @@
 }
 
 .buttonGroup .button:first-child {
-  border-radius: 6px 0 0 6px;
+  border-radius: var(--goobs-radius-md) 0 0 var(--goobs-radius-md);
 }
 
 .buttonGroup .button:last-child {
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--goobs-radius-md) var(--goobs-radius-md) 0;
 }
 
 .buttonGroup .button:not(:last-child) {
-  border-right: 1px solid rgba(255, 215, 0, 0.4);
+  border-right: 1px solid var(--goobs-gold-a40);
 }
 
 .buttonGroup[data-theme='light'] .button:not(:last-child) {
-  border-right-color: #e2e8f0;
+  border-right-color: var(--goobs-light-border);
 }
 
 .buttonGroup[data-theme='dark'] .button:not(:last-child) {
-  border-right-color: #334155;
+  border-right-color: var(--goobs-dark-border);
 }

@@ -13,32 +13,30 @@
    -------------------------------------------------------------------------- */
 .container {
   position: relative;
-  border-radius: 8px;
-  background-color: #1f2937;
-  border: 1px solid #374151;
+  border-radius: var(--goobs-radius-lg);
+  background-color: var(--goobs-dark-surface);
+  border: 1px solid var(--goobs-dark-border);
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
   /* TRANSITIONS.medium */
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--goobs-transition-medium);
   box-sizing: border-box;
 }
 
 .container[data-theme='light'] {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
+  background-color: var(--goobs-light-surface);
+  border: 1px solid var(--goobs-light-border-strong);
 }
 
 .container[data-theme='sacred'] {
   border-radius: 0px;
   background-color: #1c1917;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid var(--goobs-gold-a30);
   /* SHADOWS.sacred.medium */
-  box-shadow:
-    0 0 30px rgba(255, 215, 0, 0.5),
-    0 0 60px rgba(255, 215, 0, 0.2);
+  box-shadow: var(--goobs-shadow-sacred-glow);
   /* sacred container has no transition in the old theme */
   transition: none;
 }
@@ -65,7 +63,7 @@
   padding: 0 1rem;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--goobs-dark-border);
   position: relative;
   z-index: 20;
   overflow: hidden;
@@ -75,15 +73,15 @@
 
 .container[data-theme='light'] .header {
   background-color: #f3f4f6;
-  border-bottom: 1px solid #d1d5db;
+  border-bottom: 1px solid var(--goobs-light-border-strong);
 }
 
 .container[data-theme='sacred'] .header {
   background-color: rgba(0, 0, 0, 0.9);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  border-bottom: 1px solid var(--goobs-gold-a30);
   background-image: linear-gradient(
     to right,
-    rgba(255, 215, 0, 0.1),
+    var(--goobs-gold-a10),
     transparent
   );
 }
@@ -106,10 +104,10 @@
 .langText {
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: #d1d5db;
-  font-family: monospace;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  color: var(--goobs-dark-text-secondary);
+  font-family: var(--goobs-font-mono);
+  font-weight: var(--goobs-weight-semibold);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
   /* inline overrides from the old TSX */
   overflow: hidden;
   text-overflow: ellipsis;
@@ -117,13 +115,13 @@
 }
 
 .container[data-theme='light'] .langText {
-  color: #374151;
+  color: var(--goobs-light-text-secondary);
 }
 
 .container[data-theme='sacred'] .langText {
-  color: rgba(255, 215, 0, 0.8);
-  font-family: 'Cinzel', serif;
-  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
+  color: var(--goobs-gold-a80);
+  font-family: var(--goobs-font-sacred);
+  text-shadow: 0 0 2px var(--goobs-gold-a30);
 }
 
 /* --------------------------------------------------------------------------
@@ -153,12 +151,12 @@
 
 .container[data-theme='light'] .codeBlock {
   background-color: #f9fafb;
-  color: #1f2937;
+  color: var(--goobs-light-text);
 }
 
 .container[data-theme='sacred'] .codeBlock {
   background-color: transparent;
-  color: rgba(255, 215, 0, 0.9);
+  color: var(--goobs-gold-a90);
 }
 
 /* --------------------------------------------------------------------------
@@ -166,7 +164,7 @@
    -------------------------------------------------------------------------- */
 .lineNumbers {
   background-color: rgba(0, 0, 0, 0.5);
-  border-right: 1px solid #374151;
+  border-right: 1px solid var(--goobs-dark-border);
   padding: 1rem 0.5rem;
   user-select: none;
   position: relative;
@@ -174,30 +172,30 @@
 
 .container[data-theme='light'] .lineNumbers {
   background-color: rgba(0, 0, 0, 0.05);
-  border-right: 1px solid #d1d5db;
+  border-right: 1px solid var(--goobs-light-border-strong);
 }
 
 .container[data-theme='sacred'] .lineNumbers {
   background-color: rgba(0, 0, 0, 0.5);
-  border-right: 1px solid rgba(255, 215, 0, 0.2);
+  border-right: 1px solid var(--goobs-gold-a20);
 }
 
 /* lineNumber — base = DARK */
 .lineNumber {
-  color: #9ca3af;
+  color: var(--goobs-dark-text-muted);
   font-size: 0.75rem;
   line-height: 1.5rem;
-  font-family: monospace;
+  font-family: var(--goobs-font-mono);
   text-align: right;
   padding-right: 0.5rem;
 }
 
 .container[data-theme='light'] .lineNumber {
-  color: #6b7280;
+  color: var(--goobs-light-text-muted);
 }
 
 .container[data-theme='sacred'] .lineNumber {
-  color: rgba(255, 215, 0, 0.4);
+  color: var(--goobs-gold-a40);
 }
 
 /* NOTE: the old sacred-theme TSX set
@@ -218,19 +216,19 @@
   flex-grow: 1;
   padding: 1rem;
   overflow: auto;
-  font-family: monospace;
+  font-family: var(--goobs-font-mono);
   font-size: 0.875rem;
   line-height: 1.5rem;
   color: #f9fafb;
 }
 
 .container[data-theme='light'] .pre {
-  color: #1f2937;
+  color: var(--goobs-light-text);
 }
 
 .container[data-theme='sacred'] .pre {
-  color: rgba(255, 215, 0, 0.9);
-  text-shadow: 0 0 2px rgba(255, 215, 0, 0.2);
+  color: var(--goobs-gold-a90);
+  text-shadow: 0 0 2px var(--goobs-gold-a20);
 }
 
 /* --------------------------------------------------------------------------
@@ -242,7 +240,7 @@
   background-image: linear-gradient(
     to bottom right,
     transparent,
-    rgba(255, 215, 0, 0.05),
+    var(--goobs-gold-a05),
     transparent
   );
   background-size: 200% 100%;
@@ -258,20 +256,20 @@
    so it belongs in CSS, scoped under [data-theme='sacred'].
    -------------------------------------------------------------------------- */
 .container[data-theme='sacred'] .pre :global(.hljs-keyword) {
-  color: #ffd700;
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+  color: var(--goobs-gold);
+  text-shadow: 0 0 4px var(--goobs-gold-a50);
 }
 
 .container[data-theme='sacred'] .pre :global(.hljs-string) {
-  color: rgba(255, 215, 0, 0.8);
+  color: var(--goobs-gold-a80);
 }
 
 .container[data-theme='sacred'] .pre :global(.hljs-comment) {
-  color: rgba(255, 215, 0, 0.5);
+  color: var(--goobs-gold-a50);
   font-style: italic;
 }
 
 .container[data-theme='sacred'] .pre :global(.hljs-function),
 .container[data-theme='sacred'] .pre :global(.hljs-title) {
-  color: rgba(255, 215, 0, 0.9);
+  color: var(--goobs-gold-a90);
 }

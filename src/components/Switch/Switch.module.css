@@ -19,83 +19,82 @@
 .container {
   /* Caller-overridable tokens (set inline as CSS vars when a styles?.x prop
      is supplied). The fallbacks below ARE the per-theme defaults. */
-  --switch-transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  --switch-gap: 12px;
+  --switch-transition: var(--goobs-transition-premium);
+  --switch-gap: var(--goobs-space-sm);
 
   --switch-track-width: 56px;
   --switch-track-height: 28px;
   --switch-track-radius: 14px;
-  --switch-track-bg: rgba(10, 10, 10, 0.9);
-  --switch-track-border-color: rgba(255, 215, 0, 0.3);
+  --switch-track-bg: var(--goobs-sacred-surface);
+  --switch-track-border-color: var(--goobs-gold-a30);
   --switch-track-border-width: 2px;
   --switch-track-backdrop: blur(8px);
   --switch-track-image:
     radial-gradient(
       circle at 25% 50%,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 75% 50%,
-      rgba(255, 215, 0, 0.05) 0%,
+      var(--goobs-gold-a05) 0%,
       transparent 50%
     );
 
-  --switch-track-checked-bg: rgba(10, 10, 10, 0.9);
-  --switch-track-checked-border: #ffd700;
-  --switch-track-checked-shadow:
-    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+  --switch-track-checked-bg: var(--goobs-sacred-surface);
+  --switch-track-checked-border: var(--goobs-gold);
+  --switch-track-checked-shadow: var(--goobs-shadow-sacred-glow);
   --switch-track-checked-image:
     radial-gradient(
       circle at 25% 50%,
-      rgba(255, 215, 0, 0.1) 0%,
+      var(--goobs-gold-a10) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 75% 50%,
-      rgba(255, 215, 0, 0.1) 0%,
+      var(--goobs-gold-a10) 0%,
       transparent 50%
     );
 
-  --switch-track-focus-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
+  --switch-track-focus-shadow: var(--goobs-focus-sacred);
 
   --switch-track-disabled-bg: rgba(10, 10, 10, 0.6);
-  --switch-track-disabled-border: rgba(255, 215, 0, 0.1);
+  --switch-track-disabled-border: var(--goobs-gold-a10);
 
   --switch-thumb-size: 24px;
-  --switch-thumb-bg: rgba(10, 10, 10, 0.9);
-  --switch-thumb-border-color: rgba(255, 215, 0, 0.4);
+  --switch-thumb-bg: var(--goobs-sacred-surface);
+  --switch-thumb-border-color: var(--goobs-gold-a40);
   --switch-thumb-border-width: 1px;
   --switch-thumb-radius: 50%;
-  --switch-thumb-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-  --switch-thumb-color: #ffd700;
-  --switch-thumb-font-size: 12px;
+  --switch-thumb-shadow: 0 0 15px var(--goobs-gold-a30);
+  --switch-thumb-color: var(--goobs-gold);
+  --switch-thumb-font-size: var(--goobs-text-xs);
   --switch-thumb-offset: 2px;
   --switch-thumb-image: radial-gradient(
     circle at center,
-    rgba(255, 215, 0, 0.1) 0%,
+    var(--goobs-gold-a10) 0%,
     transparent 70%
   );
 
   --switch-thumb-checked-offset: 28px;
-  --switch-thumb-checked-border: #ffd700;
+  --switch-thumb-checked-border: var(--goobs-gold);
   --switch-thumb-checked-shadow:
-    0 0 25px rgba(255, 215, 0, 0.6), 0 0 50px rgba(255, 215, 0, 0.3);
+    0 0 25px var(--goobs-gold-a60), 0 0 50px var(--goobs-gold-a30);
   --switch-thumb-checked-image: radial-gradient(
     circle at center,
-    rgba(255, 215, 0, 0.2) 0%,
+    var(--goobs-gold-a20) 0%,
     transparent 70%
   );
 
   --switch-thumb-disabled-bg: rgba(10, 10, 10, 0.6);
-  --switch-thumb-disabled-border: rgba(255, 215, 0, 0.2);
-  --switch-thumb-disabled-color: rgba(255, 215, 0, 0.3);
+  --switch-thumb-disabled-border: var(--goobs-gold-a20);
+  --switch-thumb-disabled-color: var(--goobs-gold-a30);
 
-  --switch-label-color: #ffd700;
-  --switch-label-font-family: 'Cinzel', serif;
-  --switch-label-font-size: 14px;
-  --switch-label-font-weight: 500;
-  --switch-label-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+  --switch-label-color: var(--goobs-gold);
+  --switch-label-font-family: var(--goobs-font-sacred);
+  --switch-label-font-size: var(--goobs-text-md);
+  --switch-label-font-weight: var(--goobs-weight-medium);
+  --switch-label-shadow: 0 0 5px var(--goobs-gold-a30);
 
   position: relative;
   display: inline-flex;
@@ -114,8 +113,8 @@
    LIGHT THEME OVERRIDES
    -------------------------------------------------------------------------- */
 .container[data-theme='light'] {
-  --switch-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --switch-gap: 8px;
+  --switch-transition: var(--goobs-transition-medium);
+  --switch-gap: var(--goobs-space-xs);
 
   --switch-track-width: 48px;
   --switch-track-height: 24px;
@@ -126,39 +125,39 @@
   --switch-track-backdrop: blur(4px);
   --switch-track-image: none;
 
-  --switch-track-checked-bg: rgb(59, 130, 246);
+  --switch-track-checked-bg: var(--goobs-light-primary);
   --switch-track-checked-border: transparent;
   --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   --switch-track-checked-image: none;
 
-  --switch-track-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  --switch-track-focus-shadow: var(--goobs-focus-light);
 
   --switch-track-disabled-bg: rgba(156, 163, 175, 0.2);
   --switch-track-disabled-border: rgba(156, 163, 175, 0.1);
 
   --switch-thumb-size: 20px;
-  --switch-thumb-bg: white;
+  --switch-thumb-bg: var(--goobs-light-surface);
   --switch-thumb-border-color: transparent;
   --switch-thumb-border-width: 0px;
   --switch-thumb-shadow:
     0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  --switch-thumb-color: #6b7280;
+  --switch-thumb-color: var(--goobs-light-text-muted);
   --switch-thumb-font-size: 10px;
   --switch-thumb-image: none;
 
   --switch-thumb-checked-offset: 24px;
   --switch-thumb-checked-border: transparent;
   --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --switch-thumb-checked-color: #3b82f6;
+  --switch-thumb-checked-color: var(--goobs-light-primary);
   --switch-thumb-checked-image: none;
 
   --switch-thumb-disabled-bg: rgba(249, 250, 251, 0.8);
   --switch-thumb-disabled-border: transparent;
   --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  --switch-thumb-disabled-color: #9ca3af;
+  --switch-thumb-disabled-color: var(--goobs-light-text-disabled);
 
-  --switch-label-color: rgb(55, 65, 81);
-  --switch-label-font-family: 'Inter', system-ui, sans-serif;
+  --switch-label-color: var(--goobs-light-text-secondary);
+  --switch-label-font-family: var(--goobs-font-standard);
   --switch-label-shadow: none;
 }
 
@@ -166,8 +165,8 @@
    DARK THEME OVERRIDES
    -------------------------------------------------------------------------- */
 .container[data-theme='dark'] {
-  --switch-transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --switch-gap: 8px;
+  --switch-transition: var(--goobs-transition-medium);
+  --switch-gap: var(--goobs-space-xs);
 
   --switch-track-width: 48px;
   --switch-track-height: 24px;
@@ -178,12 +177,12 @@
   --switch-track-backdrop: blur(4px);
   --switch-track-image: none;
 
-  --switch-track-checked-bg: rgb(59, 130, 246);
+  --switch-track-checked-bg: var(--goobs-dark-primary-strong);
   --switch-track-checked-border: transparent;
   --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
   --switch-track-checked-image: none;
 
-  --switch-track-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  --switch-track-focus-shadow: var(--goobs-focus-dark);
 
   --switch-track-disabled-bg: rgba(75, 85, 99, 0.2);
   --switch-track-disabled-border: rgba(75, 85, 99, 0.1);
@@ -201,16 +200,16 @@
   --switch-thumb-checked-offset: 24px;
   --switch-thumb-checked-border: transparent;
   --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  --switch-thumb-checked-color: #3b82f6;
+  --switch-thumb-checked-color: var(--goobs-dark-primary-strong);
   --switch-thumb-checked-image: none;
 
   --switch-thumb-disabled-bg: rgba(107, 114, 128, 0.8);
   --switch-thumb-disabled-border: transparent;
   --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --switch-thumb-disabled-color: #6b7280;
+  --switch-thumb-disabled-color: var(--goobs-dark-text-muted);
 
-  --switch-label-color: rgb(209, 213, 219);
-  --switch-label-font-family: 'Inter', system-ui, sans-serif;
+  --switch-label-color: var(--goobs-dark-text-secondary);
+  --switch-label-font-family: var(--goobs-font-standard);
   --switch-label-shadow: none;
 }
 
@@ -337,7 +336,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 215, 0, 0.2),
+    var(--goobs-gold-a20),
     transparent
   );
   border-radius: inherit;

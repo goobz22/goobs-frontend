@@ -962,3 +962,65 @@ export const InteractionTest: Story = {
     await expect(input).toHaveValue('Hello, Testing!')
   },
 }
+
+// --------------------------------------------------------------------------
+// TOP-LEVEL `required` PROP (additive — same render as styles.required)
+// --------------------------------------------------------------------------
+
+/**
+ * The new top-level `required` prop produces the IDENTICAL rendered output as
+ * the legacy `styles={{ required: true }}`: the asterisk indicator next to the
+ * label, the native `required` attribute, and `aria-required` on the input. The
+ * top-level prop defaults from `styles?.required` when omitted, so every
+ * existing callsite is unaffected. The `play` test asserts both fields render
+ * the marker + required attributes the same way.
+ */
+export const TopLevelRequiredProp: Story = {
+  name: 'Top-level required prop (vs styles.required)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <TextFieldWithState
+        label="Top-level required"
+        placeholder="required={true}"
+        required
+        styles={{ theme: 'light' }}
+      />
+      <TextFieldWithState
+        label="Styles required"
+        placeholder="styles={{ required: true }}"
+        styles={{ theme: 'light', required: true }}
+      />
+      <TextFieldWithState
+        label="Not required"
+        placeholder="no required marker"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Both required labels render the asterisk indicator.
+    const topLevelLabel = canvas.getByText('Top-level required')
+    const stylesLabel = canvas.getByText('Styles required')
+    await expect(topLevelLabel).toBeInTheDocument()
+    await expect(stylesLabel).toBeInTheDocument()
+
+    // The top-level-required and styles-required inputs both carry the native
+    // `required` attribute + aria-required — identical contract.
+    const topLevelInput = canvas.getByPlaceholderText('required={true}')
+    const stylesInput = canvas.getByPlaceholderText(
+      'styles={{ required: true }}'
+    )
+    expect(topLevelInput).toBeRequired()
+    expect(stylesInput).toBeRequired()
+    expect(topLevelInput).toHaveAttribute('aria-required', 'true')
+    expect(stylesInput).toHaveAttribute('aria-required', 'true')
+
+    // The non-required input must NOT be required (defaulting from an absent
+    // styles.required leaves it false — purely additive).
+    const plainInput = canvas.getByPlaceholderText('no required marker')
+    expect(plainInput).not.toBeRequired()
+    expect(plainInput).not.toHaveAttribute('aria-required')
+  },
+}

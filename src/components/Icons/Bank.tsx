@@ -54,7 +54,6 @@ const BankIcon: React.FC<BankIconProps> = ({
       >
         <path d="M12 3L2 8h20l-10-5zm-8 6v8h16V9H4zm2 2h2v4H6v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4zM2 19h20v2H2v-2z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

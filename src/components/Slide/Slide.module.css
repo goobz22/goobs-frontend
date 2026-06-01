@@ -38,7 +38,7 @@
    -------------------------------------------------------------------------- */
 .root[data-theme='sacred'] {
   --slide-duration: 0.5s;
-  --slide-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --slide-timing: var(--goobs-ease);
 }
 
 /* light/dark share the root defaults; declared for parity + future divergence. */

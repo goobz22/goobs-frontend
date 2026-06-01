@@ -45,17 +45,17 @@ export const commonKeyframes = {
     keyframes(
       'sacredGlowPulse',
       `
-    0% { 
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.2);
-      border-color: rgba(255, 215, 0, 0.5);
+    0% {
+      box-shadow: 0 0 20px var(--goobs-gold-a30), 0 0 40px var(--goobs-gold-a20);
+      border-color: var(--goobs-gold-a50);
     }
-    50% { 
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
-      border-color: rgba(255, 215, 0, 0.8);
+    50% {
+      box-shadow: 0 0 30px var(--goobs-gold-a50), 0 0 60px var(--goobs-gold-a30);
+      border-color: var(--goobs-gold-a80);
     }
-    100% { 
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.2);
-      border-color: rgba(255, 215, 0, 0.5);
+    100% {
+      box-shadow: 0 0 20px var(--goobs-gold-a30), 0 0 40px var(--goobs-gold-a20);
+      border-color: var(--goobs-gold-a50);
     }
   `
     ),

@@ -1,66 +1,363 @@
 /* ==========================================================================
-   GOOBS-FRONTEND — GLOBAL STYLESHEET
+   GOOBS-FRONTEND — GLOBAL STYLESHEET / CANONICAL DESIGN TOKENS
    --------------------------------------------------------------------------
-   Static replacement for the old JS theme system (src/theme, removed in the
-   css-modules-theme-removal teardown). What used to be injected at runtime by
-   theme/shared.ts (KEYFRAMES + injectKeyframes) and exposed as the SHADOWS /
-   TRANSITIONS JS objects now lives here as static CSS that ships in the
-   library's single bundled stylesheet (dist/goobs-frontend.css, exported as
-   "goobs-frontend/styles").
+   This is the keystone token layer for the goobs-frontend component library.
+   It replaces the old JS theme system (src/theme, removed in the
+   css-modules-theme-removal teardown) and, going forward, the ~83 *.module.css
+   files that currently hardcode their palettes, alphas, easings, radii, and
+   fonts. Those hardcoded values had drifted badly:
+     - sacred gold rgba(255,215,0,*) appeared in 31 distinct alpha variants
+       across 57 files,
+     - the light + dark neutral palettes were scattered across 18+ files each,
+     - the easing cubic-bezier(0.4,0,0.2,1) was inlined 81×,
+     - radii 4/6/8/10/12 and fonts 'Cinzel' / 'Inter' were hardcoded everywhere.
+
+   Everything below is harvested from the REAL values in those modules and then
+   curated into a single coherent, elevated set so the whole library reads as
+   one high-end, cohesive system across its three variants:
+     - sacred  — the premium gold-on-dark hero look (the BASE / default)
+     - light   — soft, neutral, airy
+     - dark     — deep, calm slate
+
+   THEME MECHANISM (unchanged — must be respected):
+   components apply data-theme={'sacred'|'light'|'dark'} on a root element.
+   sacred is the BASE (bare-class) default; [data-theme='light'] and
+   [data-theme='dark'] are explicit override blocks. A few components (Alert,
+   ProgressBar, Icons) default to light instead — that's fine, the tokens here
+   are EXPLICIT per-theme (--goobs-sacred-*, --goobs-light-*, --goobs-dark-*),
+   NOT a single remapped context token, so a component reads whichever theme's
+   tokens it needs regardless of which theme it defaults to.
 
    Imported once from the library entry (src/index.ts) so it is part of the
    module graph and gets bundled (vite cssCodeSplit:false collapses all CSS
-   into one file).
+   into one file); the :root vars therefore reach every module.
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   SHADOW + TRANSITION DESIGN TOKENS
-   Verbatim values from the old theme/shared.ts SHADOWS and TRANSITIONS
-   objects, exposed as :root CSS custom properties so any consumer (or future
-   CSS module) can read them as var(--goobs-shadow-* / --goobs-transition-*).
-   -------------------------------------------------------------------------- */
 :root {
-  /* TRANSITIONS (old theme/shared.ts TRANSITIONS) */
-  --goobs-transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --goobs-transition-medium: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --goobs-transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --goobs-transition-premium: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* ========================================================================
+     1. GOLD — the sacred hero accent + a coherent alpha ladder
+     ------------------------------------------------------------------------
+     The 31 ad-hoc gold alphas across 57 files collapse into ONE tidy ladder.
+     Author against --goobs-gold-rgb so a future brand-gold retune is a single
+     edit. The ladder rungs were chosen to absorb the real spread (the heavy
+     hitters were .05/.1/.12/.15/.2/.25/.3/.4/.5/.6/.7/.8/.9); ad-hoc values
+     like .14/.18/.22/.55/.65 round to the nearest rung with no visible loss.
+     ======================================================================== */
+  --goobs-gold-rgb: 255, 215, 0;
+  --goobs-gold: rgb(var(--goobs-gold-rgb)); /* #ffd700 */
 
-  /* SHADOWS.light (old theme/shared.ts SHADOWS.light) */
-  --goobs-shadow-light-small:
-    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  --goobs-shadow-light-medium:
-    0 4px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
-  --goobs-shadow-light-large:
-    0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+  --goobs-gold-a02: rgba(
+    var(--goobs-gold-rgb),
+    0.02
+  ); /* faint wash / gradient tail */
+  --goobs-gold-a05: rgba(var(--goobs-gold-rgb), 0.05); /* ambient radial fill */
+  --goobs-gold-a08: rgba(var(--goobs-gold-rgb), 0.08);
+  --goobs-gold-a10: rgba(var(--goobs-gold-rgb), 0.1); /* soft glow tail */
+  --goobs-gold-a12: rgba(var(--goobs-gold-rgb), 0.12); /* disabled border */
+  --goobs-gold-a15: rgba(var(--goobs-gold-rgb), 0.15);
+  --goobs-gold-a20: rgba(
+    var(--goobs-gold-rgb),
+    0.2
+  ); /* group shadow / shimmer */
+  --goobs-gold-a25: rgba(
+    var(--goobs-gold-rgb),
+    0.25
+  ); /* resting control border (ladder-monotonic: a25 < a30) */
+  --goobs-gold-a30: rgba(
+    var(--goobs-gold-rgb),
+    0.3
+  ); /* default border / soft glow */
+  --goobs-gold-a40: rgba(var(--goobs-gold-rgb), 0.4); /* strong border */
+  --goobs-gold-a50: rgba(
+    var(--goobs-gold-rgb),
+    0.5
+  ); /* hover border / mid glow */
+  --goobs-gold-a60: rgba(var(--goobs-gold-rgb), 0.6); /* active glow / focus */
+  --goobs-gold-a70: rgba(var(--goobs-gold-rgb), 0.7); /* focused field border */
+  --goobs-gold-a80: rgba(var(--goobs-gold-rgb), 0.8); /* intense hover border */
+  --goobs-gold-a90: rgba(var(--goobs-gold-rgb), 0.9); /* near-solid text/icon */
 
-  /* SHADOWS.dark (old theme/shared.ts SHADOWS.dark) */
-  --goobs-shadow-dark-small:
-    0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --goobs-shadow-dark-medium:
-    0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-  --goobs-shadow-dark-large:
-    0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* ========================================================================
+     2. MOTION — one shared easing curve + duration tokens + ready-made
+                  transition shorthands.
+     ------------------------------------------------------------------------
+     The 81 inlined cubic-bezier(0.4,0,0.2,1) curves all become
+     var(--goobs-ease). The four duration rungs match the old
+     theme/shared.ts TRANSITIONS scale (light/dark = medium 200ms,
+     sacred = premium 400ms). The convenience --goobs-transition-* combine
+     easing + duration so a module can write `transition: var(--goobs-transition-medium)`.
+     ======================================================================== */
+  --goobs-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* SHADOWS.sacred (old theme/shared.ts SHADOWS.sacred) */
-  --goobs-shadow-sacred-small:
-    0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
-  --goobs-shadow-sacred-medium:
-    0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-  --goobs-shadow-sacred-large:
-    0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+  --goobs-duration-fast: 150ms;
+  --goobs-duration-medium: 200ms;
+  --goobs-duration-slow: 300ms;
+  --goobs-duration-premium: 400ms;
+
+  --goobs-transition-fast: all var(--goobs-duration-fast) var(--goobs-ease);
+  --goobs-transition-medium: all var(--goobs-duration-medium) var(--goobs-ease);
+  --goobs-transition-slow: all var(--goobs-duration-slow) var(--goobs-ease);
+  --goobs-transition-premium: all var(--goobs-duration-premium)
+    var(--goobs-ease);
+
+  /* ========================================================================
+     3. ELEVATION / SHADOWS — refined, per-theme.
+     ------------------------------------------------------------------------
+     sacred is a LAYERED gold glow over an ambient depth shadow so cards feel
+     lit-from-within and luxe (not just neon). light is a soft neutral lift;
+     dark is a deeper ambient shadow. The historical sacred/light/dark
+     small/medium/large names are kept (some modules already read them); the
+     sm/md/lg/glow aliases are the new canonical names.
+     ======================================================================== */
+
+  /* sacred — gold glow + ambient depth (the premium feel) */
+  /* resting micro-glow: the subtlest rung, for standalone sacred controls
+     (e.g. Button rest) so they read lit-from-within rather than flat. Sits
+     coherently below -sm (0 0 18px @ 0.22): half the spread, ~half the alpha. */
+  --goobs-shadow-sacred-rest: 0 0 10px rgba(var(--goobs-gold-rgb), 0.12);
+  --goobs-shadow-sacred-sm:
+    0 0 18px rgba(var(--goobs-gold-rgb), 0.22), 0 2px 8px rgba(0, 0, 0, 0.55);
+  --goobs-shadow-sacred-md:
+    0 0 28px rgba(var(--goobs-gold-rgb), 0.35), 0 6px 18px rgba(0, 0, 0, 0.55);
+  --goobs-shadow-sacred-lg:
+    0 0 40px rgba(var(--goobs-gold-rgb), 0.45), 0 12px 32px rgba(0, 0, 0, 0.6);
+  --goobs-shadow-sacred-glow:
+    0 0 30px rgba(var(--goobs-gold-rgb), 0.5),
+    0 0 60px rgba(var(--goobs-gold-rgb), 0.2);
+
+  /* light — soft neutral depth */
+  --goobs-shadow-light-sm:
+    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --goobs-shadow-light-md:
+    0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --goobs-shadow-light-lg:
+    0 12px 32px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* dark — deeper ambient depth */
+  --goobs-shadow-dark-sm:
+    0 2px 4px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --goobs-shadow-dark-md:
+    0 4px 12px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --goobs-shadow-dark-lg:
+    0 12px 32px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  /* Backwards-compatible aliases for the original small/medium/large names
+     that existing modules and external consumers already reference. */
+  --goobs-shadow-light-small: var(--goobs-shadow-light-sm);
+  --goobs-shadow-light-medium: var(--goobs-shadow-light-md);
+  --goobs-shadow-light-large: var(--goobs-shadow-light-lg);
+  --goobs-shadow-dark-small: var(--goobs-shadow-dark-sm);
+  --goobs-shadow-dark-medium: var(--goobs-shadow-dark-md);
+  --goobs-shadow-dark-large: var(--goobs-shadow-dark-lg);
+  --goobs-shadow-sacred-small: var(--goobs-shadow-sacred-glow);
+  --goobs-shadow-sacred-medium: var(--goobs-shadow-sacred-md);
+  --goobs-shadow-sacred-large: var(--goobs-shadow-sacred-lg);
+
+  /* ========================================================================
+     4. RADIUS — one canonical scale.
+     ------------------------------------------------------------------------
+     The 4/6/8/10/12 drift collapses to a tasteful five-rung scale. sacred's
+     slightly larger corners (it used 6 where light used 4, 8/10/12 elsewhere)
+     map cleanly onto md/lg/xl; pill covers the fully-rounded controls.
+     ======================================================================== */
+  --goobs-radius-sm: 4px;
+  --goobs-radius-md: 6px;
+  --goobs-radius-lg: 8px;
+  --goobs-radius-xl: 12px;
+  --goobs-radius-pill: 9999px;
+
+  /* ========================================================================
+     5. SPACING — 4px-based scale.
+     ------------------------------------------------------------------------
+     Covers the gap/padding/margin vocabulary in use (4/8/12/16/20/24/32).
+     ======================================================================== */
+  --goobs-space-2xs: 4px;
+  --goobs-space-xs: 8px;
+  --goobs-space-sm: 12px;
+  --goobs-space-md: 16px;
+  --goobs-space-lg: 24px;
+  --goobs-space-xl: 32px;
+  --goobs-space-2xl: 48px;
+
+  /* ========================================================================
+     6. TYPOGRAPHY — font stacks, type scale, weights, tracking.
+     ------------------------------------------------------------------------
+     sacred uses Cinzel (a display serif); light/dark use Inter (with a robust
+     system fallback). A monospace token covers code/numeric contexts. The type
+     scale tracks the real font-sizes in use (12–24px). sacred display copy uses
+     positive letter-spacing (tracking) — captured as dedicated tokens.
+     ======================================================================== */
+  --goobs-font-sacred: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --goobs-font-standard:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui,
+    sans-serif;
+  --goobs-font-mono:
+    'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* type scale */
+  --goobs-text-xs: 12px;
+  --goobs-text-sm: 13px;
+  --goobs-text-md: 14px;
+  --goobs-text-lg: 15px;
+  --goobs-text-xl: 16px;
+  --goobs-text-2xl: 20px;
+  --goobs-text-3xl: 24px;
+
+  /* weights */
+  --goobs-weight-regular: 400;
+  --goobs-weight-medium: 500;
+  --goobs-weight-semibold: 600;
+  --goobs-weight-bold: 700;
+
+  /* letter-spacing — sacred display copy reads more "engraved" with tracking */
+  --goobs-tracking-tight: 0;
+  --goobs-tracking-sacred: 0.02em; /* sacred body / labels */
+  --goobs-tracking-sacred-wide: 0.05em; /* sacred display / tooltips */
+
+  /* ========================================================================
+     7. PER-THEME ROLE PALETTES — explicit, named per theme.
+     ------------------------------------------------------------------------
+     Each theme defines the same role vocabulary so a module can pull
+     --goobs-<theme>-<role> directly. Roles:
+       surface / surface-raised — base + lifted backgrounds
+       border / border-strong   — resting + emphasized borders
+       text / text-secondary / text-muted
+       primary / primary-contrast — accent + its readable foreground
+       control-bg / control-border — interactive-control surface
+       focus-ring                — see group 9 (referenced here for cohesion)
+     Values are harvested from the modules and lightly elevated for cohesion.
+     ======================================================================== */
+
+  /* ---- SACRED (the default / hero look) -------------------------------- */
+  /* Surfaces are the signature dark glass; gold is the accent. Unified the
+     drifting blacks (rgba(0,0,0,.4/.9/.95), rgba(10,10,10,.9), rgba(12,12,12,.95))
+     onto two coherent values: a near-black glass surface + a slightly lighter
+     raised plate. */
+  --goobs-sacred-surface: rgba(10, 10, 10, 0.9);
+  --goobs-sacred-surface-raised: rgba(18, 18, 18, 0.92);
+  --goobs-sacred-border: var(--goobs-gold-a40);
+  --goobs-sacred-border-strong: var(--goobs-gold-a50);
+  --goobs-sacred-text: rgba(255, 255, 255, 0.9);
+  --goobs-sacred-text-secondary: rgba(255, 255, 255, 0.6);
+  --goobs-sacred-text-muted: rgba(255, 255, 255, 0.4);
+  --goobs-sacred-primary: var(--goobs-gold); /* gold is the accent */
+  --goobs-sacred-primary-contrast: rgba(10, 10, 10, 0.95);
+  --goobs-sacred-control-bg: rgba(0, 0, 0, 0.4);
+  --goobs-sacred-control-border: var(--goobs-gold-a40);
+  --goobs-sacred-focus-ring: var(--goobs-gold-a60);
+  /* Ambient gold radials that make sacred surfaces feel lit-from-within.
+     Drop into background-image to add the signature inner glow. */
+  --goobs-sacred-ambient:
+    radial-gradient(
+      circle at top right,
+      var(--goobs-gold-a05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      var(--goobs-gold-a02) 0%,
+      transparent 50%
+    );
+
+  /* ---- LIGHT ----------------------------------------------------------- */
+  /* Neutral slate palette; blue is the accent. Unified #1976d2 + #3b82f6 onto
+     a single canonical primary (#3b82f6, the dominant value, 97 uses) and the
+     #374151/#1f2937 text pair onto primary + a darker heading-grade option. */
+  --goobs-light-surface: #ffffff;
+  --goobs-light-surface-raised: #f8fafc;
+  --goobs-light-border: #e2e8f0;
+  --goobs-light-border-strong: #cbd5e1;
+  --goobs-light-text: #1f2937;
+  --goobs-light-text-secondary: #374151;
+  --goobs-light-text-muted: #6b7280;
+  --goobs-light-text-disabled: #9ca3af;
+  --goobs-light-primary: #3b82f6;
+  --goobs-light-primary-strong: #2563eb;
+  --goobs-light-primary-contrast: #ffffff;
+  --goobs-light-control-bg: #ffffff;
+  --goobs-light-control-border: #cbd5e1;
+  --goobs-light-focus-ring: rgba(59, 130, 246, 0.4);
+
+  /* ---- DARK ------------------------------------------------------------ */
+  /* Deep slate palette; the same blue accent as light for cross-theme
+     consistency. Unified the #1e293b/#334155/#475569/#64748b slate ramp +
+     #e2e8f0/#cbd5e1 text pair. */
+  --goobs-dark-surface: #1e293b;
+  --goobs-dark-surface-raised: #273746;
+  --goobs-dark-border: #334155;
+  --goobs-dark-border-strong: #475569;
+  --goobs-dark-text: #e2e8f0;
+  --goobs-dark-text-secondary: #cbd5e1;
+  --goobs-dark-text-muted: #64748b;
+  --goobs-dark-primary: #60a5fa;
+  --goobs-dark-primary-strong: #3b82f6;
+  --goobs-dark-primary-contrast: #0b1220;
+  --goobs-dark-control-bg: #1e293b;
+  --goobs-dark-control-border: #334155;
+  --goobs-dark-focus-ring: rgba(96, 165, 250, 0.45);
+
+  /* ========================================================================
+     8. SEVERITY — shared across all themes.
+     ------------------------------------------------------------------------
+     Base color + a translucent fill + a translucent border per severity,
+     matching the existing Alert/Card severity tables (≈0.12 bg, ≈0.35 border).
+     Themes can layer their own surface behind these (sacred keeps the dark
+     glass and only tints the text/border; light/dark use the fill).
+     ======================================================================== */
+  --goobs-danger: #ef4444;
+  --goobs-danger-rgb: 239, 68, 68;
+  --goobs-danger-bg: rgba(var(--goobs-danger-rgb), 0.12);
+  --goobs-danger-border: rgba(var(--goobs-danger-rgb), 0.35);
+
+  --goobs-warn: #f59e0b;
+  --goobs-warn-rgb: 245, 158, 11;
+  --goobs-warn-bg: rgba(var(--goobs-warn-rgb), 0.12);
+  --goobs-warn-border: rgba(var(--goobs-warn-rgb), 0.35);
+
+  --goobs-info: #3b82f6;
+  --goobs-info-rgb: 59, 130, 246;
+  --goobs-info-bg: rgba(var(--goobs-info-rgb), 0.12);
+  --goobs-info-border: rgba(var(--goobs-info-rgb), 0.35);
+
+  --goobs-success: #22c55e;
+  --goobs-success-rgb: 34, 197, 94;
+  --goobs-success-bg: rgba(var(--goobs-success-rgb), 0.12);
+  --goobs-success-border: rgba(var(--goobs-success-rgb), 0.35);
+
+  /* ========================================================================
+     9. FOCUS RING — per theme.
+     ------------------------------------------------------------------------
+     A ready-to-use box-shadow ring per theme (offset + spread + color).
+     sacred glows gold, light/dark use a soft accent halo. The bare color
+     versions live above in each role palette as --goobs-<theme>-focus-ring.
+     ======================================================================== */
+  --goobs-focus-sacred: 0 0 0 4px var(--goobs-gold-a30);
+  --goobs-focus-light: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  --goobs-focus-dark: 0 0 0 3px rgba(96, 165, 250, 0.3);
+
+  /* ========================================================================
+     10. CONTROL BASELINE — shared interactive-row metrics.
+     ------------------------------------------------------------------------
+     The 32px row vocabulary shared by Button / Dropdown trigger / Checkbox /
+     pagination chevrons / chip rows so they sit on one baseline. A compact
+     variant covers the mobile breakpoint.
+     ======================================================================== */
+  --goobs-control-height: 32px;
+  --goobs-control-height-compact: 28px;
+  --goobs-control-padding-x: 12px;
 }
 
-/* --------------------------------------------------------------------------
+/* ==========================================================================
    SHARED KEYFRAMES
-   Verbatim copy of the four @keyframes from theme/shared.ts KEYFRAMES, which
-   were previously injected at runtime via injectKeyframes(). Now static and
+   Verbatim copy of the four @keyframes from the old theme/shared.ts KEYFRAMES,
+   previously injected at runtime via injectKeyframes(). Now static and
    globally available so any component animation referencing them resolves
    without runtime injection. (ProgressBar.module.css also defines its own
    local copies of progressIndeterminate / progressStripes / progressPulse;
    the global definitions here keep the historical global names available for
    external consumers that referenced them.)
-   -------------------------------------------------------------------------- */
+   ========================================================================== */
 @keyframes pulse {
   0%,
   100% {

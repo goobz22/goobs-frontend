@@ -19,16 +19,16 @@
 
 .label {
   display: block;
-  margin-bottom: 8px;
-  color: #ffd700;
-  font-size: 14px;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--goobs-space-xs);
+  color: var(--goobs-gold);
+  font-size: var(--goobs-text-md);
+  font-family: var(--goobs-font-sacred);
+  letter-spacing: var(--goobs-tracking-sacred-wide);
 }
 
 .requiredIndicator {
-  color: #ffd700;
-  margin-left: 4px;
+  color: var(--goobs-gold);
+  margin-left: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -42,36 +42,36 @@
      the trigger to match siblings. Defaults to 40px to preserve the
      original sizing for every other call-site. */
   min-height: var(--field-button-min-height, 40px);
-  padding: 0 12px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  padding: 0 var(--goobs-space-sm);
+  background-color: var(--goobs-sacred-control-bg);
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-lg);
+  color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
-  font-size: 16px;
+  font-size: var(--goobs-text-xl);
   text-align: left;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: var(--goobs-transition-slow);
   outline: none;
   box-sizing: border-box;
 }
 
 .button:hover:not(:disabled) {
-  border-color: rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  border-color: var(--goobs-gold-a50);
+  box-shadow: 0 0 10px var(--goobs-gold-a20);
 }
 
 .button.open {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  border-color: var(--goobs-gold-a60);
+  box-shadow: 0 0 15px var(--goobs-gold-a30);
 }
 
 .button:disabled {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: rgba(255, 255, 255, 0.4);
+  background-color: var(--goobs-sacred-control-bg);
+  color: var(--goobs-sacred-text-muted);
   cursor: not-allowed;
 }
 
@@ -80,12 +80,12 @@
    -------------------------------------------------------------------------- */
 
 .arrow {
-  margin-left: 8px;
+  margin-left: var(--goobs-space-xs);
   width: 0;
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 5px solid #ffd700;
+  border-top: 5px solid var(--goobs-gold);
   transition: transform 0.3s ease;
   display: inline-block;
 }
@@ -103,17 +103,17 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin-top: 4px;
-  background-color: rgba(10, 8, 4, 0.97);
-  border: 1px solid rgba(212, 175, 55, 0.5);
-  border-radius: 8px;
+  margin-top: var(--goobs-space-2xs);
+  background-color: var(--goobs-sacred-surface);
+  border: 1px solid var(--goobs-gold-a50);
+  border-radius: var(--goobs-radius-lg);
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 999999;
   box-shadow:
-    0 8px 32px rgba(212, 175, 55, 0.15),
-    0 0 0 1px rgba(212, 175, 55, 0.1);
+    0 8px 32px var(--goobs-gold-a15),
+    0 0 0 1px var(--goobs-gold-a10);
   backdrop-filter: blur(10px);
 }
 
@@ -123,16 +123,16 @@
 
 .option {
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
   background-color: transparent;
   border: none;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
-  color: #e8dcc8;
+  border-bottom: 1px solid var(--goobs-gold-a12);
+  color: var(--goobs-sacred-text);
   font-family: 'Cormorant Garamond', 'Crimson Text', serif;
-  font-size: 14px;
+  font-size: var(--goobs-text-md);
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--goobs-transition-medium);
   outline: none;
   white-space: normal;
   word-wrap: break-word;
@@ -144,14 +144,14 @@
 }
 
 .option:hover {
-  background-color: rgba(212, 175, 55, 0.15);
-  color: #d4af37;
+  background-color: var(--goobs-gold-a15);
+  color: var(--goobs-gold);
 }
 
 .option.selected {
-  background-color: rgba(212, 175, 55, 0.2);
-  color: #d4af37;
-  font-weight: 600;
+  background-color: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
+  font-weight: var(--goobs-weight-semibold);
 }
 
 /* --------------------------------------------------------------------------
@@ -159,8 +159,8 @@
    -------------------------------------------------------------------------- */
 
 .emptyState {
-  padding: 12px 16px;
-  color: rgba(255, 255, 255, 0.6);
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
+  color: var(--goobs-sacred-text-secondary);
   font-family: 'Crimson Text', serif;
   text-align: center;
 }
@@ -170,9 +170,9 @@
    -------------------------------------------------------------------------- */
 
 .helperText {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--goobs-space-2xs);
+  font-size: var(--goobs-text-xs);
+  color: var(--goobs-sacred-text-secondary);
   font-family: 'Crimson Text', serif;
 }
 
@@ -182,154 +182,154 @@
 
 /* --------------------------------------------------------------------------
    Light Theme Override
+
+   The trigger button/label/etc. live inside <FieldShell>, whose rendered
+   wrapper carries `data-component="FieldShell"` + `data-theme`. The dropdown's
+   own `.container` class is never applied to any element here, so the previous
+   `.container[data-theme='light'] .button` selectors never matched and the
+   trigger fell through to the sacred base (dark control-bg + light text) in
+   light mode. Anchor the overrides on the FieldShell wrapper attribute the TSX
+   actually emits so light/dark remap correctly. The portaled `.menu` keeps its
+   own `.menu[data-theme=…]` rules below (it carries its own data-theme and is
+   rendered outside the shell).
    -------------------------------------------------------------------------- */
 
-.container[data-theme='light'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+[data-component='FieldShell'][data-theme='light'] .label {
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .button {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+[data-component='FieldShell'][data-theme='light'] .button {
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .button:hover:not(:disabled) {
-  border-color: #3b82f6;
+[data-component='FieldShell'][data-theme='light'] .button:hover:not(:disabled) {
+  border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.container[data-theme='light'] .button.open {
-  border-color: #3b82f6;
+[data-component='FieldShell'][data-theme='light'] .button.open {
+  border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.container[data-theme='light'] .button:disabled {
+[data-component='FieldShell'][data-theme='light'] .button:disabled {
   background-color: #f3f4f6;
-  color: #9ca3af;
+  color: var(--goobs-light-text-disabled);
 }
 
-.container[data-theme='light'] .arrow {
-  border-top-color: #6b7280;
+[data-component='FieldShell'][data-theme='light'] .arrow {
+  border-top-color: var(--goobs-light-text-muted);
 }
 
-.container[data-theme='light'] .requiredIndicator {
-  color: #ef4444;
+[data-component='FieldShell'][data-theme='light'] .requiredIndicator {
+  color: var(--goobs-danger);
 }
 
-.container[data-theme='light'] .helperText {
-  color: #6b7280;
+[data-component='FieldShell'][data-theme='light'] .helperText {
+  color: var(--goobs-light-text-muted);
 }
 
 /* Light Theme Menu - Uses [data-theme] on the menu itself since it's portaled */
 .menu[data-theme='light'] {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
+  box-shadow: var(--goobs-shadow-light-md);
   backdrop-filter: none;
 }
 
 .menu[data-theme='light'] .option {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
-  border-bottom-color: #e2e8f0;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-light-text-secondary);
+  border-bottom-color: var(--goobs-light-border);
 }
 
 .menu[data-theme='light'] .option:hover {
   background-color: #f3f4f6;
-  color: #1f2937;
+  color: var(--goobs-light-text);
 }
 
 .menu[data-theme='light'] .option.selected {
   background-color: #eff6ff;
-  color: #3b82f6;
+  color: var(--goobs-light-primary);
 }
 
 .menu[data-theme='light'] .emptyState {
-  color: #9ca3af;
+  color: var(--goobs-light-text-disabled);
 }
 
 /* --------------------------------------------------------------------------
    Dark Theme Override
    -------------------------------------------------------------------------- */
 
-.container[data-theme='dark'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+[data-component='FieldShell'][data-theme='dark'] .label {
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .button {
-  background-color: #1e293b;
-  border-color: #334155;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+[data-component='FieldShell'][data-theme='dark'] .button {
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .button:hover:not(:disabled) {
-  border-color: #3b82f6;
+[data-component='FieldShell'][data-theme='dark'] .button:hover:not(:disabled) {
+  border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.container[data-theme='dark'] .button.open {
-  border-color: #3b82f6;
+[data-component='FieldShell'][data-theme='dark'] .button.open {
+  border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.container[data-theme='dark'] .button:disabled {
+[data-component='FieldShell'][data-theme='dark'] .button:disabled {
   background-color: #0f172a;
-  color: #64748b;
+  color: var(--goobs-dark-text-muted);
 }
 
-.container[data-theme='dark'] .arrow {
+[data-component='FieldShell'][data-theme='dark'] .arrow {
   border-top-color: #94a3b8;
 }
 
-.container[data-theme='dark'] .requiredIndicator {
-  color: #ef4444;
+[data-component='FieldShell'][data-theme='dark'] .requiredIndicator {
+  color: var(--goobs-danger);
 }
 
-.container[data-theme='dark'] .helperText {
+[data-component='FieldShell'][data-theme='dark'] .helperText {
   color: #94a3b8;
 }
 
 /* Dark Theme Menu */
 .menu[data-theme='dark'] {
-  background-color: #1e293b;
-  border-color: #334155;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
+  box-shadow: var(--goobs-shadow-dark-md);
   backdrop-filter: none;
 }
 
 .menu[data-theme='dark'] .option {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
-  border-bottom-color: #334155;
+  font-family: var(--goobs-font-standard);
+  color: var(--goobs-dark-text);
+  border-bottom-color: var(--goobs-dark-border);
 }
 
 .menu[data-theme='dark'] .option:hover {
-  background-color: #334155;
+  background-color: var(--goobs-dark-border);
   color: #f1f5f9;
 }
 
 .menu[data-theme='dark'] .option.selected {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  background-color: var(--goobs-info-bg);
+  color: var(--goobs-dark-primary);
 }
 
 .menu[data-theme='dark'] .emptyState {
-  color: #64748b;
+  color: var(--goobs-dark-text-muted);
 }
 
 /* --------------------------------------------------------------------------

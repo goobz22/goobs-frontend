@@ -25,16 +25,16 @@
    Sacred theme (dark + gold) — hardcoded default
    -------------------------------------------------------------------------- */
 .root {
-  --chip-bg: rgba(0, 0, 0, 0.4);
-  --chip-border: rgba(255, 215, 0, 0.3);
-  --chip-text: #ffd700;
-  --chip-hover-bg: rgba(255, 215, 0, 0.12);
-  --chip-hover-border: rgba(255, 215, 0, 0.55);
-  --chip-active-bg: rgba(255, 215, 0, 0.2);
-  --chip-active-border: rgba(255, 215, 0, 0.6);
-  --chip-font: 'Cinzel', serif;
+  --chip-bg: var(--goobs-sacred-control-bg);
+  --chip-border: var(--goobs-gold-a30);
+  --chip-text: var(--goobs-gold);
+  --chip-hover-bg: var(--goobs-gold-a12);
+  --chip-hover-border: var(--goobs-gold-a50);
+  --chip-active-bg: var(--goobs-gold-a20);
+  --chip-active-border: var(--goobs-gold-a60);
+  --chip-font: var(--goobs-font-sacred);
   --chip-shadow: none;
-  --chip-hover-shadow: 0 0 8px rgba(255, 215, 0, 0.18);
+  --chip-hover-shadow: 0 0 8px var(--goobs-gold-a20);
 
   display: inline-flex;
   align-items: center;
@@ -82,12 +82,12 @@
 .root[data-theme='light'] {
   --chip-bg: rgba(59, 130, 246, 0.1);
   --chip-border: rgba(59, 130, 246, 0.25);
-  --chip-text: rgb(59, 130, 246);
+  --chip-text: var(--goobs-light-primary);
   --chip-hover-bg: rgba(59, 130, 246, 0.15);
   --chip-hover-border: rgba(59, 130, 246, 0.4);
   --chip-active-bg: rgba(59, 130, 246, 0.18);
   --chip-active-border: rgba(59, 130, 246, 0.5);
-  --chip-font: 'Inter', system-ui, sans-serif;
+  --chip-font: var(--goobs-font-standard);
   --chip-shadow: none;
   --chip-hover-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
 }
@@ -116,9 +116,9 @@
    because those still cascade as inline CSS-var overrides on the root.
    -------------------------------------------------------------------------- */
 .root[data-chip-tone='success'] {
-  --chip-bg: rgba(34, 197, 94, 0.15);
-  --chip-border: rgba(34, 197, 94, 0.4);
-  --chip-text: #22c55e;
+  --chip-bg: var(--goobs-success-bg);
+  --chip-border: var(--goobs-success-border);
+  --chip-text: var(--goobs-success);
   --chip-hover-bg: rgba(34, 197, 94, 0.22);
   --chip-hover-border: rgba(34, 197, 94, 0.55);
   --chip-active-bg: rgba(34, 197, 94, 0.28);
@@ -126,9 +126,9 @@
 }
 
 .root[data-chip-tone='info'] {
-  --chip-bg: rgba(59, 130, 246, 0.15);
-  --chip-border: rgba(59, 130, 246, 0.4);
-  --chip-text: #3b82f6;
+  --chip-bg: var(--goobs-info-bg);
+  --chip-border: var(--goobs-info-border);
+  --chip-text: var(--goobs-info);
   --chip-hover-bg: rgba(59, 130, 246, 0.22);
   --chip-hover-border: rgba(59, 130, 246, 0.55);
   --chip-active-bg: rgba(59, 130, 246, 0.28);
@@ -136,9 +136,9 @@
 }
 
 .root[data-chip-tone='warn'] {
-  --chip-bg: rgba(245, 158, 11, 0.15);
-  --chip-border: rgba(245, 158, 11, 0.4);
-  --chip-text: #f59e0b;
+  --chip-bg: var(--goobs-warn-bg);
+  --chip-border: var(--goobs-warn-border);
+  --chip-text: var(--goobs-warn);
   --chip-hover-bg: rgba(245, 158, 11, 0.22);
   --chip-hover-border: rgba(245, 158, 11, 0.55);
   --chip-active-bg: rgba(245, 158, 11, 0.28);
@@ -146,9 +146,9 @@
 }
 
 .root[data-chip-tone='danger'] {
-  --chip-bg: rgba(239, 68, 68, 0.15);
-  --chip-border: rgba(239, 68, 68, 0.4);
-  --chip-text: #ef4444;
+  --chip-bg: var(--goobs-danger-bg);
+  --chip-border: var(--goobs-danger-border);
+  --chip-text: var(--goobs-danger);
   --chip-hover-bg: rgba(239, 68, 68, 0.22);
   --chip-hover-border: rgba(239, 68, 68, 0.55);
   --chip-active-bg: rgba(239, 68, 68, 0.28);
@@ -158,7 +158,7 @@
 .root[data-chip-tone='neutral'] {
   --chip-bg: rgba(156, 163, 175, 0.18);
   --chip-border: rgba(156, 163, 175, 0.4);
-  --chip-text: #9ca3af;
+  --chip-text: var(--goobs-light-text-disabled);
   --chip-hover-bg: rgba(156, 163, 175, 0.25);
   --chip-hover-border: rgba(156, 163, 175, 0.55);
   --chip-active-bg: rgba(156, 163, 175, 0.32);
@@ -166,13 +166,13 @@
 }
 
 .root[data-chip-tone='gold'] {
-  --chip-bg: rgba(255, 215, 0, 0.15);
-  --chip-border: rgba(255, 215, 0, 0.4);
-  --chip-text: #ffd700;
-  --chip-hover-bg: rgba(255, 215, 0, 0.22);
-  --chip-hover-border: rgba(255, 215, 0, 0.55);
-  --chip-active-bg: rgba(255, 215, 0, 0.28);
-  --chip-active-border: rgba(255, 215, 0, 0.6);
+  --chip-bg: var(--goobs-gold-a15);
+  --chip-border: var(--goobs-gold-a40);
+  --chip-text: var(--goobs-gold);
+  --chip-hover-bg: var(--goobs-gold-a20);
+  --chip-hover-border: var(--goobs-gold-a50);
+  --chip-active-bg: var(--goobs-gold-a30);
+  --chip-active-border: var(--goobs-gold-a60);
 }
 
 /* --------------------------------------------------------------------------
@@ -181,10 +181,10 @@
 .chip {
   padding: 5px 12px;
   gap: 6px;
-  min-height: 32px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
+  min-height: var(--goobs-control-height);
+  font-size: var(--goobs-text-sm);
+  font-weight: var(--goobs-weight-medium);
+  border-radius: var(--goobs-radius-md);
 }
 
 /* --------------------------------------------------------------------------
@@ -195,9 +195,9 @@
   gap: 6px;
   min-height: 22px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border-radius: 999px;
+  font-weight: var(--goobs-weight-semibold);
+  letter-spacing: var(--goobs-tracking-sacred);
+  border-radius: var(--goobs-radius-pill);
 }
 
 .pill .icon {
@@ -213,7 +213,7 @@
   flex-shrink: 0;
   width: 0.55em;
   height: 0.55em;
-  border-radius: 999px;
+  border-radius: var(--goobs-radius-pill);
   background-color: currentColor;
   display: inline-block;
 }
@@ -273,7 +273,7 @@
   margin-left: 2px;
   margin-right: -2px;
   padding: 2px;
-  border-radius: 999px;
+  border-radius: var(--goobs-radius-pill);
   border: none;
   background-color: transparent;
   color: inherit;
@@ -292,7 +292,7 @@
 /* Sacred is the bare default, so the gold close-button hover is the base
    rule; light/dark override it below. */
 .closeButton:hover:not(:disabled) {
-  background-color: rgba(255, 215, 0, 0.16);
+  background-color: var(--goobs-gold-a15);
   opacity: 1;
 }
 

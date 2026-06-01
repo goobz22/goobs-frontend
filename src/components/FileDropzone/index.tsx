@@ -1,0 +1,301 @@
+'use client'
+
+/**
+ * =============================================================================
+ * FILEDROPZONE — drag-drop + click-to-browse file input with a preview slot
+ * =============================================================================
+ *
+ * Promoted from the ThothOS
+ * `src/forms/Inventory/ImageUploadField.tsx` (Cloudflare image upload field) and
+ * generalized into a presentation-only goobs primitive. The upload transport
+ * (Cloudflare, S3, whatever) stays in the host app: the host owns a hook that
+ * takes the picked `File` via `onFileSelect` and renders the result back in
+ * through the `preview` slot.
+ *
+ *   // in ThothOS:
+ *   const { uploadImage, isUploading, uploadError } = useCloudflareImageUpload()
+ *   <FileDropzone
+ *     label="Product Image"
+ *     variant="image"
+ *     value={imageUrl}
+ *     uploading={isUploading}
+ *     error={uploadError}
+ *     onFileSelect={async file => {
+ *       const r = await uploadImage(file)
+ *       if (r.success && r.url) onImageChange(r.url)
+ *     }}
+ *     preview={imageUrl ? <Image src={imageUrl} alt="Preview" fill /> : undefined}
+ *   />
+ *
+ * COMPOSITION
+ *
+ *   - Label / required / error wiring is delegated to goobs `<FieldShell>` —
+ *     the same shell every Field component uses — so the dropzone announces
+ *     its label, required state, and validation errors to assistive tech the
+ *     same way the rest of the form does.
+ *   - The drop surface is a real `<button>` that opens a hidden `<input
+ *     type="file">`; the whole surface is also a native drag-drop target.
+ *
+ * Presentation only: no network, no upload state machine. `uploading` and
+ * `error` are controlled by the host. `data-component="FileDropzone"`.
+ *
+ * =============================================================================
+ */
+
+import React, {
+  useId,
+  useRef,
+  useState,
+  type DragEvent,
+  type ReactNode,
+} from 'react'
+import { emitDiag } from '../../utils/diag'
+import FieldShell from '../Field/Shell'
+import type { FieldTheme } from '../Field/Shell/types'
+import cssStyles from './FileDropzone.module.css'
+
+export type FileDropzoneVariant = 'image' | 'document'
+
+export interface FileDropzoneProps {
+  /**
+   * Current value identifier — typically the uploaded asset URL / filename.
+   * Drives the "Upload" vs "Change" button label and the cleared-input reset.
+   * Presentation-only: the dropzone never fetches it, it's just a signal that
+   * a value exists.
+   */
+  value?: string
+
+  /** Called with the picked `File` whenever the user drops or browses one. */
+  onFileSelect: (file: File) => void
+
+  /**
+   * `accept` attribute for the hidden file input. Defaults are derived from
+   * `variant` (`'image/*'` for image, all files for document) when omitted.
+   */
+  accept?: string
+
+  /**
+   * Preview node rendered in the leading preview tile (e.g. a Next.js
+   * `<Image>` for image uploads, a doc icon + filename for documents). When
+   * omitted, a variant-appropriate placeholder glyph renders.
+   */
+  preview?: ReactNode
+
+  /** Host-controlled uploading flag — disables the control + shows progress copy. */
+  uploading?: boolean
+
+  /** Host-controlled error string — rendered in the FieldShell error region. */
+  error?: string
+
+  /** Visible field label. Forwarded to `<FieldShell>`. */
+  label?: ReactNode
+
+  /** Marks the field required (FieldShell renders the required indicator). */
+  required?: boolean
+
+  /** Stable test selector — forwarded to FieldShell as `data-field-name`. */
+  name?: string
+
+  /**
+   * Layout / copy variant. `'image'` shows a square preview tile; `'document'`
+   * shows a wide drop strip. Default `'image'`.
+   */
+  variant?: FileDropzoneVariant
+
+  /** Optional remove handler. When set, a "Remove" control renders while a value exists. */
+  onRemove?: () => void
+
+  /** Theming. Default `'sacred'`. */
+  styles?: { theme?: FieldTheme }
+}
+
+function defaultAccept(variant: FileDropzoneVariant): string {
+  return variant === 'image' ? 'image/*' : ''
+}
+
+function placeholderGlyph(variant: FileDropzoneVariant): ReactNode {
+  if (variant === 'image') {
+    return (
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+    )
+  }
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  )
+}
+
+const FileDropzone: React.FC<FileDropzoneProps> = ({
+  value,
+  onFileSelect,
+  accept,
+  preview,
+  uploading = false,
+  error,
+  label,
+  required,
+  name,
+  variant = 'image',
+  onRemove,
+  styles,
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isDragActive, setIsDragActive] = useState(false)
+  const instanceId = useId()
+  const theme = styles?.theme ?? 'sacred'
+  const resolvedAccept = accept ?? defaultAccept(variant)
+  const hasValue = value !== undefined && value !== ''
+
+  const dispatchFile = (file: File | undefined | null): void => {
+    if (!file) return
+    emitDiag({
+      type: 'action.invoke',
+      action: 'file.select',
+      subject: name ?? variant,
+    })
+    onFileSelect(file)
+    // Reset so the SAME file can be re-picked (mirrors the ThothOS original).
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    dispatchFile(event.target.files?.[0])
+  }
+
+  const handleDrop = (event: DragEvent<HTMLButtonElement>): void => {
+    event.preventDefault()
+    setIsDragActive(false)
+    if (uploading) return
+    dispatchFile(event.dataTransfer.files?.[0])
+  }
+
+  const handleDragOver = (event: DragEvent<HTMLButtonElement>): void => {
+    event.preventDefault()
+    if (!uploading) setIsDragActive(true)
+  }
+
+  const handleDragLeave = (event: DragEvent<HTMLButtonElement>): void => {
+    event.preventDefault()
+    setIsDragActive(false)
+  }
+
+  const browseLabel = uploading
+    ? 'Uploading…'
+    : hasValue
+      ? variant === 'image'
+        ? 'Change image'
+        : 'Change file'
+      : variant === 'image'
+        ? 'Upload image'
+        : 'Upload file'
+
+  return (
+    <FieldShell
+      label={label}
+      {...(required !== undefined && { required })}
+      {...(error !== undefined && { error })}
+      {...(name !== undefined && { name, dataFieldName: name })}
+      dataField="fileDropzone"
+      styles={{ theme }}
+    >
+      {({ inputId, inputAriaProps }) => (
+        <div
+          className={cssStyles.dropzone}
+          data-component="FileDropzone"
+          data-file-dropzone="true"
+          data-theme={theme}
+          data-variant={variant}
+          {...(uploading && { 'data-uploading': 'true' })}
+          {...(isDragActive && { 'data-drag-active': 'true' })}
+        >
+          <div className={cssStyles.row}>
+            <div
+              className={cssStyles.preview}
+              data-file-dropzone-preview="true"
+            >
+              {preview !== undefined ? (
+                preview
+              ) : (
+                <span className={cssStyles.placeholder} aria-hidden="true">
+                  {placeholderGlyph(variant)}
+                </span>
+              )}
+            </div>
+
+            <div className={cssStyles.controls}>
+              <input
+                ref={fileInputRef}
+                id={inputId}
+                type="file"
+                className={cssStyles.hiddenInput}
+                {...(resolvedAccept !== '' && { accept: resolvedAccept })}
+                onChange={handleInputChange}
+                disabled={uploading}
+                {...inputAriaProps}
+              />
+              <button
+                type="button"
+                className={cssStyles.dropTarget}
+                onClick={() => fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                disabled={uploading}
+                aria-describedby={`${instanceId}-hint`}
+                data-file-dropzone-browse="true"
+              >
+                <span className={cssStyles.dropTargetLabel}>{browseLabel}</span>
+                <span
+                  id={`${instanceId}-hint`}
+                  className={cssStyles.dropTargetHint}
+                >
+                  Drag &amp; drop or click to browse
+                </span>
+              </button>
+
+              {hasValue && onRemove !== undefined && (
+                <button
+                  type="button"
+                  className={cssStyles.removeButton}
+                  onClick={onRemove}
+                  disabled={uploading}
+                  data-file-dropzone-remove="true"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </FieldShell>
+  )
+}
+
+FileDropzone.displayName = 'FileDropzone'
+
+export default FileDropzone

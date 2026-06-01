@@ -54,7 +54,6 @@ const PointOfSaleIcon: React.FC<PointOfSaleIconProps> = ({
       >
         <path d="M17,2H7A2,2 0 0,0 5,4V20A2,2 0 0,0 7,22H17A2,2 0 0,0 19,20V4A2,2 0 0,0 17,2M17,20H7V4H17M16,6H8V8H16M16,10H8V12H16M16,14H8V16H16" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }

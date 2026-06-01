@@ -55,10 +55,10 @@ type Story = StoryObj<typeof Tabs>
 export const PremiumTheme: Story = {
   name: 'Premium Theme',
   render: args => (
-    <div className="bg-gray-800 h-[200vh]">
+    <div style={{ background: '#1f2937', height: '200vh' }}>
       <Tabs {...args} />
-      <div className="p-8 text-white">
-        <h1 className="text-2xl font-bold">Page Content</h1>
+      <div style={{ padding: '32px', color: '#ffffff' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700 }}>Page Content</h1>
         <p>Scroll down to see the tabs stick to the top.</p>
       </div>
     </div>
@@ -79,11 +79,21 @@ export const PremiumTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Sacred Theme',
   render: args => (
-    <div className="bg-black h-[200vh]">
+    <div style={{ background: '#000000', height: '200vh' }}>
       <Tabs {...args} />
-      <div className="p-8 text-yellow-200">
-        <h1 className="text-2xl font-bold font-cinzel">Ancient Archives</h1>
-        <p className="font-cinzel">Scroll to observe the sacred header.</p>
+      <div style={{ padding: '32px', color: '#ffe680' }}>
+        <h1
+          style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            fontFamily: "'Cinzel', Georgia, serif",
+          }}
+        >
+          Ancient Archives
+        </h1>
+        <p style={{ fontFamily: "'Cinzel', Georgia, serif" }}>
+          Scroll to observe the sacred header.
+        </p>
       </div>
     </div>
   ),
@@ -106,20 +116,40 @@ const InteractiveDemoRenderer = () => {
     'left' | 'center' | 'right' | 'justify'
   >('left')
 
+  const wrapperBackground =
+    theme === 'sacred' ? '#000000' : theme === 'dark' ? '#1f2937' : '#f3f4f6'
+  const contentColor =
+    theme === 'sacred' ? '#ffe680' : theme === 'dark' ? '#ffffff' : '#1f2937'
+
   return (
-    <div
-      className={`h-[200vh] ${theme === 'sacred' ? 'bg-black' : theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}
-    >
-      <div className="p-4 bg-white rounded-lg border fixed top-24 right-4 z-50">
-        <h3 className="text-lg font-bold mb-2">Controls</h3>
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2">
+    <div style={{ height: '200vh', background: wrapperBackground }}>
+      <div
+        style={{
+          padding: '16px',
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #d1d5db',
+          position: 'fixed',
+          top: '96px',
+          right: '16px',
+          zIndex: 50,
+        }}
+      >
+        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
+          Controls
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <select
               value={theme}
               onChange={e =>
                 setTheme(e.target.value as 'light' | 'dark' | 'sacred')
               }
-              className="p-1 border rounded"
+              style={{
+                padding: '4px',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+              }}
             >
               <option value="light">Light Theme</option>
               <option value="dark">Dark Theme</option>
@@ -133,7 +163,11 @@ const InteractiveDemoRenderer = () => {
                 e.target.value as 'left' | 'center' | 'right' | 'justify'
               )
             }
-            className="p-1 border rounded"
+            style={{
+              padding: '4px',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+            }}
           >
             <option value="left">Left</option>
             <option value="center">Center</option>
@@ -152,11 +186,15 @@ const InteractiveDemoRenderer = () => {
         }}
       />
 
-      <div
-        className={`p-8 ${theme === 'sacred' ? 'text-yellow-200' : theme === 'dark' ? 'text-white' : 'text-gray-800'}`}
-      >
+      <div style={{ padding: '32px', color: contentColor }}>
         <h1
-          className={`text-2xl font-bold ${theme === 'sacred' && 'font-cinzel'}`}
+          style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            ...(theme === 'sacred'
+              ? { fontFamily: "'Cinzel', Georgia, serif" }
+              : {}),
+          }}
         >
           Interactive Content
         </h1>

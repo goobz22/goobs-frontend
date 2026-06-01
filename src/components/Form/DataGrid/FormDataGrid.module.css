@@ -24,11 +24,11 @@
 
 .container[data-theme='sacred'] {
   position: relative;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: var(--goobs-sacred-surface);
   backdrop-filter: blur(16px);
-  border: 2px solid rgba(255, 215, 0, 0.5);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+  border: 2px solid var(--goobs-gold-a50);
+  border-radius: var(--goobs-radius-xl);
+  padding: var(--goobs-space-lg);
   animation: formDatagridGlowPulse 2s infinite alternate;
 }
 
@@ -40,15 +40,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 0.75rem;
-  padding: 0 0.5rem;
+  margin-bottom: var(--goobs-space-sm);
+  padding: 0 var(--goobs-space-xs);
   box-sizing: border-box;
 }
 
 .titleContainer[data-theme='sacred'] {
   text-align: center;
-  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--goobs-gold-a30);
+  padding-bottom: var(--goobs-space-sm);
 }
 
 .title {
@@ -57,19 +57,19 @@
   font-family: Merriweather, serif;
   font-size: clamp(1.25rem, 4vw, 1.75rem);
   font-weight: 700;
-  color: black;
+  color: var(--goobs-light-text);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .title[data-theme='sacred'] {
-  font-family: Cinzel, serif;
-  color: #ffd700;
+  font-family: var(--goobs-font-sacred);
+  color: var(--goobs-gold);
   text-align: center;
   font-size: clamp(1.5rem, 5vw, 2rem);
   letter-spacing: 0.05em;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px var(--goobs-gold-a50);
+  margin-bottom: var(--goobs-space-xs);
 }
 
 .description {
@@ -78,18 +78,18 @@
   font-family: Merriweather, serif;
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 400;
-  color: black;
+  color: var(--goobs-light-text);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .description[data-theme='sacred'] {
   font-family: 'Crimson Text', serif;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--goobs-sacred-text);
   text-align: center;
   font-size: clamp(0.95rem, 3vw, 1.125rem);
   letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--goobs-space-xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -116,7 +116,7 @@
   background-image: linear-gradient(
     to right,
     transparent,
-    #ffd700,
+    var(--goobs-gold),
     transparent
   );
   animation: formDatagridDataFlow 3s infinite;
@@ -126,13 +126,13 @@
    ALERT + DATAGRID WRAPPERS
    -------------------------------------------------------------------------- */
 .alertContainer {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--goobs-space-sm);
 }
 
 .dataGridContainer[data-theme='sacred'] {
   position: relative;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--goobs-sacred-control-bg);
   box-sizing: border-box;
 }
 
@@ -142,10 +142,10 @@
    -------------------------------------------------------------------------- */
 @keyframes formDatagridGlowPulse {
   from {
-    box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 8px var(--goobs-gold-a20);
   }
   to {
-    box-shadow: 0 0 24px rgba(255, 215, 0, 0.45);
+    box-shadow: 0 0 24px var(--goobs-gold-a50);
   }
 }
 

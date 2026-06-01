@@ -12,7 +12,7 @@
   height: 40px;
   width: 100%;
   border: 1px solid var(--field-border-default, hsl(0, 0%, 20%));
-  border-radius: 8px;
+  border-radius: var(--goobs-radius-lg);
   background-color: var(--field-bg, transparent);
   color: var(--field-text, inherit);
   margin: 0;

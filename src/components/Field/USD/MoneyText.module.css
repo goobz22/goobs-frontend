@@ -1,0 +1,57 @@
+/* ==========================================================================
+   MONEYTEXT COMPONENT - CSS MODULE
+   Read-only currency display span (no FieldShell, no input). Tone tints and
+   an optional tabular-monospace face for column alignment. Sacred theme is the
+   default; the gold accent mirrors the USD field's dollar-sign treatment.
+   ========================================================================== */
+
+.money {
+  /* Inline by default so it drops into running text, table cells, and stat
+     rows without disturbing layout. */
+  display: inline;
+  font-family: inherit;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tabular-monospace face — columns of figures align on the decimal point. */
+.money[data-money-mono='true'] {
+  font-family:
+    'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', 'Roboto Mono',
+    monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Negative amounts read in a muted red regardless of tone. */
+.money[data-money-negative='true'] {
+  color: rgba(255, 107, 107, 0.95);
+}
+
+/* Empty / unparseable values render the placeholder dash dimmed. */
+.money[data-money-empty='true'] {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+}
+
+/* ── Tone: total — the summed line, reads bolder + gold ─────────────────── */
+.money[data-money-tone='total'] {
+  font-weight: 700;
+  color: rgba(255, 215, 0, 0.95);
+}
+
+.money[data-money-tone='total'][data-money-negative='true'] {
+  color: rgba(255, 107, 107, 0.95);
+}
+
+/* ── Tone: due — an outstanding balance, reads in the warning palette ───── */
+.money[data-money-tone='due'] {
+  font-weight: 600;
+  color: rgba(255, 176, 32, 0.95);
+}
+
+.money[data-money-tone='due'][data-money-negative='true'] {
+  color: rgba(255, 107, 107, 0.95);
+}

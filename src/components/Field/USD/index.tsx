@@ -7,6 +7,7 @@ import { useFieldBinding } from '../Shell/useFieldBinding'
 import { useOptionalFormContext } from '../../Form/context'
 import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
+import { formatCurrency } from './formatCurrency'
 
 export interface USDFieldProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -43,21 +44,9 @@ export interface USDFieldProps extends Omit<
   styles?: FieldStyleOverrides
 }
 
-const formatCurrency = (value: string): string => {
-  const numericValue: string = value.replace(/[^0-9.]/g, '')
-  if (!numericValue) return ''
-  if (numericValue === '.') return '.'
-  const parts: string[] = numericValue.split('.')
-  if (parts.length > 2) {
-    const firstPart = parts[0] || ''
-    const remainingParts = parts.slice(1).join('')
-    return `${firstPart}.${remainingParts}`
-  }
-  if (numericValue.includes('.')) return numericValue
-  const number = parseFloat(numericValue)
-  if (isNaN(number)) return ''
-  return number.toString()
-}
+// formatCurrency (the input-side keystroke normalizer) now lives in the shared
+// ./formatCurrency util so this editable field and the read-only <MoneyText>
+// display agree on how a dollar value is parsed. Imported above.
 
 const USDField: React.FC<USDFieldProps> = ({
   initialValue = '',

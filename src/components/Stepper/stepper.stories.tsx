@@ -207,7 +207,9 @@ export const AccountSetupWizard: Story = {
       ]
 
       return (
-        <div className="min-h-screen bg-gray-100 p-8">
+        <div
+          style={{ minHeight: '100vh', background: '#f3f4f6', padding: '32px' }}
+        >
           <Button onClick={() => setIsOpen(true)}>
             Open Account Setup Wizard
           </Button>
@@ -218,7 +220,9 @@ export const AccountSetupWizard: Story = {
             title="Create Your Account"
             theme="light"
           >
-            <div className="space-y-8">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+            >
               <Stepper
                 steps={wizardSteps}
                 styles={{
@@ -227,11 +231,30 @@ export const AccountSetupWizard: Story = {
                 }}
               />
 
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">
+              <div
+                style={{
+                  background: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '24px',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    color: '#111827',
+                    marginBottom: '16px',
+                  }}
+                >
                   Step 2: Account Details
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: '16px',
+                  }}
+                >
                   <FormField label="Username">
                     <Input placeholder="Enter username" />
                   </FormField>
@@ -247,7 +270,7 @@ export const AccountSetupWizard: Story = {
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary">← Previous</Button>
                 <Button>Continue →</Button>
               </div>
@@ -299,7 +322,9 @@ export const CheckoutProcess: Story = {
       ]
 
       return (
-        <div className="min-h-screen bg-gray-900 p-8">
+        <div
+          style={{ minHeight: '100vh', background: '#111827', padding: '32px' }}
+        >
           <Button onClick={() => setIsOpen(true)} theme="dark">
             Open Checkout
           </Button>
@@ -310,7 +335,9 @@ export const CheckoutProcess: Story = {
             title="Complete Your Purchase"
             theme="dark"
           >
-            <div className="space-y-8">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+            >
               <Stepper
                 steps={checkoutSteps}
                 styles={{
@@ -319,15 +346,35 @@ export const CheckoutProcess: Story = {
                 }}
               />
 
-              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4 text-red-400">
+              <div
+                style={{
+                  background: 'rgba(127, 29, 29, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '8px',
+                  padding: '24px',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    marginBottom: '16px',
+                    color: '#f87171',
+                  }}
+                >
                   Payment Error
                 </h3>
-                <p className="text-gray-300 mb-4">
+                <p style={{ color: '#d1d5db', marginBottom: '16px' }}>
                   Your payment could not be processed. Please check your payment
                   information and try again.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: '16px',
+                  }}
+                >
                   <FormField label="Card Number" theme="dark">
                     <Input placeholder="1234 5678 9012 3456" theme="dark" />
                   </FormField>
@@ -343,7 +390,7 @@ export const CheckoutProcess: Story = {
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary" theme="dark">
                   ← Back to Shipping
                 </Button>
@@ -410,7 +457,9 @@ export const DarkConfigurationSetup: Story = {
       ]
 
       return (
-        <div className="min-h-screen bg-black p-8">
+        <div
+          style={{ minHeight: '100vh', background: '#000000', padding: '32px' }}
+        >
           <Button onClick={() => setIsOpen(true)} theme="dark">
             Begin Configuration
           </Button>
@@ -421,7 +470,9 @@ export const DarkConfigurationSetup: Story = {
             title="Configuration Process"
             theme="dark"
           >
-            <div className="space-y-8">
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+            >
               <Stepper
                 steps={configSteps}
                 styles={{
@@ -430,17 +481,53 @@ export const DarkConfigurationSetup: Story = {
                 }}
               />
 
-              <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4 text-yellow-400 font-serif">
+              <div
+                style={{
+                  background: 'rgba(250, 204, 21, 0.1)',
+                  border: '1px solid rgba(250, 204, 21, 0.3)',
+                  borderRadius: '8px',
+                  padding: '24px',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    marginBottom: '16px',
+                    color: '#ffd700',
+                    fontFamily: 'Georgia, serif',
+                  }}
+                >
                   Realignment Required
                 </h3>
-                <p className="text-yellow-100 mb-6 font-serif">
+                <p
+                  style={{
+                    color: '#fef9c3',
+                    marginBottom: '24px',
+                    fontFamily: 'Georgia, serif',
+                  }}
+                >
                   Parameters are not properly aligned. Adjust the configuration
                   settings to continue.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: '24px',
+                  }}
+                >
                   <FormField label="Phase Alignment" theme="dark">
-                    <select className="w-full px-3 py-2 border border-yellow-400/30 bg-black/50 text-yellow-100 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                    <select
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid rgba(250, 204, 21, 0.3)',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        color: '#fef9c3',
+                        borderRadius: '8px',
+                      }}
+                    >
                       <option>Phase 1</option>
                       <option>Phase 2</option>
                       <option>Phase 3</option>
@@ -448,7 +535,16 @@ export const DarkConfigurationSetup: Story = {
                     </select>
                   </FormField>
                   <FormField label="Focus Mode" theme="dark">
-                    <select className="w-full px-3 py-2 border border-yellow-400/30 bg-black/50 text-yellow-100 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                    <select
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid rgba(250, 204, 21, 0.3)',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        color: '#fef9c3',
+                        borderRadius: '8px',
+                      }}
+                    >
                       <option>Mode A</option>
                       <option>Mode B</option>
                       <option>Mode C</option>
@@ -464,7 +560,7 @@ export const DarkConfigurationSetup: Story = {
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="secondary" theme="dark">
                   Return to Initialization
                 </Button>
@@ -535,7 +631,9 @@ export const ProjectSetupFlow: Story = {
       ]
 
       return (
-        <div className="min-h-screen bg-gray-100 p-8">
+        <div
+          style={{ minHeight: '100vh', background: '#f3f4f6', padding: '32px' }}
+        >
           <Button onClick={() => setIsOpen(true)}>Open Project Setup</Button>
 
           <Dialog
@@ -544,8 +642,14 @@ export const ProjectSetupFlow: Story = {
             title="New Project Setup"
             theme="light"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: '32px',
+              }}
+            >
+              <div style={{ gridColumn: 'span 1 / span 1' }}>
                 <Stepper
                   steps={projectSteps}
                   styles={{
@@ -555,22 +659,49 @@ export const ProjectSetupFlow: Story = {
                 />
               </div>
 
-              <div className="lg:col-span-2">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-900">
+              <div style={{ gridColumn: 'span 2 / span 2' }}>
+                <div
+                  style={{
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '8px',
+                    padding: '24px',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      marginBottom: '16px',
+                      color: '#1e3a8a',
+                    }}
+                  >
                     Step 3: Project Configuration
                   </h3>
-                  <p className="text-blue-700 mb-6">
+                  <p style={{ color: '#1d4ed8', marginBottom: '24px' }}>
                     Configure your project settings and environment variables
                     for development and production.
                   </p>
 
-                  <div className="space-y-4">
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px',
+                    }}
+                  >
                     <FormField label="Project Name">
                       <Input placeholder="my-awesome-project" />
                     </FormField>
                     <FormField label="Environment">
-                      <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <select
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                        }}
+                      >
                         <option>Development</option>
                         <option>Staging</option>
                         <option>Production</option>
@@ -584,11 +715,33 @@ export const ProjectSetupFlow: Story = {
                     </FormField>
                   </div>
 
-                  <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-medium text-green-900 mb-2">
+                  <div
+                    style={{
+                      marginTop: '24px',
+                      padding: '16px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <h4
+                      style={{
+                        fontWeight: 500,
+                        color: '#14532d',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Configuration Tips:
                     </h4>
-                    <ul className="text-sm text-green-700 space-y-1">
+                    <ul
+                      style={{
+                        fontSize: '14px',
+                        color: '#15803d',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                      }}
+                    >
                       <li>• Use environment variables for sensitive data</li>
                       <li>
                         • Keep development and production configs separate
@@ -600,7 +753,13 @@ export const ProjectSetupFlow: Story = {
                   </div>
                 </div>
 
-                <div className="flex justify-between mt-6">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: '24px',
+                  }}
+                >
                   <Button variant="secondary">← Back to Dependencies</Button>
                   <Button>Continue to Database →</Button>
                 </div>
@@ -678,31 +837,110 @@ export const InteractiveDemo: Story = {
         },
       ]
 
-      const themeClasses = {
-        light: 'min-h-screen bg-gray-100 p-8',
-        dark: 'min-h-screen bg-gray-900 p-8',
-        sacred: 'min-h-screen bg-black p-8',
+      const wrapperBackground =
+        theme === 'sacred'
+          ? '#000000'
+          : theme === 'dark'
+            ? '#111827'
+            : '#f3f4f6'
+      const cardStyle: React.CSSProperties =
+        theme === 'sacred'
+          ? {
+              background: 'rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(250, 204, 21, 0.3)',
+            }
+          : theme === 'dark'
+            ? { background: '#1f2937', border: '1px solid #374151' }
+            : { background: '#ffffff', border: '1px solid #d1d5db' }
+      const headingColor =
+        theme === 'sacred'
+          ? '#ffd700'
+          : theme === 'dark'
+            ? '#ffffff'
+            : '#111827'
+      const labelColor =
+        theme === 'sacred'
+          ? '#ffd700'
+          : theme === 'dark'
+            ? '#d1d5db'
+            : '#374151'
+      const controlStyle: React.CSSProperties =
+        theme === 'sacred'
+          ? {
+              border: '1px solid rgba(250, 204, 21, 0.3)',
+              background: 'rgba(0, 0, 0, 0.5)',
+              color: '#fef9c3',
+            }
+          : theme === 'dark'
+            ? {
+                border: '1px solid #4b5563',
+                background: '#374151',
+                color: '#ffffff',
+              }
+            : {
+                border: '1px solid #d1d5db',
+                background: '#ffffff',
+                color: '#111827',
+              }
+      const labelStyle: React.CSSProperties = {
+        display: 'block',
+        fontSize: '14px',
+        fontWeight: 500,
+        marginBottom: '8px',
+        color: labelColor,
+      }
+      const selectStyle: React.CSSProperties = {
+        width: '100%',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        ...controlStyle,
       }
 
       return (
-        <div className={themeClasses[theme]}>
-          <div className="max-w-6xl mx-auto space-y-8">
-            <div className="bg-white dark:bg-gray-800 sacred:bg-black/50 rounded-lg p-6 border sacred:border-yellow-400/30">
-              <h2 className="text-2xl font-bold mb-6 dark:text-white sacred:text-yellow-400">
+        <div
+          style={{
+            minHeight: '100vh',
+            background: wrapperBackground,
+            padding: '32px',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '72rem',
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '32px',
+            }}
+          >
+            <div style={{ borderRadius: '8px', padding: '24px', ...cardStyle }}>
+              <h2
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  marginBottom: '24px',
+                  color: headingColor,
+                }}
+              >
                 Interactive Stepper Demo
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+                  gap: '16px',
+                  marginBottom: '24px',
+                }}
+              >
                 <div>
-                  <label className="block text-sm font-medium mb-2 dark:text-gray-300 sacred:text-yellow-400">
-                    Theme
-                  </label>
+                  <label style={labelStyle}>Theme</label>
                   <select
                     value={theme}
                     onChange={e =>
                       setTheme(e.target.value as 'light' | 'dark' | 'sacred')
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sacred:border-yellow-400/30 sacred:bg-black/50 sacred:text-yellow-100 rounded-lg"
+                    style={selectStyle}
                   >
                     <option value="light">Light</option>
                     <option value="dark">Dark</option>
@@ -711,9 +949,7 @@ export const InteractiveDemo: Story = {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 dark:text-gray-300 sacred:text-yellow-400">
-                    Orientation
-                  </label>
+                  <label style={labelStyle}>Orientation</label>
                   <select
                     value={orientation}
                     onChange={e =>
@@ -721,7 +957,7 @@ export const InteractiveDemo: Story = {
                         e.target.value as 'horizontal' | 'vertical'
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sacred:border-yellow-400/30 sacred:bg-black/50 sacred:text-yellow-100 rounded-lg"
+                    style={selectStyle}
                   >
                     <option value="horizontal">Horizontal</option>
                     <option value="vertical">Vertical</option>
@@ -729,13 +965,11 @@ export const InteractiveDemo: Story = {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 dark:text-gray-300 sacred:text-yellow-400">
-                    Current Step
-                  </label>
+                  <label style={labelStyle}>Current Step</label>
                   <select
                     value={currentStep}
                     onChange={e => setCurrentStep(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white sacred:border-yellow-400/30 sacred:bg-black/50 sacred:text-yellow-100 rounded-lg"
+                    style={selectStyle}
                   >
                     <option value={1}>Step 1</option>
                     <option value={2}>Step 2</option>
@@ -744,7 +978,7 @@ export const InteractiveDemo: Story = {
                   </select>
                 </div>
 
-                <div className="flex items-end">
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                   <Button
                     onClick={() =>
                       setCurrentStep(Math.floor(Math.random() * 4) + 1)
@@ -757,7 +991,7 @@ export const InteractiveDemo: Story = {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 sacred:bg-black/50 rounded-lg p-8 border sacred:border-yellow-400/30">
+            <div style={{ borderRadius: '8px', padding: '32px', ...cardStyle }}>
               <Stepper
                 steps={demoSteps}
                 styles={{
@@ -794,23 +1028,73 @@ export const ThemeShowcase: Story = {
     ]
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-12">
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
+          padding: '32px',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '72rem',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '48px',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '30px',
+              fontWeight: 700,
+              textAlign: 'center',
+              color: '#111827',
+              marginBottom: '48px',
+            }}
+          >
             Stepper Theme Showcase
           </h1>
 
           {/* Light Theme */}
-          <div className="bg-white rounded-xl p-8 shadow-lg">
-            <h2 className="text-xl font-semibold mb-6 text-gray-900">
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '32px',
+              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                marginBottom: '24px',
+                color: '#111827',
+              }}
+            >
               Light Theme
             </h2>
             <Stepper steps={basicSteps} styles={{ theme: 'light' }} />
           </div>
 
           {/* Dark Theme */}
-          <div className="bg-gray-900 rounded-xl p-8 shadow-lg">
-            <h2 className="text-xl font-semibold mb-6 text-gray-100">
+          <div
+            style={{
+              background: '#111827',
+              borderRadius: '12px',
+              padding: '32px',
+              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                marginBottom: '24px',
+                color: '#f3f4f6',
+              }}
+            >
               Dark Theme
             </h2>
             <Stepper steps={basicSteps} styles={{ theme: 'dark' }} />

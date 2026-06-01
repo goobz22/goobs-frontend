@@ -14,6 +14,10 @@ export {
   ButtonGroup,
 } from './components/Button'
 export {
+  default as SaveButton,
+  type SaveButtonProps,
+} from './components/Button/SaveButton'
+export {
   default as IconButton,
   type IconButtonProps,
 } from './components/IconButton'
@@ -185,6 +189,11 @@ export {
 } from './components/Field/Percentage'
 export { default as USDField, type USDFieldProps } from './components/Field/USD'
 export {
+  default as MoneyText,
+  type MoneyTextProps,
+  type MoneyTextTone,
+} from './components/Field/USD/MoneyText'
+export {
   default as InternalIncrementNumberField,
   type InternalIncrementNumberFieldProps,
 } from './components/Field/Number/InternalIncrement'
@@ -228,10 +237,21 @@ export {
   type SearchableHistoryProps,
   type NavigationItem,
 } from './components/Field/Dropdown/SearchableHistory'
+export {
+  default as FileDropzone,
+  type FileDropzoneProps,
+  type FileDropzoneVariant,
+} from './components/FileDropzone'
 
 // Layout Components
 export { default as Paper } from './components/Paper'
 export { default as Divider } from './components/Divider'
+// FieldGrid — responsive auto-fit field-cluster layout primitive. Lives with
+// the layout components since it is a generic grid wrapper, not a Field.
+export {
+  default as FieldGrid,
+  type FieldGridProps,
+} from './components/FieldGrid'
 
 // Animation Components
 export { default as Fade } from './components/Fade'
@@ -368,6 +388,56 @@ export {
   type CardGridProps,
   type CardEmptyStateProps,
 } from './components/Card'
+// Panel — full-height shell surface compound primitive (sibling of Card). The
+// static region subcomponents are reachable off `Panel.*` AND as named exports.
+export {
+  default as Panel,
+  PanelHeader,
+  PanelBody,
+  PanelFooter,
+  type PanelProps,
+  type PanelVariant,
+  type PanelHeaderProps,
+  type PanelBodyProps,
+  type PanelFooterProps,
+} from './components/Panel'
+// DetailField / DetailGrid — read-only label/value definition-list primitives.
+export {
+  default as DetailField,
+  DetailGrid,
+  type DetailFieldProps,
+  type DetailGridProps,
+  type DetailGridFieldDescriptor,
+} from './components/DetailField'
+// EmptyState — standalone empty / zero-data placeholder (promoted out of
+// Card.EmptyState so it can be used anywhere).
+export {
+  default as EmptyState,
+  type EmptyStateProps,
+  type EmptyStateTheme,
+} from './components/EmptyState'
+// ListItemCard — row primitive for ordered / editable / selectable lists. The
+// static slot subcomponents are reachable off `ListItemCard.*` AND as named
+// exports.
+export {
+  default as ListItemCard,
+  ListItemCardOrder,
+  ListItemCardIcon,
+  ListItemCardContent,
+  ListItemCardActions,
+  type ListItemCardProps,
+  type ListItemCardTheme,
+  type ListItemCardOrderProps,
+  type ListItemCardIconProps,
+  type ListItemCardContentProps,
+  type ListItemCardActionsProps,
+} from './components/ListItemCard'
+// SacredGlyphFrame — animated gold-glow + decorative glyph wrapper for sacred
+// surfaces.
+export {
+  default as SacredGlyphFrame,
+  type SacredGlyphFrameProps,
+} from './components/SacredGlyphFrame'
 
 // Feedback Components
 export { default as Snackbar } from './components/Snackbar'
@@ -389,6 +459,10 @@ export * as Icons from './components/Icons'
 // Per-icon styling contract, also surfaced at top level (was previously
 // re-exported via the now-removed `export * from './theme'`).
 export type { IconStyles } from './components/Icons/types'
+// Egyptian-hieroglyph set, available for opt-in decorative use (no longer
+// force-rendered onto sacred-theme icons).
+export { SACRED_GLYPHS } from './components/Icons/sacredGlyphs'
+export type { SacredGlyph } from './components/Icons/sacredGlyphs'
 
 // Utils
 export { alpha } from './utils/alpha'

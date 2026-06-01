@@ -1,0 +1,31 @@
+/* ==========================================================================
+   SAVEBUTTON COMPONENT - CSS MODULE
+   Only the pending spinner lives here — the button chrome itself is owned by
+   CustomButton (Button.module.css). The spinner renders in CustomButton's icon
+   slot while a save is in flight.
+   ========================================================================== */
+
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: saveButtonSpin 0.7s linear infinite;
+}
+
+@keyframes saveButtonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Respect reduced-motion: drop the spin, keep the partial ring as a static
+   "busy" affordance. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

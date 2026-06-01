@@ -797,6 +797,60 @@
 }
 
 /* --------------------------------------------------------------------------
+   SACRED VARIANT — formSectionStyle absorption (ADDITIVE, keyed on the
+   EXISTING data-theme='sacred' attribute the Card root already emits).
+
+   This block absorbs the ~112 hand-rolled `formSectionStyle` gold-bordered
+   titled sections scattered through the ThothOS forms/workspaces — the
+   recurring inline recipe of:
+
+       backgroundColor: 'rgba(0, 0, 0, 0.3)'
+       border:          '1px solid #D4AF37'
+       borderRadius:    'clamp(8px, 2vw, 12px)'
+       box-shadow:      subtle gold glow
+
+   Those sections become:
+       <Card styles={{ theme: 'sacred' }}>
+         <Card.Header><Card.HeaderIcon/>…</Card.Header>
+         <Card.Section>…</Card.Section>
+       </Card>
+
+   IMPORTANT — purely additive, NO prop/API change:
+   - It only RESHAPES `Card.Section` (`.section`) WHEN that section is inside
+     a sacred-themed Card root. A plain `<Card.Section>` outside a sacred Card,
+     and the Card root surface itself, are untouched — so existing Cards keep
+     their current appearance. We deliberately scope to the descendant section
+     rather than the root, so absorbing the formSection look does not alter the
+     ~50 item-card surfaces already shipping with `theme='sacred'`.
+   -------------------------------------------------------------------------- */
+.root[data-theme='sacred'] .section {
+  /* The exact formSectionStyle recipe: dark translucent fill, a crisp 1px
+     gold (#D4AF37) border, clamp() radius, and a subtle gold glow. */
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid #d4af37;
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow:
+    0 0 12px rgba(212, 175, 55, 0.12),
+    inset 0 0 18px rgba(212, 175, 55, 0.04);
+}
+
+/* The muted section flavour keeps the dark fill but drops the gold glow to a
+   neutral border, mirroring the hand-rolled "muted" formSections. */
+.root[data-theme='sacred'] .section.muted {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: color-mix(in srgb, var(--card-meta) 28%, transparent);
+  box-shadow: none;
+}
+
+/* The section eyebrow label in a sacred card adopts the gold Cinzel treatment
+   the hand-rolled formSection titles used (uppercase, tracked, gold). */
+.root[data-theme='sacred'] .section .sectionLabel {
+  color: #d4af37;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.08em;
+}
+
+/* --------------------------------------------------------------------------
    CONTAINER QUERIES — card adapts to ITS column, not the viewport
    -------------------------------------------------------------------------- */
 @container (max-width: 320px) {

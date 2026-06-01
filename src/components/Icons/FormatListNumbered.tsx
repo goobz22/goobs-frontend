@@ -72,7 +72,6 @@ const FormatListNumberedIcon: React.FC<FormatListNumberedIconProps> = ({
         <path d="M7 12h13v1H7v-1z" />
         <path d="M7 18h13v1H7v-1z" />
       </svg>
-      {theme === 'sacred' && <div className={cssStyles.glyph}></div>}
     </div>
   )
 }
