@@ -426,7 +426,7 @@ export interface CompositeFieldConfig {
  *   renderCell: ({ value }) => <StatusBadge status={value} />
  * }
  */
-export interface ColumnDef {
+export interface ColumnDef<TRow extends RowData = RowData> {
   /** Unique field name matching the key in row data objects */
   field: string
   /** Display text shown in the column header */
@@ -497,7 +497,7 @@ export interface ColumnDef {
    * )
    */
   renderCell?: (params: {
-    row: RowData
+    row: TRow
     value: unknown
     field: string
     rowIndex: number
@@ -839,13 +839,19 @@ export type { MetricCardData } from '../../Metric/types'
  * />
  * ```
  */
-export interface DatagridProps {
+export interface DatagridProps<TRow extends RowData = RowData> {
   // ─────────────────────────────────────────────────────────────────────────────
   // REQUIRED PROPS
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Column definitions - defines the schema of your data table */
-  columns: ColumnDef[]
+  /**
+   * Column definitions - defines the schema of your data table.
+   * Generic over the row type: pass `ColumnDef<MyRow>[]` (or render the grid as
+   * `<DataGrid<MyRow> …>`) and every column's `renderCell({ row })` is typed as
+   * `MyRow` — no `as unknown as` downcast needed. Defaults to `RowData` so all
+   * existing untyped usages compile unchanged.
+   */
+  columns: ColumnDef<TRow>[]
 
   /** Row data array - each object should have _id or id plus field values */
   rows: RowData[]
