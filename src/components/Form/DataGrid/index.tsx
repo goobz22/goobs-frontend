@@ -71,7 +71,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import type { DatagridProps } from '../../DataGrid/types'
+import type { DatagridProps, RowData } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 import Alert, { AlertProps } from '../../Alert'
 import cssStyles from './FormDataGrid.module.css'
@@ -89,7 +89,7 @@ import cssStyles from './FormDataGrid.module.css'
  * @property sacredtheme - Use sacred (dark/gold) theme. Default: true
  * @property alert - Optional alert message to display between header and grid
  */
-export interface FormDataGridProps {
+export interface FormDataGridProps<TRow extends RowData = RowData> {
   /** Main heading displayed above the DataGrid */
   title: string
   /** Subheading/explanatory text below the title */
@@ -99,7 +99,7 @@ export interface FormDataGridProps {
    * All properties are passed directly to the underlying DataGrid component.
    * @see DatagridProps for complete property documentation
    */
-  datagrid: DatagridProps
+  datagrid: DatagridProps<TRow>
   /**
    * Use sacred (dark/gold) theme styling.
    * - true (default): Dark background, gold accents, animated effects
@@ -154,13 +154,13 @@ export interface FormDataGridProps {
  * />
  * ```
  */
-function FormDataGrid({
+function FormDataGrid<TRow extends RowData = RowData>({
   title,
   description,
   datagrid,
   sacredtheme = true,
   alert,
-}: FormDataGridProps) {
+}: FormDataGridProps<TRow>) {
   // Theme variant as a data-attribute, mirroring the goobs Card/DataGrid house
   // pattern. The boolean `sacredtheme` maps to the canonical 'sacred' | 'light'.
   const theme: 'sacred' | 'light' = sacredtheme ? 'sacred' : 'light'
