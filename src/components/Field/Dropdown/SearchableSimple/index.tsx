@@ -85,6 +85,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   const [activeIndex, setActiveIndex] = useState(-1)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [internalValue, setInternalValue] = useState<string | number>(
     defaultValue ?? ''
   )
@@ -92,6 +93,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     top: 0,
     left: 0,
     width: 0,
+    maxHeight: 300,
   })
 
   const disabled = styles?.disabled || false
@@ -116,24 +118,52 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   // swaps are rare enough that the initial `defaultValue` is the
   // documented contract.
 
-  // Position the portalled menu under the trigger button each time
-  // it opens. Re-runs on every open because the trigger may have
-  // scrolled within its viewport since last render.
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      })
-      // Reset highlight when opening so arrow keys start at the top.
-      setActiveIndex(-1)
-    }
-  }, [isOpen])
+  // Position the portalled menu anchored to the trigger. Anchoring the menu to
+  // the trigger — recomputed on open AND on scroll/resize, rather than closing
+  // on any scroll — is what keeps it interactable for keyboard users, assistive
+  // tech, and automated tests that must scroll an option into view.
+  const computeMenuPosition = React.useCallback(() => {
+    const trigger = buttonRef.current
+    if (!trigger) return
+    const rect = trigger.getBoundingClientRect()
+    const GAP = 4
+    const spaceBelow = window.innerHeight - rect.bottom - GAP
+    // Clamp the menu height to the room below the trigger so a fixed-position
+    // menu never spills past the viewport edge (it scrolls internally beyond
+    // that); the floor keeps it usable when the field sits low on screen.
+    const maxHeight = Math.max(160, Math.min(300, spaceBelow))
+    setDropdownPosition({
+      top: rect.bottom + GAP,
+      left: rect.left,
+      width: rect.width,
+      maxHeight,
+    })
+  }, [])
 
-  // Click-outside + scroll dismissal. Scroll listener uses capture
-  // phase so it catches scroll on any ancestor (including window).
+  const closeMenu = React.useCallback(() => {
+    setIsOpen(false)
+    setSearchTerm('')
+  }, [])
+
+  // Open from the trigger's event handlers (not an effect) so the open-time
+  // setup runs exactly once per open, on every open path (pointer + keyboard).
+  const openMenu = React.useCallback(() => {
+    setIsOpen(true)
+    // Reset highlight so arrow keys start at the top.
+    setActiveIndex(-1)
+    computeMenuPosition()
+    // Focus the search input WITHOUT scrolling the page. A page scroll here
+    // (when the field is low in the viewport) is exactly what used to dismiss
+    // the freshly-opened menu.
+    requestAnimationFrame(() =>
+      searchInputRef.current?.focus({ preventScroll: true })
+    )
+  }, [computeMenuPosition])
+
+  // Click-outside closes. Scroll/resize REPOSITIONS the anchored menu instead of
+  // dismissing it, so scrolling an option into view — by a user, assistive tech,
+  // or an automated test — keeps the menu open; it closes only when the trigger
+  // scrolls fully out of view. Capture phase catches scroll on any ancestor.
   useEffect(() => {
     if (!isOpen) return
 
@@ -143,35 +173,44 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
         buttonRef.current && buttonRef.current.contains(target)
       const insideMenu = menuRef.current && menuRef.current.contains(target)
       if (!insideTrigger && !insideMenu) {
-        setIsOpen(false)
-        setSearchTerm('')
+        closeMenu()
       }
     }
 
-    const handleScroll = (event: Event) => {
-      // Don't close if scrolling inside the dropdown menu itself —
-      // long lists need to scroll without closing.
-      if (menuRef.current && menuRef.current.contains(event.target as Node)) {
+    const handleReposition = (event: Event) => {
+      // Scrolling inside the menu itself just moves the option list — leave the
+      // menu anchored where it is.
+      if (
+        event.type === 'scroll' &&
+        menuRef.current &&
+        menuRef.current.contains(event.target as Node)
+      ) {
         return
       }
-      setIsOpen(false)
-      setSearchTerm('')
+      const rect = buttonRef.current?.getBoundingClientRect()
+      // Close only once the trigger has scrolled entirely out of the viewport.
+      if (rect && (rect.bottom < 0 || rect.top > window.innerHeight)) {
+        closeMenu()
+        return
+      }
+      computeMenuPosition()
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('scroll', handleReposition, true)
+    window.addEventListener('resize', handleReposition)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('scroll', handleReposition, true)
+      window.removeEventListener('resize', handleReposition)
     }
-  }, [isOpen])
+  }, [isOpen, computeMenuPosition, closeMenu])
 
   // Escape closes the popover when focus is anywhere in this
   // component's subtree (trigger button or the search input inside
   // the portalled menu).
   useEscape(isOpen, () => {
-    setIsOpen(false)
-    setSearchTerm('')
+    closeMenu()
     buttonRef.current?.focus()
   })
 
@@ -183,8 +222,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     // `option._id ?? option.value` is exactly what the spec's payloadToStore
     // resolves to.
     bindingWriteId?.(option._id ?? option.value)
-    setIsOpen(false)
-    setSearchTerm('')
+    closeMenu()
     buttonRef.current?.focus()
   }
 
@@ -245,7 +283,11 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
               data-action={isOpen ? 'close' : 'open'}
               data-subject={dataField}
               className={buttonClassNames}
-              onClick={() => !disabled && setIsOpen(!isOpen)}
+              onClick={() => {
+                if (disabled) return
+                if (isOpen) closeMenu()
+                else openMenu()
+              }}
               onBlur={() => boundOnBlur?.()}
               onKeyDown={event => {
                 // Open on Down/Up if currently closed (combobox 1.2)
@@ -257,7 +299,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                     event.key === ' ')
                 ) {
                   event.preventDefault()
-                  setIsOpen(true)
+                  openMenu()
                   return
                 }
                 if (isOpen) handleKeyDown(event)
@@ -286,10 +328,12 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                     top: `${dropdownPosition.top}px`,
                     left: `${dropdownPosition.left}px`,
                     width: `${dropdownPosition.width}px`,
+                    maxHeight: `${dropdownPosition.maxHeight}px`,
                   }}
                 >
                   <div className={cssStyles.searchContainer}>
                     <input
+                      ref={searchInputRef}
                       type="text"
                       className={cssStyles.searchInput}
                       placeholder="Search..."
@@ -297,7 +341,6 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                       aria-label={`Search ${label}`}
                       onChange={e => setSearchTerm(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      autoFocus
                     />
                   </div>
 
