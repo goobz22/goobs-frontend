@@ -1419,10 +1419,20 @@ function DataGridContent({
  *   onCellSave={handleSave}
  * />
  */
-function DataGrid(props: DatagridProps) {
+function DataGrid<TRow extends RowData = RowData>(
+  props: DatagridProps<TRow>
+) {
   return (
     <ColumnVisibilityProvider>
-      <DataGridContent {...props} />
+      {/*
+        The public API is generic over the row type (so consumers get typed
+        renderCell rows), but the internal DataGridContent + Table render rows
+        structurally and are typed against the base RowData. ColumnDef is
+        contravariant in TRow, so ColumnDef<TRow>[] isn't assignable to
+        ColumnDef<RowData>[] — bridge it once here. Safe: at runtime each row IS
+        a TRow, and the internals never rely on the narrowed shape.
+      */}
+      <DataGridContent {...(props as DatagridProps)} />
     </ColumnVisibilityProvider>
   )
 }

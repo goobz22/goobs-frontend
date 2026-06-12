@@ -119,7 +119,10 @@ const Dropdown: React.FC<DropdownProps> = ({
     if (isOpen) setActiveIndex(-1)
   }
 
-  // Click-outside + scroll dismissal — same pattern as SearchableSimple.
+  // Click-outside closes. The menu is absolutely positioned (it scrolls WITH the
+  // field), so there is no detach to guard against — scrolling no longer closes
+  // the menu, which keeps it interactable for keyboard users, assistive tech,
+  // and automated tests that scroll an option into view.
   useEffect(() => {
     if (!isOpen) return
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,17 +132,9 @@ const Dropdown: React.FC<DropdownProps> = ({
       const insideMenu = menuRef.current && menuRef.current.contains(target)
       if (!insideTrigger && !insideMenu) setIsOpen(false)
     }
-    const handleScroll = (event: Event) => {
-      if (menuRef.current && menuRef.current.contains(event.target as Node)) {
-        return
-      }
-      setIsOpen(false)
-    }
     document.addEventListener('mousedown', handleClickOutside)
-    window.addEventListener('scroll', handleScroll, true)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
     }
   }, [isOpen])
 

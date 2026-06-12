@@ -87,7 +87,27 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     top: 0,
     left: 0,
     width: 0,
+    maxHeight: 300,
   })
+
+  // Anchor the portalled menu to the search box — recomputed on open and on
+  // scroll/resize (rather than closing on any scroll) so it stays interactable
+  // for keyboard users, assistive tech, and automated tests that scroll an
+  // option into view.
+  const computeMenuPosition = React.useCallback(() => {
+    const anchor = searchBoxRef.current
+    if (!anchor) return
+    const rect = anchor.getBoundingClientRect()
+    const GAP = 4
+    const spaceBelow = window.innerHeight - rect.bottom - GAP
+    const maxHeight = Math.max(160, Math.min(300, spaceBelow))
+    setDropdownPosition({
+      top: rect.bottom + GAP,
+      left: rect.left,
+      width: rect.width,
+      maxHeight,
+    })
+  }, [])
 
   // The active theme drives the [data-theme] attribute on the container +
   // portalled menu; CSS switches all colors off of it. Defaults to sacred —
@@ -134,40 +154,42 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       }
     }
 
-    const handleScroll = (event: Event) => {
-      // Don't close if scrolling inside the dropdown menu itself
+    const handleReposition = (event: Event) => {
+      // Scrolling inside the menu itself just moves the list — leave it open.
       if (
+        event.type === 'scroll' &&
         dropdownRef.current &&
         dropdownRef.current.contains(event.target as Node)
       ) {
         return
       }
-      setIsOpen(false)
+      const rect = searchBoxRef.current?.getBoundingClientRect()
+      // Close only once the anchor has scrolled fully out of the viewport.
+      if (rect && (rect.bottom < 0 || rect.top > window.innerHeight)) {
+        setIsOpen(false)
+        return
+      }
+      computeMenuPosition()
     }
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      // Use capture phase to catch scroll events on any scrollable ancestor
-      window.addEventListener('scroll', handleScroll, true)
+      // Capture phase catches scroll on any scrollable ancestor.
+      window.addEventListener('scroll', handleReposition, true)
+      window.addEventListener('resize', handleReposition)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('scroll', handleReposition, true)
+      window.removeEventListener('resize', handleReposition)
     }
-  }, [isOpen])
+  }, [isOpen, computeMenuPosition])
 
-  // Update dropdown position when opened
+  // Position the menu when it opens.
   useEffect(() => {
-    if (isOpen && searchBoxRef.current) {
-      const rect = searchBoxRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 4, // Just use rect.bottom for fixed positioning
-        left: rect.left,
-        width: rect.width,
-      })
-    }
-  }, [isOpen])
+    if (isOpen) computeMenuPosition()
+  }, [isOpen, computeMenuPosition])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)

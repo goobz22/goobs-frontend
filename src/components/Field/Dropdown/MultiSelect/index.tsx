@@ -92,6 +92,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     top: 0,
     left: 0,
     width: 0,
+    maxHeight: 200,
   })
 
   const disabled = styles?.disabled || false
@@ -100,20 +101,38 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   // `valueProp` when controlled, otherwise from `internalSelected`.
   // Initial `defaultSelected` covers the uncontrolled case.
 
-  // Position the portalled menu under the trigger every time it opens.
-  useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      })
-      setActiveIndex(-1)
-    }
-  }, [isOpen])
+  // Anchor the portalled menu to the trigger — recomputed on open and on
+  // scroll/resize (rather than closing on any scroll) so it stays interactable
+  // for keyboard users, assistive tech, and automated tests that scroll an
+  // option into view.
+  const computeMenuPosition = useCallback(() => {
+    const trigger = triggerRef.current
+    if (!trigger) return
+    const rect = trigger.getBoundingClientRect()
+    const GAP = 4
+    const spaceBelow = window.innerHeight - rect.bottom - GAP
+    const maxHeight = Math.max(120, Math.min(200, spaceBelow))
+    setDropdownPosition({
+      top: rect.bottom + GAP,
+      left: rect.left,
+      width: rect.width,
+      maxHeight,
+    })
+  }, [])
 
-  // Click-outside + scroll dismissal.
+  const closeMenu = useCallback(() => setIsOpen(false), [])
+
+  // Open from the event handlers (not an effect) so open-time setup runs once
+  // per open on every path (pointer + keyboard).
+  const openMenu = useCallback(() => {
+    setIsOpen(true)
+    setActiveIndex(-1)
+    computeMenuPosition()
+  }, [computeMenuPosition])
+
+  // Click-outside closes; scroll/resize REPOSITIONS the anchored menu instead of
+  // dismissing it (closing only when the trigger scrolls fully out of view), so
+  // reaching an option by scroll keeps the menu open.
   useEffect(() => {
     if (!isOpen) return
     const handleClickOutside = (event: MouseEvent) => {
@@ -121,24 +140,35 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       const insideTrigger =
         containerRef.current && containerRef.current.contains(target)
       const insideMenu = menuRef.current && menuRef.current.contains(target)
-      if (!insideTrigger && !insideMenu) setIsOpen(false)
+      if (!insideTrigger && !insideMenu) closeMenu()
     }
-    const handleScroll = (event: Event) => {
-      if (menuRef.current && menuRef.current.contains(event.target as Node)) {
+    const handleReposition = (event: Event) => {
+      if (
+        event.type === 'scroll' &&
+        menuRef.current &&
+        menuRef.current.contains(event.target as Node)
+      ) {
         return
       }
-      setIsOpen(false)
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (rect && (rect.bottom < 0 || rect.top > window.innerHeight)) {
+        closeMenu()
+        return
+      }
+      computeMenuPosition()
     }
     document.addEventListener('mousedown', handleClickOutside)
-    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('scroll', handleReposition, true)
+    window.addEventListener('resize', handleReposition)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('scroll', handleReposition, true)
+      window.removeEventListener('resize', handleReposition)
     }
-  }, [isOpen])
+  }, [isOpen, computeMenuPosition, closeMenu])
 
   useEscape(isOpen, () => {
-    setIsOpen(false)
+    closeMenu()
     triggerRef.current?.focus()
   })
 
@@ -174,7 +204,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
         event.key === 'ArrowUp')
     ) {
       event.preventDefault()
-      setIsOpen(true)
+      openMenu()
       return
     }
     if (isOpen) handleKeyDown(event)
@@ -224,7 +254,11 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               data-subject={dataField}
               tabIndex={disabled ? -1 : 0}
               className={cssStyles.chipContainer}
-              onClick={() => !disabled && setIsOpen(!isOpen)}
+              onClick={() => {
+                if (disabled) return
+                if (isOpen) closeMenu()
+                else openMenu()
+              }}
               onFocus={onFocus}
               onBlur={() => boundOnBlur?.()}
               onKeyDown={handleTriggerKeyDown}
@@ -288,6 +322,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                     top: `${dropdownPosition.top}px`,
                     left: `${dropdownPosition.left}px`,
                     width: `${dropdownPosition.width}px`,
+                    maxHeight: `${dropdownPosition.maxHeight}px`,
                   }}
                 >
                   {options.map((option, index) => {

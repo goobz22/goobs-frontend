@@ -487,19 +487,22 @@ const ExportMenu: React.FC<{
   // data-theme to pull the matching CSS custom-property set.
   const theme = styles?.theme || 'sacred'
 
-  // Update menu position when opening
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      // Position dropdown above the button
-      setMenuPosition({
-        top: rect.top - 4, // 4px margin above button
-        left: rect.left,
-      })
-    }
-  }, [isOpen])
+  // Anchor the portalled menu to the button — recomputed on open and on
+  // scroll/resize so it stays anchored instead of detaching when the page
+  // scrolls.
+  const computeMenuPosition = React.useCallback(() => {
+    const button = buttonRef.current
+    if (!button) return
+    const rect = button.getBoundingClientRect()
+    // Position dropdown above the button (4px margin).
+    setMenuPosition({ top: rect.top - 4, left: rect.left })
+  }, [])
 
-  // Close menu when clicking outside
+  useEffect(() => {
+    if (isOpen) computeMenuPosition()
+  }, [isOpen, computeMenuPosition])
+
+  // Close on click-outside; reposition (don't dismiss) on scroll/resize.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -512,15 +515,29 @@ const ExportMenu: React.FC<{
         setIsOpen(false)
       }
     }
+    const handleReposition = (event: Event) => {
+      if (
+        event.type === 'scroll' &&
+        menuRef.current &&
+        menuRef.current.contains(event.target as Node)
+      ) {
+        return
+      }
+      computeMenuPosition()
+    }
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      window.addEventListener('scroll', handleReposition, true)
+      window.addEventListener('resize', handleReposition)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('scroll', handleReposition, true)
+      window.removeEventListener('resize', handleReposition)
     }
-  }, [isOpen])
+  }, [isOpen, computeMenuPosition])
 
   const handleExportCSV = () => {
     exportToCSV(columns, rows, 'datagrid-export')

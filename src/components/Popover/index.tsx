@@ -104,6 +104,10 @@ const Popover: React.FC<PopoverProps> = ({
   const popoverRef = useRef<HTMLDivElement>(null)
   // Use lazy initialization to check if we're on client side
   const [mounted] = useState(() => typeof window !== 'undefined')
+  // Bumped on scroll/resize while open so the render-time getBoundingClientRect
+  // re-measures and the popover stays anchored to its trigger instead of
+  // detaching when the page scrolls.
+  const [, setRepositionTick] = useState(0)
   // Track if a click started inside the popover
   const clickStartedInsideRef = useRef(false)
 
@@ -158,6 +162,19 @@ const Popover: React.FC<PopoverProps> = ({
       document.removeEventListener('keydown', handleEscape)
     }
   }, [open, handleClickOutside, handleEscape])
+
+  // Keep the popover anchored to its trigger while open: re-render on
+  // scroll/resize so the render-time anchor measurement re-runs.
+  useEffect(() => {
+    if (!open) return
+    const reposition = () => setRepositionTick(tick => tick + 1)
+    window.addEventListener('scroll', reposition, true)
+    window.addEventListener('resize', reposition)
+    return () => {
+      window.removeEventListener('scroll', reposition, true)
+      window.removeEventListener('resize', reposition)
+    }
+  }, [open])
 
   // Diagnostic bus — emit an open/closed state transition whenever the
   // popover's `open` prop flips. Additive: observes the existing controlled
