@@ -157,6 +157,8 @@ export {
   useFormContext,
   useOptionalFormContext,
   useFormField,
+  useFieldArray,
+  type FieldArrayBinding,
   type FormProps,
   type FormEngine,
   type FormContextValue,

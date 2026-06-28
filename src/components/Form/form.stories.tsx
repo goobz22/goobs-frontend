@@ -17,6 +17,9 @@ import { z } from 'zod'
 import Form from './index'
 import Button from '../Button'
 import { useFormContext } from './context'
+import { useFormField } from './useFormField'
+import { useFieldArray } from './useFieldArray'
+import TextField from '../Field/Text'
 
 // --------------------------------------------------------------------------
 // MOCK DATA
@@ -228,6 +231,103 @@ export const AutoFieldsScaffold: Story = {
 export const ExternalServerErrors: Story = {
   name: 'External server errors (setExternalErrors)',
   render: () => <ServerErrorForm theme="light" />,
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// FIELD ARRAY (regression for useFieldArray)
+// --------------------------------------------------------------------------
+
+const ChecklistSchema = z.object({
+  title: z.string().min(1),
+  tasks: z.array(z.object({ label: z.string().min(1) })).min(1),
+})
+type ChecklistValues = z.infer<typeof ChecklistSchema>
+const initialChecklist: ChecklistValues = { title: '', tasks: [{ label: '' }] }
+
+/** One array-item field, bound by its dotted path (e.g. `tasks.0.label`). */
+const TaskLabelField: React.FC<{ name: string }> = ({ name }) => {
+  const { value, onChange, onBlur, error } = useFormField(name)
+  return (
+    <TextField
+      name={name}
+      label="Task"
+      value={typeof value === 'string' ? value : ''}
+      onChange={next => onChange(next)}
+      onBlur={onBlur}
+      error={error}
+      styles={{ theme: 'light' }}
+    />
+  )
+}
+
+/** Dynamic list of sub-objects driven entirely by useFieldArray. */
+const TasksEditor: React.FC = () => {
+  const { items, append, remove, itemName } =
+    useFieldArray<{ label: string }>('tasks')
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {items.map((_, index) => (
+        <div
+          key={index}
+          style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}
+        >
+          <TaskLabelField name={`${itemName(index)}.label`} />
+          <Button
+            type="button"
+            action="delete"
+            text="Remove"
+            onClick={() => remove(index)}
+            styles={{ theme: 'light' }}
+          />
+        </div>
+      ))}
+      <Button
+        type="button"
+        action="create"
+        text="Add task"
+        onClick={() => append({ label: '' })}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
+const ChecklistForm: React.FC = () => {
+  const [submitted, setSubmitted] = useState<ChecklistValues | null>(null)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Form
+        schema={ChecklistSchema}
+        initialValues={initialChecklist}
+        subject="checklist"
+        id="checklist-form"
+        onSubmit={values => setSubmitted(values)}
+      >
+        <Form.AutoFields only={['title']} />
+        <TasksEditor />
+        <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
+      </Form>
+      {submitted && (
+        <pre style={{ margin: 0, fontSize: '0.75rem' }}>
+          {JSON.stringify(submitted, null, 2)}
+        </pre>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Regression for `useFieldArray`: a dynamic list of sub-objects (add/remove)
+ * stored on the engine at `tasks`, each item field bound by its dotted path
+ * (`tasks.N.label`). Add appends an item, Remove deletes one, and the whole
+ * array validates as `z.array(z.object()).min(1)` — no parallel React state.
+ */
+export const FieldArray: Story = {
+  name: 'Field array (useFieldArray)',
+  render: () => <ChecklistForm />,
   parameters: {
     backgrounds: { default: 'light' },
   },

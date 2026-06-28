@@ -134,4 +134,5 @@ export {
   type FormContextValue,
 } from './context'
 export { useFormField } from './useFormField'
+export { useFieldArray, type FieldArrayBinding } from './useFieldArray'
 export type { AutoFieldsProps } from './AutoFields'
