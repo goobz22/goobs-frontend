@@ -89,6 +89,12 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
   const [values, setValues] = useState<TValues>(initialValues)
   const [touched, setTouchedState] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  // EXTERNAL (server-side) per-field errors, injected via setExternalErrors.
+  // Kept separate from the zod `errors` so a re-validate doesn't wipe them and
+  // so they surface regardless of touched state.
+  const [externalErrors, setExternalErrorsState] = useState<
+    Record<string, string>
+  >({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   /** Validate a candidate value set and return the flattened error map. */
@@ -115,14 +121,33 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
         setErrors(validate(next))
         return next
       })
+      // Editing a field invalidates any stale server verdict for it.
+      setExternalErrorsState(previous => {
+        if (previous[name] === undefined) return previous
+        const next = { ...previous }
+        delete next[name]
+        return next
+      })
     },
     [validate]
   )
 
   const getError = useCallback(
-    (name: string): string | undefined =>
-      touched[name] ? errors[name] : undefined,
-    [touched, errors]
+    (name: string): string | undefined => {
+      // An external (server) error takes precedence and shows regardless of
+      // touched state — the server has already judged the submitted value.
+      const external = externalErrors[name]
+      if (external !== undefined) return external
+      return touched[name] ? errors[name] : undefined
+    },
+    [touched, errors, externalErrors]
+  )
+
+  const setExternalErrors = useCallback(
+    (next: Record<string, string>): void => {
+      setExternalErrorsState(next)
+    },
+    []
   )
 
   const getTouched = useCallback(
@@ -185,6 +210,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
       isSubmitting,
       handleSubmit,
       values,
+      setExternalErrors,
     }),
     [
       getValue,
@@ -195,6 +221,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
       isSubmitting,
       handleSubmit,
       values,
+      setExternalErrors,
     ]
   )
 }

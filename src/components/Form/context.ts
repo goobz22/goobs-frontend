@@ -9,20 +9,20 @@
  * form context to auto-bind its value/error/required; the JSX provider that
  * publishes this context lives in `Form/index.tsx`.
  *
- * The `FormEngine` is the 8-method seam the controlled form engine exposes.
+ * The `FormEngine` is the 9-method seam the controlled form engine exposes.
  * Any engine implementation (the zod-native one in `engine/zod.ts`, or a
  * future one) only has to satisfy this structural contract — the rest of the
  * form surface (Form, AutoFields, useFormField, useFieldBinding, FieldShell
- * auto-binding) is engine-agnostic and talks only to these eight methods.
+ * auto-binding) is engine-agnostic and talks only to these methods.
  */
 
 import React from 'react'
 
 /**
- * The controlled form engine seam. Eight methods — get/set value, get error,
- * get/set touched, submitting flag, submit handler. Field components and the
- * binding hooks talk only to this interface; the concrete engine implementation
- * (zod-native) lives behind it.
+ * The controlled form engine seam. Get/set value, get error, get/set touched,
+ * submitting flag, submit handler, and inject external (server) errors. Field
+ * components and the binding hooks talk only to this interface; the concrete
+ * engine implementation (zod-native) lives behind it.
  */
 export interface FormEngine<
   TValues extends Record<string, unknown> = Record<string, unknown>,
@@ -51,6 +51,15 @@ export interface FormEngine<
   handleSubmit: (event?: React.FormEvent) => void
   /** The current form values (read-only snapshot). */
   values: TValues
+  /**
+   * Inject EXTERNAL (server-side) per-field errors keyed by field `name`, e.g.
+   * the `fieldErrors` map a backend returns for a validation failure. They are
+   * surfaced by `getError` regardless of touched state (the server has already
+   * judged the value) and are cleared for a field on its next `setValue` (the
+   * user is editing it, so the stale server verdict no longer applies). Passing
+   * `{}` clears all external errors. Client-side zod validation is unaffected.
+   */
+  setExternalErrors: (errors: Record<string, string>) => void
 }
 
 /**

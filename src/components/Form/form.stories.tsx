@@ -16,6 +16,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { z } from 'zod'
 import Form from './index'
 import Button from '../Button'
+import { useFormContext } from './context'
 
 // --------------------------------------------------------------------------
 // MOCK DATA
@@ -80,6 +81,43 @@ const ThemedContactForm: React.FC<{ theme: Theme }> = ({ theme }) => {
     </div>
   )
 }
+
+/**
+ * Harness button (inside <Form>) that injects EXTERNAL server-side field errors
+ * via the engine — simulating a backend validation response (the `fieldErrors`
+ * map). Reads the engine from form context.
+ */
+const InjectServerErrorButton: React.FC<{ theme: Theme }> = ({ theme }) => {
+  const { engine } = useFormContext()
+  return (
+    <Button
+      type="button"
+      action="apply"
+      text="Simulate server error"
+      onClick={() =>
+        engine.setExternalErrors({
+          fullName: 'That name is already taken',
+          email: 'This email is already registered',
+        })
+      }
+      styles={{ theme }}
+    />
+  )
+}
+
+/** A form whose only control injects external (server) errors on click. */
+const ServerErrorForm: React.FC<{ theme: Theme }> = ({ theme }) => (
+  <Form
+    schema={ContactSchema}
+    initialValues={initialContact}
+    subject="contact"
+    id="contact-server-error"
+    onSubmit={() => undefined}
+  >
+    <Form.AutoFields only={['fullName', 'email']} />
+    <InjectServerErrorButton theme={theme} />
+  </Form>
+)
 
 // --------------------------------------------------------------------------
 // STORYBOOK METADATA
@@ -167,6 +205,29 @@ export const AutoFieldsScaffold: Story = {
       />
     </Form>
   ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// EXTERNAL SERVER ERRORS (regression for engine.setExternalErrors)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression test for `engine.setExternalErrors` (the 9th FormEngine method):
+ * server-side per-field errors injected via the engine surface on the matching
+ * fields REGARDLESS of touched state, and clear for a field on its next edit.
+ *
+ * Click "Simulate server error" → both `fullName` and `email` show their server
+ * message even though they were never focused; typing into a field clears its
+ * message. This is the goobs-side of the unified error story — the inline
+ * counterpart to ThothOS's `<FormError>` banner (server `fieldErrors` mapped
+ * onto the actual fields by `name`).
+ */
+export const ExternalServerErrors: Story = {
+  name: 'External server errors (setExternalErrors)',
+  render: () => <ServerErrorForm theme="light" />,
   parameters: {
     backgrounds: { default: 'light' },
   },
