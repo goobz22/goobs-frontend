@@ -303,8 +303,7 @@ export type CurrentUser = {
  * Props for ProjectBoard.
  * (columns[] can lack a `tasks` field initially; we will merge tasks ourselves.)
  */
-export interface ProjectBoardProps {
-  variant: BoardVariant
+interface ProjectBoardBaseProps {
   boardType: BoardType
   columns: {
     _id: string
@@ -317,11 +316,10 @@ export interface ProjectBoardProps {
   rawTopics: RawTopic[]
   rawQueues: RawQueue[]
   rawArticles: RawArticle[]
-  /** Raw customers - only required for company variant (companies deal with customers) */
-  rawCustomers?: RawCustomer[]
   rawEmployees: RawEmployee[]
-  rawCompanies: RawCompany[]
-  /** Raw products - only required for company variant (admin only has services) */
+  /** Customer roster — company/customer task forms reference customers (absent ⇒ no customer dropdown). */
+  rawCustomers?: RawCustomer[]
+  /** Product roster — the product/service task selection (services always come via rawServices). */
   rawProducts?: RawProduct[]
   rawServices: RawService[]
   rawRegions: RawRegion[]
@@ -383,6 +381,34 @@ export interface ProjectBoardProps {
   /** Administrator users (for resolving comment authors in admin context) */
   administrators?: Array<{ _id: string; firstName: string; lastName: string }>
 }
+
+// The board serves three distinct users, discriminated on `variant`. The COMPANY roster
+// (`rawCompanies`) is the clearest variant-specific case: only the administrator manages tasks
+// across client companies, so `rawCompanies` is REQUIRED on the administrator variant and ABSENT
+// from company/customer — a company/customer board can no longer be handed an empty company list.
+// (rawCustomers?/rawProducts? stay shared-optional on the base for now — their exact per-variant
+// need is less clear-cut and is a follow-up tightening.)
+
+// administrator manages tasks across client COMPANIES (the only variant with a company roster).
+export interface AdministratorBoardProps extends ProjectBoardBaseProps {
+  variant: 'administrator'
+  rawCompanies: RawCompany[]
+}
+
+// company board — its customers/products come from the shared-optional base props.
+export interface CompanyBoardProps extends ProjectBoardBaseProps {
+  variant: 'company'
+}
+
+// customer board — no company roster.
+export interface CustomerBoardProps extends ProjectBoardBaseProps {
+  variant: 'customer'
+}
+
+export type ProjectBoardProps =
+  | AdministratorBoardProps
+  | CompanyBoardProps
+  | CustomerBoardProps
 
 /** View state for inline interface - tracks which view is currently displayed */
 export type ViewState = 'board' | 'addTask' | 'showTask'

@@ -20,6 +20,9 @@ import {
   Task,
   BoardType,
   AddTaskFormType,
+  RawCompany,
+  RawCustomer,
+  RawProduct,
 } from './types'
 
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
@@ -28,6 +31,13 @@ import Board from './board'
 import { Breadcrumb } from './Breadcrumb'
 import { AnimationWrapper } from './AnimationWrapper'
 import cssStyles from './ProjectBoard.module.css'
+
+// Stable empty reference lists for the variants that don't carry a given roster — module-level so
+// the derived rawCompanies/rawCustomers/rawProducts keep a constant identity across renders (they
+// feed useCallback/useMemo dependency arrays).
+const EMPTY_COMPANIES: RawCompany[] = []
+const EMPTY_CUSTOMERS: RawCustomer[] = []
+const EMPTY_PRODUCTS: RawProduct[] = []
 
 // --------------------------------------------------------------------------
 // HELPER FUNCTIONS
@@ -67,46 +77,51 @@ function mergeColumnsAndTasks(
 // MAIN PROJECT BOARD CONTENT COMPONENT
 // --------------------------------------------------------------------------
 
-function ProjectBoardContent({
-  variant,
-  boardType,
-  columns,
-  tasks,
-  rawStatuses,
-  rawSubStatuses,
-  rawTopics,
-  rawQueues,
-  rawArticles,
-  rawCustomers,
-  rawEmployees,
-  rawCompanies,
-  rawProducts,
-  rawServices,
-  rawRegions,
-  rawSeverityLevels,
-  onEdit,
-  onDelete,
-  onEditComment,
-  onAdd,
-  onComment,
-  currentUser,
-  customerId,
-  companyId,
-  preferDropdown,
-  styles,
-  permissions,
-  meetings,
-  onScheduleMeeting,
-  onCancelMeeting,
-  onConfirmMeeting,
-  onRescheduleMeeting,
-  currentDate,
-  onUpdateCompanyNotes,
-  onUpdateCustomerNotes,
-  onCaseUpdate,
-  employees,
-  administrators,
-}: ProjectBoardProps) {
+function ProjectBoardContent(props: ProjectBoardProps) {
+  const {
+    variant,
+    boardType,
+    columns,
+    tasks,
+    rawStatuses,
+    rawSubStatuses,
+    rawTopics,
+    rawQueues,
+    rawArticles,
+    rawEmployees,
+    rawServices,
+    rawRegions,
+    rawSeverityLevels,
+    onEdit,
+    onDelete,
+    onEditComment,
+    onAdd,
+    onComment,
+    currentUser,
+    customerId,
+    companyId,
+    preferDropdown,
+    styles,
+    permissions,
+    meetings,
+    onScheduleMeeting,
+    onCancelMeeting,
+    onConfirmMeeting,
+    onRescheduleMeeting,
+    currentDate,
+    onUpdateCompanyNotes,
+    onUpdateCustomerNotes,
+    onCaseUpdate,
+    employees,
+    administrators,
+  } = props
+  // rawCompanies exists ONLY on the administrator variant (narrowed off the `variant` discriminant);
+  // company/customer boards default to the stable module empty. rawCustomers/rawProducts are
+  // shared-optional base props.
+  const rawCompanies =
+    props.variant === 'administrator' ? props.rawCompanies : EMPTY_COMPANIES
+  const rawCustomers = props.rawCustomers ?? EMPTY_CUSTOMERS
+  const rawProducts = props.rawProducts ?? EMPTY_PRODUCTS
   const {
     columns: columnState,
     setColumns: setColumnState,
@@ -429,17 +444,13 @@ function ProjectBoardContent({
         createdUserId={currentUser._id}
         companyId={companyId}
         customerId={customerId}
-        rawCompanies={
-          activeAddTaskForm === 'administratorCompanyDropdown'
-            ? rawCompanies
-            : []
-        }
-        rawCustomers={
-          activeAddTaskForm === 'companyCustomerDropdown'
-            ? (rawCustomers ?? [])
-            : []
-        }
-        rawProducts={rawProducts ?? []}
+        {...(activeAddTaskForm === 'administratorCompanyDropdown'
+          ? { rawCompanies }
+          : {})}
+        {...(activeAddTaskForm === 'companyCustomerDropdown'
+          ? { rawCustomers }
+          : {})}
+        {...(variant === 'company' ? { rawProducts } : {})}
         rawServices={rawServices}
         rawRegions={rawRegions}
         knowledgebaseArticles={rawArticles}

@@ -41,10 +41,11 @@ interface InlineAddTaskProps {
   createdUserId: string
   companyId: string
   customerId: string
-  rawCompanies: RawCompany[]
-  /** Raw customers - only required for company variant (companies deal with customers) */
+  /** Company roster — only the administrator-company-dropdown form supplies it. */
+  rawCompanies?: RawCompany[]
+  /** Customer roster — only the company-customer-dropdown form supplies it. */
   rawCustomers?: RawCustomer[]
-  /** Raw products - only required for company variant (admin only has services) */
+  /** Product roster — only the company variant supplies it (admin has services only). */
   rawProducts?: RawProduct[]
   rawServices: RawService[]
   rawRegions: RawRegion[]
@@ -62,7 +63,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   createdUserId,
   companyId,
   customerId,
-  rawCompanies,
+  rawCompanies = [],
   rawCustomers = [],
   rawProducts = [],
   rawServices,
