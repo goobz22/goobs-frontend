@@ -19,6 +19,7 @@ import Button from '../Button'
 import { useFormContext } from './context'
 import { useFormField } from './useFormField'
 import { useFieldArray } from './useFieldArray'
+import { useFieldValues } from './useFieldValues'
 import TextField from '../Field/Text'
 
 // --------------------------------------------------------------------------
@@ -328,6 +329,96 @@ const ChecklistForm: React.FC = () => {
 export const FieldArray: Story = {
   name: 'Field array (useFieldArray)',
   render: () => <ChecklistForm />,
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// DYNAMIC FIELD-SET (regression for useFieldValues)
+// --------------------------------------------------------------------------
+
+/** A runtime-determined template: keys + labels come from data, not the schema. */
+const ARTICLE_TEMPLATE = [
+  { fieldId: 'summary', label: 'Summary' },
+  { fieldId: 'resolution', label: 'Resolution' },
+]
+
+const ArticleSchema = z.object({
+  title: z.string().min(1),
+  // The dynamic field-set: a map of runtime-keyed string values.
+  fieldValues: z.record(z.string(), z.string()),
+})
+type ArticleValues = z.infer<typeof ArticleSchema>
+const initialArticle: ArticleValues = {
+  title: '',
+  fieldValues: { summary: '', resolution: '' },
+}
+
+/** One dynamic field, bound by its dotted path via useFieldValues.fieldName. */
+const DynamicField: React.FC<{ name: string; label: string }> = ({
+  name,
+  label,
+}) => {
+  const { value, onChange, onBlur, error } = useFormField(name)
+  return (
+    <TextField
+      name={name}
+      label={label}
+      value={typeof value === 'string' ? value : ''}
+      onChange={next => onChange(next)}
+      onBlur={onBlur}
+      error={error}
+      styles={{ theme: 'light' }}
+    />
+  )
+}
+
+/** The template fields, each composed onto the `fieldValues` record path. */
+const DynamicFieldSet: React.FC = () => {
+  const { fieldName } = useFieldValues<string>('fieldValues')
+  return (
+    <>
+      {ARTICLE_TEMPLATE.map(f => (
+        <DynamicField key={f.fieldId} name={fieldName(f.fieldId)} label={f.label} />
+      ))}
+    </>
+  )
+}
+
+const ArticleForm: React.FC = () => {
+  const [submitted, setSubmitted] = useState<ArticleValues | null>(null)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Form
+        schema={ArticleSchema}
+        initialValues={initialArticle}
+        subject="article"
+        id="article-form"
+        onSubmit={values => setSubmitted(values)}
+      >
+        <Form.AutoFields only={['title']} />
+        <DynamicFieldSet />
+        <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
+      </Form>
+      {submitted && (
+        <pre style={{ margin: 0, fontSize: '0.75rem' }}>
+          {JSON.stringify(submitted, null, 2)}
+        </pre>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Regression for `useFieldValues`: a DYNAMIC field-set (`fieldValues`) whose keys
+ * come from a runtime template, each item bound by its dotted path
+ * (`fieldValues.summary`) and validated as `z.record(z.string(), z.string())` —
+ * no parallel React state. The Record analogue of the FieldArray story.
+ */
+export const DynamicFieldValues: Story = {
+  name: 'Dynamic field-set (useFieldValues)',
+  render: () => <ArticleForm />,
   parameters: {
     backgrounds: { default: 'light' },
   },
