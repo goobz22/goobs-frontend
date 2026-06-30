@@ -11,7 +11,7 @@ import { readFileSync, writeFileSync, cpSync, existsSync, readdirSync } from 'no
 import { join } from 'node:path'
 
 const ROOT = decodeURIComponent(new URL('..', import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1')
-const FONTS_SRC = join(ROOT, '.design-sync', 'fonts')
+const FONTS_SRC = join(ROOT, 'fonts')
 const SB = join(ROOT, '.design-sync', 'sb-reference')
 const IFRAME = join(SB, 'iframe.html')
 const DEST = join(SB, 'goobs-fonts')
@@ -22,8 +22,8 @@ if (!existsSync(IFRAME)) {
   console.error(`[skip] no reference iframe.html at ${IFRAME} — build the reference first`)
   process.exit(0)
 }
-if (!existsSync(join(FONTS_SRC, 'fonts.css'))) {
-  console.error(`[skip] no ${FONTS_SRC}/fonts.css — nothing to inject`)
+if (!existsSync(join(FONTS_SRC, 'goobs-fonts.css'))) {
+  console.error(`[skip] no ${FONTS_SRC}/goobs-fonts.css — nothing to inject`)
   process.exit(0)
 }
 
@@ -32,7 +32,7 @@ cpSync(FONTS_SRC, DEST, { recursive: true })
 const n = readdirSync(DEST).filter((f) => f.endsWith('.woff2')).length
 
 // reference CSS: same @font-face but url() pointed at ./goobs-fonts/<file>
-const css = readFileSync(join(FONTS_SRC, 'fonts.css'), 'utf8').replace(/url\(\.\//g, 'url(./goobs-fonts/')
+const css = readFileSync(join(FONTS_SRC, 'goobs-fonts.css'), 'utf8').replace(/url\(\.\//g, 'url(./goobs-fonts/')
 const styleBlock = `${MARK_OPEN}\n<style>\n${css}</style>\n${MARK_CLOSE}`
 
 let html = readFileSync(IFRAME, 'utf8')

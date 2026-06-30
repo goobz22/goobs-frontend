@@ -23,7 +23,8 @@
     "./umd": {
       "types": "./dist/index.d.ts",
       "default": "./dist/goobs-frontend.umd.js"
-    }
+    },
+    "./fonts": "./fonts/goobs-fonts.css"
   },
   "scripts": {
     "dev": "vite",
@@ -99,7 +100,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "fonts"
   ],
   "repository": {
     "type": "git",

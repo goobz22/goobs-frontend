@@ -9,7 +9,7 @@
   "cssEntry": "dist/goobs-frontend.css",
   "tsconfig": ".design-sync/bundle-tsconfig.json",
   "readmeHeader": ".design-sync/conventions.md",
-  "extraFonts": ".design-sync/fonts/fonts.css",
+  "extraFonts": "fonts/goobs-fonts.css",
   "storyImports": {
     "bundle": ["/components/Icons/", "/components/Metric/"],
     "shim": ["/components/Form/context"]
