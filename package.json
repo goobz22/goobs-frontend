@@ -19,6 +19,10 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
       "require": "./dist/server.js"
+    },
+    "./umd": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/goobs-frontend.umd.js"
     }
   },
   "scripts": {
