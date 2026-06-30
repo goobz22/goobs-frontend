@@ -174,8 +174,9 @@ const Alert: React.FC<AlertProps> = ({
     success: CheckCircleIcon,
   }[severity]
 
-  // The container theme defaulted to 'light' in the old getAlertTheme; the icon
-  // defaulted to 'sacred'. Both behaviours are preserved verbatim.
+  // The container theme defaults to 'light'. The icon follows the SAME theme as
+  // the container for visual consistency (it previously defaulted to 'sacred',
+  // which rendered a gold icon inside an un-themed light Alert).
   const containerTheme = styles?.theme || 'light'
   const isSacredTheme = styles?.theme === 'sacred'
 
@@ -342,6 +343,14 @@ const Alert: React.FC<AlertProps> = ({
   if (styles?.iconHoverTransform)
     dynamicStyle['--alert-icon-hover-transform'] = styles.iconHoverTransform
 
+  // Defensive guard: an out-of-enum `severity` leaves `Icon` undefined, which
+  // would throw "Element type is invalid / is not a function" when React tries
+  // to render <Icon/>. Placed after all hooks (rules-of-hooks safe).
+  if (!Icon) {
+    console.warn(`Alert: unknown severity "${severity}"`)
+    return <div className={cssStyles.root}>Unknown severity level: {severity}</div>
+  }
+
   return (
     <div
       className={cssStyles.root}
@@ -357,7 +366,7 @@ const Alert: React.FC<AlertProps> = ({
       {isSacredTheme && <SacredGlyphs severity={severity} />}
 
       <Icon
-        styles={{ theme: styles?.theme || 'sacred' }}
+        styles={{ theme: containerTheme }}
         className={cssStyles.icon}
         style={iconStyle}
       />
