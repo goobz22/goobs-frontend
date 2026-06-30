@@ -95,6 +95,13 @@ export interface ContentSectionProps {
     link?: LinkProps | LinkProps[]
     button?: ButtonProps | ButtonProps[]
     image?: ImageProps | ImageProps[]
+    /**
+     * Optional host element for `link`/`image` items so the section stays
+     * framework-agnostic (defaults to plain `<a>`/`<img>`). A Next.js consumer
+     * may pass `linkComponent={NextLink}` / `imageComponent={NextImage}`.
+     */
+    linkComponent?: React.ElementType
+    imageComponent?: React.ElementType
     pricing?: PricingProps
     stepper?: StepperProps | StepperProps[]
     transferlist?: TransferListProps | TransferListProps[]
@@ -190,9 +197,23 @@ const RenderContent: React.FC<
       )
     )
   )
-  addElements(useLink(withProp('link', injectsacredtheme(props.link))))
+  addElements(
+    useLink({
+      ...withProp('link', injectsacredtheme(props.link)),
+      ...(props.linkComponent !== undefined
+        ? { linkComponent: props.linkComponent }
+        : {}),
+    })
+  )
   addElements(useButton(withProp('button', injectsacredtheme(props.button))))
-  addElements(useImage(withProp('image', injectsacredtheme(props.image))))
+  addElements(
+    useImage({
+      ...withProp('image', injectsacredtheme(props.image)),
+      ...(props.imageComponent !== undefined
+        ? { imageComponent: props.imageComponent }
+        : {}),
+    })
+  )
   addElements(
     useComplexEditor(
       withProp('complexeditor', injectsacredtheme(props.complexeditor))

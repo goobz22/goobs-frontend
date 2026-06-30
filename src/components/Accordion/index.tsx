@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useCallback, type FC, type ReactNode } from 'react'
-import Link from 'next/link'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Accordion.module.css'
 
@@ -31,6 +30,14 @@ export interface AccordionProps {
   type?: 'accordion' | 'menu'
   onClick?: (event: React.SyntheticEvent) => void
   href?: string
+  /**
+   * Element used to render a `type="menu"` item's link. Defaults to a plain
+   * anchor (`'a'`) so the component works in any host; a Next.js consumer can
+   * pass `linkComponent={NextLink}` for client-side navigation (it receives the
+   * same `href`). Keeps `next/link` out of the module graph (it reads
+   * `process.env.__NEXT_*` at load and throws outside Next).
+   */
+  linkComponent?: React.ElementType
   isActive?: boolean
 }
 
@@ -89,6 +96,7 @@ const Accordion: FC<AccordionProps> = props => {
     type = 'accordion',
     onClick,
     href,
+    linkComponent,
     isActive,
     expanded: controlledExpanded,
     defaultExpanded,
@@ -228,9 +236,11 @@ const Accordion: FC<AccordionProps> = props => {
       style={dynamicStyle}
     >
       {isMenuType && href ? (
-        <Link href={href} className={cssStyles.link}>
-          {summaryContent}
-        </Link>
+        React.createElement(
+          linkComponent ?? 'a',
+          { href, className: cssStyles.link },
+          summaryContent
+        )
       ) : (
         summaryContent
       )}

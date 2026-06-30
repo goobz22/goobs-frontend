@@ -1,16 +1,25 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
 import Typography, { type TypographyProps } from '../../../Typography'
 
 export interface LinkProps extends TypographyProps {
   link: string
 }
 
+/**
+ * Render link items. Framework-agnostic: by default renders a plain anchor so
+ * the component works in any host. A Next.js (or other router) consumer can
+ * inject client-side navigation by passing `linkComponent={NextLink}` — it
+ * receives the same `href` prop. Avoids a module-scope `next/link` import,
+ * which reads `process.env.__NEXT_*` at load and throws outside Next.
+ */
 const useLink = (props: {
   link?: LinkProps | LinkProps[]
+  linkComponent?: React.ElementType
 }): React.ReactElement[] | null => {
   if (!props.link) return null
+
+  const LinkEl: React.ElementType = props.linkComponent ?? 'a'
 
   const renderLink = (
     linkItem: LinkProps,
@@ -23,7 +32,7 @@ const useLink = (props: {
     }
 
     return (
-      <Link key={`link-${index}`} href={link} passHref>
+      <LinkEl key={`link-${index}`} href={link}>
         <Typography
           {...(text !== undefined ? { text } : {})}
           styles={{
@@ -35,7 +44,7 @@ const useLink = (props: {
           }}
           {...restProps}
         />
-      </Link>
+      </LinkEl>
     )
   }
 
