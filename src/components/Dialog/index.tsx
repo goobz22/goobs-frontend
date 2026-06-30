@@ -124,23 +124,76 @@ const Dialog: React.FC<DialogProps> = ({
   // branch.
   const theme = styles?.theme === 'sacred' ? 'sacred' : 'light'
 
+  // Keep the latest onClose without making it an effect dependency, so the
+  // focus-trap effect runs once per open-transition (not on every parent
+  // re-render, which would otherwise yank focus back to the first element).
+  const onCloseRef = useRef(onClose)
   useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  // WCAG modal focus management (APG dialog pattern): on open, move focus into
+  // the dialog and remember the trigger; while open, Escape closes and Tab is
+  // trapped so focus cycles within the dialog; on close, restore focus to the
+  // trigger. Replaces the previous Escape-only handler.
+  useEffect(() => {
+    if (!open) return undefined
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const dialogEl = dialogRef.current
+
+    const getFocusable = (): HTMLElement[] =>
+      dialogEl
+        ? Array.from(
+            dialogEl.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )
+          ).filter((el) => el.offsetParent !== null)
+        : []
+
+    // Move focus into the dialog (first focusable, else the dialog container).
+    const firstFocusable = getFocusable()[0]
+    if (firstFocusable) firstFocusable.focus()
+    else dialogEl?.focus()
+
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const items = getFocusable()
+      if (items.length === 0) {
+        event.preventDefault()
+        dialogEl?.focus()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return
+      const active = document.activeElement
+      // Only cycle at the boundaries. Deliberately NO "active not in dialog →
+      // recapture" branch: goobs overlays (SearchableSimple, Popover, MultiSelect,
+      // Tooltip, …) portal their content to document.body, so a dropdown opened
+      // inside a dialog legitimately holds focus OUTSIDE dialogRef. Recapturing
+      // there would yank focus out of the open dropdown and orphan it — breaking
+      // the canonical dropdown-in-dialog form interaction. Native Tab handles
+      // focus while a portalled descendant is active.
+      if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
-    if (open) {
-      document.addEventListener('keydown', handleKeydown)
-    } else {
-      document.removeEventListener('keydown', handleKeydown)
-    }
-
+    document.addEventListener('keydown', handleKeydown)
     return () => {
       document.removeEventListener('keydown', handleKeydown)
+      // Restore focus to the element that opened the dialog.
+      previouslyFocused?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   // Diagnostic bus — emit modal open/close transitions so outcome tests (and
   // the dev diagnostics stream) can assert dialog lifecycle without scraping
@@ -310,6 +363,7 @@ const Dialog: React.FC<DialogProps> = ({
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         aria-labelledby={ariaLabelledBy}
         aria-describedby={ariaDescribedBy}
         aria-label={!ariaLabelledBy ? ariaLabel : undefined}
