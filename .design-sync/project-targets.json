@@ -1,0 +1,7 @@
+{
+  "_comment": "Multi-account sync targets for the goobs-frontend Claude Design project. The operator keeps the SAME design system synced from two different claude.ai accounts. config.json's `projectId` must always be the project on the CURRENTLY logged-in account (the converter only allows a single projectId, and a foreign-account id 404s). RESOLVE PROCEDURE at each sync start: for each id below, DesignSync(get_project); the one(s) that return successfully are on the active account → set config.json projectId to that id and sync to it. Each account's project is updated whenever that account is the one logged in; switch accounts + re-sync to update the other.",
+  "targets": [
+    { "label": "account-A", "projectId": "02a71111-4719-4054-9cfe-3ce9fc9a438d", "note": "created 2026-06-30; full 71-component sync uploaded here" },
+    { "label": "account-B", "projectId": "61668feb-e165-42ce-9f0b-fde3dd3a451c", "note": "the original project on the other account; update it by switching to that account and re-syncing" }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "next/link": ["./next-stubs/link.tsx"],
+      "next/image": ["./next-stubs/image.tsx"]
+    }
+  }
+}

@@ -54,3 +54,12 @@ src/**/*.js.map
 
 # AI assistant guidelines
 claude.md
+
+# design-sync (claude.ai/design) — transient artifacts; the durable set under
+# .design-sync/ (config.json, NOTES.md, conventions.md, previews/, overrides/) IS committed
+.design-sync/sb-reference/
+.design-sync/learnings/
+.design-sync/.cache/
+.design-sync/node_modules
+.ds-sync/
+ds-bundle/
