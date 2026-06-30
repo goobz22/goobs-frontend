@@ -128,7 +128,7 @@ export const LightCustomSize: Story = {
 // --------------------------------------------------------------------------
 
 export const Dark: Story = {
-  name: 'Dark/Basic',
+  name: 'Dark/Default',
   args: {
     name: 'dark-radio',
     label: 'Choose your plan',

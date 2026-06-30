@@ -210,7 +210,7 @@ export const LightCustomSize: Story = {
 // --------------------------------------------------------------------------
 
 export const Dark: Story = {
-  name: 'Dark/Basic',
+  name: 'Dark/Default',
   render: () => (
     <InteractivePopover styles={{ theme: 'dark' }}>
       <PopoverContent theme="dark" />
