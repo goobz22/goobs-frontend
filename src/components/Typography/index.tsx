@@ -178,6 +178,12 @@ function resolveVariant(variant: string): VariantResolution {
   return { className: '', fontWeight: 400 }
 }
 
+/**
+ * Themeable text primitive rendering a `<span>` (valid as phrasing content
+ * inside buttons, links, and headings) with heading, body, and sacred
+ * Cinzel/Merriweather variants. Resolves font family, weight, and color per
+ * variant and theme, and forwards scalar style overrides as CSS variables.
+ */
 const Typography: React.FC<TypographyProps> = ({
   text,
   children,

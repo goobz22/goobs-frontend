@@ -31,6 +31,11 @@ export interface BadgeProps {
   styles?: BadgeStyles
 }
 
+/**
+ * Small count or status indicator overlaid at a configurable corner of its
+ * wrapped children, with light/dark/sacred theming and CSS-variable style
+ * overrides.
+ */
 const Badge: React.FC<BadgeProps> = ({ content, children, styles }) => {
   const theme = styles?.theme || 'light'
   const position = styles?.position || 'top-right'

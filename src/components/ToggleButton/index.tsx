@@ -90,6 +90,12 @@ export interface ToggleButtonGroupProps {
 // TOGGLE BUTTON COMPONENT
 // --------------------------------------------------------------------------
 
+/**
+ * A single toggleable button with selected/disabled states, small/medium/large
+ * sizing, and light/dark/sacred theming. Designed to be grouped by the exported
+ * `ToggleButtonGroup`, which manages exclusive selection and auto-binds the
+ * chosen value by `name` inside a goobs `<Form>`.
+ */
 export const ToggleButton: React.FC<ToggleButtonProps> = ({
   value,
   children,

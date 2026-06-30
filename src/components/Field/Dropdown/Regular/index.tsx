@@ -48,6 +48,12 @@ export interface DropdownProps {
   styles?: FieldStyleOverrides & { fullWidth?: boolean }
 }
 
+/**
+ * Accessible single-select dropdown built on FieldShell, with a combobox
+ * trigger, an absolutely-positioned listbox menu, and full keyboard navigation.
+ * Auto-binds its value by `name` inside a goobs `<Form>` and emits the stable
+ * `[role=combobox]`/`[role=option]` structure tests target.
+ */
 const Dropdown: React.FC<DropdownProps> = ({
   label,
   options,

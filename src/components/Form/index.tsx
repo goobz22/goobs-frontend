@@ -73,6 +73,12 @@ interface FormComponent {
   AutoFields: typeof AutoFields
 }
 
+/**
+ * Root of the goobs zod-native, controlled form engine: validates against a zod
+ * schema and publishes a context so any child goobs field auto-binds its value,
+ * error, and required state by `name`. Exposes a static `Form.AutoFields` that
+ * renders one field per schema key.
+ */
 function FormInner<TValues extends Record<string, unknown>>({
   schema,
   initialValues,

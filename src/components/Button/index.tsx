@@ -244,6 +244,13 @@ function variantDefaults(variant: ButtonVariant | undefined): ButtonStyles {
   }
 }
 
+/**
+ * Themeable action button rendering a native `<button>` with an optional icon,
+ * primary/secondary/destructive variants, and an extensive `styles` override
+ * surface (sacred/light/dark themes via `data-theme`). Emits
+ * `data-action`/`data-subject`/`data-variant` for stable test selectors and
+ * forwards its ref to the underlying element.
+ */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

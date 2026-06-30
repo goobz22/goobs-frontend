@@ -58,6 +58,12 @@ export interface TextFieldProps {
   }
 }
 
+/**
+ * Single- or multiline text input built on FieldShell, with label, helper text,
+ * error and required states, and optional start/end adornments. Auto-binds its
+ * value by `name` when rendered inside a goobs `<Form>`; otherwise it is a
+ * controlled input.
+ */
 const TextField: React.FC<TextFieldProps> = ({
   value: valueProp,
   onChange: onChangeProp,

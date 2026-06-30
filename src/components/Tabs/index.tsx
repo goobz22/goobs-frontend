@@ -113,6 +113,13 @@ function kebabFallback(input: string | undefined): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/**
+ * Accessible WAI-ARIA tablist that renders a set of tab items with full
+ * keyboard navigation, optional count badges and leading icons, and route- or
+ * click-based activation. Emits `nav.change` diagnostics and stable
+ * `data-tab-id`/`data-tab-subject` selectors; pairs with the exported `Tab` and
+ * `TabPanel`.
+ */
 const Tabs: React.FC<TabsProps> = ({
   items,
   activeTab = 0,

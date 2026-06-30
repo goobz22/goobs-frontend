@@ -92,6 +92,12 @@ export interface DialogProps {
   ariaLabel?: string
 }
 
+/**
+ * Modal dialog rendered over a backdrop with Escape-key and backdrop-click
+ * dismissal, body scroll-lock, responsive sizing, and sacred/light theming.
+ * Provides ARIA modal wiring and emits open/close diagnostics, plus stable
+ * `data-dialog`/`data-subject` test selectors.
+ */
 const Dialog: React.FC<DialogProps> = ({
   open,
   onClose,

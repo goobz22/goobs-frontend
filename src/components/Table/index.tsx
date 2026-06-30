@@ -131,6 +131,12 @@ export const TableContainer: React.FC<TableContainerProps> = ({
   )
 }
 
+/**
+ * Semantic table primitive rendering a themed `<table>`, composed with the
+ * exported `TableContainer`, `TableHead`, `TableBody`, `TableRow`, and
+ * `TableCell` parts. Supports sacred/light/dark themes and per-element
+ * CSS-variable style overrides.
+ */
 export const Table: React.FC<SimpleTableProps> = ({ children }) => {
   return (
     <table className={cssStyles.table} data-component="Table">

@@ -112,6 +112,12 @@ interface PanelComponent {
   Footer: typeof PanelFooter
 }
 
+/**
+ * Full-height shell-surface compound component (root plus static `Panel.Header`,
+ * `Panel.Body`, and `Panel.Footer` regions) for inline manage/show workspaces.
+ * Offers sacred/standard/fullscreen variants and labels the region via the
+ * header title for screen readers.
+ */
 function PanelInner({
   variant = 'sacred',
   className,

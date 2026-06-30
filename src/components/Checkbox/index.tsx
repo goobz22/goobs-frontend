@@ -200,6 +200,12 @@ function buildDynamicStyle(styles?: CheckboxStyles): CSSProperties | undefined {
 // MAIN CHECKBOX COMPONENT
 // --------------------------------------------------------------------------
 
+/**
+ * Themeable checkbox supporting controlled or uncontrolled state, an
+ * indeterminate state, and an optional inline label, with light/dark/sacred
+ * themes. Auto-binds its boolean value by `name` inside a goobs `<Form>` and
+ * forwards its ref to the underlying input.
+ */
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   const {
     indeterminate,

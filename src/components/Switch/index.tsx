@@ -78,6 +78,12 @@ export interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement>
 // MAIN SWITCH COMPONENT
 // --------------------------------------------------------------------------
 
+/**
+ * Toggle switch with optional left/right labels and light/dark/sacred theming
+ * (the sacred variant renders glyph thumb content plus a shimmer). Auto-binds
+ * its boolean value by `name` inside a goobs `<Form>`; otherwise controlled via
+ * `checked`.
+ */
 const Switch: React.FC<SwitchProps> = ({
   disabled,
   checked,

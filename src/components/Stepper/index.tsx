@@ -36,6 +36,13 @@ export interface StepperProps {
   }
 }
 
+/**
+ * Multi-step progress indicator supporting a link-based `navigation` mode and a
+ * self-contained `wizard` mode (renders the active step's content plus
+ * Back/Continue/Finish controls). Offers horizontal/vertical orientation,
+ * per-step status icons, sacred/light/dark theming, and emits `nav.change`
+ * diagnostics.
+ */
 const Stepper: React.FC<StepperProps> = ({
   mode = 'navigation',
   steps,
