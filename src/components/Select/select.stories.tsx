@@ -1,0 +1,379 @@
+/**
+ * @fileoverview Storybook stories for the Select component.
+ * These stories showcase the various states, themes, variants, sizes, and
+ * styling capabilities of the native-backed Select. Options are supplied as
+ * MenuItem children (which render as <option> elements).
+ */
+import React, { useState } from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { userEvent, within, expect } from 'storybook/test'
+import Select from './index'
+import MenuItem from '../MenuItem'
+
+// Wrapper component for state management. Select is controlled — the native
+// onChange forwards the DOM event, so we read `event.target.value`.
+const SelectWithState = ({
+  initialValue = '',
+  ...props
+}: React.ComponentProps<typeof Select> & { initialValue?: string }) => {
+  const [value, setValue] = useState(initialValue)
+  return (
+    <Select
+      {...props}
+      value={value}
+      onChange={event => setValue(event.target.value)}
+    />
+  )
+}
+
+// --------------------------------------------------------------------------
+// STORYBOOK METADATA
+// --------------------------------------------------------------------------
+const meta: Meta<typeof Select> = {
+  title: 'Components/Select',
+  component: Select,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['standard', 'outlined', 'filled'],
+    },
+    size: {
+      control: 'inline-radio',
+      options: ['small', 'medium'],
+    },
+    fullWidth: { control: 'boolean' },
+    error: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    displayEmpty: { control: 'boolean' },
+    styles: {
+      control: 'object',
+      description:
+        'Comprehensive styling options including theme, colors, layout, and more',
+    },
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '400px', padding: '2rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+export default meta
+type Story = StoryObj<typeof Select>
+
+// --------------------------------------------------------------------------
+// BASIC THEME STORIES
+// --------------------------------------------------------------------------
+
+export const LightTheme: Story = {
+  name: 'Light Theme',
+  render: () => (
+    <SelectWithState styles={{ theme: 'light' }} displayEmpty>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+      <MenuItem value="nodejs">Node.js</MenuItem>
+    </SelectWithState>
+  ),
+}
+
+export const DarkTheme: Story = {
+  name: 'Dark Theme',
+  render: () => (
+    <SelectWithState styles={{ theme: 'dark' }} displayEmpty>
+      <MenuItem value="usa">United States</MenuItem>
+      <MenuItem value="canada">Canada</MenuItem>
+      <MenuItem value="uk">United Kingdom</MenuItem>
+      <MenuItem value="japan">Japan</MenuItem>
+    </SelectWithState>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+export const SacredTheme: Story = {
+  name: 'Sacred Theme',
+  render: () => (
+    <SelectWithState styles={{ theme: 'sacred' }} displayEmpty>
+      <MenuItem value="ankh">Ankh</MenuItem>
+      <MenuItem value="eye">Eye of Horus</MenuItem>
+      <MenuItem value="scarab">Scarab</MenuItem>
+      <MenuItem value="djed">Djed Pillar</MenuItem>
+    </SelectWithState>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// VARIANTS
+// --------------------------------------------------------------------------
+
+export const Variants: Story = {
+  name: 'Variants',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SelectWithState variant="outlined" styles={{ theme: 'light' }}>
+        <MenuItem value="a">Outlined (default)</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState variant="standard" styles={{ theme: 'light' }}>
+        <MenuItem value="a">Standard</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState variant="filled" styles={{ theme: 'light' }}>
+        <MenuItem value="a">Filled</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// SIZES
+// --------------------------------------------------------------------------
+
+export const Sizes: Story = {
+  name: 'Sizes',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SelectWithState size="medium" styles={{ theme: 'light' }}>
+        <MenuItem value="a">Medium (default)</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState size="small" styles={{ theme: 'light' }}>
+        <MenuItem value="a">Small</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// FULL WIDTH
+// --------------------------------------------------------------------------
+
+export const FullWidth: Story = {
+  name: 'Full Width',
+  render: () => (
+    <SelectWithState fullWidth styles={{ theme: 'light' }}>
+      <MenuItem value="a">Spans the full container width</MenuItem>
+      <MenuItem value="b">Option B</MenuItem>
+      <MenuItem value="c">Option C</MenuItem>
+    </SelectWithState>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// WITH VALUE (pre-selected)
+// --------------------------------------------------------------------------
+
+export const WithValue: Story = {
+  name: 'With Value',
+  render: () => (
+    <SelectWithState initialValue="typescript" styles={{ theme: 'light' }}>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+    </SelectWithState>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// DISPLAY EMPTY (placeholder option)
+// --------------------------------------------------------------------------
+
+export const DisplayEmpty: Story = {
+  name: 'Display Empty Placeholder',
+  render: () => (
+    <SelectWithState displayEmpty styles={{ theme: 'light' }}>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+    </SelectWithState>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// ERROR STATE
+// --------------------------------------------------------------------------
+
+export const ErrorState: Story = {
+  name: 'Error State',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SelectWithState error styles={{ theme: 'light' }}>
+        <MenuItem value="a">Light with error</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState error styles={{ theme: 'dark' }}>
+        <MenuItem value="a">Dark with error</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState styles={{ theme: 'light', helperTextType: 'error' }}>
+        <MenuItem value="a">Helper-error styling</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// DISABLED STATE
+// --------------------------------------------------------------------------
+
+export const DisabledStates: Story = {
+  name: 'Disabled States',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SelectWithState initialValue="a" disabled styles={{ theme: 'light' }}>
+        <MenuItem value="a">Disabled Light</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState initialValue="a" disabled styles={{ theme: 'dark' }}>
+        <MenuItem value="a">Disabled Dark</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState initialValue="a" disabled styles={{ theme: 'sacred' }}>
+        <MenuItem value="a">Disabled Sacred</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+    </div>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// CUSTOM COLORS
+// --------------------------------------------------------------------------
+
+export const CustomColors: Story = {
+  name: 'Custom Colors',
+  render: () => (
+    <SelectWithState
+      styles={{
+        theme: 'light',
+        backgroundColor: 'rgba(255, 240, 245, 0.95)',
+        borderColor: 'rgba(255, 20, 147, 0.4)',
+        borderFocusedColor: 'rgba(255, 20, 147, 1)',
+        textColor: 'rgba(139, 0, 139, 1)',
+      }}
+    >
+      <MenuItem value="a">Custom styled option</MenuItem>
+      <MenuItem value="b">Option B</MenuItem>
+    </SelectWithState>
+  ),
+}
+
+// --------------------------------------------------------------------------
+// COMPREHENSIVE SHOWCASE
+// --------------------------------------------------------------------------
+
+export const ComprehensiveShowcase: Story = {
+  name: 'Comprehensive Showcase',
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem',
+        padding: '1rem',
+      }}
+    >
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SelectWithState styles={{ theme: 'light' }} displayEmpty>
+            <MenuItem value="a">Basic Light</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState error styles={{ theme: 'light' }}>
+            <MenuItem value="a">With Error</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState size="small" styles={{ theme: 'light' }}>
+            <MenuItem value="a">Small Size</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+        </div>
+      </div>
+
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SelectWithState styles={{ theme: 'dark' }} displayEmpty>
+            <MenuItem value="a">Basic Dark</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState variant="filled" styles={{ theme: 'dark' }}>
+            <MenuItem value="a">Filled Dark</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState fullWidth styles={{ theme: 'dark' }}>
+            <MenuItem value="a">Full Width Dark</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+        </div>
+      </div>
+
+      <div>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SelectWithState styles={{ theme: 'sacred' }} displayEmpty>
+            <MenuItem value="a">Sacred Selection</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState error styles={{ theme: 'sacred' }}>
+            <MenuItem value="a">Sacred Error</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+          <SelectWithState
+            initialValue="a"
+            disabled
+            styles={{ theme: 'sacred' }}
+          >
+            <MenuItem value="a">Sacred Disabled</MenuItem>
+            <MenuItem value="b">Option B</MenuItem>
+          </SelectWithState>
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST
+// --------------------------------------------------------------------------
+
+export const InteractionTest: Story = {
+  name: 'Interaction Test',
+  render: () => (
+    <SelectWithState styles={{ theme: 'light' }}>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const select = canvas.getByRole('combobox')
+
+    // Initial state
+    expect(select).toBeVisible()
+
+    // Select an option and confirm the controlled value updates
+    await userEvent.selectOptions(select, 'typescript')
+    await expect(select).toHaveValue('typescript')
+  },
+}

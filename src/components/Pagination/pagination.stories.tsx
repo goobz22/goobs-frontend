@@ -1,0 +1,228 @@
+/**
+ * @fileoverview Storybook stories for the Pagination component.
+ * Demonstrates the default (MUI) palette and the sacred theme, the
+ * first/last/prev/next button options, sibling/boundary counts, and the
+ * disabled state. Stories track the current page with a stateful wrapper.
+ */
+import React, { useState } from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import Pagination from './index'
+
+const meta: Meta<typeof Pagination> = {
+  title: 'Components/Pagination',
+  component: Pagination,
+  argTypes: {
+    page: {
+      control: { type: 'number', min: 1 },
+      description: 'The currently selected page (1-based)',
+    },
+    count: {
+      control: { type: 'number', min: 1 },
+      description: 'Total number of pages',
+    },
+    siblingCount: {
+      control: { type: 'number', min: 0 },
+      description: 'Number of page buttons shown on each side of the current page',
+    },
+    boundaryCount: {
+      control: { type: 'number', min: 0 },
+      description: 'Number of page buttons shown at the start and end',
+    },
+    showFirstButton: {
+      control: 'boolean',
+      description: 'Show the jump-to-first-page button',
+    },
+    showLastButton: {
+      control: 'boolean',
+      description: 'Show the jump-to-last-page button',
+    },
+    color: {
+      control: 'select',
+      options: ['primary', 'secondary', 'standard'],
+      description: 'Color variant',
+    },
+    styles: {
+      control: 'object',
+      description: 'Styling options including theme, disabled, gap, and padding',
+    },
+  },
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+}
+
+export default meta
+type Story = StoryObj<typeof Pagination>
+
+// --------------------------------------------------------------------------
+// INTERACTIVE WRAPPER
+// --------------------------------------------------------------------------
+// Pagination is controlled — it needs `page` + `onChange` to navigate. This
+// wrapper holds the page state so the buttons actually change the selection.
+
+const InteractivePagination = ({
+  count = 10,
+  initialPage = 1,
+  siblingCount,
+  boundaryCount,
+  showFirstButton,
+  showLastButton,
+  hidePrevButton,
+  hideNextButton,
+  styles,
+}: {
+  count?: number
+  initialPage?: number
+  siblingCount?: number
+  boundaryCount?: number
+  showFirstButton?: boolean
+  showLastButton?: boolean
+  hidePrevButton?: boolean
+  hideNextButton?: boolean
+  styles?: { disabled?: boolean; theme?: string; gap?: string; padding?: string }
+}): React.JSX.Element => {
+  const [page, setPage] = useState(initialPage)
+  return (
+    <Pagination
+      page={page}
+      count={count}
+      onChange={(_event, nextPage) => setPage(nextPage)}
+      {...(siblingCount !== undefined && { siblingCount })}
+      {...(boundaryCount !== undefined && { boundaryCount })}
+      {...(showFirstButton !== undefined && { showFirstButton })}
+      {...(showLastButton !== undefined && { showLastButton })}
+      {...(hidePrevButton !== undefined && { hidePrevButton })}
+      {...(hideNextButton !== undefined && { hideNextButton })}
+      {...(styles !== undefined && { styles })}
+    />
+  )
+}
+
+// --------------------------------------------------------------------------
+// THEME STORIES
+// --------------------------------------------------------------------------
+// The default palette renders for any theme other than `sacred` (including no
+// theme at all); only `theme: 'sacred'` renders the gold palette.
+
+export const Default: Story = {
+  name: 'Themes/Default',
+  render: () => <InteractivePagination count={10} initialPage={1} />,
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+export const DarkTheme: Story = {
+  name: 'Themes/Dark Theme',
+  render: () => (
+    <InteractivePagination
+      count={10}
+      initialPage={1}
+      styles={{ theme: 'dark' }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred Theme',
+  render: () => (
+    <InteractivePagination
+      count={10}
+      initialPage={1}
+      styles={{ theme: 'sacred' }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// BUTTON OPTION STORIES
+// --------------------------------------------------------------------------
+
+export const WithFirstLastButtons: Story = {
+  name: 'Buttons/First & Last',
+  render: () => (
+    <InteractivePagination
+      count={20}
+      initialPage={10}
+      showFirstButton
+      showLastButton
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+export const HiddenPrevNext: Story = {
+  name: 'Buttons/Hidden Prev & Next',
+  render: () => (
+    <InteractivePagination
+      count={10}
+      initialPage={5}
+      hidePrevButton
+      hideNextButton
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// COUNT / SIBLING STORIES
+// --------------------------------------------------------------------------
+
+export const ManyPagesWithEllipsis: Story = {
+  name: 'Counts/Many Pages (Ellipsis)',
+  render: () => (
+    <InteractivePagination
+      count={50}
+      initialPage={25}
+      showFirstButton
+      showLastButton
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+export const SiblingAndBoundaryCount: Story = {
+  name: 'Counts/Sibling & Boundary',
+  render: () => (
+    <InteractivePagination
+      count={50}
+      initialPage={25}
+      siblingCount={2}
+      boundaryCount={2}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// STATE STORIES
+// --------------------------------------------------------------------------
+
+export const Disabled: Story = {
+  name: 'State/Disabled',
+  render: () => (
+    <InteractivePagination
+      count={10}
+      initialPage={3}
+      styles={{ disabled: true }}
+    />
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}

@@ -34,7 +34,8 @@
     "Metric": "MetricCard",
     "Toolbar": "CustomToolbar",
     "Tooltip": "StyledTooltip",
-    "CVV": "CVVField"
+    "CVV": "CVVField",
+    "QRCode": "QRCodeComponent"
   },
   "overrides": {
     "Accordion": { "cardMode": "column" },
