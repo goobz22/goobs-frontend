@@ -7,6 +7,7 @@
   "storybookStatic": ".design-sync/sb-reference",
   "buildCmd": "bun run build",
   "cssEntry": "dist/goobs-frontend.css",
+  "entry": "./dist/goobs-frontend.es.js",
   "tsconfig": ".design-sync/bundle-tsconfig.json",
   "readmeHeader": ".design-sync/conventions.md",
   "extraFonts": "fonts/goobs-fonts.css",
@@ -39,6 +40,7 @@
   },
   "overrides": {
     "Accordion": { "cardMode": "column" },
+    "BigCalendar": { "cardMode": "column" },
     "Content": { "cardMode": "column" },
     "Alert": { "cardMode": "column" },
     "ComplexEditor": { "cardMode": "column" },

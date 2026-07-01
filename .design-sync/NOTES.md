@@ -137,12 +137,24 @@ Snackbar's AllSeverities stories hit.)
 permits ONE projectId; a foreign-account id 404s). Both project ids live in `.design-sync/project-targets.json`.
 RESOLVE at each sync start: `DesignSync(get_project)` each target id; the reachable one is the active
 account → set `config.json` projectId to it and sync there. Each account's project updates only when that
-account is logged in — switch accounts + re-sync to update the other. (account-A 02a71111… synced 2026-06-30;
-account-B 61668feb… is the original, update it by switching accounts.)
+account is logged in — switch accounts + re-sync to update the other. (account-A 02a71111… last synced
+2026-07-01 = **84 components**: the original 71 + 13 storyless exports added this run — AppBar, Drawer, Paper,
+Pagination, Select, MenuItem, Slider, TimeField, Fade, Zoom, QRCode (→QRCodeComponent), SearchableHistory,
+BigCalendar; all 13 graded PASS. account-B 61668feb… is still at the 71-component state — switch to that
+account + re-sync to bring it to 84.)
 
 ## Re-sync risks (watch-list)
+- **`resync.mjs`/`package-build.mjs` NEED `cfg.entry` (`./dist/goobs-frontend.es.js`)** — the converter
+  resolves the built entry from `node_modules/goobs-frontend`, but this repo IS the package (not self-installed
+  there), so without an entry it dies `[NO_DIST] no built entry`. `cfg.entry` is now set in config.json (cwd-relative);
+  it makes the build stage reuse the current `dist/` instead of resolving from node_modules — so **rebuild `dist/`
+  (`bun run build`) yourself first when component source changed**, then re-sync (the driver does NOT run the vite build).
+  Passing `--entry ./dist/goobs-frontend.es.js` on the CLI does the same (overrides cfg.entry).
 - **RE-RUN `node .design-sync/inject-reference-fonts.mjs` after any reference storybook rebuild** — else
   the oracle reverts to system fonts and typography grades go false.
+- BigCalendar/Accordion/Content etc. use `cfg.overrides.<Name>.cardMode:"column"` — a story wider than a grid
+  cell trips `[GRID_OVERFLOW]` and the card crops; new wide components need a column override + targeted
+  `node .ds-sync/lib/preview-rebuild.mjs --components <Name>` (presentation-only, grades carry).
 - **Snackbar owned preview** (`.design-sync/previews/Snackbar.tsx`) forces open + `autoHideDuration:600000` +
   relies on `cfg.overrides.Snackbar.viewport "900x240"` to frame the position:fixed toast. If the toast's
   fixed offset or the viewport changes, re-verify the card frames it. NEVER set autoHideDuration > 2^31-1 (overflows→instant close).
