@@ -59,7 +59,7 @@
   --dg-row-bg: var(--goobs-dark-surface);
   --dg-row-alt-bg: #253145;
   --dg-row-hover-bg: var(--goobs-dark-surface-raised);
-  --dg-row-selected-bg: rgba(59, 130, 246, 0.2);
+  --dg-row-selected-bg: var(--goobs-blue-a20);
   --dg-row-border: var(--goobs-dark-border);
 
   --dg-cell-color: var(--goobs-dark-text);
@@ -419,7 +419,7 @@
 
 .resizeHandle:hover,
 .resizeHandleActive {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-blue-a20);
   border-right: 2px solid var(--goobs-light-primary);
 }
 
@@ -547,11 +547,11 @@
   --mr-text: var(--goobs-light-text-secondary);
   --mr-text-muted: var(--goobs-light-text-disabled);
   --mr-icon: var(--goobs-light-text-muted);
-  --mr-button-hover-bg: rgba(0, 0, 0, 0.04);
+  --mr-button-hover-bg: var(--goobs-black-a04);
   --mr-delete-icon: var(--goobs-danger);
   --mr-delete-hover-bg: var(--goobs-danger-bg);
   --mr-divider: #e5e7eb;
-  --mr-count-active-bg: rgba(59, 130, 246, 0.1);
+  --mr-count-active-bg: var(--goobs-blue-a10);
   --mr-count-active-text: var(--goobs-light-primary);
   --mr-add-color: var(--goobs-success);
   --mr-add-hover-bg: var(--goobs-success-bg);
@@ -567,7 +567,7 @@
   --mr-delete-icon: var(--goobs-danger);
   --mr-delete-hover-bg: var(--goobs-danger-bg);
   --mr-divider: var(--goobs-dark-border-strong);
-  --mr-count-active-bg: rgba(59, 130, 246, 0.15);
+  --mr-count-active-bg: var(--goobs-blue-a15);
   --mr-count-active-text: var(--goobs-dark-primary-strong);
   --mr-add-color: var(--goobs-success);
   --mr-add-hover-bg: var(--goobs-success-bg);
@@ -695,7 +695,7 @@
   position: sticky;
   left: 0;
   box-sizing: border-box;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--goobs-black-a70);
   border-top: 2px solid var(--goobs-gold-a30);
   backdrop-filter: blur(8px);
 }
@@ -715,14 +715,14 @@
   --ft-btn-bg: var(--goobs-light-surface-raised);
   --ft-btn-color: var(--goobs-light-text-secondary);
   --ft-btn-border: 1px solid var(--goobs-light-border);
-  --ft-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --ft-btn-hover-shadow: 0 4px 8px var(--goobs-black-a10);
   --ft-btn-disabled-color: rgba(107, 114, 128, 0.3);
   --ft-cog-bg: #f1f5f9;
   --ft-cog-bg-hover: var(--goobs-light-border);
   --ft-cog-border: 1px solid var(--goobs-light-border);
   --ft-menu-bg: var(--goobs-light-surface);
   --ft-menu-border: 1px solid var(--goobs-light-border);
-  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-shadow: 0 -4px 12px var(--goobs-black-a15);
   --ft-menu-item-color: var(--goobs-light-text-secondary);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: #f3f4f6;
@@ -735,14 +735,14 @@
   --ft-btn-bg: var(--goobs-dark-border);
   --ft-btn-color: var(--goobs-dark-text);
   --ft-btn-border: 1px solid var(--goobs-dark-border-strong);
-  --ft-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --ft-btn-disabled-color: rgba(156, 163, 175, 0.3);
+  --ft-btn-hover-shadow: 0 4px 8px var(--goobs-black-a30);
+  --ft-btn-disabled-color: var(--goobs-gray-light-a30);
   --ft-cog-bg: var(--goobs-dark-border);
   --ft-cog-bg-hover: var(--goobs-dark-border-strong);
   --ft-cog-border: 1px solid var(--goobs-dark-border-strong);
   --ft-menu-bg: var(--goobs-dark-surface);
   --ft-menu-border: 1px solid var(--goobs-dark-border-strong);
-  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-shadow: 0 -4px 12px var(--goobs-black-a15);
   --ft-menu-item-color: var(--goobs-dark-text);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: var(--goobs-dark-border);
@@ -908,7 +908,7 @@
 .exportMenu[data-theme='light'] {
   --ft-menu-bg: var(--goobs-light-surface);
   --ft-menu-border: 1px solid var(--goobs-light-border);
-  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-shadow: 0 -4px 12px var(--goobs-black-a15);
   --ft-menu-item-color: var(--goobs-light-text-secondary);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: #f3f4f6;
@@ -917,7 +917,7 @@
 .exportMenu[data-theme='dark'] {
   --ft-menu-bg: var(--goobs-dark-surface);
   --ft-menu-border: 1px solid var(--goobs-dark-border-strong);
-  --ft-menu-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  --ft-menu-shadow: 0 -4px 12px var(--goobs-black-a15);
   --ft-menu-item-color: var(--goobs-dark-text);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: var(--goobs-dark-border);
@@ -1011,7 +1011,7 @@
 }
 
 .dropdownBtn:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--goobs-blue-a10);
 }
 
 .datagrid[data-theme='sacred'] .dropdownBtn {
@@ -1042,7 +1042,7 @@
 .manageColumnsOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--goobs-black-a50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1173,13 +1173,13 @@
   --card-text-secondary: var(--goobs-gold-a80);
   --card-select-hint: var(--goobs-gold-a60);
   --card-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--goobs-gold-a30),
+    0 4px 16px var(--goobs-black-a80), 0 0 0 1px var(--goobs-gold-a30),
     0 0 12px var(--goobs-gold-a15);
   --card-shadow-selected:
     0 0 30px var(--goobs-gold-a40), 0 0 60px var(--goobs-gold-a20),
-    0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--goobs-gold-a25);
+    0 4px 16px var(--goobs-black-a60), inset 0 1px 0 var(--goobs-gold-a25);
   --card-shadow-pressed:
-    0 2px 8px var(--goobs-gold-a40), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+    0 2px 8px var(--goobs-gold-a40), inset 0 1px 2px var(--goobs-black-a40);
   --card-gradient-selected:
     radial-gradient(
       ellipse at top left,
@@ -1193,9 +1193,9 @@
     );
 
   --container-bg: var(--goobs-sacred-surface);
-  --header-bg: rgba(0, 0, 0, 0.98);
+  --header-bg: var(--goobs-black-a98);
   --header-border: var(--goobs-gold-a50);
-  --pagination-bg: rgba(0, 0, 0, 0.98);
+  --pagination-bg: var(--goobs-black-a98);
   --pagination-border: var(--goobs-gold-a50);
   --pagination-btn-bg: var(--goobs-gold-a15);
   --pagination-btn-border: var(--goobs-gold);
@@ -1204,7 +1204,7 @@
 
   --fab-bg: linear-gradient(135deg, var(--goobs-gold) 0%, #ffa500 100%);
   --fab-text: #000000;
-  --fab-shadow: 0 0 30px var(--goobs-gold-a70), 0 4px 16px rgba(0, 0, 0, 0.5);
+  --fab-shadow: 0 0 30px var(--goobs-gold-a70), 0 4px 16px var(--goobs-black-a50);
   --fab-border: 2px solid var(--goobs-gold-a90);
 
   padding: 0;
@@ -1227,18 +1227,18 @@
   --card-border-hover: var(--goobs-light-border-strong);
   --card-border-selected: var(--goobs-light-primary);
   --card-primary: var(--goobs-light-primary);
-  --card-primary-light: rgba(59, 130, 246, 0.08);
+  --card-primary-light: var(--goobs-blue-a08);
   --card-text: var(--goobs-light-text-secondary);
   --card-text-secondary: var(--goobs-light-text-muted);
   --card-select-hint: var(--goobs-light-text-disabled);
   --card-shadow: var(--goobs-shadow-light-sm);
   --card-shadow-selected:
-    0 4px 20px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.1);
+    0 4px 20px var(--goobs-blue-a15), 0 0 0 1px var(--goobs-blue-a10);
   --card-shadow-pressed:
-    0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    0 2px 8px var(--goobs-black-a10), inset 0 1px 2px var(--goobs-black-a05);
   --card-gradient-selected: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.05) 0%,
+    var(--goobs-blue-a05) 0%,
     transparent 100%
   );
 
@@ -1254,7 +1254,7 @@
 
   --fab-bg: var(--goobs-light-primary);
   --fab-text: var(--goobs-light-primary-contrast);
-  --fab-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  --fab-shadow: 0 6px 10px var(--goobs-black-a15), 0 3px 6px var(--goobs-black-a10);
   --fab-border: none;
 }
 
@@ -1269,18 +1269,18 @@
   --card-border-hover: var(--goobs-dark-border-strong);
   --card-border-selected: var(--goobs-dark-primary-strong);
   --card-primary: var(--goobs-dark-primary-strong);
-  --card-primary-light: rgba(59, 130, 246, 0.15);
+  --card-primary-light: var(--goobs-blue-a15);
   --card-text: var(--goobs-dark-text);
   --card-text-secondary: #94a3b8;
   --card-select-hint: var(--goobs-dark-text-muted);
   --card-shadow: var(--goobs-shadow-dark-sm);
   --card-shadow-selected:
-    0 4px 20px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2);
+    0 4px 20px var(--goobs-blue-a30), 0 0 0 1px var(--goobs-blue-a20);
   --card-shadow-pressed:
-    0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    0 2px 8px var(--goobs-black-a20), inset 0 1px 2px var(--goobs-black-a10);
   --card-gradient-selected: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.1) 0%,
+    var(--goobs-blue-a10) 0%,
     transparent 100%
   );
 
@@ -1296,7 +1296,7 @@
 
   --fab-bg: var(--goobs-dark-primary-strong);
   --fab-text: white;
-  --fab-shadow: 0 6px 10px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2);
+  --fab-shadow: 0 6px 10px var(--goobs-black-a30), 0 3px 6px var(--goobs-black-a20);
   --fab-border: none;
 }
 
@@ -1309,7 +1309,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
   border-bottom: 1px solid var(--goobs-gold-a30);
 }
 
@@ -1334,7 +1334,7 @@
   box-sizing: border-box;
   padding: 0.5rem;
   flex-wrap: wrap;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
 }
 
 .mobileContainer[data-theme='light'] .mobileToolbar {
@@ -1366,7 +1366,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
   border-bottom: 1px solid var(--goobs-gold-a50);
   padding: 0.5rem;
 }
@@ -1419,7 +1419,7 @@
   margin-bottom: 0.75rem;
   border: 2px solid var(--goobs-gold-a60);
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.8),
+    0 4px 16px var(--goobs-black-a80),
     0 0 0 1px var(--goobs-gold-a30),
     0 0 12px var(--goobs-gold-a15);
   cursor: pointer;
@@ -1453,7 +1453,7 @@
   border-color: var(--goobs-gold-a80);
   box-shadow:
     0 2px 8px var(--goobs-gold-a40),
-    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+    inset 0 1px 2px var(--goobs-black-a40);
   transform: scale(0.985);
 }
 
@@ -1462,8 +1462,8 @@
   background-color: #f1f5f9;
   border-color: var(--goobs-light-border-strong);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    0 2px 8px var(--goobs-black-a10),
+    inset 0 1px 2px var(--goobs-black-a05);
 }
 
 .mobileContainer[data-theme='dark'] .card:active,
@@ -1471,8 +1471,8 @@
   background-color: #2d3f52;
   border-color: var(--goobs-dark-border-strong);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    0 2px 8px var(--goobs-black-a20),
+    inset 0 1px 2px var(--goobs-black-a10);
 }
 
 /* Selected state - hardcoded sacred theme values */
@@ -1482,7 +1482,7 @@
   box-shadow:
     0 0 30px var(--goobs-gold-a50),
     0 0 60px var(--goobs-gold-a20),
-    0 4px 16px rgba(0, 0, 0, 0.6),
+    0 4px 16px var(--goobs-black-a60),
     inset 0 1px 0 var(--goobs-gold-a25);
   background-image:
     radial-gradient(
@@ -1501,11 +1501,11 @@
   background-color: #eff6ff;
   border-color: var(--goobs-light-primary);
   box-shadow:
-    0 4px 20px rgba(59, 130, 246, 0.15),
-    0 0 0 1px rgba(59, 130, 246, 0.1);
+    0 4px 20px var(--goobs-blue-a15),
+    0 0 0 1px var(--goobs-blue-a10);
   background-image: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.05) 0%,
+    var(--goobs-blue-a05) 0%,
     transparent 100%
   );
 }
@@ -1514,11 +1514,11 @@
   background-color: #1e3a5f;
   border-color: var(--goobs-dark-primary-strong);
   box-shadow:
-    0 4px 20px rgba(59, 130, 246, 0.3),
-    0 0 0 1px rgba(59, 130, 246, 0.2);
+    0 4px 20px var(--goobs-blue-a30),
+    0 0 0 1px var(--goobs-blue-a20);
   background-image: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.1) 0%,
+    var(--goobs-blue-a10) 0%,
     transparent 100%
   );
 }
@@ -1603,14 +1603,14 @@
   .card[data-selection-mode='true']
   .selectionIndicator {
   border-color: var(--goobs-light-border-strong);
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: var(--goobs-blue-a08);
 }
 
 .mobileContainer[data-theme='dark']
   .card[data-selection-mode='true']
   .selectionIndicator {
   border-color: var(--goobs-dark-border-strong);
-  background-color: rgba(59, 130, 246, 0.15);
+  background-color: var(--goobs-blue-a15);
 }
 
 /* Selected indicator - hardcoded sacred theme */
@@ -1628,7 +1628,7 @@
   .selectionIndicator {
   border-color: var(--goobs-light-primary);
   background-color: var(--goobs-light-primary);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px var(--goobs-blue-a30);
 }
 
 .mobileContainer[data-theme='dark']
@@ -1636,7 +1636,7 @@
   .selectionIndicator {
   border-color: var(--goobs-dark-primary-strong);
   background-color: var(--goobs-dark-primary-strong);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px var(--goobs-blue-a40);
 }
 
 /* Checkmark - hardcoded sacred theme (black on gold) */
@@ -1746,8 +1746,8 @@
 
 .mobileContainer[data-theme='light'] .expandBtn {
   color: var(--goobs-light-primary);
-  background-color: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-blue-a08);
+  border-color: var(--goobs-blue-a20);
 }
 
 .expandIcon {
@@ -1899,7 +1899,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
   border-top: 1px solid var(--goobs-gold-a50);
   padding: 0.5rem;
   display: flex;
@@ -1982,7 +1982,7 @@
   font-weight: bold;
   box-shadow:
     0 0 30px var(--goobs-gold-a70),
-    0 4px 16px rgba(0, 0, 0, 0.5);
+    0 4px 16px var(--goobs-black-a50);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1998,8 +1998,8 @@
   color: white;
   border: none;
   box-shadow:
-    0 6px 10px rgba(0, 0, 0, 0.15),
-    0 3px 6px rgba(0, 0, 0, 0.1);
+    0 6px 10px var(--goobs-black-a15),
+    0 3px 6px var(--goobs-black-a10);
 }
 
 .mobileContainer[data-theme='dark'] .fab {
@@ -2007,8 +2007,8 @@
   color: white;
   border: none;
   box-shadow:
-    0 6px 10px rgba(0, 0, 0, 0.3),
-    0 3px 6px rgba(0, 0, 0, 0.2);
+    0 6px 10px var(--goobs-black-a30),
+    0 3px 6px var(--goobs-black-a20);
 }
 
 .fab:active {
@@ -2030,7 +2030,7 @@
   background: var(--goobs-danger);
   box-shadow:
     0 4px 8px var(--goobs-danger-border),
-    0 2px 4px rgba(0, 0, 0, 0.1);
+    0 2px 4px var(--goobs-black-a10);
 }
 
 .fabDelete[data-has-duplicate='true'] {
@@ -2050,7 +2050,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
   border-bottom: 1px solid var(--goobs-gold-a50);
   color: #fbbf24;
 }
@@ -2089,14 +2089,14 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0, 0, 0, 0.98);
+  background-color: var(--goobs-black-a98);
   border-top: 1px solid var(--goobs-gold-a50);
   padding: 0.75rem;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 20;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 10px var(--goobs-black-a10);
 }
 
 .mobileContainer[data-theme='light'] .actionBar {

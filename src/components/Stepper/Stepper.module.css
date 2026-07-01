@@ -5,7 +5,7 @@
    Theme is expressed as data-theme on the root: sacred is the HARDCODED
    DEFAULT (verbatim transcription of the previous inline sacred-gold look),
    light / dark are [data-theme] overrides drawn from theme/stepper.ts so the
-   styles.theme prop is functional. SACRED_GOLD = #FFD700 = rgb(255, 215, 0);
+   styles.theme prop is functional. SACRED_GOLD = #FFD700 = var(--goobs-amber-a100);
    alpha(SACRED_GOLD, x) === rgba(255, 215, 0, x).
    ========================================================================== */
 
@@ -48,7 +48,7 @@
   --stepper-connector: var(--goobs-light-border);
   --stepper-label: var(--goobs-light-text);
   --stepper-label-disabled: var(--goobs-light-text-disabled);
-  --stepper-label-hover-bg: rgba(59, 130, 246, 0.1);
+  --stepper-label-hover-bg: var(--goobs-blue-a10);
   --stepper-icon-color: var(--goobs-light-primary-strong);
   --stepper-icon-color-error: var(--goobs-danger);
   --stepper-icon-color-inactive: var(--goobs-light-text-disabled);
@@ -69,12 +69,12 @@
   --stepper-connector: var(--goobs-dark-border);
   --stepper-label: var(--goobs-dark-text);
   --stepper-label-disabled: var(--goobs-dark-text-muted);
-  --stepper-label-hover-bg: rgba(96, 165, 250, 0.15);
+  --stepper-label-hover-bg: var(--goobs-blue-light-a15);
   --stepper-icon-color: var(--goobs-dark-primary);
   --stepper-icon-color-error: var(--goobs-danger);
   --stepper-icon-color-inactive: var(--goobs-dark-text-muted);
-  --stepper-completed-box-bg: rgba(96, 165, 250, 0.1);
-  --stepper-completed-box-border: rgba(96, 165, 250, 0.3);
+  --stepper-completed-box-bg: var(--goobs-blue-light-a10);
+  --stepper-completed-box-border: var(--goobs-blue-light-a30);
   --stepper-completed-title: var(--goobs-dark-primary);
   --stepper-font-family: var(--goobs-font-standard);
 }

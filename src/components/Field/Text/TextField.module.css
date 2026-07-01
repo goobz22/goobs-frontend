@@ -44,8 +44,8 @@
   align-items: center;
   width: 100%;
   min-height: 40px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background-color: var(--goobs-black-a60);
+  border: 1px solid var(--goobs-amber-a30);
   border-radius: 8px;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -57,12 +57,12 @@
 }
 
 .inputWrapper.focused {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  border-color: var(--goobs-amber-a60);
+  box-shadow: 0 0 15px var(--goobs-amber-a30);
 }
 
 .inputWrapper.disabled {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
 }
 
 /* --------------------------------------------------------------------------
@@ -78,12 +78,12 @@
   padding: 8px 16px;
   font-size: 16px;
   font-family: 'Crimson Text', serif;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--goobs-white-a90);
   box-sizing: border-box;
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--goobs-white-a50);
 }
 
 .input.hasStartAdornment {
@@ -106,13 +106,13 @@
   padding: 8px 16px;
   font-size: 16px;
   font-family: 'Crimson Text', serif;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--goobs-white-a90);
   box-sizing: border-box;
   resize: vertical;
 }
 
 .textarea::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--goobs-white-a50);
 }
 
 .textarea:disabled {
@@ -171,7 +171,7 @@
 
 .container[data-theme='light'] .inputWrapper.focused {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
 .container[data-theme='light'] .inputWrapper.disabled {
@@ -224,7 +224,7 @@
 
 .container[data-theme='dark'] .inputWrapper.focused {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
 
 .container[data-theme='dark'] .inputWrapper.disabled {

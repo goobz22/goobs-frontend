@@ -110,7 +110,7 @@
 
   --rg-radio-border-color: var(--goobs-dark-text-muted);
   --rg-radio-hover-border-color: var(--goobs-dark-primary);
-  --rg-radio-hover-bg: rgba(96, 165, 250, 0.1);
+  --rg-radio-hover-bg: var(--goobs-blue-light-a10);
   --rg-radio-checked-border-color: var(--goobs-dark-primary);
   --rg-radio-checked-bg: var(--goobs-dark-primary);
 

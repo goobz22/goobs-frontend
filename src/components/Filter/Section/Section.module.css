@@ -27,7 +27,7 @@
   --fs-toggle-bg: var(--goobs-sacred-control-bg);
   --fs-toggle-color: var(--goobs-sacred-text);
   --fs-toggle-font: var(--goobs-font-sacred);
-  --fs-panel-bg: rgba(0, 0, 0, 0.15);
+  --fs-panel-bg: var(--goobs-black-a15);
   --fs-chip-label-color: var(--goobs-sacred-text-secondary);
 
   /* Margin-bottom dropped to 0 on 2026-05-22 — DataGrid wraps the
@@ -44,7 +44,7 @@
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
   --fs-accent: var(--goobs-light-primary);
-  --fs-toggle-bg: rgba(0, 0, 0, 0.04);
+  --fs-toggle-bg: var(--goobs-black-a04);
   --fs-toggle-color: rgba(0, 0, 0, 0.75);
   --fs-toggle-font: inherit;
   --fs-panel-bg: rgba(255, 255, 255, 0.6);

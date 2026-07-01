@@ -37,7 +37,7 @@
   --select-text: var(--goobs-light-text);
   --select-font-family: var(--goobs-font-standard);
   --select-filled-bg: rgba(0, 0, 0, 0.06);
-  --select-disabled-text: rgba(0, 0, 0, 0.38);
+  --select-disabled-text: var(--goobs-black-a38);
   --select-arrow-color: rgba(0, 0, 0, 0.54);
   --select-arrow-disabled-color: rgba(0, 0, 0, 0.26);
 }

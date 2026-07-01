@@ -75,7 +75,7 @@
   box-shadow: var(
     --qr-box-shadow,
     0 0 50px var(--goobs-gold-a50),
-    0 10px 40px rgba(0, 0, 0, 0.5),
+    0 10px 40px var(--goobs-black-a50),
     inset 0 0 30px var(--goobs-gold-a15)
   );
   position: relative;

@@ -119,7 +119,7 @@
   --switch-track-width: 48px;
   --switch-track-height: 24px;
   --switch-track-radius: 12px;
-  --switch-track-bg: rgba(156, 163, 175, 0.3);
+  --switch-track-bg: var(--goobs-gray-light-a30);
   --switch-track-border-color: rgba(156, 163, 175, 0.2);
   --switch-track-border-width: 1px;
   --switch-track-backdrop: blur(4px);
@@ -127,7 +127,7 @@
 
   --switch-track-checked-bg: var(--goobs-light-primary);
   --switch-track-checked-border: transparent;
-  --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --switch-track-checked-shadow: 0 0 20px var(--goobs-blue-a30);
   --switch-track-checked-image: none;
 
   --switch-track-focus-shadow: var(--goobs-focus-light);
@@ -140,20 +140,20 @@
   --switch-thumb-border-color: transparent;
   --switch-thumb-border-width: 0px;
   --switch-thumb-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    0 1px 3px var(--goobs-black-a12), 0 1px 2px var(--goobs-black-a24);
   --switch-thumb-color: var(--goobs-light-text-muted);
   --switch-thumb-font-size: 10px;
   --switch-thumb-image: none;
 
   --switch-thumb-checked-offset: 24px;
   --switch-thumb-checked-border: transparent;
-  --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --switch-thumb-checked-shadow: 0 4px 8px var(--goobs-black-a30);
   --switch-thumb-checked-color: var(--goobs-light-primary);
   --switch-thumb-checked-image: none;
 
   --switch-thumb-disabled-bg: rgba(249, 250, 251, 0.8);
   --switch-thumb-disabled-border: transparent;
-  --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --switch-thumb-disabled-shadow: 0 1px 2px var(--goobs-black-a10);
   --switch-thumb-disabled-color: var(--goobs-light-text-disabled);
 
   --switch-label-color: var(--goobs-light-text-secondary);
@@ -172,14 +172,14 @@
   --switch-track-height: 24px;
   --switch-track-radius: 12px;
   --switch-track-bg: rgba(75, 85, 99, 0.4);
-  --switch-track-border-color: rgba(75, 85, 99, 0.3);
+  --switch-track-border-color: var(--goobs-gray-a30);
   --switch-track-border-width: 1px;
   --switch-track-backdrop: blur(4px);
   --switch-track-image: none;
 
   --switch-track-checked-bg: var(--goobs-dark-primary-strong);
   --switch-track-checked-border: transparent;
-  --switch-track-checked-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  --switch-track-checked-shadow: 0 0 20px var(--goobs-blue-a40);
   --switch-track-checked-image: none;
 
   --switch-track-focus-shadow: var(--goobs-focus-dark);
@@ -192,20 +192,20 @@
   --switch-thumb-border-color: transparent;
   --switch-thumb-border-width: 0px;
   --switch-thumb-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+    0 2px 4px var(--goobs-black-a30), 0 1px 2px var(--goobs-black-a40);
   --switch-thumb-color: #4b5563;
   --switch-thumb-font-size: 10px;
   --switch-thumb-image: none;
 
   --switch-thumb-checked-offset: 24px;
   --switch-thumb-checked-border: transparent;
-  --switch-thumb-checked-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --switch-thumb-checked-shadow: 0 4px 8px var(--goobs-black-a40);
   --switch-thumb-checked-color: var(--goobs-dark-primary-strong);
   --switch-thumb-checked-image: none;
 
   --switch-thumb-disabled-bg: rgba(107, 114, 128, 0.8);
   --switch-thumb-disabled-border: transparent;
-  --switch-thumb-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --switch-thumb-disabled-shadow: 0 1px 2px var(--goobs-black-a20);
   --switch-thumb-disabled-color: var(--goobs-dark-text-muted);
 
   --switch-label-color: var(--goobs-dark-text-secondary);

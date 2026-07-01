@@ -608,7 +608,7 @@
   text-align: center;
 }
 .root[data-theme='sacred'] .emptyPlaceholder {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--goobs-black-a20);
 }
 .root[data-theme='dark'] .emptyPlaceholder {
   background-color: var(--goobs-dark-surface);
@@ -839,7 +839,7 @@
   background-color: var(--goobs-gold-a05);
 }
 .root[data-theme='dark'] .revisionHistory {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
 }
 
 .revisionHistoryTitle {
@@ -1164,9 +1164,9 @@
 /* Preview "new schedule" box (blue/gold tint) */
 .previewBox {
   padding: 16px;
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: var(--goobs-blue-a05);
   border-radius: var(--goobs-radius-lg);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--goobs-blue-a20);
   margin-bottom: 24px;
 }
 .root[data-theme='sacred'] .previewBox {
@@ -1174,8 +1174,8 @@
   border-color: var(--goobs-gold-a30);
 }
 .root[data-theme='dark'] .previewBox {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
+  background-color: var(--goobs-blue-a10);
+  border-color: var(--goobs-blue-a30);
 }
 
 .previewLabel {
@@ -1223,7 +1223,7 @@
 .bookingCard {
   padding: 14px 16px;
   background-color: rgba(59, 130, 246, 0.04);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  border: 1px solid var(--goobs-blue-a25);
   border-left: 3px solid var(--goobs-info);
   border-radius: var(--goobs-radius-lg);
   margin-bottom: 8px;
@@ -1235,7 +1235,7 @@
 }
 .root[data-theme='dark'] .bookingCard {
   background-color: rgba(96, 165, 250, 0.06);
-  border-color: rgba(96, 165, 250, 0.3);
+  border-color: var(--goobs-blue-light-a30);
   border-left-color: var(--goobs-dark-primary);
 }
 
@@ -1536,7 +1536,7 @@
 /* Linked article card (always highlighted) */
 .kbLinkedArticleCard {
   padding: 1rem;
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: var(--goobs-blue-a05);
   border: 2px solid var(--goobs-info);
   border-radius: var(--goobs-radius-lg);
   cursor: pointer;
@@ -1547,7 +1547,7 @@
   border-color: var(--goobs-gold);
 }
 .root[data-theme='dark'] .kbLinkedArticleCard {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--goobs-blue-a10);
 }
 
 /* Browse article card — highlighted when linked */
@@ -1560,13 +1560,13 @@
   transition: all 0.2s;
 }
 .root[data-theme='sacred'] .kbArticleCard {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
 }
 .root[data-theme='dark'] .kbArticleCard {
   background-color: var(--goobs-dark-surface);
 }
 .kbArticleCard[data-linked='true'] {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: var(--goobs-blue-a05);
   border-color: var(--goobs-info);
 }
 .root[data-theme='sacred'] .kbArticleCard[data-linked='true'] {
@@ -1574,7 +1574,7 @@
   border-color: var(--goobs-gold);
 }
 .root[data-theme='dark'] .kbArticleCard[data-linked='true'] {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--goobs-blue-a10);
 }
 
 .kbCardHeader {
@@ -1744,7 +1744,7 @@
   text-align: center;
 }
 .root[data-theme='sacred'] .resolutionEmpty {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--goobs-black-a20);
 }
 .root[data-theme='dark'] .resolutionEmpty {
   background-color: var(--goobs-dark-surface);

@@ -74,7 +74,7 @@
   background-image:
     radial-gradient(
       ellipse at top,
-      rgba(0, 0, 0, 0.9) 0%,
+      var(--goobs-black-a90) 0%,
       rgba(0, 0, 0, 0.95) 100%
     ),
     radial-gradient(
@@ -91,7 +91,7 @@
   border-color: var(--goobs-gold-a40);
   border-radius: var(--goobs-radius-xl);
   box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    0 25px 50px -12px var(--goobs-black-a80),
     0 0 30px var(--goobs-gold-a20),
     inset 0 2px 4px var(--goobs-gold-a10);
   backdrop-filter: blur(20px);
@@ -190,8 +190,8 @@
 .item:hover:not([data-disabled='true']):not([data-selected='true']):not(
     [data-expanded='true']
   ) {
-  background-color: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-blue-a08);
+  border-color: var(--goobs-blue-a20);
   color: var(--goobs-light-primary);
   transform: translateX(2px);
 }
@@ -206,11 +206,11 @@
 }
 
 .item[data-selected='true']:not([data-disabled='true']) {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.4);
+  background-color: var(--goobs-blue-a10);
+  border-color: var(--goobs-blue-a40);
   color: var(--goobs-light-primary);
   font-weight: var(--goobs-weight-semibold);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 2px 4px var(--goobs-blue-a15);
 }
 
 .item[data-disabled='true'] {
@@ -226,7 +226,7 @@
 .item[data-focused='true'] {
   outline: 2px solid rgba(59, 130, 246, 0.6);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
 /* ---- DARK item ---- */
@@ -237,8 +237,8 @@
 .item[data-theme='dark']:hover:not([data-disabled='true']):not(
     [data-selected='true']
   ):not([data-expanded='true']) {
-  background-color: rgba(96, 165, 250, 0.1);
-  border-color: rgba(96, 165, 250, 0.3);
+  background-color: var(--goobs-blue-light-a10);
+  border-color: var(--goobs-blue-light-a30);
   color: var(--goobs-dark-primary);
   transform: translateX(2px);
 }
@@ -253,23 +253,23 @@
 }
 
 .item[data-theme='dark'][data-selected='true']:not([data-disabled='true']) {
-  background-color: rgba(96, 165, 250, 0.15);
+  background-color: var(--goobs-blue-light-a15);
   border-color: rgba(96, 165, 250, 0.5);
   color: var(--goobs-dark-primary);
   font-weight: var(--goobs-weight-semibold);
-  box-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
+  box-shadow: 0 2px 4px var(--goobs-blue-light-a20);
 }
 
 .item[data-theme='dark'][data-disabled='true'] {
   background-color: rgba(55, 65, 81, 0.5);
   color: var(--goobs-dark-text-muted);
-  border-color: rgba(75, 85, 99, 0.3);
+  border-color: var(--goobs-gray-a30);
 }
 
 .item[data-theme='dark'][data-focused='true'] {
   outline: 2px solid rgba(96, 165, 250, 0.6);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  box-shadow: 0 0 0 3px var(--goobs-blue-light-a10);
 }
 
 /* ---- SACRED item ---- */
@@ -279,7 +279,7 @@
   font-family: var(--goobs-font-sacred);
   font-weight: var(--goobs-weight-medium);
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 2px var(--goobs-black-a80);
   padding: 6px 16px;
   padding-left: var(--tree-item-indent, var(--goobs-space-md));
   min-height: 32px;
@@ -297,7 +297,7 @@
   transform: translateX(4px) scale(1.02);
   text-shadow:
     0 2px 8px var(--goobs-gold-a60),
-    0 1px 2px rgba(0, 0, 0, 0.8);
+    0 1px 2px var(--goobs-black-a80);
   box-shadow: 0 4px 12px var(--goobs-gold-a25);
 }
 
@@ -310,7 +310,7 @@
   font-weight: var(--goobs-weight-semibold);
   text-shadow:
     0 2px 6px var(--goobs-gold-a70),
-    0 1px 2px rgba(0, 0, 0, 0.8);
+    0 1px 2px var(--goobs-black-a80);
 }
 
 .item[data-theme='sacred'][data-selected='true']:not([data-disabled='true']) {
@@ -320,7 +320,7 @@
   font-weight: var(--goobs-weight-semibold);
   text-shadow:
     0 2px 8px var(--goobs-gold-a80),
-    0 1px 2px rgba(0, 0, 0, 0.9);
+    0 1px 2px var(--goobs-black-a90);
   box-shadow:
     0 4px 20px var(--goobs-gold-a40),
     inset 0 1px 0 var(--goobs-gold-a20);
@@ -333,7 +333,7 @@
 }
 
 .item[data-theme='sacred'][data-disabled='true'] {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
   color: var(--goobs-gold-a30);
   opacity: 0.5;
   border-color: var(--goobs-gold-a10);
@@ -392,7 +392,7 @@
 /* --------------------------------------------------------------------------
    CHECKBOX (treeViewThemes.*.checkbox). Light/dark are identical (16x16);
    sacred is 18x18 with a border + dark fill. getTreeItemStyles only kept the
-   sacred backgroundColor when it equaled rgba(0,0,0,0.5), else transparent —
+   sacred backgroundColor when it equaled var(--goobs-black-a50), else transparent —
    so light/dark stay transparent.
    -------------------------------------------------------------------------- */
 .checkbox {

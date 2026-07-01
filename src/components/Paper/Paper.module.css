@@ -27,9 +27,9 @@
   padding: var(--goobs-space-md);
   border-radius: var(--goobs-radius-lg);
   background-color: var(--goobs-light-surface);
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--goobs-black-a12);
   box-shadow: var(--paper-shadow, var(--goobs-shadow-light-sm));
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   font-family: inherit;
   transition: all 0.3s ease;
 }
@@ -38,9 +38,9 @@
    SACRED THEME — translucent black surface, gold border + glow.
    Mirrors the old isSacredTheme branch:
      padding   24px
-     bg        rgba(0, 0, 0, 0.7)
-     border    2px solid rgba(255, 215, 0, 0.3)   (alpha(SACRED_GOLD, 0.3))
-     color     rgba(255, 255, 255, 0.9)
+     bg        var(--goobs-black-a70)
+     border    2px solid var(--goobs-amber-a30)   (alpha(SACRED_GOLD, 0.3))
+     color     var(--goobs-white-a90)
      font      "Crimson Text", serif
      backdrop  blur(20px)
    The glow box-shadow is elevation-driven and supplied via --paper-shadow.

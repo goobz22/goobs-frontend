@@ -116,7 +116,7 @@
   .row[data-hover='true']:not([data-theme='dark']):not(
     [data-theme='sacred']
   ):hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--goobs-black-a05);
 }
 
 .row[data-hover='true'][data-theme='dark']:hover,

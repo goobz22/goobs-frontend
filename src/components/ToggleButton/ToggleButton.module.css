@@ -81,7 +81,7 @@
    LIGHT THEME — selected + hover (base class = light, not-selected)
    -------------------------------------------------------------------------- */
 .button[data-selected='true'] {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--goobs-blue-a10);
   color: var(--goobs-light-primary-strong);
   border-color: var(--goobs-light-primary-strong);
   font-weight: 600;
@@ -92,20 +92,20 @@
 }
 
 .button[data-selected='true']:hover:not(:disabled) {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-blue-a20);
 }
 
 /* --------------------------------------------------------------------------
    DARK THEME
    -------------------------------------------------------------------------- */
 .button[data-theme='dark'] {
-  background-color: rgba(75, 85, 99, 0.3);
+  background-color: var(--goobs-gray-a30);
   color: var(--goobs-dark-text-secondary);
   border-color: var(--goobs-dark-border);
 }
 
 .button[data-theme='dark'][data-selected='true'] {
-  background-color: rgba(59, 130, 246, 0.3);
+  background-color: var(--goobs-blue-a30);
   color: var(--goobs-dark-primary);
   border-color: var(--goobs-dark-primary);
 }
@@ -115,7 +115,7 @@
 }
 
 .button[data-theme='dark'][data-selected='true']:hover:not(:disabled) {
-  background-color: rgba(59, 130, 246, 0.4);
+  background-color: var(--goobs-blue-a40);
 }
 
 /* --------------------------------------------------------------------------

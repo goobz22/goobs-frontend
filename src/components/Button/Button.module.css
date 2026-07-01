@@ -163,7 +163,7 @@
 }
 
 .button[data-theme='light'].selected {
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: var(--goobs-blue-a08);
   border-color: var(--goobs-light-primary);
 }
 
@@ -235,12 +235,12 @@
 }
 
 .buttonGroup[data-theme='light'] {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px var(--goobs-black-a05);
   border-color: var(--goobs-light-border);
 }
 
 .buttonGroup[data-theme='dark'] {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px var(--goobs-black-a20);
   border-color: var(--goobs-dark-border);
 }
 

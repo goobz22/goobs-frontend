@@ -40,7 +40,7 @@
   --ct-border-glow: 0 0 20px var(--goobs-gold-a30);
 
   /* Editor-area tokens (sacred.editorArea) */
-  --ct-editor-bg: rgba(0, 0, 0, 0.8);
+  --ct-editor-bg: var(--goobs-black-a80);
   --ct-editor-border: var(--goobs-gold-a30);
   --ct-editor-border-focused: var(--goobs-gold-a70);
   --ct-editor-border-error: var(--goobs-danger);
@@ -84,7 +84,7 @@
 
 /* LIGHT theme override (theme/complextexteditor.ts light + TRANSITIONS.medium) */
 .container[data-theme='light'] {
-  --ct-container-bg: rgba(255, 255, 255, 0.95);
+  --ct-container-bg: var(--goobs-white-a95);
   --ct-container-radius: var(--goobs-radius-lg);
   --ct-font-family: var(--goobs-font-standard);
   --ct-transition: var(--goobs-transition-medium);
@@ -116,7 +116,7 @@
 
 /* DARK theme override (theme/complextexteditor.ts dark + TRANSITIONS.medium) */
 .container[data-theme='dark'] {
-  --ct-container-bg: rgba(31, 41, 55, 0.95);
+  --ct-container-bg: var(--goobs-slate-a95);
   --ct-container-radius: var(--goobs-radius-lg);
   --ct-font-family: var(--goobs-font-standard);
   --ct-transition: var(--goobs-transition-medium);
@@ -453,7 +453,7 @@
 }
 
 .toolbarContainer[data-theme='sacred'] {
-  --ct-toolbar-bg: rgba(0, 0, 0, 0.5);
+  --ct-toolbar-bg: var(--goobs-black-a50);
 }
 
 .toolbarRow,

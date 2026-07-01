@@ -66,9 +66,9 @@
 
   --menuitem-selected-bg: rgba(25, 118, 210, 0.08);
   --menuitem-selected-text: var(--goobs-light-primary);
-  --menuitem-disabled-text: rgba(0, 0, 0, 0.38);
-  --menuitem-divider-color: rgba(0, 0, 0, 0.12);
-  --menuitem-hover-bg: rgba(0, 0, 0, 0.04);
+  --menuitem-disabled-text: var(--goobs-black-a38);
+  --menuitem-divider-color: var(--goobs-black-a12);
+  --menuitem-hover-bg: var(--goobs-black-a04);
 }
 
 /* --------------------------------------------------------------------------
@@ -79,9 +79,9 @@
   --menuitem-text: var(--goobs-dark-text);
   --menuitem-font-family: var(--goobs-font-standard);
 
-  --menuitem-selected-bg: rgba(59, 130, 246, 0.2);
+  --menuitem-selected-bg: var(--goobs-blue-a20);
   --menuitem-selected-text: var(--goobs-dark-primary);
-  --menuitem-disabled-text: rgba(255, 255, 255, 0.3);
+  --menuitem-disabled-text: var(--goobs-white-a30);
   --menuitem-divider-color: rgba(255, 255, 255, 0.12);
   --menuitem-hover-bg: rgba(255, 255, 255, 0.05);
 }

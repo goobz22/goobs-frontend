@@ -5,8 +5,8 @@
    [data-theme] overrides. Values transcribed verbatim from the old inline-
    style/isSacredTheme ternaries in index.tsx so visual parity is exact:
 
-     SACRED_GOLD = #FFD700  => rgb(255, 215, 0)
-       alpha(SACRED_GOLD, 0.3) = rgba(255, 215, 0, 0.3)
+     SACRED_GOLD = #FFD700  => var(--goobs-amber-a100)
+       alpha(SACRED_GOLD, 0.3) = var(--goobs-amber-a30)
        alpha(SACRED_GOLD, 0.5) = rgba(255, 215, 0, 0.5)
        alpha(SACRED_GOLD, 0.7) = rgba(255, 215, 0, 0.7)
 
@@ -45,11 +45,11 @@
 }
 
 .backdrop[data-theme='light'] {
-  background-color: var(--dialog-backdrop-bg, rgba(0, 0, 0, 0.5));
+  background-color: var(--dialog-backdrop-bg, var(--goobs-black-a50));
 }
 
 .backdrop[data-theme='dark'] {
-  background-color: var(--dialog-backdrop-bg, rgba(0, 0, 0, 0.5));
+  background-color: var(--dialog-backdrop-bg, var(--goobs-black-a50));
 }
 
 /* --------------------------------------------------------------------------
@@ -74,13 +74,13 @@
 
 .dialog[data-theme='light'] {
   background-color: var(--dialog-bg, var(--goobs-light-surface));
-  border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
+  border: var(--dialog-border, 1px solid var(--goobs-black-a12));
   box-shadow: var(--dialog-shadow, var(--goobs-shadow-light-lg));
 }
 
 .dialog[data-theme='dark'] {
   background-color: var(--dialog-bg, var(--goobs-light-surface));
-  border: var(--dialog-border, 1px solid rgba(0, 0, 0, 0.12));
+  border: var(--dialog-border, 1px solid var(--goobs-black-a12));
   box-shadow: var(--dialog-shadow, var(--goobs-shadow-light-lg));
 }
 
@@ -97,12 +97,12 @@
 }
 
 .content[data-theme='light'] {
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   font-family: inherit;
 }
 
 .content[data-theme='dark'] {
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   font-family: inherit;
 }
 

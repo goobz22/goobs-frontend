@@ -177,9 +177,9 @@
   --sh-tab-inactive-text: var(--goobs-light-text-muted);
   --sh-menu-font: inherit;
   --sh-category-text: var(--goobs-light-text-muted);
-  --sh-category-divider: rgba(0, 0, 0, 0.05);
+  --sh-category-divider: var(--goobs-black-a05);
   --sh-empty-text: var(--goobs-light-text-muted);
-  --sh-history-divider: rgba(0, 0, 0, 0.1);
+  --sh-history-divider: var(--goobs-black-a10);
   --sh-clear-text: var(--goobs-light-primary);
 }
 
@@ -292,7 +292,7 @@
 .dropdown[data-theme='dark'] .item {
   --sh-item-text: var(--goobs-light-text);
   --sh-item-font: inherit;
-  --sh-item-selected-bg: rgba(59, 130, 246, 0.1);
+  --sh-item-selected-bg: var(--goobs-blue-a10);
   --sh-item-hover-bg: rgba(229, 231, 235, 0.5);
   --sh-item-hover-shadow: none;
 }

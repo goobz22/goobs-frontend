@@ -36,7 +36,7 @@
 }
 
 .root[data-theme='light'] {
-  --list-bg: rgba(255, 255, 255, 0.95);
+  --list-bg: var(--goobs-white-a95);
   --list-bg-hover: rgba(25, 118, 210, 0.06);
   --list-border: rgba(25, 118, 210, 0.2);
   --list-accent: #1976d2;
@@ -55,7 +55,7 @@
   --list-title: #e2e8f0;
   --list-subtitle: #94a3b8;
   --list-text: #cbd5e1;
-  --list-order-bg: rgba(96, 165, 250, 0.15);
+  --list-order-bg: var(--goobs-blue-light-a15);
   font-family: 'Inter', system-ui, sans-serif;
 }
 

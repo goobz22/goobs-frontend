@@ -77,7 +77,7 @@
 }
 
 .container[data-theme='sacred'] .header {
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: var(--goobs-black-a90);
   border-bottom: 1px solid var(--goobs-gold-a30);
   background-image: linear-gradient(
     to right,
@@ -163,7 +163,7 @@
    LINE NUMBERS — base = DARK
    -------------------------------------------------------------------------- */
 .lineNumbers {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--goobs-black-a50);
   border-right: 1px solid var(--goobs-dark-border);
   padding: 1rem 0.5rem;
   user-select: none;
@@ -171,12 +171,12 @@
 }
 
 .container[data-theme='light'] .lineNumbers {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--goobs-black-a05);
   border-right: 1px solid var(--goobs-light-border-strong);
 }
 
 .container[data-theme='sacred'] .lineNumbers {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--goobs-black-a50);
   border-right: 1px solid var(--goobs-gold-a20);
 }
 

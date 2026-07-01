@@ -36,7 +36,7 @@
   box-sizing: border-box;
 
   /* container base (light) */
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--goobs-white-a95);
   border-width: var(--alert-border-width, 1px);
   border-style: solid;
   /* severity blocks below set border-color; this is the theme fallback */
@@ -44,8 +44,8 @@
   border-radius: var(--alert-border-radius, var(--goobs-radius-xl));
   box-shadow: var(
     --alert-box-shadow,
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24)
+    0 1px 3px var(--goobs-black-a12),
+    0 1px 2px var(--goobs-black-a24)
   );
   backdrop-filter: var(--alert-backdrop-filter, blur(8px));
   font-family: var(--alert-font-family, var(--goobs-font-standard));
@@ -88,12 +88,12 @@
 }
 .root[data-severity='info'] {
   background-color: var(--alert-info-bg, rgba(239, 246, 255, 0.9));
-  border-color: var(--alert-info-border, rgba(96, 165, 250, 0.4));
+  border-color: var(--alert-info-border, var(--goobs-blue-light-a40));
   color: var(--alert-info-color, rgb(30, 64, 175));
 }
 .root[data-severity='success'] {
   background-color: var(--alert-success-bg, rgba(240, 253, 244, 0.9));
-  border-color: var(--alert-success-border, rgba(74, 222, 128, 0.4));
+  border-color: var(--alert-success-border, var(--goobs-green-a40));
   color: var(--alert-success-color, rgb(21, 128, 61));
 }
 
@@ -104,7 +104,7 @@
   transform: var(--alert-hover-transform, translateY(-1px));
   box-shadow: var(
     --alert-hover-box-shadow,
-    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 4px 12px var(--goobs-black-a12),
     0 2px 6px rgba(0, 0, 0, 0.08)
   );
 }
@@ -113,12 +113,12 @@
    DARK THEME
    ========================================================================== */
 .root[data-theme='dark'] {
-  background: rgba(31, 41, 55, 0.95);
+  background: var(--goobs-slate-a95);
   border-color: rgba(75, 85, 99, 0.8);
   box-shadow: var(
     --alert-box-shadow,
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    0 1px 4px rgba(0, 0, 0, 0.2)
+    0 2px 8px var(--goobs-black-a30),
+    0 1px 4px var(--goobs-black-a20)
   );
 }
 
@@ -134,12 +134,12 @@
 }
 .root[data-theme='dark'][data-severity='info'] {
   background-color: var(--alert-info-bg, rgba(30, 64, 175, 0.3));
-  border-color: var(--alert-info-border, rgba(96, 165, 250, 0.4));
+  border-color: var(--alert-info-border, var(--goobs-blue-light-a40));
   color: var(--alert-info-color, rgb(191, 219, 254));
 }
 .root[data-theme='dark'][data-severity='success'] {
   background-color: var(--alert-success-bg, rgba(20, 83, 45, 0.3));
-  border-color: var(--alert-success-border, rgba(74, 222, 128, 0.4));
+  border-color: var(--alert-success-border, var(--goobs-green-a40));
   color: var(--alert-success-color, rgb(187, 247, 208));
 }
 
@@ -147,8 +147,8 @@
   transform: var(--alert-hover-transform, translateY(-1px));
   box-shadow: var(
     --alert-hover-box-shadow,
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.3)
+    0 4px 12px var(--goobs-black-a40),
+    0 2px 6px var(--goobs-black-a30)
   );
 }
 
@@ -295,7 +295,7 @@
   height: var(--alert-close-height, 24px);
   border-radius: var(--alert-close-radius, var(--goobs-radius-md));
   border: var(--alert-close-border, none);
-  background: var(--alert-close-bg, rgba(0, 0, 0, 0.1));
+  background: var(--alert-close-bg, var(--goobs-black-a10));
   color: var(--alert-close-color, currentColor);
   font-size: var(--alert-close-font-size, var(--goobs-text-xl));
   cursor: pointer;
@@ -308,16 +308,16 @@
 }
 
 .root:hover .closeButton {
-  background: var(--alert-close-hover-bg, rgba(0, 0, 0, 0.2));
+  background: var(--alert-close-hover-bg, var(--goobs-black-a20));
   transform: var(--alert-close-hover-transform, scale(1.1));
 }
 
 /* CLOSE BUTTON — DARK */
 .root[data-theme='dark'] .closeButton {
-  background: var(--alert-close-bg, rgba(255, 255, 255, 0.1));
+  background: var(--alert-close-bg, var(--goobs-white-a10));
 }
 .root[data-theme='dark']:hover .closeButton {
-  background: var(--alert-close-hover-bg, rgba(255, 255, 255, 0.2));
+  background: var(--alert-close-hover-bg, var(--goobs-white-a20));
   transform: var(--alert-close-hover-transform, scale(1.1));
 }
 

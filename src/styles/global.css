@@ -346,6 +346,55 @@
   --goobs-control-height: 32px;
   --goobs-control-height-compact: 28px;
   --goobs-control-padding-x: 12px;
+
+  /* §4.1 color-alpha primitives — value-identical to the literals they replace */
+  --goobs-amber-a10: rgba(255, 215, 0, 0.1);
+  --goobs-amber-a100: rgba(255, 215, 0, 1);
+  --goobs-amber-a30: rgba(255, 215, 0, 0.3);
+  --goobs-amber-a60: rgba(255, 215, 0, 0.6);
+  --goobs-black-a04: rgba(0, 0, 0, 0.04);
+  --goobs-black-a05: rgba(0, 0, 0, 0.05);
+  --goobs-black-a10: rgba(0, 0, 0, 0.1);
+  --goobs-black-a12: rgba(0, 0, 0, 0.12);
+  --goobs-black-a15: rgba(0, 0, 0, 0.15);
+  --goobs-black-a20: rgba(0, 0, 0, 0.2);
+  --goobs-black-a23: rgba(0, 0, 0, 0.23);
+  --goobs-black-a24: rgba(0, 0, 0, 0.24);
+  --goobs-black-a30: rgba(0, 0, 0, 0.3);
+  --goobs-black-a38: rgba(0, 0, 0, 0.38);
+  --goobs-black-a40: rgba(0, 0, 0, 0.4);
+  --goobs-black-a50: rgba(0, 0, 0, 0.5);
+  --goobs-black-a60: rgba(0, 0, 0, 0.6);
+  --goobs-black-a70: rgba(0, 0, 0, 0.7);
+  --goobs-black-a80: rgba(0, 0, 0, 0.8);
+  --goobs-black-a87: rgba(0, 0, 0, 0.87);
+  --goobs-black-a90: rgba(0, 0, 0, 0.9);
+  --goobs-black-a98: rgba(0, 0, 0, 0.98);
+  --goobs-blue-a05: rgba(59, 130, 246, 0.05);
+  --goobs-blue-a08: rgba(59, 130, 246, 0.08);
+  --goobs-blue-a10: rgba(59, 130, 246, 0.1);
+  --goobs-blue-a12: rgba(59, 130, 246, 0.12);
+  --goobs-blue-a15: rgba(59, 130, 246, 0.15);
+  --goobs-blue-a20: rgba(59, 130, 246, 0.2);
+  --goobs-blue-a25: rgba(59, 130, 246, 0.25);
+  --goobs-blue-a30: rgba(59, 130, 246, 0.3);
+  --goobs-blue-a40: rgba(59, 130, 246, 0.4);
+  --goobs-blue-light-a10: rgba(96, 165, 250, 0.1);
+  --goobs-blue-light-a15: rgba(96, 165, 250, 0.15);
+  --goobs-blue-light-a20: rgba(96, 165, 250, 0.2);
+  --goobs-blue-light-a30: rgba(96, 165, 250, 0.3);
+  --goobs-blue-light-a40: rgba(96, 165, 250, 0.4);
+  --goobs-gray-a30: rgba(75, 85, 99, 0.3);
+  --goobs-gray-light-a30: rgba(156, 163, 175, 0.3);
+  --goobs-green-a40: rgba(74, 222, 128, 0.4);
+  --goobs-slate-a95: rgba(31, 41, 55, 0.95);
+  --goobs-white-a10: rgba(255, 255, 255, 0.1);
+  --goobs-white-a15: rgba(255, 255, 255, 0.15);
+  --goobs-white-a20: rgba(255, 255, 255, 0.2);
+  --goobs-white-a30: rgba(255, 255, 255, 0.3);
+  --goobs-white-a50: rgba(255, 255, 255, 0.5);
+  --goobs-white-a90: rgba(255, 255, 255, 0.9);
+  --goobs-white-a95: rgba(255, 255, 255, 0.95);
 }
 
 /* ==========================================================================

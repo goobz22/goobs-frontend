@@ -36,7 +36,7 @@
   font-family: 'Cinzel', serif;
   font-size: clamp(0.65em, 1.5vw, 0.7em);
   font-weight: 700;
-  color: rgba(255, 215, 0, 0.6);
+  color: var(--goobs-amber-a60);
   text-transform: uppercase;
   letter-spacing: 1px;
 }

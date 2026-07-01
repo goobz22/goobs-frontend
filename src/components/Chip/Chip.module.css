@@ -80,16 +80,16 @@
    Light theme override
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
-  --chip-bg: rgba(59, 130, 246, 0.1);
-  --chip-border: rgba(59, 130, 246, 0.25);
+  --chip-bg: var(--goobs-blue-a10);
+  --chip-border: var(--goobs-blue-a25);
   --chip-text: var(--goobs-light-primary);
-  --chip-hover-bg: rgba(59, 130, 246, 0.15);
-  --chip-hover-border: rgba(59, 130, 246, 0.4);
+  --chip-hover-bg: var(--goobs-blue-a15);
+  --chip-hover-border: var(--goobs-blue-a40);
   --chip-active-bg: rgba(59, 130, 246, 0.18);
   --chip-active-border: rgba(59, 130, 246, 0.5);
   --chip-font: var(--goobs-font-standard);
   --chip-shadow: none;
-  --chip-hover-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
+  --chip-hover-shadow: 0 1px 4px var(--goobs-blue-a12);
 }
 
 /* --------------------------------------------------------------------------
@@ -97,14 +97,14 @@
    -------------------------------------------------------------------------- */
 .root[data-theme='dark'] {
   --chip-bg: rgba(59, 130, 246, 0.18);
-  --chip-border: rgba(59, 130, 246, 0.4);
+  --chip-border: var(--goobs-blue-a40);
   --chip-text: rgb(147, 197, 253);
-  --chip-hover-bg: rgba(59, 130, 246, 0.25);
+  --chip-hover-bg: var(--goobs-blue-a25);
   --chip-hover-border: rgba(59, 130, 246, 0.55);
-  --chip-active-bg: rgba(59, 130, 246, 0.3);
+  --chip-active-bg: var(--goobs-blue-a30);
   --chip-active-border: rgba(59, 130, 246, 0.6);
   --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --chip-hover-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --chip-hover-shadow: 0 2px 6px var(--goobs-black-a30);
 }
 
 /* --------------------------------------------------------------------------

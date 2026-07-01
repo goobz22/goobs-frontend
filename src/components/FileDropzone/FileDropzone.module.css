@@ -9,7 +9,7 @@
 .dropzone {
   --drop-accent: #d4af37;
   --drop-accent-strong: #ffd700;
-  --drop-bg: rgba(0, 0, 0, 0.3);
+  --drop-bg: var(--goobs-black-a30);
   --drop-border: rgba(212, 175, 55, 0.3);
   --drop-text: rgba(212, 175, 55, 0.9);
   --drop-hint: rgba(212, 175, 55, 0.55);

@@ -208,12 +208,12 @@
 
 [data-component='FieldShell'][data-theme='light'] .button:hover:not(:disabled) {
   border-color: var(--goobs-light-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
 [data-component='FieldShell'][data-theme='light'] .button.open {
   border-color: var(--goobs-light-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
 [data-component='FieldShell'][data-theme='light'] .button:disabled {
@@ -279,12 +279,12 @@
 
 [data-component='FieldShell'][data-theme='dark'] .button:hover:not(:disabled) {
   border-color: var(--goobs-dark-primary-strong);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
 
 [data-component='FieldShell'][data-theme='dark'] .button.open {
   border-color: var(--goobs-dark-primary-strong);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
 
 [data-component='FieldShell'][data-theme='dark'] .button:disabled {

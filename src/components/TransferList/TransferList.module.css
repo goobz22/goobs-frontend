@@ -128,13 +128,13 @@
   background-color: var(--goobs-sacred-control-bg);
   animation: transferListSacredGlowPulse 2s infinite alternate;
   scrollbar-width: thin;
-  scrollbar-color: var(--goobs-gold-a50) rgba(0, 0, 0, 0.3);
+  scrollbar-color: var(--goobs-gold-a50) var(--goobs-black-a30);
 }
 
 .container[data-theme='light'] .list {
   border: 1px solid var(--goobs-light-border);
   background-color: var(--goobs-light-surface);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 2px var(--goobs-black-a05);
   animation: none;
   scrollbar-width: auto;
   scrollbar-color: auto;

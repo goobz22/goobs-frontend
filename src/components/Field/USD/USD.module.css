@@ -12,9 +12,9 @@
   align-items: center;
   height: var(--usd-height, 40px);
   width: 100%;
-  border: 1px solid var(--field-border-default, rgba(255, 215, 0, 0.3));
+  border: 1px solid var(--field-border-default, var(--goobs-amber-a30));
   border-radius: var(--usd-radius, 8px);
-  background-color: var(--field-bg, rgba(0, 0, 0, 0.6));
+  background-color: var(--field-bg, var(--goobs-black-a60));
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -99,7 +99,7 @@
 /* Sacred theme adds a gold glow to the dollar sign. */
 .inputWrapper[data-theme='sacred'] .dollarSign {
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
-  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.3));
+  filter: drop-shadow(0 0 3px var(--goobs-amber-a30));
 }
 
 .sacredGlyph {

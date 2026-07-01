@@ -123,7 +123,7 @@
 
   --pb-toolbar-bg: transparent;
 
-  --pb-glyph-color: rgba(156, 163, 175, 0.3);
+  --pb-glyph-color: var(--goobs-gray-light-a30);
   --pb-glyph-animation: none;
 }
 
@@ -185,7 +185,7 @@
 }
 
 .breadcrumb[data-theme='dark'] {
-  --pb-bc-text: rgba(255, 255, 255, 0.9);
+  --pb-bc-text: var(--goobs-white-a90);
   --pb-bc-text-hover: rgba(255, 255, 255, 1);
   --pb-bc-separator: rgba(156, 163, 175, 0.6);
   --pb-bc-border: rgba(75, 85, 99, 0.5);
@@ -291,7 +291,7 @@
   --pb-notasks-text: var(--goobs-gold-a50);
 
   /* Sacred task-card palette. */
-  --pb-card-bg: rgba(0, 0, 0, 0.9);
+  --pb-card-bg: var(--goobs-black-a90);
   --pb-card-bg-image: linear-gradient(
     135deg,
     var(--goobs-gold-a05) 0%,
@@ -304,7 +304,7 @@
   --pb-card-title: var(--goobs-gold);
   --pb-card-desc: var(--goobs-gold-a80);
   --pb-card-input-border: 1px solid var(--goobs-gold-a30);
-  --pb-card-input-bg: rgba(0, 0, 0, 0.5);
+  --pb-card-input-bg: var(--goobs-black-a50);
   --pb-card-input-text: var(--goobs-gold);
   --pb-card-edit-bg: var(--goobs-gold-a20);
   --pb-card-edit-text: var(--goobs-gold);
@@ -330,7 +330,7 @@
   --pb-column-height: 70vh;
 
   /* Sacred scrollbar palette (hardcoded default). */
-  --pb-sb-track: rgba(0, 0, 0, 0.3);
+  --pb-sb-track: var(--goobs-black-a30);
   --pb-sb-thumb: linear-gradient(
     45deg,
     var(--goobs-gold-a40),
@@ -343,7 +343,7 @@
   );
   --pb-sb-thumb-border: 1px solid var(--goobs-gold-a30);
   --pb-sb-thumb-hover-shadow: 0 0 8px var(--goobs-gold-a40);
-  --pb-sb-col-track: rgba(0, 0, 0, 0.2);
+  --pb-sb-col-track: var(--goobs-black-a20);
   --pb-sb-col-thumb: linear-gradient(
     180deg,
     var(--goobs-gold-a30),
@@ -370,23 +370,23 @@
 .board[data-theme='light'] {
   --pb-col-bg: var(--goobs-light-surface);
   --pb-col-border: 1px solid var(--goobs-light-border);
-  --pb-col-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --pb-col-shadow: 0 2px 8px var(--goobs-black-a10);
   --pb-col-dragover-border: 2px solid var(--goobs-light-primary);
-  --pb-col-dragover-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  --pb-col-dragover-shadow: 0 4px 15px var(--goobs-blue-a20);
   --pb-col-header-border: var(--goobs-light-border);
   --pb-col-header-bg: transparent;
   --pb-col-title: var(--goobs-light-text);
   --pb-col-desc: var(--goobs-light-text-muted);
   --pb-placeholder-border: var(--goobs-light-primary);
-  --pb-placeholder-bg: rgba(59, 130, 246, 0.1);
+  --pb-placeholder-bg: var(--goobs-blue-a10);
   --pb-placeholder-text: var(--goobs-light-text-muted);
   --pb-notasks-text: var(--goobs-light-text-disabled);
 
   --pb-card-bg: var(--goobs-light-surface);
   --pb-card-bg-image: none;
   --pb-card-border: 1px solid var(--goobs-light-border);
-  --pb-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --pb-card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --pb-card-shadow: 0 2px 8px var(--goobs-black-a10);
+  --pb-card-shadow-hover: 0 8px 25px var(--goobs-black-a15);
   --pb-card-accent: var(--goobs-light-primary);
   --pb-card-title: var(--goobs-light-text);
   --pb-card-desc: var(--goobs-light-text-muted);
@@ -425,23 +425,23 @@
 .board[data-theme='dark'] {
   --pb-col-bg: var(--goobs-dark-surface);
   --pb-col-border: 1px solid var(--goobs-dark-border);
-  --pb-col-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --pb-col-shadow: 0 4px 12px var(--goobs-black-a30);
   --pb-col-dragover-border: 2px solid var(--goobs-dark-primary);
-  --pb-col-dragover-shadow: 0 6px 20px rgba(96, 165, 250, 0.2);
+  --pb-col-dragover-shadow: 0 6px 20px var(--goobs-blue-light-a20);
   --pb-col-header-border: var(--goobs-dark-border);
   --pb-col-header-bg: transparent;
   --pb-col-title: var(--goobs-dark-text);
   --pb-col-desc: var(--goobs-dark-text-muted);
   --pb-placeholder-border: var(--goobs-dark-primary);
-  --pb-placeholder-bg: rgba(96, 165, 250, 0.1);
+  --pb-placeholder-bg: var(--goobs-blue-light-a10);
   --pb-placeholder-text: var(--goobs-dark-text-muted);
   --pb-notasks-text: var(--goobs-dark-text-muted);
 
   --pb-card-bg: var(--goobs-dark-surface-raised);
   --pb-card-bg-image: none;
   --pb-card-border: 1px solid var(--goobs-dark-border-strong);
-  --pb-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --pb-card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+  --pb-card-shadow: 0 2px 8px var(--goobs-black-a20);
+  --pb-card-shadow-hover: 0 8px 25px var(--goobs-black-a40);
   --pb-card-accent: var(--goobs-dark-primary);
   --pb-card-title: var(--goobs-dark-text);
   --pb-card-desc: var(--goobs-dark-text-secondary);

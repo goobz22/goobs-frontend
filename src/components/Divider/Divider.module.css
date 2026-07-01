@@ -9,7 +9,7 @@
    The gradient is built from the SACRED_GOLD token at 0.3 alpha (enabled)
    and 0.15 alpha (disabled), matching the prior inline implementation
    exactly:
-     enabled  -> rgba(255, 215, 0, 0.3)
+     enabled  -> var(--goobs-amber-a30)
      disabled -> rgba(255, 215, 0, 0.15)
    ========================================================================== */
 
@@ -22,7 +22,7 @@
   --divider-gradient-color: var(--goobs-gold-a30);
   --divider-line-color: var(--goobs-gold-a30);
   --divider-content-color: var(--goobs-gold);
-  --divider-content-bg: rgba(0, 0, 0, 0.6);
+  --divider-content-bg: var(--goobs-black-a60);
 
   /* A horizontal divider is a block-level rule; declaring display explicitly
      (rather than relying on the UA default) plus align-self:stretch guarantees

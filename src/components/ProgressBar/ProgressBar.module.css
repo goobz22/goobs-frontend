@@ -35,7 +35,7 @@
   border-radius: var(--goobs-radius-xl);
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.05);
+    0 1px 2px var(--goobs-black-a05);
   backdrop-filter: blur(8px);
 }
 
@@ -44,8 +44,8 @@
   border: 1px solid rgba(75, 85, 99, 0.6);
   border-radius: var(--goobs-radius-xl);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    0 1px 2px rgba(0, 0, 0, 0.2);
+    inset 0 2px 4px var(--goobs-black-a30),
+    0 1px 2px var(--goobs-black-a20);
   backdrop-filter: blur(8px);
 }
 
@@ -96,17 +96,17 @@
   /* light defaults */
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #2563eb 100%);
   box-shadow:
-    0 4px 12px rgba(59, 130, 246, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+    0 4px 12px var(--goobs-blue-a40),
+    inset 0 1px 0 var(--goobs-white-a20);
+  filter: drop-shadow(0 2px 4px var(--goobs-blue-a30));
 }
 
 .bar[data-theme='dark'] {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%);
   box-shadow:
-    0 4px 12px rgba(96, 165, 250, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3));
+    0 4px 12px var(--goobs-blue-light-a40),
+    inset 0 1px 0 var(--goobs-white-a10);
+  filter: drop-shadow(0 2px 4px var(--goobs-blue-light-a30));
 }
 
 .bar[data-theme='sacred'] {
@@ -121,7 +121,7 @@
   box-shadow:
     0 0 16px var(--goobs-gold-a80),
     0 4px 12px var(--goobs-gold-a40),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 1px 0 var(--goobs-white-a30);
   filter: drop-shadow(0 0 8px var(--goobs-gold-a90));
   transition: var(--goobs-transition-premium);
 }
@@ -144,30 +144,30 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(59, 130, 246, 0.3) 25%,
+    var(--goobs-blue-a30) 25%,
     #3b82f6 50%,
-    rgba(59, 130, 246, 0.3) 75%,
+    var(--goobs-blue-a30) 75%,
     transparent 100%
   );
   box-shadow:
     0 4px 12px rgba(59, 130, 246, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4));
+    inset 0 1px 0 var(--goobs-white-a20);
+  filter: drop-shadow(0 2px 4px var(--goobs-blue-a40));
 }
 
 .bar[data-variant='indeterminate'][data-theme='dark'] {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(96, 165, 250, 0.3) 25%,
+    var(--goobs-blue-light-a30) 25%,
     #60a5fa 50%,
-    rgba(96, 165, 250, 0.3) 75%,
+    var(--goobs-blue-light-a30) 75%,
     transparent 100%
   );
   box-shadow:
     0 4px 12px rgba(96, 165, 250, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.4));
+    inset 0 1px 0 var(--goobs-white-a10);
+  filter: drop-shadow(0 2px 4px var(--goobs-blue-light-a40));
 }
 
 .bar[data-variant='indeterminate'][data-theme='sacred'] {
@@ -184,7 +184,7 @@
   box-shadow:
     0 0 20px var(--goobs-gold-a90),
     0 4px 12px var(--goobs-gold-a50),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 1px 0 var(--goobs-white-a30);
   filter: drop-shadow(0 0 12px var(--goobs-gold));
 }
 
@@ -204,11 +204,11 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.15) 25%,
+      var(--goobs-white-a15) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.15) 75%,
+      var(--goobs-white-a15) 50%,
+      var(--goobs-white-a15) 75%,
       transparent 75%,
       transparent
     ),
@@ -220,11 +220,11 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.1) 25%,
+      var(--goobs-white-a10) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.1) 75%,
+      var(--goobs-white-a10) 50%,
+      var(--goobs-white-a10) 75%,
       transparent 75%,
       transparent
     ),
@@ -236,11 +236,11 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.2) 25%,
+      var(--goobs-white-a20) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.2) 75%,
+      var(--goobs-white-a20) 50%,
+      var(--goobs-white-a20) 75%,
       transparent 75%,
       transparent
     ),
@@ -262,20 +262,20 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.15) 25%,
+      var(--goobs-white-a15) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.15) 75%,
+      var(--goobs-white-a15) 50%,
+      var(--goobs-white-a15) 75%,
       transparent 75%,
       transparent
     ),
     linear-gradient(
       90deg,
       transparent 0%,
-      rgba(59, 130, 246, 0.3) 25%,
+      var(--goobs-blue-a30) 25%,
       #3b82f6 50%,
-      rgba(59, 130, 246, 0.3) 75%,
+      var(--goobs-blue-a30) 75%,
       transparent 100%
     );
   background-size: 20px 20px;
@@ -288,20 +288,20 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.1) 25%,
+      var(--goobs-white-a10) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.1) 75%,
+      var(--goobs-white-a10) 50%,
+      var(--goobs-white-a10) 75%,
       transparent 75%,
       transparent
     ),
     linear-gradient(
       90deg,
       transparent 0%,
-      rgba(96, 165, 250, 0.3) 25%,
+      var(--goobs-blue-light-a30) 25%,
       #60a5fa 50%,
-      rgba(96, 165, 250, 0.3) 75%,
+      var(--goobs-blue-light-a30) 75%,
       transparent 100%
     );
   background-size: 20px 20px;
@@ -311,11 +311,11 @@
   background-image:
     linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.2) 25%,
+      var(--goobs-white-a20) 25%,
       transparent 25%,
       transparent 50%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.2) 75%,
+      var(--goobs-white-a20) 50%,
+      var(--goobs-white-a20) 75%,
       transparent 75%,
       transparent
     ),
@@ -405,7 +405,7 @@
   font-weight: var(--goobs-weight-bold);
   text-shadow:
     0 0 8px var(--goobs-gold-a80),
-    0 2px 4px rgba(0, 0, 0, 0.5);
+    0 2px 4px var(--goobs-black-a50);
 }
 
 /* --------------------------------------------------------------------------

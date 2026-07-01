@@ -33,7 +33,7 @@
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
   --ma-accent: var(--goobs-light-primary);
-  --ma-toggle-bg: rgba(0, 0, 0, 0.04);
+  --ma-toggle-bg: var(--goobs-black-a04);
   --ma-toggle-color: var(--goobs-light-text);
   --ma-toggle-font: inherit;
   --ma-panel-bg: var(--goobs-light-surface);

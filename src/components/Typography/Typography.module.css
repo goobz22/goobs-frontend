@@ -86,7 +86,7 @@
 
 /* --------------------------------------------------------------------------
    THEME OVERRIDE — sacred (gold text)
-   parity: finalColor default = isSacred ? '#FFD700' : 'rgba(255,255,255,0.9)'.
+   parity: finalColor default = isSacred ? '#FFD700' : 'var(--goobs-white-a90)'.
    Only changes the FALLBACK; an explicit caller/merri color (the var value)
    still wins because it's the var's first argument.
    -------------------------------------------------------------------------- */
@@ -96,7 +96,7 @@
 
 /* --------------------------------------------------------------------------
    THEME OVERRIDE — light (dark text on light surface)
-   The base .root color falls back to --goobs-sacred-text (rgba(255,255,255,0.9),
+   The base .root color falls back to --goobs-sacred-text (var(--goobs-white-a90),
    near-white), which is invisible on a light surface. Remap the FALLBACK to the
    light role token so un-themed/light text reads as dark-on-light. An explicit
    caller color still wins (it's the var's first argument), exactly as the

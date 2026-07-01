@@ -52,8 +52,8 @@
   color: var(--badge-color, white);
   box-shadow: var(
     --badge-box-shadow,
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24)
+    0 1px 3px var(--goobs-black-a12),
+    0 1px 2px var(--goobs-black-a24)
   );
   backdrop-filter: var(--badge-backdrop-filter, none);
   border: var(--badge-border, none);
@@ -63,7 +63,7 @@
 .badge[data-theme='dark'] {
   background-color: var(--badge-background-color, var(--goobs-danger));
   color: var(--badge-color, white);
-  box-shadow: var(--badge-box-shadow, 0px 2px 8px rgba(0, 0, 0, 0.4));
+  box-shadow: var(--badge-box-shadow, 0px 2px 8px var(--goobs-black-a40));
   backdrop-filter: var(--badge-backdrop-filter, blur(4px));
   border: var(--badge-border, none);
   text-shadow: var(--badge-text-shadow, none);

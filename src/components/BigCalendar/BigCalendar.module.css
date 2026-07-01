@@ -14,7 +14,7 @@
      medium  = all 200ms cubic-bezier(0.4, 0, 0.2, 1)   (light / dark)
      premium = all 400ms cubic-bezier(0.4, 0, 0.2, 1)   (sacred)
    Sacred shadows (theme/shared.ts SHADOWS.sacred):
-     small  = 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,215,0,0.1)
+     small  = 0 0 20px var(--goobs-amber-a30), 0 0 40px var(--goobs-amber-a10)
      medium = 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)
    ========================================================================== */
 
@@ -35,7 +35,7 @@
   --bc-header-bg: var(--goobs-sacred-surface);
 
   --bc-cell-border: var(--goobs-gold-a20);
-  --bc-cell-bg: rgba(0, 0, 0, 0.6);
+  --bc-cell-bg: var(--goobs-black-a60);
   --bc-cell-hover-bg: var(--goobs-gold-a10);
   --bc-cell-today-bg: var(--goobs-gold-a20);
   --bc-cell-other-month-bg: rgba(10, 10, 10, 0.4);
@@ -124,11 +124,11 @@
   --bc-sacred-border-glow: none;
   --bc-calendar-bg-image: none;
 
-  --bc-cell-selected-bg: rgba(59, 130, 246, 0.08);
+  --bc-cell-selected-bg: var(--goobs-blue-a08);
   --bc-hour-selected-bg: rgba(59, 130, 246, 0.06);
-  --bc-hour-selected-outline: 1px solid rgba(59, 130, 246, 0.3);
+  --bc-hour-selected-outline: 1px solid var(--goobs-blue-a30);
   --bc-week-col-selected-bg: rgba(59, 130, 246, 0.04);
-  --bc-current-hour-bg: rgba(59, 130, 246, 0.1);
+  --bc-current-hour-bg: var(--goobs-blue-a10);
   --bc-today-date-color: inherit;
 
   box-shadow: none;
@@ -148,7 +148,7 @@
   --bc-cell-border: var(--goobs-dark-border);
   --bc-cell-bg: rgba(17, 24, 39, 1);
   --bc-cell-hover-bg: var(--goobs-dark-surface);
-  --bc-cell-today-bg: rgba(59, 130, 246, 0.2);
+  --bc-cell-today-bg: var(--goobs-blue-a20);
   --bc-cell-other-month-bg: rgba(31, 41, 55, 0.3);
   --bc-cell-other-month-color: var(--goobs-dark-text-muted);
   --bc-cell-padding: var(--goobs-space-xs);
@@ -167,11 +167,11 @@
   --bc-sacred-border-glow: none;
   --bc-calendar-bg-image: none;
 
-  --bc-cell-selected-bg: rgba(59, 130, 246, 0.12);
-  --bc-hour-selected-bg: rgba(59, 130, 246, 0.1);
-  --bc-hour-selected-outline: 1px solid rgba(59, 130, 246, 0.3);
+  --bc-cell-selected-bg: var(--goobs-blue-a12);
+  --bc-hour-selected-bg: var(--goobs-blue-a10);
+  --bc-hour-selected-outline: 1px solid var(--goobs-blue-a30);
   --bc-week-col-selected-bg: rgba(59, 130, 246, 0.06);
-  --bc-current-hour-bg: rgba(59, 130, 246, 0.1);
+  --bc-current-hour-bg: var(--goobs-blue-a10);
   --bc-today-date-color: inherit;
 
   box-shadow: none;

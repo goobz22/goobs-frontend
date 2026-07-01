@@ -6,7 +6,7 @@
    transcribed verbatim from the old JS theme — see theme/breadcrumb.ts and
    theme/shared.ts (TRANSITIONS.premium = all 400ms cubic-bezier(0.4,0,0.2,1);
    TRANSITIONS.medium = all 200ms cubic-bezier(0.4,0,0.2,1); SHADOWS.sacred.small
-   = 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,215,0,0.1)).
+   = 0 0 20px var(--goobs-amber-a30), 0 0 40px var(--goobs-amber-a10)).
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -125,7 +125,7 @@
 
 /* LIGHT item */
 .container[data-theme='light'] .item {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--goobs-black-a60);
   font-family: var(--goobs-font-standard);
   font-weight: var(--goobs-weight-regular);
   padding: var(--goobs-space-2xs) var(--goobs-space-xs);
@@ -144,7 +144,7 @@
 }
 
 .container[data-theme='light'] .item.activeItem {
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   font-weight: var(--goobs-weight-medium);
   cursor: default;
   text-shadow: none;
@@ -165,14 +165,14 @@
 
 .container[data-theme='dark'] .item:hover:not(.activeItem) {
   color: var(--goobs-dark-primary);
-  background-color: rgba(96, 165, 250, 0.1);
+  background-color: var(--goobs-blue-light-a10);
   transform: none;
   text-shadow: none;
   box-shadow: none;
 }
 
 .container[data-theme='dark'] .item.activeItem {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--goobs-white-a95);
   font-weight: var(--goobs-weight-medium);
   cursor: default;
   text-shadow: none;
@@ -199,14 +199,14 @@
 }
 
 .container[data-theme='light'] .separator {
-  color: rgba(0, 0, 0, 0.38);
+  color: var(--goobs-black-a38);
   font-size: var(--goobs-text-md);
   margin: 0 var(--goobs-space-xs);
   filter: none;
 }
 
 .container[data-theme='dark'] .separator {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--goobs-white-a50);
   font-size: var(--goobs-text-md);
   margin: 0 var(--goobs-space-xs);
   filter: none;
@@ -224,14 +224,14 @@
 }
 
 .container[data-theme='light'] .ellipsis {
-  color: rgba(0, 0, 0, 0.38);
+  color: var(--goobs-black-a38);
   font-size: var(--goobs-text-md);
   padding: var(--goobs-space-2xs) var(--goobs-space-xs);
   font-family: var(--goobs-font-standard);
 }
 
 .container[data-theme='dark'] .ellipsis {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--goobs-white-a50);
   font-size: var(--goobs-text-md);
   padding: var(--goobs-space-2xs) var(--goobs-space-xs);
   font-family: var(--goobs-font-standard);

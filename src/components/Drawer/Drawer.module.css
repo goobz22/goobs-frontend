@@ -21,7 +21,7 @@
    -------------------------------------------------------------------------- */
 .paper {
   /* Theme tokens — light defaults (override per [data-theme]) */
-  --drawer-background: rgba(255, 255, 255, 0.95);
+  --drawer-background: var(--goobs-white-a95);
   --drawer-border-color: rgba(226, 232, 240, 0.8);
   --drawer-border-width: 1px;
   --drawer-box-shadow: var(--goobs-shadow-light-lg);
@@ -77,7 +77,7 @@
    THEME OVERRIDES
    -------------------------------------------------------------------------- */
 .paper[data-theme='dark'] {
-  --drawer-background: rgba(31, 41, 55, 0.95);
+  --drawer-background: var(--goobs-slate-a95);
   --drawer-border-color: rgba(75, 85, 99, 0.8);
   --drawer-border-width: 1px;
   --drawer-box-shadow: var(--goobs-shadow-dark-lg);
@@ -203,7 +203,7 @@
    BACKDROP — fixed full-bleed scrim behind a temporary drawer.
    -------------------------------------------------------------------------- */
 .backdrop {
-  --drawer-backdrop-background: rgba(0, 0, 0, 0.5);
+  --drawer-backdrop-background: var(--goobs-black-a50);
   --drawer-backdrop-filter: blur(2px);
   --drawer-backdrop-z-index: 40;
 
@@ -215,11 +215,11 @@
   z-index: var(--drawer-backdrop-z-index);
 }
 .backdrop[data-theme='dark'] {
-  --drawer-backdrop-background: rgba(0, 0, 0, 0.7);
+  --drawer-backdrop-background: var(--goobs-black-a70);
   --drawer-backdrop-filter: blur(2px);
 }
 .backdrop[data-theme='sacred'] {
-  --drawer-backdrop-background: rgba(0, 0, 0, 0.8);
+  --drawer-backdrop-background: var(--goobs-black-a80);
   --drawer-backdrop-filter: blur(4px);
 }
 
@@ -248,7 +248,7 @@
   --drawer-scrollbar-thumb-hover: var(--goobs-dark-text-muted);
 }
 .content[data-theme='sacred'] {
-  --drawer-scrollbar-track: rgba(0, 0, 0, 0.3);
+  --drawer-scrollbar-track: var(--goobs-black-a30);
   --drawer-scrollbar-thumb: var(--goobs-gold-a40);
   --drawer-scrollbar-thumb-hover: var(--goobs-gold-a60);
 }

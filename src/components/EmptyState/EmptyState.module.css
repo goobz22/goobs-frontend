@@ -10,7 +10,7 @@
 .emptyState {
   /* SACRED is the hardcoded default (matches the Card root recipe);
      light / dark are [data-theme] overrides below. */
-  --empty-bg: rgba(0, 0, 0, 0.4);
+  --empty-bg: var(--goobs-black-a40);
   --empty-accent: #ffd700;
   --empty-text: rgba(255, 255, 255, 0.7);
   --empty-title: #ffd700;
@@ -41,7 +41,7 @@
 }
 
 .emptyState[data-theme='light'] {
-  --empty-bg: rgba(255, 255, 255, 0.95);
+  --empty-bg: var(--goobs-white-a95);
   --empty-accent: #1976d2;
   --empty-text: #374151;
   --empty-title: #1f2937;

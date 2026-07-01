@@ -10,7 +10,7 @@
   height: 40px;
   background: transparent;
   outline: none;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--goobs-black-a20);
   border-radius: var(--goobs-radius-lg);
   padding: var(--goobs-space-xs) var(--goobs-space-md);
   font-size: var(--goobs-text-xl);

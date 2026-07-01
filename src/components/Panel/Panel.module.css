@@ -17,14 +17,14 @@
    -------------------------------------------------------------------------- */
 .root {
   /* Sacred palette (hardcoded default) */
-  --panel-bg: rgba(0, 0, 0, 0.98);
-  --panel-border: rgba(255, 215, 0, 0.3);
+  --panel-bg: var(--goobs-black-a98);
+  --panel-border: var(--goobs-amber-a30);
   --panel-accent: #ffd700;
   --panel-title: #ffd700;
   --panel-subtitle: rgba(255, 215, 0, 0.7);
   --panel-text: rgba(255, 255, 255, 0.85);
-  --panel-header-bg: rgba(0, 0, 0, 0.5);
-  --panel-footer-bg: rgba(0, 0, 0, 0.5);
+  --panel-header-bg: var(--goobs-black-a50);
+  --panel-footer-bg: var(--goobs-black-a50);
 
   --panel-pad-x: clamp(16px, 4vw, 32px);
   --panel-pad-y: clamp(12px, 3vw, 24px);

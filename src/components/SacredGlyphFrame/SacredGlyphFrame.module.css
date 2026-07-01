@@ -21,7 +21,7 @@
   display: block;
   border: 1px solid color-mix(in srgb, var(--sgf-gold) 40%, transparent);
   border-radius: var(--sgf-radius);
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
   box-sizing: border-box;
 }
 
@@ -37,7 +37,7 @@
   .glow {
     animation: none;
     box-shadow:
-      0 0 20px rgba(255, 215, 0, 0.3),
+      0 0 20px var(--goobs-amber-a30),
       0 0 40px rgba(255, 215, 0, 0.2);
   }
 }

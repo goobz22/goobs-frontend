@@ -14,7 +14,7 @@
    onMouseEnter/onMouseLeave handlers are gone.
 
    Color values are transcribed 1:1 from the previous inline styles:
-     SACRED_GOLD = #FFD700 -> rgb(255, 215, 0). alpha(SACRED_GOLD, x) ===
+     SACRED_GOLD = #FFD700 -> var(--goobs-amber-a100). alpha(SACRED_GOLD, x) ===
      rgba(255, 215, 0, x).
    ========================================================================== */
 
@@ -56,37 +56,37 @@
 
 /* --------------------------------------------------------------------------
    NAV BUTTON (first / prev / next / last) — MUI default (non-sacred branch:
-   border rgba(0,0,0,0.23), color rgba(0,0,0,0.87), hover bg rgba(0,0,0,0.04)).
+   border var(--goobs-black-a23), color var(--goobs-black-a87), hover bg var(--goobs-black-a04)).
    This is the default for a no-theme callsite, exactly as the old
    `isSacredTheme === false` branch rendered.
    -------------------------------------------------------------------------- */
 .navButton {
-  border: 1px solid rgba(0, 0, 0, 0.23);
+  border: 1px solid var(--goobs-black-a23);
   background-color: transparent;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   cursor: pointer;
   font-family: inherit;
   opacity: 1;
 }
 
 .navButton:hover:not(:disabled) {
-  border-color: rgba(0, 0, 0, 0.23);
-  background-color: rgba(0, 0, 0, 0.04);
+  border-color: var(--goobs-black-a23);
+  background-color: var(--goobs-black-a04);
 }
 
 .navButton:disabled {
   /* disabled bg/color/opacity are theme-independent in the original. */
-  border-color: rgba(0, 0, 0, 0.23);
-  background-color: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.3);
+  border-color: var(--goobs-black-a23);
+  background-color: var(--goobs-black-a20);
+  color: var(--goobs-white-a30);
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 /* NAV BUTTON — SACRED override (was the isSacredTheme branch):
    border rgba(255,215,0, disabled?0.2 : hover?0.6 : 0.3)
-   bg:     transparent | hover rgba(255,215,0,0.1) | disabled rgba(0,0,0,0.2)
-   color:  #FFD700 | disabled rgba(255,255,255,0.3) */
+   bg:     transparent | hover var(--goobs-amber-a10) | disabled var(--goobs-black-a20)
+   color:  #FFD700 | disabled var(--goobs-white-a30) */
 .root[data-theme='sacred'] .navButton {
   border: 1px solid var(--goobs-gold-a30);
   background-color: transparent;
@@ -101,20 +101,20 @@
 
 .root[data-theme='sacred'] .navButton:disabled {
   border-color: var(--goobs-gold-a20);
-  background-color: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.3);
+  background-color: var(--goobs-black-a20);
+  color: var(--goobs-white-a30);
 }
 
 /* --------------------------------------------------------------------------
    PAGE BUTTON (numbered) — MUI default (non-sacred branch:
-   border rgba(0,0,0,0.23), unselected color rgba(0,0,0,0.87),
-   hover bg rgba(0,0,0,0.04), selected bg rgba(25,118,210,0.12)
+   border var(--goobs-black-a23), unselected color var(--goobs-black-a87),
+   hover bg var(--goobs-black-a04), selected bg rgba(25,118,210,0.12)
    + color #1976d2, no glow). Default for a no-theme callsite.
    -------------------------------------------------------------------------- */
 .pageButton {
-  border: 1px solid rgba(0, 0, 0, 0.23);
+  border: 1px solid var(--goobs-black-a23);
   background-color: transparent;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--goobs-black-a87);
   cursor: pointer;
   font-family: inherit;
   font-weight: 400;
@@ -122,12 +122,12 @@
 }
 
 .pageButton:hover {
-  border-color: rgba(0, 0, 0, 0.23);
-  background-color: rgba(0, 0, 0, 0.04);
+  border-color: var(--goobs-black-a23);
+  background-color: var(--goobs-black-a04);
 }
 
 .pageButton[data-pagination-selected='true'] {
-  border-color: rgba(0, 0, 0, 0.23);
+  border-color: var(--goobs-black-a23);
   background-color: var(--goobs-info-bg);
   color: var(--goobs-light-primary);
   font-weight: 600;
@@ -136,10 +136,10 @@
 
 /* PAGE BUTTON — SACRED override (was the isSacredTheme branch):
    border:  rgba(255,215,0, selected?0.6 : hover?0.4 : 0.3)
-   bg:      transparent | hover rgba(255,215,0,0.1) | selected rgba(255,215,0,0.2)
+   bg:      transparent | hover var(--goobs-amber-a10) | selected rgba(255,215,0,0.2)
    color:   selected #FFD700 | else rgba(255,215,0,0.8)
    weight:  selected 600 | else 400
-   shadow:  selected -> 0 0 10px rgba(255,215,0,0.3) */
+   shadow:  selected -> 0 0 10px var(--goobs-amber-a30) */
 .root[data-theme='sacred'] .pageButton {
   border: 1px solid var(--goobs-gold-a30);
   background-color: transparent;
@@ -163,7 +163,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   ELLIPSIS — MUI default color rgba(0,0,0,0.38) (non-sacred branch).
+   ELLIPSIS — MUI default color var(--goobs-black-a38) (non-sacred branch).
    -------------------------------------------------------------------------- */
 .ellipsis {
   min-width: 32px;
@@ -171,12 +171,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(0, 0, 0, 0.38);
+  color: var(--goobs-black-a38);
   font-family: inherit;
   font-size: 14px;
 }
 
-/* ELLIPSIS — SACRED override (color rgba(255,215,0,0.6)). */
+/* ELLIPSIS — SACRED override (color var(--goobs-amber-a60)). */
 .root[data-theme='sacred'] .ellipsis {
   color: var(--goobs-gold-a60);
   font-family: var(--goobs-font-sacred);

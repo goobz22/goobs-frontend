@@ -25,7 +25,7 @@
   --card-radius: 8px;
 
   /* Sacred palette (hardcoded default) */
-  --card-bg: rgba(0, 0, 0, 0.7);
+  --card-bg: var(--goobs-black-a70);
   --card-border: rgba(255, 215, 0, 0.25);
   --card-accent: #ffd700;
   --card-title: #ffd700;
@@ -33,7 +33,7 @@
   --card-text: rgba(255, 255, 255, 0.85);
   --card-meta: rgba(255, 255, 255, 0.45);
   --card-hover-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
-  --card-selected-ring: rgba(255, 215, 0, 0.6);
+  --card-selected-ring: var(--goobs-amber-a60);
 
   position: relative;
   display: flex;
@@ -58,7 +58,7 @@
    LIGHT THEME OVERRIDE
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
-  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: var(--goobs-white-a95);
   --card-border: rgba(25, 118, 210, 0.2);
   --card-accent: #1976d2;
   --card-title: #1f2937;
@@ -82,7 +82,7 @@
   --card-subtitle: #94a3b8;
   --card-text: #cbd5e1;
   --card-meta: #64748b;
-  --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --card-hover-shadow: 0 4px 12px var(--goobs-black-a40);
   --card-selected-ring: rgba(96, 165, 250, 0.6);
 
   font-family: 'Inter', system-ui, sans-serif;
@@ -480,7 +480,7 @@
 }
 
 .banner[data-banner-tone='info'] {
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: var(--goobs-blue-a12);
   border: 1px solid rgba(59, 130, 246, 0.35);
   color: #3b82f6;
 }
@@ -728,7 +728,7 @@
 .emptyState {
   /* SACRED is the hardcoded default (matches the card root recipe);
      light / dark are [data-theme] overrides below. */
-  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-bg: var(--goobs-black-a40);
   --card-accent: #ffd700;
   --card-text: rgba(255, 255, 255, 0.7);
   --card-title: #ffd700;
@@ -753,7 +753,7 @@
 }
 
 .emptyState[data-theme='light'] {
-  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: var(--goobs-white-a95);
   --card-accent: #1976d2;
   --card-text: #374151;
   --card-title: #1f2937;
@@ -804,7 +804,7 @@
    titled sections scattered through the ThothOS forms/workspaces — the
    recurring inline recipe of:
 
-       backgroundColor: 'rgba(0, 0, 0, 0.3)'
+       backgroundColor: 'var(--goobs-black-a30)'
        border:          '1px solid #D4AF37'
        borderRadius:    'clamp(8px, 2vw, 12px)'
        box-shadow:      subtle gold glow
@@ -826,7 +826,7 @@
 .root[data-theme='sacred'] .section {
   /* The exact formSectionStyle recipe: dark translucent fill, a crisp 1px
      gold (#D4AF37) border, clamp() radius, and a subtle gold glow. */
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
   border: 1px solid #d4af37;
   border-radius: clamp(8px, 2vw, 12px);
   box-shadow:
@@ -837,7 +837,7 @@
 /* The muted section flavour keeps the dark fill but drops the gold glow to a
    neutral border, mirroring the hand-rolled "muted" formSections. */
 .root[data-theme='sacred'] .section.muted {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--goobs-black-a30);
   border-color: color-mix(in srgb, var(--card-meta) 28%, transparent);
   box-shadow: none;
 }

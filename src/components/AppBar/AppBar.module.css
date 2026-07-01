@@ -82,7 +82,7 @@
 .container[data-theme='dark'] {
   --appbar-bg: rgba(17, 24, 39, 0.95);
   --appbar-bg-image: none;
-  --appbar-border: 1px solid rgba(75, 85, 99, 0.3);
+  --appbar-border: 1px solid var(--goobs-gray-a30);
   --appbar-radius: 0;
   --appbar-shadow: var(--goobs-shadow-dark-md);
   --appbar-backdrop: blur(10px);

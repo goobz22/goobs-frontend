@@ -424,12 +424,12 @@
 }
 
 .root[data-theme='light'] .articleCard[data-selected='true'] {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--goobs-blue-a10);
   border-color: var(--goobs-light-primary);
 }
 
 .root[data-theme='dark'] .articleCard[data-selected='true'] {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--goobs-blue-a20);
   border-color: var(--goobs-dark-primary-strong);
 }
 

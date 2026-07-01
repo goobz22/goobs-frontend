@@ -1,7 +1,7 @@
 /* ==========================================================================
    TABS - CSS MODULE
    Sacred-gold tablist primitive. The component historically rendered with
-   hardcoded SACRED_GOLD (#FFD700 -> rgb(255, 215, 0)) inline styles driven
+   hardcoded SACRED_GOLD (#FFD700 -> var(--goobs-amber-a100)) inline styles driven
    by a `hoveredTab` useState; this module moves the static visuals + hover/
    active/disabled state into native CSS, keeping only caller-supplied
    overrides (padding / gap / height / borders / alignment) in JS as CSS
@@ -150,19 +150,19 @@
 }
 
 .tab[data-theme='light']:hover:not(:disabled):not([data-tab-active='true']) {
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--goobs-blue-a10);
   border-bottom-color: var(--goobs-light-primary);
   color: rgb(29, 78, 216);
   text-shadow: none;
 }
 
 .tab[data-theme='light'][data-tab-active='true'] {
-  background: rgba(59, 130, 246, 0.15);
+  background: var(--goobs-blue-a15);
   border-bottom-color: var(--goobs-light-primary);
   color: rgb(29, 78, 216);
   font-weight: 600;
   text-shadow: none;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 4px var(--goobs-blue-a20);
 }
 
 .tab[data-theme='light']:disabled {
@@ -170,11 +170,11 @@
 }
 
 .tab[data-theme='light'] .count {
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: var(--goobs-blue-a12);
 }
 
 .tab[data-theme='light'][data-tab-active='true'] .count {
-  background-color: rgba(59, 130, 246, 0.25);
+  background-color: var(--goobs-blue-a25);
 }
 
 /* ==========================================================================
@@ -194,19 +194,19 @@
 }
 
 .tab[data-theme='dark']:hover:not(:disabled):not([data-tab-active='true']) {
-  background: rgba(96, 165, 250, 0.15);
+  background: var(--goobs-blue-light-a15);
   border-bottom-color: var(--goobs-dark-primary);
   color: var(--goobs-dark-primary);
   text-shadow: none;
 }
 
 .tab[data-theme='dark'][data-tab-active='true'] {
-  background: rgba(96, 165, 250, 0.2);
+  background: var(--goobs-blue-light-a20);
   border-bottom-color: var(--goobs-dark-primary);
   color: var(--goobs-dark-primary);
   font-weight: 600;
   text-shadow: none;
-  box-shadow: 0 2px 4px rgba(96, 165, 250, 0.3);
+  box-shadow: 0 2px 4px var(--goobs-blue-light-a30);
 }
 
 .tab[data-theme='dark']:disabled {
