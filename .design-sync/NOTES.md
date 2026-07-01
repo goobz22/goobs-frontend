@@ -152,9 +152,15 @@ account + re-sync to bring it to 84.)
   Passing `--entry ./dist/goobs-frontend.es.js` on the CLI does the same (overrides cfg.entry).
 - **RE-RUN `node .design-sync/inject-reference-fonts.mjs` after any reference storybook rebuild** — else
   the oracle reverts to system fonts and typography grades go false.
-- BigCalendar/Accordion/Content etc. use `cfg.overrides.<Name>.cardMode:"column"` — a story wider than a grid
-  cell trips `[GRID_OVERFLOW]` and the card crops; new wide components need a column override + targeted
-  `node .ds-sync/lib/preview-rebuild.mjs --components <Name>` (presentation-only, grades carry).
+- **⚠️ Triage EVERY `[GRID_OVERFLOW]` flag, not just the first** — validate emits one per component; a
+  `grep -oE "GRID_OVERFLOW\] components/[a-z]+/[A-Za-z]+"` over the whole log catches them all. (2026-07-01
+  the first re-sync flagged 11 but only BigCalendar was fixed → 10 cropped cards shipped, caught + fixed on
+  the next re-sync.) All 13 new components now have overrides: 11 `cardMode:"column"` (Accordion/BigCalendar/
+  Fade/Zoom/MenuItem/Pagination/QRCodeComponent/SearchableHistory/Select/Slider/TimeField) + Drawer
+  `cardMode:"single" primaryStory:"PermanentVariant"` (its Persistent/Temporary variants are portal/fixed —
+  no grid can present them; Permanent renders inline). AppBar/Paper fit the default grid, no override.
+  Fix = column/single override + targeted `node .ds-sync/lib/preview-rebuild.mjs --components <A,B>`
+  (presentation-only, grades carry).
 - **Snackbar owned preview** (`.design-sync/previews/Snackbar.tsx`) forces open + `autoHideDuration:600000` +
   relies on `cfg.overrides.Snackbar.viewport "900x240"` to frame the position:fixed toast. If the toast's
   fixed offset or the viewport changes, re-verify the card frames it. NEVER set autoHideDuration > 2^31-1 (overflows→instant close).

@@ -41,6 +41,15 @@
   "overrides": {
     "Accordion": { "cardMode": "column" },
     "BigCalendar": { "cardMode": "column" },
+    "Fade": { "cardMode": "column" },
+    "Zoom": { "cardMode": "column" },
+    "MenuItem": { "cardMode": "column" },
+    "Pagination": { "cardMode": "column" },
+    "QRCodeComponent": { "cardMode": "column" },
+    "SearchableHistory": { "cardMode": "column" },
+    "Select": { "cardMode": "column" },
+    "Slider": { "cardMode": "column" },
+    "TimeField": { "cardMode": "column" },
     "Content": { "cardMode": "column" },
     "Alert": { "cardMode": "column" },
     "ComplexEditor": { "cardMode": "column" },
@@ -77,6 +86,7 @@
     "DataGrid": { "cardMode": "single", "primaryStory": "Desktop" },
     "PricingTable": { "cardMode": "single", "primaryStory": "BothPrices" },
     "Snackbar": { "cardMode": "single", "primaryStory": "DarkThemeSuccess", "viewport": "900x240" },
-    "Tabs": { "cardMode": "single", "primaryStory": "PremiumTheme" }
+    "Tabs": { "cardMode": "single", "primaryStory": "PremiumTheme" },
+    "Drawer": { "cardMode": "single", "primaryStory": "PermanentVariant" }
   }
 }
