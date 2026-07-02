@@ -85,10 +85,8 @@ export interface BigCalendarStyles {
   toolbarPadding?: string
   toolbarHeight?: string
   toolbarBackground?: string
-  toolbarBorderColor?: string
 
   // Calendar surface overrides (passed to the calendar Paper)
-  calendarBackground?: string
   calendarBorderRadius?: string
 
   // Sacred surface override

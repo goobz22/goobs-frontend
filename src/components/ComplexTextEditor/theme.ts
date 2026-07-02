@@ -35,16 +35,12 @@ export interface ComplexTextEditorFormFieldStyles {
   labelColor?: string
   labelFocusedColor?: string
   labelErrorColor?: string
-  labelShrunkBackgroundColor?: string
   adornmentColor?: string
   adornmentFocusedColor?: string
   footerTextColor?: string
-  footerTextErrorColor?: string
-  footerTextInfoColor?: string
   fontFamily?: string
 
   // Required field styling
-  requiredIndicatorColor?: string
   requiredIndicatorText?: string
 
   // Field state
@@ -87,16 +83,7 @@ export interface ComplexTextEditorFormFieldStyles {
   arrowTop?: string
   arrowRight?: string
   arrowBottom?: string
-  arrowLeft?: string
   arrowPadding?: string
-
-  // Label positioning
-  labelOffset?: string
-  labelShrunkOffset?: string
-
-  // Footer spacing
-  footerMarginTop?: string
-  footerFontSize?: string
 
   // Transitions
   transitionDuration?: string
@@ -176,15 +163,8 @@ export const buildTransitionOverride = (
 export interface ComplexTextEditorStyles extends ComplexTextEditorFormFieldStyles {
   // Editor-specific styling
   toolbarBackground?: string
-  toolbarBorderColor?: string
   toolbarPadding?: string
   toolbarGap?: string
-
-  // Toggle button styling
-  toggleBackground?: string
-  toggleBorderColor?: string
-  toggleActiveBackground?: string
-  toggleActiveColor?: string
 
   // Editor area styling
   editorBackground?: string
@@ -197,11 +177,6 @@ export interface ComplexTextEditorStyles extends ComplexTextEditorFormFieldStyle
   editorBoxShadow?: string
 
   // Sacred theme overrides
-  sacredGlyphColor?: string
-  sacredGlyphFilter?: string
-  sacredGlyphAnimation?: string
-  sacredBorderGlow?: string
-  sacredTextGlow?: string
   sacredBackgroundImage?: string
 
   // Editor mode settings

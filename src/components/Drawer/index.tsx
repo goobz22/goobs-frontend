@@ -25,16 +25,12 @@ export interface DrawerStyles {
 
   // Permanent drawer styling
   permanentBackground?: string
-  permanentBorderRight?: string
-  permanentBorderLeft?: string
   permanentBoxShadow?: string
   permanentBackdropFilter?: string
   permanentBackgroundImage?: string
 
   // Temporary drawer styling
   temporaryBackground?: string
-  temporaryBorderRight?: string
-  temporaryBorderLeft?: string
   temporaryBoxShadow?: string
   temporaryBackdropFilter?: string
   temporaryBackgroundImage?: string

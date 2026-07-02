@@ -132,16 +132,12 @@ export interface FormFieldStyles {
   labelColor?: string
   labelFocusedColor?: string
   labelErrorColor?: string
-  labelShrunkBackgroundColor?: string
   adornmentColor?: string
   adornmentFocusedColor?: string
   footerTextColor?: string
-  footerTextErrorColor?: string
-  footerTextInfoColor?: string
   fontFamily?: string
 
   // Required field styling
-  requiredIndicatorColor?: string
   requiredIndicatorText?: string
 
   // Field state
@@ -184,16 +180,7 @@ export interface FormFieldStyles {
   arrowTop?: string
   arrowRight?: string
   arrowBottom?: string
-  arrowLeft?: string
   arrowPadding?: string
-
-  // Label positioning
-  labelOffset?: string
-  labelShrunkOffset?: string
-
-  // Footer spacing
-  footerMarginTop?: string
-  footerFontSize?: string
 
   // Transitions
   transitionDuration?: string

@@ -13,8 +13,6 @@ export interface IconStyles {
   size?: number
   /** Custom icon color */
   color?: string
-  /** Custom hover color */
-  hoverColor?: string
   /** Custom background color */
   backgroundColor?: string
   /** Custom hover background color */
@@ -27,8 +25,6 @@ export interface IconStyles {
   margin?: string
   /** Custom filter effects */
   filter?: string
-  /** Custom hover filter effects */
-  hoverFilter?: string
   /** Custom transform effects */
   transform?: string
   /** Custom hover transform effects */

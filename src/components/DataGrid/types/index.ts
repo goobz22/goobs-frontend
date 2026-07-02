@@ -230,12 +230,6 @@ export interface DataGridStyles {
   backdropFilter?: string
   animation?: string
 
-  // Content wrapper styling
-  contentBackgroundColor?: string
-  contentBorderColor?: string
-  contentBorderRadius?: string
-  contentBoxShadow?: string
-
   // Error states
   errorBackgroundColor?: string
   errorColor?: string
