@@ -211,7 +211,7 @@
    Mobile Responsive
    -------------------------------------------------------------------------- */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .button {
     min-height: var(--goobs-control-height-compact);
     padding: 4px 10px;

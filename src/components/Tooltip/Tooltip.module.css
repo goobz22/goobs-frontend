@@ -14,7 +14,7 @@
  * Caller-supplied overrides arrive as CSS custom properties set inline in JS
  * (only when provided), so the CSS fallback (the theme value) applies otherwise
  * — replicating the old `styles.x || baseTheme.x` resolution.
- * ===========================================================================*/
+ * =========================================================================== */
 
 /* --------------------------------------------------------------------------
    CONTAINER — relative anchor wrapper around the trigger children
@@ -37,8 +37,8 @@
   --tooltip-transition: opacity 0.3s ease, transform 0.3s ease;
 
   position: fixed;
-  left: var(--tooltip-x, 0px);
-  top: var(--tooltip-y, 0px);
+  left: var(--tooltip-x, 0);
+  top: var(--tooltip-y, 0);
   z-index: var(--tooltip-z, 9999);
   pointer-events: none;
   opacity: 0;

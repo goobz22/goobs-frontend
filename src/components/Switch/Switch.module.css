@@ -226,7 +226,6 @@
   border: var(--switch-track-border-width) solid
     var(--switch-track-border-color);
   backdrop-filter: var(--switch-track-backdrop);
-  -webkit-backdrop-filter: var(--switch-track-backdrop);
   background-image: var(--switch-track-image);
   overflow: hidden;
 }
@@ -349,7 +348,7 @@
    [data-theme] is belt-and-suspenders. The old JS gated this on
    `isSacredTheme && checked && isHovered`; here :hover + :has(:checked)
    reproduce it natively. */
-.container:not([data-theme='light']):not([data-theme='dark']):hover
+.container:not([data-theme='light'], [data-theme='dark']):hover
   .track:has(.input:checked)
   .shimmer {
   opacity: 1;
@@ -366,7 +365,6 @@
   color: var(--switch-label-color);
   font-family: var(--switch-label-font-family);
   user-select: none;
-  -webkit-user-select: none;
   transition: var(--switch-transition);
   text-shadow: var(--switch-label-shadow);
 }

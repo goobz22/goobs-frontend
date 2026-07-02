@@ -142,6 +142,18 @@ const config = {
     'no-descending-specificity': null,
     'no-duplicate-selectors': null,
     'declaration-block-no-redundant-longhand-properties': null,
+
+    // CSS Modules syntax — config-standard is written for plain CSS and does
+    // not know the CSS-Modules composition features this codebase is built on.
+    // `:global(...)` scopes a selector globally; `composes:` inherits classes.
+    'selector-pseudo-class-no-unknown': [
+      true,
+      { ignorePseudoClasses: ['global', 'local'] },
+    ],
+    'property-no-unknown': [true, { ignoreProperties: ['composes'] }],
+    // `composes:` values are case-sensitive CLASS NAMES — the lower-case
+    // autofix corrupts them into dangling references that break the build.
+    'value-keyword-case': ['lower', { ignoreProperties: ['composes'] }],
   },
 };
 

@@ -67,7 +67,7 @@
 
 /* Hover (only when not active and not disabled) — replaces the
    getBackgroundColor / getBorderBottomColor / getColor isHovered branch. */
-.tab:hover:not(:disabled):not([data-tab-active='true']) {
+.tab:hover:not(:disabled, [data-tab-active='true']) {
   background: linear-gradient(
     135deg,
     var(--goobs-gold-a10),
@@ -149,7 +149,7 @@
   transition: var(--goobs-transition-medium);
 }
 
-.tab[data-theme='light']:hover:not(:disabled):not([data-tab-active='true']) {
+.tab[data-theme='light']:hover:not(:disabled, [data-tab-active='true']) {
   background: var(--goobs-blue-a10);
   border-bottom-color: var(--goobs-light-primary);
   color: rgb(29, 78, 216);
@@ -193,7 +193,7 @@
   transition: var(--goobs-transition-medium);
 }
 
-.tab[data-theme='dark']:hover:not(:disabled):not([data-tab-active='true']) {
+.tab[data-theme='dark']:hover:not(:disabled, [data-tab-active='true']) {
   background: var(--goobs-blue-light-a15);
   border-bottom-color: var(--goobs-dark-primary);
   color: var(--goobs-dark-primary);

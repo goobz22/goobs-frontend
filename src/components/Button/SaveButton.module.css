@@ -9,7 +9,7 @@
   display: inline-block;
   width: 13px;
   height: 13px;
-  border: 2px solid currentColor;
+  border: 2px solid currentcolor;
   border-top-color: transparent;
   border-radius: 50%;
   vertical-align: -2px;

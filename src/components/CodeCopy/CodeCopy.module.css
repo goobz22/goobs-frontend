@@ -32,7 +32,7 @@
 }
 
 .container[data-theme='sacred'] {
-  border-radius: 0px;
+  border-radius: 0;
   background-color: #1c1917;
   border: 1px solid var(--goobs-gold-a30);
   /* SHADOWS.sacred.medium */
@@ -236,7 +236,7 @@
    -------------------------------------------------------------------------- */
 .shimmer {
   position: absolute;
-  inset: 0px;
+  inset: 0;
   background-image: linear-gradient(
     to bottom right,
     transparent,

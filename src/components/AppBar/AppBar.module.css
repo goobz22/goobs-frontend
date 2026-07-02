@@ -117,7 +117,7 @@
    An explicit caller-supplied shadow (data-has-shadow) always wins, even when
    not elevated — matching the old `styles?.boxShadow ||` precedence.
    -------------------------------------------------------------------------- */
-.container:not([data-elevated='true']):not([data-has-shadow='true']) {
+.container:not([data-elevated='true'], [data-has-shadow='true']) {
   box-shadow: none;
 }
 
@@ -178,7 +178,7 @@
 @keyframes sacredFloat {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translateY(0);
     opacity: 0.3;
   }
   33% {

@@ -135,7 +135,6 @@
   transition: var(--goobs-transition-medium);
   outline: none;
   white-space: normal;
-  word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
@@ -336,7 +335,7 @@
    Mobile Responsive
    -------------------------------------------------------------------------- */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .label {
     font-size: 12px;
     margin-bottom: 6px;

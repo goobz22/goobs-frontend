@@ -81,7 +81,7 @@
   box-shadow: var(--goobs-shadow-sacred-sm);
 }
 
-.input:hover:not(:disabled):not(:focus) {
+.input:hover:not(:disabled, :focus) {
   border-color: var(--goobs-gold-a50);
 }
 
@@ -144,7 +144,7 @@
   box-shadow: var(--goobs-focus-light);
 }
 
-[data-theme='light'] .input:hover:not(:disabled):not(:focus) {
+[data-theme='light'] .input:hover:not(:disabled, :focus) {
   border-color: var(--goobs-light-border-strong);
 }
 
@@ -183,7 +183,7 @@
   box-shadow: var(--goobs-focus-dark);
 }
 
-[data-theme='dark'] .input:hover:not(:disabled):not(:focus) {
+[data-theme='dark'] .input:hover:not(:disabled, :focus) {
   border-color: var(--goobs-dark-border-strong);
 }
 
@@ -200,7 +200,7 @@
    Tablet Responsive (769px - 1024px)
    -------------------------------------------------------------------------- */
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (width >= 769px) and (width <= 1024px) {
   .container {
     margin-bottom: 14px;
   }
@@ -232,7 +232,7 @@
    Mobile Responsive (max-width: 768px)
    -------------------------------------------------------------------------- */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .container {
     margin-bottom: var(--goobs-space-sm);
   }

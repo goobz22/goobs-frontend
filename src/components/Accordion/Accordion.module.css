@@ -22,7 +22,7 @@
  * summaryColor, …) and the runtime-computed level indent arrive as CSS custom
  * properties set inline in the TSX, each falling back to the theme value when
  * the caller didn't provide it (mirrors the old `styles?.x || default`).
- * ===========================================================================*/
+ * =========================================================================== */
 
 /* --------------------------------------------------------------------------
    CONTAINER — sacred defaults (base)

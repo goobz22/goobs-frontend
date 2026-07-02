@@ -39,7 +39,7 @@
 
 @keyframes transferListSacredFloat {
   0% {
-    transform: translateY(0px);
+    transform: translateY(0);
     opacity: 0.6;
   }
   50% {
@@ -47,7 +47,7 @@
     opacity: 0.8;
   }
   100% {
-    transform: translateY(0px);
+    transform: translateY(0);
     opacity: 0.6;
   }
 }

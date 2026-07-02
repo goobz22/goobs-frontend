@@ -58,7 +58,6 @@
   font-size: clamp(1.25rem, 4vw, 1.75rem);
   font-weight: 700;
   color: var(--goobs-light-text);
-  word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
@@ -79,7 +78,6 @@
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 400;
   color: var(--goobs-light-text);
-  word-wrap: break-word;
   overflow-wrap: break-word;
 }
 

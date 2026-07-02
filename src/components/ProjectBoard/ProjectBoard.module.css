@@ -47,7 +47,7 @@
       transparent 50%
     ),
     linear-gradient(135deg, var(--goobs-gold-a02) 0%, transparent 50%);
-  --pb-container-animation: projectBoardGlowPulse 3s infinite alternate;
+  --pb-container-animation: projectboardglowpulse 3s infinite alternate;
   /* TRANSITIONS.slow for sacred */
   --pb-transition: var(--goobs-transition-slow);
 
@@ -61,7 +61,7 @@
   --pb-glyph-color: var(--goobs-gold-a30);
   --pb-glyph-font-size: 1.5rem;
   --pb-glyph-z: 10;
-  --pb-glyph-animation: projectBoardFloat 10s infinite alternate;
+  --pb-glyph-animation: projectboardfloat 10s infinite alternate;
 
   box-sizing: border-box;
   position: relative;
@@ -524,7 +524,7 @@
 }
 
 .columnDescription {
-  margin: 0.25rem 0 0 0;
+  margin: 0.25rem 0 0;
   color: var(--pb-col-desc);
   font-size: 0.875rem;
   font-family: var(--pb-sacred-body-font);
@@ -565,7 +565,7 @@
 
 /* Responsive column sizing — replaces the JS useResponsiveLayout window-width
    branching (280px mobile / 300px tablet / 320px desktop + auto height). */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .board {
     --pb-column-width: 280px;
     --pb-column-height: auto;
@@ -578,7 +578,7 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 1279px) {
+@media (width >= 768px) and (width <= 1279px) {
   .board {
     --pb-column-width: 300px;
   }
@@ -635,7 +635,7 @@
 }
 
 .taskDescription {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.75rem;
   font-size: 0.875rem;
   color: var(--pb-card-desc);
   line-height: 1.4;
@@ -721,7 +721,7 @@
 
 @keyframes projectBoardFloat {
   0% {
-    transform: translateY(0px);
+    transform: translateY(0);
     opacity: 0.3;
   }
   100% {

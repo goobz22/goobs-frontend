@@ -17,7 +17,7 @@
  * custom property set inline in the TSX. Per-option chip colours stay as a
  * runtime inline style on the Chip itself (color-mix from a user-supplied
  * colour prop — genuinely dynamic, kept in JS per the house recipe).
- * ===========================================================================*/
+ * =========================================================================== */
 
 /* --------------------------------------------------------------------------
    ROOT — sacred theme (dark + gold) is the base default

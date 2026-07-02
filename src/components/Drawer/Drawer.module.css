@@ -49,7 +49,6 @@
   background-image: var(--drawer-background-image);
   box-shadow: var(--drawer-box-shadow);
   backdrop-filter: var(--drawer-backdrop-filter);
-  -webkit-backdrop-filter: var(--drawer-backdrop-filter);
   z-index: var(--drawer-z-index);
   opacity: var(--drawer-opacity);
   pointer-events: var(--drawer-pointer-events);
@@ -211,7 +210,6 @@
   inset: 0;
   background-color: var(--drawer-backdrop-background);
   backdrop-filter: var(--drawer-backdrop-filter);
-  -webkit-backdrop-filter: var(--drawer-backdrop-filter);
   z-index: var(--drawer-backdrop-z-index);
 }
 .backdrop[data-theme='dark'] {
@@ -225,7 +223,7 @@
 
 /* --------------------------------------------------------------------------
    CONTENT — scrollable inner container. Replaces the runtime-injected
-   <style id="drawer-scrollbar-styles"> block; theme-scoped scrollbar colors
+   \3c style id="drawer-scrollbar-styles"> block; theme-scoped scrollbar colors
    come straight from the old scrollbarColors map.
    -------------------------------------------------------------------------- */
 .content {

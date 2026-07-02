@@ -214,7 +214,7 @@
   width: 0.55em;
   height: 0.55em;
   border-radius: var(--goobs-radius-pill);
-  background-color: currentColor;
+  background-color: currentcolor;
   display: inline-block;
 }
 

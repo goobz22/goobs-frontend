@@ -337,8 +337,7 @@
   text-transform: var(--cci-success-message-text-transform);
   text-shadow: var(--cci-success-message-text-shadow);
   text-align: center;
-  word-wrap: break-word;
-  word-break: break-word;
+  overflow-wrap: break-word;
   max-width: 100%;
   margin: 0;
 }

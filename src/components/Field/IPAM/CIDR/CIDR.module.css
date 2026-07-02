@@ -44,7 +44,7 @@
   border: none;
   background-color: transparent;
   cursor: pointer;
-  color: currentColor;
+  color: currentcolor;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;

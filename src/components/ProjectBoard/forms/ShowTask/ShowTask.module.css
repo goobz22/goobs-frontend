@@ -283,7 +283,7 @@
   text-align: right;
   max-width: 60%;
   width: auto;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .root[data-mobile='true'] .fieldValue {

@@ -1424,7 +1424,6 @@
     0 0 12px var(--goobs-gold-a15);
   cursor: pointer;
   user-select: none;
-  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: var(--goobs-transition-medium);
   position: relative;
@@ -1812,7 +1811,7 @@
   cursor: pointer;
   border-radius: 0.25rem;
   transition: background-color 0.15s ease;
-  word-break: break-word;
+  overflow-wrap: break-word;
   line-height: 1.4;
 }
 
@@ -2074,7 +2073,7 @@
 .selectionHeader button {
   padding: 0.25rem 0.75rem;
   border-radius: 0.25rem;
-  border: 1px solid currentColor;
+  border: 1px solid currentcolor;
   background-color: transparent;
   cursor: pointer;
   color: inherit;
@@ -2230,7 +2229,7 @@
 }
 
 /* Mobile breakpoint - switch views at 768px */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .desktopView {
     display: none;
   }

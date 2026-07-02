@@ -187,18 +187,14 @@
 /* Light hover (only when not disabled/selected/expanded — those win in JS
    order: disabled > selected > expanded > hover). Mirror that cascade with
    :not() guards so hover never paints over a selected/expanded/disabled row. */
-.item:hover:not([data-disabled='true']):not([data-selected='true']):not(
-    [data-expanded='true']
-  ) {
+.item:hover:not([data-disabled='true'], [data-selected='true'], [data-expanded='true']) {
   background-color: var(--goobs-blue-a08);
   border-color: var(--goobs-blue-a20);
   color: var(--goobs-light-primary);
   transform: translateX(2px);
 }
 
-.item[data-expanded='true']:not([data-disabled='true']):not(
-    [data-selected='true']
-  ) {
+.item[data-expanded='true']:not([data-disabled='true'], [data-selected='true']) {
   background-color: rgba(16, 185, 129, 0.06);
   border-color: rgba(16, 185, 129, 0.2);
   color: var(--goobs-success);
@@ -234,18 +230,14 @@
   color: var(--goobs-dark-text-secondary);
 }
 
-.item[data-theme='dark']:hover:not([data-disabled='true']):not(
-    [data-selected='true']
-  ):not([data-expanded='true']) {
+.item[data-theme='dark']:hover:not([data-disabled='true'], [data-selected='true'], [data-expanded='true']) {
   background-color: var(--goobs-blue-light-a10);
   border-color: var(--goobs-blue-light-a30);
   color: var(--goobs-dark-primary);
   transform: translateX(2px);
 }
 
-.item[data-theme='dark'][data-expanded='true']:not([data-disabled='true']):not(
-    [data-selected='true']
-  ) {
+.item[data-theme='dark'][data-expanded='true']:not([data-disabled='true'], [data-selected='true']) {
   background-color: rgba(52, 211, 153, 0.1);
   border-color: rgba(52, 211, 153, 0.3);
   color: var(--goobs-success);
@@ -288,9 +280,7 @@
   align-items: center;
 }
 
-.item[data-theme='sacred']:hover:not([data-disabled='true']):not(
-    [data-selected='true']
-  ):not([data-expanded='true']) {
+.item[data-theme='sacred']:hover:not([data-disabled='true'], [data-selected='true'], [data-expanded='true']) {
   background-color: var(--goobs-gold-a08);
   border-color: var(--goobs-gold-a40);
   color: var(--goobs-gold);
@@ -301,9 +291,7 @@
   box-shadow: 0 4px 12px var(--goobs-gold-a25);
 }
 
-.item[data-theme='sacred'][data-expanded='true']:not(
-    [data-disabled='true']
-  ):not([data-selected='true']) {
+.item[data-theme='sacred'][data-expanded='true']:not([data-disabled='true'], [data-selected='true']) {
   background-color: var(--goobs-gold-a10);
   border-color: var(--goobs-gold-a60);
   color: var(--goobs-gold);

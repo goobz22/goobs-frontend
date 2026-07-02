@@ -85,6 +85,20 @@
 }
 
 /* --------------------------------------------------------------------------
+   OUTLINE OPT-IN — `outline: true`
+   The boolean form of the outline prop means "give this text a visible
+   outline". currentColor keys the outline to the resolved per-theme text
+   color (gold on sacred, dark-on-light, light-on-dark) so the treatment is
+   theme-cohesive without extra tokens. String outline values bypass this
+   class and pass through --typography-outline on .root verbatim. Declared
+   after .root so it wins the same-specificity cascade.
+   -------------------------------------------------------------------------- */
+.outlined {
+  outline: 1px solid currentcolor;
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
    THEME OVERRIDE — sacred (gold text)
    parity: finalColor default = isSacred ? '#FFD700' : 'var(--goobs-white-a90)'.
    Only changes the FALLBACK; an explicit caller/merri color (the var value)

@@ -22,7 +22,7 @@
  * fallback (the theme value) applies otherwise — replicating the old
  * `styles.x || baseTheme.x` precedence. The outline=false reset is driven by
  * [data-outline='false'].
- * ===========================================================================*/
+ * =========================================================================== */
 
 /* --------------------------------------------------------------------------
    ROOT CONTAINER — LIGHT THEME (the old container default)

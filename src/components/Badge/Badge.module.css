@@ -8,7 +8,7 @@
  *
  * Caller-supplied overrides arrive as CSS custom properties set inline in JS
  * (only when provided). Position is driven by [data-position] + --badge-offset.
- * ===========================================================================*/
+ * =========================================================================== */
 
 .container {
   position: relative;
@@ -37,12 +37,12 @@
   font-weight: var(--badge-font-weight, bold);
   box-shadow: var(
     --badge-box-shadow,
-    0px 2px 8px var(--goobs-gold-a30),
-    0px 0px 12px var(--goobs-gold-a20)
+    0 2px 8px var(--goobs-gold-a30),
+    0 0 12px var(--goobs-gold-a20)
   );
   backdrop-filter: var(--badge-backdrop-filter, blur(8px));
   border: var(--badge-border, 1px solid var(--goobs-gold-a30));
-  text-shadow: var(--badge-text-shadow, 0px 0px 4px var(--goobs-gold-a50));
+  text-shadow: var(--badge-text-shadow, 0 0 4px var(--goobs-gold-a50));
 }
 
 /* ---- theme overrides --------------------------------------------------- */
@@ -63,7 +63,7 @@
 .badge[data-theme='dark'] {
   background-color: var(--badge-background-color, var(--goobs-danger));
   color: var(--badge-color, white);
-  box-shadow: var(--badge-box-shadow, 0px 2px 8px var(--goobs-black-a40));
+  box-shadow: var(--badge-box-shadow, 0 2px 8px var(--goobs-black-a40));
   backdrop-filter: var(--badge-backdrop-filter, blur(4px));
   border: var(--badge-border, none);
   text-shadow: var(--badge-text-shadow, none);
