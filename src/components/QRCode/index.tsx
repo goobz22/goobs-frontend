@@ -19,24 +19,22 @@ export interface QRCodeStyles {
   // Theme selection
   theme?: 'light' | 'dark' | 'sacred'
 
-  // Container styling
+  // QR container (framed box around the canvas) styling.
+  // `qrBackgroundColor`/`qrBorderColor` are the specific knobs and win over
+  // the generic `backgroundColor`/`borderColor` when both are provided.
   backgroundColor?: string
   borderColor?: string
   borderRadius?: string
   borderWidth?: string
-  boxShadow?: string
   padding?: string
+  qrBackgroundColor?: string
+  qrBorderColor?: string
+  qrBoxShadow?: string
 
   // Text styling
   titleColor?: string
   titleFontSize?: string
   titleFontWeight?: string | number
-  infoTextColor?: string
-
-  // QR Code container styling
-  qrBackgroundColor?: string
-  qrBorderColor?: string
-  qrBoxShadow?: string
 
   // Success state styling
   successIconColor?: string
@@ -45,21 +43,8 @@ export interface QRCodeStyles {
   // Error styling
   errorTextColor?: string
 
-  // Layout and sizing
+  /** QR pixel size; overrides the top-level `size` prop when both are set. */
   size?: number
-  maxWidth?: string
-  width?: string
-  minWidth?: string
-  height?: string
-  maxHeight?: string
-  minHeight?: string
-
-  // Transitions
-  transitionDuration?: string
-  transitionEasing?: string
-
-  // States
-  showGlyphs?: boolean
 }
 
 export interface QRCodeProps {
@@ -80,7 +65,6 @@ export interface QRCodeProps {
   confirmationCode?: string
   onConfirmationCodeChange?: (value: string) => void
   confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
-  onSecretGenerated?: (secret: string) => void
   styles?: QRCodeStyles
 }
 
@@ -113,13 +97,15 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     const theme = styles?.theme || 'light'
 
     // Runtime-measured responsive size — stays in JS, surfaced to CSS as the
-    // --qr-size custom property on the QR container.
+    // --qr-size custom property on the QR container. styles.size overrides
+    // the top-level size prop when both are provided.
+    const requestedSize = styles?.size ?? size
     const responsiveSize = useMemo(() => {
       if (typeof window !== 'undefined') {
-        return Math.min(size, window.innerWidth - 32)
+        return Math.min(requestedSize, window.innerWidth - 32)
       }
-      return size
-    }, [size])
+      return requestedSize
+    }, [requestedSize])
 
     // Caller-supplied style overrides arrive as CSS custom properties so the
     // selectors stay in the CSS module (recipe: dynamic/user-prop styling).
@@ -128,11 +114,23 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     const qrContainerVars: Record<string, string> = {
       '--qr-size': `${responsiveSize}px`,
     }
-    if (styles?.qrBackgroundColor) {
-      qrContainerVars['--qr-bg-color'] = styles.qrBackgroundColor
+    const qrBackground = styles?.qrBackgroundColor || styles?.backgroundColor
+    if (qrBackground) {
+      qrContainerVars['--qr-bg-color'] = qrBackground
     }
-    if (styles?.qrBorderColor) {
-      qrContainerVars['--qr-border'] = `1px solid ${styles.qrBorderColor}`
+    const qrBorderColor = styles?.qrBorderColor || styles?.borderColor
+    if (qrBorderColor) {
+      qrContainerVars['--qr-border'] =
+        `${styles?.borderWidth || '1px'} solid ${qrBorderColor}`
+    } else if (styles?.borderWidth) {
+      // Width-only override: keep each theme's default border color.
+      qrContainerVars['--qr-border-width'] = styles.borderWidth
+    }
+    if (styles?.borderRadius) {
+      qrContainerVars['--qr-border-radius'] = styles.borderRadius
+    }
+    if (styles?.padding) {
+      qrContainerVars['--qr-padding'] = styles.padding
     }
     if (styles?.qrBoxShadow) {
       qrContainerVars['--qr-box-shadow'] = styles.qrBoxShadow

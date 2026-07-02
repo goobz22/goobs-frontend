@@ -140,6 +140,12 @@ export const Dark: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * Dark theme with caller-supplied radio colors. `radioInnerColor` opts into
+ * the ring-and-dot presentation: the checked option renders a hollow outer
+ * ring with a #60a5fa inner dot (root emits `data-inner-dot="true"`), and
+ * hovering an unchecked row shows the #60a5fa hover border.
+ */
 export const DarkWithCustomColors: Story = {
   name: 'Dark/Custom Colors',
   args: {
@@ -175,21 +181,30 @@ export const DarkBasic: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
-export const DarkWithGlyph: Story = {
-  name: 'Dark/With Glyph',
+/**
+ * Dark theme addressed via `labelText` (the group heading prop that wins over
+ * `label`). Renders the standard dark palette: default 20px radios with the
+ * checked option shown as a solid-filled ring — no extra ornamentation.
+ */
+export const DarkWithLabelText: Story = {
+  name: 'Dark/With Label Text',
   args: {
-    name: 'dark-glyph-radio',
+    name: 'dark-labeltext-radio',
     labelText: 'Select Your Divine Blessing',
     options: mysticalOptions,
     defaultValue: 'Sacred Lightning',
     styles: {
       theme: 'dark',
-      showGlyph: true,
     },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * Dark theme with size/spacing overrides: 22px radio rings, 1rem group label,
+ * and roomier 0.75rem vertical option padding. Checked state stays the default
+ * solid-filled ring (no `radioInnerColor`, so no inner dot).
+ */
 export const DarkCustomized: Story = {
   name: 'Dark/Customized',
   args: {
@@ -202,7 +217,6 @@ export const DarkCustomized: Story = {
       radioSize: '22px',
       labelFontSize: '1rem',
       padding: '0.75rem 0',
-      showGlyph: true,
     },
   },
   globals: { backgrounds: { value: 'dark' } },
@@ -212,6 +226,12 @@ export const DarkCustomized: Story = {
 // CUSTOMIZATION STORIES
 // --------------------------------------------------------------------------
 
+/**
+ * Light theme fully re-pointed to an emerald brand palette. Because
+ * `radioInnerColor` is set, the checked option renders the ring-and-dot
+ * presentation: hollow #059669-bordered outer ring with a #059669 inner dot
+ * (instead of the default solid fill); label and option text are emerald too.
+ */
 export const CustomBrandColors: Story = {
   name: 'Customization/Brand Colors',
   args: {

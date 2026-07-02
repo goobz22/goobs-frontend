@@ -21,7 +21,6 @@ import cssStyles from './ConfirmationCodeInput.module.css'
 // --------------------------------------------------------------------------
 
 export interface ConfirmationCodeInputsProps {
-  identifier?: string
   isValid: boolean
   codeLength?: number
   'aria-label'?: string

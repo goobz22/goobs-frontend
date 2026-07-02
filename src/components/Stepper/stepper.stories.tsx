@@ -176,28 +176,24 @@ export const AccountSetupWizard: Story = {
 
       const wizardSteps: StepperProps['steps'] = [
         {
-          stepNumber: 1,
           label: 'Personal Info',
           stepLink: '#personal',
           status: 'completed',
           description: 'Basic personal information and contact details',
         },
         {
-          stepNumber: 2,
           label: 'Account Details',
           stepLink: '#account',
           status: 'active',
           description: 'Username, password, and security preferences',
         },
         {
-          stepNumber: 3,
           label: 'Preferences',
           stepLink: '#preferences',
           status: 'inactive',
           description: 'Customize your experience and notification settings',
         },
         {
-          stepNumber: 4,
           label: 'Verification',
           stepLink: '#verify',
           status: 'inactive',
@@ -293,19 +289,16 @@ export const CheckoutProcess: Story = {
 
       const checkoutSteps: StepperProps['steps'] = [
         {
-          stepNumber: 1,
           label: 'Cart Review',
           stepLink: '#cart',
           status: 'completed',
         },
         {
-          stepNumber: 2,
           label: 'Shipping',
           stepLink: '#shipping',
           status: 'completed',
         },
         {
-          stepNumber: 3,
           label: 'Payment',
           stepLink: '#payment',
           status: 'error',
@@ -313,7 +306,6 @@ export const CheckoutProcess: Story = {
             'Payment method declined. Please try a different card or payment method.',
         },
         {
-          stepNumber: 4,
           label: 'Confirmation',
           stepLink: '#confirm',
           status: 'inactive',
@@ -415,7 +407,6 @@ export const DarkConfigurationSetup: Story = {
 
       const configSteps: StepperProps['steps'] = [
         {
-          stepNumber: 1,
           label: 'Preparation',
           stepLink: '#prepare',
           status: 'completed',
@@ -423,7 +414,6 @@ export const DarkConfigurationSetup: Story = {
             'Gather the required components and prepare the workspace',
         },
         {
-          stepNumber: 2,
           label: 'Initialization',
           stepLink: '#init',
           status: 'completed',
@@ -431,7 +421,6 @@ export const DarkConfigurationSetup: Story = {
             'Set up initial parameters and establish the configuration',
         },
         {
-          stepNumber: 3,
           label: 'Processing',
           stepLink: '#process',
           status: 'error',
@@ -439,7 +428,6 @@ export const DarkConfigurationSetup: Story = {
             'The process encountered an error. Realign the parameters to proceed.',
         },
         {
-          stepNumber: 4,
           label: 'Validation',
           stepLink: '#validate',
           status: 'inactive',
@@ -447,7 +435,6 @@ export const DarkConfigurationSetup: Story = {
             'Validate the configuration and ensure all requirements are met',
         },
         {
-          stepNumber: 5,
           label: 'Finalization',
           stepLink: '#finalize',
           status: 'inactive',
@@ -585,7 +572,6 @@ export const ProjectSetupFlow: Story = {
 
       const projectSteps: StepperProps['steps'] = [
         {
-          stepNumber: 1,
           label: 'Project Initialization',
           stepLink: '#init',
           status: 'completed',
@@ -593,35 +579,30 @@ export const ProjectSetupFlow: Story = {
             'Create project structure and initialize version control',
         },
         {
-          stepNumber: 2,
           label: 'Dependencies',
           stepLink: '#deps',
           status: 'completed',
           description: 'Install required packages and configure build tools',
         },
         {
-          stepNumber: 3,
           label: 'Configuration',
           stepLink: '#config',
           status: 'active',
           description: 'Set up environment variables and application settings',
         },
         {
-          stepNumber: 4,
           label: 'Database Setup',
           stepLink: '#database',
           status: 'inactive',
           description: 'Initialize database schema and seed data',
         },
         {
-          stepNumber: 5,
           label: 'Testing',
           stepLink: '#testing',
           status: 'inactive',
           description: 'Configure test suites and run initial tests',
         },
         {
-          stepNumber: 6,
           label: 'Deployment',
           stepLink: '#deploy',
           status: 'inactive',
@@ -786,14 +767,12 @@ export const InteractiveDemo: Story = {
 
       const demoSteps: StepperProps['steps'] = [
         {
-          stepNumber: 1,
           label: 'Getting Started',
           stepLink: '#start',
           status: currentStep > 1 ? 'completed' : 'active',
           description: 'Learn the basics and set up your workspace',
         },
         {
-          stepNumber: 2,
           label: 'Configuration',
           stepLink: '#config',
           status:
@@ -805,7 +784,6 @@ export const InteractiveDemo: Story = {
           description: 'Customize settings and preferences',
         },
         {
-          stepNumber: 3,
           label: 'Integration',
           stepLink: '#integration',
           status:
@@ -822,7 +800,6 @@ export const InteractiveDemo: Story = {
               : 'Connect with external services and APIs',
         },
         {
-          stepNumber: 4,
           label: 'Finalization',
           stepLink: '#final',
           status:
@@ -1007,21 +984,105 @@ export const InteractiveDemo: Story = {
 }
 
 /**
- * Simple Theme Showcase
+ * Wizard mode — the Stepper owns the active step's `content` plus the
+ * Back/Continue/Finish controls, driven by `onNext`/`onBack`/`onReset`.
+ * Pins: step 1 hides Back; Continue advances and marks prior steps completed;
+ * the last step's primary button reads "Finish"; finishing renders the
+ * "All steps completed!" panel with `finalActions` and a "Start Over" reset.
+ * Also exercises the `styles.gap` / `styles.padding` / `styles.marginBottom`
+ * spacing overrides (24px rail gap, 24px root padding, 32px bottom offset).
+ */
+export const WizardMode: Story = {
+  render: () => {
+    const Component = () => {
+      const [activeStep, setActiveStep] = useState(0)
+
+      const wizardSteps: StepperProps['steps'] = [
+        {
+          label: 'Plan',
+          description: 'Outline the rollout scope',
+          content: (
+            <div style={{ color: '#374151' }}>
+              Step 1 content — define what ships in this rollout.
+            </div>
+          ),
+        },
+        {
+          label: 'Build',
+          description: 'Implement and review',
+          content: (
+            <div style={{ color: '#374151' }}>
+              Step 2 content — implement the change and get it reviewed.
+            </div>
+          ),
+        },
+        {
+          label: 'Ship',
+          description: 'Deploy to production',
+          content: (
+            <div style={{ color: '#374151' }}>
+              Step 3 content — deploy and verify in production.
+            </div>
+          ),
+        },
+      ]
+
+      return (
+        <div
+          style={{
+            minHeight: '100vh',
+            background: '#f3f4f6',
+            padding: '32px',
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '32px',
+            }}
+          >
+            <Stepper
+              mode="wizard"
+              steps={wizardSteps}
+              activeStep={activeStep}
+              onNext={() => setActiveStep(step => step + 1)}
+              onBack={() => setActiveStep(step => Math.max(0, step - 1))}
+              onReset={() => setActiveStep(0)}
+              finalActions={<Button>View Summary</Button>}
+              styles={{
+                theme: 'light',
+                orientation: 'horizontal',
+                gap: '24px',
+                padding: '24px',
+                marginBottom: '32px',
+              }}
+            />
+          </div>
+        </div>
+      )
+    }
+    return <Component />
+  },
+}
+
+/**
+ * Simple Theme Showcase. Pins: the same steps rendered under the light and
+ * dark themes, and the per-step `description` rendering as muted secondary
+ * text beneath the "Error" step's label.
  */
 export const ThemeShowcase: Story = {
   render: () => {
     const basicSteps: StepperProps['steps'] = [
-      { stepNumber: 1, label: 'Start', stepLink: '#1', status: 'completed' },
-      { stepNumber: 2, label: 'Progress', stepLink: '#2', status: 'active' },
+      { label: 'Start', stepLink: '#1', status: 'completed' },
+      { label: 'Progress', stepLink: '#2', status: 'active' },
       {
-        stepNumber: 3,
         label: 'Error',
         stepLink: '#3',
         status: 'error',
         description: 'Something went wrong!',
       },
-      { stepNumber: 4, label: 'Finish', stepLink: '#4', status: 'inactive' },
+      { label: 'Finish', stepLink: '#4', status: 'inactive' },
     ]
 
     return (

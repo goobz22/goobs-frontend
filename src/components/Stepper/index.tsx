@@ -9,10 +9,14 @@ import CustomButton from '../Button'
 import cssStyles from './Stepper.module.css'
 import { emitDiag } from '../../utils/diag'
 
+// Allows CSS custom properties alongside standard CSS properties. Caller
+// overrides land here only when provided; the stylesheet default (the same
+// value transcribed into Stepper.module.css) applies otherwise.
+type DynamicStyle = React.CSSProperties & Record<string, string | undefined>
+
 export interface StepperProps {
   mode?: 'navigation' | 'wizard'
   steps: {
-    stepNumber: number
     label: string
     stepLink?: string
     status?: 'completed' | 'active' | 'error' | 'inactive'
@@ -40,8 +44,9 @@ export interface StepperProps {
  * Multi-step progress indicator supporting a link-based `navigation` mode and a
  * self-contained `wizard` mode (renders the active step's content plus
  * Back/Continue/Finish controls). Offers horizontal/vertical orientation,
- * per-step status icons, sacred/light/dark theming, and emits `nav.change`
- * diagnostics.
+ * per-step status icons and secondary `description` text, sacred/light/dark
+ * theming, caller `gap`/`padding`/`marginBottom` spacing overrides, and emits
+ * `nav.change` diagnostics.
  */
 const Stepper: React.FC<StepperProps> = ({
   mode = 'navigation',
@@ -57,6 +62,14 @@ const Stepper: React.FC<StepperProps> = ({
   const orientation = styles?.orientation || 'horizontal'
   const theme = styles?.theme || 'sacred'
   const isWizardMode = mode === 'wizard'
+
+  // Caller-supplied spacing overrides → CSS custom properties (set only when
+  // provided; the Stepper.module.css defaults apply otherwise).
+  const dynamicStyle: DynamicStyle = {}
+  if (styles?.gap) dynamicStyle['--stepper-gap'] = styles.gap
+  if (styles?.padding) dynamicStyle['--stepper-padding'] = styles.padding
+  if (styles?.marginBottom)
+    dynamicStyle['--stepper-margin-bottom'] = styles.marginBottom
 
   const getStepStatus = (
     step: StepperProps['steps'][0],
@@ -201,7 +214,12 @@ const Stepper: React.FC<StepperProps> = ({
   }
 
   return (
-    <div className={cssStyles.root} data-component="Stepper" data-theme={theme}>
+    <div
+      className={cssStyles.root}
+      data-component="Stepper"
+      data-theme={theme}
+      style={dynamicStyle}
+    >
       <div
         className={cssStyles.stepperContainer}
         data-orientation={orientation}
@@ -221,13 +239,20 @@ const Stepper: React.FC<StepperProps> = ({
                   {getStepIcon(status, step)}
                 </div>
 
-                <button
-                  onClick={() => handleStepClick(step, index)}
-                  disabled={!isClickable}
-                  className={cssStyles.stepButton}
-                >
-                  {step.label}
-                </button>
+                <div className={cssStyles.stepText}>
+                  <button
+                    onClick={() => handleStepClick(step, index)}
+                    disabled={!isClickable}
+                    className={cssStyles.stepButton}
+                  >
+                    {step.label}
+                  </button>
+                  {step.description && (
+                    <div className={cssStyles.stepDescription}>
+                      {step.description}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {index < steps.length - 1 && orientation === 'horizontal' && (

@@ -78,6 +78,7 @@ export const ListItem: React.FC<ListItemProps> = ({ children, styles }) => {
     <li
       className={cssStyles.listItem}
       data-theme={theme}
+      {...(styles?.dense && { 'data-dense': 'true' })}
       {...(styles?.customStyles?.listItem && {
         style: styles.customStyles.listItem,
       })}
@@ -96,6 +97,7 @@ export const ListItemIcon: React.FC<ListItemIconProps> = ({
     <div
       className={cssStyles.listItemIcon}
       data-theme={theme}
+      {...(styles?.dense && { 'data-dense': 'true' })}
       {...(styles?.customStyles?.listItemIcon && {
         style: styles.customStyles.listItemIcon,
       })}
@@ -117,6 +119,7 @@ export const ListItemText: React.FC<ListItemTextProps> = ({
         <span
           className={cssStyles.listItemTextPrimary}
           data-theme={theme}
+          {...(styles?.dense && { 'data-dense': 'true' })}
           {...(styles?.customStyles?.listItemTextPrimary && {
             style: styles.customStyles.listItemTextPrimary,
           })}
@@ -128,6 +131,7 @@ export const ListItemText: React.FC<ListItemTextProps> = ({
         <span
           className={cssStyles.listItemTextSecondary}
           data-theme={theme}
+          {...(styles?.dense && { 'data-dense': 'true' })}
           {...(styles?.customStyles?.listItemTextSecondary && {
             style: styles.customStyles.listItemTextSecondary,
           })}

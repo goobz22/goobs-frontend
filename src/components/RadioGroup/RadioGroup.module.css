@@ -218,11 +218,12 @@
 
 /* --------------------------------------------------------------------------
    RADIO INNER DOT
-   The old render forced display:none on the inner dot ("Hide the inner circle
-   completely", getRadioGroupStyles line ~400). Kept hidden for exact parity;
-   the checked fill is the solid outer ring. Sizing/position transcribed from
-   getRadioGroupTheme (innerSize = radioSize - 6, 3px offset) via calc so a
-   future un-hide stays correct.
+   Hidden by default (the checked fill is the solid outer ring, matching the
+   old getRadioGroupStyles render). Passing styles.radioInnerColor sets
+   data-inner-dot on the root, which opts into the ring-and-dot presentation:
+   the dot renders (in the caller's color) and the checked outer ring stays
+   hollow. Sizing/position transcribed from getRadioGroupTheme (innerSize =
+   radioSize - 6, 3px offset) via calc so it tracks radioSize overrides.
    -------------------------------------------------------------------------- */
 .radioInner {
   display: none;
@@ -242,6 +243,16 @@
 
 .input:checked ~ .radioSpan .radioInner {
   transform: scale(1);
+}
+
+/* Ring-and-dot presentation (styles.radioInnerColor supplied): show the inner
+   dot and keep the checked outer ring hollow so the dot is visible. */
+.formControl[data-inner-dot='true'] .radioInner {
+  display: block;
+}
+
+.formControl[data-inner-dot='true'] .input:checked ~ .radioSpan .radioOuter {
+  background-color: transparent;
 }
 
 /* --------------------------------------------------------------------------

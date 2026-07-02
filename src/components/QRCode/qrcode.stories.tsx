@@ -96,6 +96,55 @@ export const HighErrorCorrection: Story = {
 }
 
 // --------------------------------------------------------------------------
+// STYLE OVERRIDES — QR container frame knobs
+// --------------------------------------------------------------------------
+
+/**
+ * Exercises the implemented QRCodeStyles frame knobs on the QR container:
+ * `backgroundColor` ('#FFF8E7' cream, feeds --qr-bg-color), `borderColor` +
+ * `borderWidth` (3px solid '#B45309' amber, feeds --qr-border), `borderRadius`
+ * ('4px' near-square corners), `padding` ('8px' tight frame), and
+ * `styles.size` (240 — overrides the top-level `size={200}`, so --qr-size
+ * pins the framed box at 240px).
+ */
+export const CustomFrame: Story = {
+  name: 'Custom Frame Overrides',
+  args: {
+    value: sampleValue,
+    size: 200,
+    title: 'Custom framed QR',
+    styles: {
+      theme: 'light',
+      backgroundColor: '#FFF8E7',
+      borderColor: '#B45309',
+      borderWidth: '3px',
+      borderRadius: '4px',
+      padding: '8px',
+      size: 240,
+    },
+  },
+}
+
+/**
+ * Pins the width-only border branch: `borderWidth: '6px'` with no
+ * borderColor/qrBorderColor emits --qr-border-width, thickening the sacred
+ * theme's default gold border to 6px while keeping its color and glow.
+ */
+export const ThickSacredBorder: Story = {
+  name: 'Width-Only Border (Sacred)',
+  args: {
+    value: sampleValue,
+    size: 220,
+    title: 'Thick sacred border',
+    styles: {
+      theme: 'sacred',
+      borderWidth: '6px',
+    },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+}
+
+// --------------------------------------------------------------------------
 // MISSING VALUE — ERROR FALLBACK
 // --------------------------------------------------------------------------
 

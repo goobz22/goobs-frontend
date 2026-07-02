@@ -14,7 +14,7 @@ export interface RadioOption {
 
 /**
  * Custom style overrides for the RadioGroup. Theme selects the palette
- * (sacred default; light/dark are CSS [data-theme] overrides); the remaining
+ * (light default; sacred/dark are CSS [data-theme] overrides); the remaining
  * keys are caller-supplied overrides applied as CSS custom properties on the
  * root so the selectors stay in CSS while runtime values remain dynamic.
  */
@@ -32,6 +32,12 @@ export interface RadioGroupStyles {
   radioSize?: string
   radioOuterBorderColor?: string
   radioOuterBorderWidth?: string
+  /**
+   * Color of the checked inner dot. Passing this opts the group into the
+   * ring-and-dot presentation (`data-inner-dot` on the root): the checked
+   * outer ring stays hollow and the inner dot renders in this color. When
+   * omitted, checked state is the default solid-filled outer ring.
+   */
   radioInnerColor?: string
   radioHoverBorderColor?: string
   radioHoverBackgroundColor?: string
@@ -45,14 +51,10 @@ export interface RadioGroupStyles {
   // Layout and spacing
   padding?: string
   marginBottom?: string
-  gap?: string
 
   // Transitions
   transitionDuration?: string
   transitionEasing?: string
-
-  // States
-  showGlyph?: boolean
 }
 
 /**
@@ -203,6 +205,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       data-component="RadioGroup"
       data-field-name={dataFieldName ?? name}
       data-filled={effectiveValue !== undefined && effectiveValue !== ''}
+      data-inner-dot={styles?.radioInnerColor ? 'true' : undefined}
       data-theme={theme}
       style={overrideVars}
     >

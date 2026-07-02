@@ -1,85 +1,31 @@
 // Public styling contract for ConfirmationCodeInput. Relocated from the old
 // src/theme/confirmationcodeinput.ts (removed in the css-modules-theme-removal
-// teardown) — the component is fully CSS-module driven now, so only this
-// caller-facing override type survives. Shape preserved verbatim so existing
-// callers keep compiling.
+// teardown) — the component is fully CSS-module driven now. 2026-07 audit:
+// shrunk to the honored surface. The ~52 keys the component never read
+// (hover*, input*, inputFocus*, success*, statusIndicator*, transition*,
+// outline, backdropFilter — residue carried over verbatim from the removed
+// theme layer) were deleted; no consumer passed any of them. Theme-level
+// values live in ConfirmationCodeInput.module.css as --cci-* custom
+// properties keyed off [data-theme].
 export interface ConfirmationCodeInputStyles {
-  // Theme selection
+  /**
+   * Theme variant — emitted as `data-theme` on the root element; selects the
+   * --cci-* token set in the CSS module (sacred is the default).
+   */
   theme?: 'light' | 'dark' | 'sacred'
 
-  // Container styling
+  // Container styling — applied as inline overrides on the root element.
   backgroundColor?: string
+  backgroundImage?: string
   borderColor?: string
   borderRadius?: string
   borderWidth?: string
   boxShadow?: string
-  backdropFilter?: string
-  backgroundImage?: string
   padding?: string
 
-  // Hover states
-  hoverBackgroundColor?: string
-  hoverBorderColor?: string
-  hoverBoxShadow?: string
-  hoverTransform?: string
-
-  // Success container styling
-  successBackgroundColor?: string
-  successBorderColor?: string
-  successBorderRadius?: string
-  successBoxShadow?: string
-  successBackdropFilter?: string
-  successBackgroundImage?: string
-  successPadding?: string
-
-  // Success icon styling
-  successIconFontSize?: string
-  successIconColor?: string
-  successIconFilter?: string
-  successIconAnimation?: string
-
-  // Success message styling
-  successMessageFontSize?: string
-  successMessageLineHeight?: string
-  successMessageColor?: string
-  successMessageFontFamily?: string
-  successMessageFontWeight?: string | number
-  successMessageLetterSpacing?: string
-  successMessageTextTransform?: string
-  successMessageTextShadow?: string
-
-  // Input styling
-  inputWidth?: string
-  inputHeight?: string
-  inputPadding?: string
-  inputFontSize?: string
-  inputFontFamily?: string
-  inputFontWeight?: string | number
-  inputLetterSpacing?: string
-  inputColor?: string
-  inputBackgroundColor?: string
-  inputBorderColor?: string
-  inputBorderRadius?: string
-  inputBorderWidth?: string
-  inputTextShadow?: string
-  inputAnimation?: string
-
-  // Input focus styling
-  inputFocusBorderColor?: string
-  inputFocusBorderWidth?: string
-  inputFocusTransform?: string
-  inputFocusBoxShadow?: string
-
-  // Status indicator styling
-  statusIndicatorWidth?: string
-  statusIndicatorHeight?: string
-  statusIndicatorBorderRadius?: string
-  statusIndicatorBackgroundColor?: string
-  statusIndicatorAnimation?: string
-  statusIndicatorValidBackgroundColor?: string
-  statusIndicatorValidAnimation?: string
-
-  // Layout and spacing
+  // Layout and spacing. gap/inputGap forward as the --cci-gap /
+  // --cci-input-gap custom properties (main-content and digit-cell gaps);
+  // margins apply inline on the root element.
   gap?: string
   inputGap?: string
   margin?: string
@@ -88,15 +34,13 @@ export interface ConfirmationCodeInputStyles {
   marginLeft?: string
   marginRight?: string
 
-  // Transitions
-  transitionDuration?: string
-  transitionEasing?: string
-
-  // States
+  /**
+   * Disables every digit input and dims the container
+   * (emitted as `data-disabled` on the root).
+   */
   disabled?: boolean
-  outline?: boolean
 
-  // Dimensions
+  // Dimensions — applied as inline overrides on the root element.
   width?: string
   maxWidth?: string
   minWidth?: string

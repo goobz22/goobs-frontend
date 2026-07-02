@@ -8,7 +8,9 @@
 
    Caller-supplied overrides (styles.backgroundColor, styles.titleColor, the
    measured responsive size, etc.) stay in JS and arrive as CSS custom
-   properties / inline style — see index.tsx dynamicStyle.
+   properties / inline style — see index.tsx qrContainerVars/titleVars.
+   Note: the ≤768px media block deliberately strips the frame (border,
+   shadow, background), so the frame knobs are desktop-width overrides.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -63,15 +65,17 @@
   margin: 0 auto;
   width: var(--qr-size);
   height: var(--qr-size);
-  padding: 24px;
+  padding: var(--qr-padding, 24px);
   /* The shorthand resets a separate background-color, so the --qr-bg-color
      override must live inside it or the knob is dead in the sacred variant. */
   background: var(
     --qr-bg-color,
     linear-gradient(145deg, rgba(30, 25, 15, 0.98) 0%, rgba(10, 10, 10, 0.95) 100%)
   );
-  border-radius: 20px;
-  border: var(--qr-border, 2px solid var(--goobs-gold-a60));
+  border-radius: var(--qr-border-radius, 20px);
+  /* --qr-border carries a full caller shorthand (color present); the inner
+     --qr-border-width serves a width-only caller override. */
+  border: var(--qr-border, var(--qr-border-width, 2px) solid var(--goobs-gold-a60));
   box-shadow: var(
     --qr-box-shadow,
     0 0 50px var(--goobs-gold-a50),
@@ -83,19 +87,19 @@
 }
 
 .qrCodeContainer[data-theme='light'] {
-  padding: 1rem;
+  padding: var(--qr-padding, 1rem);
   background: var(--qr-bg-color, var(--goobs-light-surface));
-  border-radius: var(--goobs-radius-xl);
-  border: var(--qr-border, 1px solid var(--goobs-light-border));
+  border-radius: var(--qr-border-radius, var(--goobs-radius-xl));
+  border: var(--qr-border, var(--qr-border-width, 1px) solid var(--goobs-light-border));
   box-shadow: var(--qr-box-shadow, var(--goobs-shadow-light-sm));
   backdrop-filter: none;
 }
 
 .qrCodeContainer[data-theme='dark'] {
-  padding: 1rem;
+  padding: var(--qr-padding, 1rem);
   background: var(--qr-bg-color, white);
-  border-radius: var(--goobs-radius-xl);
-  border: var(--qr-border, 1px solid var(--goobs-dark-border-strong));
+  border-radius: var(--qr-border-radius, var(--goobs-radius-xl));
+  border: var(--qr-border, var(--qr-border-width, 1px) solid var(--goobs-dark-border-strong));
   box-shadow: var(--qr-box-shadow, var(--goobs-shadow-dark-sm));
   backdrop-filter: none;
 }

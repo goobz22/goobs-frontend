@@ -43,14 +43,34 @@ const subThemeAttr = (
 ): { 'data-theme': 'sacred' | 'light' | 'dark' } | undefined =>
   styles?.theme ? { 'data-theme': styles.theme } : undefined
 
-/**
- * Build the CSS-custom-property override object for a styled element. Each
- * scalar override (when supplied) maps to the `var(--…)` hook the CSS module
- * reads, so an override wins over the theme default without inline-styling the
- * whole element. Omitted overrides leave the var unset → CSS fallback applies.
+/*
+ * The helpers below build the CSS-custom-property override object for a
+ * styled element. Each scalar override (when supplied) maps to the `var(--…)`
+ * hook the CSS module reads, so an override wins over the theme default
+ * without inline-styling the whole element. Omitted overrides leave the var
+ * unset → CSS fallback applies.
  */
-const containerVars = (styles?: TableStyles): CSSVarStyle | undefined => {
+
+/**
+ * Overrides that target DESCENDANT elements (head / cells). CSS custom
+ * properties inherit down the DOM, so setting these once on a wrapper
+ * (TableContainer or Table) reaches every head/cell `var(--…)` lookup unless
+ * a closer element re-sets the same var (its own inline value wins).
+ */
+const descendantVars = (styles?: TableStyles): CSSVarStyle => {
   const vars: CSSVarStyle = {}
+  if (styles?.headerBackgroundColor)
+    vars['--table-header-bg'] = styles.headerBackgroundColor
+  if (styles?.headerColor) vars['--table-header-color'] = styles.headerColor
+  if (styles?.fontFamily) vars['--table-font-family'] = styles.fontFamily
+  if (styles?.color) vars['--table-cell-color'] = styles.color
+  if (styles?.cellBorderColor)
+    vars['--table-cell-border'] = styles.cellBorderColor
+  return vars
+}
+
+const containerVars = (styles?: TableStyles): CSSVarStyle | undefined => {
+  const vars: CSSVarStyle = descendantVars(styles)
   if (styles?.backgroundColor)
     vars['--table-container-bg'] = styles.backgroundColor
   if (styles?.borderColor) vars['--table-container-border'] = styles.borderColor
@@ -58,6 +78,12 @@ const containerVars = (styles?: TableStyles): CSSVarStyle | undefined => {
     vars['--table-container-radius'] = styles.borderRadius
   if (styles?.width) vars['--table-container-width'] = styles.width
   if (styles?.maxWidth) vars['--table-container-max-width'] = styles.maxWidth
+  return Object.keys(vars).length > 0 ? vars : undefined
+}
+
+const tableVars = (styles?: TableStyles): CSSVarStyle | undefined => {
+  const vars: CSSVarStyle = descendantVars(styles)
+  if (styles?.backgroundColor) vars['--table-bg'] = styles.backgroundColor
   return Object.keys(vars).length > 0 ? vars : undefined
 }
 
@@ -100,7 +126,6 @@ export interface TableHeadProps {
 
 export interface TableBodyProps {
   children: React.ReactNode
-  styles?: TableStyles
 }
 
 export interface TableRowProps {
@@ -132,14 +157,26 @@ export const TableContainer: React.FC<TableContainerProps> = ({
 }
 
 /**
- * Semantic table primitive rendering a themed `<table>`, composed with the
- * exported `TableContainer`, `TableHead`, `TableBody`, `TableRow`, and
- * `TableCell` parts. Supports sacred/light/dark themes and per-element
- * CSS-variable style overrides.
+ * Semantic table primitive rendering a `<table>`, composed with the exported
+ * `TableContainer`, `TableHead`, `TableBody`, `TableRow`, and `TableCell`
+ * parts. `styles.theme` stamps `data-theme` on the `<table>` so unthemed
+ * head/row/cell descendants cascade to that palette (same mechanism as
+ * `TableContainer`); scalar overrides (`backgroundColor` → the table surface,
+ * plus the header/cell/font vars, which inherit to descendants) map to the
+ * CSS-variable hooks the module reads. When container and table declare
+ * DIFFERENT themes, the innermost explicit `data-theme` on a leaf wins;
+ * between the two cascades, dark outranks light (rule order) — theme them
+ * consistently.
  */
-export const Table: React.FC<SimpleTableProps> = ({ children }) => {
+export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
+  const overrides = tableVars(styles)
   return (
-    <table className={cssStyles.table} data-component="Table">
+    <table
+      className={cssStyles.table}
+      data-component="Table"
+      {...subThemeAttr(styles)}
+      {...(overrides && { style: overrides })}
+    >
       {children}
     </table>
   )

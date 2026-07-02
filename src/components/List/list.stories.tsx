@@ -117,7 +117,11 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 /**
- * A compact list using the `dense` styling option.
+ * A compact list using the `dense` styling option, applied to every
+ * subcomponent. Pins: the `<ul>` and each `<li>` drop to 4px vertical
+ * padding (vs 8px), the icon gutter tightens to 12px (vs 16px), and the
+ * primary/secondary text step down to 0.875rem/0.75rem (vs 1rem/0.875rem),
+ * so the whole list reads visibly tighter than LightTheme.
  */
 export const Dense: Story = {
   name: 'State/Dense',

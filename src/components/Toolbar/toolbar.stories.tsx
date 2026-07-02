@@ -6,6 +6,7 @@ import CustomToolbar, { type CustomToolbarProps } from './index'
 
 import type { SearchbarProps } from '../Field/Search'
 import type { ButtonProps } from '../Button'
+import type { DropdownOption } from '../Field/Dropdown/Regular'
 
 const sampleButtons: ButtonProps[] = [
   { text: 'Button 1', onClick: () => console.log('Button 1 clicked') },
@@ -170,4 +171,70 @@ const InteractiveDemoRenderer = () => {
  */
 export const InteractiveDemo: Story = {
   render: () => <InteractiveDemoRenderer />,
+}
+
+const filterOptions: DropdownOption[] = [
+  { value: 'all' },
+  { value: 'active' },
+  { value: 'archived' },
+]
+
+const FilterDropdownRenderer = () => {
+  const [filterValue, setFilterValue] = React.useState('all')
+
+  return (
+    <div style={{ padding: '16px', background: '#f3f4f6' }}>
+      <CustomToolbar
+        buttons={sampleButtons}
+        searchbarProps={sampleSearchProps}
+        filterDropdown={{
+          label: 'Status',
+          options: filterOptions,
+          value: filterValue,
+          onChange: setFilterValue,
+        }}
+        styles={{ theme: 'light' }}
+      />
+      <p style={{ marginTop: '8px', fontSize: '14px', color: '#374151' }}>
+        Selected filter: {filterValue}
+      </p>
+    </div>
+  )
+}
+
+/**
+ * 5) Filter Dropdown — exercises the `filterDropdown` branch (index.tsx
+ * renders a themed Dropdown inside `.filterWrap` between the buttons and the
+ * searchbar). Pinned observable state: a "Status" dropdown trigger showing
+ * "all"; opening it lists all / active / archived, and picking one updates
+ * the "Selected filter:" readout below the toolbar.
+ */
+export const FilterDropdown: Story = {
+  render: () => <FilterDropdownRenderer />,
+}
+
+/**
+ * 6) Sacred Style Overrides — exercises the two CSS-variable knobs on
+ * `ToolbarStyles`. Pinned observable state: the sacred toolbar's 𓊗 glyph
+ * (top-right) renders crimson instead of the default faint gold
+ * (`glyphColor` → `--toolbar-glyph-color`), and the container shows a
+ * single teal radial glow at top-left instead of the default dual gold
+ * gradient (`backgroundImage` → `--toolbar-bg-image`).
+ */
+export const SacredStyleOverrides: Story = {
+  render: args => (
+    <div style={{ padding: '16px', background: '#000000' }}>
+      <CustomToolbar {...args} />
+    </div>
+  ),
+  args: {
+    buttons: sampleButtons,
+    searchbarProps: sampleSearchProps,
+    styles: {
+      theme: 'sacred',
+      glyphColor: '#dc2626',
+      backgroundImage:
+        'radial-gradient(circle at top left, rgba(45, 212, 191, 0.15) 0%, transparent 60%)',
+    },
+  },
 }

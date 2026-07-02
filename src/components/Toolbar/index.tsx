@@ -10,57 +10,27 @@ import cssStyles from './Toolbar.module.css'
 /**
  * Public styling surface for the Toolbar. Migrated off
  * `theme/toolbar.ts:ToolbarStyles` — the theme variant (light / dark /
- * sacred) now drives a `data-theme` attribute on the root and all
+ * sacred) drives a `data-theme` attribute on the root and all
  * container / glyph / divider styling lives in `Toolbar.module.css`.
  *
- * The interface is preserved verbatim so existing consumer call-sites and
- * generated typings keep compiling; the component itself only reads
- * `styles.theme` today (the remaining fields are reserved passthrough
- * tokens documented on the original theme type).
+ * The interface is intentionally minimal: it holds exactly the knobs the
+ * component honors. `theme` selects the variant; `glyphColor` and
+ * `backgroundImage` override the matching `--toolbar-*` custom properties
+ * the CSS module already consumes.
  */
 export interface ToolbarStyles {
-  // Theme selection
+  /** Theme variant; selects the `data-theme` styling block. Default 'light'. */
   theme?: 'light' | 'dark' | 'sacred'
-
-  // Container styling
-  backgroundColor?: string
-  borderColor?: string
-  borderRadius?: string
-  borderWidth?: string
-  boxShadow?: string
-  backdropFilter?: string
-  backgroundImage?: string
-  padding?: string
-  containerAnimation?: string
-
-  // Glyph styling
+  /**
+   * Overrides `--toolbar-glyph-color` — the color of the decorative 𓊗 glyph.
+   * Observable only on the sacred theme (the glyph renders only there).
+   */
   glyphColor?: string
-  glyphFontSize?: string
-  glyphAnimation?: string
-
-  // Layout and spacing
-  gap?: string
-  margin?: string
-  marginTop?: string
-  marginBottom?: string
-  marginLeft?: string
-  marginRight?: string
-
-  // Transitions
-  transitionDuration?: string
-  transitionEasing?: string
-
-  // States
-  disabled?: boolean
-  outline?: boolean
-
-  // Dimensions
-  width?: string
-  maxWidth?: string
-  minWidth?: string
-  height?: string
-  maxHeight?: string
-  minHeight?: string
+  /**
+   * Overrides `--toolbar-bg-image` — the root container's background-image
+   * (per-theme default: sacred dual radial-gradient, light/dark none).
+   */
+  backgroundImage?: string
 }
 
 export interface CustomToolbarProps {
@@ -148,8 +118,22 @@ const CustomToolbar: FC<CustomToolbarProps> = ({
   // Create proper FieldStyleOverrides based on the toolbar theme
   const searchbarStyles = createSearchbarStyles(styles)
 
+  // Caller-supplied overrides pass through as CSS custom properties; each var
+  // is set ONLY when the caller provided it, so the theme value in
+  // Toolbar.module.css applies otherwise.
+  const dynamicStyle: React.CSSProperties & Record<string, string> = {}
+  if (styles?.glyphColor)
+    dynamicStyle['--toolbar-glyph-color'] = styles.glyphColor
+  if (styles?.backgroundImage)
+    dynamicStyle['--toolbar-bg-image'] = styles.backgroundImage
+
   return (
-    <div className={cssStyles.root} data-component="Toolbar" data-theme={theme}>
+    <div
+      className={cssStyles.root}
+      data-component="Toolbar"
+      data-theme={theme}
+      style={dynamicStyle}
+    >
       {isSacredTheme && <span className={cssStyles.glyph}>𓊗</span>}
 
       <div className={cssStyles.content}>

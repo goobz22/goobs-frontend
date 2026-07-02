@@ -44,6 +44,11 @@
   align-items: center;
 }
 
+/* dense halves the vertical padding (4px vs 8px), matching the container */
+.listItem[data-dense='true'] {
+  padding: var(--goobs-space-2xs) var(--goobs-space-md);
+}
+
 /* --------------------------------------------------------------------------
    LIST ITEM ICON (<div>)
    marginRight + flex layout theme-independent; color is themed.
@@ -61,6 +66,11 @@
 
 .listItemIcon[data-theme='sacred'] {
   color: var(--goobs-gold-a90);
+}
+
+/* dense tightens the icon-to-text gutter (12px vs 16px) */
+.listItemIcon[data-dense='true'] {
+  margin-right: var(--goobs-space-sm);
 }
 
 /* --------------------------------------------------------------------------
@@ -82,6 +92,11 @@
   font-family: var(--goobs-font-sacred);
 }
 
+/* dense steps the primary text down one size (0.875rem vs 1rem) */
+.listItemTextPrimary[data-dense='true'] {
+  font-size: 0.875rem;
+}
+
 /* --------------------------------------------------------------------------
    LIST ITEM TEXT — SECONDARY (<span>)
    -------------------------------------------------------------------------- */
@@ -99,4 +114,9 @@
 .listItemTextSecondary[data-theme='sacred'] {
   color: var(--goobs-gold-a70);
   font-family: var(--goobs-font-sacred);
+}
+
+/* dense steps the secondary text down one size (0.75rem vs 0.875rem) */
+.listItemTextSecondary[data-dense='true'] {
+  font-size: 0.75rem;
 }
