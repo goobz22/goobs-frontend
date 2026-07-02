@@ -66,6 +66,43 @@ export const DarkTheme: Story = {
 }
 
 /**
+ * Secondary variant: the neutral Cancel/Close palette from variantDefaults —
+ * previously shipped with zero story coverage.
+ */
+export const SecondaryVariant: Story = {
+  name: 'Variants/Secondary',
+  args: {
+    text: 'Cancel',
+    variant: 'secondary',
+  },
+}
+
+/**
+ * Destructive variant: the irreversible-mutation (Delete) palette from
+ * variantDefaults — previously shipped with zero story coverage.
+ */
+export const DestructiveVariant: Story = {
+  name: 'Variants/Destructive',
+  args: {
+    text: 'Delete',
+    variant: 'destructive',
+  },
+}
+
+/**
+ * outline: true renders a visible 1px currentcolor outline. Pins the fix for
+ * the inversion where `outline: true` mapped to CSS `outline: none`.
+ */
+export const WithOutline: Story = {
+  name: 'Variants/With Outline',
+  args: {
+    text: 'Outlined Button',
+    styles: { theme: 'light', outline: true },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
  * A button with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {

@@ -115,18 +115,19 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       justifyContent: 'center',
       minWidth: 'auto',
       ...styles,
-      // Force remove all borders and backgrounds if sacred theme
+      // Force remove all borders and backgrounds if sacred theme; the gold
+      // hover wash rides the REAL ButtonStyles hover key (the old
+      // emotion-style '&:hover' object is not a ButtonStyles key — it was
+      // silently dead and the hover never rendered).
       ...(styles?.theme === 'sacred' && {
-        outline: false, // This is the key property that removes borders in getButtonStyles
+        outline: false as const,
         border: 'none',
         borderWidth: '0',
         borderStyle: 'none',
         borderColor: 'transparent',
         boxShadow: 'none',
         backgroundColor: 'transparent',
-        '&:hover': {
-          backgroundColor: 'rgba(255, 215, 0, 0.1)',
-        },
+        hoverBackgroundColor: 'rgba(255, 215, 0, 0.1)',
       }),
     }
 

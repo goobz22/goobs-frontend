@@ -298,12 +298,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       [isDisabled, onClick, action, subject]
     )
 
-    // Handle outline prop - convert boolean to string
+    // Handle outline. `outline: true` renders a visible outline matching the
+    // button's current text color; `false` explicitly suppresses any outline;
+    // a string passes through verbatim as the CSS `outline` value. (The old
+    // mapping inverted `true` to 'none' — the same defect class Typography
+    // carried; see docs/audits/story-jsdoc-audit-2026-07-01.md §6-A.)
     const outlineValue =
       styles?.outline === true
-        ? 'none'
+        ? '1px solid currentcolor'
         : styles?.outline === false
-          ? undefined
+          ? 'none'
           : styles?.outline || undefined
 
     // Build dynamic inline styles for customizations that override CSS.
