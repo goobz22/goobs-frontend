@@ -1,6 +1,6 @@
 # goobs-frontend
 
-goobs-frontend is a comprehensive React-based UI component library featuring a custom design system with 100+ components, built with TypeScript and modern React patterns.
+goobs-frontend is a comprehensive React-based UI component library featuring a custom design system with 85+ components, built with TypeScript and modern React patterns.
 
 The NPM repo is available here - https://www.npmjs.com/package/goobs-frontend
 
@@ -40,53 +40,64 @@ import { Button, DataGrid, Icons } from 'goobs-frontend'
 
 ## Component Library Overview
 
-goobs-frontend provides 100+ fully-featured React components organized into logical categories. All components are built with TypeScript, custom theming, and responsive design principles. For detailed documentation, examples, and interactive demos, visit our [Storybook](https://storybook.technologiesunlimited.net/).
+goobs-frontend provides 85+ fully-featured React components organized into logical categories. All components are built with TypeScript, custom theming, and responsive design principles. For detailed documentation, examples, and interactive demos, visit our [Storybook](https://storybook.technologiesunlimited.net/).
 
 ## Core Component Categories
 
 ### 🎨 Layout & Structure
 
-- **Grid** - Responsive grid system with flexible row/column configurations
-- **Container** - Responsive content containers with consistent spacing
-- **Stack** - One-dimensional layout component for arranging items
 - **Paper** - Elevated surface container for content sections
+- **Panel** - Sectioned surface with header/body/footer subcomponents
+- **Content** - Dynamic content renderer supporting multiple content types
+- **FieldGrid** - Responsive form-field layout grid
+- **Drawer** - Slide-in side panel for navigation and detail views
 - **Divider** - Visual separators for content organization
+- **EmptyState** - Consistent empty/no-data placeholder
 
 ### 📝 Form Components
+
+**Form Engine**
+
+- **Form** - Zod-native form engine: schema-driven validation, per-field
+  binding by `name`, and submit gating (`useFormField`, `useFieldArray`,
+  `useFieldValues` for dynamic shapes, `SaveButton`)
 
 **Text Inputs**
 
 - **TextField** - Versatile text input with advanced styling and label positioning
 - **PasswordField** - Secure password input with show/hide toggle functionality
-- **SearchField** - Search input with integrated search icons and styling
-- **ComplexTextEditor** - Multi-mode editor (simple, markdown, rich text) with integrated toolbar
+- **SearchBar** - Search input with integrated search icons and styling
+- **ComplexEditor** - Multi-mode editor (simple, markdown, rich text) with integrated toolbar
 
 **Specialized Inputs**
 
 - **PhoneNumberField** - Auto-formatting phone number input (+1-xxx-xxx-xxxx)
-- **USDField** - Currency input with dollar formatting and validation
+- **USDField** / **MoneyText** - Currency input and display with dollar formatting
 - **PercentageField** - Percentage input with % symbol and range validation
 - **ConfirmationCodeInput** - OTP-style multi-digit input with auto-focus progression
+- **SignatureField** - Canvas signature capture emitting a data-URL value
+- **Slider** - Range slider input
 
 **Number Inputs**
 
-- **IncrementNumberField** - Number input with built-in increment/decrement controls
-- **AccountNumberField** - Bank account number input with validation
-- **RoutingNumberField** - Bank routing number input with format validation
-- **CreditCardField** - Credit card input with real-time formatting
+- **InternalIncrementNumberField** / **ExternalIncrementNumberField** - Number inputs with increment/decrement controls
+- **AccountNumber** - Bank account number input with validation
+- **RoutingNumber** - Bank routing number input with format validation
+- **CreditCardNumber** - Credit card input with real-time formatting
 - **CVVField** - Secure CVV input for payment forms
 
 **Date & Time**
 
 - **DateField** - Date picker with calendar popup and keyboard navigation
-- **DateRangeField** - Start/end date selection with range validation
-- **TimeRangeField** - Time range selector with 12/24 hour support
+- **DateRange** - Start/end date selection with range validation
+- **TimeField** / **TimeRange** - Time selection with 12/24 hour support
 
 **Selection Components**
 
 - **Dropdown** - Customizable select component with advanced styling
 - **MultiSelectChip** - Multi-selection dropdown with chip display
-- **SearchableDropdown** - Real-time filtering dropdown with autocomplete
+- **SearchableSimple** / **SearchableHistory** - Real-time filtering dropdowns with autocomplete (history variant remembers recent picks)
+- **Select** - Native-select styling wrapper
 - **RadioGroup** - Radio button groups with custom styling and TypeScript support
 - **Checkbox** - Enhanced checkbox with indeterminate state support
 - **Switch** - Toggle switch with smooth animations
@@ -95,7 +106,7 @@ goobs-frontend provides 100+ fully-featured React components organized into logi
 
 - **IPAddressField** - IP address input with validation
 - **CIDRField** - CIDR notation input with subnet validation
-- **SubnetField** - Subnet configuration input
+- **SubnetField** / **SupernetField** - Subnet configuration inputs
 - **VLANField** - VLAN ID input with range validation
 - **MACAddressField** - MAC address input with auto-formatting
 
@@ -103,10 +114,15 @@ goobs-frontend provides 100+ fully-featured React components organized into logi
 
 - **DataGrid** - Advanced data table with sorting, filtering, pagination, and row management
 - **Table** - Lightweight table component for simple data display
-- **Card** - Versatile card container with multiple variants (product, pricing, task, inventory)
-- **List** - Flexible list component with custom item rendering
+- **Card** - Compound card family (header/body/footer/metrics/grid and more subcomponents)
+- **List** / **ListItemCard** - Flexible lists with custom item rendering
+- **DetailField** / **DetailGrid** - Read-only labeled value display
+- **Metric** / **MetricsAccordion** - KPI cards and grouped metric panels
 - **PricingTable** - Specialized pricing comparison table with feature highlights
 - **ProjectBoard** - Kanban-style board with drag-and-drop task management
+- **BigCalendar** - Month/week/day event calendar with filtering
+- **Markdown** - Rendered markdown display
+- **FilterSection** - Faceted filter panel for list/grid views
 
 ### 🧭 Navigation
 
@@ -138,19 +154,20 @@ goobs-frontend provides 100+ fully-featured React components organized into logi
 - **Avatar** - User avatars with fallback text and image support
 - **ProgressBar** - Progress indicators with customizable styling
 - **CodeCopy** - Syntax-highlighted code blocks with one-click copying
-- **QRCode** - Dynamic QR code generator with TOTP integration
+- **QRCodeComponent** - Dynamic QR code generator with TOTP integration
 - **TransferList** - Dual-list component for moving items between collections
 
 ### 🎨 Design & Animation
 
-- **Typography** - Text component with multiple font families (Arapey, Inter, Merriweather)
+- **Typography** - Text component with the brand font stack (Cinzel headings, Merriweather and Crimson Text body variants)
+- **SacredGlyphFrame** - Ornamental hieroglyph-framed surface for the sacred theme
 - **Fade**, **Slide**, **Zoom** - Smooth transition components for enhanced UX
 
 ### 🏗️ Advanced Components
 
-- **Toolbar** - Flexible toolbar with multiple sections and responsive behavior
-- **Content** - Dynamic content renderer supporting multiple content types
-- **FormDataGrid** - Data grid with integrated form validation
+- **Toolbar** / **CustomToolbar** - Flexible toolbars with multiple sections and responsive behavior
+- **FormDataGrid** / **FormProjectBoard** - DataGrid and ProjectBoard wired into the Form engine
+- **FileDropzone** - Drag-and-drop file upload surface
 
 ### 📱 Mobile-First Design
 
@@ -158,7 +175,7 @@ All components are built with mobile-first responsive design principles, ensurin
 
 ### 🎨 Comprehensive Icon Library
 
-200+ carefully crafted icons covering:
+260+ carefully crafted icons covering:
 
 - Navigation (arrows, chevrons, menu controls)
 - Actions (add, delete, edit, save, settings)
@@ -171,8 +188,8 @@ All components are built with mobile-first responsive design principles, ensurin
 
 ### 🔧 Customization
 
-- **Advanced Theming** - Override colors, fonts, spacing, and component behavior
-- **Flexible Styling** - Custom CSS-in-JS with theme-aware styling system
+- **Three built-in themes** - `sacred` (default), `light`, and `dark` via each component's `styles.theme`
+- **Token-driven styling** - CSS Modules on a shared `--goobs-*` design-token layer (import `goobs-frontend/styles`; brand fonts via `goobs-frontend/fonts`)
 - **Component Variants** - Multiple pre-built variants for common use cases
 
 ### 📋 Developer Experience
@@ -190,8 +207,7 @@ All components are built with mobile-first responsive design principles, ensurin
 ### 🚀 Modern React Patterns
 
 - **Hooks-Based** - Built with modern React hooks and functional components
-- **State Management** - Integrated Jotai support for complex state scenarios
-- **Form Integration** - Seamless integration with popular form libraries
+- **Form Integration** - A built-in zod-native `<Form>` engine binds any field by `name` (no external form library required)
 
 _For complete component documentation, interactive examples, and implementation guides, visit the [Storybook documentation](https://storybook.technologiesunlimited.net/)._
 
