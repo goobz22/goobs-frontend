@@ -1,7 +1,67 @@
-# Wave 0 — setup re-baseline — PROGRESS
+# Story + JSDoc program — COMPLETE (2026-07-02)
 
-Spec: `docs/audits/story-jsdoc-standard-proposal.md` §1.2 + §3 Wave 0 + §4.3.
+Spec: `docs/audits/story-jsdoc-standard-proposal.md`.
 Audit: `docs/audits/story-jsdoc-audit-2026-07-01.md`.
+
+## ✅ PROGRAM COMPLETE — all six waves + guards, every gate green
+
+**Final state:** typecheck (root + stories) 0 · lint 0 (incl. live
+eslint-plugin-storybook + eslint-plugin-jsdoc rules) · lint:css 0 ·
+lint:stories 0 · lint:styles-props 0 (33 interfaces, every key read or
+@deprecated) · lint:coverage 0 (152 barrel exports, 95 story files, 0
+uncovered, no duplicate titles) · vite dist build ✓ · storybook build ✓ at
+**95 docs pages + 844 stories** (pre-program: 639 stories, 0 docs pages).
+
+**Wave summary (commits on `production`):**
+- **W0** setup re-baseline: addon-docs installed (autodocs was fully inert),
+  brand fonts load, SB10 canvas/theme toolbar + global data-theme decorator,
+  vercel builds on deploy, 85 story files migrated off 3 dead/banned APIs,
+  eslint story guards. `5ecf864` `c9f63d4`
+- **W1** stories entered the type gate (tsconfig.stories.json): 34 phantom-prop/
+  handler errors fixed; 4 real component bugs fixed with regression stories
+  (Tabs aria-controls, Snackbar autoHide-0, Typography outline+merri fonts,
+  TreeView invisible sacred glyphs); 3 lying story files made truthful.
+  `ce3291d` `06cbd75` `7a25616`
+- **W2** documented-but-inert API made extinct: ~200 props deleted/implemented/
+  @deprecated across 20+ dirs (all adversarially verified), incl. Button's
+  outline inversion + IconButton/CodeCopy shipped phantom hovers; the
+  styles-key-is-read guard now enforces it in lint:all. `e555afa`→`f9926b6`
+- **W3** coverage closed: 7 new + 5 extended story files (Card compound family,
+  Form wrappers, InlineForms, SacredGlyphs, form-binding regression net, …);
+  4 more component bugs found+fixed (Card asChild crash, dead
+  onCompositeFieldSave, read-permissions not blocking edit); coverage gate
+  live. `4bcd8c0` `cf7716d` `ec1373a`
+- **W4** themes + taxonomy: dedicated sacred/dark stories for every gap the
+  component supports; titles normalized (Primitives/* gone, collisions
+  resolved); all 62 story files renamed <ComponentName>.stories.tsx.
+  `ca66496` `c53126a`
+- **W5** JSDoc debt: member docs across the exported Props/Styles surfaces
+  repo-wide, detached banners attached, ~45 barrel type exports added,
+  truth-checked against code. `54a6261` `5df9be3` `3dc4646`
+- **W6** the net wired: play assertions fixed, test-runner + addon-a11y,
+  .github/workflows/chromatic.yml (typecheck→lint:all→build→storybook→
+  chromatic), prepublishOnly gate, jsdoc lint live. `1d5da90` `142eed8` `ccb3f12`
+
+**USER-GATED leftovers:**
+1. **Push** — ~30 commits on local `production`; the auto-mode classifier
+   blocks direct push for this repo. Say "push it" or push manually.
+2. **Chromatic** — full re-baseline run needs CHROMATIC_PROJECT_TOKEN (repo
+   Actions secret + local run; every snapshot deliberately changed in W0).
+3. **Peer files** — 3 untracked story files (Card, FilterSection,
+   MetricsAccordion) have documented carve-outs in eslint.config.mjs +
+   tsconfig.stories.json; remove when their author commits + migrates them.
+4. **Component-side theme debt** (honest gaps, NOT faked in stories):
+   DetailField/Panel/FieldGrid have no theme system; TransferList caps at
+   sacred|light; Dialog's dark CSS unreachable; MoneyText empty-state color
+   invisible on light. Each needs component work before theme stories.
+5. **C3 delete candidates kept pending owner decision:** utils `css` (zero
+   consumers) + `formatters.ts` (zero consumers, now fully documented).
+6. ThothOS side: dist was rebuilt several times — clear
+   `ThothOS-production/.next-test` before the next seeded test-stack start.
+
+---
+
+# Wave 0 — setup re-baseline — PROGRESS (history)
 
 ## DONE
 - Installed `@storybook/addon-docs@10.4.6` + `eslint-plugin-storybook@10.4.6` (devDeps).
