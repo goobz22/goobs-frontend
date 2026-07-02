@@ -46,11 +46,45 @@ Audit: `docs/audits/story-jsdoc-audit-2026-07-01.md`.
 - storybook-static remains git-tracked (rebuilt fresh); untracking is a later-wave
   decision now that Vercel builds on deploy.
 
-## NEXT
-Wave 1 per the proposal §3: `tsconfig.stories.json` into `typecheck`, then fix the
-~16 phantom/false stories + the 4 real component bugs it flags (Tabs aria-controls
-mismatch, Snackbar autoHideDuration:0, Typography outline inversion, TreeView empty
-glyph).
+## WAVE 1 — COMPLETE (2026-07-01 late evening) — commits on `production`
+- `ce3291d` type gate (tsconfig.stories.json into typecheck) + all 34 flagged errors
+  fixed (12 files; 1 justified widening: TextFieldProps.error includes undefined,
+  mirroring FormFieldBinding).
+- `06cbd75` four component bugs fixed + regression stories (Tabs aria-controls via
+  shared tabPanelId + play assertion; Snackbar autoHideDuration 0 = never hide +
+  Themes/* stories now really themed; Typography outline inversion + merri*→
+  Merriweather; TreeView SACRED_GLYPHS particles + first Themes/Sacred story).
+  All 7 verified CORRECT by adversarial agents, 0 repairs.
+- `7a25616` story-truth fixes (Popover any-mask removed, ProjectBoard phantom args +
+  required data so Manage doesn't crash, CTE ModeSwitching remounts per mode).
+- VERIFIED: typecheck (both configs) 0, lint 0, lint:stories 0, vite dist build ✓
+  (dist rebuilt for the ThothOS symlink — clear ThothOS .next-test on next test-stack
+  restart), build-storybook ✓ (88 docs + 782 stories).
+- INCIDENT during gates: the interrupted stylelint --fix pass had lowercased
+  `composes: editorArea`→`editorarea` in ComplexTextEditor.module.css, breaking the
+  vite build (working-tree only; HEAD was never broken). Repaired in-tree (one line);
+  css pass remains uncommitted/deprioritized. Wave-2 note: Button outline-inversion
+  (same class as Typography's, Button/index.tsx ~302-306) still open.
+
+## WAVE 1 — original plan (kept for context)
+- DONE: `tsconfig.stories.json` created (stories + .storybook typecheck; 3 peer files
+  excluded with R13 comment); `typecheck` script now runs both configs.
+- FAIL-FIRST evidence: gate flags 34 errors across 12 story files (phantom props,
+  e.target-on-string handlers, exactOptionalPropertyTypes, unchecked index).
+- IN FLIGHT: workflow `goobs-wave1-typegate-fixes` (run wf_e2e83848-813, task wpskj3ld5):
+  12 type-fix agents (one per broken file) + 7 bug/truth agents (Tabs aria-controls,
+  Snackbar autoHide-0 + fake theme stories, Typography outline inversion + merri* font
+  lie, TreeView empty sacred glyph, Popover CustomPosition, ProjectBoard phantom args +
+  crash, CTE ModeSwitching) — each bug fix adversarially verified + repair round.
+- THEN (central, after workflow): bun run typecheck (both configs) + lint + lint:stories
+  + build-storybook + `bun run build` (component files changed → dist rebuild for the
+  ThothOS symlink; remember ThothOS .next-test clear on next test-stack restart).
+  Commits: (1) tsconfig.stories.json + typecheck script + type-fixed stories;
+  (2) component bug fixes + their regression stories; (3) story-truth fixes.
+- ALSO in working tree, UNCOMMITTED + deprioritized (user interrupted the pass):
+  stylelint --fix leftovers across ~20 .module.css (pre-existing lint:css debt,
+  partially auto-fixed, ~54 errors remained incl. :global pseudo-class and duplicate
+  overflow-wrap). Do NOT stage css files into Wave-1 commits.
 
 ## Decisions already made (do not re-litigate)
 - argTypes-description ban DEFERRED to Wave 5 (docgen descriptions must exist on props
