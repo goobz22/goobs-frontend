@@ -75,7 +75,6 @@ export interface ProgressBarStyles {
 
   // States
   disabled?: boolean
-  outline?: boolean
   striped?: boolean
   animated?: boolean
   pulse?: boolean
@@ -102,8 +101,6 @@ export interface ProgressBarProps {
   label?: string
   /** ARIA label for accessibility */
   'aria-label'?: string
-  /** Whether the progress bar represents a required process */
-  'aria-required'?: boolean
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ProgressBarStyles
 }

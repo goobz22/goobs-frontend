@@ -45,8 +45,6 @@ export interface CodeCopyStyles {
   lineHeight?: string
   /** Whether to show line numbers */
   showLineNumbers?: boolean
-  /** Custom animation duration for sacred theme */
-  animationDuration?: string
 }
 
 // --------------------------------------------------------------------------
@@ -123,16 +121,24 @@ const CodeCopy: FC<CodeCopyProps> = props => {
     if (styles?.disabled) return
 
     const codeElement = codeRef.current
-    if (codeElement) {
-      const textArea = document.createElement('textarea')
-      textArea.value = codeElement.innerText
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      textArea.remove()
+    if (!codeElement) return
+
+    const markCopied = () => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1000)
     }
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(codeElement.innerText).then(markCopied)
+      return
+    }
+    // Fallback for non-secure contexts where the Clipboard API is unavailable.
+    const textArea = document.createElement('textarea')
+    textArea.value = codeElement.innerText
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    textArea.remove()
+    markCopied()
   }, [styles?.disabled])
 
   // Apply syntax highlighting. The sacred-theme token recoloring that used
@@ -184,9 +190,10 @@ const CodeCopy: FC<CodeCopyProps> = props => {
                 textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
                 fontFamily: '"Cinzel", serif',
                 fontWeight: 600,
-                hoverColor: '#FFD700',
+                // The gold hover glow lives in CodeCopy.module.css
+                // (.copyButtonSlot button:hover under [data-theme='sacred']) —
+                // ButtonStyles has no hover text/glow keys.
                 hoverBorderColor: 'rgba(255, 215, 0, 0.8)',
-                hoverTextShadow: '0 0 10px rgba(255, 215, 0, 0.6)',
               }),
             }}
             disabled={styles?.disabled}

@@ -456,6 +456,11 @@
   --ct-toolbar-bg: var(--goobs-black-a50);
 }
 
+/* styles.showToolbar === false hides the whole editor toolbar. */
+.toolbarContainer[data-hidden='true'] {
+  display: none;
+}
+
 .toolbarRow,
 .primaryRow,
 .dropdownRow {

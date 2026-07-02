@@ -399,6 +399,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     <div
       className={cssStyles.toolbarContainer}
       data-theme={toolbarTheme}
+      {...(styles?.showToolbar === false && { 'data-hidden': 'true' })}
       {...(wrapperStyle && { style: wrapperStyle })}
     >
       {/* Row 1: Primary Actions - Undo/Redo + Essential Formatting */}

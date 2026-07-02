@@ -136,6 +136,13 @@
   justify-content: flex-end;
 }
 
+/* Sacred copy-button hover: the gold text glow the old inline attempt aimed
+   for (ButtonStyles has no hover text/glow keys, so it lives here). */
+.container[data-theme='sacred'] .copyButtonSlot button:hover {
+  color: var(--goobs-gold);
+  text-shadow: 0 0 10px var(--goobs-gold-a60);
+}
+
 /* --------------------------------------------------------------------------
    CODE BLOCK — base = DARK
    -------------------------------------------------------------------------- */

@@ -36,10 +36,6 @@ const meta: Meta<typeof ProgressBar> = {
       control: { type: 'text' },
       description: 'ARIA label for accessibility',
     },
-    'aria-required': {
-      control: { type: 'boolean' },
-      description: 'Whether the progress bar represents a required process',
-    },
     styles: {
       control: { type: 'object' },
       description:
